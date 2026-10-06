@@ -55,24 +55,29 @@ def psRustEmitParameterList
   | List.nil =>
       Except.ok List.nil
   | List.cons parameter rest =>
-      if psRustTypeContainsFunction parameter.type then
-        Except.error
-          (PsRustEmitError.lambdaFunctionParameterUnsupported parameter.name)
-      else
-        match psRustEmitType parameter.type with
-        | Except.error error =>
-            Except.error error
-        | Except.ok printedType =>
-            let rendered :=
-              psRustConcat3
-                (psRustIdentifier parameter.name)
-                ": "
-                printedType;
-            match psRustEmitParameterList rest with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedRest =>
-                Except.ok (List.cons rendered printedRest)
+      let printedTypeResult : Except PsRustEmitError String :=
+        if psRustTypeContainsFunction parameter.type then
+          if psRustFunctionTypeIsFirstOrder parameter.type then
+            psRustEmitFirstOrderClosureType parameter.type
+          else
+            Except.error
+              (PsRustEmitError.lambdaFunctionParameterUnsupported parameter.name)
+        else
+          psRustEmitType parameter.type;
+      match printedTypeResult with
+      | Except.error error =>
+          Except.error error
+      | Except.ok printedType =>
+          let rendered :=
+            psRustConcat3
+              (psRustIdentifier parameter.name)
+              ": "
+              printedType;
+          match psRustEmitParameterList rest with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedRest =>
+              Except.ok (List.cons rendered printedRest)
 
 def psRustEmitMachineIntegerBinary
     (operation : PsVerifiedIrIntegerBinaryOp)
@@ -1019,7 +1024,7 @@ def psRustEmitExprWithFuel
                       (psRustConcat2
                         (psRustJoin ", " printedArguments)
                         ")"))
-        | PsVerifiedIrExpr.letE name _ value body =>
+        | PsVerifiedIrExpr.letE name type value body =>
           match emitNested value with
           | Except.error error =>
               Except.error error
@@ -1028,16 +1033,52 @@ def psRustEmitExprWithFuel
               | Except.error error =>
                   Except.error error
               | Except.ok printedBody =>
-                  Except.ok
-                    (psRustConcat4
-                      "{ let "
-                      (psRustIdentifier name)
-                      " = "
+                  if psRustTypeContainsFunction type then
+                    if psRustFunctionTypeIsFirstOrder type then
+                      match value with
+                      | PsVerifiedIrExpr.lambda _ _ _ =>
+                          match psRustEmitFirstOrderClosureType type with
+                          | Except.error error =>
+                              Except.error error
+                          | Except.ok closureType =>
+                              Except.ok
+                                (psRustConcat4
+                                  "{ let "
+                                  (psRustIdentifier name)
+                                  ": "
+                                  (psRustConcat4
+                                    closureType
+                                    " = std::rc::Rc::new(move "
+                                    printedValue
+                                    (psRustConcat3
+                                      "); "
+                                      printedBody
+                                      " }")))
+                      | _ =>
+                          Except.ok
+                            (psRustConcat4
+                              "{ let "
+                              (psRustIdentifier name)
+                              " = "
+                              (psRustConcat4
+                                (psRustClonePrinted printedValue)
+                                "; "
+                                printedBody
+                                " }"))
+                    else
+                      Except.error
+                        (PsRustEmitError.lambdaFunctionParameterUnsupported name)
+                  else
+                    Except.ok
                       (psRustConcat4
-                        (psRustClonePrinted printedValue)
-                        "; "
-                        printedBody
-                        " }"))
+                        "{ let "
+                        (psRustIdentifier name)
+                        " = "
+                        (psRustConcat4
+                          (psRustClonePrinted printedValue)
+                          "; "
+                          printedBody
+                          " }"))
         | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
           match emitNested condition with
           | Except.error error =>

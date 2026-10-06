@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
 import { createCheckedCompilerService } from './compiler-checked-service.mjs';
+import { createCheckedBuildGraph, readCheckedBuildHostSources } from './checked-build-evidence.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkAdmissionsWithDual } from './checked-kernel-dual.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
@@ -49,6 +50,7 @@ export async function buildChecked({
   let admissions;
   let typeScript;
   let compilerIdentity;
+  let compilerBytes;
   let parity;
   const checkAdmissions = async text => {
     const checked = dualCheck
@@ -60,7 +62,8 @@ export async function buildChecked({
 
   if (seedPath) {
     const binary = path.resolve(seedPath);
-    compilerIdentity = { engine: 'native-seed', sha256: digest(await readFile(binary)) };
+    compilerBytes = await readFile(binary);
+    compilerIdentity = { engine: 'native-seed', sha256: digest(compilerBytes) };
     const result = await runCheckedSeedSession({
       binaryPath: binary,
       sourceKind: snapshot.kind,
@@ -73,7 +76,8 @@ export async function buildChecked({
     typeScript = result.typeScript;
   } else {
     const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
-    compilerIdentity = { engine: 'generated-js', sha256: digest(await readFile(file)) };
+    compilerBytes = await readFile(file);
+    compilerIdentity = { engine: 'generated-js', sha256: digest(compilerBytes) };
     const compiler = await import(pathToFileURL(file).href);
     const kind = snapshot.kind === 'ps'
       ? compiler.PsCompilerSourceKind?.proofScript
@@ -128,9 +132,20 @@ export async function buildChecked({
     if (run.error) throw run.error;
     if (run.status !== 0) throw new Error(`PSC2_CHECKED_TSC_FAILED: ${run.stdout}\n${run.stderr}`);
     receipt.typeScriptSha256 = digest(typeScript);
-    receipt.javaScriptSha256 = digest(await readFile(path.join(staging, stem + '.js')));
+    const [javaScript, declarations, sourceMap, typeScriptCompilerBytes, hostSources] = await Promise.all([
+      readFile(path.join(staging, stem + '.js')), readFile(path.join(staging, stem + '.d.ts')),
+      readFile(path.join(staging, stem + '.js.map')), readFile(tsc), readCheckedBuildHostSources(),
+    ]);
+    receipt.javaScriptSha256 = digest(javaScript);
+    const evidence = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
+      admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes,
+      compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, outputStem: stem,
+      provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1,
+      hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
+    receipt.buildGraph = evidence.identity;
+    await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
     await writeFile(path.join(staging, stem + '.admissions.json'), admissions);
-    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json']) {
+    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.build-graph.json']) {
       await rename(path.join(staging, stem + suffix), path.join(path.dirname(output), stem + suffix));
     }
     // This receipt is an audit record, not a transferable proof/capability.

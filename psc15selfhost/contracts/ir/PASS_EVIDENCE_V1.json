@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-pass-evidence/1",
+  "portableModel": "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean",
+  "hostImplementation": "scripts/artifact-evidence.mjs",
+  "productionIntegration": "scripts/checked-build-evidence.mjs",
+  "canonicalEncoding": {
+    "id": "psc-canonical-json/1",
+    "objects": "Plain data only; keys sorted by UTF-16 code units; no getters, symbols or toJSON hooks.",
+    "arrays": "Dense ordered arrays without extra properties.",
+    "scalars": "null, booleans, strings with JSON escaping and safe integers except negative zero.",
+    "bounds": "Depth, node count and output byte count are bounded; cycles and unsupported values reject."
+  },
+  "artifactIdentity": "SHA-256 of exact canonical or target bytes, with explicit domain, schema, contract and byte length. The artifact key hashes the full descriptor, preserving domain separation.",
+  "semanticFingerprint": "Exact artifact identity is the conservative default. Ignoring byte differences requires a separate reuse contract and evidence.",
+  "actionIdentity": "Canonical pass-definition identity, ordered input artifacts, explicit parameters, semantic identity, resource policy and dependencies. Records with incomplete implementation closure are not sufficient for untrusted cache reuse.",
+  "verification": [
+    "Re-hash execution, definition, implementation, action, dependencies and every input/output artifact.",
+    "Recompute ActionId; validate input/output contracts, assumption policy and exact fingerprint provenance.",
+    "Resolve evidence bytes and invoke caller-configured independent checkers against the exact relation, action, input, output and assumption subject.",
+    "A missing required evidence kind or unavailable checker fails closed.",
+    "Integrity verification is not preservation verification; serialized records never mint kernel authority."
+  ],
+  "currentBuildCoverage": [
+    "source preparation and kernel checking as an observed composite edge",
+    "checked admissions to TypeScript as an observed composite edge",
+    "TypeScript to JavaScript, declarations and source map with the actual flags and output basename"
+  ],
+  "remaining": [
+    "canonical artifacts for individual internal IR stages",
+    "complete generated compiler/runtime and TypeScript package closure",
+    "independent complete preservation evidence",
+    "full resource budget coverage",
+    "archive resolution of all referenced source and implementation bytes"
+  ],
+  "portableDigestRule": "A portable record supplied with artifact labels remains requiresByteVerification. Legacy specialization records remain unbound. Neither implies byte verification or a proof."
+}

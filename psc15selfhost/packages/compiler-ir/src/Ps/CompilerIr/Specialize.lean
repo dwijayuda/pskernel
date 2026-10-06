@@ -1846,6 +1846,12 @@ def psSpecializationPassDefinition : PsPassDefinition :=
     "psc-specialization-runtime-refinement/1"
     "psc-resource-specialization/1"
     "contract-regression-unproved"
+    "deterministic-under-declared-inputs"
+    "bounded-partial"
+    "source:packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean"
+    Option.none
+    List.nil
+    ["trusted-specialization-implementation"]
 
 structure PsSpecializedIrExecutionResult where
   specialized : PsSpecializedIrModule

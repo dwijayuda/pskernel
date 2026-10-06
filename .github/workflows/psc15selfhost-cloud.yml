@@ -75,6 +75,10 @@ jobs:
           npm run test:bootstrap-closure-contract
           npm run test:bootstrap-root-minimality
 
+      - name: Check artifact evidence and checked-service boundaries
+        working-directory: psc15selfhost
+        run: npm run test:pass-evidence
+
       - name: Build semantic compiler layers
         working-directory: psc15selfhost
         run: |

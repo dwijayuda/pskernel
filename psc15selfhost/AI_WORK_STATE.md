@@ -9,12 +9,12 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: portable dependency interface and link validation; production checked service and candidate/internal/bootstrap ownership are committed at fc7bc7b.
+- Current checkpoint: byte-bound pass records and observed production build graph. Authority is committed at fc7bc7b; portable interface/link validation at 63e2402.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
 
-1. Bind pass executions and build graph nodes to canonical artifacts, declared assumptions, resources and actual evidence. Keep pending validation/proof evidence explicit.
+1. Implement evidence-checked cache reads and complete artifact/implementation closure. Interior IR-stage artifacts and preservation evidence remain pending.
 2. Complete target-specific interface adapters, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
 3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
 4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
@@ -197,3 +197,11 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Added the runtime-values/link contract and 20 focused boundary cases, including nested layout drift, recursive types, invalid bodies and capability laundering. All pass locally, as do the existing 31 strict cases and JS backend corpus. PSC1 checks Link and its closure (427 declarations); structural rules for both new modules, all-portable source (273 modules) and portable-selfhost profile (91 modules) pass without rule changes. The focused corpus and PSC1 check are registered in cloud CI.
 - The invariant registry now has 37 implemented checks. The original external-interface/ABI gap is narrowed to target-specific external ABI adapter validation; module-link compatibility is implemented for the declared acyclic, monomorphic boundary profile. Artifact/evidence binding, target-specific adapters and global validator/link soundness remain pending and are explicitly recorded in INTERFACE_LINK_V1.json.
 - Continue immediately with artifact/pass evidence and real build integration. Extensive testing and formal proof campaigns remain deferred; no release or promotion gate has been relaxed.
+
+## 2026-10-07 artifact and observed build graph checkpoint
+
+- Added bounded canonical data encoding, domain-qualified byte identities, exact-artifact semantic fingerprints, pass definitions and ActionIds. Verification re-hashes all declared artifacts, implementations and dependencies, checks contracts, assumptions and fingerprint provenance, and invokes configured evidence checkers against the exact relation/input/output/action subject. Hash integrity alone never reports preservation.
+- Expanded the portable pass model with determinism, totality, implementation/validator/theorem/assumption references, artifact bindings, resource observations and diagnostics. Legacy specialization labels are explicitly unbound; caller-supplied digests require byte verification. No global specialization theorem was added or claimed.
+- Production checked-build writes a canonical .build-graph.json sidecar and binds its exact bytes in the receipt. It records actual ordered source inputs, accepted admissions, TypeScript and tsc outputs, the selected compiler entry bytes, static checked-host source closure, semantic/security context and output basename/flags. Composite edges remain explicitly composite; hidden internal IR stages do not get invented identities.
+- Complete generated-compiler/runtime and TypeScript package closure, per-IR-stage artifacts, independent preservation evidence, full resource coverage and archival byte resolution remain open. Current records must not justify untrusted cache reuse by themselves.
+- Focused evidence: 10 artifact/build-graph/service tests pass, including tampering, altered actions/fingerprints, missing evidence and wrong evidence subjects. Specialization tests and PSC1 Pass check (30 declarations) pass, portable structural rules remain unchanged, and production topology passes. The local checked native seed is absent, so actual end-to-end checked-build integration is left to its existing cloud gate; no local execution claim is made.

@@ -199,7 +199,9 @@
     "check:direct-js-promotion": "node scripts/direct-js-promotion-audit.mjs",
     "check:bootstrap-assurance": "node scripts/bootstrap-assurance-audit.mjs",
     "test:verified-ir-strict": "lake exe psc1_verified_ir_strict_tests",
-    "test:erasure-eta": "node scripts/erasure-eta-runtime.test.mjs"
+    "test:erasure-eta": "node scripts/erasure-eta-runtime.test.mjs",
+    "test:interface-ir": "lake exe pscv_interface_ir_tests",
+    "test:pass-evidence": "node --test scripts/artifact-evidence.test.mjs scripts/checked-build-evidence.test.mjs scripts/compiler-checked-service.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

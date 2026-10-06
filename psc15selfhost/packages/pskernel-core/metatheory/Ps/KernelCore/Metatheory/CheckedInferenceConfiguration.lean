@@ -1,6 +1,6 @@
 import Ps.KernelCore.Metatheory.InferenceConfiguration
 import Ps.KernelCore.Metatheory.InferenceTyping
-import Ps.KernelCore.Metatheory.ProjectionConfiguration
+import Ps.KernelCore.Metatheory.CheckedProjectionConfiguration
 import Ps.KernelCore.Metatheory.ExprEq
 
 /-
@@ -9,7 +9,7 @@ recursive configuration contract because the projection checker itself calls
 the smaller checked-inference function.
 -/
 
-theorem psKernelCheckedInferenceCoreConfigurationSound_of_projection
+theorem psKernelCheckedInferenceCoreConfigurationSound_contract
     (whnf :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -25,23 +25,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_of_projection
     (hWhnf :
       PsKernelWhnfConfigurationSound whnf)
     (hDefEq :
-      PsKernelDefEqConfigurationSound defeq)
-    (hProjection :
-      ∀ remaining : Nat,
-        PsKernelProjectionConfigurationSound
-          whnf
-          (fun
-            projectionContext
-            projectionState
-            projectionExpr =>
-              psKernelInferCoreWithFuel
-                remaining
-                whnf
-                defeq
-                projectionContext
-                projectionState
-                projectionExpr
-                false)) :
+      PsKernelDefEqConfigurationSound defeq) :
     PsKernelCheckedInferenceCoreConfigurationSound
       whnf
       defeq := by
@@ -1819,8 +1803,32 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_of_projection
                 | ok projectionRun =>
                     rcases projectionRun with
                       ⟨projectionType, projectionState⟩
+                    have hInferChecked :
+                        PsKernelCheckedInferenceConfigurationSound
+                          inferType := by
+                      intro
+                        projectionContext
+                        projectionState0
+                        projectionNext
+                        projectionExpr
+                        projectionResult
+                        hProjectionConfig
+                        hProjectionCoreRun
+                      exact
+                        ih
+                          projectionContext
+                          projectionState0
+                          projectionNext
+                          projectionExpr
+                          projectionResult
+                          hProjectionConfig
+                          hProjectionCoreRun
                     have hProjectionSemantic :=
-                      hProjection remaining
+                      psKernelInferProjectionWith_configuration_sound
+                        whnf
+                        inferType
+                        hWhnf
+                        hInferChecked
                         nextContext
                         state
                         projectionState

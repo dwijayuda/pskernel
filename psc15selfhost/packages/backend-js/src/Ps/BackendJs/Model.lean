@@ -1,5 +1,12 @@
 import Ps.CompilerIr.Model
 
+inductive PsJsWordSize where
+  | bits32
+  | bits64
+
+structure PsJsTargetProfile where
+  wordSize : PsJsWordSize
+
 inductive PsJsIrMachineIntegerType where
   | uint8
   | uint16

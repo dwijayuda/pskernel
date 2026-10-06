@@ -6239,3 +6239,9 @@ def psWasmLowerModule
       Except.error PsWasmLowerError.unsupportedModuleFeature
   | Except.ok specialized =>
       psWasmLowerSpecializedModule profile specialized
+
+def psWasmLowerValidatedModule
+    (profile : PsWasmTargetProfile)
+    (validated : PsValidatedIrModule) :
+    Except PsWasmLowerError PsWasmModule :=
+  psWasmLowerModule profile validated.raw

@@ -191,3 +191,267 @@ theorem psKernelCheckerContextWithLet_preserves_semantic_state
         hString
         hCanonical)
       hState
+
+
+def PsKernelCheckerConfigurationSound
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState) : Prop :=
+  PsKernelEnvironmentIndexRefines
+      context.environment ∧
+  PsKernelLocalContextFreshBound
+      context.localContext
+      state.nextFresh ∧
+  PsKernelCheckerStateSemanticSound
+      context.environment
+      context.localContext
+      state
+
+theorem psKernelCheckerStateFreshName_preserves_semantic_state
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (base : PsKernelName)
+    (hState :
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        state) :
+    PsKernelCheckerStateSemanticSound
+      context.environment
+      context.localContext
+      (Prod.snd
+        (psKernelCheckerStateFreshName
+          state
+          base)) := by
+  simpa [
+    psKernelCheckerStateFreshName,
+    PsKernelCheckerStateSemanticSound
+  ] using hState
+
+theorem psKernelCheckerFreshLocal_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        state) :
+    let freshResult :=
+      psKernelCheckerStateFreshName
+        state
+        userName
+    let fresh :=
+      Prod.fst freshResult
+    let nextState :=
+      Prod.snd freshResult
+    let nextLocal :=
+      psKernelLocalContextAddLocal
+        context.localContext
+        fresh
+        userName
+        type
+        binderInfo
+    let nextContext :=
+      psKernelCheckerContextWithLocalContext
+        context
+        nextLocal
+    PsKernelCheckerConfigurationSound
+      nextContext
+      nextState := by
+  intro freshResult fresh nextState nextLocal nextContext
+  rcases hConfig with
+    ⟨hIndex, hBound, hState⟩
+  have hStateOld :
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        nextState := by
+    simpa [
+      freshResult,
+      nextState
+    ] using
+      psKernelCheckerStateFreshName_preserves_semantic_state
+        context
+        state
+        userName
+        hState
+  have hExt :
+      PsKernelLocalContextExtends
+        context.localContext
+        nextLocal := by
+    simpa [
+      freshResult,
+      fresh,
+      nextState,
+      nextLocal,
+      psKernelCheckerStateFreshName
+    ] using
+      psKernelLocalContextAddLocal_extends_freshBound
+        context.localContext
+        state.nextFresh
+        userName
+        userName
+        type
+        binderInfo
+        hString
+        hBound
+  have hStateNew :
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        nextLocal
+        nextState :=
+    psKernelCheckerStateSemanticSound_contextWeaken
+      context.environment
+      context.localContext
+      nextLocal
+      nextState
+      hExt
+      hStateOld
+  have hBoundNew :
+      PsKernelLocalContextFreshBound
+        nextLocal
+        nextState.nextFresh := by
+    simpa [
+      freshResult,
+      fresh,
+      nextState,
+      nextLocal,
+      psKernelCheckerStateFreshName
+    ] using
+      psKernelLocalContextAddLocal_preserves_freshBound
+        context.localContext
+        state.nextFresh
+        userName
+        userName
+        type
+        binderInfo
+        hBound
+  simpa [
+    PsKernelCheckerConfigurationSound,
+    nextContext,
+    psKernelCheckerContextWithLocalContext
+  ] using
+    (show
+      PsKernelEnvironmentIndexRefines context.environment ∧
+        PsKernelLocalContextFreshBound nextLocal nextState.nextFresh ∧
+        PsKernelCheckerStateSemanticSound
+          context.environment
+          nextLocal
+          nextState
+      from ⟨hIndex, hBoundNew, hStateNew⟩)
+
+theorem psKernelCheckerFreshLet_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (userName : PsKernelName)
+    (type value : PsKernelExpr)
+    (hString : PsKernelStringEqSoundLaw)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        state) :
+    let freshResult :=
+      psKernelCheckerStateFreshName
+        state
+        userName
+    let fresh :=
+      Prod.fst freshResult
+    let nextState :=
+      Prod.snd freshResult
+    let nextLocal :=
+      psKernelLocalContextAddLet
+        context.localContext
+        fresh
+        userName
+        type
+        value
+    let nextContext :=
+      psKernelCheckerContextWithLocalContext
+        context
+        nextLocal
+    PsKernelCheckerConfigurationSound
+      nextContext
+      nextState := by
+  intro freshResult fresh nextState nextLocal nextContext
+  rcases hConfig with
+    ⟨hIndex, hBound, hState⟩
+  have hStateOld :
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        nextState := by
+    simpa [
+      freshResult,
+      nextState
+    ] using
+      psKernelCheckerStateFreshName_preserves_semantic_state
+        context
+        state
+        userName
+        hState
+  have hExt :
+      PsKernelLocalContextExtends
+        context.localContext
+        nextLocal := by
+    simpa [
+      freshResult,
+      fresh,
+      nextState,
+      nextLocal,
+      psKernelCheckerStateFreshName
+    ] using
+      psKernelLocalContextAddLet_extends_freshBound
+        context.localContext
+        state.nextFresh
+        userName
+        userName
+        type
+        value
+        hString
+        hBound
+  have hStateNew :
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        nextLocal
+        nextState :=
+    psKernelCheckerStateSemanticSound_contextWeaken
+      context.environment
+      context.localContext
+      nextLocal
+      nextState
+      hExt
+      hStateOld
+  have hBoundNew :
+      PsKernelLocalContextFreshBound
+        nextLocal
+        nextState.nextFresh := by
+    simpa [
+      freshResult,
+      fresh,
+      nextState,
+      nextLocal,
+      psKernelCheckerStateFreshName
+    ] using
+      psKernelLocalContextAddLet_preserves_freshBound
+        context.localContext
+        state.nextFresh
+        userName
+        userName
+        type
+        value
+        hBound
+  simpa [
+    PsKernelCheckerConfigurationSound,
+    nextContext,
+    psKernelCheckerContextWithLocalContext
+  ] using
+    (show
+      PsKernelEnvironmentIndexRefines context.environment ∧
+        PsKernelLocalContextFreshBound nextLocal nextState.nextFresh ∧
+        PsKernelCheckerStateSemanticSound
+          context.environment
+          nextLocal
+          nextState
+      from ⟨hIndex, hBoundNew, hStateNew⟩)

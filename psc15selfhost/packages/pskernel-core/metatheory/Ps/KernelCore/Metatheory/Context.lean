@@ -621,3 +621,308 @@ theorem psKernelCheckerContextWithLet_extends
       value
       hString
       hCanonical
+
+
+def PsKernelLocalContextFreshBound
+    (context : PsKernelLocalContext)
+    (nextFresh : Nat) : Prop :=
+  ∀ (decl : PsKernelLocalDecl),
+    List.Mem decl context.decls ->
+      ∃ (base : PsKernelName) (index : Nat),
+        psKernelLocalDeclName decl =
+            PsKernelName.num base index ∧
+          index < nextFresh
+
+theorem psKernelLocalContextEmpty_freshBound
+    (nextFresh : Nat) :
+    PsKernelLocalContextFreshBound
+      psKernelLocalContextEmpty
+      nextFresh := by
+  intro decl hMem
+  cases hMem
+
+theorem psKernelLocalContextAddLocal_preserves_freshBound
+    (context : PsKernelLocalContext)
+    (counter : Nat)
+    (base userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hBound :
+      PsKernelLocalContextFreshBound
+        context
+        counter) :
+    PsKernelLocalContextFreshBound
+      (psKernelLocalContextAddLocal
+        context
+        (PsKernelName.num base counter)
+        userName
+        type
+        binderInfo)
+      (Nat.succ counter) := by
+  intro decl hMem
+  change
+    List.Mem
+      decl
+      (List.cons
+        (PsKernelLocalDecl.localDecl
+          context.nextIndex
+          (PsKernelName.num base counter)
+          userName
+          type
+          binderInfo)
+        context.decls) at hMem
+  cases hMem with
+  | head =>
+      exact
+        ⟨
+          base,
+          counter,
+          rfl,
+          Nat.lt_succ_self counter
+        ⟩
+  | tail _ hTail =>
+      rcases hBound decl hTail with
+        ⟨oldBase, oldIndex, hName, hLt⟩
+      exact
+        ⟨
+          oldBase,
+          oldIndex,
+          hName,
+          Nat.lt_succ_of_lt hLt
+        ⟩
+
+theorem psKernelLocalContextAddLet_preserves_freshBound
+    (context : PsKernelLocalContext)
+    (counter : Nat)
+    (base userName : PsKernelName)
+    (type value : PsKernelExpr)
+    (hBound :
+      PsKernelLocalContextFreshBound
+        context
+        counter) :
+    PsKernelLocalContextFreshBound
+      (psKernelLocalContextAddLet
+        context
+        (PsKernelName.num base counter)
+        userName
+        type
+        value)
+      (Nat.succ counter) := by
+  intro decl hMem
+  change
+    List.Mem
+      decl
+      (List.cons
+        (PsKernelLocalDecl.letDecl
+          context.nextIndex
+          (PsKernelName.num base counter)
+          userName
+          type
+          value)
+        context.decls) at hMem
+  cases hMem with
+  | head =>
+      exact
+        ⟨
+          base,
+          counter,
+          rfl,
+          Nat.lt_succ_self counter
+        ⟩
+  | tail _ hTail =>
+      rcases hBound decl hTail with
+        ⟨oldBase, oldIndex, hName, hLt⟩
+      exact
+        ⟨
+          oldBase,
+          oldIndex,
+          hName,
+          Nat.lt_succ_of_lt hLt
+        ⟩
+
+theorem psKernelLocalContextFreshBound_name_absent
+    (context : PsKernelLocalContext)
+    (counter : Nat)
+    (base : PsKernelName)
+    (hString : PsKernelStringEqSoundLaw)
+    (hBound :
+      PsKernelLocalContextFreshBound
+        context
+        counter) :
+    psKernelLocalContextFind
+        context
+        (PsKernelName.num base counter) =
+      Option.none := by
+  cases hFind :
+      psKernelLocalContextFind
+        context
+        (PsKernelName.num base counter) with
+  | none =>
+      rfl
+  | some decl =>
+      have hFound :=
+        psKernelLocalContextFind_some_mem_and_matches_meta
+          context
+          (PsKernelName.num base counter)
+          decl
+          hFind
+      rcases hBound decl hFound.1 with
+        ⟨declBase, declIndex, hDeclName, hLt⟩
+      have hNameEq :
+          psKernelLocalDeclName decl =
+            PsKernelName.num base counter :=
+        psKernelNameEq_sound_of_string_law
+          hString
+          (psKernelLocalDeclName decl)
+          (PsKernelName.num base counter)
+          hFound.2
+      rw [hDeclName] at hNameEq
+      have hIndexEq :
+          declIndex = counter := by
+        have hProjected :=
+          congrArg
+            psKernelNameNumIndexMeta
+            hNameEq
+        simpa [psKernelNameNumIndexMeta] using hProjected
+      omega
+
+theorem psKernelLocalContextAddLocal_extends_freshBound
+    (context : PsKernelLocalContext)
+    (counter : Nat)
+    (base userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hBound :
+      PsKernelLocalContextFreshBound
+        context
+        counter) :
+    PsKernelLocalContextExtends
+      context
+      (psKernelLocalContextAddLocal
+        context
+        (PsKernelName.num base counter)
+        userName
+        type
+        binderInfo) := by
+  intro query decl hFind
+  have hFreshNone :=
+    psKernelLocalContextFreshBound_name_absent
+      context counter base hString hBound
+  have hDifferent :
+      psKernelNameEq
+          (PsKernelName.num base counter)
+          query =
+        false := by
+    cases hEq :
+        psKernelNameEq
+          (PsKernelName.num base counter)
+          query with
+    | false =>
+        rfl
+    | true =>
+        have hName :
+            PsKernelName.num base counter =
+              query :=
+          psKernelNameEq_sound_of_string_law
+            hString
+            (PsKernelName.num base counter)
+            query
+            hEq
+        rw [← hName] at hFind
+        rw [hFreshNone] at hFind
+        contradiction
+  change
+    (if
+        psKernelNameEq
+          (PsKernelName.num base counter)
+          query then
+      Option.some
+        (PsKernelLocalDecl.localDecl
+          context.nextIndex
+          (PsKernelName.num base counter)
+          userName
+          type
+          binderInfo)
+    else
+      psKernelLocalContextFindIn
+        query
+        context.decls) =
+      Option.some decl
+  rw [hDifferent]
+  change
+    psKernelLocalContextFindIn
+        query
+        context.decls =
+      Option.some decl at hFind
+  exact hFind
+
+theorem psKernelLocalContextAddLet_extends_freshBound
+    (context : PsKernelLocalContext)
+    (counter : Nat)
+    (base userName : PsKernelName)
+    (type value : PsKernelExpr)
+    (hString : PsKernelStringEqSoundLaw)
+    (hBound :
+      PsKernelLocalContextFreshBound
+        context
+        counter) :
+    PsKernelLocalContextExtends
+      context
+      (psKernelLocalContextAddLet
+        context
+        (PsKernelName.num base counter)
+        userName
+        type
+        value) := by
+  intro query decl hFind
+  have hFreshNone :=
+    psKernelLocalContextFreshBound_name_absent
+      context counter base hString hBound
+  have hDifferent :
+      psKernelNameEq
+          (PsKernelName.num base counter)
+          query =
+        false := by
+    cases hEq :
+        psKernelNameEq
+          (PsKernelName.num base counter)
+          query with
+    | false =>
+        rfl
+    | true =>
+        have hName :
+            PsKernelName.num base counter =
+              query :=
+          psKernelNameEq_sound_of_string_law
+            hString
+            (PsKernelName.num base counter)
+            query
+            hEq
+        rw [← hName] at hFind
+        rw [hFreshNone] at hFind
+        contradiction
+  change
+    (if
+        psKernelNameEq
+          (PsKernelName.num base counter)
+          query then
+      Option.some
+        (PsKernelLocalDecl.letDecl
+          context.nextIndex
+          (PsKernelName.num base counter)
+          userName
+          type
+          value)
+    else
+      psKernelLocalContextFindIn
+        query
+        context.decls) =
+      Option.some decl
+  rw [hDifferent]
+  change
+    psKernelLocalContextFindIn
+        query
+        context.decls =
+      Option.some decl at hFind
+  exact hFind

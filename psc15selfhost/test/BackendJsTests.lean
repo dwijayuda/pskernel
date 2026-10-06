@@ -535,7 +535,21 @@ def psRunBackendJsTests : List PsBackendJsNamedTest -> IO Bool
       let restPassed ← psRunBackendJsTests rest
       pure (test.passed && restPassed)
 
+def psReportBackendJsSelectiveStackSafety : IO Unit := do
+  if psTestBackendJsSelectiveStackSafety then
+    pure Unit.unit
+  else
+    match psJsPrintModuleStackSafe psBackendJsSelectiveStackModule with
+    | Except.error _ =>
+        IO.println "PSC2_BACKEND_JS_SELECTIVE_OUTPUT: <emit-error>"
+    | Except.ok output =>
+        IO.println
+          ("PSC2_BACKEND_JS_SELECTIVE_OUTPUT_BEGIN\n" ++
+            output ++
+            "PSC2_BACKEND_JS_SELECTIVE_OUTPUT_END")
+
 def main : IO Unit := do
+  psReportBackendJsSelectiveStackSafety
   let passed ← psRunBackendJsTests psBackendJsTests
   if passed then
     IO.println "PSC2_BACKEND_JS_TESTS: PASS"

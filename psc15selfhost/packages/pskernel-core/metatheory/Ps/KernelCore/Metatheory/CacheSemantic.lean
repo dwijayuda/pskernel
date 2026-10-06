@@ -392,27 +392,12 @@ theorem psKernelExprMapGet_insert_match_core
             psKernelExprMapGetIn_insertIn_match_core
               key
               value
-              key
+              query
               (psKernelExprMapIndexBucket
                 16
                 index
                 (psKernelExprHash key))
-              (by
-                have hReverse :
-                    psKernelExprEq query key = true := by
-                  rw [
-                    ← psKernelExprEq_symm_core
-                      key
-                      query
-                  ]
-                  exact hMatch
-                exact
-                  psKernelExprEq_trans_core
-                    key
-                    query
-                    key
-                    hMatch
-                    hReverse)
+              hMatch
 
 theorem psKernelExprMapGet_insert_other_core
     (cache : PsKernelExprMap)

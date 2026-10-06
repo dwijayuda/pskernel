@@ -2148,18 +2148,8 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                     hArgsLengthBool
                                                 rw [hBeqFalse] at hBeqTrue
                                                 cases hBeqTrue
-                                              simp [
-                                                psKernelInferProjectionWith,
-                                                hInferRun,
-                                                hTypeWhnf,
-                                                hIndexBound,
-                                                hFn,
-                                                hTypeName,
-                                                hInductFind,
-                                                hCtors,
-                                                hCtorRest,
-                                                hArgsLengthNeRaw
-                                              ] at hSuccess
+                                              rw [if_neg hArgsLengthNeRaw] at hSuccess
+                                              simp at hSuccess
                                           | true =>
                                               have hArgsLength :
                                                   psKernelExprListLength args =

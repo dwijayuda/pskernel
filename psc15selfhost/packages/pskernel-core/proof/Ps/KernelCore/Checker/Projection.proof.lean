@@ -144,14 +144,28 @@ theorem psKernelProjectionApplyParamsWithFuel_refines_semantics
                             PsKernelProjectionApplyParamsJudgment.step
                               index numParams current domain body result
                               argument name binderInfo hMore hClosure hArg hRest
-                  | bvar value | fvar value | mvar value | sort value |
-                    const value _ | app _ _ | lam _ _ _ _ |
-                    letE _ _ _ _ _ | lit value | mdata _ _ | proj _ _ _ =>
-                      simp [
-                        psKernelProjectionApplyParamsWithFuel,
-                        hMore,
-                        hRun
-                      ] at hSuccess
+                  | bvar value =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | fvar value =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | mvar value =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | sort value =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | const name levels =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | app fn arg =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | lam name type body binderInfo =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | letE name type value body nondep =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | lit value =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | mdata metadata body =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
+                  | proj typeName projIndex body =>
+                      simp [psKernelProjectionApplyParamsWithFuel, hMore, hRun] at hSuccess
 
 theorem psKernelProjectionSkipFieldsWithFuel_refines_semantics
     (fuel : Nat)
@@ -323,11 +337,25 @@ theorem psKernelProjectionSkipFieldsWithFuel_refines_semantics
                                               index current domain body result
                                               name binderInfo
                                               hMore hClosure hLoose hRest
-                  | bvar value | fvar value | mvar value | sort value |
-                    const value _ | app _ _ | lam _ _ _ _ |
-                    letE _ _ _ _ _ | lit value | mdata _ _ | proj _ _ _ =>
-                      simp [
-                        psKernelProjectionSkipFieldsWithFuel,
-                        hMore,
-                        hRun
-                      ] at hSuccess
+                  | bvar value =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | fvar value =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | mvar value =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | sort value =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | const name levels =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | app fn arg =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | lam name type body binderInfo =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | letE name type value body nondep =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | lit value =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | mdata metadata body =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+                  | proj typeName projIndex body =>
+                      simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess

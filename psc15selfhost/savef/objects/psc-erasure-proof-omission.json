@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "FormalEvidence",
+  "semanticProfile": "ps-0.9-r3",
+  "authorityClass": "formal-evidence",
+  "scope": {
+    "pass": "psc-erasure/1",
+    "slice": "top-level-proof-declaration-omission"
+  },
+  "dependsOn": [
+    "psc-declarative-core-seed/1"
+  ],
+  "assumes": [],
+  "claims": [
+    {
+      "id": "psc-erasure-proof-declaration-omission/1",
+      "status": "proved"
+    }
+  ],
+  "evidenceRefs": [
+    "lean:packages/pscv-theory/src/Ps/Theory/Core.lean"
+  ],
+  "payload": {
+    "symbol": "psErasureProofDeclarationOmitted",
+    "scope": "classification-conditional top-level proof declaration omission"
+  },
+  "objectId": "sha256:6439c2f0e24bb357c272cf7b67148d1283e20532460dd867c0ae3faf60bedf2f"
+}

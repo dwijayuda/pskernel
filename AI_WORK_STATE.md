@@ -4,9 +4,9 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `69c9e3ad8459446c4110594625f86d6278851cdd`
-- Last known green proof checkpoint: `69c9e3ad8459446c4110594625f86d6278851cdd` (run #277)
-- Current integration HEAD observed: `637c7e77a9e52141f9ddda1af18ca11c1a874210`
+- Current proof HEAD when this state was written: `8d50f7cd8ef34a453623d569228f367801975b18`
+- Last known green proof checkpoint: `e94787d6557f38ee20f1680806f0392b8ca3bca9` (run #281)
+- Current integration HEAD last observed: `304706da6d3775a716561870110b7e7f5b46ac03`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
 ## Acceptance criteria
@@ -27,7 +27,7 @@ The work is complete only when all of the following hold:
      - infer-only preserves configuration soundness,
      - WHNF/reduction returns a valid reduction and preserves configuration soundness,
      - true DefEq is sound and preserves configuration soundness.
-   - Cache publication, presentation equality, context extension/weakening, freshness, environment-index refinement, and recursion-depth/configuration obligations needed by the knot proof are discharged.
+   - Cache publication, presentation equality, context extension/weakening, freshness, environment-index refinement, recursion-depth/configuration obligations needed by the knot proof are discharged.
 
 4. **Admission soundness**
    - Successful ordinary declaration admission refines a well-formed semantic environment extension.
@@ -51,43 +51,65 @@ Last checked-in audit:
 - D: 7
 - Total canonical source/proof pairs: 79
 
-The audit is conservative relative to newer cross-module checker-contract work; do not inflate module grades without applying the written A/B/C/D criteria.
+The audit is conservative relative to newer cross-module checker-contract/context work. Do not inflate module grades without applying the written A/B/C/D criteria.
 
 ## Current checkpoint
-Run #277 is fully green at `69c9e3ad8459446c4110594625f86d6278851cdd`.
+- Run #281 is fully green at `e94787d6557f38ee20f1680806f0392b8ca3bca9`.
+- Current head `8d50f7cd8ef34a453623d569228f367801975b18` fixes the only run #282 failure: a declaration-order dependency in `Metatheory/ContextState.lean` for rec-depth configuration transport.
+- Run #283 is pending/in progress on that fix; the GitHub runner was last observed stuck in checkout, so this is infrastructure waiting rather than a known Lean failure.
 
-Newly established architecture since the prior checkpoint includes:
-- semantic map-cache and unordered DefEq pair-cache publication laws;
-- presentation-equivalence transport in typing/reduction/defeq judgments;
-- local-context freshness, extension, semantic weakening, and configuration transport;
-- checker configuration soundness tracking environment-index refinement, local fresh-name bounds, and all semantic caches;
-- configuration-preservation across inference cache publication, WHNF/WHNF-core caching, successful DefEq caching, recursion-depth entry, eager-reduction/native-evaluator context flags, and semantic-equivalent contexts;
-- final inference contract split:
-  - checked inference must return a `PsKernelTypingJudgment` and preserve configuration;
-  - inference-only need only preserve configuration, because the executable infer-only path intentionally skips some checked-application validation;
-- public Knot wrappers already compose abstract configuration contracts into checker/API-level contracts;
-- `psKernelEnsureSortWith_configuration_refines` is now proved, including the nontrivial WHNF fallback path.
+## Established architecture
+The branch now includes:
+- shared independent judgments for typing, reduction closure, structural/presentation equality, non-transitive algorithmic DefEq, projection semantics, environment-index refinement, cache/state soundness, declaration admission and inductive foundations;
+- total/reference substitution semantics and implementation-refinement proofs;
+- semantic environment-index and cache promotion/refinement;
+- semantic cache publication laws and presentation transport;
+- context freshness/canonicality, extension/weakening, generated-name absence, and configuration transport;
+- checker configuration soundness tracking environment-index refinement, fresh-name bounds, inference caches, WHNF/WHNF-core/unfold caches, and DefEq success cache;
+- configuration preservation across inference publication, WHNF/WHNF-core finish, successful DefEq finish, rec-depth entry, eager-reduction/native-evaluator flag changes, and semantic-equivalent contexts;
+- checked/infer-only contract split matching executable behavior;
+- EnsureSort and EnsureForall refinement through WHNF semantics;
+- projection typing/refinement plus configuration contract scaffolding;
+- lower-level occurrence/elimination/recursor-validation/constructor-result inductive semantics;
+- public API/session composition theorems parameterized by checker soundness contracts.
 
 ## Current blocker
-No mechanical blocker at this checkpoint.
+No known production-kernel semantic defect.
 
-The remaining blocker is architectural: prove the concrete mutually recursive checker functions satisfy the final configuration contracts, then close the remaining DefEq/reduction/inductive transaction semantics needed by those proofs.
+Immediate mechanical blocker from run #282 was fixed at current HEAD:
+- `psKernelCheckerConfigurationSound_enterRecDepth_back` referenced `psKernelCheckerConfigurationSound_transport` before declaration;
+- the theorem now proves the transport directly by unfolding configuration soundness and rewriting the preserved semantic view.
+
+The remaining blocker is architectural:
+- prove the concrete mutually recursive checker functions satisfy the final configuration contracts, then close remaining DefEq/reduction/inductive transaction semantics and final public composition.
 
 ## Immediate plan
-1. Prove concrete `psKernelInferCoreWithFuel` contracts by fuel induction:
-   - checked mode: `PsKernelCheckedInferenceCoreConfigurationSound`;
-   - infer-only mode: `PsKernelInferOnlyCoreConfigurationPreserves`;
-   using cache-hit soundness, EnsureSort, context freshness/weakening, projection/typing refinements, and concrete WHNF/DefEq contracts.
-2. Prove concrete WHNF-core/public-WHNF configuration soundness using reduction-cache publication, existing reduction semantics, recursor reduction, native reduction boundaries, and context/configuration preservation.
-3. Prove concrete DefEq checked/configuration soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and successful-cache paths.
-4. Compose the mutually recursive checker knot and discharge the abstract assumptions already used by API/session theorems.
-5. Complete ordinary/mutual/nested inductive admission transactions and environment-extension refinement.
-6. Add the final explicit implementation-refinement theorem/family.
-7. Reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
+1. Validate current HEAD with the full proof gate; if CI remains runner-blocked, continue only dependency-safe proof work and preserve checkpoints.
+2. Prove concrete checked/infer-only `psKernelInferCoreWithFuel` configuration contracts by fuel induction, reusing:
+   - cache-hit semantic soundness,
+   - EnsureSort/EnsureForall,
+   - context freshness/weakening,
+   - projection refinement/configuration contract,
+   - WHNF/DefEq configuration contracts.
+3. Prove concrete WHNF-core/public-WHNF configuration contracts using:
+   - reduction-cache publication,
+   - existing reduction semantics,
+   - recursor/native-reduction boundaries,
+   - semantic context/configuration preservation.
+4. Prove concrete DefEq checked/configuration soundness, prioritizing:
+   - LazyDelta,
+   - FinalRules,
+   - eta/proof-irrelevance,
+   - recursor computation,
+   - success-cache paths.
+5. Compose the mutually recursive checker knot and discharge the assumptions already used by API/session theorems.
+6. Complete ordinary/mutual/nested inductive admission transactions and environment-extension refinement.
+7. Add the final explicit implementation-refinement theorem/family.
+8. Reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Work discipline
 - Preserve GitHub history and concurrent proof work.
-- Refresh the real branch tip through the GitHub commits API before every write if concurrent work may have landed.
-- Prefer dependency-guided reusable lemmas and structural induction over test/fix hunting.
+- Refresh the real branch tip through GitHub before every write if concurrent work may have landed.
+- Prefer dependency-guided reusable lemmas and structural/fuel induction over test/fix hunting.
 - Do not change production `pskernel-core/src/**` merely to make proofs easier. If a proof exposes a real implementation defect, document it and make the smallest semantically justified source fix.
 - Commit meaningful checkpoints and keep this file updated as milestones/blockers change.

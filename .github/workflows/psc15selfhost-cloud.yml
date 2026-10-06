@@ -93,6 +93,7 @@ jobs:
             PsBackendWasm \
             psc1 \
             psc1_erasure_tests \
+            psc1_verified_ir_strict_tests \
             psc1_project_query_graph_tests \
             psc1_host_project_query_tests \
             psc2_joint_closure_inventory \
@@ -111,6 +112,10 @@ jobs:
       - name: Run VerifiedIR and erasure corpus
         working-directory: psc15selfhost
         run: lake exe psc1_erasure_tests
+
+      - name: Run strict VerifiedIR invariant corpus
+        working-directory: psc15selfhost
+        run: lake exe psc1_verified_ir_strict_tests
 
       - name: Check generalized erasure source equality guard
         working-directory: psc15selfhost

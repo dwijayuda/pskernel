@@ -221,8 +221,13 @@
       "sections": [
         26
       ],
-      "status": "missing",
-      "owners": [],
+      "status": "partial",
+      "owners": [
+        "packages/interface-ir/src/Ps/InterfaceIr/Model.lean",
+        "packages/interface-ir/src/Ps/InterfaceIr/Validate.lean",
+        "packages/interface-ir/src/Ps/InterfaceIr/Wit.lean",
+        "contracts/interface/FOREIGN_INTERFACE_V1.json"
+      ],
       "completion": "Typed functions, aggregates, handles, ownership, errors, streams/futures, targets and capability imports/exports drive adapters.",
       "assurance": "pending"
     },

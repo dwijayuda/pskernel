@@ -101,6 +101,7 @@ def psHostPackageDirectory : List String -> Option String
   | "Ps" :: "Bridge" :: _ => some "bridge"
   | "Ps" :: "Theory" :: _ => some "pscv-theory"
   | "Ps" :: "TheoryBridge" :: _ => some "theory-bridge"
+  | "Ps" :: "InterfaceIr" :: _ => some "interface-ir"
   | "Ps" :: "CompilerIr" :: _ => some "compiler-ir"
   | "Ps" :: "Compiler" :: _ => some "compiler"
   | "Ps" :: "Erasure" :: _ => some "erasure"

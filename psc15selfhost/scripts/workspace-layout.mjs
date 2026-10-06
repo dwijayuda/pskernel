@@ -12,6 +12,7 @@ export const packageBySection = new Map([
   ["Bridge", "bridge"],
   ["Theory", "pscv-theory"],
   ["TheoryBridge", "theory-bridge"],
+  ["InterfaceIr", "interface-ir"],
   ["CompilerIr", "compiler-ir"],
   ["Compiler", "compiler"],
   ["Erasure", "erasure"],

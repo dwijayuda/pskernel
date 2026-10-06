@@ -33,7 +33,7 @@
     {
       "id": "selfhost-fixed-points",
       "status": "failing",
-      "required": "Re-run full JS, Wasm and Rust fixed points after implementation repairs. Rust run 37516533780 at 0849ae7 passed generation and fixture execution, then generation-2 native compilation overflowed the stack. Generation/instantiation alone is insufficient."
+      "required": "Re-run full JS, Wasm and Rust fixed points after implementation repairs. Rust run 37532839774, job 112506520954 at a6477b1 passed fixture execution, whole-compiler generation and native generation-1 build, then generation-2 native compilation overflowed the stack. Generation/instantiation alone is insufficient."
     },
     {
       "id": "bootstrap-diversity",
@@ -64,6 +64,11 @@
       "id": "logical-translation-preservation",
       "status": "unproved",
       "required": "Bind actual source/destination checked admissions and canonical artifacts to the portable closed-renaming validator, replay its relation through a registered independent checker, and Lean-check preservation. Current 19 executable cases and PSC1 source/emission parity establish no global theorem; cross-foundation morphisms and general inductive/proof translations remain unsupported."
+    },
+    {
+      "id": "foreign-interface-adapters",
+      "status": "pending",
+      "required": "Check emitted WIT with an independent pinned Component Model parser, implement actual target runtime adapters and bind them to validated modules/artifacts, then exercise canonical ABI behavior, ownership/lifetimes, capability confinement and async cancellation. Portable structural checks and the 17-case WIT fixture do not establish runtime ABI behavior or global adapter soundness."
     }
   ]
 }

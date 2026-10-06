@@ -146,6 +146,10 @@ jobs:
         working-directory: psc15selfhost
         run: npm run check:theory-bridge
 
+      - name: Check portable foreign interfaces and WIT boundary
+        working-directory: psc15selfhost
+        run: npm run check:foreign-interface
+
       - name: Run host project query reuse corpus
         working-directory: psc15selfhost
         run: lake exe psc1_host_project_query_tests

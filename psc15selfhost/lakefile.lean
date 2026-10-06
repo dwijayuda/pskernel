@@ -506,6 +506,14 @@ lean_lib PsTheoryBridge where
     `Ps.TheoryBridge.Translate
   ]
 
+lean_lib PsInterfaceIr where
+  srcDir := "packages/interface-ir/src"
+  roots := #[`Ps.InterfaceIr.Model, `Ps.InterfaceIr.Validate, `Ps.InterfaceIr.Wit]
+
+lean_exe pscv_foreign_interface_tests where
+  srcDir := "packages/interface-ir/test"
+  root := `ForeignInterfaceTests
+
 lean_exe pscv_theory_bridge_tests where
   srcDir := "packages/theory-bridge/test"
   root := `TheoryBridgeTests

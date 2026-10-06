@@ -12,6 +12,9 @@ inductive PsWasmLowerError where
   | unsupportedType
   | unsupportedTypeContext (context : String)
   | unsupportedExpression
+  | unsupportedExpressionContext
+      (context : String)
+      (reason : String)
   | unsupportedIntrinsic
   | invalidIntrinsicArity
   | invalidCallArity
@@ -4390,7 +4393,12 @@ def psWasmLowerCallWith
                 resultType
                 arguments
           | _ =>
-              Except.error PsWasmLowerError.unsupportedExpression
+              Except.error
+                (PsWasmLowerError.unsupportedExpressionContext
+                  state.currentDefinition
+                  (String.Internal.append
+                    "call-binding-not-function:"
+                    name))
       | Option.none =>
           match
               psWasmLowerExprListWith
@@ -4404,7 +4412,11 @@ def psWasmLowerCallWith
                     [PsWasmInstruction.call name]
                 state := lowered.state
               }
-  | _ => Except.error PsWasmLowerError.unsupportedExpression
+  | _ =>
+      Except.error
+        (PsWasmLowerError.unsupportedExpressionContext
+          state.currentDefinition
+          "call-target")
 
 def psWasmLowerIfWith
     (lower :
@@ -4579,8 +4591,11 @@ def psWasmLowerMatchAlternativesWorker
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match alternatives with
   | List.nil =>
-      fun (_state : PsWasmLowerState) =>
-        Except.error PsWasmLowerError.unsupportedExpression
+      fun (state : PsWasmLowerState) =>
+        Except.error
+          (PsWasmLowerError.unsupportedExpressionContext
+            state.currentDefinition
+            "empty-match")
   | List.cons alternative rest =>
       let smaller :
           PsWasmLowerState ->
@@ -5022,9 +5037,12 @@ def psWasmLowerExprWorker
   | 0 =>
       fun (_bindings : List PsWasmBinding) =>
         fun (_expected : Option PsWasmValueType) =>
-          fun (_state : PsWasmLowerState) =>
+          fun (state : PsWasmLowerState) =>
             fun (_expr : PsVerifiedIrExpr) =>
-              Except.error PsWasmLowerError.unsupportedExpression
+              Except.error
+                (PsWasmLowerError.unsupportedExpressionContext
+                  state.currentDefinition
+                  "fuel-exhausted")
   | fuel + 1 =>
       let smaller :
           List PsWasmBinding ->

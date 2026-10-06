@@ -337,7 +337,10 @@ def psSynthInstanceWithFuelWorker
           fun (index : PsInstanceIndex) =>
             fun (context : PsMetaContext) =>
               fun (target : PsExpr) =>
-                let synthesize :=
+                let synthesize :
+                    PsMetaContext ->
+                    PsExpr ->
+                    PsSynthInstanceResult :=
                   fun (nextContext : PsMetaContext) =>
                     fun (nextTarget : PsExpr) =>
                       smaller

@@ -36,9 +36,9 @@ def PsKernelUniformOccurrenceHeadValid
 def PsKernelUniformOccurrenceSafe
     (declaredNames : List PsKernelName)
     (expectedLevels : List PsKernelLevel)
-    (numParams : Nat) :
-    PsKernelExpr -> Nat -> Prop
-  | expr, offset =>
+    (numParams : Nat)
+    (expr : PsKernelExpr)
+    (offset : Nat) : Prop :=
       match
           psKernelSimpleCheckUniformOccurrenceHead
             declaredNames

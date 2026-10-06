@@ -272,6 +272,21 @@ inductive PsKernelReductionClosure
         localContext
         expr
         expr
+  | presentationSource
+      (source query result : PsKernelExpr)
+      (hPresentation :
+        PsKernelStructuralExprEq source query)
+      (hReduction :
+        PsKernelReductionClosure
+          environment
+          localContext
+          source
+          result) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        query
+        result
   | cons
       (left middle right : PsKernelExpr)
       (hStep :
@@ -414,6 +429,27 @@ inductive PsKernelDefEqJudgment
         localContext
         right
         left
+  | presentation
+      (storedLeft storedRight queryLeft queryRight : PsKernelExpr)
+      (hLeft :
+        PsKernelStructuralExprEq
+          storedLeft
+          queryLeft)
+      (hStored :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          storedLeft
+          storedRight)
+      (hRight :
+        PsKernelStructuralExprEq
+          storedRight
+          queryRight) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        queryLeft
+        queryRight
   | structural
       (left right : PsKernelExpr)
       (h : PsKernelStructuralExprEq left right) :
@@ -764,6 +800,24 @@ inductive PsKernelProjectionResultJudgment
 inductive PsKernelTypingJudgment
     (environment : PsKernelEnvironment) :
     PsKernelLocalContext -> PsKernelExpr -> PsKernelExpr -> Prop
+  | presentation
+      {localContext : PsKernelLocalContext}
+      (storedExpr queryExpr result : PsKernelExpr)
+      (hExpr :
+        PsKernelStructuralExprEq
+          storedExpr
+          queryExpr)
+      (hStored :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          storedExpr
+          result) :
+      PsKernelTypingJudgment
+        environment
+        localContext
+        queryExpr
+        result
   | sort
       {localContext : PsKernelLocalContext}
       (level : PsKernelLevel) :

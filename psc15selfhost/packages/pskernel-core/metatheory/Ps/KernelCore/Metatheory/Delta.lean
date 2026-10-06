@@ -16,6 +16,14 @@ theorem psKernelReductionClosure_trans
   induction hLeft with
   | refl expr =>
       exact hRight
+  | presentationSource source query middle hPresentation hReduction ih =>
+      exact
+        PsKernelReductionClosure.presentationSource
+          source
+          query
+          right
+          hPresentation
+          (ih hRight)
   | cons first next last hStep hRest ih =>
       exact
         PsKernelReductionClosure.cons

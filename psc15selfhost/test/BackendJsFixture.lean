@@ -255,6 +255,119 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
             [PsVerifiedIrExpr.var "value"]
       },
       {
+        name := "stringUtf8ByteSizeDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringUtf8ByteSize
+            []
+            [PsVerifiedIrExpr.var "value"]
+      },
+      {
+        name := "stringNextDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "position"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringNext
+            []
+            [
+              PsVerifiedIrExpr.var "value",
+              PsVerifiedIrExpr.var "position"
+            ]
+      },
+      {
+        name := "stringGetDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "position"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.char
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringGet
+            []
+            [
+              PsVerifiedIrExpr.var "value",
+              PsVerifiedIrExpr.var "position"
+            ]
+      },
+      {
+        name := "stringAtEndDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "position"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringAtEnd
+            []
+            [
+              PsVerifiedIrExpr.var "value",
+              PsVerifiedIrExpr.var "position"
+            ]
+      },
+      {
+        name := "stringExtractDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+          },
+          {
+            name := "start"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "stop"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.stringExtract
+            []
+            [
+              PsVerifiedIrExpr.var "value",
+              PsVerifiedIrExpr.var "start",
+              PsVerifiedIrExpr.var "stop"
+            ]
+      },
+      {
         name := "u8AddWrap"
         typeParameters := []
         parameters := [

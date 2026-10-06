@@ -925,9 +925,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                               rcases hSuccess with ⟨rfl, rfl⟩
                                                                                                               exact
                                                                                                                 ⟨structType, hStruct, hProjection⟩
-                                                                                          | bvar value | fvar value | mvar value | sort value |
-                                                                                            const value _ | app _ _ | lam _ _ _ _ |
-                                                                                            letE _ _ _ _ _ | lit value | mdata _ _ | proj _ _ _ =>
+                                                                                          | bvar value =>
                                                                                               simp [
                                                                                                 psKernelInferProjectionWith,
                                                                                                 hInfer,
@@ -947,8 +945,207 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hFields,
                                                                                                 hFinal
                                                                                               ] at hSuccess
-                                                      | axiomInfo value | defnInfo value | thmInfo value |
-                                                        opaqueInfo value | inductInfo value | recInfo value | quotInfo value =>
+                                                                                          | fvar value =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | mvar value =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | sort value =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | const name levels =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | app fn arg =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | lam name type body binderInfo =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | letE name type value body nondep =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | lit value =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | mdata metadata body =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                                                          | proj projName projIndex body =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                      | axiomInfo value =>
                                                           simp [
                                                             psKernelInferProjectionWith,
                                                             hInfer,
@@ -963,8 +1160,97 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                             hArgsLengthBool,
                                                             hCtorFind
                                                           ] at hSuccess
-                                  | axiomInfo value | defnInfo value | thmInfo value |
-                                    opaqueInfo value | ctorInfo value | recInfo value | quotInfo value =>
+                                                      | defnInfo value =>
+                                                          simp [
+                                                            psKernelInferProjectionWith,
+                                                            hInfer,
+                                                            hTypeWhnf,
+                                                            hIndexBound,
+                                                            hFn,
+                                                            hTypeName,
+                                                            hInductFind,
+                                                            hCtors,
+                                                            hCtorRest,
+                                                            args,
+                                                            hArgsLengthBool,
+                                                            hCtorFind
+                                                          ] at hSuccess
+                                                      | thmInfo value =>
+                                                          simp [
+                                                            psKernelInferProjectionWith,
+                                                            hInfer,
+                                                            hTypeWhnf,
+                                                            hIndexBound,
+                                                            hFn,
+                                                            hTypeName,
+                                                            hInductFind,
+                                                            hCtors,
+                                                            hCtorRest,
+                                                            args,
+                                                            hArgsLengthBool,
+                                                            hCtorFind
+                                                          ] at hSuccess
+                                                      | opaqueInfo value =>
+                                                          simp [
+                                                            psKernelInferProjectionWith,
+                                                            hInfer,
+                                                            hTypeWhnf,
+                                                            hIndexBound,
+                                                            hFn,
+                                                            hTypeName,
+                                                            hInductFind,
+                                                            hCtors,
+                                                            hCtorRest,
+                                                            args,
+                                                            hArgsLengthBool,
+                                                            hCtorFind
+                                                          ] at hSuccess
+                                                      | inductInfo value =>
+                                                          simp [
+                                                            psKernelInferProjectionWith,
+                                                            hInfer,
+                                                            hTypeWhnf,
+                                                            hIndexBound,
+                                                            hFn,
+                                                            hTypeName,
+                                                            hInductFind,
+                                                            hCtors,
+                                                            hCtorRest,
+                                                            args,
+                                                            hArgsLengthBool,
+                                                            hCtorFind
+                                                          ] at hSuccess
+                                                      | recInfo value =>
+                                                          simp [
+                                                            psKernelInferProjectionWith,
+                                                            hInfer,
+                                                            hTypeWhnf,
+                                                            hIndexBound,
+                                                            hFn,
+                                                            hTypeName,
+                                                            hInductFind,
+                                                            hCtors,
+                                                            hCtorRest,
+                                                            args,
+                                                            hArgsLengthBool,
+                                                            hCtorFind
+                                                          ] at hSuccess
+                                                      | quotInfo value =>
+                                                          simp [
+                                                            psKernelInferProjectionWith,
+                                                            hInfer,
+                                                            hTypeWhnf,
+                                                            hIndexBound,
+                                                            hFn,
+                                                            hTypeName,
+                                                            hInductFind,
+                                                            hCtors,
+                                                            hCtorRest,
+                                                            args,
+                                                            hArgsLengthBool,
+                                                            hCtorFind
+                                                          ] at hSuccess
+                                  | axiomInfo value =>
                                       simp [
                                         psKernelInferProjectionWith,
                                         hInfer,
@@ -974,9 +1260,147 @@ theorem psKernelInferProjectionWith_refines_semantics
                                         hTypeName,
                                         hInductFind
                                       ] at hSuccess
-                      | bvar value | fvar value | mvar value | sort value |
-                        app _ _ | lam _ _ _ _ | forallE _ _ _ _ |
-                        letE _ _ _ _ _ | lit value | mdata _ _ | proj _ _ _ =>
+                                  | defnInfo value =>
+                                      simp [
+                                        psKernelInferProjectionWith,
+                                        hInfer,
+                                        hTypeWhnf,
+                                        hIndexBound,
+                                        hFn,
+                                        hTypeName,
+                                        hInductFind
+                                      ] at hSuccess
+                                  | thmInfo value =>
+                                      simp [
+                                        psKernelInferProjectionWith,
+                                        hInfer,
+                                        hTypeWhnf,
+                                        hIndexBound,
+                                        hFn,
+                                        hTypeName,
+                                        hInductFind
+                                      ] at hSuccess
+                                  | opaqueInfo value =>
+                                      simp [
+                                        psKernelInferProjectionWith,
+                                        hInfer,
+                                        hTypeWhnf,
+                                        hIndexBound,
+                                        hFn,
+                                        hTypeName,
+                                        hInductFind
+                                      ] at hSuccess
+                                  | ctorInfo value =>
+                                      simp [
+                                        psKernelInferProjectionWith,
+                                        hInfer,
+                                        hTypeWhnf,
+                                        hIndexBound,
+                                        hFn,
+                                        hTypeName,
+                                        hInductFind
+                                      ] at hSuccess
+                                  | recInfo value =>
+                                      simp [
+                                        psKernelInferProjectionWith,
+                                        hInfer,
+                                        hTypeWhnf,
+                                        hIndexBound,
+                                        hFn,
+                                        hTypeName,
+                                        hInductFind
+                                      ] at hSuccess
+                                  | quotInfo value =>
+                                      simp [
+                                        psKernelInferProjectionWith,
+                                        hInfer,
+                                        hTypeWhnf,
+                                        hIndexBound,
+                                        hFn,
+                                        hTypeName,
+                                        hInductFind
+                                      ] at hSuccess
+                      | bvar value =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | fvar value =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | mvar value =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | sort value =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | app fn arg =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | lam name type body binderInfo =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | forallE name type body binderInfo =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | letE name type value body nondep =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | lit value =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | mdata metadata body =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+                      | proj projName projIndex body =>
                           simp [
                             psKernelInferProjectionWith,
                             hInfer,

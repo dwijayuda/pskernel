@@ -90,39 +90,49 @@ async function loadCompiler(file, generation) {
     pathToFileURL(file).href + "?generation=" + String(generation)
   );
   for (const name of [
-    "psCompilerJavaScriptPrepareProofScriptSources",
+    "psCompilerJavaScriptPrepareProofScriptSourceStep",
+    "psCompilerJavaScriptFinishProofScriptPreparation",
     "psCompilerJavaScriptValidatedIrFromPrepared",
     "psCompilerJavaScriptSpecializeValidatedIr",
     "psCompilerJavaScriptEmitSpecialized",
-    "psCompilerSelfHostSourceListCons",
   ]) {
     if (typeof module[name] !== "function") {
       throw new Error("PSC2_DIRECT_JS_SELFHOST_COMPILER_API_MISSING: " + name);
     }
   }
-  if (!("psCompilerSelfHostSourceListEmpty" in module)) {
+  if (!("psCompilerJavaScriptPreparationInitial" in module)) {
     throw new Error(
-      "PSC2_DIRECT_JS_SELFHOST_COMPILER_API_MISSING: psCompilerSelfHostSourceListEmpty",
+      "PSC2_DIRECT_JS_SELFHOST_COMPILER_API_MISSING: psCompilerJavaScriptPreparationInitial",
     );
   }
   return module;
 }
 
-function sourceList(compiler, sources) {
-  let result = compiler.psCompilerSelfHostSourceListEmpty;
-  for (let index = sources.length - 1; index >= 0; index -= 1) {
-    result = compiler.psCompilerSelfHostSourceListCons(sources[index], result);
+async function compileWith(compiler, sourceItems, stage) {
+  let state = compiler.psCompilerJavaScriptPreparationInitial;
+  for (let index = 0; index < sourceItems.length; index += 1) {
+    const item = sourceItems[index];
+    phase(
+      stage +
+        ":prepare:" +
+        String(index + 1) +
+        "/" +
+        String(sourceItems.length) +
+        ":" +
+        path.relative(workspace, item.path).replaceAll(path.sep, "/"),
+    );
+    state = unwrapDirectExcept(
+      compiler.psCompilerJavaScriptPrepareProofScriptSourceStep(
+        state,
+        item.source,
+      ),
+      stage + "_PREPARE_" + String(index + 1),
+    );
   }
-  return result;
-}
-
-async function compileWith(compiler, sources, stage) {
-  phase(stage + ":prepare");
+  phase(stage + ":prepare:finish");
   const prepared = unwrapDirectExcept(
-    compiler.psCompilerJavaScriptPrepareProofScriptSources(
-      sourceList(compiler, sources),
-    ),
-    stage + "_PREPARE",
+    compiler.psCompilerJavaScriptFinishProofScriptPreparation(state),
+    stage + "_PREPARE_FINISH",
   );
 
   phase(stage + ":validated-ir");
@@ -184,14 +194,12 @@ const closure = await readGeneratedSourceClosure(entryPs, workspace);
 if (!closure || closure.ordered.length === 0) {
   throw new Error("PSC2_DIRECT_JS_SELFHOST_CLOSURE_EMPTY");
 }
-const sources = closure.ordered.map((item) => item.source);
-
 phase("import-generation-1");
 const compiler1 = await loadCompiler(generation1, 1);
 phase("compile-generation-2");
 const generation2Source = await compileWith(
   compiler1,
-  sources,
+  closure.ordered,
   "GENERATION_2",
 );
 await writeFile(generation2, generation2Source, "utf8");
@@ -205,7 +213,7 @@ const compiler2 = await loadCompiler(generation2, 2);
 phase("compile-generation-3");
 const generation3Source = await compileWith(
   compiler2,
-  sources,
+  closure.ordered,
   "GENERATION_3",
 );
 await writeFile(generation3, generation3Source, "utf8");

@@ -192,9 +192,13 @@
         7,
         41
       ],
-      "status": "prototype",
+      "status": "implementation-available-assurance-pending",
       "owners": [
-        "scripts/comparator-v1.mjs"
+        "scripts/comparator-v1.mjs",
+        "scripts/comparator-session.mjs",
+        "scripts/comparator-export.mjs",
+        "scripts/isolated-producer.mjs",
+        "contracts/resource/COMPARATOR_PROTOCOL_V1.json"
       ],
       "completion": "Trusted challenge, isolated producer, bounded export decoding, statement/interface match, assumption policy and checker evidence determine outcomes.",
       "assurance": "pending"

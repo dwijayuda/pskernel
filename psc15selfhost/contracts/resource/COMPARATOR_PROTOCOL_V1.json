@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-comparator-challenge/1",
+  "implementation": "scripts/comparator-session.mjs",
+  "decoder": "scripts/comparator-export.mjs",
+  "producerAdapter": "scripts/isolated-producer.mjs",
+  "status": "implementation-available-assurance-pending",
+  "trustedInputs": [
+    "exact source artifact bytes and identity",
+    "reference admissions from which expected statements and public interfaces are derived",
+    "selected theory-base artifact and semantic provider profile",
+    "provider/security policy and required IndependenceVector axes",
+    "digest-pinned producer configuration and resource limits"
+  ],
+  "protocol": [
+    "Issue a session-owned, one-use challenge with a fresh nonce and exact source/interface/theory/producer/policy identities.",
+    "Send the challenge and source snapshot to the configured isolated producer; never give the producer host checker-selection authority.",
+    "Bound and decode canonical UTF-8 JSON. Reject duplicate keys, hidden/unknown schema fields, excess depth/nodes/bytes/admissions and challenge/source mismatch.",
+    "Derive the public interface from actual kernel admissions. Preserve transparent bodies/hints/safety; omit only theorem proof bodies, which every selected kernel still checks.",
+    "Use the closed additional-axiom policy. Additional axioms reject; opaque/unsafe/partial/unknown admission forms decline as inconclusive.",
+    "Require actual statement/interface identity before invoking pinned checkers. Every selected checker receives the same exact admissions bytes.",
+    "Checker disagreement, unknown failure or a missing required semantic-model check is inconclusive, never acceptance. No majority vote is used.",
+    "Only unanimous checked acceptance and all requested model evidence create a live session-owned handle. Serialization, revocation, reuse of a challenge or session closure cannot recreate it."
+  ],
+  "assuranceScope": "Kernel acceptance under selected semantic/provider policies. Executable preservation is explicitly not established.",
+  "independence": "Record all known/shared/unknown axes and require the configured distinct axes. Different language alone never establishes full independence.",
+  "remaining": [
+    "real pinned producer image, actual multi-provider execution and hostile-input/container tests",
+    "provider/OS/runtime hardening evidence; paranoid profile remains unchanged and disabled where unsupported",
+    "checked model implementation and global refinement theorems",
+    "complete per-stage resource accounting and interruption of every host-only operation"
+  ]
+}

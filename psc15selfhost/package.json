@@ -183,7 +183,7 @@
     "check:architecture-contracts": "npm run test:architecture-contracts && npm run test:architecture-delta && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs && npm run check:semantic-contracts && npm run check:production-authority && npm run check:defeq-cache-source && npm run check:resource-contract && npm run check:independence && npm run check:semantic-lock && npm run check:archive-profile && npm run check:direct-js-promotion && npm run check:bootstrap-assurance && npm run check:theory-seed && npm run check:theory-bridge && npm run test:savef && npm run check:v3-acceptance",
     "check:semantic-contracts": "node scripts/semantic-contract-audit.mjs",
     "check:production-authority": "node scripts/production-authority-audit.mjs",
-    "test:comparator-v1": "node --test scripts/comparator-v1.test.mjs",
+    "test:comparator-v1": "node --test scripts/comparator-v1.test.mjs scripts/comparator-export.test.mjs scripts/comparator-session.test.mjs",
     "check:theory-seed": "node scripts/theory-contract-audit.mjs && lake build PsPscvTheory PsPscvTheoryProof pscv_theory_seed_tests && lake exe pscv_theory_seed_tests && lake exe psc1 check packages/pscv-theory/src/Ps/Theory/Core.lean",
     "test:savef": "node --test scripts/savef-object.test.mjs scripts/pscv-verify.test.mjs",
     "verify:offline-prototype": "node scripts/pscv-verify.mjs",

@@ -5,6 +5,7 @@
   "releaseAccepted": false,
   "policy": "Run focused compilation and boundary checks during implementation. Independent testing and checked global proofs remain required for final acceptance.",
   "obligations": [
+    { "id": "comparator-isolation-and-checkers", "status": "pending", "required": "Run the new comparator session against a real digest-pinned Linux producer and pinned actual kernel providers, exercise hostile exports and runtime escape/cleanup cases, and supply provider/runtime hardening evidence. Current decoder/session tests use mock kernels and container orchestration; no formal theorem or real sandbox assurance follows." },
     { "id": "authority-adversarial", "status": "pending", "required": "Exercise the actual generated compiler and pinned provider through production checked service, cross-session replay, policy mutation, rejection, target routing, revocation and closure; audit every production import path." },
     { "id": "global-core-soundness", "status": "unproved", "required": "Lean-check the semantic environment model, full algorithmic-defeq soundness, cache refinement and checker soundness, with explicit theory and assumption closure." },
     { "id": "global-erasure-specialization", "status": "unproved", "required": "Lean-check global erasure/specialization preservation, or independently validate every actual transformation under a precisely declared supported contract. Existing local slices do not discharge this obligation." },

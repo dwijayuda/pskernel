@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { buildChecked } from "./checked-build.mjs";
+export { createComparatorSession } from './comparator-session.mjs';
 
 export const comparatorV1 = Object.freeze({
   id: "psc-comparator/1",

@@ -77,7 +77,9 @@ jobs:
 
       - name: Check artifact evidence and checked-service boundaries
         working-directory: psc15selfhost
-        run: npm run test:pass-evidence
+        run: |
+          npm run test:pass-evidence
+          npm run test:comparator-v1
 
       - name: Build semantic compiler layers
         working-directory: psc15selfhost

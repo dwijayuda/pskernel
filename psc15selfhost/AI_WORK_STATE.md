@@ -9,12 +9,12 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: bounded host execution and isolated-producer mechanism. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede; evidence cache at b7a8b22.
+- Current checkpoint: challenge-bound comparator session and bounded export decoding. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede; evidence cache at b7a8b22; bounded producer execution at 2737479.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
 
-1. Connect isolated production to a bounded comparator protocol with trusted challenges, actual statement/interface extraction, assumption policy and independent checkers. Keep runtime security and full resource coverage explicit.
+1. Implement the remaining certificate/solver boundary, evidence replay and SAVEF/archive integration; continue internal artifact, incremental interface and target adapter work. Comparator runtime security and full resource coverage remain explicit assurance obligations.
 2. Complete target-specific interface adapters, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
 3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
 4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
@@ -220,3 +220,10 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Added a Linux-container producer adapter based on the documented Docker runtime interface. It requires an already-present digest-pinned image, validates architecture and absence of declared volumes, forbids network and host mounts, uses read-only/non-root/restricted-capability execution, bounds scratch/memory/processes/CPU allocation, and confirms cleanup of the invocation's unique name.
 - Focused checks exercise actual bounded Node child processes and mock container policy/orchestration, including output/time limits, cancellation, image volume rejection and cleanup. All four cases pass. No real container run, sandbox hardening assurance or paranoid-profile promotion is claimed.
 - Next: connect this mechanism to a complete fail-closed comparator export decoder, trusted statement/interface challenge, assumption policy, provider diversity and accepted-only live handles. Existing Comparator-v1 remains the earlier prototype until that integration is implemented.
+
+## 2026-10-07 challenge-bound comparator protocol checkpoint
+
+- Added a session-owned one-use challenge binding nonce, exact source, expected public interface, theory base, provider/security policy, independence axes, pinned producer configuration and budgets. The session invokes the isolated producer, checks its policy binding, decodes the actual export, and sends identical admissions bytes to every pinned checker.
+- Trusted bounded projection preserves transparent definitions and inductive metadata, while omitting theorem proof bodies only from the expected public interface. Those proof bodies still reach all checkers. Added axioms reject under the explicit closed-additional-assumption policy; opaque/unsafe/partial/unknown exports are inconclusive. Malformed/noncanonical UTF-8 JSON, duplicate fields, changed statements and stale challenges fail before checking.
+- Diversity is recorded by known/shared/unknown IndependenceVector axes. Disagreement, unknown checker failure and unavailable required model checking are inconclusive; unanimous acceptance alone can mint a non-serializable session handle. Revocation and closure are enforced. Executable preservation remains explicitly not-established; the existing paranoid provider-security rules remain unchanged.
+- The seven new decoder/session tests and three legacy comparator tests pass locally. They use mocked checkers and producer orchestration and deliberately do not claim valid Lean proofs, real sandbox execution or global assurance. These focused gates are registered in cloud CI, and the assurance handoff records actual provider/container testing still required.

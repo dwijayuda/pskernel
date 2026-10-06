@@ -1438,8 +1438,6 @@ def psIrSpecializeAppendOneRequest
   | Option.some key =>
       if psIrSpecializeSeenContains state.seen key then
         state
-      else if psIrSpecializePendingContainsKey state.pending key then
-        state
       else
         {
           imports := state.imports
@@ -1447,7 +1445,7 @@ def psIrSpecializeAppendOneRequest
           inductives := state.inductives
           declarations := state.declarations
           pending := psListAppend state.pending [request]
-          seen := state.seen
+          seen := List.cons key state.seen
         }
 
 def psIrSpecializeAppendRequestWorker
@@ -1738,7 +1736,7 @@ def psIrSpecializeLoop
             | Option.none =>
                 Except.error
                   (PsIrSpecializeError.nonGroundType request.name)
-            | Option.some key =>
+            | Option.some _ =>
                 let withoutHead : PsIrSpecializeState := {
                   imports := state.imports
                   structures := state.structures
@@ -1747,19 +1745,14 @@ def psIrSpecializeLoop
                   pending := rest
                   seen := state.seen
                 };
-                if psIrSpecializeSeenContains state.seen key then
-                  smaller withoutHead
-                else
-                  let marked :=
-                    psIrSpecializeMarkSeen withoutHead key;
-                  match
-                      psIrSpecializeProcessRequest
-                        module
-                        marked
-                        request with
-                  | Except.error error => Except.error error
-                  | Except.ok next =>
-                      smaller next
+                match
+                    psIrSpecializeProcessRequest
+                      module
+                      withoutHead
+                      request with
+                | Except.error error => Except.error error
+                | Except.ok next =>
+                    smaller next
 
 def psIrSpecializeModule
     (module : PsVerifiedIrModule) :

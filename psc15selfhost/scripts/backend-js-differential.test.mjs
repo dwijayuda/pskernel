@@ -194,6 +194,117 @@ try {
   );
   assert.equal(direct.stringExtractDemo(unicodeText, 2n, 7n), "");
 
+  const arraySource = [20n, 22n];
+
+  assert.deepEqual(
+    direct.arrayEmptyDemo(100n),
+    reference.arrayEmptyDemo(100n),
+  );
+  assert.deepEqual(direct.arrayEmptyDemo(100n), []);
+
+  assert.equal(
+    direct.arraySizeDemo(arraySource),
+    reference.arraySizeDemo(arraySource),
+  );
+  assert.equal(direct.arraySizeDemo(arraySource), 2n);
+
+  const directPushed = direct.arrayPushDemo(arraySource, 30n);
+  const referencePushed = reference.arrayPushDemo(arraySource, 30n);
+  assert.deepEqual(directPushed, referencePushed);
+  assert.deepEqual(directPushed, [20n, 22n, 30n]);
+  assert.deepEqual(arraySource, [20n, 22n]);
+
+  assert.equal(
+    direct.arrayGetDemo(arraySource, 1n),
+    reference.arrayGetDemo(arraySource, 1n),
+  );
+  assert.equal(direct.arrayGetDemo(arraySource, 1n), 22n);
+
+  assert.equal(
+    direct.arrayGetDDemo(arraySource, 1n, 99n),
+    reference.arrayGetDDemo(arraySource, 1n, 99n),
+  );
+  assert.equal(direct.arrayGetDDemo(arraySource, 1n, 99n), 22n);
+  assert.equal(
+    direct.arrayGetDDemo(arraySource, 7n, 99n),
+    reference.arrayGetDDemo(arraySource, 7n, 99n),
+  );
+  assert.equal(direct.arrayGetDDemo(arraySource, 7n, 99n), 99n);
+
+  const directSetSource = [20n, 22n];
+  const referenceSetSource = [20n, 22n];
+  const directSet = direct.arraySetDemo(directSetSource, 1n, 42n);
+  const referenceSet = reference.arraySetDemo(referenceSetSource, 1n, 42n);
+  assert.deepEqual(directSet, referenceSet);
+  assert.deepEqual(directSet, [20n, 42n]);
+  assert.deepEqual(directSetSource, [20n, 22n]);
+  assert.deepEqual(referenceSetSource, [20n, 22n]);
+
+  const directSetIfSource = [20n, 22n];
+  const referenceSetIfSource = [20n, 22n];
+  const directSetIf = direct.arraySetIfInBoundsDemo(
+    directSetIfSource,
+    1n,
+    42n,
+  );
+  const referenceSetIf = reference.arraySetIfInBoundsDemo(
+    referenceSetIfSource,
+    1n,
+    42n,
+  );
+  assert.deepEqual(directSetIf, referenceSetIf);
+  assert.deepEqual(directSetIf, [20n, 42n]);
+  assert.deepEqual(directSetIfSource, [20n, 22n]);
+  assert.deepEqual(referenceSetIfSource, [20n, 22n]);
+
+  const directOobSource = [20n, 22n];
+  const referenceOobSource = [20n, 22n];
+  assert.equal(
+    direct.arraySetIfInBoundsDemo(directOobSource, 7n, 99n),
+    directOobSource,
+  );
+  assert.equal(
+    reference.arraySetIfInBoundsDemo(referenceOobSource, 7n, 99n),
+    referenceOobSource,
+  );
+
+  assert.deepEqual(
+    direct.arrayMapDemo((value) => value + 1n, arraySource),
+    reference.arrayMapDemo((value) => value + 1n, arraySource),
+  );
+  assert.deepEqual(
+    direct.arrayMapDemo((value) => value + 1n, arraySource),
+    [21n, 23n],
+  );
+
+  const foldFunction = (acc, value) => acc + value;
+  assert.equal(
+    direct.arrayFoldDemo(
+      foldFunction,
+      1n,
+      [20n, 22n, 30n],
+      1n,
+      3n,
+    ),
+    reference.arrayFoldDemo(
+      foldFunction,
+      1n,
+      [20n, 22n, 30n],
+      1n,
+      3n,
+    ),
+  );
+  assert.equal(
+    direct.arrayFoldDemo(
+      foldFunction,
+      1n,
+      [20n, 22n, 30n],
+      1n,
+      3n,
+    ),
+    53n,
+  );
+
   assert.equal(
     direct.u8AddWrap(250, 10),
     reference.u8AddWrap(250, 10),

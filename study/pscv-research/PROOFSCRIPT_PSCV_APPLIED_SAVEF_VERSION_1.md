@@ -116,14 +116,14 @@ The applied architecture was iterated using criteria defined later in this docum
 ~~~text
 Current applied repository evidence:       5.35 / 10
 Applied SAVEF iteration A:                 7.76 / 10
-Applied SAVEF iteration B / this version:  8.75 / 10
+Applied SAVEF iteration B / this version:  8.76 / 10
 ~~~
 
 The accepted architecture clears the requested 8.0 threshold.
 
 All hard-gate architecture criteria score at least 8.2.
 
-The current repository does not implement an 8.75/10 SAVEF.
+The current repository does not implement an 8.76/10 SAVEF.
 
 Current whole-system implementation/evidence maturity remains approximately:
 
@@ -2000,7 +2000,7 @@ Iteration B adds:
 
 Final architecture score:
 
-**8.75 / 10**
+**8.76 / 10**
 
 Hard gates:
 
@@ -2041,7 +2041,7 @@ All clear 8.
 
 Weighted target architecture:
 
-**8.75 / 10**
+**8.76 / 10**
 
 ---
 
@@ -2482,7 +2482,7 @@ derived theorem/capability index
 replaceable AI agents
 ~~~
 
-This target scores **8.75 / 10** because it is:
+This target scores **8.76 / 10** because it is:
 
 - grounded in actual repository structures;
 - compatible with the existing PSCV design;

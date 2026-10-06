@@ -149,7 +149,8 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.RuntimeString,
     `Ps.BackendWasm.RuntimeIntRepr,
     `Ps.BackendWasm.Binary,
-    `Ps.BackendWasm.Lower
+    `Ps.BackendWasm.Lower,
+    `Ps.BackendWasm.SelfHostAbi
   ]
 
 lean_lib PsHost where

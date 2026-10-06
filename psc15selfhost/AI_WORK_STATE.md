@@ -88,3 +88,9 @@ Checkpoint P0/P2/P3:
 - semantic lock prototype binds source/Core/kernel/runtime/IR/provider-security/trust identities
 - archive profile requires offline-verifiable contracts, trust, SAVEF objects, and verifier capsule
 - offline verifier now binds semantic lock, archive profile, independence vectors, and all current SAVEF evidence
+
+## Checkpoint promotion/bootstrap gates
+
+- direct-JS canonical promotion is now machine-gated and remains intentionally NOT promoted while global erasure/specialization/JsIR preservation is incomplete
+- bootstrap assurance B0-B10 is machine-classified; fixed point, reproducibility, DDC, and verified bootstrap cannot be conflated
+- B7/B8 direct JS/Wasm bootstrap have existing fixed-point gates; B9 diverse bootstrap and B10 verified bootstrap remain explicitly incomplete

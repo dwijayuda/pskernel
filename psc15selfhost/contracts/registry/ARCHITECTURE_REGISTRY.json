@@ -207,6 +207,18 @@
       "kind": "archive-profile",
       "status": "experimental",
       "canonicalPath": "contracts/archive/ARCHIVE_PROFILE_V0.json"
+    },
+    {
+      "id": "psc-direct-js-promotion/1",
+      "kind": "promotion-policy",
+      "status": "current",
+      "canonicalPath": "contracts/promotion/DIRECT_JS_PROMOTION_V1.json"
+    },
+    {
+      "id": "psc-bootstrap-assurance/1",
+      "kind": "bootstrap-assurance",
+      "status": "current",
+      "canonicalPath": "contracts/bootstrap/BOOTSTRAP_ASSURANCE_V1.json"
     }
   ]
 }

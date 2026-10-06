@@ -546,8 +546,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                     hCtors,
                                                     hCtorRest
                                                   ] at hSuccess
-                                                  rw [if_neg hArgsLengthNeRaw] at hSuccess
-                                                  simp at hSuccess
+                                                  simp [hArgsLengthBool] at hSuccess
                                               | true =>
                                                   have hArgsLength :
                                                       psKernelExprListLength args =

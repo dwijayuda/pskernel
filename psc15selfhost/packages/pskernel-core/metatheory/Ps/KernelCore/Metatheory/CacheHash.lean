@@ -189,20 +189,17 @@ theorem psKernelCacheNameHash_of_nameEq_true
       | str rightParent rightValue =>
           simp [psKernelNameEq] at hEq
       | num rightParent rightValue =>
-          cases hNat : Nat.beq leftValue rightValue with
-          | false =>
-              simp [psKernelNameEq, hNat] at hEq
-          | true =>
-              have hValue : leftValue = rightValue := by
-                simpa using hNat
-              have hParent :
-                  psKernelNameEq leftParent rightParent = true := by
-                simpa [psKernelNameEq, hNat] using hEq
-              subst rightValue
-              simp [
-                psKernelCacheNameHash,
-                ih rightParent hParent
-              ]
+          have hPair :
+              leftValue = rightValue ∧
+              psKernelNameEq leftParent rightParent = true := by
+            simpa [psKernelNameEq] using hEq
+          have hValue := hPair.1
+          have hParent := hPair.2
+          subst rightValue
+          simp [
+            psKernelCacheNameHash,
+            ih rightParent hParent
+          ]
 
 theorem psKernelCacheLevelHash_of_levelEq_true
     (left right : PsKernelLevel)

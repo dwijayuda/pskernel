@@ -1406,18 +1406,60 @@ def psIrSpecializeSeedDeclarations
                                     loweredBody.requests
                                     (Prod.snd loweredRest)))))
 
+def psIrSpecializePendingContainsKey
+    (requests : List PsIrSpecializeRequest)
+    (key : String) : Bool :=
+  match requests with
+  | List.nil => false
+  | List.cons request rest =>
+      match psIrSpecializeRequestKey request with
+      | Option.none =>
+          psIrSpecializePendingContainsKey rest key
+      | Option.some requestKey =>
+          if psStringEq requestKey key then
+            true
+          else
+            psIrSpecializePendingContainsKey rest key
+
+def psIrSpecializeAppendOneRequest
+    (state : PsIrSpecializeState)
+    (request : PsIrSpecializeRequest) :
+    PsIrSpecializeState :=
+  match psIrSpecializeRequestKey request with
+  | Option.none =>
+      {
+        imports := state.imports
+        structures := state.structures
+        inductives := state.inductives
+        declarations := state.declarations
+        pending := psListAppend state.pending [request]
+        seen := state.seen
+      }
+  | Option.some key =>
+      if psIrSpecializeSeenContains state.seen key then
+        state
+      else if psIrSpecializePendingContainsKey state.pending key then
+        state
+      else
+        {
+          imports := state.imports
+          structures := state.structures
+          inductives := state.inductives
+          declarations := state.declarations
+          pending := psListAppend state.pending [request]
+          seen := state.seen
+        }
+
 def psIrSpecializeAppendRequest
     (state : PsIrSpecializeState)
     (requests : List PsIrSpecializeRequest) :
     PsIrSpecializeState :=
-  {
-    imports := state.imports
-    structures := state.structures
-    inductives := state.inductives
-    declarations := state.declarations
-    pending := psListAppend state.pending requests
-    seen := state.seen
-  }
+  match requests with
+  | List.nil => state
+  | List.cons request rest =>
+      psIrSpecializeAppendRequest
+        (psIrSpecializeAppendOneRequest state request)
+        rest
 
 def psIrSpecializeMarkSeen
     (state : PsIrSpecializeState)
@@ -1437,42 +1479,48 @@ def psIrSpecializeAddStructure
     (structureInfo : PsVerifiedIrStructure)
     (requests : List PsIrSpecializeRequest) :
     PsIrSpecializeState :=
-  {
-    imports := state.imports
-    structures := psListAppend state.structures [structureInfo]
-    inductives := state.inductives
-    declarations := state.declarations
-    pending := psListAppend state.pending requests
-    seen := state.seen
-  }
+  psIrSpecializeAppendRequest
+    {
+      imports := state.imports
+      structures := psListAppend state.structures [structureInfo]
+      inductives := state.inductives
+      declarations := state.declarations
+      pending := state.pending
+      seen := state.seen
+    }
+    requests
 
 def psIrSpecializeAddInductive
     (state : PsIrSpecializeState)
     (inductiveInfo : PsVerifiedIrInductive)
     (requests : List PsIrSpecializeRequest) :
     PsIrSpecializeState :=
-  {
-    imports := state.imports
-    structures := state.structures
-    inductives := psListAppend state.inductives [inductiveInfo]
-    declarations := state.declarations
-    pending := psListAppend state.pending requests
-    seen := state.seen
-  }
+  psIrSpecializeAppendRequest
+    {
+      imports := state.imports
+      structures := state.structures
+      inductives := psListAppend state.inductives [inductiveInfo]
+      declarations := state.declarations
+      pending := state.pending
+      seen := state.seen
+    }
+    requests
 
 def psIrSpecializeAddDeclaration
     (state : PsIrSpecializeState)
     (declaration : PsVerifiedIrDeclaration)
     (requests : List PsIrSpecializeRequest) :
     PsIrSpecializeState :=
-  {
-    imports := state.imports
-    structures := state.structures
-    inductives := state.inductives
-    declarations := psListAppend state.declarations [declaration]
-    pending := psListAppend state.pending requests
-    seen := state.seen
-  }
+  psIrSpecializeAppendRequest
+    {
+      imports := state.imports
+      structures := state.structures
+      inductives := state.inductives
+      declarations := psListAppend state.declarations [declaration]
+      pending := state.pending
+      seen := state.seen
+    }
+    requests
 
 def psIrSpecializeProcessStructure
     (module : PsVerifiedIrModule)
@@ -1730,15 +1778,24 @@ def psIrSpecializeModule
                     module.declarations with
               | Except.error error => Except.error error
               | Except.ok declarations =>
-                  let initial : PsIrSpecializeState := {
+                  let initialBase : PsIrSpecializeState := {
                     imports := imports.imports
                     structures := (Prod.fst structures)
                     inductives := (Prod.fst inductives)
                     declarations := (Prod.fst declarations)
-                    pending :=
-                      psListAppend imports.requests (psListAppend (Prod.snd structures) (psListAppend (Prod.snd inductives) (Prod.snd declarations)))
+                    pending := []
                     seen := []
                   };
+                  let initial : PsIrSpecializeState :=
+                    psIrSpecializeAppendRequest
+                      initialBase
+                      (psListAppend
+                        imports.requests
+                        (psListAppend
+                          (Prod.snd structures)
+                          (psListAppend
+                            (Prod.snd inductives)
+                            (Prod.snd declarations))));
                   match
                       psIrSpecializeLoop
                         module

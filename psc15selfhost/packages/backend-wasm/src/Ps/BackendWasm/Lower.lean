@@ -29,6 +29,7 @@ inductive PsWasmLowerError where
       (constructorName : String)
       (field : String)
   | unsupportedModuleFeature
+  | specializationFailed (error : PsIrSpecializeError)
 
 structure PsWasmLowerState where
   nextLocalIndex : Nat
@@ -6235,8 +6236,8 @@ def psWasmLowerModule
     (module : PsVerifiedIrModule) :
     Except PsWasmLowerError PsWasmModule :=
   match psIrSpecializeModule module with
-  | Except.error _ =>
-      Except.error PsWasmLowerError.unsupportedModuleFeature
+  | Except.error error =>
+      Except.error (PsWasmLowerError.specializationFailed error)
   | Except.ok specialized =>
       psWasmLowerSpecializedModule profile specialized
 

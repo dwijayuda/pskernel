@@ -685,21 +685,25 @@ theorem psKernelExprPairSetBuildIndex_contains_cons_self
         hExisting
       ] using hExisting
   | false =>
-      change
-        psKernelExprPairSetContainsIn
-            left
-            right
-            (psKernelExprPairSetIndexBucket
+      have hBuild :
+          psKernelExprPairSetBuildIndex
+              (List.cons
+                (Prod.mk left right)
+                rest) =
+            psKernelExprPairSetIndexSet
               16
-              (psKernelExprPairSetIndexSet
-                16
-                oldIndex
-                (psKernelExprPairHash left right)
-                (List.cons
-                  (Prod.mk left right)
-                  oldBucket))
-              (psKernelExprPairHash left right)) =
-          true
+              oldIndex
+              (psKernelExprPairHash left right)
+              (List.cons
+                (Prod.mk left right)
+                oldBucket) := by
+        simp [
+          psKernelExprPairSetBuildIndex,
+          oldIndex,
+          oldBucket,
+          hExisting
+        ]
+      rw [hBuild]
       rw [
         psKernelExprPairSetIndexBucket_set_same
           16

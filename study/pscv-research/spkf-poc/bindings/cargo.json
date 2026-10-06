@@ -1,0 +1,10 @@
+{
+  "schema": "spkf-poc/0",
+  "kind": "distribution-binding",
+  "subject": {
+    "spkf": "spkf-poc-v0:sha256:fb24f3a56242051134f95ef4036d5c985f3c7d085602e738f825c96764c6afe6"
+  },
+  "package": {
+    "purl": "pkg:cargo/proofscript-spkf-poc-identity@0.0.1"
+  }
+}

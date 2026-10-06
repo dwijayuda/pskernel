@@ -1,4 +1,5 @@
 import Ps.BackendJs.Model
+import Ps.CompilerIr.Specialize
 import Ps.Bridge.Json
 import Ps.Foundation.List
 import Ps.Foundation.Name
@@ -8,6 +9,7 @@ inductive PsJsLowerError where
   | importsUnsupported
   | structuresUnsupported
   | inductivesUnsupported
+  | specializationFailed
   | genericDeclarationUnsupported (name : String)
   | unsupportedType
   | unsupportedLiteral
@@ -170,7 +172,7 @@ def psJsTypeSupportedWithFuel
                   | List.nil => smaller elementType
                   | List.cons _ _ => false
             else
-              false
+              psListIsEmpty arguments
         | _ => false
 
 def psJsTypeSupported
@@ -472,6 +474,93 @@ def psJsLowerRuntimeExactArityWith
             loweredArguments)
   else
     Except.error PsJsLowerError.intrinsicArity
+
+def psJsLowerFieldsWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (fields : List (String × PsVerifiedIrExpr)) :
+    Except PsJsLowerError (List (String × PsJsIrExpr)) :=
+  match fields with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons field rest =>
+      match field with
+      | Prod.mk name value =>
+          match lower value with
+          | Except.error error => Except.error error
+          | Except.ok loweredValue =>
+              match psJsLowerFieldsWith lower rest with
+              | Except.error error => Except.error error
+              | Except.ok loweredRest =>
+                  Except.ok
+                    (List.cons
+                      (Prod.mk name loweredValue)
+                      loweredRest)
+
+def psJsLowerMatchBindings
+    (bindings : List PsVerifiedIrMatchBinding) :
+    Except PsJsLowerError (List PsJsIrMatchBinding) :=
+  match bindings with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons binding rest =>
+      if psJsIdentifierSupported binding.name then
+        if psJsTypeSupported binding.type then
+          match psJsLowerMatchBindings rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok
+                (List.cons
+                  (PsJsIrMatchBinding.mk
+                    binding.field
+                    binding.name)
+                  loweredRest)
+        else
+          Except.error PsJsLowerError.unsupportedType
+      else
+        Except.error
+          (PsJsLowerError.unsupportedName binding.name)
+
+def psJsLowerMatchAlternativesWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
+    Except
+      PsJsLowerError
+      (List
+        (String ×
+          List PsJsIrMatchBinding ×
+          PsJsIrExpr)) :=
+  match alternatives with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons alternative rest =>
+      match alternative with
+      | Prod.mk constructorName detail =>
+          match detail with
+          | Prod.mk bindings body =>
+              match psJsLowerMatchBindings bindings with
+              | Except.error error => Except.error error
+              | Except.ok loweredBindings =>
+                  match lower body with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredBody =>
+                      match
+                          psJsLowerMatchAlternativesWith
+                            lower
+                            rest with
+                      | Except.error error => Except.error error
+                      | Except.ok loweredRest =>
+                          Except.ok
+                            (List.cons
+                              (Prod.mk
+                                constructorName
+                                (Prod.mk
+                                  loweredBindings
+                                  loweredBody))
+                              loweredRest)
 
 def psJsLowerIdentityWith
     (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
@@ -817,8 +906,69 @@ def psJsLowerExprWithFuel
                             loweredCondition
                             loweredThen
                             loweredElse)
-        | _ =>
-            Except.error PsJsLowerError.unsupportedExpression
+        | PsVerifiedIrExpr.record
+            _structureName
+            typeArguments
+            fields =>
+            if psListIsEmpty typeArguments then
+              match psJsLowerFieldsWith smaller fields with
+              | Except.error error => Except.error error
+              | Except.ok loweredFields =>
+                  Except.ok
+                    (PsJsIrExpr.record loweredFields)
+            else
+              Except.error PsJsLowerError.typeArgumentsUnsupported
+        | PsVerifiedIrExpr.projection
+            _structureName
+            typeArguments
+            target
+            field =>
+            if psListIsEmpty typeArguments then
+              match smaller target with
+              | Except.error error => Except.error error
+              | Except.ok loweredTarget =>
+                  Except.ok
+                    (PsJsIrExpr.projection
+                      loweredTarget
+                      field)
+            else
+              Except.error PsJsLowerError.typeArgumentsUnsupported
+        | PsVerifiedIrExpr.constructor
+            _inductiveName
+            constructorName
+            typeArguments
+            fields =>
+            if psListIsEmpty typeArguments then
+              match psJsLowerFieldsWith smaller fields with
+              | Except.error error => Except.error error
+              | Except.ok loweredFields =>
+                  Except.ok
+                    (PsJsIrExpr.constructor
+                      constructorName
+                      loweredFields)
+            else
+              Except.error PsJsLowerError.typeArgumentsUnsupported
+        | PsVerifiedIrExpr.matchE
+            _inductiveName
+            typeArguments
+            scrutinee
+            alternatives =>
+            if psListIsEmpty typeArguments then
+              match smaller scrutinee with
+              | Except.error error => Except.error error
+              | Except.ok loweredScrutinee =>
+                  match
+                      psJsLowerMatchAlternativesWith
+                        smaller
+                        alternatives with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredAlternatives =>
+                      Except.ok
+                        (PsJsIrExpr.matchE
+                          loweredScrutinee
+                          loweredAlternatives)
+            else
+              Except.error PsJsLowerError.typeArgumentsUnsupported
 
 def psJsLowerExpr
     (expr : PsVerifiedIrExpr) :
@@ -889,20 +1039,26 @@ def psJsLowerDeclarations
           | Except.ok loweredRest =>
               Except.ok (List.cons lowered loweredRest)
 
+def psJsLowerSpecializedModule
+    (module : PsVerifiedIrModule) :
+    Except PsJsLowerError PsJsIrModule :=
+  if psListIsEmpty module.imports then
+    match psJsLowerDeclarations module.declarations with
+    | Except.error error => Except.error error
+    | Except.ok declarations =>
+        Except.ok (PsJsIrModule.mk declarations)
+  else
+    Except.error PsJsLowerError.importsUnsupported
+
 def psJsLowerValidatedModule
     (validated : PsValidatedIrModule) :
     Except PsJsLowerError PsJsIrModule :=
-  let module := validated.raw;
+  let module : PsVerifiedIrModule := validated.raw;
   if psListIsEmpty module.imports then
-    if psListIsEmpty module.structures then
-      if psListIsEmpty module.inductives then
-        match psJsLowerDeclarations module.declarations with
-        | Except.error error => Except.error error
-        | Except.ok declarations =>
-            Except.ok (PsJsIrModule.mk declarations)
-      else
-        Except.error PsJsLowerError.inductivesUnsupported
-    else
-      Except.error PsJsLowerError.structuresUnsupported
+    match psIrSpecializeModule module with
+    | Except.error _ =>
+        Except.error PsJsLowerError.specializationFailed
+    | Except.ok specialized =>
+        psJsLowerSpecializedModule specialized
   else
     Except.error PsJsLowerError.importsUnsupported

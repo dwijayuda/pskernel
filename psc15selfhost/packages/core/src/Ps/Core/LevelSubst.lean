@@ -48,8 +48,8 @@ def psLevelInstantiateParams
         (psLevelInstantiateParams parameters arguments right)
   | .param name =>
       match psFindLevelArgument parameters arguments name with
-      | none => PsLevel.param name
-      | some value => value
+      | Option.none => PsLevel.param name
+      | Option.some value => value
   | .mvar id => PsLevel.mvar id
 
 def psLevelListInstantiateParams

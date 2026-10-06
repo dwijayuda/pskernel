@@ -762,14 +762,9 @@ theorem psKernelCheckerConfigurationSound_enterRecDepth_back
   have hView :=
     psKernelCheckerContextEnterRecDepth_preserves_semantic_view
       context nextContext hEnter
-  exact
-    psKernelCheckerConfigurationSound_transport
-      nextContext
-      context
-      state
-      hView.1
-      hView.2
-      hSound
+  unfold PsKernelCheckerConfigurationSound at hSound ⊢
+  rw [hView.1, hView.2] at hSound
+  exact hSound
 
 
 theorem psKernelCheckerContextEnterRecDepth_preserves_configuration

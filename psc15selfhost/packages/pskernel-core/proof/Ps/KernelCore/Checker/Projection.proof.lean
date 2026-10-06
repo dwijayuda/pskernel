@@ -359,3 +359,663 @@ theorem psKernelProjectionSkipFieldsWithFuel_refines_semantics
                       simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
                   | proj typeName projIndex body =>
                       simp [psKernelProjectionSkipFieldsWithFuel, hMore, hRun] at hSuccess
+
+
+theorem psKernelInferProjectionWith_refines_semantics
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (typeName : PsKernelName)
+    (index : Nat)
+    (structValue result : PsKernelExpr)
+    (hWhnfSound : PsKernelWhnfSound whnf)
+    (hInferSound : PsKernelInferenceSound inferType)
+    (hIndex :
+      PsKernelEnvironmentIndexRefines context.environment)
+    (hSuccess :
+      psKernelInferProjectionWith
+          whnf
+          inferType
+          context
+          state
+          typeName
+          index
+          structValue =
+        Except.ok (Prod.mk result nextState)) :
+    ∃ structType : PsKernelExpr,
+      PsKernelTypingJudgment
+          context.environment
+          context.localContext
+          structValue
+          structType ∧
+      PsKernelProjectionResultJudgment
+          context.environment
+          context.localContext
+          typeName
+          index
+          structValue
+          structType
+          result := by
+  cases hInfer : inferType context state structValue with
+  | error error =>
+      simp [psKernelInferProjectionWith, hInfer] at hSuccess
+  | ok inferRun =>
+      cases inferRun with
+      | mk structType state0 =>
+          have hStruct :
+              PsKernelTypingJudgment
+                context.environment
+                context.localContext
+                structValue
+                structType :=
+            hInferSound
+              context
+              state
+              state0
+              structValue
+              structType
+              hInfer
+          cases hTypeWhnf :
+              whnf context state0 structType with
+          | error error =>
+              simp [
+                psKernelInferProjectionWith,
+                hInfer,
+                hTypeWhnf
+              ] at hSuccess
+          | ok typeRun =>
+              cases typeRun with
+              | mk typeWhnf state1 =>
+                  have hTypeClosure :
+                      PsKernelReductionClosure
+                        context.environment
+                        context.localContext
+                        structType
+                        typeWhnf :=
+                    hWhnfSound
+                      context
+                      state0
+                      state1
+                      structType
+                      typeWhnf
+                      hTypeWhnf
+                  cases hIndexBound :
+                      psKernelNatGt index psKernelLeanUInt32Max with
+                  | true =>
+                      simp [
+                        psKernelInferProjectionWith,
+                        hInfer,
+                        hTypeWhnf,
+                        hIndexBound
+                      ] at hSuccess
+                  | false =>
+                      cases hFn :
+                          psKernelExprGetAppFn typeWhnf with
+                      | const inductName inductLevels =>
+                          cases hTypeName :
+                              psKernelNameEq inductName typeName with
+                          | false =>
+                              simp [
+                                psKernelInferProjectionWith,
+                                hInfer,
+                                hTypeWhnf,
+                                hIndexBound,
+                                hFn,
+                                hTypeName
+                              ] at hSuccess
+                          | true =>
+                              cases hInductFind :
+                                  psKernelEnvironmentFind
+                                    context.environment
+                                    inductName with
+                              | none =>
+                                  simp [
+                                    psKernelInferProjectionWith,
+                                    hInfer,
+                                    hTypeWhnf,
+                                    hIndexBound,
+                                    hFn,
+                                    hTypeName,
+                                    hInductFind
+                                  ] at hSuccess
+                              | some inductEntry =>
+                                  cases inductEntry with
+                                  | inductInfo inductInfo =>
+                                      cases hCtors : inductInfo.ctors with
+                                      | nil =>
+                                          simp [
+                                            psKernelInferProjectionWith,
+                                            hInfer,
+                                            hTypeWhnf,
+                                            hIndexBound,
+                                            hFn,
+                                            hTypeName,
+                                            hInductFind,
+                                            hCtors
+                                          ] at hSuccess
+                                      | cons ctorName ctorRest =>
+                                          cases hCtorRest : ctorRest with
+                                          | cons nextCtor restCtors =>
+                                              simp [
+                                                psKernelInferProjectionWith,
+                                                hInfer,
+                                                hTypeWhnf,
+                                                hIndexBound,
+                                                hFn,
+                                                hTypeName,
+                                                hInductFind,
+                                                hCtors,
+                                                hCtorRest
+                                              ] at hSuccess
+                                          | nil =>
+                                              let args :=
+                                                psKernelExprGetAppArgs typeWhnf
+                                              cases hArgsLengthBool :
+                                                  Nat.beq
+                                                    (psKernelExprListLength args)
+                                                    (Nat.add
+                                                      inductInfo.numParams
+                                                      inductInfo.numIndices) with
+                                              | false =>
+                                                  simp [
+                                                    psKernelInferProjectionWith,
+                                                    hInfer,
+                                                    hTypeWhnf,
+                                                    hIndexBound,
+                                                    hFn,
+                                                    hTypeName,
+                                                    hInductFind,
+                                                    hCtors,
+                                                    hCtorRest,
+                                                    args,
+                                                    hArgsLengthBool
+                                                  ] at hSuccess
+                                              | true =>
+                                                  have hArgsLength :
+                                                      psKernelExprListLength args =
+                                                        Nat.add
+                                                          inductInfo.numParams
+                                                          inductInfo.numIndices := by
+                                                    simpa using hArgsLengthBool
+                                                  cases hCtorFind :
+                                                      psKernelEnvironmentFind
+                                                        context.environment
+                                                        ctorName with
+                                                  | none =>
+                                                      simp [
+                                                        psKernelInferProjectionWith,
+                                                        hInfer,
+                                                        hTypeWhnf,
+                                                        hIndexBound,
+                                                        hFn,
+                                                        hTypeName,
+                                                        hInductFind,
+                                                        hCtors,
+                                                        hCtorRest,
+                                                        args,
+                                                        hArgsLengthBool,
+                                                        hCtorFind
+                                                      ] at hSuccess
+                                                  | some ctorEntry =>
+                                                      cases ctorEntry with
+                                                      | ctorInfo ctorInfo =>
+                                                          let initial :=
+                                                            psKernelExprInstantiateLevelParams
+                                                              ctorInfo.base.type
+                                                              ctorInfo.base.levelParams
+                                                              inductLevels
+                                                          cases hParams :
+                                                              psKernelProjectionApplyParamsWithFuel
+                                                                (Nat.succ inductInfo.numParams)
+                                                                whnf
+                                                                context
+                                                                state1
+                                                                args
+                                                                0
+                                                                inductInfo.numParams
+                                                                initial with
+                                                          | error error =>
+                                                              simp [
+                                                                psKernelInferProjectionWith,
+                                                                hInfer,
+                                                                hTypeWhnf,
+                                                                hIndexBound,
+                                                                hFn,
+                                                                hTypeName,
+                                                                hInductFind,
+                                                                hCtors,
+                                                                hCtorRest,
+                                                                args,
+                                                                hArgsLengthBool,
+                                                                hCtorFind,
+                                                                initial,
+                                                                hParams
+                                                              ] at hSuccess
+                                                          | ok paramRun =>
+                                                              cases paramRun with
+                                                              | mk afterParams state2 =>
+                                                                  have hParamsSemantic :
+                                                                      PsKernelProjectionApplyParamsJudgment
+                                                                        context.environment
+                                                                        context.localContext
+                                                                        args
+                                                                        0
+                                                                        inductInfo.numParams
+                                                                        initial
+                                                                        afterParams :=
+                                                                    psKernelProjectionApplyParamsWithFuel_refines_semantics
+                                                                      (Nat.succ inductInfo.numParams)
+                                                                      whnf
+                                                                      context
+                                                                      state1
+                                                                      state2
+                                                                      args
+                                                                      0
+                                                                      inductInfo.numParams
+                                                                      initial
+                                                                      afterParams
+                                                                      hWhnfSound
+                                                                      hParams
+                                                                  cases hProp :
+                                                                      psKernelInferIsPropWith
+                                                                        whnf
+                                                                        inferType
+                                                                        context
+                                                                        state2
+                                                                        typeWhnf with
+                                                                  | error error =>
+                                                                      simp [
+                                                                        psKernelInferProjectionWith,
+                                                                        hInfer,
+                                                                        hTypeWhnf,
+                                                                        hIndexBound,
+                                                                        hFn,
+                                                                        hTypeName,
+                                                                        hInductFind,
+                                                                        hCtors,
+                                                                        hCtorRest,
+                                                                        args,
+                                                                        hArgsLengthBool,
+                                                                        hCtorFind,
+                                                                        initial,
+                                                                        hParams,
+                                                                        hProp
+                                                                      ] at hSuccess
+                                                                  | ok propRun =>
+                                                                      cases propRun with
+                                                                      | mk propType state3 =>
+                                                                          cases hFields :
+                                                                              psKernelProjectionSkipFieldsWithFuel
+                                                                                (Nat.succ index)
+                                                                                whnf
+                                                                                inferType
+                                                                                context
+                                                                                state3
+                                                                                inductName
+                                                                                structValue
+                                                                                propType
+                                                                                index
+                                                                                0
+                                                                                afterParams with
+                                                                          | error error =>
+                                                                              simp [
+                                                                                psKernelInferProjectionWith,
+                                                                                hInfer,
+                                                                                hTypeWhnf,
+                                                                                hIndexBound,
+                                                                                hFn,
+                                                                                hTypeName,
+                                                                                hInductFind,
+                                                                                hCtors,
+                                                                                hCtorRest,
+                                                                                args,
+                                                                                hArgsLengthBool,
+                                                                                hCtorFind,
+                                                                                initial,
+                                                                                hParams,
+                                                                                hProp,
+                                                                                hFields
+                                                                              ] at hSuccess
+                                                                          | ok fieldRun =>
+                                                                              cases fieldRun with
+                                                                              | mk afterFields state4 =>
+                                                                                  have hFieldsSemantic :
+                                                                                      PsKernelProjectionSkipFieldsJudgment
+                                                                                        context.environment
+                                                                                        context.localContext
+                                                                                        inductName
+                                                                                        structValue
+                                                                                        index
+                                                                                        0
+                                                                                        afterParams
+                                                                                        afterFields :=
+                                                                                    psKernelProjectionSkipFieldsWithFuel_refines_semantics
+                                                                                      (Nat.succ index)
+                                                                                      whnf
+                                                                                      inferType
+                                                                                      context
+                                                                                      state3
+                                                                                      state4
+                                                                                      inductName
+                                                                                      structValue
+                                                                                      propType
+                                                                                      index
+                                                                                      0
+                                                                                      afterParams
+                                                                                      afterFields
+                                                                                      hWhnfSound
+                                                                                      hFields
+                                                                                  cases hFinal :
+                                                                                      whnf
+                                                                                        context
+                                                                                        state4
+                                                                                        afterFields with
+                                                                                  | error error =>
+                                                                                      simp [
+                                                                                        psKernelInferProjectionWith,
+                                                                                        hInfer,
+                                                                                        hTypeWhnf,
+                                                                                        hIndexBound,
+                                                                                        hFn,
+                                                                                        hTypeName,
+                                                                                        hInductFind,
+                                                                                        hCtors,
+                                                                                        hCtorRest,
+                                                                                        args,
+                                                                                        hArgsLengthBool,
+                                                                                        hCtorFind,
+                                                                                        initial,
+                                                                                        hParams,
+                                                                                        hProp,
+                                                                                        hFields,
+                                                                                        hFinal
+                                                                                      ] at hSuccess
+                                                                                  | ok finalRun =>
+                                                                                      cases finalRun with
+                                                                                      | mk finalExpr state5 =>
+                                                                                          cases finalExpr with
+                                                                                          | forallE fieldName domain fieldBody fieldBinderInfo =>
+                                                                                              have hFinalClosure :
+                                                                                                  PsKernelReductionClosure
+                                                                                                    context.environment
+                                                                                                    context.localContext
+                                                                                                    afterFields
+                                                                                                    (PsKernelExpr.forallE
+                                                                                                      fieldName
+                                                                                                      domain
+                                                                                                      fieldBody
+                                                                                                      fieldBinderInfo) :=
+                                                                                                hWhnfSound
+                                                                                                  context
+                                                                                                  state4
+                                                                                                  state5
+                                                                                                  afterFields
+                                                                                                  (PsKernelExpr.forallE
+                                                                                                    fieldName
+                                                                                                    domain
+                                                                                                    fieldBody
+                                                                                                    fieldBinderInfo)
+                                                                                                  hFinal
+                                                                                              have hInductAuthoritative :
+                                                                                                  psKernelFindConstantInList
+                                                                                                      inductName
+                                                                                                      context.environment.constants =
+                                                                                                    Option.some
+                                                                                                      (PsKernelConstantInfo.inductInfo inductInfo) := by
+                                                                                                unfold psKernelEnvironmentFind at hInductFind
+                                                                                                rw [hIndex inductName] at hInductFind
+                                                                                                exact hInductFind
+                                                                                              have hCtorAuthoritative :
+                                                                                                  psKernelFindConstantInList
+                                                                                                      ctorName
+                                                                                                      context.environment.constants =
+                                                                                                    Option.some
+                                                                                                      (PsKernelConstantInfo.ctorInfo ctorInfo) := by
+                                                                                                unfold psKernelEnvironmentFind at hCtorFind
+                                                                                                rw [hIndex ctorName] at hCtorFind
+                                                                                                exact hCtorFind
+                                                                                              have hCtorsExact :
+                                                                                                  inductInfo.ctors =
+                                                                                                    List.cons ctorName List.nil := by
+                                                                                                rw [hCtors, hCtorRest]
+                                                                                              have hProjection :
+                                                                                                  PsKernelProjectionResultJudgment
+                                                                                                    context.environment
+                                                                                                    context.localContext
+                                                                                                    typeName
+                                                                                                    index
+                                                                                                    structValue
+                                                                                                    structType
+                                                                                                    domain :=
+                                                                                                PsKernelProjectionResultJudgment.intro
+                                                                                                  typeName
+                                                                                                  inductName
+                                                                                                  ctorName
+                                                                                                  fieldName
+                                                                                                  index
+                                                                                                  structValue
+                                                                                                  structType
+                                                                                                  typeWhnf
+                                                                                                  inductLevels
+                                                                                                  args
+                                                                                                  inductInfo
+                                                                                                  ctorInfo
+                                                                                                  initial
+                                                                                                  afterParams
+                                                                                                  afterFields
+                                                                                                  fieldBody
+                                                                                                  domain
+                                                                                                  fieldBinderInfo
+                                                                                                  hTypeClosure
+                                                                                                  hFn
+                                                                                                  rfl
+                                                                                                  hIndexBound
+                                                                                                  hTypeName
+                                                                                                  hInductAuthoritative
+                                                                                                  hCtorsExact
+                                                                                                  hArgsLength
+                                                                                                  hCtorAuthoritative
+                                                                                                  rfl
+                                                                                                  hParamsSemantic
+                                                                                                  hFieldsSemantic
+                                                                                                  hFinalClosure
+                                                                                              cases propType with
+                                                                                              | false =>
+                                                                                                  simp [
+                                                                                                    psKernelInferProjectionWith,
+                                                                                                    hInfer,
+                                                                                                    hTypeWhnf,
+                                                                                                    hIndexBound,
+                                                                                                    hFn,
+                                                                                                    hTypeName,
+                                                                                                    hInductFind,
+                                                                                                    hCtors,
+                                                                                                    hCtorRest,
+                                                                                                    args,
+                                                                                                    hArgsLengthBool,
+                                                                                                    hCtorFind,
+                                                                                                    initial,
+                                                                                                    hParams,
+                                                                                                    hProp,
+                                                                                                    hFields,
+                                                                                                    hFinal
+                                                                                                  ] at hSuccess
+                                                                                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                                                                                  exact
+                                                                                                    ⟨structType, hStruct, hProjection⟩
+                                                                                              | true =>
+                                                                                                  cases hDomainProp :
+                                                                                                      psKernelInferIsPropWith
+                                                                                                        whnf
+                                                                                                        inferType
+                                                                                                        context
+                                                                                                        state5
+                                                                                                        domain with
+                                                                                                  | error error =>
+                                                                                                      simp [
+                                                                                                        psKernelInferProjectionWith,
+                                                                                                        hInfer,
+                                                                                                        hTypeWhnf,
+                                                                                                        hIndexBound,
+                                                                                                        hFn,
+                                                                                                        hTypeName,
+                                                                                                        hInductFind,
+                                                                                                        hCtors,
+                                                                                                        hCtorRest,
+                                                                                                        args,
+                                                                                                        hArgsLengthBool,
+                                                                                                        hCtorFind,
+                                                                                                        initial,
+                                                                                                        hParams,
+                                                                                                        hProp,
+                                                                                                        hFields,
+                                                                                                        hFinal,
+                                                                                                        hDomainProp
+                                                                                                      ] at hSuccess
+                                                                                                  | ok domainPropRun =>
+                                                                                                      cases domainPropRun with
+                                                                                                      | mk domainIsProp state6 =>
+                                                                                                          cases domainIsProp with
+                                                                                                          | false =>
+                                                                                                              simp [
+                                                                                                                psKernelInferProjectionWith,
+                                                                                                                hInfer,
+                                                                                                                hTypeWhnf,
+                                                                                                                hIndexBound,
+                                                                                                                hFn,
+                                                                                                                hTypeName,
+                                                                                                                hInductFind,
+                                                                                                                hCtors,
+                                                                                                                hCtorRest,
+                                                                                                                args,
+                                                                                                                hArgsLengthBool,
+                                                                                                                hCtorFind,
+                                                                                                                initial,
+                                                                                                                hParams,
+                                                                                                                hProp,
+                                                                                                                hFields,
+                                                                                                                hFinal,
+                                                                                                                hDomainProp
+                                                                                                              ] at hSuccess
+                                                                                                          | true =>
+                                                                                                              simp [
+                                                                                                                psKernelInferProjectionWith,
+                                                                                                                hInfer,
+                                                                                                                hTypeWhnf,
+                                                                                                                hIndexBound,
+                                                                                                                hFn,
+                                                                                                                hTypeName,
+                                                                                                                hInductFind,
+                                                                                                                hCtors,
+                                                                                                                hCtorRest,
+                                                                                                                args,
+                                                                                                                hArgsLengthBool,
+                                                                                                                hCtorFind,
+                                                                                                                initial,
+                                                                                                                hParams,
+                                                                                                                hProp,
+                                                                                                                hFields,
+                                                                                                                hFinal,
+                                                                                                                hDomainProp
+                                                                                                              ] at hSuccess
+                                                                                                              rcases hSuccess with ⟨rfl, rfl⟩
+                                                                                                              exact
+                                                                                                                ⟨structType, hStruct, hProjection⟩
+                                                                                          | bvar value | fvar value | mvar value | sort value |
+                                                                                            const value _ | app _ _ | lam _ _ _ _ |
+                                                                                            letE _ _ _ _ _ | lit value | mdata _ _ | proj _ _ _ =>
+                                                                                              simp [
+                                                                                                psKernelInferProjectionWith,
+                                                                                                hInfer,
+                                                                                                hTypeWhnf,
+                                                                                                hIndexBound,
+                                                                                                hFn,
+                                                                                                hTypeName,
+                                                                                                hInductFind,
+                                                                                                hCtors,
+                                                                                                hCtorRest,
+                                                                                                args,
+                                                                                                hArgsLengthBool,
+                                                                                                hCtorFind,
+                                                                                                initial,
+                                                                                                hParams,
+                                                                                                hProp,
+                                                                                                hFields,
+                                                                                                hFinal
+                                                                                              ] at hSuccess
+                                                      | axiomInfo value | defnInfo value | thmInfo value |
+                                                        opaqueInfo value | inductInfo value | recInfo value | quotInfo value =>
+                                                          simp [
+                                                            psKernelInferProjectionWith,
+                                                            hInfer,
+                                                            hTypeWhnf,
+                                                            hIndexBound,
+                                                            hFn,
+                                                            hTypeName,
+                                                            hInductFind,
+                                                            hCtors,
+                                                            hCtorRest,
+                                                            args,
+                                                            hArgsLengthBool,
+                                                            hCtorFind
+                                                          ] at hSuccess
+                                  | axiomInfo value | defnInfo value | thmInfo value |
+                                    opaqueInfo value | ctorInfo value | recInfo value | quotInfo value =>
+                                      simp [
+                                        psKernelInferProjectionWith,
+                                        hInfer,
+                                        hTypeWhnf,
+                                        hIndexBound,
+                                        hFn,
+                                        hTypeName,
+                                        hInductFind
+                                      ] at hSuccess
+                      | bvar value | fvar value | mvar value | sort value |
+                        app _ _ | lam _ _ _ _ | forallE _ _ _ _ |
+                        letE _ _ _ _ _ | lit value | mdata _ _ | proj _ _ _ =>
+                          simp [
+                            psKernelInferProjectionWith,
+                            hInfer,
+                            hTypeWhnf,
+                            hIndexBound,
+                            hFn
+                          ] at hSuccess
+
+theorem psKernelInferProjectionWith_refines_typing
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (typeName : PsKernelName)
+    (index : Nat)
+    (structValue result : PsKernelExpr)
+    (hWhnfSound : PsKernelWhnfSound whnf)
+    (hInferSound : PsKernelInferenceSound inferType)
+    (hIndex :
+      PsKernelEnvironmentIndexRefines context.environment)
+    (hSuccess :
+      psKernelInferProjectionWith
+          whnf inferType context state typeName index structValue =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      (PsKernelExpr.proj typeName index structValue)
+      result := by
+  rcases
+      psKernelInferProjectionWith_refines_semantics
+        whnf inferType context state nextState
+        typeName index structValue result
+        hWhnfSound hInferSound hIndex hSuccess with
+    ⟨structType, hStruct, hProjection⟩
+  exact
+    PsKernelTypingJudgment.proj
+      typeName index structValue structType result
+      hStruct hProjection

@@ -1166,20 +1166,21 @@ def psJsTailPrintNonRecursive
     | Except.ok printed => Option.some printed
 
 def psJsTailPrintArguments
-    (recursiveName : String) :
-    List PsJsIrExpr -> Option (List String)
+    (recursiveName : String)
+    (arguments : List PsJsIrExpr) :
+    Option (List String) :=
+  match arguments with
   | List.nil => Option.some List.nil
   | List.cons argument rest =>
+      let smaller : Option (List String) :=
+        psJsTailPrintArguments recursiveName rest;
       match
           psJsTailPrintNonRecursive
             recursiveName
             argument with
       | Option.none => Option.none
       | Option.some printed =>
-          match
-              psJsTailPrintArguments
-                recursiveName
-                rest with
+          match smaller with
           | Option.none => Option.none
           | Option.some printedRest =>
               Option.some
@@ -1238,14 +1239,22 @@ def psJsTailPrintAlternativeWith
 
 def psJsTailPrintAlternativesWith
     (emit : PsJsIrExpr -> Option String)
-    (recursiveName temp : String) :
-    List
-      (String ×
-        List PsJsIrMatchBinding ×
-        PsJsIrExpr) ->
-    Option (List String)
+    (recursiveName temp : String)
+    (alternatives :
+      List
+        (String ×
+          List PsJsIrMatchBinding ×
+          PsJsIrExpr)) :
+    Option (List String) :=
+  match alternatives with
   | List.nil => Option.some List.nil
   | List.cons alternative rest =>
+      let smaller : Option (List String) :=
+        psJsTailPrintAlternativesWith
+          emit
+          recursiveName
+          temp
+          rest;
       match
           psJsTailPrintAlternativeWith
             emit
@@ -1254,12 +1263,7 @@ def psJsTailPrintAlternativesWith
             alternative with
       | Option.none => Option.none
       | Option.some printed =>
-          match
-              psJsTailPrintAlternativesWith
-                emit
-                recursiveName
-                temp
-                rest with
+          match smaller with
           | Option.none => Option.none
           | Option.some printedRest =>
               Option.some

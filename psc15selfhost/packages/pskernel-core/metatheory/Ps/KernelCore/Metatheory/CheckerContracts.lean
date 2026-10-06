@@ -139,6 +139,147 @@ def PsKernelDefEqConfigurationSound
           left
           right)
 
+
+/-
+Final checker contracts used by the implementation-refinement theorem.
+
+The executable kernel intentionally distinguishes inference-only from checked
+inference.  Inference-only skips argument validation in application spines, so
+it must not be given the same unconditional TypingJudgment contract as the
+checked path.  The final proof therefore targets the two contracts separately.
+-/
+
+def PsKernelCheckedInferenceCoreConfigurationSound
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState)) : Prop :=
+  ∀
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr),
+    PsKernelCheckerConfigurationSound context state ->
+    psKernelInferCoreWithFuel
+        fuel whnf defeq
+        context state expr false =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelTypingJudgment
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState
+
+def PsKernelInferOnlyCoreConfigurationPreserves
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState)) : Prop :=
+  ∀
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr),
+    PsKernelCheckerConfigurationSound context state ->
+    psKernelInferCoreWithFuel
+        fuel whnf defeq
+        context state expr true =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelCheckerConfigurationSound
+      context
+      nextState
+
+def PsKernelCheckedInferenceConfigurationSound
+    (check :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr),
+    PsKernelCheckerConfigurationSound context state ->
+    check context state expr =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelTypingJudgment
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState
+
+def PsKernelInferOnlyConfigurationPreserves
+    (infer :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr),
+    PsKernelCheckerConfigurationSound context state ->
+    infer context state expr =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelCheckerConfigurationSound
+      context
+      nextState
+
+def PsKernelDefEqCheckedConfigurationSound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right leftType rightType : PsKernelExpr)
+    (value : Bool),
+    PsKernelCheckerConfigurationSound context state ->
+    PsKernelTypingJudgment
+        context.environment
+        context.localContext
+        left
+        leftType ->
+    PsKernelTypingJudgment
+        context.environment
+        context.localContext
+        right
+        rightType ->
+    defeq context state left right =
+      Except.ok (Prod.mk value nextState) ->
+    PsKernelCheckerConfigurationSound
+        context
+        nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right)
+
 theorem psKernelCacheInferResult_preserves_configuration
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

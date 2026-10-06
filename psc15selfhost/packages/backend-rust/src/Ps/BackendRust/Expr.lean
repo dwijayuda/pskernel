@@ -882,8 +882,7 @@ def psRustEmitExprWithFuel
       let emitNested :
           PsVerifiedIrExpr ->
           Except PsRustEmitError String :=
-        fun (nested : PsVerifiedIrExpr) =>
-          psRustEmitExprWithFuel remaining nested;
+        psRustEmitExprWithFuel remaining;
       match expr with
       | PsVerifiedIrExpr.literal literal =>
           Except.ok (psRustEmitLiteral literal)

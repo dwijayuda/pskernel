@@ -60,6 +60,16 @@ try {
   );
   const directPath = path.join(directory, "direct.js");
   const typeScriptPath = path.join(directory, "reference.ts");
+  const supportTypeScriptPath = path.join(directory, "support.ts");
+  await writeFile(
+    supportTypeScriptPath,
+    [
+      "export function importedAdd(left: bigint, right: bigint): bigint { return left + right; }",
+      "export function namedIdentity(value: bigint): bigint { return value; }",
+      "export default function defaultIdentity(value: bigint): bigint { return value + 1n; }",
+      "",
+    ].join("\n"),
+  );
   await writeFile(directPath, emit("js"));
   await writeFile(typeScriptPath, emit("ts"));
 
@@ -304,6 +314,24 @@ try {
     ),
     53n,
   );
+
+  assert.equal(
+    direct.externalAddDemo(20n, 22n),
+    reference.externalAddDemo(20n, 22n),
+  );
+  assert.equal(direct.externalAddDemo(20n, 22n), 42n);
+
+  assert.equal(
+    direct.externalNamedDemo(42n),
+    reference.externalNamedDemo(42n),
+  );
+  assert.equal(direct.externalNamedDemo(42n), 42n);
+
+  assert.equal(
+    direct.externalDefaultDemo(41n),
+    reference.externalDefaultDemo(41n),
+  );
+  assert.equal(direct.externalDefaultDemo(41n), 42n);
 
   assert.equal(
     direct.genericIdNat(42n),

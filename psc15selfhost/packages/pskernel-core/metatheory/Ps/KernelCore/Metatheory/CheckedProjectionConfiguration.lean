@@ -590,8 +590,11 @@ theorem psKernelInferProjectionWith_configuration_sound
                                             rw [hFalse] at hTrue
                                             cases hTrue
                                           simp only [hCtors, hCtorRest] at hSuccess
-                                          rw [if_neg hArgsLengthNeRaw] at hSuccess
-                                          cases hSuccess
+                                          split at hSuccess
+                                          next hEq =>
+                                            exact (hArgsLengthNeRaw hEq).elim
+                                          next hNe =>
+                                            cases hSuccess
                                       | true =>
                                           have hArgsLength :
                                               psKernelExprListLength args =

@@ -86,6 +86,10 @@ def PsKernelBetaSpineSoundLaw : Prop :=
         fn
         (psKernelExprListLength args) =
       Prod.mk lastLam consumed ->
+    psKernelNatLt
+        0
+        (psKernelExprListLength args) =
+      true ->
     lastLam =
       PsKernelExpr.lam
         name

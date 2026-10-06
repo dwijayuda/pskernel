@@ -157,6 +157,11 @@ theorem psKernelDefEqQuick_success_cache_refines
         context.localContext
         state.success)
     (hEq : psKernelExprEq left right = false)
+    (hEligible :
+      psKernelSemanticPairCacheEligible
+        left
+        right =
+      true)
     (hCache :
       psKernelExprPairSetContains
         state.success left right =
@@ -171,7 +176,12 @@ theorem psKernelDefEqQuick_success_cache_refines
       left
       right := by
   constructor
-  · simp [psKernelDefEqQuick, hEq, hCache]
+  · simp [
+      psKernelDefEqQuick,
+      hEq,
+      hEligible,
+      hCache
+    ]
   · exact hSound left right hCache
 
 

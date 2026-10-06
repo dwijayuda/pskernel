@@ -9,12 +9,12 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: certificate boundary and declared checked-host source closure. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede; evidence cache at b7a8b22; bounded producer at 2737479; comparator session at 7337e2a.
+- Current checkpoint: SAVEF context validity and offline certificate replay. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede; evidence cache at b7a8b22; bounded producer at 2737479; comparator session at 7337e2a; certificate boundary and declared host closure at 8815244.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
 
-1. Implement evidence replay and SAVEF/archive integration; continue internal artifact, incremental interface and target adapter work. Solver-specific formats, comparator runtime security and full resource coverage remain explicit obligations.
+1. Continue typed migration/negative/reuse records, incremental interface and internal artifact integration. Offline replay implementation now enforces exact consumer context and claim mapping; complete release packaging and actual proof replay remain obligations.
 2. Complete target-specific interface adapters, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
 3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
 4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
@@ -234,3 +234,10 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - The Core proof adapter reuses actual public-interface extraction and pinned kernel checks. Its authority is only kernel-checked-public-interface. It cannot turn an arbitrary theorem into a compiler-preservation claim; such relation-to-theorem mappings remain separate checked obligations. Solver-specific formats are declined until their checker/translator is explicitly admitted.
 - Added an explicit 16-module static checked-host source closure to TrustManifest. CI now computes that closure and rejects undeclared/stale paths or new dynamic-import owners. Generated compiler/provider/runtime/TypeScript closure remains a separately named supply-chain obligation; static host closure is not advertised as the full TCB.
 - Three focused certificate routing/ownership tests pass using mock kernel decisions, and actual static host/bootstrap package closure audits pass (16 host modules, 13 reachable bootstrap packages). Actual proof replay remains an assurance obligation; no new Lean theorem is claimed.
+
+## 2026-10-07 SAVEF validity and offline replay checkpoint
+
+- Added a versioned six-kind typed knowledge graph with bounded iterative dependency closure, exact semantic/scope validity, assumption policy and full referenced byte integrity. The historical prototype remains metadata-only. Claims marked proved or validated now require fresh registered certificate replay against a consumer-selected exact subject, checker and claim class; unrelated theorems and unproved labels cannot satisfy required claims.
+- Added canonical self-contained data capsules, caller-pinned evidence manifests and semantic locks, explicit archive roles, safe bounded file reads, and actual Ed25519 provenance verification against local trusted keys. No paths are extracted and no checker module is loaded from an archive. The CLI supports trusted local Core-checker configuration and requires no full compiler or live registry. Complete shipped verifier/provider assets and real release archives remain pending.
+- Ten focused SAVEF/offline tests pass, including a real small integer-equality validator and real signatures. These are boundary checks, not evidence of global compiler preservation or replay of committed Lean proofs. All returned records remain audit data and releaseAccepted is false.
+- Cloud run 37527617654 at 8815244 passed focused evidence/comparator, portable-source, strict IR, interface/link, semantic build, query and JS differential stages. It was still running the long JS fixed point when inspected. Existing long JS/Wasm fixed-point steps are moved to the end of the same workflow so functional/provider integration runs first; no step or gate is removed.

@@ -28,6 +28,9 @@ export function createCertificateBoundary({ checkers, limits = {} }) {
         certificate = { bytes: Buffer.from(certificate.bytes), identity: copy(certificate.identity) };
         verifyArtifact(subject.bytes, subject.identity);
         verifyArtifact(certificate.bytes, certificate.identity);
+        if (certificate.identity.domain !== 'certificate' || certificate.identity.contract !== 'psc-certificate/1') {
+          return { kind: 'rejectedInvalid', code: 'certificate-artifact-contract' };
+        }
         const envelope = decodeComparatorJson(certificate.bytes, limits);
         if (envelope.contract !== 'psc-certificate/1' ||
             Object.keys(envelope).sort().join(',') !== 'checkerId,contract,payload,subjectId') return { kind: 'rejectedInvalid', code: 'certificate-schema' };

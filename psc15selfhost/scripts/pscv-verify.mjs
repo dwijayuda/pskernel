@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { verifySavefFile } from "./savef-object.mjs";
 import { assertProviderSecurityRegistry } from "./provider-security.mjs";
+import { pathToFileURL } from 'node:url';
+export { verifyOfflineCapsule } from './offline-capsule.mjs';
 
 export const pscvVerifierPrototype = Object.freeze({
   id:"pscv-verify/0-prototype",
@@ -44,6 +46,18 @@ export async function verifyOfflinePrototype() {
   });
 }
 
-if(process.argv[1]&&new URL("file:"+process.argv[1]).pathname===new URL(import.meta.url).pathname){
-  verifyOfflinePrototype().then(result=>process.stdout.write("PSCV_VERIFY_OFFLINE: PASS "+JSON.stringify(result)+"\n"));
+if(process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url){
+  const args = process.argv.slice(2);
+  const run = async () => {
+    if (!args.length) return { prototype: await verifyOfflinePrototype() };
+    if (args.length !== 4 || args[0] !== '--capsule' || args[2] !== '--policy') {
+      throw new Error('Usage: pscv-verify --capsule FILE --policy TRUSTED_LOCAL_POLICY');
+    }
+    const { verifyCapsuleCommand } = await import('./offline-verifier-cli.mjs');
+    return verifyCapsuleCommand(args[1], args[3]);
+  };
+  run().then(result => {
+    process.stdout.write(JSON.stringify(result) + '\n');
+    if (result.kind && result.kind !== 'accepted') process.exitCode = 1;
+  }).catch(error => { process.stderr.write(error.message + '\n'); process.exitCode = 1; });
 }

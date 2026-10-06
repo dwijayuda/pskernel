@@ -247,7 +247,8 @@
       ],
       "status": "prototype",
       "owners": [
-        "scripts/savef-object.mjs"
+        "scripts/savef-object.mjs",
+        "scripts/savef-graph.mjs"
       ],
       "completion": "Typed graphs, ValidUnder checks, migrations, supersession, failure knowledge and accepted reuse events operate end to end.",
       "assurance": "pending"
@@ -261,7 +262,10 @@
       ],
       "status": "prototype",
       "owners": [
-        "scripts/pscv-verify.mjs"
+        "scripts/pscv-verify.mjs",
+        "scripts/offline-capsule.mjs",
+        "scripts/offline-verifier-cli.mjs",
+        "contracts/archive/OFFLINE_CAPSULE_V1.json"
       ],
       "completion": "Standalone bounded verification replays supported evidence and validates archives, provenance and algorithm/domain/schema-qualified hashes offline.",
       "assurance": "pending"

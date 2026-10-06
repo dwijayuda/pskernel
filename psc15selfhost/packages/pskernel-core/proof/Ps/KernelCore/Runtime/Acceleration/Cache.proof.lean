@@ -627,7 +627,7 @@ theorem psKernelExprMapGet_insert_self
                 psKernelExprMapGet_insert_small_self
                   small expr value hRefl hFits
           | false =>
-              simp only [
+              simp [
                 psKernelExprMapInsert,
                 hFits,
                 psKernelExprMapGet

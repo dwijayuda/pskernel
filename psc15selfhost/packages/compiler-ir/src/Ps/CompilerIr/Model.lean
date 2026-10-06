@@ -282,6 +282,22 @@ inductive PsVerifiedIrValidationError where
   | typeArgumentArity (name : String)
   | invalidMachineIntegerLiteral
       (type : PsVerifiedIrMachineIntegerType)
+  | duplicateGlobalName (name : String)
+  | duplicateTypeParameter (name : String)
+  | duplicateParameter (name : String)
+  | duplicateField (owner field : String)
+  | duplicateAlternative (constructorName : String)
+  | unknownTypeName (name : String)
+  | unknownTypeParameter (name : String)
+  | unknownVariable (name : String)
+  | expressionTypeMismatch
+  | callArity
+  | intrinsicArity
+  | intrinsicTypeArgumentArity
+  | fieldCompleteness (owner : String)
+  | matchExhaustiveness (inductiveName : String)
+  | invalidExternalImport (localName : String)
+  | emptyMatch
 
 def psVerifiedIrIntDecimalMagnitudeWithFuel
     (remainingFuel : Nat) :
@@ -1082,7 +1098,7 @@ def psVerifiedIrValidateReferences
     module
     module.declarations
 
-def psValidateErasedIrModule
+def psValidateErasedIrModuleReferences
     (erased : PsErasedIrModule) :
     Except PsVerifiedIrValidationError PsValidatedIrModule :=
   if psVerifiedIrModuleResolved erased.raw then

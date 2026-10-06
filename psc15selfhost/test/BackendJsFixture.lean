@@ -686,6 +686,34 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
             ]
       },
       {
+        name := "genericId"
+        typeParameters := [{ name := "A" }]
+        parameters := [
+          {
+            name := "x"
+            type := psBackendJsTypeA
+          }
+        ]
+        resultType := psBackendJsTypeA
+        body := PsVerifiedIrExpr.var "x"
+      },
+      {
+        name := "genericIdNat"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "genericId")
+            [psBackendJsNatType]
+            [PsVerifiedIrExpr.var "value"]
+      },
+      {
         name := "pointSum"
         typeParameters := []
         parameters := [

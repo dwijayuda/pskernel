@@ -384,6 +384,129 @@ theorem psKernelEnsureSortWith_configuration_refines
                   hSemantic.2
                 ⟩
 
+theorem psKernelEnsureForallWith_configuration_refines
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (type : PsKernelExpr)
+    (view : PsKernelForallView)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        state)
+    (hSuccess :
+      psKernelEnsureForallWith
+          whnf
+          context
+          state
+          type =
+        Except.ok (Prod.mk view nextState)) :
+    PsKernelDefEqJudgment
+        context.environment
+        context.localContext
+        type
+        (PsKernelExpr.forallE
+          view.name
+          view.domain
+          view.body
+          view.binderInfo) ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState := by
+  by_cases hDirect :
+      ∃
+        (name : PsKernelName)
+        (domain body : PsKernelExpr)
+        (binderInfo : PsKernelBinderInfo),
+        type =
+          PsKernelExpr.forallE
+            name domain body binderInfo
+  · rcases hDirect with
+      ⟨name, domain, body, binderInfo, rfl⟩
+    simp [psKernelEnsureForallWith] at hSuccess
+    rcases hSuccess with ⟨rfl, rfl⟩
+    exact
+      ⟨
+        PsKernelDefEqJudgment.refl
+          (PsKernelExpr.forallE
+            name domain body binderInfo),
+        hConfig
+      ⟩
+  · have hFallback :
+        psKernelEnsureForallWith
+            whnf
+            context
+            state
+            type =
+          match whnf context state type with
+          | Except.error error =>
+              Except.error error
+          | Except.ok result =>
+              match Prod.fst result with
+              | PsKernelExpr.forallE
+                  name domain body binderInfo =>
+                  Except.ok
+                    (Prod.mk
+                      (PsKernelForallView.mk
+                        name domain body binderInfo)
+                      (Prod.snd result))
+              | _ =>
+                  Except.error "expected function type" := by
+      cases type with
+      | forallE name domain body binderInfo =>
+          exfalso
+          exact
+            hDirect
+              ⟨name, domain, body, binderInfo, rfl⟩
+      | bvar index => rfl
+      | fvar name => rfl
+      | mvar name => rfl
+      | sort level => rfl
+      | const name levels => rfl
+      | app fn arg => rfl
+      | lam name domain body binderInfo => rfl
+      | letE name ty value body nondep => rfl
+      | lit literal => rfl
+      | mdata metadata body => rfl
+      | proj typeName index body => rfl
+    rw [hFallback] at hSuccess
+    cases hRun : whnf context state type with
+    | error error =>
+        simp [hRun] at hSuccess
+    | ok result =>
+        cases result with
+        | mk reduced reducedState =>
+            rw [hRun] at hSuccess
+            cases reduced <;> simp at hSuccess
+            case forallE name domain body binderInfo =>
+              rcases hSuccess with ⟨rfl, rfl⟩
+              have hSemantic :=
+                hWhnf
+                  context
+                  state
+                  reducedState
+                  type
+                  (PsKernelExpr.forallE
+                    name domain body binderInfo)
+                  hConfig
+                  hRun
+              exact
+                ⟨
+                  PsKernelDefEqJudgment.reductionClosure
+                    type
+                    (PsKernelExpr.forallE
+                      name domain body binderInfo)
+                    hSemantic.1,
+                  hSemantic.2
+                ⟩
+
+
 theorem psKernelCacheInferResult_preserves_configuration
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

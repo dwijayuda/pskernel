@@ -569,60 +569,57 @@ theorem psKernelCheckerContextEnterRecDepth_preserves_configuration
     PsKernelCheckerConfigurationSound
       nextContext
       state := by
-  by_cases hUnlimited :
-      Nat.beq context.maxRecDepth 0 = true
-  · have hOk :
-        (Except.ok context :
-          Except String PsKernelCheckerContext) =
-        Except.ok nextContext := by
-      simpa [
-        psKernelCheckerContextEnterRecDepth,
-        hUnlimited
-      ] using hEnter
-    injection hOk with hContext
-    subst nextContext
-    exact hConfig
-  · by_cases hTooDeep :
-        psKernelNatGt
-            (Nat.add context.recDepth 1)
-            (Nat.mul
-              context.maxRecDepth
-              psKernelRecDepthFactor) =
-          true
-    · have hImpossible :
-          (Except.error
-              "deep recursion detected, use maxRecDepth to increase the limit" :
-            Except String PsKernelCheckerContext) =
-          Except.ok nextContext := by
-        simpa [
-          psKernelCheckerContextEnterRecDepth,
-          hUnlimited,
-          hTooDeep
-        ] using hEnter
-      cases hImpossible
-    · let entered : PsKernelCheckerContext :=
-        {
-          environment := context.environment
-          localContext := context.localContext
-          levelParams := context.levelParams
-          safety := context.safety
-          eagerReduce := context.eagerReduce
-          nativeEvaluator := context.nativeEvaluator
-          maxRecDepth := context.maxRecDepth
-          maxNatSize := context.maxNatSize
-          recDepth := Nat.succ context.recDepth
-        }
+  cases hUnlimited :
+      Nat.beq context.maxRecDepth 0 with
+  | true =>
       have hOk :
-          (Except.ok entered :
+          (Except.ok context :
             Except String PsKernelCheckerContext) =
           Except.ok nextContext := by
         simpa [
           psKernelCheckerContextEnterRecDepth,
-          hUnlimited,
-          hTooDeep,
-          entered
+          hUnlimited
         ] using hEnter
       injection hOk with hContext
       subst nextContext
-      unfold PsKernelCheckerConfigurationSound at hConfig ⊢
-      simpa [entered] using hConfig
+      exact hConfig
+  | false =>
+      cases hTooDeep :
+          psKernelNatGt
+            (Nat.add context.recDepth 1)
+            (Nat.mul
+              context.maxRecDepth
+              psKernelRecDepthFactor) with
+      | true =>
+          simp [
+            psKernelCheckerContextEnterRecDepth,
+            hUnlimited,
+            hTooDeep
+          ] at hEnter
+      | false =>
+          let entered : PsKernelCheckerContext :=
+            {
+              environment := context.environment
+              localContext := context.localContext
+              levelParams := context.levelParams
+              safety := context.safety
+              eagerReduce := context.eagerReduce
+              nativeEvaluator := context.nativeEvaluator
+              maxRecDepth := context.maxRecDepth
+              maxNatSize := context.maxNatSize
+              recDepth := Nat.add context.recDepth 1
+            }
+          have hOk :
+              (Except.ok entered :
+                Except String PsKernelCheckerContext) =
+              Except.ok nextContext := by
+            simpa [
+              psKernelCheckerContextEnterRecDepth,
+              hUnlimited,
+              hTooDeep,
+              entered
+            ] using hEnter
+          injection hOk with hContext
+          subst nextContext
+          unfold PsKernelCheckerConfigurationSound at hConfig ⊢
+          simpa [entered] using hConfig

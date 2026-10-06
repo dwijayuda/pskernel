@@ -988,6 +988,115 @@ theorem psKernelWhnfFinish_preserves_configuration
             hSuccess
           ⟩)
 
+theorem psKernelWhnfCoreFinish_success_refines
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (original candidate output : PsKernelExpr)
+    (cheapProj : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hReduction :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        original
+        candidate)
+    (hSuccess :
+      psKernelWhnfCoreFinish
+          original
+          cheapProj
+          candidate
+          state =
+        Except.ok (Prod.mk output nextState)) :
+    output = candidate ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState := by
+  cases cheapProj with
+  | true =>
+      simp [psKernelWhnfCoreFinish] at hSuccess
+      rcases hSuccess with ⟨rfl, rfl⟩
+      exact ⟨rfl, hConfig⟩
+  | false =>
+      cases hEligible :
+          psKernelSemanticCacheEligible original with
+      | false =>
+          simp [
+            psKernelWhnfCoreFinish,
+            hEligible
+          ] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact ⟨rfl, hConfig⟩
+      | true =>
+          simp [
+            psKernelWhnfCoreFinish,
+            hEligible
+          ] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact
+            ⟨
+              rfl,
+              psKernelWhnfCoreFinish_preserves_configuration
+                context
+                state
+                original
+                candidate
+                false
+                hConfig
+                hReduction
+            ⟩
+
+
+theorem psKernelWhnfFinish_success_refines
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (original candidate output : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hReduction :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        original
+        candidate)
+    (hSuccess :
+      psKernelWhnfFinish
+          original
+          candidate
+          state =
+        Except.ok (Prod.mk output nextState)) :
+    output = candidate ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState := by
+  cases hEligible :
+      psKernelSemanticCacheEligible original with
+  | false =>
+      simp [
+        psKernelWhnfFinish,
+        hEligible
+      ] at hSuccess
+      rcases hSuccess with ⟨rfl, rfl⟩
+      exact ⟨rfl, hConfig⟩
+  | true =>
+      simp [
+        psKernelWhnfFinish,
+        hEligible
+      ] at hSuccess
+      rcases hSuccess with ⟨rfl, rfl⟩
+      exact
+        ⟨
+          rfl,
+          psKernelWhnfFinish_preserves_configuration
+            context
+            state
+            original
+            candidate
+            hConfig
+            hReduction
+        ⟩
+
+
 theorem psKernelWhnfCoreFinish_success_preserves_configuration
     (context : PsKernelCheckerContext)
     (state nextState : PsKernelCheckerState)

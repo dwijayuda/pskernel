@@ -4,8 +4,8 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `40837a8ad2278c9db7bf7a7fd35821728f0a87b9`
-- Last known green proof checkpoint: `40837a8ad2278c9db7bf7a7fd35821728f0a87b9` (run #315)
+- Current proof HEAD when this state was written: `69a7b63c4cbc61590eea2e59a5937eae745f6b1d`
+- Last known green proof checkpoint: `69a7b63c4cbc61590eea2e59a5937eae745f6b1d` (run #319)
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
@@ -54,13 +54,16 @@ Last checked-in audit:
 The audit is conservative relative to newer cross-module checker-contract/context work. Do not inflate module grades without applying the written A/B/C/D criteria.
 
 ## Current checkpoint
-- Fully green checkpoint: `40837a8ad2278c9db7bf7a7fd35821728f0a87b9` (run #315).
-- Full recursive proof tree remains green with all 84 proof files after the local-fvar cache fix and binder-scope cache-isolation hardening.
-- Confirmed source defect #1: local-scope fvar cache escape. Direct fvar-bearing cache keys are now rejected by semantic cache policy.
-- Binder-scope hardening: `psKernelCheckerStateExitLocalScope` restores all semantic caches to the pre-child state while preserving a monotone fresh-name counter with `Nat.max parent.nextFresh child.nextFresh`.
-- Lambda/forall/let inference now applies this scope exit before parent-expression cache publication, preventing any child-scope semantic cache mutation from escaping even when the cached key itself is fvar-free.
-- The scope-exit state fields and checked typing-refinement proofs are migrated and green.
-- Context/configuration metatheory includes a generic theorem that scope exit preserves parent `PsKernelCheckerConfigurationSound`.
+- Fully green checkpoint: `69a7b63c4cbc61590eea2e59a5937eae745f6b1d` (run #319).
+- Full recursive PSKernel Core proof tree is green after centralizing fresh-bound monotonicity in `Metatheory/Context.lean`.
+- The context/state Assurance Plane now has:
+  - local-context extension/weakening for typing, reduction, DefEq, and semantic caches,
+  - generated-name freshness bounds with monotonicity,
+  - fresh local/let configuration preservation,
+  - recursion-depth configuration transport,
+  - scope-exit configuration preservation with monotone `nextFresh`,
+  - the local-scope cache-isolation source hardening from the confirmed fvar escape defect.
+- Projection has a green configuration-preservation theorem in the standalone proof layer; the next architectural step is to promote that contract into importable metatheory so general inference configuration soundness can reuse it.
 - The checked-in semantic audit remains conservative at A=44/B=9/C=19/D=7 pending the next criteria-based refresh.
 
 ## Current blocker
@@ -68,8 +71,9 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- prove concrete `PsKernelInferOnlyCoreConfigurationPreserves whnf defeq` by fuel induction from the now-green scope-isolation architecture;
-- then prove `PsKernelCheckedInferenceCoreConfigurationSound whnf defeq` using the existing per-branch typing refinement theorems and the same configuration induction.
+- promote the already-green Projection configuration-preservation theorem into an importable metatheory module;
+- prove concrete `PsKernelInferOnlyCoreConfigurationPreserves whnf defeq` by fuel induction using the green rec-depth, app-only, projection, freshness, scope-exit, and cache-publication contracts;
+- then prove `PsKernelCheckedInferenceCoreConfigurationSound whnf defeq` using the same configuration induction plus the existing per-branch typing refinement theorems.
 
 Architectural blockers still remaining:
 - close concrete checked/infer-only inference configuration contracts across all branches;
@@ -80,15 +84,16 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Prove `PsKernelInferOnlyCoreConfigurationPreserves whnf defeq` by fuel/constructor induction, reusing the already-green helper contracts.
-2. Prove `PsKernelCheckedInferenceCoreConfigurationSound whnf defeq` by the same induction plus the existing per-branch typing refinement theorems.
-3. Lift those core theorems through the public inference wrapper.
-4. Prove concrete WHNF-core/public-WHNF configuration/stateful contracts.
-5. Prove concrete DefEq configuration/stateful soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
-6. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
-7. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
-8. Add the final explicit implementation-refinement theorem/family and refresh the semantic audit.
-9. Reconcile against current integration, rerun the full proof/conformance gates, and commit the final `AI_WORK_STATE.md`.
+1. Promote Projection configuration preservation into importable metatheory.
+2. Prove `PsKernelInferOnlyCoreConfigurationPreserves whnf defeq` by fuel/constructor induction.
+3. Prove `PsKernelCheckedInferenceCoreConfigurationSound whnf defeq`.
+4. Lift those core theorems through the public inference wrapper.
+5. Prove concrete WHNF-core/public-WHNF configuration/stateful contracts.
+6. Prove concrete DefEq configuration/stateful soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
+7. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
+8. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
+9. Add the final explicit implementation-refinement theorem/family and refresh the semantic audit.
+10. Reconcile against current integration, rerun the full proof/conformance gates, and commit the final `AI_WORK_STATE.md`.
 
 ## Work discipline
 - Preserve GitHub history and concurrent proof work.

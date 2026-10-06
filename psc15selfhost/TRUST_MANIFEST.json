@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-trust-manifest/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+  "semanticBootstrapRoot": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+  "selfHostProfile": "PSC1-selfhost-stable/1",
+  "portableSelfHostProfile": "PSC1-portable-selfhost/1",
+  "bootstrapPackageClosure": [
+    "bootstrap",
+    "foundation",
+    "syntax",
+    "core",
+    "environment",
+    "meta",
+    "elab",
+    "bridge",
+    "compiler-ir",
+    "erasure",
+    "compiler",
+    "backend-ts",
+    "driver-ts"
+  ],
+  "checkedAuthority": {
+    "kernelContract": "proofscript-kernel-contract/1",
+    "checkedCapability": "psc-checked-core-capability/1",
+    "providerSecurityContract": "psc-provider-security/1",
+    "hostBoundary": "scripts/kernel-checked-session.mjs",
+    "checkedBuildBoundary": "scripts/checked-build.mjs",
+    "failClosed": true,
+    "semanticFallbackForbidden": true
+  },
+  "trustClasses": {
+    "logicalAcceptance": [
+      "selected kernel provider under proofscript-kernel-contract/1",
+      "checked-session composition boundary",
+      "provider identity validation"
+    ],
+    "executableValidation": [
+      "psValidateErasedIrModule under psc-verified-ir/1"
+    ],
+    "transformationTrustCurrent": [
+      "erasure",
+      "specialization where used",
+      "target lowering and emission where not independently validated"
+    ],
+    "externalExecutionAssumptions": [
+      "selected JavaScript/WebAssembly/native runtime",
+      "host OS and memory safety",
+      "declared FFI implementations"
+    ]
+  }
+}

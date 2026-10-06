@@ -1,3 +1,4 @@
+import { assertProviderSecurity, defaultProviderSecurityProfile } from './provider-security.mjs';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -72,6 +73,10 @@ export async function checkAdmissionsWithKernel(
   if (typeof admissions !== 'string') throw new TypeError('Expected canonical admissions text');
   assertCanonicalAdmissionsEnvelope(admissions);
   const descriptor = checkedKernelDescriptor(selector);
+  const providerSecurity = assertProviderSecurity(
+    selector,
+    options.securityProfile ?? defaultProviderSecurityProfile,
+  );
   const timeoutMs = options.timeoutMs ?? 60000;
   let result;
 
@@ -120,5 +125,5 @@ export async function checkAdmissionsWithKernel(
   }
 
   assertSemanticIdentity(result, selector);
-  return Object.freeze({ result, descriptor });
+  return Object.freeze({ result, descriptor, providerSecurity });
 }

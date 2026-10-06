@@ -15,6 +15,7 @@ import {
 } from './checked-kernel-provider.mjs';
 import { runCheckedSeedSession } from './checked-seed-session.mjs';
 import { pinnedTypeScriptVersionText, resolveTypeScriptCli } from './typescript-cli.mjs';
+import { assertProviderSecurity, defaultProviderSecurityProfile } from './provider-security.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -34,8 +35,13 @@ export async function buildChecked({
   checkOnly = false,
   kernel = defaultCheckedKernel,
   dualCheck,
+  securityProfile = defaultProviderSecurityProfile,
 }) {
   const kernelDescriptor = checkedKernelDescriptor(kernel);
+  const selectedProviderSecurity = assertProviderSecurity(kernel, securityProfile);
+  const secondaryProviderSecurity = dualCheck
+    ? assertProviderSecurity(dualCheck, securityProfile)
+    : undefined;
   if (dualCheck) checkedKernelDescriptor(dualCheck);
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
@@ -46,8 +52,8 @@ export async function buildChecked({
   let parity;
   const checkAdmissions = async text => {
     const checked = dualCheck
-      ? await checkAdmissionsWithDual(text, kernel, dualCheck)
-      : await checkAdmissionsWithKernel(text, kernel);
+      ? await checkAdmissionsWithDual(text, kernel, dualCheck, { securityProfile })
+      : await checkAdmissionsWithKernel(text, kernel, { securityProfile });
     parity = checked.parity;
     return checked.result;
   };
@@ -76,7 +82,7 @@ export async function buildChecked({
     const session = createKernelCheckedSession(compiler, async text => {
       admissions = text;
       return checkAdmissions(text);
-    }, checkedKernelIdentity(kernel));
+    }, checkedKernelIdentity(kernel), kernelContractV1, selectedProviderSecurity);
     const handle = await session.checkSources(kind, snapshot.sources);
     if (!checkOnly) typeScript = session.emit(handle);
   }
@@ -86,6 +92,8 @@ export async function buildChecked({
     kind: 'psc2-checked-build',
     kernelContract: kernelContractV1,
     provider: checkedKernelIdentity(kernel),
+    providerSecurity: selectedProviderSecurity,
+    ...(secondaryProviderSecurity ? { secondaryProviderSecurity } : {}),
     kernel: kernelDescriptor,
     compiler: compilerIdentity,
     sourceClosureSha256: snapshot.closureSha256,
@@ -141,14 +149,14 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   while (args.length) {
     const flag = args.shift();
     if (flag === '--check') options.checkOnly = true;
-    else if (['--out', '--compiler', '--seed', '--kernel', '--dual-check'].includes(flag)) {
+    else if (['--out', '--compiler', '--seed', '--kernel', '--dual-check', '--security-profile'].includes(flag)) {
       const value = args.shift();
       if (!value || value.startsWith('--')) throw new Error(`Missing value for ${flag}`);
-      options[{ '--out': 'outputPath', '--compiler': 'compilerPath', '--seed': 'seedPath', '--kernel': 'kernel', '--dual-check': 'dualCheck' }[flag]] = value;
+      options[{ '--out': 'outputPath', '--compiler': 'compilerPath', '--seed': 'seedPath', '--kernel': 'kernel', '--dual-check': 'dualCheck', '--security-profile': 'securityProfile' }[flag]] = value;
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1]');
   }
   const receipt = await buildChecked(options);
   console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));

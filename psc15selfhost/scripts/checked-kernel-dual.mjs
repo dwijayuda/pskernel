@@ -56,5 +56,9 @@ export async function checkAdmissionsWithDual(
       secondary: { selector: secondary, ...checkedKernelIdentity(secondary) },
       decision,
     }),
+    providerSecurity: Object.freeze({
+      primary: left.providerSecurity,
+      secondary: right.providerSecurity,
+    }),
   });
 }

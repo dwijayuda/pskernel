@@ -15,7 +15,7 @@
   "scripts": {
     "psc": "node packages/cli/bin/psc.mjs",
     "clean": "node scripts/clean.mjs",
-    "check:workspace": "node scripts/bootstrap-closure-contract-tests.mjs && node scripts/check-workspace.mjs",
+    "check:workspace": "node scripts/bootstrap-closure-contract-tests.mjs && node scripts/check-workspace.mjs && npm run check:architecture-contracts",
     "check:source:bootstrap": "node check-psc1-source.mjs",
     "check:source:all": "node check-psc1-source.mjs --all-portable",
     "check:source": "npm run check:source:bootstrap",
@@ -178,7 +178,9 @@
     "test:direct-wasm-selfhost": "node scripts/direct-wasm-selfhost-fixed-point.mjs",
     "test:backend-rust-cargo": "node scripts/backend-rust-cargo.test.mjs",
     "test:direct-rust-whole-compiler": "node scripts/direct-rust-whole-compiler.test.mjs",
-    "test:direct-rust-selfhost": "node scripts/direct-rust-selfhost-fixed-point.mjs"
+    "test:direct-rust-selfhost": "node scripts/direct-rust-selfhost-fixed-point.mjs",
+    "test:architecture-contracts": "node --test scripts/architecture-contracts.test.mjs scripts/provider-security.test.mjs",
+    "check:architecture-contracts": "npm run test:architecture-contracts && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

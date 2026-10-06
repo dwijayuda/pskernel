@@ -61,6 +61,7 @@ export function createKernelCheckedSession(
   checkAdmissions,
   expectedIdentity = leanCheckedIdentity,
   kernelContract = kernelContractV1,
+  providerSecurity = Object.freeze({ contract: 'psc-provider-security/1', profile: 'unclassified-development' }),
 ) {
   const identity = Object.freeze({ ...expectedIdentity });
   if (!identity.protocol || !identity.provider || !identity.profile) {
@@ -88,10 +89,12 @@ export function createKernelCheckedSession(
       }
       if (!result.accepted) throw new Error(`PSC2_KERNEL_REJECTED: ${result.errorKind}`);
       const handle = Object.freeze({
+        capability: 'psc-checked-core-capability/1',
         sourceSha256: hash(source),
         canonicalAdmissionsSha256: hash(admissions),
         kernelContract: kernelContractV1,
         provider: identity,
+        providerSecurity,
       });
       modules.set(handle, { prepared, admissions });
       return handle;

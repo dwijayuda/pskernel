@@ -486,6 +486,20 @@ def psTestLocalInstanceSynthesis : Bool :=
   | none => false
 
 
+def psTestParserCursorCounts : Bool :=
+  match psLex "A.B tail" with
+  | .error _ => false
+  | .ok tokens =>
+      let initial := psTokenCursorFromTokens tokens;
+      initial.remainingCount == 5 &&
+        (match psTokenCursorAdvance initial with
+         | .none => false
+         | .some read => read.cursor.remainingCount == 4 && read.cursor.remaining.length == 4) &&
+        (match psParseSyntaxName initial with
+         | .error _ => false
+         | .ok parsed => parsed.cursor.remainingCount == 2 &&
+             parsed.cursor.remaining.length == 2 && psTokenCursorAtText parsed.cursor "tail")
+
 def psTestLexerAccumulatorBoundaries : Bool :=
   psLexStringToListFromWithFuel 0 "Aé😀" 0 == []
     && psLexStringToListFromWithFuel 1 "Aé😀" 0 == ['A']
@@ -2599,6 +2613,7 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "reject invalid Char escapes", passed := psTestRejectInvalidCharacterEscapes },
   { name := "ProofScript empty call stays empty", passed := psTestProofScriptEmptyCallStaysEmpty },
   { name := "ProofScript CallGap", passed := psTestProofScriptCallGap },
+  { name := "parser cursor cached counts", passed := psTestParserCursorCounts },
   { name := "lexer accumulator boundaries", passed := psTestLexerAccumulatorBoundaries },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },
   { name := "lexer nested trivia", passed := psTestLexerNestedTrivia },

@@ -1,8 +1,10 @@
+import Ps.Foundation.List
 import Ps.Foundation.Name
 import Ps.Syntax.Token
 
 structure PsTokenCursor where
   remaining : List PsToken
+  remainingCount : Nat
 
 structure PsTokenRead where
   token : PsToken
@@ -22,7 +24,7 @@ inductive PsParseError where
       (span : PsSourceSpan)
 
 def psTokenCursorFromTokens (tokens : List PsToken) : PsTokenCursor :=
-  { remaining := tokens }
+  { remaining := tokens, remainingCount := psListLength tokens }
 
 def psTokenCursorPeek (cursor : PsTokenCursor) : Option PsToken :=
   match cursor.remaining with
@@ -40,7 +42,7 @@ def psTokenCursorAdvance (cursor : PsTokenCursor) : Option PsTokenRead :=
   | List.cons token rest =>
       Option.some {
         token := token
-        cursor := { remaining := rest }
+        cursor := { remaining := rest, remainingCount := Nat.sub cursor.remainingCount 1 }
       }
 
 def psTokenCursorAtText (cursor : PsTokenCursor) (text : String) : Bool :=

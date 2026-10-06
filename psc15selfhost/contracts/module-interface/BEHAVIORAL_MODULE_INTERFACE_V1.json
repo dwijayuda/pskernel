@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-behavioral-module-interface/1",
+  "fields": [
+    "specificationKey",
+    "effectKey",
+    "resourceKey",
+    "assumptionKey"
+  ],
+  "composition": "psc-certified-module-interface/1",
+  "authority": "interface-evidence-only",
+  "currentStatus": "typed-contract-scaffold",
+  "reusePolicy": "behavioral compatibility requires equality of contract and every behavioral key until refinement evidence permits a weaker relation",
+  "implementation": "packages/project/src/Ps/Project/ModuleInterface.lean"
+}

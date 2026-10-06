@@ -1494,9 +1494,9 @@ theorem psKernelExprAbstractInstantiateReferenceChanged_roundtrip_singleton_core
               hFnLoose
             ] using hClosed
           have ihFnResult :=
-            ihFn offset hFnLoose hNameSound
+            ihFn offset hFnLoose
           have ihArgResult :=
-            ihArg offset hArgLoose hNameSound
+            ihArg offset hArgLoose
           have hWholeClosed :=
             psKernelExprInstantiateAtReferenceChanged_closed_core
               (PsKernelExpr.app fn arg)
@@ -1547,9 +1547,9 @@ theorem psKernelExprAbstractInstantiateReferenceChanged_roundtrip_singleton_core
               hTypeLoose
             ] using hClosed
           have ihTypeResult :=
-            ihType offset hTypeLoose hNameSound
+            ihType offset hTypeLoose
           have ihBodyResult :=
-            ihBody (Nat.succ offset) hBodyLoose hNameSound
+            ihBody (Nat.succ offset) hBodyLoose
           have hWholeClosed :=
             psKernelExprInstantiateAtReferenceChanged_closed_core
               (PsKernelExpr.lam name type body binderInfo)
@@ -1600,9 +1600,9 @@ theorem psKernelExprAbstractInstantiateReferenceChanged_roundtrip_singleton_core
               hTypeLoose
             ] using hClosed
           have ihTypeResult :=
-            ihType offset hTypeLoose hNameSound
+            ihType offset hTypeLoose
           have ihBodyResult :=
-            ihBody (Nat.succ offset) hBodyLoose hNameSound
+            ihBody (Nat.succ offset) hBodyLoose
           have hWholeClosed :=
             psKernelExprInstantiateAtReferenceChanged_closed_core
               (PsKernelExpr.forallE name type body binderInfo)
@@ -1663,11 +1663,11 @@ theorem psKernelExprAbstractInstantiateReferenceChanged_roundtrip_singleton_core
                   hValueLoose
                 ] using hClosed
               have ihTypeResult :=
-                ihType offset hTypeLoose hNameSound
+                ihType offset hTypeLoose
               have ihValueResult :=
-                ihValue offset hValueLoose hNameSound
+                ihValue offset hValueLoose
               have ihBodyResult :=
-                ihBody (Nat.succ offset) hBodyLoose hNameSound
+                ihBody (Nat.succ offset) hBodyLoose
               have hWholeClosed :=
                 psKernelExprInstantiateAtReferenceChanged_closed_core
                   (PsKernelExpr.letE
@@ -1725,7 +1725,7 @@ theorem psKernelExprAbstractInstantiateReferenceChanged_roundtrip_singleton_core
           psKernelExprHasLooseAt body offset = false := by
         simpa [psKernelExprHasLooseAt] using hClosed
       have ihBodyResult :=
-        ihBody offset hBodyLoose hNameSound
+        ihBody offset hBodyLoose
       have hWholeClosed :=
         psKernelExprInstantiateAtReferenceChanged_closed_core
           (PsKernelExpr.mdata metadata body)
@@ -1752,7 +1752,7 @@ theorem psKernelExprAbstractInstantiateReferenceChanged_roundtrip_singleton_core
           psKernelExprHasLooseAt body offset = false := by
         simpa [psKernelExprHasLooseAt] using hClosed
       have ihBodyResult :=
-        ihBody offset hBodyLoose hNameSound
+        ihBody offset hBodyLoose
       have hWholeClosed :=
         psKernelExprInstantiateAtReferenceChanged_closed_core
           (PsKernelExpr.proj typeName index body)

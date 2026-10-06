@@ -401,7 +401,8 @@ def psJsLowerFloatCompareOp
   | PsVerifiedIrFloatCompareOp.gt => PsJsIrFloatCompareOp.gt
   | PsVerifiedIrFloatCompareOp.ge => PsJsIrFloatCompareOp.ge
 
-def psJsLowerLiteral
+def psJsLowerLiteralWithProfile
+    (profile : Option PsJsTargetProfile)
     (literal : PsVerifiedIrLiteral) :
     Except PsJsLowerError PsJsIrLiteral :=
   match literal with
@@ -416,15 +417,31 @@ def psJsLowerLiteral
   | PsVerifiedIrLiteral.unit =>
       Except.ok PsJsIrLiteral.unit
   | PsVerifiedIrLiteral.machineInteger type value =>
-      match psJsLowerMachineIntegerType type with
-      | Except.error error => Except.error error
-      | Except.ok loweredType =>
-          Except.ok
-            (PsJsIrLiteral.machineInteger
-              loweredType
-              value)
+      if
+          psJsMachineIntegerLiteralCanonicalForProfile
+            profile
+            type
+            value then
+        match
+            psJsLowerMachineIntegerTypeWithProfile
+              profile
+              type with
+        | Except.error error => Except.error error
+        | Except.ok loweredType =>
+            Except.ok
+              (PsJsIrLiteral.machineInteger
+                loweredType
+                value)
+      else
+        Except.error PsJsLowerError.unsupportedLiteral
 
-def psJsLowerParameterNames
+def psJsLowerLiteral
+    (literal : PsVerifiedIrLiteral) :
+    Except PsJsLowerError PsJsIrLiteral :=
+  psJsLowerLiteralWithProfile Option.none literal
+
+def psJsLowerParameterNamesWithProfile
+    (profile : Option PsJsTargetProfile)
     (parameters : List PsVerifiedIrParameter) :
     Except PsJsLowerError (List String) :=
   match parameters with
@@ -432,16 +449,30 @@ def psJsLowerParameterNames
       Except.ok List.nil
   | List.cons parameter rest =>
       if psJsIdentifierSupported parameter.name then
-        if psJsTypeSupported parameter.type then
-          match psJsLowerParameterNames rest with
+        if
+            psJsTypeSupportedWithProfile
+              profile
+              parameter.type then
+          match
+              psJsLowerParameterNamesWithProfile
+                profile
+                rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (List.cons parameter.name loweredRest)
+              Except.ok
+                (List.cons parameter.name loweredRest)
         else
           Except.error PsJsLowerError.unsupportedType
       else
         Except.error
           (PsJsLowerError.unsupportedName parameter.name)
+
+def psJsLowerParameterNames
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsJsLowerError (List String) :=
+  psJsLowerParameterNamesWithProfile
+    Option.none
+    parameters
 
 def psJsLowerUnaryWith
     (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
@@ -619,7 +650,8 @@ def psJsLowerFieldsWith
                       (Prod.mk name loweredValue)
                       loweredRest)
 
-def psJsLowerMatchBindings
+def psJsLowerMatchBindingsWithProfile
+    (profile : Option PsJsTargetProfile)
     (bindings : List PsVerifiedIrMatchBinding) :
     Except PsJsLowerError (List PsJsIrMatchBinding) :=
   match bindings with
@@ -627,8 +659,14 @@ def psJsLowerMatchBindings
       Except.ok List.nil
   | List.cons binding rest =>
       if psJsIdentifierSupported binding.name then
-        if psJsTypeSupported binding.type then
-          match psJsLowerMatchBindings rest with
+        if
+            psJsTypeSupportedWithProfile
+              profile
+              binding.type then
+          match
+              psJsLowerMatchBindingsWithProfile
+                profile
+                rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok
@@ -643,7 +681,15 @@ def psJsLowerMatchBindings
         Except.error
           (PsJsLowerError.unsupportedName binding.name)
 
-def psJsLowerMatchAlternativesWith
+def psJsLowerMatchBindings
+    (bindings : List PsVerifiedIrMatchBinding) :
+    Except PsJsLowerError (List PsJsIrMatchBinding) :=
+  psJsLowerMatchBindingsWithProfile
+    Option.none
+    bindings
+
+def psJsLowerMatchAlternativesWithProfile
+    (profile : Option PsJsTargetProfile)
     (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
     (alternatives :
       List
@@ -664,14 +710,18 @@ def psJsLowerMatchAlternativesWith
       | Prod.mk constructorName detail =>
           match detail with
           | Prod.mk bindings body =>
-              match psJsLowerMatchBindings bindings with
+              match
+                  psJsLowerMatchBindingsWithProfile
+                    profile
+                    bindings with
               | Except.error error => Except.error error
               | Except.ok loweredBindings =>
                   match lower body with
                   | Except.error error => Except.error error
                   | Except.ok loweredBody =>
                       match
-                          psJsLowerMatchAlternativesWith
+                          psJsLowerMatchAlternativesWithProfile
+                            profile
                             lower
                             rest with
                       | Except.error error => Except.error error
@@ -684,6 +734,24 @@ def psJsLowerMatchAlternativesWith
                                   loweredBindings
                                   loweredBody))
                               loweredRest)
+
+def psJsLowerMatchAlternativesWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
+    Except
+      PsJsLowerError
+      (List
+        (String ×
+          List PsJsIrMatchBinding ×
+          PsJsIrExpr)) :=
+  psJsLowerMatchAlternativesWithProfile
+    Option.none
+    lower
+    alternatives
 
 def psJsLowerIdentityWith
     (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)

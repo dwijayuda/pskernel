@@ -1207,3 +1207,602 @@ If generated JavaScript cannot enforce opaque construction through source privac
 - semantic-profile identity.
 
 After this milestone, authoritative compiler logical claims should key to CheckedCore or stronger identities rather than AdmissionReady serialization.
+
+
+---
+
+# 31. PSCV-CERT compiler milestone
+
+Once real CheckedCore exists, introduce compiler-level certification.
+
+For every compiler module in the selected SAVEF experiment, record:
+
+~~~text
+proof closure
+specification coverage
+effect closure
+dependency certification
+assumption closure
+ghost/proof erasure safety
+~~~
+
+Private helpers do not each require redundant public theorems.
+
+Coverage may be discharged transitively through module-level specifications and checked refinement evidence.
+
+---
+
+# 32. L7 — direct JavaScript backend
+
+Current direct-JS source is approximately 3.3k lines.
+
+Do not begin with a full handwritten proof of the complete emitter.
+
+Use a staged preservation strategy.
+
+## JS-0
+
+Freeze the canonical JavaScript target subset.
+
+## JS-1
+
+Define JsIR semantics for that subset.
+
+## JS-2
+
+Prove or validate VerifiedIR to JsIR lowering invariants.
+
+## JS-3
+
+Use translation validation for emitted JavaScript where practical.
+
+## JS-4
+
+Differentially execute against reference lanes as additional assurance.
+
+Only proof or accepted translation-validation evidence creates PreservedTargetArtifact.
+
+Differential testing alone remains lower assurance.
+
+---
+
+# 33. L7 — direct WebAssembly backend
+
+Current direct-Wasm source is approximately 10.1k lines and already supports whole-compiler binary generation and fixed-point machinery.
+
+Prioritize Wasm as the strongest first target lane.
+
+Recommended structure:
+
+~~~text
+VerifiedIR
+    ->
+WasmIR
+    ->
+Wasm binary
+    ->
+validation
+    ->
+preservation evidence
+~~~
+
+Then separately:
+
+~~~text
+CertifiedModuleInterface
+    ->
+InterfaceIR
+    ->
+WIT
+    ->
+Wasm Component boundary
+~~~
+
+WIT defines portable API shape.
+
+SPKF carries behavioral theory.
+
+The Wasm backend proof is not required to start SAVEF levels S1-S4.
+
+It is required for S6.
+
+---
+
+# 34. Knowledge extraction after every accepted slice
+
+Every accepted slice should emit structured reusable knowledge.
+
+At minimum:
+
+~~~text
+SpecificationSet
+TheoremSet
+AssumptionSet
+ModuleInterface
+ProofDependencySet
+~~~
+
+Optionally:
+
+~~~text
+TheoryExtension
+FailureKnowledge
+ProofRecipe
+Counterexample
+CompatibilityCertificate
+~~~
+
+The output is not merely proof files added.
+
+It is a reusable knowledge increment.
+
+---
+
+# 35. Proof recipes are advisory
+
+SAVEF should preserve successful proof structure without turning it into authority.
+
+Example:
+
+~~~text
+goal class:
+    list recursion preserving length
+
+recipe:
+    induction on explicit list
+    simplify psListAppend
+    reuse append_length
+
+success history:
+    14 of 16 related obligations
+~~~
+
+An AI may retrieve this recipe.
+
+The resulting proof still requires ordinary checking.
+
+---
+
+# 36. Failure knowledge
+
+Record failed attempts only when they reveal reusable structure.
+
+Example:
+
+~~~text
+goal:
+    environment lookup remains unchanged after add
+
+failed assumption:
+    only names differ syntactically
+
+counterexample:
+    name-equality normalization collision
+
+repair:
+    require psNameEq correctness plus explicit freshness
+~~~
+
+This becomes advisory knowledge linked to the semantic subject.
+
+Do not publish raw noisy model traces as canonical knowledge by default.
+
+Extract structured lessons.
+
+---
+
+# 37. Proof context slicing
+
+For every obligation derive context from authoritative dependency information.
+
+Candidate context:
+
+~~~text
+local variables
+goal
+transparent definitions required by reduction
+direct theorem dependencies
+candidate reusable theorems
+relevant assumptions
+effect model
+canonical proof recipes
+relevant failure knowledge
+~~~
+
+Avoid giving the agent the full compiler unless the dependency slice requires it.
+
+This is both a performance feature and a SAVEF experimental variable.
+
+---
+
+# 38. Joint implementation-proof planning
+
+After initial retrofitting, every new compiler feature in the experiment should begin with a joint plan:
+
+~~~text
+feature semantics
+public interface impact
+new obligations
+expected reusable theorems
+proof strategy
+QueryGraph invalidation
+backend implications
+~~~
+
+Only then modify implementation.
+
+This tests whether planning for proofability reduces repair loops.
+
+---
+
+# 39. Proposed repository layout
+
+Keep the 55-module source closure unchanged initially.
+
+Add sidecar roots such as:
+
+~~~text
+psc15selfhost/savef/
+    compiler-selfapp-profile.json
+    factorybench-v1.json
+    manifests/
+    snapshots/
+
+psc15selfhost/packages/foundation/
+    spec/
+    proof/
+
+psc15selfhost/packages/core/
+    spec/
+    proof/
+
+psc15selfhost/packages/environment/
+    spec/
+    proof/
+
+...
+
+psc15selfhost/packages/compiler/
+    spec/
+    proof/
+~~~
+
+Exact names may change.
+
+The critical rule is:
+
+~~~text
+proof/spec support files
+    must not accidentally enter
+PSC1-selfhost-stable/1 compiler bootstrap closure
+~~~
+
+until an intentional profile revision makes them part of the source language.
+
+---
+
+# 40. Branch and workflow strategy
+
+Recommended implementation branch:
+
+~~~text
+research/savef-compiler-selfapp-v1
+~~~
+
+or an equivalent dedicated branch.
+
+Do not modify pskernel-core proof implementation on this branch.
+
+Consume its evidence/status as an external dependency.
+
+The self-application branch should:
+
+- track psc2/pscv-direct-backends as implementation baseline;
+- preserve existing self-host/fixed-point gates;
+- add proof/spec sidecars modularly;
+- push checkpoints after each accepted layer;
+- never weaken compiler tests to make formalization easier.
+
+---
+
+# 41. Phase 0 — freeze the experiment
+
+Before writing new proofs, create a reproducible baseline.
+
+Freeze:
+
+~~~text
+compiler commit
+55-module closure hash
+self-host profile identity
+Lean/compiler semantic identity
+kernel provider policy
+tool versions
+model ID/version
+model inference parameters
+agent/tool protocol
+benchmark task manifest
+resource budgets
+acceptance policy
+~~~
+
+Record current:
+
+- fixed-point status;
+- source/admission/emission hashes;
+- test suite status;
+- QueryGraph tests;
+- direct backend tests;
+- PSKernel semantic-audit snapshot.
+
+Without this baseline, later productivity claims are not scientifically interpretable.
+
+---
+
+# 42. Phase 0 — CompilerFactoryBench-v1
+
+Create a benchmark before publishing the knowledge that could leak answers into it.
+
+The benchmark should contain at least 30 held-out tasks across at least five compiler packages.
+
+Recommended task classes:
+
+1. theorem completion;
+2. invariant strengthening;
+3. proof repair after implementation-preserving refactor;
+4. semantic bug repair plus proof;
+5. CertifiedModuleInterface-preserving refactor;
+6. dependency-interface change requiring downstream repair;
+7. small new compiler capability with implementation plus proof plan.
+
+Tasks should vary in dependency-closure size.
+
+Each task records:
+
+~~~text
+task ID
+subject commit
+allowed files
+required acceptance gates
+hidden expected semantic property
+dependency closure
+difficulty bucket
+resource budget
+~~~
+
+The held-out solutions must not enter the searchable SAVEF graph before evaluation.
+
+---
+
+# 43. Baseline experiment B0
+
+Run CompilerFactoryBench-v1 with:
+
+~~~text
+same model
+same inference settings
+same tool access
+ordinary repository/source retrieval
+no SAVEF semantic retrieval
+~~~
+
+Record per task:
+
+- success/failure;
+- wall time;
+- model tokens;
+- tool calls;
+- proof attempts;
+- compiler/test cycles;
+- human interventions;
+- files read;
+- dependency context size;
+- final assurance results.
+
+This becomes the causal baseline.
+
+---
+
+# 44. Assisted experiment B1
+
+Run the same benchmark policy with SAVEF retrieval enabled.
+
+The model may receive:
+
+- CertifiedModuleInterfaces;
+- relevant theorem sets;
+- exact assumption closure;
+- semantic dependency slices;
+- canonical proof recipes;
+- selected structured failure knowledge.
+
+It does not receive hidden benchmark solutions.
+
+Compare against B0.
+
+---
+
+# 45. Experimental isolation
+
+To avoid misleading results:
+
+- pin model version;
+- pin tool protocol;
+- pin task order or randomization seed policy;
+- pin resource limits;
+- keep acceptance gates identical;
+- do not change compiler source between paired runs unless the task itself changes it;
+- isolate persistent agent memory between baseline and assisted runs;
+- record all retrieved SPKF object IDs;
+- keep benchmark holdouts outside the knowledge graph.
+
+If a model upgrade occurs, start a new benchmark series.
+
+---
+
+# 46. Primary SAVEF productivity metrics
+
+Define:
+
+~~~text
+SolveRate
+MedianTokensPerAcceptedTask
+MedianWallTimePerAcceptedTask
+MedianHumanInterventions
+MedianRepairIterations
+SemanticContextBytes
+NewImplementationLines
+NewProofLines
+~~~
+
+Also track:
+
+~~~text
+TheoremReuseCount
+SpecificationReuseCount
+CertifiedInterfaceReuseCount
+FailureKnowledgeReuseCount
+~~~
+
+The goal is not minimizing proof lines by itself.
+
+The goal is reducing total production/supervision cost while preserving assurance.
+
+---
+
+# 47. Self-amplification pass condition
+
+SAVEF-COMPILER-SELFAPP-v1 may claim measurable self-amplification only if all of the following hold.
+
+## A — assurance non-regression
+
+Every accepted assisted result passes the exact same semantic/test/kernel/fixed-point gates required of baseline results.
+
+## B — real knowledge reuse
+
+At least 30 percent of accepted assisted benchmark tasks consume at least one accepted knowledge object produced by an earlier compiler slice.
+
+## C — productivity improvement
+
+At least one primary productivity metric improves materially, with no material regression in solve rate or assurance.
+
+Recommended initial target:
+
+~~~text
+at least 20 percent reduction
+in median tokens or median wall time
+
+OR
+
+at least 10 percentage-point increase
+in accepted solve rate
+~~~
+
+## D — closed-loop reuse
+
+At least one compiler change produced using SAVEF must emit new accepted knowledge that is later used by another accepted compiler task.
+
+A stronger publication claim should use repeated runs and confidence intervals rather than one model trajectory.
+
+---
+
+# 48. Strong statistical evaluation
+
+For research-quality evidence:
+
+- use paired tasks;
+- run multiple independent repetitions per task where budget permits;
+- pre-register primary metrics;
+- report median and distribution, not only best run;
+- bootstrap confidence intervals over task-level deltas;
+- report failures and exclusions;
+- separate model/tool crashes from proof failures.
+
+Do not tune retrieval against the held-out benchmark and then report the same benchmark as independent evidence.
+
+---
+
+# 49. Knowledge leverage metrics
+
+SAVEF should additionally measure whether the compiler theory is becoming more reusable.
+
+Define engineering metrics such as:
+
+~~~text
+KnowledgeReuseRate
+    accepted tasks reusing prior accepted objects
+    /
+    accepted tasks
+
+ProofInvalidationFanout
+    downstream proof tasks invalidated by one change
+
+InterfaceStabilityRate
+    implementation changes preserving semantic interface
+    /
+    implementation changes
+
+ContextCompressionRatio
+    raw dependency context bytes
+    /
+    SAVEF selected context bytes
+
+KnowledgeYield
+    accepted reusable objects
+    /
+    unit of human/model cost
+~~~
+
+These are empirical engineering metrics, not logical theorems.
+
+---
+
+# 50. The strongest self-application demonstration
+
+The ideal demonstration is a real compiler evolution sequence.
+
+Example:
+
+~~~text
+G0
+current compiler
+
+Task 1
+prove Foundation/Core knowledge
+    ->
+K0
+
+Task 2
+use K0 to prove environment invariants
+    ->
+K1
+
+Task 3
+use K1 to strengthen Meta/Infer or specialization
+    ->
+K2
+
+Task 4
+use K2 to prove an erasure property
+    ->
+K3
+
+Task 5
+use K3 to implement/prove a new compiler capability
+    ->
+compiler G1
+
+G1 passes:
+    self-host profile
+    canonical source parity
+    fixed point
+    semantic proof gates
+
+G1 emits:
+    new K4 knowledge
+
+Task 6
+uses K4 on another real compiler change
+~~~
+
+That closes the SAVEF loop on the compiler itself.

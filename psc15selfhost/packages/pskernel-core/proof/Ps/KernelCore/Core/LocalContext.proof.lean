@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.LocalContext
+import Ps.KernelCore.Metatheory.Context
 
 theorem psKernelLocalContextFindIn_nil
     (name : PsKernelName) :
@@ -109,3 +110,57 @@ theorem psKernelLocalContextFind_some_mem_and_matches
       context.decls
       decl
       hFind
+
+
+theorem psKernelLocalContext_generated_name_absent
+    (context : PsKernelLocalContext)
+    (base : PsKernelName)
+    (hString : PsKernelStringEqSoundLaw)
+    (hCanonical :
+      PsKernelLocalContextCanonical context) :
+    psKernelLocalContextFind
+        context
+        (PsKernelName.num
+          base
+          context.nextIndex) =
+      Option.none :=
+  psKernelLocalContextCanonical_fresh_absent
+    context
+    base
+    hString
+    hCanonical
+
+theorem psKernelLocalContext_generated_local_preserves_old_lookup
+    (context : PsKernelLocalContext)
+    (base userName query : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (decl : PsKernelLocalDecl)
+    (hString : PsKernelStringEqSoundLaw)
+    (hCanonical :
+      PsKernelLocalContextCanonical context)
+    (hFind :
+      psKernelLocalContextFind context query =
+        Option.some decl) :
+    psKernelLocalContextFind
+        (psKernelLocalContextAddLocal
+          context
+          (PsKernelName.num
+            base
+            context.nextIndex)
+          userName
+          type
+          binderInfo)
+        query =
+      Option.some decl :=
+  psKernelLocalContextAddLocal_preserves_old_find
+    context
+    base
+    userName
+    query
+    type
+    binderInfo
+    decl
+    hString
+    hCanonical
+    hFind

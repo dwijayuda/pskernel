@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Context
+import Ps.KernelCore.Metatheory.Context
 
 theorem psKernelCheckerContextEmpty_local
     (environment : PsKernelEnvironment) :
@@ -81,3 +82,47 @@ theorem psKernelApplyArgs_cons
     psKernelApplyArgs fn (List.cons arg rest) =
       psKernelApplyArgs (PsKernelExpr.app fn arg) rest := by
   rfl
+
+
+theorem psKernelCheckerContextWithLocal_preserves_canonical_context
+    (context : PsKernelCheckerContext)
+    (userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hCanonical :
+      PsKernelLocalContextCanonical
+        context.localContext) :
+    PsKernelLocalContextCanonical
+      (Prod.snd
+        (psKernelCheckerContextWithLocal
+          context
+          userName
+          type
+          binderInfo)).localContext :=
+  psKernelCheckerContextWithLocal_canonical
+    context
+    userName
+    type
+    binderInfo
+    hCanonical
+
+theorem psKernelCheckerContextWithLet_preserves_canonical_context
+    (context : PsKernelCheckerContext)
+    (userName : PsKernelName)
+    (type value : PsKernelExpr)
+    (hCanonical :
+      PsKernelLocalContextCanonical
+        context.localContext) :
+    PsKernelLocalContextCanonical
+      (Prod.snd
+        (psKernelCheckerContextWithLet
+          context
+          userName
+          type
+          value)).localContext :=
+  psKernelCheckerContextWithLet_canonical
+    context
+    userName
+    type
+    value
+    hCanonical

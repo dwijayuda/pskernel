@@ -308,6 +308,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.Comparator,
     `Ps.KernelCore.Metatheory.CacheHash,
     `Ps.KernelCore.Metatheory.CacheIndexRefinement,
+    `Ps.KernelCore.Metatheory.CacheSemantic,
     `Ps.KernelCore.Metatheory.EnvironmentIndexHash,
     `Ps.KernelCore.Metatheory.EnvironmentIndexRefinement,
     `Ps.KernelCore.Metatheory.NativeReduction,

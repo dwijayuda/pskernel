@@ -1,5 +1,60 @@
 import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
+theorem psKernelSemanticCacheEligible_fvar
+    (name : PsKernelName) :
+    psKernelSemanticCacheEligible
+        (PsKernelExpr.fvar name) =
+      false := by
+  rfl
+
+theorem psKernelSemanticCacheEligible_app_with_fvar_left
+    (name : PsKernelName)
+    (arg : PsKernelExpr) :
+    psKernelSemanticCacheEligible
+        (PsKernelExpr.app
+          (PsKernelExpr.fvar name)
+          arg) =
+      false := by
+  rfl
+
+theorem psKernelSemanticCacheEligible_app_with_fvar_right
+    (fn : PsKernelExpr)
+    (name : PsKernelName) :
+    psKernelSemanticCacheEligible
+        (PsKernelExpr.app
+          fn
+          (PsKernelExpr.fvar name)) =
+      false := by
+  simp [
+    psKernelSemanticCacheEligible,
+    psKernelExprHasFVar
+  ]
+
+theorem psKernelSemanticPairCacheEligible_left_fvar
+    (name : PsKernelName)
+    (right : PsKernelExpr) :
+    psKernelSemanticPairCacheEligible
+        (PsKernelExpr.fvar name)
+        right =
+      false := by
+  rfl
+
+theorem psKernelSemanticPairCacheEligible_right_fvar
+    (left : PsKernelExpr)
+    (name : PsKernelName) :
+    psKernelSemanticPairCacheEligible
+        left
+        (PsKernelExpr.fvar name) =
+      false := by
+  cases hLeft :
+      psKernelSemanticCacheEligible left <;>
+    simp [
+      psKernelSemanticPairCacheEligible,
+      hLeft,
+      psKernelSemanticCacheEligible,
+      psKernelExprHasFVar
+    ]
+
 theorem psKernelInferCacheEligible_literal
     (inferOnly : Bool)
     (literal : PsKernelLiteral) :
@@ -15,7 +70,12 @@ theorem psKernelInferCacheEligible_app
     psKernelInferCacheEligible
         inferOnly
         (PsKernelExpr.app fn arg) =
-      inferOnly := by
+      if
+          psKernelSemanticCacheEligible
+            (PsKernelExpr.app fn arg) then
+        inferOnly
+      else
+        false := by
   rfl
 
 theorem psKernelInferCacheEligible_lam
@@ -26,7 +86,16 @@ theorem psKernelInferCacheEligible_lam
     psKernelInferCacheEligible
         inferOnly
         (PsKernelExpr.lam name type body binderInfo) =
-      inferOnly := by
+      if
+          psKernelSemanticCacheEligible
+            (PsKernelExpr.lam
+              name
+              type
+              body
+              binderInfo) then
+        inferOnly
+      else
+        false := by
   rfl
 
 theorem psKernelInferCacheEligible_bvar
@@ -36,4 +105,13 @@ theorem psKernelInferCacheEligible_bvar
         inferOnly
         (PsKernelExpr.bvar index) =
       true := by
+  rfl
+
+theorem psKernelInferCacheEligible_fvar
+    (inferOnly : Bool)
+    (name : PsKernelName) :
+    psKernelInferCacheEligible
+        inferOnly
+        (PsKernelExpr.fvar name) =
+      false := by
   rfl

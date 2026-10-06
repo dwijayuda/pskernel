@@ -782,55 +782,30 @@ theorem psKernelNameEq_trans_core
           | str rightParent rightValue =>
               simp [psKernelNameEq] at hRight
           | num rightParent rightValue =>
-              cases hLMNat :
-                  Nat.beq leftValue middleValue with
-              | false =>
-                  simp [
-                    psKernelNameEq,
-                    hLMNat
-                  ] at hLeft
-              | true =>
-                  have hLMParent :
-                      psKernelNameEq
-                          leftParent
-                          middleParent =
-                        true := by
-                    simpa [
-                      psKernelNameEq,
-                      hLMNat
-                    ] using hLeft
-                  cases hMRNat :
-                      Nat.beq middleValue rightValue with
-                  | false =>
-                      simp [
-                        psKernelNameEq,
-                        hMRNat
-                      ] at hRight
-                  | true =>
-                      have hMRParent :
-                          psKernelNameEq
-                              middleParent
-                              rightParent =
-                            true := by
-                        simpa [
-                          psKernelNameEq,
-                          hMRNat
-                        ] using hRight
-                      have hLRNat :=
-                        psKernelNatBeq_trans_core
-                          leftValue
-                          middleValue
-                          rightValue
-                          hLMNat
-                          hMRNat
-                      have hLRParent :=
-                        ih
-                          middleParent
-                          rightParent
-                          hLMParent
-                          hMRParent
-                      simp [
-                        psKernelNameEq,
-                        hLRNat,
-                        hLRParent
-                      ]
+              have hLM :
+                  leftValue = middleValue ∧
+                  psKernelNameEq
+                      leftParent
+                      middleParent =
+                    true := by
+                simpa [psKernelNameEq] using hLeft
+              have hMR :
+                  middleValue = rightValue ∧
+                  psKernelNameEq
+                      middleParent
+                      rightParent =
+                    true := by
+                simpa [psKernelNameEq] using hRight
+              have hParent :
+                  psKernelNameEq
+                      leftParent
+                      rightParent =
+                    true :=
+                ih
+                  middleParent
+                  rightParent
+                  hLM.2
+                  hMR.2
+              subst middleValue
+              subst rightValue
+              simpa [psKernelNameEq] using hParent

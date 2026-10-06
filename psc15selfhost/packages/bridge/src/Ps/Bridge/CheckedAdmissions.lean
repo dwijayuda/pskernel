@@ -323,10 +323,10 @@ def psEncodeCodecConstructor
     (constructorName : PsName) :
     Except PsCheckedAdmissionCodecError String :=
   match psBridgeFindConstructor allDeclarations constructorName with
-  | none =>
+  | Option.none =>
       Except.error
         (PsCheckedAdmissionCodecError.missingConstructor constructorName)
-  | some info =>
+  | Option.some info =>
       if psCheckedAdmissionBoolNot (psNameEq info.inductiveName inductiveName) then
         Except.error
           (PsCheckedAdmissionCodecError.mismatchedConstructor constructorName)

@@ -1884,216 +1884,240 @@ def psStrictInferExprWithFuel
             target
             fieldName =>
             match
-                psVerifiedIrFindStructure
-                  module.structures
-                  structureName with
-            | Option.none =>
-                Except.error
-                  (PsVerifiedIrValidationError.unknownStructure
-                    structureName)
-            | Option.some structureInfo =>
-                if
-                    psVerifiedIrTypeArgumentArityMatches
-                      structureInfo.typeParameters
-                      structureArguments then
-                  match inferCurrent target with
-                  | Except.error error => Except.error error
-                  | Except.ok targetType =>
-                      let expectedTarget :
-                          PsVerifiedIrType :=
-                        PsVerifiedIrType.named
-                          structureName
-                          structureArguments;
-                      if psStrictTypeEq targetType expectedTarget then
-                        match
-                            psStrictFindStructureField
-                              structureInfo.fields
-                              fieldName with
-                        | Option.none =>
-                            Except.error
-                              (PsVerifiedIrValidationError.unknownStructureField
-                                structureName
-                                fieldName)
-                        | Option.some field =>
+                psStrictValidateTypeListInScope
+                  module
+                  typeParameters
+                  structureArguments with
+            | Except.error error => Except.error error
+            | Except.ok _ =>
+                match
+                    psVerifiedIrFindStructure
+                      module.structures
+                      structureName with
+                | Option.none =>
+                    Except.error
+                      (PsVerifiedIrValidationError.unknownStructure
+                        structureName)
+                | Option.some structureInfo =>
+                    if
+                        psVerifiedIrTypeArgumentArityMatches
+                          structureInfo.typeParameters
+                          structureArguments then
+                      match inferCurrent target with
+                      | Except.error error => Except.error error
+                      | Except.ok targetType =>
+                          let expectedTarget :
+                              PsVerifiedIrType :=
+                            PsVerifiedIrType.named
+                              structureName
+                              structureArguments;
+                          if psStrictTypeEq targetType expectedTarget then
                             match
-                                psStrictBuildSubstitution
-                                  structureInfo.typeParameters
-                                  structureArguments with
-                            | Except.error error => Except.error error
-                            | Except.ok substitution =>
-                                Except.ok
-                                  (psStrictSubstituteType
-                                    substitution
-                                    field.type)
-                      else
-                        Except.error
-                          PsVerifiedIrValidationError.expressionTypeMismatch
-                else
-                  Except.error
-                    (PsVerifiedIrValidationError.typeArgumentArity
-                      structureName)
+                                psStrictFindStructureField
+                                  structureInfo.fields
+                                  fieldName with
+                            | Option.none =>
+                                Except.error
+                                  (PsVerifiedIrValidationError.unknownStructureField
+                                    structureName
+                                    fieldName)
+                            | Option.some field =>
+                                match
+                                    psStrictBuildSubstitution
+                                      structureInfo.typeParameters
+                                      structureArguments with
+                                | Except.error error => Except.error error
+                                | Except.ok substitution =>
+                                    Except.ok
+                                      (psStrictSubstituteType
+                                        substitution
+                                        field.type)
+                          else
+                            Except.error
+                              PsVerifiedIrValidationError.expressionTypeMismatch
+                    else
+                      Except.error
+                        (PsVerifiedIrValidationError.typeArgumentArity
+                          structureName)
+
         | .constructor
             inductiveName
             constructorName
             inductiveArguments
             fields =>
             match
-                psVerifiedIrFindInductive
-                  module.inductives
-                  inductiveName with
-            | Option.none =>
-                Except.error
-                  (PsVerifiedIrValidationError.unknownInductive
-                    inductiveName)
-            | Option.some inductiveInfo =>
-                if
-                    psVerifiedIrTypeArgumentArityMatches
-                      inductiveInfo.typeParameters
-                      inductiveArguments then
-                  match
-                      psVerifiedIrFindConstructor
-                        inductiveInfo.constructors
-                        constructorName with
-                  | Option.none =>
-                      Except.error
-                        (PsVerifiedIrValidationError.unknownConstructor
-                          inductiveName
-                          constructorName)
-                  | Option.some constructorInfo =>
-                      if
-                          psStrictStringListUnique
-                            (psStrictExprFieldNames fields) then
-                        if
-                            Nat.beq
-                              (psVerifiedIrListLength fields)
-                              (psVerifiedIrListLength constructorInfo.fields) then
-                          match
-                              psStrictBuildSubstitution
-                                inductiveInfo.typeParameters
-                                inductiveArguments with
-                          | Except.error error => Except.error error
-                          | Except.ok substitution =>
-                              match
-                                  psStrictCheckConstructorFieldsWith
-                                    inferCurrent
-                                    inductiveName
-                                    constructorName
-                                    substitution
-                                    constructorInfo.fields
-                                    fields with
-                              | Except.error error => Except.error error
-                              | Except.ok _ =>
-                                  Except.ok
-                                    (PsVerifiedIrType.named
-                                      inductiveName
-                                      inductiveArguments)
-                        else
+                psStrictValidateTypeListInScope
+                  module
+                  typeParameters
+                  inductiveArguments with
+            | Except.error error => Except.error error
+            | Except.ok _ =>
+                match
+                    psVerifiedIrFindInductive
+                      module.inductives
+                      inductiveName with
+                | Option.none =>
+                    Except.error
+                      (PsVerifiedIrValidationError.unknownInductive
+                        inductiveName)
+                | Option.some inductiveInfo =>
+                    if
+                        psVerifiedIrTypeArgumentArityMatches
+                          inductiveInfo.typeParameters
+                          inductiveArguments then
+                      match
+                          psVerifiedIrFindConstructor
+                            inductiveInfo.constructors
+                            constructorName with
+                      | Option.none =>
                           Except.error
-                            (PsVerifiedIrValidationError.fieldCompleteness
+                            (PsVerifiedIrValidationError.unknownConstructor
+                              inductiveName
                               constructorName)
-                      else
-                        Except.error
-                          (PsVerifiedIrValidationError.duplicateField
-                            constructorName
-                            "")
-                else
-                  Except.error
-                    (PsVerifiedIrValidationError.typeArgumentArity
-                      inductiveName)
+                      | Option.some constructorInfo =>
+                          if
+                              psStrictStringListUnique
+                                (psStrictExprFieldNames fields) then
+                            if
+                                Nat.beq
+                                  (psVerifiedIrListLength fields)
+                                  (psVerifiedIrListLength constructorInfo.fields) then
+                              match
+                                  psStrictBuildSubstitution
+                                    inductiveInfo.typeParameters
+                                    inductiveArguments with
+                              | Except.error error => Except.error error
+                              | Except.ok substitution =>
+                                  match
+                                      psStrictCheckConstructorFieldsWith
+                                        inferCurrent
+                                        inductiveName
+                                        constructorName
+                                        substitution
+                                        constructorInfo.fields
+                                        fields with
+                                  | Except.error error => Except.error error
+                                  | Except.ok _ =>
+                                      Except.ok
+                                        (PsVerifiedIrType.named
+                                          inductiveName
+                                          inductiveArguments)
+                            else
+                              Except.error
+                                (PsVerifiedIrValidationError.fieldCompleteness
+                                  constructorName)
+                          else
+                            Except.error
+                              (PsVerifiedIrValidationError.duplicateField
+                                constructorName
+                                "")
+                    else
+                      Except.error
+                        (PsVerifiedIrValidationError.typeArgumentArity
+                          inductiveName)
+
         | .matchE
             inductiveName
             inductiveArguments
             scrutinee
             alternatives =>
             match
-                psVerifiedIrFindInductive
-                  module.inductives
-                  inductiveName with
-            | Option.none =>
-                Except.error
-                  (PsVerifiedIrValidationError.unknownInductive
-                    inductiveName)
-            | Option.some inductiveInfo =>
-                if
-                    psVerifiedIrTypeArgumentArityMatches
-                      inductiveInfo.typeParameters
-                      inductiveArguments then
-                  match inferCurrent scrutinee with
-                  | Except.error error => Except.error error
-                  | Except.ok scrutineeType =>
-                      let expectedScrutinee :
-                          PsVerifiedIrType :=
-                        PsVerifiedIrType.named
-                          inductiveName
-                          inductiveArguments;
-                      if
-                          psStrictTypeEq
-                            scrutineeType
-                            expectedScrutinee then
-                        if
-                            psStrictStringListUnique
-                              (psStrictAlternativeNames alternatives) then
+                psStrictValidateTypeListInScope
+                  module
+                  typeParameters
+                  inductiveArguments with
+            | Except.error error => Except.error error
+            | Except.ok _ =>
+                match
+                    psVerifiedIrFindInductive
+                      module.inductives
+                      inductiveName with
+                | Option.none =>
+                    Except.error
+                      (PsVerifiedIrValidationError.unknownInductive
+                        inductiveName)
+                | Option.some inductiveInfo =>
+                    if
+                        psVerifiedIrTypeArgumentArityMatches
+                          inductiveInfo.typeParameters
+                          inductiveArguments then
+                      match inferCurrent scrutinee with
+                      | Except.error error => Except.error error
+                      | Except.ok scrutineeType =>
+                          let expectedScrutinee :
+                              PsVerifiedIrType :=
+                            PsVerifiedIrType.named
+                              inductiveName
+                              inductiveArguments;
                           if
-                              Nat.beq
-                                (psVerifiedIrListLength alternatives)
-                                (psVerifiedIrListLength
-                                  inductiveInfo.constructors) then
-                            match alternatives with
-                            | List.nil =>
-                                Except.error
-                                  PsVerifiedIrValidationError.emptyMatch
-                            | List.cons first rest =>
-                                match
-                                    psStrictBuildSubstitution
-                                      inductiveInfo.typeParameters
-                                      inductiveArguments with
-                                | Except.error error => Except.error error
-                                | Except.ok substitution =>
+                              psStrictTypeEq
+                                scrutineeType
+                                expectedScrutinee then
+                            if
+                                psStrictStringListUnique
+                                  (psStrictAlternativeNames alternatives) then
+                              if
+                                  Nat.beq
+                                    (psVerifiedIrListLength alternatives)
+                                    (psVerifiedIrListLength
+                                      inductiveInfo.constructors) then
+                                match alternatives with
+                                | List.nil =>
+                                    Except.error
+                                      PsVerifiedIrValidationError.emptyMatch
+                                | List.cons first rest =>
                                     match
-                                        psStrictInferMatchAlternativeWith
-                                          smaller
-                                          locals
-                                          inductiveName
-                                          substitution
-                                          inductiveInfo.constructors
-                                          first with
+                                        psStrictBuildSubstitution
+                                          inductiveInfo.typeParameters
+                                          inductiveArguments with
                                     | Except.error error => Except.error error
-                                    | Except.ok firstType =>
+                                    | Except.ok substitution =>
                                         match
-                                            psStrictCheckRemainingAlternativesWith
+                                            psStrictInferMatchAlternativeWith
                                               smaller
                                               locals
                                               inductiveName
                                               substitution
                                               inductiveInfo.constructors
-                                              firstType
-                                              rest with
+                                              first with
                                         | Except.error error => Except.error error
-                                        | Except.ok _ =>
-                                            if
-                                                psStrictAllConstructorsCovered
+                                        | Except.ok firstType =>
+                                            match
+                                                psStrictCheckRemainingAlternativesWith
+                                                  smaller
+                                                  locals
+                                                  inductiveName
+                                                  substitution
                                                   inductiveInfo.constructors
-                                                  alternatives then
-                                              Except.ok firstType
-                                            else
-                                              Except.error
-                                                (PsVerifiedIrValidationError.matchExhaustiveness
-                                                  inductiveName)
+                                                  firstType
+                                                  rest with
+                                            | Except.error error => Except.error error
+                                            | Except.ok _ =>
+                                                if
+                                                    psStrictAllConstructorsCovered
+                                                      inductiveInfo.constructors
+                                                      alternatives then
+                                                  Except.ok firstType
+                                                else
+                                                  Except.error
+                                                    (PsVerifiedIrValidationError.matchExhaustiveness
+                                                      inductiveName)
+                              else
+                                Except.error
+                                  (PsVerifiedIrValidationError.matchExhaustiveness
+                                    inductiveName)
+                            else
+                              Except.error
+                                (PsVerifiedIrValidationError.duplicateAlternative
+                                  inductiveName)
                           else
                             Except.error
-                              (PsVerifiedIrValidationError.matchExhaustiveness
-                                inductiveName)
-                        else
-                          Except.error
-                            (PsVerifiedIrValidationError.duplicateAlternative
-                              inductiveName)
-                      else
-                        Except.error
-                          PsVerifiedIrValidationError.expressionTypeMismatch
-                else
-                  Except.error
-                    (PsVerifiedIrValidationError.typeArgumentArity
-                      inductiveName)
+                              PsVerifiedIrValidationError.expressionTypeMismatch
+                    else
+                      Except.error
+                        (PsVerifiedIrValidationError.typeArgumentArity
+                          inductiveName)
+
 
 def psStrictValidateTypeParameters
     (parameters : List PsVerifiedIrTypeParameter) :
@@ -2408,7 +2432,7 @@ def psStrictValidateGlobalNames
         (psListAppend
           (psStrictCollectInductiveNames module.inductives)
           (psStrictCollectDeclarationNames module.declarations)));
-  if psStrictStringListUnique names then
+  if psStrictStringListUnique (List.cons "Array" names) then
     Except.ok Unit.unit
   else
     Except.error

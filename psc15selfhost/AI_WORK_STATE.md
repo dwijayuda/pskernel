@@ -112,3 +112,10 @@ Checkpoint P0/P2/P3:
 - Repaired conditional proof omission with a checked if-elimination term. Lean 4.34.0 compiled the proof sidecar and specialization slice locally. SAVEF evidence paths and canonical object hashes now identify that sidecar. Global preservation and checker soundness remain target-unproved.
 - Restored the JS fixture strict-validator import and updated the offline verifier assertion to check all five returned object identities.
 - Local results: strict corpus 20/20; PSC1 validator/theory-source checks; strict-validator TypeScript emission; source and portable static profiles; JS backend corpus; Lean theory tests. Whole-closure/cloud checks remain pending, so no VerifiedIR gap is marked closed yet.
+
+## VerifiedIR adversarial follow-up
+
+- Added a counterexample with an unresolved phantom generic argument consumed by a match, and a forged structure named Array accepted as the built-in array type. Both were accepted by the prior validator.
+- Constructor, projection, and match type arguments now undergo explicit scope/name validation; the built-in Array identity participates in global uniqueness.
+- Expanded strict corpus from 20 to 31 cases, including call argument/result types, duplicate constructor fields, duplicate binding fields/locals, built-in arity, and a valid phantom-generic control. Four new rejection checks fail on the previous compiled validator and all 31 pass after the fix.
+- fd7313b passes the local 56-module stable self-host contract with canonical source/admissions/TypeScript parity; the full workspace gate also passes. Cloud progressed through strict tests and now exposes backend closure-emission failures being repaired next.

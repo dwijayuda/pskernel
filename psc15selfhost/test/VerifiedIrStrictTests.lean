@@ -655,6 +655,120 @@ def psStrictTestValidAggregateAndMatch : Bool :=
       (List.cons boxValue
         (List.cons choice List.nil)))
 
+
+def psStrictTestPhantomModule (argument : PsVerifiedIrType) : PsVerifiedIrModule :=
+  let phantom := PsVerifiedIrInductive.mk "Phantom"
+    [PsVerifiedIrTypeParameter.mk "T"]
+    [PsVerifiedIrConstructor.mk "only" List.nil];
+  let value := PsVerifiedIrExpr.constructor "Phantom" "only" [argument] List.nil;
+  let body := PsVerifiedIrExpr.matchE "Phantom" [argument] value
+    [Prod.mk "only" (Prod.mk List.nil
+      (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)))];
+  psStrictTestModule List.nil [phantom]
+    [psStrictTestDeclaration "observe" List.nil psStrictTestNat body]
+
+def psStrictTestPhantomUnknownType : Bool :=
+  match psValidateErasedIrModule (PsErasedIrModule.mk
+      (psStrictTestPhantomModule (PsVerifiedIrType.named "Missing" List.nil))) with
+  | Except.error (PsVerifiedIrValidationError.unknownTypeName _) => true
+  | _ => false
+
+def psStrictTestPhantomUnboundParameter : Bool :=
+  match psValidateErasedIrModule (PsErasedIrModule.mk
+      (psStrictTestPhantomModule (PsVerifiedIrType.typeParameter "Unbound"))) with
+  | Except.error (PsVerifiedIrValidationError.unknownTypeParameter _) => true
+  | _ => false
+
+def psStrictTestBuiltinArrayShadow : Bool :=
+  let fakeArray := PsVerifiedIrStructure.mk "Array"
+    [PsVerifiedIrTypeParameter.mk "T"]
+    [PsVerifiedIrStructureField.mk "value" (PsVerifiedIrType.typeParameter "T")];
+  let body := PsVerifiedIrExpr.record "Array" [psStrictTestNat]
+    [Prod.mk "value" (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1))];
+  let declaration := psStrictTestDeclaration "fake" List.nil
+    (PsVerifiedIrType.named "Array" [psStrictTestNat]) body;
+  match psValidateErasedIrModule (PsErasedIrModule.mk
+      (psStrictTestModule [fakeArray] List.nil [declaration])) with
+  | Except.error (PsVerifiedIrValidationError.duplicateGlobalName _) => true
+  | _ => false
+
+def psStrictTestDeclarationRejected (declaration : PsVerifiedIrDeclaration) : Bool :=
+  match psValidateErasedIrModule (PsErasedIrModule.mk
+      (psStrictTestModule List.nil List.nil [declaration])) with
+  | Except.error PsVerifiedIrValidationError.expressionTypeMismatch => true
+  | _ => false
+
+def psStrictTestCallArgumentType : Bool :=
+  psStrictTestDeclarationRejected
+    (psStrictTestDeclaration "bad" List.nil psStrictTestNat
+      (PsVerifiedIrExpr.call
+        (PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "x" psStrictTestNat]
+          psStrictTestNat (PsVerifiedIrExpr.var "x"))
+        List.nil [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)]))
+
+def psStrictTestCallResultType : Bool :=
+  psStrictTestDeclarationRejected
+    (psStrictTestDeclaration "bad" List.nil psStrictTestBool
+      (PsVerifiedIrExpr.call
+        (PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "x" psStrictTestNat]
+          psStrictTestNat (PsVerifiedIrExpr.var "x"))
+        List.nil [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)]))
+
+def psStrictTestDuplicateConstructorField : Bool :=
+  let field := Prod.mk "value" (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1));
+  let declaration := psStrictTestDeclaration "bad" List.nil psStrictTestPayloadType
+    (PsVerifiedIrExpr.constructor "Payload" "some" List.nil [field, field]);
+  match psValidateErasedIrModule (PsErasedIrModule.mk
+      (psStrictTestModule List.nil [psStrictTestPayload] [declaration])) with
+  | Except.error (PsVerifiedIrValidationError.duplicateField _ _) => true
+  | _ => false
+
+def psStrictTestDuplicateBindingField : Bool :=
+  let binding := PsVerifiedIrMatchBinding.mk "value" "x" psStrictTestNat;
+  let body := PsVerifiedIrExpr.matchE "Payload" List.nil (PsVerifiedIrExpr.var "p")
+    [Prod.mk "some" (Prod.mk [binding, binding] (PsVerifiedIrExpr.var "x"))];
+  let declaration := psStrictTestDeclaration "bad"
+    [PsVerifiedIrParameter.mk "p" psStrictTestPayloadType] psStrictTestNat body;
+  match psValidateErasedIrModule (PsErasedIrModule.mk
+      (psStrictTestModule List.nil [psStrictTestPayload] [declaration])) with
+  | Except.error (PsVerifiedIrValidationError.duplicateField _ _) => true
+  | _ => false
+
+def psStrictTestDuplicateBindingLocal : Bool :=
+  let pair := PsVerifiedIrInductive.mk "Pair" List.nil
+    [PsVerifiedIrConstructor.mk "pair"
+      [PsVerifiedIrConstructorField.mk "first" psStrictTestNat,
+       PsVerifiedIrConstructorField.mk "second" psStrictTestNat]];
+  let body := PsVerifiedIrExpr.matchE "Pair" List.nil (PsVerifiedIrExpr.var "p")
+    [Prod.mk "pair" (Prod.mk
+      [PsVerifiedIrMatchBinding.mk "first" "x" psStrictTestNat,
+       PsVerifiedIrMatchBinding.mk "second" "x" psStrictTestNat]
+      (PsVerifiedIrExpr.var "x"))];
+  let declaration := psStrictTestDeclaration "bad"
+    [PsVerifiedIrParameter.mk "p" (PsVerifiedIrType.named "Pair" List.nil)]
+    psStrictTestNat body;
+  match psValidateErasedIrModule (PsErasedIrModule.mk
+      (psStrictTestModule List.nil [pair] [declaration])) with
+  | Except.error (PsVerifiedIrValidationError.duplicateParameter _) => true
+  | _ => false
+
+def psStrictTestBuiltinTypeArity : Bool :=
+  let declaration := psStrictTestDeclaration "bad"
+    [PsVerifiedIrParameter.mk "xs" (PsVerifiedIrType.named "Array" List.nil)]
+    psStrictTestNat (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1));
+  match psValidateErasedIrModule (PsErasedIrModule.mk
+      (psStrictTestModule List.nil List.nil [declaration])) with
+  | Except.error (PsVerifiedIrValidationError.typeArgumentArity _) => true
+  | _ => false
+
+def psStrictTestConstructorArgumentScope : Bool :=
+  let module := psStrictTestPhantomModule psStrictTestNat;
+  match psStrictInferExprWithFuel module List.nil 20 List.nil
+      (PsVerifiedIrExpr.constructor "Phantom" "only"
+        [PsVerifiedIrType.named "Missing" List.nil] List.nil) with
+  | Except.error (PsVerifiedIrValidationError.unknownTypeName _) => true
+  | _ => false
+
 structure PsStrictVerifiedIrNamedTest where
   name : String
   passed : Bool
@@ -662,6 +776,17 @@ structure PsStrictVerifiedIrNamedTest where
 def psStrictVerifiedIrTests :
     List PsStrictVerifiedIrNamedTest :=
   [
+    { name := "phantom unknown type", passed := psStrictTestPhantomUnknownType },
+    { name := "phantom unbound type parameter", passed := psStrictTestPhantomUnboundParameter },
+    { name := "valid phantom type", passed := psStrictTestAccepted (psStrictTestPhantomModule psStrictTestNat) },
+    { name := "builtin Array shadow", passed := psStrictTestBuiltinArrayShadow },
+    { name := "call argument type", passed := psStrictTestCallArgumentType },
+    { name := "call result type", passed := psStrictTestCallResultType },
+    { name := "duplicate constructor field", passed := psStrictTestDuplicateConstructorField },
+    { name := "duplicate binding field", passed := psStrictTestDuplicateBindingField },
+    { name := "duplicate binding local", passed := psStrictTestDuplicateBindingLocal },
+    { name := "builtin type arity", passed := psStrictTestBuiltinTypeArity },
+    { name := "constructor type argument scope", passed := psStrictTestConstructorArgumentScope },
     { name := "duplicate global", passed := psStrictTestDuplicateGlobal },
     { name := "unknown type name", passed := psStrictTestUnknownTypeName },
     { name := "unknown type parameter", passed := psStrictTestUnknownTypeParameter },

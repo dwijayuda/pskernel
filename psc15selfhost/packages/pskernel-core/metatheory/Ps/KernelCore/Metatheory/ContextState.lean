@@ -839,3 +839,52 @@ theorem psKernelCheckerConfigurationSound_transport
   unfold PsKernelCheckerConfigurationSound at hSound ⊢
   rw [← hEnvironment, ← hLocal]
   exact hSound
+
+
+theorem psKernelLocalContextFreshBound_mono
+    (context : PsKernelLocalContext)
+    (first second : Nat)
+    (hBound :
+      PsKernelLocalContextFreshBound
+        context
+        first)
+    (hLe : first ≤ second) :
+    PsKernelLocalContextFreshBound
+      context
+      second := by
+  intro decl hMem
+  rcases hBound decl hMem with
+    ⟨base, index, hName, hLt⟩
+  exact
+    ⟨base, index, hName,
+      Nat.lt_of_lt_of_le hLt hLe⟩
+
+theorem psKernelCheckerStateExitLocalScope_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (parent child : PsKernelCheckerState)
+    (hParent :
+      PsKernelCheckerConfigurationSound
+        context
+        parent) :
+    PsKernelCheckerConfigurationSound
+      context
+      (psKernelCheckerStateExitLocalScope
+        parent
+        child) := by
+  rcases hParent with
+    ⟨hIndex, hBound, hState⟩
+  refine
+    ⟨
+      hIndex,
+      psKernelLocalContextFreshBound_mono
+        context.localContext
+        parent.nextFresh
+        (Nat.max parent.nextFresh child.nextFresh)
+        hBound
+        (Nat.le_max_left
+          parent.nextFresh
+          child.nextFresh),
+      ?_
+    ⟩
+  unfold PsKernelCheckerStateSemanticSound at hState ⊢
+  simpa [psKernelCheckerStateExitLocalScope] using hState

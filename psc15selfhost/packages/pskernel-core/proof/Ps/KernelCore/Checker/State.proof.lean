@@ -186,7 +186,7 @@ theorem psKernelCheckerStateEmpty_semantic_sound
 theorem psKernelCheckerStateExitLocalScope_nextFresh
     (parent child : PsKernelCheckerState) :
     (psKernelCheckerStateExitLocalScope parent child).nextFresh =
-      child.nextFresh := by
+      Nat.max parent.nextFresh child.nextFresh := by
   rfl
 
 theorem psKernelCheckerStateExitLocalScope_inferOnly

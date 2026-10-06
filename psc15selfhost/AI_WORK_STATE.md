@@ -56,3 +56,11 @@ Checkpoint P0/P2/P3:
 - added PSC1-portable Wasm translation validator for a closed literal-declaration slice
 - validator independently checks source SpecializedIR against WasmIR export/signature/body and fails closed on unsupported shapes
 - negative drift test changes 42 -> 43 and must be rejected
+
+## Checkpoint P10 formal seed
+
+- added portable @proofscript/pscv-theory package
+- real Lean proof terms establish declarative-conversion reflexivity and the exact-identity algorithmic-defeq quick slice
+- full checker soundness remains explicitly target-unproved
+- source audit enforces pair-local success-cache implementation and rejects equivalence-closure machinery
+- theory package is wired for Lean build/test and psc1 checking under the portable self-host discipline

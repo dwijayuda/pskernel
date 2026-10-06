@@ -122,14 +122,28 @@ theorem psKernelStringEqFromWithFuel_symm
                           left
                           (String.Pos.Raw.mk leftPos)) :=
                   hChar.symm
-                simp [
+                rw [
                   psKernelStringEqFromWithFuel,
+                  psKernelStringEqFromWithFuel
+                ]
+                simp only [
                   hLeft,
                   hRight,
                   hChar,
                   hCharSymm,
-                  ih
+                  if_false,
+                  if_true
                 ]
+                exact
+                  ih
+                    (String.Pos.Raw.byteIdx
+                      (String.Internal.next
+                        left
+                        (String.Pos.Raw.mk leftPos)))
+                    (String.Pos.Raw.byteIdx
+                      (String.Internal.next
+                        right
+                        (String.Pos.Raw.mk rightPos)))
               · have hCharSymm :
                     Char.toNat
                         (String.Internal.get
@@ -141,8 +155,11 @@ theorem psKernelStringEqFromWithFuel_symm
                           (String.Pos.Raw.mk leftPos)) := by
                   intro hReverse
                   exact hChar hReverse.symm
-                simp [
+                rw [
                   psKernelStringEqFromWithFuel,
+                  psKernelStringEqFromWithFuel
+                ]
+                simp [
                   hLeft,
                   hRight,
                   hChar,

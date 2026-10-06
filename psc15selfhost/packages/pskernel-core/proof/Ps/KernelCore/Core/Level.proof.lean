@@ -69,3 +69,10 @@ theorem psKernelLevelListEq_symm
     psKernelLevelListEq left right =
       psKernelLevelListEq right left :=
   psKernelLevelListEq_symm_core left right
+
+
+theorem psKernelLevelEq_true_implies_equivalent
+    (left right : PsKernelLevel)
+    (hEq : psKernelLevelEq left right = true) :
+    psKernelLevelEquivalent left right = true := by
+  simp [psKernelLevelEquivalent, hEq]

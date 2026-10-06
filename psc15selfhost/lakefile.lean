@@ -68,6 +68,8 @@ lean_lib PsCompilerIr where
   roots := #[
     `Ps.CompilerIr.Model,
     `Ps.CompilerIr.Validate,
+    `Ps.CompilerIr.Interface,
+    `Ps.CompilerIr.Link,
     `Ps.CompilerIr.Pass,
     `Ps.CompilerIr.Specialize
   ]
@@ -427,6 +429,10 @@ lean_exe psc1_erasure_tests where
 lean_exe psc1_verified_ir_strict_tests where
   srcDir := "test"
   root := `VerifiedIrStrictTests
+
+lean_exe pscv_interface_ir_tests where
+  srcDir := "test"
+  root := `InterfaceIrTests
 
 lean_exe psc2_minimal_selfhost_tests where
   srcDir := "test"

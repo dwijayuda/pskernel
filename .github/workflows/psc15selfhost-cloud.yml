@@ -94,6 +94,7 @@ jobs:
             psc1 \
             psc1_erasure_tests \
             psc1_verified_ir_strict_tests \
+            pscv_interface_ir_tests \
             psc1_project_query_graph_tests \
             psc1_host_project_query_tests \
             psc2_joint_closure_inventory \
@@ -118,6 +119,12 @@ jobs:
       - name: Run strict VerifiedIR invariant corpus
         working-directory: psc15selfhost
         run: lake exe psc1_verified_ir_strict_tests
+
+      - name: Check portable interface and link boundaries
+        working-directory: psc15selfhost
+        run: |
+          lake exe pscv_interface_ir_tests
+          lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/Link.lean
 
       - name: Check generalized erasure source equality guard
         working-directory: psc15selfhost

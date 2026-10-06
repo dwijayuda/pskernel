@@ -9,13 +9,13 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: production checked service plus explicit candidate/internal/bootstrap ownership.
+- Current checkpoint: portable dependency interface and link validation; production checked service and candidate/internal/bootstrap ownership are committed at fc7bc7b.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
 
-1. Implement portable dependency interfaces and actual import/link validation; reconcile runtime capability and representation constraints against section 14.
-2. Complete pass/artifact evidence, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
+1. Bind pass executions and build graph nodes to canonical artifacts, declared assumptions, resources and actual evidence. Keep pending validation/proof evidence explicit.
+2. Complete target-specific interface adapters, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
 3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
 4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
 
@@ -189,3 +189,11 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Production import topology audit rejects raw transform references outside the checked session and checks candidate/internal ownership. Existing source guards retain their assertions under the new owners.
 - Focused evidence: Lean compiler build, PSC1 Internal check (1993 declarations), portable profile (91 modules), source-owner guards, authority topology, and 25 checked-session/service tests pass. Extensive whole-closure and formal campaigns are deferred by user instruction.
 - GitHub 0849ae7: four bounded/native/provider workflows passed; direct Rust run 37516533780 passed fixture execution and whole-compiler generation, then failed its native fixed point with a stack overflow. This is an open implementation/assurance issue, not successful bootstrap evidence.
+
+## 2026-10-07 portable interface and link checkpoint
+
+- The default strict validator now rejects external imports without an interface context. The explicit context validator checks provider/export resolution, exact function/value signatures, semantic/runtime-value profiles, declared target availability, required capabilities and recursive public layouts. It rejects unresolved foreign representations rather than assigning meanings silently.
+- The portable link validator derives exported signatures from actual declarations, validates all bodies, enforces public export visibility and transitive capability declarations, and returns deterministic dependency order. Duplicate identities, missing providers, cycles, generic exported declarations and forged linked-module host contracts fail closed. Host contracts retain explicit assumption identities; matching metadata does not establish foreign code behavior.
+- Added the runtime-values/link contract and 20 focused boundary cases, including nested layout drift, recursive types, invalid bodies and capability laundering. All pass locally, as do the existing 31 strict cases and JS backend corpus. PSC1 checks Link and its closure (427 declarations); structural rules for both new modules, all-portable source (273 modules) and portable-selfhost profile (91 modules) pass without rule changes. The focused corpus and PSC1 check are registered in cloud CI.
+- The invariant registry now has 37 implemented checks. The original external-interface/ABI gap is narrowed to target-specific external ABI adapter validation; module-link compatibility is implemented for the declared acyclic, monomorphic boundary profile. Artifact/evidence binding, target-specific adapters and global validator/link soundness remain pending and are explicitly recorded in INTERFACE_LINK_V1.json.
+- Continue immediately with artifact/pass evidence and real build integration. Extensive testing and formal proof campaigns remain deferred; no release or promotion gate has been relaxed.

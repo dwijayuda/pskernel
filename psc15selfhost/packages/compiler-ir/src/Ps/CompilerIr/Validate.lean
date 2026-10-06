@@ -2472,4 +2472,7 @@ def psValidateErasedIrModule
       match psStrictValidateModule erased.raw with
       | Except.error error => Except.error error
       | Except.ok _ =>
-          Except.ok (PsValidatedIrModule.mk erased.raw)
+          match erased.raw.imports with
+          | List.nil => Except.ok (PsValidatedIrModule.mk erased.raw)
+          | List.cons value _ =>
+              Except.error (PsVerifiedIrValidationError.invalidExternalImport value.localName)

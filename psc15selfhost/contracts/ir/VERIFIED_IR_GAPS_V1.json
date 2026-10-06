@@ -32,12 +32,25 @@
     "if-condition-and-result-typing",
     "match-exhaustiveness",
     "duplicate-match-alternatives",
-    "match-branch-result-type-equality"
-  ],
-  "gaps": [
-    "external-import-interface-and-abi-compatibility",
+    "match-branch-result-type-equality",
+    "explicit-external-interface-resolution",
+    "external-export-signature-compatibility",
+    "recursive-public-layout-compatibility",
+    "semantic-and-runtime-values-profile-compatibility",
+    "declared-target-availability",
+    "declared-runtime-capabilities-and-transitive-link-propagation",
     "module-link-compatibility"
   ],
+  "gaps": [
+    "target-specific-external-abi-adapter-validation"
+  ],
+  "boundaryScope": {
+    "contract": "contracts/ir/INTERFACE_LINK_V1.json",
+    "previousExternalGap": "external-import-interface-and-abi-compatibility",
+    "closedPart": "Declared interface, signature, nominal recursive layout, runtime-values profile, target and capability compatibility.",
+    "remainingPart": "Actual target-specific ABI adapters and independent evidence of their behavior. Host implementation behavior remains an explicit assumption.",
+    "moduleLinkProfile": "Complete acyclic graph with monomorphic exports derived from actual validated module bodies; unsupported generic exports and cycles reject."
+  },
   "policy": {
     "unknownMeaningMustNotBeAddedSilently": true,
     "strengtheningMayRemainV1OnlyWhenAlreadyRequiredByContract": true,
@@ -46,6 +59,9 @@
   "evidence": {
     "validator": "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
     "regressionCorpus": "test/VerifiedIrStrictTests.lean",
+    "interfaceLinkCorpus": "test/InterfaceIrTests.lean",
+    "interfaceLinkCases": 20,
+    "interfaceLinkEvidence": "Focused local Lean build, 20-case corpus and PSC1 check; cloud and global soundness pending.",
     "strictRegressionCases": 31,
     "cloudStrictCorpus": {
       "commit": "8835161aae436a7da320a41f2814d2d89888aa2e",

@@ -73,7 +73,10 @@
       ],
       "status": "partial",
       "owners": [
-        "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean"
+        "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+        "packages/compiler-ir/src/Ps/CompilerIr/Interface.lean",
+        "packages/compiler-ir/src/Ps/CompilerIr/Link.lean",
+        "contracts/ir/INTERFACE_LINK_V1.json"
       ],
       "completion": "All declared executable invariants including capabilities, interfaces, ABI and links are checked.",
       "assurance": "pending"

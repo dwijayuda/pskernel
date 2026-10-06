@@ -468,3 +468,156 @@ theorem psKernelCheckerContextWithLet_canonical
       type
       value
       hCanonical
+
+
+def PsKernelLocalContextExtends
+    (older newer : PsKernelLocalContext) : Prop :=
+  ∀ (name : PsKernelName) (decl : PsKernelLocalDecl),
+    psKernelLocalContextFind older name =
+        Option.some decl ->
+      psKernelLocalContextFind newer name =
+        Option.some decl
+
+theorem psKernelLocalContextExtends_refl
+    (context : PsKernelLocalContext) :
+    PsKernelLocalContextExtends
+      context
+      context := by
+  intro name decl hFind
+  exact hFind
+
+theorem psKernelLocalContextExtends_trans
+    (first second third : PsKernelLocalContext)
+    (hFirst :
+      PsKernelLocalContextExtends first second)
+    (hSecond :
+      PsKernelLocalContextExtends second third) :
+    PsKernelLocalContextExtends first third := by
+  intro name decl hFind
+  exact
+    hSecond
+      name
+      decl
+      (hFirst name decl hFind)
+
+theorem psKernelLocalContextAddLocal_extends
+    (context : PsKernelLocalContext)
+    (base userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hCanonical :
+      PsKernelLocalContextCanonical context) :
+    PsKernelLocalContextExtends
+      context
+      (psKernelLocalContextAddLocal
+        context
+        (PsKernelName.num
+          base
+          context.nextIndex)
+        userName
+        type
+        binderInfo) := by
+  intro name decl hFind
+  exact
+    psKernelLocalContextAddLocal_preserves_old_find
+      context
+      base
+      userName
+      name
+      type
+      binderInfo
+      decl
+      hString
+      hCanonical
+      hFind
+
+theorem psKernelLocalContextAddLet_extends
+    (context : PsKernelLocalContext)
+    (base userName : PsKernelName)
+    (type value : PsKernelExpr)
+    (hString : PsKernelStringEqSoundLaw)
+    (hCanonical :
+      PsKernelLocalContextCanonical context) :
+    PsKernelLocalContextExtends
+      context
+      (psKernelLocalContextAddLet
+        context
+        (PsKernelName.num
+          base
+          context.nextIndex)
+        userName
+        type
+        value) := by
+  intro name decl hFind
+  exact
+    psKernelLocalContextAddLet_preserves_old_find
+      context
+      base
+      userName
+      name
+      type
+      value
+      decl
+      hString
+      hCanonical
+      hFind
+
+theorem psKernelCheckerContextWithLocal_extends
+    (context : PsKernelCheckerContext)
+    (userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hCanonical :
+      PsKernelLocalContextCanonical
+        context.localContext) :
+    PsKernelLocalContextExtends
+      context.localContext
+      (Prod.snd
+        (psKernelCheckerContextWithLocal
+          context
+          userName
+          type
+          binderInfo)).localContext := by
+  simpa [
+    psKernelCheckerContextWithLocal,
+    psKernelCheckerContextFreshName
+  ] using
+    psKernelLocalContextAddLocal_extends
+      context.localContext
+      userName
+      userName
+      type
+      binderInfo
+      hString
+      hCanonical
+
+theorem psKernelCheckerContextWithLet_extends
+    (context : PsKernelCheckerContext)
+    (userName : PsKernelName)
+    (type value : PsKernelExpr)
+    (hString : PsKernelStringEqSoundLaw)
+    (hCanonical :
+      PsKernelLocalContextCanonical
+        context.localContext) :
+    PsKernelLocalContextExtends
+      context.localContext
+      (Prod.snd
+        (psKernelCheckerContextWithLet
+          context
+          userName
+          type
+          value)).localContext := by
+  simpa [
+    psKernelCheckerContextWithLet,
+    psKernelCheckerContextFreshName
+  ] using
+    psKernelLocalContextAddLet_extends
+      context.localContext
+      userName
+      userName
+      type
+      value
+      hString
+      hCanonical

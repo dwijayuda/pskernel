@@ -316,22 +316,15 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
           rcases hSuccess with ⟨rfl, rfl⟩
           exact hConfig
       | true =>
-          let pending :=
-            psKernelExprListTake
-              (Nat.sub index instantiated)
-              (psKernelExprListDrop instantiated args)
-          let exposed :=
-            psKernelExprInstantiateRev
-              current
-              pending
-          have hFallback
+          have preserveFallback
+              (fallbackExpr : PsKernelExpr)
               (hRun :
                 (match
                     psKernelEnsureForallWith
                       whnf
                       context
                       state
-                      exposed with
+                      fallbackExpr with
                 | Except.error error =>
                     Except.error error
                 | Except.ok forallResult =>
@@ -354,7 +347,7 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
                   whnf
                   context
                   state
-                  exposed with
+                  fallbackExpr with
             | error error =>
                 simp [hEnsure] at hRun
             | ok forallResult =>
@@ -368,7 +361,7 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
                         context
                         state
                         forallState
-                        exposed
+                        fallbackExpr
                         view
                         hConfig
                         hEnsure
@@ -383,8 +376,8 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
                         result
                         hEnsureSemantic.2
                         hRun
-          cases current with
-          | forallE name domain body binderInfo =>
+          cases current
+          case forallE name domain body binderInfo =>
               have hRun :
                   psKernelInferAppOnlyLoopWithFuel
                       remaining
@@ -412,25 +405,10 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
                   result
                   hConfig
                   hRun
-          | bvar value =>
-              exact hFallback hSuccess
-          | fvar name =>
-              exact hFallback hSuccess
-          | mvar name =>
-              exact hFallback hSuccess
-          | sort level =>
-              exact hFallback hSuccess
-          | const name levels =>
-              exact hFallback hSuccess
-          | app fn arg =>
-              exact hFallback hSuccess
-          | lam name domain body binderInfo =>
-              exact hFallback hSuccess
-          | letE name type value body nondep =>
-              exact hFallback hSuccess
-          | lit literal =>
-              exact hFallback hSuccess
-          | mdata metadata body =>
-              exact hFallback hSuccess
-          | proj typeName projIndex body =>
-              exact hFallback hSuccess
+          all_goals
+            apply preserveFallback
+            simpa [
+              psKernelInferAppOnlyLoopWithFuel,
+              hMore
+            ] using hSuccess
+

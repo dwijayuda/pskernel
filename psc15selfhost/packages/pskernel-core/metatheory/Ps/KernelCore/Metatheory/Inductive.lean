@@ -1,4 +1,5 @@
 import Ps.KernelCore.Admission.Inductive.Common.Occurrence
+import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
 
 /-
 Independent Assurance Plane predicates for simple-inductive occurrence checks.
@@ -146,3 +147,43 @@ def PsKernelUniformOccurrencesSafe
         numParams
         expr
         0
+
+
+def PsKernelSimpleInductiveAppValid
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (result : PsKernelExpr)
+    (indices : List PsKernelExpr) : Prop :=
+  ∃
+    (resultName : PsKernelName)
+    (resultLevels : List PsKernelLevel),
+      psKernelExprGetAppFn result =
+        PsKernelExpr.const resultName resultLevels ∧
+      psKernelNameEq resultName target = true ∧
+      psKernelLevelListEq resultLevels levels = true ∧
+      psKernelConsumeSimpleResultParams
+          params
+          (psKernelExprGetAppArgs result) =
+        Option.some indices ∧
+      psKernelExprListLength indices = numIndices
+
+def PsKernelSimpleConstructorResultValid
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (result : PsKernelExpr)
+    (indices : List PsKernelExpr) : Prop :=
+  PsKernelSimpleInductiveAppValid
+      target
+      levels
+      params
+      numIndices
+      result
+      indices ∧
+    psKernelSimpleIndicesContainTarget
+        target
+        indices =
+      false

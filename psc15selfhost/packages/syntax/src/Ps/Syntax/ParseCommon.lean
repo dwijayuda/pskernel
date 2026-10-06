@@ -260,11 +260,11 @@ def psParseRecordFieldsWithFuel
                         Prod.mk name.value value.value;
                       if psTokenCursorAtText value.cursor "," then
                         match psTokenCursorAdvance value.cursor with
-                        | none =>
+                        | Option.none =>
                             Except.error
                               (PsParseError.unexpectedEnd
                                 "record field")
-                        | some afterComma =>
+                        | Option.some afterComma =>
                             smaller
                               afterComma.cursor
                               (List.cons nextField fieldsRev)
@@ -279,11 +279,11 @@ def psParseRecordFieldsWithFuel
                           (List.cons nextField fieldsRev)
                       else
                         match psTokenCursorPeek value.cursor with
-                        | none =>
+                        | Option.none =>
                             Except.error
                               (PsParseError.unexpectedEnd
                                 ", or }")
-                        | some token =>
+                        | Option.some token =>
                             Except.error
                               (PsParseError.expectedText
                                 ", or }"
@@ -325,21 +325,21 @@ def psParseSimpleTerm
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match psTokenCursorPeek cursor with
-  | none => Except.error (PsParseError.unexpectedEnd "term")
-  | some token =>
+  | Option.none => Except.error (PsParseError.unexpectedEnd "term")
+  | Option.some token =>
       if psTokenKindEq token.kind PsTokenKind.identifier then
         if psStringEq token.text "true" then
           match psTokenCursorAdvance cursor with
-          | none => Except.error (PsParseError.unexpectedEnd "term")
-          | some read =>
+          | Option.none => Except.error (PsParseError.unexpectedEnd "term")
+          | Option.some read =>
               Except.ok {
                 value := PsSyntaxTerm.bool true token.span
                 cursor := read.cursor
               }
         else if psStringEq token.text "false" then
           match psTokenCursorAdvance cursor with
-          | none => Except.error (PsParseError.unexpectedEnd "term")
-          | some read =>
+          | Option.none => Except.error (PsParseError.unexpectedEnd "term")
+          | Option.some read =>
               Except.ok {
                 value := PsSyntaxTerm.bool false token.span
                 cursor := read.cursor
@@ -354,24 +354,24 @@ def psParseSimpleTerm
               }
       else if psTokenKindEq token.kind PsTokenKind.natural then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "term")
-        | some read =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "term")
+        | Option.some read =>
             Except.ok {
               value := PsSyntaxTerm.natural token.text token.span
               cursor := read.cursor
             }
       else if psTokenKindEq token.kind PsTokenKind.string then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "term")
-        | some read =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "term")
+        | Option.some read =>
             Except.ok {
               value := PsSyntaxTerm.string token.text token.span
               cursor := read.cursor
             }
       else if psTokenKindEq token.kind PsTokenKind.character then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "term")
-        | some read =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "term")
+        | Option.some read =>
             Except.ok {
               value := PsSyntaxTerm.character token.text token.span
               cursor := read.cursor
@@ -391,12 +391,12 @@ def psParseBinderOpening
     (cursor : PsTokenCursor) :
     Except PsParseError PsSyntaxBinderOpening :=
   match psTokenCursorPeek cursor with
-  | none => Except.error (PsParseError.unexpectedEnd "binder")
-  | some token =>
+  | Option.none => Except.error (PsParseError.unexpectedEnd "binder")
+  | Option.some token =>
       if psStringEq token.text "(" then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "binder")
-        | some opening =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "binder")
+        | Option.some opening =>
             Except.ok {
               kind := PsSyntaxBinderKind.explicit
               start := opening.token.span.start
@@ -406,12 +406,12 @@ def psParseBinderOpening
             }
       else if psStringEq token.text "{" then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "binder")
-        | some first =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "binder")
+        | Option.some first =>
             if psTokenCursorAtText first.cursor "{" then
               match psTokenCursorAdvance first.cursor with
-              | none => Except.error (PsParseError.unexpectedEnd "binder")
-              | some second =>
+              | Option.none => Except.error (PsParseError.unexpectedEnd "binder")
+              | Option.some second =>
                   Except.ok {
                     kind := PsSyntaxBinderKind.strictImplicit
                     start := first.token.span.start
@@ -429,8 +429,8 @@ def psParseBinderOpening
               }
       else if psStringEq token.text "[" then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "binder")
-        | some opening =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "binder")
+        | Option.some opening =>
             Except.ok {
               kind := PsSyntaxBinderKind.instanceImplicit
               start := opening.token.span.start
@@ -487,16 +487,16 @@ def psTokenCursorExpectArrow
     (cursor : PsTokenCursor) :
     Except PsParseError PsTokenRead :=
   match psTokenCursorPeek cursor with
-  | none => Except.error (PsParseError.unexpectedEnd "->")
-  | some token =>
+  | Option.none => Except.error (PsParseError.unexpectedEnd "->")
+  | Option.some token =>
       if psStringEq token.text "->" then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "->")
-        | some read => Except.ok read
+        | Option.none => Except.error (PsParseError.unexpectedEnd "->")
+        | Option.some read => Except.ok read
       else if psStringEq token.text "→" then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "->")
-        | some read => Except.ok read
+        | Option.none => Except.error (PsParseError.unexpectedEnd "->")
+        | Option.some read => Except.ok read
       else
         Except.error
           (PsParseError.expectedText "->" token.text token.span)
@@ -542,12 +542,12 @@ def psParsePatternBindersWithFuel
           (cursor : PsTokenCursor)
           (bindersRev : List PsSyntaxName) =>
         match psTokenCursorPeek cursor with
-        | none =>
+        | Option.none =>
             Except.ok {
               value := psParseListReverse bindersRev
               cursor := cursor
             }
-        | some token =>
+        | Option.some token =>
             if
                 psTokenKindEq
                   token.kind
@@ -564,12 +564,12 @@ def psParsePatternBindersWithFuel
                 }
               else
                 match psTokenCursorAdvance cursor with
-                | none =>
+                | Option.none =>
                     Except.ok {
                       value := psParseListReverse bindersRev
                       cursor := cursor
                     }
-                | some read =>
+                | Option.some read =>
                     let binder : PsSyntaxName := {
                       segments := List.cons token.text List.nil
                       span := token.span
@@ -613,36 +613,36 @@ def psParseBasicPattern
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
   match psTokenCursorPeek cursor with
-  | none => Except.error (PsParseError.unexpectedEnd "match pattern")
-  | some token =>
+  | Option.none => Except.error (PsParseError.unexpectedEnd "match pattern")
+  | Option.some token =>
       if psStringEq token.text "true" then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "match pattern")
-        | some read =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "match pattern")
+        | Option.some read =>
             Except.ok {
               value := PsSyntaxPattern.bool true token.span
               cursor := read.cursor
             }
       else if psStringEq token.text "false" then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "match pattern")
-        | some read =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "match pattern")
+        | Option.some read =>
             Except.ok {
               value := PsSyntaxPattern.bool false token.span
               cursor := read.cursor
             }
       else if psStringEq token.text "_" then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "match pattern")
-        | some read =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "match pattern")
+        | Option.some read =>
             Except.ok {
               value := PsSyntaxPattern.wildcard token.span
               cursor := read.cursor
             }
       else if psStringEq token.text "." then
         match psTokenCursorAdvance cursor with
-        | none => Except.error (PsParseError.unexpectedEnd "constructor name")
-        | some dot =>
+        | Option.none => Except.error (PsParseError.unexpectedEnd "constructor name")
+        | Option.some dot =>
             match psParseSyntaxName dot.cursor with
             | Except.error error => Except.error error
             | Except.ok constructorName =>

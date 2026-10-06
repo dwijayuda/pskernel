@@ -153,6 +153,11 @@ inductive PsJsIrExpr where
             List PsJsIrMatchBinding ×
             PsJsIrExpr))
 
+structure PsJsIrImport where
+  localName : String
+  source : String
+  importedName : String
+
 structure PsJsIrParameter where
   name : String
 
@@ -162,4 +167,5 @@ structure PsJsIrDeclaration where
   body : PsJsIrExpr
 
 structure PsJsIrModule where
+  imports : List PsJsIrImport
   declarations : List PsJsIrDeclaration

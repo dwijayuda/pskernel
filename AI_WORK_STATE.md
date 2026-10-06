@@ -4,8 +4,12 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `7191b91df2521cfdf1c64ed464a1341fb33b052a`
-- Last known green proof checkpoint: `7191b91df2521cfdf1c64ed464a1341fb33b052a` (run #325)
+- Current proof implementation HEAD reconciled in this state: `4248828b28f106f8cb4fbd633bce3c46aa753fbe`
+- Last fully registered green proof checkpoint: `7191b91df2521cfdf1c64ed464a1341fb33b052a` (run #325)
+- Run #326 (`dbdbc591...`) succeeded, but it predated Lake-root registration of `CheckedInferenceConfiguration.lean` and therefore did not validate that module.
+- Run #327 (`8a51ffc...`) failed after registration exposed two eager-reduce context transport errors in checked inference.
+- Commit `5f46df27...` fixes those transports explicitly; run #328 is/was validating that fix.
+- Commit `4248828...` closes projection recursion with the configuration-aware projection theorem; run #329 is the first intended full validation of the concrete checked-inference contract.
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
@@ -54,7 +58,9 @@ Last checked-in audit:
 The audit is conservative relative to newer cross-module checker-contract/context work. Do not inflate module grades without applying the written A/B/C/D criteria.
 
 ## Current checkpoint
-- Fully green checkpoint: `7191b91df2521cfdf1c64ed464a1341fb33b052a` (run #325).
+- Fully registered green checkpoint remains `7191b91df2521cfdf1c64ed464a1341fb33b052a` (run #325) until run #329 finishes.
+- Configuration-aware projection semantics were added in `8a51ffc99f3a40f0847ea2121e93a9eab7100507` and registered as a Lake root in `48c5195caa9600990dd9b40537d2b8e2553bac9b`.
+- Checked inference projection recursion is closed in `4248828b28f106f8cb4fbd633bce3c46aa753fbe` by deriving fixed-fuel checked-inference soundness from the induction hypothesis and feeding it to the projection configuration theorem.
 - Full registered PSKernel Core metatheory/proof tree is green with the concrete infer-only core configuration-preservation theorem enabled as a Lake root.
 - Projection configuration and Projection semantic/refinement layers are now importable Assurance Plane modules and green.
 - The 13 per-constructor inference typing refinement theorems are promoted into importable `Metatheory/InferenceTyping.lean` and green.
@@ -67,8 +73,8 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- prove concrete `PsKernelCheckedInferenceCoreConfigurationSound whnf defeq` by fuel induction, reusing the green infer-only configuration theorem, `InferenceTyping`, `ProjectionSemantics`, `ProjectionConfiguration`, rec-depth/freshness/scope-exit contracts, WHNF configuration soundness, and DefEq configuration soundness;
-- lift the green infer-only and checked core contracts through public inference wrappers and the concrete checker knot.
+- validate run #329 for `psKernelCheckedInferenceCoreConfigurationSound_contract`, which now closes projection recursion from the smaller-fuel induction hypothesis through `CheckedProjectionConfiguration`;
+- if #329 is green, lift the checked and infer-only core contracts through the public inference wrappers; if it fails, fix the exact theorem obligation without weakening the contract.
 
 Architectural blockers still remaining:
 - close concrete checked/infer-only inference configuration contracts across all branches;

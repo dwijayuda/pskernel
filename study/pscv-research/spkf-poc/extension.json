@@ -1,0 +1,20 @@
+{
+  "schema": "spkf-poc/0",
+  "kind": "theory-extension",
+  "subject": {
+    "spkf": "spkf-poc-v0:sha256:fb24f3a56242051134f95ef4036d5c985f3c7d085602e738f825c96764c6afe6"
+  },
+  "adds": {
+    "theorems": [
+      {
+        "name": "identityNat_spec",
+        "statement": "forall x : Nat, identityNat x = x",
+        "proofSource": {
+          "blob": "spkf-poc-blob-v0:sha256:f4f6c65555c95780b0b236bb1ac1f8826503465a58e6f2079b68f1f04ba1c02a",
+          "format": "lean4-source-demo",
+          "authority": "candidate-source-only"
+        }
+      }
+    ]
+  }
+}

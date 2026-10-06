@@ -608,3 +608,10 @@ def psKernelExprAbstractFVarsReference
     PsKernelExpr :=
   psKernelExprAbstractFVarsAtReference
     expr fvars 0
+
+
+def PsKernelNameEqSoundAgainst
+    (target : PsKernelName) : Prop :=
+  ∀ (candidate : PsKernelName),
+    psKernelNameEq candidate target = true ->
+      candidate = target

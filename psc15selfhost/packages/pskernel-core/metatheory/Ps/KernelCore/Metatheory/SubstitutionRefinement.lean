@@ -1334,3 +1334,76 @@ theorem psKernelExprInstantiateAt_closed_core
   exact
     psKernelExprInstantiateAtReference_closed_core
       expr subst offset hClosed
+
+
+theorem psKernelExprLiftLooseBVarsReference_fvar_core
+    (name : PsKernelName)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVarsReference
+        (PsKernelExpr.fvar name)
+        start
+        amount =
+      PsKernelExpr.fvar name := by
+  cases amount <;>
+    simp [
+      psKernelExprLiftLooseBVarsReference,
+      psKernelExprLiftLooseBVarsReferenceChanged
+    ]
+
+
+theorem psKernelExprAbstractInstantiateReferenceChanged_fvar_core
+    (name target : PsKernelName)
+    (offset : Nat)
+    (hNameSound : PsKernelNameEqSoundAgainst target) :
+    psKernelExprInstantiateAtReferenceChanged
+        (Prod.fst
+          (psKernelExprAbstractFVarsAtReferenceChanged
+            (PsKernelExpr.fvar name)
+            (List.cons target List.nil)
+            offset))
+        0
+        (List.cons (PsKernelExpr.fvar target) List.nil)
+        offset =
+      Prod.mk
+        (PsKernelExpr.fvar name)
+        (Prod.snd
+          (psKernelExprAbstractFVarsAtReferenceChanged
+            (PsKernelExpr.fvar name)
+            (List.cons target List.nil)
+            offset)) := by
+  cases hEq : psKernelNameEq name target with
+  | false =>
+      have hClosed :
+          psKernelExprHasLooseAt
+              (PsKernelExpr.fvar name)
+              offset =
+            false := by
+        rfl
+      have hInst :=
+        psKernelExprInstantiateAtReferenceChanged_closed_core
+          (PsKernelExpr.fvar name)
+          (List.cons (PsKernelExpr.fvar target) List.nil)
+          offset
+          hClosed
+      simpa [
+        psKernelExprAbstractFVarsAtReferenceChanged,
+        psKernelNameLastIndexReference,
+        psKernelNameLastIndexReferenceWorker,
+        hEq
+      ] using hInst
+  | true =>
+      have hName : name = target :=
+        hNameSound name hEq
+      subst name
+      simp [
+        psKernelExprAbstractFVarsAtReferenceChanged,
+        psKernelNameLastIndexReference,
+        psKernelNameLastIndexReferenceWorker,
+        hEq,
+        psKernelExprInstantiateAtReferenceChanged,
+        psKernelExprLiftLooseBVarsReference_fvar_core,
+        psKernelNatLt,
+        psKernelExprListGet,
+        psKernelExprListLength,
+        psKernelNameListLength
+      ]

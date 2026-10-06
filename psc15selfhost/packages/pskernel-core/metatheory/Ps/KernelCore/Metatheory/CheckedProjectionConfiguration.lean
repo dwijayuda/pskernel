@@ -589,6 +589,7 @@ theorem psKernelInferProjectionWith_configuration_sound
                                                 hArgsLengthBool
                                             rw [hFalse] at hTrue
                                             cases hTrue
+                                          simp only [hCtors, hCtorRest] at hSuccess
                                           rw [if_neg hArgsLengthNeRaw] at hSuccess
                                           cases hSuccess
                                       | true =>

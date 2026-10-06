@@ -4,8 +4,8 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `8f2e0660ee1c288ed45fdb019889dcd06bd119ab`
-- Last known green proof checkpoint: `8f2e0660ee1c288ed45fdb019889dcd06bd119ab` (run #312)
+- Current proof HEAD when this state was written: `40837a8ad2278c9db7bf7a7fd35821728f0a87b9`
+- Last known green proof checkpoint: `40837a8ad2278c9db7bf7a7fd35821728f0a87b9` (run #315)
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
@@ -54,24 +54,22 @@ Last checked-in audit:
 The audit is conservative relative to newer cross-module checker-contract/context work. Do not inflate module grades without applying the written A/B/C/D criteria.
 
 ## Current checkpoint
-- Fully green checkpoint: `8f2e0660ee1c288ed45fdb019889dcd06bd119ab` (run #312).
-- Full recursive result: `PSKERNEL_CORE_PROOFS: PASS files=84`; metatheory build completed with 101 jobs in 110 seconds.
-- The local-fvar semantic-cache source defect is fixed and its proof migration is now green.
-- Projection configuration-preservation migration after the cache-policy fix is green.
-- DefEq quick success-cache refinement now correctly requires `psKernelSemanticPairCacheEligible left right = true`.
-- Concrete-checker infrastructure includes checker configuration contracts, context-state weakening/freshness, fvar-free cache eligibility, cache/state soundness transport, Projection configuration preservation, EnsureSort/EnsureForall transport, and infer-only application-loop configuration preservation.
-- The checked-in semantic audit remains conservative at A=44/B=9/C=19/D=7 and should only be refreshed after applying the written criteria.
-- Integration has moved far in commit count; no proof work should be discarded. Final reconciliation remains required.
+- Fully green checkpoint: `40837a8ad2278c9db7bf7a7fd35821728f0a87b9` (run #315).
+- Full recursive proof tree remains green with all 84 proof files after the local-fvar cache fix and binder-scope cache-isolation hardening.
+- Confirmed source defect #1: local-scope fvar cache escape. Direct fvar-bearing cache keys are now rejected by semantic cache policy.
+- Binder-scope hardening: `psKernelCheckerStateExitLocalScope` restores all semantic caches to the pre-child state while preserving a monotone fresh-name counter with `Nat.max parent.nextFresh child.nextFresh`.
+- Lambda/forall/let inference now applies this scope exit before parent-expression cache publication, preventing any child-scope semantic cache mutation from escaping even when the cached key itself is fvar-free.
+- The scope-exit state fields and checked typing-refinement proofs are migrated and green.
+- Context/configuration metatheory includes a generic theorem that scope exit preserves parent `PsKernelCheckerConfigurationSound`.
+- The checked-in semantic audit remains conservative at A=44/B=9/C=19/D=7 pending the next criteria-based refresh.
 
 ## Current blocker
 Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- prove concrete `psKernelInferCoreWithFuel` configuration contracts:
-  - infer-only preserves `PsKernelCheckerConfigurationSound`,
-  - checked inference returns a `PsKernelTypingJudgment` and preserves configuration;
-- reuse existing app-only loop, Projection, EnsureSort/EnsureForall, context weakening/freshness, and cache-publication theorems rather than duplicating branch proofs.
+- prove concrete `PsKernelInferOnlyCoreConfigurationPreserves whnf defeq` by fuel induction from the now-green scope-isolation architecture;
+- then prove `PsKernelCheckedInferenceCoreConfigurationSound whnf defeq` using the existing per-branch typing refinement theorems and the same configuration induction.
 
 Architectural blockers still remaining:
 - close concrete checked/infer-only inference configuration contracts across all branches;

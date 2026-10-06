@@ -49,3 +49,15 @@ def psCompilerJavaScriptProofScriptSource
   psCompilerJavaScriptSource
     PsCompilerSourceKind.proofScript
     source
+
+def psCompilerJavaScriptProofScriptSources
+    (sources : List String) :
+    Except PsCompilerJavaScriptError String :=
+  match
+      psCompilerPrepareSources
+        PsCompilerSourceKind.proofScript
+        sources with
+  | Except.error error =>
+      Except.error (PsCompilerJavaScriptError.compiler error)
+  | Except.ok prepared =>
+      psCompilerJavaScriptFromPrepared prepared

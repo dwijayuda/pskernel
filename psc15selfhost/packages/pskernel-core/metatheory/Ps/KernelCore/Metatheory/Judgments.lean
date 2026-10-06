@@ -492,6 +492,243 @@ def PsKernelDefEqCacheSound
         left
         right
 
+
+inductive PsKernelProjectionApplyParamsJudgment
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (args : List PsKernelExpr) :
+    Nat -> Nat -> PsKernelExpr -> PsKernelExpr -> Prop
+  | done
+      (index numParams : Nat)
+      (current : PsKernelExpr)
+      (hDone : psKernelNatLt index numParams = false) :
+      PsKernelProjectionApplyParamsJudgment
+        environment
+        localContext
+        args
+        index
+        numParams
+        current
+        current
+  | step
+      (index numParams : Nat)
+      (current domain body result argument : PsKernelExpr)
+      (name : PsKernelName)
+      (binderInfo : PsKernelBinderInfo)
+      (hMore : psKernelNatLt index numParams = true)
+      (hWhnf :
+        PsKernelReductionClosure
+          environment
+          localContext
+          current
+          (PsKernelExpr.forallE name domain body binderInfo))
+      (hArg :
+        psKernelExprListGet args index =
+          Option.some argument)
+      (hRest :
+        PsKernelProjectionApplyParamsJudgment
+          environment
+          localContext
+          args
+          (Nat.succ index)
+          numParams
+          (psKernelExprInstantiate1 body argument)
+          result) :
+      PsKernelProjectionApplyParamsJudgment
+        environment
+        localContext
+        args
+        index
+        numParams
+        current
+        result
+
+inductive PsKernelProjectionSkipFieldsJudgment
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (inductName : PsKernelName)
+    (structValue : PsKernelExpr)
+    (targetIndex : Nat) :
+    Nat -> PsKernelExpr -> PsKernelExpr -> Prop
+  | done
+      (index : Nat)
+      (current : PsKernelExpr)
+      (hDone : psKernelNatLt index targetIndex = false) :
+      PsKernelProjectionSkipFieldsJudgment
+        environment
+        localContext
+        inductName
+        structValue
+        targetIndex
+        index
+        current
+        current
+  | stepClosed
+      (index : Nat)
+      (current domain body result : PsKernelExpr)
+      (name : PsKernelName)
+      (binderInfo : PsKernelBinderInfo)
+      (hMore : psKernelNatLt index targetIndex = true)
+      (hWhnf :
+        PsKernelReductionClosure
+          environment
+          localContext
+          current
+          (PsKernelExpr.forallE name domain body binderInfo))
+      (hClosed : psKernelExprHasLooseBVar body = false)
+      (hRest :
+        PsKernelProjectionSkipFieldsJudgment
+          environment
+          localContext
+          inductName
+          structValue
+          targetIndex
+          (Nat.succ index)
+          body
+          result) :
+      PsKernelProjectionSkipFieldsJudgment
+        environment
+        localContext
+        inductName
+        structValue
+        targetIndex
+        index
+        current
+        result
+  | stepDependent
+      (index : Nat)
+      (current domain body result : PsKernelExpr)
+      (name : PsKernelName)
+      (binderInfo : PsKernelBinderInfo)
+      (hMore : psKernelNatLt index targetIndex = true)
+      (hWhnf :
+        PsKernelReductionClosure
+          environment
+          localContext
+          current
+          (PsKernelExpr.forallE name domain body binderInfo))
+      (hDependent : psKernelExprHasLooseBVar body = true)
+      (hRest :
+        PsKernelProjectionSkipFieldsJudgment
+          environment
+          localContext
+          inductName
+          structValue
+          targetIndex
+          (Nat.succ index)
+          (psKernelExprInstantiate1
+            body
+            (PsKernelExpr.proj
+              inductName
+              index
+              structValue))
+          result) :
+      PsKernelProjectionSkipFieldsJudgment
+        environment
+        localContext
+        inductName
+        structValue
+        targetIndex
+        index
+        current
+        result
+
+inductive PsKernelProjectionResultJudgment
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelName ->
+    Nat ->
+    PsKernelExpr ->
+    PsKernelExpr ->
+    PsKernelExpr ->
+    Prop
+  | intro
+      (typeName inductName ctorName fieldName : PsKernelName)
+      (index : Nat)
+      (structValue structType typeWhnf : PsKernelExpr)
+      (inductLevels : List PsKernelLevel)
+      (args : List PsKernelExpr)
+      (inductInfo : PsKernelInductiveInfo)
+      (ctorInfo : PsKernelConstructorInfo)
+      (initial afterParams afterFields fieldBody result : PsKernelExpr)
+      (fieldBinderInfo : PsKernelBinderInfo)
+      (hTypeWhnf :
+        PsKernelReductionClosure
+          environment
+          localContext
+          structType
+          typeWhnf)
+      (hTypeFn :
+        psKernelExprGetAppFn typeWhnf =
+          PsKernelExpr.const inductName inductLevels)
+      (hTypeArgs :
+        psKernelExprGetAppArgs typeWhnf = args)
+      (hIndexBound :
+        psKernelNatGt index psKernelLeanUInt32Max = false)
+      (hTypeName :
+        psKernelNameEq inductName typeName = true)
+      (hInduct :
+        psKernelFindConstantInList
+            inductName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.inductInfo inductInfo))
+      (hCtors :
+        inductInfo.ctors =
+          List.cons ctorName List.nil)
+      (hArgsLength :
+        psKernelExprListLength args =
+          Nat.add inductInfo.numParams inductInfo.numIndices)
+      (hCtor :
+        psKernelFindConstantInList
+            ctorName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.ctorInfo ctorInfo))
+      (hInitial :
+        initial =
+          psKernelExprInstantiateLevelParams
+            ctorInfo.base.type
+            ctorInfo.base.levelParams
+            inductLevels)
+      (hParams :
+        PsKernelProjectionApplyParamsJudgment
+          environment
+          localContext
+          args
+          0
+          inductInfo.numParams
+          initial
+          afterParams)
+      (hFields :
+        PsKernelProjectionSkipFieldsJudgment
+          environment
+          localContext
+          inductName
+          structValue
+          index
+          0
+          afterParams
+          afterFields)
+      (hFinal :
+        PsKernelReductionClosure
+          environment
+          localContext
+          afterFields
+          (PsKernelExpr.forallE
+            fieldName
+            result
+            fieldBody
+            fieldBinderInfo)) :
+      PsKernelProjectionResultJudgment
+        environment
+        localContext
+        typeName
+        index
+        structValue
+        structType
+        result
+
 inductive PsKernelTypingJudgment
     (environment : PsKernelEnvironment) :
     PsKernelLocalContext -> PsKernelExpr -> PsKernelExpr -> Prop
@@ -730,6 +967,33 @@ inductive PsKernelTypingJudgment
         localContext
         (PsKernelExpr.mdata metadata body)
         bodyType
+
+
+  | proj
+      {localContext : PsKernelLocalContext}
+      (typeName : PsKernelName)
+      (index : Nat)
+      (structValue structType result : PsKernelExpr)
+      (hStruct :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          structValue
+          structType)
+      (hProjection :
+        PsKernelProjectionResultJudgment
+          environment
+          localContext
+          typeName
+          index
+          structValue
+          structType
+          result) :
+      PsKernelTypingJudgment
+        environment
+        localContext
+        (PsKernelExpr.proj typeName index structValue)
+        result
 
 def PsKernelInferenceCacheSound
     (environment : PsKernelEnvironment)

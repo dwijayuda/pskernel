@@ -18,11 +18,11 @@
     }
   ],
   "evidenceRefs": [
-    "lean:packages/pscv-theory/src/Ps/Theory/Core.lean"
+    "lean:packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
   ],
   "payload": {
     "symbol": "psErasureProofDeclarationOmitted",
     "scope": "classification-conditional top-level proof declaration omission"
   },
-  "objectId": "sha256:6439c2f0e24bb357c272cf7b67148d1283e20532460dd867c0ae3faf60bedf2f"
+  "objectId": "sha256:72c3a556de93438cd7254e85b5f52ac23a0754fdfe7aa9fc2b31f13fe8e9bd5e"
 }

@@ -22,11 +22,11 @@
     }
   ],
   "evidenceRefs": [
-    "lean:packages/pscv-theory/src/Ps/Theory/Core.lean"
+    "lean:packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
   ],
   "payload": {
     "implementation": "packages/pscv-theory/src/Ps/Theory/Core.lean",
     "scope": "reflexive exact-identity slice only"
   },
-  "objectId": "sha256:54deb434778845b38a5e0f492e5d0fee8bbdb92c2d8fbdb8c311fec7b89fbba2"
+  "objectId": "sha256:99503f9f17fabe443ef02b3532599c503eea6a891eabfea271e4e6d5a54cb6f7"
 }

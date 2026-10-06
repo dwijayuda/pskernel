@@ -1,4 +1,4 @@
-import Ps.CompilerIr.Model
+import Ps.CompilerIr.Validate
 
 def psBackendJsNatType : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat

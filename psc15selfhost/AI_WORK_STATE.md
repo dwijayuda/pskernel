@@ -102,3 +102,13 @@ Checkpoint P0/P2/P3:
 - strict stage checks global uniqueness, type names/parameters, lexical variables, declaration calls, all current intrinsic signatures, exact aggregate fields, field typing, projection target typing, if typing, match binding typing, duplicate alternatives, branch result equality, and match exhaustiveness
 - dedicated psc1_verified_ir_strict_tests corpus added and cloud CI gate wired
 - external cross-module ABI/link compatibility remains intentionally deferred to InterfaceIR/link validation; gap registry will not be marked closed until the strict corpus and self-host fixed points are green
+
+## 2026-10-07 continuation: portable validator and checked proof ownership
+
+- Continued from GitHub HEAD 1dbfde24d7596f08dcb172947a5598383d185137; no earlier checkpoint restarted or history rewritten.
+- Diagnosed cloud run 37502916227 (invalid erasure proof), 37502916378 (PSC1 grouped-lambda parse failure), and 37502916392 (the same parse failure plus a missing strict-validator import in the JS fixture).
+- Strict validation now uses a named field-name walker and partial application instead of grouped inline lambdas; stable and portable profile rules are unchanged.
+- Portable theory source retains executable witness/model data. Indexed propositions and Lean proof terms live in an explicit proof sidecar, compiled by the required theory gate; unsupported dependent Lean syntax is not presented as PSC1-portable.
+- Repaired conditional proof omission with a checked if-elimination term. Lean 4.34.0 compiled the proof sidecar and specialization slice locally. SAVEF evidence paths and canonical object hashes now identify that sidecar. Global preservation and checker soundness remain target-unproved.
+- Restored the JS fixture strict-validator import and updated the offline verifier assertion to check all five returned object identities.
+- Local results: strict corpus 20/20; PSC1 validator/theory-source checks; strict-validator TypeScript emission; source and portable static profiles; JS backend corpus; Lean theory tests. Whole-closure/cloud checks remain pending, so no VerifiedIR gap is marked closed yet.

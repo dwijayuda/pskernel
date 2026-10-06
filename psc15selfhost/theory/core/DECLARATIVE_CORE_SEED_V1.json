@@ -41,7 +41,7 @@
     }
   ],
   "noProofClaim": true,
-  "leanImplementation": "packages/pscv-theory/src/Ps/Theory/Core.lean",
+  "leanImplementation": "packages/pscv-theory/proof/Ps/Theory/Refinement.lean",
   "provedSlices": [
     {
       "id": "psc-declarative-conversion-refl/1",

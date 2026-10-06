@@ -9,7 +9,7 @@
       "id": "psc-erasure-proof-declaration-omission/1",
       "status": "proved-lean",
       "scope": "top-level definition classified as Prop is omitted by psEraseDefinition",
-      "evidence": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+      "evidence": "packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
     }
   ],
   "regressionEvidence": [

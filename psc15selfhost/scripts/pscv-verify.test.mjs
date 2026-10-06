@@ -6,5 +6,9 @@ test("offline verifier prototype checks local architecture/trust/SAVEF closure",
   const result=await verifyOfflinePrototype();
   assert.equal(result.verifier,"pscv-verify/0-prototype");
   assert.equal(result.architecture,"pscv-architecture/v3");
-  assert.match(result.savefObject,/^sha256:[0-9a-f]{64}$/u);
+  assert.equal(result.savefObjects.length,5);
+  assert.equal(new Set(result.savefObjects).size,5);
+  for(const objectId of result.savefObjects) {
+    assert.match(objectId,/^sha256:[0-9a-f]{64}$/u);
+  }
 });

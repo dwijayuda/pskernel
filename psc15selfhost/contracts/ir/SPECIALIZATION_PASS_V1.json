@@ -13,7 +13,7 @@
       "id": "psc-specialization-literal-preservation/1",
       "status": "proved-lean",
       "scope": "closed monomorphic UInt32 literal module is preserved exactly",
-      "evidence": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+      "evidence": "packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
     }
   ],
   "globalPreservation": {

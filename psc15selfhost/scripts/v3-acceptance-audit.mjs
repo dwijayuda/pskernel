@@ -84,7 +84,7 @@ await check("A11-comparator-prototype",async()=>{
 });
 
 await check("A12-formal-theory-slice",async()=>{
-  const theory=await read("packages/pscv-theory/src/Ps/Theory/Core.lean");
+  const theory=await read("packages/pscv-theory/proof/Ps/Theory/Refinement.lean");
   const manifest=await json("theory/core/DECLARATIVE_CORE_SEED_V1.json");
   if(!theory.includes("PsDeclarativeConversion.refl")||!manifest.provedSlices?.some(item=>item.id==="psc-kernel-exact-defeq-sound/1"&&item.status==="proved-lean")) throw new Error("formal proof slice missing");
 });
@@ -115,14 +115,14 @@ await check("A15-factorybench-holdout-frozen",async()=>{
 
 await check("A16-erasure-formal-slice",async()=>{
   const contract=await json("contracts/ir/ERASURE_PRESERVATION_V0.json");
-  const theory=await read("packages/pscv-theory/src/Ps/Theory/Core.lean");
+  const theory=await read("packages/pscv-theory/proof/Ps/Theory/Refinement.lean");
   if(!contract.provedSlices?.some(item=>item.id==="psc-erasure-proof-declaration-omission/1"&&item.status==="proved-lean")) throw new Error("erasure proof slice not registered");
   if(!theory.includes("psErasureProofDeclarationOmitted")) throw new Error("erasure proof term missing");
 });
 
 await check("A17-specialization-formal-slice",async()=>{
   const contract=await json("contracts/ir/SPECIALIZATION_PASS_V1.json");
-  const theory=await read("packages/pscv-theory/src/Ps/Theory/Core.lean");
+  const theory=await read("packages/pscv-theory/proof/Ps/Theory/Refinement.lean");
   if(!contract.provedSlices?.some(item=>item.id==="psc-specialization-literal-preservation/1"&&item.status==="proved-lean")) throw new Error("specialization proof slice not registered");
   if(!theory.includes("psSpecializationLiteralModulePreserves")) throw new Error("specialization proof term missing");
 });

@@ -19,11 +19,11 @@
     }
   ],
   "evidenceRefs": [
-    "lean:packages/pscv-theory/src/Ps/Theory/Core.lean"
+    "lean:packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
   ],
   "payload": {
     "symbol": "psSpecializationLiteralModulePreserves",
     "globalPassAssurance": "contract-regression-unproved"
   },
-  "objectId": "sha256:654a5f9b1309c7d6224694f4eb818ca2bc11522753f332b95e78859cb48c39a7"
+  "objectId": "sha256:ab90170527409b0e255724921cf5777855511cdbe19ad483cfc716d2e79e1483"
 }

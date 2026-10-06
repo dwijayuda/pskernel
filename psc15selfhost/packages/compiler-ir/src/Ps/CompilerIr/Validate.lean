@@ -272,6 +272,16 @@ def psStrictFindConstructorField
       else
         psStrictFindConstructorField rest target
 
+def psStrictExprFieldNames
+    (fields : List (String × PsVerifiedIrExpr)) :
+    List String :=
+  match fields with
+  | List.nil => List.nil
+  | List.cons field rest =>
+      List.cons
+        (Prod.fst field)
+        (psStrictExprFieldNames rest)
+
 def psStrictFindExprField
     (fields : List (String × PsVerifiedIrExpr))
     (target : String) :
@@ -523,11 +533,7 @@ def psStrictValidateTypeListInScope
     (types : List PsVerifiedIrType) :
     Except PsVerifiedIrValidationError Unit :=
   psStrictValidateTypeListWith
-    (fun (type : PsVerifiedIrType) =>
-      psStrictValidateTypeInScope
-        module
-        typeParameters
-        type)
+    (psStrictValidateTypeInScope module typeParameters)
     types
 
 def psStrictLocalLookup
@@ -1835,10 +1841,7 @@ def psStrictInferExprWithFuel
                           structureArguments then
                       if
                           psStrictStringListUnique
-                            (psListMap
-                              (fun (field : String × PsVerifiedIrExpr) =>
-                                Prod.fst field)
-                              fields) then
+                            (psStrictExprFieldNames fields) then
                         if
                             Nat.beq
                               (psVerifiedIrListLength fields)
@@ -1959,10 +1962,7 @@ def psStrictInferExprWithFuel
                   | Option.some constructorInfo =>
                       if
                           psStrictStringListUnique
-                            (psListMap
-                              (fun (field : String × PsVerifiedIrExpr) =>
-                                Prod.fst field)
-                              fields) then
+                            (psStrictExprFieldNames fields) then
                         if
                             Nat.beq
                               (psVerifiedIrListLength fields)
@@ -2449,4 +2449,3 @@ def psValidateErasedIrModule
       | Except.error error => Except.error error
       | Except.ok _ =>
           Except.ok (PsValidatedIrModule.mk erased.raw)
-

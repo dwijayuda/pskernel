@@ -479,6 +479,12 @@ lean_lib PsPscvTheory where
     `Ps.Theory.Core
   ]
 
+lean_lib PsPscvTheoryProof where
+  srcDir := "packages/pscv-theory/proof"
+  roots := #[
+    `Ps.Theory.Refinement
+  ]
+
 lean_exe pscv_theory_seed_tests where
   srcDir := "packages/pscv-theory/test"
   root := `TheorySeedTests

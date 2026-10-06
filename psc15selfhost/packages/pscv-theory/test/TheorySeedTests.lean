@@ -1,4 +1,4 @@
-import Ps.Theory.Core
+import Ps.Theory.Refinement
 
 def psTheorySeedExpr : PsKernelExpr :=
   PsKernelExpr.bvar 0

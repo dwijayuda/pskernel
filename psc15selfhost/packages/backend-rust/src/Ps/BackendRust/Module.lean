@@ -270,7 +270,9 @@ def psRustDeclarationIsGenericValue
   | List.cons _ _ =>
       false
 
-def psRustFunctionResultExprSupported : PsVerifiedIrExpr -> Bool
+def psRustFunctionResultExprSupported
+    (expr : PsVerifiedIrExpr) : Bool :=
+  match expr with
   | PsVerifiedIrExpr.lambda _ _ _ =>
       true
   | PsVerifiedIrExpr.var _ =>
@@ -326,6 +328,62 @@ def psRustPrepareDeclarationBody
         printedBody
   else
     printedBody
+
+def psRustEmitFunctionResultExprWithFuel
+    (declarationName : String)
+    (fuel : Nat)
+    (expr : PsVerifiedIrExpr) :
+    Except PsRustEmitError String :=
+  match fuel with
+  | Nat.zero =>
+      Except.error PsRustEmitError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          PsVerifiedIrExpr ->
+          Except PsRustEmitError String :=
+        psRustEmitFunctionResultExprWithFuel
+          declarationName
+          remaining;
+      match expr with
+      | PsVerifiedIrExpr.lambda _ _ _ =>
+          match psRustEmitExprWithFuel remaining expr with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printed =>
+              Except.ok (psRustConcat2 "move " printed)
+      | PsVerifiedIrExpr.var _ =>
+          psRustEmitExprWithFuel remaining expr
+      | PsVerifiedIrExpr.call fn typeArguments arguments =>
+          match fn with
+          | PsVerifiedIrExpr.var _ =>
+              psRustEmitExprWithFuel
+                remaining
+                (PsVerifiedIrExpr.call fn typeArguments arguments)
+          | _ =>
+              Except.error
+                (PsRustEmitError.functionResultUnsupported declarationName)
+      | PsVerifiedIrExpr.letE name _ value body =>
+          match psRustEmitExprWithFuel remaining value with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedValue =>
+              match smaller body with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok printedBody =>
+                  Except.ok
+                    (psRustConcat4
+                      "{ let "
+                      (psRustIdentifier name)
+                      " = "
+                      (psRustConcat4
+                        (psRustClonePrinted printedValue)
+                        "; "
+                        printedBody
+                        " }"))
+      | _ =>
+          Except.error
+            (PsRustEmitError.functionResultUnsupported declarationName)
 
 def psRustEmitFunctionResultExprWithFuel
     (declarationName : String) :
@@ -512,22 +570,31 @@ def psRustEmitDeclarationList
           | Except.ok printedRest =>
               Except.ok (List.cons printed printedRest)
 
-def psRustStructureNames :
-    List PsVerifiedIrStructure -> List String
+def psRustStructureNames
+    (structures : List PsVerifiedIrStructure) :
+    List String :=
+  match structures with
   | List.nil =>
       List.nil
   | List.cons structureInfo rest =>
-      List.cons structureInfo.name (psRustStructureNames rest)
+      List.cons
+        structureInfo.name
+        (psRustStructureNames rest)
 
-def psRustInductiveNames :
-    List PsVerifiedIrInductive -> List String
+def psRustInductiveNames
+    (inductives : List PsVerifiedIrInductive) :
+    List String :=
+  match inductives with
   | List.nil =>
       List.nil
   | List.cons inductiveInfo rest =>
-      List.cons inductiveInfo.name (psRustInductiveNames rest)
+      List.cons
+        inductiveInfo.name
+        (psRustInductiveNames rest)
 
-def psRustParameterListContainsFunction :
-    List PsVerifiedIrParameter -> Bool
+def psRustParameterListContainsFunction
+    (parameters : List PsVerifiedIrParameter) : Bool :=
+  match parameters with
   | List.nil =>
       false
   | List.cons parameter rest =>
@@ -554,8 +621,10 @@ def psRustDeclarationIsStaticFirstOrderFunction
   | List.cons _ _ =>
       false
 
-def psRustStaticFirstOrderFunctionNames :
-    List PsVerifiedIrDeclaration -> List String
+def psRustStaticFirstOrderFunctionNames
+    (declarations : List PsVerifiedIrDeclaration) :
+    List String :=
+  match declarations with
   | List.nil =>
       List.nil
   | List.cons declaration rest =>
@@ -567,9 +636,10 @@ def psRustStaticFirstOrderFunctionNames :
         psRustStaticFirstOrderFunctionNames rest
 
 def psRustFindStructureFields
-    (target : String) :
-    List PsVerifiedIrStructure ->
-    Option (List PsVerifiedIrStructureField)
+    (target : String)
+    (structures : List PsVerifiedIrStructure) :
+    Option (List PsVerifiedIrStructureField) :=
+  match structures with
   | List.nil =>
       Option.none
   | List.cons structureInfo rest =>
@@ -579,9 +649,10 @@ def psRustFindStructureFields
         psRustFindStructureFields target rest
 
 def psRustFindStructureFieldType
-    (target : String) :
-    List PsVerifiedIrStructureField ->
-    Option PsVerifiedIrType
+    (target : String)
+    (fields : List PsVerifiedIrStructureField) :
+    Option PsVerifiedIrType :=
+  match fields with
   | List.nil =>
       Option.none
   | List.cons field rest =>
@@ -591,9 +662,10 @@ def psRustFindStructureFieldType
         psRustFindStructureFieldType target rest
 
 def psRustFindInductiveConstructors
-    (target : String) :
-    List PsVerifiedIrInductive ->
-    Option (List PsVerifiedIrConstructor)
+    (target : String)
+    (inductives : List PsVerifiedIrInductive) :
+    Option (List PsVerifiedIrConstructor) :=
+  match inductives with
   | List.nil =>
       Option.none
   | List.cons inductiveInfo rest =>
@@ -603,9 +675,10 @@ def psRustFindInductiveConstructors
         psRustFindInductiveConstructors target rest
 
 def psRustFindConstructorFields
-    (target : String) :
-    List PsVerifiedIrConstructor ->
-    Option (List PsVerifiedIrConstructorField)
+    (target : String)
+    (constructors : List PsVerifiedIrConstructor) :
+    Option (List PsVerifiedIrConstructorField) :=
+  match constructors with
   | List.nil =>
       Option.none
   | List.cons constructorInfo rest =>
@@ -615,9 +688,10 @@ def psRustFindConstructorFields
         psRustFindConstructorFields target rest
 
 def psRustFindConstructorFieldType
-    (target : String) :
-    List PsVerifiedIrConstructorField ->
-    Option PsVerifiedIrType
+    (target : String)
+    (fields : List PsVerifiedIrConstructorField) :
+    Option PsVerifiedIrType :=
+  match fields with
   | List.nil =>
       Option.none
   | List.cons field rest =>
@@ -650,9 +724,10 @@ def psRustValidateStaticStoredFunction
 def psRustValidateExprListWith
     (validate :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool) :
-    List PsVerifiedIrExpr ->
-    Except PsRustEmitError Bool
+      Except PsRustEmitError Bool)
+    (expressions : List PsVerifiedIrExpr) :
+    Except PsRustEmitError Bool :=
+  match expressions with
   | List.nil =>
       Except.ok true
   | List.cons expr rest =>
@@ -665,9 +740,10 @@ def psRustValidateExprListWith
 def psRustValidateFieldListWith
     (validate :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool) :
-    List (Prod String PsVerifiedIrExpr) ->
-    Except PsRustEmitError Bool
+      Except PsRustEmitError Bool)
+    (fields : List (Prod String PsVerifiedIrExpr)) :
+    Except PsRustEmitError Bool :=
+  match fields with
   | List.nil =>
       Except.ok true
   | List.cons field rest =>
@@ -680,13 +756,15 @@ def psRustValidateFieldListWith
 def psRustValidateAlternativeListWith
     (validate :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool) :
-    List
-      (Prod String
-        (Prod
-          (List PsVerifiedIrMatchBinding)
-          PsVerifiedIrExpr)) ->
-    Except PsRustEmitError Bool
+      Except PsRustEmitError Bool)
+    (alternatives :
+      List
+        (Prod String
+          (Prod
+            (List PsVerifiedIrMatchBinding)
+            PsVerifiedIrExpr))) :
+    Except PsRustEmitError Bool :=
+  match alternatives with
   | List.nil =>
       Except.ok true
   | List.cons alternative rest =>
@@ -703,9 +781,10 @@ def psRustValidateStorageFieldListWith
     (definitionFields : List PsVerifiedIrStructureField)
     (validateNested :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool) :
-    List (Prod String PsVerifiedIrExpr) ->
-    Except PsRustEmitError Bool
+      Except PsRustEmitError Bool)
+    (fields : List (Prod String PsVerifiedIrExpr)) :
+    Except PsRustEmitError Bool :=
+  match fields with
   | List.nil =>
       Except.ok true
   | List.cons field rest =>
@@ -762,9 +841,10 @@ def psRustValidateConstructorStorageFieldListWith
     (definitionFields : List PsVerifiedIrConstructorField)
     (validateNested :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool) :
-    List (Prod String PsVerifiedIrExpr) ->
-    Except PsRustEmitError Bool
+      Except PsRustEmitError Bool)
+    (fields : List (Prod String PsVerifiedIrExpr)) :
+    Except PsRustEmitError Bool :=
+  match fields with
   | List.nil =>
       Except.ok true
   | List.cons field rest =>
@@ -819,13 +899,15 @@ def psRustValidateStorageAlternativeListWith
     (validateBody :
       List PsVerifiedIrMatchBinding ->
       PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool) :
-    List
-      (Prod String
-        (Prod
-          (List PsVerifiedIrMatchBinding)
-          PsVerifiedIrExpr)) ->
-    Except PsRustEmitError Bool
+      Except PsRustEmitError Bool)
+    (alternatives :
+      List
+        (Prod String
+          (Prod
+            (List PsVerifiedIrMatchBinding)
+            PsVerifiedIrExpr))) :
+    Except PsRustEmitError Bool :=
+  match alternatives with
   | List.nil =>
       Except.ok true
   | List.cons alternative rest =>
@@ -842,22 +924,23 @@ def psRustValidateStorageExprWithFuel
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
     (staticFunctionNames : List String)
-    (locals : List String) :
-    Nat ->
-    PsVerifiedIrExpr ->
-    Except PsRustEmitError Bool
-  | 0, _ =>
+    (locals : List String)
+    (fuel : Nat)
+    (expr : PsVerifiedIrExpr) :
+    Except PsRustEmitError Bool :=
+  match fuel with
+  | Nat.zero =>
       Except.error PsRustEmitError.fuelExhausted
-  | fuel + 1, expr =>
-      let validateNested :=
-        fun (nested : PsVerifiedIrExpr) =>
-          psRustValidateStorageExprWithFuel
-            structures
-            inductives
-            staticFunctionNames
-            locals
-            fuel
-            nested;
+  | Nat.succ remaining =>
+      let validateNested :
+          PsVerifiedIrExpr ->
+          Except PsRustEmitError Bool :=
+        psRustValidateStorageExprWithFuel
+          structures
+          inductives
+          staticFunctionNames
+          locals
+          remaining;
       match expr with
       | PsVerifiedIrExpr.literal _ =>
           Except.ok true
@@ -866,13 +949,16 @@ def psRustValidateStorageExprWithFuel
       | PsVerifiedIrExpr.intrinsic _ _ arguments =>
           psRustValidateExprListWith validateNested arguments
       | PsVerifiedIrExpr.lambda parameters _ body =>
-          psRustValidateStorageExprWithFuel
-            structures
-            inductives
-            staticFunctionNames
-            (psRustAddParameterNames parameters locals)
-            fuel
-            body
+          let validateBody :
+              PsVerifiedIrExpr ->
+              Except PsRustEmitError Bool :=
+            psRustValidateStorageExprWithFuel
+              structures
+              inductives
+              staticFunctionNames
+              (psRustAddParameterNames parameters locals)
+              remaining;
+          validateBody body
       | PsVerifiedIrExpr.call fn _ arguments =>
           match validateNested fn with
           | Except.error error =>
@@ -884,13 +970,16 @@ def psRustValidateStorageExprWithFuel
           | Except.error error =>
               Except.error error
           | Except.ok _ =>
-              psRustValidateStorageExprWithFuel
-                structures
-                inductives
-                staticFunctionNames
-                (List.cons name locals)
-                fuel
-                body
+              let validateBody :
+                  PsVerifiedIrExpr ->
+                  Except PsRustEmitError Bool :=
+                psRustValidateStorageExprWithFuel
+                  structures
+                  inductives
+                  staticFunctionNames
+                  (List.cons name locals)
+                  remaining;
+              validateBody body
       | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
           match validateNested condition with
           | Except.error error =>
@@ -944,17 +1033,23 @@ def psRustValidateStorageExprWithFuel
           | Except.error error =>
               Except.error error
           | Except.ok _ =>
-              let validateBody :=
+              let validateBody :
+                  List PsVerifiedIrMatchBinding ->
+                  PsVerifiedIrExpr ->
+                  Except PsRustEmitError Bool :=
                 fun
                   (bindings : List PsVerifiedIrMatchBinding)
                   (body : PsVerifiedIrExpr) =>
-                  psRustValidateStorageExprWithFuel
-                    structures
-                    inductives
-                    staticFunctionNames
-                    (psRustAddBindingNames bindings locals)
-                    fuel
-                    body;
+                  let validateWithBindings :
+                      PsVerifiedIrExpr ->
+                      Except PsRustEmitError Bool :=
+                    psRustValidateStorageExprWithFuel
+                      structures
+                      inductives
+                      staticFunctionNames
+                      (psRustAddBindingNames bindings locals)
+                      remaining;
+                  validateWithBindings body;
               psRustValidateStorageAlternativeListWith
                 validateBody
                 alternatives
@@ -962,9 +1057,10 @@ def psRustValidateStorageExprWithFuel
 def psRustValidateStorageDeclarationList
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
-    (staticFunctionNames : List String) :
-    List PsVerifiedIrDeclaration ->
-    Except PsRustEmitError Bool
+    (staticFunctionNames : List String)
+    (declarations : List PsVerifiedIrDeclaration) :
+    Except PsRustEmitError Bool :=
+  match declarations with
   | List.nil =>
       Except.ok true
   | List.cons declaration rest =>
@@ -998,20 +1094,21 @@ def psRustValidateModuleFunctionStorage
 
 def psRustValidateExprNamesWithFuel
     (structureNames : List String)
-    (inductiveNames : List String) :
-    Nat ->
-    PsVerifiedIrExpr ->
-    Except PsRustEmitError Bool
-  | 0, _ =>
+    (inductiveNames : List String)
+    (fuel : Nat)
+    (expr : PsVerifiedIrExpr) :
+    Except PsRustEmitError Bool :=
+  match fuel with
+  | Nat.zero =>
       Except.error PsRustEmitError.fuelExhausted
-  | fuel + 1, expr =>
-      let validateNested :=
-        fun (nested : PsVerifiedIrExpr) =>
-          psRustValidateExprNamesWithFuel
-            structureNames
-            inductiveNames
-            fuel
-            nested;
+  | Nat.succ remaining =>
+      let validateNested :
+          PsVerifiedIrExpr ->
+          Except PsRustEmitError Bool :=
+        psRustValidateExprNamesWithFuel
+          structureNames
+          inductiveNames
+          remaining;
       match expr with
       | PsVerifiedIrExpr.literal _ =>
           Except.ok true
@@ -1080,9 +1177,10 @@ def psRustValidateExprNamesWithFuel
 
 def psRustValidateDeclarationNames
     (structureNames : List String)
-    (inductiveNames : List String) :
-    List PsVerifiedIrDeclaration ->
-    Except PsRustEmitError Bool
+    (inductiveNames : List String)
+    (declarations : List PsVerifiedIrDeclaration) :
+    Except PsRustEmitError Bool :=
+  match declarations with
   | List.nil =>
       Except.ok true
   | List.cons declaration rest =>

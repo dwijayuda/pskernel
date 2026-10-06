@@ -507,17 +507,36 @@ def psTestBackendJsNestedTailMatchHygiene : Bool :=
           "[value] = [next2]; continue;"
 
 
+structure PsBackendJsNamedTest where
+  name : String
+  passed : Bool
+
+def psBackendJsTests : List PsBackendJsNamedTest := [
+  { name := "fixture emission", passed := psTestBackendJsFixtureEmission },
+  { name := "keyword rejection", passed := psTestBackendJsRejectsKeywordName },
+  { name := "structure metadata", passed := psTestBackendJsAcceptsStructureMetadata },
+  { name := "word-sized no-profile rejection", passed := psTestBackendJsRejectsWordSizedWithoutProfile },
+  { name := "machine integer printers", passed := psTestBackendJsMachineIntegerPrinters },
+  { name := "float printers", passed := psTestBackendJsFloatPrinters },
+  { name := "UInt8.ofNat printer", passed := psTestBackendJsUInt8OfNatPrinter },
+  { name := "selective stack safety", passed := psTestBackendJsSelectiveStackSafety },
+  { name := "tail recursion loop", passed := psTestBackendJsTailLoop },
+  { name := "nested tail-match hygiene", passed := psTestBackendJsNestedTailMatchHygiene }
+]
+
+def psRunBackendJsTests : List PsBackendJsNamedTest -> IO Bool
+  | [] => pure true
+  | test :: rest => do
+      if test.passed then
+        IO.println ("PSC2_BACKEND_JS_PASS: " ++ test.name)
+      else
+        IO.println ("PSC2_BACKEND_JS_FAIL: " ++ test.name)
+      let restPassed ← psRunBackendJsTests rest
+      pure (test.passed && restPassed)
+
 def main : IO Unit := do
-  if psTestBackendJsFixtureEmission
-      && psTestBackendJsRejectsKeywordName
-      && psTestBackendJsAcceptsStructureMetadata
-      && psTestBackendJsRejectsWordSizedWithoutProfile
-      && psTestBackendJsMachineIntegerPrinters
-      && psTestBackendJsFloatPrinters
-      && psTestBackendJsUInt8OfNatPrinter
-      && psTestBackendJsSelectiveStackSafety
-      && psTestBackendJsTailLoop
-      && psTestBackendJsNestedTailMatchHygiene then
+  let passed ← psRunBackendJsTests psBackendJsTests
+  if passed then
     IO.println "PSC2_BACKEND_JS_TESTS: PASS"
   else
     throw

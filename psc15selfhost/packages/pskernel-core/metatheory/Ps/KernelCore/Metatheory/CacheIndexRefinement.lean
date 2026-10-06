@@ -20,12 +20,12 @@ theorem psKernelExprHash_lt_modulus
     psKernelExprHash expr <
       psKernelCacheHashModulus := by
   cases expr <;>
-    simp [
+    simp only [
       psKernelExprHash,
       psKernelCacheMix,
-      psKernelCacheHashModulus,
-      Nat.mod_lt
-    ]
+      psKernelCacheHashModulus
+    ] <;>
+    exact Nat.mod_lt _ (by decide)
 
 theorem psKernelExprHash_lt_two_pow_16
     (expr : PsKernelExpr) :

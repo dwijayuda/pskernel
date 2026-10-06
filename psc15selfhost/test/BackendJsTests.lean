@@ -31,6 +31,7 @@ def psBackendJsExpected : String :=
   "export function arraySetIfInBoundsDemo(array, index, value) { return ((__ps_a, __ps_i, __ps_v) => { if (__ps_i >= BigInt(__ps_a.length)) return __ps_a; const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; return __ps_out; })(array, index, value); }\n" ++
   "export function arrayMapDemo(fn, array) { return ((__ps_f, __ps_a) => __ps_a.map((__ps_x) => __ps_f(__ps_x)))(fn, array); }\n" ++
   "export function arrayFoldDemo(fn, init, array, start, stop) { return ((__ps_f, __ps_init, __ps_a, __ps_start, __ps_stop) => { const __ps_size = BigInt(__ps_a.length); const __ps_end = __ps_stop <= __ps_size ? __ps_stop : __ps_size; let __ps_acc = __ps_init; for (let __ps_i = __ps_start; __ps_i < __ps_end; __ps_i += 1n) { __ps_acc = __ps_f(__ps_acc, __ps_a[Number(__ps_i)]); } return __ps_acc; })(fn, init, array, start, stop); }\n" ++
+  "export function genericIdNat(value) { return genericId$spec$Nat(value); }\n" ++
   "export function pointSum(left, right) { return (() => { const point = ({ \"x\": left, \"y\": right }); return ((point)[\"x\"] + (point)[\"y\"]); })(); }\n" ++
   "export function boxNatGet(value) { return (() => { const box = ({ \"value\": value }); return (box)[\"value\"]; })(); }\n" ++
   "export function maybeSomeOrZero(value) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return 0n; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { \"value\": value } })); }\n" ++
@@ -46,7 +47,8 @@ def psBackendJsExpected : String :=
   "export function float32Mul(left, right) { return Math.fround((left * right)); }\n" ++
   "export function floatDiv(left, right) { return (left / right); }\n" ++
   "export function letNatDemo(x) { return (() => { const y = (x + 1n); return (y * 2n); })(); }\n" ++
-  "export function applyLambda(x) { return ((y) => (y + 2n))(x); }\n"
+  "export function applyLambda(x) { return ((y) => (y + 2n))(x); }\n" ++
+  "export function genericId$spec$Nat(x) { return x; }\n"
 
 def psTestBackendJsFixtureEmission : Bool :=
   match psBackendJsFixtureValidated with

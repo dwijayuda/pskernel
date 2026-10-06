@@ -1,4 +1,5 @@
 import Ps.KernelCore.Metatheory.Judgments
+import Ps.KernelCore.Admission.Declaration.Validation
 
 /- Semantic environment-extension relations used by checked admission proofs. -/
 

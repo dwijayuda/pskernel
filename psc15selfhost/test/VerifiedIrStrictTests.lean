@@ -701,7 +701,7 @@ def psRunStrictVerifiedIrTests
           (String.Internal.append
             "PSCV_VERIFIED_IR_STRICT_FAIL: "
             test.name)
-      let restPassed <-
+      let restPassed ←
         psRunStrictVerifiedIrTests rest
       pure
         (if test.passed then
@@ -710,7 +710,7 @@ def psRunStrictVerifiedIrTests
           false)
 
 def main : IO Unit := do
-  let passed <-
+  let passed ←
     psRunStrictVerifiedIrTests
       psStrictVerifiedIrTests
   if passed then

@@ -142,27 +142,27 @@ def psEnvironmentFindInductive
     (environment : PsEnvironment)
     (name : PsName) : Option PsInductiveInfo :=
   match psEnvironmentFind environment name with
-  | some declaration => psDeclarationInductiveInfo declaration
-  | none => Option.none
+  | Option.some declaration => psDeclarationInductiveInfo declaration
+  | Option.none => Option.none
 
 def psEnvironmentFindConstructor
     (environment : PsEnvironment)
     (name : PsName) : Option PsConstructorInfo :=
   match psEnvironmentFind environment name with
-  | some declaration => psDeclarationConstructorInfo declaration
-  | none => Option.none
+  | Option.some declaration => psDeclarationConstructorInfo declaration
+  | Option.none => Option.none
 
 def psEnvironmentFindRecursor
     (environment : PsEnvironment)
     (name : PsName) : Option PsRecursorInfo :=
   match psEnvironmentFind environment name with
-  | some declaration => psDeclarationRecursorInfo declaration
-  | none => Option.none
+  | Option.some declaration => psDeclarationRecursorInfo declaration
+  | Option.none => Option.none
 
 def psEnvironmentContains (environment : PsEnvironment) (name : PsName) : Bool :=
   match psEnvironmentFind environment name with
-  | none => false
-  | some _ => true
+  | Option.none => false
+  | Option.some _ => true
 
 def psEnvironmentRemoveNameWorker
     (declarations : List PsDeclaration) :
@@ -196,12 +196,12 @@ def psEnvironmentAddReplacingAxiom
     (declaration : PsDeclaration) : Option PsEnvironment :=
   let name := psDeclarationName declaration;
   match psEnvironmentFind environment name with
-  | none =>
+  | Option.none =>
       Option.some
         (PsEnvironment.mk
           (List.cons declaration environment.declarations)
           (psEnvironmentIndexInsert environment.index declaration))
-  | some existing =>
+  | Option.some existing =>
       match existing with
       | .axiomDecl _ _ _ =>
           Option.some

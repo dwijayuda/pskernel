@@ -254,7 +254,7 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
                   environment localContext state.success
               from
                 ⟨
-                  hInsert
+                  psKernelInferOnlyCacheIsolated_insert
                     environment
                     localContext
                     state.inferOnly
@@ -413,90 +413,24 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
                   hConfig
                   hRun
           | bvar value =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | fvar name =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | mvar name =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | sort level =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | const name levels =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | app fn arg =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | lam name domain body binderInfo =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | letE name type value body nondep =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | lit literal =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | mdata metadata body =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess
           | proj typeName projIndex body =>
-              apply hFallback
-              simpa [
-                psKernelInferAppOnlyLoopWithFuel,
-                hMore,
-                pending,
-                exposed
-              ] using hSuccess
+              exact hFallback hSuccess

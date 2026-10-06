@@ -57,3 +57,25 @@ inductive PsKernelTrustedNativeReduction
           (PsKernelExpr.const target targetLevels))
         (PsKernelExpr.lit
           (PsKernelLiteral.nat value))
+
+
+/-
+The native evaluator is intentionally outside the portable logical kernel.
+This law is the exact TCB bridge consumed by WHNF soundness: whenever the
+installed runtime capability publishes a native reduction, that answer must be
+a valid reduction in the current semantic environment/local context.
+
+Keeping the obligation at `psKernelReduceNative` avoids pretending that the
+opaque evaluator implementation has been verified inside the Assurance Plane.
+-/
+def PsKernelNativeReductionSoundLaw : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (expr result : PsKernelExpr),
+    psKernelReduceNative context expr =
+      Except.ok (Option.some result) ->
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      expr
+      result

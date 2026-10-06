@@ -285,7 +285,7 @@ theorem psKernelDefEqUnfold_preserves_semantic_sound
               value
               hIndex
               hDirect
-          unfold PsKernelCheckerStateSemanticSound at hState
+          unfold PsKernelCheckerStateSemanticSound at hState ⊢
           rcases hState with
             ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
           simpa [

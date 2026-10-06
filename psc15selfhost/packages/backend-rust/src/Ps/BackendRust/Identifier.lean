@@ -107,8 +107,10 @@ def psRustIdentifierReservedPrefix
     (value : String) : Bool :=
   if psRustIdentifierStartsWith value "__psr_" then
     true
+  else if psRustIdentifierStartsWith value "__ps_kw_" then
+    true
   else
-    psRustIdentifierStartsWith value "__ps_kw_"
+    psRustIdentifierStartsWith value "__ps_internal_"
 
 def psRustIdentifierStringIn
     (value : String)

@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Inference
 import Ps.KernelCore.Metatheory.Judgments
+import Ps.KernelCore.Metatheory.CheckedInferenceConfiguration
 
 theorem psKernelInferWithFuel_is_inferOnly_core
     (fuel : Nat)
@@ -154,4 +155,49 @@ theorem psKernelCheckWithFuel_refines_typing
       expr
       result
       false
+      hSuccess
+
+
+theorem psKernelCheckWithFuel_configuration_sound_contract
+    (fuel : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hString : PsKernelStringEqSoundLaw)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (hDefEq : PsKernelDefEqConfigurationSound defeq) :
+    PsKernelCheckedInferenceConfigurationSound
+      (fun context state expr =>
+        psKernelCheckWithFuel
+          fuel
+          whnf
+          defeq
+          context
+          state
+          expr) := by
+  have hCore :=
+    psKernelCheckedInferenceCoreConfigurationSound_contract
+      whnf
+      defeq
+      hString
+      hWhnf
+      hDefEq
+  intro context state nextState expr result hConfig hSuccess
+  exact
+    hCore
+      fuel
+      context
+      state
+      nextState
+      expr
+      result
+      hConfig
       hSuccess

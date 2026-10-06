@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 41 |
-| B | 10 |
-| C | 21 |
+| A | 44 |
+| B | 9 |
+| C | 19 |
 | D | 7 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -28,7 +28,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `API/Kernel.lean` | **A** | Public check-expression, WHNF, and true-defeq successes now refine independent typing/reduction/defeq judgments under explicit checker-operation soundness contracts; fail-closed orchestration remains proved. |
 | `API/KernelContractV1.lean` | **C** | Contract identity/version facts. |
 | `API/Outcome.lean` | **C** | Outcome classification/control facts. |
-| `API/Provider.lean` | **C** | Provider compatibility decision facts. |
+| `API/Provider.lean` | **A** | Under explicit string-runtime reflexivity/soundness TCB laws, `psKernelProviderCompatible = true` is equivalent to exact pinned `KernelContract-v1` target identity (Lean 4.34.0 and the pinned commit). |
 | `API/Session.lean` | **A** | Session environment construction is proved semantically transparent to native-evaluator installation and preserves `EnvironmentIndexRefines`, alongside fail-closed preflight facts. |
 | `Admission/Declaration/Admission.lean` | **A** | Successful checked safe-definition/theorem admission now refines the shared `PsKernelDeclarationExtension`; remaining declaration variants are being closed on the same relation. |
 | `Admission/Declaration/Validation.lean` | **A** | Successful definition-body validation refines `PsKernelDefinitionBodyValid`, including closedness, universe-parameter discipline, typing, and declared-type defeq under explicit checker soundness contracts. |
@@ -81,7 +81,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/Reduction/Primitives.lean` | **D** | Single aggregation/fuel fact. |
 | `Checker/Reduction/Whnf.lean` | **A** | Observable WHNF rules now bridge to the independent `PsKernelReductionClosure` relation for reflexive/metadata cases. |
 | `Checker/Reduction/WhnfCore.lean` | **A** | Zeta implementation now bridges to the independent `PsKernelReductionClosure`; additional beta/delta/projection coverage remains. |
-| `Checker/ResourcePolicy.lean` | **C** | Fail-closed/resource policy cases. |
+| `Checker/ResourcePolicy.lean` | **A** | Successful preflight certifies non-cancellation and nonzero fuel; declaration-size acceptance/denial refine explicit unbounded-or-bounded and overflow arithmetic properties. |
 | `Checker/Session.lean` | **A** | Session infer/check/WHNF/true-defeq successes now forward the independent semantic judgments while preserving the session context; error propagation remains proved. |
 | `Checker/State.lean` | **A** | Empty checker state now establishes independent inference-cache and successful-defeq-cache soundness invariants; field-isolation/freshness laws support preservation proofs. |
 | `Core/Declaration.lean` | **B** | Declaration projection/safety/delta facts. |
@@ -98,7 +98,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Environment/Lookup.lean` | **A** | Under `PsKernelEnvironmentIndexRefines`, indexed lookup is proved equal to authoritative `environment.constants` lookup. |
 | `Environment/Operations.lean` | **A** | Explicit semantic-history preservation for add/replace/Quot marking. |
 | `Environment/Semantic.lean` | **A** | Successful authoritative declaration-list lookup is proved to return an element of semantic history with a matching kernel name; list-length and replacement algebra remain supporting invariants. |
-| `Runtime/Acceleration/Cache.lean` | **B** | Map/pair-cache set/get foundations; whole-cache refinement invariant pending. |
+| `Runtime/Acceleration/Cache.lean` | **A** | Expression-map list→indexed rebuild is lookup-equivalent for every query; insertion preserves the inserted semantic answer across small→indexed promotion, and unordered defeq pair insertion preserves self-membership across the same promotion boundary. |
 | `Runtime/Acceleration/CachePolicy.lean` | **C** | Eligibility policy cases. |
 | `Runtime/Acceleration/EnvironmentIndex.lean` | **A** | Rebuilding the trie from any authoritative declaration list is proved lookup-equivalent to that list for every name, including same-name updates, different hashes, and hash-collision buckets; routing noninterference is proved separately. |
 | `Runtime/Capability/Lean434NativeReduction.lean` | **A** | Any successful native wrapper reduction now refines an explicit `PsKernelTrustedNativeReduction` relation carrying the evaluator result as a TCB premise; evaluator correctness remains intentionally trusted, not internally proved. |

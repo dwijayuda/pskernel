@@ -5097,10 +5097,21 @@ def psWasmLowerExprWorker
                         state := state
                       }
                   | .unit =>
-                      Except.ok {
-                        instructions := []
-                        state := state
-                      }
+                      match expected with
+                      | Option.none =>
+                          Except.ok {
+                            instructions := []
+                            state := state
+                          }
+                      | Option.some PsWasmValueType.i32 =>
+                          Except.ok {
+                            instructions :=
+                              [PsWasmInstruction.i32Const 0]
+                            state := state
+                          }
+                      | Option.some _ =>
+                          Except.error
+                            PsWasmLowerError.unsupportedType
               | .var name =>
                   match psWasmFindBindingIndex bindings name with
                   | Option.none =>

@@ -558,18 +558,16 @@ theorem psKernelInferProjectionWith_configuration_sound
                                               inductInfo.numParams
                                               inductInfo.numIndices) with
                                       | false =>
+                                          have hArgsLengthNe :
+                                              psKernelExprListLength args ≠
+                                                Nat.add
+                                                  inductInfo.numParams
+                                                  inductInfo.numIndices := by
+                                            intro hEq
+                                            simp [hEq] at hArgsLengthBool
                                           simp [
-                                            psKernelInferProjectionWith,
-                                            hInferRun,
-                                            hTypeWhnf,
-                                            hIndexBound,
-                                            hFn,
-                                            hTypeName,
-                                            hInductFind,
-                                            hCtors,
-                                            hCtorRest,
                                             args,
-                                            hArgsLengthBool
+                                            hArgsLengthNe
                                           ] at hSuccess
                                       | true =>
                                           have hArgsLength :

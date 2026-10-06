@@ -125,7 +125,10 @@ await writeFile(
 );
 
 requireSuccess(
-  execute("cargo", ["check", "--quiet"], { cwd: cargoRoot }),
+  execute("cargo", ["check", "--quiet"], {
+    cwd: cargoRoot,
+    env: { ...process.env, RUSTFLAGS: "-Awarnings" },
+  }),
   "PSC2_DIRECT_RUST_WHOLE_COMPILER_CARGO_CHECK_FAILED",
   "cargo",
   ["check", "--quiet"],

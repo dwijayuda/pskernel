@@ -556,3 +556,49 @@ theorem psKernelCheckerFreshLet_preserves_configuration
           nextLocal
           nextState
       from ⟨hIndex, hBoundNew, hStateNew⟩)
+
+
+theorem psKernelCheckerContextEnterRecDepth_preserves_configuration
+    (context nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hEnter :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext) :
+    PsKernelCheckerConfigurationSound
+      nextContext
+      state := by
+  unfold psKernelCheckerContextEnterRecDepth at hEnter
+  cases hUnlimited :
+      Nat.beq context.maxRecDepth 0 with
+  | true =>
+      simp [hUnlimited] at hEnter
+      subst nextContext
+      exact hConfig
+  | false =>
+      let nextDepth := Nat.succ context.recDepth
+      let limit :=
+        Nat.mul
+          context.maxRecDepth
+          psKernelRecDepthFactor
+      cases hTooDeep :
+          psKernelNatGt nextDepth limit with
+      | true =>
+          simp [
+            hUnlimited,
+            nextDepth,
+            limit,
+            hTooDeep
+          ] at hEnter
+      | false =>
+          simp [
+            hUnlimited,
+            nextDepth,
+            limit,
+            hTooDeep
+          ] at hEnter
+          subst nextContext
+          simpa [
+            PsKernelCheckerConfigurationSound
+          ] using hConfig

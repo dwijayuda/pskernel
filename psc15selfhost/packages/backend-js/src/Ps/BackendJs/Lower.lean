@@ -134,7 +134,14 @@ def psJsImportNameSupported
       else
         false
 
-def psJsPrimitiveTypeSupported
+def psJsProfileHasWordSize
+    (profile : Option PsJsTargetProfile) : Bool :=
+  match profile with
+  | Option.none => false
+  | Option.some _ => true
+
+def psJsPrimitiveTypeSupportedWithProfile
+    (profile : Option PsJsTargetProfile)
     (type : PsVerifiedIrPrimitiveType) : Bool :=
   match type with
   | PsVerifiedIrPrimitiveType.nat => true
@@ -143,19 +150,27 @@ def psJsPrimitiveTypeSupported
   | PsVerifiedIrPrimitiveType.uint16 => true
   | PsVerifiedIrPrimitiveType.uint32 => true
   | PsVerifiedIrPrimitiveType.uint64 => true
+  | PsVerifiedIrPrimitiveType.usize =>
+      psJsProfileHasWordSize profile
   | PsVerifiedIrPrimitiveType.int8 => true
   | PsVerifiedIrPrimitiveType.int16 => true
   | PsVerifiedIrPrimitiveType.int32 => true
   | PsVerifiedIrPrimitiveType.int64 => true
+  | PsVerifiedIrPrimitiveType.isize =>
+      psJsProfileHasWordSize profile
   | PsVerifiedIrPrimitiveType.float => true
   | PsVerifiedIrPrimitiveType.float32 => true
   | PsVerifiedIrPrimitiveType.bool => true
   | PsVerifiedIrPrimitiveType.char => true
   | PsVerifiedIrPrimitiveType.string => true
   | PsVerifiedIrPrimitiveType.unit => true
-  | _ => false
 
-def psJsTypeSupportedWithFuel
+def psJsPrimitiveTypeSupported
+    (type : PsVerifiedIrPrimitiveType) : Bool :=
+  psJsPrimitiveTypeSupportedWithProfile Option.none type
+
+def psJsTypeSupportedWithProfileAndFuel
+    (profile : Option PsJsTargetProfile)
     (fuel : Nat) :
     PsVerifiedIrType -> Bool :=
   match fuel with
@@ -163,11 +178,15 @@ def psJsTypeSupportedWithFuel
       fun (_type : PsVerifiedIrType) => false
   | Nat.succ remaining =>
       let smaller : PsVerifiedIrType -> Bool :=
-        psJsTypeSupportedWithFuel remaining;
+        psJsTypeSupportedWithProfileAndFuel
+          profile
+          remaining;
       fun (type : PsVerifiedIrType) =>
         match type with
         | PsVerifiedIrType.primitive primitive =>
-            psJsPrimitiveTypeSupported primitive
+            psJsPrimitiveTypeSupportedWithProfile
+              profile
+              primitive
         | PsVerifiedIrType.function parameters result =>
             if psVerifiedIrListAll smaller parameters then
               smaller result
@@ -185,20 +204,37 @@ def psJsTypeSupportedWithFuel
               psListIsEmpty arguments
         | _ => false
 
+def psJsTypeSupportedWithProfile
+    (profile : Option PsJsTargetProfile)
+    (type : PsVerifiedIrType) : Bool :=
+  psJsTypeSupportedWithProfileAndFuel
+    profile
+    64
+    type
+
 def psJsTypeSupported
     (type : PsVerifiedIrType) : Bool :=
-  psJsTypeSupportedWithFuel 64 type
+  psJsTypeSupportedWithProfile Option.none type
 
-def psJsOneTypeArgumentSupported
+def psJsOneTypeArgumentSupportedWithProfile
+    (profile : Option PsJsTargetProfile)
     (arguments : List PsVerifiedIrType) : Bool :=
   match arguments with
   | List.nil => false
   | List.cons value rest =>
       match rest with
-      | List.nil => psJsTypeSupported value
+      | List.nil =>
+          psJsTypeSupportedWithProfile profile value
       | List.cons _ _ => false
 
-def psJsTwoTypeArgumentsSupported
+def psJsOneTypeArgumentSupported
+    (arguments : List PsVerifiedIrType) : Bool :=
+  psJsOneTypeArgumentSupportedWithProfile
+    Option.none
+    arguments
+
+def psJsTwoTypeArgumentsSupportedWithProfile
+    (profile : Option PsJsTargetProfile)
     (arguments : List PsVerifiedIrType) : Bool :=
   match arguments with
   | List.nil => false
@@ -208,13 +244,25 @@ def psJsTwoTypeArgumentsSupported
       | List.cons second tail =>
           match tail with
           | List.nil =>
-              if psJsTypeSupported first then
-                psJsTypeSupported second
+              if
+                  psJsTypeSupportedWithProfile
+                    profile
+                    first then
+                psJsTypeSupportedWithProfile
+                  profile
+                  second
               else
                 false
           | List.cons _ _ => false
 
-def psJsLowerMachineIntegerType
+def psJsTwoTypeArgumentsSupported
+    (arguments : List PsVerifiedIrType) : Bool :=
+  psJsTwoTypeArgumentsSupportedWithProfile
+    Option.none
+    arguments
+
+def psJsLowerMachineIntegerTypeWithProfile
+    (profile : Option PsJsTargetProfile)
     (type : PsVerifiedIrMachineIntegerType) :
     Except PsJsLowerError PsJsIrMachineIntegerType :=
   match type with
@@ -226,6 +274,16 @@ def psJsLowerMachineIntegerType
       Except.ok PsJsIrMachineIntegerType.uint32
   | PsVerifiedIrMachineIntegerType.uint64 =>
       Except.ok PsJsIrMachineIntegerType.uint64
+  | PsVerifiedIrMachineIntegerType.usize =>
+      match profile with
+      | Option.none =>
+          Except.error PsJsLowerError.unsupportedType
+      | Option.some target =>
+          match target.wordSize with
+          | PsJsWordSize.bits32 =>
+              Except.ok PsJsIrMachineIntegerType.uint32
+          | PsJsWordSize.bits64 =>
+              Except.ok PsJsIrMachineIntegerType.uint64
   | PsVerifiedIrMachineIntegerType.int8 =>
       Except.ok PsJsIrMachineIntegerType.int8
   | PsVerifiedIrMachineIntegerType.int16 =>
@@ -234,10 +292,65 @@ def psJsLowerMachineIntegerType
       Except.ok PsJsIrMachineIntegerType.int32
   | PsVerifiedIrMachineIntegerType.int64 =>
       Except.ok PsJsIrMachineIntegerType.int64
-  | PsVerifiedIrMachineIntegerType.usize =>
-      Except.error PsJsLowerError.unsupportedType
   | PsVerifiedIrMachineIntegerType.isize =>
-      Except.error PsJsLowerError.unsupportedType
+      match profile with
+      | Option.none =>
+          Except.error PsJsLowerError.unsupportedType
+      | Option.some target =>
+          match target.wordSize with
+          | PsJsWordSize.bits32 =>
+              Except.ok PsJsIrMachineIntegerType.int32
+          | PsJsWordSize.bits64 =>
+              Except.ok PsJsIrMachineIntegerType.int64
+
+def psJsLowerMachineIntegerType
+    (type : PsVerifiedIrMachineIntegerType) :
+    Except PsJsLowerError PsJsIrMachineIntegerType :=
+  psJsLowerMachineIntegerTypeWithProfile
+    Option.none
+    type
+
+def psJsMachineIntegerLiteralCanonicalForProfile
+    (profile : Option PsJsTargetProfile)
+    (type : PsVerifiedIrMachineIntegerType)
+    (value : Int) : Bool :=
+  let parts : Bool × Nat :=
+    psVerifiedIrIntNegativeMagnitude value;
+  let negative : Bool := Prod.fst parts;
+  let magnitude : Nat := Prod.snd parts;
+  match type with
+  | PsVerifiedIrMachineIntegerType.usize =>
+      if negative then
+        false
+      else
+        match profile with
+        | Option.none => false
+        | Option.some target =>
+            match target.wordSize with
+            | PsJsWordSize.bits32 =>
+                Nat.ble magnitude 4294967295
+            | PsJsWordSize.bits64 =>
+                Nat.ble magnitude 18446744073709551615
+  | PsVerifiedIrMachineIntegerType.isize =>
+      match profile with
+      | Option.none => false
+      | Option.some target =>
+          match target.wordSize with
+          | PsJsWordSize.bits32 =>
+              if negative then
+                Nat.ble magnitude 2147483648
+              else
+                Nat.ble magnitude 2147483647
+          | PsJsWordSize.bits64 =>
+              if negative then
+                Nat.ble magnitude 9223372036854775808
+              else
+                Nat.ble magnitude 9223372036854775807
+  | _ =>
+      psVerifiedIrMachineIntegerLiteralCanonical
+        type
+        value
+
 
 def psJsLowerIntegerBinaryOp
     (operation : PsVerifiedIrIntegerBinaryOp) :

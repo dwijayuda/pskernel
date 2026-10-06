@@ -28,7 +28,12 @@ theorem psKernelExprMapIndexBucket_set_same_core
       entries := by
   induction fuel generalizing index hash with
   | zero =>
-      rfl
+      cases index <;>
+        simp [
+          psKernelExprPairSetIndexAsMapIndex,
+          psKernelExprPairSetIndexSet,
+          psKernelExprMapIndexSet
+        ]
   | succ remaining ih =>
       cases index <;>
         by_cases hEven : Nat.mod hash 2 = 0 <;>
@@ -575,13 +580,26 @@ theorem psKernelExprPairSetIndexBucket_as_map_core
         hash := by
   induction fuel generalizing index hash with
   | zero =>
-      cases index <;> rfl
+      cases index <;>
+        simp [
+          psKernelExprPairSetIndexAsMapIndex,
+          psKernelExprMapIndexBucket,
+          psKernelExprPairSetIndexBucket
+        ]
   | succ remaining ih =>
       cases index with
       | empty =>
-          rfl
+          simp [
+            psKernelExprPairSetIndexAsMapIndex,
+            psKernelExprMapIndexBucket,
+            psKernelExprPairSetIndexBucket
+          ]
       | bucket entries =>
-          rfl
+          simp [
+            psKernelExprPairSetIndexAsMapIndex,
+            psKernelExprMapIndexBucket,
+            psKernelExprPairSetIndexBucket
+          ]
       | branch left right =>
           by_cases hEven :
               Nat.mod hash 2 = 0 <;>
@@ -796,7 +814,7 @@ theorem psKernelExprPairEq_true_cases_core
           psKernelExprPairEq,
           hFirst
         ] using h
-      exact ⟨hFirst, hSecond⟩
+      exact ⟨rfl, hSecond⟩
   | false =>
       cases hSwap :
           psKernelExprEq storedLeft queryRight with
@@ -815,7 +833,7 @@ theorem psKernelExprPairEq_true_cases_core
               hFirst,
               hSwap
             ] using h
-          exact ⟨hSwap, hSecond⟩
+          exact ⟨rfl, hSecond⟩
 
 theorem psKernelExprPairEq_true_refines_presentation_core
     (queryLeft queryRight storedLeft storedRight : PsKernelExpr)
@@ -907,7 +925,7 @@ theorem psKernelExprPairSetContainsIn_cons_true_cases_core
   cases hHead :
       psKernelExprPairEq queryLeft queryRight entry with
   | true =>
-      exact Or.inl hHead
+      exact Or.inl rfl
   | false =>
       right
       simpa [

@@ -5,6 +5,15 @@ import Lean.Elab.Tactic.Omega
 Routing refinement for the 16-level environment index trie.
 -/
 
+theorem psKernelNat_eq_of_div_two_eq_and_mod_two_eq
+    (left right : Nat)
+    (hDiv : Nat.div left 2 = Nat.div right 2)
+    (hMod : Nat.mod left 2 = Nat.mod right 2) :
+    left = right := by
+  have hLeft := Nat.mod_add_div left 2
+  have hRight := Nat.mod_add_div right 2
+  omega
+
 theorem psKernelEnvironmentIndexFindWorker_setWorker_other_bounded
     (fuel : Nat)
     (index : PsKernelEnvironmentIndex)
@@ -25,6 +34,7 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_other_bounded
   induction fuel generalizing index setHash findHash with
   | zero =>
       simp [Nat.pow_zero] at hSetBound hFindBound
+      omega
   | succ remaining ih =>
       have hSetBound' : setHash < Nat.pow 2 remaining * 2 := by
         simpa [Nat.pow_succ] using hSetBound
@@ -33,15 +43,21 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_other_bounded
       by_cases hSetEven : Nat.mod setHash 2 = 0
       · by_cases hFindEven : Nat.mod findHash 2 = 0
         · have hSetDiv :
-              Nat.div setHash 2 < Nat.pow 2 remaining := by
-            omega
+              Nat.div setHash 2 < Nat.pow 2 remaining :=
+            (Nat.div_lt_iff_lt_mul Nat.zero_lt_two).2 hSetBound'
           have hFindDiv :
-              Nat.div findHash 2 < Nat.pow 2 remaining := by
-            omega
+              Nat.div findHash 2 < Nat.pow 2 remaining :=
+            (Nat.div_lt_iff_lt_mul Nat.zero_lt_two).2 hFindBound'
+          have hMod :
+              Nat.mod setHash 2 = Nat.mod findHash 2 := by
+            rw [hSetEven, hFindEven]
           have hDivDifferent :
               Nat.div setHash 2 ≠ Nat.div findHash 2 := by
             intro hDiv
-            omega
+            apply hDifferent
+            exact
+              psKernelNat_eq_of_div_two_eq_and_mod_two_eq
+                setHash findHash hDiv hMod
           have hRec :=
             ih
               index
@@ -74,15 +90,29 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_other_bounded
               hFindEven
             ]
         · have hSetDiv :
-              Nat.div setHash 2 < Nat.pow 2 remaining := by
-            omega
+              Nat.div setHash 2 < Nat.pow 2 remaining :=
+            (Nat.div_lt_iff_lt_mul Nat.zero_lt_two).2 hSetBound'
           have hFindDiv :
-              Nat.div findHash 2 < Nat.pow 2 remaining := by
-            omega
+              Nat.div findHash 2 < Nat.pow 2 remaining :=
+            (Nat.div_lt_iff_lt_mul Nat.zero_lt_two).2 hFindBound'
+          have hSetModOne : Nat.mod setHash 2 = 1 := by
+            rcases Nat.mod_two_eq_zero_or_one setHash with hZero | hOne
+            · exact False.elim (hSetEven hZero)
+            · exact hOne
+          have hFindModOne : Nat.mod findHash 2 = 1 := by
+            rcases Nat.mod_two_eq_zero_or_one findHash with hZero | hOne
+            · exact False.elim (hFindEven hZero)
+            · exact hOne
+          have hMod :
+              Nat.mod setHash 2 = Nat.mod findHash 2 := by
+            rw [hSetModOne, hFindModOne]
           have hDivDifferent :
               Nat.div setHash 2 ≠ Nat.div findHash 2 := by
             intro hDiv
-            omega
+            apply hDifferent
+            exact
+              psKernelNat_eq_of_div_two_eq_and_mod_two_eq
+                setHash findHash hDiv hMod
           have hRec :=
             ih
               index

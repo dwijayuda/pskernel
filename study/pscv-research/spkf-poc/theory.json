@@ -1,0 +1,24 @@
+{
+  "schema": "spkf-poc/0",
+  "kind": "knowledge-root",
+  "semanticProfile": "pscv-demo/0",
+  "name": "identity-nat",
+  "interface": {
+    "definitions": [
+      {
+        "name": "identityNat",
+        "type": "Nat -> Nat"
+      }
+    ]
+  },
+  "specifications": [
+    {
+      "name": "identityNat_spec",
+      "statement": "forall x : Nat, identityNat x = x"
+    }
+  ],
+  "capabilities": [
+    "identity.nat"
+  ],
+  "assumptions": []
+}

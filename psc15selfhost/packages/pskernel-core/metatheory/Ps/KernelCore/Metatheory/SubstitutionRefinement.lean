@@ -1,5 +1,6 @@
 import Ps.KernelCore.Metatheory.Substitution
 import Ps.KernelCore.Core.Substitution.Instantiate
+import Ps.KernelCore.Core.Substitution.Abstract
 
 theorem psKernelExprLiftLooseBVarsChanged_zero_amount_core
     (expr : PsKernelExpr)

@@ -688,3 +688,522 @@ Direct JS/Wasm executable artifacts have accepted preservation evidence.
 The first genuine proof that SAVEF works as a factory is S3 plus S4.
 
 S5 and S6 strengthen assurance but are not required to demonstrate the economic self-amplification hypothesis.
+
+
+---
+
+# 21. Proof-leverage ordering
+
+Do not prove modules in alphabetical order.
+
+Prioritize modules that create reusable lemmas for many downstream algorithms.
+
+Recommended strata:
+
+~~~text
+L0
+foundation + core
+
+L1
+environment + CompilerIr.Model
+
+L2
+meta + CompilerIr.Specialize
+
+L3
+erasure
+
+L4
+syntax / translation
+
+L5
+elaboration
+
+L6
+compiler API / whole semantic compiler
+
+L7
+direct JS/Wasm backends
+~~~
+
+This ordering deliberately postpones the largest frontend modules until the theory graph is richer.
+
+---
+
+# 22. L0 — foundation and core
+
+Subject size:
+
+~~~text
+12 modules
+approximately 1,113 lines
+~~~
+
+This is the best knowledge seed.
+
+## Foundation/List
+
+Candidate reusable theorems:
+
+- psListLength agrees with List.length;
+- length of psListAppend;
+- reverse preserves length;
+- reverse of reverse;
+- map preserves length;
+- map composition;
+- take length bound;
+- zip length bound;
+- psListMapExcept success implies pointwise conversion success.
+
+These are highly reusable across syntax, environment, meta, erasure, and IR specialization.
+
+## Foundation/Name
+
+Candidate theorems:
+
+- psStringEq correctness;
+- psNameEq correctness;
+- depth behavior under append;
+- append/string rendering compatibility;
+- last-component properties;
+- hash/equality compatibility where later required.
+
+## Core/Equality
+
+Candidate semantic relation:
+
+~~~text
+PsExprAlphaEqSound
+~~~
+
+with supporting level/literal/binder equality results.
+
+## Core/Subst and Core/Abstract
+
+Candidate theorems:
+
+- lift reference semantics;
+- instantiate reference semantics;
+- lift composition;
+- instantiate/lift interaction;
+- closed-term identity;
+- abstraction/instantiation roundtrip;
+- capture-avoidance conditions.
+
+These are among the highest-leverage compiler theorems because meta inference, reduction, elaboration, and erasure all depend on substitution behavior.
+
+## L0 output
+
+For every accepted theorem:
+
+- checked proof artifact;
+- theorem identity;
+- dependency slice;
+- reusable proof recipe if useful;
+- SPKF theory extension or theorem-set update.
+
+## L0 gate
+
+L0 is complete when:
+
+1. every selected public helper law has checked evidence;
+2. exported theorem interfaces are canonical;
+3. at least one L0 theorem is reused by an L1 proof;
+4. knowledge extraction is deterministic.
+
+---
+
+# 23. L1 — environment and CompilerIr.Model
+
+Subject size:
+
+~~~text
+environment
+    7 modules
+    approximately 2,091 lines
+
+CompilerIr.Model
+    approximately 1,095 lines
+~~~
+
+This layer creates state/index/validation invariants used throughout later compiler work.
+
+## Environment candidate contracts
+
+Important abstractions:
+
+~~~text
+EnvironmentSemanticView
+EnvironmentIndexRefines
+UniqueDeclarationNames
+LookupSound
+AddPreservesWellFormedness
+~~~
+
+Candidate theorems:
+
+- indexed lookup equals authoritative list lookup under refinement invariant;
+- successful lookup returns declaration with matching name;
+- adding fresh declaration preserves unrelated lookup;
+- permitted axiom replacement obeys exact policy;
+- environment-add success establishes declared uniqueness/well-formedness conditions;
+- instance collection/order is deterministic under the selected profile.
+
+The PSKernel proof branch already contains similar environment-index refinement ideas.
+
+SAVEF should reuse the pattern while proving the compiler environment's own semantics.
+
+## CompilerIr.Model candidate contracts
+
+Define an explicit predicate:
+
+~~~text
+VerifiedIrWellFormed(module)
+~~~
+
+covering at least:
+
+- all executable types resolved;
+- no unresolved unknown in accepted executable positions;
+- names resolve;
+- calls have valid arity;
+- record/constructor fields exist;
+- match alternatives are valid;
+- intrinsic forms are accepted;
+- external references are declared;
+- runtime representations are supported.
+
+Target theorem:
+
+~~~text
+psValidateErasedIrModule raw = ok validated
+    ->
+VerifiedIrWellFormed(validated)
+~~~
+
+This is one of the highest-value compiler theorems.
+
+## L1 gate
+
+L1 is complete when downstream proofs can consume abstract environment and VerifiedIR invariants rather than reopen their implementations.
+
+---
+
+# 24. First CertifiedModuleInterface prototype
+
+L1 should produce the first compiler-specific CertifiedModuleInterface prototype.
+
+Start with a small module such as Foundation.List or Core.Subst.
+
+The prototype should contain:
+
+~~~text
+module identity
+semantic profile identity
+exported declarations/types
+opaque versus transparent export classification
+approved specifications
+theorem interface
+assumption closure
+dependency interface IDs
+~~~
+
+The first goal is not ecosystem packaging.
+
+The goal is to establish the compiler-scale abstraction rule:
+
+~~~text
+private implementation changes
+    while
+CertifiedModuleInterface remains equivalent
+    ->
+dependent proof context need not reopen private implementation
+~~~
+
+---
+
+# 25. L2 — meta and specialization
+
+Subject size:
+
+~~~text
+meta
+    6 modules
+    approximately 1,976 lines
+
+CompilerIr.Specialize
+    approximately 1,820 lines
+~~~
+
+This is where SAVEF should begin showing significant proof reuse.
+
+## Meta/Reduce
+
+Define an independent reduction relation for the compiler meta layer.
+
+Candidate properties:
+
+- successful WHNF is reachable by that relation;
+- reduction preserves relevant typing assumptions where required;
+- read-only defeq does not mutate semantic environment;
+- fuel exhaustion is never success.
+
+## Meta/Infer
+
+Target relation:
+
+~~~text
+CompilerTypingJudgment
+~~~
+
+Candidate theorem:
+
+~~~text
+psInferType succeeds
+    ->
+CompilerTypingJudgment environment context expr inferredType
+~~~
+
+Soundness is the first requirement. Completeness is not required initially.
+
+## Meta/Unify
+
+Candidate relation:
+
+~~~text
+UnificationSolutionSound
+~~~
+
+Successful assignments must satisfy the equations they claim to solve under explicit meta-context assumptions.
+
+## Meta/SynthInstance
+
+Candidate properties:
+
+- returned instance has the requested class type;
+- ordering/priority follows deterministic policy;
+- unsupported ambiguity fails closed;
+- synthesis does not silently widen assumptions.
+
+## CompilerIr.Specialize
+
+Candidate theorem family:
+
+~~~text
+specialization preserves observable VerifiedIR semantics
+~~~
+
+Initial sub-results:
+
+- generated specializations are ground;
+- type substitution is correct;
+- specialized names/keys are deterministic;
+- seen/pending structures obey invariants;
+- successful final output has no unresolved type parameters;
+- reference closure is preserved.
+
+---
+
+# 26. L3 — erasure
+
+Subject size:
+
+~~~text
+6 modules
+approximately 3,747 lines
+~~~
+
+Erasure is central to PSCV because proof/specification material must disappear without changing runtime behavior.
+
+Target relation:
+
+~~~text
+ErasureRefines
+    certified source
+    RuntimeIR
+~~~
+
+Candidate results:
+
+- erased proof/ghost binders do not influence runtime observations;
+- runtime-relevant binders preserve order/reference mapping;
+- constructor/structure layout mapping is consistent;
+- generated names are deterministic and collision-safe under explicit assumptions;
+- erased expression references resolve;
+- primitive/runtime type mapping preserves selected representation contracts.
+
+Long-term theorem shape:
+
+~~~text
+sourceExecSemantics(source)
+    ~
+runtimeIrSemantics(erase(source))
+~~~
+
+The first implementation can prove local transformation lemmas before composing the whole relation.
+
+---
+
+# 27. L4 — syntax and translation
+
+Subject size:
+
+~~~text
+12 modules
+approximately 8,207 lines
+~~~
+
+This is the largest single package group and is deliberately postponed.
+
+First targets:
+
+- token-span monotonicity and bounds;
+- lexer progress under fuel;
+- parser cursor bounds;
+- canonical printer determinism;
+- parse-print roundtrip on supported canonical AST forms;
+- ProofScript print-parse canonical roundtrip;
+- translation preserves the selected syntax-level semantic representation;
+- translation error paths are fail-closed.
+
+The repository already requires canonical ProofScript reprint idempotence.
+
+SAVEF should convert useful parts of that executable invariant into reusable semantic specifications.
+
+Long-term target:
+
+~~~text
+parse(print(ast)) = ast
+~~~
+
+modulo explicitly defined canonical equivalence.
+
+---
+
+# 28. L5 — elaboration
+
+Subject size:
+
+~~~text
+4 modules
+approximately 4,792 lines
+~~~
+
+This is likely the hardest semantic compiler slice.
+
+It is also where SAVEF should provide the clearest productivity evidence.
+
+Target theorem shape:
+
+~~~text
+psElabTerm succeeds
+    ->
+ElaborationJudgment
+        environment
+        localContext
+        syntax
+        coreExpr
+        type
+~~~
+
+and:
+
+~~~text
+psElabDeclaration succeeds
+    ->
+CandidateDeclarationWellTyped
+~~~
+
+under explicit assumptions about meta operations.
+
+Elaboration proofs should reuse:
+
+- name/equality laws;
+- substitution laws;
+- environment lookup laws;
+- inference soundness;
+- unification soundness;
+- instance-synthesis laws;
+- parser AST invariants.
+
+This layer is a natural test of whether accumulated theorem interfaces reduce context and proof construction cost.
+
+---
+
+# 29. L6 — compiler API composition
+
+Subject size:
+
+~~~text
+2 modules
+approximately 294 lines
+~~~
+
+The compiler API itself is small.
+
+The old proof experiment already shows that wrapper/control-flow proofs are cheap.
+
+Do not mistake them for compiler correctness.
+
+Once lower layers exist, the API can compose their results into stronger end-to-end claims.
+
+Target pipeline:
+
+~~~text
+source
+    ->
+parsed module
+    ->
+elaborated CandidateCore
+    ->
+AdmissionReady
+    ->
+CheckedCore
+    ->
+CertifiedSource
+    ->
+VerifiedIR
+~~~
+
+Target theorem families:
+
+~~~text
+compile-check success
+    ->
+source accepted under selected semantic profile
+
+certified source
+    ->
+all required specs/proofs/effects/assumptions closed
+
+verified IR success
+    ->
+VerifiedIrWellFormed
+~~~
+
+---
+
+# 30. Real CheckedCore milestone
+
+This milestone should happen early enough to prevent SAVEF from building authority on the wrong state.
+
+Required implementation:
+
+~~~text
+AdmissionReady
+    |
+    | KernelContract
+    v
+CheckedCore
+~~~
+
+Construction of CheckedCore must be restricted to the designated provider result.
+
+If generated JavaScript cannot enforce opaque construction through source privacy, use a provider-owned checked handle containing:
+
+- session identity;
+- checked-core digest;
+- kernel-contract identity;
+- semantic-profile identity.
+
+After this milestone, authoritative compiler logical claims should key to CheckedCore or stronger identities rather than AdmissionReady serialization.

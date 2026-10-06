@@ -59,7 +59,7 @@ theorem psKernelFindConstantInList_some_mem_and_matches
           ] at hFind
           subst info
           constructor
-          · simp
+          · exact List.Mem.head tail
           · exact hMatch
       | false =>
           simp [

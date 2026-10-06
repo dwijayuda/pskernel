@@ -937,3 +937,71 @@ theorem psKernelExprEq_refl_of_string_law
         psKernelNameEq_refl_of_string_law hString,
         ihBody
       ]
+
+
+/-
+The portable String comparator ultimately depends on opaque Lean runtime string
+primitives.  Soundness is therefore named explicitly as a TCB law rather than
+being silently assumed by higher layers.
+-/
+
+def PsKernelStringEqSoundLaw : Prop :=
+  ∀ (left right : String),
+    psKernelStringEq left right = true ->
+      left = right
+
+theorem psKernelNameEq_sound_of_string_law
+    (hString : PsKernelStringEqSoundLaw)
+    (left right : PsKernelName)
+    (hEq : psKernelNameEq left right = true) :
+    left = right := by
+  induction left generalizing right with
+  | anonymous =>
+      cases right with
+      | anonymous =>
+          rfl
+      | str parent value =>
+          simp [psKernelNameEq] at hEq
+      | num parent value =>
+          simp [psKernelNameEq] at hEq
+  | str leftParent leftValue ih =>
+      cases right with
+      | anonymous =>
+          simp [psKernelNameEq] at hEq
+      | num rightParent rightValue =>
+          simp [psKernelNameEq] at hEq
+      | str rightParent rightValue =>
+          cases hStringEq :
+              psKernelStringEq leftValue rightValue with
+          | false =>
+              simp [psKernelNameEq, hStringEq] at hEq
+          | true =>
+              have hParent :
+                  psKernelNameEq leftParent rightParent = true := by
+                simpa [psKernelNameEq, hStringEq] using hEq
+              have hValue :
+                  leftValue = rightValue :=
+                hString leftValue rightValue hStringEq
+              have hParentEq :
+                  leftParent = rightParent :=
+                ih rightParent hParent
+              subst rightValue
+              subst rightParent
+              rfl
+  | num leftParent leftValue ih =>
+      cases right with
+      | anonymous =>
+          simp [psKernelNameEq] at hEq
+      | str rightParent rightValue =>
+          simp [psKernelNameEq] at hEq
+      | num rightParent rightValue =>
+          have hParts :
+              leftValue = rightValue ∧
+              psKernelNameEq leftParent rightParent = true := by
+            simpa [psKernelNameEq] using hEq
+          have hParentEq :
+              leftParent = rightParent :=
+            ih rightParent hParts.2
+          subst rightValue
+          subst rightParent
+          rfl

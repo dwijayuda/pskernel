@@ -82,6 +82,13 @@ inductive PsKernelReductionStep
         localContext
         (PsKernelExpr.fvar name)
         value
+  | stringLiteral
+      (value : String) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.lit (PsKernelLiteral.str value))
+        (psKernelStringLitToConstructor value)
   | projection
       (typeName ctorName : PsKernelName)
       (ctorLevels : List PsKernelLevel)

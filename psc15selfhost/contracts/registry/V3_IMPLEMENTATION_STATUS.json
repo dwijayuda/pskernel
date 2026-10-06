@@ -194,7 +194,9 @@
         "scripts/wasm-literal-binary-validator.mjs",
         "scripts/wasm-literal-certificate.mjs",
         "packages/backend-rust/src/Ps/BackendRust/Tail.lean",
-        "packages/backend-rust/src/Ps/BackendRust/TailAlias.lean"
+        "packages/backend-rust/src/Ps/BackendRust/TailAlias.lean",
+        "packages/backend-js/src/Ps/BackendJs/TailAlias.lean",
+        "packages/backend-js/src/Ps/BackendJs/Print.lean"
       ],
       "completion": "Supported JS/Wasm/TS/Rust paths compile, validate and report unsupported cases deterministically.",
       "assurance": "pending"

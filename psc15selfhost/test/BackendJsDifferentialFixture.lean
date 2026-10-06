@@ -1,4 +1,5 @@
 import BackendJsFixture
+import BackendJsTailFixture
 import Ps.BackendJs.Print
 import Ps.BackendTs.Module
 
@@ -20,6 +21,10 @@ def psBackendJsDiffEmitTs : Except String String :=
 
 def main (args : List String) : IO Unit := do
   match args with
+  | ["tail"] =>
+      match psJsPrintModuleStackSafe psJsTailFixtureModule with
+      | Except.error _ => throw (IO.userError "PSC2_BACKEND_JS_TAIL_EMIT_FAILED")
+      | Except.ok output => IO.print output
   | ["js"] =>
       match psBackendJsDiffEmitJs with
       | Except.error target =>
@@ -41,4 +46,4 @@ def main (args : List String) : IO Unit := do
   | _ =>
       throw
         (IO.userError
-          "usage: psc1_backend_js_diff_fixture <js|ts>")
+          "usage: psc1_backend_js_diff_fixture <js|ts|tail>")

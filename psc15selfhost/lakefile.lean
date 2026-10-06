@@ -107,7 +107,8 @@ lean_lib PsBackendJs where
   roots := #[
     `Ps.BackendJs.Model,
     `Ps.BackendJs.Lower,
-    `Ps.BackendJs.Print
+    `Ps.BackendJs.Print,
+    `Ps.BackendJs.TailAlias
   ]
 
 lean_lib PsDriverTs where
@@ -390,7 +391,7 @@ lean_exe psc1_backend_ts_tests where
 
 lean_lib PsBackendJsTestSupport where
   srcDir := "test"
-  roots := #[`BackendJsFixture]
+  roots := #[`BackendJsFixture, `BackendJsTailFixture]
 
 lean_exe psc1_backend_js_tests where
   srcDir := "test"

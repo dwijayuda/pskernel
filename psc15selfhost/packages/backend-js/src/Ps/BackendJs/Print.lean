@@ -1,4 +1,5 @@
 import Ps.BackendJs.Lower
+import Ps.BackendJs.TailAlias
 import Ps.Bridge.Json
 import Ps.Foundation.List
 import Ps.Foundation.Name
@@ -897,26 +898,22 @@ def psJsPrintExprWithModeAndFuel
                         (psJsJoin
                           ""
                           [
-                            "(yield* (function*() { const ",
+                            "(yield* (function*(",
                             name,
-                            " = ",
-                            printedValue,
-                            "; return ",
+                            ") { return ",
                             printedBody,
-                            "; })())"
+                            "; })(", printedValue, "))"
                           ])
                     else
                       Except.ok
                         (psJsJoin
                           ""
                           [
-                            "(() => { const ",
+                            "((",
                             name,
-                            " = ",
-                            printedValue,
-                            "; return ",
+                            ") => ",
                             printedBody,
-                            "; })()"
+                            ")(", printedValue, ")"
                           ])
         | PsJsIrExpr.ifE
             condition
@@ -1258,6 +1255,7 @@ def psJsTailPrintAlternativesWith
 
 def psJsTailEmitWithFuel
     (declaration : PsJsIrDeclaration)
+    (available : String -> Bool)
     (fuel : Nat) :
     Nat -> PsJsIrExpr -> Option String :=
   match fuel with
@@ -1269,6 +1267,7 @@ def psJsTailEmitWithFuel
           Nat -> PsJsIrExpr -> Option String :=
         psJsTailEmitWithFuel
           declaration
+          available
           remaining;
       fun (matchDepth : Nat) (expr : PsJsIrExpr) =>
         let sameDepth : PsJsIrExpr -> Option String :=
@@ -1294,12 +1293,7 @@ def psJsTailEmitWithFuel
                           (psJsJoin
                             ""
                             [
-                              "[",
-                              psJsJoin
-                                ", "
-                                (psJsTailParameterNames
-                                  declaration.parameters),
-                              "] = [",
+                              "__ps$tail$state = [",
                               psJsJoin ", " printedArguments,
                               "]; continue;"
                             ])
@@ -1342,17 +1336,16 @@ def psJsTailEmitWithFuel
                   match sameDepth body with
                   | Option.none => Option.none
                   | Option.some printedBody =>
-                      Option.some
-                        (psJsJoin
-                          ""
-                          [
-                            "const ",
-                            name,
-                            " = ",
-                            printedValue,
-                            "; ",
-                            printedBody
-                          ])
+                      let temp := String.Internal.append "__ps$tail$value$" (psNatToString remaining);
+                      if available temp then
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "{ const ", temp, " = ", printedValue,
+                              "; { const ", name, " = ", temp, "; ", printedBody, " } }"
+                            ])
+                      else Option.none
         | PsJsIrExpr.ifE condition thenBranch elseBranch =>
             match
                 psJsTailPrintNonRecursive
@@ -1429,30 +1422,30 @@ def psJsPrintTailLoop
   match declaration.parameters with
   | List.nil => Option.none
   | List.cons _ _ =>
-      match
-          psJsTailEmitWithFuel
-            declaration
-            4096
-            0
-            declaration.body with
-      | Option.none => Option.none
-      | Option.some printedBody =>
-          let parameters : String :=
-            psJsJoin
-              ", "
-              (psJsTailParameterNames declaration.parameters);
-          Option.some
-            (psJsJoin
-              ""
-              [
-                "export function ",
-                declaration.name,
-                "(",
-                parameters,
-                ") { while (true) { ",
-                printedBody,
-                " } }\n"
-              ])
+      let names := psJsTailParameterNames declaration.parameters;
+      let uses : PsJsIrExpr -> String -> Bool := psJsExprUsesNameWithFuel 4096;
+      let available : String -> Bool := fun (name : String) =>
+        if psStringEq name declaration.name then false
+        else if psJsTailContains names name then false
+        else if uses declaration.body name then false else true;
+      if uses declaration.body declaration.name then
+        if available "__ps$tail$state" then
+          match psJsTailRewriteWithFuel declaration uses available 4096 names List.nil declaration.body with
+          | Option.none => Option.none
+          | Option.some rewritten =>
+              match psJsTailEmitWithFuel declaration available 4096 0 rewritten with
+              | Option.none => Option.none
+              | Option.some printedBody =>
+                  let parameters := psJsJoin ", " names;
+                  Option.some
+                    (psJsJoin "" [
+                      "export function ", declaration.name, "(", parameters,
+                      ") { let __ps$tail$state = [", parameters,
+                      "]; while (true) { const [", parameters,
+                      "] = __ps$tail$state; ", printedBody, " } }\n"
+                    ])
+        else Option.none
+      else Option.none
 
 def psJsPrintDeclarationStackSafe
     (declaration : PsJsIrDeclaration) :

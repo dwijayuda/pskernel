@@ -28,7 +28,7 @@
     {
       "id": "backend-preservation",
       "status": "pending",
-      "required": "Check complete supported backend semantics, differential/adversarial corpora, artifact validators and ABI adapters; unsupported slices must fail closed."
+      "required": "Check complete supported backend semantics, differential/adversarial corpora, artifact validators and ABI adapters; unsupported slices must fail closed. JavaScript now lowers saturated decreasing-worker aliases to loops with frozen captures and immutable iteration parameters; focused source/printer execution and the portable round-trip contract pass. Global preservation and the actual whole-compiler fixed point remain separate obligations."
     },
     {
       "id": "selfhost-fixed-points",

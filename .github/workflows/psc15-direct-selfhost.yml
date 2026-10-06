@@ -51,7 +51,8 @@ jobs:
             psc1 \
             psc1_ir_specialize_tests \
             psc1_erasure_tests \
-            psc1_backend_js_tests
+            psc1_backend_js_tests \
+            psc1_backend_js_diff_fixture
 
       - name: Run shared and direct JS regressions
         working-directory: psc15selfhost
@@ -59,6 +60,7 @@ jobs:
           lake exe psc1_ir_specialize_tests
           lake exe psc1_erasure_tests
           lake exe psc1_backend_js_tests
+          node scripts/backend-js-tail.test.mjs
           npm run test:erasure-eta
 
       - name: Prove direct JavaScript whole-compiler fixed point

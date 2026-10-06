@@ -1,4 +1,5 @@
 import BackendJsFixture
+import BackendJsTailFixture
 import Ps.BackendJs.Print
 
 def psBackendJsExpected : String :=
@@ -39,8 +40,8 @@ def psBackendJsExpected : String :=
   "export function externalNamedDemo(value) { return namedIdentity(value); }\n" ++
   "export function externalDefaultDemo(value) { return externalDefault(value); }\n" ++
   "export function genericIdNat(value) { return genericId$spec$Nat(value); }\n" ++
-  "export function pointSum(left, right) { return (() => { const point = ({ \"x\": left, \"y\": right }); return ((point)[\"x\"] + (point)[\"y\"]); })(); }\n" ++
-  "export function boxNatGet(value) { return (() => { const box = ({ \"value\": value }); return (box)[\"value\"]; })(); }\n" ++
+  "export function pointSum(left, right) { return ((point) => ((point)[\"x\"] + (point)[\"y\"]))(({ \"x\": left, \"y\": right })); }\n" ++
+  "export function boxNatGet(value) { return ((box) => (box)[\"value\"])(({ \"value\": value })); }\n" ++
   "export function maybeSomeOrZero(value) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return 0n; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { \"value\": value } })); }\n" ++
   "export function maybeNoneOr(fallback) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return fallback; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"none\", \"$ps$fields\": {  } })); }\n" ++
   "export function optionNatSome(value) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return 0n; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { \"value\": value } })); }\n" ++
@@ -53,7 +54,7 @@ def psBackendJsExpected : String :=
   "export const u8Literal44 = Number(BigInt.asUintN(8, 44n));\n" ++
   "export function float32Mul(left, right) { return Math.fround((left * right)); }\n" ++
   "export function floatDiv(left, right) { return (left / right); }\n" ++
-  "export function letNatDemo(x) { return (() => { const y = (x + 1n); return (y * 2n); })(); }\n" ++
+  "export function letNatDemo(x) { return ((y) => (y * 2n))((x + 1n)); }\n" ++
   "export function applyLambda(x) { return ((y) => (y + 2n))(x); }\n" ++
   "export function genericId$spec$Nat(x) { return x; }\n"
 
@@ -440,7 +441,7 @@ def psTestBackendJsTailLoop : Bool :=
   | Except.error _ => false
   | Except.ok output =>
       output.contains
-        "export function tail(n) { while (true) { [n] = [n]; continue; } }"
+        "export function tail(n) { let __ps$tail$state = [n]; while (true) { const [n] = __ps$tail$state; __ps$tail$state = [n]; continue; } }"
         && !output.contains "function* __ps$impl$tail"
 
 
@@ -506,7 +507,7 @@ def psTestBackendJsNestedTailMatchHygiene : Bool :=
       output.contains "const __ps$tail$match$0"
         && output.contains "const __ps$tail$match$1"
         && output.contains
-          "[value] = [next2]; continue;"
+          "__ps$tail$state = [next2]; continue;"
 
 
 structure PsBackendJsNamedTest where
@@ -514,6 +515,7 @@ structure PsBackendJsNamedTest where
   passed : Bool
 
 def psBackendJsTests : List PsBackendJsNamedTest := [
+  { name := "removed worker aliases cannot be captured as values", passed := psJsTailFixtureCapturedAliasDeclined },
   { name := "fixture emission", passed := psTestBackendJsFixtureEmission },
   { name := "UTF-8 runtime name rejection", passed := !psJsIdentifierSupported "__ps$utf8" && !psJsIdentifierSupported "__ps$utf8Cache" },
   { name := "keyword rejection", passed := psTestBackendJsRejectsKeywordName },

@@ -177,7 +177,9 @@ jobs:
 
       - name: Differential direct JavaScript against TS to tsc
         working-directory: psc15selfhost
-        run: node scripts/backend-js-differential.test.mjs
+        run: |
+          node scripts/backend-js-differential.test.mjs
+          node scripts/backend-js-tail.test.mjs
 
       - name: Run Rust source driver corpus
         working-directory: psc15selfhost

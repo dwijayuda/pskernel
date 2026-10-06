@@ -358,8 +358,8 @@ def psPrintLeanTermWithFuel
               let printType :
                   Except PsSourcePrintError String :=
                 match type with
-                | none => Except.ok ""
-                | some declaredType =>
+                | Option.none => Except.ok ""
+                | Option.some declaredType =>
                     match smaller declaredType with
                     | Except.error error => Except.error error
                     | Except.ok printed =>
@@ -599,8 +599,8 @@ def psPrintLeanDeclaration
               let printResult :
                   Except PsSourcePrintError String :=
                 match resultType with
-                | none => Except.ok ""
-                | some type =>
+                | Option.none => Except.ok ""
+                | Option.some type =>
                     match psPrintLeanTerm type with
                     | Except.error error => Except.error error
                     | Except.ok printed =>

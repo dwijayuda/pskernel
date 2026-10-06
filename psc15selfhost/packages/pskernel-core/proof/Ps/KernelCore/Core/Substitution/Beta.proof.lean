@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Substitution.Beta
+import Ps.KernelCore.Metatheory.Judgments
 
 theorem psKernelExprApplyArgsCheap_nil
     (fn : PsKernelExpr) :
@@ -99,3 +100,164 @@ theorem psKernelExprCheapBetaReduce_closed_body
     psKernelExprApplyArgsCheapWorker,
     h
   ]
+
+
+theorem psKernelExprCheapBetaReduce_single_refines_beta
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (name : PsKernelName)
+    (type body arg : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo) :
+    let original :=
+      PsKernelExpr.app
+        (PsKernelExpr.lam name type body binderInfo)
+        arg
+    let result :=
+      psKernelExprCheapBetaReduce original
+    result = original ∨
+      PsKernelReductionStep
+        environment
+        localContext
+        original
+        result := by
+  dsimp
+  cases hLoose : psKernelExprHasLooseBVar body with
+  | false =>
+      right
+      have hCheap :
+          psKernelExprCheapBetaReduce
+              (PsKernelExpr.app
+                (PsKernelExpr.lam name type body binderInfo)
+                arg) =
+            body :=
+        psKernelExprCheapBetaReduce_closed_body
+          name type body arg binderInfo hLoose
+      have hInst :
+          psKernelExprInstantiate1 body arg = body :=
+        psKernelExprInstantiate1_closed
+          body arg hLoose
+      rw [hCheap]
+      rw [← hInst]
+      exact
+        PsKernelReductionStep.beta
+          name type body arg binderInfo
+  | true =>
+      cases body with
+      | bvar index =>
+          cases index with
+          | zero =>
+              right
+              change
+                PsKernelReductionStep
+                  environment
+                  localContext
+                  (PsKernelExpr.app
+                    (PsKernelExpr.lam
+                      name type
+                      (PsKernelExpr.bvar 0)
+                      binderInfo)
+                    arg)
+                  (psKernelExprCheapBetaReduce
+                    (PsKernelExpr.app
+                      (PsKernelExpr.lam
+                        name type
+                        (PsKernelExpr.bvar 0)
+                        binderInfo)
+                      arg))
+              rw [
+                psKernelExprCheapBetaReduce_identity_lambda
+                  name
+                  (match type with
+                   | PsKernelExpr.sort level => level
+                   | _ => PsKernelLevel.zero)
+                  binderInfo
+                  arg
+              ] <;>
+                first
+                | exact
+                    PsKernelReductionStep.beta
+                      name type
+                      (PsKernelExpr.bvar 0)
+                      arg binderInfo
+                | skip
+          | succ index =>
+              left
+              simp [
+                psKernelExprCheapBetaReduce,
+                psKernelExprGetAppFn,
+                psKernelExprGetAppArgs,
+                psKernelExprGetAppArgsWorker,
+                psKernelExprConsumeLambdaSpine_single,
+                hLoose,
+                psKernelNatLt
+              ]
+      | fvar fvarName =>
+          simp [psKernelExprHasLooseBVar, psKernelExprHasLooseAt] at hLoose
+      | mvar mvarName =>
+          simp [psKernelExprHasLooseBVar, psKernelExprHasLooseAt] at hLoose
+      | sort level =>
+          simp [psKernelExprHasLooseBVar, psKernelExprHasLooseAt] at hLoose
+      | const constName levels =>
+          simp [psKernelExprHasLooseBVar, psKernelExprHasLooseAt] at hLoose
+      | app fn argBody =>
+          left
+          simp [
+            psKernelExprCheapBetaReduce,
+            psKernelExprGetAppFn,
+            psKernelExprGetAppArgs,
+            psKernelExprGetAppArgsWorker,
+            psKernelExprConsumeLambdaSpine_single,
+            hLoose
+          ]
+      | lam bodyName bodyType bodyBody bodyInfo =>
+          left
+          simp [
+            psKernelExprCheapBetaReduce,
+            psKernelExprGetAppFn,
+            psKernelExprGetAppArgs,
+            psKernelExprGetAppArgsWorker,
+            psKernelExprConsumeLambdaSpine_single,
+            hLoose
+          ]
+      | forallE bodyName bodyType bodyBody bodyInfo =>
+          left
+          simp [
+            psKernelExprCheapBetaReduce,
+            psKernelExprGetAppFn,
+            psKernelExprGetAppArgs,
+            psKernelExprGetAppArgsWorker,
+            psKernelExprConsumeLambdaSpine_single,
+            hLoose
+          ]
+      | letE bodyName bodyType bodyValue bodyBody nondep =>
+          left
+          simp [
+            psKernelExprCheapBetaReduce,
+            psKernelExprGetAppFn,
+            psKernelExprGetAppArgs,
+            psKernelExprGetAppArgsWorker,
+            psKernelExprConsumeLambdaSpine_single,
+            hLoose
+          ]
+      | lit literal =>
+          simp [psKernelExprHasLooseBVar, psKernelExprHasLooseAt] at hLoose
+      | mdata metadata bodyBody =>
+          left
+          simp [
+            psKernelExprCheapBetaReduce,
+            psKernelExprGetAppFn,
+            psKernelExprGetAppArgs,
+            psKernelExprGetAppArgsWorker,
+            psKernelExprConsumeLambdaSpine_single,
+            hLoose
+          ]
+      | proj typeName index bodyBody =>
+          left
+          simp [
+            psKernelExprCheapBetaReduce,
+            psKernelExprGetAppFn,
+            psKernelExprGetAppArgs,
+            psKernelExprGetAppArgsWorker,
+            psKernelExprConsumeLambdaSpine_single,
+            hLoose
+          ]

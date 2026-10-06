@@ -42,7 +42,7 @@ theorem psKernelLocalContextEmpty_canonical :
     PsKernelLocalContextCanonical
       psKernelLocalContextEmpty := by
   intro decl hMem
-  simp [psKernelLocalContextEmpty] at hMem
+  cases hMem
 
 theorem psKernelLocalContextAddLocal_canonical
     (context : PsKernelLocalContext)
@@ -74,22 +74,17 @@ theorem psKernelLocalContextAddLocal_canonical
           type
           binderInfo)
         context.decls) at hMem
-  simp only [List.mem_cons] at hMem
-  rcases hMem with hHead | hTail
-  · subst decl
-    constructor
-    · simpa [
-        psKernelLocalContextAddLocal,
-        psKernelLocalDeclIndexMeta
-      ] using Nat.lt_succ_self context.nextIndex
-    · rfl
-  · have hOld :=
-      hCanonical decl hTail
-    constructor
-    · simpa [
-        psKernelLocalContextAddLocal
-      ] using Nat.lt_succ_of_lt hOld.1
-    · exact hOld.2
+  cases hMem with
+  | head =>
+      constructor
+      · exact Nat.lt_succ_self context.nextIndex
+      · rfl
+  | tail _ hTail =>
+      have hOld :=
+        hCanonical decl hTail
+      constructor
+      · exact Nat.lt_succ_of_lt hOld.1
+      · exact hOld.2
 
 theorem psKernelLocalContextAddLet_canonical
     (context : PsKernelLocalContext)
@@ -120,22 +115,77 @@ theorem psKernelLocalContextAddLet_canonical
           type
           value)
         context.decls) at hMem
-  simp only [List.mem_cons] at hMem
-  rcases hMem with hHead | hTail
-  · subst decl
-    constructor
-    · simpa [
-        psKernelLocalContextAddLet,
-        psKernelLocalDeclIndexMeta
-      ] using Nat.lt_succ_self context.nextIndex
-    · rfl
-  · have hOld :=
-      hCanonical decl hTail
-    constructor
-    · simpa [
-        psKernelLocalContextAddLet
-      ] using Nat.lt_succ_of_lt hOld.1
-    · exact hOld.2
+  cases hMem with
+  | head =>
+      constructor
+      · exact Nat.lt_succ_self context.nextIndex
+      · rfl
+  | tail _ hTail =>
+      have hOld :=
+        hCanonical decl hTail
+      constructor
+      · exact Nat.lt_succ_of_lt hOld.1
+      · exact hOld.2
+
+theorem psKernelLocalContextFindIn_some_mem_and_matches_meta
+    (name : PsKernelName)
+    (decls : List PsKernelLocalDecl)
+    (decl : PsKernelLocalDecl)
+    (hFind :
+      psKernelLocalContextFindIn name decls =
+        Option.some decl) :
+    List.Mem decl decls ∧
+    psKernelNameEq
+        (psKernelLocalDeclName decl)
+        name =
+      true := by
+  induction decls with
+  | nil =>
+      simp [psKernelLocalContextFindIn] at hFind
+  | cons head tail ih =>
+      cases hMatch :
+          psKernelNameEq
+            (psKernelLocalDeclName head)
+            name with
+      | true =>
+          simp [
+            psKernelLocalContextFindIn,
+            hMatch
+          ] at hFind
+          subst decl
+          exact
+            ⟨List.Mem.head tail, hMatch⟩
+      | false =>
+          simp [
+            psKernelLocalContextFindIn,
+            hMatch
+          ] at hFind
+          have hTail :=
+            ih hFind
+          exact
+            ⟨
+              List.Mem.tail head hTail.1,
+              hTail.2
+            ⟩
+
+theorem psKernelLocalContextFind_some_mem_and_matches_meta
+    (context : PsKernelLocalContext)
+    (name : PsKernelName)
+    (decl : PsKernelLocalDecl)
+    (hFind :
+      psKernelLocalContextFind context name =
+        Option.some decl) :
+    List.Mem decl context.decls ∧
+    psKernelNameEq
+        (psKernelLocalDeclName decl)
+        name =
+      true := by
+  exact
+    psKernelLocalContextFindIn_some_mem_and_matches_meta
+      name
+      context.decls
+      decl
+      hFind
 
 theorem psKernelLocalContextCanonical_fresh_absent
     (context : PsKernelLocalContext)
@@ -159,7 +209,7 @@ theorem psKernelLocalContextCanonical_fresh_absent
       rfl
   | some decl =>
       have hFound :=
-        psKernelLocalContextFind_some_mem_and_matches
+        psKernelLocalContextFind_some_mem_and_matches_meta
           context
           (PsKernelName.num
             base
@@ -251,13 +301,34 @@ theorem psKernelLocalContextAddLocal_preserves_old_find
         rw [← hName] at hFind
         rw [hFreshNone] at hFind
         contradiction
-  simp [
-    psKernelLocalContextFind,
-    psKernelLocalContextAddLocal,
-    psKernelLocalContextFindIn,
-    hDifferent,
-    hFind
-  ]
+  change
+    (if
+        psKernelNameEq
+          (PsKernelName.num
+            base
+            context.nextIndex)
+          query then
+      Option.some
+        (PsKernelLocalDecl.localDecl
+          context.nextIndex
+          (PsKernelName.num
+            base
+            context.nextIndex)
+          userName
+          type
+          binderInfo)
+    else
+      psKernelLocalContextFindIn
+        query
+        context.decls) =
+      Option.some decl
+  rw [hDifferent]
+  change
+    psKernelLocalContextFindIn
+        query
+        context.decls =
+      Option.some decl at hFind
+  exact hFind
 
 theorem psKernelLocalContextAddLet_preserves_old_find
     (context : PsKernelLocalContext)
@@ -318,13 +389,34 @@ theorem psKernelLocalContextAddLet_preserves_old_find
         rw [← hName] at hFind
         rw [hFreshNone] at hFind
         contradiction
-  simp [
-    psKernelLocalContextFind,
-    psKernelLocalContextAddLet,
-    psKernelLocalContextFindIn,
-    hDifferent,
-    hFind
-  ]
+  change
+    (if
+        psKernelNameEq
+          (PsKernelName.num
+            base
+            context.nextIndex)
+          query then
+      Option.some
+        (PsKernelLocalDecl.letDecl
+          context.nextIndex
+          (PsKernelName.num
+            base
+            context.nextIndex)
+          userName
+          type
+          value)
+    else
+      psKernelLocalContextFindIn
+        query
+        context.decls) =
+      Option.some decl
+  rw [hDifferent]
+  change
+    psKernelLocalContextFindIn
+        query
+        context.decls =
+      Option.some decl at hFind
+  exact hFind
 
 theorem psKernelCheckerContextWithLocal_canonical
     (context : PsKernelCheckerContext)

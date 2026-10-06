@@ -93,6 +93,11 @@ inductive PsJsIrRuntimeOp where
   | charOfNat
   | charToNat
   | stringLength
+  | stringUtf8ByteSize
+  | stringNext
+  | stringGet
+  | stringAtEnd
+  | stringExtract
 
 inductive PsJsIrExpr where
   | literal (value : PsJsIrLiteral)

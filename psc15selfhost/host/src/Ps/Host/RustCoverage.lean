@@ -328,11 +328,16 @@ def psRustCoverageLambdaParameterList :
   | coverage, List.cons parameter rest =>
       let withParameter :=
         if psRustTypeContainsFunction parameter.type then
-          psRustCoverageAddUnsupported
-            (psRustCoverageAddFeature
+          if psRustFunctionTypeIsFirstOrder parameter.type then
+            psRustCoverageAddFeature
               coverage
-              "expr:lambdaFunctionParameter")
-            "expr:lambdaFunctionParameter"
+              "expr:lambdaFirstOrderFunctionParameter"
+          else
+            psRustCoverageAddUnsupported
+              (psRustCoverageAddFeature
+                coverage
+                "expr:lambdaFunctionParameter")
+              "expr:lambdaFunctionParameter"
         else
           coverage;
       psRustCoverageLambdaParameterList

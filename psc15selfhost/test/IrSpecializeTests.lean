@@ -325,8 +325,47 @@ def psTestGenericSpecialization : Bool :=
             && psIrSpecNoGenericDeclaration module.declarations
       | _, _, _, _ => false
 
+def psTestSpecializationWorklistDeduplicates : Bool :=
+  let request : PsIrSpecializeRequest := {
+    kind := PsIrSpecializeKind.declaration
+    name := "id"
+    arguments := [psIrSpecU32]
+  };
+  let base : PsIrSpecializeState := {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := []
+    pending := []
+    seen := []
+  };
+  let queued :=
+    psIrSpecializeAppendRequest
+      base
+      [request, request, request];
+  if Nat.beq (psListLength queued.pending) 1 then
+    match psIrSpecializeRequestKey request with
+    | Option.none => false
+    | Option.some key =>
+        let seenState : PsIrSpecializeState := {
+          imports := queued.imports
+          structures := queued.structures
+          inductives := queued.inductives
+          declarations := queued.declarations
+          pending := []
+          seen := [key]
+        };
+        let afterSeen :=
+          psIrSpecializeAppendRequest
+            seenState
+            [request];
+        Nat.beq (psListLength afterSeen.pending) 0
+  else
+    false
+
 def main : IO Unit := do
-  if psTestGenericSpecialization then
+  if psTestGenericSpecialization
+      && psTestSpecializationWorklistDeduplicates then
     IO.println "PSC1_IR_SPECIALIZE_TESTS: PASS"
   else
     throw (IO.userError "PSC1_IR_SPECIALIZE_TESTS: FAIL")

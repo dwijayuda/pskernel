@@ -568,6 +568,235 @@ def psJsPrintRuntime
                       | List.cons _ _ =>
                           Except.error PsJsEmitError.malformedIr
 
+def psJsExprUsesNameWithFuel
+    (fuel : Nat) :
+    PsJsIrExpr -> String -> Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun (_expr : PsJsIrExpr) (_name : String) => true
+  | Nat.succ remaining =>
+      let smaller : PsJsIrExpr -> String -> Bool :=
+        psJsExprUsesNameWithFuel remaining;
+      fun (expr : PsJsIrExpr) (name : String) =>
+        let uses : PsJsIrExpr -> Bool :=
+          fun (value : PsJsIrExpr) =>
+            smaller value name;
+        let nameUses : String -> Bool :=
+          fun (value : String) =>
+            psStringEq value name;
+        let fieldUses :
+            (String × PsJsIrExpr) -> Bool :=
+          fun (field : String × PsJsIrExpr) =>
+            uses (Prod.snd field);
+        let bindingUses :
+            PsJsIrMatchBinding -> Bool :=
+          fun (binding : PsJsIrMatchBinding) =>
+            psStringEq binding.name name;
+        let alternativeUses :
+            (String ×
+              List PsJsIrMatchBinding ×
+              PsJsIrExpr) -> Bool :=
+          fun
+            (alternative :
+              String ×
+                List PsJsIrMatchBinding ×
+                PsJsIrExpr) =>
+            let detail := Prod.snd alternative;
+            if psListAny bindingUses (Prod.fst detail) then
+              true
+            else
+              uses (Prod.snd detail);
+        match expr with
+        | PsJsIrExpr.literal _ => false
+        | PsJsIrExpr.var value =>
+            psStringEq value name
+        | PsJsIrExpr.unary _ value =>
+            uses value
+        | PsJsIrExpr.binary _ left right =>
+            if uses left then true else uses right
+        | PsJsIrExpr.runtime _ arguments =>
+            psListAny uses arguments
+        | PsJsIrExpr.lambda parameters body =>
+            if psListAny nameUses parameters then
+              true
+            else
+              uses body
+        | PsJsIrExpr.call fn arguments =>
+            if uses fn then true else psListAny uses arguments
+        | PsJsIrExpr.letE localName value body =>
+            if psStringEq localName name then
+              true
+            else if uses value then
+              true
+            else
+              uses body
+        | PsJsIrExpr.ifE condition thenBranch elseBranch =>
+            if uses condition then
+              true
+            else if uses thenBranch then
+              true
+            else
+              uses elseBranch
+        | PsJsIrExpr.record fields =>
+            psListAny fieldUses fields
+        | PsJsIrExpr.projection target _ =>
+            uses target
+        | PsJsIrExpr.constructor _ fields =>
+            psListAny fieldUses fields
+        | PsJsIrExpr.matchE scrutinee alternatives =>
+            if uses scrutinee then
+              true
+            else
+              psListAny alternativeUses alternatives
+
+def psJsFreshMatchTempWorker
+    (expr : PsJsIrExpr)
+    (attempts : Nat) :
+    Nat -> String :=
+  match attempts with
+  | Nat.zero =>
+      fun (_index : Nat) => "__ps$match$overflow"
+  | Nat.succ remaining =>
+      let smaller : Nat -> String :=
+        psJsFreshMatchTempWorker expr remaining;
+      fun (index : Nat) =>
+        let candidate : String :=
+          String.Internal.append
+            "__ps$match$"
+            (psNatToString index);
+        if psJsExprUsesNameWithFuel 4096 expr candidate then
+          smaller (Nat.succ index)
+        else
+          candidate
+
+def psJsFreshMatchTemp
+    (expr : PsJsIrExpr) : String :=
+  psJsFreshMatchTempWorker expr 4096 0
+
+def psJsPrintFieldWith
+    (print : PsJsIrExpr -> Except PsJsEmitError String)
+    (field : String × PsJsIrExpr) :
+    Except PsJsEmitError String :=
+  match field with
+  | Prod.mk name value =>
+      match print value with
+      | Except.error error => Except.error error
+      | Except.ok printedValue =>
+          Except.ok
+            (psJsJoin
+              ""
+              [
+                psJsonQuote name,
+                ": ",
+                printedValue
+              ])
+
+def psJsPrintFieldsWith
+    (print : PsJsIrExpr -> Except PsJsEmitError String)
+    (fields : List (String × PsJsIrExpr)) :
+    Except PsJsEmitError (List String) :=
+  match fields with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons field rest =>
+      match psJsPrintFieldWith print field with
+      | Except.error error => Except.error error
+      | Except.ok printedField =>
+          match psJsPrintFieldsWith print rest with
+          | Except.error error => Except.error error
+          | Except.ok printedRest =>
+              Except.ok
+                (List.cons printedField printedRest)
+
+def psJsPrintMatchBinding
+    (temp : String)
+    (binding : PsJsIrMatchBinding) : String :=
+  psJsJoin
+    ""
+    [
+      "const ",
+      binding.name,
+      " = ",
+      temp,
+      "[\"$ps$fields\"][",
+      psJsonQuote binding.field,
+      "];"
+    ]
+
+def psJsPrintMatchBindings
+    (temp : String)
+    (bindings : List PsJsIrMatchBinding) :
+    List String :=
+  match bindings with
+  | List.nil => List.nil
+  | List.cons binding rest =>
+      List.cons
+        (psJsPrintMatchBinding temp binding)
+        (psJsPrintMatchBindings temp rest)
+
+def psJsPrintMatchAlternativeWith
+    (print : PsJsIrExpr -> Except PsJsEmitError String)
+    (temp : String)
+    (alternative :
+      String ×
+        List PsJsIrMatchBinding ×
+        PsJsIrExpr) :
+    Except PsJsEmitError String :=
+  let constructorName : String :=
+    Prod.fst alternative;
+  let detail :=
+    Prod.snd alternative;
+  let bindings : List PsJsIrMatchBinding :=
+    Prod.fst detail;
+  let body : PsJsIrExpr :=
+    Prod.snd detail;
+  match print body with
+  | Except.error error => Except.error error
+  | Except.ok printedBody =>
+      let printedBindings : List String :=
+        psJsPrintMatchBindings temp bindings;
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "case ",
+            psJsonQuote constructorName,
+            ": { ",
+            psJsJoin " " printedBindings,
+            if psListIsEmpty printedBindings then "" else " ",
+            "return ",
+            printedBody,
+            "; }"
+          ])
+
+def psJsPrintMatchAlternativesWith
+    (print : PsJsIrExpr -> Except PsJsEmitError String)
+    (temp : String)
+    (alternatives :
+      List
+        (String ×
+          List PsJsIrMatchBinding ×
+          PsJsIrExpr)) :
+    Except PsJsEmitError (List String) :=
+  match alternatives with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons alternative rest =>
+      match
+          psJsPrintMatchAlternativeWith
+            print temp alternative with
+      | Except.error error => Except.error error
+      | Except.ok printedAlternative =>
+          match
+              psJsPrintMatchAlternativesWith
+                print temp rest with
+          | Except.error error => Except.error error
+          | Except.ok printedRest =>
+              Except.ok
+                (List.cons
+                  printedAlternative
+                  printedRest)
+
 def psJsPrintExprWithFuel
     (fuel : Nat) :
     PsJsIrExpr -> Except PsJsEmitError String :=

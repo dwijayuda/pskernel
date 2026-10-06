@@ -1,4 +1,5 @@
 import Ps.KernelCore.API.Kernel
+import Ps.KernelCore.Metatheory.Judgments
 
 /-!
 KernelContract-v1 wrapper proofs.
@@ -145,3 +146,249 @@ theorem psKernelDefEq_requires_right_check
         session levelParams safety left right =
       Except.error error := by
   simp [psKernelV1IsDefEq, hLeft, hRight]
+
+
+theorem psKernelV1CheckExpression_refines_typing
+    (session : PsKernelKernelSession)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (expression : PsKernelExpr)
+    (checked : PsKernelCheckedExpression)
+    (hSound :
+      PsKernelInferenceSound
+        (psKernelCheckerCheck
+          session.resources.fuel))
+    (hSuccess :
+      psKernelV1CheckExpression
+          session
+          levelParams
+          safety
+          expression =
+        Except.ok checked) :
+    PsKernelTypingJudgment
+      (psKernelKernelSessionEnvironment session)
+      psKernelLocalContextEmpty
+      expression
+      checked.type := by
+  cases hPreflight :
+      psKernelKernelSessionPreflight session with
+  | error error =>
+      simp [
+        psKernelV1CheckExpression,
+        hPreflight
+      ] at hSuccess
+  | ok preflight =>
+      cases preflight
+      let checker :=
+        psKernelKernelSessionChecker
+          session
+          levelParams
+          safety
+      cases hRun :
+          psKernelCheckerCheck
+            session.resources.fuel
+            checker.context
+            checker.state
+            expression with
+      | error error =>
+          simp [
+            psKernelV1CheckExpression,
+            hPreflight,
+            psKernelSessionCheck,
+            checker,
+            hRun
+          ] at hSuccess
+      | ok run =>
+          cases run with
+          | mk inferred nextState =>
+              simp [
+                psKernelV1CheckExpression,
+                hPreflight,
+                psKernelSessionCheck,
+                checker,
+                hRun
+              ] at hSuccess
+              subst checked
+              have hTyping :=
+                hSound
+                  checker.context
+                  checker.state
+                  nextState
+                  expression
+                  inferred
+                  hRun
+              simpa [
+                checker,
+                psKernelKernelSessionChecker,
+                psKernelMkCheckerSession,
+                psKernelCheckerContextEmpty
+              ] using hTyping
+
+theorem psKernelV1Whnf_refines_reduction
+    (session : PsKernelKernelSession)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (expression result : PsKernelExpr)
+    (hSound :
+      PsKernelWhnfSound
+        (psKernelCheckerWhnf
+          session.resources.fuel))
+    (hSuccess :
+      psKernelV1Whnf
+          session
+          levelParams
+          safety
+          expression =
+        Except.ok result) :
+    PsKernelReductionClosure
+      (psKernelKernelSessionEnvironment session)
+      psKernelLocalContextEmpty
+      expression
+      result := by
+  cases hCheck :
+      psKernelV1CheckExpression
+        session
+        levelParams
+        safety
+        expression with
+  | error error =>
+      simp [psKernelV1Whnf, hCheck] at hSuccess
+  | ok checked =>
+      let checker :=
+        psKernelKernelSessionChecker
+          session
+          levelParams
+          safety
+      cases hRun :
+          psKernelCheckerWhnf
+            session.resources.fuel
+            checker.context
+            checker.state
+            expression with
+      | error error =>
+          simp [
+            psKernelV1Whnf,
+            hCheck,
+            psKernelSessionWhnf,
+            checker,
+            hRun
+          ] at hSuccess
+      | ok run =>
+          cases run with
+          | mk reduced nextState =>
+              simp [
+                psKernelV1Whnf,
+                hCheck,
+                psKernelSessionWhnf,
+                checker,
+                hRun
+              ] at hSuccess
+              subst result
+              have hReduction :=
+                hSound
+                  checker.context
+                  checker.state
+                  nextState
+                  expression
+                  reduced
+                  hRun
+              simpa [
+                checker,
+                psKernelKernelSessionChecker,
+                psKernelMkCheckerSession,
+                psKernelCheckerContextEmpty
+              ] using hReduction
+
+theorem psKernelV1IsDefEq_true_refines_defeq
+    (session : PsKernelKernelSession)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (left right : PsKernelExpr)
+    (hSound :
+      PsKernelDefEqSound
+        (psKernelIsDefEq
+          session.resources.fuel))
+    (hSuccess :
+      psKernelV1IsDefEq
+          session
+          levelParams
+          safety
+          left
+          right =
+        Except.ok true) :
+    PsKernelDefEqJudgment
+      (psKernelKernelSessionEnvironment session)
+      psKernelLocalContextEmpty
+      left
+      right := by
+  cases hLeft :
+      psKernelV1CheckExpression
+        session
+        levelParams
+        safety
+        left with
+  | error error =>
+      simp [psKernelV1IsDefEq, hLeft] at hSuccess
+  | ok leftChecked =>
+      cases hRight :
+          psKernelV1CheckExpression
+            session
+            levelParams
+            safety
+            right with
+      | error error =>
+          simp [
+            psKernelV1IsDefEq,
+            hLeft,
+            hRight
+          ] at hSuccess
+      | ok rightChecked =>
+          let checker :=
+            psKernelKernelSessionChecker
+              session
+              levelParams
+              safety
+          cases hRun :
+              psKernelIsDefEq
+                session.resources.fuel
+                checker.context
+                checker.state
+                left
+                right with
+          | error error =>
+              simp [
+                psKernelV1IsDefEq,
+                hLeft,
+                hRight,
+                psKernelSessionIsDefEq,
+                checker,
+                hRun
+              ] at hSuccess
+          | ok run =>
+              cases run with
+              | mk value nextState =>
+                  cases value with
+                  | false =>
+                      simp [
+                        psKernelV1IsDefEq,
+                        hLeft,
+                        hRight,
+                        psKernelSessionIsDefEq,
+                        checker,
+                        hRun
+                      ] at hSuccess
+                  | true =>
+                      have hDefEq :=
+                        hSound
+                          checker.context
+                          checker.state
+                          nextState
+                          left
+                          right
+                          hRun
+                      simpa [
+                        checker,
+                        psKernelKernelSessionChecker,
+                        psKernelMkCheckerSession,
+                        psKernelCheckerContextEmpty
+                      ] using hDefEq

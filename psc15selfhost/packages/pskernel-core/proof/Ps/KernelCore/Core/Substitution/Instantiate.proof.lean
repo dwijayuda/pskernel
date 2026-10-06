@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Substitution.Instantiate
+import Ps.KernelCore.Metatheory.SubstitutionRefinement
 
 theorem psKernelExprInstantiateAtChangedWithFuel_zero
     (expr : PsKernelExpr)
@@ -112,3 +113,41 @@ theorem psKernelExprInstantiateAt_bvar_hit
     psKernelNatLt,
     psKernelExprListGet
   ]
+
+
+theorem psKernelExprInstantiateAt_refines_reference
+    (expr : PsKernelExpr)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAt expr start subst offset =
+      psKernelExprInstantiateAtReference expr start subst offset := by
+  exact
+    psKernelExprInstantiateAt_refines_reference_core
+      expr start subst offset
+
+theorem psKernelExprInstantiate_refines_reference
+    (expr : PsKernelExpr)
+    (subst : List PsKernelExpr) :
+    psKernelExprInstantiate expr subst =
+      psKernelExprInstantiateReference expr subst := by
+  exact
+    psKernelExprInstantiate_refines_reference_core
+      expr subst
+
+theorem psKernelExprInstantiate1_refines_reference
+    (expr replacement : PsKernelExpr) :
+    psKernelExprInstantiate1 expr replacement =
+      psKernelExprInstantiate1Reference expr replacement := by
+  exact
+    psKernelExprInstantiate1_refines_reference_core
+      expr replacement
+
+theorem psKernelExprInstantiateRev_refines_reference
+    (expr : PsKernelExpr)
+    (subst : List PsKernelExpr) :
+    psKernelExprInstantiateRev expr subst =
+      psKernelExprInstantiateRevReference expr subst := by
+  exact
+    psKernelExprInstantiateRev_refines_reference_core
+      expr subst

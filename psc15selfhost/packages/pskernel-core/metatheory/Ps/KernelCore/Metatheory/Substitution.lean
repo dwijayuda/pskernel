@@ -179,3 +179,222 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
       Prod.mk expr false := by
   cases expr <;>
     simp [psKernelExprLiftLooseBVarsReferenceChanged]
+
+
+/-
+Total reference semantics for capture-avoiding de Bruijn instantiation.
+
+Substitution hits use the reference lifting operation above, so this
+specification does not depend on the production instantiation or lifting
+workers.
+-/
+
+def psKernelExprInstantiateAtReferenceChanged
+    (expr : PsKernelExpr)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    Prod PsKernelExpr Bool :=
+  match expr with
+  | PsKernelExpr.bvar index =>
+      let substitutionStart :=
+        Nat.add start offset
+      if psKernelNatLt index substitutionStart then
+        Prod.mk expr false
+      else
+        let relative :=
+          Nat.sub index substitutionStart
+        match psKernelExprListGet subst relative with
+        | Option.some replacement =>
+            Prod.mk
+              (psKernelExprLiftLooseBVarsReference
+                replacement
+                0
+                offset)
+              true
+        | Option.none =>
+            if psKernelExprListIsEmpty subst then
+              Prod.mk expr false
+            else
+              Prod.mk
+                (PsKernelExpr.bvar
+                  (Nat.sub
+                    index
+                    (psKernelExprListLength subst)))
+                true
+  | PsKernelExpr.app fn arg =>
+      let fnResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          fn start subst offset
+      let argResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          arg start subst offset
+      if Prod.snd fnResult then
+        Prod.mk
+          (PsKernelExpr.app
+            (Prod.fst fnResult)
+            (Prod.fst argResult))
+          true
+      else if Prod.snd argResult then
+        Prod.mk
+          (PsKernelExpr.app
+            (Prod.fst fnResult)
+            (Prod.fst argResult))
+          true
+      else
+        Prod.mk expr false
+  | PsKernelExpr.lam name type body binderInfo =>
+      let typeResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          type start subst offset
+      let bodyResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          body start subst (Nat.succ offset)
+      if Prod.snd typeResult then
+        Prod.mk
+          (PsKernelExpr.lam
+            name
+            (Prod.fst typeResult)
+            (Prod.fst bodyResult)
+            binderInfo)
+          true
+      else if Prod.snd bodyResult then
+        Prod.mk
+          (PsKernelExpr.lam
+            name
+            (Prod.fst typeResult)
+            (Prod.fst bodyResult)
+            binderInfo)
+          true
+      else
+        Prod.mk expr false
+  | PsKernelExpr.forallE name type body binderInfo =>
+      let typeResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          type start subst offset
+      let bodyResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          body start subst (Nat.succ offset)
+      if Prod.snd typeResult then
+        Prod.mk
+          (PsKernelExpr.forallE
+            name
+            (Prod.fst typeResult)
+            (Prod.fst bodyResult)
+            binderInfo)
+          true
+      else if Prod.snd bodyResult then
+        Prod.mk
+          (PsKernelExpr.forallE
+            name
+            (Prod.fst typeResult)
+            (Prod.fst bodyResult)
+            binderInfo)
+          true
+      else
+        Prod.mk expr false
+  | PsKernelExpr.letE name type value body nondep =>
+      let typeResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          type start subst offset
+      let valueResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          value start subst offset
+      let bodyResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          body start subst (Nat.succ offset)
+      if Prod.snd typeResult then
+        Prod.mk
+          (PsKernelExpr.letE
+            name
+            (Prod.fst typeResult)
+            (Prod.fst valueResult)
+            (Prod.fst bodyResult)
+            nondep)
+          true
+      else if Prod.snd valueResult then
+        Prod.mk
+          (PsKernelExpr.letE
+            name
+            (Prod.fst typeResult)
+            (Prod.fst valueResult)
+            (Prod.fst bodyResult)
+            nondep)
+          true
+      else if Prod.snd bodyResult then
+        Prod.mk
+          (PsKernelExpr.letE
+            name
+            (Prod.fst typeResult)
+            (Prod.fst valueResult)
+            (Prod.fst bodyResult)
+            nondep)
+          true
+      else
+        Prod.mk expr false
+  | PsKernelExpr.mdata metadata body =>
+      let bodyResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          body start subst offset
+      if Prod.snd bodyResult then
+        Prod.mk
+          (PsKernelExpr.mdata
+            metadata
+            (Prod.fst bodyResult))
+          true
+      else
+        Prod.mk expr false
+  | PsKernelExpr.proj typeName index body =>
+      let bodyResult :=
+        psKernelExprInstantiateAtReferenceChanged
+          body start subst offset
+      if Prod.snd bodyResult then
+        Prod.mk
+          (PsKernelExpr.proj
+            typeName
+            index
+            (Prod.fst bodyResult))
+          true
+      else
+        Prod.mk expr false
+  | _ =>
+      Prod.mk expr false
+termination_by expr
+
+def psKernelExprInstantiateAtReference
+    (expr : PsKernelExpr)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    PsKernelExpr :=
+  if psKernelExprListIsEmpty subst then
+    expr
+  else
+    Prod.fst
+      (psKernelExprInstantiateAtReferenceChanged
+        expr start subst offset)
+
+def psKernelExprInstantiateReference
+    (expr : PsKernelExpr)
+    (subst : List PsKernelExpr) :
+    PsKernelExpr :=
+  psKernelExprInstantiateAtReference
+    expr 0 subst 0
+
+def psKernelExprInstantiate1Reference
+    (expr replacement : PsKernelExpr) :
+    PsKernelExpr :=
+  if psKernelExprHasLooseBVar expr then
+    psKernelExprInstantiateReference
+      expr
+      (List.cons replacement List.nil)
+  else
+    expr
+
+def psKernelExprInstantiateRevReference
+    (expr : PsKernelExpr)
+    (subst : List PsKernelExpr) :
+    PsKernelExpr :=
+  psKernelExprInstantiateReference
+    expr
+    (psKernelExprListReverse subst)

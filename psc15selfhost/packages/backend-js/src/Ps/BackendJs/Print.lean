@@ -744,7 +744,8 @@ def psJsPrintMatchAlternativeWith
     Except PsJsEmitError String :=
   let constructorName : String :=
     Prod.fst alternative;
-  let detail :=
+  let detail :
+      List PsJsIrMatchBinding × PsJsIrExpr :=
     Prod.snd alternative;
   let bindings : List PsJsIrMatchBinding :=
     Prod.fst detail;
@@ -755,6 +756,8 @@ def psJsPrintMatchAlternativeWith
   | Except.ok printedBody =>
       let printedBindings : List String :=
         psJsPrintMatchBindings temp bindings;
+      let bindingSeparator : String :=
+        if psListIsEmpty printedBindings then "" else " ";
       Except.ok
         (psJsJoin
           ""
@@ -763,7 +766,7 @@ def psJsPrintMatchAlternativeWith
             psJsonQuote constructorName,
             ": { ",
             psJsJoin " " printedBindings,
-            if psListIsEmpty printedBindings then "" else " ",
+            bindingSeparator,
             "return ",
             printedBody,
             "; }"

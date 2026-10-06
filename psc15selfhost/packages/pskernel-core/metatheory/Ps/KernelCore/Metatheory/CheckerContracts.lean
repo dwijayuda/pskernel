@@ -988,6 +988,107 @@ theorem psKernelWhnfFinish_preserves_configuration
             hSuccess
           ⟩)
 
+theorem psKernelWhnfCoreFinish_success_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (original result : PsKernelExpr)
+    (cheapProj : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hReduction :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        original
+        result)
+    (hSuccess :
+      psKernelWhnfCoreFinish
+          original
+          cheapProj
+          result
+          state =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  cases cheapProj with
+  | true =>
+      simp [psKernelWhnfCoreFinish] at hSuccess
+      subst nextState
+      exact hConfig
+  | false =>
+      cases hEligible :
+          psKernelSemanticCacheEligible original with
+      | false =>
+          simp [
+            psKernelWhnfCoreFinish,
+            hEligible
+          ] at hSuccess
+          subst nextState
+          exact hConfig
+      | true =>
+          simp [
+            psKernelWhnfCoreFinish,
+            hEligible
+          ] at hSuccess
+          subst nextState
+          exact
+            psKernelWhnfCoreFinish_preserves_configuration
+              context
+              state
+              original
+              result
+              false
+              hConfig
+              hReduction
+
+
+theorem psKernelWhnfFinish_success_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (original result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hReduction :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        original
+        result)
+    (hSuccess :
+      psKernelWhnfFinish
+          original
+          result
+          state =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  cases hEligible :
+      psKernelSemanticCacheEligible original with
+  | false =>
+      simp [
+        psKernelWhnfFinish,
+        hEligible
+      ] at hSuccess
+      subst nextState
+      exact hConfig
+  | true =>
+      simp [
+        psKernelWhnfFinish,
+        hEligible
+      ] at hSuccess
+      subst nextState
+      exact
+        psKernelWhnfFinish_preserves_configuration
+          context
+          state
+          original
+          result
+          hConfig
+          hReduction
+
+
 theorem psKernelDefEqFinish_preserves_configuration
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

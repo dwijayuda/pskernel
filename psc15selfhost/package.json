@@ -177,7 +177,8 @@
     "test:direct-wasm-whole-compiler": "node scripts/direct-wasm-whole-compiler.test.mjs",
     "test:direct-wasm-selfhost": "node scripts/direct-wasm-selfhost-fixed-point.mjs",
     "test:backend-rust-cargo": "node scripts/backend-rust-cargo.test.mjs",
-    "test:direct-rust-whole-compiler": "node scripts/direct-rust-whole-compiler.test.mjs"
+    "test:direct-rust-whole-compiler": "node scripts/direct-rust-whole-compiler.test.mjs",
+    "test:direct-rust-selfhost": "node scripts/direct-rust-selfhost-fixed-point.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

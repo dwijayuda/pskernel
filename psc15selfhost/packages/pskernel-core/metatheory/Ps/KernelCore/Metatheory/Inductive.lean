@@ -1,5 +1,6 @@
 import Ps.KernelCore.Admission.Inductive.Common.Occurrence
 import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
+import Ps.KernelCore.Admission.Inductive.Common.RecursorValidation
 
 /-
 Independent Assurance Plane predicates for simple-inductive occurrence checks.
@@ -187,3 +188,130 @@ def PsKernelSimpleConstructorResultValid
         target
         indices =
       false
+
+
+def PsKernelSessionCheckSoundAtFuel
+    (fuel : Nat) : Prop :=
+  ∀
+    (session nextSession : PsKernelCheckerSession)
+    (expr result : PsKernelExpr),
+    psKernelSessionCheck
+        fuel
+        session
+        expr =
+      Except.ok (Prod.mk result nextSession) ->
+    PsKernelTypingJudgment
+      session.context.environment
+      session.context.localContext
+      expr
+      result
+
+def PsKernelSessionDefEqSoundAtFuel
+    (fuel : Nat) : Prop :=
+  ∀
+    (session nextSession : PsKernelCheckerSession)
+    (left right : PsKernelExpr),
+    psKernelSessionIsDefEq
+        fuel
+        session
+        left
+        right =
+      Except.ok (Prod.mk true nextSession) ->
+    PsKernelDefEqJudgment
+      session.context.environment
+      session.context.localContext
+      left
+      right
+
+inductive PsKernelSimpleRecursorRulesValid
+    (fuel : Nat)
+    (params : List PsKernelOpenBinder)
+    (ruleBinders : List PsKernelOpenBinder)
+    (motive : PsKernelExpr)
+    (levels : List PsKernelLevel) :
+    PsKernelCheckerSession ->
+    List PsKernelSimpleConstructorShape ->
+    List PsKernelRecursorRule ->
+    Prop
+  | nil
+      (session : PsKernelCheckerSession) :
+      PsKernelSimpleRecursorRulesValid
+        fuel
+        params
+        ruleBinders
+        motive
+        levels
+        session
+        List.nil
+        List.nil
+  | cons
+      (session checkedSession equalSession : PsKernelCheckerSession)
+      (shape : PsKernelSimpleConstructorShape)
+      (shapeRest : List PsKernelSimpleConstructorShape)
+      (rule : PsKernelRecursorRule)
+      (ruleRest : List PsKernelRecursorRule)
+      (gotType : PsKernelExpr)
+      (hCheck :
+        psKernelSessionCheck
+            fuel
+            session
+            rule.rhs =
+          Except.ok (Prod.mk gotType checkedSession))
+      (hTyping :
+        PsKernelTypingJudgment
+          session.context.environment
+          session.context.localContext
+          rule.rhs
+          gotType)
+      (hDefEqRun :
+        psKernelSessionIsDefEq
+            fuel
+            checkedSession
+            gotType
+            (psKernelCloseOpenBinders
+              (psKernelOpenBinderListAppend
+                ruleBinders
+                shape.fields)
+              (psKernelSimpleMotiveApp
+                motive
+                shape.resultIndices
+                (psKernelSimpleCtorApp
+                  levels
+                  params
+                  shape))) =
+          Except.ok (Prod.mk true equalSession))
+      (hDefEq :
+        PsKernelDefEqJudgment
+          checkedSession.context.environment
+          checkedSession.context.localContext
+          gotType
+          (psKernelCloseOpenBinders
+            (psKernelOpenBinderListAppend
+              ruleBinders
+              shape.fields)
+            (psKernelSimpleMotiveApp
+              motive
+              shape.resultIndices
+              (psKernelSimpleCtorApp
+                levels
+                params
+                shape))))
+      (hRest :
+        PsKernelSimpleRecursorRulesValid
+          fuel
+          params
+          ruleBinders
+          motive
+          levels
+          equalSession
+          shapeRest
+          ruleRest) :
+      PsKernelSimpleRecursorRulesValid
+        fuel
+        params
+        ruleBinders
+        motive
+        levels
+        session
+        (List.cons shape shapeRest)
+        (List.cons rule ruleRest)

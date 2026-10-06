@@ -302,7 +302,11 @@ def psRustEmitDeclarationResultType
     Except PsRustEmitError String :=
   match declaration.resultType with
   | PsVerifiedIrType.function _ _ =>
-      psRustEmitClosureValueType declaration.resultType
+      if psRustFunctionTypeIsFirstOrder declaration.resultType then
+        psRustEmitClosureValueType declaration.resultType
+      else
+        Except.error
+          (PsRustEmitError.functionResultUnsupported declaration.name)
   | _ =>
       psRustEmitType declaration.resultType
 

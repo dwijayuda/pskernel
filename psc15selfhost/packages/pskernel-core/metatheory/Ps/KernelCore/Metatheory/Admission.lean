@@ -30,3 +30,25 @@ theorem psKernelEnvironmentExtendsBy_refl
     (environment : PsKernelEnvironment) :
     PsKernelEnvironmentExtendsBy environment environment List.nil := by
   constructor <;> rfl
+
+
+def PsKernelDefinitionBodyValid
+    (session : PsKernelCheckerSession)
+    (value : PsKernelDefinitionInfo) : Prop :=
+  psKernelExprHasMVar value.value = false ∧
+  psKernelExprHasFVar value.value = false ∧
+  psKernelFindUndefExprLevelParam
+      value.value
+      value.base.levelParams =
+    Option.none ∧
+  ∃ inferredType : PsKernelExpr,
+    PsKernelTypingJudgment
+        session.context.environment
+        session.context.localContext
+        value.value
+        inferredType ∧
+    PsKernelDefEqJudgment
+        session.context.environment
+        session.context.localContext
+        inferredType
+        value.base.type

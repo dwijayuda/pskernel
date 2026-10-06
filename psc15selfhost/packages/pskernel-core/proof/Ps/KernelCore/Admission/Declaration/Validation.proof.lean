@@ -1,4 +1,5 @@
 import Ps.KernelCore.Admission.Declaration.Validation
+import Ps.KernelCore.Metatheory.Admission
 
 theorem psKernelNameListsEq_nil :
     psKernelNameListsEq List.nil List.nil = true := by
@@ -188,3 +189,206 @@ theorem psKernelCheckDefinitionBody_accepts_defeq
     hCheck,
     hDefEq
   ]
+
+
+theorem psKernelCheckNoMVarNoFVar_success_flags
+    (expr : PsKernelExpr)
+    (hSuccess :
+      psKernelCheckNoMVarNoFVar expr =
+        Except.ok Unit.unit) :
+    psKernelExprHasMVar expr = false ∧
+    psKernelExprHasFVar expr = false := by
+  cases hMVar : psKernelExprHasMVar expr with
+  | true =>
+      simp [
+        psKernelCheckNoMVarNoFVar,
+        hMVar
+      ] at hSuccess
+  | false =>
+      cases hFVar : psKernelExprHasFVar expr with
+      | true =>
+          simp [
+            psKernelCheckNoMVarNoFVar,
+            hMVar,
+            hFVar
+          ] at hSuccess
+      | false =>
+          exact ⟨hMVar, hFVar⟩
+
+theorem psKernelCheckLevelParams_success_none
+    (expr : PsKernelExpr)
+    (allowed : List PsKernelName)
+    (hSuccess :
+      psKernelCheckLevelParams expr allowed =
+        Except.ok Unit.unit) :
+    psKernelFindUndefExprLevelParam expr allowed =
+      Option.none := by
+  cases hFind :
+      psKernelFindUndefExprLevelParam expr allowed with
+  | none =>
+      exact hFind
+  | some name =>
+      simp [
+        psKernelCheckLevelParams,
+        hFind
+      ] at hSuccess
+
+theorem psKernelSessionCheck_success_preserves_context_for_validation
+    (fuel : Nat)
+    (session nextSession : PsKernelCheckerSession)
+    (expr result : PsKernelExpr)
+    (hSuccess :
+      psKernelSessionCheck fuel session expr =
+        Except.ok (Prod.mk result nextSession)) :
+    nextSession.context = session.context := by
+  unfold psKernelSessionCheck at hSuccess
+  cases hRun :
+      psKernelCheckerCheck
+        fuel session.context session.state expr with
+  | error error =>
+      simp [hRun] at hSuccess
+  | ok run =>
+      cases run with
+      | mk inferred nextState =>
+          simp [hRun] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          rfl
+
+theorem psKernelCheckDefinitionBody_success_refines_semantics
+    (fuel : Nat)
+    (session nextSession : PsKernelCheckerSession)
+    (value : PsKernelDefinitionInfo)
+    (hCheckSound :
+      PsKernelInferenceSound
+        (psKernelCheckerCheck fuel))
+    (hDefEqSound :
+      PsKernelDefEqSound
+        (psKernelIsDefEq fuel))
+    (hSuccess :
+      psKernelCheckDefinitionBodyWithSession
+          fuel session value =
+        Except.ok nextSession) :
+    PsKernelDefinitionBodyValid
+      session
+      value := by
+  cases hClosed :
+      psKernelCheckNoMVarNoFVar value.value with
+  | error error =>
+      simp [
+        psKernelCheckDefinitionBodyWithSession,
+        hClosed
+      ] at hSuccess
+  | ok closedUnit =>
+      cases closedUnit
+      cases hLevels :
+          psKernelCheckLevelParams
+            value.value
+            value.base.levelParams with
+      | error error =>
+          simp [
+            psKernelCheckDefinitionBodyWithSession,
+            hClosed,
+            hLevels
+          ] at hSuccess
+      | ok levelsUnit =>
+          cases levelsUnit
+          cases hCheck :
+              psKernelSessionCheck
+                fuel
+                session
+                value.value with
+          | error error =>
+              simp [
+                psKernelCheckDefinitionBodyWithSession,
+                hClosed,
+                hLevels,
+                hCheck
+              ] at hSuccess
+          | ok checkResult =>
+              cases checkResult with
+              | mk inferredType checkedSession =>
+                  cases hDefEq :
+                      psKernelSessionIsDefEq
+                        fuel
+                        checkedSession
+                        inferredType
+                        value.base.type with
+                  | error error =>
+                      simp [
+                        psKernelCheckDefinitionBodyWithSession,
+                        hClosed,
+                        hLevels,
+                        hCheck,
+                        hDefEq
+                      ] at hSuccess
+                  | ok defeqResult =>
+                      cases defeqResult with
+                      | mk equal finalSession =>
+                          cases equal with
+                          | false =>
+                              simp [
+                                psKernelCheckDefinitionBodyWithSession,
+                                hClosed,
+                                hLevels,
+                                hCheck,
+                                hDefEq
+                              ] at hSuccess
+                          | true =>
+                              have hFlags :=
+                                psKernelCheckNoMVarNoFVar_success_flags
+                                  value.value
+                                  hClosed
+                              have hLevelNone :=
+                                psKernelCheckLevelParams_success_none
+                                  value.value
+                                  value.base.levelParams
+                                  hLevels
+                              have hTyping :
+                                  PsKernelTypingJudgment
+                                    session.context.environment
+                                    session.context.localContext
+                                    value.value
+                                    inferredType :=
+                                psKernelSessionCheck_refines_typing
+                                  fuel
+                                  session
+                                  checkedSession
+                                  value.value
+                                  inferredType
+                                  hCheckSound
+                                  hCheck
+                              have hCheckedContext :
+                                  checkedSession.context =
+                                    session.context :=
+                                psKernelSessionCheck_success_preserves_context_for_validation
+                                  fuel
+                                  session
+                                  checkedSession
+                                  value.value
+                                  inferredType
+                                  hCheck
+                              have hDefEqSemantic :
+                                  PsKernelDefEqJudgment
+                                    checkedSession.context.environment
+                                    checkedSession.context.localContext
+                                    inferredType
+                                    value.base.type :=
+                                psKernelSessionIsDefEq_refines_defeq
+                                  fuel
+                                  checkedSession
+                                  finalSession
+                                  inferredType
+                                  value.base.type
+                                  hDefEqSound
+                                  hDefEq
+                              unfold PsKernelDefinitionBodyValid
+                              refine ⟨
+                                hFlags.1,
+                                hFlags.2,
+                                hLevelNone,
+                                inferredType,
+                                hTyping,
+                                ?_
+                              ⟩
+                              simpa [hCheckedContext] using
+                                hDefEqSemantic

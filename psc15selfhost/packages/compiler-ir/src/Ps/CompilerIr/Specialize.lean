@@ -1457,9 +1457,9 @@ def psIrSpecializeAppendRequest
   match requests with
   | List.nil => state
   | List.cons request rest =>
-      psIrSpecializeAppendRequest
-        (psIrSpecializeAppendOneRequest state request)
-        rest
+      let nextState : PsIrSpecializeState :=
+        psIrSpecializeAppendOneRequest state request;
+      psIrSpecializeAppendRequest nextState rest
 
 def psIrSpecializeMarkSeen
     (state : PsIrSpecializeState)
@@ -1479,48 +1479,45 @@ def psIrSpecializeAddStructure
     (structureInfo : PsVerifiedIrStructure)
     (requests : List PsIrSpecializeRequest) :
     PsIrSpecializeState :=
-  psIrSpecializeAppendRequest
-    {
-      imports := state.imports
-      structures := psListAppend state.structures [structureInfo]
-      inductives := state.inductives
-      declarations := state.declarations
-      pending := state.pending
-      seen := state.seen
-    }
-    requests
+  let nextState : PsIrSpecializeState := {
+    imports := state.imports
+    structures := psListAppend state.structures [structureInfo]
+    inductives := state.inductives
+    declarations := state.declarations
+    pending := state.pending
+    seen := state.seen
+  };
+  psIrSpecializeAppendRequest nextState requests
 
 def psIrSpecializeAddInductive
     (state : PsIrSpecializeState)
     (inductiveInfo : PsVerifiedIrInductive)
     (requests : List PsIrSpecializeRequest) :
     PsIrSpecializeState :=
-  psIrSpecializeAppendRequest
-    {
-      imports := state.imports
-      structures := state.structures
-      inductives := psListAppend state.inductives [inductiveInfo]
-      declarations := state.declarations
-      pending := state.pending
-      seen := state.seen
-    }
-    requests
+  let nextState : PsIrSpecializeState := {
+    imports := state.imports
+    structures := state.structures
+    inductives := psListAppend state.inductives [inductiveInfo]
+    declarations := state.declarations
+    pending := state.pending
+    seen := state.seen
+  };
+  psIrSpecializeAppendRequest nextState requests
 
 def psIrSpecializeAddDeclaration
     (state : PsIrSpecializeState)
     (declaration : PsVerifiedIrDeclaration)
     (requests : List PsIrSpecializeRequest) :
     PsIrSpecializeState :=
-  psIrSpecializeAppendRequest
-    {
-      imports := state.imports
-      structures := state.structures
-      inductives := state.inductives
-      declarations := psListAppend state.declarations [declaration]
-      pending := state.pending
-      seen := state.seen
-    }
-    requests
+  let nextState : PsIrSpecializeState := {
+    imports := state.imports
+    structures := state.structures
+    inductives := state.inductives
+    declarations := psListAppend state.declarations [declaration]
+    pending := state.pending
+    seen := state.seen
+  };
+  psIrSpecializeAppendRequest nextState requests
 
 def psIrSpecializeProcessStructure
     (module : PsVerifiedIrModule)
@@ -1786,16 +1783,24 @@ def psIrSpecializeModule
                     pending := []
                     seen := []
                   };
+                  let inductiveAndDeclarationRequests :
+                      List PsIrSpecializeRequest :=
+                    psListAppend
+                      (Prod.snd inductives)
+                      (Prod.snd declarations);
+                  let structureAndLaterRequests :
+                      List PsIrSpecializeRequest :=
+                    psListAppend
+                      (Prod.snd structures)
+                      inductiveAndDeclarationRequests;
+                  let allRequests : List PsIrSpecializeRequest :=
+                    psListAppend
+                      imports.requests
+                      structureAndLaterRequests;
                   let initial : PsIrSpecializeState :=
                     psIrSpecializeAppendRequest
                       initialBase
-                      (psListAppend
-                        imports.requests
-                        (psListAppend
-                          (Prod.snd structures)
-                          (psListAppend
-                            (Prod.snd inductives)
-                            (Prod.snd declarations))));
+                      allRequests;
                   match
                       psIrSpecializeLoop
                         module

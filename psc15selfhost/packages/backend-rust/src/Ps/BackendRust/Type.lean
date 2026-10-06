@@ -1,6 +1,7 @@
 import Ps.CompilerIr.Model
 import Ps.Bridge.Json
 import Ps.Foundation.Name
+import Ps.Foundation.List
 import Ps.BackendRust.Identifier
 
 inductive PsRustEmitError where

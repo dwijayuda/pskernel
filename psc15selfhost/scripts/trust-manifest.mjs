@@ -1,6 +1,7 @@
 import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readCheckedBuildHostSources } from './checked-build-evidence.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const trust = JSON.parse(await readFile(path.join(root, "TRUST_MANIFEST.json"), "utf8"));
@@ -38,4 +39,13 @@ const allowed = new Set(trust.bootstrapPackageClosure);
 for (const folder of seenFolders) {
   if (!allowed.has(folder)) throw new Error("PSC_TRUST_BOOTSTRAP_CLOSURE_EXPANDED: " + folder);
 }
+const hostSources = await readCheckedBuildHostSources();
+const declaration = trust.hostSourceClosure;
+if (declaration?.coverage !== 'static-relative-esm-imports/1' || declaration.entry !== 'scripts/checked-build.mjs' ||
+    JSON.stringify(hostSources.map(item => item.path)) !== JSON.stringify(declaration.declared)) {
+  throw new Error('PSC_TRUST_HOST_CLOSURE_UNDECLARED_OR_STALE');
+}
+const dynamicOwners = hostSources.filter(item => /\bimport\s*\(/u.test(item.bytes.toString('utf8'))).map(item => item.path);
+if (JSON.stringify(dynamicOwners) !== JSON.stringify(declaration.dynamicImportOwners)) throw new Error('PSC_TRUST_DYNAMIC_IMPORT_OWNER_DRIFT');
+process.stdout.write('PSCV_TRUST_HOST_CLOSURE: PASS (' + hostSources.length + ' declared static host modules)\n');
 process.stdout.write("PSCV_TRUST_MANIFEST: PASS (" + seenFolders.size + " reachable bootstrap packages)\n");

@@ -208,8 +208,11 @@
       "sections": [
         27
       ],
-      "status": "missing",
-      "owners": [],
+      "status": "implementation-available-assurance-pending",
+      "owners": [
+        "scripts/certificate-boundary.mjs",
+        "contracts/ir/CERTIFICATE_BOUNDARY_V1.json"
+      ],
       "completion": "External solver results create authority only through a configured certificate checker.",
       "assurance": "pending"
     },

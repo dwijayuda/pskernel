@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-certificate/1",
+  "implementation": "scripts/certificate-boundary.mjs",
+  "rules": [
+    "External solvers, search and AI submit bytes, not authority. A success flag or checker URL cannot create evidence.",
+    "Certificate and subject bytes are snapshotted, bounded, re-hashed and decoded canonically before invoking a host-registered checker.",
+    "The certificate must bind the exact caller-selected subject. The checker must return its configured claim class for that same subject.",
+    "The Core proof adapter matches the actual public interface and sends the exact proof admissions to pinned configured kernel providers.",
+    "Unsupported certificates, missing checkers, disagreement, resource failure and infrastructure failure do not become semantic acceptance.",
+    "Accepted certificates produce only a live session-owned scoped validation handle. Serializable receipts are audit data.",
+    "A checked theorem interface is not automatically a global compiler-preservation claim; that relation-to-theorem mapping needs a separate checked contract."
+  ],
+  "implementedCertificateKinds": ["kernel-admissions-for-exact-public-interface"],
+  "remaining": [
+    "solver-specific proof-term or compact-certificate translators/checkers as those formats are admitted",
+    "actual kernel-provider replay and adversarial certificate campaigns",
+    "formally checked global relation-to-theorem mappings and verifier refinement"
+  ],
+  "status": "implementation-available-assurance-pending"
+}

@@ -29,6 +29,33 @@
     "failClosed": true,
     "semanticFallbackForbidden": true
   },
+  "hostSourceClosure": {
+    "coverage": "static-relative-esm-imports/1",
+    "entry": "scripts/checked-build.mjs",
+    "declared": [
+      "scripts/artifact-evidence.mjs",
+      "scripts/bootstrap-manifest.mjs",
+      "scripts/checked-build-evidence.mjs",
+      "scripts/checked-build.mjs",
+      "scripts/checked-kernel-dual.mjs",
+      "scripts/checked-kernel-identity.mjs",
+      "scripts/checked-kernel-provider.mjs",
+      "scripts/checked-seed-session.mjs",
+      "scripts/checked-source-snapshot.mjs",
+      "scripts/compiler-checked-service.mjs",
+      "scripts/kernel-checked-session.mjs",
+      "scripts/kernel-contract.mjs",
+      "scripts/provider-security.mjs",
+      "scripts/selfhost-source-workspace.mjs",
+      "scripts/typescript-cli.mjs",
+      "scripts/workspace-layout.mjs"
+    ],
+    "dynamicImportOwners": [
+      "scripts/checked-build.mjs",
+      "scripts/checked-kernel-provider.mjs"
+    ],
+    "remaining": "Generated compiler, selected provider binaries, runtimes and external TypeScript package closure need their own pinned supply-chain evidence; static closure is not the entire TCB."
+  },
   "trustClasses": {
     "logicalAcceptance": [
       "selected kernel provider under proofscript-kernel-contract/1",

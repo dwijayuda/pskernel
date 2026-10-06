@@ -9,12 +9,12 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: challenge-bound comparator session and bounded export decoding. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede; evidence cache at b7a8b22; bounded producer execution at 2737479.
+- Current checkpoint: certificate boundary and declared checked-host source closure. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede; evidence cache at b7a8b22; bounded producer at 2737479; comparator session at 7337e2a.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
 
-1. Implement the remaining certificate/solver boundary, evidence replay and SAVEF/archive integration; continue internal artifact, incremental interface and target adapter work. Comparator runtime security and full resource coverage remain explicit assurance obligations.
+1. Implement evidence replay and SAVEF/archive integration; continue internal artifact, incremental interface and target adapter work. Solver-specific formats, comparator runtime security and full resource coverage remain explicit obligations.
 2. Complete target-specific interface adapters, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
 3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
 4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
@@ -227,3 +227,10 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Trusted bounded projection preserves transparent definitions and inductive metadata, while omitting theorem proof bodies only from the expected public interface. Those proof bodies still reach all checkers. Added axioms reject under the explicit closed-additional-assumption policy; opaque/unsafe/partial/unknown exports are inconclusive. Malformed/noncanonical UTF-8 JSON, duplicate fields, changed statements and stale challenges fail before checking.
 - Diversity is recorded by known/shared/unknown IndependenceVector axes. Disagreement, unknown checker failure and unavailable required model checking are inconclusive; unanimous acceptance alone can mint a non-serializable session handle. Revocation and closure are enforced. Executable preservation remains explicitly not-established; the existing paranoid provider-security rules remain unchanged.
 - The seven new decoder/session tests and three legacy comparator tests pass locally. They use mocked checkers and producer orchestration and deliberately do not claim valid Lean proofs, real sandbox execution or global assurance. These focused gates are registered in cloud CI, and the assurance handoff records actual provider/container testing still required.
+
+## 2026-10-07 certificate and host trust closure checkpoint
+
+- Added a bounded certificate boundary with host-selected checker registration, immutable byte snapshots, exact subject binding, explicit outcome classification and revocable live validation handles. Solver success flags, checker URLs and serialized verified flags cannot create evidence.
+- The Core proof adapter reuses actual public-interface extraction and pinned kernel checks. Its authority is only kernel-checked-public-interface. It cannot turn an arbitrary theorem into a compiler-preservation claim; such relation-to-theorem mappings remain separate checked obligations. Solver-specific formats are declined until their checker/translator is explicitly admitted.
+- Added an explicit 16-module static checked-host source closure to TrustManifest. CI now computes that closure and rejects undeclared/stale paths or new dynamic-import owners. Generated compiler/provider/runtime/TypeScript closure remains a separately named supply-chain obligation; static host closure is not advertised as the full TCB.
+- Three focused certificate routing/ownership tests pass using mock kernel decisions, and actual static host/bootstrap package closure audits pass (16 host modules, 13 reachable bootstrap packages). Actual proof replay remains an assurance obligation; no new Lean theorem is claimed.

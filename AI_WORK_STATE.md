@@ -4,7 +4,7 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `e9fa0c1b4091222e9f52aa85c266e52e280e3b9d`
+- Current proof implementation HEAD reconciled in this state: `04df1f148c723e690ea1e315d8130e772a12fb7a`
 - Last fully registered green proof checkpoint: `2e825608bcf38ed82eb97ce5bacdc6a4a287f9bd` (run #355)
 - Run #328 validated the eager-reduce context transport fix.
 - The checked-inference fuel proof now closes projection recursion through the smaller-fuel induction hypothesis and configuration-aware projection semantics.
@@ -66,6 +66,10 @@ The audit is conservative relative to newer cross-module checker-contract/contex
 - Run #352 green: string-literal representation reduction plus the optimized beta-spine contract validated.
 - Run #354 green: generalized WHNF finish success/refinement helpers validated.
 - Run #355 green: optimized beta-spine contract strengthened with the required nonempty application-spine premise.
+- Subsequent WHNF work introduced and registered factored application/projection refinement modules plus WHNF-core composition scaffolding.
+- Run #369 failed on two localized proof-alignment classes: projection expansion/canonical-result equations and application reduced-head specialization.
+- Commits `df33416c...`, `06e70249...`, and `04df1f14...` canonicalize projection expansion consumption and specialize both executable-success and semantic-head handoffs across every WHNF head shape.
+- Runs #371/#372 are validating those corrections; use the newest completed run as the next obligation rather than older #365/#366 failures.
 - WHNF core is now split into independent Assurance Plane modules for application and projection refinement instead of one monolithic proof.
 - Current live WHNF work includes `WhnfCoreApplication.lean`, `WhnfCoreProjection.lean`, and composed WHNF-core configuration soundness scaffolding.
 - The semantic audit remains conservatively A=44/B=9/C=19/D=7 until a criteria-based refresh after concrete checker closure.
@@ -76,9 +80,9 @@ Confirmed production-kernel semantic defect:
 
 Immediate blocker:
 - finish compiling the factored WHNF projection/application refinement modules;
-- current failures are proof-composition/type-alignment obligations in `WhnfCoreApplication.lean` and `WhnfCoreProjection.lean`, not a confirmed new production semantic defect;
-- run #365 failed in WHNF application/projection composition; the projection-expansion factoring reduced the remaining error surface but did not close it;
-- commit `e9fa0c1b...` specializes WHNF application success per reduced-head shape; run #366 is queued to validate that refinement;
+- current failures remain proof-composition/type-alignment obligations in `WhnfCoreApplication.lean` and `WhnfCoreProjection.lean`, not a confirmed new production semantic defect;
+- run #369 exposed stale projection-expansion equations and missing reduced-head specialization; the live branch has explicit fixes through `04df1f14...`;
+- validate runs #371/#372 (or any newer live run), repair only the remaining exact obligations, and compose concrete WHNF-core configuration soundness;
 - once WHNF core is green, lift to public WHNF, then concrete DefEq, checker-knot composition, admission refinement, final implementation refinement, and integration reconciliation.
 
 Architectural blockers still remaining:

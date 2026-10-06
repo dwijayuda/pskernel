@@ -180,7 +180,7 @@
     "test:direct-rust-whole-compiler": "node scripts/direct-rust-whole-compiler.test.mjs",
     "test:direct-rust-selfhost": "node scripts/direct-rust-selfhost-fixed-point.mjs",
     "test:architecture-contracts": "node --test scripts/architecture-contracts.test.mjs scripts/provider-security.test.mjs scripts/comparator-v1.test.mjs",
-    "check:architecture-contracts": "npm run test:architecture-contracts && npm run test:architecture-delta && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs && npm run check:semantic-contracts && npm run check:production-authority && npm run check:defeq-cache-source && npm run check:resource-contract && npm run check:independence && npm run check:semantic-lock && npm run check:archive-profile && npm run check:theory-seed && npm run check:theory-bridge && npm run test:savef && npm run check:v3-acceptance",
+    "check:architecture-contracts": "npm run test:architecture-contracts && npm run test:architecture-delta && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs && npm run check:semantic-contracts && npm run check:production-authority && npm run check:defeq-cache-source && npm run check:resource-contract && npm run check:independence && npm run check:semantic-lock && npm run check:archive-profile && npm run check:direct-js-promotion && npm run check:bootstrap-assurance && npm run check:theory-seed && npm run check:theory-bridge && npm run test:savef && npm run check:v3-acceptance",
     "check:semantic-contracts": "node scripts/semantic-contract-audit.mjs",
     "check:production-authority": "node scripts/production-authority-audit.mjs",
     "test:comparator-v1": "node --test scripts/comparator-v1.test.mjs",
@@ -195,7 +195,9 @@
     "check:theory-bridge": "lake build PsTheoryBridge pscv_theory_bridge_tests && lake exe pscv_theory_bridge_tests && lake exe psc1 check packages/theory-bridge/src/Ps/TheoryBridge/Model.lean",
     "test:architecture-delta": "node --test scripts/architecture-delta.test.mjs",
     "check:semantic-lock": "node scripts/semantic-lock-audit.mjs",
-    "check:archive-profile": "node scripts/archive-profile-audit.mjs && node scripts/pscv-verify.mjs"
+    "check:archive-profile": "node scripts/archive-profile-audit.mjs && node scripts/pscv-verify.mjs",
+    "check:direct-js-promotion": "node scripts/direct-js-promotion-audit.mjs",
+    "check:bootstrap-assurance": "node scripts/bootstrap-assurance-audit.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

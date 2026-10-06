@@ -13,7 +13,9 @@ theorem psKernelDefEqFinish_true_value
     (left right : PsKernelExpr) :
     Prod.fst (psKernelDefEqFinish state left right true) =
       true := by
-  rfl
+  cases hEligible :
+      psKernelSemanticPairCacheEligible left right <;>
+    simp [psKernelDefEqFinish, hEligible]
 
 theorem psKernelDefEqFinish_true_preserves_failure
     (state : PsKernelCheckerState)
@@ -21,7 +23,13 @@ theorem psKernelDefEqFinish_true_preserves_failure
     (Prod.snd
       (psKernelDefEqFinish state left right true)).failure =
       state.failure := by
-  rfl
+  cases hEligible :
+      psKernelSemanticPairCacheEligible left right <;>
+    simp [
+      psKernelDefEqFinish,
+      hEligible,
+      psKernelCheckerStateWithSuccess
+    ]
 
 theorem psKernelDefEqLambdaSpineWithFuel_zero
     (defeq :
@@ -90,38 +98,63 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
           from
             ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩)
   | true =>
-      simpa [
-        psKernelDefEqFinish,
-        psKernelCheckerStateWithSuccess
-      ] using
-        (show
-          PsKernelInferOnlyCacheIsolated
-              environment localContext state.inferOnly ∧
-            PsKernelInferenceCacheSound
-              environment localContext state.checkedInfer ∧
-            PsKernelReductionCacheSound
-              environment localContext state.whnfCore ∧
-            PsKernelReductionCacheSound
-              environment localContext state.whnf ∧
-            PsKernelReductionCacheSound
-              environment localContext state.unfold ∧
-            PsKernelDefEqCacheSound
-              environment localContext
-              (psKernelExprPairSetInsert
-                state.success left right)
-          from
-            ⟨
-              hInferOnly,
-              hChecked,
-              hWhnfCore,
-              hWhnf,
-              hUnfold,
-              hInsert
-                environment
-                localContext
-                state.success
-                left
-                right
-                hSuccess
-                hDefEq
-            ⟩)
+      cases hEligible :
+          psKernelSemanticPairCacheEligible left right with
+      | false =>
+          simpa [
+            psKernelDefEqFinish,
+            hEligible
+          ] using
+            (show
+              PsKernelInferOnlyCacheIsolated
+                  environment localContext state.inferOnly ∧
+                PsKernelInferenceCacheSound
+                  environment localContext state.checkedInfer ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.whnfCore ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.whnf ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.unfold ∧
+                PsKernelDefEqCacheSound
+                  environment localContext state.success
+              from
+                ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩)
+      | true =>
+          simpa [
+            psKernelDefEqFinish,
+            hEligible,
+            psKernelCheckerStateWithSuccess
+          ] using
+            (show
+              PsKernelInferOnlyCacheIsolated
+                  environment localContext state.inferOnly ∧
+                PsKernelInferenceCacheSound
+                  environment localContext state.checkedInfer ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.whnfCore ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.whnf ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.unfold ∧
+                PsKernelDefEqCacheSound
+                  environment localContext
+                  (psKernelExprPairSetInsert
+                    state.success left right)
+              from
+                ⟨
+                  hInferOnly,
+                  hChecked,
+                  hWhnfCore,
+                  hWhnf,
+                  hUnfold,
+                  hInsert
+                    environment
+                    localContext
+                    state.success
+                    left
+                    right
+                    hSuccess
+                    hDefEq
+                ⟩)
+

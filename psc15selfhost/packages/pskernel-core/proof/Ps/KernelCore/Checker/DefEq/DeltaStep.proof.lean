@@ -117,6 +117,9 @@ theorem psKernelDefEqFinishLazyStep_success_cache_refines
     (state : PsKernelCheckerState)
     (left right : PsKernelExpr)
     (hEq : psKernelExprEq left right = false)
+    (hEligible :
+      psKernelSemanticPairCacheEligible left right =
+        true)
     (hCache :
       psKernelExprPairSetContains
           state.success
@@ -144,6 +147,7 @@ theorem psKernelDefEqFinishLazyStep_success_cache_refines
       psKernelDefEqFinishLazyStep,
       psKernelDefEqQuick,
       hEq,
+      hEligible,
       hCache
     ]
   · exact hSound left right hCache
@@ -252,90 +256,105 @@ theorem psKernelDefEqUnfold_preserves_semantic_sound
           context
           state
           expr)) := by
-  cases hCache :
-      psKernelExprMapGet
-        state.unfold
-        expr with
-  | some cached =>
-      simpa [
-        psKernelDefEqUnfold,
-        hCache
-      ] using hState
-  | none =>
+  cases hEligible :
+      psKernelSemanticCacheEligible expr with
+  | false =>
       cases hDirect :
-          psKernelUnfoldDefinition
-            context
+          psKernelUnfoldDefinition context expr <;>
+        simpa [
+          psKernelDefEqUnfold,
+          hEligible,
+          hDirect
+        ] using hState
+  | true =>
+      cases hCache :
+          psKernelExprMapGet
+            state.unfold
             expr with
-      | none =>
+      | some cached =>
           simpa [
             psKernelDefEqUnfold,
-            hCache,
-            hDirect
+            hEligible,
+            hCache
           ] using hState
-      | some value =>
-          have hReduction :
-              PsKernelReductionClosure
-                context.environment
-                context.localContext
-                expr
-                value :=
-            psKernelUnfoldDefinition_some_refines_closure
-              context
-              expr
-              value
-              hIndex
-              hDirect
-          unfold PsKernelCheckerStateSemanticSound at hState ⊢
-          rcases hState with
-            ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
-          simpa [
-            psKernelDefEqUnfold,
-            hCache,
-            hDirect,
-            psKernelCheckerStateWithUnfold,
-            PsKernelCheckerStateSemanticSound
-          ] using
-            (show
-              PsKernelInferOnlyCacheIsolated
+      | none =>
+          cases hDirect :
+              psKernelUnfoldDefinition
+                context
+                expr with
+          | none =>
+              simpa [
+                psKernelDefEqUnfold,
+                hEligible,
+                hCache,
+                hDirect
+              ] using hState
+          | some value =>
+              have hReduction :
+                  PsKernelReductionClosure
                     context.environment
                     context.localContext
-                    state.inferOnly ∧
-                PsKernelInferenceCacheSound
-                    context.environment
-                    context.localContext
-                    state.checkedInfer ∧
-                PsKernelReductionCacheSound
-                    context.environment
-                    context.localContext
-                    state.whnfCore ∧
-                PsKernelReductionCacheSound
-                    context.environment
-                    context.localContext
-                    state.whnf ∧
-                PsKernelReductionCacheSound
-                    context.environment
-                    context.localContext
-                    (psKernelExprMapInsert
-                      state.unfold
-                      expr
-                      value) ∧
-                PsKernelDefEqCacheSound
-                    context.environment
-                    context.localContext
-                    state.success
-              from
-                ⟨
-                  hInferOnly,
-                  hChecked,
-                  hWhnfCore,
-                  hWhnf,
-                  hInsert
-                    context.environment
-                    context.localContext
-                    state.unfold
                     expr
-                    value
-                    hUnfold
-                    hReduction,
-                  hSuccess
-                ⟩)
+                    value :=
+                psKernelUnfoldDefinition_some_refines_closure
+                  context
+                  expr
+                  value
+                  hIndex
+                  hDirect
+              unfold PsKernelCheckerStateSemanticSound at hState ⊢
+              rcases hState with
+                ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
+              simpa [
+                psKernelDefEqUnfold,
+                hEligible,
+                hCache,
+                hDirect,
+                psKernelCheckerStateWithUnfold,
+                PsKernelCheckerStateSemanticSound
+              ] using
+                (show
+                  PsKernelInferOnlyCacheIsolated
+                        context.environment
+                        context.localContext
+                        state.inferOnly ∧
+                    PsKernelInferenceCacheSound
+                        context.environment
+                        context.localContext
+                        state.checkedInfer ∧
+                    PsKernelReductionCacheSound
+                        context.environment
+                        context.localContext
+                        state.whnfCore ∧
+                    PsKernelReductionCacheSound
+                        context.environment
+                        context.localContext
+                        state.whnf ∧
+                    PsKernelReductionCacheSound
+                        context.environment
+                        context.localContext
+                        (psKernelExprMapInsert
+                          state.unfold
+                          expr
+                          value) ∧
+                    PsKernelDefEqCacheSound
+                        context.environment
+                        context.localContext
+                        state.success
+                  from
+                    ⟨
+                      hInferOnly,
+                      hChecked,
+                      hWhnfCore,
+                      hWhnf,
+                      hInsert
+                        context.environment
+                        context.localContext
+                        state.unfold
+                        expr
+                        value
+                        hUnfold
+                        hReduction,
+                      hSuccess
+                    ⟩)
+

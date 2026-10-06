@@ -28,6 +28,9 @@ theorem psKernelDefEqQuick_success_cache
     (state : PsKernelCheckerState)
     (left right : PsKernelExpr)
     (hEq : psKernelExprEq left right = false)
+    (hEligible :
+      psKernelSemanticPairCacheEligible left right =
+        true)
     (hCache :
       psKernelExprPairSetContains
         state.success left right =
@@ -36,7 +39,12 @@ theorem psKernelDefEqQuick_success_cache
         defeq context state left right =
       Except.ok
         (Prod.mk (Option.some true) state) := by
-  simp [psKernelDefEqQuick, hEq, hCache]
+  simp [
+    psKernelDefEqQuick,
+    hEq,
+    hEligible,
+    hCache
+  ]
 
 theorem psKernelLevelListsEquivalent_nil_nil :
     psKernelLevelListsEquivalent

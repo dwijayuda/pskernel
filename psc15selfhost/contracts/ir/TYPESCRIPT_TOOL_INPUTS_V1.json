@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-typescript-tool-inputs/1",
+  "implementation": "scripts/typescript-tool-inputs.mjs",
+  "integration": "scripts/checked-build.mjs; scripts/checked-build-evidence.mjs",
+  "status": "observed-installed-package-profile",
+  "installedProfile": {
+    "version": "7.0.2",
+    "trees": ["typescript excluding nested node_modules", "selected @typescript/typescript-PLATFORM-ARCH package excluding nested node_modules"],
+    "invocation": "The checked host directly invokes the native executable selected from the captured installed platform package. The version gate and existing compilation flags remain mandatory.",
+    "capture": "Retain all regular package files, including package metadata, compiler code, native executable, declarations and licenses. Paths are package-relative and sorted by code units. No mtime enters identity.",
+    "stability": "After successful compilation, re-enumerate both trees and re-hash every file. Added, missing or changed files reject before final publication.",
+    "filesystem": "Package roots resolve before capture; linked descendants and non-regular files reject. Trusted local filesystem behavior remains assumed: before/after checks do not defeat malicious transient substitution."
+  },
+  "customEntryProfile": "Explicit non-package launchers retain their exact entry bytes and before/after checks, with entry-only coverage. They do not claim dependency discovery.",
+  "budgets": { "files": 2048, "fileBytes": 67108864, "totalBytes": 83886080, "depth": 24, "metadataBytes": 1048576 },
+  "artifactBinding": "The canonical manifest contains every package-relative path and byte ArtifactId. It is the TypeScript pass implementation identity and an action dependency. The observed build archive retains every referenced byte snapshot.",
+  "fullInputClosureEstablished": false,
+  "remaining": [
+    "host runtime, OS libraries and ambient environment",
+    "filesystem/module/type resolution outside the selected package trees",
+    "generated compiler and selected provider execution closure",
+    "independent compiler preservation and source-binary correspondence",
+    "release distribution and authenticated toolchain pins"
+  ],
+  "authority": "Observed byte integrity and stable inventory do not establish semantic acceptance, reproducibility, preservation, complete toolchain closure or eligibility for semantic cache reuse."
+}

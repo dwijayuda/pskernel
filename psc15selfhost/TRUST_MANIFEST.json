@@ -51,13 +51,14 @@
       "scripts/provider-security.mjs",
       "scripts/selfhost-source-workspace.mjs",
       "scripts/typescript-cli.mjs",
+      "scripts/typescript-tool-inputs.mjs",
       "scripts/workspace-layout.mjs"
     ],
     "dynamicImportOwners": [
       "scripts/checked-build.mjs",
       "scripts/checked-kernel-provider.mjs"
     ],
-    "remaining": "Generated compiler, selected provider binaries, runtimes and external TypeScript package closure need their own pinned supply-chain evidence; static closure is not the entire TCB."
+    "remaining": "Installed TypeScript and selected native platform package bytes are now captured separately by checked builds. Generated compiler/provider/runtime execution closure, ambient inputs and authenticated supply-chain evidence remain incomplete; static closure is not the entire TCB."
   },
   "trustClasses": {
     "logicalAcceptance": [

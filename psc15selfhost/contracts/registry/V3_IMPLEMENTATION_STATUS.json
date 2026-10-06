@@ -96,6 +96,7 @@
         "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean",
         "scripts/artifact-evidence.mjs",
         "scripts/checked-build-evidence.mjs",
+        "scripts/typescript-tool-inputs.mjs",
         "scripts/observed-build-archive.mjs",
         "contracts/ir/PASS_EVIDENCE_V1.json",
         "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",

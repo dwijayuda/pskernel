@@ -17,6 +17,7 @@ import {
 } from './checked-kernel-provider.mjs';
 import { runCheckedSeedSession } from './checked-seed-session.mjs';
 import { pinnedTypeScriptVersionText, resolveTypeScriptCli } from './typescript-cli.mjs';
+import { captureTypeScriptToolInputs, verifyTypeScriptToolInputs } from './typescript-tool-inputs.mjs';
 import { assertProviderSecurity, defaultProviderSecurityProfile } from './provider-security.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -122,7 +123,9 @@ export async function buildChecked({
   // Kernel acceptance has already happened. TypeScript writes only into staging;
   // a failed tsc cannot create a new final output or checked receipt.
   const tsc = resolveTypeScriptCli();
-  const version = spawnSync(process.execPath, [tsc, '--version'], { encoding: 'utf8', timeout: 10000 });
+  const toolCapture = await captureTypeScriptToolInputs(tsc);
+  const version = spawnSync(toolCapture.command, [...toolCapture.argumentsPrefix, '--version'],
+    { encoding: 'utf8', timeout: 10000, windowsHide: true });
   if (version.error || version.status !== 0 || version.stdout.trim() !== pinnedTypeScriptVersionText) {
     throw new Error('PSC2_CHECKED_TYPESCRIPT_PIN: require TypeScript 7.0.2');
   }
@@ -131,25 +134,28 @@ export async function buildChecked({
   try {
     const tsFile = path.join(staging, stem + '.ts');
     await writeFile(tsFile, typeScript);
-    const run = spawnSync(process.execPath, [tsc, tsFile, '--ignoreConfig', '--target', 'ES2022', '--module', 'ES2022',
+    const run = spawnSync(toolCapture.command, [...toolCapture.argumentsPrefix, tsFile, '--ignoreConfig', '--target', 'ES2022', '--module', 'ES2022',
       '--moduleResolution', 'bundler', '--strict', '--declaration', '--sourceMap',
       '--noEmitOnError', '--skipLibCheck', '--pretty', 'false'], {
       encoding: 'utf8', timeout: 120000, maxBuffer: 16 * 1024 * 1024, windowsHide: true,
     });
     if (run.error) throw run.error;
     if (run.status !== 0) throw new Error(`PSC2_CHECKED_TSC_FAILED: ${run.stdout}\n${run.stderr}`);
+    const typeScriptToolInputs = await verifyTypeScriptToolInputs(toolCapture);
     receipt.typeScriptSha256 = digest(typeScript);
-    const [javaScript, declarations, sourceMap, typeScriptCompilerBytes, hostSources] = await Promise.all([
+    const [javaScript, declarations, sourceMap, hostSources] = await Promise.all([
       readFile(path.join(staging, stem + '.js')), readFile(path.join(staging, stem + '.d.ts')),
-      readFile(path.join(staging, stem + '.js.map')), readFile(tsc), readCheckedBuildHostSources(),
+      readFile(path.join(staging, stem + '.js.map')), readCheckedBuildHostSources(),
     ]);
+    const typeScriptCompilerBytes = typeScriptToolInputs.files.find(item => item.path === typeScriptToolInputs.details.entryPath).bytes;
     receipt.javaScriptSha256 = digest(javaScript);
     const evidence = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes,
-      compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, outputStem: stem, irStages,
+      compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1,
       hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     receipt.buildGraph = evidence.identity;
+    receipt.typeScriptToolInputs = evidence.typeScriptToolInputs;
     const archive = packObservedBuildArchive(evidence);
     receipt.buildArchive = archive.identity;
     await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);

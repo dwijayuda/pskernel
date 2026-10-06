@@ -1,4 +1,5 @@
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,8 +32,9 @@ export async function readCheckedBuildHostSources() {
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
-  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages }) {
+  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs }) {
   const artifacts = new Map(), entries = [], executions = [];
+  let toolInputs;
   function add(item, source, inline = false) {
     const key = artifactKey(item.identity);
     if (!artifacts.has(key)) {
@@ -108,16 +110,35 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       if (typeof outputStem !== 'string' || !outputStem) throw new Error('PSC_BUILD_GRAPH_OUTPUT_STEM');
       const tool = bytes(typeScriptCompilerBytes, 'typescript-compiler-entry', 'typescript-compiler-entry/1',
         { kind: 'archive-required', role: 'typescript-compiler-entry' });
+      if (typeScriptToolInputs) {
+        const { details, files } = typeScriptToolInputs;
+        if (details.contract !== 'psc-typescript-tool-inputs/1' || details.fullInputClosureEstablished !== false ||
+            !Array.isArray(files) || !Array.isArray(details.files) || files.length !== details.files.length || !files.length)
+          throw new Error('PSC_BUILD_GRAPH_TOOL_INPUTS_SCHEMA');
+        const capturedFiles = files.map((item, index) => {
+          const expected = details.files[index];
+          if (item.path !== expected.path || !(item.bytes instanceof Uint8Array) ||
+              item.bytes.byteLength !== expected.byteLength ||
+              createHash('sha256').update(item.bytes).digest('hex') !== expected.sha256 ||
+              (index > 0 && files[index - 1].path >= item.path)) throw new Error('PSC_BUILD_GRAPH_TOOL_INPUTS_BYTES');
+          return { path: item.path, artifact: bytes(item.bytes, 'typescript-tool-file', 'psc-tool-file-bytes/1',
+            { kind: 'archive-required', role: 'typescript-package-file', path: item.path }).identity };
+        });
+        const entry = files.find(item => item.path === details.entryPath);
+        if (!entry || !Buffer.from(entry.bytes).equals(Buffer.from(typeScriptCompilerBytes))) throw new Error('PSC_BUILD_GRAPH_TOOL_ENTRY');
+        toolInputs = json({ ...details, files: capturedFiles, stabilityObservation: 'same-inventory-and-bytes-before-and-after-execution' },
+          'tool-inputs', 'psc-typescript-tool-inputs/1', { kind: 'inline' });
+      }
       const outputs = [
         bytes(javaScript, 'javascript-output', 'typescript-emitted-file/1', { kind: 'output-file', suffix: '.js' }),
         bytes(declarations, 'declarations-output', 'typescript-emitted-file/1', { kind: 'output-file', suffix: '.d.ts' }),
         bytes(sourceMap, 'source-map-output', 'typescript-emitted-file/1', { kind: 'output-file', suffix: '.js.map' }),
       ];
-      execute('typescript-to-es2022/1', ts, outputs, tool, 'typescript-erasure-to-es2022/1',
+      execute('typescript-to-es2022/1', ts, outputs, toolInputs ?? tool, 'typescript-erasure-to-es2022/1',
         { outputStem, inputClosureComplete: false,
           flags: ['--ignoreConfig', '--target', 'ES2022', '--module', 'ES2022', '--moduleResolution', 'bundler',
           '--strict', '--declaration', '--sourceMap', '--noEmitOnError', '--skipLibCheck', '--pretty', 'false'] },
-        baseDependencies, ['selected-typescript-package-closure']);
+        toolInputs ? [...baseDependencies, toolInputs.identity] : baseDependencies, ['selected-typescript-package-closure']);
     }
   }
   const graph = { schemaVersion: 1, contract: 'psc-observed-build-graph/1', authority: 'audit-record-only',
@@ -126,5 +147,6 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       'complete toolchain closure', 'independent preservation evidence'] };
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded,
-    identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1') };
+    identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1'),
+    ...(toolInputs ? { typeScriptToolInputs: toolInputs.identity } : {}) };
 }

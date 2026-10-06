@@ -143,6 +143,12 @@ for (const [kind, source] of [
       assert.equal(graph.executions.length, 5);
       assert.equal(graph.entries.filter(entry => entry.identity.domain === 'runtime-ir').length, 1);
       assert.equal(graph.entries.filter(entry => entry.identity.domain === 'verified-ir').length, 1);
+      const tool = graph.entries.find(entry => entry.identity.contract === 'psc-typescript-tool-inputs/1');
+      assert.deepEqual(tool.identity, receipt.typeScriptToolInputs);
+      assert.equal(tool.canonicalValue.coverage, 'installed-package-and-selected-native-package');
+      assert.equal(tool.canonicalValue.fullInputClosureEstablished, false);
+      assert.ok(tool.canonicalValue.files.some(item => item.path === tool.canonicalValue.nativePath));
+      assert.ok(tool.canonicalValue.files.some(item => item.path.endsWith('/lib.es2022.d.ts')));
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

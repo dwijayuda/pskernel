@@ -376,3 +376,28 @@ theorem psKernelWhnfFinish_preserves_semantic_sound
                 hSuccess
               ⟩)
 
+
+
+theorem psKernelWhnfCoreFinish_fvar_not_cached
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (result : PsKernelExpr)
+    (cheapProj : Bool) :
+    psKernelWhnfCoreFinish
+        (PsKernelExpr.fvar name)
+        cheapProj
+        result
+        state =
+      Except.ok (Prod.mk result state) := by
+  cases cheapProj <;> rfl
+
+theorem psKernelWhnfFinish_fvar_not_cached
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (result : PsKernelExpr) :
+    psKernelWhnfFinish
+        (PsKernelExpr.fvar name)
+        result
+        state =
+      Except.ok (Prod.mk result state) := by
+  rfl

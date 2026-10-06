@@ -158,3 +158,21 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
                     hDefEq
                 ⟩)
 
+
+
+theorem psKernelDefEqFinish_fvar_pair_not_cached
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (right : PsKernelExpr) :
+    psKernelDefEqFinish
+        state
+        (PsKernelExpr.fvar name)
+        right
+        true =
+      Prod.mk true state := by
+  simp [
+    psKernelDefEqFinish,
+    psKernelSemanticPairCacheEligible,
+    psKernelSemanticCacheEligible,
+    psKernelExprHasFVar
+  ]

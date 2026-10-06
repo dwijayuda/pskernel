@@ -610,3 +610,48 @@ theorem psKernelInferCoreWithFuel_app_checked_defeq_rejects
         hEager,
         hDefEq
       ]
+
+
+theorem psKernelInferCoreWithFuel_unknown_fvar_ignores_cache
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (inferOnly : Bool)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hMissing :
+      psKernelLocalContextFind
+          nextContext.localContext
+          name =
+        Option.none) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf
+        defeq
+        context
+        state
+        (PsKernelExpr.fvar name)
+        inferOnly =
+      Except.error "unknown free variable" := by
+  cases inferOnly <;>
+    simp [
+      psKernelInferCoreWithFuel,
+      psKernelInferCacheEligible,
+      psKernelSemanticCacheEligible,
+      psKernelExprHasFVar,
+      hDepth,
+      hMissing
+    ]

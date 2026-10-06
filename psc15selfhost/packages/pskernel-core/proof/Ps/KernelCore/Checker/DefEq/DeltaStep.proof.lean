@@ -358,3 +358,15 @@ theorem psKernelDefEqUnfold_preserves_semantic_sound
                       hSuccess
                     ⟩)
 
+
+
+theorem psKernelDefEqUnfold_fvar_ignores_cache
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName) :
+    psKernelDefEqUnfold
+        context
+        state
+        (PsKernelExpr.fvar name) =
+      Prod.mk Option.none state := by
+  rfl

@@ -1,56 +1,42 @@
-import Ps.BackendRust.Expr
+import Ps.BackendRust.TailAlias
 
--- Only saturated, unshadowed, monomorphic direct self calls are eligible.
--- The loop carries a tuple so every argument is evaluated before replacement.
--- Mutual, polymorphic, indirect and non-tail recursion keep ordinary emission.
-def psRustTailArguments (declaration : PsVerifiedIrDeclaration)
-    (locals : List String) (expr : PsVerifiedIrExpr) : Option (List PsVerifiedIrExpr) :=
-  match declaration.typeParameters with
-  | List.cons _ _ => Option.none
-  | List.nil =>
-      match expr with
-      | PsVerifiedIrExpr.call fn typeArguments arguments =>
-          match fn with
-          | PsVerifiedIrExpr.var name =>
-              if psStringEq name declaration.name then
-                if psRustStringListContains locals name then Option.none
-                else
-                  match typeArguments with
-                  | List.cons _ _ => Option.none
-                  | List.nil =>
-                      if Nat.beq (psListLength declaration.parameters) (psListLength arguments) then
-                        Option.some arguments
-                      else Option.none
-              else Option.none
-          | _ => Option.none
-      | _ => Option.none
-
+-- The loop carries a tuple so arguments are evaluated before replacement.
+-- Recognized eta aliases freeze captures before binding; shadowing hides aliases.
 def psRustTailAnyAlternative
-    (check : List String -> PsVerifiedIrExpr -> Bool) (locals : List String)
+    (check : List String -> List PsRustTailAlias -> PsVerifiedIrExpr -> Bool)
+    (locals : List String) (aliases : List PsRustTailAlias)
     (alternatives : List (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr))) : Bool :=
   match alternatives with
   | List.nil => false
   | List.cons alternative rest =>
       let payload := Prod.snd alternative;
-      if check (psRustAddBindingNames (Prod.fst payload) locals) (Prod.snd payload) then true
-      else psRustTailAnyAlternative check locals rest
+      let names := psRustAddBindingNames (Prod.fst payload) List.nil;
+      if check (psRustAddBindingNames (Prod.fst payload) locals) (psRustTailHideAliases names aliases) (Prod.snd payload) then true
+      else psRustTailAnyAlternative check locals aliases rest
 
-def psRustHasTailWorker (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
-    List String -> PsVerifiedIrExpr -> Bool :=
+def psRustHasTailAliasWorker (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
+    List String -> List PsRustTailAlias -> PsVerifiedIrExpr -> Bool :=
   match fuel with
-  | Nat.zero => fun (_locals : List String) (_expr : PsVerifiedIrExpr) => false
+  | Nat.zero =>
+      fun (_locals : List String) (_aliases : List PsRustTailAlias) (_expr : PsVerifiedIrExpr) => false
   | Nat.succ remaining =>
-      let smaller : List String -> PsVerifiedIrExpr -> Bool := psRustHasTailWorker declaration remaining;
-      fun (locals : List String) (expr : PsVerifiedIrExpr) =>
-        match psRustTailArguments declaration locals expr with
+      let smaller : List String -> List PsRustTailAlias -> PsVerifiedIrExpr -> Bool :=
+        psRustHasTailAliasWorker declaration remaining;
+      fun (locals : List String) (aliases : List PsRustTailAlias) (expr : PsVerifiedIrExpr) =>
+        match psRustTailCallFor declaration locals aliases expr with
         | Option.some _ => true
         | Option.none =>
             match expr with
-            | PsVerifiedIrExpr.letE name _ _ body => smaller (List.cons name locals) body
+            | PsVerifiedIrExpr.letE name _ value body =>
+                smaller (List.cons name locals) (psRustTailEnterAlias declaration locals aliases remaining name value) body
             | PsVerifiedIrExpr.ifE _ thenBranch elseBranch =>
-                if smaller locals thenBranch then true else smaller locals elseBranch
-            | PsVerifiedIrExpr.matchE _ _ _ alternatives => psRustTailAnyAlternative smaller locals alternatives
+                if smaller locals aliases thenBranch then true else smaller locals aliases elseBranch
+            | PsVerifiedIrExpr.matchE _ _ _ alternatives => psRustTailAnyAlternative smaller locals aliases alternatives
             | _ => false
+
+def psRustHasTailWorker (declaration : PsVerifiedIrDeclaration) (fuel : Nat)
+    (locals : List String) (expr : PsVerifiedIrExpr) : Bool :=
+  psRustHasTailAliasWorker declaration fuel locals List.nil expr
 
 def psRustTailTuple (values : List String) : String :=
   match values with
@@ -81,40 +67,47 @@ def psRustTailLet (name : String) (type : PsVerifiedIrType) (value : PsVerifiedI
 
 def psRustEmitTailWorker (declarations : List PsVerifiedIrDeclaration)
     (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
-    List String -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
+    List String -> List PsRustTailAlias -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
   match fuel with
   | Nat.zero =>
-      fun (_locals : List String) (_expr : PsVerifiedIrExpr) => Except.error PsRustEmitError.fuelExhausted
+      fun (_locals : List String) (_aliases : List PsRustTailAlias) (_expr : PsVerifiedIrExpr) => Except.error PsRustEmitError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : List String -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
+      let smaller : List String -> List PsRustTailAlias -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
         psRustEmitTailWorker declarations declaration remaining;
-      fun (locals : List String) (expr : PsVerifiedIrExpr) =>
+      fun (locals : List String) (aliases : List PsRustTailAlias) (expr : PsVerifiedIrExpr) =>
         let ordinary : PsVerifiedIrExpr -> Except PsRustEmitError String :=
           psRustEmitExprWorker declarations remaining locals;
-        match psRustTailArguments declaration locals expr with
-        | Option.some arguments =>
-            match psRustEmitExprListWith ordinary arguments with
+        match psRustTailCallFor declaration locals aliases expr with
+        | Option.some call =>
+            match psRustEmitExprListWith ordinary call.arguments with
             | Except.error error => Except.error error
             | Except.ok printed =>
                 Except.ok (psRustConcat3 "{ __ps_internal_tail_state = "
-                  (psRustTailTuple printed) "; continue; }")
+                  (psRustTailTuple (psListAppend call.captured printed)) "; continue; }")
         | Option.none =>
             match expr with
             | PsVerifiedIrExpr.letE name type value body =>
                 match ordinary value with
                 | Except.error error => Except.error error
                 | Except.ok printedValue =>
-                    match smaller (List.cons name locals) body with
+                    match smaller (List.cons name locals) (psRustTailEnterAlias declaration locals aliases remaining name value) body with
                     | Except.error error => Except.error error
-                    | Except.ok printedBody => psRustTailLet name type value printedValue printedBody
+                    | Except.ok printedBody =>
+                        match psRustTailLet name type value printedValue printedBody with
+                        | Except.error error => Except.error error
+                        | Except.ok printedLet =>
+                            match psRustTailAliasFor declaration locals remaining name value with
+                            | Option.none => Except.ok printedLet
+                            | Option.some alias =>
+                                Except.ok (psRustJoin "" ["{ ", psRustTailCaptureLets alias.captures, printedLet, " }"])
             | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
                 match ordinary condition with
                 | Except.error error => Except.error error
                 | Except.ok printedCondition =>
-                    match smaller locals thenBranch with
+                    match smaller locals aliases thenBranch with
                     | Except.error error => Except.error error
                     | Except.ok printedThen =>
-                        match smaller locals elseBranch with
+                        match smaller locals aliases elseBranch with
                         | Except.error error => Except.error error
                         | Except.ok printedElse =>
                             Except.ok (psRustJoin ""
@@ -123,7 +116,11 @@ def psRustEmitTailWorker (declarations : List PsVerifiedIrDeclaration)
                 match ordinary scrutinee with
                 | Except.error error => Except.error error
                 | Except.ok printedScrutinee =>
-                    match psRustEmitAlternativeListWith locals smaller inductiveName alternatives with
+                    let emitAlternative : List String -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
+                      fun (nestedLocals : List String) (body : PsVerifiedIrExpr) =>
+                        let addedNames := psListTake (Nat.sub (psListLength nestedLocals) (psListLength locals)) nestedLocals;
+                        smaller nestedLocals (psRustTailHideAliases addedNames aliases) body;
+                    match psRustEmitAlternativeListWith locals emitAlternative inductiveName alternatives with
                     | Except.error error => Except.error error
                     | Except.ok printedAlternatives =>
                         Except.ok (psRustJoin "" ["match ", psRustCloneExprPrinted scrutinee printedScrutinee,
@@ -137,7 +134,7 @@ def psRustEmitDeclarationBody (declarations : List PsVerifiedIrDeclaration)
     (declaration : PsVerifiedIrDeclaration) (locals : List String)
     (body : PsVerifiedIrExpr) : Except PsRustEmitError String :=
   if psRustHasTailWorker declaration 4096 locals body then
-    match psRustEmitTailWorker declarations declaration 4096 locals body with
+    match psRustEmitTailWorker declarations declaration 4096 locals List.nil body with
     | Except.error error => Except.error error
     | Except.ok printed =>
         let parameters := psRustTailTuple (psRustTailParameterNames declaration.parameters);

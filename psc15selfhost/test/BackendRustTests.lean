@@ -1322,6 +1322,23 @@ def psTestRustTailEmission : Bool :=
       printed.contains "break { (value).clone() };" &&
       !(printed.contains "(tail)(")
 
+def psTestRustTailAliasScope : Bool :=
+  let type := PsVerifiedIrType.primitive .uint32;
+  let declaration := PsVerifiedIrDeclaration.mk "worker" [] [.mk "count" type, .mk "value" type] type (.var "value");
+  let alias := PsVerifiedIrExpr.lambda [.mk "next" type] type (.call (.var "worker") [] [.var "count", .var "next"]);
+  let use := PsVerifiedIrExpr.call (.var "smaller") [] [.var "value"];
+  let bound := PsVerifiedIrExpr.letE "smaller" (.function [type] type) alias use;
+  let detects := psRustHasTailWorker declaration 100 ["count", "value"];
+  detects bound &&
+    !detects (.letE "smaller" (.function [type] type) alias
+      (.letE "smaller" (.function [type] type) (.var "other") use)) &&
+    !detects (.letE "smaller" (.function [type] type) alias
+      (.matchE "Holder" [] (.var "holder") [("hold", [.mk "callback" "smaller" (.function [type] type)], use)])) &&
+    !detects (.letE "smaller" (.function [type] type)
+      (.lambda [.mk "next" type] type (.call (.var "worker") [] [.var "next", .var "count"])) use) &&
+    !(psRustTailSameTypes [.mk "A"] [PsVerifiedIrType.named "List" [.typeParameter "A"]]) &&
+    psRustTailSameTypes [.mk "A"] [.typeParameter "A"]
+
 structure PsBackendRustNamedTest where
   name : String
   passed : Bool
@@ -1329,6 +1346,7 @@ structure PsBackendRustNamedTest where
 def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "tail calls respect lexical scope, arity and supported recursion", passed := psTestRustTailClassification },
   { name := "supported tail calls emit argument-tuple loops", passed := psTestRustTailEmission },
+  { name := "tail worker aliases preserve captures and lexical shadowing", passed := psTestRustTailAliasScope },
   { name := "identity module", passed := psTestBackendRustIdentity },
   { name := "Nat intrinsic", passed := psTestBackendRustIntrinsic },
   { name := "UInt8.ofNat intrinsic", passed := psTestBackendRustUInt8OfNat },

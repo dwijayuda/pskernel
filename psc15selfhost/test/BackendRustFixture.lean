@@ -75,6 +75,25 @@ def psRustTailChainFixture : PsVerifiedIrDeclaration :=
        ("link", [.mk "head" "head" psRustTailFixtureType, .mk "tail" "tail" chain],
          .call (.var "tailChainCount") [] [.var "tail", psRustTailFixtureBinary .add (.var "count") (psRustTailFixtureLit 1)])])
 
+def psRustTailAliasFixture (functionName aliasName shadowName : String) : PsVerifiedIrDeclaration :=
+  .mk functionName [] [.mk "count" psRustTailFixtureType, .mk "value" psRustTailFixtureType] psRustTailFixtureType
+    (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "count", psRustTailFixtureLit 0]) (.var "value")
+      (.letE "remaining" psRustTailFixtureType (psRustTailFixtureBinary .sub (.var "count") (psRustTailFixtureLit 1))
+        (.letE aliasName (.function [psRustTailFixtureType] psRustTailFixtureType)
+          (.lambda [.mk "next" psRustTailFixtureType] psRustTailFixtureType
+            (.call (.var functionName) [] [.var "remaining", .var "next"]))
+          (.letE shadowName psRustTailFixtureType (psRustTailFixtureLit 0)
+            (.call (.var aliasName) [] [psRustTailFixtureBinary .add (.var "value") (psRustTailFixtureLit 1)])))))
+
+def psRustTailGenericFixture : PsVerifiedIrDeclaration :=
+  let type := PsVerifiedIrType.typeParameter "A";
+  .mk "genericTailAlias" [.mk "A"] [.mk "count" psRustTailFixtureType, .mk "value" type] type
+    (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "count", psRustTailFixtureLit 0]) (.var "value")
+      (.letE "remaining" psRustTailFixtureType (psRustTailFixtureBinary .sub (.var "count") (psRustTailFixtureLit 1))
+        (.letE "smaller" (.function [type] type)
+          (.lambda [.mk "next" type] type (.call (.var "genericTailAlias") [type] [.var "remaining", .var "next"]))
+          (.call (.var "smaller") [] [.var "value"]))))
+
 def psBackendRustCompileFixture : PsVerifiedIrModule :=
   {
     imports := []
@@ -155,6 +174,9 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
       psRustTailSwapFixture,
       psRustTailShadowFixture,
       psRustTailChainFixture,
+      psRustTailAliasFixture "tailAlias" "smaller" "remaining",
+      psRustTailAliasFixture "tailAliasBeforeBinder" "remaining" "count",
+      psRustTailGenericFixture,
       PsVerifiedIrDeclaration.mk "shareChain" [PsVerifiedIrTypeParameter.mk "A"]
         [PsVerifiedIrParameter.mk "value" (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"])]
         (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"]) (PsVerifiedIrExpr.var "value"),

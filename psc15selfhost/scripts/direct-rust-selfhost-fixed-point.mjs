@@ -140,6 +140,27 @@ function runNative(paths, stage) {
     cwd: root,
     maxBuffer: 512 * 1024 * 1024,
   });
+  if (result.status !== 0 && /overflowed its stack/u.test(result.stderr ?? "")) {
+    // Diagnostic replay cannot satisfy the fixed-point gate. GNU timeout kills
+    // the debugger's process group after 45 seconds; never enlarge the stack.
+    // Disable automatic debugger scripts before reading generated binaries:
+    // https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading.html
+    if (process.platform === "linux" && existsSync("/usr/bin/gdb") && existsSync("/usr/bin/timeout")) {
+      phase(stage + "-overflow-diagnostic");
+      const trace = spawnSync("/usr/bin/timeout", [
+        "--signal=KILL", "45s", "/usr/bin/gdb", "--batch", "--nx", "--quiet",
+        "-iex", "set auto-load off", "-ex", "set pagination off",
+        "-ex", "set debuginfod enabled off", "-ex", "set startup-with-shell off",
+        "-ex", "set print frame-arguments none", "-ex", "run", "-ex", "backtrace 96",
+        "--args", binary, ...paths,
+      ], { cwd: root, encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
+      process.stderr.write("PSC2_DIRECT_RUST_OVERFLOW_DIAGNOSTIC: " +
+        JSON.stringify({ status: trace.status, signal: trace.signal, error: trace.error?.code }) + "\n");
+      process.stderr.write((trace.stdout ?? "").slice(-128 * 1024) + (trace.stderr ?? "").slice(-8192));
+    } else {
+      process.stderr.write("PSC2_DIRECT_RUST_OVERFLOW_DIAGNOSTIC_UNAVAILABLE\n");
+    }
+  }
   return requireSuccess(
     result,
     "PSC2_DIRECT_RUST_SELFHOST_" + stage + "_FAILED",

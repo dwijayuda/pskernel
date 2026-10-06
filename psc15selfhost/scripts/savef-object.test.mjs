@@ -15,7 +15,7 @@ const objectUrls=[
 test("committed SAVEF objects verify offline", async()=>{
   const schema=JSON.parse(await readFile(schemaUrl,"utf8"));
   for(const objectUrl of objectUrls){
-    const object=JSON.parse(await readFile(objectUrls[0],"utf8"));
+    const object=JSON.parse(await readFile(objectUrl,"utf8"));
     const result=verifySavefObject(object,schema);
     assert.equal(result.accepted,true);
   }

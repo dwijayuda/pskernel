@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-declarative-core-seed/1",
+  "status": "definition-seed-unproved",
+  "semanticProfile": "lean4.34-core",
+  "judgments": [
+    "WellFormedLevel",
+    "LevelEq",
+    "WellFormedExpr",
+    "HasType",
+    "DeclarativeConversion",
+    "KernelAlgorithmicDefEq",
+    "WellFormedDeclaration",
+    "AdmitsDeclaration"
+  ],
+  "relationPolicy": {
+    "declarativeConversion": "mathematical-theory-relation",
+    "algorithmicDefEq": "exact-pinned-compatibility-algorithm",
+    "runtimeValueEquality": "separate-runtime-relation"
+  },
+  "theoremTargets": [
+    {
+      "id": "psc-algorithmic-defeq-sound/1",
+      "status": "target-unproved",
+      "statement": "KernelAlgorithmicDefEq(a,b) implies DeclarativeConversion(a,b)"
+    },
+    {
+      "id": "psc-cache-refines-uncached-defeq/1",
+      "status": "target-unproved",
+      "statement": "cached acceptance implies uncached acceptance for the same query"
+    },
+    {
+      "id": "psc-checker-sound/1",
+      "status": "target-unproved",
+      "statement": "checker acceptance implies declarative admission"
+    },
+    {
+      "id": "psc-environment-model/1",
+      "status": "target-unproved",
+      "statement": "accepted environments admit a declared semantic model under explicit assumptions"
+    }
+  ],
+  "noProofClaim": true
+}

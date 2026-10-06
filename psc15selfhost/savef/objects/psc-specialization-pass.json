@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "CompilerPassContract",
+  "semanticProfile": "ps-0.9-r3",
+  "authorityClass": "validation-authority",
+  "scope": {
+    "pass": "psc-pass-specialize/1"
+  },
+  "dependsOn": [
+    "psc-verified-ir/1",
+    "psc-specialized-ir/1"
+  ],
+  "assumes": [],
+  "claims": [
+    {
+      "id": "psc-specialization-runtime-refinement/1",
+      "status": "target-unproved"
+    }
+  ],
+  "evidenceRefs": [
+    "contract:psc-pass-specialize/1"
+  ],
+  "payload": {
+    "passId": "psc-pass-specialize/1",
+    "currentAssurance": "contract-regression-unproved"
+  },
+  "objectId": "sha256:905a2e07a8e48f5439f067e84a067221fb4ff260543755e71b92b0c69b0aef60"
+}

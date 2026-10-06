@@ -105,6 +105,30 @@
       "kind": "module-interface",
       "status": "current",
       "canonicalPath": "contracts/module-interface/STRUCTURAL_MODULE_INTERFACE_V1.json"
+    },
+    {
+      "id": "psc-declarative-core-seed/1",
+      "kind": "theory-seed",
+      "status": "experimental",
+      "canonicalPath": "theory/core/DECLARATIVE_CORE_SEED_V1.json"
+    },
+    {
+      "id": "spkf-local-prototype/1",
+      "kind": "savef-format",
+      "status": "experimental",
+      "canonicalPath": "savef/schemas/KNOWLEDGE_OBJECT_V1.json"
+    },
+    {
+      "id": "pscv-verify/0-prototype",
+      "kind": "offline-verifier",
+      "status": "experimental",
+      "canonicalPath": "scripts/pscv-verify.mjs"
+    },
+    {
+      "id": "factorybench-v4-holdout/0",
+      "kind": "factory-bench",
+      "status": "experimental",
+      "canonicalPath": "factory/bench/FACTORYBENCH_V4_HOLDOUT.json"
     }
   ]
 }

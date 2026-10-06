@@ -36,3 +36,12 @@ Checkpoint P0/P2/P3:
 - current host extraction remains conservative canonical-admissions semantics, now versioned by contract
 - Comparator-v1 challenge/replay scaffold added; current status is process-isolated prototype, not yet a production sandbox
 - next: cloud validation, then declarative theory seed, defeq/cache source enforcement, SAVEF object format and verifier capsule
+
+## Checkpoint P9/P16/P17/P18
+
+- declarative Core theory seed registered with explicit target-unproved theorem status; no proof claim fabricated
+- minimal local SAVEF KnowledgeObject format implemented with deterministic canonical hashing and fail-closed tamper detection
+- specialization pass contract exported as the first SAVEF knowledge object
+- offline pscv-verify prototype validates architecture/trust/provider-security/SAVEF closure without the full compiler
+- FactoryBench-v4 holdout policy scaffold frozen with searchableByFactory=false; task corpus remains intentionally pending/sealed
+- next: strengthen defeq cache source audit, add theory definitions/proof skeletons where self-host-compatible, then Wasm validation evidence

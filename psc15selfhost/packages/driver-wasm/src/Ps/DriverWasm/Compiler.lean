@@ -63,3 +63,23 @@ def psCompilerWasm32ProofScriptBytesOrEmpty
   match psCompilerWasm32ProofScriptSource source with
   | Except.error _ => List.nil
   | Except.ok bytes => bytes
+
+def psCompilerWasm32ProofScriptSources
+    (sources : List String) :
+    Except PsCompilerWasmError (List UInt8) :=
+  match
+      psCompilerPrepareSources
+        PsCompilerSourceKind.proofScript
+        sources with
+  | Except.error error =>
+      Except.error (PsCompilerWasmError.compiler error)
+  | Except.ok prepared =>
+      psCompilerWasmFromPrepared
+        psCompilerWasm32Target
+        prepared
+
+def psCompilerWasm32ProofScriptSourcesBytesOrEmpty
+    (sources : List String) : List UInt8 :=
+  match psCompilerWasm32ProofScriptSources sources with
+  | Except.error _ => List.nil
+  | Except.ok bytes => bytes

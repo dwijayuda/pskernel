@@ -5,6 +5,8 @@ import Ps.Environment.Prelude
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
 import Ps.BackendTs.Module
+import Ps.Compiler.Api
+import Ps.CompilerIr.Specialize
 
 def psCompileLeanSourceToTypeScript
     (source : String) : Except String String :=
@@ -766,6 +768,27 @@ def psTestVerifiedIrValidationRejectsMatchBindingField : Bool :=
         false
   | _ => false
 
+def psTestGenericStructuralRecursionSpecializes : Bool :=
+  let source :=
+    "def genericLength {α : Type} (xs : List α) : Nat :=\n" ++
+    "  match xs with\n" ++
+    "  | List.nil => 0\n" ++
+    "  | List.cons head tail => Nat.add 1 (genericLength tail)\n" ++
+    "def genericLengthNat (xs : List Nat) : Nat := genericLength xs"
+  match
+      psCompilerVerifiedIrSource
+        PsCompilerSourceKind.lean
+        source with
+  | Except.error _ => false
+  | Except.ok validated =>
+      match psIrSpecializeModule validated.raw with
+      | Except.error _ => false
+      | Except.ok specialized =>
+          let hasSpecialized : PsVerifiedIrDeclaration -> Bool :=
+            fun (declaration : PsVerifiedIrDeclaration) =>
+              psStringEq declaration.name "genericLength$spec$Nat";
+          psListAny hasSpecialized specialized.declarations
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -801,7 +824,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "VerifiedIR rejects unknown constructor", passed := psTestVerifiedIrValidationRejectsUnknownConstructor },
   { name := "VerifiedIR rejects unknown constructor field", passed := psTestVerifiedIrValidationRejectsConstructorField },
   { name := "VerifiedIR rejects unknown match constructor", passed := psTestVerifiedIrValidationRejectsMatchConstructor },
-  { name := "VerifiedIR rejects unknown match binding field", passed := psTestVerifiedIrValidationRejectsMatchBindingField }
+  { name := "VerifiedIR rejects unknown match binding field", passed := psTestVerifiedIrValidationRejectsMatchBindingField },
+  { name := "generic structural recursion preserves specialization arguments", passed := psTestGenericStructuralRecursionSpecializes }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

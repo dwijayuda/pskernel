@@ -269,12 +269,15 @@ theorem psKernelReduceNatWith_sub_literals_refines
               (PsKernelExpr.lit
                 (PsKernelLiteral.nat
                   (Nat.sub left right)))) := by
-      simpa [
-        psKernelReduceNatBinary,
+      unfold psKernelReduceNatBinary
+      simp only [
         hNotAdd,
+        Bool.false_eq_true,
+        if_false,
         hSub,
-        hSize
+        if_true
       ]
+      rw [hSize]
     simp [
       psKernelReduceNatWith,
       hLeft,
@@ -372,13 +375,16 @@ theorem psKernelReduceNatWith_mul_literals_refines
               (PsKernelExpr.lit
                 (PsKernelLiteral.nat
                   (Nat.mul left right)))) := by
-      simpa [
-        psKernelReduceNatBinary,
+      unfold psKernelReduceNatBinary
+      simp only [
         hNotAdd,
+        Bool.false_eq_true,
+        if_false,
         hNotSub,
         hMul,
-        hSize
+        if_true
       ]
+      rw [hSize]
     simp [
       psKernelReduceNatWith,
       hLeft,

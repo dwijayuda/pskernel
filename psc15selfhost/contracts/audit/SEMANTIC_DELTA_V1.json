@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-semantic-delta/1",
+  "requiredFields": [
+    "sourceIdentity",
+    "destinationIdentity",
+    "ruleAdditions",
+    "ruleRemovals",
+    "ruleChanges",
+    "representationOnlyChanges",
+    "securityOnlyChanges",
+    "compatibilityImpact",
+    "migrationEvidence"
+  ],
+  "policy": {
+    "securityOnlyChangeDoesNotImplicitlyChangeSemantics": true,
+    "ruleChangeRequiresExplicitDestinationIdentity": true,
+    "oldBytesNeverSilentlyReinterpreted": true
+  },
+  "authority": "audit-evidence-only"
+}

@@ -15,6 +15,10 @@ def psCompilerWasmLowerErrorCode
     (error : PsWasmLowerError) : String :=
   match error with
   | PsWasmLowerError.unsupportedType => "lower.unsupported-type"
+  | PsWasmLowerError.unsupportedTypeContext context =>
+      String.Internal.append
+        "lower.unsupported-type:"
+        context
   | PsWasmLowerError.unsupportedExpression => "lower.unsupported-expression"
   | PsWasmLowerError.unsupportedIntrinsic => "lower.unsupported-intrinsic"
   | PsWasmLowerError.invalidIntrinsicArity => "lower.invalid-intrinsic-arity"

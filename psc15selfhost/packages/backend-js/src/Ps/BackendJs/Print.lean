@@ -1134,10 +1134,14 @@ def psJsPrintDeclarations
                   printedRest)
 
 def psJsStackRuntimeSupport : String :=
-  "const __ps$implementations = new WeakMap();\n" ++
-  "function __ps$run(root) { const pending = [root]; let value = undefined; while (pending.length !== 0) { const next = pending[pending.length - 1].next(value); if (next.done) { pending.pop(); value = next.value; } else { const { fn, args } = next.value; const implementation = __ps$implementations.get(fn); if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; } else { value = Reflect.apply(fn, undefined, args); } } } return value; }\n" ++
-  "function __ps$wrap(implementation) { const fn = (...args) => __ps$run(implementation(...args)); __ps$implementations.set(fn, implementation); return fn; }\n" ++
-  "function* __ps$invoke(fn, ...args) { return (yield { fn, args }); }\n"
+  psJsJoin
+    ""
+    [
+      "const __ps$implementations = new WeakMap();\n",
+      "function __ps$run(root) { const pending = [root]; let value = undefined; while (pending.length !== 0) { const next = pending[pending.length - 1].next(value); if (next.done) { pending.pop(); value = next.value; } else { const { fn, args } = next.value; const implementation = __ps$implementations.get(fn); if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; } else { value = Reflect.apply(fn, undefined, args); } } } return value; }\n",
+      "function __ps$wrap(implementation) { const fn = (...args) => __ps$run(implementation(...args)); __ps$implementations.set(fn, implementation); return fn; }\n",
+      "function* __ps$invoke(fn, ...args) { return (yield { fn, args }); }\n"
+    ]
 
 def psJsImplementationName
     (name : String) : String :=

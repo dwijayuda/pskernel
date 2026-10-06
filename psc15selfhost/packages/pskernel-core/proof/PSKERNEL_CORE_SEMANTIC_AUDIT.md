@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 30 |
+| A | 31 |
 | B | 15 |
-| C | 26 |
+| C | 25 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -57,7 +57,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Admission/Inductive/Ordinary/Recursor.lean` | **B** | Recursor helper/list laws; generated-rule semantic validity incomplete. |
 | `Admission/Inductive/Types.lean` | **B** | Basic list/name/binder helper laws. |
 | `Admission/Quot/Admission.lean` | **A** | Successful Quot initialization refines the shared `PsKernelQuotExtension`, with exact four-declaration semantic history and runtime preservation. |
-| `Admission/Quot/Bootstrap.lean` | **C** | Reserved-name branch behavior and binder base case. |
+| `Admission/Quot/Bootstrap.lean` | **A** | Successful reserved-name validation now proves every requested Quot name is absent from authoritative semantic declaration history under `EnvironmentIndexRefines`; binder construction laws remain supporting evidence. |
 | `Checker/Context.lean` | **B** | Context construction/freshness/application helper invariants. |
 | `Checker/DefEq/BinderSpines.lean` | **A** | `psKernelDefEqFinish` now preserves checker-state semantic soundness under the isolated successful-pair cache insertion law; binder-spine congruence itself still needs deeper semantic coverage. |
 | `Checker/DefEq/DeltaStep.lean` | **C** | Delta-step result/control cases. |

@@ -108,6 +108,38 @@ inductive PsKernelReductionStep
           levels)
 
 
+  | deltaSpine
+      (expr : PsKernelExpr)
+      (name : PsKernelName)
+      (levels : List PsKernelLevel)
+      (info : PsKernelConstantInfo)
+      (value : PsKernelExpr)
+      (hFn :
+        psKernelExprGetAppFn expr =
+          PsKernelExpr.const name levels)
+      (hFind :
+        psKernelFindConstantInList
+            name
+            environment.constants =
+          Option.some info)
+      (hDelta :
+        psKernelConstantInfoDeltaValue info =
+          Option.some value)
+      (hLevels :
+        psKernelNameListLength
+            (psKernelConstantInfoLevelParams info) =
+          psKernelLevelListLength levels) :
+      PsKernelReductionStep
+        environment
+        localContext
+        expr
+        (psKernelApplyArgs
+          (psKernelExprInstantiateLevelParams
+            value
+            (psKernelConstantInfoLevelParams info)
+            levels)
+          (psKernelExprGetAppArgs expr))
+
   | natAdd
       (op : PsKernelName)
       (left right : Nat)
@@ -995,6 +1027,19 @@ inductive PsKernelTypingJudgment
         (PsKernelExpr.proj typeName index structValue)
         result
 
+def PsKernelReductionCacheSound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (cache : PsKernelExprMap) : Prop :=
+  ∀ (expr result : PsKernelExpr),
+    psKernelExprMapGet cache expr = Option.some result ->
+      PsKernelReductionClosure
+        environment
+        localContext
+        expr
+        result
+
+
 def PsKernelInferenceCacheSound
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)
@@ -1097,6 +1142,34 @@ def PsKernelInferenceCoreSound
         context state expr inferOnly =
       Except.ok (Prod.mk result nextState) ->
     PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      expr
+      result
+
+
+def PsKernelWhnfCoreSound
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (cheapRec cheapProj : Bool),
+    coreWhnf
+        context
+        state
+        expr
+        cheapRec
+        cheapProj =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelReductionClosure
       context.environment
       context.localContext
       expr

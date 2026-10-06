@@ -1153,29 +1153,47 @@ theorem psKernelExprInstantiateAtReferenceChanged_closed_core
       Prod.mk expr false := by
   induction expr generalizing offset with
   | bvar index =>
-      have hNotLe :
-          ¬ offset ≤ index := by
+      have hClosedBool :
+          Nat.ble offset index = false := by
         simpa [psKernelExprHasLooseAt] using hClosed
-      have hLt : index < offset := by
-        omega
-      have hNe : index ≠ offset := by
-        omega
+      have hNotTrue :
+          Nat.ble offset index ≠ true := by
+        intro hTrue
+        rw [hTrue] at hClosedBool
+        contradiction
+      have hNotLe :
+          ¬ offset ≤ index :=
+        Nat.not_le_of_not_ble_eq_true hNotTrue
+      have hLt : index < offset :=
+        Nat.lt_of_not_ge hNotLe
+      have hBeq :
+          Nat.beq index offset = false := by
+        cases hEq : Nat.beq index offset with
+        | false =>
+            rfl
+        | true =>
+            have hEqual : index = offset :=
+              Nat.eq_of_beq_eq_true hEq
+            subst offset
+            exact (Nat.lt_irrefl index hLt).elim
+      have hBle :
+          Nat.ble index offset = true :=
+        Nat.ble_eq_true_of_le (Nat.le_of_lt hLt)
       have hNatLt :
           psKernelNatLt index offset = true := by
-        simp [psKernelNatLt, Nat.beq_eq_false_iff, hNe, Nat.ble_eq]
-        omega
+        simp [psKernelNatLt, hBeq, hBle]
       simp [
         psKernelExprInstantiateAtReferenceChanged,
         hNatLt
       ]
   | fvar name =>
-      rfl
+      simp [psKernelExprInstantiateAtReferenceChanged]
   | mvar name =>
-      rfl
+      simp [psKernelExprInstantiateAtReferenceChanged]
   | sort level =>
-      rfl
+      simp [psKernelExprInstantiateAtReferenceChanged]
   | const name levels =>
-      rfl
+      simp [psKernelExprInstantiateAtReferenceChanged]
   | app fn arg ihFn ihArg =>
       cases hFn :
           psKernelExprHasLooseAt fn offset with
@@ -1258,7 +1276,7 @@ theorem psKernelExprInstantiateAtReferenceChanged_closed_core
                 hBodyClosed
               ]
   | lit literal =>
-      rfl
+      simp [psKernelExprInstantiateAtReferenceChanged]
   | mdata metadata body ihBody =>
       have hBody :
           psKernelExprHasLooseAt body offset = false := by

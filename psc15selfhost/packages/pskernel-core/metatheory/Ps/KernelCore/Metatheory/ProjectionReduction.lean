@@ -66,25 +66,13 @@ theorem psKernelReduceProjCore_some_refines_reduction
                             (psKernelExprGetAppArgs structValue)
                             (Nat.add ctorInfo.numParams index) with
                       | none =>
-                          simp [
-                            psKernelReduceProjCore,
-                            hBound,
-                            hFn,
-                            hFind,
-                            hInduct,
-                            hArg
-                          ] at hSuccess
+                          rw [hArg] at hSuccess
+                          cases hSuccess
                       | some argument =>
                           have hResult :
                               argument = result := by
-                            simpa [
-                              psKernelReduceProjCore,
-                              hBound,
-                              hFn,
-                              hFind,
-                              hInduct,
-                              hArg
-                            ] using hSuccess
+                            rw [hArg] at hSuccess
+                            simpa using hSuccess
                           have hIndexed :
                               psKernelFindConstantInList
                                   ctorName

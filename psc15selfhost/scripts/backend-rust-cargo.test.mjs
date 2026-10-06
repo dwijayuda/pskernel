@@ -37,6 +37,21 @@ if (rustSource.length === 0) {
 
 const closureTests = '\n#[cfg(test)] mod closure_regressions {\n' +
   '  use super::*;\n' +
+  '  struct CloneProbe(std::rc::Rc<std::cell::Cell<usize>>);\n' +
+  '  impl Clone for CloneProbe { fn clone(&self) -> Self { self.0.set(self.0.get() + 1); Self(self.0.clone()) } }\n' +
+  '  #[test] fn generated_recursive_values_clone_without_copying_descendants() {\n' +
+  '    let copies = std::rc::Rc::new(std::cell::Cell::new(0));\n' +
+  '    let mut chain = SharedChain::empty {};\n' +
+  '    for _ in 0..30000 { chain = SharedChain::link { head: std::rc::Rc::new(CloneProbe(copies.clone())), tail: std::rc::Rc::new(chain) }; }\n' +
+  '    let shared = shareChain(chain.clone());\n' +
+  '    assert_eq!(copies.get(), 0, "sharing must not clone any descendant payload");\n' +
+  '    drop(shared);\n' +
+  '    let mut count = 0;\n' +
+  '    loop { match chain { SharedChain::empty {} => break, SharedChain::link { head: _, tail } => {\n' +
+  '      chain = match std::rc::Rc::try_unwrap(tail) { Ok(value) => value, Err(_) => panic!("unexpected retained owner") }; count += 1;\n' +
+  '    } } }\n' +
+  '    assert_eq!(count, 30000); assert_eq!(copies.get(), 0);\n' +
+  '  }\n' +
   '  #[test] fn captured_closures_are_owned_and_reusable() {\n' +
   '    let direct = makeAdder(PsNat::from(2u8));\n' +
   '    assert_eq!(direct(PsNat::from(40u8)), PsNat::from(42u8));\n' +

@@ -45,7 +45,7 @@ def psRustEmitFieldListWith
           let rendered : String :=
             psRustConcat3
               (psRustIdentifier (Prod.fst field))
-              ": Box::new("
+              ": std::rc::Rc::new("
               (psRustConcat2
                 (psRustCloneExprPrinted (Prod.snd field) printed)
                 ")");

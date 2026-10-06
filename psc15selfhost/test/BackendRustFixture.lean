@@ -77,6 +77,11 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
       }
     ]
     inductives := [
+      PsVerifiedIrInductive.mk "SharedChain" [PsVerifiedIrTypeParameter.mk "A"]
+        [PsVerifiedIrConstructor.mk "empty" [],
+         PsVerifiedIrConstructor.mk "link"
+           [PsVerifiedIrConstructorField.mk "head" (PsVerifiedIrType.typeParameter "A"),
+            PsVerifiedIrConstructorField.mk "tail" (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"])]],
       {
         name := "Maybe"
         typeParameters := [{ name := "A" }]
@@ -116,6 +121,9 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
       }
     ]
     declarations := [
+      PsVerifiedIrDeclaration.mk "shareChain" [PsVerifiedIrTypeParameter.mk "A"]
+        [PsVerifiedIrParameter.mk "value" (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"])]
+        (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"]) (PsVerifiedIrExpr.var "value"),
       psBackendRustLetClosureFixture,
       psBackendRustSharedCaptureFixture,
       psBackendRustGlobalCallbackFixture,

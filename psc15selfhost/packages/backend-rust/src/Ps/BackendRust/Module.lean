@@ -30,9 +30,12 @@ def psRustGenericNames
         ">"
         ""
 
-def psRustBoxedStorageType
+-- Runtime values are immutable. Sharing fields keeps derived Clone shallow:
+-- Box<T>::clone recursively copied full syntax/list trees at every binding.
+-- Call recursion and final-owner destruction still require separate treatment.
+def psRustSharedStorageType
     (printedType : String) : String :=
-  psRustConcat3 "Box<" printedType ">"
+  psRustConcat3 "std::rc::Rc<" printedType ">"
 
 def psRustEmitStructureFieldList
     (fields : List PsVerifiedIrStructureField) :
@@ -52,7 +55,7 @@ def psRustEmitStructureFieldList
                   "pub "
                   (psRustIdentifier field.name)
                   ": "
-                  (psRustBoxedStorageType printedType);
+                  (psRustSharedStorageType printedType);
               match psRustEmitStructureFieldList rest with
               | Except.error error =>
                   Except.error error
@@ -71,7 +74,7 @@ def psRustEmitStructureFieldList
                 "pub "
                 (psRustIdentifier field.name)
                 ": "
-                (psRustBoxedStorageType printedType);
+                (psRustSharedStorageType printedType);
             match psRustEmitStructureFieldList rest with
             | Except.error error =>
                 Except.error error
@@ -115,7 +118,7 @@ def psRustEmitConstructorFieldList
                 psRustConcat3
                   (psRustIdentifier field.name)
                   ": "
-                  (psRustBoxedStorageType printedType);
+                  (psRustSharedStorageType printedType);
               match psRustEmitConstructorFieldList rest with
               | Except.error error =>
                   Except.error error
@@ -133,7 +136,7 @@ def psRustEmitConstructorFieldList
               psRustConcat3
                 (psRustIdentifier field.name)
                 ": "
-                (psRustBoxedStorageType printedType);
+                (psRustSharedStorageType printedType);
             match psRustEmitConstructorFieldList rest with
             | Except.error error =>
                 Except.error error

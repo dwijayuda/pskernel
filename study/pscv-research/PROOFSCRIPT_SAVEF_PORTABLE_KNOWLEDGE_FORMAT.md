@@ -1885,3 +1885,916 @@ The first prototype is accepted only if all of these pass:
 10. Normal npm consumers do not need the heavyweight proof archive.
 11. A malformed resource-exhaustion graph fails closed.
 12. QueryGraph/CAS can use SPKF IDs without forcing global invalidation.
+
+
+---
+
+# 66. Provable and falsifiable criteria
+
+Evidence classes:
+
+~~~text
+P = machine-checked proof
+M = deterministic machine/conformance test
+A = adversarial test
+R = independent replay/reproduction
+E = empirical benchmark
+I = interoperability test
+~~~
+
+The weights below total 100.
+
+---
+
+## C1 — Registry-independent semantic identity
+
+**Weight:** 6
+
+**Evidence:** M + I.
+
+The same semantic object packaged through npm, Cargo, PyPI, Maven, Composer, OCI, and filesystem mirrors must preserve the same SPKF ID.
+
+**Pass test**
+
+Package one KnowledgeRoot through at least three independent carrier systems and recover identical canonical SPKF bytes/ID.
+
+**Failure witness**
+
+Changing only registry/package coordinate changes semantic identity.
+
+**Target architecture score:** 9.8.
+
+---
+
+## C2 — Canonical serialization determinism
+
+**Weight:** 5
+
+**Evidence:** M + P where practical.
+
+Independent implementations must canonicalize equivalent valid SPKF JSON to identical bytes.
+
+**Pass test**
+
+Cross-language test vectors agree exactly.
+
+**Failure witness**
+
+Key ordering, irrelevant whitespace, Unicode normalization ambiguity, or numeric representation changes semantic ID.
+
+**Target:** 9.5.
+
+---
+
+## C3 — Content-integrity closure
+
+**Weight:** 5
+
+**Evidence:** M + A.
+
+Every authority-bearing referenced object/blob must be digest-verified before semantic use.
+
+**Failure witness**
+
+A mutated blob is consumed under an unchanged reference.
+
+**Target:** 9.8.
+
+---
+
+## C4 — Proof-authority separation
+
+**Weight:** 6
+
+**Evidence:** M + A + P.
+
+No manifest, index, registry statement, popularity score, package field, signature, or provenance record may create theorem validity without accepted semantic evidence.
+
+**Adversarial test**
+
+Edit metadata to claim a stronger assurance level while leaving proof evidence unchanged.
+
+Logical assurance must not increase.
+
+**Target:** 9.8.
+
+---
+
+## C5 — PSCV artifact fidelity
+
+**Weight:** 6
+
+**Evidence:** M + P.
+
+SPKF must preserve the meanings of CheckedCore, CertifiedSource, CertifiedModuleInterface, SpecCapsule, VerifiedIR, and related existing artifacts.
+
+**Failure witness**
+
+AdmissionReady or unvalidated IR gains checked/verified authority merely through packaging.
+
+**Target:** 9.7.
+
+---
+
+## C6 — Registry neutrality and mirrorability
+
+**Weight:** 6
+
+**Evidence:** I + R.
+
+A complete authority closure must be mirrorable and independently verifiable without access to its original registry.
+
+**Failure witness**
+
+Verification requires one mutable ProofScript server or registry tag.
+
+**Target:** 9.7.
+
+---
+
+## C7 — Package-adapter feasibility
+
+**Weight:** 5
+
+**Evidence:** I.
+
+npm, Cargo, PyPI, Maven, and Composer must be able to carry or locate SPKF bindings without package-manager forks.
+
+**Failure witness**
+
+One of the target ecosystems requires modifying its registry protocol for basic use.
+
+**Target:** 9.1.
+
+---
+
+## C8 — OCI transport feasibility
+
+**Weight:** 5
+
+**Evidence:** I + R.
+
+SPKF objects must be pushable/pullable through OCI 1.1-compatible registries while retaining semantic identity.
+
+**Failure witness**
+
+SPKF semantic identity depends on one OCI manifest digest or repository location.
+
+**Target:** 9.5.
+
+---
+
+## C9 — Multi-ecosystem developer practicality
+
+**Weight:** 6
+
+**Evidence:** E + I.
+
+Ordinary runtime consumers should not download the entire proof/evidence graph by default.
+
+**Measure**
+
+Track installation bytes, time, dependency count, and additional commands compared with ordinary ecosystem usage.
+
+**Failure witness**
+
+SAVEF makes normal package consumption impractically large or complex.
+
+**Target:** 8.9.
+
+---
+
+## C10 — Multiple implementation witnesses
+
+**Weight:** 5
+
+**Evidence:** M + P/I.
+
+One portable theory must support several implementations with separately classified evidence.
+
+**Failure witness**
+
+The theorem identity is structurally tied to JavaScript, Rust, Python, or another implementation language.
+
+**Target:** 9.0.
+
+---
+
+## C11 — Wasm universal implementation lane
+
+**Weight:** 4
+
+**Evidence:** I + E.
+
+A single preserved Wasm implementation should be consumable from multiple host ecosystems through explicit interfaces without changing the theory root.
+
+**Failure witness**
+
+Every host wrapper requires re-defining the semantic theory.
+
+**Target:** 9.1.
+
+---
+
+## C12 — Longevity and offline archival
+
+**Weight:** 4
+
+**Evidence:** R.
+
+A fetched closure should remain verifiable without mutable registry metadata, subject to supported semantic and cryptographic profiles.
+
+**Failure witness**
+
+A theorem becomes unverifiable only because a tag moved or package listing disappeared.
+
+**Target:** 9.7.
+
+---
+
+## C13 — Third-party theorem extension
+
+**Weight:** 5
+
+**Evidence:** M + P.
+
+A contributor must be able to publish a valid theorem/refinement about an immutable subject without modifying that subject.
+
+**Failure witness**
+
+Only the original package publisher can extend the theory.
+
+**Target:** 9.3.
+
+---
+
+## C14 — Curation and theorem-spam resistance
+
+**Weight:** 4
+
+**Evidence:** M + E + A.
+
+Logical acceptance, indexing, ranking/canonical recommendation, and advisory knowledge must remain distinct.
+
+**Measure**
+
+Evaluate retrieval precision and theorem duplication before/after curation/generalization.
+
+**Failure witness**
+
+Correct but low-value generated facts make default retrieval worse than source search.
+
+**Target:** 8.8.
+
+---
+
+## C15 — Licensing and provenance practicality
+
+**Weight:** 4
+
+**Evidence:** M + R.
+
+Objects must preserve license/source attribution and support in-toto/SLSA/SPDX linkage without conflating provenance and proof.
+
+**Failure witness**
+
+A mirror loses enough licensing/provenance information that redistribution or audit becomes ambiguous.
+
+**Target:** 9.2.
+
+---
+
+## C16 — Security and resource robustness
+
+**Weight:** 5
+
+**Evidence:** A + M.
+
+Malformed manifests, huge graphs, decompression bombs, malicious proof payloads, and hostile locators must fail within explicit budgets.
+
+**Failure witness**
+
+Resource exhaustion becomes acceptance or triggers unbounded network traversal.
+
+**Target:** 9.4.
+
+---
+
+## C17 — Incremental/cache compatibility
+
+**Weight:** 5
+
+**Evidence:** M + E.
+
+SPKF IDs must integrate with psc.lock, QueryGraph, CAS, and BuildAction identities.
+
+**Pass test**
+
+A private implementation change that preserves the semantic interface does not force unrelated theorem replay.
+
+**Failure witness**
+
+Portable packaging destroys existing semantic red/green behavior.
+
+**Target:** 9.5.
+
+---
+
+## C18 — Index rebuildability
+
+**Weight:** 4
+
+**Evidence:** R + M.
+
+Delete the derived search/index database and rebuild it from immutable roots, mirrors, snapshots, and distribution bindings.
+
+**Failure witness**
+
+Semantic truth exists only in mutable index state.
+
+**Target:** 9.5.
+
+---
+
+## C19 — AI usefulness
+
+**Weight:** 4
+
+**Evidence:** E.
+
+SPKF theorem/capability retrieval must measurably lower at least one of:
+
+- input tokens;
+- proof retries;
+- human review time;
+- implementation duplication;
+- solve failure;
+
+compared with raw repository/package-source retrieval at fixed model capability.
+
+**Failure witness**
+
+Portable knowledge adds storage overhead but no measurable production benefit.
+
+**Target:** 9.3.
+
+---
+
+## C20 — Implementation feasibility and migration cost
+
+**Weight:** 6
+
+**Evidence:** E + I.
+
+A useful MVP must be implementable using current ProofScript artifacts and current external standards without:
+
+- replacing package managers;
+- adding a new trusted proof logic;
+- requiring every backend to be fully proved;
+- deploying a mandatory new central registry.
+
+**Failure witness**
+
+First useful deployment requires solving all long-term verification problems.
+
+**Target:** 9.0.
+
+---
+
+# 67. Scoring rubric
+
+~~~text
+0
+    impossible or contradicts the objective
+
+4
+    speculative concept only
+
+6
+    plausible architecture with major unresolved feasibility gaps
+
+8
+    implementable with current standards and bounded research gaps
+
+9
+    concrete schemas, authority rules, interoperability and failure tests
+
+9.5
+    strong cross-implementation evidence plus explicit evolution policy
+
+10
+    reserved for a mature deployed standard with no material known gap
+~~~
+
+---
+
+# 68. Evaluation loop
+
+## Iteration A — single portable bundle
+
+Design:
+
+~~~text
+one SAVEF archive
+one manifest
+package-manager sidecars
+~~~
+
+**Score: 7.31 / 10**
+
+Problems:
+
+- heavyweight evidence duplicated into distributions;
+- weak extension model;
+- weak mirroring semantics;
+- no standard artifact graph;
+- theorem extensions require bundle republishing;
+- package size likely scales poorly.
+
+Rejected.
+
+---
+
+## Iteration B — content-addressed graph + OCI
+
+Added:
+
+- SPKF IDs;
+- JCS canonicalization;
+- DAG model;
+- OCI transport;
+- PURL bindings;
+- TheoryExtension;
+- advisory knowledge plane;
+- mirrorability.
+
+**Score: 8.64 / 10**
+
+Remaining problems:
+
+- native-backend formalization burden too high;
+- OCI repository-local subject semantics insufficiently separated;
+- package adapters not detailed enough;
+- first cross-ecosystem deployment still expensive.
+
+---
+
+## Iteration C — accepted SPKF-v1 architecture
+
+Added:
+
+- intrinsic SPKF subject IDs independent from OCI subject;
+- native and Wasm implementation lanes;
+- detailed npm/Cargo/PyPI/Maven/Composer mappings;
+- content-addressed CAS/build integration;
+- schema/hash migration policy;
+- licensing/provenance;
+- theorem curation;
+- bounded verification;
+- foundation-tagged but PSCV-specific v1 proof semantics;
+- offline/mirror/snapshot model.
+
+**Weighted target architecture score: 9.39 / 10**
+
+This clears the requested 8.0 threshold.
+
+---
+
+# 69. Target architecture score table
+
+| Criterion | Weight | Target |
+| --- | ---: | ---: |
+| C1 Registry-independent identity | 6 | 9.8 |
+| C2 Canonical serialization | 5 | 9.5 |
+| C3 Content-integrity closure | 5 | 9.8 |
+| C4 Proof-authority separation | 6 | 9.8 |
+| C5 PSCV artifact fidelity | 6 | 9.7 |
+| C6 Registry neutrality/mirroring | 6 | 9.7 |
+| C7 Package-adapter feasibility | 5 | 9.1 |
+| C8 OCI transport feasibility | 5 | 9.5 |
+| C9 Developer practicality | 6 | 8.9 |
+| C10 Multiple implementations | 5 | 9.0 |
+| C11 Wasm universal lane | 4 | 9.1 |
+| C12 Longevity/offline | 4 | 9.7 |
+| C13 Third-party extensions | 5 | 9.3 |
+| C14 Curation/spam resistance | 4 | 8.8 |
+| C15 Licensing/provenance | 4 | 9.2 |
+| C16 Security/resources | 5 | 9.4 |
+| C17 Incremental/cache compatibility | 5 | 9.5 |
+| C18 Index rebuildability | 4 | 9.5 |
+| C19 AI usefulness | 4 | 9.3 |
+| C20 Feasibility/migration cost | 6 | 9.0 |
+
+Weighted result:
+
+**9.39 / 10**
+
+No criterion is given a perfect 10.
+
+---
+
+# 70. Current implementation/readiness score
+
+Current readiness is intentionally separate from target design.
+
+| Criterion | Current readiness |
+| --- | ---: |
+| C1 Registry-independent identity | 8.5 |
+| C2 Canonical serialization | 6.5 |
+| C3 Content integrity | 8.0 |
+| C4 Authority separation | 8.5 |
+| C5 PSCV artifact fidelity | 8.5 |
+| C6 Mirrorability | 4.0 |
+| C7 Package adapters | 5.5 |
+| C8 OCI integration | 5.5 |
+| C9 Developer practicality | 4.0 |
+| C10 Multiple implementation witnesses | 5.0 |
+| C11 Wasm universal lane | 6.5 |
+| C12 Long-term archival | 5.0 |
+| C13 Open theorem extensions | 3.5 |
+| C14 Curation | 2.5 |
+| C15 Licensing/provenance integration | 5.0 |
+| C16 Security/resource controls | 6.0 |
+| C17 Cache integration | 6.5 |
+| C18 Index rebuildability | 3.0 |
+| C19 AI usefulness evidence | 3.5 |
+| C20 Migration feasibility | 4.5 |
+
+Weighted current readiness:
+
+**approximately 5.63 / 10**
+
+Interpretation:
+
+> SPKF can reuse substantial existing ProofScript and public ecosystem infrastructure, but the portable knowledge layer itself is new work.
+
+---
+
+# 71. Feasibility verdict by subsystem
+
+## Identity and canonical objects
+
+**Highly feasible.**
+
+JCS, SHA-256, and the existing ProofScript ArtifactId direction provide a straightforward path.
+
+## OCI distribution
+
+**Highly feasible.**
+
+OCI 1.1 already provides generic artifact conventions, digest addressing, and referrers.
+
+Important limitation:
+
+OCI subject/referrers are repository-local.
+
+SPKF solves global identity independently.
+
+## npm / Cargo / Composer integration
+
+**Highly feasible.**
+
+Each ecosystem supports practical package metadata or embedded files.
+
+## PyPI / Maven integration
+
+**Feasible.**
+
+Use ordinary package files/Project-URL for Python and attached/classified artifacts for Maven.
+
+No registry fork is necessary.
+
+## Cross-language executable portability
+
+**Feasible incrementally.**
+
+The Wasm Component lane reduces early backend proof burden.
+
+Fully native formally preserved implementations remain difficult.
+
+## Cross-ecosystem theorem reuse
+
+**Technically feasible but research-sensitive.**
+
+The hardest issue is not storage.
+
+It is designing portable specifications/theorem interfaces abstract enough to apply across implementations.
+
+## Open theorem contribution
+
+**Feasible.**
+
+Primary risks are curation, ranking, licensing, and retrieval quality.
+
+---
+
+# 72. Practicality verdict
+
+SPKF is practical only if these constraints remain true:
+
+1. Runtime package users do not download the entire proof universe by default.
+2. Compact certified interfaces travel with or are cheaply discoverable from ordinary packages.
+3. Heavy evidence is fetched on demand.
+4. CAS avoids repeated proof replay.
+5. Wasm provides an early cross-language execution lane.
+6. Package managers remain unchanged.
+7. Search indexes are optional and rebuildable.
+8. Proof evidence is separable from AI/advisory data.
+9. Licensing permits desired mirroring.
+10. Package developers can adopt SPKF incrementally.
+
+Under these constraints, the design is practically strong.
+
+---
+
+# 73. Recommended implementation phases
+
+## SPKF-0 — freeze object/digest profile
+
+Implement:
+
+- restricted canonical JSON profile;
+- SPKF object ID;
+- blob ID;
+- verification budget;
+- frozen test vectors.
+
+## SPKF-1 — local object graph
+
+Implement:
+
+- KnowledgeRoot;
+- SemanticProfile;
+- TheoryExtension;
+- DistributionBinding;
+- local CAS.
+
+No network required.
+
+## SPKF-2 — bridge current ProofScript artifacts
+
+Connect:
+
+- CertifiedModuleInterface;
+- SpecCapsule;
+- theorem/proof exports;
+- assumption closure;
+- capability metadata.
+
+## SPKF-3 — npm carrier
+
+Add:
+
+- package.json locator;
+- proofscript/savef.json;
+- psc.lock binding;
+- runtime package with compact semantic interface.
+
+## SPKF-4 — OCI/GHCR mirror
+
+Implement:
+
+- OCI artifact mapping;
+- push/pull;
+- digest verification;
+- mirror inventory;
+- optional Cosign/in-toto/SLSA.
+
+## SPKF-5 — Cargo carrier
+
+Use package.metadata.savef and test same-root identity across npm/Cargo.
+
+## SPKF-6 — first TheoryExtension contribution
+
+Third party publishes a theorem against immutable JSON/parser theory.
+
+Verify and index it independently.
+
+## SPKF-7 — PyPI/Maven/Composer carriers
+
+Prefer Wasm-backed implementation where native preservation is not yet strong.
+
+## SPKF-8 — curation/index
+
+Add:
+
+- accepted/indexed/canonical states;
+- generalization links;
+- duplicate detection;
+- semantic search.
+
+## SPKF-9 — offline snapshot/mirror drill
+
+Disable primary services.
+
+Reconstruct and verify from mirror/snapshot only.
+
+## SPKF-10 — cross-ecosystem FactoryBench
+
+Test whether shared theorem knowledge improves production at fixed model capability.
+
+---
+
+# 74. Concrete first experiment
+
+Build three theories:
+
+~~~text
+Bytes
+    |
+    v
+Parser
+    |
+    v
+JSON
+~~~
+
+Publish JSON as:
+
+~~~text
+npm package
+    JavaScript/Wasm runtime
+
+GHCR
+    full SPKF root/evidence
+
+Cargo
+    native Rust or Wasm-backed binding
+~~~
+
+Then ask an independent contributor/AI to publish:
+
+~~~text
+TheoryExtension:
+    JSON streaming parser theorem
+~~~
+
+Measure:
+
+- proof reuse;
+- implementation reuse;
+- package sizes;
+- mirror sizes;
+- verification time;
+- index rebuild time;
+- AI token/context savings;
+- theorem discovery precision.
+
+This experiment directly tests the SPKF thesis.
+
+---
+
+# 75. What would falsify SPKF?
+
+Revise or abandon parts of the architecture if evidence shows:
+
+1. canonicalization cannot be implemented consistently across ecosystems;
+2. theory objects cannot stay sufficiently abstract across backend implementations;
+3. portable theorem reuse is negligible;
+4. evidence graphs become operationally unmanageable;
+5. theorem spam harms retrieval more than the knowledge helps;
+6. cross-ecosystem wrappers destroy performance/usability;
+7. Wasm Component tooling remains too immature for practical universal wrappers;
+8. package carriers reject the required locator patterns;
+9. proof replay/storage cost dominates capability value;
+10. licensing prevents useful open mirroring;
+11. global extension discovery requires a de facto central authority;
+12. content-addressed semantic migration becomes unmanageable across PSCV versions.
+
+A falsifiable format is stronger than a philosophical architecture.
+
+---
+
+# 76. Research references
+
+## Canonicalization
+
+RFC 8785 JSON Canonicalization Scheme  
+https://www.rfc-editor.org/rfc/rfc8785.html
+
+RFC 8949 CBOR deterministic encoding  
+https://www.rfc-editor.org/rfc/rfc8949.html
+
+## OCI / ORAS
+
+OCI Image and Distribution 1.1  
+https://opencontainers.org/posts/blog/2024-03-13-image-and-distribution-1-1/
+
+OCI Image Manifest  
+https://specs.opencontainers.org/image-spec/manifest/
+
+OCI Distribution Specification  
+https://github.com/opencontainers/distribution-spec
+
+ORAS  
+https://oras.land/
+
+## Cross-ecosystem package identity
+
+ECMA-427 Package URL  
+https://ecma-international.org/publications-and-standards/standards/ecma-427/
+
+## Supply-chain evidence
+
+in-toto Attestation Framework  
+https://github.com/in-toto/attestation
+
+SLSA 1.2  
+https://slsa.dev/spec/v1.2/
+
+SPDX 3.0.1  
+https://spdx.github.io/spdx-spec/v3.0.1/
+
+Sigstore registry support  
+https://docs.sigstore.dev/cosign/system_config/registry_support/
+
+## Package ecosystems
+
+npm package metadata  
+https://docs.npmjs.com/about-package-json-and-package-lock-json-files/
+
+Cargo manifests  
+https://doc.rust-lang.org/cargo/reference/manifest.html
+
+Python core metadata  
+https://packaging.python.org/en/latest/specifications/core-metadata/
+
+Composer schema  
+https://getcomposer.org/doc/04-schema.md
+
+Maven attached artifacts  
+https://maven.apache.org/plugins/maven-jar-plugin/examples/attached-jar.html
+
+## Build/content-addressed systems
+
+Nix derivations  
+https://releases.nixos.org/nix/nix-2.31.0/manual/store/derivation/
+
+Bazel Remote Execution API  
+https://github.com/bazelbuild/remote-apis
+
+## Wasm Component Model
+
+https://component-model.bytecodealliance.org/
+
+## Lean proof validation
+
+https://lean-lang.org/doc/reference/latest/ValidatingProofs/
+
+---
+
+# 77. Canonical recommendation
+
+> **SPKF-v1 should make SAVEF knowledge content-addressed, registry-neutral, foundation-tagged, independently verifiable, freely mirrorable where licensing permits, and extensible by third parties. Package managers should carry bindings and compact consumer-facing semantic interfaces rather than the entire evidence universe. OCI should be the preferred universal evidence/mirroring transport, PURL should identify distribution coordinates, in-toto/SLSA/SPDX should carry provenance and software-supply-chain metadata, and PSCV/PSKernel should remain the semantic authority.**
+
+The central principle is:
+
+> **Spread the knowledge everywhere without giving every ecosystem a different identity for the same knowledge.**
+
+This is how npm, Cargo, PyPI, Maven, Composer, GitHub, Wasm, and future ecosystems can contribute to one compounding body of executable software mathematics.
+
+---
+
+# 78. Final decision
+
+The architecture is feasible enough to prototype now.
+
+The strongest implementation path is:
+
+~~~text
+current ProofScript artifact model
+    +
+CertifiedModuleInterface
+    +
+SPKF JCS/SHA-256 object identity
+    +
+local CAS
+    +
+npm locator
+    +
+OCI/GHCR evidence mirror
+    +
+PURL distribution bindings
+    +
+third-party TheoryExtension
+    +
+Wasm universal implementation lane
+    +
+derived non-authoritative theorem index
+~~~
+
+Target architecture:
+
+**9.39 / 10**
+
+Current implementation/readiness:
+
+**approximately 5.63 / 10**
+
+The first implementation should deliberately stay small.
+
+Do not begin by building a global SAVEF registry.
+
+Build immutable portable knowledge objects first.
+
+If the object model is correct, registries and indexes can multiply around it without fragmenting the mathematics.

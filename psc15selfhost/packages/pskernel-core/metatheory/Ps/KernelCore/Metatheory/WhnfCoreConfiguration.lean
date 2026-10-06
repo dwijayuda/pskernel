@@ -741,3 +741,72 @@ theorem psKernelWhnfCoreWithFuel_configuration_sound_contract
                           hEligible
                         ])
                       hSuccess
+
+
+/-
+Public WHNF always invokes WHNF core with both cheap-reduction flags disabled.
+Expose that specialization directly so the public composition layer does not
+need to reopen the core fuel induction.
+-/
+theorem psKernelWhnfCoreWithFuel_public_configuration_refines
+    (fuel : Nat)
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (hPublic :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (hRecursor :
+      PsKernelRecursorReductionConfigurationSound
+        reduceRecursor)
+    (hBeta :
+      PsKernelBetaSpineSoundLaw)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelWhnfCoreWithFuel
+          fuel
+          publicWhnf
+          reduceRecursor
+          context
+          state
+          expr
+          false
+          false =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelReductionClosure
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState :=
+  psKernelWhnfCoreWithFuel_configuration_sound_contract
+    fuel
+    publicWhnf
+    reduceRecursor
+    hPublic
+    hRecursor
+    hBeta
+    context
+    state
+    nextState
+    expr
+    result
+    false
+    false
+    hConfig
+    hSuccess

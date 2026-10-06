@@ -124,6 +124,16 @@ def psJsIdentifierSupported
       else
         false
 
+def psJsImportNameSupported
+    (value : String) : Bool :=
+  match psJsonStringToChars value with
+  | List.nil => false
+  | List.cons first rest =>
+      if psJsIdentifierFirstCharAllowed first then
+        psJsIdentifierRestSupported rest
+      else
+        false
+
 def psJsPrimitiveTypeSupported
     (type : PsVerifiedIrPrimitiveType) : Bool :=
   match type with
@@ -997,6 +1007,43 @@ def psJsLowerParameters
         Except.error
           (PsJsLowerError.unsupportedName parameter.name)
 
+def psJsLowerImport
+    (importInfo : PsVerifiedIrExternalImport) :
+    Except PsJsLowerError PsJsIrImport :=
+  if psJsIdentifierSupported importInfo.localName then
+    if psJsImportNameSupported importInfo.importedName then
+      if psJsTypeSupported importInfo.type then
+        Except.ok
+          (PsJsIrImport.mk
+            importInfo.localName
+            importInfo.source
+            importInfo.importedName)
+      else
+        Except.error PsJsLowerError.unsupportedType
+    else
+      Except.error
+        (PsJsLowerError.unsupportedName
+          importInfo.importedName)
+  else
+    Except.error
+      (PsJsLowerError.unsupportedName
+        importInfo.localName)
+
+def psJsLowerImports
+    (imports : List PsVerifiedIrExternalImport) :
+    Except PsJsLowerError (List PsJsIrImport) :=
+  match imports with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons importInfo rest =>
+      match psJsLowerImport importInfo with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          match psJsLowerImports rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok (List.cons lowered loweredRest)
+
 def psJsLowerDeclaration
     (declaration : PsVerifiedIrDeclaration) :
     Except PsJsLowerError PsJsIrDeclaration :=
@@ -1042,23 +1089,21 @@ def psJsLowerDeclarations
 def psJsLowerSpecializedModule
     (module : PsVerifiedIrModule) :
     Except PsJsLowerError PsJsIrModule :=
-  if psListIsEmpty module.imports then
-    match psJsLowerDeclarations module.declarations with
-    | Except.error error => Except.error error
-    | Except.ok declarations =>
-        Except.ok (PsJsIrModule.mk declarations)
-  else
-    Except.error PsJsLowerError.importsUnsupported
+  match psJsLowerImports module.imports with
+  | Except.error error => Except.error error
+  | Except.ok imports =>
+      match psJsLowerDeclarations module.declarations with
+      | Except.error error => Except.error error
+      | Except.ok declarations =>
+          Except.ok
+            (PsJsIrModule.mk imports declarations)
 
 def psJsLowerValidatedModule
     (validated : PsValidatedIrModule) :
     Except PsJsLowerError PsJsIrModule :=
   let module : PsVerifiedIrModule := validated.raw;
-  if psListIsEmpty module.imports then
-    match psIrSpecializeModule module with
-    | Except.error _ =>
-        Except.error PsJsLowerError.specializationFailed
-    | Except.ok specialized =>
-        psJsLowerSpecializedModule specialized
-  else
-    Except.error PsJsLowerError.importsUnsupported
+  match psIrSpecializeModule module with
+  | Except.error _ =>
+      Except.error PsJsLowerError.specializationFailed
+  | Except.ok specialized =>
+      psJsLowerSpecializedModule specialized

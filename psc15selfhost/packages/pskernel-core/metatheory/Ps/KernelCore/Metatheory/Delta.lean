@@ -390,8 +390,7 @@ theorem psKernelDefEqTryUnfoldProjApp_some_refines_reduction
                     hCore,
                     hEq
                   ] at hSuccess
-                  subst result
-                  subst nextState
+                  rcases hSuccess with ⟨rfl, rfl⟩
                   exact
                     hCoreSound
                       context

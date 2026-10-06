@@ -108,6 +108,10 @@ inductive PsJsIrRuntimeOp where
   | arrayMap
   | arrayFoldl
 
+structure PsJsIrMatchBinding where
+  field : String
+  name : String
+
 inductive PsJsIrExpr where
   | literal (value : PsJsIrLiteral)
   | var (name : String)
@@ -133,6 +137,21 @@ inductive PsJsIrExpr where
   | ifE
       (condition : PsJsIrExpr)
       (thenBranch elseBranch : PsJsIrExpr)
+  | record
+      (fields : List (String × PsJsIrExpr))
+  | projection
+      (target : PsJsIrExpr)
+      (field : String)
+  | constructor
+      (constructorName : String)
+      (fields : List (String × PsJsIrExpr))
+  | matchE
+      (scrutinee : PsJsIrExpr)
+      (alternatives :
+        List
+          (String ×
+            List PsJsIrMatchBinding ×
+            PsJsIrExpr))
 
 structure PsJsIrParameter where
   name : String

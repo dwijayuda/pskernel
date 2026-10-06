@@ -476,3 +476,807 @@ All known SPKF objects
 Only Open Commons semantic objects participate in the canonical freely mirrorable public knowledge corpus.
 
 A proprietary implementation may point to Open Commons theory without itself entering the Commons.
+
+
+---
+
+# 17. Example: proprietary implementation over open mathematics
+
+Open semantic subject:
+
+~~~text
+spkf:A
+
+JsonSpec
+parse_valid
+parse_deterministic
+
+license:
+    MPL-2.0
+~~~
+
+Company implementation:
+
+~~~text
+SuperFastJson
+
+license:
+    proprietary
+
+ImplementationWitness:
+    implements spkf:A
+~~~
+
+The company may participate without publishing its implementation source, subject to applicable license boundaries.
+
+If it contributes a new theorem such as:
+
+~~~text
+streaming_parser_memory_bound
+~~~
+
+to the public commons, that TheoryExtension must satisfy Open Commons policy.
+
+---
+
+# 18. Example: cross-ecosystem theorem contribution
+
+Original theory:
+
+~~~text
+spkf:A
+MPL-2.0
+~~~
+
+Rust contributor:
+
+~~~text
+spkf:T1
+
+subject:
+    A
+
+theorem:
+    streaming_parse_memory_bound
+
+license:
+    MPL-2.0
+~~~
+
+Python contributor:
+
+~~~text
+spkf:T2
+
+subject:
+    A
+
+theorem:
+    decode_error_partition_complete
+
+license:
+    MPL-2.0
+~~~
+
+Then npm, Cargo, PyPI, Maven, Composer, Wasm users, and AI agents may discover and reuse T1 and T2.
+
+Runtime implementation licenses may differ.
+
+The shared mathematical knowledge remains open.
+
+---
+
+# 19. OpenKnowledgeClosure
+
+SAVEF should eventually compute an engineering-level licensing closure.
+
+Conceptual function:
+
+~~~text
+OpenKnowledgeClosure(root)
+~~~
+
+checks:
+
+- declared license expressions;
+- source availability;
+- dependency knowledge licenses;
+- embedded knowledge blobs;
+- public proof source;
+- interface licenses;
+- redistribution/mirroring policy.
+
+Example:
+
+~~~text
+psc knowledge audit-license <root>
+~~~
+
+Possible output:
+
+~~~text
+KnowledgeRoot:
+    OPEN-COMMONS
+
+Semantic theory:
+    MPL-2.0
+
+Proof source:
+    MPL-2.0
+
+CertifiedModuleInterface:
+    MPL-2.0
+
+WIT:
+    Apache-2.0
+
+Index metadata:
+    CC0-1.0
+
+External proprietary implementation:
+    OUTSIDE COMMONS CLOSURE
+
+Commons result:
+    PASS
+~~~
+
+The tool reports declared policy compatibility.
+
+It does not provide legal advice.
+
+---
+
+# 20. Transitive licensing must be explicit
+
+A KnowledgeRoot may depend on other semantic roots.
+
+If the canonical Open Commons depends transitively on knowledge whose license forbids redistribution or modification, that root may fail Commons eligibility.
+
+Example:
+
+~~~text
+Theory A
+    MPL-2.0
+
+imports Theory B
+    proprietary
+~~~
+
+Then:
+
+~~~text
+OpenKnowledgeClosure(A)
+    FAIL
+~~~
+
+unless B is modeled as an external boundary rather than redistributed semantic knowledge.
+
+This mirrors SAVEF's existing distinction between internal formal knowledge and explicit assumptions/boundaries.
+
+---
+
+# 21. Boundary versus imported knowledge
+
+A proprietary external implementation need not contaminate the Open Commons knowledge closure if it is modeled as a boundary.
+
+Example:
+
+~~~text
+Open PostgreSQL transaction model
+    MPL-2.0
+
+foreign PostgreSQL server
+    external boundary
+~~~
+
+The formal model remains open.
+
+The external implementation is not embedded into the semantic knowledge closure.
+
+This is essential for practical interoperability.
+
+---
+
+# 22. Patent considerations
+
+Formal software knowledge can interact with software patents.
+
+Apache-2.0 includes an explicit contributor patent grant.
+
+MPL 2.0 also contains patent-related provisions.
+
+This is one reason software-oriented licenses are preferable to general content licenses for machine-executable theorem/specification source.
+
+Before freezing Commons policy, obtain legal review covering:
+
+- theorem/proof code;
+- generated implementations;
+- WIT/interface definitions;
+- contributor patent grants;
+- AI-generated contributions;
+- cross-license compatibility.
+
+---
+
+# 23. Contributor policy
+
+A public SAVEF contribution should provide:
+
+- contributor identity/provenance as required by project governance;
+- SPDX license expression;
+- proof/spec source;
+- semantic profile;
+- subject SPKF ID;
+- authorship information where applicable;
+- source repository/origin;
+- machine-checkable evidence;
+- declaration that the contribution can be redistributed under the stated terms.
+
+The project may later use mechanisms such as:
+
+- Developer Certificate of Origin;
+- contributor agreement;
+- repository-specific contribution terms.
+
+These mechanisms remain separate from theorem validity.
+
+---
+
+# 24. AI-generated knowledge
+
+AI may generate:
+
+- theorem statements;
+- proofs;
+- specifications;
+- counterexamples;
+- generalizations.
+
+Before an AI-generated object enters the public Commons:
+
+1. semantic evidence is checked;
+2. provenance is recorded;
+3. license/origin policy is evaluated;
+4. similarity/copyright-contamination policy is applied where appropriate;
+5. human or policy approval occurs if required.
+
+PSKernel can establish logical validity.
+
+PSKernel cannot establish copyright provenance.
+
+Those are separate authority systems.
+
+---
+
+# 25. Open training and retrieval corpus
+
+A major benefit of the Open Commons is a high-quality public AI corpus containing:
+
+~~~text
+formal specification
+implementation
+proof
+kernel acceptance/rejection
+counterexample
+dependency graph
+repair path
+generalized theorem
+performance evidence
+~~~
+
+Training and retrieval must still respect the license and provenance policy of each object.
+
+The Commons license defaults should be selected partly to make broad machine use practical.
+
+---
+
+# 26. Asset-specific openness
+
+Different assets have different legal and engineering roles.
+
+Preferred pattern:
+
+~~~text
+semantic source
+    reciprocal open software license
+
+interoperability interface
+    permissive software license
+
+index facts
+    public-domain-style dedication where appropriate
+
+documentation
+    open-content license
+~~~
+
+One license should not be forced mechanically onto every artifact type.
+
+---
+
+# 27. Open Definition and OSI floor
+
+Canonical Commons policy should preserve freedoms consistent with the Open Definition:
+
+- access;
+- use;
+- modification;
+- redistribution;
+- commercial use;
+- no field-of-use discrimination.
+
+Open Definition:
+https://opendefinition.org/od/2.1/en/
+
+For software-like knowledge source, prefer OSI-approved licenses.
+
+Open Source Definition:
+https://opensource.org/osd
+
+The canonical Commons should reject licenses with restrictions such as:
+
+- NonCommercial;
+- NoDerivatives;
+- research-only use;
+- registry-exclusive redistribution;
+- industry/geography restrictions.
+
+Such objects may still exist outside the canonical Open Commons.
+
+---
+
+# 28. Commons acceptance states
+
+Recommended states:
+
+~~~text
+SEMANTICALLY_VALID
+    evidence checks
+
+OPEN_ELIGIBLE
+    licensing/policy checks
+
+INDEXED
+    metadata/quality policy
+
+CANONICAL
+    preferred/generalized knowledge
+~~~
+
+Example:
+
+~~~text
+valid proprietary theorem
+
+SEMANTICALLY_VALID = yes
+OPEN_ELIGIBLE = no
+INDEXED_PUBLIC_COMMONS = no
+~~~
+
+Another:
+
+~~~text
+valid MPL theorem
+
+SEMANTICALLY_VALID = yes
+OPEN_ELIGIBLE = yes
+INDEXED = yes
+CANONICAL = maybe
+~~~
+
+This prevents legal openness, logical correctness, and quality ranking from being conflated.
+
+---
+
+# 29. Curation remains necessary
+
+Open licensing alone can produce:
+
+- duplicate theorems;
+- overspecialized facts;
+- AI-generated spam;
+- weak abstractions.
+
+The factory may identify:
+
+~~~text
+T1
+T2
+T3
+T4
+~~~
+
+as instances of a more reusable theorem G.
+
+After G is checked:
+
+~~~text
+G
+    canonical
+
+T1-T4
+    valid but lower-ranked
+~~~
+
+All remain open and immutable.
+
+---
+
+# 30. Mirroring guarantee
+
+Every Open Commons semantic object should permit lawful mirroring.
+
+Operational target:
+
+~~~text
+psc knowledge mirror <root>
+~~~
+
+A mirror should be able to redistribute:
+
+- canonical knowledge root;
+- theorem extensions;
+- required proof source;
+- CertifiedModuleInterfaces;
+- required semantic artifacts;
+- licensing metadata.
+
+Executable implementations are mirrored according to their own licenses.
+
+The semantic commons should not depend on one commercial host.
+
+---
+
+# 31. OCI and GitHub
+
+SPKF Open Commons knowledge may be mirrored through OCI/GHCR.
+
+OCI is transport, not licensing authority.
+
+A root may be available through:
+
+~~~text
+GHCR
+university OCI registry
+community registry
+offline snapshot
+~~~
+
+with the same SPKF semantic identity.
+
+GitHub immutable releases can additionally archive stable Commons snapshots.
+
+---
+
+# 32. Package-manager bindings
+
+Open Commons policy travels independently of ecosystem distribution.
+
+Example:
+
+~~~text
+Theory A
+    MPL-2.0
+
+npm wrapper
+    Apache-2.0
+
+Cargo wrapper
+    Apache-2.0
+
+PyPI wrapper
+    Apache-2.0
+
+Maven wrapper
+    Apache-2.0
+
+proprietary internal implementation
+    proprietary
+~~~
+
+All may point to the same open semantic theory.
+
+---
+
+# 33. WIT licensing rule
+
+Recommended default:
+
+~~~text
+WIT
+    Apache-2.0
+~~~
+
+Reasons:
+
+1. WIT is an interface contract, not behavior implementation.
+2. Generated bindings should have minimal licensing friction.
+3. Apache-2.0 provides broad reuse and an explicit patent grant.
+4. Behavioral reciprocity is enforced at the SPKF semantic-knowledge layer.
+
+Do not use WIT licensing as the mechanism that keeps theorem knowledge open.
+
+---
+
+# 34. Why not GPL or AGPL for the universal semantic layer
+
+Strong copyleft can be appropriate for specific implementations.
+
+It is less attractive as the default universal semantic-knowledge policy because SAVEF targets reuse across:
+
+- proprietary applications;
+- cloud systems;
+- embedded software;
+- mobile apps;
+- open-source projects;
+- enterprise systems;
+- research tools.
+
+The Commons should maximize reuse of the mathematics while keeping distributed modifications to the canonical knowledge open.
+
+A weak/file-level reciprocal model is better aligned with that objective.
+
+Implementations may independently choose GPL/AGPL.
+
+---
+
+# 35. Dual licensing
+
+A knowledge author may choose an SPDX expression such as:
+
+~~~text
+MPL-2.0 OR LicenseRef-Commercial
+~~~
+
+The Commons policy should ask whether at least one offered licensing path satisfies Open Commons requirements.
+
+This can support commercial licensing while retaining a permanently open path.
+
+---
+
+# 36. License compatibility results
+
+SAVEF may later maintain a non-authoritative license-policy knowledge base.
+
+Concept:
+
+~~~text
+LicensePolicyResult {
+    object
+    commonsPolicy
+    declaredLicense
+    result
+    policyVersion
+    rationale
+}
+~~~
+
+This is policy/tooling output.
+
+It is not a theorem covering every jurisdiction.
+
+Legal guidance can change without changing the underlying semantic theorem object.
+
+---
+
+# 37. Governance
+
+The public Commons should transparently govern:
+
+- approved license set;
+- canonical theorem/spec ranking;
+- spam controls;
+- deprecation;
+- policy migration;
+- supported semantic profiles;
+- mirror requirements;
+- contributor policy.
+
+Governance cannot mutate content-addressed historical objects.
+
+It changes only:
+
+- indexing;
+- recommendation;
+- active support;
+- policy eligibility.
+
+---
+
+# 38. Policy versioning
+
+Commons policy is versioned separately from SPKF.
+
+Example:
+
+~~~text
+SPKF:
+    spkf/1
+
+Commons policy:
+    savef-open-commons/1
+~~~
+
+A future:
+
+~~~text
+savef-open-commons/2
+~~~
+
+does not reinterpret old SPKF bytes.
+
+This separation is important for longevity.
+
+---
+
+# 39. Initial implementation roadmap
+
+## Commons-0 — licensing metadata
+
+Add to SPKF:
+
+~~~text
+license.spdx
+sourceForm
+commonsPolicy
+~~~
+
+Implement:
+
+~~~text
+psc knowledge audit-license
+~~~
+
+## Commons-1 — public index enforcement
+
+Public SAVEF index accepts only Commons-eligible semantic roots and TheoryExtensions into the canonical Commons view.
+
+## Commons-2 — WIT/interface defaults
+
+Official WIT and thin generated bindings use Apache-2.0 by default.
+
+## Commons-3 — independent mirrors
+
+Publish the canonical semantic graph to at least two independently controlled mirrors.
+
+## Commons-4 — transitive closure
+
+Implement OpenKnowledgeClosure.
+
+## Commons-5 — public AI corpus
+
+Generate an Open-Commons-only theorem/spec/failure corpus with provenance.
+
+---
+
+# 40. Acceptance criteria
+
+An object qualifies for SAVEF-OPEN-COMMONS-v1 only if:
+
+1. semantic evidence is valid under its declared assurance policy;
+2. it has an SPDX-recognized or explicitly approved open license;
+3. commercial use is permitted;
+4. redistribution is permitted;
+5. modification/derivative works are permitted;
+6. mirroring is permitted;
+7. required source/evidence form is accessible;
+8. transitive embedded semantic knowledge satisfies Commons policy;
+9. license metadata is included in content-addressed identity as defined by SPKF;
+10. provenance satisfies project contribution policy.
+
+Failing Commons eligibility does not imply semantic invalidity.
+
+---
+
+# 41. Questions requiring legal review before freeze
+
+1. Is MPL-2.0 the best default for ProofScript theorem/spec source?
+2. Should CertifiedModuleInterface source be MPL-covered by default?
+3. How should generated proof/interface artifacts be classified?
+4. Is Apache-2.0 the best default for WIT/generated bindings?
+5. How should patent grants interact with formal specifications?
+6. What contributor policy is appropriate for AI-assisted work?
+7. How should large derived theorem indexes handle database rights?
+8. Is CC0 suitable for all intended metadata jurisdictions?
+9. What GPL-family compatibility paths need explicit support?
+10. Is DCO sufficient or is a CLA preferable?
+
+---
+
+# 42. Research references
+
+## Mozilla Public License 2.0
+
+https://www.mozilla.org/en-US/MPL/
+
+https://www.mozilla.org/en-US/MPL/2.0/FAQ/
+
+Key property used here:
+
+> file-level copyleft intended to keep covered modifications open while permitting combination with separately licensed code.
+
+## Apache License 2.0
+
+https://www.apache.org/licenses/LICENSE-2.0.html
+
+https://www.apache.org/legal/apply-license.html
+
+Key property used here:
+
+> permissive software licensing with an explicit contributor patent grant.
+
+## Creative Commons
+
+https://creativecommons.org/faq/
+
+https://creativecommons.org/publicdomain/zero/1.0/legalcode.en
+
+Used here primarily for documentation/data/metadata rather than ProofScript software/proof source.
+
+## WIT / WebAssembly Component Model
+
+https://component-model.bytecodealliance.org/design/wit.html
+
+Key distinction:
+
+> WIT defines interfaces/worlds, not component behavior.
+
+## Open Definition
+
+https://opendefinition.org/od/2.1/en/
+
+## Open Source Definition
+
+https://opensource.org/osd
+
+## SPDX
+
+https://spdx.github.io/spdx-spec/v3.0.1/
+
+---
+
+# 43. Canonical policy recommendation
+
+> **SAVEF should maintain a canonical Open Knowledge Commons in which formal definitions, specifications, theorem/proof source, CertifiedModuleInterfaces, effect laws, and TheoryExtensions remain openly licensed and freely mirrorable. The default research recommendation is MPL-2.0 for machine-checkable semantic knowledge, Apache-2.0 for WIT/interfaces and thin interoperability adapters, CC0-1.0 for public index/mirror metadata where appropriate, and an open-content license such as CC-BY-SA-4.0 for explanatory documentation. Runtime implementations and applications may use other licenses, including proprietary licenses, provided restricted material is not falsely represented as canonical Open Commons knowledge.**
+
+The architectural objective is not:
+
+> make every program open source.
+
+It is:
+
+> **make the shared mathematical knowledge underlying software permanently open and cumulatively improvable.**
+
+---
+
+# 44. Final principle
+
+~~~text
+one open theorem
+        |
+        +--> npm users
+        +--> Rust users
+        +--> Python users
+        +--> JVM users
+        +--> PHP users
+        +--> proprietary applications
+        +--> open-source applications
+        +--> AI agents
+        |
+        v
+new discoveries
+        |
+        v
+open TheoryExtensions
+        |
+        v
+larger shared mathematical software commons
+        |
+        +-------------------------------> repeat
+~~~
+
+The most important rule is:
+
+> **Keep the knowledge open, keep interoperability permissive, and do not require every application built on top of that knowledge to share one licensing model.**
+
+That gives SAVEF the widest adoption surface while preserving an openly compounding body of executable software mathematics.

@@ -143,6 +143,7 @@ structure PsRuntimeInductiveInfo where
 
 structure PsErasureCurrentDefinition where
   name : String
+  typeArguments : List PsVerifiedIrType
   runtimeParameters : List String
 
 structure PsErasureScope where

@@ -1491,7 +1491,10 @@ def psEraseRuntimeExprWithFuelWorker
           let view := psErasureAppView expr;
           let erase :=
             smaller scope;
-          let eraseAt :=
+          let eraseAt :
+              PsErasureScope ->
+              PsExpr ->
+              Except PsErasureError PsVerifiedIrExpr :=
             fun (nextScope : PsErasureScope) (value : PsExpr) =>
               smaller nextScope
                 value;

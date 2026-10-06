@@ -4,7 +4,7 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `686ad6b784f08e5840726c7fd97986e36cc4d01d`
+- Current proof HEAD when this state was written: `f3ab5575b8b085e83b9d61d23f8fc1127dbdfcbf`
 - Last known green proof checkpoint: `c521adc59916a7fed2384365db222876c2677e2b` (run #285)
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
@@ -54,20 +54,20 @@ Last checked-in audit:
 The audit is conservative relative to newer cross-module checker-contract/context work. Do not inflate module grades without applying the written A/B/C/D criteria.
 
 ## Current checkpoint
-- Last explicitly recorded fully green checkpoint remains `c521adc59916a7fed2384365db222876c2677e2b` (run #285); later work has advanced eight+ proof commits beyond the previous work-state snapshot.
-- Live proof HEAD is `686ad6b784f08e5840726c7fd97986e36cc4d01d`, `proof(pskernel-core): close app-loop fallback step definitionally`.
-- GitHub job `112386546827` is validating that exact head.
-- The immediately preceding head `d25acfe0a0205dd6ceceb877e4e3a2bbb9dc86d4` failed only in `Checker/Inference/Helpers.proof.lean`: the non-forall app-only fallback step reduced to a reflexive equation after simplification. The live commit adds the minimal definitional closure rather than adding constructor-specific semantics.
-- The live branch now contains newer concrete-checker infrastructure beyond the old work-state snapshot, including checker configuration contracts, context-state metatheory, cache/state soundness transport, projection configuration preservation, EnsureSort/EnsureForall transport, and infer-only app-loop configuration-preservation work.
+- Last explicitly recorded fully green checkpoint remains `c521adc59916a7fed2384365db222876c2677e2b` (run #285).
+- Live proof HEAD is `f3ab5575b8b085e83b9d61d23f8fc1127dbdfcbf`, `proof(pskernel-core): normalize projection configuration rejection`.
+- GitHub run #298 is queued for that exact head.
+- The immediately preceding head `8afb5afa1b70813e58ecde6137995461d4cf295e` failed only in `Checker/Projection.proof.lean`: the configuration-preservation proof tried to rewrite a Boolean length test although the residual implementation branch was propositional equality. The live commit derives the raw inequality and rewrites the actual `if` with `if_neg`.
+- Concrete-checker infrastructure now includes checker configuration contracts, context-state metatheory, cache/state soundness transport, Projection configuration preservation, EnsureSort/EnsureForall transport, and infer-only app-loop configuration-preservation work.
 - The checked-in semantic audit remains conservative at A=44/B=9/C=19/D=7 and has not yet been refreshed for the latest checker-contract work.
-- Integration head remains `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`. Final proof/integration reconciliation remains required, but GitHub is canonical and no proof work should be discarded.
+- Integration has moved far in commit count but final proof/integration reconciliation remains required; GitHub is canonical and no proof work should be discarded.
 
 ## Current blocker
 No known production-kernel semantic defect.
 
 Immediate blocker:
-- validate the full proof gate at live HEAD `686ad6b784f08e5840726c7fd97986e36cc4d01d`;
-- if green, continue the concrete inference configuration/stateful proof immediately;
+- validate the full proof gate at live HEAD `f3ab5575b8b085e83b9d61d23f8fc1127dbdfcbf` (run #298);
+- if green, continue concrete checked/infer-only inference configuration/stateful proof immediately;
 - if red, repair only the first real Lean obligation and continue.
 
 Architectural blockers still remaining:

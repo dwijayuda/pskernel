@@ -92,7 +92,7 @@ theorem psKernelSimpleElimOnlyAtZero_true_semantics
       ] at hSuccess
   | false =>
       constructor
-      · exact hLevel
+      · rfl
       · cases ctors with
         | nil =>
             simp [

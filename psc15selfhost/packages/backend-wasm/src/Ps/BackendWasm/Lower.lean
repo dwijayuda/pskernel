@@ -6307,8 +6307,18 @@ def psWasmLowerModule
   | Except.ok specialized =>
       psWasmLowerSpecializedModule profile specialized
 
+def psWasmLowerSpecializedValidatedModule
+    (profile : PsWasmTargetProfile)
+    (specialized : PsSpecializedIrModule) :
+    Except PsWasmLowerError PsWasmModule :=
+  psWasmLowerSpecializedModule profile specialized.raw
+
 def psWasmLowerValidatedModule
     (profile : PsWasmTargetProfile)
     (validated : PsValidatedIrModule) :
     Except PsWasmLowerError PsWasmModule :=
-  psWasmLowerModule profile validated.raw
+  match psIrSpecializeValidatedModule validated with
+  | Except.error error =>
+      Except.error (PsWasmLowerError.specializationFailed error)
+  | Except.ok specialized =>
+      psWasmLowerSpecializedValidatedModule profile specialized

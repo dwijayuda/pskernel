@@ -81,6 +81,18 @@
       "id": "spkf/1",
       "kind": "savef-format",
       "status": "target"
+    },
+    {
+      "id": "psc-algorithmic-defeq-cache/1",
+      "kind": "semantic-cache-contract",
+      "status": "current",
+      "canonicalPath": "contracts/semantic/ALGORITHMIC_DEFEQ_CACHE_V1.json"
+    },
+    {
+      "id": "psc-verified-ir-gap-registry/1",
+      "kind": "verified-ir-gap-registry",
+      "status": "current",
+      "canonicalPath": "contracts/ir/VERIFIED_IR_GAPS_V1.json"
     }
   ]
 }

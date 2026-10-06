@@ -18,3 +18,12 @@ Checkpoint P0/P2/P3:
 2. make algorithmic-defeq/cache contracts machine-readable
 3. finish VerifiedIR invariant gap registry
 4. introduce explicit SpecializedIR capability using PSC1-compatible source patterns
+
+## Checkpoint P1/P4/P5/P6
+
+- public Node `psc build` now routes through checked-build; `build-unchecked` is explicit bootstrap/internal
+- algorithmic-defeq cache contract registered; non-transitive relation forbids union-find/transitive closure without proof
+- VerifiedIR v1 gap registry is machine-readable
+- PsSpecializedIrModule added in PSC1-selfhost-compatible Lean source
+- validated JS/Wasm specialization paths now construct the explicit SpecializedIR capability
+- next: open PR/cloud CI, then pass/build evidence + ModuleInterface semantic fingerprint prototype

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-verified-ir-gap-registry/1",
+  "verifiedIrContract": "psc-verified-ir/1",
+  "implemented": [
+    "no-reachable-unknown-runtime-type",
+    "record-target-structure-exists",
+    "projection-target-structure-exists",
+    "structure-type-argument-arity",
+    "record-field-membership",
+    "projection-field-membership",
+    "constructor-inductive-exists",
+    "match-inductive-exists",
+    "inductive-type-argument-arity",
+    "constructor-membership",
+    "match-alternative-constructor-membership",
+    "constructor-field-membership",
+    "match-binding-field-membership",
+    "machine-integer-literal-canonical-range",
+    "validation-fuel-fail-closed"
+  ],
+  "gaps": [
+    "global-declaration-and-type-name-uniqueness",
+    "general-named-type-resolution-and-arity",
+    "variable-scope-and-name-resolution",
+    "call-arity",
+    "call-argument-and-result-typing",
+    "record-field-completeness",
+    "constructor-field-completeness",
+    "duplicate-record-and-constructor-fields",
+    "duplicate-match-bindings",
+    "field-value-typing",
+    "intrinsic-type-and-value-argument-rules",
+    "if-condition-and-result-typing",
+    "match-exhaustiveness",
+    "duplicate-match-alternatives",
+    "match-branch-result-type-equality",
+    "external-import-interface-and-abi-compatibility",
+    "module-link-compatibility"
+  ],
+  "policy": {
+    "unknownMeaningMustNotBeAddedSilently": true,
+    "strengtheningMayRemainV1OnlyWhenAlreadyRequiredByContract": true,
+    "newExecutableSemanticsRequiresVersionDecision": true
+  }
+}

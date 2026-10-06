@@ -31,7 +31,8 @@ function usage() {
     "",
     "usage:",
     "  psc bootstrap",
-    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]",
+    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>] [--kernel <provider>] [--security-profile <profile>]",
+    "  psc build-unchecked <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]  # bootstrap/internal",
     "  psc translate <input.lean|input.ps> --to <lean|ps> [--out <output>] [--compiler <compiler.js>]",
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",
     "  psc emit-ps <input.lean|input.ps> [--out <output.ps>] [--compiler <compiler.js>]",
@@ -74,15 +75,29 @@ if (!command || command === "--help" || command === "-h") {
   const entry = args[1];
   const output = option(args, "--out");
   const compiler = option(args, "--compiler") ?? defaultCompiler;
+  const kernel = option(args, "--kernel") ?? "lean434-wasm";
+  const securityProfile = option(args, "--security-profile") ?? "development-v1";
 
   if (!entry || !output) throw new Error(usage());
 
   run(node, [
-    "scripts/compile-with-generated.mjs",
-    compiler,
+    "scripts/checked-build.mjs",
     entry,
+    "--out",
     output,
+    "--compiler",
+    compiler,
+    "--kernel",
+    kernel,
+    "--security-profile",
+    securityProfile,
   ]);
+} else if (command === "build-unchecked") {
+  const entry = args[1];
+  const output = option(args, "--out");
+  const compiler = option(args, "--compiler") ?? defaultCompiler;
+  if (!entry || !output) throw new Error(usage());
+  run(node, ["scripts/compile-with-generated.mjs", compiler, entry, output]);
 } else if (command === "project" && args[1] === "emit") {
   const entry = args[2];
   const target = option(args, "--to");

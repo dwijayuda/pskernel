@@ -1,0 +1,17 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const cli=await readFile(path.join(root,"packages/cli/bin/psc.mjs"),"utf8");
+const buildStart=cli.indexOf('} else if (command === "build")');
+const uncheckedStart=cli.indexOf('} else if (command === "build-unchecked")');
+if(buildStart<0||uncheckedStart<0||uncheckedStart<=buildStart) throw new Error("PSC_PRODUCTION_BUILD_COMMAND_SHAPE");
+const checkedBlock=cli.slice(buildStart,uncheckedStart);
+if(!checkedBlock.includes("scripts/checked-build.mjs")) throw new Error("PSC_PRODUCTION_BUILD_NOT_CHECKED");
+if(checkedBlock.includes("compile-with-generated.mjs")) throw new Error("PSC_PRODUCTION_BUILD_UNCHECKED_BYPASS");
+const uncheckedEnd=cli.indexOf('} else if',uncheckedStart+10);
+const uncheckedBlock=cli.slice(uncheckedStart,uncheckedEnd<0?cli.length:uncheckedEnd);
+if(!uncheckedBlock.includes("compile-with-generated.mjs")) throw new Error("PSC_BOOTSTRAP_UNCHECKED_PATH_MISSING");
+const session=await readFile(path.join(root,"scripts/kernel-checked-session.mjs"),"utf8");
+if(!session.includes("psc-checked-core-capability/1")||!session.includes("WeakMap")) throw new Error("PSC_CHECKED_CAPABILITY_BOUNDARY");
+process.stdout.write("PSCV_PRODUCTION_AUTHORITY: PASS (checked build default; unchecked build explicit)\n");

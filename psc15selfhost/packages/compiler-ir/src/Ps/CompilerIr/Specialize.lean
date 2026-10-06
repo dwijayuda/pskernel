@@ -1817,3 +1817,20 @@ def psIrSpecializeModule
                         inductives := final.inductives
                         declarations := final.declarations
                       }
+
+
+/- Explicit post-validation specialization capability.
+This wrapper is deliberately simple so it remains inside the PSC1 portable
+self-host profile. Raw psIrSpecializeModule remains a low-level/bootstrap/test
+operation; certified target paths should consume PsSpecializedIrModule. -/
+structure PsSpecializedIrModule where
+  raw : PsVerifiedIrModule
+
+def psIrSpecializeValidatedModule
+    (validated : PsValidatedIrModule) :
+    Except PsIrSpecializeError PsSpecializedIrModule :=
+  match psIrSpecializeModule validated.raw with
+  | Except.error error =>
+      Except.error error
+  | Except.ok specialized =>
+      Except.ok (PsSpecializedIrModule.mk specialized)

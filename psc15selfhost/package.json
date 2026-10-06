@@ -180,7 +180,9 @@
     "test:direct-rust-whole-compiler": "node scripts/direct-rust-whole-compiler.test.mjs",
     "test:direct-rust-selfhost": "node scripts/direct-rust-selfhost-fixed-point.mjs",
     "test:architecture-contracts": "node --test scripts/architecture-contracts.test.mjs scripts/provider-security.test.mjs",
-    "check:architecture-contracts": "npm run test:architecture-contracts && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs"
+    "check:architecture-contracts": "npm run test:architecture-contracts && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs && npm run check:semantic-contracts && npm run check:production-authority",
+    "check:semantic-contracts": "node scripts/semantic-contract-audit.mjs",
+    "check:production-authority": "node scripts/production-authority-audit.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

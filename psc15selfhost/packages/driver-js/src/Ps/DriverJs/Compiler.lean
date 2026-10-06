@@ -169,8 +169,8 @@ def psCompilerJavaScriptValidatedIrFromPrepared
 
 def psCompilerJavaScriptSpecializeValidatedIr
     (validated : PsValidatedIrModule) :
-    Except PsCompilerJavaScriptError PsVerifiedIrModule :=
-  match psIrSpecializeModule validated.raw with
+    Except PsCompilerJavaScriptError PsSpecializedIrModule :=
+  match psIrSpecializeValidatedModule validated with
   | Except.error error =>
       Except.error
         (PsCompilerJavaScriptError.emit
@@ -180,12 +180,12 @@ def psCompilerJavaScriptSpecializeValidatedIr
       Except.ok specialized
 
 def psCompilerJavaScriptEmitSpecialized
-    (specialized : PsVerifiedIrModule) :
+    (specialized : PsSpecializedIrModule) :
     Except PsCompilerJavaScriptError String :=
   match
       psJsLowerSpecializedModuleWithProfile
         (Option.some psCompilerJavaScriptTarget64)
-        specialized with
+        specialized.raw with
   | Except.error error =>
       Except.error
         (PsCompilerJavaScriptError.emit

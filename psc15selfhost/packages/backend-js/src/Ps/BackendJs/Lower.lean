@@ -1431,16 +1431,23 @@ def psJsLowerSpecializedModule
     Option.none
     module
 
+def psJsLowerSpecializedValidatedModuleWithProfile
+    (profile : Option PsJsTargetProfile)
+    (specialized : PsSpecializedIrModule) :
+    Except PsJsLowerError PsJsIrModule :=
+  psJsLowerSpecializedModuleWithProfile
+    profile
+    specialized.raw
+
 def psJsLowerValidatedModuleWithProfile
     (profile : Option PsJsTargetProfile)
     (validated : PsValidatedIrModule) :
     Except PsJsLowerError PsJsIrModule :=
-  let module : PsVerifiedIrModule := validated.raw;
-  match psIrSpecializeModule module with
+  match psIrSpecializeValidatedModule validated with
   | Except.error error =>
       Except.error (PsJsLowerError.specializationFailed error)
   | Except.ok specialized =>
-      psJsLowerSpecializedModuleWithProfile
+      psJsLowerSpecializedValidatedModuleWithProfile
         profile
         specialized
 

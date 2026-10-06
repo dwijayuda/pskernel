@@ -1228,10 +1228,24 @@ def psRustModuleHasImports
   | List.cons _ _ =>
       true
 
+def psRustAssembleModuleSource
+    (structures : List String)
+    (inductives : List String)
+    (declarations : List String) : String :=
+  let tail : List String :=
+    List.append
+      structures
+      (List.append inductives declarations);
+  let sections : List String :=
+    List.cons psRustRuntimePrelude tail;
+  psRustConcat2
+    (psRustJoin "\n" sections)
+    "\n"
+
 def psRustEmitModule
     (module : PsVerifiedIrModule) :
     Except PsRustEmitError String :=
-  let valueNames :=
+  let valueNames : List String :=
     psRustValueDeclarationNames module.declarations;
   if psRustModuleHasImports module.imports then
     Except.error PsRustEmitError.externalImportUnsupported
@@ -1256,16 +1270,11 @@ def psRustEmitModule
                     | Except.error error =>
                         Except.error error
                     | Except.ok declarations =>
-                        let sections :=
-                          List.cons
-                            psRustRuntimePrelude
-                            (List.append
-                              structures
-                              (List.append inductives declarations));
                         Except.ok
-                          (psRustConcat2
-                            (psRustJoin "\n" sections)
-                            "\n")
+                          (psRustAssembleModuleSource
+                            structures
+                            inductives
+                            declarations)
 
 def psRustEmitValidatedModule
     (module : PsValidatedIrModule) :

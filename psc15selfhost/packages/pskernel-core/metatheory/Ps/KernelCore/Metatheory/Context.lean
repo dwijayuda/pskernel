@@ -641,6 +641,29 @@ theorem psKernelLocalContextEmpty_freshBound
   intro decl hMem
   cases hMem
 
+
+theorem psKernelLocalContextFreshBound_mono
+    (context : PsKernelLocalContext)
+    (oldBound newBound : Nat)
+    (hBound :
+      PsKernelLocalContextFreshBound
+        context
+        oldBound)
+    (hLe : oldBound ≤ newBound) :
+    PsKernelLocalContextFreshBound
+      context
+      newBound := by
+  intro decl hMem
+  rcases hBound decl hMem with
+    ⟨base, index, hName, hLt⟩
+  exact
+    ⟨
+      base,
+      index,
+      hName,
+      Nat.lt_of_lt_of_le hLt hLe
+    ⟩
+
 theorem psKernelLocalContextAddLocal_preserves_freshBound
     (context : PsKernelLocalContext)
     (counter : Nat)

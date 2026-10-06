@@ -24,14 +24,6 @@ theorem psKernelReductionClosure_trans
           right
           hPresentation
           (ih hRight)
-  | contextWeaken older first middle hExt hReduction ih =>
-      exact
-        PsKernelReductionClosure.contextWeaken
-          older
-          first
-          right
-          hExt
-          (ih hRight)
   | cons first next last hStep hRest ih =>
       exact
         PsKernelReductionClosure.cons

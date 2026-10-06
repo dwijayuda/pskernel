@@ -10,43 +10,12 @@ theorem psKernelReductionStep_contextWeaken
         environment older left right) :
     PsKernelReductionStep
       environment newer left right := by
-  cases hStep with
-  | beta name type body arg binderInfo =>
-      exact PsKernelReductionStep.beta
-        name type body arg binderInfo
-  | zeta name type value body nondep =>
-      exact PsKernelReductionStep.zeta
-        name type value body nondep
-  | metadata metadata body =>
-      exact PsKernelReductionStep.metadata
-        metadata body
-  | localLet name declaration value hFind hValue =>
-      exact PsKernelReductionStep.localLet
-        name declaration value
-        (hExt name declaration hFind)
-        hValue
-  | deltaConst name levels info value hFind hDelta hLevels =>
-      exact PsKernelReductionStep.deltaConst
-        name levels info value hFind hDelta hLevels
-  | deltaSpine expr name levels info value hFn hFind hDelta hLevels =>
-      exact PsKernelReductionStep.deltaSpine
-        expr name levels info value hFn hFind hDelta hLevels
-  | natAdd op left right hOp =>
-      exact PsKernelReductionStep.natAdd op left right hOp
-  | natSub op left right hOp =>
-      exact PsKernelReductionStep.natSub op left right hOp
-  | natMul op left right hOp =>
-      exact PsKernelReductionStep.natMul op left right hOp
-  | natSucc op value hOp =>
-      exact PsKernelReductionStep.natSucc op value hOp
-  | natMod op left right hOp =>
-      exact PsKernelReductionStep.natMod op left right hOp
-  | natDiv op left right hOp =>
-      exact PsKernelReductionStep.natDiv op left right hOp
-  | natBeq op left right hOp =>
-      exact PsKernelReductionStep.natBeq op left right hOp
-  | natBle op left right hOp =>
-      exact PsKernelReductionStep.natBle op left right hOp
+  cases hStep <;>
+    constructor <;>
+    try assumption
+  all_goals
+    apply hExt <;>
+    assumption
 
 theorem psKernelReductionClosure_contextWeaken
     (environment : PsKernelEnvironment)

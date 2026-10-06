@@ -1,5 +1,21 @@
 import Ps.CompilerIr.Model
 
+def psBackendJsNatType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+
+def psBackendJsArrayNatType : PsVerifiedIrType :=
+  PsVerifiedIrType.named "Array" [psBackendJsNatType]
+
+def psBackendJsNatUnaryFunctionType : PsVerifiedIrType :=
+  PsVerifiedIrType.function
+    [psBackendJsNatType]
+    psBackendJsNatType
+
+def psBackendJsNatBinaryFunctionType : PsVerifiedIrType :=
+  PsVerifiedIrType.function
+    [psBackendJsNatType, psBackendJsNatType]
+    psBackendJsNatType
+
 def psBackendJsFixtureModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -363,6 +379,229 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
             []
             [
               PsVerifiedIrExpr.var "value",
+              PsVerifiedIrExpr.var "start",
+              PsVerifiedIrExpr.var "stop"
+            ]
+      },
+      {
+        name := "arrayEmptyDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "capacity"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsArrayNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+            [psBackendJsNatType]
+            [PsVerifiedIrExpr.var "capacity"]
+      },
+      {
+        name := "arraySizeDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "array"
+            type := psBackendJsArrayNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arraySize
+            [psBackendJsNatType]
+            [PsVerifiedIrExpr.var "array"]
+      },
+      {
+        name := "arrayPushDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "array"
+            type := psBackendJsArrayNatType
+          },
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsArrayNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayPush
+            [psBackendJsNatType]
+            [
+              PsVerifiedIrExpr.var "array",
+              PsVerifiedIrExpr.var "value"
+            ]
+      },
+      {
+        name := "arrayGetDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "array"
+            type := psBackendJsArrayNatType
+          },
+          {
+            name := "index"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayGet
+            [psBackendJsNatType]
+            [
+              PsVerifiedIrExpr.var "array",
+              PsVerifiedIrExpr.var "index"
+            ]
+      },
+      {
+        name := "arrayGetDDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "array"
+            type := psBackendJsArrayNatType
+          },
+          {
+            name := "index"
+            type := psBackendJsNatType
+          },
+          {
+            name := "fallback"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayGetD
+            [psBackendJsNatType]
+            [
+              PsVerifiedIrExpr.var "array",
+              PsVerifiedIrExpr.var "index",
+              PsVerifiedIrExpr.var "fallback"
+            ]
+      },
+      {
+        name := "arraySetDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "array"
+            type := psBackendJsArrayNatType
+          },
+          {
+            name := "index"
+            type := psBackendJsNatType
+          },
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsArrayNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arraySet
+            [psBackendJsNatType]
+            [
+              PsVerifiedIrExpr.var "array",
+              PsVerifiedIrExpr.var "index",
+              PsVerifiedIrExpr.var "value"
+            ]
+      },
+      {
+        name := "arraySetIfInBoundsDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "array"
+            type := psBackendJsArrayNatType
+          },
+          {
+            name := "index"
+            type := psBackendJsNatType
+          },
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsArrayNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arraySetIfInBounds
+            [psBackendJsNatType]
+            [
+              PsVerifiedIrExpr.var "array",
+              PsVerifiedIrExpr.var "index",
+              PsVerifiedIrExpr.var "value"
+            ]
+      },
+      {
+        name := "arrayMapDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "fn"
+            type := psBackendJsNatUnaryFunctionType
+          },
+          {
+            name := "array"
+            type := psBackendJsArrayNatType
+          }
+        ]
+        resultType := psBackendJsArrayNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayMap
+            [psBackendJsNatType, psBackendJsNatType]
+            [
+              PsVerifiedIrExpr.var "fn",
+              PsVerifiedIrExpr.var "array"
+            ]
+      },
+      {
+        name := "arrayFoldDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "fn"
+            type := psBackendJsNatBinaryFunctionType
+          },
+          {
+            name := "init"
+            type := psBackendJsNatType
+          },
+          {
+            name := "array"
+            type := psBackendJsArrayNatType
+          },
+          {
+            name := "start"
+            type := psBackendJsNatType
+          },
+          {
+            name := "stop"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.arrayFoldl
+            [psBackendJsNatType, psBackendJsNatType]
+            [
+              PsVerifiedIrExpr.var "fn",
+              PsVerifiedIrExpr.var "init",
+              PsVerifiedIrExpr.var "array",
               PsVerifiedIrExpr.var "start",
               PsVerifiedIrExpr.var "stop"
             ]

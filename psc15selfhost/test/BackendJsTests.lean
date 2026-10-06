@@ -418,6 +418,30 @@ def psTestBackendJsSelectiveStackSafety : Bool :=
         && output.contains "yield* __ps$invoke(helper, (yield* __ps$invoke(recur, n)))"
         && output.contains "const implementation = __ps$implementations.get(fn)"
 
+def psBackendJsTailLoopModule : PsJsIrModule :=
+  {
+    imports := []
+    declarations := [
+      {
+        name := "tail"
+        parameters := [{ name := "n" }]
+        body :=
+          PsJsIrExpr.call
+            (PsJsIrExpr.var "tail")
+            [PsJsIrExpr.var "n"]
+      }
+    ]
+  }
+
+def psTestBackendJsTailLoop : Bool :=
+  match psJsPrintModuleStackSafe psBackendJsTailLoopModule with
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains
+        "export function tail(n) { while (true) { [n] = [n]; continue; } }"
+        && !output.contains "function* __ps$impl$tail"
+
+
 def main : IO Unit := do
   if psTestBackendJsFixtureEmission
       && psTestBackendJsRejectsKeywordName
@@ -426,7 +450,8 @@ def main : IO Unit := do
       && psTestBackendJsMachineIntegerPrinters
       && psTestBackendJsFloatPrinters
       && psTestBackendJsUInt8OfNatPrinter
-      && psTestBackendJsSelectiveStackSafety then
+      && psTestBackendJsSelectiveStackSafety
+      && psTestBackendJsTailLoop then
     IO.println "PSC2_BACKEND_JS_TESTS: PASS"
   else
     throw

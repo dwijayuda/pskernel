@@ -1,5 +1,5 @@
 import Ps.BackendRust.Module
-import Ps.BackendRust.Coverage
+import Ps.Host.RustCoverage
 
 def psBackendRustLetFunctionResultModule : PsVerifiedIrModule :=
   {

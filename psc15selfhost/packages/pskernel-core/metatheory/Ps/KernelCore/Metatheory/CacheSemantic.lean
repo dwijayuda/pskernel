@@ -398,12 +398,21 @@ theorem psKernelExprMapGet_insert_match_core
                 index
                 (psKernelExprHash key))
               (by
-                rw [
-                  ← psKernelExprEq_symm_core
+                have hReverse :
+                    psKernelExprEq query key = true := by
+                  rw [
+                    ← psKernelExprEq_symm_core
+                      key
+                      query
+                  ]
+                  exact hMatch
+                exact
+                  psKernelExprEq_trans_core
                     key
                     query
-                ]
-                exact hMatch)
+                    key
+                    hMatch
+                    hReverse)
 
 theorem psKernelExprMapGet_insert_other_core
     (cache : PsKernelExprMap)

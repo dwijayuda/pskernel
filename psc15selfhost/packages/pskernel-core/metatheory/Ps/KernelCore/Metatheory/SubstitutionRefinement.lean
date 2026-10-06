@@ -1,6 +1,7 @@
 import Ps.KernelCore.Metatheory.Substitution
 import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.Substitution.Abstract
+import Lean.Elab.Tactic.Omega
 
 theorem psKernelExprLiftLooseBVarsChanged_zero_amount_core
     (expr : PsKernelExpr)
@@ -1139,3 +1140,179 @@ theorem psKernelExprAbstractFVars_refines_reference_core
   exact
     psKernelExprAbstractFVarsAt_refines_reference_core
       expr fvars 0
+
+
+theorem psKernelExprInstantiateAtReferenceChanged_closed_core
+    (expr : PsKernelExpr)
+    (subst : List PsKernelExpr)
+    (offset : Nat)
+    (hClosed :
+      psKernelExprHasLooseAt expr offset = false) :
+    psKernelExprInstantiateAtReferenceChanged
+        expr 0 subst offset =
+      Prod.mk expr false := by
+  induction expr generalizing offset with
+  | bvar index =>
+      have hNotLe :
+          ¬ offset ≤ index := by
+        simpa [psKernelExprHasLooseAt] using hClosed
+      have hLt : index < offset := by
+        omega
+      have hNe : index ≠ offset := by
+        omega
+      have hNatLt :
+          psKernelNatLt index offset = true := by
+        simp [psKernelNatLt, Nat.beq_eq_false_iff, hNe, Nat.ble_eq]
+        omega
+      simp [
+        psKernelExprInstantiateAtReferenceChanged,
+        hNatLt
+      ]
+  | fvar name =>
+      rfl
+  | mvar name =>
+      rfl
+  | sort level =>
+      rfl
+  | const name levels =>
+      rfl
+  | app fn arg ihFn ihArg =>
+      cases hFn :
+          psKernelExprHasLooseAt fn offset with
+      | true =>
+          simp [psKernelExprHasLooseAt, hFn] at hClosed
+      | false =>
+          have hArg :
+              psKernelExprHasLooseAt arg offset = false := by
+            simpa [psKernelExprHasLooseAt, hFn] using hClosed
+          have hFnClosed := ihFn offset hFn
+          have hArgClosed := ihArg offset hArg
+          simp [
+            psKernelExprInstantiateAtReferenceChanged,
+            hFnClosed,
+            hArgClosed
+          ]
+  | lam name type body binderInfo ihType ihBody =>
+      cases hType :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [psKernelExprHasLooseAt, hType] at hClosed
+      | false =>
+          have hBody :
+              psKernelExprHasLooseAt body (Nat.succ offset) =
+                false := by
+            simpa [psKernelExprHasLooseAt, hType] using hClosed
+          have hTypeClosed := ihType offset hType
+          have hBodyClosed := ihBody (Nat.succ offset) hBody
+          simp [
+            psKernelExprInstantiateAtReferenceChanged,
+            hTypeClosed,
+            hBodyClosed
+          ]
+  | forallE name type body binderInfo ihType ihBody =>
+      cases hType :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [psKernelExprHasLooseAt, hType] at hClosed
+      | false =>
+          have hBody :
+              psKernelExprHasLooseAt body (Nat.succ offset) =
+                false := by
+            simpa [psKernelExprHasLooseAt, hType] using hClosed
+          have hTypeClosed := ihType offset hType
+          have hBodyClosed := ihBody (Nat.succ offset) hBody
+          simp [
+            psKernelExprInstantiateAtReferenceChanged,
+            hTypeClosed,
+            hBodyClosed
+          ]
+  | letE name type value body nondep ihType ihValue ihBody =>
+      cases hType :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [psKernelExprHasLooseAt, hType] at hClosed
+      | false =>
+          cases hValue :
+              psKernelExprHasLooseAt value offset with
+          | true =>
+              simp [psKernelExprHasLooseAt, hType, hValue] at hClosed
+          | false =>
+              have hBody :
+                  psKernelExprHasLooseAt
+                      body
+                      (Nat.succ offset) =
+                    false := by
+                simpa [
+                  psKernelExprHasLooseAt,
+                  hType,
+                  hValue
+                ] using hClosed
+              have hTypeClosed := ihType offset hType
+              have hValueClosed := ihValue offset hValue
+              have hBodyClosed :=
+                ihBody (Nat.succ offset) hBody
+              simp [
+                psKernelExprInstantiateAtReferenceChanged,
+                hTypeClosed,
+                hValueClosed,
+                hBodyClosed
+              ]
+  | lit literal =>
+      rfl
+  | mdata metadata body ihBody =>
+      have hBody :
+          psKernelExprHasLooseAt body offset = false := by
+        simpa [psKernelExprHasLooseAt] using hClosed
+      have hBodyClosed := ihBody offset hBody
+      simp [
+        psKernelExprInstantiateAtReferenceChanged,
+        hBodyClosed
+      ]
+  | proj typeName index body ihBody =>
+      have hBody :
+          psKernelExprHasLooseAt body offset = false := by
+        simpa [psKernelExprHasLooseAt] using hClosed
+      have hBodyClosed := ihBody offset hBody
+      simp [
+        psKernelExprInstantiateAtReferenceChanged,
+        hBodyClosed
+      ]
+
+theorem psKernelExprInstantiateAtReference_closed_core
+    (expr : PsKernelExpr)
+    (subst : List PsKernelExpr)
+    (offset : Nat)
+    (hClosed :
+      psKernelExprHasLooseAt expr offset = false) :
+    psKernelExprInstantiateAtReference
+        expr 0 subst offset =
+      expr := by
+  cases hEmpty : psKernelExprListIsEmpty subst with
+  | true =>
+      simp [
+        psKernelExprInstantiateAtReference,
+        hEmpty
+      ]
+  | false =>
+      simp [
+        psKernelExprInstantiateAtReference,
+        hEmpty,
+        psKernelExprInstantiateAtReferenceChanged_closed_core,
+        hClosed
+      ]
+
+theorem psKernelExprInstantiateAt_closed_core
+    (expr : PsKernelExpr)
+    (subst : List PsKernelExpr)
+    (offset : Nat)
+    (hClosed :
+      psKernelExprHasLooseAt expr offset = false) :
+    psKernelExprInstantiateAt
+        expr 0 subst offset =
+      expr := by
+  rw [
+    psKernelExprInstantiateAt_refines_reference_core
+  ]
+  exact
+    psKernelExprInstantiateAtReference_closed_core
+      expr subst offset hClosed

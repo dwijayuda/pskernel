@@ -1043,7 +1043,7 @@ def psRustEmitExprWithFuel
                                   "{ let "
                                   (psRustIdentifier name)
                                   ": "
-                                  (psRustConcat4
+                                  (psRustConcat3
                                     closureType
                                     " = "
                                     (psRustConcat4

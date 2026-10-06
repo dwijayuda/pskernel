@@ -90,7 +90,10 @@ async function loadCompiler(file, generation) {
     pathToFileURL(file).href + "?generation=" + String(generation)
   );
   for (const name of [
-    "psCompilerJavaScriptProofScriptSources",
+    "psCompilerJavaScriptPrepareProofScriptSources",
+    "psCompilerJavaScriptValidatedIrFromPrepared",
+    "psCompilerJavaScriptSpecializeValidatedIr",
+    "psCompilerJavaScriptEmitSpecialized",
     "psCompilerSelfHostSourceListCons",
   ]) {
     if (typeof module[name] !== "function") {
@@ -114,10 +117,31 @@ function sourceList(compiler, sources) {
 }
 
 async function compileWith(compiler, sources, stage) {
-  const result = compiler.psCompilerJavaScriptProofScriptSources(
-    sourceList(compiler, sources),
+  phase(stage + ":prepare");
+  const prepared = unwrapDirectExcept(
+    compiler.psCompilerJavaScriptPrepareProofScriptSources(
+      sourceList(compiler, sources),
+    ),
+    stage + "_PREPARE",
   );
-  const output = unwrapDirectExcept(result, stage);
+
+  phase(stage + ":validated-ir");
+  const validated = unwrapDirectExcept(
+    compiler.psCompilerJavaScriptValidatedIrFromPrepared(prepared),
+    stage + "_VALIDATED_IR",
+  );
+
+  phase(stage + ":specialize");
+  const specialized = unwrapDirectExcept(
+    compiler.psCompilerJavaScriptSpecializeValidatedIr(validated),
+    stage + "_SPECIALIZE",
+  );
+
+  phase(stage + ":emit");
+  const output = unwrapDirectExcept(
+    compiler.psCompilerJavaScriptEmitSpecialized(specialized),
+    stage + "_EMIT",
+  );
   if (typeof output !== "string" || output.length === 0) {
     throw new Error("PSC2_DIRECT_JS_SELFHOST_" + stage + "_EMPTY");
   }

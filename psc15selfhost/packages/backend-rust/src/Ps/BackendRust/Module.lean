@@ -302,7 +302,7 @@ def psRustEmitDeclarationResultType
     Except PsRustEmitError String :=
   match declaration.resultType with
   | PsVerifiedIrType.function _ _ =>
-      if psRustFunctionTypeIsFirstOrder declaration.resultType then
+      if psRustDeclarationDirectFunctionResultSupported declaration then
         psRustEmitClosureValueType declaration.resultType
       else
         Except.error
@@ -432,7 +432,12 @@ def psRustEmitDeclaration
                 Except.error error
             | Except.ok rewrittenBody =>
                 let emittedBody :=
-                  psRustEmitExpr rewrittenBody;
+                  if psRustTypeContainsFunction declaration.resultType then
+                    psRustEmitFunctionResultExpr
+                      declaration.name
+                      rewrittenBody
+                  else
+                    psRustEmitExpr rewrittenBody;
                 match emittedBody with
                 | Except.error error =>
                     Except.error error

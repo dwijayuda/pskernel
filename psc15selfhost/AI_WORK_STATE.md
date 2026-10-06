@@ -73,3 +73,9 @@ Checkpoint P0/P2/P3:
 - offline verifier checks all three knowledge objects
 - Version-3 15-criterion acceptance audit is wired into check:workspace
 - current next gate: cloud CI must compile/check portable theory, Wasm validator, direct self-host fixed points, Rust self-host, and architecture acceptance together
+
+## CI repair: portable Wasm closure
+
+- cloud CI correctly detected that the new portable Validate.lean root expanded backend-wasm's minimal portable entry closure
+- portable profile expectation now includes Validate.lean explicitly
+- no profile weakening or new repair guard was added

@@ -2120,27 +2120,28 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                   inductInfo.numParams
                                                   inductInfo.numIndices) with
                                           | false =>
-                                              have hArgsLengthNe :
-                                                  psKernelExprListLength args ≠
-                                                    Nat.add
-                                                      inductInfo.numParams
-                                                      inductInfo.numIndices := by
-                                                intro hEq
-                                                simpa [hEq] using hArgsLengthBool
-                                              have hArgsLengthNeRaw :
-                                                  psKernelExprListLength
-                                                      (psKernelExprGetAppArgs typeWhnf) ≠
-                                                    Nat.add
-                                                      inductInfo.numParams
-                                                      inductInfo.numIndices := by
+                                              have hArgsLengthBoolRaw :
+                                                  Nat.beq
+                                                      (psKernelExprListLength
+                                                        (psKernelExprGetAppArgs typeWhnf))
+                                                      (Nat.add
+                                                        inductInfo.numParams
+                                                        inductInfo.numIndices) =
+                                                    false := by
                                                 simpa [args] using
-                                                  hArgsLengthNe
-                                              split at hSuccess
-                                              · rename_i hLength
-                                                exact
-                                                  False.elim
-                                                    (hArgsLengthNeRaw hLength)
-                                              · simp at hSuccess
+                                                  hArgsLengthBool
+                                              simp [
+                                                psKernelInferProjectionWith,
+                                                hInferRun,
+                                                hTypeWhnf,
+                                                hIndexBound,
+                                                hFn,
+                                                hTypeName,
+                                                hInductFind,
+                                                hCtors,
+                                                hCtorRest,
+                                                hArgsLengthBoolRaw
+                                              ] at hSuccess
                                           | true =>
                                               have hArgsLength :
                                                   psKernelExprListLength args =

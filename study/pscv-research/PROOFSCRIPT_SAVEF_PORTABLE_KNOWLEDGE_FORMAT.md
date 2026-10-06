@@ -1274,3 +1274,311 @@ Process:
 6. search prefers G when appropriate.
 
 Old objects remain immutable.
+
+
+---
+
+# 41. Advisory knowledge plane
+
+SAVEF also benefits from non-proof knowledge:
+
+- failed proof attempts;
+- counterexamples;
+- proof-search traces;
+- architecture patterns;
+- performance observations;
+- AI hints;
+- examples.
+
+Store these as advisory-knowledge objects.
+
+No advisory object may discharge a formal obligation.
+
+---
+
+# 42. Security model
+
+All SPKF input is untrusted.
+
+Threats include:
+
+- malformed JSON;
+- duplicate-key ambiguity;
+- huge strings;
+- deeply nested structures;
+- graph bombs;
+- decompression bombs;
+- malicious proof payloads;
+- hash downgrade;
+- malicious package locators;
+- malicious OCI annotations;
+- malicious index results;
+- cyclic fetch patterns;
+- attacker-controlled install/build scripts.
+
+Verification is fail-closed.
+
+---
+
+# 43. SPKFVerificationBudget
+
+Suggested dimensions:
+
+~~~text
+maxManifestBytes
+maxBlobBytes
+maxObjectDepth
+maxObjectCount
+maxReferrerCount
+maxStringBytes
+maxArrayItems
+maxProofBytes
+maxKernelSteps
+maxDecompressedBytes
+maxFetchBytes
+maxConcurrentFetches
+~~~
+
+Exhaustion produces ResourceExhausted, never acceptance.
+
+---
+
+# 44. Hash algorithm policy
+
+SPKF-v1 MUST support SHA-256.
+
+Object IDs carry the algorithm name.
+
+Future versions may add algorithms.
+
+Unknown algorithms cannot establish authority.
+
+No silent downgrade is allowed.
+
+---
+
+# 45. Schema evolution
+
+SPKF authority semantics are versioned.
+
+Rules:
+
+~~~text
+spkf/1
+    fixed major interpretation
+
+additive non-authoritative metadata
+    may evolve compatibly
+
+new authority-bearing meaning
+    requires explicit schema/kind revision
+
+unknown semantic fields
+    cannot silently establish authority
+~~~
+
+Parsers MAY preserve unknown data.
+
+Verifiers MUST fail closed where unknown data is necessary to determine authority.
+
+---
+
+# 46. Semantic-profile migration
+
+If PSCV moves from semantic profile A to B:
+
+~~~text
+SPKF objects under A
+    do not become B objects automatically
+~~~
+
+Options:
+
+1. replay/recheck under B;
+2. publish migration/refinement evidence;
+3. retain original object under A.
+
+A migration object may relate Theory A to Theory B with accepted evidence.
+
+---
+
+# 47. Cross-foundation future
+
+Generic SPKF envelopes should not hard-code Lean into every field.
+
+Use a logic identifier plus SemanticProfile object.
+
+A future system could define another logic tag.
+
+SPKF-v1 does NOT attempt automatic proof translation between Lean, Rocq, HOL, Isabelle, Dedukti, or other foundations.
+
+Container portability and proof-foundation portability are separate problems.
+
+---
+
+# 48. Search and AI model
+
+A derived search engine should support semantic queries such as:
+
+~~~text
+find:
+    streaming parser
+
+guarantees:
+    deterministic
+    bounded memory
+
+targets:
+    Wasm
+
+assumptions:
+    no foreign logical axioms
+
+assurance:
+    kernel checked
+~~~
+
+Results reference immutable SPKF IDs.
+
+AI may retrieve:
+
+- certified interface;
+- theorem dependencies;
+- assumption closure;
+- canonical extensions;
+- implementations;
+- compatibility certificates;
+- failure patterns.
+
+The search index is non-authoritative.
+
+---
+
+# 49. Query API concept
+
+Possible API operations:
+
+~~~text
+resolve(id)
+verifyIdentity(id)
+fetchClosure(id)
+listExtensions(id)
+listImplementations(id)
+listDistributions(id)
+assumptionClosure(id)
+theoremClosure(id)
+capabilitySearch(query)
+verifyEvidence(id, policy)
+mirror(id, policy)
+~~~
+
+These can support CLI, build tools, IDEs, registry clients, and AI agents.
+
+---
+
+# 50. Proposed CLI
+
+Candidate commands:
+
+~~~text
+psc knowledge pack
+psc knowledge inspect
+psc knowledge verify
+psc knowledge fetch
+psc knowledge mirror
+psc knowledge bind
+psc knowledge publish-oci
+psc knowledge extensions
+~~~
+
+Exact CLI spelling remains non-normative.
+
+---
+
+# 51. Minimal repository implementation
+
+Recommended packages:
+
+~~~text
+psc15selfhost/packages/
+
+savef-format/
+    src/Ps/Savef/
+        Model.lean
+        Canonical.lean
+        Digest.lean
+        Validate.lean
+        Relations.lean
+
+savef-bridge/
+    src/Ps/SavefBridge/
+        SemanticArtifacts.lean
+        CertifiedInterface.lean
+        Evidence.lean
+
+savef-package/
+    src/Ps/SavefPackage/
+        Purl.lean
+        Binding.lean
+        Npm.lean
+        Cargo.lean
+        PyPi.lean
+        Maven.lean
+        Composer.lean
+~~~
+
+Network/registry clients should remain host-side initially.
+
+---
+
+# 52. SPKF trust boundary
+
+The portable semantic layer may own:
+
+- object model;
+- canonicalization contract;
+- digest contract;
+- bounded validation;
+- typed relationship model.
+
+Host layer owns:
+
+- HTTP;
+- OCI registry access;
+- npm/Cargo/PyPI discovery;
+- credentials;
+- filesystem mirrors;
+- transport compression.
+
+PSKernel never imports networking code.
+
+---
+
+# 53. JCS implementation plan
+
+Canonical JSON is a correctness-sensitive component.
+
+Implementation phases:
+
+## J0 — reference host implementation
+
+Use a tested RFC 8785 implementation.
+
+## J1 — portable PSC implementation
+
+Implement the restricted SPKF JSON canonicalizer in portable ProofScript source and differential-test it against independent implementations.
+
+## J2 — formal refinement
+
+Prove or strongly validate the restricted canonicalizer properties required by SPKF identity.
+
+Test families include:
+
+- property ordering;
+- Unicode;
+- escapes;
+- nested arrays/objects;
+- duplicate-key rejection;
+- safe bounded numeric fields;
+- arbitrary-integer string encoding;
+- forbidden non-I-JSON cases.

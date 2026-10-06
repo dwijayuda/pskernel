@@ -1,5 +1,6 @@
 import Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex
 import Ps.KernelCore.Environment.Semantic
+import Ps.KernelCore.Metatheory.EnvironmentIndexRefinement
 
 theorem psKernelEnvironmentIndexFind_empty
     (name : PsKernelName) :
@@ -312,3 +313,311 @@ theorem psKernelEnvironmentIndexFind_insert_has_head
                 (PsKernelEnvironmentIndex.branch left right)
                 (psKernelEnvironmentNameHash
                   (psKernelConstantInfoName info)))))
+
+
+theorem psKernelEnvironmentIndexRemoveName_find_other
+    (constants : List PsKernelConstantInfo)
+    (removed query : PsKernelName)
+    (hDifferent :
+      psKernelNameEq removed query = false) :
+    psKernelFindConstantInList
+        query
+        (psKernelEnvironmentIndexRemoveName
+          removed
+          constants) =
+      psKernelFindConstantInList
+        query
+        constants := by
+  induction constants with
+  | nil =>
+      rfl
+  | cons info rest ih =>
+      cases hRemoved :
+          psKernelNameEq
+            (psKernelConstantInfoName info)
+            removed with
+      | false =>
+          simp [
+            psKernelEnvironmentIndexRemoveName,
+            psKernelEnvironmentIndexRemoveNameWorker,
+            psKernelFindConstantInList,
+            hRemoved,
+            ih hDifferent
+          ]
+      | true =>
+          have hInfoQuery :
+              psKernelNameEq
+                  (psKernelConstantInfoName info)
+                  query =
+                false := by
+            cases hQuery :
+                psKernelNameEq
+                  (psKernelConstantInfoName info)
+                  query with
+            | false =>
+                rfl
+            | true =>
+                have hRemovedSymm :
+                    psKernelNameEq
+                        removed
+                        (psKernelConstantInfoName info) =
+                      true := by
+                  rw [
+                    ← psKernelNameEq_symm_core
+                      (psKernelConstantInfoName info)
+                      removed
+                  ]
+                  exact hRemoved
+                have hTrans :
+                    psKernelNameEq removed query = true :=
+                  psKernelNameEq_trans_core
+                    removed
+                    (psKernelConstantInfoName info)
+                    query
+                    hRemovedSymm
+                    hQuery
+                rw [hDifferent] at hTrans
+          simp [
+            psKernelEnvironmentIndexRemoveName,
+            psKernelEnvironmentIndexRemoveNameWorker,
+            psKernelFindConstantInList,
+            hRemoved,
+            hInfoQuery,
+            ih hDifferent
+          ]
+
+theorem psKernelEnvironmentIndexFind_build_eq_worker
+    (constants : List PsKernelConstantInfo)
+    (name : PsKernelName) :
+    psKernelEnvironmentIndexFind
+        (psKernelEnvironmentIndexBuild constants)
+        name =
+      psKernelEnvironmentIndexFindWorker
+        16
+        (psKernelEnvironmentIndexBuild constants)
+        (psKernelEnvironmentNameHash name) := by
+  cases constants with
+  | nil =>
+      rfl
+  | cons info rest =>
+      let infoName :=
+        psKernelConstantInfoName info
+      let bucket :=
+        psKernelEnvironmentIndexFindWorker
+          16
+          (psKernelEnvironmentIndexBuild rest)
+          (psKernelEnvironmentNameHash infoName)
+      let next :=
+        List.cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            infoName
+            bucket)
+      have hSetShape :=
+        psKernelEnvironmentIndexSetWorker_succ_is_branch
+          15
+          (psKernelEnvironmentIndexBuild rest)
+          (psKernelEnvironmentNameHash infoName)
+          next
+      rcases hSetShape with ⟨left, right, hSet⟩
+      change
+        psKernelEnvironmentIndexFind
+            (psKernelEnvironmentIndexSetWorker
+              16
+              (psKernelEnvironmentIndexBuild rest)
+              (psKernelEnvironmentNameHash infoName)
+              next)
+            name =
+          psKernelEnvironmentIndexFindWorker
+            16
+            (psKernelEnvironmentIndexSetWorker
+              16
+              (psKernelEnvironmentIndexBuild rest)
+              (psKernelEnvironmentNameHash infoName)
+              next)
+            (psKernelEnvironmentNameHash name)
+      rw [hSet]
+      rfl
+
+theorem psKernelEnvironmentIndexFind_setWorker_eq_worker
+    (index : PsKernelEnvironmentIndex)
+    (setHash : Nat)
+    (constants : List PsKernelConstantInfo)
+    (name : PsKernelName) :
+    psKernelEnvironmentIndexFind
+        (psKernelEnvironmentIndexSetWorker
+          16
+          index
+          setHash
+          constants)
+        name =
+      psKernelEnvironmentIndexFindWorker
+        16
+        (psKernelEnvironmentIndexSetWorker
+          16
+          index
+          setHash
+          constants)
+        (psKernelEnvironmentNameHash name) := by
+  have hSetShape :=
+    psKernelEnvironmentIndexSetWorker_succ_is_branch
+      15
+      index
+      setHash
+      constants
+  rcases hSetShape with ⟨left, right, hSet⟩
+  rw [hSet]
+  rfl
+
+theorem psKernelEnvironmentIndexBuild_refines_authoritative
+    (constants : List PsKernelConstantInfo)
+    (query : PsKernelName) :
+    psKernelFindConstantInList
+        query
+        (psKernelEnvironmentIndexFind
+          (psKernelEnvironmentIndexBuild constants)
+          query) =
+      psKernelFindConstantInList
+        query
+        constants := by
+  induction constants generalizing query with
+  | nil =>
+      rfl
+  | cons info rest ih =>
+      let infoName :=
+        psKernelConstantInfoName info
+      let oldIndex :=
+        psKernelEnvironmentIndexBuild rest
+      let oldBucket :=
+        psKernelEnvironmentIndexFindWorker
+          16
+          oldIndex
+          (psKernelEnvironmentNameHash infoName)
+      let newBucket :=
+        List.cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            infoName
+            oldBucket)
+      change
+        psKernelFindConstantInList
+            query
+            (psKernelEnvironmentIndexFind
+              (psKernelEnvironmentIndexSetWorker
+                16
+                oldIndex
+                (psKernelEnvironmentNameHash infoName)
+                newBucket)
+              query) =
+          psKernelFindConstantInList
+            query
+            (List.cons info rest)
+      cases hSame :
+          psKernelNameEq infoName query with
+      | true =>
+          have hHash :
+              psKernelEnvironmentNameHash infoName =
+                psKernelEnvironmentNameHash query :=
+            psKernelEnvironmentNameHash_of_nameEq_true
+              infoName
+              query
+              hSame
+          have hCandidates :
+              psKernelEnvironmentIndexFind
+                  (psKernelEnvironmentIndexSetWorker
+                    16
+                    oldIndex
+                    (psKernelEnvironmentNameHash infoName)
+                    newBucket)
+                  query =
+                newBucket := by
+            rw [hHash]
+            exact
+              psKernelEnvironmentIndexFind_setWorker_same_name
+                oldIndex
+                query
+                newBucket
+          rw [hCandidates]
+          simp [
+            newBucket,
+            psKernelFindConstantInList,
+            hSame
+          ]
+      | false =>
+          have hRight :
+              psKernelFindConstantInList
+                  query
+                  (List.cons info rest) =
+                psKernelFindConstantInList query rest := by
+            simp [
+              psKernelFindConstantInList,
+              infoName,
+              hSame
+            ]
+          rw [hRight]
+          by_cases hHash :
+              psKernelEnvironmentNameHash infoName =
+                psKernelEnvironmentNameHash query
+          · have hCandidates :
+                psKernelEnvironmentIndexFind
+                    (psKernelEnvironmentIndexSetWorker
+                      16
+                      oldIndex
+                      (psKernelEnvironmentNameHash infoName)
+                      newBucket)
+                    query =
+                  newBucket := by
+              rw [hHash]
+              exact
+                psKernelEnvironmentIndexFind_setWorker_same_name
+                  oldIndex
+                  query
+                  newBucket
+            rw [hCandidates]
+            simp [
+              newBucket,
+              psKernelFindConstantInList,
+              infoName,
+              hSame
+            ]
+            rw [
+              psKernelEnvironmentIndexRemoveName_find_other
+                oldBucket
+                infoName
+                query
+                hSame
+            ]
+            have hOldBucket :
+                oldBucket =
+                  psKernelEnvironmentIndexFind
+                    oldIndex
+                    query := by
+              unfold oldBucket
+              rw [hHash]
+              exact
+                (psKernelEnvironmentIndexFind_build_eq_worker
+                  rest
+                  query).symm
+            rw [hOldBucket]
+            exact ih query
+          · rw [
+              psKernelEnvironmentIndexFind_setWorker_eq_worker
+                oldIndex
+                (psKernelEnvironmentNameHash infoName)
+                newBucket
+                query
+            ]
+            rw [
+              psKernelEnvironmentIndexFindWorker_setWorker_other_name_hash
+                oldIndex
+                infoName
+                query
+                newBucket
+                hHash
+            ]
+            rw [
+              ← psKernelEnvironmentIndexFind_build_eq_worker
+                rest
+                query
+            ]
+            exact ih query

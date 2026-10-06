@@ -24,7 +24,20 @@ def psCompilerJavaScriptLowerErrorCode
   | PsJsLowerError.importsUnsupported => "lower.imports-unsupported"
   | PsJsLowerError.structuresUnsupported => "lower.structures-unsupported"
   | PsJsLowerError.inductivesUnsupported => "lower.inductives-unsupported"
-  | PsJsLowerError.specializationFailed => "lower.specialization-failed"
+  | PsJsLowerError.specializationFailed specializeError =>
+      match specializeError with
+      | PsIrSpecializeError.fuelExhausted =>
+          "lower.specialization:fuel-exhausted"
+      | PsIrSpecializeError.unresolvedTypeParameter name =>
+          String.Internal.append "lower.specialization:unresolved-type-parameter:" name
+      | PsIrSpecializeError.nonGroundType name =>
+          String.Internal.append "lower.specialization:non-ground-type:" name
+      | PsIrSpecializeError.typeArgumentArity name =>
+          String.Internal.append "lower.specialization:type-argument-arity:" name
+      | PsIrSpecializeError.unknownTarget name =>
+          String.Internal.append "lower.specialization:unknown-target:" name
+      | PsIrSpecializeError.unsupportedGenericCall =>
+          "lower.specialization:unsupported-generic-call"
   | PsJsLowerError.genericDeclarationUnsupported name =>
       String.Internal.append "lower.generic-declaration:" name
   | PsJsLowerError.unsupportedType => "lower.unsupported-type"

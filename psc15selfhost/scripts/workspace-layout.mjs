@@ -17,6 +17,7 @@ export const packageBySection = new Map([
   ["BackendJs", "backend-js"],
   ["DriverTs", "driver-ts"],
   ["DriverJs", "driver-js"],
+  ["DriverWasm", "driver-wasm"],
   ["BackendRust", "backend-rust"],
   ["DriverRust", "driver-rust"],
   ["BackendWasm", "backend-wasm"],

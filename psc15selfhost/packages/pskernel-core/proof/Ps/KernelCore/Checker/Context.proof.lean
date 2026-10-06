@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Context
 import Ps.KernelCore.Metatheory.Context
+import Ps.KernelCore.Metatheory.ContextState
 
 theorem psKernelCheckerContextEmpty_local
     (environment : PsKernelEnvironment) :
@@ -126,3 +127,38 @@ theorem psKernelCheckerContextWithLet_preserves_canonical_context
     type
     value
     hCanonical
+
+
+theorem psKernelCheckerContextWithLocal_preserves_sound_state
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hCanonical :
+      PsKernelLocalContextCanonical
+        context.localContext)
+    (hState :
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        state) :
+    PsKernelCheckerStateSemanticSound
+      context.environment
+      (Prod.snd
+        (psKernelCheckerContextWithLocal
+          context
+          userName
+          type
+          binderInfo)).localContext
+      state :=
+  psKernelCheckerContextWithLocal_preserves_semantic_state
+    context
+    state
+    userName
+    type
+    binderInfo
+    hString
+    hCanonical
+    hState

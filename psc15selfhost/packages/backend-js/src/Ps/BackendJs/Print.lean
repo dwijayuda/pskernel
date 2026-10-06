@@ -813,11 +813,10 @@ def psJsPrintExprWithModeAndFuel
           PsJsIrExpr -> Except PsJsEmitError String :=
         psJsPrintExprWithModeAndFuel stackTarget remaining;
       fun (expr : PsJsIrExpr) =>
-        let stackSafe : Bool :=
+        let stackContext : Bool :=
           match stackTarget with
           | Option.none => false
-          | Option.some target =>
-              psJsExprUsesNameWithFuel 4096 expr target;
+          | Option.some _ => true;
         match expr with
         | PsJsIrExpr.literal literal =>
             Except.ok (psJsPrintLiteral literal)
@@ -849,7 +848,7 @@ def psJsPrintExprWithModeAndFuel
             match smaller body with
             | Except.error error => Except.error error
             | Except.ok printedBody =>
-                if stackSafe then
+                if stackContext then
                   Except.ok
                     (psJsJoin
                       ""
@@ -878,12 +877,7 @@ def psJsPrintExprWithModeAndFuel
                 match psListMapExcept smaller arguments with
                 | Except.error error => Except.error error
                 | Except.ok printedArguments =>
-                    let callStackSafe : Bool :=
-                      match stackTarget with
-                      | Option.none => false
-                      | Option.some target =>
-                          psJsExprUsesNameWithFuel 4096 fn target;
-                    if callStackSafe then
+                    if stackContext then
                       let suffix : String :=
                         if psListIsEmpty printedArguments then
                           ""
@@ -914,7 +908,7 @@ def psJsPrintExprWithModeAndFuel
                 match smaller body with
                 | Except.error error => Except.error error
                 | Except.ok printedBody =>
-                    if stackSafe then
+                    if stackContext then
                       Except.ok
                         (psJsJoin
                           ""
@@ -1023,7 +1017,7 @@ def psJsPrintExprWithModeAndFuel
                       alternatives with
                 | Except.error error => Except.error error
                 | Except.ok printedAlternatives =>
-                    if stackSafe then
+                    if stackContext then
                       Except.ok
                         (psJsJoin
                           ""
@@ -1154,7 +1148,7 @@ def psJsStackRuntimeSupport : String :=
       "const __ps$implementations = new WeakMap();\n",
       "function __ps$run(root) { const pending = [root]; let value = undefined; while (pending.length !== 0) { const next = pending[pending.length - 1].next(value); if (next.done) { pending.pop(); value = next.value; } else { const { fn, args } = next.value; const implementation = __ps$implementations.get(fn); if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; } else { value = Reflect.apply(fn, undefined, args); } } } return value; }\n",
       "function __ps$wrap(implementation) { const fn = (...args) => __ps$run(implementation(...args)); __ps$implementations.set(fn, implementation); return fn; }\n",
-      "function* __ps$invoke(fn, ...args) { return (yield { fn, args }); }\n"
+      "function* __ps$invoke(fn, ...args) { const implementation = __ps$implementations.get(fn); if (implementation) return (yield { fn, args }); return fn(...args); }\n"
     ]
 
 def psJsImplementationName

@@ -2146,8 +2146,7 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                 hCtors,
                                                 hCtorRest
                                               ] at hSuccess
-                                              rw [if_neg hArgsLengthNeRaw] at hSuccess
-                                              simp at hSuccess
+                                              simp [hArgsLengthNeRaw] at hSuccess
                                           | true =>
                                               have hArgsLength :
                                                   psKernelExprListLength args =

@@ -382,6 +382,45 @@ def psJsLowerRuntimeBinaryWith
           | List.cons _ _ =>
               Except.error PsJsLowerError.intrinsicArity
 
+def psJsLowerRuntimeTernaryWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (operation : PsJsIrRuntimeOp)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsJsLowerError.intrinsicArity
+  | List.cons first rest =>
+      match rest with
+      | List.nil =>
+          Except.error PsJsLowerError.intrinsicArity
+      | List.cons second tail =>
+          match tail with
+          | List.nil =>
+              Except.error PsJsLowerError.intrinsicArity
+          | List.cons third finalTail =>
+              match finalTail with
+              | List.cons _ _ =>
+                  Except.error PsJsLowerError.intrinsicArity
+              | List.nil =>
+                  match lower first with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredFirst =>
+                      match lower second with
+                      | Except.error error => Except.error error
+                      | Except.ok loweredSecond =>
+                          match lower third with
+                          | Except.error error => Except.error error
+                          | Except.ok loweredThird =>
+                              Except.ok
+                                (PsJsIrExpr.runtime
+                                  operation
+                                  [
+                                    loweredFirst,
+                                    loweredSecond,
+                                    loweredThird
+                                  ])
+
 def psJsLowerIdentityWith
     (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
     (arguments : List PsVerifiedIrExpr) :
@@ -549,6 +588,21 @@ def psJsLowerExprWithFuel
               | PsVerifiedIrIntrinsic.stringAppend =>
                   psJsLowerBinaryWith
                     smaller PsJsIrBinaryOp.stringConcat arguments
+              | PsVerifiedIrIntrinsic.stringUtf8ByteSize =>
+                  psJsLowerRuntimeUnaryWith
+                    smaller PsJsIrRuntimeOp.stringUtf8ByteSize arguments
+              | PsVerifiedIrIntrinsic.stringNext =>
+                  psJsLowerRuntimeBinaryWith
+                    smaller PsJsIrRuntimeOp.stringNext arguments
+              | PsVerifiedIrIntrinsic.stringGet =>
+                  psJsLowerRuntimeBinaryWith
+                    smaller PsJsIrRuntimeOp.stringGet arguments
+              | PsVerifiedIrIntrinsic.stringAtEnd =>
+                  psJsLowerRuntimeBinaryWith
+                    smaller PsJsIrRuntimeOp.stringAtEnd arguments
+              | PsVerifiedIrIntrinsic.stringExtract =>
+                  psJsLowerRuntimeTernaryWith
+                    smaller PsJsIrRuntimeOp.stringExtract arguments
               | PsVerifiedIrIntrinsic.stringEq =>
                   psJsLowerBinaryWith
                     smaller PsJsIrBinaryOp.stringEq arguments

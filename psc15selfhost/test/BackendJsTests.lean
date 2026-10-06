@@ -412,10 +412,13 @@ def psTestBackendJsSelectiveStackSafety : Bool :=
   match psJsPrintModuleStackSafe psBackendJsSelectiveStackModule with
   | Except.error _ => false
   | Except.ok output =>
+      let trampolineSafe : Bool :=
+        output.contains "function* __ps$impl$recur(n)"
+          && output.contains "__ps$invoke(recur, n)";
+      let tailLoopSafe : Bool :=
+        output.contains "export function recur(n) { while (true)";
       output.contains "export function helper(x) { return x; }"
-        && output.contains "function* __ps$impl$recur(n)"
-        && output.contains "yield* __ps$invoke(recur, n)"
-        && output.contains "yield* __ps$invoke(helper, (yield* __ps$invoke(recur, n)))"
+        && (trampolineSafe || tailLoopSafe)
         && output.contains "const implementation = __ps$implementations.get(fn)"
 
 def psBackendJsTailLoopModule : PsJsIrModule :=

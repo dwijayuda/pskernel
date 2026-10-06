@@ -289,6 +289,18 @@ def psJsRuntimeUnary
         (psJsJoin
           ""
           ["((__ps_s) => BigInt(Array.from(__ps_s).length))(", value, ")"])
+  | PsJsIrRuntimeOp.stringUtf8ByteSize =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_s) => { let __ps_n = 0n; for (const __ps_c of __ps_s) { ",
+            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
+            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
+            "__ps_n += __ps_w; } return __ps_n; })(",
+            value,
+            ")"
+          ])
   | _ =>
       Except.error PsJsEmitError.malformedIr
 
@@ -330,6 +342,81 @@ def psJsRuntimeBinary
             right,
             ")"
           ])
+  | PsJsIrRuntimeOp.stringNext =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_s, __ps_p) => { let __ps_i = 0n; for (const __ps_c of __ps_s) { ",
+            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
+            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
+            "if (__ps_i === __ps_p) return __ps_p + __ps_w; ",
+            "if (__ps_i > __ps_p) return __ps_p + 1n; ",
+            "__ps_i += __ps_w; } return __ps_p + 1n; })(",
+            left,
+            ", ",
+            right,
+            ")"
+          ])
+  | PsJsIrRuntimeOp.stringGet =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_s, __ps_p) => { let __ps_i = 0n; for (const __ps_c of __ps_s) { ",
+            "if (__ps_i === __ps_p) return __ps_c; ",
+            "if (__ps_i > __ps_p) return \"A\"; ",
+            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
+            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
+            "__ps_i += __ps_w; } return \"A\"; })(",
+            left,
+            ", ",
+            right,
+            ")"
+          ])
+  | PsJsIrRuntimeOp.stringAtEnd =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_s, __ps_p) => { let __ps_n = 0n; for (const __ps_c of __ps_s) { ",
+            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
+            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
+            "__ps_n += __ps_w; } return __ps_p >= __ps_n; })(",
+            left,
+            ", ",
+            right,
+            ")"
+          ])
+  | _ =>
+      Except.error PsJsEmitError.malformedIr
+
+def psJsRuntimeTernary
+    (operation : PsJsIrRuntimeOp)
+    (first second third : String) :
+    Except PsJsEmitError String :=
+  match operation with
+  | PsJsIrRuntimeOp.stringExtract =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_s, __ps_b, __ps_e) => { if (__ps_b >= __ps_e) return \"\"; ",
+            "let __ps_i = 0n; let __ps_started = false; let __ps_out = \"\"; ",
+            "for (const __ps_c of __ps_s) { ",
+            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
+            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
+            "if (!__ps_started) { if (__ps_i === __ps_b) __ps_started = true; ",
+            "else { __ps_i += __ps_w; continue; } } ",
+            "if (__ps_i === __ps_e) return __ps_out; ",
+            "__ps_out += __ps_c; __ps_i += __ps_w; } return __ps_out; })(",
+            first,
+            ", ",
+            second,
+            ", ",
+            third,
+            ")"
+          ])
   | _ =>
       Except.error PsJsEmitError.malformedIr
 
@@ -348,8 +435,13 @@ def psJsPrintRuntime
           match tail with
           | List.nil =>
               psJsRuntimeBinary operation first second
-          | List.cons _ _ =>
-              Except.error PsJsEmitError.malformedIr
+          | List.cons third finalTail =>
+              match finalTail with
+              | List.nil =>
+                  psJsRuntimeTernary
+                    operation first second third
+              | List.cons _ _ =>
+                  Except.error PsJsEmitError.malformedIr
 
 def psJsPrintExprWithFuel
     (fuel : Nat) :

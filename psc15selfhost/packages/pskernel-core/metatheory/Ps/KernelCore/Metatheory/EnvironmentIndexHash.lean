@@ -188,35 +188,19 @@ theorem psKernelEnvironmentNameHash_of_nameEq_true
                 simpa [psKernelNameEq, hString] using hEq
               have hParentHash :=
                 ih rightParent hParent
-              let leftSeed :=
-                Nat.mod
-                  (Nat.add
-                    (Nat.mul
-                      (psKernelEnvironmentNameHash leftParent)
-                      31)
-                    1)
-                  65521
-              let rightSeed :=
-                Nat.mod
-                  (Nat.add
-                    (Nat.mul
-                      (psKernelEnvironmentNameHash rightParent)
-                      31)
-                    1)
-                  65521
-              have hSeed : leftSeed = rightSeed := by
-                simp [
-                  leftSeed,
-                  rightSeed,
-                  hParentHash
-                ]
               unfold psKernelEnvironmentNameHash
-              rw [hSeed]
+              rw [hParentHash]
               exact
                 psKernelEnvironmentStringHash_of_stringEq_true
                   leftValue
                   rightValue
-                  rightSeed
+                  (Nat.mod
+                    (Nat.add
+                      (Nat.mul
+                        (psKernelEnvironmentNameHash rightParent)
+                        31)
+                      1)
+                    65521)
                   hString
       | num rightParent rightValue =>
           simp [psKernelNameEq] at hEq
@@ -233,6 +217,9 @@ theorem psKernelEnvironmentNameHash_of_nameEq_true
             simpa [psKernelNameEq] using hEq
           have hParentHash :=
             ih rightParent hPair.2
+          have hValue :
+              leftValue = rightValue :=
+            hPair.1
           subst rightValue
           simp [
             psKernelEnvironmentNameHash,

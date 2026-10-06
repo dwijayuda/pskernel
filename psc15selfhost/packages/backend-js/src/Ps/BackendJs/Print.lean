@@ -1299,23 +1299,23 @@ def psJsTailPrintAlternativesWith
 
 def psJsTailEmitWithFuel
     (declaration : PsJsIrDeclaration)
-    (fuel matchDepth : Nat) :
-    PsJsIrExpr -> Option String :=
+    (fuel : Nat) :
+    Nat -> PsJsIrExpr -> Option String :=
   match fuel with
   | Nat.zero =>
-      fun (_expr : PsJsIrExpr) => Option.none
+      fun (_matchDepth : Nat) (_expr : PsJsIrExpr) =>
+        Option.none
   | Nat.succ remaining =>
-      let smaller : PsJsIrExpr -> Option String :=
+      let smaller :
+          Nat -> PsJsIrExpr -> Option String :=
         psJsTailEmitWithFuel
           declaration
-          remaining
-          matchDepth;
-      let nested : PsJsIrExpr -> Option String :=
-        psJsTailEmitWithFuel
-          declaration
-          remaining
-          (Nat.succ matchDepth);
-      fun (expr : PsJsIrExpr) =>
+          remaining;
+      fun (matchDepth : Nat) (expr : PsJsIrExpr) =>
+        let sameDepth : PsJsIrExpr -> Option String :=
+          smaller matchDepth;
+        let nested : PsJsIrExpr -> Option String :=
+          smaller (Nat.succ matchDepth);
         match expr with
         | PsJsIrExpr.call fn arguments =>
             match fn with
@@ -1380,7 +1380,7 @@ def psJsTailEmitWithFuel
                     value with
               | Option.none => Option.none
               | Option.some printedValue =>
-                  match smaller body with
+                  match sameDepth body with
                   | Option.none => Option.none
                   | Option.some printedBody =>
                       Option.some
@@ -1401,10 +1401,10 @@ def psJsTailEmitWithFuel
                   condition with
             | Option.none => Option.none
             | Option.some printedCondition =>
-                match smaller thenBranch with
+                match sameDepth thenBranch with
                 | Option.none => Option.none
                 | Option.some printedThen =>
-                    match smaller elseBranch with
+                    match sameDepth elseBranch with
                     | Option.none => Option.none
                     | Option.some printedElse =>
                         Option.some

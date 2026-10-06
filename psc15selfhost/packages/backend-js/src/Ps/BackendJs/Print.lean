@@ -1155,10 +1155,311 @@ def psJsImplementationName
     (name : String) : String :=
   psJsConcat2 "__ps$impl$" name
 
+def psJsTailPrintNonRecursive
+    (recursiveName : String)
+    (expr : PsJsIrExpr) : Option String :=
+  if psJsExprUsesNameWithFuel 4096 expr recursiveName then
+    Option.none
+  else
+    match psJsPrintExpr expr with
+    | Except.error _ => Option.none
+    | Except.ok printed => Option.some printed
+
+def psJsTailPrintArguments
+    (recursiveName : String) :
+    List PsJsIrExpr -> Option (List String)
+  | List.nil => Option.some List.nil
+  | List.cons argument rest =>
+      match
+          psJsTailPrintNonRecursive
+            recursiveName
+            argument with
+      | Option.none => Option.none
+      | Option.some printed =>
+          match
+              psJsTailPrintArguments
+                recursiveName
+                rest with
+          | Option.none => Option.none
+          | Option.some printedRest =>
+              Option.some
+                (List.cons printed printedRest)
+
+def psJsTailParameterNames
+    (parameters : List PsJsIrParameter) : List String :=
+  psListMap psJsParameterName parameters
+
+def psJsTailBindingsShadow
+    (recursiveName : String)
+    (bindings : List PsJsIrMatchBinding) : Bool :=
+  let shadows : PsJsIrMatchBinding -> Bool :=
+    fun (binding : PsJsIrMatchBinding) =>
+      psStringEq binding.name recursiveName;
+  psListAny shadows bindings
+
+def psJsTailPrintAlternativeWith
+    (emit : PsJsIrExpr -> Option String)
+    (recursiveName temp : String)
+    (alternative :
+      String ×
+        List PsJsIrMatchBinding ×
+        PsJsIrExpr) : Option String :=
+  let constructorName : String :=
+    Prod.fst alternative;
+  let detail :
+      List PsJsIrMatchBinding × PsJsIrExpr :=
+    Prod.snd alternative;
+  let bindings : List PsJsIrMatchBinding :=
+    Prod.fst detail;
+  let body : PsJsIrExpr :=
+    Prod.snd detail;
+  if psJsTailBindingsShadow recursiveName bindings then
+    Option.none
+  else
+    match emit body with
+    | Option.none => Option.none
+    | Option.some printedBody =>
+        let printedBindings : List String :=
+          psJsPrintMatchBindings temp bindings;
+        let separator : String :=
+          if psListIsEmpty printedBindings then "" else " ";
+        Option.some
+          (psJsJoin
+            ""
+            [
+              "case ",
+              psJsonQuote constructorName,
+              ": { ",
+              psJsJoin " " printedBindings,
+              separator,
+              printedBody,
+              " }"
+            ])
+
+def psJsTailPrintAlternativesWith
+    (emit : PsJsIrExpr -> Option String)
+    (recursiveName temp : String) :
+    List
+      (String ×
+        List PsJsIrMatchBinding ×
+        PsJsIrExpr) ->
+    Option (List String)
+  | List.nil => Option.some List.nil
+  | List.cons alternative rest =>
+      match
+          psJsTailPrintAlternativeWith
+            emit
+            recursiveName
+            temp
+            alternative with
+      | Option.none => Option.none
+      | Option.some printed =>
+          match
+              psJsTailPrintAlternativesWith
+                emit
+                recursiveName
+                temp
+                rest with
+          | Option.none => Option.none
+          | Option.some printedRest =>
+              Option.some
+                (List.cons printed printedRest)
+
+def psJsTailEmitWithFuel
+    (declaration : PsJsIrDeclaration)
+    (fuel : Nat) :
+    PsJsIrExpr -> Option String :=
+  match fuel with
+  | Nat.zero =>
+      fun (_expr : PsJsIrExpr) => Option.none
+  | Nat.succ remaining =>
+      let smaller : PsJsIrExpr -> Option String :=
+        psJsTailEmitWithFuel declaration remaining;
+      fun (expr : PsJsIrExpr) =>
+        match expr with
+        | PsJsIrExpr.call fn arguments =>
+            match fn with
+            | PsJsIrExpr.var name =>
+                if psStringEq name declaration.name then
+                  if
+                      Nat.beq
+                        (psListLength declaration.parameters)
+                        (psListLength arguments) then
+                    match
+                        psJsTailPrintArguments
+                          declaration.name
+                          arguments with
+                    | Option.none => Option.none
+                    | Option.some printedArguments =>
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "[",
+                              psJsJoin
+                                ", "
+                                (psJsTailParameterNames
+                                  declaration.parameters),
+                              "] = [",
+                              psJsJoin ", " printedArguments,
+                              "]; continue;"
+                            ])
+                  else
+                    Option.none
+                else
+                  match
+                      psJsTailPrintNonRecursive
+                        declaration.name
+                        expr with
+                  | Option.none => Option.none
+                  | Option.some printed =>
+                      Option.some
+                        (psJsConcat3
+                          "return "
+                          printed
+                          ";")
+            | _ =>
+                match
+                    psJsTailPrintNonRecursive
+                      declaration.name
+                      expr with
+                | Option.none => Option.none
+                | Option.some printed =>
+                    Option.some
+                      (psJsConcat3
+                        "return "
+                        printed
+                        ";")
+        | PsJsIrExpr.letE name value body =>
+            if psStringEq name declaration.name then
+              Option.none
+            else
+              match
+                  psJsTailPrintNonRecursive
+                    declaration.name
+                    value with
+              | Option.none => Option.none
+              | Option.some printedValue =>
+                  match smaller body with
+                  | Option.none => Option.none
+                  | Option.some printedBody =>
+                      Option.some
+                        (psJsJoin
+                          ""
+                          [
+                            "const ",
+                            name,
+                            " = ",
+                            printedValue,
+                            "; ",
+                            printedBody
+                          ])
+        | PsJsIrExpr.ifE condition thenBranch elseBranch =>
+            match
+                psJsTailPrintNonRecursive
+                  declaration.name
+                  condition with
+            | Option.none => Option.none
+            | Option.some printedCondition =>
+                match smaller thenBranch with
+                | Option.none => Option.none
+                | Option.some printedThen =>
+                    match smaller elseBranch with
+                    | Option.none => Option.none
+                    | Option.some printedElse =>
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "if (",
+                              printedCondition,
+                              ") { ",
+                              printedThen,
+                              " } else { ",
+                              printedElse,
+                              " }"
+                            ])
+        | PsJsIrExpr.matchE scrutinee alternatives =>
+            match
+                psJsTailPrintNonRecursive
+                  declaration.name
+                  scrutinee with
+            | Option.none => Option.none
+            | Option.some printedScrutinee =>
+                let temp : String :=
+                  psJsFreshMatchTemp expr;
+                match
+                    psJsTailPrintAlternativesWith
+                      smaller
+                      declaration.name
+                      temp
+                      alternatives with
+                | Option.none => Option.none
+                | Option.some printedAlternatives =>
+                    Option.some
+                      (psJsJoin
+                        ""
+                        [
+                          "const ",
+                          temp,
+                          " = ",
+                          printedScrutinee,
+                          "; switch (",
+                          temp,
+                          "[\"$ps$tag\"]) { ",
+                          psJsJoin " " printedAlternatives,
+                          " } throw new Error(\"invalid ProofScript constructor tag\");"
+                        ])
+        | _ =>
+            match
+                psJsTailPrintNonRecursive
+                  declaration.name
+                  expr with
+            | Option.none => Option.none
+            | Option.some printed =>
+                Option.some
+                  (psJsConcat3
+                    "return "
+                    printed
+                    ";")
+
+def psJsPrintTailLoop
+    (declaration : PsJsIrDeclaration) : Option String :=
+  match declaration.parameters with
+  | List.nil => Option.none
+  | List.cons _ _ =>
+      match
+          psJsTailEmitWithFuel
+            declaration
+            4096
+            declaration.body with
+      | Option.none => Option.none
+      | Option.some printedBody =>
+          let parameters : String :=
+            psJsJoin
+              ", "
+              (psJsTailParameterNames declaration.parameters);
+          Option.some
+            (psJsJoin
+              ""
+              [
+                "export function ",
+                declaration.name,
+                "(",
+                parameters,
+                ") { while (true) { ",
+                printedBody,
+                " } }\n"
+              ])
+
 def psJsPrintDeclarationStackSafe
     (declaration : PsJsIrDeclaration) :
     Except PsJsEmitError String :=
-  if
+  match psJsPrintTailLoop declaration with
+  | Option.some printed =>
+      Except.ok printed
+  | Option.none =>
+    if
       psJsExprUsesNameWithFuel
         4096
         declaration.body
@@ -1216,8 +1517,8 @@ def psJsPrintDeclarationStackSafe
                   implementation,
                   ");\n"
                 ])
-  else
-    psJsPrintDeclaration declaration
+    else
+      psJsPrintDeclaration declaration
 
 def psJsPrintDeclarationsStackSafe
     (declarations : List PsJsIrDeclaration) :

@@ -384,6 +384,39 @@ def psTestBackendJsUInt8OfNatPrinter : Bool :=
         "Number(BigInt.asUintN(8, value))"
   | Except.error _ => false
 
+def psBackendJsSelectiveStackModule : PsJsIrModule :=
+  {
+    imports := []
+    declarations := [
+      {
+        name := "helper"
+        parameters := [{ name := "x" }]
+        body := PsJsIrExpr.var "x"
+      },
+      {
+        name := "recur"
+        parameters := [{ name := "n" }]
+        body :=
+          PsJsIrExpr.call
+            (PsJsIrExpr.var "helper")
+            [
+              PsJsIrExpr.call
+                (PsJsIrExpr.var "recur")
+                [PsJsIrExpr.var "n"]
+            ]
+      }
+    ]
+  }
+
+def psTestBackendJsSelectiveStackSafety : Bool :=
+  match psJsPrintModuleStackSafe psBackendJsSelectiveStackModule with
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains "export function helper(x) { return x; }"
+        && output.contains "function* __ps$impl$recur(n)"
+        && output.contains "yield* __ps$invoke(recur, n)"
+        && output.contains "helper((yield* __ps$invoke(recur, n)))"
+
 def main : IO Unit := do
   if psTestBackendJsFixtureEmission
       && psTestBackendJsRejectsKeywordName
@@ -391,7 +424,8 @@ def main : IO Unit := do
       && psTestBackendJsRejectsWordSizedWithoutProfile
       && psTestBackendJsMachineIntegerPrinters
       && psTestBackendJsFloatPrinters
-      && psTestBackendJsUInt8OfNatPrinter then
+      && psTestBackendJsUInt8OfNatPrinter
+      && psTestBackendJsSelectiveStackSafety then
     IO.println "PSC2_BACKEND_JS_TESTS: PASS"
   else
     throw

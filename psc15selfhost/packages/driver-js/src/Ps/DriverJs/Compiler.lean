@@ -72,7 +72,7 @@ def psCompilerJavaScriptFromPrepared
       Except.error (PsCompilerJavaScriptError.compiler error)
   | Except.ok ir =>
       match
-          psJsEmitValidatedModuleWithTargetProfile
+          psJsEmitValidatedModuleStackSafeWithTargetProfile
             psCompilerJavaScriptTarget64
             ir with
       | Except.error error =>

@@ -877,3 +877,23 @@ def PsKernelDefEqSound
       context.localContext
       left
       right
+
+
+def PsKernelInferenceSound
+    (infer :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr),
+    infer context state expr =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      expr
+      result

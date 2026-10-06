@@ -170,3 +170,51 @@ theorem psKernelIsDefEq_refines_defeq
       left
       right
       hSuccess
+
+
+theorem psKernelCheckerInfer_semantic_sound
+    (fuel : Nat)
+    (hCore :
+      PsKernelInferenceCoreSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel)) :
+    PsKernelInferenceSound
+      (psKernelCheckerInfer fuel) := by
+  intro context state nextState expr result hSuccess
+  exact
+    psKernelCheckerInfer_refines_typing
+      fuel context state nextState expr result
+      hCore hSuccess
+
+theorem psKernelCheckerCheck_semantic_sound
+    (fuel : Nat)
+    (hCore :
+      PsKernelInferenceCoreSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel)) :
+    PsKernelInferenceSound
+      (psKernelCheckerCheck fuel) := by
+  intro context state nextState expr result hSuccess
+  exact
+    psKernelCheckerCheck_refines_typing
+      fuel context state nextState expr result
+      hCore hSuccess
+
+theorem psKernelCheckerWhnf_semantic_sound
+    (fuel : Nat)
+    (hWhnf :
+      PsKernelWhnfSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))) :
+    PsKernelWhnfSound
+      (psKernelCheckerWhnf fuel) := by
+  intro context state nextState expr result hSuccess
+  exact
+    psKernelCheckerWhnf_refines_reduction
+      fuel context state nextState expr result
+      hWhnf hSuccess

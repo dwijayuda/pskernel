@@ -171,6 +171,42 @@
       "kind": "formal-proof-slice",
       "status": "current",
       "canonicalPath": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+    },
+    {
+      "id": "psc-independence-vector/1",
+      "kind": "assurance-lineage",
+      "status": "current",
+      "canonicalPath": "profiles/assurance/INDEPENDENCE_VECTORS.json"
+    },
+    {
+      "id": "psc-trust-delta/1",
+      "kind": "audit-contract",
+      "status": "current",
+      "canonicalPath": "contracts/audit/TRUST_DELTA_V1.json"
+    },
+    {
+      "id": "psc-semantic-delta/1",
+      "kind": "audit-contract",
+      "status": "current",
+      "canonicalPath": "contracts/audit/SEMANTIC_DELTA_V1.json"
+    },
+    {
+      "id": "psc-theory-bridge/1",
+      "kind": "logical-interoperability",
+      "status": "current",
+      "canonicalPath": "contracts/interface/THEORY_BRIDGE_V1.json"
+    },
+    {
+      "id": "psc-semantic-lock/0",
+      "kind": "semantic-lock",
+      "status": "experimental",
+      "canonicalPath": "psc.semantic-lock.json"
+    },
+    {
+      "id": "psc-archive-profile/0",
+      "kind": "archive-profile",
+      "status": "experimental",
+      "canonicalPath": "contracts/archive/ARCHIVE_PROFILE_V0.json"
     }
   ]
 }

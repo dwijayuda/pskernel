@@ -40,8 +40,10 @@ def psRustEmitFieldListWith
           let rendered : String :=
             psRustConcat3
               (psRustIdentifier (Prod.fst field))
-              ": "
-              (psRustClonePrinted printed);
+              ": Box::new("
+              (psRustConcat2
+                (psRustClonePrinted printed)
+                ")");
           match psRustEmitFieldListWith emitExpr rest with
           | Except.error error =>
               Except.error error
@@ -889,17 +891,24 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
 
-def psRustEmitMatchBindings
+def psRustMatchBindingTemp
+    (index : Nat) : String :=
+  psRustConcat2
+    "__ps_internal_match_"
+    (psNatToString index)
+
+def psRustEmitMatchBindingsPatternWorker
+    (index : Nat)
     (bindings : List PsVerifiedIrMatchBinding) : String :=
   match bindings with
   | List.nil =>
       ""
   | List.cons binding rest =>
-      let current :=
+      let current : String :=
         psRustConcat3
           (psRustIdentifier binding.field)
           ": "
-          (psRustIdentifier binding.name);
+          (psRustMatchBindingTemp index);
       match rest with
       | List.nil =>
           current
@@ -907,7 +916,36 @@ def psRustEmitMatchBindings
           psRustConcat3
             current
             ", "
-            (psRustEmitMatchBindings rest)
+            (psRustEmitMatchBindingsPatternWorker
+              (Nat.succ index)
+              rest)
+
+def psRustEmitMatchBindingsPattern
+    (bindings : List PsVerifiedIrMatchBinding) : String :=
+  psRustEmitMatchBindingsPatternWorker 0 bindings
+
+def psRustEmitMatchBindingLetsWorker
+    (index : Nat)
+    (bindings : List PsVerifiedIrMatchBinding) : String :=
+  match bindings with
+  | List.nil =>
+      ""
+  | List.cons binding rest =>
+      psRustConcat4
+        "let "
+        (psRustIdentifier binding.name)
+        " = (*"
+        (psRustConcat4
+          (psRustMatchBindingTemp index)
+          ").clone(); "
+          (psRustEmitMatchBindingLetsWorker
+            (Nat.succ index)
+            rest)
+          "")
+
+def psRustEmitMatchBindingLets
+    (bindings : List PsVerifiedIrMatchBinding) : String :=
+  psRustEmitMatchBindingLetsWorker 0 bindings
 
 def psRustEmitAlternativeListWith
     (emitExpr :
@@ -943,13 +981,14 @@ def psRustEmitAlternativeListWith
               (psRustIdentifier constructorName)
               (psRustConcat3
                 " { "
-                (psRustEmitMatchBindings bindings)
+                (psRustEmitMatchBindingsPattern bindings)
                 " }");
           let rendered : String :=
-            psRustConcat3
+            psRustConcat4
               pattern
-              " => "
-              printedBody;
+              " => { "
+              (psRustEmitMatchBindingLets bindings)
+              (psRustConcat2 printedBody " }");
           match psRustEmitAlternativeListWith
               emitExpr
               inductiveName
@@ -1123,10 +1162,14 @@ def psRustEmitExprWithFuel
           | Except.ok printedTarget =>
               Except.ok
                 (psRustConcat4
-                  "("
-                  (psRustClonePrinted printedTarget)
-                  ")."
-                  (psRustIdentifier field))
+                  "(*("
+                  (psRustConcat4
+                    (psRustClonePrinted printedTarget)
+                    ")."
+                    (psRustIdentifier field)
+                    ")")
+                  ").clone()"
+                  "")
         | PsVerifiedIrExpr.constructor
           inductiveName
           constructorName

@@ -57,7 +57,7 @@ theorem psKernelReduceNatBinary_add_refines
   · cases hCheck :
         psKernelCheckNatSize
           maxNatSize
-          (Nat.add left right) with
+          (left + right) with
     | error error =>
         simp [hCheck] at hSize
     | ok checked =>
@@ -104,7 +104,7 @@ theorem psKernelReduceNatBinary_sub_refines
   · cases hCheck :
         psKernelCheckNatSize
           maxNatSize
-          (Nat.sub left right) with
+          (left - right) with
     | error error =>
         simp [hCheck] at hSize
     | ok checked =>
@@ -154,7 +154,7 @@ theorem psKernelReduceNatBinary_mul_refines
   · cases hCheck :
         psKernelCheckNatSize
           maxNatSize
-          (Nat.mul left right) with
+          (left * right) with
     | error error =>
         simp [hCheck] at hSize
     | ok checked =>

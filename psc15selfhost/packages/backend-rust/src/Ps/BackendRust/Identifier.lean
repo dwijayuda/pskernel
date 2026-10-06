@@ -72,9 +72,9 @@ def psRustIdentifierCharsStartWith
           if Nat.beq
               (Char.toNat valueHead)
               (Char.toNat expectedHead) then
-            psRustIdentifierCharsStartWith
-              valueRest
-              expectedRest
+            let smaller : List Char -> Bool :=
+              psRustIdentifierCharsStartWith valueRest;
+            smaller expectedRest
           else
             false
 

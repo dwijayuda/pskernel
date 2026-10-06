@@ -539,6 +539,92 @@ theorem psKernelEnsureForallWith_configuration_refines
                 ⟩
 
 
+theorem psKernelCacheInferOnlyResult_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        state) :
+    PsKernelCheckerConfigurationSound
+      context
+      (psKernelCacheInferResult
+        state
+        true
+        expr
+        result) := by
+  rcases hConfig with
+    ⟨hIndex, hBound, hState⟩
+  refine ⟨hIndex, ?_, ?_⟩
+  · have hNext :
+        (psKernelCacheInferResult
+          state true expr result).nextFresh =
+          state.nextFresh := by
+      cases hEligible :
+          psKernelInferCacheEligible true expr <;>
+        simp [
+          psKernelCacheInferResult,
+          hEligible,
+          psKernelCheckerStateWithInferOnly
+        ]
+    simpa [hNext] using hBound
+  · unfold PsKernelCheckerStateSemanticSound at hState ⊢
+    rcases hState with
+      ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
+    cases hEligible :
+        psKernelInferCacheEligible true expr with
+    | false =>
+        simpa [
+          psKernelCacheInferResult,
+          hEligible
+        ] using
+          (show
+            PsKernelInferOnlyCacheIsolated
+                context.environment context.localContext state.inferOnly ∧
+              PsKernelInferenceCacheSound
+                context.environment context.localContext state.checkedInfer ∧
+              PsKernelReductionCacheSound
+                context.environment context.localContext state.whnfCore ∧
+              PsKernelReductionCacheSound
+                context.environment context.localContext state.whnf ∧
+              PsKernelReductionCacheSound
+                context.environment context.localContext state.unfold ∧
+              PsKernelDefEqCacheSound
+                context.environment context.localContext state.success
+            from
+              ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩)
+    | true =>
+        simpa [
+          psKernelCacheInferResult,
+          hEligible,
+          psKernelCheckerStateWithInferOnly
+        ] using
+          (show
+            PsKernelInferOnlyCacheIsolated
+                context.environment context.localContext
+                (psKernelExprMapInsert
+                  state.inferOnly expr result) ∧
+              PsKernelInferenceCacheSound
+                context.environment context.localContext state.checkedInfer ∧
+              PsKernelReductionCacheSound
+                context.environment context.localContext state.whnfCore ∧
+              PsKernelReductionCacheSound
+                context.environment context.localContext state.whnf ∧
+              PsKernelReductionCacheSound
+                context.environment context.localContext state.unfold ∧
+              PsKernelDefEqCacheSound
+                context.environment context.localContext state.success
+            from
+              ⟨
+                by trivial,
+                hChecked,
+                hWhnfCore,
+                hWhnf,
+                hUnfold,
+                hSuccess
+              ⟩)
+
 theorem psKernelCacheInferResult_preserves_configuration
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

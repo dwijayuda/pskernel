@@ -51,6 +51,20 @@ theorem psKernelNameListLength_eq_length
       simp [psKernelNameListLength, ih]
 
 
+
+theorem psKernelNatBeq_symm
+    (left right : Nat) :
+    Nat.beq left right = Nat.beq right left := by
+  induction left generalizing right with
+  | zero =>
+      cases right <;> rfl
+  | succ left ih =>
+      cases right with
+      | zero =>
+          rfl
+      | succ right =>
+          exact ih right
+
 theorem psKernelStringEqFromWithFuel_symm
     (fuel : Nat)
     (left right : String)
@@ -76,7 +90,7 @@ theorem psKernelStringEqFromWithFuel_symm
           hLeft,
           hRight,
           ih,
-          Nat.beq_comm
+          eq_comm
         ]
 
 theorem psKernelStringEq_symm
@@ -84,7 +98,11 @@ theorem psKernelStringEq_symm
     psKernelStringEq left right =
       psKernelStringEq right left := by
   unfold psKernelStringEq
-  rw [Nat.beq_comm (String.utf8ByteSize left)]
+  rw [
+    psKernelNatBeq_symm
+      (String.utf8ByteSize left)
+      (String.utf8ByteSize right)
+  ]
   cases hSize :
       Nat.beq
         (String.utf8ByteSize right)
@@ -92,6 +110,11 @@ theorem psKernelStringEq_symm
   | false =>
       simp [hSize]
   | true =>
+      have hSizeEq :
+          String.utf8ByteSize right =
+            String.utf8ByteSize left := by
+        simpa using hSize
+      subst hSizeEq
       simp [hSize]
       exact
         psKernelStringEqFromWithFuel_symm
@@ -113,16 +136,15 @@ theorem psKernelNameEq_symm
       | anonymous =>
           rfl
       | str rightParent rightValue =>
-          rw [psKernelNameEq]
-          rw [psKernelNameEq]
+          change
+            (if psKernelStringEq leftValue rightValue = true then
+              psKernelNameEq leftParent rightParent
+            else false) =
+            (if psKernelStringEq rightValue leftValue = true then
+              psKernelNameEq rightParent leftParent
+            else false)
           rw [psKernelStringEq_symm leftValue rightValue]
-          cases hString :
-              psKernelStringEq rightValue leftValue with
-          | false =>
-              simp [hString]
-          | true =>
-              simp [hString]
-              exact ih rightParent
+          rw [ih rightParent]
       | num rightParent rightValue =>
           rfl
   | num leftParent leftValue ih =>
@@ -132,12 +154,12 @@ theorem psKernelNameEq_symm
       | str rightParent rightValue =>
           rfl
       | num rightParent rightValue =>
-          rw [psKernelNameEq]
-          rw [psKernelNameEq]
-          rw [Nat.beq_comm leftValue rightValue]
-          cases hNat : Nat.beq rightValue leftValue with
-          | false =>
-              simp [hNat]
-          | true =>
-              simp [hNat]
-              exact ih rightParent
+          change
+            (if Nat.beq leftValue rightValue = true then
+              psKernelNameEq leftParent rightParent
+            else false) =
+            (if Nat.beq rightValue leftValue = true then
+              psKernelNameEq rightParent leftParent
+            else false)
+          rw [psKernelNatBeq_symm leftValue rightValue]
+          rw [ih rightParent]

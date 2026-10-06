@@ -115,10 +115,12 @@ def psHostCompilerJavaScriptSource
     (inputPath : String) : IO String := do
   let elaborated ← psHostCompilerElaborateProject inputPath
   match psCompilerJavaScriptFromElaborated elaborated with
-  | Except.error _ =>
+  | Except.error error =>
       throw
         (IO.userError
-          "PSC2_CLI_DIRECT_JS_EMIT_FAILED: source is outside the executable Direct JS backend subset")
+          (String.Internal.append
+            "PSC2_CLI_DIRECT_JS_EMIT_FAILED: "
+            (psCompilerJavaScriptErrorCode error)))
   | Except.ok output =>
       pure output
 

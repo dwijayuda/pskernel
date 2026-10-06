@@ -60,23 +60,28 @@ def psRustIdentifierEncodeChars
           true
 
 def psRustIdentifierCharsStartWith
-    (value expected : List Char) : Bool :=
-  match expected with
+    (value : List Char) :
+    List Char -> Bool :=
+  match value with
   | List.nil =>
-      true
-  | List.cons expectedHead expectedRest =>
-      match value with
-      | List.nil =>
-          false
-      | List.cons valueHead valueRest =>
-          if Nat.beq
-              (Char.toNat valueHead)
-              (Char.toNat expectedHead) then
-            let smaller : List Char -> Bool :=
-              psRustIdentifierCharsStartWith valueRest;
-            smaller expectedRest
-          else
-            false
+      fun (expected : List Char) =>
+        match expected with
+        | List.nil => true
+        | List.cons _ _ => false
+  | List.cons valueHead valueRest =>
+      let smaller : List Char -> Bool :=
+        psRustIdentifierCharsStartWith valueRest;
+      fun (expected : List Char) =>
+        match expected with
+        | List.nil =>
+            true
+        | List.cons expectedHead expectedRest =>
+            if Nat.beq
+                (Char.toNat valueHead)
+                (Char.toNat expectedHead) then
+              smaller expectedRest
+            else
+              false
 
 def psRustIdentifierStartsWith
     (value expected : String) : Bool :=

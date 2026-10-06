@@ -92,12 +92,12 @@ def psWasmValidationFunctionMatches
   | PsWasmLiteralExpectation.i32 expected =>
       match function with
       | {
+          name := _
           typeName := Option.none
           parameters := List.nil
           results := [PsWasmValueType.i32]
           locals := List.nil
           body := [PsWasmInstruction.i32Const actual]
-          ..
         } =>
           psStringEq (Int.repr expected) (Int.repr actual)
       | _ =>

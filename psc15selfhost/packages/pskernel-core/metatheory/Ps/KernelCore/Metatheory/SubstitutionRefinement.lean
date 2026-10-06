@@ -362,60 +362,70 @@ theorem psKernelExprInstantiateAtChangedWithFuel_refines_reference_core
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
-          cases hBefore :
-              psKernelNatLt index (Nat.add start offset) with
-          | true =>
-              simp [
-                psKernelExprInstantiateAtChangedWithFuel,
-                psKernelExprInstantiateAtReferenceChanged,
-                hBefore
-              ]
-          | false =>
-              cases hGet :
-                  psKernelExprListGet
-                    subst
-                    (Nat.sub
-                      index
-                      (Nat.add start offset)) with
-              | none =>
-                  simp [
-                    psKernelExprInstantiateAtChangedWithFuel,
-                    psKernelExprInstantiateAtReferenceChanged,
-                    hBefore,
-                    hGet
-                  ]
-              | some replacement =>
-                  simp [
-                    psKernelExprInstantiateAtChangedWithFuel,
-                    psKernelExprInstantiateAtReferenceChanged,
-                    hBefore,
-                    hGet,
-                    psKernelExprLiftLooseBVars_refines_reference_core
-                  ]
+          by_cases hBefore :
+              psKernelNatLt index (Nat.add start offset) = true
+          · simp [
+              psKernelExprInstantiateAtChangedWithFuel,
+              psKernelExprInstantiateAtReferenceChanged,
+              hBefore
+            ]
+          · cases hGet :
+                psKernelExprListGet
+                  subst
+                  (Nat.sub
+                    index
+                    (Nat.add start offset)) with
+            | none =>
+                simp [
+                  psKernelExprInstantiateAtChangedWithFuel,
+                  psKernelExprInstantiateAtReferenceChanged,
+                  hBefore,
+                  hGet
+                ]
+            | some replacement =>
+                simp [
+                  psKernelExprInstantiateAtChangedWithFuel,
+                  psKernelExprInstantiateAtReferenceChanged,
+                  hBefore,
+                  hGet,
+                  psKernelExprLiftLooseBVars_refines_reference_core
+                ]
   | fvar name =>
       cases fuel with
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
-          rfl
+          simp [
+            psKernelExprInstantiateAtChangedWithFuel,
+            psKernelExprInstantiateAtReferenceChanged
+          ]
   | mvar name =>
       cases fuel with
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
-          rfl
+          simp [
+            psKernelExprInstantiateAtChangedWithFuel,
+            psKernelExprInstantiateAtReferenceChanged
+          ]
   | sort level =>
       cases fuel with
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
-          rfl
+          simp [
+            psKernelExprInstantiateAtChangedWithFuel,
+            psKernelExprInstantiateAtReferenceChanged
+          ]
   | const name levels =>
       cases fuel with
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
-          rfl
+          simp [
+            psKernelExprInstantiateAtChangedWithFuel,
+            psKernelExprInstantiateAtReferenceChanged
+          ]
   | app fn arg ihFn ihArg =>
       cases fuel with
       | zero =>
@@ -623,7 +633,10 @@ theorem psKernelExprInstantiateAtChangedWithFuel_refines_reference_core
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
-          rfl
+          simp [
+            psKernelExprInstantiateAtChangedWithFuel,
+            psKernelExprInstantiateAtReferenceChanged
+          ]
   | mdata metadata body ihBody =>
       cases fuel with
       | zero =>

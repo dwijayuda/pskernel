@@ -312,3 +312,53 @@ theorem psKernelIsDefEq_configuration_sound
       value
       hConfig
       hSuccess
+
+
+theorem psKernelCheckerCheck_configuration_sound_checked
+    (fuel : Nat)
+    (hCore :
+      PsKernelCheckedInferenceCoreConfigurationSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel)) :
+    PsKernelCheckedInferenceConfigurationSound
+      (psKernelCheckerCheck fuel) := by
+  intro context state nextState expr result hConfig hSuccess
+  unfold psKernelCheckerCheck at hSuccess
+  unfold psKernelCheckWithFuel at hSuccess
+  exact
+    hCore
+      fuel
+      context
+      state
+      nextState
+      expr
+      result
+      hConfig
+      hSuccess
+
+theorem psKernelCheckerInfer_configuration_preserves
+    (fuel : Nat)
+    (hCore :
+      PsKernelInferOnlyCoreConfigurationPreserves
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel)) :
+    PsKernelInferOnlyConfigurationPreserves
+      (psKernelCheckerInfer fuel) := by
+  intro context state nextState expr result hConfig hSuccess
+  unfold psKernelCheckerInfer at hSuccess
+  unfold psKernelInferWithRecursorFuel at hSuccess
+  unfold psKernelInferWithFuel at hSuccess
+  exact
+    hCore
+      fuel
+      context
+      state
+      nextState
+      expr
+      result
+      hConfig
+      hSuccess

@@ -182,6 +182,17 @@ test('general infix arithmetic is rejected but structural successor patterns rem
     '  Nat.add (Nat.mod x 128) (Nat.div y 64)',
   ].join('\n');
   assert(!ids(explicit).includes('term-arithmetic-operator'));
+
+  const characterOperators = [
+    "def slash (c : Char) : Bool := psLexCharEq c '/'",
+    "def star (c : Char) : Bool := psLexCharEq c '*'",
+    "def pair (a b : Char) : Bool := psLexPairEq a b '=' '>'",
+    "def escaped : Char := '\\\\'",
+  ].join('\n');
+  assert(
+    !ids(characterOperators).includes('term-arithmetic-operator'),
+    characterOperators,
+  );
 });
 
 test('portable scalar member capabilities are allowlisted explicitly', () => {

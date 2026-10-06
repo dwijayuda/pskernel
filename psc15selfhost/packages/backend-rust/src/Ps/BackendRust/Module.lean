@@ -30,6 +30,10 @@ def psRustGenericNames
         ">"
         ""
 
+def psRustBoxedStorageType
+    (printedType : String) : String :=
+  psRustConcat3 "Box<" printedType ">"
+
 def psRustEmitStructureFieldList
     (fields : List PsVerifiedIrStructureField) :
     Except PsRustEmitError (List String) :=
@@ -48,7 +52,7 @@ def psRustEmitStructureFieldList
                   "pub "
                   (psRustIdentifier field.name)
                   ": "
-                  printedType;
+                  (psRustBoxedStorageType printedType);
               match psRustEmitStructureFieldList rest with
               | Except.error error =>
                   Except.error error
@@ -67,7 +71,7 @@ def psRustEmitStructureFieldList
                 "pub "
                 (psRustIdentifier field.name)
                 ": "
-                printedType;
+                (psRustBoxedStorageType printedType);
             match psRustEmitStructureFieldList rest with
             | Except.error error =>
                 Except.error error
@@ -111,7 +115,7 @@ def psRustEmitConstructorFieldList
                 psRustConcat3
                   (psRustIdentifier field.name)
                   ": "
-                  printedType;
+                  (psRustBoxedStorageType printedType);
               match psRustEmitConstructorFieldList rest with
               | Except.error error =>
                   Except.error error
@@ -129,7 +133,7 @@ def psRustEmitConstructorFieldList
               psRustConcat3
                 (psRustIdentifier field.name)
                 ": "
-                printedType;
+                (psRustBoxedStorageType printedType);
             match psRustEmitConstructorFieldList rest with
             | Except.error error =>
                 Except.error error

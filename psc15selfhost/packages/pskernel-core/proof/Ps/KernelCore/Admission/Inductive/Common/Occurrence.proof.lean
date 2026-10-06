@@ -213,10 +213,8 @@ theorem psKernelSimpleCheckUniformOccurrenceWithFuel_success_refines
       | ok stop =>
           cases stop with
           | true =>
-              simp [
-                PsKernelUniformOccurrenceSafe,
-                hHead
-              ]
+              unfold PsKernelUniformOccurrenceSafe
+              rw [hHead]
               exact
                 psKernelSimpleCheckUniformOccurrenceHead_true_refines
                   declaredNames

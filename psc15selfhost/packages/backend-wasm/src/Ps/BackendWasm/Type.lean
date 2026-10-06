@@ -160,7 +160,7 @@ def psWasmValueTypeOfPrimitive
   | .bool => PsWasmValueType.i32
   | .char => PsWasmValueType.i32
   | .string => PsWasmValueType.refT "ProofScript.String"
-  | .unit => PsWasmValueType.noValue
+  | .unit => PsWasmValueType.i32
 
 def psWasmStorageTypeOfPrimitive
     (profile : PsWasmTargetProfile)

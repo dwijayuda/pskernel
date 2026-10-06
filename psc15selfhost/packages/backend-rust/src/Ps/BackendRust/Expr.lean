@@ -150,6 +150,19 @@ def psRustEmitFloatCompare
   | PsVerifiedIrFloatCompareOp.ge =>
       psRustConcat4 "((" left ") >= (" (psRustConcat2 right "))")
 
+def psRustExactOneArgument
+    (arguments : List String) :
+    Option String :=
+  match arguments with
+  | List.nil =>
+      Option.none
+  | List.cons value rest =>
+      match rest with
+      | List.nil =>
+          Option.some value
+      | List.cons _ _ =>
+          Option.none
+
 def psRustExactTwoArguments
     (arguments : List String) :
     Option (Prod String String) :=
@@ -338,49 +351,50 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intOfNat =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_int_of_nat(&("
               value
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.uint8OfNat =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_uint8_of_nat(&("
               value
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intRepr =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok (psRustConcat3 "(" value ").to_string()")
-      | _ => Except.error PsRustEmitError.intrinsicArity
+      | Option.none =>
+          Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intNegSucc =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_int_neg_succ(&("
               value
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intNeg =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_int_neg(&("
               value
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intAdd =>
       match psRustExactTwoArguments arguments with
@@ -461,11 +475,11 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.boolNot =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3 "(!(" value "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.boolAnd =>
       match psRustExactTwoArguments arguments with
@@ -520,24 +534,24 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.charOfNat =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_char_of_nat(&("
               value
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.charToNat =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_char_to_nat("
               value
               ")")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringPush =>
       match psRustExactTwoArguments arguments with
@@ -553,24 +567,24 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringSingleton =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_string_singleton("
               value
               ")")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringLength =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_string_length(&("
               value
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringAppend =>
       match psRustExactTwoArguments arguments with
@@ -586,14 +600,14 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringUtf8ByteSize =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_string_utf8_byte_size(&("
               value
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringNext =>
       match psRustExactTwoArguments arguments with
@@ -665,24 +679,24 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
-      match arguments with
-      | List.cons capacity List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some capacity =>
           Except.ok
             (psRustConcat3
               "__ps_array_empty_with_capacity(&("
               capacity
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arraySize =>
-      match arguments with
-      | List.cons value List.nil =>
+      match psRustExactOneArgument arguments with
+      | Option.some value =>
           Except.ok
             (psRustConcat3
               "__ps_array_size(&("
               value
               "))")
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayPush =>
       match psRustExactTwoArguments arguments with

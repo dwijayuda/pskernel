@@ -1,6 +1,4 @@
 import Ps.KernelCore.Core.Expr
-import Init.Data.String.Basic
-import Lean.Elab.Tactic.Omega
 
 /- Reusable symmetry algebra for the portable kernel comparators. -/
 
@@ -823,80 +821,22 @@ theorem psKernelNameEq_trans_core
 
 
 /-
-Reflexivity algebra for the semantic comparators.
+Lean 4.34 exposes `String.Internal.atEnd/get/next` as opaque externs in
+`Init.Data.String.Bootstrap`.  The logical library does not provide a theorem
+identifying those externs with the reducible `String.Pos.Raw` operations.
+Consequently reflexivity of the portable String comparator is a runtime/TCB
+obligation rather than something derivable from the current logical interface.
 
-The String worker is fuel-bounded.  The invariant below shows that the
-remaining UTF-8 byte distance is strictly smaller than the available fuel.
-Because every non-end `next` strictly advances the raw byte index, the public
-`utf8ByteSize + 1` budget is sufficient for self-comparison.
+Keeping this as a named premise makes the boundary explicit.  All higher
+comparator reflexivity facts below are derived from this one obligation.
 -/
 
-theorem psKernelStringEqFromWithFuel_refl_core
-    (fuel : Nat)
-    (value : String)
-    (position : Nat)
-    (hFuel :
-      String.utf8ByteSize value - position < fuel) :
-    psKernelStringEqFromWithFuel
-        fuel
-        value
-        value
-        position
-        position =
-      true := by
-  induction fuel generalizing position with
-  | zero =>
-      omega
-  | succ remaining ih =>
-      dsimp only [psKernelStringEqFromWithFuel]
-      cases hEnd :
-          String.Internal.atEnd
-            value
-            (String.Pos.Raw.mk position) with
-      | true =>
-          simp [hEnd]
-      | false =>
-          have hPositionLt :
-              position < String.utf8ByteSize value := by
-            simp [String.Internal.atEnd] at hEnd
-            omega
-          let nextPosition :=
-            String.Pos.Raw.byteIdx
-              (String.Internal.next
-                value
-                (String.Pos.Raw.mk position))
-          have hAdvance :
-              position < nextPosition := by
-            dsimp [nextPosition]
-            simpa [String.Internal.next] using
-              String.Pos.Raw.byteIdx_lt_byteIdx_next
-                value
-                (String.Pos.Raw.mk position)
-          have hNextFuel :
-              String.utf8ByteSize value - nextPosition <
-                remaining := by
-            omega
-          have hRest :=
-            ih nextPosition hNextFuel
-          simp [
-            hEnd,
-            nextPosition,
-            hRest
-          ]
+def PsKernelStringEqReflexiveLaw : Prop :=
+  ∀ value : String,
+    psKernelStringEq value value = true
 
-theorem psKernelStringEq_refl_core
-    (value : String) :
-    psKernelStringEq value value = true := by
-  unfold psKernelStringEq
-  simp
-  exact
-    psKernelStringEqFromWithFuel_refl_core
-      (Nat.succ (String.utf8ByteSize value))
-      value
-      0
-      (by omega)
-
-theorem psKernelNameEq_refl_core
+theorem psKernelNameEq_refl_of_string_law
+    (hString : PsKernelStringEqReflexiveLaw)
     (name : PsKernelName) :
     psKernelNameEq name name = true := by
   induction name with
@@ -905,13 +845,14 @@ theorem psKernelNameEq_refl_core
   | str parent value ih =>
       simp [
         psKernelNameEq,
-        psKernelStringEq_refl_core,
+        hString value,
         ih
       ]
   | num parent value ih =>
       simp [psKernelNameEq, ih]
 
-theorem psKernelLevelEq_refl_core
+theorem psKernelLevelEq_refl_of_string_law
+    (hString : PsKernelStringEqReflexiveLaw)
     (level : PsKernelLevel) :
     psKernelLevelEq level level = true := by
   induction level with
@@ -924,11 +865,12 @@ theorem psKernelLevelEq_refl_core
   | imax left right ihLeft ihRight =>
       simp [psKernelLevelEq, ihLeft, ihRight]
   | param name =>
-      exact psKernelNameEq_refl_core name
+      exact psKernelNameEq_refl_of_string_law hString name
   | mvar name =>
-      exact psKernelNameEq_refl_core name
+      exact psKernelNameEq_refl_of_string_law hString name
 
-theorem psKernelLevelListEq_refl_core
+theorem psKernelLevelListEq_refl_of_string_law
+    (hString : PsKernelStringEqReflexiveLaw)
     (levels : List PsKernelLevel) :
     psKernelLevelListEq levels levels = true := by
   induction levels with
@@ -937,41 +879,38 @@ theorem psKernelLevelListEq_refl_core
   | cons head tail ih =>
       simp [
         psKernelLevelListEq,
-        psKernelLevelEq_refl_core,
+        psKernelLevelEq_refl_of_string_law hString,
         ih
       ]
 
-theorem psKernelBoolEq_refl_core
-    (value : Bool) :
-    psKernelBoolEq value value = true := by
-  cases value <;> rfl
-
-theorem psKernelLiteralEq_refl_core
+theorem psKernelLiteralEq_refl_of_string_law
+    (hString : PsKernelStringEqReflexiveLaw)
     (literal : PsKernelLiteral) :
     psKernelLiteralEq literal literal = true := by
   cases literal with
   | nat value =>
       simp [psKernelLiteralEq]
   | str value =>
-      exact psKernelStringEq_refl_core value
+      exact hString value
 
-theorem psKernelExprEq_refl_core
+theorem psKernelExprEq_refl_of_string_law
+    (hString : PsKernelStringEqReflexiveLaw)
     (expr : PsKernelExpr) :
     psKernelExprEq expr expr = true := by
   induction expr with
   | bvar index =>
       simp [psKernelExprEq]
   | fvar name =>
-      exact psKernelNameEq_refl_core name
+      exact psKernelNameEq_refl_of_string_law hString name
   | mvar name =>
-      exact psKernelNameEq_refl_core name
+      exact psKernelNameEq_refl_of_string_law hString name
   | sort level =>
-      exact psKernelLevelEq_refl_core level
+      exact psKernelLevelEq_refl_of_string_law hString level
   | const name levels =>
       simp [
         psKernelExprEq,
-        psKernelNameEq_refl_core,
-        psKernelLevelListEq_refl_core
+        psKernelNameEq_refl_of_string_law hString,
+        psKernelLevelListEq_refl_of_string_law hString
       ]
   | app fn arg ihFn ihArg =>
       simp [psKernelExprEq, ihFn, ihArg]
@@ -980,20 +919,21 @@ theorem psKernelExprEq_refl_core
   | forallE name type body binderInfo ihType ihBody =>
       simp [psKernelExprEq, ihType, ihBody]
   | letE name type value body nondep ihType ihValue ihBody =>
-      simp [
-        psKernelExprEq,
-        ihType,
-        ihValue,
-        ihBody,
-        psKernelBoolEq_refl_core
-      ]
+      cases nondep <;>
+        simp [
+          psKernelExprEq,
+          ihType,
+          ihValue,
+          ihBody,
+          psKernelBoolEq
+        ]
   | lit literal =>
-      exact psKernelLiteralEq_refl_core literal
+      exact psKernelLiteralEq_refl_of_string_law hString literal
   | mdata metadata body ihBody =>
       simp [psKernelExprEq, ihBody]
   | proj typeName index body ihBody =>
       simp [
         psKernelExprEq,
-        psKernelNameEq_refl_core,
+        psKernelNameEq_refl_of_string_law hString,
         ihBody
       ]

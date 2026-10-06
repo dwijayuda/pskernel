@@ -1760,3 +1760,35 @@ theorem psKernelExprEq_trans_core
               simp [psKernelExprEq] at hRight
       | _ =>
           simp [psKernelExprEq] at hLeft
+
+
+theorem psKernelLevelEquivalent_sound_of_string_law
+    (hString : PsKernelStringEqSoundLaw)
+    (left right : PsKernelLevel)
+    (hEq : psKernelLevelEquivalent left right = true) :
+    psKernelLevelNormalize left =
+      psKernelLevelNormalize right := by
+  unfold psKernelLevelEquivalent at hEq
+  cases hRaw : psKernelLevelEq left right with
+  | true =>
+      have hSame :
+          left = right :=
+        psKernelLevelEq_sound_of_string_law
+          hString
+          left
+          right
+          hRaw
+      rw [hSame]
+  | false =>
+      have hNormalized :
+          psKernelLevelEq
+              (psKernelLevelNormalize left)
+              (psKernelLevelNormalize right) =
+            true := by
+        simpa [hRaw] using hEq
+      exact
+        psKernelLevelEq_sound_of_string_law
+          hString
+          (psKernelLevelNormalize left)
+          (psKernelLevelNormalize right)
+          hNormalized

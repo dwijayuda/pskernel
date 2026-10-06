@@ -112,9 +112,13 @@ lean_lib PsDriverJs where
   srcDir := "packages/driver-js/src"
   roots := #[`Ps.DriverJs.Compiler]
 
+lean_lib PsDriverWasm where
+  srcDir := "packages/driver-wasm/src"
+  roots := #[`Ps.DriverWasm.Compiler]
+
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
-  roots := #[`Ps.Bootstrap.SelfHost, `Ps.Bootstrap.SelfHostJs]
+  roots := #[`Ps.Bootstrap.SelfHost, `Ps.Bootstrap.SelfHostJs, `Ps.Bootstrap.SelfHostWasm]
 
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"

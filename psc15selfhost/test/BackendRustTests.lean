@@ -1296,11 +1296,39 @@ def psTestBackendRustCoverageReport : Bool :=
     && unsupported.contains
       "PSC1_RUST_COVERAGE_UNSUPPORTED: module:externalImport"
 
+def psTestRustTailClassification : Bool :=
+  let type := PsVerifiedIrType.primitive .uint32;
+  let call := PsVerifiedIrExpr.call (.var "tail") [] [.var "value"];
+  let declaration := PsVerifiedIrDeclaration.mk "tail" [] [.mk "value" type] type call;
+  let detects := psRustHasTailWorker declaration 100 ["value"];
+  detects call &&
+    !psRustHasTailWorker declaration 100 ["tail", "value"] call &&
+    !detects (.letE "tail" (.function [type] type) (.var "another") call) &&
+    !detects (.intrinsic (.machineIntBinary .uint32 .add) [] [call, .var "value"]) &&
+    !detects (.lambda [.mk "value" type] type call) &&
+    !detects (.call (.var "tail") [] []) &&
+    !psRustHasTailWorker { declaration with typeParameters := [.mk "A"] } 100 ["value"] call
+
+def psTestRustTailEmission : Bool :=
+  let type := PsVerifiedIrType.primitive .uint32;
+  let call := PsVerifiedIrExpr.call (.var "tail") [] [.var "value"];
+  let declaration := PsVerifiedIrDeclaration.mk "tail" [] [.mk "value" type] type
+    (.ifE (.literal (.bool true)) (.var "value") call);
+  match psRustEmitDeclaration [declaration] [] declaration with
+  | .error _ => false
+  | .ok printed =>
+      printed.contains "let mut __ps_internal_tail_state = (value,); loop" &&
+      printed.contains "__ps_internal_tail_state = ((value).clone(),); continue;" &&
+      printed.contains "break { (value).clone() };" &&
+      !(printed.contains "(tail)(")
+
 structure PsBackendRustNamedTest where
   name : String
   passed : Bool
 
 def psBackendRustTests : List PsBackendRustNamedTest := [
+  { name := "tail calls respect lexical scope, arity and supported recursion", passed := psTestRustTailClassification },
+  { name := "supported tail calls emit argument-tuple loops", passed := psTestRustTailEmission },
   { name := "identity module", passed := psTestBackendRustIdentity },
   { name := "Nat intrinsic", passed := psTestBackendRustIntrinsic },
   { name := "UInt8.ofNat intrinsic", passed := psTestBackendRustUInt8OfNat },

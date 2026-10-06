@@ -44,6 +44,37 @@ def psBackendRustConditionalCallbackFixture : PsVerifiedIrDeclaration :=
         (PsVerifiedIrExpr.var "arrayIdOnly") (PsVerifiedIrExpr.var "countDown")) []
       [PsVerifiedIrExpr.var "value"])
 
+def psRustTailFixtureType : PsVerifiedIrType := .primitive .uint32
+
+def psRustTailFixtureBinary (operation : PsVerifiedIrIntegerBinaryOp)
+    (left right : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  .intrinsic (.machineIntBinary .uint32 operation) [] [left, right]
+
+def psRustTailFixtureLit (value : Int) : PsVerifiedIrExpr := .literal (.machineInteger .uint32 value)
+
+def psRustTailSwapFixture : PsVerifiedIrDeclaration :=
+  .mk "tailSwap" [] [.mk "count" psRustTailFixtureType, .mk "left" psRustTailFixtureType, .mk "right" psRustTailFixtureType]
+    psRustTailFixtureType
+    (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "count", psRustTailFixtureLit 0])
+      (.var "left")
+      (.call (.var "tailSwap") []
+        [psRustTailFixtureBinary .sub (.var "count") (psRustTailFixtureLit 1), .var "right", .var "left"]))
+
+def psRustTailShadowFixture : PsVerifiedIrDeclaration :=
+  .mk "tailShadow" [] [.mk "count" psRustTailFixtureType, .mk "value" psRustTailFixtureType] psRustTailFixtureType
+    (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "count", psRustTailFixtureLit 0])
+      (.var "value")
+      (.letE "value" psRustTailFixtureType (psRustTailFixtureBinary .add (.var "value") (psRustTailFixtureLit 1))
+        (.call (.var "tailShadow") [] [psRustTailFixtureBinary .sub (.var "count") (psRustTailFixtureLit 1), .var "value"])))
+
+def psRustTailChainFixture : PsVerifiedIrDeclaration :=
+  let chain := PsVerifiedIrType.named "SharedChain" [psRustTailFixtureType];
+  .mk "tailChainCount" [] [.mk "chain" chain, .mk "count" psRustTailFixtureType] psRustTailFixtureType
+    (.matchE "SharedChain" [psRustTailFixtureType] (.var "chain")
+      [("empty", [], .var "count"),
+       ("link", [.mk "head" "head" psRustTailFixtureType, .mk "tail" "tail" chain],
+         .call (.var "tailChainCount") [] [.var "tail", psRustTailFixtureBinary .add (.var "count") (psRustTailFixtureLit 1)])])
+
 def psBackendRustCompileFixture : PsVerifiedIrModule :=
   {
     imports := []
@@ -121,6 +152,9 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
       }
     ]
     declarations := [
+      psRustTailSwapFixture,
+      psRustTailShadowFixture,
+      psRustTailChainFixture,
       PsVerifiedIrDeclaration.mk "shareChain" [PsVerifiedIrTypeParameter.mk "A"]
         [PsVerifiedIrParameter.mk "value" (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"])]
         (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"]) (PsVerifiedIrExpr.var "value"),

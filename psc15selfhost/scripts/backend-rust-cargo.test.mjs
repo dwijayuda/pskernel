@@ -39,6 +39,16 @@ const closureTests = '\n#[cfg(test)] mod closure_regressions {\n' +
   '  use super::*;\n' +
   '  struct CloneProbe(std::rc::Rc<std::cell::Cell<usize>>);\n' +
   '  impl Clone for CloneProbe { fn clone(&self) -> Self { self.0.set(self.0.get() + 1); Self(self.0.clone()) } }\n' +
+  '  #[test] fn tail_loops_preserve_simultaneous_arguments_and_shadowed_bindings() {\n' +
+  '    assert_eq!(tailSwap(100001, 17, 23), 23); assert_eq!(tailSwap(100000, 17, 23), 17);\n' +
+  '    assert_eq!(tailShadow(100000, 19), 100019);\n' +
+  '    let mut chain = SharedChain::empty {};\n' +
+  '    for value in 0..30000u32 { chain = SharedChain::link { head: std::rc::Rc::new(value), tail: std::rc::Rc::new(chain) }; }\n' +
+  '    assert_eq!(tailChainCount(chain.clone(), 7), 30007);\n' +
+  '    loop { match chain { SharedChain::empty {} => break, SharedChain::link { head: _, tail } => {\n' +
+  '      chain = match std::rc::Rc::try_unwrap(tail) { Ok(value) => value, Err(_) => panic!("unexpected retained owner") };\n' +
+  '    } } }\n' +
+  '  }\n' +
   '  #[test] fn generated_recursive_values_clone_without_copying_descendants() {\n' +
   '    let copies = std::rc::Rc::new(std::cell::Cell::new(0));\n' +
   '    let mut chain = SharedChain::empty {};\n' +

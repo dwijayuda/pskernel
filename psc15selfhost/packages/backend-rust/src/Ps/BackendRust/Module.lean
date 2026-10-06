@@ -1,5 +1,5 @@
 import Ps.Foundation.List
-import Ps.BackendRust.Expr
+import Ps.BackendRust.Tail
 import Ps.BackendRust.ValueRefs
 import Ps.BackendRust.Runtime
 
@@ -429,7 +429,7 @@ def psRustEmitDeclaration
                 Except.error error
             | Except.ok rewrittenBody =>
                 let emittedBody :=
-                  psRustEmitExprWorker allDeclarations 4096 locals rewrittenBody;
+                  psRustEmitDeclarationBody allDeclarations declaration locals rewrittenBody;
                 match emittedBody with
                 | Except.error error =>
                     Except.error error

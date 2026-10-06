@@ -33,7 +33,7 @@
     {
       "id": "selfhost-fixed-points",
       "status": "failing",
-      "required": "Re-run full JS, Wasm and Rust fixed points after implementation repairs. Rust run 37532839774, job 112506520954 at a6477b1 passed fixture execution, whole-compiler generation and native generation-1 build, then generation-2 native compilation overflowed the stack. Generation/instantiation alone is insufficient."
+      "required": "Re-run full JS, Wasm and Rust fixed points after implementation repairs. Rust run 37541394649/job 112534992942 at 09efc87 passed the native 30000-node shallow-copy fixture, whole-compiler generation and generation-1 native build, then generation-2 execution still overflowed the stack. Direct-tail loop emission is being added; worker aliases, generic/non-tail recursion and final-owner destruction need separate handling. Generation/instantiation alone is insufficient."
     },
     {
       "id": "bootstrap-diversity",

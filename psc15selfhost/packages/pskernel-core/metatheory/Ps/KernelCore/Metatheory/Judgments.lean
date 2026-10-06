@@ -82,6 +82,35 @@ inductive PsKernelReductionStep
         localContext
         (PsKernelExpr.fvar name)
         value
+  | projection
+      (typeName ctorName : PsKernelName)
+      (ctorLevels : List PsKernelLevel)
+      (index : Nat)
+      (structValue result : PsKernelExpr)
+      (ctorInfo : PsKernelConstructorInfo)
+      (hIndex :
+        psKernelNatGt index psKernelLeanUInt32Max = false)
+      (hFn :
+        psKernelExprGetAppFn structValue =
+          PsKernelExpr.const ctorName ctorLevels)
+      (hFind :
+        psKernelFindConstantInList
+            ctorName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.ctorInfo ctorInfo))
+      (hInduct :
+        psKernelNameEq ctorInfo.induct typeName = true)
+      (hArg :
+        psKernelExprListGet
+            (psKernelExprGetAppArgs structValue)
+            (Nat.add ctorInfo.numParams index) =
+          Option.some result) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.proj typeName index structValue)
+        result
   | deltaConst
       (name : PsKernelName)
       (levels : List PsKernelLevel)

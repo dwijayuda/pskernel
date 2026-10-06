@@ -318,6 +318,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionRefinement,
     `Ps.KernelCore.Metatheory.SessionRefinement,
     `Ps.KernelCore.Metatheory.Delta,
+    `Ps.KernelCore.Metatheory.ProjectionReduction,
     `Ps.KernelCore.Metatheory.Inductive,
     `Ps.KernelCore.Metatheory.Context,
     `Ps.KernelCore.Metatheory.ContextState,

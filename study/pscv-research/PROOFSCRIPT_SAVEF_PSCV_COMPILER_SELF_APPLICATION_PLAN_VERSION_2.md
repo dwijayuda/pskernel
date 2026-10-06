@@ -2843,3 +2843,758 @@ next compiler feature consumes that knowledge
 
 This is the decisive self-application experiment.
 
+---
+
+# 91. Provable and falsifiable criteria
+
+Each criterion has equal weight 4.
+
+Total weight is 100.
+
+Evidence classes:
+
+~~~text
+P = machine-checked proof
+M = deterministic/conformance test
+A = adversarial test
+R = reproducible or independent replay
+E = empirical benchmark
+I = interoperability test
+~~~
+
+---
+
+## C1 — Lean reference bootstrap independence
+
+**Claim:** SAVEF development can proceed using the pinned Lean reference compiler without waiting for owned compiler feature completeness.
+
+**Pass:** SAVEF/compiler infrastructure written in the declared PSCV subset builds natively through Lean and carries explicit semantic/toolchain identity.
+
+**Failure witness:** progress still depends on an unrelated owned-backend feature gap.
+
+**Target:** 9.8. **Current:** 9.5.
+
+---
+
+## C2 — semantic authority separation
+
+**Claim:** reference compilation, kernel checking, source certification, compiler preservation, and package provenance remain distinct authorities.
+
+**Adversarial test:** attempt to promote Lean compilation success or self-host success directly to PSCV certified status.
+
+**Target:** 9.8. **Current:** 5.0.
+
+---
+
+## C3 — first-class pass contracts
+
+**Claim:** every certified semantic compiler transform has a versioned CompilerPassContract.
+
+**Pass:** unknown or phase-incompatible pass rejects from the certified lane.
+
+**Target:** 9.7. **Current:** 6.0.
+
+---
+
+## C4 — explicit phase artifacts
+
+**Claim:** RuntimeIR, VerifiedIR, SpecializedIR, and target IRs are construction-restricted distinct states.
+
+**Pass:** a backend cannot consume raw RuntimeIR in the certified lane.
+
+**Target:** 9.7. **Current:** 6.0.
+
+---
+
+## C5 — shared specialization
+
+**Claim:** target-neutral specialization occurs once as a shared compiler pass.
+
+**Pass:** JS and Wasm certified paths both consume the same SpecializedIR contract.
+
+**Failure witness:** one backend secretly specializes internally with a different policy.
+
+**Target:** 9.7. **Current:** 5.0.
+
+---
+
+## C6 — CertifiedModuleInterface completeness
+
+**Claim:** downstream semantic/proof dependencies are captured by a compact certified interface.
+
+**Pass:** private implementation changes preserving interface keep justified dependents green.
+
+**Target:** 9.6. **Current:** 4.5.
+
+---
+
+## C7 — semantic QueryGraph
+
+**Claim:** rebuild/reproof invalidation follows semantic interfaces and pass artifacts.
+
+**Pass:** spec/theorem/transparent-body changes invalidate relevant dependents; private changes do not propagate unnecessarily.
+
+**Target:** 9.6. **Current:** 7.5.
+
+---
+
+## C8 — proof/spec sidecar viability
+
+**Claim:** semantic knowledge can be added without destabilizing the current self-host compiler source discipline.
+
+**Pass:** proof/spec sidecars are checked and indexed while the 55-module self-host closure remains unchanged.
+
+**Target:** 9.6. **Current:** 4.5.
+
+---
+
+## C9 — specification coverage
+
+**Claim:** compiler certification refers to approved behavioral specifications rather than proof-file presence.
+
+**Pass:** coverage is computable for selected compiler modules/passes.
+
+**Target:** 9.5. **Current:** 3.5.
+
+---
+
+## C10 — independent kernel authority
+
+**Claim:** candidate compiler evidence is checked by an explicit kernel/checker policy independent of the generating agent/compiler.
+
+**Pass:** high-assurance compiler knowledge can be replayed independently.
+
+**Target:** 9.4. **Current:** 7.5.
+
+---
+
+## C11 — Lean oracle differentiation
+
+**Claim:** Lean provides a bootstrap/differential oracle without becoming proof-by-agreement.
+
+**Pass:** oracle agreement is recorded as independent evidence but cannot mint PSCV logical authority.
+
+**Target:** 9.4. **Current:** 8.5.
+
+---
+
+## C12 — erasure/IR semantic evidence
+
+**Claim:** certified source to VerifiedIR transitions have explicit semantic invariants and preservation evidence.
+
+**Pass:** validator success implies declared VerifiedIR properties and proof/ghost noninterference is established.
+
+**Target:** 9.3. **Current:** 5.0.
+
+---
+
+## C13 — backend preservation
+
+**Claim:** direct JS/Wasm/native artifacts receive source claims only through proof/accepted translation validation.
+
+**Mutation test:** alter an observable target result; preservation validation must fail.
+
+**Target:** 9.3. **Current:** 5.0.
+
+---
+
+## C14 — bootstrap/fixed-point claim separation
+
+**Claim:** self-host fixed point, semantic correctness, artifact reproducibility, and SAVEF productivity remain distinct evidence.
+
+**Target:** 9.8. **Current:** 9.0.
+
+---
+
+## C15 — SPKF knowledge extraction
+
+**Claim:** compiler specs/theorems/pass evidence can be exported as deterministic portable SAVEF knowledge.
+
+**Pass:** repeated extraction from unchanged authority artifacts produces identical SPKF identities.
+
+**Target:** 9.5. **Current:** 4.0.
+
+---
+
+## C16 — actual knowledge reuse
+
+**Claim:** later compiler tasks consume accepted knowledge produced by earlier compiler tasks.
+
+**Pass:** proof/retrieval dependency graph records real cross-generation reuse.
+
+**Target:** 9.5. **Current:** 3.0.
+
+---
+
+## C17 — causal FactoryBench
+
+**Claim:** SAVEF productivity is measured against a fixed baseline.
+
+**Pass:** paired B0/B1 runs use identical model/tool/acceptance policy except SAVEF retrieval.
+
+**Target:** 9.6. **Current:** 2.0.
+
+---
+
+## C18 — holdout/leakage resistance
+
+**Claim:** benchmark answers cannot enter the searchable knowledge snapshot before evaluation.
+
+**Pass:** task solutions and future objects are excluded by frozen snapshot identity.
+
+**Target:** 9.5. **Current:** 1.5.
+
+---
+
+## C19 — AI/acceptance separation
+
+**Claim:** AI cannot weaken specifications, pass contracts, checker policy, or benchmark criteria while retaining identity.
+
+**Target:** 9.8. **Current:** 5.0.
+
+---
+
+## C20 — resource practicality
+
+**Claim:** SAVEF does not make ordinary compiler development unusably expensive.
+
+**Measure:** wall time, memory, replay time, context size, cache hit ratio.
+
+**Target:** 9.4. **Current:** 7.0.
+
+---
+
+## C21 — incremental implementability
+
+**Claim:** useful architecture can be introduced without rewriting the compiler or finishing every proof/backend first.
+
+**Pass:** Lean reference + pass contracts + interfaces + proof seed works before owned compiler completion.
+
+**Target:** 9.6. **Current:** 7.5.
+
+---
+
+## C22 — native-first bootstrap practicality
+
+**Claim:** SAVEF tools can run as native binaries immediately through the Lean reference lane.
+
+**Pass:** native SAVEF/index/benchmark tooling builds from the PSCV subset with pinned Lean.
+
+**Target:** 9.7. **Current:** 9.0.
+
+---
+
+## C23 — WIT/cross-ecosystem compatibility
+
+**Claim:** the compiler's public semantic interface can map to InterfaceIR/WIT without leaking target representation into VerifiedIR.
+
+**Target:** 9.3. **Current:** 4.0.
+
+---
+
+## C24 — semantic migration/longevity
+
+**Claim:** Lean profile, PSCV profile, pass-contract, and artifact-format changes do not silently reinterpret old evidence.
+
+**Pass:** incompatible identities reject unless explicit migration/refinement evidence exists.
+
+**Target:** 9.5. **Current:** 6.5.
+
+---
+
+## C25 — falsifiability
+
+**Claim:** the SAVEF compiler thesis has explicit conditions under which it is considered unsuccessful.
+
+**Pass:** no-productivity-gain, excessive proof invalidation, unstable interfaces, or excessive resource cost are reported as negative evidence rather than explained away.
+
+**Target:** 9.7. **Current:** 4.0.
+
+---
+
+# 92. Target score
+
+| Criterion | Target |
+| --- | ---: |
+| C1 Lean reference bootstrap | 9.8 |
+| C2 authority separation | 9.8 |
+| C3 pass contracts | 9.7 |
+| C4 phase artifacts | 9.7 |
+| C5 shared specialization | 9.7 |
+| C6 CertifiedModuleInterface | 9.6 |
+| C7 semantic QueryGraph | 9.6 |
+| C8 sidecar viability | 9.6 |
+| C9 specification coverage | 9.5 |
+| C10 independent kernel | 9.4 |
+| C11 Lean oracle policy | 9.4 |
+| C12 erasure/IR evidence | 9.3 |
+| C13 backend preservation | 9.3 |
+| C14 bootstrap separation | 9.8 |
+| C15 SPKF extraction | 9.5 |
+| C16 knowledge reuse | 9.5 |
+| C17 FactoryBench causality | 9.6 |
+| C18 holdout isolation | 9.5 |
+| C19 AI separation | 9.8 |
+| C20 resource practicality | 9.4 |
+| C21 incremental implementability | 9.6 |
+| C22 native-first practicality | 9.7 |
+| C23 WIT interoperability | 9.3 |
+| C24 migration/longevity | 9.5 |
+| C25 falsifiability | 9.7 |
+
+Equal-weight average:
+
+**9.59 / 10**
+
+This clears the requested threshold of 9.
+
+No criterion is scored 10.
+
+---
+
+# 93. Current readiness score
+
+| Criterion | Current |
+| --- | ---: |
+| C1 Lean reference bootstrap | 9.5 |
+| C2 authority separation | 5.0 |
+| C3 pass contracts | 6.0 |
+| C4 phase artifacts | 6.0 |
+| C5 shared specialization | 5.0 |
+| C6 CertifiedModuleInterface | 4.5 |
+| C7 semantic QueryGraph | 7.5 |
+| C8 sidecar viability | 4.5 |
+| C9 specification coverage | 3.5 |
+| C10 independent kernel | 7.5 |
+| C11 Lean oracle policy | 8.5 |
+| C12 erasure/IR evidence | 5.0 |
+| C13 backend preservation | 5.0 |
+| C14 bootstrap separation | 9.0 |
+| C15 SPKF extraction | 4.0 |
+| C16 knowledge reuse | 3.0 |
+| C17 FactoryBench causality | 2.0 |
+| C18 holdout isolation | 1.5 |
+| C19 AI separation | 5.0 |
+| C20 resource practicality | 7.0 |
+| C21 incremental implementability | 7.5 |
+| C22 native-first practicality | 9.0 |
+| C23 WIT interoperability | 4.0 |
+| C24 migration/longevity | 6.5 |
+| C25 falsifiability | 4.0 |
+
+Equal-weight average:
+
+**approximately 5.72 / 10**
+
+The major advantage of the new assumption is visible in C1/C21/C22: SAVEF architecture can begin immediately even while the owned compiler remains incomplete.
+
+The major remaining gaps are evidence/certification and the actual causal self-amplification experiment.
+
+---
+
+# 94. Architecture iteration loop
+
+## Iteration 1 — current compiler + proof retrofit
+
+Design:
+
+~~~text
+current 55-module compiler
+    +
+proof sidecars
+    +
+theory index
+~~~
+
+Score:
+
+**7.41 / 10**
+
+Problems:
+
+- still blocked too much by owned compiler feature state;
+- compiler passes are not first-class knowledge units;
+- specialization remains inconsistently owned;
+- native reference lane not integrated architecturally;
+- artifact/interface split is incomplete;
+- no clean path from Lean bootstrap to owned compiler convergence.
+
+Rejected as final design.
+
+---
+
+## Iteration 2 — Lean reference lane + four-plane architecture
+
+Added:
+
+- Lean reference/native lane;
+- semantic/compiler/build/knowledge planes;
+- explicit RuntimeIR/VerifiedIR/SpecializedIR;
+- shared specialization;
+- CompilerPassContract;
+- CertifiedModuleInterface;
+- semantic QueryGraph;
+- compiler service.
+
+Score:
+
+**8.84 / 10**
+
+Remaining weaknesses:
+
+- causal self-amplification evaluation still incomplete;
+- pass evidence not fully integrated with SPKF;
+- holdout/leakage policy insufficient;
+- cross-ecosystem WIT lane not integrated;
+- conformance backlog from Lean reference to owned compiler underspecified.
+
+---
+
+## Iteration 3 — accepted SAVEF compiler architecture
+
+Added:
+
+- PscvFeatureRequirementSet;
+- Lean reference versus owned compiler conformance service;
+- pass-level SPKF knowledge;
+- knowledge reproducibility;
+- CompilerFactoryBench-v2;
+- B0/B1/B2 ablation;
+- closed-loop compiler evolution;
+- holdout snapshot isolation;
+- WIT/Component universal lane;
+- explicit falsification criteria;
+- first-class native SAVEF tooling.
+
+Final score:
+
+**9.59 / 10**
+
+This is the accepted Version 2 target architecture.
+
+---
+
+# 95. First ten implementation PRs
+
+## PR 1 — experiment/reference manifests
+
+Add:
+
+- SemanticProfileIdentity;
+- LeanReferenceToolchainIdentity;
+- compiler implementation identity;
+- FactoryBench policy;
+- PscvFeatureRequirementSet.
+
+No compiler semantic changes.
+
+## PR 2 — Lean reference service
+
+Build a small native service that compiles selected PSCV-compatible compiler modules and exports canonical semantic identities.
+
+## PR 3 — compiler-contract skeleton
+
+Add:
+
+- phase IDs;
+- pass IDs;
+- pass manifests;
+- validation hooks;
+- resource budget model.
+
+## PR 4 — explicit SpecializedIR
+
+Introduce PsSpecializedIrModule wrapper.
+
+Move JS and Wasm paths toward the same explicit specialization API.
+
+## PR 5 — first CertifiedModuleInterface
+
+Use Foundation.List.
+
+Add deterministic extraction and a synthetic green/red QueryGraph test.
+
+## PR 6 — Foundation/Core theorem seed
+
+Prove:
+
+- list algebra;
+- name equality;
+- substitution/lifting;
+- abstraction/instantiation.
+
+Emit theorem interfaces/SPKF objects.
+
+## PR 7 — environment reuse
+
+Prove Environment lookup/add/index facts using earlier theorem interfaces.
+
+This is the first mandatory real SAVEF theorem-reuse checkpoint.
+
+## PR 8 — FactoryBench baseline
+
+Freeze held-out tasks and execute B0 before the searchable knowledge graph grows further.
+
+## PR 9 — SAVEF-assisted benchmark
+
+Run B1 with semantic retrieval against the same frozen benchmark policy.
+
+## PR 10 — RuntimeIR/VerifiedIR invariant gate
+
+Define VerifiedIrWellFormed and connect validator success to explicit invariants.
+
+At this point there is enough evidence to decide whether to expand or revise the approach before tackling the largest frontend proofs.
+
+---
+
+# 96. Later milestone sequence
+
+~~~text
+M0
+Lean reference/native lane operational
+
+M1
+CompilerPassContract registry operational
+
+M2
+SpecializedIR shared by JS/Wasm
+
+M3
+first CertifiedModuleInterface
+
+M4
+Foundation/Core theorem library
+
+M5
+Environment/Meta reuse proves real knowledge composition
+
+M6
+FactoryBench shows or fails to show measurable benefit
+
+M7
+RuntimeIR/VerifiedIR semantic evidence
+
+M8
+erasure preservation
+
+M9
+syntax/elaboration proof expansion
+
+M10
+real CheckedCore + PSCV-CERT
+
+M11
+Wasm preservation
+
+M12
+JavaScript preservation
+
+M13
+WIT/Component cross-ecosystem lane
+
+M14
+owned compiler semantic conformance with Lean reference
+
+M15
+owned compiler fixed point
+
+M16
+SAVEF-assisted real compiler feature produces knowledge reused by next feature
+
+M17
+public CompilerFactoryBench result
+~~~
+
+---
+
+# 97. Practicality budgets
+
+SAVEF is unsuccessful as developer infrastructure if every edit requires whole-compiler theorem replay.
+
+Set separate budgets.
+
+## Edit-time
+
+Expected to use:
+
+- source/profile checks;
+- local syntax/type checks;
+- cached semantic interfaces;
+- local proof slice.
+
+## Module checkpoint
+
+Use:
+
+- affected proof closure;
+- module interface extraction;
+- QueryGraph invalidation;
+- pass validators.
+
+## Release/high assurance
+
+Use:
+
+- clean kernel replay;
+- full semantic closure;
+- independent checker policy;
+- full compiler fixed point;
+- backend preservation;
+- reproducibility/provenance.
+
+This separation mirrors the practical distinction between Lean interactive checking, module artifacts, and full build/replay.
+
+---
+
+# 98. Anti-goals for the first implementation
+
+Do NOT simultaneously:
+
+- rewrite the parser;
+- rewrite the elaborator;
+- redesign PSCV syntax;
+- replace the package manager;
+- finish every backend;
+- move all current source files into new packages;
+- formally verify the whole Lean compiler;
+- build a central SAVEF registry.
+
+Those actions would obscure whether the core SAVEF mechanism works.
+
+---
+
+# 99. What would falsify this Version 2 plan
+
+The architecture should be revised if experiments show:
+
+1. Lean reference compilation and owned compiler semantics cannot be related cleanly enough for useful differential work.
+2. CertifiedModuleInterfaces must expose nearly all implementation bodies, eliminating abstraction benefit.
+3. Explicit compiler phase artifacts create more maintenance than semantic clarity.
+4. Shared specialization cannot serve both JS and Wasm without target-specific leakage.
+5. Pass-level proof effort dominates all downstream reuse.
+6. Semantic QueryGraph invalidation produces unsafe false-green states.
+7. SAVEF retrieval performs worse than raw source context on held-out compiler tasks.
+8. Proof/specification authoring costs exceed later reuse benefits.
+9. Native Lean-hosted SAVEF tooling diverges so far from owned self-host code that later convergence is impractical.
+10. WIT/Component wrappers introduce more complexity than direct ecosystem backends.
+11. Resource cost makes independent proof replay impractical.
+12. Closed-loop compiler tasks fail to reuse knowledge from previous compiler generations.
+
+Negative evidence should be retained and published rather than hidden.
+
+---
+
+# 100. Strong success claim
+
+A strong initial success statement would be:
+
+> Using a pinned Lean reference compiler, fixed PSCV semantic profile, fixed model/tool protocol, and identical acceptance gates, SAVEF's certified compiler interfaces and theorem/pass knowledge materially improved held-out PSCV compiler development tasks relative to raw repository context. At least 30 percent of accepted tasks reused earlier accepted compiler knowledge, and at least one SAVEF-assisted compiler change produced new checked knowledge that was consumed by a later accepted compiler change.
+
+A stronger later statement can additionally claim:
+
+- owned PSCV compiler semantic conformance;
+- real CheckedCore/PSCV-CERT;
+- self-host fixed point;
+- direct Wasm/JS preservation.
+
+Do not require the stronger statement before testing the core compounding hypothesis.
+
+---
+
+# 101. Canonical architecture
+
+~~~text
+                    PSCV / Lean-subset source
+                              |
+             +----------------+----------------+
+             |                                 |
+             v                                 v
+      Lean Reference                     Owned PSCV Frontend
+         Compiler                               |
+             |                                  v
+             |                            CandidateCore
+             |                                  |
+             |                             KernelContract
+             |                                  |
+             +-------------------------->  CheckedCore
+                                                |
+                                           PSCV-CERT
+                                                |
+                                                v
+                                         CertifiedSource
+                                          /             \
+                                         /               \
+                                        v                 v
+                       CertifiedModuleInterface         RuntimeIR
+                                |                         |
+                                |                    validate
+                                |                         |
+                                |                         v
+                                |                    VerifiedIR
+                                |                         |
+                                |                    specialize
+                                |                         |
+                                |                         v
+                                |                   SpecializedIR
+                                |                    /         \
+                                |                   v           v
+                                |                 JsIR        WasmIR
+                                |                   |           |
+                                |                   v           v
+                                |                  JS          Wasm
+                                |                               |
+                                |                              WIT
+                                |                               |
+                                +---------------+---------------+
+                                                |
+                                                v
+                                        SAVEF / SPKF graph
+                                       /        |        \
+                                      v         v         v
+                                  theorems   pass facts  assumptions
+                                       \       |       /
+                                        \      |      /
+                                         v     v     v
+                                         semantic index
+                                                |
+                                                v
+                                               AI
+                                                |
+                                                +---------> next compiler generation
+~~~
+
+---
+
+# 102. Final recommendation
+
+The best current strategy is:
+
+> **Use Lean as the immediate PSCV reference/native compiler, build SAVEF architecture now, make compiler passes and module interfaces explicit reusable knowledge boundaries, and let the owned PSCV compiler converge later against the same contracts.**
+
+The most important architecture changes are:
+
+1. split executable IR into RuntimeIR, VerifiedIR, and SpecializedIR;
+2. make specialization one shared target-neutral pass;
+3. add CompilerPassContract and pass evidence;
+4. add CertifiedModuleInterface;
+5. extend QueryGraph with semantic/proof/pass identities;
+6. add Lean reference/compiler-service lane;
+7. add a PSCV feature conformance backlog instead of blocking SAVEF;
+8. extract checked compiler knowledge to SPKF;
+9. run FactoryBench before claiming self-amplification;
+10. converge the owned compiler and direct backends after the SAVEF mechanism is already useful.
+
+Target architecture score:
+
+**9.59 / 10**
+
+Current repository readiness under the Lean-reference assumption:
+
+**approximately 5.72 / 10**
+
+The assumption that Lean already compiles the required PSCV subset is not a shortcut around SAVEF.
+
+It is the correct bootstrapping move.
+
+It lets ProofScript use a mature compiler to build the machinery that will eventually make its own compiler more formally structured, more incremental, more portable, easier for AI to reason about, and measurably easier to improve as compiler knowledge compounds.
+

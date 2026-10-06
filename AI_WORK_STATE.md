@@ -4,8 +4,8 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `3152c42abfafa7f13cd6b6f804c01f2fa9f6f99e`
-- Last known green proof checkpoint: `3152c42abfafa7f13cd6b6f804c01f2fa9f6f99e` (run #262)
+- Current proof HEAD when this state was written: `f17135e43244bb820d399ea7a4b18072d2acea72`
+- Last known green proof checkpoint: `f17135e43244bb820d399ea7a4b18072d2acea72` (run #269)
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
 ## Acceptance criteria
@@ -50,20 +50,24 @@ Last checked-in audit before this state file:
 - Total canonical source/proof pairs: 79
 
 ## Current blocker
-None at the current checkpoint. Run #262 is fully green:
-- configuration-level checker contracts compile;
-- metatheory build is green;
-- recursive proof tree is green.
+None at the current checkpoint. Run #269 is fully green.
 
-The configuration layer now tracks authoritative environment-index refinement, generated-name freshness, and all semantic caches together.
+The proof branch now has:
+- semantic map-cache and unordered DefEq pair-cache publication laws;
+- presentation-equality transport in typing/reduction/defeq judgments;
+- canonical local-context freshness and extension theorems;
+- checker configuration soundness tracking environment-index refinement, fresh-name bounds, and all semantic caches;
+- configuration-preservation lemmas for inference cache publication, WHNF/WHNF-core caching, successful DefEq caching, recursion-depth entry, and context flags.
+
+The remaining blocker is architectural rather than mechanical: prove the concrete mutually recursive checker implementation satisfies the configuration/stateful soundness contracts, then finish uncovered DefEq/reduction/inductive transaction rules needed by that proof.
 
 ## Immediate plan
-1. Prove the concrete stateful checker-knot contracts by fuel/mutual induction, using the now-green cache publication and context weakening/freshness layers.
-2. Complete remaining DefEq/reduction rules needed by that induction (LazyDelta/FinalRules/recursor computation and any uncovered terminal rules).
-3. Complete ordinary/mutual/nested inductive admission transactions and environment-extension refinement.
-4. Compose the final public KernelContract/API soundness theorem/family with concrete checker/admission proofs, not abstract assumptions.
-5. Reconcile with the current integration branch and rerun all final proof/conformance gates.
-6. Refresh the semantic audit and leave only explicit TCB boundaries as assumptions.
+1. Prove concrete `psKernelInferCoreWithFuel` / public inference configuration soundness by fuel induction, using cache-hit soundness, context freshness/extension, and the existing per-rule typing refinements.
+2. Prove concrete WHNF-core/public-WHNF configuration soundness using reduction-cache publication and existing reduction refinements.
+3. Prove concrete DefEq configuration soundness, prioritizing LazyDelta/FinalRules/recursor-computation rules that remain uncovered.
+4. Compose these into soundness for the concrete checker knot and discharge the abstract assumptions already used by API/session theorems.
+5. Complete ordinary/mutual/nested inductive admission transactions and environment-extension refinement.
+6. Add final explicit implementation-refinement theorem/family, refresh the semantic audit, reconcile with current integration, and rerun final proof/conformance gates.
 
 ## Work discipline
 - Preserve GitHub history and concurrent proof work.

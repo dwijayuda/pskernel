@@ -174,7 +174,8 @@
     "test:prelude-extension-contract": "node --test scripts/prelude-extension-contract.test.mjs",
     "check:prelude-declaration-parity": "npm run test:prelude-extension-contract && node scripts/check-prelude-declaration-parity.mjs",
     "test:direct-js-selfhost": "node scripts/direct-js-selfhost-fixed-point.mjs",
-    "test:direct-wasm-whole-compiler": "node scripts/direct-wasm-whole-compiler.test.mjs"
+    "test:direct-wasm-whole-compiler": "node scripts/direct-wasm-whole-compiler.test.mjs",
+    "test:direct-wasm-selfhost": "node scripts/direct-wasm-selfhost-fixed-point.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

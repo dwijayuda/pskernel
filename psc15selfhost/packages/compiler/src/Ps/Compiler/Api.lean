@@ -107,6 +107,43 @@ def psCompilerPrepareSource
   | Except.ok elaborated =>
       psCompilerPrepareElaborated elaborated
 
+structure PsCompilerSourcePreparationState where
+  environment : PsEnvironment
+  declarationsRev : List PsDeclaration
+
+def psCompilerSourcePreparationInitial :
+    PsCompilerSourcePreparationState :=
+  PsCompilerSourcePreparationState.mk
+    psSelfHostProdPreludeEnvironment
+    List.nil
+
+def psCompilerPrepareSourceStep
+    (sourceKind : PsCompilerSourceKind)
+    (state : PsCompilerSourcePreparationState)
+    (source : String) :
+    Except PsCompilerError PsCompilerSourcePreparationState :=
+  match psCompilerParseSource sourceKind source with
+  | Except.error error => Except.error error
+  | Except.ok sourceModule =>
+      match psElabModule state.environment sourceModule with
+      | Except.error error =>
+          Except.error (PsCompilerError.elaboration error)
+      | Except.ok elaborated =>
+          Except.ok
+            (PsCompilerSourcePreparationState.mk
+              elaborated.environment
+              (psListAppend
+                (psListReverse elaborated.declarations)
+                state.declarationsRev))
+
+def psCompilerFinishSourcePreparation
+    (state : PsCompilerSourcePreparationState) :
+    Except PsCompilerError PsCompilerAdmissionReadyModule :=
+  psCompilerPrepareElaborated
+    (PsElabModuleResult.mk
+      state.environment
+      (psListReverse state.declarationsRev))
+
 def psCompilerElaborateSourcesWorker
     (sourceKind : PsCompilerSourceKind) (sources : List String) :
     PsEnvironment -> List PsDeclaration -> Except PsCompilerError PsElabModuleResult :=

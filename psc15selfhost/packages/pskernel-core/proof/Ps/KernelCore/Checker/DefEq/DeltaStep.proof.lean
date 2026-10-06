@@ -296,7 +296,7 @@ theorem psKernelDefEqUnfold_preserves_semantic_sound
             PsKernelCheckerStateSemanticSound
           ] using
             (show
-              PsKernelInferenceCacheSound
+              PsKernelInferOnlyCacheIsolated
                     context.environment
                     context.localContext
                     state.inferOnly ∧

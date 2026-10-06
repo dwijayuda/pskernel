@@ -229,7 +229,7 @@ theorem psKernelWhnfCoreFinish_preserves_semantic_sound
           PsKernelCheckerStateSemanticSound
         ] using
           (show
-            PsKernelInferenceCacheSound
+            PsKernelInferOnlyCacheIsolated
                   environment localContext state.inferOnly ∧
               PsKernelInferenceCacheSound
                   environment localContext state.checkedInfer ∧
@@ -309,7 +309,7 @@ theorem psKernelWhnfFinish_preserves_semantic_sound
       PsKernelCheckerStateSemanticSound
     ] using
       (show
-        PsKernelInferenceCacheSound
+        PsKernelInferOnlyCacheIsolated
               environment localContext state.inferOnly ∧
           PsKernelInferenceCacheSound
               environment localContext state.checkedInfer ∧

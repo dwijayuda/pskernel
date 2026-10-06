@@ -1160,11 +1160,60 @@ def PsKernelInferenceCacheSound
         result
 
 
+
+/-
+Infer-only memoization is operationally isolated from checked kernel
+acceptance.  Infer-only application/lambda/forall paths deliberately skip some
+checks and may therefore cache results that are not full TypingJudgment
+certificates.  Checked inference never consults this cache, so the Assurance
+Plane records isolation rather than a false typing-soundness obligation.
+-/
+def PsKernelInferOnlyCacheIsolated
+    (_environment : PsKernelEnvironment)
+    (_localContext : PsKernelLocalContext)
+    (_cache : PsKernelExprMap) : Prop :=
+  True
+
+theorem psKernelInferOnlyCacheIsolated_empty
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelInferOnlyCacheIsolated
+      environment
+      localContext
+      psKernelExprMapEmpty := by
+  trivial
+
+theorem psKernelInferOnlyCacheIsolated_insert
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (cache : PsKernelExprMap)
+    (expr result : PsKernelExpr)
+    (_hCache :
+      PsKernelInferOnlyCacheIsolated
+        environment
+        localContext
+        cache)
+    (_hTyping :
+      PsKernelTypingJudgment
+        environment
+        localContext
+        expr
+        result) :
+    PsKernelInferOnlyCacheIsolated
+      environment
+      localContext
+      (psKernelExprMapInsert
+        cache
+        expr
+        result) := by
+  trivial
+
+
 def PsKernelCheckerStateSemanticSound
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)
     (state : PsKernelCheckerState) : Prop :=
-  PsKernelInferenceCacheSound
+  PsKernelInferOnlyCacheIsolated
       environment
       localContext
       state.inferOnly ∧

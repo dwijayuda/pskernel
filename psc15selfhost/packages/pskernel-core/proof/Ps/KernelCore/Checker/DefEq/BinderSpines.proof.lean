@@ -75,7 +75,7 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
   | false =>
       simpa [psKernelDefEqFinish] using
         (show
-          PsKernelInferenceCacheSound
+          PsKernelInferOnlyCacheIsolated
               environment localContext state.inferOnly ∧
             PsKernelInferenceCacheSound
               environment localContext state.checkedInfer ∧
@@ -95,7 +95,7 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
         psKernelCheckerStateWithSuccess
       ] using
         (show
-          PsKernelInferenceCacheSound
+          PsKernelInferOnlyCacheIsolated
               environment localContext state.inferOnly ∧
             PsKernelInferenceCacheSound
               environment localContext state.checkedInfer ∧

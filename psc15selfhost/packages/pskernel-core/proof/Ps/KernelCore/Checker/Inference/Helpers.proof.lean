@@ -178,7 +178,7 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
   | false =>
       simpa [psKernelCacheInferResult, hEligible] using
         (show
-          PsKernelInferenceCacheSound
+          PsKernelInferOnlyCacheIsolated
               environment localContext state.inferOnly ∧
             PsKernelInferenceCacheSound
               environment localContext state.checkedInfer ∧
@@ -201,7 +201,7 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
             psKernelCheckerStateWithCheckedInfer
           ] using
             (show
-              PsKernelInferenceCacheSound
+              PsKernelInferOnlyCacheIsolated
                   environment localContext state.inferOnly ∧
                 PsKernelInferenceCacheSound
                   environment localContext
@@ -238,7 +238,7 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
             psKernelCheckerStateWithInferOnly
           ] using
             (show
-              PsKernelInferenceCacheSound
+              PsKernelInferOnlyCacheIsolated
                   environment localContext
                   (psKernelExprMapInsert
                     state.inferOnly expr result) ∧

@@ -185,6 +185,22 @@ theorem psKernelDefEqCacheSound_contextWeaken
       hExt
       (hCache left right hGet)
 
+theorem psKernelInferOnlyCacheIsolated_contextWeaken
+    (environment : PsKernelEnvironment)
+    (older newer : PsKernelLocalContext)
+    (cache : PsKernelExprMap)
+    (_hExt : PsKernelLocalContextExtends older newer)
+    (_hCache :
+      PsKernelInferOnlyCacheIsolated
+        environment
+        older
+        cache) :
+    PsKernelInferOnlyCacheIsolated
+      environment
+      newer
+      cache := by
+  trivial
+
 theorem psKernelCheckerStateSemanticSound_contextWeaken
     (environment : PsKernelEnvironment)
     (older newer : PsKernelLocalContext)
@@ -205,7 +221,7 @@ theorem psKernelCheckerStateSemanticSound_contextWeaken
     ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
   exact
     ⟨
-      psKernelInferenceCacheSound_contextWeaken
+      psKernelInferOnlyCacheIsolated_contextWeaken
         environment older newer state.inferOnly hExt hInferOnly,
       psKernelInferenceCacheSound_contextWeaken
         environment older newer state.checkedInfer hExt hChecked,

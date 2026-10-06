@@ -115,7 +115,7 @@ theorem psKernelDefEqCacheSound_empty
 theorem psKernelCheckerStateEmpty_semantic_caches_sound
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext) :
-    PsKernelInferenceCacheSound
+    PsKernelInferOnlyCacheIsolated
         environment
         localContext
         psKernelCheckerStateEmpty.inferOnly ∧
@@ -141,7 +141,7 @@ theorem psKernelCheckerStateEmpty_semantic_caches_sound
         psKernelCheckerStateEmpty.success := by
   constructor
   · simpa [psKernelCheckerStateEmpty] using
-      psKernelInferenceCacheSound_empty
+      psKernelInferOnlyCacheIsolated_empty
         environment
         localContext
   · constructor
@@ -168,7 +168,6 @@ theorem psKernelCheckerStateEmpty_semantic_caches_sound
               psKernelDefEqCacheSound_empty
                 environment
                 localContext
-
 
 theorem psKernelCheckerStateEmpty_semantic_sound
     (environment : PsKernelEnvironment)

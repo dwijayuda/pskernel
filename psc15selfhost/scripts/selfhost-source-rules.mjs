@@ -597,6 +597,7 @@ export function findSelfhostStructuralViolations(
 
     const arithmeticSegment =
       termSegment
+        .replace(/'(?:\\(?:x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|.)|[^'\\])'/gu, ' ')
         .replace(/->/gu, '  ')
         .replace(/=>/gu, '  ');
     if (

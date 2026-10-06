@@ -11,6 +11,91 @@ inductive PsCompilerWasmError where
 def psCompilerWasm32Target : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }
 
+def psCompilerWasmLowerErrorCode
+    (error : PsWasmLowerError) : String :=
+  match error with
+  | PsWasmLowerError.unsupportedType => "lower.unsupported-type"
+  | PsWasmLowerError.unsupportedExpression => "lower.unsupported-expression"
+  | PsWasmLowerError.unsupportedIntrinsic => "lower.unsupported-intrinsic"
+  | PsWasmLowerError.invalidIntrinsicArity => "lower.invalid-intrinsic-arity"
+  | PsWasmLowerError.invalidCallArity => "lower.invalid-call-arity"
+  | PsWasmLowerError.unknownVariable name =>
+      String.Internal.append "lower.unknown-variable:" name
+  | PsWasmLowerError.unknownStructure name =>
+      String.Internal.append "lower.unknown-structure:" name
+  | PsWasmLowerError.unknownStructureField structureName field =>
+      String.Internal.append
+        "lower.unknown-structure-field:"
+        (String.Internal.append
+          structureName
+          (String.Internal.append ":" field))
+  | PsWasmLowerError.missingRecordField structureName field =>
+      String.Internal.append
+        "lower.missing-record-field:"
+        (String.Internal.append
+          structureName
+          (String.Internal.append ":" field))
+  | PsWasmLowerError.unknownInductive name =>
+      String.Internal.append "lower.unknown-inductive:" name
+  | PsWasmLowerError.unknownConstructor inductiveName constructorName =>
+      String.Internal.append
+        "lower.unknown-constructor:"
+        (String.Internal.append
+          inductiveName
+          (String.Internal.append ":" constructorName))
+  | PsWasmLowerError.unknownConstructorField inductiveName constructorName field =>
+      String.Internal.append
+        "lower.unknown-constructor-field:"
+        (String.Internal.append
+          inductiveName
+          (String.Internal.append
+            ":"
+            (String.Internal.append
+              constructorName
+              (String.Internal.append ":" field))))
+  | PsWasmLowerError.missingConstructorField inductiveName constructorName field =>
+      String.Internal.append
+        "lower.missing-constructor-field:"
+        (String.Internal.append
+          inductiveName
+          (String.Internal.append
+            ":"
+            (String.Internal.append
+              constructorName
+              (String.Internal.append ":" field))))
+  | PsWasmLowerError.unsupportedModuleFeature =>
+      "lower.unsupported-module-feature"
+  | PsWasmLowerError.specializationFailed specializeError =>
+      match specializeError with
+      | PsIrSpecializeError.fuelExhausted =>
+          "lower.specialization:fuel-exhausted"
+      | PsIrSpecializeError.unresolvedTypeParameter name =>
+          String.Internal.append
+            "lower.specialization:unresolved-type-parameter:"
+            name
+      | PsIrSpecializeError.nonGroundType name =>
+          String.Internal.append
+            "lower.specialization:non-ground-type:"
+            name
+      | PsIrSpecializeError.typeArgumentArity name =>
+          String.Internal.append
+            "lower.specialization:type-argument-arity:"
+            name
+      | PsIrSpecializeError.unknownTarget name =>
+          String.Internal.append
+            "lower.specialization:unknown-target:"
+            name
+      | PsIrSpecializeError.unsupportedGenericCall =>
+          "lower.specialization:unsupported-generic-call"
+
+def psCompilerWasmErrorCode
+    (error : PsCompilerWasmError) : String :=
+  match error with
+  | PsCompilerWasmError.compiler _ => "compiler"
+  | PsCompilerWasmError.lower lowerError =>
+      psCompilerWasmLowerErrorCode lowerError
+  | PsCompilerWasmError.encode _ => "encode"
+
 def psCompilerWasmFromPrepared
     (profile : PsWasmTargetProfile)
     (prepared : PsCompilerAdmissionReadyModule) :

@@ -48,7 +48,9 @@
       ],
       "status": "partial",
       "owners": [
-        "TRUST_MANIFEST.json"
+        "TRUST_MANIFEST.json",
+        "scripts/semantic-lock.mjs",
+        "contracts/semantic/SEMANTIC_LOCK_V1.json"
       ],
       "completion": "Complete semantic, implementation, security, assumption, resource and lineage identities bind exact artifacts and computed trust closure.",
       "assurance": "pending"

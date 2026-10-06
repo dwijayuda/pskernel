@@ -9,10 +9,12 @@ import { createCertificateBoundary } from './certificate-boundary.mjs';
 import { knowledgeObject } from './savef-graph.mjs';
 import { archiveSignatureBytes, packOfflineCapsule, verifyOfflineCapsule, readOfflineCapsule } from './offline-capsule.mjs';
 import { verifyCapsuleCommand } from './offline-verifier-cli.mjs';
+import { semanticLockFixture } from './semantic-lock-fixture.mjs';
 
 const object = (value, domain = 'test-data', contract = 'test-data/1') => canonicalArtifact(value, domain, contract);
 function fixture({ changeKnowledge, includeCertificate = true } = {}) {
-  const subject = object({ left: 12, right: 12 }, 'test-subject'), lock = object({ semantics: 'fixture' });
+  const lockFixture = semanticLockFixture(), lock = lockFixture.lock;
+  const subject = object({ left: 12, right: 12 }, 'test-subject');
   const payload = object({ statement: 'fixture integer equality; no compiler theorem' });
   const license = object({ spdx: 'MIT' });
   const certificate = object({ contract: 'psc-certificate/1', checkerId: 'fixture-equality',
@@ -43,9 +45,10 @@ function fixture({ changeKnowledge, includeCertificate = true } = {}) {
     },
   }]]) });
   const policy = { expectedManifestId: manifest.identity, expectedSemanticLockId: lock.identity, context,
+    semanticLockPolicy: lockFixture.policy,
     claimPolicies: new Map([['fixture-equality', { subjectId: subject.identity, claimClass: 'fixture-integer-equality', checkerId: 'fixture-equality' }]]),
     certificateBoundary: boundary, requiredArchiveRoles: ['semantic-lock', 'license'] };
-  const artifacts = [subject, lock, payload, license, knowledge, ...(includeCertificate ? [certificate] : [])];
+  const artifacts = [subject, ...lockFixture.artifacts, payload, license, knowledge, ...(includeCertificate ? [certificate] : [])];
   const capsule = packOfflineCapsule({ manifest, artifacts });
   return { subject, lock, payload, license, knowledge, manifest, artifacts, capsule, policy, boundary, calls: () => calls };
 }
@@ -68,6 +71,14 @@ test('stale context, forbidden assumptions and missing evidence fail closed', as
   assert.match((await verifyOfflineCapsule(assumption.capsule.bytes, assumption.policy)).code, /ASSUMPTION_DENIED/);
   const missing = fixture({ includeCertificate: false });
   assert.match((await verifyOfflineCapsule(missing.capsule.bytes, missing.policy)).code, /MISSING_ARTIFACT/);
+});
+
+test('capsule cannot omit semantic lock policy or substitute a different knowledge lock', async () => {
+  const f = fixture(), policy = { ...f.policy }; delete policy.semanticLockPolicy;
+  assert.match((await verifyOfflineCapsule(f.capsule.bytes, policy)).code, /SEMANTIC_LOCK_POLICY/);
+  const substituted = { ...f.policy, context: { ...f.policy.context, semanticIdentity: { semanticLockId: f.payload.identity } } };
+  assert.match((await verifyOfflineCapsule(f.capsule.bytes, substituted)).code, /SEMANTIC_LOCK_POLICY/);
+  assert.equal(f.calls(), 0);
 });
 
 test('claim labels cannot reinterpret unrelated evidence or bypass required proof checks', async () => {
@@ -130,6 +141,7 @@ test('CLI verifies a local unsigned metadata capsule without compiler or checker
     await writeFile(file, f.capsule.bytes);
     await writeFile(policyFile, JSON.stringify({ contract: 'psc-offline-consumer-policy/1',
       expectedManifestId: f.manifest.identity, expectedSemanticLockId: f.lock.identity,
+      semanticLockPolicy: f.policy.semanticLockPolicy,
       context: { ...f.policy.context, requiredClaims: [] }, checkers: [], claims: [], publicKeys: [],
       requiredSignerIds: [], requiredArchiveRoles: ['license'] }));
     const result = await verifyCapsuleCommand(file, policyFile);

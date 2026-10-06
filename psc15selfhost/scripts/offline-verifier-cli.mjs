@@ -1,6 +1,16 @@
-import { artifactKey } from './artifact-evidence.mjs';
+import { artifactId, artifactKey } from './artifact-evidence.mjs';
+import { compareSemanticLocks } from './semantic-lock.mjs';
 import { createCertificateBoundary, coreProofCertificateChecker } from './certificate-boundary.mjs';
 import { readOfflineCapsule, unpackOfflineCapsule, verifyOfflineCapsule } from './offline-capsule.mjs';
+
+export async function compareSemanticLockFiles(leftPath, rightPath) {
+  const locks = [];
+  for (const file of [leftPath, rightPath]) {
+    const bytes = await readOfflineCapsule(file, { maxCapsuleBytes: 8 * 1024 * 1024 });
+    locks.push({ bytes, identity: artifactId(bytes, 'semantic-lock', 'psc-semantic-lock/1') });
+  }
+  return compareSemanticLocks(...locks);
+}
 
 /** Policy is an explicitly selected, trusted LOCAL file. The capsule never
  * supplies it. Only built-in checker adapters are selectable, never module URLs.
@@ -39,6 +49,7 @@ export async function verifyCapsuleCommand(capsulePath, policyPath) {
   try {
     return await verifyOfflineCapsule(bytes, { expectedManifestId: policy.expectedManifestId,
       expectedSemanticLockId: policy.expectedSemanticLockId, context: policy.context, claimPolicies,
+      semanticLockPolicy: policy.semanticLockPolicy,
       certificateBoundary, publicKeys, requiredSignerIds: policy.requiredSignerIds,
       requiredArchiveRoles: policy.requiredArchiveRoles, resourceLimits: policy.resourceLimits });
   } finally { certificateBoundary.close(); }

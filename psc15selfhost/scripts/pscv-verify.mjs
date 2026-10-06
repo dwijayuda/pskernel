@@ -50,8 +50,12 @@ if(process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url){
   const args = process.argv.slice(2);
   const run = async () => {
     if (!args.length) return { prototype: await verifyOfflinePrototype() };
+    if (args.length === 3 && args[0] === '--diff-locks') {
+      const { compareSemanticLockFiles } = await import('./offline-verifier-cli.mjs');
+      return compareSemanticLockFiles(args[1], args[2]);
+    }
     if (args.length !== 4 || args[0] !== '--capsule' || args[2] !== '--policy') {
-      throw new Error('Usage: pscv-verify --capsule FILE --policy TRUSTED_LOCAL_POLICY');
+      throw new Error('Usage: pscv-verify --capsule FILE --policy TRUSTED_LOCAL_POLICY | --diff-locks LEFT RIGHT');
     }
     const { verifyCapsuleCommand } = await import('./offline-verifier-cli.mjs');
     return verifyCapsuleCommand(args[1], args[3]);

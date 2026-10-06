@@ -4,6 +4,7 @@ import { constants } from 'node:fs';
 import { artifactId, artifactKey, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyKnowledgeGraph } from './savef-graph.mjs';
+import { verifySemanticLock } from './semantic-lock.mjs';
 
 const copy = value => JSON.parse(canonicalBytes(value));
 const fail = code => { throw new Error('PSC_CAPSULE_' + code); };
@@ -126,10 +127,14 @@ function checkSignatures(capsule, publicKeys, requiredSignerIds) {
 }
 
 export async function verifyOfflineCapsule(bytes, { expectedManifestId, expectedSemanticLockId, context, claimPolicies,
-  certificateBoundary, publicKeys = new Map(), requiredSignerIds = [], requiredArchiveRoles = [], resourceLimits } = {}) {
+  certificateBoundary, semanticLockPolicy, publicKeys = new Map(), requiredSignerIds = [], requiredArchiveRoles = [], resourceLimits } = {}) {
   try {
     const capsule = unpackOfflineCapsule(bytes, { expectedManifestId, resourceLimits });
     if (artifactKey(capsule.manifest.semanticLockId) !== artifactKey(expectedSemanticLockId)) fail('SEMANTIC_LOCK');
+    if (!semanticLockPolicy || artifactKey(context?.semanticIdentity?.semanticLockId) !== artifactKey(expectedSemanticLockId)) fail('SEMANTIC_LOCK_POLICY');
+    const lockCheck = await verifySemanticLock({ identity: expectedSemanticLockId,
+      bytes: capsule.resolveArtifact(expectedSemanticLockId) }, { ...semanticLockPolicy,
+      expectedLockId: expectedSemanticLockId, resolveArtifact: capsule.resolveArtifact });
     if (!Array.isArray(requiredArchiveRoles) || requiredArchiveRoles.some(role => !archiveRoles.includes(role))) fail('ARCHIVE_POLICY');
     for (const role of requiredArchiveRoles) if (!capsule.archiveRoles.includes(role)) fail('ARCHIVE_ROLE_REQUIRED');
     const signers = checkSignatures(capsule, publicKeys, requiredSignerIds);
@@ -137,7 +142,7 @@ export async function verifyOfflineCapsule(bytes, { expectedManifestId, expected
       resolveArtifact: capsule.resolveArtifact, context, claimPolicies, certificateBoundary,
       limits: resourceLimits });
     return { kind: 'accepted', contract: 'psc-offline-verification/1', manifestId: capsule.manifestId,
-      semanticLockId: capsule.manifest.semanticLockId, signers, validity,
+      semanticLockId: capsule.manifest.semanticLockId, lockCheck, signers, validity,
       artifactCount: capsule.artifactCount, artifactBytes: capsule.artifactBytes,
       authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {

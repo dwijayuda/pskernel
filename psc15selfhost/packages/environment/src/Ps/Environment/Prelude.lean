@@ -5,8 +5,8 @@ def psPreludeAdd
     (environment : PsEnvironment)
     (declaration : PsDeclaration) : PsEnvironment :=
   match psEnvironmentAdd environment declaration with
-  | some next => next
-  | none => environment
+  | Option.some next => next
+  | Option.none => environment
 
 -- Small closed definitions avoid repeatedly elaborating a single large local
 -- context. The resulting prelude declarations and their order are unchanged.

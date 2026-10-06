@@ -114,6 +114,77 @@ def PsKernelWhnfConfigurationSound
         context
         nextState
 
+
+/-
+Reusable contract for reduction helpers that may decline to reduce.  A
+successful call must preserve checker configuration; when it publishes a
+replacement expression, that replacement must be connected to the input by
+the independent reduction closure.  The `none` case deliberately carries no
+reduction claim because callers keep the original expression.
+-/
+def PsKernelOptionalReductionConfigurationSound
+    (reduce :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (answer : Option PsKernelExpr),
+    PsKernelCheckerConfigurationSound context state ->
+    reduce context state expr =
+      Except.ok (Prod.mk answer nextState) ->
+    PsKernelCheckerConfigurationSound context nextState ∧
+      match answer with
+      | Option.none => True
+      | Option.some result =>
+          PsKernelReductionClosure
+            context.environment
+            context.localContext
+            expr
+            result
+
+/-
+Recursor reduction has the same semantic shape but carries the two observable
+cheap-reduction controls used by WHNF core.
+-/
+def PsKernelRecursorReductionConfigurationSound
+    (reduce :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (cheapRec cheapProj : Bool)
+    (answer : Option PsKernelExpr),
+    PsKernelCheckerConfigurationSound context state ->
+    reduce
+        context
+        state
+        expr
+        cheapRec
+        cheapProj =
+      Except.ok (Prod.mk answer nextState) ->
+    PsKernelCheckerConfigurationSound context nextState ∧
+      match answer with
+      | Option.none => True
+      | Option.some result =>
+          PsKernelReductionClosure
+            context.environment
+            context.localContext
+            expr
+            result
+
+
 def PsKernelDefEqConfigurationSound
     (defeq :
       PsKernelCheckerContext ->

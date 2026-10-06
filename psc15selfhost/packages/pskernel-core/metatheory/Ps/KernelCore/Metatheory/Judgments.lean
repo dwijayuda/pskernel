@@ -1129,6 +1129,195 @@ def PsKernelDefEqCacheInsertLaw : Prop :=
         right)
 
 
+
+def PsKernelReductionCacheInsertLaw : Prop :=
+  ∀
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (cache : PsKernelExprMap)
+    (expr result : PsKernelExpr),
+    PsKernelReductionCacheSound
+        environment
+        localContext
+        cache ->
+    PsKernelReductionClosure
+        environment
+        localContext
+        expr
+        result ->
+    PsKernelReductionCacheSound
+      environment
+      localContext
+      (psKernelExprMapInsert
+        cache
+        expr
+        result)
+
+/-
+Stateful contracts are the final Assurance Plane target for the checker knot.
+They make cache/state preservation explicit; the older result-only contracts
+below remain useful for local composition but are insufficient for arbitrary
+checker states because executable operations may return cached answers.
+-/
+
+def PsKernelInferenceCoreStatefulSound
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState)) : Prop :=
+  ∀
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (inferOnly : Bool),
+    PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        state ->
+    psKernelInferCoreWithFuel
+        fuel whnf defeq
+        context state expr inferOnly =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelTypingJudgment
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        nextState
+
+def PsKernelWhnfCoreStatefulSound
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (cheapRec cheapProj : Bool),
+    PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        state ->
+    coreWhnf
+        context
+        state
+        expr
+        cheapRec
+        cheapProj =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelReductionClosure
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        nextState
+
+def PsKernelWhnfStatefulSound
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr),
+    PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        state ->
+    whnf context state expr =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelReductionClosure
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        nextState
+
+def PsKernelDefEqStatefulSound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool),
+    PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        state ->
+    defeq context state left right =
+      Except.ok (Prod.mk value nextState) ->
+    PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right)
+
+def PsKernelInferenceStatefulSound
+    (infer :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr),
+    PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        state ->
+    infer context state expr =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelTypingJudgment
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerStateSemanticSound
+        context.environment
+        context.localContext
+        nextState
+
+
 def PsKernelInferenceCoreSound
     (whnf :
       PsKernelCheckerContext ->

@@ -144,13 +144,12 @@ def psRustEmitTypeWithFuel
           let emitNested :
               PsVerifiedIrType ->
               Except PsRustEmitError String :=
-            fun (nestedType : PsVerifiedIrType) =>
-              psRustEmitTypeWithFuel remaining nestedType;
+            psRustEmitTypeWithFuel remaining;
           match psRustEmitTypeListWith emitNested parameters with
           | Except.error error =>
               Except.error error
           | Except.ok printedParameters =>
-              match psRustEmitTypeWithFuel remaining result with
+              match emitNested result with
               | Except.error error =>
                   Except.error error
               | Except.ok printedResult =>
@@ -233,10 +232,7 @@ def psRustTypeContainsFunctionWithFuel
       | PsVerifiedIrType.named _ arguments =>
           let containsFunction :
               PsVerifiedIrType -> Bool :=
-            fun (argument : PsVerifiedIrType) =>
-              psRustTypeContainsFunctionWithFuel
-                remaining
-                argument;
+            psRustTypeContainsFunctionWithFuel remaining;
           psListAny containsFunction arguments
       | _ =>
           false

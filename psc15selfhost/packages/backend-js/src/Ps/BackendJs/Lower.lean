@@ -1233,7 +1233,8 @@ def psJsLowerExpr
     Except PsJsLowerError PsJsIrExpr :=
   psJsLowerExprWithFuel 4096 expr
 
-def psJsLowerParameters
+def psJsLowerParametersWithProfile
+    (profile : Option PsJsTargetProfile)
     (parameters : List PsVerifiedIrParameter) :
     Except PsJsLowerError (List PsJsIrParameter) :=
   match parameters with
@@ -1241,8 +1242,14 @@ def psJsLowerParameters
       Except.ok List.nil
   | List.cons parameter rest =>
       if psJsIdentifierSupported parameter.name then
-        if psJsTypeSupported parameter.type then
-          match psJsLowerParameters rest with
+        if
+            psJsTypeSupportedWithProfile
+              profile
+              parameter.type then
+          match
+              psJsLowerParametersWithProfile
+                profile
+                rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok
@@ -1255,12 +1262,23 @@ def psJsLowerParameters
         Except.error
           (PsJsLowerError.unsupportedName parameter.name)
 
-def psJsLowerImport
+def psJsLowerParameters
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsJsLowerError (List PsJsIrParameter) :=
+  psJsLowerParametersWithProfile
+    Option.none
+    parameters
+
+def psJsLowerImportWithProfile
+    (profile : Option PsJsTargetProfile)
     (importInfo : PsVerifiedIrExternalImport) :
     Except PsJsLowerError PsJsIrImport :=
   if psJsIdentifierSupported importInfo.localName then
     if psJsImportNameSupported importInfo.importedName then
-      if psJsTypeSupported importInfo.type then
+      if
+          psJsTypeSupportedWithProfile
+            profile
+            importInfo.type then
         Except.ok
           (PsJsIrImport.mk
             importInfo.localName
@@ -1277,31 +1295,63 @@ def psJsLowerImport
       (PsJsLowerError.unsupportedName
         importInfo.localName)
 
-def psJsLowerImports
+def psJsLowerImport
+    (importInfo : PsVerifiedIrExternalImport) :
+    Except PsJsLowerError PsJsIrImport :=
+  psJsLowerImportWithProfile
+    Option.none
+    importInfo
+
+def psJsLowerImportsWithProfile
+    (profile : Option PsJsTargetProfile)
     (imports : List PsVerifiedIrExternalImport) :
     Except PsJsLowerError (List PsJsIrImport) :=
   match imports with
   | List.nil =>
       Except.ok List.nil
   | List.cons importInfo rest =>
-      match psJsLowerImport importInfo with
+      match
+          psJsLowerImportWithProfile
+            profile
+            importInfo with
       | Except.error error => Except.error error
       | Except.ok lowered =>
-          match psJsLowerImports rest with
+          match
+              psJsLowerImportsWithProfile
+                profile
+                rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok (List.cons lowered loweredRest)
 
-def psJsLowerDeclaration
+def psJsLowerImports
+    (imports : List PsVerifiedIrExternalImport) :
+    Except PsJsLowerError (List PsJsIrImport) :=
+  psJsLowerImportsWithProfile
+    Option.none
+    imports
+
+def psJsLowerDeclarationWithProfile
+    (profile : Option PsJsTargetProfile)
     (declaration : PsVerifiedIrDeclaration) :
     Except PsJsLowerError PsJsIrDeclaration :=
   if psJsIdentifierSupported declaration.name then
     if psListIsEmpty declaration.typeParameters then
-      if psJsTypeSupported declaration.resultType then
-        match psJsLowerParameters declaration.parameters with
+      if
+          psJsTypeSupportedWithProfile
+            profile
+            declaration.resultType then
+        match
+            psJsLowerParametersWithProfile
+              profile
+              declaration.parameters with
         | Except.error error => Except.error error
         | Except.ok parameters =>
-            match psJsLowerExpr declaration.body with
+            match
+                psJsLowerExprWithProfileAndFuel
+                  profile
+                  4096
+                  declaration.body with
             | Except.error error => Except.error error
             | Except.ok body =>
                 Except.ok
@@ -1319,34 +1369,70 @@ def psJsLowerDeclaration
     Except.error
       (PsJsLowerError.unsupportedName declaration.name)
 
-def psJsLowerDeclarations
+def psJsLowerDeclaration
+    (declaration : PsVerifiedIrDeclaration) :
+    Except PsJsLowerError PsJsIrDeclaration :=
+  psJsLowerDeclarationWithProfile
+    Option.none
+    declaration
+
+def psJsLowerDeclarationsWithProfile
+    (profile : Option PsJsTargetProfile)
     (declarations : List PsVerifiedIrDeclaration) :
     Except PsJsLowerError (List PsJsIrDeclaration) :=
   match declarations with
   | List.nil =>
       Except.ok List.nil
   | List.cons declaration rest =>
-      match psJsLowerDeclaration declaration with
+      match
+          psJsLowerDeclarationWithProfile
+            profile
+            declaration with
       | Except.error error => Except.error error
       | Except.ok lowered =>
-          match psJsLowerDeclarations rest with
+          match
+              psJsLowerDeclarationsWithProfile
+                profile
+                rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok (List.cons lowered loweredRest)
 
-def psJsLowerSpecializedModule
+def psJsLowerDeclarations
+    (declarations : List PsVerifiedIrDeclaration) :
+    Except PsJsLowerError (List PsJsIrDeclaration) :=
+  psJsLowerDeclarationsWithProfile
+    Option.none
+    declarations
+
+def psJsLowerSpecializedModuleWithProfile
+    (profile : Option PsJsTargetProfile)
     (module : PsVerifiedIrModule) :
     Except PsJsLowerError PsJsIrModule :=
-  match psJsLowerImports module.imports with
+  match
+      psJsLowerImportsWithProfile
+        profile
+        module.imports with
   | Except.error error => Except.error error
   | Except.ok imports =>
-      match psJsLowerDeclarations module.declarations with
+      match
+          psJsLowerDeclarationsWithProfile
+            profile
+            module.declarations with
       | Except.error error => Except.error error
       | Except.ok declarations =>
           Except.ok
             (PsJsIrModule.mk imports declarations)
 
-def psJsLowerValidatedModule
+def psJsLowerSpecializedModule
+    (module : PsVerifiedIrModule) :
+    Except PsJsLowerError PsJsIrModule :=
+  psJsLowerSpecializedModuleWithProfile
+    Option.none
+    module
+
+def psJsLowerValidatedModuleWithProfile
+    (profile : Option PsJsTargetProfile)
     (validated : PsValidatedIrModule) :
     Except PsJsLowerError PsJsIrModule :=
   let module : PsVerifiedIrModule := validated.raw;
@@ -1354,4 +1440,21 @@ def psJsLowerValidatedModule
   | Except.error _ =>
       Except.error PsJsLowerError.specializationFailed
   | Except.ok specialized =>
-      psJsLowerSpecializedModule specialized
+      psJsLowerSpecializedModuleWithProfile
+        profile
+        specialized
+
+def psJsLowerValidatedModuleWithTargetProfile
+    (profile : PsJsTargetProfile)
+    (validated : PsValidatedIrModule) :
+    Except PsJsLowerError PsJsIrModule :=
+  psJsLowerValidatedModuleWithProfile
+    (Option.some profile)
+    validated
+
+def psJsLowerValidatedModule
+    (validated : PsValidatedIrModule) :
+    Except PsJsLowerError PsJsIrModule :=
+  psJsLowerValidatedModuleWithProfile
+    Option.none
+    validated

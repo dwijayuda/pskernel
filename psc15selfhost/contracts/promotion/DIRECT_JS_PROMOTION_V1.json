@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-direct-js-promotion/1",
+  "target": "direct-js-canonical-bootstrap",
+  "currentStatus": "gated-not-promoted",
+  "required": [
+    "psc-runtime-semantics/1",
+    "psc-verified-ir/1",
+    "psc-specialized-ir/1",
+    "global-erasure-preservation-or-validator",
+    "global-specialization-preservation-or-validator",
+    "direct-js-whole-compiler-fixed-point",
+    "direct-js-runtime-differential",
+    "checked-authority-production-path"
+  ],
+  "currentBlockers": [
+    "global erasure preservation remains target-unproved beyond proved slices",
+    "global specialization preservation remains target-unproved beyond proved slices",
+    "direct JsIR target-preservation proof/translation validator is not yet complete"
+  ],
+  "policy": {
+    "noAutomaticPromotion": true,
+    "fixedPointAloneInsufficient": true,
+    "fallbackForbidden": true
+  }
+}

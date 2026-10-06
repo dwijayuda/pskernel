@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Inference.Core
 import Ps.KernelCore.Checker.Reduction.Whnf
+import Ps.KernelCore.Metatheory.Context
 
 /-
 Shared Assurance Plane judgments for PSKernel Core.
@@ -386,6 +387,24 @@ inductive PsKernelReductionClosure
         localContext
         query
         result
+  | contextWeaken
+      (older : PsKernelLocalContext)
+      (left right : PsKernelExpr)
+      (hExt :
+        PsKernelLocalContextExtends
+          older
+          localContext)
+      (hReduction :
+        PsKernelReductionClosure
+          environment
+          older
+          left
+          right) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        left
+        right
   | cons
       (left middle right : PsKernelExpr)
       (hStep :
@@ -451,6 +470,24 @@ inductive PsKernelDefEqJudgment
         localContext
         queryLeft
         queryRight
+  | contextWeaken
+      (older : PsKernelLocalContext)
+      (left right : PsKernelExpr)
+      (hExt :
+        PsKernelLocalContextExtends
+          older
+          localContext)
+      (hDefEq :
+        PsKernelDefEqJudgment
+          environment
+          older
+          left
+          right) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
   | structural
       (left right : PsKernelExpr)
       (h : PsKernelStructuralExprEq left right) :
@@ -818,6 +855,24 @@ inductive PsKernelTypingJudgment
         environment
         localContext
         queryExpr
+        result
+  | contextWeaken
+      {older newer : PsKernelLocalContext}
+      (expr result : PsKernelExpr)
+      (hExt :
+        PsKernelLocalContextExtends
+          older
+          newer)
+      (hTyping :
+        PsKernelTypingJudgment
+          environment
+          older
+          expr
+          result) :
+      PsKernelTypingJudgment
+        environment
+        newer
+        expr
         result
   | sort
       {localContext : PsKernelLocalContext}

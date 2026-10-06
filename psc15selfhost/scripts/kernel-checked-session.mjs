@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 import { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 import {
@@ -12,6 +12,11 @@ const hash = text => createHash('sha256').update(text, 'utf8').digest('hex');
 
 export function unwrapCompilerResult(result, stage) {
   if (result !== null && typeof result === 'object') {
+    if (Object.hasOwn(result, '$ps$tag')) {
+      if (result.$ps$tag === 'ok' && result.$ps$fields && Object.hasOwn(result.$ps$fields, 'value')) return result.$ps$fields.value;
+      if (result.$ps$tag === 'error') throw new Error(`PSC2_CHECKED_${stage}_FAILED`);
+      throw new Error(`PSC2_CHECKED_${stage}_RESULT_SHAPE`);
+    }
     const tags = Object.getOwnPropertySymbols(result).map(key => result[key]);
     if (tags.includes('ok') && !tags.includes('error')) return result.value;
     if (tags.includes('error') && !tags.includes('ok')) {
@@ -62,7 +67,17 @@ export function createKernelCheckedSession(
   expectedIdentity = leanCheckedIdentity,
   kernelContract = kernelContractV1,
   providerSecurity = Object.freeze({ contract: 'psc-provider-security/1', profile: 'unclassified-development' }),
+  policy = {},
 ) {
+  const sessionIdentity = randomUUID();
+  const targets = Object.freeze([...(policy.targets ?? ['typescript'])]);
+  const permittedTargets = new Set(['typescript', 'javascript', 'wasm', 'rust']);
+  if (targets.length === 0 || targets.some(target => !permittedTargets.has(target))) throw new Error('PSC2_CHECKED_TARGET_POLICY');
+  const security = freezeGraph(structuredClone(providerSecurity));
+  const assumptionPolicy = policy.assumptionPolicy ?? 'kernel-contract-default';
+  const resourcePolicy = policy.resourcePolicy ?? 'kernel-contract-default';
+  if (typeof assumptionPolicy !== 'string' || !assumptionPolicy || typeof resourcePolicy !== 'string' || !resourcePolicy) throw new Error('PSC2_CHECKED_POLICY_IDENTITY');
+  let closed = false;
   const identity = Object.freeze({ ...expectedIdentity });
   if (!identity.protocol || !identity.provider || !identity.profile) {
     throw new Error('PSC2_CHECKED_IDENTITY_REQUIRED');
@@ -71,13 +86,20 @@ export function createKernelCheckedSession(
       kernelContract?.sha256 !== kernelContractV1.sha256) {
     throw new Error('PSC2_KERNEL_CONTRACT_IDENTITY');
   }
-  for (const name of ['psCompilerPrepareSource', 'psCompilerAdmissionsFromPrepared',
-    'psCompilerTypeScriptFromPrepared']) {
+  for (const name of ['psCompilerPrepareSource', 'psCompilerAdmissionsFromPrepared']) {
     if (typeof compiler?.[name] !== 'function') throw new Error(`PSC2_CHECKED_API_MISSING: ${name}`);
   }
   if (typeof checkAdmissions !== 'function') throw new TypeError('Expected kernel checker');
   const modules = new WeakMap();
+  function requireOpen() { if (closed) throw new Error('PSC2_CHECKED_SESSION_CLOSED'); }
+  function checkedItem(handle) {
+    requireOpen();
+    const item = handle !== null && typeof handle === 'object' ? modules.get(handle) : undefined;
+    if (!item) throw new Error('PSC2_CHECKED_UNCHECKED_MODULE');
+    return item;
+  }
   async function checkPrepared(prepared, source) {
+      requireOpen();
       if (prepared === null || typeof prepared !== 'object') throw new Error('PSC2_CHECKED_PREPARE_RESULT_SHAPE');
       freezeGraph(prepared);
       const admissions = admissionsFrom(compiler, prepared);
@@ -88,24 +110,52 @@ export function createKernelCheckedSession(
         if (result?.[field] !== expected) throw new Error(`PSC2_CHECKED_PROVIDER_IDENTITY: ${field}`);
       }
       if (!result.accepted) throw new Error(`PSC2_KERNEL_REJECTED: ${result.errorKind}`);
+      requireOpen();
       const handle = Object.freeze({
         capability: 'psc-checked-core-capability/1',
+        sessionIdentity,
+        semanticProfile: identity.profile,
+        assumptionPolicy,
+        resourcePolicy,
+        targets,
         sourceSha256: hash(source),
         canonicalAdmissionsSha256: hash(admissions),
         kernelContract: kernelContractV1,
         provider: identity,
-        providerSecurity,
+        providerSecurity: security,
       });
       modules.set(handle, { prepared, admissions });
       return handle;
   }
+  function emitTarget(handle, target) {
+      const item = checkedItem(handle);
+      if (!targets.includes(target)) throw new Error('PSC2_CHECKED_TARGET_FORBIDDEN');
+      if (admissionsFrom(compiler, item.prepared) !== item.admissions) {
+        throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
+      }
+      const names = { typescript: 'psCompilerTypeScriptFromPrepared', javascript: 'psCompilerJavaScriptFromPrepared',
+        rust: 'psCompilerRustFromPrepared', wasm: 'psCompilerWasmFromPrepared' };
+      const name = names[target];
+      if (typeof compiler[name] !== 'function') throw new Error(`PSC2_CHECKED_API_MISSING: ${name}`);
+      let result;
+      if (target === 'typescript') result = compiler.psCompilerTypeScriptFromPrepared(item.prepared);
+      else if (target === 'wasm') {
+        if (!compiler.psCompilerWasm32Target) throw new Error('PSC2_CHECKED_WASM_TARGET_MISSING');
+        result = compiler[name](compiler.psCompilerWasm32Target, item.prepared);
+      } else result = compiler[name](item.prepared);
+      const output = unwrapCompilerResult(result, 'EMIT');
+      if (target !== 'wasm' && typeof output !== 'string') throw new Error('PSC2_CHECKED_EMIT_RESULT_SHAPE');
+      return output;
+  }
   return Object.freeze({
     async check(sourceKind, source) {
+      requireOpen();
       if (typeof source !== 'string') throw new TypeError('Expected immutable source text');
       const prepared = unwrapCompilerResult(compiler.psCompilerPrepareSource(sourceKind, source), 'PREPARE');
       return checkPrepared(prepared, source);
     },
     async checkSources(sourceKind, sources) {
+      requireOpen();
       if (!Array.isArray(sources) || sources.some(source => typeof source !== 'string')) {
         throw new TypeError('Expected immutable source texts');
       }
@@ -120,14 +170,11 @@ export function createKernelCheckedSession(
       return checkPrepared(prepared, source);
     },
     emit(handle) {
-      const item = handle !== null && typeof handle === 'object' ? modules.get(handle) : undefined;
-      if (!item) throw new Error('PSC2_CHECKED_UNCHECKED_MODULE');
-      if (admissionsFrom(compiler, item.prepared) !== item.admissions) {
-        throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
-      }
-      const output = unwrapCompilerResult(compiler.psCompilerTypeScriptFromPrepared(item.prepared), 'EMIT');
-      if (typeof output !== 'string') throw new Error('PSC2_CHECKED_EMIT_RESULT_SHAPE');
-      return output;
+      return emitTarget(handle, 'typescript');
     },
+    emitTarget,
+    describe(handle) { checkedItem(handle); return handle; },
+    revoke(handle) { checkedItem(handle); modules.delete(handle); },
+    close() { closed = true; },
   });
 }

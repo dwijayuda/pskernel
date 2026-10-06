@@ -5,19 +5,23 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
-Checkpoint P0/P2/P3:
-- architecture/contract registry: implemented in this checkpoint
-- ProviderSecurityProfile: implemented in this checkpoint
-- compiler-wide TrustManifest: implemented in this checkpoint
-- checked host capability identity: strengthened in this checkpoint
-- PSC1 self-host rule: all future portable Lean/ProofScript compiler code must pass PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1 where applicable
+Mode: implementation first, as requested on 2026-10-07. Continue research and implementation with focused compilation, portable-profile and boundary checks. Extensive regression campaigns, fixed-point reruns and formal assurance are deferred to the later assurance pass; existing CI failures remain recorded and actionable. No implementation milestone implies final V3 acceptance.
+
+- Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
+- Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
+- Current checkpoint: production checked service plus explicit candidate/internal/bootstrap ownership.
+- Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
 
-1. close production AdmissionReady -> erasure bypass without breaking the bootstrap-only self-host path
-2. make algorithmic-defeq/cache contracts machine-readable
-3. finish VerifiedIR invariant gap registry
-4. introduce explicit SpecializedIR capability using PSC1-compatible source patterns
+1. Implement portable dependency interfaces and actual import/link validation; reconcile runtime capability and representation constraints against section 14.
+2. Complete pass/artifact evidence, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
+3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
+4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
+
+## Historical checkpoint P0/P2/P3
+
+- architecture/contract registry, ProviderSecurityProfile, compiler-wide TrustManifest and initial checked host identity implemented.
 
 ## Checkpoint P1/P4/P5/P6
 
@@ -176,3 +180,12 @@ Checkpoint P0/P2/P3:
 - The full emitted SelfHostRust compiler passes local metadata-only type/ownership checking. The 56-module stable self-host contract passes canonical source, admissions, and TypeScript parity. Local source/profile and workspace gates pass; general erasure/specialization preservation remains target-unproved.
 - GitHub e9778df direct JS timed out after 20 minutes at source preparation module 13/58 (run 37512767797, job 112438116083). Native Rust built and entered generation-2 compilation, then overflowed its stack (run 37512768115, job 112437895111). These remain failed full-bootstrap results. The cached-count and eta changes require a new cloud run; the earlier local cached-count fixed-point diagnostic was interrupted and is not acceptance evidence.
 - User requested stopping before the next stage. Finish publishing/checking this repair checkpoint, then stop before further invariant/link work, global-preservation work, or promotion/bootstrap acceptance work. The two VerifiedIR interface/link gaps, full fixed points, global proofs, diverse/verified bootstrap and final V3 acceptance remain open.
+
+## 2026-10-07 implementation-first authority checkpoint
+
+- Reconciled all 57 reference sections into an explicit workstream ledger. Scaffolding, implementation availability, assurance and release acceptance remain separate states.
+- Split the portable compiler into Model, Frontend, Candidate and Internal owners. Compiler.Api and each driver Compiler module are compatibility facades over explicitly marked bootstrap transforms. Existing declaration identities and bootstrap entry points are preserved.
+- Production checked-build now composes a checked service. Live session handles bind target policy, provider/security identity, semantic/assumption/resource policy and exact accepted admissions. The service supports TS, direct JS, Rust and Wasm emission through those handles, revocation, session closure, output bounds and byte-digest receipts. Receipts cannot recreate authority. Transformation preservation remains explicitly unproved, and trusted host composition does not claim to sandbox malicious host code.
+- Production import topology audit rejects raw transform references outside the checked session and checks candidate/internal ownership. Existing source guards retain their assertions under the new owners.
+- Focused evidence: Lean compiler build, PSC1 Internal check (1993 declarations), portable profile (91 modules), source-owner guards, authority topology, and 25 checked-session/service tests pass. Extensive whole-closure and formal campaigns are deferred by user instruction.
+- GitHub 0849ae7: four bounded/native/provider workflows passed; direct Rust run 37516533780 passed fixture execution and whole-compiler generation, then failed its native fixed point with a stack overflow. This is an open implementation/assurance issue, not successful bootstrap evidence.

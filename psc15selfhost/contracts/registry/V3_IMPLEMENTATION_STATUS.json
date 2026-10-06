@@ -1,0 +1,725 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-v3-implementation-status/1",
+  "reference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+  "executionBranch": "pscv/v3-execution",
+  "startingCommit": "0849ae75ff6ce7c970603501581798fd153f0f8e",
+  "mode": "implementation-first",
+  "policy": {
+    "extensiveTesting": "deferred-to-assurance-pass",
+    "formalProofs": "explicit-obligations-until-checked",
+    "portableProfiles": [
+      "PSC1-selfhost-stable/1",
+      "PSC1-portable-selfhost/1"
+    ],
+    "scaffoldIsImplementationComplete": false,
+    "implementationCompleteIsAcceptedRelease": false
+  },
+  "workstreams": [
+    {
+      "id": "authority",
+      "sections": [
+        10,
+        11,
+        12,
+        13,
+        43
+      ],
+      "status": "implementation-available-assurance-pending",
+      "owners": [
+        "scripts/kernel-checked-session.mjs",
+        "scripts/compiler-checked-service.mjs",
+        "scripts/production-authority-audit.mjs",
+        "packages/compiler/src/Ps/Compiler/Candidate.lean",
+        "packages/compiler/src/Ps/Compiler/Internal.lean"
+      ],
+      "completion": "Production drivers accept only live checked handles; raw preparation/erasure has explicit bootstrap/internal ownership.",
+      "assurance": "pending"
+    },
+    {
+      "id": "identity-trust",
+      "sections": [
+        5,
+        7,
+        9,
+        17,
+        39,
+        40
+      ],
+      "status": "partial",
+      "owners": [
+        "TRUST_MANIFEST.json"
+      ],
+      "completion": "Complete semantic, implementation, security, assumption, resource and lineage identities bind exact artifacts and computed trust closure.",
+      "assurance": "pending"
+    },
+    {
+      "id": "defeq-cache",
+      "sections": [
+        3,
+        4
+      ],
+      "status": "partial",
+      "owners": [
+        "contracts/semantic/ALGORITHMIC_DEFEQ_CACHE_V1.json"
+      ],
+      "completion": "Executable cache validity follows exact query/context identities; no unsupported equivalence closure.",
+      "assurance": "pending"
+    },
+    {
+      "id": "verified-ir",
+      "sections": [
+        14
+      ],
+      "status": "partial",
+      "owners": [
+        "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean"
+      ],
+      "completion": "All declared executable invariants including capabilities, interfaces, ABI and links are checked.",
+      "assurance": "pending"
+    },
+    {
+      "id": "pass-evidence",
+      "sections": [
+        15,
+        16
+      ],
+      "status": "partial",
+      "owners": [
+        "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean"
+      ],
+      "completion": "Every transformation records canonical action/input/output IDs, semantic relation, assumptions, resources and evidence requirements.",
+      "assurance": "pending"
+    },
+    {
+      "id": "query-interfaces",
+      "sections": [
+        18,
+        24
+      ],
+      "status": "partial",
+      "owners": [
+        "packages/project/src/Ps/Project/QueryGraph.lean"
+      ],
+      "completion": "Structural and behavioral interfaces drive actual invalidation and dependency compatibility.",
+      "assurance": "pending"
+    },
+    {
+      "id": "cache-store",
+      "sections": [
+        19,
+        30
+      ],
+      "status": "partial",
+      "owners": [
+        "scripts/cache-utils.mjs"
+      ],
+      "completion": "Untrusted cache reads verify canonical bytes, action, schema, evidence class and fingerprint provenance.",
+      "assurance": "pending"
+    },
+    {
+      "id": "resources",
+      "sections": [
+        20,
+        21,
+        22,
+        23,
+        31
+      ],
+      "status": "partial",
+      "owners": [
+        "contracts/resource/COMPILATION_RESOURCE_V1.json"
+      ],
+      "completion": "Budgets and bounded decoders return classified failures; measurements distinguish host-observed resources.",
+      "assurance": "pending"
+    },
+    {
+      "id": "core-theory",
+      "sections": [
+        8,
+        9
+      ],
+      "status": "seed",
+      "owners": [
+        "theory/core/DECLARATIVE_CORE_SEED_V1.json"
+      ],
+      "completion": "Implement complete theory definitions and explicit checker/model refinement obligations without creating unproved authority.",
+      "assurance": "pending"
+    },
+    {
+      "id": "preservation",
+      "sections": [
+        14,
+        15,
+        29
+      ],
+      "status": "partial",
+      "owners": [
+        "contracts/ir/ERASURE_PRESERVATION_V0.json"
+      ],
+      "completion": "Erasure, specialization and target passes expose complete relation/validator interfaces and coverage with explicit proof obligations.",
+      "assurance": "pending"
+    },
+    {
+      "id": "backends",
+      "sections": [
+        28,
+        29,
+        32
+      ],
+      "status": "partial",
+      "owners": [
+        "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean"
+      ],
+      "completion": "Supported JS/Wasm/TS/Rust paths compile, validate and report unsupported cases deterministically.",
+      "assurance": "pending"
+    },
+    {
+      "id": "comparator",
+      "sections": [
+        6,
+        7,
+        41
+      ],
+      "status": "prototype",
+      "owners": [
+        "scripts/comparator-v1.mjs"
+      ],
+      "completion": "Trusted challenge, isolated producer, bounded export decoding, statement/interface match, assumption policy and checker evidence determine outcomes.",
+      "assurance": "pending"
+    },
+    {
+      "id": "solver-certificates",
+      "sections": [
+        27
+      ],
+      "status": "missing",
+      "owners": [],
+      "completion": "External solver results create authority only through a configured certificate checker.",
+      "assurance": "pending"
+    },
+    {
+      "id": "executable-interop",
+      "sections": [
+        26
+      ],
+      "status": "missing",
+      "owners": [],
+      "completion": "Typed functions, aggregates, handles, ownership, errors, streams/futures, targets and capability imports/exports drive adapters.",
+      "assurance": "pending"
+    },
+    {
+      "id": "logical-interop",
+      "sections": [
+        25
+      ],
+      "status": "prototype",
+      "owners": [
+        "packages/theory-bridge/src/Ps/TheoryBridge/Model.lean"
+      ],
+      "completion": "Theory translations bind symbol/axiom maps, assumptions, unsupported features and preservation evidence.",
+      "assurance": "pending"
+    },
+    {
+      "id": "savef",
+      "sections": [
+        35,
+        36,
+        37
+      ],
+      "status": "prototype",
+      "owners": [
+        "scripts/savef-object.mjs"
+      ],
+      "completion": "Typed graphs, ValidUnder checks, migrations, supersession, failure knowledge and accepted reuse events operate end to end.",
+      "assurance": "pending"
+    },
+    {
+      "id": "verifier-archive",
+      "sections": [
+        33,
+        34,
+        40
+      ],
+      "status": "prototype",
+      "owners": [
+        "scripts/pscv-verify.mjs"
+      ],
+      "completion": "Standalone bounded verification replays supported evidence and validates archives, provenance and algorithm/domain/schema-qualified hashes offline.",
+      "assurance": "pending"
+    },
+    {
+      "id": "factorybench",
+      "sections": [
+        38
+      ],
+      "status": "policy-only",
+      "owners": [
+        "factory/bench/FACTORYBENCH_V4_HOLDOUT.json"
+      ],
+      "completion": "A sealed holdout and executable B0-B4 harness produce comparable measurements without retrieval leakage.",
+      "assurance": "pending"
+    },
+    {
+      "id": "bootstrap-promotion",
+      "sections": [
+        32,
+        28
+      ],
+      "status": "partial",
+      "owners": [
+        "contracts/bootstrap/BOOTSTRAP_ASSURANCE_V1.json"
+      ],
+      "completion": "Campaign runners and promotion gates distinguish fixed points, reproducibility, DDC, preservation and verified binaries.",
+      "assurance": "pending"
+    },
+    {
+      "id": "indexing-layout",
+      "sections": [
+        42,
+        43,
+        44,
+        45,
+        57
+      ],
+      "status": "partial",
+      "owners": [
+        "contracts/registry/ARCHITECTURE_REGISTRY.json"
+      ],
+      "completion": "Canonical semantic ownership, sidecars, historical indexing and semantic deltas guide incremental organization.",
+      "assurance": "pending"
+    },
+    {
+      "id": "adversarial",
+      "sections": [
+        41
+      ],
+      "status": "partial",
+      "owners": [
+        "scripts/kernel-checked-session.test.mjs"
+      ],
+      "completion": "Attack-family fixtures and deterministic failure contracts cover every authority boundary; extensive execution is deferred.",
+      "assurance": "pending"
+    },
+    {
+      "id": "acceptance",
+      "sections": [
+        1,
+        46,
+        48,
+        49,
+        50,
+        52,
+        53,
+        56
+      ],
+      "status": "partial",
+      "owners": [
+        "scripts/v3-acceptance-audit.mjs"
+      ],
+      "completion": "Implementation inventory and acceptance evidence are separate; no target score, manifest declaration or fixture result implies global completion.",
+      "assurance": "pending"
+    }
+  ],
+  "sectionCoverage": [
+    {
+      "section": 1,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "acceptance"
+      ]
+    },
+    {
+      "section": 2,
+      "kind": "context-design-evaluation-or-research",
+      "workstreams": []
+    },
+    {
+      "section": 3,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "defeq-cache"
+      ]
+    },
+    {
+      "section": 4,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "defeq-cache"
+      ]
+    },
+    {
+      "section": 5,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "identity-trust"
+      ]
+    },
+    {
+      "section": 6,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "comparator"
+      ]
+    },
+    {
+      "section": 7,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "identity-trust",
+        "comparator"
+      ]
+    },
+    {
+      "section": 8,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "core-theory"
+      ]
+    },
+    {
+      "section": 9,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "identity-trust",
+        "core-theory"
+      ]
+    },
+    {
+      "section": 10,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "authority"
+      ]
+    },
+    {
+      "section": 11,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "authority"
+      ]
+    },
+    {
+      "section": 12,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "authority"
+      ]
+    },
+    {
+      "section": 13,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "authority"
+      ]
+    },
+    {
+      "section": 14,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "verified-ir",
+        "preservation"
+      ]
+    },
+    {
+      "section": 15,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "pass-evidence",
+        "preservation"
+      ]
+    },
+    {
+      "section": 16,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "pass-evidence"
+      ]
+    },
+    {
+      "section": 17,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "identity-trust"
+      ]
+    },
+    {
+      "section": 18,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "query-interfaces"
+      ]
+    },
+    {
+      "section": 19,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "cache-store"
+      ]
+    },
+    {
+      "section": 20,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "resources"
+      ]
+    },
+    {
+      "section": 21,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "resources"
+      ]
+    },
+    {
+      "section": 22,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "resources"
+      ]
+    },
+    {
+      "section": 23,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "resources"
+      ]
+    },
+    {
+      "section": 24,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "query-interfaces"
+      ]
+    },
+    {
+      "section": 25,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "logical-interop"
+      ]
+    },
+    {
+      "section": 26,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "executable-interop"
+      ]
+    },
+    {
+      "section": 27,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "solver-certificates"
+      ]
+    },
+    {
+      "section": 28,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "backends",
+        "bootstrap-promotion"
+      ]
+    },
+    {
+      "section": 29,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "preservation",
+        "backends"
+      ]
+    },
+    {
+      "section": 30,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "cache-store"
+      ]
+    },
+    {
+      "section": 31,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "resources"
+      ]
+    },
+    {
+      "section": 32,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "backends",
+        "bootstrap-promotion"
+      ]
+    },
+    {
+      "section": 33,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "verifier-archive"
+      ]
+    },
+    {
+      "section": 34,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "verifier-archive"
+      ]
+    },
+    {
+      "section": 35,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "savef"
+      ]
+    },
+    {
+      "section": 36,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "savef"
+      ]
+    },
+    {
+      "section": 37,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "savef"
+      ]
+    },
+    {
+      "section": 38,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "factorybench"
+      ]
+    },
+    {
+      "section": 39,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "identity-trust"
+      ]
+    },
+    {
+      "section": 40,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "identity-trust",
+        "verifier-archive"
+      ]
+    },
+    {
+      "section": 41,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "comparator",
+        "adversarial"
+      ]
+    },
+    {
+      "section": 42,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "indexing-layout"
+      ]
+    },
+    {
+      "section": 43,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "authority",
+        "indexing-layout"
+      ]
+    },
+    {
+      "section": 44,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "indexing-layout"
+      ]
+    },
+    {
+      "section": 45,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "indexing-layout"
+      ]
+    },
+    {
+      "section": 46,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "acceptance"
+      ]
+    },
+    {
+      "section": 47,
+      "kind": "context-design-evaluation-or-research",
+      "workstreams": []
+    },
+    {
+      "section": 48,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "acceptance"
+      ]
+    },
+    {
+      "section": 49,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "acceptance"
+      ]
+    },
+    {
+      "section": 50,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "acceptance"
+      ]
+    },
+    {
+      "section": 51,
+      "kind": "context-design-evaluation-or-research",
+      "workstreams": []
+    },
+    {
+      "section": 52,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "acceptance"
+      ]
+    },
+    {
+      "section": 53,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "acceptance"
+      ]
+    },
+    {
+      "section": 54,
+      "kind": "context-design-evaluation-or-research",
+      "workstreams": []
+    },
+    {
+      "section": 55,
+      "kind": "context-design-evaluation-or-research",
+      "workstreams": []
+    },
+    {
+      "section": 56,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "acceptance"
+      ]
+    },
+    {
+      "section": 57,
+      "kind": "implementation-requirements",
+      "workstreams": [
+        "indexing-layout"
+      ]
+    }
+  ]
+}

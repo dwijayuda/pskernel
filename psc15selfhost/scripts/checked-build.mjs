@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
-import { createKernelCheckedSession } from './kernel-checked-session.mjs';
+import { createCheckedCompilerService } from './compiler-checked-service.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkAdmissionsWithDual } from './checked-kernel-dual.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
@@ -79,10 +79,10 @@ export async function buildChecked({
       ? compiler.PsCompilerSourceKind?.proofScript
       : compiler.PsCompilerSourceKind?.lean;
     if (kind === undefined) throw new Error('PSC2_CHECKED_SOURCE_KIND_API_MISSING');
-    const session = createKernelCheckedSession(compiler, async text => {
+    const session = createCheckedCompilerService({ compiler, checkAdmissions: async text => {
       admissions = text;
       return checkAdmissions(text);
-    }, checkedKernelIdentity(kernel), kernelContractV1, selectedProviderSecurity);
+    }, identity: checkedKernelIdentity(kernel), kernelContract: kernelContractV1, providerSecurity: selectedProviderSecurity });
     const handle = await session.checkSources(kind, snapshot.sources);
     if (!checkOnly) typeScript = session.emit(handle);
   }

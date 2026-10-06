@@ -15,3 +15,40 @@ if(!uncheckedBlock.includes("compile-with-generated.mjs")) throw new Error("PSC_
 const session=await readFile(path.join(root,"scripts/kernel-checked-session.mjs"),"utf8");
 if(!session.includes("psc-checked-core-capability/1")||!session.includes("WeakMap")) throw new Error("PSC_CHECKED_CAPABILITY_BOUNDARY");
 process.stdout.write("PSCV_PRODUCTION_AUTHORITY: PASS (checked build default; unchecked build explicit)\n");
+// Compiler authority topology. These checks enforce repository ownership; they
+// do not claim sandbox isolation against malicious code in the trusted host.
+const read = file => readFile(path.join(root, file), 'utf8');
+const owners = ['Model', 'Frontend', 'Candidate'];
+for (const owner of owners) {
+  const source = await read('packages/compiler/src/Ps/Compiler/' + owner + '.lean');
+  if (/import\s+Ps\.Compiler\.(?:Api|Internal)|import\s+Ps\.Erasure\.Definition|\bpsEraseCoreModule(?:WithRuntimePrelude)?\b/u.test(source)) {
+    throw new Error('PSC_CANDIDATE_IMPORTS_TRANSFORMATION: ' + owner);
+  }
+}
+const facade = await read('packages/compiler/src/Ps/Compiler/Api.lean');
+if (!/^import Ps\.Compiler\.Internal\s*$/mu.test(facade) || /^(?:def|structure|inductive)\s/mu.test(facade)) {
+  throw new Error('PSC_BOOTSTRAP_API_FACADE');
+}
+for (const [folder, name] of [['driver-ts','DriverTs'],['driver-js','DriverJs'],['driver-wasm','DriverWasm'],['driver-rust','DriverRust']]) {
+  const manifest = JSON.parse(await read('packages/' + folder + '/package.json'));
+  if (manifest.proofscript.authorityRole !== 'bootstrap-transform') throw new Error('PSC_DRIVER_AUTHORITY_ROLE');
+  const source = await read('packages/' + folder + '/src/Ps/' + name + '/Compiler.lean');
+  if (!source.includes('import Ps.' + name + '.Bootstrap') || /^(?:def|structure|inductive)\s/mu.test(source)) throw new Error('PSC_DRIVER_BOOTSTRAP_FACADE');
+}
+const visited = new Set(), pending = ['scripts/checked-build.mjs'];
+while (pending.length) {
+  const file = pending.pop();
+  if (visited.has(file)) continue;
+  visited.add(file);
+  const source = await read(file);
+  if (file === 'scripts/compile-with-generated.mjs') throw new Error('PSC_PRODUCTION_IMPORTS_UNCHECKED_DRIVER');
+  const rawCalls = /\bpsCompiler(?:ErasedIr|VerifiedIr|TypeScript|JavaScript|Rust|Wasm)FromPrepared\b/u;
+  if (rawCalls.test(source) && file !== 'scripts/kernel-checked-session.mjs') throw new Error('PSC_RAW_EMITTER_OUTSIDE_AUTHORITY: ' + file);
+  for (const match of source.matchAll(/(?:from\s*|import\s*)['"](\.[^'"]+\.mjs)['"]/gu)) {
+    const dependency = path.posix.normalize(path.posix.join(path.posix.dirname(file), match[1]));
+    if (dependency.startsWith('../')) throw new Error('PSC_AUTHORITY_IMPORT_ESCAPE');
+    pending.push(dependency);
+  }
+}
+if (!visited.has('scripts/compiler-checked-service.mjs') || !visited.has('scripts/kernel-checked-session.mjs')) throw new Error('PSC_CHECKED_SERVICE_TOPOLOGY');
+process.stdout.write('PSCV_AUTHORITY_TOPOLOGY: PASS (candidate/internal separation; checked host production imports)\n');

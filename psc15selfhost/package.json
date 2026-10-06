@@ -180,7 +180,7 @@
     "test:direct-rust-whole-compiler": "node scripts/direct-rust-whole-compiler.test.mjs",
     "test:direct-rust-selfhost": "node scripts/direct-rust-selfhost-fixed-point.mjs",
     "test:architecture-contracts": "node --test scripts/architecture-contracts.test.mjs scripts/provider-security.test.mjs scripts/comparator-v1.test.mjs",
-    "check:architecture-contracts": "npm run test:architecture-contracts && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs && npm run check:semantic-contracts && npm run check:production-authority && npm run check:defeq-cache-source && npm run check:theory-seed && npm run test:savef",
+    "check:architecture-contracts": "npm run test:architecture-contracts && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs && npm run check:semantic-contracts && npm run check:production-authority && npm run check:defeq-cache-source && npm run check:resource-contract && npm run check:theory-seed && npm run test:savef",
     "check:semantic-contracts": "node scripts/semantic-contract-audit.mjs",
     "check:production-authority": "node scripts/production-authority-audit.mjs",
     "test:comparator-v1": "node --test scripts/comparator-v1.test.mjs",
@@ -188,7 +188,8 @@
     "test:savef": "node --test scripts/savef-object.test.mjs scripts/pscv-verify.test.mjs",
     "verify:offline-prototype": "node scripts/pscv-verify.mjs",
     "check:wasm-translation-validator": "lake exe psc1_backend_wasm_tests",
-    "check:defeq-cache-source": "node scripts/defeq-cache-source-audit.mjs"
+    "check:defeq-cache-source": "node scripts/defeq-cache-source-audit.mjs",
+    "check:resource-contract": "node scripts/resource-contract-audit.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

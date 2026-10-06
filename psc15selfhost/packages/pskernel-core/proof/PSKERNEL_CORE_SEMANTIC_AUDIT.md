@@ -13,10 +13,10 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 33 |
-| B | 14 |
-| C | 24 |
-| D | 8 |
+| A | 41 |
+| B | 10 |
+| C | 21 |
+| D | 7 |
 | **Total canonical source/proof pairs** | **79** |
 
 The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and is used when grading `Checker/Inference/Core`; it is not one of the 79 canonical source/proof pairs.
@@ -32,10 +32,10 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `API/Session.lean` | **A** | Session environment construction is proved semantically transparent to native-evaluator installation and preserves `EnvironmentIndexRefines`, alongside fail-closed preflight facts. |
 | `Admission/Declaration/Admission.lean` | **A** | Successful checked safe-definition/theorem admission now refines the shared `PsKernelDeclarationExtension`; remaining declaration variants are being closed on the same relation. |
 | `Admission/Declaration/Validation.lean` | **A** | Successful definition-body validation refines `PsKernelDefinitionBodyValid`, including closedness, universe-parameter discipline, typing, and declared-type defeq under explicit checker soundness contracts. |
-| `Admission/Inductive/Common/Elimination.lean` | **C** | Fuel/base control facts only. |
-| `Admission/Inductive/Common/Occurrence.lean` | **C** | Selected occurrence/control cases; positivity semantics incomplete. |
+| `Admission/Inductive/Common/Elimination.lean` | **A** | K-target is characterized exactly as Prop/zero-level + one fieldless constructor, and successful elimination-only-at-zero decisions expose the semantic reason large elimination is forbidden. |
+| `Admission/Inductive/Common/Occurrence.lean` | **A** | Successful fuel-bounded uniform-occurrence checking refines the fuel-free `PsKernelUniformOccurrenceSafe` predicate; declared occurrences certify exact parameter arity, universe levels, offset, and uniform bvar arguments. |
 | `Admission/Inductive/Common/Parameters.lean` | **B** | Reusable binder/list structure plus opening base case. |
-| `Admission/Inductive/Common/RecursorValidation.lean` | **D** | Empty-worker base case only. |
+| `Admission/Inductive/Common/RecursorValidation.lean` | **A** | Successful recursor-rule validation refines `PsKernelSimpleRecursorRulesValid`, proving each generated rule RHS is typed and definitionally equal to the expected closed motive application under explicit session soundness contracts. |
 | `Admission/Inductive/Mutual/Admission.lean` | **C** | Selected rejection/empty transaction behavior. |
 | `Admission/Inductive/Mutual/AdmissionLoops.lean` | **D** | Empty-worker base case only. |
 | `Admission/Inductive/Mutual/Analysis.lean` | **B** | Reusable structural analysis lemmas; mutual positivity relation incomplete. |
@@ -52,7 +52,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Admission/Inductive/Nested/Types.lean` | **D** | Structure eta only. |
 | `Admission/Inductive/Nested/Validation.lean` | **C** | Length/fuel control; restored-type preservation incomplete. |
 | `Admission/Inductive/Ordinary/Admission.lean` | **C** | Fresh-name empty behavior only. |
-| `Admission/Inductive/Ordinary/Constructor.lean` | **B** | Binder/field structural laws; positivity theorem incomplete. |
+| `Admission/Inductive/Ordinary/Constructor.lean` | **A** | Successful constructor-result validation refines `PsKernelSimpleConstructorResultValid`: exact datatype head/name, universes, parameter consumption, index arity, and absence of recursive occurrences in result indices; recursive-field positivity remains a downstream obligation. |
 | `Admission/Inductive/Ordinary/ConstructorAdmission.lean` | **C** | Fuel exhaustion only. |
 | `Admission/Inductive/Ordinary/Recursor.lean` | **B** | Recursor helper/list laws; generated-rule semantic validity incomplete. |
 | `Admission/Inductive/Types.lean` | **B** | Basic list/name/binder helper laws. |
@@ -60,7 +60,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Admission/Quot/Bootstrap.lean` | **A** | Successful reserved-name validation now proves every requested Quot name is absent from authoritative semantic declaration history under `EnvironmentIndexRefines`; binder construction laws remain supporting evidence. |
 | `Checker/Context.lean` | **B** | Context construction/freshness/application helper invariants. |
 | `Checker/DefEq/BinderSpines.lean` | **A** | `psKernelDefEqFinish` now preserves checker-state semantic soundness under the isolated successful-pair cache insertion law; binder-spine congruence itself still needs deeper semantic coverage. |
-| `Checker/DefEq/DeltaStep.lean` | **C** | Delta-step result/control cases. |
+| `Checker/DefEq/DeltaStep.lean` | **A** | Successful delta unfolding and projection-app unfolding now refine `PsKernelReductionClosure` through the shared Delta metatheory; quick equal/cache finish paths also refine `PsKernelDefEqJudgment`. |
 | `Checker/DefEq/FinalRules.lean` | **C** | Fuel/control only for final rules. |
 | `Checker/DefEq/FullShape.lean` | **A** | Full-shape Sort and literal success paths now refine the independent algorithmic defeq judgment; app/binder/eta terminal cases remain to be connected. |
 | `Checker/DefEq/LazyDelta.lean` | **C** | Fuel exhaustion only. |
@@ -86,9 +86,9 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/State.lean` | **A** | Empty checker state now establishes independent inference-cache and successful-defeq-cache soundness invariants; field-isolation/freshness laws support preservation proofs. |
 | `Core/Declaration.lean` | **B** | Declaration projection/safety/delta facts. |
 | `Core/Expr.lean` | **A** | `psKernelExprEq = true` now refines an independent structural-expression equality relation and therefore the formal non-transitive defeq judgment; spine/fvar/list helper laws remain available. |
-| `Core/Level.lean` | **B** | Offset/list normalization foundations; full universe semantic equivalence proof pending. |
+| `Core/Level.lean` | **A** | Under the explicit string-runtime comparator soundness law, structural level equality is sound and `psKernelLevelEquivalent = true` implies equality of normalized universe levels; offset/list normalization foundations remain supporting evidence. |
 | `Core/LocalContext.lean` | **A** | Successful authoritative local-context lookup is proved to return a declaration present in `context.decls` whose kernel name matches the queried name; add/value structural laws remain as supporting invariants. |
-| `Core/Name.lean` | **B** | Append/list algebra; equality correctness pending. |
+| `Core/Name.lean` | **A** | Name equality now has symmetry/transitivity and, under explicit string-runtime reflexivity/soundness TCB laws, `psKernelNameEq = true ↔` actual `PsKernelName` equality. |
 | `Core/Substitution/Abstract.lean` | **A** | Production free-variable abstraction now refines a total fuel-free reference semantics; singleton abstraction/instantiation roundtrip is being generalized over the full tree. |
 | `Core/Substitution/Beta.lean` | **A** | Single-lambda cheap beta is proved to either preserve the original term or realize the formal `PsKernelReductionStep.beta`; closed-body and identity cases remain as concrete corollaries. |
 | `Core/Substitution/Instantiate.lean` | **A** | `InstantiateAt`/`Instantiate`/`Instantiate1`/`InstantiateRev` now refine total fuel-free reference semantics; arbitrary-depth closed instantiation is proved identity. |
@@ -100,7 +100,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Environment/Semantic.lean` | **A** | Successful authoritative declaration-list lookup is proved to return an element of semantic history with a matching kernel name; list-length and replacement algebra remain supporting invariants. |
 | `Runtime/Acceleration/Cache.lean` | **B** | Map/pair-cache set/get foundations; whole-cache refinement invariant pending. |
 | `Runtime/Acceleration/CachePolicy.lean` | **C** | Eligibility policy cases. |
-| `Runtime/Acceleration/EnvironmentIndex.lean` | **B** | Set/find/remove/insert candidate refinement foundations; full authoritative lookup equivalence pending. |
+| `Runtime/Acceleration/EnvironmentIndex.lean` | **A** | Rebuilding the trie from any authoritative declaration list is proved lookup-equivalent to that list for every name, including same-name updates, different hashes, and hash-collision buckets; routing noninterference is proved separately. |
 | `Runtime/Capability/Lean434NativeReduction.lean` | **A** | Any successful native wrapper reduction now refines an explicit `PsKernelTrustedNativeReduction` relation carrying the evaluator result as a TCB premise; evaluator correctness remains intentionally trusted, not internally proved. |
 | `Runtime/Capability/Types.lean` | **D** | Empty capability structure fact only. |
 | `SelfHost.lean` | **D** | Semantic-root marker only. |

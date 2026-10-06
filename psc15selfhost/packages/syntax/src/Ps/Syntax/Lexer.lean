@@ -32,10 +32,7 @@ def psLexAdvanceTwo
 
 
 def psLexListLength {α : Type} (xs : List α) : Nat :=
-  match xs with
-  | List.nil => 0
-  | List.cons _ tail =>
-      Nat.add 1 (psLexListLength tail)
+  psListLength xs
 
 def psLexCharEq (left : Char) (right : Char) : Bool :=
   Nat.beq (Char.toNat left) (Char.toNat right)
@@ -972,13 +969,13 @@ def psLexReadToken
                     read)
                   read.cursor)
 
-def psLexAllWorker
+def psLexAllAcc
     (inputBound : Nat)
     (fuel : Nat) :
-    PsLexCursor -> Except PsLexError (List PsToken) :=
+    PsLexCursor -> List PsToken -> Except PsLexError (List PsToken) :=
   match fuel with
   | 0 =>
-      fun (cursor : PsLexCursor) =>
+      fun (cursor : PsLexCursor) (tokensRev : List PsToken) =>
         if psLexCursorDone cursor then
           let position := cursor.position;
           let token : PsToken := {
@@ -987,15 +984,16 @@ def psLexAllWorker
             span := psLexSpan position position
           };
           Except.ok
-            (List.cons token List.nil)
+            (psListReverse (List.cons token tokensRev))
         else
           Except.error PsLexError.fuelExhausted
   | remainingFuel + 1 =>
       let smaller :
           PsLexCursor ->
+          List PsToken ->
           Except PsLexError (List PsToken) :=
-        psLexAllWorker inputBound remainingFuel;
-      fun (cursor : PsLexCursor) =>
+        psLexAllAcc inputBound remainingFuel;
+      fun (cursor : PsLexCursor) (tokensRev : List PsToken) =>
         match psLexSkipTriviaWithFuel inputBound cursor.remaining cursor.position with
         | Except.error error => Except.error error
         | Except.ok ready =>
@@ -1007,17 +1005,18 @@ def psLexAllWorker
                 span := psLexSpan position position
               };
               Except.ok
-                (List.cons token List.nil)
+                (psListReverse (List.cons token tokensRev))
             else
               match psLexReadToken ready with
               | Except.error error => Except.error error
               | Except.ok pair =>
                   let token : PsToken := pair.fst;
                   let next : PsLexCursor := pair.snd;
-                  match smaller next with
-                  | Except.error error => Except.error error
-                  | Except.ok rest =>
-                      Except.ok (List.cons token rest)
+                  smaller next (List.cons token tokensRev)
+
+def psLexAllWorker (inputBound fuel : Nat) (cursor : PsLexCursor) :
+    Except PsLexError (List PsToken) :=
+  psLexAllAcc inputBound fuel cursor List.nil
 
 def psLexAllWithFuel (fuel : Nat) (cursor : PsLexCursor) : Except PsLexError (List PsToken) :=
   psLexAllWorker (Nat.succ (psLexListLength cursor.remaining)) fuel cursor

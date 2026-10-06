@@ -192,6 +192,21 @@ try {
   );
   assert.equal(direct.stringAtEndDemo(unicodeText, 7n), true);
   assert.equal(direct.stringAtEndDemo(unicodeText, 6n), false);
+  for (const text of ["", "ASCII", "é😀A", "another", "é😀A"]) {
+    const size = reference.stringUtf8ByteSizeDemo(text);
+    for (let offset = 0n; offset <= size + 2n; offset++) {
+      assert.equal(direct.stringGetDemo(text, offset), reference.stringGetDemo(text, offset));
+      assert.equal(direct.stringNextDemo(text, offset), reference.stringNextDemo(text, offset));
+      assert.equal(direct.stringAtEndDemo(text, offset), reference.stringAtEndDemo(text, offset));
+    }
+    assert.equal(direct.stringUtf8ByteSizeDemo(text), size);
+  }
+  const longText = "Aé😀".repeat(10000);
+  assert.equal(direct.stringUtf8ByteSizeDemo(longText), 70000n);
+  for (let offset = 0n; offset < 70000n; offset += 7n) {
+    assert.equal(direct.stringGetDemo(longText, offset + 3n), "😀");
+    assert.equal(direct.stringNextDemo(longText, offset + 3n), offset + 7n);
+  }
 
   assert.equal(
     direct.stringExtractDemo(unicodeText, 1n, 7n),

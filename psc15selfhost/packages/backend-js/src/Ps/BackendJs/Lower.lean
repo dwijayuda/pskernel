@@ -58,7 +58,9 @@ def psJsIdentifierRestSupported
 
 def psJsIdentifierKeyword
     (value : String) : Bool :=
-  if psStringEq value "arguments" then true
+  if psStringEq value "__ps$utf8" then true
+  else if psStringEq value "__ps$utf8Cache" then true
+  else if psStringEq value "arguments" then true
   else if psStringEq value "await" then true
   else if psStringEq value "break" then true
   else if psStringEq value "case" then true

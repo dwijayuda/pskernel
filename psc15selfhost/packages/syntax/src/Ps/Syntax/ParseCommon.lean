@@ -1,12 +1,10 @@
+import Ps.Foundation.List
 import Ps.Syntax.Ast
 import Ps.Syntax.ParserState
 
 
 def psParseListLength {α : Type} (xs : List α) : Nat :=
-  match xs with
-  | List.nil => 0
-  | List.cons _ tail =>
-      Nat.add 1 (psParseListLength tail)
+  psListLength xs
 
 def psParseListReverseAcc {α : Type}
     (xs : List α) : List α -> List α :=

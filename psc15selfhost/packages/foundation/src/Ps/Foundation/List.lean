@@ -1,7 +1,12 @@
-def psListLength {alpha : Type} (values : List alpha) : Nat :=
+def psListLengthAcc {alpha : Type} (values : List alpha) : Nat -> Nat :=
   match values with
-  | List.nil => 0
-  | List.cons _ rest => Nat.succ (psListLength rest)
+  | List.nil => fun (count : Nat) => count
+  | List.cons _ rest =>
+      let smaller : Nat -> Nat := psListLengthAcc rest;
+      fun (count : Nat) => smaller (Nat.succ count)
+
+def psListLength {alpha : Type} (values : List alpha) : Nat :=
+  psListLengthAcc values 0
 
 def psListIsEmpty {alpha : Type} (values : List alpha) : Bool :=
   match values with

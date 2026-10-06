@@ -33,7 +33,26 @@ def psBackendJsOptionNatType : PsVerifiedIrType :=
 
 def psBackendJsFixtureModule : PsVerifiedIrModule :=
   {
-    imports := []
+    imports := [
+      {
+        localName := "externalAdd"
+        source := "./support.js"
+        importedName := "importedAdd"
+        type := psBackendJsNatBinaryFunctionType
+      },
+      {
+        localName := "namedIdentity"
+        source := "./support.js"
+        importedName := "namedIdentity"
+        type := psBackendJsNatUnaryFunctionType
+      },
+      {
+        localName := "externalDefault"
+        source := "./support.js"
+        importedName := "default"
+        type := psBackendJsNatUnaryFunctionType
+      }
+    ]
     structures := [
       {
         name := "Point"
@@ -684,6 +703,61 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
               PsVerifiedIrExpr.var "start",
               PsVerifiedIrExpr.var "stop"
             ]
+      },
+      {
+        name := "externalAddDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := psBackendJsNatType
+          },
+          {
+            name := "right"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "externalAdd")
+            []
+            [
+              PsVerifiedIrExpr.var "left",
+              PsVerifiedIrExpr.var "right"
+            ]
+      },
+      {
+        name := "externalNamedDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "namedIdentity")
+            []
+            [PsVerifiedIrExpr.var "value"]
+      },
+      {
+        name := "externalDefaultDemo"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.call
+            (PsVerifiedIrExpr.var "externalDefault")
+            []
+            [PsVerifiedIrExpr.var "value"]
       },
       {
         name := "genericId"

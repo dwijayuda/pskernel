@@ -340,8 +340,21 @@ theorem psKernelEnsureSortWith_configuration_refines
                     (Prod.mk found (Prod.snd result))
               | _ =>
                   Except.error "expected sort" := by
-      cases type <;>
-        simp [psKernelEnsureSortWith] at hDirect ⊢
+      cases type with
+      | sort directLevel =>
+          exfalso
+          exact hDirect ⟨directLevel, rfl⟩
+      | bvar index => rfl
+      | fvar name => rfl
+      | mvar name => rfl
+      | const name levels => rfl
+      | app fn arg => rfl
+      | lam name domain body binderInfo => rfl
+      | forallE name domain body binderInfo => rfl
+      | letE name type value body nondep => rfl
+      | lit literal => rfl
+      | mdata metadata body => rfl
+      | proj typeName index body => rfl
     rw [hFallback] at hSuccess
     cases hRun : whnf context state type with
     | error error =>

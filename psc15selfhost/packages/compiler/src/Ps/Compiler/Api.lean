@@ -3,6 +3,7 @@ import Ps.Bridge.CheckedAdmissions
 import Ps.Environment.SelfHostProd
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
+import Ps.CompilerIr.Validate
 
 inductive PsCompilerSourceKind where
   | lean

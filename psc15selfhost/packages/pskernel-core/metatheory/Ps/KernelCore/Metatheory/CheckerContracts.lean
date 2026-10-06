@@ -66,6 +66,43 @@ def PsKernelInferenceConfigurationSound
         context
         nextState
 
+/-
+Semantic contract for the optimized multi-lambda beta path used by WHNF core.
+
+This is a proof obligation, not a TCB law.  It is intentionally separated from
+the WHNF fuel induction so the substitution/list algebra can be discharged in a
+small metatheory module.
+-/
+def PsKernelBetaSpineSoundLaw : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (fn lastLam body : PsKernelExpr)
+    (args : List PsKernelExpr)
+    (consumed : Nat)
+    (name : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo),
+    psKernelWhnfCountLambdas
+        fn
+        (psKernelExprListLength args) =
+      Prod.mk lastLam consumed ->
+    lastLam =
+      PsKernelExpr.lam
+        name
+        type
+        body
+        binderInfo ->
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      (psKernelExprApplyArgsCheap fn args)
+      (psKernelExprApplyArgsCheap
+        (psKernelExprInstantiateRev
+          body
+          (psKernelExprListTake consumed args))
+        (psKernelExprListDrop consumed args))
+
+
 def PsKernelWhnfCoreConfigurationSound
     (coreWhnf :
       PsKernelCheckerContext ->

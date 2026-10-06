@@ -795,7 +795,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               cheapProj
               hArgsNonempty
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -818,7 +818,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.bvar index) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -841,7 +841,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.fvar name) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -864,7 +864,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.mvar name) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -887,7 +887,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.sort level) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -910,7 +910,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.const name levels) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -933,7 +933,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.app nestedFn nestedArg) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -957,7 +957,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               (PsKernelExpr.forallE name domain codomain binderInfo)
               result args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -981,7 +981,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               (PsKernelExpr.letE name type value body nondep)
               result args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -1004,7 +1004,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.lit literal) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -1027,7 +1027,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.mdata metadata body) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -1050,7 +1050,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.proj typeName index body) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa using hHead)
+              (by simpa [hFnShape] using hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,

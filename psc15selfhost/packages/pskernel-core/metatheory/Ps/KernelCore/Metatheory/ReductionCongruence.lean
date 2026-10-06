@@ -183,3 +183,109 @@ theorem psKernelReductionClosure_appSpineHead
   have hReconstruct :=
     psKernelExprGetAppFnArgs_reconstruct expr
   simpa [hReconstruct] using hLift
+
+
+/-
+Every syntactic application decomposes to a nonempty argument spine.  WHNF's
+optimized beta path relies on this fact when invoking PsKernelBetaSpineSoundLaw.
+-/
+theorem psKernelExprGetAppFnArgsWorker_nonempty_suffix
+    (expr head : PsKernelExpr)
+    (tail : List PsKernelExpr) :
+    psKernelNatLt
+        0
+        (psKernelExprListLength
+          (Prod.snd
+            (psKernelExprGetAppFnArgsWorker
+              expr
+              (List.cons head tail)))) =
+      true := by
+  induction expr generalizing head tail with
+  | app fn arg fnIH _ =>
+      simpa [psKernelExprGetAppFnArgsWorker] using
+        fnIH arg (List.cons head tail)
+  | bvar index =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | fvar name =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | mvar name =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | sort level =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | const name levels =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | lam name type body binderInfo typeIH bodyIH =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | forallE name type body binderInfo typeIH bodyIH =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | letE name type value body nondep typeIH valueIH bodyIH =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | lit literal =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | mdata metadata body bodyIH =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+  | proj typeName index body bodyIH =>
+      simp [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprListLength,
+        psKernelNatLt
+      ]
+
+
+theorem psKernelExprGetAppFnArgs_app_args_nonempty
+    (fn arg : PsKernelExpr) :
+    psKernelNatLt
+        0
+        (psKernelExprListLength
+          (Prod.snd
+            (psKernelExprGetAppFnArgs
+              (PsKernelExpr.app fn arg)))) =
+      true := by
+  simpa [
+    psKernelExprGetAppFnArgs,
+    psKernelExprGetAppFnArgsWorker
+  ] using
+    psKernelExprGetAppFnArgsWorker_nonempty_suffix
+      fn
+      arg
+      List.nil

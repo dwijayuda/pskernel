@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.DefEq.DeltaStep
 import Ps.KernelCore.Metatheory.ExprEq
+import Ps.KernelCore.Metatheory.Delta
 
 theorem psKernelDefEqFinishLazyStep_equal
     (defeq :
@@ -146,3 +147,86 @@ theorem psKernelDefEqFinishLazyStep_success_cache_refines
       hCache
     ]
   · exact hSound left right hCache
+
+
+theorem psKernelDefEqDeltaOnce_success_refines_reduction
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hIndex :
+      PsKernelEnvironmentIndexRefines context.environment)
+    (hCache :
+      PsKernelReductionCacheSound
+        context.environment
+        context.localContext
+        state.unfold)
+    (hCoreSound :
+      PsKernelWhnfCoreSound coreWhnf)
+    (hSuccess :
+      psKernelDefEqDeltaOnce
+          coreWhnf
+          context
+          state
+          expr =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      expr
+      result :=
+  psKernelDefEqDeltaOnce_refines_reduction
+    coreWhnf
+    context
+    state
+    nextState
+    expr
+    result
+    hIndex
+    hCache
+    hCoreSound
+    hSuccess
+
+theorem psKernelDefEqTryUnfoldProjApp_success_refines_reduction
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hCoreSound :
+      PsKernelWhnfCoreSound coreWhnf)
+    (hSuccess :
+      psKernelDefEqTryUnfoldProjApp
+          coreWhnf
+          context
+          state
+          expr =
+        Except.ok
+          (Prod.mk (Option.some result) nextState)) :
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      expr
+      result :=
+  psKernelDefEqTryUnfoldProjApp_some_refines_reduction
+    coreWhnf
+    context
+    state
+    nextState
+    expr
+    result
+    hCoreSound
+    hSuccess

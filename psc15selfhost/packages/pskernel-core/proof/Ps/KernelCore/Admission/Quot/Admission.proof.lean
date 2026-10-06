@@ -1,4 +1,5 @@
 import Ps.KernelCore.Admission.Quot.Admission
+import Ps.KernelCore.Metatheory.Admission
 
 theorem psKernelAddQuot_idempotent_when_initialized
     (environment : PsKernelEnvironment)
@@ -227,3 +228,36 @@ theorem psKernelAddQuot_success_semantic_history
             psKernelQuotIndInfoForProof,
             hInit
           ]
+
+
+theorem psKernelAddQuot_success_refines_extension
+    (environment result : PsKernelEnvironment)
+    (hInit : environment.quotInitialized = false)
+    (hSuccess :
+      psKernelAddQuot environment =
+        Except.ok result) :
+    PsKernelQuotExtension
+      environment
+      result
+      (List.cons
+        psKernelQuotIndInfoForProof
+        (List.cons
+          psKernelQuotLiftInfoForProof
+          (List.cons
+            psKernelQuotMkInfoForProof
+            (List.cons
+              psKernelQuotTypeInfoForProof
+              List.nil)))) := by
+  have hHistory :=
+    psKernelAddQuot_success_semantic_history
+      environment result hInit hSuccess
+  have hPost :=
+    psKernelAddQuot_success_postconditions
+      environment result hInit hSuccess
+  unfold PsKernelQuotExtension
+  constructor
+  · unfold PsKernelEnvironmentExtendsBy
+    constructor
+    · simpa using hHistory
+    · exact hPost.2.1
+  · exact ⟨hInit, hPost.1⟩

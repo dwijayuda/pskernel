@@ -9,7 +9,7 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: byte-bound semantic locks and offline audit integration. Prior checkpoints: authority fc7bc7b; interfaces/links 63e2402; pass artifacts/build graph 2525ede; evidence cache b7a8b22; bounded producer 2737479; comparator 7337e2a; certificate/trust 8815244; SAVEF/offline replay 3f96177; logical translation/Wasm repair 95b5573; SAVEF lifecycle/FactoryBench a6477b1; portable foreign interfaces/WIT 082c71a.
+- Current checkpoint: portable stage-aware query planning. Prior checkpoints: authority fc7bc7b; interfaces/links 63e2402; pass artifacts/build graph 2525ede; evidence cache b7a8b22; bounded producer 2737479; comparator 7337e2a; certificate/trust 8815244; SAVEF/offline replay 3f96177; logical translation/Wasm repair 95b5573; SAVEF lifecycle/FactoryBench a6477b1; portable foreign interfaces/WIT 082c71a; byte-bound locks 2b26cf3.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
@@ -273,3 +273,11 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - All 20 focused SAVEF, lock, capsule and lifecycle tests pass, including real capsule signatures and the existing small validator fixture. The new lock tests cover exact bytes, context substitution, dependency behavioral drift, cycles, laundering, missing closure, budgets and source-path collisions. Fixtures are fictional and no real release lock, complete TCB closure or global theorem is claimed.
 - GitHub 082c71a cloud run 37535002090, job 112513929926 passed the new portable foreign-interface/WIT gate and all functional stages through Wasm whole-compiler instantiation. Its complete portable self-check was still running when inspected; final fixed points remain pending.
 - Next implementation focus: integrate structural/behavioral/context dependencies into the incremental query mechanism while preserving portable rules and conservative invalidation. Broader assurance remains on the explicit handoff.
+
+## 2026-10-07 portable stage query planner checkpoint
+
+- Added stage fingerprints and dependency planning for source, parsed, elaborated public, checked structural, certified behavioral, assumptions, runtime, VerifiedIR, SpecializedIR and target outputs. Source/implementation/context/resource/parameter/interface changes invalidate. A changed dependency artifact with stable meaning requires a consumer-selected stage-specific rule, exact prior/current fingerprint subject and checker identity.
+- The planner returns rebuild or validateCandidate only. Cached names cannot create acceptance; even identical inputs still require host artifact/pass replay. Actual production per-stage producers, independent adequacy/reuse checkers and live evidence integration remain pending, and semantic cache promotion stays disabled.
+- PSC1 self-check found legacy anonymous record application syntax in the seed QueryGraph and non-portable recursive forms in ModuleGraph. Rewrote these with explicit constructors and structural workers while retaining APIs and behavior. The whole project package now declares PSC1-portable-selfhost/1. No rule was relaxed.
+- Focused checks pass: 13 new stage cases, all 10 existing query cases, cold/warm host reuse, and the full project portable executable contract (4 roots, 2 entries, 6 closure modules). The host fixture had hardcoded slash separators; diagnostics showed correct rebuilt/reused modules with Windows separators. Its two expected imported paths now use the existing host path joiner, preserving the same assertions across platforms.
+- Continue with target validator completeness and artifact integration; no global incremental theorem or full V3 acceptance is claimed.

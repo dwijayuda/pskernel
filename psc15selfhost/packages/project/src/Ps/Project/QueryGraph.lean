@@ -38,9 +38,7 @@ inductive PsQueryGraphError where
       (dependency : PsName)
 
 def psQuerySnapshotEmpty : PsQuerySnapshot :=
-  {
-    records := List.nil
-  }
+  PsQuerySnapshot.mk List.nil
 
 def psFindModuleQueryRecord
     (target : PsName)
@@ -70,52 +68,32 @@ def psQuerySnapshotInsert
       Except.error
         (PsQueryGraphError.duplicateRecord record.name)
   | Option.none =>
-      Except.ok {
-        records :=
-          psListAppend
-            snapshot.records
-            (List.cons record List.nil)
-      }
+      Except.ok (PsQuerySnapshot.mk (psListAppend snapshot.records (List.cons record List.nil)))
 
 def psQueryDependencyInvalidation
     (current : PsQuerySnapshot)
-    (imports : List PsName)
-    (previousDependencies :
-      List PsModuleDependencyInterface) :
-    Option PsQueryInvalidation :=
+    (imports : List PsName) :
+    List PsModuleDependencyInterface -> Option PsQueryInvalidation :=
   match imports with
   | List.nil =>
-      match previousDependencies with
-      | List.nil =>
-          Option.none
-      | List.cons _ _ =>
-          Option.some PsQueryInvalidation.importsChanged
+      fun (previousDependencies : List PsModuleDependencyInterface) =>
+        match previousDependencies with
+        | List.nil => Option.none
+        | List.cons _ _ => Option.some PsQueryInvalidation.importsChanged
   | List.cons dependency restImports =>
-      match previousDependencies with
-      | List.nil =>
-          Option.some PsQueryInvalidation.importsChanged
-      | List.cons previous restPrevious =>
-          if psNameEq dependency previous.name then
-            match psQuerySnapshotFind current dependency with
-            | Option.none =>
-                Option.some
-                  (PsQueryInvalidation.dependencyUnavailable
-                    dependency)
-            | Option.some currentDependency =>
-                if
-                    psModuleInterfaceFingerprintEq
-                      currentDependency.interfaceFingerprint
-                      previous.interfaceFingerprint then
-                  psQueryDependencyInvalidation
-                    current
-                    restImports
-                    restPrevious
-                else
-                  Option.some
-                    (PsQueryInvalidation.dependencyInterfaceChanged
-                      dependency)
-          else
-            Option.some PsQueryInvalidation.importsChanged
+      let smaller := psQueryDependencyInvalidation current restImports;
+      fun (previousDependencies : List PsModuleDependencyInterface) =>
+        match previousDependencies with
+        | List.nil => Option.some PsQueryInvalidation.importsChanged
+        | List.cons previous restPrevious =>
+            if psNameEq dependency previous.name then
+              match psQuerySnapshotFind current dependency with
+              | Option.none => Option.some (PsQueryInvalidation.dependencyUnavailable dependency)
+              | Option.some currentDependency =>
+                  if psModuleInterfaceFingerprintEq currentDependency.interfaceFingerprint previous.interfaceFingerprint then
+                    smaller restPrevious
+                  else Option.some (PsQueryInvalidation.dependencyInterfaceChanged dependency)
+            else Option.some PsQueryInvalidation.importsChanged
 
 def psQueryEvaluateModule
     (previous : PsQuerySnapshot)
@@ -172,11 +150,7 @@ def psQueryCaptureDependencyInterfaces
           | Except.ok dependencyInterfaces =>
               Except.ok
                 (List.cons
-                  {
-                    name := dependency
-                    interfaceFingerprint :=
-                      dependencyRecord.interfaceFingerprint
-                  }
+                  (PsModuleDependencyInterface.mk dependency dependencyRecord.interfaceFingerprint)
                   dependencyInterfaces)
 
 def psQueryCommitRebuilt
@@ -194,12 +168,7 @@ def psQueryCommitRebuilt
   | Except.ok dependencyInterfaces =>
       psQuerySnapshotInsert
         current
-        {
-          name := input.name
-          sourceKey := input.sourceKey
-          interfaceFingerprint := interfaceFingerprint
-          dependencyInterfaces := dependencyInterfaces
-        }
+        (PsModuleQueryRecord.mk input.name input.sourceKey interfaceFingerprint dependencyInterfaces)
 
 def psQueryCommitReused
     (current : PsQuerySnapshot)

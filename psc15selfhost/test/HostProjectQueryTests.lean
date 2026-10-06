@@ -26,7 +26,7 @@ def psTestHostProjectQueryColdWarm : IO Bool := do
   let coldHasA :=
     psHostListContainsString
       cold.rebuiltPaths
-      "test/fixtures/project-query/A.lean"
+      (psHostJoinPath "test/fixtures/project-query" "A.lean")
   let coldHasB :=
     psHostListContainsString
       cold.rebuiltPaths
@@ -34,7 +34,7 @@ def psTestHostProjectQueryColdWarm : IO Bool := do
   let warmHasA :=
     psHostListContainsString
       warm.reusedPaths
-      "test/fixtures/project-query/A.lean"
+      (psHostJoinPath "test/fixtures/project-query" "A.lean")
   let warmHasB :=
     psHostListContainsString
       warm.reusedPaths

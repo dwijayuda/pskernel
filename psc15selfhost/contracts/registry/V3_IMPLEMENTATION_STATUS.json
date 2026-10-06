@@ -107,7 +107,9 @@
       ],
       "status": "partial",
       "owners": [
-        "packages/project/src/Ps/Project/QueryGraph.lean"
+        "packages/project/src/Ps/Project/QueryGraph.lean",
+        "packages/project/src/Ps/Project/QueryGraphV2.lean",
+        "contracts/module-interface/QUERY_GRAPH_V2.json"
       ],
       "completion": "Structural and behavioral interfaces drive actual invalidation and dependency compatibility.",
       "assurance": "pending"

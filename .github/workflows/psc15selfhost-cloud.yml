@@ -140,7 +140,7 @@ jobs:
 
       - name: Run project query graph corpus
         working-directory: psc15selfhost
-        run: lake exe psc1_project_query_graph_tests
+        run: npm run test:project-query-graph
 
       - name: Check portable logical theory translation
         working-directory: psc15selfhost

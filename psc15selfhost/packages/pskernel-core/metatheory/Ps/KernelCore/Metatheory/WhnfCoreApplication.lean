@@ -8,6 +8,77 @@ core.  The non-lambda tail and optimized multi-beta tail are factored
 separately so recursor and substitution semantics remain explicit obligations.
 -/
 
+def psKernelWhnfCoreAppNonLambdaTailRun
+    (remaining : Nat)
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (original fn0 fn : PsKernelExpr)
+    (args : List PsKernelExpr)
+    (cheapRec cheapProj : Bool) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  if psKernelExprEq fn fn0 then
+    match
+        reduceRecursor
+          context
+          state
+          original
+          cheapRec
+          cheapProj with
+    | Except.error error =>
+        Except.error error
+    | Except.ok reduction =>
+        match Prod.fst reduction with
+        | Option.none =>
+            Except.ok
+              (Prod.mk
+                original
+                (Prod.snd reduction))
+        | Option.some value =>
+            psKernelWhnfCoreWithFuel
+              remaining
+              publicWhnf
+              reduceRecursor
+              context
+              (Prod.snd reduction)
+              value
+              cheapRec
+              cheapProj
+  else
+    let rebuilt :=
+      psKernelExprApplyArgsCheap fn args
+    match
+        psKernelWhnfCoreWithFuel
+          remaining
+          publicWhnf
+          reduceRecursor
+          context
+          state
+          rebuilt
+          cheapRec
+          cheapProj with
+    | Except.error error =>
+        Except.error error
+    | Except.ok reduced =>
+        psKernelWhnfCoreFinish
+          original
+          cheapProj
+          (Prod.fst reduced)
+          (Prod.snd reduced)
+
+
 theorem psKernelWhnfCoreAppNonLambdaTail_configuration_refines
     (remaining : Nat)
     (publicWhnf :
@@ -46,54 +117,18 @@ theorem psKernelWhnfCoreAppNonLambdaTail_configuration_refines
         original
         (psKernelExprApplyArgsCheap fn args))
     (hSuccess :
-      (if psKernelExprEq fn fn0 then
-        match
-            reduceRecursor
-              context
-              state
-              original
-              cheapRec
-              cheapProj with
-        | Except.error error =>
-            Except.error error
-        | Except.ok reduction =>
-            match Prod.fst reduction with
-            | Option.none =>
-                Except.ok
-                  (Prod.mk
-                    original
-                    (Prod.snd reduction))
-            | Option.some value =>
-                psKernelWhnfCoreWithFuel
-                  remaining
-                  publicWhnf
-                  reduceRecursor
-                  context
-                  (Prod.snd reduction)
-                  value
-                  cheapRec
-                  cheapProj
-      else
-        let rebuilt :=
-          psKernelExprApplyArgsCheap fn args
-        match
-            psKernelWhnfCoreWithFuel
-              remaining
-              publicWhnf
-              reduceRecursor
-              context
-              state
-              rebuilt
-              cheapRec
-              cheapProj with
-        | Except.error error =>
-            Except.error error
-        | Except.ok reduced =>
-            psKernelWhnfCoreFinish
-              original
-              cheapProj
-              (Prod.fst reduced)
-              (Prod.snd reduced)) =
+      psKernelWhnfCoreAppNonLambdaTailRun
+          remaining
+          publicWhnf
+          reduceRecursor
+          context
+          state
+          original
+          fn0
+          fn
+          args
+          cheapRec
+          cheapProj =
         Except.ok (Prod.mk result nextState)) :
     PsKernelReductionClosure
         context.environment
@@ -103,6 +138,7 @@ theorem psKernelWhnfCoreAppNonLambdaTail_configuration_refines
       PsKernelCheckerConfigurationSound
         context
         nextState := by
+  unfold psKernelWhnfCoreAppNonLambdaTailRun at hSuccess
   cases hEq : psKernelExprEq fn fn0 with
   | true =>
       cases hRecursorRun :
@@ -275,6 +311,74 @@ theorem psKernelWhnfCoreAppNonLambdaTail_configuration_refines
             ⟩
 
 
+def psKernelWhnfCoreAppLambdaTailRun
+    (remaining : Nat)
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (original : PsKernelExpr)
+    (name : PsKernelName)
+    (type body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (args : List PsKernelExpr)
+    (cheapRec cheapProj : Bool) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  let fn :=
+    PsKernelExpr.lam name type body binderInfo
+  let consumedResult :=
+    psKernelWhnfCountLambdas
+      fn
+      (psKernelExprListLength args)
+  let lastLam :=
+    Prod.fst consumedResult
+  let consumed :=
+    Prod.snd consumedResult
+  match lastLam with
+  | PsKernelExpr.lam _ _ lastBody _ =>
+      let selected :=
+        psKernelExprListTake consumed args
+      let reducedBody :=
+        psKernelExprInstantiateRev
+          lastBody
+          selected
+      let rebuilt :=
+        psKernelExprApplyArgsCheap
+          reducedBody
+          (psKernelExprListDrop consumed args)
+      match
+          psKernelWhnfCoreWithFuel
+            remaining
+            publicWhnf
+            reduceRecursor
+            context
+            state
+            rebuilt
+            cheapRec
+            cheapProj with
+      | Except.error error =>
+          Except.error error
+      | Except.ok reduced =>
+          psKernelWhnfCoreFinish
+            original
+            cheapProj
+            (Prod.fst reduced)
+            (Prod.snd reduced)
+  | _ =>
+      Except.ok (Prod.mk original state)
+
+
 theorem psKernelWhnfCoreAppLambdaTail_configuration_refines
     (remaining : Nat)
     (publicWhnf :
@@ -323,48 +427,20 @@ theorem psKernelWhnfCoreAppLambdaTail_configuration_refines
           (PsKernelExpr.lam name type body binderInfo)
           args))
     (hSuccess :
-      (let fn :=
-          PsKernelExpr.lam name type body binderInfo
-       let consumedResult :=
-          psKernelWhnfCountLambdas
-            fn
-            (psKernelExprListLength args)
-       let lastLam :=
-          Prod.fst consumedResult
-       let consumed :=
-          Prod.snd consumedResult
-       match lastLam with
-       | PsKernelExpr.lam _ _ lastBody _ =>
-           let selected :=
-             psKernelExprListTake consumed args
-           let reducedBody :=
-             psKernelExprInstantiateRev
-               lastBody
-               selected
-           let rebuilt :=
-             psKernelExprApplyArgsCheap
-               reducedBody
-               (psKernelExprListDrop consumed args)
-           match
-               psKernelWhnfCoreWithFuel
-                 remaining
-                 publicWhnf
-                 reduceRecursor
-                 context
-                 state
-                 rebuilt
-                 cheapRec
-                 cheapProj with
-           | Except.error error =>
-               Except.error error
-           | Except.ok reduced =>
-               psKernelWhnfCoreFinish
-                 original
-                 cheapProj
-                 (Prod.fst reduced)
-                 (Prod.snd reduced)
-       | _ =>
-           Except.ok (Prod.mk original state)) =
+      psKernelWhnfCoreAppLambdaTailRun
+          remaining
+          publicWhnf
+          reduceRecursor
+          context
+          state
+          original
+          name
+          type
+          body
+          binderInfo
+          args
+          cheapRec
+          cheapProj =
         Except.ok (Prod.mk result nextState)) :
     PsKernelReductionClosure
         context.environment
@@ -374,6 +450,7 @@ theorem psKernelWhnfCoreAppLambdaTail_configuration_refines
       PsKernelCheckerConfigurationSound
         context
         nextState := by
+  unfold psKernelWhnfCoreAppLambdaTailRun at hSuccess
   let fn :=
     PsKernelExpr.lam name type body binderInfo
   cases hCount :
@@ -562,6 +639,58 @@ theorem psKernelWhnfCoreAppLambdaTail_configuration_refines
           simp [fn, hCount] at hSuccess
           rcases hSuccess with ⟨rfl, rfl⟩
           exact ⟨PsKernelReductionClosure.refl original, hConfig⟩
+
+
+def psKernelWhnfCoreAppTailRun
+    (remaining : Nat)
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (original fn0 fn : PsKernelExpr)
+    (args : List PsKernelExpr)
+    (cheapRec cheapProj : Bool) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  match fn with
+  | PsKernelExpr.lam name type body binderInfo =>
+      psKernelWhnfCoreAppLambdaTailRun
+        remaining
+        publicWhnf
+        reduceRecursor
+        context
+        state
+        original
+        name
+        type
+        body
+        binderInfo
+        args
+        cheapRec
+        cheapProj
+  | _ =>
+      psKernelWhnfCoreAppNonLambdaTailRun
+        remaining
+        publicWhnf
+        reduceRecursor
+        context
+        state
+        original
+        fn0
+        fn
+        args
+        cheapRec
+        cheapProj
 
 
 theorem psKernelWhnfCoreApplication_configuration_refines
@@ -782,6 +911,20 @@ theorem psKernelWhnfCoreApplication_configuration_refines
         args,
         hFn
       ] at hTailSuccess
+      change
+        psKernelWhnfCoreAppTailRun
+            remaining
+            publicWhnf
+            reduceRecursor
+            nextContext
+            state1
+            original
+            fn0
+            fn
+            args
+            cheapRec
+            cheapProj =
+          Except.ok (Prod.mk result nextState) at hTailSuccess
       cases hFnShape : fn with
       | lam name type body binderInfo =>
           apply hBackPair
@@ -807,7 +950,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               hArgsNonempty
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | bvar index =>
           apply hBackPair
           exact
@@ -819,7 +962,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | fvar name =>
           apply hBackPair
           exact
@@ -831,7 +974,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | mvar name =>
           apply hBackPair
           exact
@@ -843,7 +986,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | sort level =>
           apply hBackPair
           exact
@@ -855,7 +998,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | const name levels =>
           apply hBackPair
           exact
@@ -867,7 +1010,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | app nestedFn nestedArg =>
           apply hBackPair
           exact
@@ -879,7 +1022,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | forallE name domain codomain binderInfo =>
           apply hBackPair
           exact
@@ -892,7 +1035,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               result args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | letE name type value body nondep =>
           apply hBackPair
           exact
@@ -905,7 +1048,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               result args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | lit literal =>
           apply hBackPair
           exact
@@ -917,7 +1060,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | mdata metadata body =>
           apply hBackPair
           exact
@@ -929,7 +1072,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)
       | proj typeName index body =>
           apply hBackPair
           exact
@@ -941,4 +1084,4 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               args cheapRec cheapProj
               hFnSemantic.2
               (by simpa [hFnShape] using hHead)
-              (by simpa [original, spine, fn0, args, hFnShape] using hTailSuccess)
+              (by simpa only [psKernelWhnfCoreAppTailRun, hFnShape] using hTailSuccess)

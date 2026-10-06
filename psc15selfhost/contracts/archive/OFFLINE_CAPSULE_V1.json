@@ -11,7 +11,7 @@
   "validity": "Exact consumer-selected semantic identity and scope; all dependency edges checked against six supported target kinds; iterative acyclic closure; explicit allowed assumptions; every referenced artifact rehashed under aggregate budgets.",
   "claims": "Proved/validated claims require a caller-selected claimId to exact subjectId, checkerId and claimClass mapping and fresh certificate-boundary replay. Unproved, empirical and advisory labels cannot meet required checked claims. Supersession and migration references carry no implicit preservation or context-widening authority.",
   "provenance": "Ed25519 verifies psc-archive-signature/1 plus exact manifest identity using caller-selected public keys and required signer IDs. Authentication does not imply semantic validity.",
-  "cli": "node scripts/pscv-verify.mjs --capsule FILE --policy TRUSTED_LOCAL_POLICY; only built-in Core proof checker adapters and pinned local provider assets are selectable; full compiler and live registry are not required",
+  "cli": "node scripts/pscv-verify.mjs --capsule FILE --policy TRUSTED_LOCAL_POLICY; only built-in Core proof (with pinned local provider assets) and closed-literal Wasm binary checker adapters are selectable; full compiler and live registry are not required",
   "outcome": "Audit data only; never creates a CheckedCore handle or reports release acceptance. Unsupported certificates cannot be accepted as proved.",
   "checkedLocally": "Focused real integer-equality validator replay, actual Ed25519 verification, context/assumption/evidence/subject/tamper/budget/typed-edge rejection, and metadata-only CLI path. No new Lean theorem or global preservation claim.",
   "remaining": [

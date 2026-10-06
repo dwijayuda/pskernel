@@ -1,5 +1,6 @@
 import { artifactId, artifactKey } from './artifact-evidence.mjs';
 import { compareSemanticLocks } from './semantic-lock.mjs';
+import { wasmLiteralCertificateChecker } from './wasm-literal-certificate.mjs';
 import { createCertificateBoundary, coreProofCertificateChecker } from './certificate-boundary.mjs';
 import { readOfflineCapsule, unpackOfflineCapsule, verifyOfflineCapsule } from './offline-capsule.mjs';
 
@@ -27,12 +28,17 @@ export async function verifyCapsuleCommand(capsulePath, policyPath) {
     resourceLimits: policy.resourceLimits });
   const checkers = new Map();
   for (const entry of policy.checkers) {
-    if (typeof entry.checkerId !== 'string' || !entry.checkerId || checkers.has(entry.checkerId) ||
-        entry.kind !== 'core-proof') throw new Error('PSC_OFFLINE_CHECKER_POLICY');
-    capsule.resolveArtifact(entry.theoryBaseId);
-    const expectedAdmissions = new TextDecoder('utf-8', { fatal: true }).decode(capsule.resolveArtifact(entry.expectedAdmissionsId));
-    const selected = coreProofCertificateChecker({ theoryBaseId: entry.theoryBaseId, expectedAdmissions,
-      providers: entry.providers, securityProfile: entry.securityProfile, timeoutMs: entry.timeoutMs });
+    if (typeof entry.checkerId !== 'string' || !entry.checkerId || checkers.has(entry.checkerId)) throw new Error('PSC_OFFLINE_CHECKER_POLICY');
+    let selected;
+    if (entry.kind === 'core-proof') {
+      capsule.resolveArtifact(entry.theoryBaseId);
+      const expectedAdmissions = new TextDecoder('utf-8', { fatal: true }).decode(capsule.resolveArtifact(entry.expectedAdmissionsId));
+      selected = coreProofCertificateChecker({ theoryBaseId: entry.theoryBaseId, expectedAdmissions,
+        providers: entry.providers, securityProfile: entry.securityProfile, timeoutMs: entry.timeoutMs });
+    } else if (entry.kind === 'wasm-literal') {
+      selected = wasmLiteralCertificateChecker({ binary: { identity: entry.binaryId, bytes: capsule.resolveArtifact(entry.binaryId) },
+        expectation: { identity: entry.expectationId, bytes: capsule.resolveArtifact(entry.expectationId) }, resourceLimits: entry.resourceLimits });
+    } else throw new Error('PSC_OFFLINE_CHECKER_POLICY');
     if (artifactKey(selected.subject.identity) !== artifactKey(entry.subjectId)) throw new Error('PSC_OFFLINE_CHECKER_SUBJECT');
     checkers.set(entry.checkerId, selected.checker);
   }

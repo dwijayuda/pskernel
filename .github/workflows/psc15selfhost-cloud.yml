@@ -177,7 +177,7 @@ jobs:
       - name: Run WebAssembly backend corpus
         working-directory: psc15selfhost
         run: |
-          lake exe psc1_backend_wasm_tests
+          npm run check:wasm-translation-validator
           lake exe psc1_backend_wasm_binary_smoke > /tmp/psc15-wasm-bytes.txt
           node scripts/backend-wasm-runtime.test.mjs /tmp/psc15-wasm-bytes.txt
 

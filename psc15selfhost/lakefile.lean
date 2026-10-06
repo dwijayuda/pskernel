@@ -156,6 +156,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Binary,
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Validate,
+    `Ps.BackendWasm.LiteralEvidence,
     `Ps.BackendWasm.SelfHostAbi
   ]
 
@@ -366,6 +367,10 @@ lean_exe psc1_project_query_graph_tests where
 lean_exe pscv_query_graph_v2_tests where
   srcDir := "test"
   root := `QueryGraphV2Tests
+
+lean_exe pscv_wasm_literal_validation_tests where
+  srcDir := "test"
+  root := `WasmLiteralValidationTests
 
 lean_exe psc1_host_project_query_tests where
   srcDir := "test"

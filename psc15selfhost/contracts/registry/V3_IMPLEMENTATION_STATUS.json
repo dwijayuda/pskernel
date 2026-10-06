@@ -184,7 +184,9 @@
       ],
       "status": "partial",
       "owners": [
-        "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean"
+        "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean",
+        "scripts/wasm-literal-binary-validator.mjs",
+        "scripts/wasm-literal-certificate.mjs"
       ],
       "completion": "Supported JS/Wasm/TS/Rust paths compile, validate and report unsupported cases deterministically.",
       "assurance": "pending"

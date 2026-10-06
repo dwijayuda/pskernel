@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Specialize
+import Ps.CompilerIr.Validate
 import Ps.BackendWasm.Model
 
 inductive PsWasmTranslationValidationError where
@@ -6,6 +7,8 @@ inductive PsWasmTranslationValidationError where
   | missingFunction (name : String)
   | functionMismatch (name : String)
   | missingExport (name : String)
+  | invalidSource (error : PsVerifiedIrValidationError)
+  | targetShapeMismatch
 
 inductive PsWasmLiteralExpectation where
   | i32 (value : Int)
@@ -178,7 +181,28 @@ def psWasmValidateLiteralDeclarations
             target
             rest
 
-def psWasmValidateSpecializedLiteralModule
+def psWasmValidationFunctionName (function : PsWasmFunction) : String := function.name
+
+def psWasmValidationExportName (item : Prod String String) : String := Prod.fst item
+
+def psWasmValidationClosedTarget (source : PsVerifiedIrModule) (target : PsWasmModule) : Bool :=
+  if psListIsEmpty target.structures then
+    if psListIsEmpty target.arrays then
+      if psListIsEmpty target.functionTypes then
+        if psListIsEmpty target.functionRefs then
+          if Nat.beq (psListLength target.functions) (psListLength source.declarations) then
+            if Nat.beq (psListLength target.exports) (psListLength source.declarations) then
+              if psStrictStringListUnique (psListMap psWasmValidationFunctionName target.functions) then
+                psStrictStringListUnique (psListMap psWasmValidationExportName target.exports)
+              else false
+            else false
+          else false
+        else false
+      else false
+    else false
+  else false
+
+def psWasmValidateSpecializedLiteralShape
     (source : PsSpecializedIrModule)
     (target : PsWasmModule) :
     Except PsWasmTranslationValidationError Unit :=
@@ -200,3 +224,14 @@ def psWasmValidateSpecializedLiteralModule
               psWasmValidateLiteralDeclarations
                 target
                 source.raw.declarations
+
+-- The public wrapper may be constructed by an untrusted producer. Recheck
+-- source invariants, and reject duplicate/extra target definitions or exports.
+def psWasmValidateSpecializedLiteralModule
+    (source : PsSpecializedIrModule) (target : PsWasmModule) :
+    Except PsWasmTranslationValidationError Unit :=
+  match psStrictValidateModule source.raw with
+  | Except.error error => Except.error (PsWasmTranslationValidationError.invalidSource error)
+  | Except.ok _ =>
+      if psWasmValidationClosedTarget source.raw target then psWasmValidateSpecializedLiteralShape source target
+      else Except.error PsWasmTranslationValidationError.targetShapeMismatch

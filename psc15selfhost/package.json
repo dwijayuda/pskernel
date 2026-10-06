@@ -187,7 +187,7 @@
     "check:theory-seed": "node scripts/theory-contract-audit.mjs && lake build PsPscvTheory PsPscvTheoryProof pscv_theory_seed_tests && lake exe pscv_theory_seed_tests && lake exe psc1 check packages/pscv-theory/src/Ps/Theory/Core.lean",
     "test:savef": "node --test scripts/savef-object.test.mjs scripts/pscv-verify.test.mjs scripts/offline-capsule.test.mjs scripts/savef-lifecycle.test.mjs scripts/semantic-lock.test.mjs",
     "verify:offline-prototype": "node scripts/pscv-verify.mjs",
-    "check:wasm-translation-validator": "lake exe psc1_backend_wasm_tests",
+    "check:wasm-translation-validator": "lake exe psc1_backend_wasm_tests && lake exe pscv_wasm_literal_validation_tests && lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/LiteralEvidence.lean && node --test scripts/wasm-literal-binary-validator.test.mjs",
     "check:defeq-cache-source": "node scripts/defeq-cache-source-audit.mjs",
     "check:resource-contract": "node scripts/resource-contract-audit.mjs",
     "check:v3-acceptance": "node scripts/v3-acceptance-audit.mjs",

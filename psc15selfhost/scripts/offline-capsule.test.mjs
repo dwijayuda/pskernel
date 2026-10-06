@@ -4,12 +4,13 @@ import { generateKeyPairSync, sign } from 'node:crypto';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { artifactKey, canonicalArtifact, canonicalBytes } from './artifact-evidence.mjs';
+import { artifactId, artifactKey, canonicalArtifact, canonicalBytes } from './artifact-evidence.mjs';
 import { createCertificateBoundary } from './certificate-boundary.mjs';
 import { knowledgeObject } from './savef-graph.mjs';
 import { archiveSignatureBytes, packOfflineCapsule, verifyOfflineCapsule, readOfflineCapsule } from './offline-capsule.mjs';
 import { verifyCapsuleCommand } from './offline-verifier-cli.mjs';
 import { semanticLockFixture } from './semantic-lock-fixture.mjs';
+import { wasmLiteralCertificateChecker } from './wasm-literal-certificate.mjs';
 
 const object = (value, domain = 'test-data', contract = 'test-data/1') => canonicalArtifact(value, domain, contract);
 function fixture({ changeKnowledge, includeCertificate = true } = {}) {
@@ -147,5 +148,37 @@ test('CLI verifies a local unsigned metadata capsule without compiler or checker
     const result = await verifyCapsuleCommand(file, policyFile);
     assert.equal(result.kind, 'accepted'); assert.deepEqual(result.validity.verifiedClaims, []);
     await assert.rejects(readOfflineCapsule(file, { maxCapsuleBytes: 1 }), /RESOURCE_EXHAUSTED/);
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test('offline CLI replays the built-in literal Wasm checker under an exact claim class', async () => {
+  const f = fixture(), bytes = Buffer.from([0,97,115,109,1,0,0,0,1,5,1,96,0,1,127,3,2,1,0,
+    7,10,1,6,97,110,115,119,101,114,0,0,10,6,1,4,0,65,42,11]);
+  const binary = { bytes, identity: artifactId(bytes, 'wasm-binary', 'webassembly-core/1') };
+  const expectation = object({ contract: 'psc-wasm-literal-expectation/1', exports: [{ name: 'answer', type: 'uint32', value: '42' }] },
+    'wasm-literal-expectation', 'psc-wasm-literal-expectation/1');
+  const selected = wasmLiteralCertificateChecker({ binary, expectation });
+  const certificate = object({ contract: 'psc-certificate/1', checkerId: 'wasm-literal', subjectId: selected.subject.identity,
+    payload: selected.payload }, 'certificate', 'psc-certificate/1');
+  const statement = object({ statement: 'binary answer export returns i32 42; no source preservation claim' });
+  const fields = JSON.parse(f.knowledge.bytes); fields.payload = statement.identity;
+  fields.claims = [{ claimId: 'wasm-literal', status: 'validated', subjectId: selected.subject.identity, certificateId: certificate.identity }];
+  const knowledge = knowledgeObject(fields), manifestFields = JSON.parse(f.manifest.bytes); manifestFields.roots = [knowledge.identity];
+  const manifest = object(manifestFields, 'evidence-manifest', 'psc-evidence-manifest/1');
+  const capsule = packOfflineCapsule({ manifest, artifacts: [...f.artifacts, binary, expectation, selected.subject, certificate, statement, knowledge] });
+  const directory = await mkdtemp(path.join(tmpdir(), 'psc-wasm-offline-'));
+  try {
+    const file = path.join(directory, 'capsule.json'), policyFile = path.join(directory, 'policy.json');
+    const policy = { contract: 'psc-offline-consumer-policy/1', expectedManifestId: manifest.identity,
+      expectedSemanticLockId: f.lock.identity, semanticLockPolicy: f.policy.semanticLockPolicy,
+      context: { ...f.policy.context, requiredClaims: ['wasm-literal'] }, publicKeys: [], requiredSignerIds: [], requiredArchiveRoles: [],
+      checkers: [{ checkerId: 'wasm-literal', kind: 'wasm-literal', binaryId: binary.identity, expectationId: expectation.identity, subjectId: selected.subject.identity }],
+      claims: [{ claimId: 'wasm-literal', subjectId: selected.subject.identity, checkerId: 'wasm-literal', claimClass: selected.checker.claimClass }] };
+    await writeFile(file, capsule.bytes); await writeFile(policyFile, JSON.stringify(policy));
+    const result = await verifyCapsuleCommand(file, policyFile);
+    assert.equal(result.kind, 'accepted', JSON.stringify(result));
+    assert.equal(result.validity.verifiedClaims[0].claimClass, 'wasm-closed-i32-literal-export-behavior');
+    policy.claims[0].claimClass = 'global-compiler-preservation'; await writeFile(policyFile, JSON.stringify(policy));
+    assert.equal((await verifyCapsuleCommand(file, policyFile)).kind, 'rejectedInvalid');
   } finally { await rm(directory, { recursive: true, force: true }); }
 });

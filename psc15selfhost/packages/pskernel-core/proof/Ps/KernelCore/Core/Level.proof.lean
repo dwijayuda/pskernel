@@ -76,3 +76,53 @@ theorem psKernelLevelEq_true_implies_equivalent
     (hEq : psKernelLevelEq left right = true) :
     psKernelLevelEquivalent left right = true := by
   simp [psKernelLevelEquivalent, hEq]
+
+
+theorem psKernelLevelEq_true_iff_of_string_laws
+    (hRefl : PsKernelStringEqReflexiveLaw)
+    (hSound : PsKernelStringEqSoundLaw)
+    (left right : PsKernelLevel) :
+    psKernelLevelEq left right = true ↔
+      left = right := by
+  constructor
+  · intro h
+    exact
+      psKernelLevelEq_sound_of_string_law
+        hSound left right h
+  · intro h
+    subst right
+    exact
+      psKernelLevelEq_refl_of_string_law
+        hRefl
+        left
+
+theorem psKernelLevelEquivalent_true_refines_normalized_eq
+    (hSound : PsKernelStringEqSoundLaw)
+    (left right : PsKernelLevel)
+    (hEq : psKernelLevelEquivalent left right = true) :
+    psKernelLevelNormalize left =
+      psKernelLevelNormalize right := by
+  unfold psKernelLevelEquivalent at hEq
+  cases hRaw : psKernelLevelEq left right with
+  | true =>
+      have hSame :
+          left = right :=
+        psKernelLevelEq_sound_of_string_law
+          hSound
+          left
+          right
+          hRaw
+      rw [hSame]
+  | false =>
+      have hNormalized :
+          psKernelLevelEq
+              (psKernelLevelNormalize left)
+              (psKernelLevelNormalize right) =
+            true := by
+        simpa [hRaw] using hEq
+      exact
+        psKernelLevelEq_sound_of_string_law
+          hSound
+          (psKernelLevelNormalize left)
+          (psKernelLevelNormalize right)
+          hNormalized

@@ -79,7 +79,7 @@ theorem psKernelLocalContextFindIn_some_mem_and_matches
           ] at hFind
           subst decl
           constructor
-          · simp
+          · exact List.Mem.head tail
           · exact hMatch
       | false =>
           simp [

@@ -2120,6 +2120,13 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                   inductInfo.numParams
                                                   inductInfo.numIndices) with
                                           | false =>
+                                              have hArgsLengthNe :
+                                                  psKernelExprListLength args ≠
+                                                    Nat.add
+                                                      inductInfo.numParams
+                                                      inductInfo.numIndices := by
+                                                intro hEq
+                                                simpa [hEq] using hArgsLengthBool
                                               have hArgsLengthBoolRaw :
                                                   Nat.beq
                                                       (psKernelExprListLength
@@ -2130,14 +2137,6 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                     false := by
                                                 simpa [args] using
                                                   hArgsLengthBool
-                                              have hArgsLengthNeRaw :
-                                                  psKernelExprListLength
-                                                      (psKernelExprGetAppArgs typeWhnf) ≠
-                                                    Nat.add
-                                                      inductInfo.numParams
-                                                      inductInfo.numIndices :=
-                                                beq_eq_false_iff_ne.mp
-                                                  hArgsLengthBoolRaw
                                               simp only [
                                                 psKernelInferProjectionWith,
                                                 hInferRun,
@@ -2149,7 +2148,8 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                 hCtors,
                                                 hCtorRest
                                               ] at hSuccess
-                                              simp [hArgsLengthNeRaw] at hSuccess
+                                              rw [hArgsLengthBoolRaw] at hSuccess
+                                              simp at hSuccess
                                           | true =>
                                               have hArgsLength :
                                                   psKernelExprListLength args =

@@ -75,11 +75,11 @@ def psTestBackendRustLetFunctionResult : Bool :=
       false
   | Except.ok output =>
       output.contains
-          "pub fn makeAdderViaLet(offset: PsNat) -> impl Fn(PsNat) -> PsNat + Clone"
+          "pub fn makeAdderViaLet(offset: PsNat) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
         && output.contains
-          "{ let delta = (offset).clone(); move |value: PsNat| "
+          "{ let delta = (offset).clone(); { let __ps_internal_lambda: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = std::rc::Rc::new(move |value: PsNat| "
         && output.contains
-          "pub fn forwardCallbackViaLet(callback: impl Fn(PsNat) -> PsNat + Clone) -> impl Fn(PsNat) -> PsNat + Clone"
+          "pub fn forwardCallbackViaLet(callback: std::rc::Rc<dyn Fn(PsNat) -> PsNat>) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
         && output.contains
           "{ let forwarded = (callback).clone(); forwarded }"
 
@@ -177,11 +177,11 @@ def psTestBackendRustCallFunctionResult : Bool :=
       false
   | Except.ok output =>
       output.contains
-          "pub fn makeAdderViaCall(offset: PsNat) -> impl Fn(PsNat) -> PsNat + Clone"
+          "pub fn makeAdderViaCall(offset: PsNat) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
         && output.contains
           "(makeAdderForCall)((offset).clone())"
         && output.contains
-          "pub fn makeAdderViaLetThenCall(offset: PsNat) -> impl Fn(PsNat) -> PsNat + Clone"
+          "pub fn makeAdderViaLetThenCall(offset: PsNat) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
         && output.contains
           "{ let delta = (offset).clone(); (makeAdderForCall)((delta).clone()) }"
 

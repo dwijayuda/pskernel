@@ -113,6 +113,20 @@ await check("A15-factorybench-holdout-frozen",async()=>{
   if(holdout.searchableByFactory!==false||!String(holdout.status).startsWith("policy-frozen")) throw new Error("holdout exposure policy invalid");
 });
 
+await check("A16-erasure-formal-slice",async()=>{
+  const contract=await json("contracts/ir/ERASURE_PRESERVATION_V0.json");
+  const theory=await read("packages/pscv-theory/src/Ps/Theory/Core.lean");
+  if(!contract.provedSlices?.some(item=>item.id==="psc-erasure-proof-declaration-omission/1"&&item.status==="proved-lean")) throw new Error("erasure proof slice not registered");
+  if(!theory.includes("psErasureProofDeclarationOmitted")) throw new Error("erasure proof term missing");
+});
+
+await check("A17-specialization-formal-slice",async()=>{
+  const contract=await json("contracts/ir/SPECIALIZATION_PASS_V1.json");
+  const theory=await read("packages/pscv-theory/src/Ps/Theory/Core.lean");
+  if(!contract.provedSlices?.some(item=>item.id==="psc-specialization-literal-preservation/1"&&item.status==="proved-lean")) throw new Error("specialization proof slice not registered");
+  if(!theory.includes("psSpecializationLiteralModulePreserves")) throw new Error("specialization proof term missing");
+});
+
 const failed=checks.filter(item=>!item.accepted);
 if(failed.length){
   for(const item of failed) process.stderr.write("PSCV_V3_ACCEPTANCE_FAIL: "+item.id+": "+item.error+"\n");

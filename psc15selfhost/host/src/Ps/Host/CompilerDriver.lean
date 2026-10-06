@@ -135,10 +135,12 @@ def psHostCompilerWasm32Bytes
       psCompilerWasmFromElaborated
         psCompilerWasm32Target
         elaborated with
-  | Except.error _ =>
+  | Except.error error =>
       throw
         (IO.userError
-          "PSC2_CLI_DIRECT_WASM_EMIT_FAILED: source is outside the executable Direct Wasm backend subset")
+          (String.Internal.append
+            "PSC2_CLI_DIRECT_WASM_EMIT_FAILED: "
+            (psCompilerWasmErrorCode error)))
   | Except.ok bytes =>
       pure bytes
 

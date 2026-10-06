@@ -40,5 +40,20 @@
       "statement": "accepted environments admit a declared semantic model under explicit assumptions"
     }
   ],
-  "noProofClaim": true
+  "noProofClaim": true,
+  "leanImplementation": "packages/pscv-theory/src/Ps/Theory/Core.lean",
+  "provedSlices": [
+    {
+      "id": "psc-declarative-conversion-refl/1",
+      "status": "proved-lean",
+      "statement": "DeclarativeConversion(expr,expr)",
+      "symbol": "psDeclarativeConversionRefl"
+    },
+    {
+      "id": "psc-kernel-exact-defeq-sound/1",
+      "status": "proved-lean",
+      "statement": "exact syntactic identity produces declarative conversion evidence",
+      "symbol": "psKernelExactDefEqSound"
+    }
+  ]
 }

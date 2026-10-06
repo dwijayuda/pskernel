@@ -806,6 +806,15 @@ theorem psKernelNameEq_trans_core
                   rightParent
                   hLM.2
                   hMR.2
-              subst middleValue
-              subst rightValue
-              simpa [psKernelNameEq] using hParent
+              have hValue :
+                  leftValue = rightValue :=
+                Eq.trans hLM.1 hMR.1
+              have hValueBeq :
+                  Nat.beq leftValue rightValue = true := by
+                simpa [hValue]
+              change
+                (if Nat.beq leftValue rightValue = true then
+                  psKernelNameEq leftParent rightParent
+                else false) =
+                  true
+              simp [hValueBeq, hParent]

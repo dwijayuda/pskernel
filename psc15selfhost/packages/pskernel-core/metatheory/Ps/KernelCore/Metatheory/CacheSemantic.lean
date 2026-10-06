@@ -914,3 +914,202 @@ theorem psKernelExprPairSetContainsIn_cons_true_cases_core
         psKernelExprPairSetContainsIn,
         hHead
       ] using h
+
+
+theorem psKernelExprPairSetBuildIndex_contains_sound_core
+    (entries : List (Prod PsKernelExpr PsKernelExpr))
+    (queryLeft queryRight : PsKernelExpr)
+    (h :
+      psKernelExprPairSetContainsIn
+          queryLeft
+          queryRight
+          (psKernelExprPairSetIndexBucket
+            16
+            (psKernelExprPairSetBuildIndex entries)
+            (psKernelExprPairHash queryLeft queryRight)) =
+        true) :
+    psKernelExprPairSetContainsIn
+        queryLeft
+        queryRight
+        entries =
+      true := by
+  induction entries generalizing queryLeft queryRight with
+  | nil =>
+      simp [
+        psKernelExprPairSetBuildIndex,
+        psKernelExprPairSetIndexBucket,
+        psKernelExprPairSetContainsIn
+      ] at h
+  | cons entry rest ih =>
+      let storedLeft := Prod.fst entry
+      let storedRight := Prod.snd entry
+      let oldIndex :=
+        psKernelExprPairSetBuildIndex rest
+      let storedHash :=
+        psKernelExprPairHash storedLeft storedRight
+      let oldBucket :=
+        psKernelExprPairSetIndexBucket
+          16
+          oldIndex
+          storedHash
+      cases hExisting :
+          psKernelExprPairSetContainsIn
+            storedLeft
+            storedRight
+            oldBucket with
+      | true =>
+          have hBuild :
+              psKernelExprPairSetBuildIndex
+                  (List.cons entry rest) =
+                oldIndex := by
+            simp [
+              psKernelExprPairSetBuildIndex,
+              storedLeft,
+              storedRight,
+              oldIndex,
+              storedHash,
+              oldBucket,
+              hExisting
+            ]
+          rw [hBuild] at h
+          have hRest :=
+            ih queryLeft queryRight h
+          cases hHead :
+              psKernelExprPairEq
+                queryLeft
+                queryRight
+                entry with
+          | true =>
+              simp [
+                psKernelExprPairSetContainsIn,
+                hHead
+              ]
+          | false =>
+              simpa [
+                psKernelExprPairSetContainsIn,
+                hHead
+              ] using hRest
+      | false =>
+          have hBuild :
+              psKernelExprPairSetBuildIndex
+                  (List.cons entry rest) =
+                psKernelExprPairSetIndexSet
+                  16
+                  oldIndex
+                  storedHash
+                  (List.cons entry oldBucket) := by
+            simp [
+              psKernelExprPairSetBuildIndex,
+              storedLeft,
+              storedRight,
+              oldIndex,
+              storedHash,
+              oldBucket,
+              hExisting
+            ]
+          rw [hBuild] at h
+          by_cases hHash :
+              storedHash =
+                psKernelExprPairHash queryLeft queryRight
+          · have hBucket :
+                psKernelExprPairSetIndexBucket
+                    16
+                    (psKernelExprPairSetIndexSet
+                      16
+                      oldIndex
+                      storedHash
+                      (List.cons entry oldBucket))
+                    (psKernelExprPairHash queryLeft queryRight) =
+                  List.cons entry oldBucket := by
+              rw [← hHash]
+              exact
+                psKernelExprPairSetIndexBucket_set_same_core
+                  16
+                  oldIndex
+                  storedHash
+                  (List.cons entry oldBucket)
+            rw [hBucket] at h
+            rcases
+                psKernelExprPairSetContainsIn_cons_true_cases_core
+                  queryLeft
+                  queryRight
+                  entry
+                  oldBucket
+                  h with
+              hHead | hOld
+            · simp [
+                psKernelExprPairSetContainsIn,
+                hHead
+              ]
+            · have hOldIndex :
+                  psKernelExprPairSetContainsIn
+                      queryLeft
+                      queryRight
+                      (psKernelExprPairSetIndexBucket
+                        16
+                        oldIndex
+                        (psKernelExprPairHash
+                          queryLeft
+                          queryRight)) =
+                    true := by
+                unfold oldBucket at hOld
+                rw [hHash] at hOld
+                exact hOld
+              have hRest :=
+                ih queryLeft queryRight hOldIndex
+              cases hHead :
+                  psKernelExprPairEq
+                    queryLeft
+                    queryRight
+                    entry with
+              | true =>
+                  simp [
+                    psKernelExprPairSetContainsIn,
+                    hHead
+                  ]
+              | false =>
+                  simpa [
+                    psKernelExprPairSetContainsIn,
+                    hHead
+                  ] using hRest
+          · have hRouted :
+                psKernelExprPairSetContainsIn
+                    queryLeft
+                    queryRight
+                    (psKernelExprPairSetIndexBucket
+                      16
+                      oldIndex
+                      (psKernelExprPairHash
+                        queryLeft
+                        queryRight)) =
+                  true := by
+              rw [
+                psKernelExprPairSetIndexBucket_set_other_hash_core
+                  oldIndex
+                  storedHash
+                  (psKernelExprPairHash queryLeft queryRight)
+                  (List.cons entry oldBucket)
+                  (psKernelExprPairHash_lt_two_pow_16_core
+                    storedLeft storedRight)
+                  (psKernelExprPairHash_lt_two_pow_16_core
+                    queryLeft queryRight)
+                  hHash
+              ] at h
+              exact h
+            have hRest :=
+              ih queryLeft queryRight hRouted
+            cases hHead :
+                psKernelExprPairEq
+                  queryLeft
+                  queryRight
+                  entry with
+            | true =>
+                simp [
+                  psKernelExprPairSetContainsIn,
+                  hHead
+                ]
+            | false =>
+                simpa [
+                  psKernelExprPairSetContainsIn,
+                  hHead
+                ] using hRest

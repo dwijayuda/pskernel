@@ -170,6 +170,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
           PsVerifiedIrExpr.ifE
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natEq
+              []
               [
                 PsVerifiedIrExpr.var "x",
                 PsVerifiedIrExpr.literal
@@ -183,6 +184,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
               [
                 PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.natSub
+                  []
                   [
                     PsVerifiedIrExpr.var "x",
                     PsVerifiedIrExpr.literal
@@ -210,6 +212,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natAdd
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "one"
@@ -240,6 +243,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natAdd
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
@@ -269,6 +273,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
             (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natAdd
+              []
               [
                 PsVerifiedIrExpr.var "value",
                 PsVerifiedIrExpr.var "offset"
@@ -459,10 +464,12 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringPush
+            []
             [
               PsVerifiedIrExpr.var "text",
               PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.charOfNat
+                []
                 [
                   PsVerifiedIrExpr.literal
                     (PsVerifiedIrLiteral.natural 33)
@@ -482,6 +489,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringUtf8ByteSize
+            []
             [PsVerifiedIrExpr.var "text"]
       },
       {
@@ -515,6 +523,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.arrayMap
+            []
             [
               PsVerifiedIrExpr.var "genericId",
               PsVerifiedIrExpr.var "xs"
@@ -551,6 +560,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.arrayMap
+            []
             [
               PsVerifiedIrExpr.var "arrayIdOnly",
               PsVerifiedIrExpr.var "xs"
@@ -588,6 +598,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.arrayFoldl
+            []
             [
               PsVerifiedIrExpr.var "arrayKeepLeft",
               PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0),
@@ -595,6 +606,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
               PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0),
               PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.arraySize
+                []
                 [PsVerifiedIrExpr.var "xs"]
             ]
       },
@@ -620,12 +632,15 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
               [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayPush
+              []
               [
                 PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arrayPush
+                  []
                   [
                     PsVerifiedIrExpr.intrinsic
                       PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      []
                       [
                         PsVerifiedIrExpr.literal
                           (PsVerifiedIrLiteral.natural 2)
@@ -641,6 +656,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
                 [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.arraySetIfInBounds
+                []
                 [
                   PsVerifiedIrExpr.var "xs",
                   PsVerifiedIrExpr.literal
@@ -650,6 +666,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
                 ])
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.arrayGetD
+                []
                 [
                   PsVerifiedIrExpr.var "ys",
                   PsVerifiedIrExpr.literal

@@ -282,19 +282,6 @@ inductive PsKernelStructuralExprEq :
       PsKernelStructuralExprEq
         (PsKernelExpr.mvar left)
         (PsKernelExpr.mvar right)
-  | reductionClosure
-      (left right : PsKernelExpr)
-      (h :
-        PsKernelReductionClosure
-          environment
-          localContext
-          left
-          right) :
-      PsKernelDefEqJudgment
-        environment
-        localContext
-        left
-        right
   | sort
       (left right : PsKernelLevel)
       (h : psKernelLevelEq left right = true) :
@@ -477,6 +464,19 @@ inductive PsKernelDefEqJudgment
       (left right : PsKernelExpr)
       (h :
         PsKernelReductionStep
+          environment
+          localContext
+          left
+          right) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+  | reductionClosure
+      (left right : PsKernelExpr)
+      (h :
+        PsKernelReductionClosure
           environment
           localContext
           left

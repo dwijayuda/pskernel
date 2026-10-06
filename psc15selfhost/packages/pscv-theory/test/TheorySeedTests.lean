@@ -11,3 +11,10 @@ def psTheorySeedProof :
 
 def main : IO Unit := do
   IO.println "PSCV_THEORY_SEED_TESTS: PASS"
+
+
+def psTheorySpecializationProof :
+    psIrSpecializeModule
+      psTheorySpecializationModule =
+      Except.ok psTheorySpecializationModule :=
+  psSpecializationLiteralModulePreserves

@@ -97,3 +97,77 @@ theorem psKernelReductionClosure_applyArgs
           (PsKernelExpr.app left arg)
           (PsKernelExpr.app right arg)
           hApp
+
+
+/-
+Application-spine reconstruction.
+
+The executable WHNF worker decomposes an application into a head and argument
+list, reduces the head, then rebuilds the spine.  These lemmas show that the
+decomposition/rebuild round trip is exact and therefore contextual reduction of
+the head is semantic reduction of the original application.
+-/
+
+theorem psKernelExprGetAppFnArgsWorker_reconstruct
+    (expr : PsKernelExpr)
+    (suffix : List PsKernelExpr) :
+    let spine :=
+      psKernelExprGetAppFnArgsWorker expr suffix
+    psKernelExprApplyArgsCheap
+        (Prod.fst spine)
+        (Prod.snd spine) =
+      psKernelExprApplyArgsCheap expr suffix := by
+  induction expr generalizing suffix <;>
+    simp [
+      psKernelExprGetAppFnArgsWorker,
+      psKernelExprApplyArgsCheap,
+      psKernelExprApplyArgsCheapWorker,
+      *
+    ]
+
+
+theorem psKernelExprGetAppFnArgs_reconstruct
+    (expr : PsKernelExpr) :
+    let spine := psKernelExprGetAppFnArgs expr
+    psKernelExprApplyArgsCheap
+        (Prod.fst spine)
+        (Prod.snd spine) =
+      expr := by
+  simpa [
+    psKernelExprGetAppFnArgs,
+    psKernelExprApplyArgsCheap,
+    psKernelExprApplyArgsCheapWorker
+  ] using
+    psKernelExprGetAppFnArgsWorker_reconstruct
+      expr
+      List.nil
+
+
+theorem psKernelReductionClosure_appSpineHead
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (expr reducedHead : PsKernelExpr)
+    (hHead :
+      PsKernelReductionClosure
+        environment
+        localContext
+        (Prod.fst (psKernelExprGetAppFnArgs expr))
+        reducedHead) :
+    PsKernelReductionClosure
+      environment
+      localContext
+      expr
+      (psKernelExprApplyArgsCheap
+        reducedHead
+        (Prod.snd (psKernelExprGetAppFnArgs expr))) := by
+  have hLift :=
+    psKernelReductionClosure_applyArgsCheap
+      environment
+      localContext
+      (Prod.snd (psKernelExprGetAppFnArgs expr))
+      (Prod.fst (psKernelExprGetAppFnArgs expr))
+      reducedHead
+      hHead
+  have hReconstruct :=
+    psKernelExprGetAppFnArgs_reconstruct expr
+  simpa [hReconstruct] using hLift

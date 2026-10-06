@@ -101,15 +101,23 @@ theorem psKernelReduceNatWith_add_literals_refines
       result := by
   dsimp
   constructor
-  · simp [
-      psKernelReduceNatWith,
-      hLeft,
-      hRight,
-      psKernelExprNatLiteralValue,
-      psKernelReduceNatBinary,
-      hAdd,
-      hSize
-    ]
+  · cases hCheck :
+        psKernelCheckNatSize
+          context.maxNatSize
+          (left + right) with
+    | error error =>
+        simp [hCheck] at hSize
+    | ok checked =>
+        cases checked
+        simp [
+          psKernelReduceNatWith,
+          hLeft,
+          hRight,
+          psKernelExprNatLiteralValue,
+          psKernelReduceNatBinary,
+          hAdd,
+          hCheck
+        ]
   · exact
       PsKernelReductionStep.natAdd
         op

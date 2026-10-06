@@ -86,6 +86,7 @@ jobs:
             PsBackendTs \
             PsBackendJs \
             PsDriverTs \
+            PsDriverJs \
             PsBackendRust \
             PsDriverRust \
             PsBackendWasm \
@@ -137,6 +138,10 @@ jobs:
       - name: Differential direct JavaScript against TS to tsc
         working-directory: psc15selfhost
         run: node scripts/backend-js-differential.test.mjs
+
+      - name: Prove direct JavaScript whole-compiler self-host fixed point
+        working-directory: psc15selfhost
+        run: npm run test:direct-js-selfhost
 
       - name: Run Rust source driver corpus
         working-directory: psc15selfhost

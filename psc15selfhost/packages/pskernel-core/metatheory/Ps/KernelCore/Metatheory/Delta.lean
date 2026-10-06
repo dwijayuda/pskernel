@@ -198,30 +198,22 @@ theorem psKernelDefEqUnfold_some_refines_reduction
       context.localContext
       expr
       result := by
-  cases hCacheGet :
-      psKernelExprMapGet state.unfold expr with
-  | some cached =>
-      have hEq : cached = result := by
-        simpa [
-          psKernelDefEqUnfold,
-          hCacheGet
-        ] using hSuccess
-      subst result
-      exact hCache expr cached hCacheGet
-  | none =>
+  cases hEligible :
+      psKernelSemanticCacheEligible expr with
+  | false =>
       cases hDirect :
           psKernelUnfoldDefinition context expr with
       | none =>
           simp [
             psKernelDefEqUnfold,
-            hCacheGet,
+            hEligible,
             hDirect
           ] at hSuccess
       | some unfolded =>
           have hEq : unfolded = result := by
             simpa [
               psKernelDefEqUnfold,
-              hCacheGet,
+              hEligible,
               hDirect
             ] using hSuccess
           subst result
@@ -232,6 +224,44 @@ theorem psKernelDefEqUnfold_some_refines_reduction
               unfolded
               hIndex
               hDirect
+  | true =>
+      cases hCacheGet :
+          psKernelExprMapGet state.unfold expr with
+      | some cached =>
+          have hEq : cached = result := by
+            simpa [
+              psKernelDefEqUnfold,
+              hEligible,
+              hCacheGet
+            ] using hSuccess
+          subst result
+          exact hCache expr cached hCacheGet
+      | none =>
+          cases hDirect :
+              psKernelUnfoldDefinition context expr with
+          | none =>
+              simp [
+                psKernelDefEqUnfold,
+                hEligible,
+                hCacheGet,
+                hDirect
+              ] at hSuccess
+          | some unfolded =>
+              have hEq : unfolded = result := by
+                simpa [
+                  psKernelDefEqUnfold,
+                  hEligible,
+                  hCacheGet,
+                  hDirect
+                ] using hSuccess
+              subst result
+              exact
+                psKernelUnfoldDefinition_some_refines_closure
+                  context
+                  expr
+                  unfolded
+                  hIndex
+                  hDirect
 
 theorem psKernelDefEqDeltaOnce_refines_reduction
     (coreWhnf :

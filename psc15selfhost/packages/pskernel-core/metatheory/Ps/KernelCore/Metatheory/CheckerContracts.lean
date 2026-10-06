@@ -903,57 +903,69 @@ theorem psKernelDefEqFinish_preserves_configuration
   | false =>
       simpa [psKernelDefEqFinish] using hConfig
   | true =>
-      rcases hConfig with
-        ⟨hIndex, hBound, hState⟩
-      have hEq :
-          PsKernelDefEqJudgment
-            context.environment
-            context.localContext
+      cases hEligible :
+          psKernelSemanticPairCacheEligible
             left
-            right :=
-        hDefEq rfl
-      refine ⟨hIndex, ?_, ?_⟩
-      · simpa [
-          psKernelDefEqFinish,
-          psKernelCheckerStateWithSuccess
-        ] using hBound
-      · unfold PsKernelCheckerStateSemanticSound at hState ⊢
-        rcases hState with
-          ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
-        simpa [
-          psKernelDefEqFinish,
-          psKernelCheckerStateWithSuccess
-        ] using
-          (show
-            PsKernelInferOnlyCacheIsolated
-                context.environment context.localContext state.inferOnly ∧
-              PsKernelInferenceCacheSound
-                context.environment context.localContext state.checkedInfer ∧
-              PsKernelReductionCacheSound
-                context.environment context.localContext state.whnfCore ∧
-              PsKernelReductionCacheSound
-                context.environment context.localContext state.whnf ∧
-              PsKernelReductionCacheSound
-                context.environment context.localContext state.unfold ∧
-              PsKernelDefEqCacheSound
-                context.environment context.localContext
-                (psKernelExprPairSetInsert state.success left right)
-            from
-              ⟨
-                hInferOnly,
-                hChecked,
-                hWhnfCore,
-                hWhnf,
-                hUnfold,
-                psKernelDefEqCacheInsertLaw_all
-                  context.environment
-                  context.localContext
-                  state.success
-                  left
-                  right
-                  hSuccess
-                  hEq
-              ⟩)
+            right with
+      | false =>
+          simpa [
+            psKernelDefEqFinish,
+            hEligible
+          ] using hConfig
+      | true =>
+          rcases hConfig with
+            ⟨hIndex, hBound, hState⟩
+          have hEq :
+              PsKernelDefEqJudgment
+                context.environment
+                context.localContext
+                left
+                right :=
+            hDefEq rfl
+          refine ⟨hIndex, ?_, ?_⟩
+          · simpa [
+              psKernelDefEqFinish,
+              hEligible,
+              psKernelCheckerStateWithSuccess
+            ] using hBound
+          · unfold PsKernelCheckerStateSemanticSound at hState ⊢
+            rcases hState with
+              ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
+            simpa [
+              psKernelDefEqFinish,
+              hEligible,
+              psKernelCheckerStateWithSuccess
+            ] using
+              (show
+                PsKernelInferOnlyCacheIsolated
+                    context.environment context.localContext state.inferOnly ∧
+                  PsKernelInferenceCacheSound
+                    context.environment context.localContext state.checkedInfer ∧
+                  PsKernelReductionCacheSound
+                    context.environment context.localContext state.whnfCore ∧
+                  PsKernelReductionCacheSound
+                    context.environment context.localContext state.whnf ∧
+                  PsKernelReductionCacheSound
+                    context.environment context.localContext state.unfold ∧
+                  PsKernelDefEqCacheSound
+                    context.environment context.localContext
+                    (psKernelExprPairSetInsert state.success left right)
+                from
+                  ⟨
+                    hInferOnly,
+                    hChecked,
+                    hWhnfCore,
+                    hWhnf,
+                    hUnfold,
+                    psKernelDefEqCacheInsertLaw_all
+                      context.environment
+                      context.localContext
+                      state.success
+                      left
+                      right
+                      hSuccess
+                      hEq
+                  ⟩)
 
 
 theorem psKernelInferenceConfigurationSound_preserves

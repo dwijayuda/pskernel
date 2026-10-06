@@ -4,8 +4,8 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `69fe4aec6aadaed176e3e490d1fc3c5436bba238`
-- Last known green proof checkpoint: `28d0d5c30490e010909da14617d36d82dc58d5db` (run #252)
+- Current proof HEAD when this state was written: `91d03bca250c4e1b97a2967b403a0aced211d3eb`
+- Last known green proof checkpoint: `91d03bca250c4e1b97a2967b403a0aced211d3eb` (run #260)
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
 ## Acceptance criteria
@@ -50,25 +50,25 @@ Last checked-in audit before this state file:
 - Total canonical source/proof pairs: 79
 
 ## Current blocker
-Run #257 on `69fe4aec6aadaed176e3e490d1fc3c5436bba238` fails while building `Metatheory/Judgments.lean`.
+None at the current checkpoint. Run #260 is fully green:
+- metatheory build: 100 jobs successful;
+- recursive proof tree: 84/84 PASS;
+- proof check: 110 seconds.
 
-Primary errors:
-- invalid recursive occurrences of `PsKernelReductionClosure` and `PsKernelDefEqJudgment` inside the new context-weakening constructors;
-- downstream unknown/function-expected errors are cascading elaboration failures.
-
-Likely cause:
-- context-weakening work added constructors that recursively mention the same inductive under a changed local-context parameter in a way Lean's positivity/parameter rules reject.
+Recently discharged prerequisites:
+- semantic expression-map cache publication;
+- semantic DefEq pair-cache insertion;
+- canonical local-context freshness and extension;
+- semantic checker-state transport under context extension;
+- reduction/DefEq weakening proved externally rather than as illegal recursive constructors.
 
 ## Immediate plan
-1. Repair the context-extension/weakening design in the Assurance Plane without weakening semantics.
-2. Restore the full proof tree to green.
-3. Resume semantic cache-publication closure if not already green.
-4. Prove local-context freshness/weakening as external theorems or a separate relation, not illegal recursive constructors.
-5. Use those lemmas to prove stateful checker-knot contracts by fuel/mutual induction.
-6. Complete remaining DefEq/reduction rules.
-7. Complete ordinary/mutual/nested inductive transactions.
-8. Compose the final public soundness theorem/family.
-9. Reconcile with integration and run final gates.
+1. Prove the concrete stateful checker-knot contracts by fuel/mutual induction, using the now-green cache publication and context weakening/freshness layers.
+2. Complete remaining DefEq/reduction rules needed by that induction (LazyDelta/FinalRules/recursor computation and any uncovered terminal rules).
+3. Complete ordinary/mutual/nested inductive admission transactions and environment-extension refinement.
+4. Compose the final public KernelContract/API soundness theorem/family with concrete checker/admission proofs, not abstract assumptions.
+5. Reconcile with the current integration branch and rerun all final proof/conformance gates.
+6. Refresh the semantic audit and leave only explicit TCB boundaries as assumptions.
 
 ## Work discipline
 - Preserve GitHub history and concurrent proof work.

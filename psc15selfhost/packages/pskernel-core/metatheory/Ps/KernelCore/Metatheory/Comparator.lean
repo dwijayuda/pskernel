@@ -1007,3 +1007,124 @@ theorem psKernelNameEq_sound_of_string_law
             ih rightParent hParts.2
           rw [← hValue, ← hParentEq]
 
+
+
+theorem psKernelLevelEq_sound_of_string_law
+    (hString : PsKernelStringEqSoundLaw)
+    (left right : PsKernelLevel)
+    (hEq : psKernelLevelEq left right = true) :
+    left = right := by
+  induction left generalizing right with
+  | zero =>
+      cases right with
+      | zero => rfl
+      | succ value => simp [psKernelLevelEq] at hEq
+      | max a b => simp [psKernelLevelEq] at hEq
+      | imax a b => simp [psKernelLevelEq] at hEq
+      | param name => simp [psKernelLevelEq] at hEq
+      | mvar name => simp [psKernelLevelEq] at hEq
+  | succ leftValue ih =>
+      cases right with
+      | succ rightValue =>
+          have hInner :
+              leftValue = rightValue :=
+            ih rightValue hEq
+          rw [hInner]
+      | _ =>
+          simp [psKernelLevelEq] at hEq
+  | max leftA leftB ihA ihB =>
+      cases right with
+      | max rightA rightB =>
+          cases hA : psKernelLevelEq leftA rightA with
+          | false =>
+              simp [psKernelLevelEq, hA] at hEq
+          | true =>
+              have hB :
+                  psKernelLevelEq leftB rightB = true := by
+                simpa [psKernelLevelEq, hA] using hEq
+              have hAEq : leftA = rightA :=
+                ihA rightA hA
+              have hBEq : leftB = rightB :=
+                ihB rightB hB
+              rw [hAEq, hBEq]
+      | _ =>
+          simp [psKernelLevelEq] at hEq
+  | imax leftA leftB ihA ihB =>
+      cases right with
+      | imax rightA rightB =>
+          cases hA : psKernelLevelEq leftA rightA with
+          | false =>
+              simp [psKernelLevelEq, hA] at hEq
+          | true =>
+              have hB :
+                  psKernelLevelEq leftB rightB = true := by
+                simpa [psKernelLevelEq, hA] using hEq
+              have hAEq : leftA = rightA :=
+                ihA rightA hA
+              have hBEq : leftB = rightB :=
+                ihB rightB hB
+              rw [hAEq, hBEq]
+      | _ =>
+          simp [psKernelLevelEq] at hEq
+  | param leftName =>
+      cases right with
+      | param rightName =>
+          have hName :
+              leftName = rightName :=
+            psKernelNameEq_sound_of_string_law
+              hString
+              leftName
+              rightName
+              hEq
+          rw [hName]
+      | _ =>
+          simp [psKernelLevelEq] at hEq
+  | mvar leftName =>
+      cases right with
+      | mvar rightName =>
+          have hName :
+              leftName = rightName :=
+            psKernelNameEq_sound_of_string_law
+              hString
+              leftName
+              rightName
+              hEq
+          rw [hName]
+      | _ =>
+          simp [psKernelLevelEq] at hEq
+
+theorem psKernelLevelListEq_sound_of_string_law
+    (hString : PsKernelStringEqSoundLaw)
+    (left right : List PsKernelLevel)
+    (hEq : psKernelLevelListEq left right = true) :
+    left = right := by
+  induction left generalizing right with
+  | nil =>
+      cases right with
+      | nil => rfl
+      | cons head tail =>
+          simp [psKernelLevelListEq] at hEq
+  | cons leftHead leftTail ih =>
+      cases right with
+      | nil =>
+          simp [psKernelLevelListEq] at hEq
+      | cons rightHead rightTail =>
+          cases hHead :
+              psKernelLevelEq leftHead rightHead with
+          | false =>
+              simp [psKernelLevelListEq, hHead] at hEq
+          | true =>
+              have hTail :
+                  psKernelLevelListEq leftTail rightTail = true := by
+                simpa [psKernelLevelListEq, hHead] using hEq
+              have hHeadEq :
+                  leftHead = rightHead :=
+                psKernelLevelEq_sound_of_string_law
+                  hString
+                  leftHead
+                  rightHead
+                  hHead
+              have hTailEq :
+                  leftTail = rightTail :=
+                ih rightTail hTail
+              rw [hHeadEq, hTailEq]

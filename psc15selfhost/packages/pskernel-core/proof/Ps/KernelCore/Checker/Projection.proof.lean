@@ -2135,18 +2135,31 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                       inductInfo.numIndices := by
                                                 simpa [args] using
                                                   hArgsLengthNe
-                                              simp only [
-                                                psKernelInferProjectionWith,
-                                                hInferRun,
-                                                hTypeWhnf,
-                                                hIndexBound,
-                                                hFn,
-                                                hTypeName,
-                                                hInductFind,
-                                                hCtors,
-                                                hCtorRest
-                                              ] at hSuccess
-                                              simp [hArgsLengthNeRaw] at hSuccess
+                                              have hReject :
+                                                  psKernelInferProjectionWith
+                                                      whnf
+                                                      inferType
+                                                      context
+                                                      state
+                                                      typeName
+                                                      index
+                                                      structValue =
+                                                    Except.error
+                                                      "invalid projection: inductive type is not fully applied" := by
+                                                simp [
+                                                  psKernelInferProjectionWith,
+                                                  hInferRun,
+                                                  hTypeWhnf,
+                                                  hIndexBound,
+                                                  hFn,
+                                                  hTypeName,
+                                                  hInductFind,
+                                                  hCtors,
+                                                  hCtorRest,
+                                                  hArgsLengthNeRaw
+                                                ]
+                                              rw [hReject] at hSuccess
+                                              cases hSuccess
                                           | true =>
                                               have hArgsLength :
                                                   psKernelExprListLength args =

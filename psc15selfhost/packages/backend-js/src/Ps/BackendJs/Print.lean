@@ -904,6 +904,81 @@ def psJsPrintExprWithFuel
                             " : "
                             printedElse
                             ")")
+        | PsJsIrExpr.record fields =>
+            match psJsPrintFieldsWith smaller fields with
+            | Except.error error => Except.error error
+            | Except.ok printedFields =>
+                Except.ok
+                  (psJsJoin
+                    ""
+                    [
+                      "({ ",
+                      psJsJoin ", " printedFields,
+                      " })"
+                    ])
+        | PsJsIrExpr.projection target field =>
+            match smaller target with
+            | Except.error error => Except.error error
+            | Except.ok printedTarget =>
+                Except.ok
+                  (psJsJoin
+                    ""
+                    [
+                      "(",
+                      printedTarget,
+                      ")[",
+                      psJsonQuote field,
+                      "]"
+                    ])
+        | PsJsIrExpr.constructor constructorName fields =>
+            match psJsPrintFieldsWith smaller fields with
+            | Except.error error => Except.error error
+            | Except.ok printedFields =>
+                let payload : String :=
+                  psJsJoin
+                    ""
+                    [
+                      "{ ",
+                      psJsJoin ", " printedFields,
+                      " }"
+                    ];
+                Except.ok
+                  (psJsJoin
+                    ""
+                    [
+                      "({ \"$ps$tag\": ",
+                      psJsonQuote constructorName,
+                      ", \"$ps$fields\": ",
+                      payload,
+                      " })"
+                    ])
+        | PsJsIrExpr.matchE scrutinee alternatives =>
+            match smaller scrutinee with
+            | Except.error error => Except.error error
+            | Except.ok printedScrutinee =>
+                let temp : String :=
+                  psJsFreshMatchTemp expr;
+                match
+                    psJsPrintMatchAlternativesWith
+                      smaller
+                      temp
+                      alternatives with
+                | Except.error error => Except.error error
+                | Except.ok printedAlternatives =>
+                    Except.ok
+                      (psJsJoin
+                        ""
+                        [
+                          "((",
+                          temp,
+                          ") => { switch (",
+                          temp,
+                          "[\"$ps$tag\"]) { ",
+                          psJsJoin " " printedAlternatives,
+                          " } throw new Error(\"invalid ProofScript constructor tag\"); })(",
+                          printedScrutinee,
+                          ")"
+                        ])
 
 def psJsPrintExpr
     (expr : PsJsIrExpr) :

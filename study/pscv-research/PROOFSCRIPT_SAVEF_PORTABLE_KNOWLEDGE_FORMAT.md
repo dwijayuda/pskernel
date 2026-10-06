@@ -1582,3 +1582,306 @@ Test families include:
 - safe bounded numeric fields;
 - arbitrary-integer string encoding;
 - forbidden non-I-JSON cases.
+
+
+---
+
+# 54. Digest implementation plan
+
+Freeze test vectors for:
+
+- minimal KnowledgeRoot;
+- nested object graph;
+- reordered input keys producing identical canonical bytes;
+- whitespace changes producing identical ID;
+- one semantic-field mutation producing a different ID;
+- Unicode edge cases;
+- proof/blob mutation.
+
+The domain separator is part of the frozen digest contract.
+
+---
+
+# 55. OCI implementation plan
+
+Host-side command:
+
+~~~text
+psc knowledge publish-oci
+~~~
+
+Steps:
+
+1. fully validate SPKF object locally;
+2. map object kind to OCI artifactType;
+3. create OCI 1.1 image manifest;
+4. push required layers/blobs;
+5. push manifest;
+6. use OCI subject only where same-repository mapping applies;
+7. fetch and verify resulting transport digest;
+8. optionally sign or attest;
+9. emit mirror record.
+
+Pulling reverses this process and always recomputes SPKF identity after extraction.
+
+---
+
+# 56. Distribution adapter implementation
+
+Every package ecosystem adapter should implement the same conceptual contract.
+
+~~~text
+DistributionAdapter {
+    ecosystem
+    extractBinding(packageArtifact)
+    verifyTransportIntegrity(packageArtifact)
+    locateEmbeddedSpkf(packageArtifact)
+    emitBinding(subject, packageArtifact)
+}
+~~~
+
+The adapter establishes a mapping from package artifact to SPKF object.
+
+It does not establish theorem validity.
+
+---
+
+# 57. Wasm universal lane implementation
+
+Near-term target:
+
+~~~text
+Certified PSCV
+    |
+    v
+VerifiedIR
+    |
+    v
+direct Wasm backend
+    |
+    v
+preserved Wasm artifact
+    |
+    v
+Wasm Component adapter
+    |
+    v
+WIT interface
+    |
+    +-- npm wrapper
+    +-- Cargo wrapper
+    +-- PyPI wrapper
+    +-- other hosts
+~~~
+
+Assurance remains separated:
+
+~~~text
+Wasm behavior
+    backend preservation evidence
+
+Component/WIT boundary
+    ABI/interface evidence
+
+host wrapper
+    adapter/conformance evidence
+~~~
+
+This reduces the number of fully formalized native backends required for initial ecosystem reach.
+
+---
+
+# 58. Native backend implementation
+
+Native implementations remain valuable.
+
+Each native target should bind:
+
+~~~text
+TargetSemanticProfile
+BackendPreservationContract
+ImplementationWitness
+DistributionBinding
+~~~
+
+Evidence maturity may progress from characterization to differential validation, translation validation, and formal proof.
+
+The AssuranceVector records the actual evidence level.
+
+---
+
+# 59. Free distribution model
+
+No central registry owns SPKF semantic identity.
+
+Communities may run:
+
+~~~text
+GHCR mirror
+university mirror
+company mirror
+public object store
+offline archive
+future registry
+~~~
+
+Identical canonical objects validate to identical SPKF IDs.
+
+---
+
+# 60. Discovery without central authority
+
+Possible discovery sources:
+
+- package-manager embedded locators;
+- OCI referrers;
+- Git repositories;
+- GitHub releases;
+- curated snapshots;
+- community indexes;
+- local graph databases.
+
+Different indexes may disagree about ranking and canonical recommendations.
+
+They cannot redefine object bytes for an SPKF ID.
+
+---
+
+# 61. Example: portable JSON theory
+
+KnowledgeRoot A:
+
+~~~text
+Json
+parse
+encode
+
+parse_valid
+parse_deterministic
+encode_parse_roundtrip
+~~~
+
+Implementation witnesses:
+
+~~~text
+I1
+    PSCV source
+
+I2
+    preserved JavaScript artifact
+
+I3
+    preserved Wasm component
+
+I4
+    native Rust implementation
+
+I5
+    Python package using I3
+~~~
+
+Bindings:
+
+~~~text
+npm -> I2
+Cargo -> I4
+PyPI -> I5
+Maven -> I3 host wrapper
+Composer -> I3 host wrapper
+~~~
+
+Portable theorems remain rooted in A.
+
+---
+
+# 62. Example: theorem contributed from another ecosystem
+
+A Rust contributor proves:
+
+~~~text
+streaming_parse_memory_bound
+~~~
+
+If the theorem statement depends only on portable ParserSpec semantics, publish a K1/K2 TheoryExtension against the shared subject.
+
+Every implementation refining that subject may use it.
+
+If the theorem mentions Rust allocator internals, classify it as K4 ecosystem-specific knowledge instead.
+
+SPKF preserves useful target-specific knowledge without pretending it is universal.
+
+---
+
+# 63. Example: implementation replacement
+
+Suppose an npm Map implementation changes:
+
+~~~text
+red-black tree
+    ->
+HAMT
+~~~
+
+If both implementations refine the same certified opaque Map theory, the semantic KnowledgeRoot can remain unchanged.
+
+The DistributionBinding changes the implementation/artifact identity.
+
+Downstream clients depending only on the stable theory may remain green.
+
+---
+
+# 64. First prototype architecture
+
+Do not begin with every ecosystem.
+
+Prototype:
+
+~~~text
+@proofscript/bytes
+    |
+    v
+@proofscript/parser
+    |
+    v
+@proofscript/json
+~~~
+
+Use:
+
+~~~text
+npm
+    runtime + compact SPKF locator/interface
+
+GHCR
+    complete SPKF knowledge/evidence graph
+
+local CAS
+    verified-object cache
+~~~
+
+Then add:
+
+~~~text
+Cargo binding
+~~~
+
+and one independent third-party TheoryExtension.
+
+---
+
+# 65. Prototype acceptance gates
+
+The first prototype is accepted only if all of these pass:
+
+1. The same knowledge root packaged through npm and OCI produces the same SPKF ID.
+2. Any semantic-field mutation changes the ID.
+3. Proof/blob mutation is detected before semantic use.
+4. npm metadata alone cannot create theorem authority.
+5. The authority closure can be mirrored locally.
+6. Offline replay succeeds from mirrored bytes.
+7. A third party can publish a theorem extension without republishing the original root.
+8. The search index can be deleted and rebuilt.
+9. A Cargo package can point to the same theory root as an npm package.
+10. Normal npm consumers do not need the heavyweight proof archive.
+11. A malformed resource-exhaustion graph fails closed.
+12. QueryGraph/CAS can use SPKF IDs without forcing global invalidation.

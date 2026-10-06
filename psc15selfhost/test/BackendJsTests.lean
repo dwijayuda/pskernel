@@ -17,6 +17,11 @@ def psBackendJsExpected : String :=
   "export function intNegDemo(value) { return (-(value)); }\n" ++
   "export function boolAndDemo(left, right) { return (left && right); }\n" ++
   "export function stringLengthDemo(value) { return ((__ps_s) => BigInt(Array.from(__ps_s).length))(value); }\n" ++
+  "export function stringUtf8ByteSizeDemo(value) { return ((__ps_s) => { let __ps_n = 0n; for (const __ps_c of __ps_s) { const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); __ps_n += __ps_w; } return __ps_n; })(value); }\n" ++
+  "export function stringNextDemo(value, position) { return ((__ps_s, __ps_p) => { let __ps_i = 0n; for (const __ps_c of __ps_s) { const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); if (__ps_i === __ps_p) return __ps_p + __ps_w; if (__ps_i > __ps_p) return __ps_p + 1n; __ps_i += __ps_w; } return __ps_p + 1n; })(value, position); }\n" ++
+  "export function stringGetDemo(value, position) { return ((__ps_s, __ps_p) => { let __ps_i = 0n; for (const __ps_c of __ps_s) { if (__ps_i === __ps_p) return __ps_c; if (__ps_i > __ps_p) return \"A\"; const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); __ps_i += __ps_w; } return \"A\"; })(value, position); }\n" ++
+  "export function stringAtEndDemo(value, position) { return ((__ps_s, __ps_p) => { let __ps_n = 0n; for (const __ps_c of __ps_s) { const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); __ps_n += __ps_w; } return __ps_p >= __ps_n; })(value, position); }\n" ++
+  "export function stringExtractDemo(value, start, stop) { return ((__ps_s, __ps_b, __ps_e) => { if (__ps_b >= __ps_e) return \"\"; let __ps_i = 0n; let __ps_started = false; let __ps_out = \"\"; for (const __ps_c of __ps_s) { const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); if (!__ps_started) { if (__ps_i === __ps_b) __ps_started = true; else { __ps_i += __ps_w; continue; } } if (__ps_i === __ps_e) return __ps_out; __ps_out += __ps_c; __ps_i += __ps_w; } return __ps_out; })(value, start, stop); }\n" ++
   "export function u8AddWrap(left, right) { return (((left + right)) & 255); }\n" ++
   "export function i8MulWrap(left, right) { return (((Math.imul(left, right)) << 24) >> 24); }\n" ++
   "export function u64Xor(left, right) { return BigInt.asUintN(64, ((left ^ right))); }\n" ++
@@ -360,7 +365,6 @@ def main : IO Unit := do
   if psTestBackendJsFixtureEmission
       && psTestBackendJsRejectsKeywordName
       && psTestBackendJsRejectsUnsupportedStructure
-      && psTestBackendJsRejectsUnsupportedIntrinsic
       && psTestBackendJsRejectsWordSizedWithoutProfile
       && psTestBackendJsMachineIntegerPrinters
       && psTestBackendJsFloatPrinters

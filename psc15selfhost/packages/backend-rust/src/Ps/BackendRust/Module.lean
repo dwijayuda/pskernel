@@ -1,3 +1,4 @@
+import Ps.Foundation.List
 import Ps.BackendRust.Expr
 import Ps.BackendRust.ValueRefs
 import Ps.BackendRust.Runtime
@@ -1232,14 +1233,14 @@ def psRustAssembleModuleSource
     (structures : List String)
     (inductives : List String)
     (declarations : List String) : String :=
-  let tail : List String :=
-    List.append
-      structures
-      (List.append inductives declarations);
-  let sections : List String :=
-    List.cons psRustRuntimePrelude tail;
   psRustConcat2
-    (psRustJoin "\n" sections)
+    (psRustJoin
+      "\n"
+      (List.cons
+        psRustRuntimePrelude
+        (psListAppend
+          structures
+          (psListAppend inductives declarations))))
     "\n"
 
 def psRustEmitModule

@@ -528,6 +528,13 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                           inductInfo.numIndices := by
                                                     intro hEq
                                                     simpa [hEq] using hArgsLengthBool
+                                                  have hArgsLengthNeRaw :
+                                                      psKernelExprListLength
+                                                          (psKernelExprGetAppArgs typeWhnf) ≠
+                                                        Nat.add
+                                                          inductInfo.numParams
+                                                          inductInfo.numIndices := by
+                                                    simpa [args] using hArgsLengthNe
                                                   simp [
                                                     psKernelInferProjectionWith,
                                                     hInfer,
@@ -538,8 +545,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                     hInductFind,
                                                     hCtors,
                                                     hCtorRest,
-                                                    args,
-                                                    hArgsLengthNe
+                                                    hArgsLengthNeRaw
                                                   ] at hSuccess
                                               | true =>
                                                   have hArgsLength :

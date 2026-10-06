@@ -27,19 +27,19 @@ def psMetaSetLevels
 
 def psMetaVarAssignable (context : PsMetaContext) (id : Nat) : Bool :=
   match psMetaFindDecl context id with
-  | none => false
-  | some declaration =>
+  | Option.none => false
+  | Option.some declaration =>
       match declaration.kind with
       | .syntheticOpaque => false
       | _ => true
 
 def psMetaVarIsNatural (context : PsMetaContext) (id : Nat) : Bool :=
   match psMetaFindDecl context id with
-  | some declaration =>
+  | Option.some declaration =>
       match declaration.kind with
       | .natural => true
       | _ => false
-  | none => false
+  | Option.none => false
 
 def psUnifyAssign
     (context : PsMetaContext)
@@ -47,8 +47,8 @@ def psUnifyAssign
     (value : PsExpr) : PsUnifyResult :=
   if psMetaVarAssignable context id then
     match psMetaAssign context id value with
-    | none => psUnifyFailure context
-    | some next => psUnifySuccess next
+    | Option.none => psUnifyFailure context
+    | Option.some next => psUnifySuccess next
   else
     psUnifyFailure context
 

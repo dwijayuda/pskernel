@@ -773,6 +773,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
           ⟩
       cases hFnShape : fn with
       | lam name type body binderInfo =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppLambdaTail_configuration_refines
@@ -795,7 +796,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               cheapProj
               hArgsNonempty
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -805,10 +806,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | bvar index =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -818,7 +819,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.bvar index) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -828,10 +829,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | fvar name =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -841,7 +842,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.fvar name) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -851,10 +852,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | mvar name =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -864,7 +865,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.mvar name) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -874,10 +875,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | sort level =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -887,7 +888,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.sort level) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -897,10 +898,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | const name levels =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -910,7 +911,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.const name levels) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -920,10 +921,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | app nestedFn nestedArg =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -933,7 +934,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.app nestedFn nestedArg) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -943,10 +944,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | forallE name domain codomain binderInfo =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -957,7 +958,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               (PsKernelExpr.forallE name domain codomain binderInfo)
               result args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -967,10 +968,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | letE name type value body nondep =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -981,7 +982,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               (PsKernelExpr.letE name type value body nondep)
               result args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -991,10 +992,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | lit literal =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -1004,7 +1005,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.lit literal) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -1014,10 +1015,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | mdata metadata body =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -1027,7 +1028,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.mdata metadata body) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -1037,10 +1038,10 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)
       | proj typeName index body =>
+          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -1050,7 +1051,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.proj typeName index body) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by simpa [hFnShape] using hHead)
+              (by exact hHead)
               (by
                 simpa [
                   psKernelWhnfCoreWithFuel,
@@ -1060,6 +1061,5 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn,
-                  hFnShape
+                  hFn
                 ] using hSuccess)

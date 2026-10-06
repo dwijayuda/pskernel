@@ -726,7 +726,7 @@ with pskernel.
 ### L2 — ProofScript compiles the same Lean source
 
 ```text
-compiler.lean --PSC0/compatible ProofScript compiler--> compiler.ts/js
+compiler.lean --CompilerGen0/compatible bootstrap compiler--> compiler.ts/js
 ```
 
 This becomes required only after the necessary PSC1 source features exist in
@@ -735,7 +735,7 @@ the ProofScript compiler implementation.
 ### L3 — first self-host
 
 ```text
-compiler.lean --PSC1--> PSC2
+compiler.lean --CompilerGen1--> CompilerGen2
 ```
 
 Require stable checked-core/IR fingerprints and equivalent output.
@@ -744,7 +744,7 @@ Require stable checked-core/IR fingerprints and equivalent output.
 
 ```text
 compiler.lean <-> compiler.ps
-compiler.ps --PSC1--> next compiler
+compiler.ps --CompilerGen1--> next compiler generation
 ```
 
 Canonical Lean and ProofScript forms must represent the same compiler

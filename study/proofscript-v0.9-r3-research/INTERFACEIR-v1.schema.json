@@ -1,0 +1,609 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proofscript.org/schema/interface-ir-1.0.0.json",
+  "title": "ProofScript InterfaceIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "resolution",
+    "declarations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "proofscript-interface-ir-1.0.0"
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "typescriptVersion",
+        "moduleResolution",
+        "customConditions",
+        "effectiveConditions",
+        "packageName",
+        "packageVersion",
+        "packageJsonSha256",
+        "exportSubpath",
+        "runtimeEntry",
+        "runtimeFormat",
+        "typesEntry",
+        "declarationFiles",
+        "targetRuntime",
+        "targetPlatform",
+        "installIdentity",
+        "resolverProfile",
+        "runtimeEntrySha256",
+        "typesEntrySha256",
+        "runtimeConditionTrace",
+        "typeConditionTrace"
+      ],
+      "properties": {
+        "typescriptVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "moduleResolution": {
+          "enum": [
+            "node16",
+            "nodenext",
+            "bundler"
+          ]
+        },
+        "customConditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "effectiveConditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "packageName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "packageVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "packageJsonSha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "exportSubpath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtimeEntry": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtimeFormat": {
+          "enum": [
+            "esm",
+            "commonjs",
+            "native-addon",
+            "wasm",
+            "other"
+          ]
+        },
+        "typesEntry": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declarationFiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256"
+              }
+            }
+          }
+        },
+        "targetRuntime": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetPlatform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installIdentity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lockfileSha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "resolverProfile": {
+          "const": "psc-node-exports-v1"
+        },
+        "runtimeEntrySha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "typesEntrySha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "runtimeConditionTrace": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "typeConditionTrace": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "declarations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/declaration"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "support": {
+      "enum": [
+        "native",
+        "specialized",
+        "runtime-adapter",
+        "opaque-handle",
+        "import-normalization",
+        "unsupported"
+      ]
+    },
+    "typeRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "support"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "unit",
+                "bool",
+                "string",
+                "number",
+                "bigint",
+                "unknown",
+                "any",
+                "null",
+                "undefined",
+                "foreignOpaque"
+              ]
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "support",
+            "element"
+          ],
+          "properties": {
+            "kind": {
+              "const": "array"
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "element": {
+              "$ref": "#/$defs/typeRef"
+            },
+            "readonly": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "support",
+            "elements"
+          ],
+          "properties": {
+            "kind": {
+              "const": "tuple"
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "elements": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/typeRef"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "support",
+            "fields"
+          ],
+          "properties": {
+            "kind": {
+              "const": "record"
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/field"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "support",
+            "members"
+          ],
+          "properties": {
+            "kind": {
+              "const": "union"
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "members": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/typeRef"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "support",
+            "result"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "promise",
+                "iterable",
+                "asyncIterable"
+              ]
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "result": {
+              "$ref": "#/$defs/typeRef"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "support",
+            "name"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "handle",
+                "typeParam",
+                "named"
+              ]
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "readonly",
+        "presence"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "$ref": "#/$defs/typeRef"
+        },
+        "readonly": {
+          "type": "boolean"
+        },
+        "presence": {
+          "enum": [
+            "required",
+            "optional",
+            "missing-or-undefined",
+            "nullable",
+            "explicit-four-state"
+          ]
+        }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "optional",
+        "kind"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/typeRef"
+        },
+        "optional": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "required",
+            "optional",
+            "defaulted",
+            "rest",
+            "this"
+          ]
+        },
+        "defaultSourceKnown": {
+          "type": "boolean"
+        }
+      }
+    },
+    "declaration": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "name",
+            "support",
+            "parameters",
+            "result",
+            "syncKind",
+            "throwsPolicy",
+            "sourceDeclarationSha256"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "function",
+                "callSignature",
+                "constructSignature",
+                "constructor"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "receiver": {
+              "$ref": "#/$defs/typeRef"
+            },
+            "typeParameters": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "parameters": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/parameter"
+              }
+            },
+            "result": {
+              "$ref": "#/$defs/typeRef"
+            },
+            "syncKind": {
+              "enum": [
+                "sync",
+                "promise",
+                "callback",
+                "async-iterable",
+                "unknown"
+              ]
+            },
+            "throwsPolicy": {
+              "enum": [
+                "none-documented",
+                "documented",
+                "arbitrary-foreign",
+                "unknown"
+              ]
+            },
+            "overloadGroup": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sourceDeclarationSha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "externalAssumptions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "validationPolicy": {
+              "type": "string"
+            },
+            "logicalModelIdentity": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "name",
+            "support",
+            "fields",
+            "sourceDeclarationSha256"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "interface",
+                "class",
+                "record"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/field"
+              }
+            },
+            "sourceDeclarationSha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "externalAssumptions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "validationPolicy": {
+              "type": "string"
+            },
+            "logicalModelIdentity": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "name",
+            "support",
+            "type",
+            "sourceDeclarationSha256"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "const",
+                "typeAlias",
+                "enum",
+                "namespace"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "support": {
+              "$ref": "#/$defs/support"
+            },
+            "type": {
+              "$ref": "#/$defs/typeRef"
+            },
+            "sourceDeclarationSha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "externalAssumptions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "validationPolicy": {
+              "type": "string"
+            },
+            "logicalModelIdentity": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

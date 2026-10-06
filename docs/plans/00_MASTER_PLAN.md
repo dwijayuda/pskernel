@@ -1,5 +1,8 @@
 # Master package plan
 
+> **r3 reconciliation note.** This file is an implementation/package plan, not a language authority. On `research/proofscript-v0.9-r3`, source syntax and language meaning are defined only by `study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md`. The first PSC2 compiler must implement the exact `psc2-language-v1` closure defined there; package/library/prover/platform milestones in this plan do not silently enlarge that language profile.
+
+
 Status: living plan.
 
 > **Execution priority override (2026-09-24):** ProofScript package/infrastructure

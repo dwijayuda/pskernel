@@ -21,7 +21,7 @@ for (const entry of await readdir(path.join(root, "packages"), { withFileTypes: 
     manifests.set(manifest.name, { folder: entry.name, manifest });
   } catch {}
 }
-const start = manifests.get("@proofscript/bootstrap-next") ?? manifests.get("@proofscript/bootstrap");
+const start = manifests.get("@proofscript/psc2-bootstrap");
 if (!start) throw new Error("PSC_TRUST_BOOTSTRAP_PACKAGE");
 const pending = [start];
 const seenFolders = new Set();

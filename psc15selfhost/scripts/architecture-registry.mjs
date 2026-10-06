@@ -7,7 +7,7 @@ const registry = JSON.parse(await readFile(path.join(root, "contracts/registry/A
 if (registry.schemaVersion !== 1) throw new Error("PSC_ARCH_REGISTRY_SCHEMA");
 if (registry.masterPlan !== "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md") throw new Error("PSC_ARCH_REGISTRY_MASTER_PLAN");
 const ids = new Set();
-const allowed = new Set(["current","frozen","experimental","target","accepted-target","current-host","retired"]);
+const allowed = new Set(["current","frozen","experimental","target","accepted-target","current-host","current-hosted-semantic","retired"]);
 for (const entry of registry.entries ?? []) {
   if (!entry?.id || ids.has(entry.id)) throw new Error("PSC_ARCH_REGISTRY_ID");
   ids.add(entry.id);

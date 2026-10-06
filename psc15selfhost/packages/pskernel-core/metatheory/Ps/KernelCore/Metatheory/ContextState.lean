@@ -611,6 +611,40 @@ theorem psKernelCheckerContextWithNativeEvaluator_preserves_configuration
       hState
     ⟩
 
+theorem psKernelCheckerContextEnterRecDepth_preserves_semantic_view
+    (context nextContext : PsKernelCheckerContext)
+    (hEnter :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext) :
+    nextContext.environment = context.environment ∧
+      nextContext.localContext = context.localContext := by
+  unfold psKernelCheckerContextEnterRecDepth at hEnter
+  cases hUnlimited :
+      Nat.beq context.maxRecDepth 0 with
+  | true =>
+      rw [hUnlimited] at hEnter
+      simp at hEnter
+      subst nextContext
+      exact ⟨rfl, rfl⟩
+  | false =>
+      rw [hUnlimited] at hEnter
+      simp only [Bool.false_eq_true, if_false] at hEnter
+      cases hTooDeep :
+          psKernelNatGt
+            (Nat.add context.recDepth 1)
+            (Nat.mul
+              context.maxRecDepth
+              psKernelRecDepthFactor) with
+      | true =>
+          rw [hTooDeep] at hEnter
+          simp at hEnter
+      | false =>
+          rw [hTooDeep] at hEnter
+          simp at hEnter
+          subst nextContext
+          exact ⟨rfl, rfl⟩
+
+
 theorem psKernelCheckerContextEnterRecDepth_preserves_configuration
     (context nextContext : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

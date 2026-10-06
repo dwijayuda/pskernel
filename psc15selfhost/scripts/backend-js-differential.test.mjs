@@ -306,6 +306,42 @@ try {
   );
 
   assert.equal(
+    direct.pointSum(20n, 22n),
+    reference.pointSum(20n, 22n),
+  );
+  assert.equal(direct.pointSum(20n, 22n), 42n);
+
+  assert.equal(
+    direct.boxNatGet(42n),
+    reference.boxNatGet(42n),
+  );
+  assert.equal(direct.boxNatGet(42n), 42n);
+
+  assert.equal(
+    direct.maybeSomeOrZero(42n),
+    reference.maybeSomeOrZero(42n),
+  );
+  assert.equal(direct.maybeSomeOrZero(42n), 42n);
+
+  assert.equal(
+    direct.maybeNoneOr(7n),
+    reference.maybeNoneOr(7n),
+  );
+  assert.equal(direct.maybeNoneOr(7n), 7n);
+
+  assert.equal(
+    direct.optionNatSome(42n),
+    reference.optionNatSome(42n),
+  );
+  assert.equal(direct.optionNatSome(42n), 42n);
+
+  assert.equal(
+    direct.matchTempCollision(20n, 22n),
+    reference.matchTempCollision(20n, 22n),
+  );
+  assert.equal(direct.matchTempCollision(20n, 22n), 42n);
+
+  assert.equal(
     direct.u8AddWrap(250, 10),
     reference.u8AddWrap(250, 10),
   );

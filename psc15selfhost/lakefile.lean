@@ -323,7 +323,8 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.ContextState,
     `Ps.KernelCore.Metatheory.CheckerContracts,
     `Ps.KernelCore.Metatheory.ProjectionConfiguration,
-    `Ps.KernelCore.Metatheory.InferenceConfiguration
+    `Ps.KernelCore.Metatheory.InferenceConfiguration,
+    `Ps.KernelCore.Metatheory.InferenceTyping
   ]
 
 lean_lib PsKernelCoreTestSupport where

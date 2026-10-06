@@ -64,15 +64,15 @@ def psElabStructuralRecursionFromSource
       match scrutinee with
       | .reference scrutineeName =>
           match psSyntaxNameToName scrutineeName with
-          | none =>
+          | Option.none =>
               Option.none
-          | some sourceName =>
+          | Option.some sourceName =>
               match
                   psResolveName
                     context.localContext
                     context.environment
                     sourceName with
-              | some resolution =>
+              | Option.some resolution =>
                   match resolution with
                   | .local scrutineeId =>
                       let explicitParameterIds :=
@@ -83,9 +83,9 @@ def psElabStructuralRecursionFromSource
                             scrutineeId
                             explicitParameterIds
                             0 with
-                      | none =>
+                      | Option.none =>
                           Option.none
-                      | some recursiveParameterIndex =>
+                      | Option.some recursiveParameterIndex =>
                           Option.some
                             (PsElabStructuralRecursion.mk
                               functionName
@@ -94,7 +94,7 @@ def psElabStructuralRecursionFromSource
                               List.nil)
                   | _ =>
                       Option.none
-              | none =>
+              | Option.none =>
                   Option.none
       | _ =>
           Option.none
@@ -117,9 +117,9 @@ def psElabDeclarationParts
     (isTheorem : Bool) :
     Except PsElabError PsElabDeclarationResult :=
   match psSyntaxNameToName nameSyntax with
-  | none =>
+  | Option.none =>
       Except.error PsElabError.emptyName
-  | some name =>
+  | Option.some name =>
       let initial : PsElabContext :=
         psElabContextEmpty environment;
       match
@@ -497,8 +497,8 @@ def psElabInductiveConstructor
     (source : PsSyntaxInductiveConstructor) :
     Except PsElabError PsDeclaration :=
   match psSyntaxConstructorCoreName inductiveName source.name with
-  | none => Except.error PsElabError.emptyName
-  | some constructorName =>
+  | Option.none => Except.error PsElabError.emptyName
+  | Option.some constructorName =>
       match psElabTypedBinders
           psElabDeclarationTermCallback
           context
@@ -665,10 +665,10 @@ def psAddDeclarationListWorker
             environment
             declaration;
         match nextResult with
-        | none =>
+        | Option.none =>
             Except.error
               (PsElabError.duplicateDeclaration name)
-        | some next =>
+        | Option.some next =>
             smaller next
 
 def psAddDeclarationList
@@ -790,8 +790,8 @@ def psWrapRecursiveHypotheses
   | List.nil => Except.ok body
   | List.cons fieldIndex rest =>
       match psElabExprAt fieldArgs fieldIndex with
-      | none => Except.error PsElabError.unsupportedTerm
-      | some recursiveValue =>
+      | Option.none => Except.error PsElabError.unsupportedTerm
+      | Option.some recursiveValue =>
           match
               psWrapRecursiveHypotheses
                 motiveId

@@ -20,6 +20,12 @@ def psCompilerWasmLowerErrorCode
         "lower.unsupported-type:"
         context
   | PsWasmLowerError.unsupportedExpression => "lower.unsupported-expression"
+  | PsWasmLowerError.unsupportedExpressionContext context reason =>
+      String.Internal.append
+        "lower.unsupported-expression:"
+        (String.Internal.append
+          context
+          (String.Internal.append ":" reason))
   | PsWasmLowerError.unsupportedIntrinsic => "lower.unsupported-intrinsic"
   | PsWasmLowerError.invalidIntrinsicArity => "lower.invalid-intrinsic-arity"
   | PsWasmLowerError.invalidCallArity => "lower.invalid-call-arity"

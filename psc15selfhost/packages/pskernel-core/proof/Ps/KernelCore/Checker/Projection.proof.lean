@@ -521,6 +521,13 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                       inductInfo.numParams
                                                       inductInfo.numIndices) with
                                               | false =>
+                                                  have hArgsLengthNe :
+                                                      psKernelExprListLength args ≠
+                                                        Nat.add
+                                                          inductInfo.numParams
+                                                          inductInfo.numIndices := by
+                                                    intro hEq
+                                                    simpa [hEq] using hArgsLengthBool
                                                   simp [
                                                     psKernelInferProjectionWith,
                                                     hInfer,
@@ -532,7 +539,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                     hCtors,
                                                     hCtorRest,
                                                     args,
-                                                    hArgsLengthBool
+                                                    hArgsLengthNe
                                                   ] at hSuccess
                                               | true =>
                                                   have hArgsLength :
@@ -557,7 +564,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                         hCtors,
                                                         hCtorRest,
                                                         args,
-                                                        hArgsLengthBool,
+                                                        hArgsLength,
                                                         hCtorFind
                                                       ] at hSuccess
                                                   | some ctorEntry =>
@@ -590,7 +597,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                 hCtors,
                                                                 hCtorRest,
                                                                 args,
-                                                                hArgsLengthBool,
+                                                                hArgsLength,
                                                                 hCtorFind,
                                                                 initial,
                                                                 hParams
@@ -639,7 +646,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                         hCtors,
                                                                         hCtorRest,
                                                                         args,
-                                                                        hArgsLengthBool,
+                                                                        hArgsLength,
                                                                         hCtorFind,
                                                                         initial,
                                                                         hParams,
@@ -673,7 +680,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                 hCtors,
                                                                                 hCtorRest,
                                                                                 args,
-                                                                                hArgsLengthBool,
+                                                                                hArgsLength,
                                                                                 hCtorFind,
                                                                                 initial,
                                                                                 hParams,
@@ -726,7 +733,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                         hCtors,
                                                                                         hCtorRest,
                                                                                         args,
-                                                                                        hArgsLengthBool,
+                                                                                        hArgsLength,
                                                                                         hCtorFind,
                                                                                         initial,
                                                                                         hParams,
@@ -836,7 +843,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                     hCtors,
                                                                                                     hCtorRest,
                                                                                                     args,
-                                                                                                    hArgsLengthBool,
+                                                                                                    hArgsLength,
                                                                                                     hCtorFind,
                                                                                                     initial,
                                                                                                     hParams,
@@ -867,7 +874,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                         hCtors,
                                                                                                         hCtorRest,
                                                                                                         args,
-                                                                                                        hArgsLengthBool,
+                                                                                                        hArgsLength,
                                                                                                         hCtorFind,
                                                                                                         initial,
                                                                                                         hParams,
@@ -892,7 +899,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                                 hCtors,
                                                                                                                 hCtorRest,
                                                                                                                 args,
-                                                                                                                hArgsLengthBool,
+                                                                                                                hArgsLength,
                                                                                                                 hCtorFind,
                                                                                                                 initial,
                                                                                                                 hParams,
@@ -913,7 +920,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                                 hCtors,
                                                                                                                 hCtorRest,
                                                                                                                 args,
-                                                                                                                hArgsLengthBool,
+                                                                                                                hArgsLength,
                                                                                                                 hCtorFind,
                                                                                                                 initial,
                                                                                                                 hParams,
@@ -937,7 +944,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -957,7 +964,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -977,7 +984,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -997,7 +1004,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -1017,7 +1024,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -1037,7 +1044,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -1057,7 +1064,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -1077,7 +1084,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -1097,7 +1104,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -1117,7 +1124,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -1137,7 +1144,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                                                                 hCtors,
                                                                                                 hCtorRest,
                                                                                                 args,
-                                                                                                hArgsLengthBool,
+                                                                                                hArgsLength,
                                                                                                 hCtorFind,
                                                                                                 initial,
                                                                                                 hParams,
@@ -1157,7 +1164,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                             hCtors,
                                                             hCtorRest,
                                                             args,
-                                                            hArgsLengthBool,
+                                                            hArgsLength,
                                                             hCtorFind
                                                           ] at hSuccess
                                                       | defnInfo value =>
@@ -1172,7 +1179,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                             hCtors,
                                                             hCtorRest,
                                                             args,
-                                                            hArgsLengthBool,
+                                                            hArgsLength,
                                                             hCtorFind
                                                           ] at hSuccess
                                                       | thmInfo value =>
@@ -1187,7 +1194,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                             hCtors,
                                                             hCtorRest,
                                                             args,
-                                                            hArgsLengthBool,
+                                                            hArgsLength,
                                                             hCtorFind
                                                           ] at hSuccess
                                                       | opaqueInfo value =>
@@ -1202,7 +1209,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                             hCtors,
                                                             hCtorRest,
                                                             args,
-                                                            hArgsLengthBool,
+                                                            hArgsLength,
                                                             hCtorFind
                                                           ] at hSuccess
                                                       | inductInfo value =>
@@ -1217,7 +1224,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                             hCtors,
                                                             hCtorRest,
                                                             args,
-                                                            hArgsLengthBool,
+                                                            hArgsLength,
                                                             hCtorFind
                                                           ] at hSuccess
                                                       | recInfo value =>
@@ -1232,7 +1239,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                             hCtors,
                                                             hCtorRest,
                                                             args,
-                                                            hArgsLengthBool,
+                                                            hArgsLength,
                                                             hCtorFind
                                                           ] at hSuccess
                                                       | quotInfo value =>
@@ -1247,7 +1254,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                             hCtors,
                                                             hCtorRest,
                                                             args,
-                                                            hArgsLengthBool,
+                                                            hArgsLength,
                                                             hCtorFind
                                                           ] at hSuccess
                                   | axiomInfo value =>

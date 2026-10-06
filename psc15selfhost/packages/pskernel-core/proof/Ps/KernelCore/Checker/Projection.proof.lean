@@ -2148,6 +2148,10 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                     hArgsLengthBool
                                                 rw [hBeqFalse] at hBeqTrue
                                                 cases hBeqTrue
+                                              simp only [
+                                                hCtors,
+                                                hCtorRest
+                                              ] at hSuccess
                                               rw [if_neg hArgsLengthNeRaw] at hSuccess
                                               simp at hSuccess
                                           | true =>

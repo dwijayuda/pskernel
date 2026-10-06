@@ -161,11 +161,46 @@ def psJsTypeSupportedWithFuel
               smaller result
             else
               false
+        | PsVerifiedIrType.named name arguments =>
+            if psStringEq name "Array" then
+              match arguments with
+              | List.nil => false
+              | List.cons elementType rest =>
+                  match rest with
+                  | List.nil => smaller elementType
+                  | List.cons _ _ => false
+            else
+              false
         | _ => false
 
 def psJsTypeSupported
     (type : PsVerifiedIrType) : Bool :=
   psJsTypeSupportedWithFuel 64 type
+
+def psJsOneTypeArgumentSupported
+    (arguments : List PsVerifiedIrType) : Bool :=
+  match arguments with
+  | List.nil => false
+  | List.cons value rest =>
+      match rest with
+      | List.nil => psJsTypeSupported value
+      | List.cons _ _ => false
+
+def psJsTwoTypeArgumentsSupported
+    (arguments : List PsVerifiedIrType) : Bool :=
+  match arguments with
+  | List.nil => false
+  | List.cons first rest =>
+      match rest with
+      | List.nil => false
+      | List.cons second tail =>
+          match tail with
+          | List.nil =>
+              if psJsTypeSupported first then
+                psJsTypeSupported second
+              else
+                false
+          | List.cons _ _ => false
 
 def psJsLowerMachineIntegerType
     (type : PsVerifiedIrMachineIntegerType) :
@@ -421,6 +456,23 @@ def psJsLowerRuntimeTernaryWith
                                     loweredThird
                                   ])
 
+def psJsLowerRuntimeExactArityWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (operation : PsJsIrRuntimeOp)
+    (arity : Nat)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  if Nat.beq (psListLength arguments) arity then
+    match psListMapExcept lower arguments with
+    | Except.error error => Except.error error
+    | Except.ok loweredArguments =>
+        Except.ok
+          (PsJsIrExpr.runtime
+            operation
+            loweredArguments)
+  else
+    Except.error PsJsLowerError.intrinsicArity
+
 def psJsLowerIdentityWith
     (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
     (arguments : List PsVerifiedIrExpr) :
@@ -609,7 +661,90 @@ def psJsLowerExprWithFuel
               | _ =>
                   Except.error PsJsLowerError.unsupportedIntrinsic
             else
-              Except.error PsJsLowerError.typeArgumentsUnsupported
+              match operation with
+              | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
+                  if psJsOneTypeArgumentSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arrayEmptyWithCapacity
+                      1
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | PsVerifiedIrIntrinsic.arraySize =>
+                  if psJsOneTypeArgumentSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arraySize
+                      1
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | PsVerifiedIrIntrinsic.arrayPush =>
+                  if psJsOneTypeArgumentSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arrayPush
+                      2
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | PsVerifiedIrIntrinsic.arrayGet =>
+                  if psJsOneTypeArgumentSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arrayGet
+                      2
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | PsVerifiedIrIntrinsic.arrayGetD =>
+                  if psJsOneTypeArgumentSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arrayGetD
+                      3
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | PsVerifiedIrIntrinsic.arraySet =>
+                  if psJsOneTypeArgumentSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arraySet
+                      3
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | PsVerifiedIrIntrinsic.arraySetIfInBounds =>
+                  if psJsOneTypeArgumentSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arraySetIfInBounds
+                      3
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | PsVerifiedIrIntrinsic.arrayMap =>
+                  if psJsTwoTypeArgumentsSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arrayMap
+                      2
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | PsVerifiedIrIntrinsic.arrayFoldl =>
+                  if psJsTwoTypeArgumentsSupported typeArguments then
+                    psJsLowerRuntimeExactArityWith
+                      smaller
+                      PsJsIrRuntimeOp.arrayFoldl
+                      5
+                      arguments
+                  else
+                    Except.error PsJsLowerError.typeArgumentsUnsupported
+              | _ =>
+                  Except.error PsJsLowerError.typeArgumentsUnsupported
         | PsVerifiedIrExpr.lambda
             parameters
             resultType

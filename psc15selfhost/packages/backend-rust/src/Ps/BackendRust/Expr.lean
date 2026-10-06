@@ -872,23 +872,25 @@ def psRustEmitAlternativeListWith
               Except.ok (List.cons rendered printedRest)
 
 def psRustEmitExprWithFuel
-    (fuel : Nat)
-    (expr : PsVerifiedIrExpr) :
+    (fuel : Nat) :
+    PsVerifiedIrExpr ->
     Except PsRustEmitError String :=
   match fuel with
   | Nat.zero =>
-      Except.error PsRustEmitError.fuelExhausted
+      fun (_expr : PsVerifiedIrExpr) =>
+        Except.error PsRustEmitError.fuelExhausted
   | Nat.succ remaining =>
       let emitNested :
           PsVerifiedIrExpr ->
           Except PsRustEmitError String :=
         psRustEmitExprWithFuel remaining;
-      match expr with
-      | PsVerifiedIrExpr.literal literal =>
+      fun (expr : PsVerifiedIrExpr) =>
+        match expr with
+        | PsVerifiedIrExpr.literal literal =>
           Except.ok (psRustEmitLiteral literal)
-      | PsVerifiedIrExpr.var name =>
+        | PsVerifiedIrExpr.var name =>
           Except.ok (psRustIdentifier name)
-      | PsVerifiedIrExpr.intrinsic operation _ arguments =>
+        | PsVerifiedIrExpr.intrinsic operation _ arguments =>
           match psRustEmitExprListWith emitNested arguments with
           | Except.error error =>
               Except.error error
@@ -896,7 +898,7 @@ def psRustEmitExprWithFuel
               psRustEmitIntrinsicFromPrinted
                 operation
                 printedArguments
-      | PsVerifiedIrExpr.lambda parameters resultType body =>
+        | PsVerifiedIrExpr.lambda parameters resultType body =>
           if psRustTypeContainsFunction resultType then
             Except.error PsRustEmitError.lambdaFunctionResultUnsupported
           else
@@ -914,7 +916,7 @@ def psRustEmitExprWithFuel
                         (psRustJoin ", " printedParameters)
                         "| "
                         printedBody)
-      | PsVerifiedIrExpr.call fn _ arguments =>
+        | PsVerifiedIrExpr.call fn _ arguments =>
           match emitNested fn with
           | Except.error error =>
               Except.error error
@@ -931,7 +933,7 @@ def psRustEmitExprWithFuel
                       (psRustConcat2
                         (psRustJoin ", " printedArguments)
                         ")"))
-      | PsVerifiedIrExpr.letE name _ value body =>
+        | PsVerifiedIrExpr.letE name _ value body =>
           match emitNested value with
           | Except.error error =>
               Except.error error
@@ -950,7 +952,7 @@ def psRustEmitExprWithFuel
                         "; "
                         printedBody
                         " }"))
-      | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
+        | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
           match emitNested condition with
           | Except.error error =>
               Except.error error
@@ -973,7 +975,7 @@ def psRustEmitExprWithFuel
                             " } else { "
                             printedElse
                             " })"))
-      | PsVerifiedIrExpr.record structureName typeArguments fields =>
+        | PsVerifiedIrExpr.record structureName typeArguments fields =>
           match psRustEmitTypeArguments typeArguments with
           | Except.error error =>
               Except.error error
@@ -990,7 +992,7 @@ def psRustEmitExprWithFuel
                       " { "
                       (psRustJoin ", " printedFields)
                       " }")
-      | PsVerifiedIrExpr.projection _ _ target field =>
+        | PsVerifiedIrExpr.projection _ _ target field =>
           match emitNested target with
           | Except.error error =>
               Except.error error
@@ -1001,7 +1003,7 @@ def psRustEmitExprWithFuel
                   (psRustClonePrinted printedTarget)
                   ")."
                   (psRustIdentifier field))
-      | PsVerifiedIrExpr.constructor
+        | PsVerifiedIrExpr.constructor
           inductiveName
           constructorName
           typeArguments
@@ -1036,7 +1038,7 @@ def psRustEmitExprWithFuel
                             " { "
                             (psRustJoin ", " printedFields)
                             " }"))
-      | PsVerifiedIrExpr.matchE
+        | PsVerifiedIrExpr.matchE
           inductiveName
           _
           scrutinee

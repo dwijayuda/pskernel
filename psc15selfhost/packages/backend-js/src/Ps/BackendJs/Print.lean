@@ -301,6 +301,16 @@ def psJsRuntimeUnary
             value,
             ")"
           ])
+  | PsJsIrRuntimeOp.arrayEmptyWithCapacity =>
+      Except.ok
+        (psJsJoin
+          ""
+          ["(() => { void (", value, "); return []; })()"])
+  | PsJsIrRuntimeOp.arraySize =>
+      Except.ok
+        (psJsJoin
+          ""
+          ["BigInt((", value, ").length)"])
   | _ =>
       Except.error PsJsEmitError.malformedIr
 
@@ -388,6 +398,33 @@ def psJsRuntimeBinary
             right,
             ")"
           ])
+  | PsJsIrRuntimeOp.arrayPush =>
+      Except.ok
+        (psJsJoin
+          ""
+          ["[...(", left, "), ", right, "]"])
+  | PsJsIrRuntimeOp.arrayGet =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_a, __ps_i) => __ps_a[Number(__ps_i)])(",
+            left,
+            ", ",
+            right,
+            ")"
+          ])
+  | PsJsIrRuntimeOp.arrayMap =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_f, __ps_a) => __ps_a.map((__ps_x) => __ps_f(__ps_x)))(",
+            left,
+            ", ",
+            right,
+            ")"
+          ])
   | _ =>
       Except.error PsJsEmitError.malformedIr
 
@@ -417,6 +454,80 @@ def psJsRuntimeTernary
             third,
             ")"
           ])
+  | PsJsIrRuntimeOp.arrayGetD =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_a, __ps_i, __ps_fallback) => (__ps_i < BigInt(__ps_a.length) ? ",
+            "__ps_a[Number(__ps_i)] : __ps_fallback))(",
+            first,
+            ", ",
+            second,
+            ", ",
+            third,
+            ")"
+          ])
+  | PsJsIrRuntimeOp.arraySet =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_a, __ps_i, __ps_v) => { const __ps_out = [...__ps_a]; ",
+            "__ps_out[Number(__ps_i)] = __ps_v; return __ps_out; })(",
+            first,
+            ", ",
+            second,
+            ", ",
+            third,
+            ")"
+          ])
+  | PsJsIrRuntimeOp.arraySetIfInBounds =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_a, __ps_i, __ps_v) => { if (__ps_i >= BigInt(__ps_a.length)) return __ps_a; ",
+            "const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; ",
+            "return __ps_out; })(",
+            first,
+            ", ",
+            second,
+            ", ",
+            third,
+            ")"
+          ])
+  | _ =>
+      Except.error PsJsEmitError.malformedIr
+
+def psJsRuntimeFive
+    (operation : PsJsIrRuntimeOp)
+    (first second third fourth fifth : String) :
+    Except PsJsEmitError String :=
+  match operation with
+  | PsJsIrRuntimeOp.arrayFoldl =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_f, __ps_init, __ps_a, __ps_start, __ps_stop) => { ",
+            "const __ps_size = BigInt(__ps_a.length); ",
+            "const __ps_end = __ps_stop <= __ps_size ? __ps_stop : __ps_size; ",
+            "let __ps_acc = __ps_init; ",
+            "for (let __ps_i = __ps_start; __ps_i < __ps_end; __ps_i += 1n) { ",
+            "__ps_acc = __ps_f(__ps_acc, __ps_a[Number(__ps_i)]); } ",
+            "return __ps_acc; })(",
+            first,
+            ", ",
+            second,
+            ", ",
+            third,
+            ", ",
+            fourth,
+            ", ",
+            fifth,
+            ")"
+          ])
   | _ =>
       Except.error PsJsEmitError.malformedIr
 
@@ -440,8 +551,22 @@ def psJsPrintRuntime
               | List.nil =>
                   psJsRuntimeTernary
                     operation first second third
-              | List.cons _ _ =>
-                  Except.error PsJsEmitError.malformedIr
+              | List.cons fourth afterFourth =>
+                  match afterFourth with
+                  | List.nil =>
+                      Except.error PsJsEmitError.malformedIr
+                  | List.cons fifth finalTail =>
+                      match finalTail with
+                      | List.nil =>
+                          psJsRuntimeFive
+                            operation
+                            first
+                            second
+                            third
+                            fourth
+                            fifth
+                      | List.cons _ _ =>
+                          Except.error PsJsEmitError.malformedIr
 
 def psJsPrintExprWithFuel
     (fuel : Nat) :

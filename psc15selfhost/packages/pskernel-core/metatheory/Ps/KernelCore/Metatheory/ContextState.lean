@@ -875,24 +875,6 @@ theorem psKernelCheckerConfigurationSound_transport
   exact hSound
 
 
-theorem psKernelLocalContextFreshBound_mono
-    (context : PsKernelLocalContext)
-    (first second : Nat)
-    (hBound :
-      PsKernelLocalContextFreshBound
-        context
-        first)
-    (hLe : first ≤ second) :
-    PsKernelLocalContextFreshBound
-      context
-      second := by
-  intro decl hMem
-  rcases hBound decl hMem with
-    ⟨base, index, hName, hLt⟩
-  exact
-    ⟨base, index, hName,
-      Nat.lt_of_lt_of_le hLt hLe⟩
-
 theorem psKernelCheckerStateExitLocalScope_preserves_configuration
     (context : PsKernelCheckerContext)
     (parent child : PsKernelCheckerState)

@@ -32,7 +32,7 @@ def psWhnfCoreWithFuel
         match instantiated with
         | .fvar id =>
             match psLocalFindById localContext id with
-            | some declaration =>
+            | Option.some declaration =>
                 match declaration with
                 | .letDecl _ _ _ value =>
                   smaller value
@@ -79,11 +79,11 @@ def psWhnfWithFuel
         match core with
         | .constE name levels =>
             match psEnvironmentFind environment name with
-            | none => core
-            | some declaration =>
+            | Option.none => core
+            | Option.some declaration =>
                 match psDeclarationValue declaration with
-                | none => core
-                | some value =>
+                | Option.none => core
+                | Option.some value =>
                     let parameters := psDeclarationLevelParams declaration;
                     if Nat.beq
                         (psReduceNameListLength parameters)

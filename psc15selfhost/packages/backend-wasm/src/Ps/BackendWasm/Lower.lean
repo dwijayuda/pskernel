@@ -10,6 +10,7 @@ import Ps.BackendWasm.RuntimeIntRepr
 
 inductive PsWasmLowerError where
   | unsupportedType
+  | unsupportedTypeContext (context : String)
   | unsupportedExpression
   | unsupportedIntrinsic
   | invalidIntrinsicArity
@@ -30,6 +31,14 @@ inductive PsWasmLowerError where
       (field : String)
   | unsupportedModuleFeature
   | specializationFailed (error : PsIrSpecializeError)
+
+def psWasmContextualizeUnsupportedType
+    (context : String)
+    (error : PsWasmLowerError) : PsWasmLowerError :=
+  match error with
+  | PsWasmLowerError.unsupportedType =>
+      PsWasmLowerError.unsupportedTypeContext context
+  | _ => error
 
 structure PsWasmLowerState where
   nextLocalIndex : Nat
@@ -1349,7 +1358,13 @@ def psWasmLowerStructures
   | List.nil => Except.ok []
   | List.cons structInfo rest =>
       match psWasmLowerStructure profile structInfo with
-      | Except.error error => Except.error error
+      | Except.error error =>
+          Except.error
+            (psWasmContextualizeUnsupportedType
+              (String.Internal.append
+                "structure:"
+                structInfo.name)
+              error)
       | Except.ok lowered =>
           match psWasmLowerStructures profile rest with
           | Except.error error => Except.error error
@@ -1506,7 +1521,13 @@ def psWasmLowerInductives
   | List.nil => Except.ok []
   | List.cons inductiveInfo rest =>
       match psWasmLowerInductive profile inductiveInfo with
-      | Except.error error => Except.error error
+      | Except.error error =>
+          Except.error
+            (psWasmContextualizeUnsupportedType
+              (String.Internal.append
+                "inductive:"
+                inductiveInfo.name)
+              error)
       | Except.ok lowered =>
           match psWasmLowerInductives profile rest with
           | Except.error error => Except.error error
@@ -2015,7 +2036,13 @@ def psWasmLowerExprListWorker
         psWasmLowerExprListWorker lower expected rest;
       fun (state : PsWasmLowerState) =>
         match lower expected state expr with
-        | Except.error error => Except.error error
+        | Except.error error =>
+            Except.error
+              (psWasmContextualizeUnsupportedType
+                (String.Internal.append
+                  "declaration:"
+                  declaration.name)
+                error)
         | Except.ok lowered =>
             match smaller lowered.state with
             | Except.error error => Except.error error
@@ -6123,7 +6150,11 @@ def psWasmLowerSpecializedModule
             let semanticArrayTypes :=
               psWasmCollectModuleArrayTypes module;
             match psWasmLowerArrayTypes profile semanticArrayTypes with
-            | Except.error error => Except.error error
+            | Except.error error =>
+                Except.error
+                  (psWasmContextualizeUnsupportedType
+                    "module:arrays"
+                    error)
             | Except.ok arrays =>
                 let semanticFunctionTypes :=
                   psWasmCollectModuleFunctionTypes module;
@@ -6131,7 +6162,11 @@ def psWasmLowerSpecializedModule
                     psWasmLowerClosureSignatures
                       profile
                       semanticFunctionTypes with
-                | Except.error error => Except.error error
+                | Except.error error =>
+                    Except.error
+                      (psWasmContextualizeUnsupportedType
+                        "module:closures"
+                        error)
                 | Except.ok closureSignatures =>
                     let initialState : PsWasmLowerState := {
                   nextLocalIndex := 0

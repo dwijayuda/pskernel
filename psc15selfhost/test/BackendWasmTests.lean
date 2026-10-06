@@ -1014,6 +1014,36 @@ def psTestWasmUInt8OfNatIntrinsic : Bool :=
       psStringEq functionName psWasmNatToU32Fn
   | _ => false
 
+def psTestWasmRuntimeUnitRepresentation : Bool :=
+  let unitType : PsVerifiedIrType :=
+    PsVerifiedIrType.primitive
+      PsVerifiedIrPrimitiveType.unit;
+  let valueTypeOk : Bool :=
+    match psWasmValueTypeOfIrType? psWasmProfile32 unitType with
+    | Option.some PsWasmValueType.i32 => true
+    | _ => false;
+  let resultTypeOk : Bool :=
+    match psWasmLowerResultType psWasmProfile32 unitType with
+    | Except.ok [] => true
+    | _ => false;
+  let literalOk : Bool :=
+    match
+        psWasmLowerExpr
+          psWasmProfile32
+          []
+          []
+          []
+          (Option.some PsWasmValueType.i32)
+          psWasmUInt8OfNatTestState
+          (PsVerifiedIrExpr.literal
+            PsVerifiedIrLiteral.unit) with
+    | Except.ok {
+        instructions := [PsWasmInstruction.i32Const 0],
+        state := _
+      } => true
+    | _ => false;
+  valueTypeOk && resultTypeOk && literalOk
+
 def psWasmBoolInstructionMatches
     (operation : PsVerifiedIrIntrinsic)
     (instruction : PsWasmInstruction) : Bool :=
@@ -1252,6 +1282,7 @@ def psTestWasmNatConstructorIdentityInvariant : Bool :=
       && psTestWasmMachineIntegerOps
       && psTestWasmMachineIntegerLiterals
       && psTestWasmUInt8OfNatIntrinsic
+      && psTestWasmRuntimeUnitRepresentation
       && psTestWasmBoolIntrinsics
       && psTestWasmCharOfNatIntrinsic
       && psTestWasmCharToNatIntrinsic

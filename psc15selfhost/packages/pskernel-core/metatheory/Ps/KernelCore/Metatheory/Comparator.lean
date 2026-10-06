@@ -999,9 +999,11 @@ theorem psKernelNameEq_sound_of_string_law
               leftValue = rightValue ∧
               psKernelNameEq leftParent rightParent = true := by
             simpa [psKernelNameEq] using hEq
+          have hValue :
+              leftValue = rightValue :=
+            hParts.1
           have hParentEq :
               leftParent = rightParent :=
             ih rightParent hParts.2
-          subst rightValue
-          subst rightParent
-          rfl
+          rw [← hValue, ← hParentEq]
+

@@ -9,7 +9,7 @@ inductive PsJsLowerError where
   | importsUnsupported
   | structuresUnsupported
   | inductivesUnsupported
-  | specializationFailed
+  | specializationFailed (error : PsIrSpecializeError)
   | genericDeclarationUnsupported (name : String)
   | unsupportedType
   | unsupportedLiteral
@@ -1437,8 +1437,8 @@ def psJsLowerValidatedModuleWithProfile
     Except PsJsLowerError PsJsIrModule :=
   let module : PsVerifiedIrModule := validated.raw;
   match psIrSpecializeModule module with
-  | Except.error _ =>
-      Except.error PsJsLowerError.specializationFailed
+  | Except.error error =>
+      Except.error (PsJsLowerError.specializationFailed error)
   | Except.ok specialized =>
       psJsLowerSpecializedModuleWithProfile
         profile

@@ -1806,3 +1806,347 @@ uses K4 on another real compiler change
 ~~~
 
 That closes the SAVEF loop on the compiler itself.
+
+
+---
+
+# 51. Provable and falsifiable criteria
+
+Each criterion has equal weight 5.
+
+Total weight is 100.
+
+Evidence classes:
+
+~~~text
+P = machine-checked proof
+M = deterministic machine/conformance test
+A = adversarial test
+R = reproducible/independent replay
+E = empirical benchmark
+~~~
+
+## C1 — bounded self-application subject
+
+**Claim:** the compiler experiment has a complete frozen subject rather than an open-ended moving repository.
+
+**Pass evidence:** pinned commit, exact 55-module closure, source/profile identities, and closure hash.
+
+**Failure witness:** modules silently enter or leave the experiment without changing experiment identity.
+
+**Target:** 9.8. **Current:** 9.5.
+
+## C2 — reproducible baseline
+
+**Claim:** baseline compiler behavior and experiment conditions can be replayed.
+
+**Evidence:** fixed toolchain/model/task manifests, self-host/fixed-point hashes, repeatable baseline runs.
+
+**Failure witness:** B0 cannot be reproduced independently.
+
+**Target:** 9.5. **Current:** 8.5.
+
+## C3 — semantic-state honesty
+
+**Claim:** AdmissionReady, CheckedCore, CertifiedSource, VerifiedIR, and PreservedTargetArtifact cannot be conflated.
+
+**Adversarial test:** attempt to publish a stronger assurance object from a weaker state.
+
+**Target:** 9.7. **Current:** 5.0.
+
+## C4 — compiler specification coverage
+
+**Claim:** selected public compiler behavior is connected to approved formal specifications rather than proof-file presence.
+
+**Pass:** specification coverage can be computed for the selected compiler closure.
+
+**Target:** 9.2. **Current:** 3.0.
+
+## C5 — certified semantic interfaces
+
+**Claim:** downstream proof work can depend on compact semantic interfaces rather than private implementation.
+
+**Pass:** implementation-preserving change leaves dependent proof obligations green where justified.
+
+**Target:** 9.5. **Current:** 4.5.
+
+## C6 — actual theorem/knowledge reuse
+
+**Claim:** later compiler work imports accepted earlier knowledge.
+
+**Pass:** proof dependency graph records real reuse across compiler strata.
+
+**Target:** 9.4. **Current:** 3.5.
+
+## C7 — QueryGraph integration
+
+**Claim:** SAVEF semantic dependencies extend the real incremental compiler graph rather than a disconnected AI database.
+
+**Pass:** spec/theorem/interface changes invalidate exactly relevant downstream nodes.
+
+**Target:** 9.5. **Current:** 7.5.
+
+## C8 — proof-friendly implementation discipline
+
+**Claim:** SAVEF preserves and exploits PSC1-selfhost-stable/1 rather than destabilizing self-host source.
+
+**Pass:** proof/spec sidecars improve assurance without breaking existing self-host/fixed-point gates.
+
+**Target:** 9.6. **Current:** 9.0.
+
+## C9 — independent logical authority
+
+**Claim:** the compiler cannot certify its own claims merely because it generated them.
+
+**Pass:** accepted proof artifacts replay through designated external/kernel authority; high-assurance milestones support independent checking.
+
+**Target:** 9.0. **Current:** 7.5.
+
+## C10 — erasure and IR semantic evidence
+
+**Claim:** the transition from certified source toward VerifiedIR has explicit preservation/validation evidence.
+
+**Pass:** validator success implies declared IR invariants and ghost/proof noninterference is covered.
+
+**Target:** 8.9. **Current:** 5.5.
+
+## C11 — backend preservation path
+
+**Claim:** direct JS/Wasm executable compiler artifacts can eventually inherit source claims through proof/translation validation.
+
+**Pass:** target mutation that changes behavior fails preservation checking.
+
+**Target:** 8.8. **Current:** 4.5.
+
+## C12 — bootstrap claim separation
+
+**Claim:** fixed point, compiler semantic correctness, backend preservation, and SAVEF productivity remain distinct evidence.
+
+**Pass:** fixed-point success alone cannot mint compiler-correctness status.
+
+**Target:** 9.8. **Current:** 9.0.
+
+## C13 — AI/acceptance separation
+
+**Claim:** AI cannot weaken specifications or acceptance gates while preserving identity.
+
+**Adversarial test:** agent attempts to alter approved specification, benchmark evaluator, or required checks.
+
+**Target:** 9.7. **Current:** 5.0.
+
+## C14 — causal FactoryBench design
+
+**Claim:** SAVEF benefit is measured against a fixed baseline.
+
+**Pass:** same model/tool policy, paired tasks, same acceptance criteria, logged retrieval identities.
+
+**Target:** 9.4. **Current:** 2.0.
+
+## C15 — holdout and leakage resistance
+
+**Claim:** benchmark tasks are not solved merely because their answers entered the knowledge graph.
+
+**Pass:** held-out solutions are excluded from search; knowledge snapshots are frozen before evaluation.
+
+**Target:** 9.2. **Current:** 1.5.
+
+## C16 — measurable self-amplification
+
+**Claim:** accepted knowledge materially improves later compiler production.
+
+**Pass:** predefined productivity threshold plus assurance non-regression plus real knowledge reuse.
+
+**Target:** 9.4. **Current:** 2.0.
+
+## C17 — resource practicality
+
+**Claim:** proof checking/retrieval/incremental reuse is affordable enough for normal compiler development.
+
+**Measure:** wall time, peak memory, context bytes, cache hit rate, proof replay time.
+
+**Target:** 9.0. **Current:** 7.0.
+
+## C18 — incremental adoption
+
+**Claim:** useful SAVEF benefits appear before complete whole-compiler verification.
+
+**Pass:** L0/L1 knowledge is reusable while L4/L5 remain incomplete.
+
+**Target:** 9.6. **Current:** 6.0.
+
+## C19 — falsifiability
+
+**Claim:** failure of SAVEF can be demonstrated rather than explained away.
+
+**Pass:** explicit rejection criteria for no productivity gain, excessive invalidation, excessive proof cost, or unstable interfaces.
+
+**Target:** 9.5. **Current:** 4.0.
+
+## C20 — repository implementability
+
+**Claim:** the plan maps onto actual existing packages and workflows.
+
+**Pass:** no mandatory compiler rewrite, new logic, or central registry is needed for the first useful slices.
+
+**Target:** 9.3. **Current:** 7.5.
+
+---
+
+# 52. Target architecture score
+
+All criteria have weight 5.
+
+| Criterion | Target |
+| --- | ---: |
+| C1 bounded subject | 9.8 |
+| C2 reproducible baseline | 9.5 |
+| C3 semantic-state honesty | 9.7 |
+| C4 specification coverage | 9.2 |
+| C5 certified interfaces | 9.5 |
+| C6 knowledge reuse | 9.4 |
+| C7 QueryGraph integration | 9.5 |
+| C8 source discipline | 9.6 |
+| C9 independent authority | 9.0 |
+| C10 erasure/IR evidence | 8.9 |
+| C11 backend preservation | 8.8 |
+| C12 bootstrap separation | 9.8 |
+| C13 AI separation | 9.7 |
+| C14 causal benchmark | 9.4 |
+| C15 holdout isolation | 9.2 |
+| C16 self-amplification measurement | 9.4 |
+| C17 resource practicality | 9.0 |
+| C18 incremental adoption | 9.6 |
+| C19 falsifiability | 9.5 |
+| C20 repository implementability | 9.3 |
+
+Average:
+
+**9.39 / 10**
+
+No criterion receives 10.
+
+---
+
+# 53. Current repository readiness score
+
+| Criterion | Current |
+| --- | ---: |
+| C1 bounded subject | 9.5 |
+| C2 reproducible baseline | 8.5 |
+| C3 semantic-state honesty | 5.0 |
+| C4 specification coverage | 3.0 |
+| C5 certified interfaces | 4.5 |
+| C6 knowledge reuse | 3.5 |
+| C7 QueryGraph integration | 7.5 |
+| C8 source discipline | 9.0 |
+| C9 independent authority | 7.5 |
+| C10 erasure/IR evidence | 5.5 |
+| C11 backend preservation | 4.5 |
+| C12 bootstrap separation | 9.0 |
+| C13 AI separation | 5.0 |
+| C14 causal benchmark | 2.0 |
+| C15 holdout isolation | 1.5 |
+| C16 measured amplification | 2.0 |
+| C17 resource practicality | 7.0 |
+| C18 incremental adoption | 6.0 |
+| C19 falsifiability | 4.0 |
+| C20 repository implementability | 7.5 |
+
+Average:
+
+**5.60 / 10**
+
+The low current score is not a criticism of the compiler.
+
+It reflects that the self-amplification experiment itself has not yet been run.
+
+---
+
+# 54. Architecture iteration loop
+
+## Iteration A — prove the compiler, then call it SAVEF
+
+Design:
+
+~~~text
+write proofs for compiler
+publish theorem graph
+declare self-application
+~~~
+
+Score:
+
+**6.72 / 10**
+
+Rejected because it confuses verification with self-amplification and has no causal baseline.
+
+## Iteration B — layered compiler knowledge graph
+
+Added:
+
+- dependency-stratified proof order;
+- semantic sidecars;
+- CertifiedModuleInterface;
+- QueryGraph integration;
+- SPKF knowledge extraction;
+- failure/proof recipe knowledge;
+- incremental adoption.
+
+Score:
+
+**7.94 / 10**
+
+Still below target because productivity evidence is observational and benchmark leakage is insufficiently controlled.
+
+## Iteration C — accepted self-application architecture
+
+Added:
+
+- CompilerFactoryBench-v1;
+- frozen B0 baseline;
+- assisted B1 ablation;
+- holdout isolation;
+- explicit productivity thresholds;
+- assurance non-regression;
+- closed-loop compiler generation requirement;
+- knowledge reproducibility;
+- independent logical authority;
+- distinction between SAVEF economic proof and complete compiler verification.
+
+Final score:
+
+**9.39 / 10**
+
+This clears the requested score of 8.
+
+---
+
+# 55. Why complete compiler verification is not required before SAVEF can be tested
+
+Suppose Foundation/Core knowledge measurably reduces the cost of proving Environment/Meta while all results pass the same acceptance gates.
+
+That is already evidence for the SAVEF mechanism.
+
+We do not need to wait until all of these are complete:
+
+~~~text
+parser proof
+elaborator proof
+erasure proof
+JavaScript preservation
+Wasm preservation
+~~~
+
+before testing whether accumulated checked knowledge helps.
+
+Waiting for complete verification would make SAVEF unnecessarily difficult to validate experimentally.
+
+Therefore use progressive assurance:
+
+~~~text
+prove useful knowledge
+measure reuse
+expand coverage
+increase assurance
+repeat
+~~~

@@ -14,15 +14,22 @@ export async function verifyOfflinePrototype() {
   const trust=JSON.parse(await readFile(new URL("../TRUST_MANIFEST.json",import.meta.url),"utf8"));
   if(architecture.masterPlan!=="THE_PSCV_COMPILER_REFERENCE_VERSION_3.md") throw new Error("PSCV_VERIFY_ARCHITECTURE");
   if(trust.contract!=="psc-trust-manifest/1") throw new Error("PSCV_VERIFY_TRUST");
-  const savef=await verifySavefFile(
+  const schemaUrl=new URL("../savef/schemas/KNOWLEDGE_OBJECT_V1.json",import.meta.url);
+  const objectUrls=[
     new URL("../savef/objects/psc-specialization-pass.json",import.meta.url),
-    new URL("../savef/schemas/KNOWLEDGE_OBJECT_V1.json",import.meta.url),
-  );
+    new URL("../savef/objects/psc-theory-exact-defeq-reflexive.json",import.meta.url),
+    new URL("../savef/objects/psc-module-interface-validation.json",import.meta.url),
+  ];
+  const savefObjects=[];
+  for(const objectUrl of objectUrls){
+    const verified=await verifySavefFile(objectUrl,schemaUrl);
+    savefObjects.push(verified.objectId);
+  }
   return Object.freeze({
     verifier:pscvVerifierPrototype.id,
     architecture:"pscv-architecture/v3",
     trust:trust.contract,
-    savefObject:savef.objectId,
+    savefObjects:Object.freeze(savefObjects),
   });
 }
 

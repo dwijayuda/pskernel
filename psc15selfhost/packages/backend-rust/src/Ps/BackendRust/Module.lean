@@ -202,21 +202,8 @@ def psRustEmitHigherOrderParameterType
     (type : PsVerifiedIrType) :
     Except PsRustEmitError String :=
   match type with
-  | PsVerifiedIrType.function parameters result =>
-      match psRustEmitTypeListWith psRustEmitType parameters with
-      | Except.error error =>
-          Except.error error
-      | Except.ok printedParameters =>
-          match psRustEmitType result with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedResult =>
-              Except.ok
-                (psRustConcat4
-                  "impl Fn("
-                  (psRustJoin ", " printedParameters)
-                  ") -> "
-                  (psRustConcat2 printedResult " + Clone"))
+  | PsVerifiedIrType.function _ _ =>
+      psRustEmitClosureValueType type
   | _ =>
       psRustEmitType type
 
@@ -313,14 +300,11 @@ def psRustDeclarationDirectFunctionResultSupported
 def psRustEmitDeclarationResultType
     (declaration : PsVerifiedIrDeclaration) :
     Except PsRustEmitError String :=
-  if psRustTypeContainsFunction declaration.resultType then
-    if psRustDeclarationDirectFunctionResultSupported declaration then
-      psRustEmitHigherOrderParameterType declaration.resultType
-    else
-      Except.error
-        (PsRustEmitError.functionResultUnsupported declaration.name)
-  else
-    psRustEmitType declaration.resultType
+  match declaration.resultType with
+  | PsVerifiedIrType.function _ _ =>
+      psRustEmitClosureValueType declaration.resultType
+  | _ =>
+      psRustEmitType declaration.resultType
 
 def psRustPrepareDeclarationBody
     (declaration : PsVerifiedIrDeclaration)
@@ -444,12 +428,7 @@ def psRustEmitDeclaration
                 Except.error error
             | Except.ok rewrittenBody =>
                 let emittedBody :=
-                  if psRustTypeContainsFunction declaration.resultType then
-                    psRustEmitFunctionResultExpr
-                      declaration.name
-                      rewrittenBody
-                  else
-                    psRustEmitExpr rewrittenBody;
+                  psRustEmitExpr rewrittenBody;
                 match emittedBody with
                 | Except.error error =>
                     Except.error error

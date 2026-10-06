@@ -341,7 +341,7 @@ theorem psKernelEnsureSortWith_configuration_refines
               | _ =>
                   Except.error "expected sort" := by
       cases type <;>
-        simp_all [psKernelEnsureSortWith]
+        simp [psKernelEnsureSortWith] at hDirect ⊢
     rw [hFallback] at hSuccess
     cases hRun : whnf context state type with
     | error error =>

@@ -248,14 +248,14 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                   state1
                   structReduced =
                 Except.error error := by
-            simpa [expandedResult] using hExpanded
+            simpa [expandedResult] using hExpandedRun
+          unfold psKernelWhnfProjectionExpandWith at hExpandedRun
           simp [
             psKernelWhnfCoreWithFuel,
             hDepth,
             hMiss,
             structResult,
             hStruct,
-            psKernelWhnfProjectionExpandWith,
             hExpandedRun
           ] at hSuccess
       | ok secondRun =>
@@ -267,7 +267,8 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                   state1
                   structReduced =
                 Except.ok (Prod.mk expanded state2) := by
-            simpa [expandedResult] using hExpanded
+            simpa [expandedResult] using hExpandedRun
+          unfold psKernelWhnfProjectionExpandWith at hExpandedRun
           have hExpandedSemantic :
               PsKernelReductionClosure
                   nextContext.environment
@@ -277,49 +278,48 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                 PsKernelCheckerConfigurationSound
                   nextContext
                   state2 := by
-            unfold expandedResult at hExpanded
             cases structReduced with
             | bvar value =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | fvar value =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | mvar value =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | sort value =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | const name levels =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | app fn arg =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | lam name type body binderInfo =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | forallE name type body binderInfo =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | letE name type value body nondep =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | lit literal =>
                 cases literal with
                 | nat value =>
-                    simp at hExpanded
-                    rcases hExpanded with ⟨rfl, rfl⟩
+                    simp at hExpandedRun
+                    rcases hExpandedRun with ⟨rfl, rfl⟩
                     exact hStructSemantic
                 | str value =>
                     have hStringRun :
@@ -329,7 +329,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                             (psKernelStringLitToConstructor value) =
                           Except.ok
                             (Prod.mk expanded state2) := by
-                      simpa using hExpanded
+                      simpa using hExpandedRun
                     have hStringSemantic :=
                       hPublic
                         nextContext
@@ -376,12 +376,12 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                         hStringSemantic.2
                       ⟩
             | mdata metadata body =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | proj projectionName projectionIndex body =>
-                simp at hExpanded
-                rcases hExpanded with ⟨rfl, rfl⟩
+                simp at hExpandedRun
+                rcases hExpandedRun with ⟨rfl, rfl⟩
                 exact hStructSemantic
           cases hProjection :
               psKernelReduceProjCore
@@ -491,9 +491,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                     original,
                     structResult,
                     hStruct,
-                    psKernelWhnfProjectionExpandWith,
-                    psKernelWhnfProjectionExpandWith,
-                    hExpandedRun,
+                                    hExpandedRun,
                     hProjection,
                     hReduce
                   ] at hSuccess
@@ -539,8 +537,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                       original,
                       structResult,
                       hStruct,
-                      psKernelWhnfProjectionExpandWith,
-                      hExpandedRun,
+                                hExpandedRun,
                       hProjection,
                       hReduce
                     ] using hSuccess

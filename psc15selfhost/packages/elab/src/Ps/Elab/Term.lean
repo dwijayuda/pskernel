@@ -99,8 +99,8 @@ def psElabFinalizeExpected
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match expected with
-  | none => Except.ok result
-  | some expectedType =>
+  | Option.none => Except.ok result
+  | Option.some expectedType =>
       let unified :=
         psUnify
           result.context.environment
@@ -224,8 +224,8 @@ def psElabProjectionStep
   match view.head with
   | .constE typeName _ =>
       match psEnvironmentFindInductive current.context.environment typeName with
-      | none => Except.error PsElabError.unsupportedTerm
-      | some info =>
+      | Option.none => Except.error PsElabError.unsupportedTerm
+      | Option.some info =>
           let projectionInvalid :=
             if info.isStructure then
               if Nat.beq info.numIndices 0 then
@@ -250,8 +250,8 @@ def psElabProjectionStep
                         psEnvironmentFindConstructor
                           current.context.environment
                           constructorName with
-                    | none => Except.error PsElabError.unsupportedTerm
-                    | some constructorInfo =>
+                    | Option.none => Except.error PsElabError.unsupportedTerm
+                    | Option.some constructorInfo =>
                         match
                             psElabProjectionApplyParameters
                               current.context
@@ -317,14 +317,14 @@ def psElabProjectionReference
   match sourceName.segments with
   | List.nil =>
       match psSyntaxNameToName sourceName with
-      | none => Except.error PsElabError.emptyName
-      | some name => Except.error (PsElabError.unknownName name)
+      | Option.none => Except.error PsElabError.emptyName
+      | Option.some name => Except.error (PsElabError.unknownName name)
   | List.cons base tail =>
       match tail with
       | List.nil =>
           match psSyntaxNameToName sourceName with
-          | none => Except.error PsElabError.emptyName
-          | some name => Except.error (PsElabError.unknownName name)
+          | Option.none => Except.error PsElabError.emptyName
+          | Option.some name => Except.error (PsElabError.unknownName name)
       | List.cons field rest =>
           let baseName :=
             psNameAppendStr PsName.anonymous base;
@@ -333,8 +333,8 @@ def psElabProjectionReference
                 context.localContext
                 context.environment
                 baseName with
-          | none => Except.error (PsElabError.unknownName baseName)
-          | some resolved =>
+          | Option.none => Except.error (PsElabError.unknownName baseName)
+          | Option.some resolved =>
               let baseTerm : PsExpr :=
                 match resolved with
                 | .local id => PsExpr.fvar id
@@ -357,12 +357,12 @@ def psElabNamedReference
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match psSyntaxNameToName sourceName with
-  | none => Except.error PsElabError.emptyName
-  | some name =>
+  | Option.none => Except.error PsElabError.emptyName
+  | Option.some name =>
       match psResolveName context.localContext context.environment name with
-      | none =>
+      | Option.none =>
           psElabProjectionReference context sourceName expected
-      | some resolved =>
+      | Option.some resolved =>
           match resolved with
           | .local id =>
               psElabResolvedTerm context (PsExpr.fvar id) expected
@@ -404,11 +404,11 @@ def psElabNatural
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match psParseNaturalText text with
-  | none => Except.error (PsElabError.invalidNatural text)
-  | some value =>
+  | Option.none => Except.error (PsElabError.invalidNatural text)
+  | Option.some value =>
       let natural := PsExpr.lit (PsLiteral.natural value);
       match expected with
-      | some expectedType =>
+      | Option.some expectedType =>
           let reducedExpected :=
             psWhnf
               context.environment
@@ -428,7 +428,7 @@ def psElabNatural
                 psElabResolvedTerm context natural expected
           | _ =>
               psElabResolvedTerm context natural expected
-      | none =>
+      | Option.none =>
           psElabResolvedTerm context natural Option.none
 
 def psElabString
@@ -437,8 +437,8 @@ def psElabString
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match psDecodeStringLiteral text with
-  | none => Except.error (PsElabError.invalidString text)
-  | some value =>
+  | Option.none => Except.error (PsElabError.invalidString text)
+  | Option.some value =>
       psElabResolvedTerm
         context
         (PsExpr.lit (PsLiteral.string value))
@@ -450,8 +450,8 @@ def psElabCharacter
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match psDecodeCharacterLiteral text with
-  | none => Except.error (PsElabError.invalidCharacter text)
-  | some value =>
+  | Option.none => Except.error (PsElabError.invalidCharacter text)
+  | Option.some value =>
       let term :=
         PsExpr.app
           (PsExpr.constE psCharOfNatName [])
@@ -528,8 +528,8 @@ def psElabTypedBindersAcc
           let head := Prod.fst entry;
           let sourceType := Prod.snd entry;
           match psSyntaxNameToName head.name with
-          | none => Except.error PsElabError.emptyName
-          | some name =>
+          | Option.none => Except.error PsElabError.emptyName
+          | Option.some name =>
               match elaborate context sourceType Option.none with
               | Except.error error => Except.error error
               | Except.ok typeResult =>
@@ -688,9 +688,9 @@ def psElabLambdaBodyExpected
       PsElabError
       (Prod PsElabContext (Option PsExpr)) :=
   match expected with
-  | none =>
+  | Option.none =>
       Except.ok (Prod.mk context Option.none)
-  | some expectedType =>
+  | Option.some expectedType =>
       match
           psElabLambdaExpectedBody
             binders
@@ -874,10 +874,10 @@ def psElabLet
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match psSyntaxNameToName nameSyntax with
-  | none => Except.error PsElabError.emptyName
-  | some name =>
+  | Option.none => Except.error PsElabError.emptyName
+  | Option.some name =>
       match declaredType with
-      | none =>
+      | Option.none =>
           match elaborate context value Option.none with
           | Except.error error => Except.error error
           | Except.ok valueResult =>
@@ -889,7 +889,7 @@ def psElabLet
                 valueResult
                 body
                 expected
-      | some sourceType =>
+      | Option.some sourceType =>
           match elaborate context sourceType Option.none with
           | Except.error error => Except.error error
           | Except.ok typeResult =>
@@ -970,8 +970,8 @@ def psElabIf
       | Except.ok thenResult =>
           let resultType : PsExpr :=
             match expected with
-            | some type => type
-            | none => thenResult.type;
+            | Option.some type => type
+            | Option.none => thenResult.type;
           match elaborate
               thenResult.context
               elseBranch
@@ -1107,8 +1107,8 @@ def psElabMatchAlternativeCovered
     (alternatives : List PsElabMatchAlternative)
     (ctorName : PsName) : Bool :=
   match psElabMatchAlternativeFind ctorName alternatives with
-  | some _ => true
-  | none => false
+  | Option.some _ => true
+  | Option.none => false
 
 def psElabFillWildcardAlternatives
     (pattern : PsSyntaxPattern)
@@ -1133,8 +1133,8 @@ def psElabFillWildcardAlternatives
       fun (alternativesRev : List PsElabMatchAlternative) =>
         let next : List PsElabMatchAlternative :=
           match psElabMatchAlternativeFind ctorName alternativesRev with
-          | some _ => alternativesRev
-          | none =>
+          | Option.some _ => alternativesRev
+          | Option.none =>
               let alternative : PsElabMatchAlternative := {
                 constructorName := ctorName
                 pattern := pattern
@@ -1202,8 +1202,8 @@ def psElabMatchPatternConstructorName
               Except.ok (psNameAppendStr inductiveInfo segment)
           | _ :: _ =>
               match psSyntaxNameToName syntaxName with
-              | none => Except.error PsElabError.matchPatternUnsupported
-              | some name => Except.ok name
+              | Option.none => Except.error PsElabError.matchPatternUnsupported
+              | Option.some name => Except.ok name
 
 def psElabPrepareMatchAlternativesWorker
     (inductiveInfo : PsInductiveInfo)
@@ -1266,10 +1266,10 @@ def psElabPrepareMatchAlternativesWorker
                       psElabMatchAlternativeFind
                         ctorName
                         alternativesRev with
-                  | some _ =>
+                  | Option.some _ =>
                       Except.error
                         (PsElabError.matchDuplicateConstructor ctorName)
-                  | none =>
+                  | Option.none =>
                       let alternative : PsElabMatchAlternative := {
                         constructorName := ctorName
                         pattern := pattern
@@ -1356,13 +1356,13 @@ def psSyntaxNameMatchesCore
     false
   else
     match coreName with
-    | none =>
+    | Option.none =>
         false
-    | some left =>
+    | Option.some left =>
         match psSyntaxNameToName candidate with
-        | none =>
+        | Option.none =>
             false
-        | some right =>
+        | Option.some right =>
             psNameEq left right
 
 def psSyntaxNameListContainsCore
@@ -1429,8 +1429,8 @@ def psElabMatchFieldsWorker
                 Except.error (PsElabError.infer error)
             | Except.ok forallView =>
                 match psSyntaxNameToName binderSyntax with
-                | none => Except.error PsElabError.emptyName
-                | some binderName =>
+                | Option.none => Except.error PsElabError.emptyName
+                | Option.some binderName =>
                     let pushed :=
                       psLocalPushBinding
                         context.localContext
@@ -1524,8 +1524,8 @@ def psElabPushRecursiveHypothesesWorker
       fun (context : PsElabContext) =>
         fun (hypothesesRev : List PsElabMatchField) =>
           match psElabMatchFieldAt fields fieldIndex with
-          | none => Except.error PsElabError.structuralRecursionInternal
-          | some field =>
+          | Option.none => Except.error PsElabError.structuralRecursionInternal
+          | Option.some field =>
               let hypothesisName :=
                 psNameAppendNum
                   (psRootName "_ih")
@@ -1542,9 +1542,9 @@ def psElabPushRecursiveHypothesesWorker
                   pushed.context;
               let withRecursion : PsElabContext :=
                 match context.structuralRecursion with
-                | none =>
+                | Option.none =>
                     withLocal
-                | some recursion =>
+                | Option.some recursion =>
                     let nextRecursion : PsElabStructuralRecursion := {
                       functionName := recursion.functionName
                       explicitParameterIds := recursion.explicitParameterIds
@@ -1685,14 +1685,14 @@ def psElabMatchConstructorMinor
   match psEnvironmentFindConstructor
       context.environment
       constructorName with
-  | none =>
+  | Option.none =>
       Except.error
         (PsElabError.matchConstructorUnknown constructorName)
-  | some ctorInfo =>
+  | Option.some ctorInfo =>
       let binders : List PsSyntaxName :=
         match sourceBinders with
-        | some values => values
-        | none =>
+        | Option.some values => values
+        | Option.none =>
             psElabWildcardBinderNames
               span
               0
@@ -1854,8 +1854,8 @@ def psElabMatchMinorsWorker
           rest;
       fun (context : PsElabContext) =>
         match psElabMatchAlternativeFind ctorName alternatives with
-        | none => Except.error PsElabError.matchNonExhaustive
-        | some alternative =>
+        | Option.none => Except.error PsElabError.matchNonExhaustive
+        | Option.some alternative =>
             match psElabMatchMinor
                 elaborate
                 context
@@ -1930,8 +1930,8 @@ def psElabMatch
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   match expected with
-  | none => Except.error PsElabError.matchExpectedType
-  | some expectedType =>
+  | Option.none => Except.error PsElabError.matchExpectedType
+  | Option.some expectedType =>
       match elaborate context scrutineeSyntax Option.none with
       | Except.error error => Except.error error
       | Except.ok scrutineeResult =>
@@ -1947,9 +1947,9 @@ def psElabMatch
               match psEnvironmentFindInductive
                   scrutineeResult.context.environment
                   inductiveName with
-              | none =>
+              | Option.none =>
                   Except.error PsElabError.matchScrutineeUnsupported
-              | some inductiveInfo =>
+              | Option.some inductiveInfo =>
                   if psElabNatNe inductiveInfo.numIndices 0 then
                     Except.error PsElabError.matchInductiveUnsupported
                   else if psElabNatNe (psElabListLength typeView.args) inductiveInfo.numParams then
@@ -1966,9 +1966,9 @@ def psElabMatch
                         match psEnvironmentFindRecursor
                             scrutineeResult.context.environment
                             recursorName with
-                        | none =>
+                        | Option.none =>
                             Except.error PsElabError.matchRecursorUnsupported
-                        | some recInfo =>
+                        | Option.some recInfo =>
                             if
                                 psElabBoolOr
                                   (psElabNatNe
@@ -2258,13 +2258,13 @@ def psElabSolvePendingInstancesWorker
       fun (current : PsElabTermResult) =>
         let metaContext := current.context.metaContext;
         match psMetaFindAssignment metaContext id with
-        | some _ =>
+        | Option.some _ =>
             smaller current
-        | none =>
+        | Option.none =>
             match psMetaFindDecl metaContext id with
-            | none =>
+            | Option.none =>
                 Except.error PsElabError.implicitApplicationUnsupported
-            | some declaration =>
+            | Option.some declaration =>
                 let target :=
                   psMetaInstantiate metaContext declaration.type;
                 if psExprHasUnresolvedMeta target then
@@ -2278,17 +2278,17 @@ def psElabSolvePendingInstancesWorker
                       metaContext
                       target;
                   match synthesized.value with
-                  | none =>
+                  | Option.none =>
                       Except.error PsElabError.implicitApplicationUnsupported
-                  | some value =>
+                  | Option.some value =>
                       match psMetaAssign
                           synthesized.context
                           id
                           value with
-                      | none =>
+                      | Option.none =>
                           Except.error
                             PsElabError.implicitApplicationUnsupported
-                      | some assigned =>
+                      | Option.some assigned =>
                           let assignedResult : PsElabTermResult := {
                             context :=
                               psElabContextWithMeta
@@ -2359,8 +2359,8 @@ def psElabTakeForallNamesWorker
         match type with
         | .forallE name _ body _ =>
             match smaller body with
-            | none => Option.none
-            | some rest =>
+            | Option.none => Option.none
+            | Option.some rest =>
                 Option.some
                   (List.cons (psNameLastComponent name) rest)
         | _ => Option.none
@@ -2394,8 +2394,8 @@ def psSyntaxRecordFieldMatchesName
     (name : String)
     (field : Prod PsSyntaxName PsSyntaxTerm) : Bool :=
   match psSyntaxRecordFieldName field with
-  | none => false
-  | some fieldName => psStringEq fieldName name
+  | Option.none => false
+  | Option.some fieldName => psStringEq fieldName name
 
 def psSyntaxRecordHasField
     (fields :
@@ -2562,7 +2562,7 @@ def psElabRecordCandidates
               psElabRecordCandidateForInfo
                 environment
                 info with
-          | some candidate =>
+          | Option.some candidate =>
               if
                   psSyntaxRecordFieldsMatch
                     fields
@@ -2570,7 +2570,7 @@ def psElabRecordCandidates
                 List.cons candidate candidates
               else
                 candidates
-          | none =>
+          | Option.none =>
               candidates
       | _ =>
           candidates
@@ -2606,12 +2606,12 @@ def psElabRecord
     Except PsElabError PsElabTermResult :=
   let candidate : Option PsElabRecordCandidate :=
     match expected with
-    | some expectedType =>
+    | Option.some expectedType =>
         match
             psElabRecordCandidateFromExpected
               context
               expectedType with
-        | some found =>
+        | Option.some found =>
             if
                 psSyntaxRecordFieldsMatch
                   fields
@@ -2619,23 +2619,23 @@ def psElabRecord
               Option.some found
             else
               Option.none
-        | none =>
+        | Option.none =>
             psElabUniqueRecordCandidate
               context.environment
               fields
-    | none =>
+    | Option.none =>
         psElabUniqueRecordCandidate
           context.environment
           fields;
   match candidate with
-  | none => Except.error PsElabError.unsupportedTerm
-  | some found =>
+  | Option.none => Except.error PsElabError.unsupportedTerm
+  | Option.some found =>
       match
           psSyntaxRecordOrderFields
             fields
             found.fieldNames with
-      | none => Except.error PsElabError.unsupportedTerm
-      | some arguments =>
+      | Option.none => Except.error PsElabError.unsupportedTerm
+      | Option.some arguments =>
           match
               psElabResolvedTerm
                 context

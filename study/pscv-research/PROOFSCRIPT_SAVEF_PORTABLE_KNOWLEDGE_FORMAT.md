@@ -538,3 +538,739 @@ The target proof payload should eventually be a stable, fully elaborated Core ex
 Current canonical admission payloads may be transported as candidate material, but AdmissionReady data MUST NOT become checked evidence merely because it was packaged in SPKF.
 
 Only successful kernel replay establishes that authority.
+
+
+---
+
+# 16. Authority graph must be acyclic
+
+Content-addressed objects cannot directly hash cyclic references.
+
+Therefore authority-bearing SPKF references MUST form a DAG.
+
+Mutually recursive semantic declarations are represented inside one canonical bundle.
+
+~~~text
+mutually recursive declarations
+        |
+        v
+one semantic bundle
+        |
+        v
+one SPKF object ID
+~~~
+
+If package-level semantic dependencies form a true cycle, the relevant profile must either:
+
+- normalize the strongly connected component into one semantic bundle; or
+- reject the cycle.
+
+No verifier may resolve a hash cycle by trusting mutable external names.
+
+---
+
+# 17. Typed relationship vocabulary
+
+Initial relationship types:
+
+~~~text
+imports
+extends
+proves
+discharges
+refines
+implements
+preserves
+assumes
+validates
+benchmarks
+conforms-to
+binds-distribution
+derived-from
+generalizes
+specializes
+replaces
+compatible-with
+~~~
+
+Unknown relation types MAY be preserved as opaque extension data.
+
+Unknown relation types MUST NOT establish semantic authority.
+
+---
+
+# 18. Knowledge portability classes
+
+Not all knowledge has equal reuse value.
+
+## K0 — Foundation
+
+Examples:
+
+- logical metatheory;
+- generic algebraic results.
+
+## K1 — Semantic
+
+Target-independent PSCV definitions/specifications/theorems.
+
+Example:
+
+~~~text
+map preserves length
+~~~
+
+## K2 — Capability
+
+Knowledge over abstract effects/capabilities.
+
+Example:
+
+~~~text
+transaction preserves conservation under TransactionEffectModel
+~~~
+
+## K3 — Backend
+
+Backend-specific semantic preservation.
+
+Example:
+
+~~~text
+VerifiedIR to Wasm preserves observable result
+~~~
+
+## K4 — Ecosystem adapter
+
+Examples:
+
+- Node adapter;
+- Rust crate mapping;
+- Python wrapper;
+- JVM binding;
+- PHP binding.
+
+## K5 — Deployment
+
+Examples:
+
+- benchmark on hardware H;
+- service SLA;
+- runtime observation.
+
+SAVEF search/generalization SHOULD prefer K0-K2 when the task can be stated at that abstraction level.
+
+---
+
+# 19. ImplementationWitness
+
+One theory can have multiple executable witnesses.
+
+Concept:
+
+~~~json
+{
+  "schema": "spkf/1",
+  "kind": "implementation-witness",
+
+  "subjectTheory": {
+    "spkf": "spkf-v1:sha256:..."
+  },
+
+  "implementation": {
+    "artifact": "spkf-blob-v1:sha256:..."
+  },
+
+  "target": {
+    "kind": "wasm-component"
+  },
+
+  "relation": "implements",
+
+  "evidence": {
+    "spkf": "spkf-v1:sha256:..."
+  }
+}
+~~~
+
+The witness object is a claim container.
+
+Referenced evidence determines whether the claimed relation is accepted.
+
+---
+
+# 20. Two implementation lanes
+
+Cross-ecosystem feasibility improves substantially if SPKF supports two lanes.
+
+## 20.1 Native ecosystem implementation
+
+Examples:
+
+~~~text
+JavaScript
+Rust
+Python
+JVM
+PHP
+~~~
+
+Benefits:
+
+- idiomatic ecosystem integration;
+- potentially best performance;
+- native debugging/tooling.
+
+Costs:
+
+- each target semantic path requires its own evidence model;
+- complete formal refinement may be expensive.
+
+## 20.2 Portable Wasm Component implementation
+
+Near-term strategy:
+
+~~~text
+PSCV theory
+    |
+    v
+Certified PSCV implementation
+    |
+    v
+VerifiedIR
+    |
+    v
+preserved Wasm
+    |
+    v
+Wasm Component / WIT boundary
+    |
+ +--+-------+--------+--------+
+ |          |        |        |
+JS        Rust     Python    other hosts
+~~~
+
+The Wasm Component Model provides language-neutral interfaces through WIT and a Canonical ABI for passing rich values between components.
+
+WIT describes API shape, not behavior.
+
+SPKF supplies behavioral specifications/theorems.
+
+This lane lets one strong PSCV-to-Wasm preservation result support many host ecosystems while native backends mature separately.
+
+Source:
+https://component-model.bytecodealliance.org/
+
+---
+
+# 21. Why WIT complements SPKF
+
+WIT can describe:
+
+~~~text
+parse: bytes -> result json parse-error
+~~~
+
+SPKF can additionally establish:
+
+~~~text
+parse is deterministic
+parse never reads out of bounds
+successful parse satisfies JsonGrammar
+~~~
+
+Therefore:
+
+~~~text
+WIT
+    language-neutral interface
+
+SPKF
+    behavior/specification/proof knowledge
+~~~
+
+The two systems solve different problems.
+
+---
+
+# 22. DistributionBinding
+
+DistributionBinding maps an SPKF semantic/implementation object to an ecosystem artifact.
+
+Concept:
+
+~~~json
+{
+  "schema": "spkf/1",
+  "kind": "distribution-binding",
+
+  "subject": {
+    "spkf": "spkf-v1:sha256:..."
+  },
+
+  "package": {
+    "purl": "pkg:npm/%40proofscript/json@3.2.0"
+  },
+
+  "artifactIntegrity": {
+    "algorithm": "sha512",
+    "digest": "..."
+  },
+
+  "embeddedLocator": "proofscript/savef.json"
+}
+~~~
+
+PURL identifies the package coordinate.
+
+Artifact integrity identifies exact package bytes where available.
+
+The distribution binding does not define theorem truth.
+
+---
+
+# 23. npm mapping
+
+Recommended npm carrier:
+
+~~~text
+package.json
+proofscript/savef.json
+~~~
+
+Example package.json fragment:
+
+~~~json
+{
+  "name": "@proofscript/json",
+  "version": "3.2.0",
+
+  "proofscript": {
+    "savef": {
+      "root": "spkf-v1:sha256:...",
+      "locator": "./proofscript/savef.json"
+    }
+  }
+}
+~~~
+
+The custom field is a locator only.
+
+Ordinary npm consumers do not need SPKF-aware tooling.
+
+---
+
+# 24. Cargo mapping
+
+Cargo explicitly provides package.metadata for external tools.
+
+Recommended:
+
+~~~toml
+[package.metadata.savef]
+root = "spkf-v1:sha256:..."
+locator = "savef.json"
+~~~
+
+The .crate archive MAY include a compact locator and CertifiedModuleInterface.
+
+Full evidence MAY live in OCI or another mirror.
+
+Source:
+https://doc.rust-lang.org/cargo/reference/manifest.html
+
+---
+
+# 25. PyPI mapping
+
+Python core project metadata has a fixed set of standard fields.
+
+SPKF should not require a custom core metadata field.
+
+Recommended:
+
+1. include savef.json in the wheel/sdist;
+2. optionally use a Project-URL label such as SAVEF for discovery;
+3. bind the exact wheel/sdist digest through DistributionBinding.
+
+Example:
+
+~~~toml
+[project.urls]
+SAVEF = "https://example.org/savef/spkf-v1-sha256-..."
+~~~
+
+Project-URL labels may be custom free text.
+
+The URL is discovery metadata.
+
+The SPKF digest is identity.
+
+Sources:
+https://packaging.python.org/en/latest/specifications/core-metadata/
+https://packaging.python.org/en/latest/specifications/well-known-project-urls/
+
+---
+
+# 26. Composer mapping
+
+Composer permits arbitrary tool data in the extra field.
+
+Recommended:
+
+~~~json
+{
+  "extra": {
+    "savef": {
+      "root": "spkf-v1:sha256:...",
+      "locator": "savef.json"
+    }
+  }
+}
+~~~
+
+Source:
+https://getcomposer.org/doc/04-schema.md
+
+---
+
+# 27. Maven mapping
+
+Maven supports attached/classified secondary artifacts.
+
+Recommended options:
+
+- embed META-INF/savef.json in the main JAR;
+- attach a compact artifact with classifier savef;
+- attach heavyweight evidence separately with classifier savef-evidence.
+
+Example:
+
+~~~text
+org.proofscript:json:3.2.0
+org.proofscript:json:3.2.0:savef
+~~~
+
+Sources:
+https://maven.apache.org/plugins/maven-jar-plugin/examples/attached-jar.html
+https://maven.apache.org/plugins/maven-deploy-plugin/examples/deploying-with-classifiers.html
+
+---
+
+# 28. GitHub mapping
+
+GitHub can serve three distinct roles.
+
+## Source
+
+Git repository stores human-authored source/review/history.
+
+## Immutable releases
+
+A release MAY archive:
+
+- SPKF root bundle;
+- knowledge snapshots;
+- independent verification bundles.
+
+GitHub immutable releases lock associated tags and assets after publication and generate release attestations.
+
+Source:
+https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases
+
+## GHCR
+
+GitHub Container Registry can act as the first public OCI mirror for SPKF objects.
+
+No custom SAVEF registry is required for an MVP.
+
+---
+
+# 29. Preferred OCI mapping
+
+SPKF-v1 recommends OCI Image Manifest 1.1 artifact usage.
+
+Provisional vendor media types:
+
+~~~text
+application/vnd.proofscript.savef.knowledge.v1+json
+application/vnd.proofscript.savef.theory-extension.v1+json
+application/vnd.proofscript.savef.implementation.v1+json
+application/vnd.proofscript.savef.backend-evidence.v1+json
+application/vnd.proofscript.savef.distribution-binding.v1+json
+application/vnd.proofscript.savef.advisory.v1+json
+~~~
+
+These names should be reviewed/registered before being frozen as a public standard.
+
+---
+
+# 30. OCI subject/referrers rule
+
+When subject and extension are stored in the same OCI repository, an extension SHOULD additionally use OCI subject/referrers.
+
+However SPKF semantic subject identity MUST remain inside the canonical SPKF object.
+
+Reason:
+
+- OCI subject is repository-local;
+- SPKF subjects may be mirrored across repositories/registries;
+- the same SPKF object may be packaged by different OCI manifests.
+
+Therefore:
+
+~~~text
+OCI subject
+    mirror-local discovery optimization
+
+SPKF subject ID
+    portable semantic relationship
+~~~
+
+This is a critical portability rule.
+
+---
+
+# 31. Cross-registry discovery
+
+A search service may maintain:
+
+~~~text
+SPKF root
+    -> known mirrors
+    -> known extensions
+    -> known implementation witnesses
+    -> known distribution bindings
+~~~
+
+The search service is disposable.
+
+If it disappears:
+
+- SPKF IDs still resolve from mirrors;
+- package locators still identify roots;
+- snapshots can rebuild indexes;
+- proofs remain independently replayable.
+
+---
+
+# 32. Mirror protocol
+
+Conceptual command:
+
+~~~text
+psc knowledge mirror <root>
+~~~
+
+A mirror operation should:
+
+1. fetch root;
+2. recompute root ID;
+3. traverse required authority-bearing references within explicit limits;
+4. verify every object/blob ID;
+5. store immutable local objects;
+6. optionally fetch selected extensions/implementations;
+7. emit mirror inventory.
+
+Mirror policies may select:
+
+- theory only;
+- full proof evidence;
+- specific ecosystems;
+- advisory knowledge;
+- snapshots.
+
+---
+
+# 33. Offline verification
+
+Target:
+
+~~~text
+psc knowledge fetch --closure <root>
+psc knowledge verify --offline <root>
+~~~
+
+A release-critical closure should be verifiable without live registry access after required objects are fetched.
+
+This supports:
+
+- reproducibility;
+- air-gapped use;
+- disaster recovery;
+- archival research;
+- long-term theorem replay.
+
+---
+
+# 34. Knowledge snapshots
+
+SnapshotIndex may represent a curated ecosystem state:
+
+~~~text
+SAVEF Snapshot
+    |
+    +-- theory roots
+    +-- selected canonical theorem extensions
+    +-- distribution bindings
+    +-- checker profiles
+~~~
+
+Snapshots can be distributed through:
+
+- OCI;
+- GitHub immutable releases;
+- institutional archives;
+- object stores;
+- offline media.
+
+Snapshot signatures establish curation/provenance, not theorem validity.
+
+---
+
+# 35. Build/cache integration
+
+SPKF should integrate with ProofScript's existing CAS/BuildAction model.
+
+Nix demonstrates content-addressed outputs and build derivations over precise inputs.
+
+Bazel Remote Execution separates:
+
+- ContentAddressableStorage for immutable blobs;
+- ActionCache mapping deterministic Action IDs to results.
+
+ProofScript already plans equivalent concepts.
+
+Recommended:
+
+~~~text
+BuildActionId
+    ->
+CheckedCoreArtifact
+CertifiedModuleInterface
+VerifiedIR
+backend artifact
+SPKF root
+~~~
+
+SPKF objects MAY reference existing ProofScript artifact IDs.
+
+The build cache remains an accelerator rather than semantic authority.
+
+---
+
+# 36. Provenance model
+
+Separate semantic truth from supply-chain origin.
+
+~~~text
+PSCV / PSKernel
+    checks semantic claims
+
+in-toto / SLSA
+    authenticates claims about how artifacts were produced
+~~~
+
+An in-toto Statement MAY bind an SPKF digest or distribution artifact digest as subject.
+
+SLSA provenance MAY record:
+
+- source repository;
+- commit;
+- builder identity;
+- build inputs;
+- output digests.
+
+None of this proves a program theorem.
+
+---
+
+# 37. SPDX integration
+
+SPKF SHOULD emit/reference SPDX where useful.
+
+Possible mappings:
+
+~~~text
+SPKF implementation
+    -> SPDX SoftwareArtifact
+
+DistributionBinding PURL
+    -> SPDX ExternalIdentifier
+
+SPKF digest
+    -> SPDX contentIdentifier
+
+selected artifact relations
+    -> SPDX Relationship
+~~~
+
+Do not encode PSCV proof calculus into SPDX.
+
+---
+
+# 38. Licensing
+
+Free distribution requires explicit rights.
+
+Every public KnowledgeRoot or TheoryExtension SHOULD state:
+
+- SPDX license expression;
+- authorship/provenance reference;
+- source project;
+- optional notice/attribution.
+
+A theorem derived while working with a package is not automatically redistributable under arbitrary terms.
+
+Mirrors must respect object licensing and policy.
+
+---
+
+# 39. Curation and theorem spam
+
+Logical validity is not usefulness.
+
+An open graph may accumulate:
+
+- duplicate lemmas;
+- highly specialized lemmas;
+- AI-generated low-value facts;
+- misleading titles;
+- redundant implementation witnesses.
+
+SPKF therefore separates:
+
+## Accepted
+
+Evidence is semantically valid.
+
+## Indexed
+
+Object meets index metadata/resource policy.
+
+## Canonical
+
+Curator/factory recommends this abstraction as preferred reusable knowledge.
+
+Canonical status affects search ranking only.
+
+It does not create proof authority.
+
+---
+
+# 40. Generalization workflow
+
+Suppose many extensions prove similar local facts.
+
+The factory may propose a generalized theorem G.
+
+Process:
+
+1. generate G statement;
+2. generate proof;
+3. PSKernel checks proof;
+4. publish G as immutable extension;
+5. index records G generalizes older facts;
+6. search prefers G when appropriate.
+
+Old objects remain immutable.

@@ -673,6 +673,34 @@ def psJsFreshMatchTemp
     (expr : PsJsIrExpr) : String :=
   psJsFreshMatchTempWorker expr 4096 0
 
+def psJsFreshTailMatchTempWorker
+    (expr : PsJsIrExpr)
+    (attempts : Nat) :
+    Nat -> String :=
+  match attempts with
+  | Nat.zero =>
+      fun (index : Nat) =>
+        psJsConcat2
+          "__ps$tail$match$"
+          (psNatToString index)
+  | Nat.succ remaining =>
+      let smaller : Nat -> String :=
+        psJsFreshTailMatchTempWorker expr remaining;
+      fun (index : Nat) =>
+        let candidate : String :=
+          psJsConcat2
+            "__ps$tail$match$"
+            (psNatToString index);
+        if psJsExprUsesNameWithFuel 4096 expr candidate then
+          smaller (Nat.succ index)
+        else
+          candidate
+
+def psJsFreshTailMatchTemp
+    (expr : PsJsIrExpr)
+    (depth : Nat) : String :=
+  psJsFreshTailMatchTempWorker expr 4096 depth
+
 def psJsPrintFieldWith
     (print : PsJsIrExpr -> Except PsJsEmitError String)
     (field : String × PsJsIrExpr) :
@@ -1271,14 +1299,22 @@ def psJsTailPrintAlternativesWith
 
 def psJsTailEmitWithFuel
     (declaration : PsJsIrDeclaration)
-    (fuel : Nat) :
+    (fuel matchDepth : Nat) :
     PsJsIrExpr -> Option String :=
   match fuel with
   | Nat.zero =>
       fun (_expr : PsJsIrExpr) => Option.none
   | Nat.succ remaining =>
       let smaller : PsJsIrExpr -> Option String :=
-        psJsTailEmitWithFuel declaration remaining;
+        psJsTailEmitWithFuel
+          declaration
+          remaining
+          matchDepth;
+      let nested : PsJsIrExpr -> Option String :=
+        psJsTailEmitWithFuel
+          declaration
+          remaining
+          (Nat.succ matchDepth);
       fun (expr : PsJsIrExpr) =>
         match expr with
         | PsJsIrExpr.call fn arguments =>
@@ -1391,10 +1427,12 @@ def psJsTailEmitWithFuel
             | Option.none => Option.none
             | Option.some printedScrutinee =>
                 let temp : String :=
-                  psJsFreshMatchTemp expr;
+                  psJsFreshTailMatchTemp
+                    expr
+                    matchDepth;
                 match
                     psJsTailPrintAlternativesWith
-                      smaller
+                      nested
                       declaration.name
                       temp
                       alternatives with
@@ -1436,6 +1474,7 @@ def psJsPrintTailLoop
           psJsTailEmitWithFuel
             declaration
             4096
+            0
             declaration.body with
       | Option.none => Option.none
       | Option.some printedBody =>

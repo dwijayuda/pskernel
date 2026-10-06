@@ -466,3 +466,14 @@ lean_exe psc_kernel_core_provider where
 lean_exe psc_kernel_core_provider_tests where
   srcDir := "test"
   root := `KernelCoreProviderTests
+
+
+lean_lib PsPscvTheory where
+  srcDir := "packages/pscv-theory/src"
+  roots := #[
+    `Ps.Theory.Core
+  ]
+
+lean_exe pscv_theory_seed_tests where
+  srcDir := "packages/pscv-theory/test"
+  root := `TheorySeedTests

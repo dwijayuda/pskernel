@@ -52,14 +52,6 @@ function run(command, args, options = {}) {
   return result.stdout ?? "";
 }
 
-function stripImports(source) {
-  return source
-    .split(/\r?\n/u)
-    .filter((line) => !/^\s*import\s+[A-Za-z0-9_.]+\s*;?\s*$/u.test(line))
-    .join("\n")
-    .trim();
-}
-
 function printable(value) {
   try {
     return JSON.stringify(
@@ -97,16 +89,34 @@ async function loadCompiler(file, generation) {
   const module = await import(
     pathToFileURL(file).href + "?generation=" + String(generation)
   );
-  if (typeof module.psCompilerJavaScriptProofScriptSource !== "function") {
+  for (const name of [
+    "psCompilerJavaScriptProofScriptSources",
+    "psCompilerSelfHostSourceListCons",
+  ]) {
+    if (typeof module[name] !== "function") {
+      throw new Error("PSC2_DIRECT_JS_SELFHOST_COMPILER_API_MISSING: " + name);
+    }
+  }
+  if (!("psCompilerSelfHostSourceListEmpty" in module)) {
     throw new Error(
-      "PSC2_DIRECT_JS_SELFHOST_COMPILER_API_MISSING: psCompilerJavaScriptProofScriptSource",
+      "PSC2_DIRECT_JS_SELFHOST_COMPILER_API_MISSING: psCompilerSelfHostSourceListEmpty",
     );
   }
   return module;
 }
 
-async function compileWith(compiler, source, stage) {
-  const result = compiler.psCompilerJavaScriptProofScriptSource(source);
+function sourceList(compiler, sources) {
+  let result = compiler.psCompilerSelfHostSourceListEmpty;
+  for (let index = sources.length - 1; index >= 0; index -= 1) {
+    result = compiler.psCompilerSelfHostSourceListCons(sources[index], result);
+  }
+  return result;
+}
+
+async function compileWith(compiler, sources, stage) {
+  const result = compiler.psCompilerJavaScriptProofScriptSources(
+    sourceList(compiler, sources),
+  );
   const output = unwrapDirectExcept(result, stage);
   if (typeof output !== "string" || output.length === 0) {
     throw new Error("PSC2_DIRECT_JS_SELFHOST_" + stage + "_EMPTY");
@@ -143,16 +153,12 @@ const closure = await readGeneratedSourceClosure(entryPs, workspace);
 if (!closure || closure.ordered.length === 0) {
   throw new Error("PSC2_DIRECT_JS_SELFHOST_CLOSURE_EMPTY");
 }
-const flattenedSource =
-  closure.ordered
-    .map((item) => stripImports(item.source))
-    .filter((source) => source.length > 0)
-    .join("\n\n") + "\n";
+const sources = closure.ordered.map((item) => item.source);
 
 const compiler1 = await loadCompiler(generation1, 1);
 const generation2Source = await compileWith(
   compiler1,
-  flattenedSource,
+  sources,
   "GENERATION_2",
 );
 await writeFile(generation2, generation2Source, "utf8");
@@ -164,7 +170,7 @@ if (generation1Source !== generation2Source) {
 const compiler2 = await loadCompiler(generation2, 2);
 const generation3Source = await compileWith(
   compiler2,
-  flattenedSource,
+  sources,
   "GENERATION_3",
 );
 await writeFile(generation3, generation3Source, "utf8");

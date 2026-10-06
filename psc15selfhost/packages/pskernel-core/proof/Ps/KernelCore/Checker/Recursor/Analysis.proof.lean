@@ -149,7 +149,7 @@ theorem psKernelIsConstructorApp_true_refines_authoritative
                 hFind
               ] at hConstructor
           | ctorInfo ctor =>
-              refine ⟨name, levels, ctor, hFn, ?_⟩
+              refine ⟨name, levels, ctor, rfl, ?_⟩
               unfold psKernelEnvironmentFind at hFind
               rw [hIndex name] at hFind
               exact hFind

@@ -811,11 +811,11 @@ theorem psKernelExprAbstractFVarsAtChangedWithFuel_refines_reference_core
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
-          simp [
+          simp only [
             psKernelExprAbstractFVarsAtChangedWithFuel,
-            psKernelExprAbstractFVarsAtReferenceChanged,
-            psKernelNameLastIndex_refines_reference_core
+            psKernelExprAbstractFVarsAtReferenceChanged
           ]
+          rw [psKernelNameLastIndex_refines_reference_core]
   | mvar name =>
       cases fuel with
       | zero =>

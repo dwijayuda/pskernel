@@ -83,3 +83,17 @@ def psCompilerRustProofScriptSources
       Except.error (PsCompilerRustError.compiler error)
   | Except.ok prepared =>
       psCompilerRustFromPrepared prepared
+
+def psCompilerRustSelfHostSourceListEmpty : List String :=
+  List.nil
+
+def psCompilerRustSelfHostSourceListCons
+    (source : String)
+    (rest : List String) : List String :=
+  List.cons source rest
+
+def psCompilerRustProofScriptSourcesOrEmpty
+    (sources : List String) : String :=
+  match psCompilerRustProofScriptSources sources with
+  | Except.error _ => ""
+  | Except.ok output => output

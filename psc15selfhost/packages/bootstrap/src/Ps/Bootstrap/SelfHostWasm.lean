@@ -1,0 +1,5 @@
+import Ps.DriverWasm.Compiler
+
+-- Direct-WebAssembly self-host composition root.
+-- Host filesystem/process orchestration and the eventual byte/string ABI adapter
+-- remain outside the semantic compiler closure.

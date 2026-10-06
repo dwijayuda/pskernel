@@ -29,18 +29,18 @@ def psBackendRustScalarProofScriptSource : String :=
   "function idFloat32(x : Float32): Float32 := { x }"
 
 def psBackendRustScalarOutputOk (output : String) : Bool :=
-  output.contains "pub fn idUInt8(x: u8) -> u8 { x }"
-    && output.contains "pub fn idUInt16(x: u16) -> u16 { x }"
-    && output.contains "pub fn idUInt32(x: u32) -> u32 { x }"
-    && output.contains "pub fn idUInt64(x: u64) -> u64 { x }"
-    && output.contains "pub fn idUSize(x: usize) -> usize { x }"
-    && output.contains "pub fn idInt8(x: i8) -> i8 { x }"
-    && output.contains "pub fn idInt16(x: i16) -> i16 { x }"
-    && output.contains "pub fn idInt32(x: i32) -> i32 { x }"
-    && output.contains "pub fn idInt64(x: i64) -> i64 { x }"
-    && output.contains "pub fn idISize(x: isize) -> isize { x }"
-    && output.contains "pub fn idFloat(x: f64) -> f64 { x }"
-    && output.contains "pub fn idFloat32(x: f32) -> f32 { x }"
+  output.contains "pub fn idUInt8(x: u8) -> u8 { (x).clone() }"
+    && output.contains "pub fn idUInt16(x: u16) -> u16 { (x).clone() }"
+    && output.contains "pub fn idUInt32(x: u32) -> u32 { (x).clone() }"
+    && output.contains "pub fn idUInt64(x: u64) -> u64 { (x).clone() }"
+    && output.contains "pub fn idUSize(x: usize) -> usize { (x).clone() }"
+    && output.contains "pub fn idInt8(x: i8) -> i8 { (x).clone() }"
+    && output.contains "pub fn idInt16(x: i16) -> i16 { (x).clone() }"
+    && output.contains "pub fn idInt32(x: i32) -> i32 { (x).clone() }"
+    && output.contains "pub fn idInt64(x: i64) -> i64 { (x).clone() }"
+    && output.contains "pub fn idISize(x: isize) -> isize { (x).clone() }"
+    && output.contains "pub fn idFloat(x: f64) -> f64 { (x).clone() }"
+    && output.contains "pub fn idFloat32(x: f32) -> f32 { (x).clone() }"
 
 def psTestBackendRustScalarLeanSource : Bool :=
   match

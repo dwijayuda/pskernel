@@ -17,9 +17,7 @@
     "constructor-field-membership",
     "match-binding-field-membership",
     "machine-integer-literal-canonical-range",
-    "validation-fuel-fail-closed"
-  ],
-  "gaps": [
+    "validation-fuel-fail-closed",
     "global-declaration-and-type-name-uniqueness",
     "general-named-type-resolution-and-arity",
     "variable-scope-and-name-resolution",
@@ -34,7 +32,9 @@
     "if-condition-and-result-typing",
     "match-exhaustiveness",
     "duplicate-match-alternatives",
-    "match-branch-result-type-equality",
+    "match-branch-result-type-equality"
+  ],
+  "gaps": [
     "external-import-interface-and-abi-compatibility",
     "module-link-compatibility"
   ],
@@ -42,5 +42,18 @@
     "unknownMeaningMustNotBeAddedSilently": true,
     "strengtheningMayRemainV1OnlyWhenAlreadyRequiredByContract": true,
     "newExecutableSemanticsRequiresVersionDecision": true
+  },
+  "evidence": {
+    "validator": "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+    "regressionCorpus": "test/VerifiedIrStrictTests.lean",
+    "strictRegressionCases": 31,
+    "cloudStrictCorpus": {
+      "commit": "8835161aae436a7da320a41f2814d2d89888aa2e",
+      "runId": 37507278125,
+      "jobId": 112419614389,
+      "step": "Run strict VerifiedIR invariant corpus",
+      "conclusion": "success"
+    },
+    "scope": "Implemented executable checks, not a proof of validator soundness or completed global preservation. Full self-host fixed points remain pending."
   }
 }

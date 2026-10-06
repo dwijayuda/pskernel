@@ -320,7 +320,8 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.Delta,
     `Ps.KernelCore.Metatheory.Inductive,
     `Ps.KernelCore.Metatheory.Context,
-    `Ps.KernelCore.Metatheory.ContextState
+    `Ps.KernelCore.Metatheory.ContextState,
+    `Ps.KernelCore.Metatheory.CheckerContracts
   ]
 
 lean_lib PsKernelCoreTestSupport where

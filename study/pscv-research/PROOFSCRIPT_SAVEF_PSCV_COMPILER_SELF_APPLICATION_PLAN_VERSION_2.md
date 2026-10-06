@@ -1582,3 +1582,702 @@ large frontend
 
 The large frontend then becomes the experiment that tests whether accumulated knowledge pays off.
 
+---
+
+# 46. SAVEF self-application model
+
+Applying SAVEF to the compiler means more than proving compiler functions.
+
+Every accepted compiler slice should produce reusable knowledge.
+
+The loop is:
+
+~~~text
+compiler requirement/change
+    |
+    v
+approved compiler specification
+    |
+    v
+implementation
+    |
+    v
+checked proof / validator
+    |
+    v
+CertifiedModuleInterface or PassEvidence
+    |
+    v
+SPKF knowledge
+    |
+    v
+QueryGraph/theory index
+    |
+    v
+next compiler change retrieves prior knowledge
+    |
+    v
+new accepted compiler result
+    |
+    +----------------------> repeat
+~~~
+
+The compiler becomes a producer and consumer of its own accepted software mathematics.
+
+---
+
+# 47. Compiler knowledge generations
+
+Define explicit knowledge generations.
+
+## K0 — seed knowledge
+
+Hand-built or retrofitted theorem interfaces from Foundation/Core and selected compiler contracts.
+
+## K1 — first reused knowledge
+
+Environment/IR proofs that explicitly import and reuse K0.
+
+## K2 — meta/specialization knowledge
+
+Inference, unification, reduction, and specialization results built using K0/K1.
+
+## K3 — erasure/frontend knowledge
+
+Proofs use accumulated lower-layer theorems.
+
+## K4 — whole compiler knowledge
+
+Compiler API and semantic pipeline composition.
+
+## K5 — artifact preservation knowledge
+
+JavaScript/Wasm/native backend evidence.
+
+SAVEF's core hypothesis is that marginal production cost should decline as K grows.
+
+---
+
+# 48. Lean-seeded implementation generations
+
+Separate implementation generations from knowledge generations.
+
+~~~text
+I0
+Lean-hosted native compiler/tooling
+
+I1
+current PSCV-owned semantic compiler
+
+I2
+SAVEF-aware owned compiler
+    pass contracts
+    interfaces
+    knowledge extraction
+
+I3
+self-host compiler consumes same SAVEF knowledge
+
+I4
+direct JS/Wasm/native implementations satisfy same contracts
+~~~
+
+No knowledge theorem is tied to one implementation generation unless its statement is implementation-specific.
+
+---
+
+# 49. First self-build demonstration
+
+The first SAVEF self-build should not attempt the whole 55-module compiler.
+
+Use a small compiler subsystem.
+
+Recommended seed:
+
+~~~text
+Foundation.List
+Foundation.Name
+Core.Expr
+Core.Subst
+Core.Abstract
+~~~
+
+Steps:
+
+1. compile these modules through the Lean reference lane;
+2. produce semantic identities;
+3. create approved specifications;
+4. prove reusable laws;
+5. emit theorem interfaces/SPKF objects;
+6. build the next subsystem using those facts;
+7. measure retrieval/reuse.
+
+A successful Environment proof that imports Foundation/Core theorem knowledge is already a real self-application step.
+
+---
+
+# 50. Second self-build demonstration
+
+Target:
+
+~~~text
+Environment.Basic
+Environment.LocalContext
+Environment.Resolve
+~~~
+
+Expected reused knowledge:
+
+- name equality correctness;
+- list membership/append facts;
+- substitution/name invariants where relevant.
+
+Produce:
+
+~~~text
+EnvironmentLookupSound
+EnvironmentAddPreserves
+EnvironmentIndexRefines
+~~~
+
+These become knowledge for Meta and Elab.
+
+---
+
+# 51. Third self-build demonstration
+
+Target:
+
+~~~text
+Meta.Reduce
+Meta.Infer
+Meta.Unify
+Meta.SynthInstance
+~~~
+
+Expected reused knowledge:
+
+- substitution/lifting;
+- environment lookup;
+- expression equality;
+- local-context facts.
+
+Produce:
+
+~~~text
+ReductionSound
+InferenceSound
+UnificationSound
+InstanceSynthesisSound
+~~~
+
+These are high-leverage frontend theorems.
+
+---
+
+# 52. Fourth self-build demonstration
+
+Target:
+
+~~~text
+CompilerIr.Model
+CompilerPass.Specialize
+Erasure
+~~~
+
+Expected outputs:
+
+~~~text
+RuntimeIrWellFormed
+VerifiedIrWellFormed
+SpecializedIrWellFormed
+SpecializationPreserves
+ErasurePreserves
+GhostErasureNoninterference
+~~~
+
+This is where SAVEF moves from frontend correctness into compiler-pass correctness.
+
+---
+
+# 53. Fifth self-build demonstration
+
+Target the large frontend:
+
+~~~text
+Syntax
+Elab
+~~~
+
+By this point the SAVEF graph should already contain:
+
+- list/name laws;
+- substitution;
+- environment;
+- inference;
+- unification;
+- reduction;
+- IR invariants.
+
+This is the best layer for measuring whether accumulated knowledge actually reduces proof-search context and repair cost.
+
+---
+
+# 54. Final compiler composition demonstration
+
+The compiler API is small compared with the lower layers.
+
+Once lower relations exist, prove composition.
+
+Target theorem shape:
+
+~~~text
+compileCertified(source) = success artifact
+    ->
+SourceSpec(source)
+and
+TargetArtifactRefinesSource(artifact, source)
+~~~
+
+The exact final theorem may be split by target/backend.
+
+The important property is compositional evidence.
+
+---
+
+# 55. Compiler source policy under the Lean bootstrap assumption
+
+New SAVEF/compiler architecture code should satisfy two properties where practical:
+
+1. valid Lean source under the pinned reference toolchain;
+2. inside the intended PSCV subset/profile.
+
+This permits immediate native compilation while preserving future self-hostability.
+
+Do not wait for the current compiler to accept a feature if Lean already provides the agreed PSCV semantics.
+
+Instead:
+
+~~~text
+write PSCV-compatible Lean now
+    ->
+compile with Lean
+    ->
+record required PSCV feature
+    ->
+later require owned compiler conformance
+~~~
+
+This converts today's compiler feature gap from a blocking dependency into a conformance backlog.
+
+---
+
+# 56. PSCV conformance backlog
+
+For every construct used by the Lean-hosted SAVEF/compiler source, record:
+
+~~~text
+PscvFeatureRequirement {
+    featureId
+    semanticProfile
+    exampleSource
+    expectedCoreBehavior
+    expectedExecutableBehavior
+    currentOwnedCompilerStatus
+}
+~~~
+
+The owned compiler becomes complete by closing this backlog.
+
+SAVEF work does not stop while the backlog is open.
+
+---
+
+# 57. Reference/native-first build mode
+
+Add a build mode conceptually equivalent to:
+
+~~~text
+psc build --compiler lean-reference
+~~~
+
+or an internal equivalent.
+
+This mode:
+
+1. checks PSCV subset/profile;
+2. invokes pinned Lean;
+3. kernel-checks through reference policy;
+4. compiles to native executable;
+5. records SemanticProfile;
+6. records Lean/toolchain identity;
+7. emits SAVEF build/evidence metadata.
+
+It provides a practical bootstrap lane before owned self-host compilation is complete.
+
+---
+
+# 58. Owned compiler conformance mode
+
+Concept:
+
+~~~text
+psc compare-compiler
+~~~
+
+For selected modules compare:
+
+~~~text
+Lean reference lane
+    vs
+owned PSCV compiler lane
+~~~
+
+Compare:
+
+- source acceptance;
+- elaborated declarations;
+- canonical admissions;
+- CertifiedModuleInterface;
+- RuntimeIR/VerifiedIR where defined;
+- observable execution tests.
+
+Differences fail closed until explained by an explicit compatibility rule.
+
+---
+
+# 59. Do not require binary equality across compiler lanes
+
+Lean native output, JavaScript output, Wasm output, and a future native PSCV backend will not be byte-identical.
+
+The conformance target is semantic.
+
+Use:
+
+~~~text
+same certified public semantics
++
+accepted preservation relation
+~~~
+
+not executable byte identity.
+
+Byte fixed points remain useful inside a specific reproducible implementation lane.
+
+---
+
+# 60. Compiler pass tests should become theorem-guided
+
+Current compiler development has many behavior tests.
+
+Keep them.
+
+For every semantic pass classify tests as:
+
+~~~text
+conformance examples
+negative/rejection cases
+differential tests
+property tests
+adversarial cases
+~~~
+
+Then map them to:
+
+~~~text
+pass invariant
+preservation theorem
+or
+explicit empirical evidence
+~~~
+
+Tests help discover counterexamples and regression bugs.
+
+They do not replace pass theorems.
+
+---
+
+# 61. Proof sidecars should follow the implementation dependency graph
+
+Recommended proof directory pattern:
+
+~~~text
+proof/
+    Foundation/
+    Core/
+    Environment/
+    Meta/
+    RuntimeIr/
+    VerifiedIr/
+    Specialize/
+    Erasure/
+    Syntax/
+    Elab/
+    Compiler/
+~~~
+
+Proof imports should prefer theorem interfaces over implementation modules once interfaces exist.
+
+This is essential for measuring abstraction benefit.
+
+---
+
+# 62. Knowledge extraction pipeline
+
+After a successful proof/check:
+
+~~~text
+Lean/PSKernel proof environment
+    |
+    v
+extract checked theorem identities
+    |
+    v
+construct theorem interface
+    |
+    v
+construct assumption closure
+    |
+    v
+bind CertifiedModuleInterface
+    |
+    v
+emit SPKF KnowledgeRoot / TheoryExtension
+    |
+    v
+index for semantic retrieval
+~~~
+
+Re-running the extractor against unchanged authority artifacts must reproduce the same knowledge identities.
+
+---
+
+# 63. Knowledge reproducibility
+
+Define a new build invariant:
+
+~~~text
+authoritative compiler artifacts
+    ->
+SAVEF extraction
+    ->
+KnowledgeRoot K
+
+same authoritative artifacts
+    ->
+SAVEF extraction
+    ->
+KnowledgeRoot K
+~~~
+
+This is analogous to a fixed point for knowledge packaging.
+
+It proves deterministic extraction, not theorem correctness.
+
+---
+
+# 64. SAVEF index architecture
+
+The index should store/search:
+
+- capabilities;
+- definitions;
+- theorem statements;
+- theorem dependency graph;
+- specifications;
+- assumptions;
+- compiler pass contracts;
+- implementation witnesses;
+- proof recipes;
+- structured failures;
+- benchmark metrics.
+
+The index is rebuildable from SPKF/authority objects.
+
+Deleting it must not delete semantic truth.
+
+---
+
+# 65. Semantic retrieval API for compiler agents
+
+Agent query examples:
+
+~~~text
+find theorems about:
+    substitution under binders
+
+find invariants required by:
+    psValidateErasedIrModule
+
+find compiler passes preserving:
+    observable return value
+
+find prior failures matching:
+    environment lookup after replacement
+
+find compatible module interfaces for:
+    Ps.Meta.Infer
+~~~
+
+The result should include exact SPKF/theorem identities.
+
+---
+
+# 66. Context slicing policy
+
+For every compiler obligation, calculate:
+
+~~~text
+local goal
+local context
+
+transparent dependency closure
+public theorem interface closure
+assumption closure
+
+candidate reusable theorems
+relevant pass contracts
+
+optional proof recipes/failure knowledge
+~~~
+
+The agent receives this slice by default.
+
+Full-repository access remains available when needed.
+
+This makes semantic context size a measurable variable.
+
+---
+
+# 67. FactoryBench-v2 for compiler self-application
+
+Create CompilerFactoryBench-v2 before completing the knowledge graph.
+
+It should contain held-out tasks in these classes:
+
+1. theorem completion;
+2. proof repair;
+3. invariant strengthening;
+4. implementation-preserving refactor;
+5. semantic bug repair;
+6. new compiler pass/property;
+7. new frontend feature;
+8. backend preservation task;
+9. QueryGraph invalidation task;
+10. interface-stability task.
+
+Tasks should span multiple dependency depths.
+
+---
+
+# 68. Baseline versus SAVEF experiment
+
+Baseline B0:
+
+~~~text
+pinned model
+pinned tools
+pinned compiler commit
+raw repository access
+no SAVEF semantic retrieval
+same acceptance gates
+~~~
+
+SAVEF B1:
+
+~~~text
+same model
+same tools
+same compiler commit
+same tasks
+same acceptance gates
++
+SAVEF semantic retrieval
+~~~
+
+Optional B2:
+
+~~~text
+SAVEF retrieval
++
+proof recipes/failure knowledge
+~~~
+
+This separates semantic theorem reuse from advisory agent-memory benefit.
+
+---
+
+# 69. Metrics
+
+Record at least:
+
+~~~text
+accepted solve rate
+wall time
+model tokens
+tool calls
+proof attempts
+test/rebuild cycles
+human interventions
+files read
+raw context bytes
+semantic context bytes
+new implementation lines
+new proof lines
+~~~
+
+Reuse metrics:
+
+~~~text
+theorem reuse count
+specification reuse count
+module-interface reuse count
+pass-theorem reuse count
+proof-recipe reuse count
+~~~
+
+Maintenance metrics:
+
+~~~text
+proof invalidation fanout
+repair time
+interface stability rate
+cache hit ratio
+~~~
+
+---
+
+# 70. Self-amplification pass threshold
+
+Initial research threshold:
+
+## Assurance non-regression
+
+Every accepted SAVEF-assisted result must pass the same or stronger gates as baseline.
+
+## Real reuse
+
+At least 30 percent of accepted B1 tasks must consume prior accepted knowledge objects.
+
+## Productivity
+
+At least one of:
+
+~~~text
+20 percent lower median token use
+20 percent lower median wall time
+20 percent lower median human intervention
+
+or
+
+10 percentage-point higher accepted solve rate
+~~~
+
+without a material regression in other primary metrics.
+
+## Closed loop
+
+At least one SAVEF-assisted compiler change must create accepted knowledge used by a later accepted compiler change.
+
+Only then claim compiler self-amplification.
+

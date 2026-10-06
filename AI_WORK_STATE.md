@@ -4,7 +4,7 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `e2cedd4bb8cae1ea3267c94cccf35cb676bca606`
+- Current proof implementation HEAD reconciled in this state: `e9fa0c1b4091222e9f52aa85c266e52e280e3b9d`
 - Last fully registered green proof checkpoint: `2e825608bcf38ed82eb97ce5bacdc6a4a287f9bd` (run #355)
 - Run #328 validated the eager-reduce context transport fix.
 - The checked-inference fuel proof now closes projection recursion through the smaller-fuel induction hypothesis and configuration-aware projection semantics.
@@ -77,7 +77,8 @@ Confirmed production-kernel semantic defect:
 Immediate blocker:
 - finish compiling the factored WHNF projection/application refinement modules;
 - current failures are proof-composition/type-alignment obligations in `WhnfCoreApplication.lean` and `WhnfCoreProjection.lean`, not a confirmed new production semantic defect;
-- run #365 on `e2cedd4b...` is validating the latest projection-expansion factoring;
+- run #365 failed in WHNF application/projection composition; the projection-expansion factoring reduced the remaining error surface but did not close it;
+- commit `e9fa0c1b...` specializes WHNF application success per reduced-head shape; run #366 is queued to validate that refinement;
 - once WHNF core is green, lift to public WHNF, then concrete DefEq, checker-knot composition, admission refinement, final implementation refinement, and integration reconciliation.
 
 Architectural blockers still remaining:

@@ -77,6 +77,7 @@ theorem psKernelStringEqFromWithFuel_symm
   | zero =>
       rfl
   | succ remaining ih =>
+      dsimp only [psKernelStringEqFromWithFuel]
       cases hLeft :
           String.Internal.atEnd
             left
@@ -86,81 +87,62 @@ theorem psKernelStringEqFromWithFuel_symm
               String.Internal.atEnd
                 right
                 (String.Pos.Raw.mk rightPos) <;>
-            simp [
-              psKernelStringEqFromWithFuel,
-              hLeft,
-              hRight
-            ]
+            simp [hLeft, hRight]
       | false =>
           cases hRight :
               String.Internal.atEnd
                 right
                 (String.Pos.Raw.mk rightPos) with
           | true =>
-              simp [
-                psKernelStringEqFromWithFuel,
-                hLeft,
-                hRight
-              ]
+              simp [hLeft, hRight]
           | false =>
-              by_cases hChar :
-                  Char.toNat
-                      (String.Internal.get
-                        left
-                        (String.Pos.Raw.mk leftPos)) =
-                    Char.toNat
-                      (String.Internal.get
-                        right
-                        (String.Pos.Raw.mk rightPos))
-              · have hCharSymm :
-                    Char.toNat
-                        (String.Internal.get
-                          right
-                          (String.Pos.Raw.mk rightPos)) =
-                      Char.toNat
-                        (String.Internal.get
+              let leftChar :=
+                Char.toNat
+                  (String.Internal.get
+                    left
+                    (String.Pos.Raw.mk leftPos))
+              let rightChar :=
+                Char.toNat
+                  (String.Internal.get
+                    right
+                    (String.Pos.Raw.mk rightPos))
+              cases hBeq : Nat.beq leftChar rightChar with
+              | false =>
+                  have hBeqSymm :
+                      Nat.beq rightChar leftChar = false := by
+                    rw [← psKernelNatBeq_symm leftChar rightChar]
+                    exact hBeq
+                  simp [
+                    hLeft,
+                    hRight,
+                    leftChar,
+                    rightChar,
+                    hBeq,
+                    hBeqSymm
+                  ]
+              | true =>
+                  have hBeqSymm :
+                      Nat.beq rightChar leftChar = true := by
+                    rw [← psKernelNatBeq_symm leftChar rightChar]
+                    exact hBeq
+                  simp [
+                    hLeft,
+                    hRight,
+                    leftChar,
+                    rightChar,
+                    hBeq,
+                    hBeqSymm
+                  ]
+                  exact
+                    ih
+                      (String.Pos.Raw.byteIdx
+                        (String.Internal.next
                           left
-                          (String.Pos.Raw.mk leftPos)) :=
-                  hChar.symm
-                simp only [
-                  psKernelStringEqFromWithFuel,
-                  hLeft,
-                  hRight,
-                  hChar,
-                  hCharSymm,
-                  if_false,
-                  if_true
-                ]
-                exact
-                  ih
-                    (String.Pos.Raw.byteIdx
-                      (String.Internal.next
-                        left
-                        (String.Pos.Raw.mk leftPos)))
-                    (String.Pos.Raw.byteIdx
-                      (String.Internal.next
-                        right
-                        (String.Pos.Raw.mk rightPos)))
-              · have hCharSymm :
-                    Char.toNat
-                        (String.Internal.get
+                          (String.Pos.Raw.mk leftPos)))
+                      (String.Pos.Raw.byteIdx
+                        (String.Internal.next
                           right
-                          (String.Pos.Raw.mk rightPos)) ≠
-                      Char.toNat
-                        (String.Internal.get
-                          left
-                          (String.Pos.Raw.mk leftPos)) := by
-                  intro hReverse
-                  exact hChar hReverse.symm
-                simp only [
-                  psKernelStringEqFromWithFuel,
-                  hLeft,
-                  hRight,
-                  hChar,
-                  hCharSymm,
-                  if_false,
-                  if_true
-                ]
+                          (String.Pos.Raw.mk rightPos)))
 
 theorem psKernelStringEq_symm
     (left right : String) :

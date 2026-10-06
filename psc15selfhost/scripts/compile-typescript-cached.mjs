@@ -127,6 +127,7 @@ export async function compileTypeScriptCached(projectRoot, typeScriptPath) {
 
   if (
     await restoreFileSetCache({
+      cacheTrust: 'bootstrap-local',
       projectRoot,
       namespace: "tsc-v1",
       key,
@@ -138,6 +139,7 @@ export async function compileTypeScriptCached(projectRoot, typeScriptPath) {
 
   compileTypeScriptCold(projectRoot, typeScriptPath, pinned.tsc);
   await storeFileSetCache({
+    cacheTrust: 'bootstrap-local',
     projectRoot,
     namespace: "tsc-v1",
     key,

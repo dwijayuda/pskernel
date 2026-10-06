@@ -193,6 +193,7 @@ for (const item of ordered) {
   const itemExtension = item.path.endsWith(".lean") ? ".lean" : ".ps";
   const itemKind = compilerKind(compiler, itemExtension);
   const translatedResult = await cachedTextTransform({
+    cacheTrust: 'bootstrap-local',
     projectRoot: selfhostRoot,
     namespace: "translate-source-v1",
     contract: {

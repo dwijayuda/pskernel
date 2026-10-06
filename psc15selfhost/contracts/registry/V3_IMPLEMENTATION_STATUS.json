@@ -118,7 +118,9 @@
       ],
       "status": "partial",
       "owners": [
-        "scripts/cache-utils.mjs"
+        "scripts/cache-utils.mjs",
+        "scripts/evidence-cache.mjs",
+        "contracts/ir/EVIDENCE_CACHE_V1.json"
       ],
       "completion": "Untrusted cache reads verify canonical bytes, action, schema, evidence class and fingerprint provenance.",
       "assurance": "pending"

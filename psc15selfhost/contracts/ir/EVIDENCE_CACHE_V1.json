@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-evidence-cache/1",
+  "implementation": "scripts/evidence-cache.mjs",
+  "trust": "All stored content is an untrusted proposal.",
+  "readPolicy": [
+    "The caller supplies the expected ActionId, allowed assumptions, required evidence kinds and trusted checker implementations.",
+    "Bound index size, artifact size, total resolved bytes and artifact count before reading or allocating artifact buffers.",
+    "Read each artifact once into a snapshot; verify exact bytes, schema, action, contracts and fingerprint provenance.",
+    "Verify all required evidence on every hit against the exact relation, inputs, outputs, action and assumptions.",
+    "Incomplete implementation closure, missing artifacts, tampering, unavailable checkers or rejected evidence produce a miss without writing final outputs.",
+    "Returned data never reconstructs a live checked-kernel capability."
+  ],
+  "writePolicy": "Publish bounded content-addressed blobs by atomic replacement; publish the action index last. A write does not assert evidence validity.",
+  "legacyBootstrapCache": {
+    "implementation": "scripts/cache-utils.mjs",
+    "requiresExplicitTrustClass": "bootstrap-local",
+    "defaultUntrustedBehavior": "bypass text reuse and refuse file-set restore",
+    "productionImportForbidden": true,
+    "scope": "Local bootstrap acceleration under a trusted local-cache assumption, never semantic acceptance or independent bootstrap evidence."
+  },
+  "remaining": [
+    "production pass-specific independent checkers and complete implementation closure before enabling semantic cache hits",
+    "cache quota, garbage collection and cross-process eviction policy",
+    "host filesystem isolation beyond ordinary untrusted cache-file contents"
+  ]
+}

@@ -9,12 +9,12 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: byte-bound pass records and observed production build graph. Authority is committed at fc7bc7b; portable interface/link validation at 63e2402.
+- Current checkpoint: evidence-checked cache and explicit bootstrap-cache trust. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
 
-1. Implement evidence-checked cache reads and complete artifact/implementation closure. Interior IR-stage artifacts and preservation evidence remain pending.
+1. Complete typed resource outcomes, bounded host execution and incremental interface integration; bind missing internal artifacts and implementation closure as those paths are connected.
 2. Complete target-specific interface adapters, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
 3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
 4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
@@ -205,3 +205,11 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Production checked-build writes a canonical .build-graph.json sidecar and binds its exact bytes in the receipt. It records actual ordered source inputs, accepted admissions, TypeScript and tsc outputs, the selected compiler entry bytes, static checked-host source closure, semantic/security context and output basename/flags. Composite edges remain explicitly composite; hidden internal IR stages do not get invented identities.
 - Complete generated-compiler/runtime and TypeScript package closure, per-IR-stage artifacts, independent preservation evidence, full resource coverage and archival byte resolution remain open. Current records must not justify untrusted cache reuse by themselves.
 - Focused evidence: 10 artifact/build-graph/service tests pass, including tampering, altered actions/fingerprints, missing evidence and wrong evidence subjects. Specialization tests and PSC1 Pass check (30 declarations) pass, portable structural rules remain unchanged, and production topology passes. The local checked native seed is absent, so actual end-to-end checked-build integration is left to its existing cloud gate; no local execution claim is made.
+
+## 2026-10-07 evidence-checked cache checkpoint
+
+- Added a bounded content-addressed cache for untrusted proposals. Each read requires a caller-known ActionId, explicit evidence policy and configured independent checkers. Every hit rechecks artifact bytes, schemas, action, assumption policy, fingerprint provenance and certificate subject. Unsupported/incomplete closure, corruption, missing evidence or resource exhaustion becomes a miss without writing product outputs or creating a kernel capability.
+- Blob and action-index writes are atomic; the action index is published last. Reads check file type/size and allocation budgets, reject symbolic-link entries, detect truncation/growth, and retain validated byte snapshots. Filesystem isolation against a malicious host and cache quota/GC remain separate open work.
+- The legacy hashes-only cache now requires explicit bootstrap-local trust; default untrusted text calls recompute and file-set restores refuse reuse. Existing bootstrap-only callers declare that assumption. Production topology rejects imports of that cache. Canonical contract keys avoid object insertion-order dependence, path components are constrained, and restore writes the validated snapshot instead of rereading a mutable cache file.
+- Focused tests pass for valid evidence, a forged output with internally consistent recomputed hashes, unavailable checkers, wrong action, incomplete closure, corruption, resource limits and legacy trusted/default-untrusted behavior. Production topology passes. Production semantic hits remain disabled until pass-specific independent checkers and full input/implementation closure are available.
+- GitHub 63e2402 passed the interface/link corpus and PSC1 gate, semantic build, strict IR and JS differential checks. Long fixed-point gates remained in progress when inspected; no new fixed-point claim is made.

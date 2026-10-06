@@ -119,6 +119,16 @@ def psErasureAppendRuntimeParameter
   | List.cons parameter rest =>
       List.cons parameter (psErasureAppendRuntimeParameter rest name)
 
+def psErasureAppendTypeArgument
+    (arguments : List PsVerifiedIrType)
+    (type : PsVerifiedIrType) : List PsVerifiedIrType :=
+  match arguments with
+  | List.nil => List.cons type List.nil
+  | List.cons argument rest =>
+      List.cons
+        argument
+        (psErasureAppendTypeArgument rest type)
+
 def psEraseOpenDefinitionWithFuel
     (environment : PsEnvironment)
     (fuel : Nat) :
@@ -185,7 +195,7 @@ def psEraseOpenDefinitionWithFuel
                           Option.some
                             (PsErasureCurrentDefinition.mk
                               current.name
-                              (psErasureAppendRuntimeArgument
+                              (psErasureAppendTypeArgument
                                 current.typeArguments
                                 (PsVerifiedIrType.typeParameter parameterName))
                               current.runtimeParameters);

@@ -67,6 +67,7 @@ lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
     `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Validate,
     `Ps.CompilerIr.Pass,
     `Ps.CompilerIr.Specialize
   ]

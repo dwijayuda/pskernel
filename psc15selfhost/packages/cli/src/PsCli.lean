@@ -12,6 +12,7 @@ def psCliUsage : String :=
   "  psc admissions <input.lean|input.ps>\n" ++
   "  psc typescript <input.lean|input.ps>\n" ++
   "  psc javascript <input.lean|input.ps>\n" ++
+  "  psc wasm <input.lean|input.ps> --out <output.wasm>\n" ++
   "  psc compile <input.lean|input.ps> --out <output.js|output.ts>"
 
 def psCliMain (args : List String) : IO Unit := do
@@ -42,6 +43,8 @@ def psCliMain (args : List String) : IO Unit := do
       psHostCompilerTypeScript inputPath
   | ["javascript", inputPath] =>
       psHostCompilerJavaScript inputPath
+  | ["wasm", inputPath, "--out", outputPath] =>
+      psHostCompilerWasm32ToFile inputPath outputPath
   | ["build", inputPath, "--out", outputPath] =>
       psHostCompilerBuild inputPath outputPath
   | ["compile", inputPath, "--out", outputPath] =>

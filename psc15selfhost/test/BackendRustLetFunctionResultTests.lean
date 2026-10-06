@@ -81,7 +81,7 @@ def psTestBackendRustLetFunctionResult : Bool :=
         && output.contains
           "pub fn forwardCallbackViaLet(callback: std::rc::Rc<dyn Fn(PsNat) -> PsNat>) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
         && output.contains
-          "{ let forwarded = (callback).clone(); forwarded }"
+          "{ let forwarded: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = (callback).clone(); forwarded }"
 
 def psTestBackendRustCoverageLetFunctionResult : Bool :=
   let coverage :=

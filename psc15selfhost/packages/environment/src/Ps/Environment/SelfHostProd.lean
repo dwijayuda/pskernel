@@ -155,20 +155,20 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
       psEnvironmentFind
         psSelfHostProdPreludeEnvironment
         psProdName with
-  | none => List.nil
-  | some prodDeclaration =>
+  | Option.none => List.nil
+  | Option.some prodDeclaration =>
       match
           psEnvironmentFind
             psSelfHostProdPreludeEnvironment
             psProdMkName with
-      | none => List.nil
-      | some prodMkDeclaration =>
+      | Option.none => List.nil
+      | Option.some prodMkDeclaration =>
           match
               psEnvironmentFind
                 psSelfHostProdPreludeEnvironment
                 psSelfHostProdRecName with
-          | none => List.nil
-          | some prodRecDeclaration =>
+          | Option.none => List.nil
+          | Option.some prodRecDeclaration =>
               List.cons
                 prodDeclaration
                 (List.cons

@@ -742,3 +742,118 @@ theorem psKernelAddOpaque_success_refines_extension
       environment result
       (PsKernelConstantInfo.opaqueInfo value)
       hSuccess
+
+
+theorem psKernelMutualWorkEnvironment_refines_extension
+    (values : List PsKernelDefinitionInfo)
+    (environment : PsKernelEnvironment) :
+    PsKernelEnvironmentExtendsBy
+      environment
+      (psKernelMutualWorkEnvironment values environment)
+      (List.reverse
+        (List.map
+          (fun value : PsKernelDefinitionInfo =>
+            PsKernelConstantInfo.defnInfo value)
+          values)) := by
+  induction values generalizing environment with
+  | nil =>
+      exact psKernelEnvironmentExtendsBy_refl environment
+  | cons value rest ih =>
+      have hTail :=
+        ih
+          (psKernelEnvironmentAddUnchecked
+            environment
+            (PsKernelConstantInfo.defnInfo value))
+      simpa [
+        psKernelMutualWorkEnvironment,
+        PsKernelEnvironmentExtendsBy,
+        psKernelEnvironmentAddUnchecked,
+        List.map,
+        List.reverse_cons,
+        List.append_assoc
+      ] using hTail
+
+theorem psKernelAddMutualDefinitions_success_refines_extension
+    (fuel : Nat)
+    (environment result : PsKernelEnvironment)
+    (values : List PsKernelDefinitionInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (hSuccess :
+      psKernelAddMutualDefinitions
+          fuel
+          environment
+          values
+          maxRecDepth
+          maxNatSize =
+        Except.ok result) :
+    PsKernelEnvironmentExtendsBy
+      environment
+      result
+      (List.reverse
+        (List.map
+          (fun value : PsKernelDefinitionInfo =>
+            PsKernelConstantInfo.defnInfo value)
+          values)) := by
+  cases values with
+  | nil =>
+      simp [psKernelAddMutualDefinitions] at hSuccess
+  | cons first rest =>
+      cases hSafe :
+          psKernelDefinitionSafetyIsSafe first.safety with
+      | true =>
+          simp [
+            psKernelAddMutualDefinitions,
+            hSafe
+          ] at hSuccess
+      | false =>
+          cases hHeaders :
+              psKernelCheckMutualHeaders
+                (List.cons first rest)
+                fuel
+                environment
+                first
+                maxRecDepth
+                maxNatSize
+                List.nil with
+          | error error =>
+              simp [
+                psKernelAddMutualDefinitions,
+                hSafe,
+                hHeaders
+              ] at hSuccess
+          | ok headerResult =>
+              cases headerResult
+              let work :=
+                psKernelMutualWorkEnvironment
+                  (List.cons first rest)
+                  environment
+              cases hBodies :
+                  psKernelCheckMutualBodies
+                    (List.cons first rest)
+                    fuel
+                    work
+                    first.safety
+                    maxRecDepth
+                    maxNatSize with
+              | error error =>
+                  simp [
+                    psKernelAddMutualDefinitions,
+                    hSafe,
+                    hHeaders,
+                    work,
+                    hBodies
+                  ] at hSuccess
+              | ok bodyResult =>
+                  cases bodyResult
+                  simp [
+                    psKernelAddMutualDefinitions,
+                    hSafe,
+                    hHeaders,
+                    work,
+                    hBodies
+                  ] at hSuccess
+                  subst result
+                  exact
+                    psKernelMutualWorkEnvironment_refines_extension
+                      (List.cons first rest)
+                      environment

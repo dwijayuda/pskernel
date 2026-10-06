@@ -7,5 +7,16 @@
   "resourceContract": "psc-resource-specialization/1",
   "currentAssurance": "contract-regression-unproved",
   "targetAssurance": "formal-proof-or-translation-validation",
-  "implementation": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean"
+  "implementation": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+  "provedSlices": [
+    {
+      "id": "psc-specialization-literal-preservation/1",
+      "status": "proved-lean",
+      "scope": "closed monomorphic UInt32 literal module is preserved exactly",
+      "evidence": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+    }
+  ],
+  "globalPreservation": {
+    "status": "target-unproved"
+  }
 }

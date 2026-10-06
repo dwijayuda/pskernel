@@ -442,6 +442,71 @@ def psTestBackendJsTailLoop : Bool :=
         && !output.contains "function* __ps$impl$tail"
 
 
+def psBackendJsNestedTailMatchModule : PsJsIrModule :=
+  {
+    imports := []
+    declarations := [
+      {
+        name := "walk"
+        parameters := [{ name := "value" }]
+        body :=
+          PsJsIrExpr.matchE
+            (PsJsIrExpr.var "value")
+            [
+              (
+                "done",
+                [],
+                PsJsIrExpr.literal
+                  (PsJsIrLiteral.natural 0)
+              ),
+              (
+                "more",
+                [
+                  {
+                    field := "next"
+                    name := "next"
+                  }
+                ],
+                PsJsIrExpr.matchE
+                  (PsJsIrExpr.var "next")
+                  [
+                    (
+                      "done",
+                      [],
+                      PsJsIrExpr.literal
+                        (PsJsIrLiteral.natural 0)
+                    ),
+                    (
+                      "more",
+                      [
+                        {
+                          field := "next"
+                          name := "next2"
+                        }
+                      ],
+                      PsJsIrExpr.call
+                        (PsJsIrExpr.var "walk")
+                        [PsJsIrExpr.var "next2"]
+                    )
+                  ]
+              )
+            ]
+      }
+    ]
+  }
+
+def psTestBackendJsNestedTailMatchHygiene : Bool :=
+  match
+      psJsPrintModuleStackSafe
+        psBackendJsNestedTailMatchModule with
+  | Except.error _ => false
+  | Except.ok output =>
+      output.contains "const __ps$tail$match$0"
+        && output.contains "const __ps$tail$match$1"
+        && output.contains
+          "[value] = [next2]; continue;"
+
+
 def main : IO Unit := do
   if psTestBackendJsFixtureEmission
       && psTestBackendJsRejectsKeywordName
@@ -451,7 +516,8 @@ def main : IO Unit := do
       && psTestBackendJsFloatPrinters
       && psTestBackendJsUInt8OfNatPrinter
       && psTestBackendJsSelectiveStackSafety
-      && psTestBackendJsTailLoop then
+      && psTestBackendJsTailLoop
+      && psTestBackendJsNestedTailMatchHygiene then
     IO.println "PSC2_BACKEND_JS_TESTS: PASS"
   else
     throw

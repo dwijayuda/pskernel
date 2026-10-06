@@ -117,3 +117,55 @@ def psCompilerJavaScriptProofScriptSources
       Except.error (PsCompilerJavaScriptError.compiler error)
   | Except.ok prepared =>
       psCompilerJavaScriptFromPrepared prepared
+
+
+def psCompilerJavaScriptPrepareProofScriptSources
+    (sources : List String) :
+    Except PsCompilerJavaScriptError PsCompilerAdmissionReadyModule :=
+  match
+      psCompilerPrepareSources
+        PsCompilerSourceKind.proofScript
+        sources with
+  | Except.error error =>
+      Except.error (PsCompilerJavaScriptError.compiler error)
+  | Except.ok prepared =>
+      Except.ok prepared
+
+def psCompilerJavaScriptValidatedIrFromPrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerJavaScriptError PsValidatedIrModule :=
+  match psCompilerVerifiedIrFromPrepared prepared with
+  | Except.error error =>
+      Except.error (PsCompilerJavaScriptError.compiler error)
+  | Except.ok validated =>
+      Except.ok validated
+
+def psCompilerJavaScriptSpecializeValidatedIr
+    (validated : PsValidatedIrModule) :
+    Except PsCompilerJavaScriptError PsVerifiedIrModule :=
+  match psIrSpecializeModule validated.raw with
+  | Except.error error =>
+      Except.error
+        (PsCompilerJavaScriptError.emit
+          (PsJsEmitError.lower
+            (PsJsLowerError.specializationFailed error)))
+  | Except.ok specialized =>
+      Except.ok specialized
+
+def psCompilerJavaScriptEmitSpecialized
+    (specialized : PsVerifiedIrModule) :
+    Except PsCompilerJavaScriptError String :=
+  match
+      psJsLowerSpecializedModuleWithProfile
+        (Option.some psCompilerJavaScriptTarget64)
+        specialized with
+  | Except.error error =>
+      Except.error
+        (PsCompilerJavaScriptError.emit
+          (PsJsEmitError.lower error))
+  | Except.ok jsIr =>
+      match psJsPrintModuleStackSafe jsIr with
+      | Except.error error =>
+          Except.error (PsCompilerJavaScriptError.emit error)
+      | Except.ok output =>
+          Except.ok output

@@ -328,6 +328,7 @@ theorem psKernelEnvironmentIndexRemoveName_find_other
       psKernelFindConstantInList
         query
         constants := by
+  unfold psKernelEnvironmentIndexRemoveName
   induction constants with
   | nil =>
       rfl
@@ -338,11 +339,10 @@ theorem psKernelEnvironmentIndexRemoveName_find_other
             removed with
       | false =>
           simp [
-            psKernelEnvironmentIndexRemoveName,
             psKernelEnvironmentIndexRemoveNameWorker,
             psKernelFindConstantInList,
             hRemoved,
-            ih hDifferent
+            ih
           ]
       | true =>
           have hInfoQuery :
@@ -377,13 +377,13 @@ theorem psKernelEnvironmentIndexRemoveName_find_other
                     hRemovedSymm
                     hQuery
                 rw [hDifferent] at hTrans
+                cases hTrans
           simp [
-            psKernelEnvironmentIndexRemoveName,
             psKernelEnvironmentIndexRemoveNameWorker,
             psKernelFindConstantInList,
             hRemoved,
             hInfoQuery,
-            ih hDifferent
+            ih
           ]
 
 theorem psKernelEnvironmentIndexFind_build_eq_worker
@@ -537,11 +537,17 @@ theorem psKernelEnvironmentIndexBuild_refines_authoritative
                 oldIndex
                 query
                 newBucket
+          have hSameRaw :
+              psKernelNameEq
+                  (psKernelConstantInfoName info)
+                  query =
+                true := by
+            simpa [infoName] using hSame
           rw [hCandidates]
           simp [
             newBucket,
             psKernelFindConstantInList,
-            hSame
+            hSameRaw
           ]
       | false =>
           have hRight :

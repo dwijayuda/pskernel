@@ -954,3 +954,25 @@ theorem psKernelDefEqFinish_preserves_configuration
                   hSuccess
                   hEq
               ⟩)
+
+
+theorem psKernelInferenceConfigurationSound_preserves
+    (infer :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (hInfer :
+      PsKernelInferenceConfigurationSound infer) :
+    PsKernelInferOnlyConfigurationPreserves infer := by
+  intro context state nextState expr result hConfig hRun
+  exact
+    (hInfer
+      context
+      state
+      nextState
+      expr
+      result
+      hConfig
+      hRun).2

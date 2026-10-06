@@ -1533,7 +1533,7 @@ theorem psKernelProjectionEnsureSortWith_preserves_configuration
             hConfig
             hRun).2
 
-theorem psKernelInferIsPropWith_preserves_configuration
+theorem psKernelInferIsPropWith_preserves_configuration_of_infer_preserves
     (whnf inferType :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -1542,7 +1542,7 @@ theorem psKernelInferIsPropWith_preserves_configuration
     (hWhnf :
       PsKernelWhnfConfigurationSound whnf)
     (hInfer :
-      PsKernelInferenceConfigurationSound inferType)
+      PsKernelInferOnlyConfigurationPreserves inferType)
     (context : PsKernelCheckerContext)
     (state nextState : PsKernelCheckerState)
     (expr : PsKernelExpr)
@@ -1568,14 +1568,14 @@ theorem psKernelInferIsPropWith_preserves_configuration
           PsKernelCheckerConfigurationSound
             context
             inferState :=
-        (hInfer
+        hInfer
           context
           state
           inferState
           expr
           inferredType
           hConfig
-          hInferRun).2
+          hInferRun
       cases hSort :
           psKernelProjectionEnsureSortWith
             whnf
@@ -1719,7 +1719,7 @@ theorem psKernelProjectionApplyParamsWithFuel_preserves_configuration
                     hRun
                   ] at hSuccess
 
-theorem psKernelProjectionSkipFieldsWithFuel_preserves_configuration
+theorem psKernelProjectionSkipFieldsWithFuel_preserves_configuration_of_infer_preserves
     (fuel : Nat)
     (whnf inferType :
       PsKernelCheckerContext ->
@@ -1729,7 +1729,7 @@ theorem psKernelProjectionSkipFieldsWithFuel_preserves_configuration
     (hWhnf :
       PsKernelWhnfConfigurationSound whnf)
     (hInfer :
-      PsKernelInferenceConfigurationSound inferType)
+      PsKernelInferOnlyConfigurationPreserves inferType)
     (context : PsKernelCheckerContext)
     (state nextState : PsKernelCheckerState)
     (inductName : PsKernelName)
@@ -1893,7 +1893,7 @@ theorem psKernelProjectionSkipFieldsWithFuel_preserves_configuration
                                   PsKernelCheckerConfigurationSound
                                     context
                                     propState :=
-                                psKernelInferIsPropWith_preserves_configuration
+                                psKernelInferIsPropWith_preserves_configuration_of_infer_preserves
                                   whnf
                                   inferType
                                   hWhnf
@@ -1964,7 +1964,7 @@ theorem psKernelProjectionSkipFieldsWithFuel_preserves_configuration
                   ] at hSuccess
 
 
-theorem psKernelInferProjectionWith_preserves_configuration
+theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
     (whnf inferType :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -1973,7 +1973,7 @@ theorem psKernelInferProjectionWith_preserves_configuration
     (hWhnf :
       PsKernelWhnfConfigurationSound whnf)
     (hInfer :
-      PsKernelInferenceConfigurationSound inferType)
+      PsKernelInferOnlyConfigurationPreserves inferType)
     (context : PsKernelCheckerContext)
     (state nextState : PsKernelCheckerState)
     (typeName : PsKernelName)
@@ -1996,14 +1996,14 @@ theorem psKernelInferProjectionWith_preserves_configuration
       | mk structType state0 =>
           have hState0 :
               PsKernelCheckerConfigurationSound context state0 :=
-            (hInfer
+            hInfer
               context
               state
               state0
               structValue
               structType
               hConfig
-              hInferRun).2
+              hInferRun
           cases hTypeWhnf : whnf context state0 structType with
           | error error =>
               simp [
@@ -2279,7 +2279,7 @@ theorem psKernelInferProjectionWith_preserves_configuration
                                                                         PsKernelCheckerConfigurationSound
                                                                           context
                                                                           state3 :=
-                                                                      psKernelInferIsPropWith_preserves_configuration
+                                                                      psKernelInferIsPropWith_preserves_configuration_of_infer_preserves
                                                                         whnf
                                                                         inferType
                                                                         hWhnf
@@ -2330,7 +2330,7 @@ theorem psKernelInferProjectionWith_preserves_configuration
                                                                                 PsKernelCheckerConfigurationSound
                                                                                   context
                                                                                   state4 :=
-                                                                              psKernelProjectionSkipFieldsWithFuel_preserves_configuration
+                                                                              psKernelProjectionSkipFieldsWithFuel_preserves_configuration_of_infer_preserves
                                                                                 (Nat.succ index)
                                                                                 whnf
                                                                                 inferType
@@ -2470,7 +2470,7 @@ theorem psKernelInferProjectionWith_preserves_configuration
                                                                                                       PsKernelCheckerConfigurationSound
                                                                                                         context
                                                                                                         state6 :=
-                                                                                                    psKernelInferIsPropWith_preserves_configuration
+                                                                                                    psKernelInferIsPropWith_preserves_configuration_of_infer_preserves
                                                                                                       whnf
                                                                                                       inferType
                                                                                                       hWhnf
@@ -2528,3 +2528,144 @@ theorem psKernelInferProjectionWith_preserves_configuration
                                                                                                       rcases hSuccess with
                                                                                                         ⟨rfl, rfl⟩
                                                                                                       exact hState6
+
+
+theorem psKernelInferIsPropWith_preserves_configuration
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (hInfer :
+      PsKernelInferenceConfigurationSound inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (value : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelInferIsPropWith
+          whnf inferType context state expr =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  exact
+    psKernelInferIsPropWith_preserves_configuration_of_infer_preserves
+      whnf
+      inferType
+      hWhnf
+      (psKernelInferenceConfigurationSound_preserves
+        inferType
+        hInfer)
+      context
+      state
+      nextState
+      expr
+      value
+      hConfig
+      hSuccess
+
+theorem psKernelProjectionSkipFieldsWithFuel_preserves_configuration
+    (fuel : Nat)
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (hInfer :
+      PsKernelInferenceConfigurationSound inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (inductName : PsKernelName)
+    (structValue : PsKernelExpr)
+    (propType : Bool)
+    (targetIndex index : Nat)
+    (current result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelProjectionSkipFieldsWithFuel
+          fuel
+          whnf
+          inferType
+          context
+          state
+          inductName
+          structValue
+          propType
+          targetIndex
+          index
+          current =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  exact
+    psKernelProjectionSkipFieldsWithFuel_preserves_configuration_of_infer_preserves
+      fuel
+      whnf
+      inferType
+      hWhnf
+      (psKernelInferenceConfigurationSound_preserves
+        inferType
+        hInfer)
+      context
+      state
+      nextState
+      inductName
+      structValue
+      propType
+      targetIndex
+      index
+      current
+      result
+      hConfig
+      hSuccess
+
+theorem psKernelInferProjectionWith_preserves_configuration
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (hInfer :
+      PsKernelInferenceConfigurationSound inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (typeName : PsKernelName)
+    (index : Nat)
+    (structValue result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelInferProjectionWith
+          whnf inferType context state typeName index structValue =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  exact
+    psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
+      whnf
+      inferType
+      hWhnf
+      (psKernelInferenceConfigurationSound_preserves
+        inferType
+        hInfer)
+      context
+      state
+      nextState
+      typeName
+      index
+      structValue
+      result
+      hConfig
+      hSuccess

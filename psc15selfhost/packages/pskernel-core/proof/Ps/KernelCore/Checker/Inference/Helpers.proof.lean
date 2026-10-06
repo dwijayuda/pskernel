@@ -316,32 +316,92 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
           rcases hSuccess with ⟨rfl, rfl⟩
           exact hConfig
       | true =>
-          have preserveFallback
-              (fallbackExpr : PsKernelExpr)
-              (hRun :
-                (match
-                    psKernelEnsureForallWith
-                      whnf
-                      context
-                      state
-                      fallbackExpr with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok forallResult =>
-                    psKernelInferAppOnlyLoopWithFuel
-                      remaining
-                      whnf
-                      context
-                      (Prod.snd forallResult)
-                      args
-                      (Nat.succ index)
-                      index
-                      (Prod.fst forallResult).body) =
+          by_cases hForall :
+              ∃
+                (name : PsKernelName)
+                (domain body : PsKernelExpr)
+                (binderInfo : PsKernelBinderInfo),
+                current =
+                  PsKernelExpr.forallE
+                    name domain body binderInfo
+          · rcases hForall with
+              ⟨name, domain, body, binderInfo, rfl⟩
+            have hRun :
+                psKernelInferAppOnlyLoopWithFuel
+                    remaining
+                    whnf
+                    context
+                    state
+                    args
+                    (Nat.succ index)
+                    instantiated
+                    body =
                   Except.ok
-                    (Prod.mk result nextState)) :
-              PsKernelCheckerConfigurationSound
-                context
-                nextState := by
+                    (Prod.mk result nextState) := by
+              simpa [
+                psKernelInferAppOnlyLoopWithFuel,
+                hMore
+              ] using hSuccess
+            exact
+              ih
+                state
+                nextState
+                args
+                (Nat.succ index)
+                instantiated
+                body
+                result
+                hConfig
+                hRun
+          · let pending :=
+              psKernelExprListTake
+                (Nat.sub index instantiated)
+                (psKernelExprListDrop instantiated args)
+            let fallbackExpr :=
+              psKernelExprInstantiateRev
+                current
+                pending
+            have hStep :
+                psKernelInferAppOnlyLoopWithFuel
+                    (Nat.succ remaining)
+                    whnf
+                    context
+                    state
+                    args
+                    index
+                    instantiated
+                    current =
+                  match
+                      psKernelEnsureForallWith
+                        whnf
+                        context
+                        state
+                        fallbackExpr with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok forallResult =>
+                      psKernelInferAppOnlyLoopWithFuel
+                        remaining
+                        whnf
+                        context
+                        (Prod.snd forallResult)
+                        args
+                        (Nat.succ index)
+                        index
+                        (Prod.fst forallResult).body := by
+              cases current
+              case forallE name domain body binderInfo =>
+                exact
+                  (hForall
+                    ⟨name, domain, body, binderInfo, rfl⟩).elim
+              all_goals
+                simp [
+                  psKernelInferAppOnlyLoopWithFuel,
+                  hMore,
+                  pending,
+                  fallbackExpr
+                ]
+            rw [hStep] at hSuccess
             cases hEnsure :
                 psKernelEnsureForallWith
                   whnf
@@ -349,11 +409,11 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
                   state
                   fallbackExpr with
             | error error =>
-                simp [hEnsure] at hRun
+                simp [hEnsure] at hSuccess
             | ok forallResult =>
                 cases forallResult with
                 | mk view forallState =>
-                    simp [hEnsure] at hRun
+                    simp [hEnsure] at hSuccess
                     have hEnsureSemantic :=
                       psKernelEnsureForallWith_configuration_refines
                         whnf
@@ -375,40 +435,5 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
                         view.body
                         result
                         hEnsureSemantic.2
-                        hRun
-          cases current
-          case forallE name domain body binderInfo =>
-              have hRun :
-                  psKernelInferAppOnlyLoopWithFuel
-                      remaining
-                      whnf
-                      context
-                      state
-                      args
-                      (Nat.succ index)
-                      instantiated
-                      body =
-                    Except.ok
-                      (Prod.mk result nextState) := by
-                simpa [
-                  psKernelInferAppOnlyLoopWithFuel,
-                  hMore
-                ] using hSuccess
-              exact
-                ih
-                  state
-                  nextState
-                  args
-                  (Nat.succ index)
-                  instantiated
-                  body
-                  result
-                  hConfig
-                  hRun
-          all_goals
-            apply preserveFallback
-            simpa [
-              psKernelInferAppOnlyLoopWithFuel,
-              hMore
-            ] using hSuccess
+                        hSuccess
 

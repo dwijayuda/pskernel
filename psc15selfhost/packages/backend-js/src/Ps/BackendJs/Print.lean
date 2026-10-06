@@ -801,7 +801,7 @@ def psJsPrintMatchAlternativesWith
                   printedRest)
 
 def psJsPrintExprWithModeAndFuel
-    (stackSafe : Bool)
+    (stackTarget : Option String)
     (fuel : Nat) :
     PsJsIrExpr -> Except PsJsEmitError String :=
   match fuel with
@@ -811,8 +811,13 @@ def psJsPrintExprWithModeAndFuel
   | Nat.succ remaining =>
       let smaller :
           PsJsIrExpr -> Except PsJsEmitError String :=
-        psJsPrintExprWithModeAndFuel stackSafe remaining;
+        psJsPrintExprWithModeAndFuel stackTarget remaining;
       fun (expr : PsJsIrExpr) =>
+        let stackSafe : Bool :=
+          match stackTarget with
+          | Option.none => false
+          | Option.some target =>
+              psJsExprUsesNameWithFuel 4096 expr target;
         match expr with
         | PsJsIrExpr.literal literal =>
             Except.ok (psJsPrintLiteral literal)
@@ -873,7 +878,12 @@ def psJsPrintExprWithModeAndFuel
                 match psListMapExcept smaller arguments with
                 | Except.error error => Except.error error
                 | Except.ok printedArguments =>
-                    if stackSafe then
+                    let callStackSafe : Bool :=
+                      match stackTarget with
+                      | Option.none => false
+                      | Option.some target =>
+                          psJsExprUsesNameWithFuel 4096 fn target;
+                    if callStackSafe then
                       let suffix : String :=
                         if psListIsEmpty printedArguments then
                           ""
@@ -1047,12 +1057,16 @@ def psJsPrintExprWithModeAndFuel
 def psJsPrintExpr
     (expr : PsJsIrExpr) :
     Except PsJsEmitError String :=
-  psJsPrintExprWithModeAndFuel false 4096 expr
+  psJsPrintExprWithModeAndFuel Option.none 4096 expr
 
 def psJsPrintExprStackSafe
+    (recursiveName : String)
     (expr : PsJsIrExpr) :
     Except PsJsEmitError String :=
-  psJsPrintExprWithModeAndFuel true 4096 expr
+  psJsPrintExprWithModeAndFuel
+    (Option.some recursiveName)
+    4096
+    expr
 
 def psJsPrintImport
     (importInfo : PsJsIrImport) : String :=
@@ -1150,56 +1164,66 @@ def psJsImplementationName
 def psJsPrintDeclarationStackSafe
     (declaration : PsJsIrDeclaration) :
     Except PsJsEmitError String :=
-  match psJsPrintExprStackSafe declaration.body with
-  | Except.error error => Except.error error
-  | Except.ok body =>
-      match declaration.parameters with
-      | List.nil =>
-          Except.ok
-            (psJsJoin
-              ""
-              [
-                "export const ",
-                declaration.name,
-                " = __ps$run((function*() { return ",
-                body,
-                "; })());\n"
-              ])
-      | List.cons _ _ =>
-          let parameters :=
-            psListMap
-              psJsParameterName
-              declaration.parameters;
-          let joinedParameters : String :=
-            psJsJoin ", " parameters;
-          let implementation : String :=
-            psJsImplementationName declaration.name;
-          Except.ok
-            (psJsJoin
-              ""
-              [
-                "export function ",
-                declaration.name,
-                "(",
-                joinedParameters,
-                ") { return __ps$run(",
-                implementation,
-                "(",
-                joinedParameters,
-                ")); }\n",
-                "function* ",
-                implementation,
-                "(",
-                joinedParameters,
-                ") { return ",
-                body,
-                "; }\n",
-                "__ps$implementations.set(",
-                declaration.name,
-                ", ",
-                implementation,
-                ");\n"
-              ])
+  if
+      psJsExprUsesNameWithFuel
+        4096
+        declaration.body
+        declaration.name then
+    match
+        psJsPrintExprStackSafe
+          declaration.name
+          declaration.body with
+    | Except.error error => Except.error error
+    | Except.ok body =>
+        match declaration.parameters with
+        | List.nil =>
+            Except.ok
+              (psJsJoin
+                ""
+                [
+                  "export const ",
+                  declaration.name,
+                  " = __ps$run((function*() { return ",
+                  body,
+                  "; })());\n"
+                ])
+        | List.cons _ _ =>
+            let parameters :=
+              psListMap
+                psJsParameterName
+                declaration.parameters;
+            let joinedParameters : String :=
+              psJsJoin ", " parameters;
+            let implementation : String :=
+              psJsImplementationName declaration.name;
+            Except.ok
+              (psJsJoin
+                ""
+                [
+                  "export function ",
+                  declaration.name,
+                  "(",
+                  joinedParameters,
+                  ") { return __ps$run(",
+                  implementation,
+                  "(",
+                  joinedParameters,
+                  ")); }\n",
+                  "function* ",
+                  implementation,
+                  "(",
+                  joinedParameters,
+                  ") { return ",
+                  body,
+                  "; }\n",
+                  "__ps$implementations.set(",
+                  declaration.name,
+                  ", ",
+                  implementation,
+                  ");\n"
+                ])
+  else
+    psJsPrintDeclaration declaration
 
 def psJsPrintDeclarationsStackSafe
     (declarations : List PsJsIrDeclaration) :

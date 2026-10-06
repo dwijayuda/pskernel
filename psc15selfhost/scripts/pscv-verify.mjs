@@ -19,6 +19,8 @@ export async function verifyOfflinePrototype() {
     new URL("../savef/objects/psc-specialization-pass.json",import.meta.url),
     new URL("../savef/objects/psc-theory-exact-defeq-reflexive.json",import.meta.url),
     new URL("../savef/objects/psc-module-interface-validation.json",import.meta.url),
+    new URL("../savef/objects/psc-erasure-proof-omission.json",import.meta.url),
+    new URL("../savef/objects/psc-specialization-literal-proof.json",import.meta.url),
   ];
   const savefObjects=[];
   for(const objectUrl of objectUrls){

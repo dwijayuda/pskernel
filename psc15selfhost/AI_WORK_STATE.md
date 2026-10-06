@@ -64,3 +64,12 @@ Checkpoint P0/P2/P3:
 - full checker soundness remains explicitly target-unproved
 - source audit enforces pair-local success-cache implementation and rejects equivalence-closure machinery
 - theory package is wired for Lean build/test and psc1 checking under the portable self-host discipline
+
+## Checkpoint behavioral/resource/SAVEF acceptance
+
+- added typed BehavioralModuleInterface and PsCertifiedModuleInterface without changing current structural QueryGraph reuse semantics
+- added psc-compilation-resource/1 with typed outcome classes and a concrete small->larger budget acceptance regression; general monotonicity remains target-unproved
+- SAVEF now contains pass, formal-theory, and module-interface validation objects under one canonical object format
+- offline verifier checks all three knowledge objects
+- Version-3 15-criterion acceptance audit is wired into check:workspace
+- current next gate: cloud CI must compile/check portable theory, Wasm validator, direct self-host fixed points, Rust self-host, and architecture acceptance together

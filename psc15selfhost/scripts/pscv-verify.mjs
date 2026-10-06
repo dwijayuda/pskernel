@@ -12,8 +12,14 @@ export async function verifyOfflinePrototype() {
   assertProviderSecurityRegistry();
   const architecture=JSON.parse(await readFile(new URL("../contracts/registry/ARCHITECTURE_REGISTRY.json",import.meta.url),"utf8"));
   const trust=JSON.parse(await readFile(new URL("../TRUST_MANIFEST.json",import.meta.url),"utf8"));
+  const semanticLock=JSON.parse(await readFile(new URL("../psc.semantic-lock.json",import.meta.url),"utf8"));
+  const archiveProfile=JSON.parse(await readFile(new URL("../contracts/archive/ARCHIVE_PROFILE_V0.json",import.meta.url),"utf8"));
+  const independence=JSON.parse(await readFile(new URL("../profiles/assurance/INDEPENDENCE_VECTORS.json",import.meta.url),"utf8"));
   if(architecture.masterPlan!=="THE_PSCV_COMPILER_REFERENCE_VERSION_3.md") throw new Error("PSCV_VERIFY_ARCHITECTURE");
   if(trust.contract!=="psc-trust-manifest/1") throw new Error("PSCV_VERIFY_TRUST");
+  if(semanticLock.contract!=="psc-semantic-lock/0") throw new Error("PSCV_VERIFY_SEMANTIC_LOCK");
+  if(archiveProfile.contract!=="psc-archive-profile/0"||archiveProfile.offlineVerificationRequired!==true) throw new Error("PSCV_VERIFY_ARCHIVE");
+  if(independence.contract!=="psc-independence-vector/1") throw new Error("PSCV_VERIFY_INDEPENDENCE");
   const schemaUrl=new URL("../savef/schemas/KNOWLEDGE_OBJECT_V1.json",import.meta.url);
   const objectUrls=[
     new URL("../savef/objects/psc-specialization-pass.json",import.meta.url),
@@ -31,6 +37,9 @@ export async function verifyOfflinePrototype() {
     verifier:pscvVerifierPrototype.id,
     architecture:"pscv-architecture/v3",
     trust:trust.contract,
+    semanticLock:semanticLock.contract,
+    archiveProfile:archiveProfile.contract,
+    independence:independence.contract,
     savefObjects:Object.freeze(savefObjects),
   });
 }

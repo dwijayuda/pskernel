@@ -54,7 +54,8 @@ theorem psKernelReduceNatBinary_add_refines
       (PsKernelExpr.lit
         (PsKernelLiteral.nat (Nat.add left right))) := by
   constructor
-  · simp [psKernelReduceNatBinary, hAdd, hSize]
+  · simp [psKernelReduceNatBinary, hAdd]
+    rw [hSize]
   · exact PsKernelReductionStep.natAdd op left right hAdd
 
 theorem psKernelReduceNatBinary_sub_refines
@@ -92,9 +93,9 @@ theorem psKernelReduceNatBinary_sub_refines
   · simp [
       psKernelReduceNatBinary,
       hNotAdd,
-      hSub,
-      hSize
+      hSub
     ]
+    rw [hSize]
   · exact PsKernelReductionStep.natSub op left right hSub
 
 theorem psKernelReduceNatBinary_mul_refines
@@ -135,7 +136,7 @@ theorem psKernelReduceNatBinary_mul_refines
       psKernelReduceNatBinary,
       hNotAdd,
       hNotSub,
-      hMul,
-      hSize
+      hMul
     ]
+    rw [hSize]
   · exact PsKernelReductionStep.natMul op left right hMul

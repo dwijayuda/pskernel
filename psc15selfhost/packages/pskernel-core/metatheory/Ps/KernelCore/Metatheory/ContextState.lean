@@ -341,6 +341,38 @@ theorem psKernelCheckerStateFreshName_preserves_semantic_state
     PsKernelCheckerStateSemanticSound
   ] using hState
 
+theorem psKernelCheckerStateFreshName_absent_of_configuration
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (base fresh : PsKernelName)
+    (hString : PsKernelStringEqSoundLaw)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        state)
+    (hFresh :
+      psKernelCheckerStateFreshName
+          state
+          base =
+        Prod.mk fresh nextState) :
+    psKernelLocalContextFind
+        context.localContext
+        fresh =
+      Option.none := by
+  rcases hConfig with
+    ⟨_hIndex, hBound, _hState⟩
+  unfold psKernelCheckerStateFreshName at hFresh
+  simp at hFresh
+  rcases hFresh with ⟨rfl, _⟩
+  exact
+    psKernelLocalContextFreshBound_name_absent
+      context.localContext
+      state.nextFresh
+      base
+      hString
+      hBound
+
+
 theorem psKernelCheckerFreshLocal_preserves_configuration
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

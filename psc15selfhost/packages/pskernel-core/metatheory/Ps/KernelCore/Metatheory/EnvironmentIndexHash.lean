@@ -225,3 +225,62 @@ theorem psKernelEnvironmentNameHash_of_nameEq_true
             psKernelEnvironmentNameHash,
             hParentHash
           ]
+
+
+theorem psKernelEnvironmentHashStringWorker_lt_modulus
+    (fuel : Nat)
+    (value : String)
+    (position hash : Nat)
+    (hHash : hash < 65521) :
+    psKernelEnvironmentHashStringWorker
+        fuel value position hash <
+      65521 := by
+  induction fuel generalizing position hash with
+  | zero =>
+      exact hHash
+  | succ remaining ih =>
+      cases hEnd :
+          String.Internal.atEnd
+            value
+            (String.Pos.Raw.mk position) with
+      | true =>
+          simpa [
+            psKernelEnvironmentHashStringWorker,
+            hEnd
+          ] using hHash
+      | false =>
+          apply ih
+          exact
+            Nat.mod_lt
+              _
+              (by decide)
+
+theorem psKernelEnvironmentNameHash_lt_modulus
+    (name : PsKernelName) :
+    psKernelEnvironmentNameHash name < 65521 := by
+  induction name with
+  | anonymous =>
+      decide
+  | str parent value ih =>
+      unfold psKernelEnvironmentNameHash
+      apply
+        psKernelEnvironmentHashStringWorker_lt_modulus
+      exact
+        Nat.mod_lt
+          _
+          (by decide)
+  | num parent value ih =>
+      unfold psKernelEnvironmentNameHash
+      exact
+        Nat.mod_lt
+          _
+          (by decide)
+
+theorem psKernelEnvironmentNameHash_lt_two_pow_16
+    (name : PsKernelName) :
+    psKernelEnvironmentNameHash name <
+      Nat.pow 2 16 := by
+  exact
+    Nat.lt_trans
+      (psKernelEnvironmentNameHash_lt_modulus name)
+      (by decide)

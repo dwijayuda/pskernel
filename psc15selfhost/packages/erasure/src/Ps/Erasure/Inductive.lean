@@ -241,7 +241,9 @@ def psPrepareRuntimeConstructors
                     ctorInfo.numFields with
               | Except.error error => Except.error error
               | Except.ok preparedFields =>
-                  let adjustField :=
+                  let adjustField :
+                      PsRuntimeConstructorField ->
+                      PsRuntimeConstructorField :=
                     fun (field : PsRuntimeConstructorField) =>
                       PsRuntimeConstructorField.mk
                         (Nat.add ctorInfo.numParams field.sourceIndex)
@@ -325,7 +327,9 @@ def psPrepareRuntimeInductive
                     typeParameters := parameters.typeParameters
                     constructors := constructors
                   };
-                  let makeEntry :=
+                  let makeEntry :
+                      PsRuntimeConstructorInfo ->
+                      (PsName × PsRuntimeConstructorInfo) :=
                     fun (ctorInfo : PsRuntimeConstructorInfo) => Prod.mk ctorInfo.coreName ctorInfo;
                   let constructorEntries := psListMap makeEntry constructors;
                   let nextScope : PsErasureScope := {
@@ -344,10 +348,14 @@ def psPrepareRuntimeInductive
                     runtimeExpressions := []
                     currentDefinition := Option.none
                   };
-                  let makeField :=
+                  let makeField :
+                      PsRuntimeConstructorField ->
+                      PsVerifiedIrConstructorField :=
                     fun (field : PsRuntimeConstructorField) =>
                       PsVerifiedIrConstructorField.mk field.name field.type;
-                  let makeConstructor :=
+                  let makeConstructor :
+                      PsRuntimeConstructorInfo ->
+                      PsVerifiedIrConstructor :=
                     fun (ctorInfo : PsRuntimeConstructorInfo) =>
                       PsVerifiedIrConstructor.mk ctorInfo.name (psListMap makeField ctorInfo.fields);
                   let irConstructors := psListMap makeConstructor constructors;

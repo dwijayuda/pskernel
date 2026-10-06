@@ -35,6 +35,7 @@ def psBackendRustLetFunctionResultModule : PsVerifiedIrModule :=
               (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.natAdd
+                []
                 [
                   PsVerifiedIrExpr.var "value",
                   PsVerifiedIrExpr.var "delta"
@@ -119,6 +120,7 @@ def psBackendRustCallFunctionResultModule : PsVerifiedIrModule :=
             (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natAdd
+              []
               [
                 PsVerifiedIrExpr.var "value",
                 PsVerifiedIrExpr.var "offset"
@@ -274,6 +276,7 @@ def psBackendRustLetLambdaForwardingModule : PsVerifiedIrModule :=
               (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.natAdd
+                []
                 [
                   PsVerifiedIrExpr.var "value",
                   PsVerifiedIrExpr.var "offset"

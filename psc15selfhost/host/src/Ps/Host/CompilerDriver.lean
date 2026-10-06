@@ -5,6 +5,7 @@ import Ps.DriverWasm.Compiler
 import Ps.DriverRust.Compiler
 import Ps.Host.ProjectCompiler
 import Ps.Host.TypeScriptCompiler
+import Ps.Host.RustCoverage
 
 def psHostCompilerSourceKindFromPath
     (path : String) : Option PsCompilerSourceKind :=
@@ -179,15 +180,27 @@ def psHostCompilerRustToFile
 def psHostCompilerRustCoverage
     (inputPath : String) : IO Unit := do
   let elaborated ← psHostCompilerElaborateProject inputPath
-  match psCompilerRustCoverageFromElaborated elaborated with
+  match psCompilerPrepareElaborated elaborated with
   | Except.error error =>
       throw
         (IO.userError
           (String.Internal.append
             "PSC2_CLI_DIRECT_RUST_COVERAGE_FAILED: "
-            (psCompilerRustErrorCode error)))
-  | Except.ok report =>
-      IO.print report
+            (psCompilerRustErrorCode
+              (PsCompilerRustError.compiler error))))
+  | Except.ok prepared =>
+      match psCompilerVerifiedIrFromPrepared prepared with
+      | Except.error error =>
+          throw
+            (IO.userError
+              (String.Internal.append
+                "PSC2_CLI_DIRECT_RUST_COVERAGE_FAILED: "
+                (psCompilerRustErrorCode
+                  (PsCompilerRustError.compiler error))))
+      | Except.ok validated =>
+          IO.print
+            (psRustCoverageReport
+              (psRustCoverageModule validated.raw))
 
 def psHostCompilerBuild
     (inputPath outputPath : String) : IO Unit := do

@@ -234,27 +234,6 @@ theorem psKernelCheckLevelParams_success_none
         hFind
       ] at hSuccess
 
-theorem psKernelSessionCheck_success_preserves_context_core
-    (fuel : Nat)
-    (session nextSession : PsKernelCheckerSession)
-    (expr result : PsKernelExpr)
-    (hSuccess :
-      psKernelSessionCheck fuel session expr =
-        Except.ok (Prod.mk result nextSession)) :
-    nextSession.context = session.context := by
-  unfold psKernelSessionCheck at hSuccess
-  cases hRun :
-      psKernelCheckerCheck
-        fuel session.context session.state expr with
-  | error error =>
-      simp [hRun] at hSuccess
-  | ok run =>
-      cases run with
-      | mk inferred nextState =>
-          simp [hRun] at hSuccess
-          rcases hSuccess with ⟨rfl, rfl⟩
-          rfl
-
 theorem psKernelCheckDefinitionBody_success_refines_semantics
     (fuel : Nat)
     (session nextSession : PsKernelCheckerSession)

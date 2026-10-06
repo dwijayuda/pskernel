@@ -170,3 +170,12 @@ def psKernelExprLiftLooseBVarsReference
   Prod.fst
     (psKernelExprLiftLooseBVarsReferenceChanged
       expr start amount)
+
+
+theorem psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
+    (expr : PsKernelExpr)
+    (start : Nat) :
+    psKernelExprLiftLooseBVarsReferenceChanged expr start 0 =
+      Prod.mk expr false := by
+  cases expr <;>
+    simp [psKernelExprLiftLooseBVarsReferenceChanged]

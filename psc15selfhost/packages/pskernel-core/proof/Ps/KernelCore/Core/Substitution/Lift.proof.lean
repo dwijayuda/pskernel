@@ -406,7 +406,12 @@ theorem psKernelExprLiftLooseBVarsChanged_refines_reference
         expr start amount := by
   cases amount with
   | zero =>
-      cases expr <;> rfl
+      rw [psKernelExprLiftLooseBVarsChanged_zero_amount]
+      symm
+      exact
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
+          expr
+          start
   | succ amount =>
       simpa [psKernelExprLiftLooseBVarsChanged] using
         psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference

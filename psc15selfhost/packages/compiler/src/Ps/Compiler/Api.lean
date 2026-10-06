@@ -134,6 +134,15 @@ def psCompilerPrepareSources
   | Except.error error => Except.error error
   | Except.ok elaborated => psCompilerPrepareElaborated elaborated
 
+
+def psCompilerSelfHostSourceListEmpty : List String :=
+  List.nil
+
+def psCompilerSelfHostSourceListCons
+    (source : String)
+    (rest : List String) : List String :=
+  List.cons source rest
+
 def psCompilerCheckSource
     (sourceKind : PsCompilerSourceKind)
     (source : String) :

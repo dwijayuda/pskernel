@@ -14,10 +14,14 @@ def psHostCompilerTranslationErrorCode
       match translationError with
       | PsTranslationError.leanFrontend frontendError =>
           match frontendError with
-          | PsLeanFrontendError.lex _ =>
-              "translation.lean.lex"
-          | PsLeanFrontendError.parse _ =>
-              "translation.lean.parse"
+          | PsLeanFrontendError.lex lexError =>
+              String.Internal.append
+                "translation.lean.lex:"
+                (psHostLexErrorText lexError)
+          | PsLeanFrontendError.parse parseError =>
+              String.Internal.append
+                "translation.lean.parse:"
+                (psHostParseErrorText parseError)
       | PsTranslationError.proofScriptFrontend _ =>
           "translation.proofscript-frontend"
       | PsTranslationError.print printError =>

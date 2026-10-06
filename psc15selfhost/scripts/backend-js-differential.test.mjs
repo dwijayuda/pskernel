@@ -306,6 +306,12 @@ try {
   );
 
   assert.equal(
+    direct.genericIdNat(42n),
+    reference.genericIdNat(42n),
+  );
+  assert.equal(direct.genericIdNat(42n), 42n);
+
+  assert.equal(
     direct.pointSum(20n, 22n),
     reference.pointSum(20n, 22n),
   );

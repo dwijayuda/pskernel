@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 21 |
-| B | 16 |
-| C | 34 |
+| A | 30 |
+| B | 15 |
+| C | 26 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -25,11 +25,11 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 
 | Module | Grade | Current evidence / missing step |
 |---|:---:|---|
-| `API/Kernel.lean` | **C** | Public fail-closed/control-flow theorems; no end-to-end semantic refinement yet. |
+| `API/Kernel.lean` | **A** | Public check-expression, WHNF, and true-defeq successes now refine independent typing/reduction/defeq judgments under explicit checker-operation soundness contracts; fail-closed orchestration remains proved. |
 | `API/KernelContractV1.lean` | **C** | Contract identity/version facts. |
 | `API/Outcome.lean` | **C** | Outcome classification/control facts. |
 | `API/Provider.lean` | **C** | Provider compatibility decision facts. |
-| `API/Session.lean` | **C** | Session/preflight control and propagation facts. |
+| `API/Session.lean` | **A** | Session environment construction is proved semantically transparent to native-evaluator installation and preserves `EnvironmentIndexRefines`, alongside fail-closed preflight facts. |
 | `Admission/Declaration/Admission.lean` | **A** | Successful checked safe-definition/theorem admission now refines the shared `PsKernelDeclarationExtension`; remaining declaration variants are being closed on the same relation. |
 | `Admission/Declaration/Validation.lean` | **B** | Closedness, universes, body checking and defeq gating; formal validation relation pending. |
 | `Admission/Inductive/Common/Elimination.lean` | **C** | Fuel/base control facts only. |
@@ -67,22 +67,22 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/DefEq/Quick.lean` | **A** | Expression-equality and successful-cache quick paths now refine the independent defeq judgment under explicit `ExprEqSound` / `DefEqCacheSound` invariants; Sort/literal rules are directly bridged. |
 | `Checker/DefEq/Shortcuts.lean` | **C** | Selected disabled shortcut behavior. |
 | `Checker/DefEq/Support.lean` | **D** | Single empty-list aggregation fact. |
-| `Checker/Inference.lean` | **C** | Wrapper/fuel facts. |
+| `Checker/Inference.lean` | **A** | Infer-only and checked public inference wrappers now refine `PsKernelTypingJudgment` under the named `PsKernelInferenceCoreSound` contract. |
 | `Checker/Inference/Core.lean` | **A** | Independent typing refinement now covers Sort/literals/fvar/const, both checked-application acceptance paths, and checked lambda/Π/let rules with explicit opened-body and freshness premises. |
 | `Checker/Inference/Helpers.lean` | **A** | Cache publication now preserves the named checker-state semantic soundness invariant under the isolated inference-cache insertion law; Sort/Pi views and noninterference laws remain. |
-| `Checker/Knot.lean` | **C** | Public wiring/fuel equations; end-to-end soundness pending. |
+| `Checker/Knot.lean` | **A** | Concrete checker infer/check/WHNF/defeq entry points now compose to independent typing/reduction/defeq judgments under explicit lower-layer soundness contracts; full discharge of those contracts remains pending. |
 | `Checker/Ops.lean` | **D** | Eta/wrapper fact only. |
 | `Checker/Projection.lean` | **C** | Fuel/error control facts; dependent projection typing relation pending. |
-| `Checker/Recursor/Analysis.lean` | **B** | Reusable search/list/analysis foundations. |
+| `Checker/Recursor/Analysis.lean` | **A** | Successful recursor-rule lookup proves constructor-name agreement and list membership, and constructor-app recognition refines authoritative semantic-environment constructor metadata under index refinement. |
 | `Checker/Recursor/Reduction.lean` | **C** | Selected no-reduction case only. |
-| `Checker/Reduction/KernelReductions.lean` | **C** | Quot gating/control facts; reduction relation bridge pending. |
+| `Checker/Reduction/KernelReductions.lean` | **A** | WHNF-facing Nat succ/add/sub/mul hooks now refine independent primitive reduction steps when normalized literal premises and resource gates succeed; Quot/recursor hooks remain to be bridged. |
 | `Checker/Reduction/PrimitiveData.lean` | **C** | Primitive base/control facts. |
-| `Checker/Reduction/PrimitiveNat.lean` | **C** | Primitive fuel/base facts. |
+| `Checker/Reduction/PrimitiveNat.lean` | **A** | Executable Nat add/sub/mul/mod/div/beq/ble primitive success paths now refine explicit independent primitive reduction rules under their exact gate premises. |
 | `Checker/Reduction/Primitives.lean` | **D** | Single aggregation/fuel fact. |
 | `Checker/Reduction/Whnf.lean` | **A** | Observable WHNF rules now bridge to the independent `PsKernelReductionClosure` relation for reflexive/metadata cases. |
 | `Checker/Reduction/WhnfCore.lean` | **A** | Zeta implementation now bridges to the independent `PsKernelReductionClosure`; additional beta/delta/projection coverage remains. |
 | `Checker/ResourcePolicy.lean` | **C** | Fail-closed/resource policy cases. |
-| `Checker/Session.lean` | **C** | Session forwarding/error propagation. |
+| `Checker/Session.lean` | **A** | Session infer/check/WHNF/true-defeq successes now forward the independent semantic judgments while preserving the session context; error propagation remains proved. |
 | `Checker/State.lean` | **A** | Empty checker state now establishes independent inference-cache and successful-defeq-cache soundness invariants; field-isolation/freshness laws support preservation proofs. |
 | `Core/Declaration.lean` | **B** | Declaration projection/safety/delta facts. |
 | `Core/Expr.lean` | **A** | `psKernelExprEq = true` now refines an independent structural-expression equality relation and therefore the formal non-transitive defeq judgment; spine/fvar/list helper laws remain available. |
@@ -101,7 +101,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Runtime/Acceleration/Cache.lean` | **B** | Map/pair-cache set/get foundations; whole-cache refinement invariant pending. |
 | `Runtime/Acceleration/CachePolicy.lean` | **C** | Eligibility policy cases. |
 | `Runtime/Acceleration/EnvironmentIndex.lean` | **B** | Set/find/remove/insert candidate refinement foundations; full authoritative lookup equivalence pending. |
-| `Runtime/Capability/Lean434NativeReduction.lean` | **C** | Provider-none and Bool construction behavior; provider soundness is trusted boundary. |
+| `Runtime/Capability/Lean434NativeReduction.lean` | **A** | Any successful native wrapper reduction now refines an explicit `PsKernelTrustedNativeReduction` relation carrying the evaluator result as a TCB premise; evaluator correctness remains intentionally trusted, not internally proved. |
 | `Runtime/Capability/Types.lean` | **D** | Empty capability structure fact only. |
 | `SelfHost.lean` | **D** | Semantic-root marker only. |
 

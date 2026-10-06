@@ -226,18 +226,50 @@ theorem psKernelWhnfCoreProjection_configuration_refines
               (Prod.mk structReduced state1)
       cases hExpanded : expandedResult with
       | error error =>
+          have hExpandedRun :
+              (match structReduced with
+             | PsKernelExpr.lit literal =>
+                 match literal with
+                 | PsKernelLiteral.str value =>
+                     publicWhnf
+                       nextContext
+                       state1
+                       (psKernelStringLitToConstructor value)
+                 | PsKernelLiteral.nat _ =>
+                     Except.ok
+                       (Prod.mk structReduced state1)
+             | _ =>
+                 Except.ok
+                   (Prod.mk structReduced state1)) =
+                Except.error error := by
+            simpa [expandedResult] using hExpanded
           simp [
             psKernelWhnfCoreWithFuel,
             hDepth,
             hMiss,
-            original,
             structResult,
             hStruct,
-            expandedResult,
-            hExpanded
+            hExpandedRun
           ] at hSuccess
       | ok secondRun =>
           rcases secondRun with ⟨expanded, state2⟩
+          have hExpandedRun :
+              (match structReduced with
+             | PsKernelExpr.lit literal =>
+                 match literal with
+                 | PsKernelLiteral.str value =>
+                     publicWhnf
+                       nextContext
+                       state1
+                       (psKernelStringLitToConstructor value)
+                 | PsKernelLiteral.nat _ =>
+                     Except.ok
+                       (Prod.mk structReduced state1)
+             | _ =>
+                 Except.ok
+                   (Prod.mk structReduced state1)) =
+                Except.ok (Prod.mk expanded state2) := by
+            simpa [expandedResult] using hExpanded
           have hExpandedSemantic :
               PsKernelReductionClosure
                   nextContext.environment
@@ -375,8 +407,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                   original,
                   structResult,
                   hStruct,
-                  expandedResult,
-                  hExpanded,
+                  hExpandedRun,
                   hProjection
                 ] using hSuccess
               have hFinishSemantic :=
@@ -462,8 +493,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                     original,
                     structResult,
                     hStruct,
-                    expandedResult,
-                    hExpanded,
+                    hExpandedRun,
                     hProjection,
                     hReduce
                   ] at hSuccess

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-trust-delta/1",
+  "requiredFields": [
+    "baseTrustManifest",
+    "targetTrustManifest",
+    "addedTrustedComponents",
+    "removedTrustedComponents",
+    "changedContracts",
+    "changedCapabilities",
+    "changedProviderSecurity",
+    "changedAssumptions"
+  ],
+  "reviewRule": "any non-empty trust expansion requires explicit architecture review",
+  "authority": "audit-evidence-only"
+}

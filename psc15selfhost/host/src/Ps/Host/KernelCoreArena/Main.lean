@@ -10,12 +10,12 @@ partial def replayStream
     IO.eprintln (
       "pskernel-core arena progress: records=" ++ toString state.records ++
       " declarations=" ++ toString state.declarations ++
-      " names=" ++ toString state.transport.names.count ++
-      "/" ++ toString state.transport.names.dense.size ++
-      " levels=" ++ toString state.transport.levels.count ++
-      "/" ++ toString state.transport.levels.dense.size ++
-      " exprs=" ++ toString state.transport.exprs.count ++
-      "/" ++ toString state.transport.exprs.dense.size)
+      " names=" ++ toString state.coreTransport.names.count ++
+      "/" ++ toString state.coreTransport.names.dense.size ++
+      " levels=" ++ toString state.coreTransport.levels.count ++
+      "/" ++ toString state.coreTransport.levels.dense.size ++
+      " exprs=" ++ toString state.coreTransport.exprs.count ++
+      "/" ++ toString state.coreTransport.exprs.dense.size)
   let line ← stream.getLine
   if line.isEmpty then
     pure state.finish

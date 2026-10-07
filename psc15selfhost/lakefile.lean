@@ -333,6 +333,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.Context,
     `Ps.KernelCore.Metatheory.ContextState,
     `Ps.KernelCore.Metatheory.CheckerContracts,
+    `Ps.KernelCore.Metatheory.DefEqBinderConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionConfiguration,
     `Ps.KernelCore.Metatheory.CheckedProjectionConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionSemantics,

@@ -109,7 +109,7 @@ function wasmInstruction(value){
       arr(value,2);text(value[1]);return;
     case 'arrayCopy':arr(value,3);text(value[1]);text(value[2]);return;
     case 'i32Const':case 'i64Const':arr(value,2);decimal(value[1]);return;
-    case 'ifStart':arr(value,2);if(value[1][0]==='some')wasmValueType(value[1][1]); else optionText(value[1]);return;
+    case 'ifStart': { arr(value,2); const option=arr(value[1]); if(option[0]==='some'){arr(option,2);wasmValueType(option[1]);} else optionText(option); return; }
   }
   if(tag==='localGet'||tag==='localSet'){arr(value,2);decimal(value[1]);return;}
   if(tag==='arrayNewFixed'){arr(value,3);text(value[1]);decimal(value[2]);return;}

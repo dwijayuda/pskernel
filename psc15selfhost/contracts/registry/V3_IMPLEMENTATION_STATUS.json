@@ -106,9 +106,11 @@
         "packages/driver-ts/src/Ps/DriverTs/Stages.lean",
         "packages/driver-js/src/Ps/DriverJs/Stages.lean",
         "packages/driver-wasm/src/Ps/DriverWasm/Stages.lean",
-        "scripts/ir-artifact.mjs"
+        "scripts/ir-artifact.mjs",
+        "scripts/evidence-envelope.mjs",
+        "contracts/archive/EVIDENCE_ENVELOPE_V1.json"
       ],
-      "completion": "Every transformation records canonical action/input/output IDs, semantic relation, assumptions, resources and evidence requirements.",
+      "completion": "Every transformation records canonical action/input/output IDs; production executable artifacts are packaged with source certification, build graph/archive, interfaces, tool/provider inputs and resource observations in a non-authoritative EvidenceEnvelope.",
       "assurance": "pending"
     },
     {
@@ -840,7 +842,7 @@
       },
       {
         "id": "artifact-to-evidence-envelope",
-        "status": "partial"
+        "status": "implementation-available"
       },
       {
         "id": "evidence-to-query-trust-theory",

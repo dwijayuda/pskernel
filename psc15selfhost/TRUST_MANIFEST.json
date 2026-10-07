@@ -49,6 +49,7 @@
       "scripts/checked-source-snapshot.mjs",
       "scripts/comparator-export.mjs",
       "scripts/compiler-checked-service.mjs",
+      "scripts/evidence-envelope.mjs",
       "scripts/ir-artifact.mjs",
       "scripts/kernel-checked-session.mjs",
       "scripts/kernel-contract.mjs",

@@ -140,9 +140,11 @@ for (const [kind, source] of [
       assert.equal(saved.compiler.engine, 'native-seed');
       assert.equal(receipt.pscvCert.contract, 'pscv-cert/1');
       assert.equal(receipt.certifiedSource.contract, 'psc-certified-source/1');
+      assert.equal(receipt.evidenceEnvelope.contract, 'psc-evidence-envelope/1');
       assert.ok(existsSync(path.join(dir, 'out.admissions.json')));
       assert.ok(existsSync(path.join(dir, 'out.pscv-cert.json')));
       assert.ok(existsSync(path.join(dir, 'out.certified-source.json')));
+      assert.ok(existsSync(path.join(dir, 'out.evidence-envelope.json')));
       const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json'), 'utf8'));
       assert.equal(graph.coverage, 'observed-erasure-validation-and-composite-backend-edges');
       assert.equal(graph.executions.length, 7);

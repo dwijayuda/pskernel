@@ -481,3 +481,10 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Fresh cloud architecture/trust/semantic/authority gates passed with the new certification handoff. The pass-evidence suite exposed one stale negative-test expectation after revocation: production now rejects the same invalid handle one layer earlier as PSCV_CERTIFIED_SOURCE_NOT_LIVE rather than PSC2_CHECKED_UNCHECKED_MODULE. Updated the test only; no authority rule or implementation behavior was weakened.
 - Hardened staged SAVEF-index query argument validation so malformed kind/assumption inputs are classified by the index boundary before constructing host Sets.
+
+
+## 2026-10-07 executable artifact to EvidenceEnvelope handoff
+
+- Implemented the pipeline handoff ExecutableArtifact -> EvidenceEnvelope. Production checked builds now identify the actual final JavaScript/direct-JS/direct-Wasm artifact and bind it to the exact PSCV-CERT, CertifiedSource, observed build graph/archive, runtime interface where present, selected provider/tool inputs and host-observed resource records.
+- The new psc-evidence-envelope/1 verifier re-hashes the envelope and every caller-resolved referenced artifact. It deliberately separates source semantic acceptance from executable preservation: current source acceptance is kernel-checked, while executablePreservation remains not-established until later backend/preservation assurance closes it.
+- EvidenceEnvelope is audit-record-only, releaseAccepted=false and cannot mint CheckedCore/CertifiedSource/cache authority. Production receipts expose the envelope identity and builds emit .evidence-envelope.json beside the executable evidence. This closes the implementation box ExecutableArtifact -> EvidenceEnvelope without overclaiming the still-deferred preservation proof.

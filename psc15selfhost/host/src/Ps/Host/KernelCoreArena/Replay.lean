@@ -27,6 +27,22 @@ def Failure.withContext (context : String) : Failure -> Failure
   | .resource message => .resource (context ++ message)
   | .internal message => .internal (context ++ message)
 
+def stripNestedStagePrefix? (message : String) : Option String :=
+  let prefixes := [
+    "nested preprocessing: ",
+    "nested transformed admission: ",
+    "nested original restoration: ",
+    "nested restored validation: "
+  ]
+  let rec go : List String -> Option String
+    | [] => none
+    | prefix :: rest =>
+        if message.startsWith prefix then
+          some (message.drop prefix.length)
+        else
+          go rest
+  go prefixes
+
 def fromKernelError : PsKernelError -> Failure
   | .rejectedInvalid message => .rejected message
   | .declinedUnsupported message => .declined message
@@ -35,7 +51,18 @@ def fromKernelError : PsKernelError -> Failure
       if message.endsWith "budget exhausted" then
         .resource message
       else
-        .internal message
+        match stripNestedStagePrefix? message with
+        | some payload =>
+            if psKernelKnownInvalidDiagnostic payload then
+              .rejected message
+            else if psKernelKnownUnsupportedDiagnostic payload then
+              .declined message
+            else
+              match psKernelResourceMessage payload with
+              | some _ => .resource message
+              | none => .internal message
+        | none =>
+            .internal message
 
 def liftKernel (result : Except PsKernelError α) : Except Failure α :=
   match result with

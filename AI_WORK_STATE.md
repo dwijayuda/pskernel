@@ -1,5 +1,53 @@
 # AI Work State
 
+## Arena continuation checkpoint — 2026-10-07 20:48 +07
+
+- Arena branch checkpoint before this state write: `108f376ac6d8034952354bdb7398bf9f0bf6019a`.
+- **Confirmed production semantic fix: symmetric function eta in full-shape DefEq.**
+  Exact upstream Arena exports for `Std.PRange.UpwardEnumerable.succMany?_add` and
+  `Nat.Internal.Linear.Expr.denote_toPoly_go` showed current PSKernel rejecting
+  equality types that legacy PSC1 accepted. The shared family was a function term
+  versus its eta-expanded lambda. `psKernelDefEqFullShapeWith` was left-shape
+  ordered, so a right-hand lambda could be missed after application/full-shape
+  handling. Lean 4.34 tries function eta symmetrically after full-shape reduction.
+  Arena fix: `d572f20456077ec3dd295ef9e4c0587b08ab89ff`.
+  Focused Init/Std targets, Tutorial, soundness, and readiness were green at that
+  semantic checkpoint. The minimal production fix + bidirectional partial-
+  application regression were reconciled to `pscv/prove-pskernel-core-v1` at
+  `0dd5d4db43a78be020f2257c226761ef4849d763`; proof run #503 was green.
+- KernelContract-v1 outcome adaptation had a separate classification defect:
+  enriched invalid diagnostics such as `application type mismatch; fn=...` were
+  rejected by the checker but mapped to `internalError` because the adapter used
+  exact diagnostic equality. Arena production-API fix `33ca909d8f26f4dbdade9365166dd432be9b4eff`
+  recognizes a stable known diagnostic or that diagnostic followed by `;` details;
+  regression `029f0ca9ccc8becb00e3a3382edcecdae3a3dc69` locks the enriched family.
+  This changes outcome classification only, not semantic acceptance.
+- Enabling the whole portable foundation differential suite in Arena readiness
+  exposed stale cache expectations caused by the earlier confirmed fvar-scope
+  semantic-cache fix. These are test alignment issues, not new recursor/DefEq
+  semantic regressions:
+  - `psKernelCoreRecursorTests` now requires no infer-only cache publication for
+    an fvar major (`3d52e35cb510bc815c25db8540499f5887fb9a5b`).
+  - generic `psKernelDefEqDifferential` requires success-cache publication only
+    for `psKernelSemanticPairCacheEligible` pairs
+    (`870faa2b109d9a08479d88552deffc8647782816`).
+- Tutorial remains green after these changes; keep the acceptance target at
+  **141/141** with zero false accepts.
+- Full upstream Arena exports are large: Init ~331.5 MB / 6.5M lines; Std
+  ~569.0 MB / 10.8M lines. At eta-fixed `d572f204...`, the canonical checker
+  returned from Init in ~8.3 min and Std in ~9.8 min, but Arena reported one
+  checker error for each. The workflow then spent the remaining job time in the
+  diagnostic legacy PSC1 full-stream replay, so the JSON row containing canonical
+  stderr was not surfaced. The old declaration-specific eta failures are already
+  green in focused replay; the later full-corpus error is still unclassified.
+- High-volume temporary `LEGACY_TARGET` eta tracing was removed at
+  `e4f197bc219200c212e58b3b4b28d0c38c0fdb2b`. The legacy oracle remains a
+  focused diagnostic oracle, not production authority and not a prerequisite for
+  production semantics.
+- Do not start Mathlib until canonical Init and Std are both classified and green.
+- Do not report a new metatheory semantic fix unless the full-corpus discrepancy
+  is reproduced exactly and confirmed as a production semantic rule defect.
+
 ## Arena / Mathlib parallel lane — 2026-10-07
 
 - Branch: `pscv/pskernel-core-arena-v1`, intentionally separate from `pscv/prove-pskernel-core-v1`.

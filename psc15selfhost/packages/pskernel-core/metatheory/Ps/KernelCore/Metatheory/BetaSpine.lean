@@ -304,6 +304,752 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
             ] at hRun
           exact hRun.symm
 
+theorem psKernelExprLiftLooseBVarsReference_app
+    (fn arg : PsKernelExpr)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVarsReference
+        (PsKernelExpr.app fn arg)
+        start amount =
+      PsKernelExpr.app
+        (psKernelExprLiftLooseBVarsReference fn start amount)
+        (psKernelExprLiftLooseBVarsReference arg start amount) := by
+  cases amount with
+  | zero =>
+      simp [
+        psKernelExprLiftLooseBVarsReference,
+        psKernelExprLiftLooseBVarsReferenceChanged
+      ]
+  | succ remaining =>
+      cases hFn :
+          psKernelExprLiftLooseBVarsReferenceChanged
+            fn start (Nat.succ remaining) with
+      | mk fnResult fnChanged =>
+          cases hArg :
+              psKernelExprLiftLooseBVarsReferenceChanged
+                arg start (Nat.succ remaining) with
+          | mk argResult argChanged =>
+              cases fnChanged with
+              | false =>
+                  cases argChanged with
+                  | false =>
+                      have hFnOrig :=
+                        psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                          fn start (Nat.succ remaining)
+                          fnResult hFn
+                      have hArgOrig :=
+                        psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                          arg start (Nat.succ remaining)
+                          argResult hArg
+                      simp [
+                        psKernelExprLiftLooseBVarsReference,
+                        psKernelExprLiftLooseBVarsReferenceChanged,
+                        hFn,
+                        hArg,
+                        hFnOrig,
+                        hArgOrig
+                      ]
+                  | true =>
+                      simp [
+                        psKernelExprLiftLooseBVarsReference,
+                        psKernelExprLiftLooseBVarsReferenceChanged,
+                        hFn,
+                        hArg
+                      ]
+              | true =>
+                  cases argChanged <;>
+                    simp [
+                      psKernelExprLiftLooseBVarsReference,
+                      psKernelExprLiftLooseBVarsReferenceChanged,
+                      hFn,
+                      hArg
+                    ]
+
+
+theorem psKernelExprLiftLooseBVarsReference_lam
+    (name : PsKernelName)
+    (type body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVarsReference
+        (PsKernelExpr.lam name type body binderInfo)
+        start amount =
+      PsKernelExpr.lam
+        name
+        (psKernelExprLiftLooseBVarsReference type start amount)
+        (psKernelExprLiftLooseBVarsReference
+          body (Nat.succ start) amount)
+        binderInfo := by
+  cases amount with
+  | zero =>
+      simp [
+        psKernelExprLiftLooseBVarsReference,
+        psKernelExprLiftLooseBVarsReferenceChanged
+      ]
+  | succ remaining =>
+      cases hType :
+          psKernelExprLiftLooseBVarsReferenceChanged
+            type start (Nat.succ remaining) with
+      | mk typeResult typeChanged =>
+          cases hBody :
+              psKernelExprLiftLooseBVarsReferenceChanged
+                body (Nat.succ start) (Nat.succ remaining) with
+          | mk bodyResult bodyChanged =>
+              cases typeChanged with
+              | false =>
+                  cases bodyChanged with
+                  | false =>
+                      have hTypeOrig :=
+                        psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                          type start (Nat.succ remaining)
+                          typeResult hType
+                      have hBodyOrig :=
+                        psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                          body (Nat.succ start) (Nat.succ remaining)
+                          bodyResult hBody
+                      simp [
+                        psKernelExprLiftLooseBVarsReference,
+                        psKernelExprLiftLooseBVarsReferenceChanged,
+                        hType,
+                        hBody,
+                        hTypeOrig,
+                        hBodyOrig
+                      ]
+                  | true =>
+                      simp [
+                        psKernelExprLiftLooseBVarsReference,
+                        psKernelExprLiftLooseBVarsReferenceChanged,
+                        hType,
+                        hBody
+                      ]
+              | true =>
+                  cases bodyChanged <;>
+                    simp [
+                      psKernelExprLiftLooseBVarsReference,
+                      psKernelExprLiftLooseBVarsReferenceChanged,
+                      hType,
+                      hBody
+                    ]
+
+
+theorem psKernelExprLiftLooseBVarsReference_forallE
+    (name : PsKernelName)
+    (type body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVarsReference
+        (PsKernelExpr.forallE name type body binderInfo)
+        start amount =
+      PsKernelExpr.forallE
+        name
+        (psKernelExprLiftLooseBVarsReference type start amount)
+        (psKernelExprLiftLooseBVarsReference
+          body (Nat.succ start) amount)
+        binderInfo := by
+  cases amount with
+  | zero =>
+      simp [
+        psKernelExprLiftLooseBVarsReference,
+        psKernelExprLiftLooseBVarsReferenceChanged
+      ]
+  | succ remaining =>
+      cases hType :
+          psKernelExprLiftLooseBVarsReferenceChanged
+            type start (Nat.succ remaining) with
+      | mk typeResult typeChanged =>
+          cases hBody :
+              psKernelExprLiftLooseBVarsReferenceChanged
+                body (Nat.succ start) (Nat.succ remaining) with
+          | mk bodyResult bodyChanged =>
+              cases typeChanged with
+              | false =>
+                  cases bodyChanged with
+                  | false =>
+                      have hTypeOrig :=
+                        psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                          type start (Nat.succ remaining)
+                          typeResult hType
+                      have hBodyOrig :=
+                        psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                          body (Nat.succ start) (Nat.succ remaining)
+                          bodyResult hBody
+                      simp [
+                        psKernelExprLiftLooseBVarsReference,
+                        psKernelExprLiftLooseBVarsReferenceChanged,
+                        hType,
+                        hBody,
+                        hTypeOrig,
+                        hBodyOrig
+                      ]
+                  | true =>
+                      simp [
+                        psKernelExprLiftLooseBVarsReference,
+                        psKernelExprLiftLooseBVarsReferenceChanged,
+                        hType,
+                        hBody
+                      ]
+              | true =>
+                  cases bodyChanged <;>
+                    simp [
+                      psKernelExprLiftLooseBVarsReference,
+                      psKernelExprLiftLooseBVarsReferenceChanged,
+                      hType,
+                      hBody
+                    ]
+
+
+theorem psKernelExprLiftLooseBVarsReference_letE
+    (name : PsKernelName)
+    (type value body : PsKernelExpr)
+    (nondep : Bool)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVarsReference
+        (PsKernelExpr.letE name type value body nondep)
+        start amount =
+      PsKernelExpr.letE
+        name
+        (psKernelExprLiftLooseBVarsReference type start amount)
+        (psKernelExprLiftLooseBVarsReference value start amount)
+        (psKernelExprLiftLooseBVarsReference
+          body (Nat.succ start) amount)
+        nondep := by
+  cases amount with
+  | zero =>
+      simp [
+        psKernelExprLiftLooseBVarsReference,
+        psKernelExprLiftLooseBVarsReferenceChanged
+      ]
+  | succ remaining =>
+      cases hType :
+          psKernelExprLiftLooseBVarsReferenceChanged
+            type start (Nat.succ remaining) with
+      | mk typeResult typeChanged =>
+          cases hValue :
+              psKernelExprLiftLooseBVarsReferenceChanged
+                value start (Nat.succ remaining) with
+          | mk valueResult valueChanged =>
+              cases hBody :
+                  psKernelExprLiftLooseBVarsReferenceChanged
+                    body (Nat.succ start) (Nat.succ remaining) with
+              | mk bodyResult bodyChanged =>
+                  cases typeChanged with
+                  | false =>
+                      cases valueChanged with
+                      | false =>
+                          cases bodyChanged with
+                          | false =>
+                              have hTypeOrig :=
+                                psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                                  type start (Nat.succ remaining)
+                                  typeResult hType
+                              have hValueOrig :=
+                                psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                                  value start (Nat.succ remaining)
+                                  valueResult hValue
+                              have hBodyOrig :=
+                                psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                                  body (Nat.succ start) (Nat.succ remaining)
+                                  bodyResult hBody
+                              simp [
+                                psKernelExprLiftLooseBVarsReference,
+                                psKernelExprLiftLooseBVarsReferenceChanged,
+                                hType,
+                                hValue,
+                                hBody,
+                                hTypeOrig,
+                                hValueOrig,
+                                hBodyOrig
+                              ]
+                          | true =>
+                              simp [
+                                psKernelExprLiftLooseBVarsReference,
+                                psKernelExprLiftLooseBVarsReferenceChanged,
+                                hType,
+                                hValue,
+                                hBody
+                              ]
+                      | true =>
+                          cases bodyChanged <;>
+                            simp [
+                              psKernelExprLiftLooseBVarsReference,
+                              psKernelExprLiftLooseBVarsReferenceChanged,
+                              hType,
+                              hValue,
+                              hBody
+                            ]
+                  | true =>
+                      cases valueChanged <;>
+                        cases bodyChanged <;>
+                        simp [
+                          psKernelExprLiftLooseBVarsReference,
+                          psKernelExprLiftLooseBVarsReferenceChanged,
+                          hType,
+                          hValue,
+                          hBody
+                        ]
+
+
+theorem psKernelExprLiftLooseBVarsReference_mdata
+    (metadata : Nat)
+    (body : PsKernelExpr)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVarsReference
+        (PsKernelExpr.mdata metadata body)
+        start amount =
+      PsKernelExpr.mdata
+        metadata
+        (psKernelExprLiftLooseBVarsReference body start amount) := by
+  cases amount with
+  | zero =>
+      simp [
+        psKernelExprLiftLooseBVarsReference,
+        psKernelExprLiftLooseBVarsReferenceChanged
+      ]
+  | succ remaining =>
+      cases hBody :
+          psKernelExprLiftLooseBVarsReferenceChanged
+            body start (Nat.succ remaining) with
+      | mk bodyResult bodyChanged =>
+          cases bodyChanged with
+          | false =>
+              have hBodyOrig :=
+                psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                  body start (Nat.succ remaining)
+                  bodyResult hBody
+              simp [
+                psKernelExprLiftLooseBVarsReference,
+                psKernelExprLiftLooseBVarsReferenceChanged,
+                hBody,
+                hBodyOrig
+              ]
+          | true =>
+              simp [
+                psKernelExprLiftLooseBVarsReference,
+                psKernelExprLiftLooseBVarsReferenceChanged,
+                hBody
+              ]
+
+
+theorem psKernelExprLiftLooseBVarsReference_proj
+    (typeName : PsKernelName)
+    (index : Nat)
+    (body : PsKernelExpr)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVarsReference
+        (PsKernelExpr.proj typeName index body)
+        start amount =
+      PsKernelExpr.proj
+        typeName
+        index
+        (psKernelExprLiftLooseBVarsReference body start amount) := by
+  cases amount with
+  | zero =>
+      simp [
+        psKernelExprLiftLooseBVarsReference,
+        psKernelExprLiftLooseBVarsReferenceChanged
+      ]
+  | succ remaining =>
+      cases hBody :
+          psKernelExprLiftLooseBVarsReferenceChanged
+            body start (Nat.succ remaining) with
+      | mk bodyResult bodyChanged =>
+          cases bodyChanged with
+          | false =>
+              have hBodyOrig :=
+                psKernelExprLiftLooseBVarsReferenceChanged_false_fst
+                  body start (Nat.succ remaining)
+                  bodyResult hBody
+              simp [
+                psKernelExprLiftLooseBVarsReference,
+                psKernelExprLiftLooseBVarsReferenceChanged,
+                hBody,
+                hBodyOrig
+              ]
+          | true =>
+              simp [
+                psKernelExprLiftLooseBVarsReference,
+                psKernelExprLiftLooseBVarsReferenceChanged,
+                hBody
+              ]
+
+
+theorem psKernelExprInstantiateAtReference_app
+    (fn arg : PsKernelExpr)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.app fn arg)
+        start subst offset =
+      PsKernelExpr.app
+        (psKernelExprInstantiateAtReference fn start subst offset)
+        (psKernelExprInstantiateAtReference arg start subst offset) := by
+  cases hEmpty : psKernelExprListIsEmpty subst with
+  | true =>
+      simp [
+        psKernelExprInstantiateAtReference,
+        hEmpty
+      ]
+  | false =>
+      cases hFn :
+          psKernelExprInstantiateAtReferenceChanged
+            fn start subst offset with
+      | mk fnResult fnChanged =>
+          cases hArg :
+              psKernelExprInstantiateAtReferenceChanged
+                arg start subst offset with
+          | mk argResult argChanged =>
+              cases fnChanged with
+              | false =>
+                  cases argChanged with
+                  | false =>
+                      have hFnOrig :=
+                        psKernelExprInstantiateAtReferenceChanged_false_fst
+                          fn start subst offset fnResult hFn
+                      have hArgOrig :=
+                        psKernelExprInstantiateAtReferenceChanged_false_fst
+                          arg start subst offset argResult hArg
+                      simp [
+                        psKernelExprInstantiateAtReference,
+                        hEmpty,
+                        psKernelExprInstantiateAtReferenceChanged,
+                        hFn,
+                        hArg,
+                        hFnOrig,
+                        hArgOrig
+                      ]
+                  | true =>
+                      simp [
+                        psKernelExprInstantiateAtReference,
+                        hEmpty,
+                        psKernelExprInstantiateAtReferenceChanged,
+                        hFn,
+                        hArg
+                      ]
+              | true =>
+                  cases argChanged <;>
+                    simp [
+                      psKernelExprInstantiateAtReference,
+                      hEmpty,
+                      psKernelExprInstantiateAtReferenceChanged,
+                      hFn,
+                      hArg
+                    ]
+
+
+theorem psKernelExprInstantiateAtReference_lam
+    (name : PsKernelName)
+    (type body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.lam name type body binderInfo)
+        start subst offset =
+      PsKernelExpr.lam
+        name
+        (psKernelExprInstantiateAtReference
+          type start subst offset)
+        (psKernelExprInstantiateAtReference
+          body start subst (Nat.succ offset))
+        binderInfo := by
+  cases hEmpty : psKernelExprListIsEmpty subst with
+  | true =>
+      simp [psKernelExprInstantiateAtReference, hEmpty]
+  | false =>
+      cases hType :
+          psKernelExprInstantiateAtReferenceChanged
+            type start subst offset with
+      | mk typeResult typeChanged =>
+          cases hBody :
+              psKernelExprInstantiateAtReferenceChanged
+                body start subst (Nat.succ offset) with
+          | mk bodyResult bodyChanged =>
+              cases typeChanged with
+              | false =>
+                  cases bodyChanged with
+                  | false =>
+                      have hTypeOrig :=
+                        psKernelExprInstantiateAtReferenceChanged_false_fst
+                          type start subst offset typeResult hType
+                      have hBodyOrig :=
+                        psKernelExprInstantiateAtReferenceChanged_false_fst
+                          body start subst (Nat.succ offset)
+                          bodyResult hBody
+                      simp [
+                        psKernelExprInstantiateAtReference,
+                        hEmpty,
+                        psKernelExprInstantiateAtReferenceChanged,
+                        hType,
+                        hBody,
+                        hTypeOrig,
+                        hBodyOrig
+                      ]
+                  | true =>
+                      simp [
+                        psKernelExprInstantiateAtReference,
+                        hEmpty,
+                        psKernelExprInstantiateAtReferenceChanged,
+                        hType,
+                        hBody
+                      ]
+              | true =>
+                  cases bodyChanged <;>
+                    simp [
+                      psKernelExprInstantiateAtReference,
+                      hEmpty,
+                      psKernelExprInstantiateAtReferenceChanged,
+                      hType,
+                      hBody
+                    ]
+
+
+theorem psKernelExprInstantiateAtReference_forallE
+    (name : PsKernelName)
+    (type body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.forallE name type body binderInfo)
+        start subst offset =
+      PsKernelExpr.forallE
+        name
+        (psKernelExprInstantiateAtReference
+          type start subst offset)
+        (psKernelExprInstantiateAtReference
+          body start subst (Nat.succ offset))
+        binderInfo := by
+  cases hEmpty : psKernelExprListIsEmpty subst with
+  | true =>
+      simp [psKernelExprInstantiateAtReference, hEmpty]
+  | false =>
+      cases hType :
+          psKernelExprInstantiateAtReferenceChanged
+            type start subst offset with
+      | mk typeResult typeChanged =>
+          cases hBody :
+              psKernelExprInstantiateAtReferenceChanged
+                body start subst (Nat.succ offset) with
+          | mk bodyResult bodyChanged =>
+              cases typeChanged with
+              | false =>
+                  cases bodyChanged with
+                  | false =>
+                      have hTypeOrig :=
+                        psKernelExprInstantiateAtReferenceChanged_false_fst
+                          type start subst offset typeResult hType
+                      have hBodyOrig :=
+                        psKernelExprInstantiateAtReferenceChanged_false_fst
+                          body start subst (Nat.succ offset)
+                          bodyResult hBody
+                      simp [
+                        psKernelExprInstantiateAtReference,
+                        hEmpty,
+                        psKernelExprInstantiateAtReferenceChanged,
+                        hType,
+                        hBody,
+                        hTypeOrig,
+                        hBodyOrig
+                      ]
+                  | true =>
+                      simp [
+                        psKernelExprInstantiateAtReference,
+                        hEmpty,
+                        psKernelExprInstantiateAtReferenceChanged,
+                        hType,
+                        hBody
+                      ]
+              | true =>
+                  cases bodyChanged <;>
+                    simp [
+                      psKernelExprInstantiateAtReference,
+                      hEmpty,
+                      psKernelExprInstantiateAtReferenceChanged,
+                      hType,
+                      hBody
+                    ]
+
+
+theorem psKernelExprInstantiateAtReference_letE
+    (name : PsKernelName)
+    (type value body : PsKernelExpr)
+    (nondep : Bool)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.letE name type value body nondep)
+        start subst offset =
+      PsKernelExpr.letE
+        name
+        (psKernelExprInstantiateAtReference type start subst offset)
+        (psKernelExprInstantiateAtReference value start subst offset)
+        (psKernelExprInstantiateAtReference
+          body start subst (Nat.succ offset))
+        nondep := by
+  cases hEmpty : psKernelExprListIsEmpty subst with
+  | true =>
+      simp [psKernelExprInstantiateAtReference, hEmpty]
+  | false =>
+      cases hType :
+          psKernelExprInstantiateAtReferenceChanged
+            type start subst offset with
+      | mk typeResult typeChanged =>
+          cases hValue :
+              psKernelExprInstantiateAtReferenceChanged
+                value start subst offset with
+          | mk valueResult valueChanged =>
+              cases hBody :
+                  psKernelExprInstantiateAtReferenceChanged
+                    body start subst (Nat.succ offset) with
+              | mk bodyResult bodyChanged =>
+                  cases typeChanged with
+                  | false =>
+                      cases valueChanged with
+                      | false =>
+                          cases bodyChanged with
+                          | false =>
+                              have hTypeOrig :=
+                                psKernelExprInstantiateAtReferenceChanged_false_fst
+                                  type start subst offset typeResult hType
+                              have hValueOrig :=
+                                psKernelExprInstantiateAtReferenceChanged_false_fst
+                                  value start subst offset valueResult hValue
+                              have hBodyOrig :=
+                                psKernelExprInstantiateAtReferenceChanged_false_fst
+                                  body start subst (Nat.succ offset)
+                                  bodyResult hBody
+                              simp [
+                                psKernelExprInstantiateAtReference,
+                                hEmpty,
+                                psKernelExprInstantiateAtReferenceChanged,
+                                hType,
+                                hValue,
+                                hBody,
+                                hTypeOrig,
+                                hValueOrig,
+                                hBodyOrig
+                              ]
+                          | true =>
+                              simp [
+                                psKernelExprInstantiateAtReference,
+                                hEmpty,
+                                psKernelExprInstantiateAtReferenceChanged,
+                                hType,
+                                hValue,
+                                hBody
+                              ]
+                      | true =>
+                          cases bodyChanged <;>
+                            simp [
+                              psKernelExprInstantiateAtReference,
+                              hEmpty,
+                              psKernelExprInstantiateAtReferenceChanged,
+                              hType,
+                              hValue,
+                              hBody
+                            ]
+                  | true =>
+                      cases valueChanged <;>
+                        cases bodyChanged <;>
+                        simp [
+                          psKernelExprInstantiateAtReference,
+                          hEmpty,
+                          psKernelExprInstantiateAtReferenceChanged,
+                          hType,
+                          hValue,
+                          hBody
+                        ]
+
+
+theorem psKernelExprInstantiateAtReference_mdata
+    (metadata : Nat)
+    (body : PsKernelExpr)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.mdata metadata body)
+        start subst offset =
+      PsKernelExpr.mdata
+        metadata
+        (psKernelExprInstantiateAtReference
+          body start subst offset) := by
+  cases hEmpty : psKernelExprListIsEmpty subst with
+  | true =>
+      simp [psKernelExprInstantiateAtReference, hEmpty]
+  | false =>
+      cases hBody :
+          psKernelExprInstantiateAtReferenceChanged
+            body start subst offset with
+      | mk bodyResult bodyChanged =>
+          cases bodyChanged with
+          | false =>
+              have hBodyOrig :=
+                psKernelExprInstantiateAtReferenceChanged_false_fst
+                  body start subst offset bodyResult hBody
+              simp [
+                psKernelExprInstantiateAtReference,
+                hEmpty,
+                psKernelExprInstantiateAtReferenceChanged,
+                hBody,
+                hBodyOrig
+              ]
+          | true =>
+              simp [
+                psKernelExprInstantiateAtReference,
+                hEmpty,
+                psKernelExprInstantiateAtReferenceChanged,
+                hBody
+              ]
+
+
+theorem psKernelExprInstantiateAtReference_proj
+    (typeName : PsKernelName)
+    (index : Nat)
+    (body : PsKernelExpr)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.proj typeName index body)
+        start subst offset =
+      PsKernelExpr.proj
+        typeName
+        index
+        (psKernelExprInstantiateAtReference
+          body start subst offset) := by
+  cases hEmpty : psKernelExprListIsEmpty subst with
+  | true =>
+      simp [psKernelExprInstantiateAtReference, hEmpty]
+  | false =>
+      cases hBody :
+          psKernelExprInstantiateAtReferenceChanged
+            body start subst offset with
+      | mk bodyResult bodyChanged =>
+          cases bodyChanged with
+          | false =>
+              have hBodyOrig :=
+                psKernelExprInstantiateAtReferenceChanged_false_fst
+                  body start subst offset bodyResult hBody
+              simp [
+                psKernelExprInstantiateAtReference,
+                hEmpty,
+                psKernelExprInstantiateAtReferenceChanged,
+                hBody,
+                hBodyOrig
+              ]
+          | true =>
+              simp [
+                psKernelExprInstantiateAtReference,
+                hEmpty,
+                psKernelExprInstantiateAtReferenceChanged,
+                hBody
+              ]
+
+
 theorem psKernelExprLiftOne_then_instantiateReference_cancel
     (expr replacement : PsKernelExpr)
     (offset : Nat) :

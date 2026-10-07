@@ -220,8 +220,9 @@ def psTsDeclarationTasks
       match types with
       | List.nil => Except.ok rest
       | List.cons type tail =>
+          let separator : String := if Nat.beq index 0 then "" else ", ";
           let label : String :=
-            psTextJoin "" [if Nat.beq index 0 then "" else ", ", "_arg", psNatToString index, ": "];
+            psTextJoin "" [separator, "_arg", psNatToString index, ": "];
           Except.ok
             (List.cons (PsTsDeclarationTask.text label)
               (List.cons (PsTsDeclarationTask.typeNode type genericCount depth)
@@ -231,8 +232,9 @@ def psTsDeclarationTasks
       | List.nil => Except.ok rest
       | List.cons parameter tail =>
           if Nat.beq parameter.index index then
+            let separator : String := if Nat.beq index 0 then "" else ", ";
             let label : String :=
-              psTextJoin "" [if Nat.beq index 0 then "" else ", ", "T", psNatToString index];
+              psTextJoin "" [separator, "T", psNatToString index];
             Except.ok
               (List.cons (PsTsDeclarationTask.text label)
                 (List.cons (PsTsDeclarationTask.generics tail (Nat.succ index)) rest))

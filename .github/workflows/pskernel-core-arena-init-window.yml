@@ -106,9 +106,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          cat > tests/init-hot.lean <<'EOF'
+          import Init
+          EOF
           cat > tests/init-hot.yaml <<'EOF'
           description: Focused export for the Init Array.extract performance cliff.
-          module: Init
+          leanfile: tests/init-hot.lean
           export-decls:
             - _private.Init.Data.Array.Extract.0.Array.extract_append_extract._proof_1_3
           outcome: accept

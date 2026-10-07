@@ -38,8 +38,8 @@ theorem psKernelNatLt_false_of_le
               Nat.le_of_ble_eq_true h
             have hEqual :=
               Nat.le_antisymm hLeftLeRight hLe
-            exact (Bool.noConfusion (by
-              simpa [hEqual] using hEq))
+            subst right
+            simp at hEq
       simp [psKernelNatLt, hEq, hBle]
 
 

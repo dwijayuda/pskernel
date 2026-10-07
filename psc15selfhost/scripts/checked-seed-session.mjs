@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { checkedSeedLimits, checkedSeedFrames, checkedSeedExhausted, checkSeedBytes } from './checked-seed-protocol.mjs';
+import { createPscvCertification } from './certified-source.mjs';
 
 function withTimeout(promise, timeoutMs, child, label) {
   let timer;
@@ -24,6 +25,7 @@ export async function runCheckedSeedSession({
   emit,
   timeoutMs = 300000,
   resourceLimits,
+  certificationContext,
 }) {
   const limits = checkedSeedLimits(resourceLimits);
   if (!['lean', 'ps'].includes(sourceKind)) throw new Error('PSC2_CHECKED_SEED_SOURCE_KIND');
@@ -91,6 +93,27 @@ export async function runCheckedSeedSession({
       throw new Error(`PSC2_KERNEL_REJECTED: ${kernelResult?.errorKind ?? 'kernel-rejection'}`);
     }
 
+    let certification;
+    if (certificationContext !== undefined) {
+      const expected = certificationContext.provider;
+      if (!expected || typeof expected !== 'object') throw new Error('PSC2_CHECKED_SEED_CERT_PROVIDER');
+      for (const [field, value] of Object.entries(expected)) {
+        if (kernelResult?.[field] !== value) throw new Error('PSC2_CHECKED_SEED_PROVIDER_IDENTITY: ' + field);
+      }
+      certification = createPscvCertification({
+        source,
+        admissions: prepared.admissions,
+        semanticProfile: expected.profile,
+        kernelContract: certificationContext.kernelContract,
+        provider: expected,
+        providerSecurity: certificationContext.providerSecurity,
+        assumptionPolicy: certificationContext.assumptionPolicy,
+        resourcePolicy: certificationContext.resourcePolicy,
+        targets: certificationContext.targets,
+        executionBoundary: certificationContext.executionBoundary,
+      });
+    }
+
     child.stdin.end(emit ? 'emit\n' : 'checked\n');
     const completed = await nextFrame(emit ? 'emitted' : 'checked');
     if (emit) {
@@ -122,6 +145,10 @@ export async function runCheckedSeedSession({
       ...(emit ? { typeScript: completed.typescript } : {}),
       ...(emit && completed.runtimeIr !== undefined
         ? { stages: Object.freeze({ runtimeIr: completed.runtimeIr, verifiedIr: completed.verifiedIr }) } : {}),
+      ...(certification ? {
+        pscvCertificate: certification.certificate,
+        certifiedSourceArtifact: certification.certifiedSource,
+      } : {}),
     });
   } catch (error) {
     if (child && child.exitCode === null) child.kill('SIGKILL');

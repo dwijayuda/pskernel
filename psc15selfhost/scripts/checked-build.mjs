@@ -60,6 +60,8 @@ export async function buildChecked({
   let seedResources;
   let parity;
   let providerToolInputs = [];
+  let pscvCertificate;
+  let certifiedSourceArtifact;
   const checkAdmissions = async text => {
     const captures = await Promise.all([kernel, ...(dualCheck ? [dualCheck] : [])].map(selector => captureCheckedProviderInputs(selector)));
     const pinnedOptions = Object.assign({}, ...captures.map(captured => captured.invocationOptions));
@@ -83,8 +85,19 @@ export async function buildChecked({
       checkAdmissions,
       emit: !checkOnly,
       resourceLimits: seedResourceLimits,
+      certificationContext: {
+        provider: checkedKernelIdentity(kernel),
+        providerSecurity: selectedProviderSecurity,
+        kernelContract: kernelContractV1,
+        assumptionPolicy: 'kernel-contract-default',
+        resourcePolicy: 'checked-native-seed-session/1',
+        targets: ['typescript'],
+        executionBoundary: 'native-seed-checked-session',
+      },
     });
     admissions = result.admissions;
+    pscvCertificate = result.pscvCertificate;
+    certifiedSourceArtifact = result.certifiedSourceArtifact;
     typeScript = result.typeScript;
     irStages = result.stages;
     seedResources = result.resourceObservation;
@@ -102,6 +115,8 @@ export async function buildChecked({
       return checkAdmissions(text);
     }, identity: checkedKernelIdentity(kernel), kernelContract: kernelContractV1, providerSecurity: selectedProviderSecurity });
     const handle = await session.checkSources(kind, snapshot.sources);
+    pscvCertificate = session.certificate(handle);
+    certifiedSourceArtifact = session.certifiedSourceArtifact(handle);
     if (!checkOnly) {
       const emitted = session.emitArtifact(handle);
       typeScript = emitted.payload;
@@ -126,6 +141,8 @@ export async function buildChecked({
     canonicalAdmissionsSha256: digest(admissions),
     providerInputObservations: providerToolInputs.map(item => item.details),
     ...(parity ? { dualCheck: parity } : {}),
+    pscvCert: pscvCertificate?.identity,
+    certifiedSource: certifiedSourceArtifact?.identity,
   };
   if (checkOnly) return receipt;
   if (typeof typeScript !== 'string') throw new Error('PSC2_CHECKED_TS_RESULT');
@@ -166,17 +183,20 @@ export async function buildChecked({
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
-      hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
+      hostSources, pscvCertificate, certifiedSourceArtifact,
+      runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     receipt.buildGraph = evidence.identity;
     if (evidence.runtimeInterface) receipt.runtimeInterface = evidence.runtimeInterface;
     receipt.typeScriptToolInputs = evidence.typeScriptToolInputs;
     receipt.providerInputs = evidence.providerInputs;
     const archive = packObservedBuildArchive(evidence);
     receipt.buildArchive = archive.identity;
+    await writeFile(path.join(staging, stem + '.pscv-cert.json'), pscvCertificate.bytes);
+    await writeFile(path.join(staging, stem + '.certified-source.json'), certifiedSourceArtifact.bytes);
     await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);
     await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
     await writeFile(path.join(staging, stem + '.admissions.json'), admissions);
-    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.build-graph.json', '.build-archive.json']) {
+    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.pscv-cert.json', '.certified-source.json', '.build-graph.json', '.build-archive.json']) {
       await rename(path.join(staging, stem + suffix), path.join(path.dirname(output), stem + suffix));
     }
     // This receipt is an audit record, not a transferable proof/capability.

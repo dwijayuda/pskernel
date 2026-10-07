@@ -1,4 +1,4 @@
-import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
+import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, passDefinition, recordPassExecution, verifyArtifact } from './artifact-evidence.mjs';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -34,7 +34,8 @@ export async function readCheckedBuildHostSources() {
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
-  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources }) {
+  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
+  pscvCertificate, certifiedSourceArtifact }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -121,14 +122,42 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   execute('psc-prepare-and-check/1', source, [core], implementation, 'psc-source-checked-admissions/1',
     { sourceKind, sourceCount: sources.length, observedStages: ['prepare', 'kernel-check'] }, baseDependencies,
     ['trusted-frontend-source-interpretation']);
+  let certifiedInput = core;
+  let certification;
+  if ((pscvCertificate === undefined) !== (certifiedSourceArtifact === undefined))
+    throw new Error('PSC_BUILD_GRAPH_CERTIFICATION_PAIR');
+  if (pscvCertificate !== undefined) {
+    verifyArtifact(pscvCertificate.bytes, pscvCertificate.identity);
+    verifyArtifact(certifiedSourceArtifact.bytes, certifiedSourceArtifact.identity);
+    if (pscvCertificate.identity.contract !== 'pscv-cert/1' ||
+        certifiedSourceArtifact.identity.contract !== 'psc-certified-source/1')
+      throw new Error('PSC_BUILD_GRAPH_CERTIFICATION_CONTRACT');
+    const certificateValue = JSON.parse(pscvCertificate.bytes);
+    const certifiedValue = JSON.parse(certifiedSourceArtifact.bytes);
+    if (certificateValue.contract !== 'pscv-cert/1' || certifiedValue.contract !== 'psc-certified-source/1' ||
+        artifactKey(certificateValue.canonicalAdmissionsId) !== artifactKey(core.identity) ||
+        artifactKey(certifiedValue.canonicalAdmissionsId) !== artifactKey(core.identity) ||
+        artifactKey(certifiedValue.certificateId) !== artifactKey(pscvCertificate.identity))
+      throw new Error('PSC_BUILD_GRAPH_CERTIFICATION_BINDING');
+    const cert = add(pscvCertificate, { kind: 'output-file', suffix: '.pscv-cert.json' });
+    const certified = add(certifiedSourceArtifact, { kind: 'output-file', suffix: '.certified-source.json' });
+    execute('psc-certify-checked-core/1', core, [certified], implementation, 'psc-kernel-accepted-certified-source/1',
+      { observedStages: ['pscv-cert', 'certified-source'], certificateId: cert.identity,
+        serializedAuthority: false, liveCapabilityRequiredForTransformation: true },
+      [...baseDependencies, cert.identity], ['trusted-host-certification-binding']);
+    certifiedInput = certified;
+    certification = { pscvCert: cert.identity, certifiedSource: certified.identity };
+  }
   const stages = checkedIrStageArtifacts(irStages);
   let verifiedIr;
   if (stages && (typeScript !== undefined || directBackend)) {
       const runtimeIr = add(stages.runtimeIr, { kind: 'archive-required', role: 'actual-erasure-output' });
       verifiedIr = add(stages.verifiedIr, { kind: 'archive-required', role: 'actual-validation-output' });
       if (!runtimeIr.bytes.equals(verifiedIr.bytes)) throw new Error('PSC_BUILD_GRAPH_VALIDATION_CHANGED_IR');
-      execute('psc-erase-checked-core/1', core, [runtimeIr], implementation, 'psc-core-runtime-refinement/1',
-        { observedStages: ['erase'] }, baseDependencies, ['trusted-erasure-implementation']);
+      execute('psc-erase-checked-core/1', certifiedInput, [runtimeIr], implementation,
+        certifiedInput === core ? 'psc-core-runtime-refinement/1' : 'psc-certified-source-runtime-refinement/1',
+        { observedStages: ['erase'], certifiedSourceRequired: certifiedInput !== core }, baseDependencies,
+        ['trusted-erasure-implementation']);
       execute('psc-validate-runtime-ir/1', runtimeIr, [verifiedIr], implementation, 'psc-runtime-ir-invariants/1',
         { observedStages: ['validate-ir'], bytesPreserved: true }, baseDependencies, ['trusted-strict-ir-validator']);
       runtimeInterface = add(runtimeInterfaceArtifact(verifiedIr), { kind: 'archive-required', role: 'runtime-structural-interface' });
@@ -144,7 +173,9 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           unobservedInteriorStages: ['typescript-lower', 'typescript-print'] }, baseDependencies,
         ['trusted-typescript-emission']);
     } else {
-      execute('psc-checked-core-to-typescript/1', core, [ts], implementation, 'psc-core-runtime-refinement/1',
+      execute(certifiedInput === core ? 'psc-checked-core-to-typescript/1' : 'psc-certified-source-to-typescript/1',
+        certifiedInput, [ts], implementation,
+        certifiedInput === core ? 'psc-core-runtime-refinement/1' : 'psc-certified-source-runtime-refinement/1',
         { target: 'typescript', observedStages: ['checked-emission'],
           unobservedInteriorStages: ['erase', 'validate-ir', 'typescript-lower', 'typescript-print'] }, baseDependencies,
         ['trusted-erasure-and-typescript-emission']);
@@ -204,6 +235,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       'complete toolchain closure', 'independent preservation evidence'] };
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
+    ...(certification ? { certification } : {}),
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1'),
     ...(providerInputs.length ? { providerInputs: providerInputs.map(item => item.identity) } : {}),
     ...(toolInputs ? { typeScriptToolInputs: toolInputs.identity } : {}) };

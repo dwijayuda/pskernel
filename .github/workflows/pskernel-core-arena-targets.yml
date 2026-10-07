@@ -7,6 +7,8 @@ on:
       - pscv/pskernel-core-arena-v1
     paths:
       - ".github/workflows/pskernel-core-arena-targets.yml"
+      - "psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Checker/**"
+      - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
 
 permissions:
   contents: read

@@ -37,6 +37,7 @@
     "declared": [
       "scripts/artifact-evidence.mjs",
       "scripts/bootstrap-manifest.mjs",
+      "scripts/bounded-process.mjs",
       "scripts/certified-source.mjs",
       "scripts/checked-build-evidence.mjs",
       "scripts/checked-build.mjs",
@@ -51,6 +52,7 @@
       "scripts/compiler-checked-service.mjs",
       "scripts/evidence-envelope.mjs",
       "scripts/ir-artifact.mjs",
+      "scripts/ir-invariant-replay.mjs",
       "scripts/js-abi-artifact.mjs",
       "scripts/kernel-checked-session.mjs",
       "scripts/kernel-contract.mjs",
@@ -79,7 +81,8 @@
       "provider identity validation"
     ],
     "executableValidation": [
-      "psValidateErasedIrModule under psc-verified-ir/1"
+      "psValidateErasedIrModule under psc-verified-ir/1",
+      "caller-pinned native closed-IR decoder/strict-validator replay under psc-closed-ir-invariant-replay/1 when explicitly requested"
     ],
     "transformationTrustCurrent": [
       "erasure",

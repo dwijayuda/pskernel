@@ -11,13 +11,13 @@
     {
       "id": "ps-source/0.9-r3",
       "kind": "source-language",
-      "status": "base-current",
+      "status": "current",
       "canonicalPath": "language-authority.json"
     },
     {
       "id": "pscv-v1",
       "kind": "verified-language-profile",
-      "status": "normative-target",
+      "status": "target",
       "canonicalPath": "PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md"
     },
     {

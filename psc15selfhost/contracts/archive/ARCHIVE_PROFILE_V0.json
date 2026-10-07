@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contract": "psc-archive-profile/0",
-  "status": "prototype",
+  "status": "implementation-available-release-composition-assurance-pending",
   "offlineVerificationRequired": true,
   "requiredRepositoryObjects": [
     "psc.semantic-lock.json",
@@ -20,10 +20,9 @@
     "savef/objects/psc-specialization-literal-proof.json"
   ],
   "futureReleaseRequirements": [
+    "actual V1 SemanticLock generated from selected release context",
     "canonical source closure",
     "toolchain manifest",
-    "target artifacts",
-    "provenance envelope",
     "licenses",
     "semantic migration history"
   ],
@@ -35,5 +34,16 @@
       "schemaVersion",
       "digest"
     ]
+  },
+  "releaseEvidenceBundle": {
+    "contract": "psc-release-evidence-bundle/1",
+    "implementation": "scripts/release-evidence-bundle.mjs",
+    "contents": [
+      "exact EvidenceEnvelope",
+      "exact observed build archive"
+    ],
+    "replay": "independently verifies the build archive, reconstructs its artifact resolver and verifies every EvidenceEnvelope reference",
+    "authority": "audit-record-only",
+    "releaseAccepted": false
   }
 }

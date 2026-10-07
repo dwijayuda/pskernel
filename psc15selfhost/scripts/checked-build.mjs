@@ -22,6 +22,7 @@ import { captureTypeScriptToolInputs, verifyTypeScriptToolInputs } from './types
 import { captureCheckedProviderInputs, verifyCheckedProviderInputs } from './checked-provider-inputs.mjs';
 import { assertProviderSecurity, defaultProviderSecurityProfile } from './provider-security.mjs';
 import { decodeJsAbiPolicy } from './js-abi-artifact.mjs';
+import { checkedSourceClosureArtifacts } from './source-closure-artifact.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -55,6 +56,7 @@ export async function buildChecked({
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
   const snapshot = await readCheckedSourceSnapshot(entryPath, sourceResourceLimits);
+  const sourceClosure = checkedSourceClosureArtifacts(snapshot);
   let admissions;
   let typeScript;
   let compilerIdentity;
@@ -191,9 +193,10 @@ export async function buildChecked({
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
-      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy,
+      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, sourceClosure,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     receipt.buildGraph = evidence.identity;
+    if (evidence.sourceClosure) receipt.sourceClosureArtifact = evidence.sourceClosure;
     if (evidence.runtimeInterface) receipt.runtimeInterface = evidence.runtimeInterface;
     if (evidence.jsAbi) {
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;

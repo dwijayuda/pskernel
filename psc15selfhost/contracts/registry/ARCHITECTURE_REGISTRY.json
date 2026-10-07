@@ -285,6 +285,30 @@
       "kind": "target-ir-validator",
       "status": "current",
       "canonicalPath": "packages/backend-js/src/Ps/BackendJs/Validate.lean"
+    },
+    {
+      "id": "psc-source-closure/1",
+      "kind": "source-closure",
+      "status": "current-host",
+      "canonicalPath": "scripts/source-closure-artifact.mjs"
+    },
+    {
+      "id": "psc-semantic-lock/1",
+      "kind": "semantic-lock",
+      "status": "current-host",
+      "canonicalPath": "contracts/semantic/SEMANTIC_LOCK_V1.json"
+    },
+    {
+      "id": "psc-release-semantic-lock-proposal/1",
+      "kind": "release-lock-producer",
+      "status": "current-host",
+      "canonicalPath": "scripts/release-semantic-lock.mjs"
+    },
+    {
+      "id": "psc-release-evidence-bundle/1",
+      "kind": "release-evidence",
+      "status": "current-host",
+      "canonicalPath": "scripts/release-evidence-bundle.mjs"
     }
   ]
 }

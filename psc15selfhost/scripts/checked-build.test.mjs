@@ -46,6 +46,7 @@ test('explicit owned kernel checks dependent source before emission and executio
     assert.equal(receipt.schemaVersion, 4);
     assert.equal(receipt.kernelContract.id, kernelContractV1.id);
     assert.equal(receipt.kernelContract.sha256, kernelContractV1.sha256);
+    assert.equal(receipt.sourceClosureArtifact.contract, 'psc-source-closure/1');
     const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json'), 'utf8'));
     const archiveBytes = await readFile(path.join(dir, 'out.build-archive.json'));
     verifyArtifact(archiveBytes, receipt.buildArchive);
@@ -64,6 +65,8 @@ test('explicit owned kernel checks dependent source before emission and executio
       'typescript-to-es2022/1',
     ]);
     assert.equal(archived.runtimeInterfaceProjections.length, 1);
+    assert.equal(archived.sourceClosures.length, 1);
+    assert.equal(archived.sourceClosures[0].closureId.digest, receipt.sourceClosureArtifact.digest);
     assert.equal(archived.semanticClaimsVerified, false);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });

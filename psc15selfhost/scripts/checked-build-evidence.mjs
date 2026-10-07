@@ -8,6 +8,7 @@ import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
+import { verifyCheckedSourceClosure } from './source-closure-artifact.mjs';
 
 export async function readCheckedBuildHostSources() {
   const root = path.dirname(fileURLToPath(import.meta.url));
@@ -37,7 +38,7 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, sourceClosure }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -49,6 +50,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   let executableArtifact;
   let jsAbiPlan;
   let jsAbiPolicyArtifact;
+  let sourceClosureArtifact;
   function add(item, source, inline = false) {
     const key = artifactKey(item.identity);
     if (!artifacts.has(key)) {
@@ -91,6 +93,21 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     'implementation', 'psc-hosted-compiler-implementation/1', { kind: 'inline' });
   const source = json({ sourceKind, sources }, 'source-snapshot', 'psc-source-snapshot/1',
     { kind: 'archive-required', role: 'ordered-preparation-inputs' }, false);
+  if (sourceClosure !== undefined) {
+    if (!sourceClosure?.closure || !Array.isArray(sourceClosure.files)) throw new Error('PSC_BUILD_GRAPH_SOURCE_CLOSURE');
+    for (const item of sourceClosure.files) {
+      if (typeof item.path !== 'string' || !(item.bytes instanceof Uint8Array) || !item.identity)
+        throw new Error('PSC_BUILD_GRAPH_SOURCE_FILE');
+      add({ bytes: Buffer.from(item.bytes), identity: item.identity },
+        { kind: 'archive-required', role: 'checked-source-file', path: item.path });
+    }
+    sourceClosureArtifact = add(sourceClosure.closure,
+      { kind: 'archive-required', role: 'checked-source-closure' });
+    const fileMap = new Map(sourceClosure.files.map(item => [artifactKey(item.identity), Buffer.from(item.bytes)]));
+    verifyCheckedSourceClosure(sourceClosureArtifact, {
+      resolveArtifact: identity => fileMap.get(artifactKey(identity)),
+    });
+  }
   const core = bytes(admissions, 'canonical-admissions', 'proofscript-checked-admissions/2',
     { kind: 'output-file', suffix: '.admissions.json' });
   const security = json({ provider, providerSecurity, kernelContract,
@@ -98,7 +115,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     'psc-acceptance-context/1', { kind: 'inline' });
   const semanticIdentity = { providerProfile: provider.profile, kernelContract, runtimeSemantics: 'psc-runtime-semantics/1' };
   const baseDependencies = [compiler.identity, ...hosts.map(item => item.identity), security.identity,
-    ...providerInputs.map(item => item.identity)];
+    ...providerInputs.map(item => item.identity), ...(sourceClosureArtifact ? [sourceClosureArtifact.identity] : [])];
   const assumptions = ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
     'selected-kernel-invocation'];
   function execute(id, input, outputs, impl, relation, parameters, dependencies, extraAssumptions = [], validation) {
@@ -125,7 +142,8 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     executions.push(record.identity);
   }
   execute('psc-prepare-and-check/1', source, [core], implementation, 'psc-source-checked-admissions/1',
-    { sourceKind, sourceCount: sources.length, observedStages: ['prepare', 'kernel-check'] }, baseDependencies,
+    { sourceKind, sourceCount: sources.length, observedStages: ['prepare', 'kernel-check'],
+      ...(sourceClosureArtifact ? { sourceClosureId: sourceClosureArtifact.identity } : {}) }, baseDependencies,
     ['trusted-frontend-source-interpretation']);
   let certifiedInput = core;
   let certification;
@@ -269,6 +287,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...(certification ? { certification } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),
+    ...(sourceClosureArtifact ? { sourceClosure: sourceClosureArtifact.identity } : {}),
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1'),
     ...(providerInputs.length ? { providerInputs: providerInputs.map(item => item.identity) } : {}),
     ...(toolInputs ? { typeScriptToolInputs: toolInputs.identity } : {}) };

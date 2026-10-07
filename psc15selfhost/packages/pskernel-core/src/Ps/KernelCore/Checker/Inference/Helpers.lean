@@ -22,6 +22,80 @@ structure PsKernelForallView where
   body : PsKernelExpr
   binderInfo : PsKernelBinderInfo
 
+partial def psKernelInferenceDebugName : PsKernelName -> String
+  | .anonymous => "_"
+  | .str .anonymous value => value
+  | .str parent value => psKernelInferenceDebugName parent ++ "." ++ value
+  | .num .anonymous value => toString value
+  | .num parent value => psKernelInferenceDebugName parent ++ "." ++ toString value
+
+partial def psKernelInferenceDebugExprHead (expr : PsKernelExpr) : String :=
+  let args := psKernelExprListLength (psKernelExprGetAppArgs expr)
+  match psKernelExprGetAppFn expr with
+  | .const name _ =>
+      "const " ++ psKernelInferenceDebugName name ++ " (args=" ++ toString args ++ ")"
+  | .fvar name =>
+      "fvar " ++ psKernelInferenceDebugName name ++ " (args=" ++ toString args ++ ")"
+  | .bvar index =>
+      "bvar " ++ toString index ++ " (args=" ++ toString args ++ ")"
+  | .mvar name =>
+      "mvar " ++ psKernelInferenceDebugName name ++ " (args=" ++ toString args ++ ")"
+  | .sort _ => "sort"
+  | .lam _ _ _ _ => "lambda"
+  | .forallE _ _ _ _ => "forall"
+  | .letE _ _ _ _ _ => "let"
+  | .lit _ => "literal"
+  | .mdata _ _ => "metadata"
+  | .proj name index _ =>
+      "projection " ++ psKernelInferenceDebugName name ++ "." ++ toString index
+  | .app _ _ => "application"
+
+partial def psKernelInferenceDebugExprDiffAt
+    (path : String)
+    (left right : PsKernelExpr) : Option String :=
+  if psKernelExprEq left right then
+    none
+  else
+    match left, right with
+    | .app lf la, .app rf ra =>
+        match psKernelInferenceDebugExprDiffAt (path ++ ".fn") lf rf with
+        | some diff => some diff
+        | none => psKernelInferenceDebugExprDiffAt (path ++ ".arg") la ra
+    | .lam _ lt lb _, .lam _ rt rb _ =>
+        match psKernelInferenceDebugExprDiffAt (path ++ ".lamType") lt rt with
+        | some diff => some diff
+        | none => psKernelInferenceDebugExprDiffAt (path ++ ".lamBody") lb rb
+    | .forallE _ lt lb _, .forallE _ rt rb _ =>
+        match psKernelInferenceDebugExprDiffAt (path ++ ".forallType") lt rt with
+        | some diff => some diff
+        | none => psKernelInferenceDebugExprDiffAt (path ++ ".forallBody") lb rb
+    | .letE _ lt lv lb lnd, .letE _ rt rv rb rnd =>
+        if lnd != rnd then
+          some (path ++ ": let nondep mismatch")
+        else
+          match psKernelInferenceDebugExprDiffAt (path ++ ".letType") lt rt with
+          | some diff => some diff
+          | none =>
+              match psKernelInferenceDebugExprDiffAt (path ++ ".letValue") lv rv with
+              | some diff => some diff
+              | none => psKernelInferenceDebugExprDiffAt (path ++ ".letBody") lb rb
+    | .mdata _ le, .mdata _ re =>
+        psKernelInferenceDebugExprDiffAt (path ++ ".mdata") le re
+    | .proj ln li le, .proj rn ri re =>
+        if psKernelNameEq ln rn && Nat.beq li ri then
+          psKernelInferenceDebugExprDiffAt (path ++ ".proj") le re
+        else
+          some (path ++ ": projection metadata mismatch")
+    | _, _ =>
+        some (
+          path ++ ": " ++ psKernelInferenceDebugExprHead left ++
+          " != " ++ psKernelInferenceDebugExprHead right)
+
+def psKernelInferenceDebugExprDiff
+    (left right : PsKernelExpr) : String :=
+  (psKernelInferenceDebugExprDiffAt "root" left right).getD
+    "no structural difference"
+
 def psKernelCacheInferResult
     (state : PsKernelCheckerState)
     (inferOnly : Bool)

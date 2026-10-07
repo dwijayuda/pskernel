@@ -2021,8 +2021,8 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                       exact ⟨hConfig, trivial⟩
                   | some major0 =>
                       intro hSuccess
-                      have hTail :
-                          psKernelReduceInductiveRecMajorTailWith
+                      have hInline :
+                          psKernelReduceInductiveRecMajorInlineTailWith
                               publicWhnf
                               coreWhnf
                               inferType
@@ -2047,6 +2047,38 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                           hShort,
                           hMajor
                         ] using hSuccess
+                      have hTail :
+                          psKernelReduceInductiveRecMajorTailWith
+                              publicWhnf
+                              coreWhnf
+                              inferType
+                              defeq
+                              context
+                              state
+                              recursor
+                              recLevels
+                              recArgs
+                              major0
+                              cheapRec
+                              cheapProj =
+                            Except.ok
+                              (Prod.mk answer nextState) := by
+                        rw [
+                          ← psKernelReduceInductiveRecMajorInlineTailWith_eq_factored
+                            publicWhnf
+                            coreWhnf
+                            inferType
+                            defeq
+                            context
+                            state
+                            recursor
+                            recLevels
+                            recArgs
+                            major0
+                            cheapRec
+                            cheapProj
+                        ]
+                        exact hInline
                       have hTailSemantic :=
                         psKernelReduceInductiveRecMajorTailWith_configuration_sound
                           publicWhnf

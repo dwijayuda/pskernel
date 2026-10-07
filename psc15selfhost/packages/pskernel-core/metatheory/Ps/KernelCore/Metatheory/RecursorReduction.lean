@@ -162,6 +162,86 @@ theorem psKernelStructureFieldsWithFuel_refines_eta_fields
               hRest)
 
 
+theorem psKernelRecursorIsPropWith_configuration_preserves
+    (publicWhnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (hInfer :
+      PsKernelInferOnlyConfigurationPreserves inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (answer : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelRecursorIsPropWith
+          publicWhnf
+          inferType
+          context
+          state
+          expr =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  cases hInferRun :
+      inferType context state expr with
+  | error error =>
+      simp [
+        psKernelRecursorIsPropWith,
+        hInferRun
+      ] at hSuccess
+  | ok inferredRun =>
+      rcases inferredRun with
+        ⟨inferredType, inferredState⟩
+      have hInferredConfig :=
+        hInfer
+          context
+          state
+          inferredState
+          expr
+          inferredType
+          hConfig
+          hInferRun
+      cases hWhnfRun :
+          publicWhnf
+            context
+            inferredState
+            inferredType with
+      | error error =>
+          simp [
+            psKernelRecursorIsPropWith,
+            hInferRun,
+            hWhnfRun
+          ] at hSuccess
+      | ok reducedRun =>
+          rcases reducedRun with
+            ⟨reducedType, reducedState⟩
+          have hReducedSemantic :=
+            hWhnf
+              context
+              inferredState
+              reducedState
+              inferredType
+              reducedType
+              hInferredConfig
+              hWhnfRun
+          cases reducedType <;>
+            simp [
+              psKernelRecursorIsPropWith,
+              hInferRun,
+              hWhnfRun
+            ] at hSuccess
+          case sort level =>
+            rcases hSuccess with ⟨rfl, rfl⟩
+            exact hReducedSemantic.2
+
+
 def PsKernelRecursorPreparedMajor
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)

@@ -1,4 +1,5 @@
 import Ps.InterfaceIr.CanonicalAbi
+import Ps.InterfaceIr.Encode
 
 def scalar (value : PsForeignScalar) : PsForeignType := .scalar value
 
@@ -151,7 +152,50 @@ def malformedAndFuel : Bool :=
     rejects (layout .memory32 (.future none)) &&
     rejects (psCanonicalTypeWithFuel .memory32 [] [] 0 (scalar .u8))
 
-def main : IO Unit := do
+def memoryDefinitions : List PsForeignDefinition := [
+  PsForeignDefinition.mk "bytes" (.alias (.list (scalar .u8))),
+  PsForeignDefinition.mk "text" (.alias (scalar .string)),
+  PsForeignDefinition.mk "wide" (.alias (scalar .u64)),
+  PsForeignDefinition.mk "wide-list" (.alias (.list (scalar .u64))),
+  PsForeignDefinition.mk "signed" (.alias (scalar .s16)),
+  PsForeignDefinition.mk "letter" (.alias (scalar .char)),
+  PsForeignDefinition.mk "boolean" (.alias (scalar .bool)),
+  PsForeignDefinition.mk "single" (.alias (scalar .f32)),
+  PsForeignDefinition.mk "choice" (.enumeration ["first", "second"]),
+  PsForeignDefinition.mk "maybe" (.alias (.option (scalar .u64))),
+  PsForeignDefinition.mk "outcome" (.alias (.result (some (scalar .string)) (some (scalar .u32)))),
+  PsForeignDefinition.mk "pair" (.alias (.tuple [scalar .u8, scalar .u64, scalar .u16])),
+  PsForeignDefinition.mk "message" (.record [
+    PsForeignField.mk "name" (.named "text"), PsForeignField.mk "data" (.named "bytes"),
+    PsForeignField.mk "constructor" (.named "wide"), PsForeignField.mk "status" (.named "maybe")])
+]
+
+def memoryWorld : PsForeignWorld :=
+  PsForeignWorld.mk "psc-foreign-interface/1" "psc" "codec" "world"
+    [PsForeignInterface.mk "values" memoryDefinitions [] [] []] [] []
+
+def memoryFlatJson (value : PsCanonicalFlatType) : String :=
+  psJsonQuote (match value with | .i32 => "i32" | .i64 => "i64" | .f32 => "f32" | .f64 => "f64")
+
+def memoryBoolJson (value : Bool) : String := if value then "true" else "false"
+
+def memoryLayoutJson (value : PsCanonicalLayout) : String :=
+  psJsonArray [psNatToString value.alignment, psNatToString value.byteSize, psNatToString value.flatCount,
+    psJsonArray (value.flatPrefix.map memoryFlatJson), psJsonArray (value.fieldOffsets.map psNatToString),
+    psNatToString value.payloadOffset, memoryBoolJson value.needsMemory, memoryBoolJson value.needsHandleTable]
+
+def memoryFixtureLayouts (width : PsCanonicalPointerWidth) : String :=
+  match psCanonicalResolve width memoryDefinitions 64 with
+  | .error _ => "null"
+  | .ok layouts => psJsonArray (layouts.map fun entry =>
+      psJsonArray [psJsonQuote entry.1, memoryLayoutJson entry.2])
+
+def memoryFixture : String :=
+  match psForeignEncodeWorld 64 memoryWorld with
+  | .error _ => "null"
+  | .ok world => psJsonArray [world, memoryFixtureLayouts .memory32, memoryFixtureLayouts .memory64]
+
+def runTests : IO Unit := do
   let tests := [("record alignment/offsets", scalarAndRecord), ("pointer widths", memoryWidths),
     ("variant joins/payload alignment", variants), ("tag widths", tagWidths),
     ("tag bounds", noTagOverflow), ("indirect lift/lower", indirect),
@@ -164,3 +208,7 @@ def main : IO Unit := do
     if !passed then throw (IO.userError ("PSC_CANONICAL_ABI_FAIL: " ++ name))
     IO.println ("PSC_CANONICAL_ABI_PASS: " ++ name)
   IO.println "PSC_CANONICAL_ABI_TESTS: PASS"
+
+
+def main (arguments : List String) : IO Unit := do
+  if arguments == ["--memory-fixture"] then IO.println memoryFixture else runTests

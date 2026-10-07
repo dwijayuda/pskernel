@@ -69,3 +69,14 @@ Imported functions use canon-lower conventions; exported functions use canon-lif
 The planner provides data for later adapters. It does not perform memory reads/writes, allocation, string transcoding, post-return cleanup, resource-table operations or component binary generation. Those operations must follow the selected value and ownership contract; reusing the internal GC representation as a Canonical ABI representation would be unsound.
 
 Foreign structural validation and Canonical ABI planning now share cached dependency/depth analysis. Each accepted definition body has a summarized maximum type depth, and named uses account for that depth without unfolding shared bodies. The same graph orders layout computation. This preserves valid acyclic depth thresholds and rejects unsupported borrow/async forms, missing names and cycles. Bounded topological passes and list lookup avoid exponential expansion, but do not establish a global resource theorem or constant/linear-time complexity. Multiple-error inputs may select a different first diagnostic.
+
+
+## Canonical memory value runtime
+
+The first actual-memory layer is `scripts/canonical-memory.mjs`, under `psc-canonical-memory-sync-utf8/1`. It pins exact InterfaceIR bytes, derives bounded named layouts, checks the memory64 size limit and operates on caller-selected Wasm memory. Synchronous memory32/memory64 scalar, record, tuple, enum/variant, option/result, list and UTF-8 values are supported. Its independent layout summaries are compared with the portable planner, including offsets, flat prefixes and pointer-width differences.
+
+The pinned reference requires nonzero Boolean bytes to lift as true, integer loads/stores to use little-endian signedness, Unicode scalar validation, strict UTF-8, aligned/bounded ranges and dynamic list/string size checks. The runtime preserves a leading U+FEFF instead of treating it as a transport BOM and writes deterministic canonical NaN bits. It refreshes memory views after allocator calls, because growth can detach the previous buffer.
+
+Before stores, a bounded snapshot validates input shapes and own data properties; invalid input does not call realloc or write memory. Allocator failures after this point can leave writes and allocations. Realloc is an explicit trusted capability required to provide owned, disjoint regions, with its returned range checked again after possible memory growth. Shared memory, resource handles, borrowed values and asynchronous values fail closed. Proxy behavior and host allocator effects are not a sandbox boundary.
+
+This layer does not bind foreign functions, flatten core call values, execute canon-lift/canon-lower state transitions, perform post-return cleanup or emit components. Those operations remain separate implementation obligations; no layout or memory round trip establishes global adapter preservation.

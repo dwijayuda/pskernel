@@ -18,9 +18,7 @@ def psKernelInstantiateConstantType
     (type : PsKernelExpr)
     (params : List PsKernelName)
     (levels : List PsKernelLevel) : PsKernelExpr :=
-  match params with
-  | List.nil => type
-  | List.cons _ _ => psKernelExprInstantiateLevelParams type params levels
+  psKernelExprInstantiateLevelParamsIfNeeded type params levels
 
 def psKernelInferenceDebugForallTerminalWithFuel
     (fuel : Nat)

@@ -924,6 +924,178 @@ theorem psKernelDefEqEtaStructWith_configuration_preserves
             exact hSecondConfig
 
 
+
+theorem psKernelDefEqEtaStructWith_true_refines
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqEtaStructWith
+          defeq inferType context state left right =
+        Except.ok (Prod.mk true nextState)) :
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  simp only [psKernelDefEqEtaStructWith] at hSuccess
+  cases hFirst :
+      psKernelDefEqEtaStructCoreWith
+        defeq inferType context state left right with
+  | error error =>
+      simp only [hFirst] at hSuccess
+      simp at hSuccess
+  | ok firstRun =>
+      simp only [hFirst] at hSuccess
+      rcases firstRun with ⟨firstValue, firstState⟩
+      have hFirstConfig :=
+        psKernelDefEqEtaStructCoreWith_configuration_preserves
+          defeq
+          inferType
+          hDefEq
+          hInfer
+          context
+          state
+          firstState
+          left
+          right
+          firstValue
+          hConfig
+          hFirst
+      by_cases hFirstTrue : firstValue = true
+      · have hFirstRun :
+            psKernelDefEqEtaStructCoreWith
+                defeq inferType context state left right =
+              Except.ok (Prod.mk true firstState) := by
+          simpa [hFirstTrue] using hFirst
+        exact
+          psKernelDefEqEtaStructCoreWith_true_refines
+            defeq
+            inferType
+            hDefEq
+            hInfer
+            context
+            state
+            firstState
+            left
+            right
+            hConfig
+            hFirstRun
+      · rw [if_neg hFirstTrue] at hSuccess
+        cases hSecond :
+            psKernelDefEqEtaStructCoreWith
+              defeq inferType
+              context firstState right left with
+        | error error =>
+            simp only [hSecond] at hSuccess
+            simp at hSuccess
+        | ok secondRun =>
+            simp only [hSecond] at hSuccess
+            rcases secondRun with ⟨secondValue, secondState⟩
+            by_cases hSecondTrue : secondValue = true
+            · have hSecondRun :
+                  psKernelDefEqEtaStructCoreWith
+                      defeq inferType
+                      context firstState right left =
+                    Except.ok (Prod.mk true secondState) := by
+                simpa [hSecondTrue] using hSecond
+              exact
+                PsKernelDefEqJudgment.symm
+                  right
+                  left
+                  (psKernelDefEqEtaStructCoreWith_true_refines
+                    defeq
+                    inferType
+                    hDefEq
+                    hInfer
+                    context
+                    firstState
+                    secondState
+                    right
+                    left
+                    hFirstConfig
+                    hSecondRun)
+            · simp [hSecondTrue] at hSuccess
+
+
+theorem psKernelDefEqEtaStructWith_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqEtaStructWith
+          defeq inferType context state left right =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right) := by
+  constructor
+  · exact
+      psKernelDefEqEtaStructWith_configuration_preserves
+        defeq
+        inferType
+        hDefEq
+        hInfer
+        context
+        state
+        nextState
+        left
+        right
+        value
+        hConfig
+        hSuccess
+  · intro hValue
+    cases value with
+    | false =>
+        simp at hValue
+    | true =>
+        exact
+          psKernelDefEqEtaStructWith_true_refines
+            defeq
+            inferType
+            hDefEq
+            hInfer
+            context
+            state
+            nextState
+            left
+            right
+            hConfig
+            hSuccess
+
 theorem psKernelDefEqStringLitExpansionCoreWith_configuration_preserves
     (defeq :
       PsKernelCheckerContext ->

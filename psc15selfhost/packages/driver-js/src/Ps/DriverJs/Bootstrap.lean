@@ -58,6 +58,8 @@ def psCompilerJavaScriptErrorCode
       match emitError with
       | PsJsEmitError.lower lowerError =>
           psCompilerJavaScriptLowerErrorCode lowerError
+      | PsJsEmitError.targetValidation _ =>
+          "emit.target-validation"
       | PsJsEmitError.fuelExhausted => "emit.fuel-exhausted"
       | PsJsEmitError.malformedIr => "emit.malformed-ir"
 

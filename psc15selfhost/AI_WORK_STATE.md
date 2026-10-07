@@ -5,6 +5,7 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
+- **2026-10-07 language-authority migration:** `PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md` is now the normative target language/profile authority for this branch (`pscv-v1`, `PSCV-VERIFY-v1`, `PSCV-CERT-v1`, Lean 4.35.0-rc3 semantic pin). `language-authority.json` binds its exact SHA-256. The executable compiler/self-host implementation remains the inherited `psc2-compiler-v1` / PSC1 bootstrap closure until PSCV conformance gates are actually implemented; no conformance claim was promoted by this documentation/configuration change.
 Mode: implementation first, as requested on 2026-10-07. All subsequent edits/commits use GitHub APIs and validation runs in GitHub Actions; no local execution. Continue research and implementation with focused compilation, portable-profile and boundary checks. Extensive regression campaigns, fixed-point reruns and formal assurance are deferred to the later assurance pass; existing CI failures remain recorded and actionable. No implementation milestone implies final V3 acceptance.
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.

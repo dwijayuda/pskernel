@@ -419,24 +419,24 @@ def psKernelExprReferenceEq
 /-- Preserve the full substitution behavior while eliminating empty
 universe-substitution traversals in constant-type inference. -/
 def psKernelCoreConstantTypeInstantiationTests : Bool :=
-  let universe := PsKernelName.str PsKernelName.anonymous "u"
+  let univName := PsKernelName.str PsKernelName.anonymous "u"
   let name := PsKernelName.str PsKernelName.anonymous "x"
   let type :=
     PsKernelExpr.forallE
       name
-      (PsKernelExpr.sort (PsKernelLevel.param universe))
+      (PsKernelExpr.sort (PsKernelLevel.param univName))
       (PsKernelExpr.app
-        (PsKernelExpr.const name [PsKernelLevel.param universe])
+        (PsKernelExpr.const name [PsKernelLevel.param univName])
         (PsKernelExpr.bvar 0))
       PsKernelBinderInfo.default
   let substituted :=
     psKernelExprInstantiateLevelParams
-      type [universe] [PsKernelLevel.succ PsKernelLevel.zero]
+      type [univName] [PsKernelLevel.succ PsKernelLevel.zero]
   psKernelExprEq
     (psKernelInstantiateConstantType type List.nil List.nil)
     type &&
   psKernelExprEq
-    (psKernelInstantiateConstantType type [universe]
+    (psKernelInstantiateConstantType type [univName]
       [PsKernelLevel.succ PsKernelLevel.zero])
     substituted
 

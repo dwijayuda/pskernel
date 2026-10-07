@@ -161,7 +161,7 @@ def psKernelCachePolicyTests : Bool :=
     PsKernelExpr.app
       (PsKernelExpr.const psKernelNatName List.nil)
       (PsKernelExpr.lit (PsKernelLiteral.nat 1))
-  let local :=
+  let localKey :=
     PsKernelExpr.fvar
       (PsKernelName.str PsKernelName.anonymous "cacheLocal")
   let largeClosed :=
@@ -170,7 +170,7 @@ def psKernelCachePolicyTests : Bool :=
   Bool.and
     (psKernelSemanticCacheEligible smallClosed)
     (Bool.and
-      (!psKernelSemanticCacheEligible local)
+      (!psKernelSemanticCacheEligible localKey)
       (Bool.and
         (!psKernelSemanticCacheEligible largeClosed)
         (!psKernelSemanticPairCacheEligible largeClosed smallClosed)))

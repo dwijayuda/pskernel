@@ -85,197 +85,6 @@ def psKernelInferenceDebugForallTerminalWithFuel
                         (Prod.fst leftResult)
                         (Prod.fst rightResult))
 
-def psKernelInferLambdaSpineWithFuel
-    (fuel : Nat) :
-    (PsKernelCheckerContext ->
-      PsKernelCheckerState ->
-      PsKernelExpr ->
-      Bool ->
-      Except String
-        (Prod PsKernelExpr PsKernelCheckerState)) ->
-    (PsKernelCheckerContext ->
-      PsKernelCheckerState ->
-      PsKernelExpr ->
-      Except String
-        (Prod PsKernelExpr PsKernelCheckerState)) ->
-    PsKernelCheckerContext ->
-    PsKernelCheckerState ->
-    PsKernelExpr ->
-    Bool ->
-    List PsKernelExpr ->
-    List PsKernelCheckerCloseBinder ->
-    Option PsKernelCheckerState ->
-    Except String
-      (Prod PsKernelExpr PsKernelCheckerState) :=
-  match fuel with
-  | Nat.zero =>
-      fun
-        (_inferCore :
-          PsKernelCheckerContext ->
-          PsKernelCheckerState ->
-          PsKernelExpr ->
-          Bool ->
-          Except String
-            (Prod PsKernelExpr PsKernelCheckerState))
-        (_whnf :
-          PsKernelCheckerContext ->
-          PsKernelCheckerState ->
-          PsKernelExpr ->
-          Except String
-            (Prod PsKernelExpr PsKernelCheckerState))
-        (_context : PsKernelCheckerContext)
-        (_state : PsKernelCheckerState)
-        (_current : PsKernelExpr)
-        (_inferOnly : Bool)
-        (_fvars : List PsKernelExpr)
-        (_binders : List PsKernelCheckerCloseBinder)
-        (_publishState : Option PsKernelCheckerState) =>
-        Except.error "kernel lambda-spine budget exhausted"
-  | Nat.succ remaining =>
-      let smaller :=
-        psKernelInferLambdaSpineWithFuel remaining;
-      fun
-        (inferCore :
-          PsKernelCheckerContext ->
-          PsKernelCheckerState ->
-          PsKernelExpr ->
-          Bool ->
-          Except String
-            (Prod PsKernelExpr PsKernelCheckerState))
-        (whnf :
-          PsKernelCheckerContext ->
-          PsKernelCheckerState ->
-          PsKernelExpr ->
-          Except String
-            (Prod PsKernelExpr PsKernelCheckerState))
-        (context : PsKernelCheckerContext)
-        (state : PsKernelCheckerState)
-        (current : PsKernelExpr)
-        (inferOnly : Bool)
-        (fvars : List PsKernelExpr)
-        (binders : List PsKernelCheckerCloseBinder)
-        (publishState : Option PsKernelCheckerState) =>
-        match current with
-        | PsKernelExpr.lam name domain body binderInfo =>
-            let openedDomain :=
-              psKernelExprInstantiateRev
-                domain
-                fvars;
-            let checkedState :=
-              if inferOnly then
-                Except.ok state
-              else
-                match
-                    inferCore
-                      context
-                      state
-                      openedDomain
-                      false with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok domainResult =>
-                    match
-                        psKernelEnsureSortWith
-                          whnf
-                          context
-                          (Prod.snd domainResult)
-                          (Prod.fst domainResult) with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok sortResult =>
-                        Except.ok (Prod.snd sortResult);
-            match checkedState with
-            | Except.error error =>
-                Except.error error
-            | Except.ok domainState =>
-                let freshResult :=
-                  psKernelCheckerStateFreshName
-                    domainState
-                    name;
-                let fresh :=
-                  Prod.fst freshResult;
-                let state1 :=
-                  Prod.snd freshResult;
-                let childLocal :=
-                  psKernelLocalContextAddLocal
-                    context.localContext
-                    fresh
-                    name
-                    openedDomain
-                    binderInfo;
-                let child :=
-                  psKernelCheckerContextWithLocalContext
-                    context
-                    childLocal;
-                let binder :=
-                  PsKernelCheckerCloseBinder.mk
-                    fresh
-                    name
-                    openedDomain
-                    binderInfo
-                    Option.none
-                    false;
-                let nextFVars :=
-                  List.append
-                    fvars
-                    (List.cons
-                      (PsKernelExpr.fvar fresh)
-                      List.nil);
-                let nextBinders :=
-                  List.append
-                    binders
-                    (List.cons binder List.nil);
-                let nextPublish :=
-                  match publishState with
-                  | Option.none =>
-                      Option.some state1
-                  | Option.some parent =>
-                      Option.some parent;
-                smaller
-                  inferCore
-                  whnf
-                  child
-                  state1
-                  body
-                  inferOnly
-                  nextFVars
-                  nextBinders
-                  nextPublish
-        | tail =>
-            let openedTail :=
-              psKernelExprInstantiateRev
-                tail
-                fvars;
-            match
-                inferCore
-                  context
-                  state
-                  openedTail
-                  inferOnly with
-            | Except.error error =>
-                Except.error error
-            | Except.ok tailResult =>
-                let terminalType :=
-                  psKernelExprCheapBetaReduce
-                    (Prod.fst tailResult);
-                let result :=
-                  psKernelCloseCheckerBinders
-                    binders
-                    terminalType
-                    false;
-                let scopedState :=
-                  match publishState with
-                  | Option.none =>
-                      Prod.snd tailResult
-                  | Option.some parent =>
-                      psKernelCheckerStateExitLocalScope
-                        parent
-                        (Prod.snd tailResult);
-                Except.ok
-                  (Prod.mk
-                    result
-                    scopedState)
-
 def psKernelInferCoreWithFuel
     (fuel : Nat) :
     (PsKernelCheckerContext ->
@@ -756,31 +565,103 @@ def psKernelInferCoreWithFuel
                                                        | Except.ok message => message
                                                        | Except.error message =>
                                                            "terminal-debug-error=" ++ message))
-                | PsKernelExpr.lam _ _ _ _ =>
-                    match
-                        psKernelInferLambdaSpineWithFuel
-                          (Nat.succ
-                            (psKernelExprNodeCount expr))
-                          (smaller whnf defeq)
-                          whnf
-                          nextContext
-                          state
-                          expr
-                          inferOnly
-                          List.nil
-                          List.nil
-                          Option.none with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok lambdaResult =>
+                | PsKernelExpr.lam name domain body binderInfo =>
+                    let checkedDomain :=
+                      if inferOnly then
                         Except.ok
                           (Prod.mk
-                            (Prod.fst lambdaResult)
-                            (psKernelCacheInferResult
-                              (Prod.snd lambdaResult)
-                              inferOnly
-                              expr
-                              (Prod.fst lambdaResult)))
+                            domain
+                            state)
+                      else
+                        match
+                            smaller
+                              whnf
+                              defeq
+                              nextContext
+                              state
+                              domain
+                              false with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok domainResult =>
+                            match
+                                psKernelEnsureSortWith
+                                  whnf
+                                  nextContext
+                                  (Prod.snd domainResult)
+                                  (Prod.fst domainResult) with
+                            | Except.error error =>
+                                Except.error error
+                            | Except.ok sortResult =>
+                                Except.ok
+                                  (Prod.mk
+                                    domain
+                                    (Prod.snd sortResult));
+                    match checkedDomain with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok domainState =>
+                        let freshResult :=
+                          psKernelCheckerStateFreshName
+                            (Prod.snd domainState)
+                            name;
+                        let fresh :=
+                          Prod.fst freshResult;
+                        let state1 :=
+                          Prod.snd freshResult;
+                        let childLocal :=
+                          psKernelLocalContextAddLocal
+                            nextContext.localContext
+                            fresh
+                            name
+                            domain
+                            binderInfo;
+                        let child :=
+                          psKernelCheckerContextWithLocalContext
+                            nextContext
+                            childLocal;
+                        let openedBody :=
+                          psKernelExprInstantiate1
+                            body
+                            (PsKernelExpr.fvar fresh);
+                        match
+                            smaller
+                              whnf
+                              defeq
+                              child
+                              state1
+                              openedBody
+                              inferOnly with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok bodyResult =>
+                            let bodyType :=
+                              psKernelExprCheapBetaReduce
+                                (Prod.fst bodyResult);
+                            let closedBody :=
+                              psKernelExprAbstractFVars
+                                bodyType
+                                (List.cons
+                                  fresh
+                                  List.nil);
+                            let result :=
+                              PsKernelExpr.forallE
+                                name
+                                domain
+                                closedBody
+                                binderInfo;
+                            let scopedState :=
+                              psKernelCheckerStateExitLocalScope
+                                state1
+                                (Prod.snd bodyResult);
+                            Except.ok
+                              (Prod.mk
+                                result
+                                (psKernelCacheInferResult
+                                  scopedState
+                                  inferOnly
+                                  expr
+                                  result))
                 | PsKernelExpr.forallE name domain body binderInfo =>
                     match
                         smaller

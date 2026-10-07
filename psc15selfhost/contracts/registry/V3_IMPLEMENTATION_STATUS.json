@@ -50,13 +50,15 @@
         39,
         40
       ],
-      "status": "partial",
+      "status": "implementation-available-release-lock-producer-assurance-pending",
       "owners": [
         "TRUST_MANIFEST.json",
         "scripts/semantic-lock.mjs",
-        "contracts/semantic/SEMANTIC_LOCK_V1.json"
+        "contracts/semantic/SEMANTIC_LOCK_V1.json",
+        "scripts/source-closure-artifact.mjs",
+        "scripts/release-semantic-lock.mjs"
       ],
-      "completion": "Complete semantic, implementation, security, assumption, resource and lineage identities bind exact artifacts and computed trust closure.",
+      "completion": "Exact source closure, semantic context, trust, interfaces, assumptions, capabilities, toolchains and target ABI can now be bound into SemanticLock V1 without inferring missing evidence; final release packaging/inventory completeness remains pending.",
       "assurance": "pending"
     },
     {

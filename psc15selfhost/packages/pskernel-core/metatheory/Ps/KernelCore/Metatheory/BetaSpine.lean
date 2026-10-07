@@ -2642,7 +2642,12 @@ theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
                   (List.cons replacement (List.cons head tail))
                   (Nat.sub index (Nat.add 0 offset)) =
                 Option.some found := by
-            rw [Nat.zero_add, hRelativeSucc]
+            change
+              psKernelExprListGet
+                  (List.cons replacement (List.cons head tail))
+                  (Nat.sub index offset) =
+                Option.some found
+            rw [hRelativeSucc]
             simpa [psKernelExprListGet] using hGet
           rw [
             psKernelExprInstantiateAtReference_bvar_hit_cons
@@ -2679,14 +2684,40 @@ theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
               (List.cons head tail)
               relative
               hGet
+          have hLengthPlusThreshold :
+              Nat.add
+                  (psKernelExprListLength (List.cons head tail))
+                  (Nat.succ offset) ≤
+                index := by
+            have hThresholdLe : Nat.succ offset ≤ index :=
+              hInnerLe
+            have hBound :
+                psKernelExprListLength (List.cons head tail) ≤
+                  Nat.sub index (Nat.succ offset) := by
+              simpa [relative] using hLengthBound
+            exact
+              (Nat.le_sub_iff_add_le hThresholdLe).1
+                hBound
+          have hLengthPlusOffsetLt :
+              Nat.add
+                  (psKernelExprListLength (List.cons head tail))
+                  offset <
+                index := by
+            apply Nat.lt_of_succ_le
+            simpa [Nat.add_succ] using hLengthPlusThreshold
+          have hOffsetPlusLengthLt :
+              Nat.add
+                  offset
+                  (psKernelExprListLength (List.cons head tail)) <
+                index := by
+            simpa [Nat.add_comm] using hLengthPlusOffsetLt
           have hReducedAbove :
               offset <
                 Nat.sub
                   index
                   (psKernelExprListLength
-                    (List.cons head tail)) := by
-            dsimp [relative] at hLengthBound
-            omega
+                    (List.cons head tail)) :=
+            (Nat.lt_sub_iff_add_lt).2 hOffsetPlusLengthLt
           rw [
             psKernelExprInstantiateAtReference_singleton_above
               (Nat.sub
@@ -2702,7 +2733,12 @@ theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
                   (List.cons replacement (List.cons head tail))
                   (Nat.sub index (Nat.add 0 offset)) =
                 Option.none := by
-            rw [Nat.zero_add, hRelativeSucc]
+            change
+              psKernelExprListGet
+                  (List.cons replacement (List.cons head tail))
+                  (Nat.sub index offset) =
+                Option.none
+            rw [hRelativeSucc]
             simpa [psKernelExprListGet] using hGet
           rw [
             psKernelExprInstantiateAtReference_bvar_miss_cons

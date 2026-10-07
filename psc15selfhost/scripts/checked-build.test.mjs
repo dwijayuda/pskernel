@@ -15,7 +15,7 @@ const native = existsSync(seed);
 
 function passDefinitions(graph) {
   return graph.entries
-    .filter(entry => entry.identity?.contract === 'psc-pass-definition/1')
+    .filter(entry => entry.identity?.domain === 'pass-definition')
     .map(entry => entry.canonicalValue);
 }
 

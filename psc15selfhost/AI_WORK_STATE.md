@@ -6,6 +6,8 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
+- **2026-10-08 focused cloud ClaimSet evidence:** `2f7426d` run 37666664679/job 112947533544 passed portable source/profile, V5 reconciliation, all seven ClaimSet boundary cases and all new typed-product/effect tests. The archive fixture then denied an assumption omitted by its v1-only definition inventory after TypeScript outputs adopted v2 domain-separated products. Updated both affected test consumers to discover pass definitions by their stable artifact domain; actual pass verification still checks exact supported schema/contracts and the consumer's explicit assumption policy. Audited 51 related evidence/archive/cache/bootstrap host files; no production assumption-policy bypass was added. Full CI and scalar-export replay remain pending.
+
 - **2026-10-08 ClaimSet and typed pass products:** implemented bounded canonical ClaimSet assertions with exact subject/profile/checker/evidence/resource identities, consumer-selected checker replay and a live verification result for exact policy conjunctions. Claims do not imply each other; raw AssuredRelease assertions reject and policy satisfaction creates no release capability. Production bundle/checker adapters remain pending. Added `psc-pass-definition/2` ordered domain/contract products and explicit conservative effects; legacy homogeneous definitions retain their rejecting behavior. Observed Canonical interface/binding projection now records both distinct output contracts, and offline replay checks arity/order/domain/contract. Portable declarations use ordinary PSC1 structures/lists; global proof and QueryGraph effect integration remain pending. Focused cloud validation is pending for this checkpoint.
 
 

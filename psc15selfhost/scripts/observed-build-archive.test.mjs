@@ -12,7 +12,7 @@ function fixture() {
     compilerBytes: Buffer.from('fictional compiler'), compilerKind: 'test-double', typeScriptCompilerBytes: Buffer.from('fictional tsc'),
     provider: { profile: 'test-profile' }, providerSecurity: { profile: 'test-security' }, kernelContract: { id: 'test-kernel' },
     hostSources: [{ path: 'test.mjs', bytes: Buffer.from('test implementation') }], runtime: { version: 'test' }, outputStem: 'seven' });
-  const allowedAssumptions = [...new Set(built.graph.entries.filter(entry => entry.identity.contract === 'psc-pass-definition/1')
+  const allowedAssumptions = [...new Set(built.graph.entries.filter(entry => entry.identity.domain === 'pass-definition')
     .flatMap(entry => entry.canonicalValue.assumptionIds))];
   return { built, policy: { expectedGraphId: built.identity, allowedAssumptions } };
 }

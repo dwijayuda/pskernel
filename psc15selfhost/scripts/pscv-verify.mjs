@@ -17,7 +17,7 @@ export async function verifyOfflinePrototype() {
   const semanticLock=JSON.parse(await readFile(new URL("../psc.semantic-lock.json",import.meta.url),"utf8"));
   const archiveProfile=JSON.parse(await readFile(new URL("../contracts/archive/ARCHIVE_PROFILE_V0.json",import.meta.url),"utf8"));
   const independence=JSON.parse(await readFile(new URL("../profiles/assurance/INDEPENDENCE_VECTORS.json",import.meta.url),"utf8"));
-  if(architecture.masterPlan!=="THE_PSCV_COMPILER_REFERENCE_VERSION_3.md") throw new Error("PSCV_VERIFY_ARCHITECTURE");
+  if(architecture.masterPlan!=="THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md") throw new Error("PSCV_VERIFY_ARCHITECTURE");
   if(trust.contract!=="psc-trust-manifest/1") throw new Error("PSCV_VERIFY_TRUST");
   if(semanticLock.contract!=="psc-semantic-lock/0") throw new Error("PSCV_VERIFY_SEMANTIC_LOCK");
   if(archiveProfile.contract!=="psc-archive-profile/0"||archiveProfile.offlineVerificationRequired!==true) throw new Error("PSCV_VERIFY_ARCHIVE");
@@ -37,7 +37,9 @@ export async function verifyOfflinePrototype() {
   }
   return Object.freeze({
     verifier:pscvVerifierPrototype.id,
-    architecture:"pscv-architecture/v3",
+    architecture:"pscv-architecture/v3", // Historical evidence origin, not current target conformance.
+    targetArchitecture:"pscv-architecture/v5.1",
+    targetConformance:false,
     trust:trust.contract,
     semanticLock:semanticLock.contract,
     archiveProfile:archiveProfile.contract,

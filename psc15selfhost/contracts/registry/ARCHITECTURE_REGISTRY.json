@@ -1,11 +1,17 @@
 {
   "schemaVersion": 1,
-  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
   "entries": [
+    {
+      "id": "pscv-architecture/v5.1",
+      "kind": "architecture",
+      "status": "accepted-target",
+      "canonicalPath": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md"
+    },
     {
       "id": "pscv-architecture/v3",
       "kind": "architecture",
-      "status": "accepted-target",
+      "status": "historical",
       "canonicalPath": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"
     },
     {
@@ -291,6 +297,13 @@
       "kind": "target-ir-validator",
       "status": "current",
       "canonicalPath": "packages/backend-js/src/Ps/BackendJs/Validate.lean"
+    },
+    {
+      "id": "psc-v5-migration-status/1",
+      "kind": "migration-registry",
+      "status": "current-host",
+      "canonicalPath": "contracts/registry/V5_MIGRATION_STATUS.json"
     }
-  ]
+  ],
+  "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"
 }

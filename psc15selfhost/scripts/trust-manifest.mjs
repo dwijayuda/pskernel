@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const trust = JSON.parse(await readFile(path.join(root, "TRUST_MANIFEST.json"), "utf8"));
 const selfHost = JSON.parse(await readFile(path.join(root, "selfhost-profile.json"), "utf8"));
 if (trust.schemaVersion !== 1 || trust.contract !== "psc-trust-manifest/1") throw new Error("PSC_TRUST_MANIFEST_SCHEMA");
-if (trust.masterPlan !== "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md") throw new Error("PSC_TRUST_MANIFEST_MASTER_PLAN");
+if (trust.masterPlan !== "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md") throw new Error("PSC_TRUST_MANIFEST_MASTER_PLAN");
 await access(path.join(root, trust.semanticBootstrapRoot));
 for (const relative of [trust.checkedAuthority.hostBoundary, trust.checkedAuthority.checkedBuildBoundary]) await access(path.join(root, relative));
 const expected = [...trust.bootstrapPackageClosure].sort();

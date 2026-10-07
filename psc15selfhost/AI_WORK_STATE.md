@@ -1,9 +1,15 @@
 # AI Work State
 
-Master plan: THE_PSCV_COMPILER_REFERENCE_VERSION_3.md
+Master target architecture: THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md
+Preserved implementation/evidence origin: THE_PSCV_COMPILER_REFERENCE_VERSION_3.md
 Branch: pscv/v3-execution
 
 ## Active execution
+
+- **2026-10-08 explicit V5.1 adoption and reconciliation:** user instruction adopts V5.1 as the master target architecture. Read the complete reference and reconciled all 22 V3 workstreams, all 49 inherited architecture identities, all 57 V3 sections through their retained ledger, all 13 deferred assurance obligations, and every one of the 12 current compiler-ir source files. Machine-readable mapping: `contracts/registry/V5_MIGRATION_STATUS.json`; coverage check: `scripts/v5-migration-audit.mjs`. No files were relocated and no legacy evidence or contract identity was upgraded. The earlier entries describing V5.1 as proposed are historical and superseded by this adoption decision; the implementation is not declared V5.1-conformant.
+- **V5.1 boundaries:** small semantic spine; RuntimeIR plus validation capability; source-level PublicApiIR separate from foreign InterfaceIR; OriginGraph/debug products separate from semantic authority; TS/JS/Wasm/Rust first-class backends. SAVEF, FactoryBench, comparator/assurance and release/archive remain companions. PSKernel internals/metatheory remain exclusively the external kernel workstream. Work remains GitHub/cloud only.
+- **Current baseline failure:** at `64b1889`, cloud main run 37663136253/job 112936034457 passed five of six generated scalar-export host tests, then rejected the observed archive projection with `PSC_EVIDENCE_PASS_ARTIFACT_CONTRACT`. Root cause: the current homogeneous pass-output contract cannot describe the distinct interface and binding outputs. Preserve the rejecting contract and add explicit typed product metadata; do not bypass evidence validation. This baseline is not green.
+
 
 - **2026-10-08 Canonical scalar evidence integration:** implemented independent host projection from exact SpecializedIR/selection artifacts and exact closed binary export/signature checks, optionally bound to actual WasmIR export routing and function indices. The portable producer retains its exact validated target module. Observed build graphs now retain policy/interface/binding/target/binary/validation artifacts, and offline archive replay recomputes the two narrow relations. Updated the static host TrustManifest for four newly reachable modules. Extended real native-output tests exercise projection mismatch, fresh-hash tampering, explicit non-preservation classification and archived replay. This checkpoint awaits cloud validation; production checked-driver/CLI selection routing and EvidenceEnvelope publication remain next. No strict body-validation or behavioral-preservation claim is inferred from signatures.
 - **2026-10-08 scalar export cloud evidence:** `3090317` main run 37661580595 / job 112930171287 passed portable structural checks, native scalar-export cases, explicit PSC1 source checking, real generated-Wasm execution for both word sizes, all backend corpus steps and whole-Wasm generation before concurrent documentation commits cancelled its tail. Preserved the standalone V5.1 proposal and its state entry; it explicitly keeps V3 as active implementation/evidence authority.
@@ -27,10 +33,15 @@ Mode: implementation first, as requested on 2026-10-07. All subsequent edits/com
 
 ## Next
 
-1. Continue executable interface adapters, internal artifact/semantic-lock closure and incremental integration. SAVEF lifecycle and B0-B4 harness mechanisms are implemented; real operation adapters, independent holdout selection/campaigns, release packaging and actual proof replay remain obligations.
-2. Complete target-specific interface adapters, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
-3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
-4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
+1. Implement machine-readable ClaimSet with exact subjects and evidence classes; no serialized record creates live authority.
+2. Register BackendDescriptor for TS, direct JS, Wasm and Rust, then a common typed ArtifactBundle and production consumers.
+3. Enforce package/dependency/authority anti-drift checks; use the completed compiler-ir logical ownership map before physical moves.
+4. Extend pass preservation/invalidation and typed product contracts; bind QueryGraph reuse to ProfileEnvironment, ActionId and declared semantic fingerprints.
+5. Implement checked-source PublicApiIR, OriginGraph and direct-JS declarations/source maps (optional declaration maps) without tsc. Research primary TypeScript/ECMA-426/Wasm designs before backend changes.
+6. Complete least-authority extension contracts/host, isolated AuthorityBroker and hermetic actions. Resume compatible pending Canonical adapter routing within these contracts.
+7. Map all inherited assurance, bootstrap, SAVEF, release and holdout obligations to exact ClaimSet policies; defer extensive formal/independent campaigns without claiming their results. Perform low-risk physical refactoring only after contract consumers and focused cloud checks exist.
+
+Implementation-first status and acceptance remain separate in the V5 migration registry. Historical V3 ledger and assurance handoff are retained; no target score or milestone inventory establishes conformance, global preservation, promotion, DDC or assured release.
 
 ## Historical checkpoint P0/P2/P3
 

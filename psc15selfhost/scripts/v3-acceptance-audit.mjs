@@ -46,7 +46,7 @@ await check("A4-no-provider-fallback",async()=>{
 
 await check("A5-trust-manifest",async()=>{
   const trust=await json("TRUST_MANIFEST.json");
-  if(trust.contract!=="psc-trust-manifest/1"||trust.masterPlan!=="THE_PSCV_COMPILER_REFERENCE_VERSION_3.md") throw new Error("trust manifest drift");
+  if(trust.contract!=="psc-trust-manifest/1"||trust.legacyImplementationReference!=="THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"||trust.masterPlan!=="THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md") throw new Error("trust manifest drift");
   await access(new URL(trust.semanticBootstrapRoot,root));
 });
 

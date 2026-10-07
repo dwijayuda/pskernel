@@ -3083,3 +3083,144 @@ theorem psKernelExprInstantiateRev_append_singleton_beta
   unfold psKernelExprInstantiateRev
   unfold psKernelExprInstantiate
   rw [psKernelExprListReverse_append_singleton]
+
+
+theorem psKernelBetaPrefixStep
+    (context : PsKernelCheckerContext)
+    (name : PsKernelName)
+    (type body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (prefix : List PsKernelExpr)
+    (arg : PsKernelExpr)
+    (rest : List PsKernelExpr) :
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      (psKernelExprApplyArgsCheap
+        (psKernelExprInstantiateRev
+          (PsKernelExpr.lam
+            name type body binderInfo)
+          prefix)
+        (List.cons arg rest))
+      (psKernelExprApplyArgsCheap
+        (psKernelExprInstantiateRev
+          body
+          (List.append
+            prefix
+            (List.cons arg List.nil)))
+        rest) := by
+  let instantiatedType :=
+    psKernelExprInstantiateAt
+      type
+      0
+      (psKernelExprListReverse prefix)
+      0
+  let instantiatedBody :=
+    psKernelExprInstantiateAt
+      body
+      0
+      (psKernelExprListReverse prefix)
+      1
+  have hLam :
+      psKernelExprInstantiateRev
+          (PsKernelExpr.lam
+            name type body binderInfo)
+          prefix =
+        PsKernelExpr.lam
+          name
+          instantiatedType
+          instantiatedBody
+          binderInfo := by
+    simpa [
+      instantiatedType,
+      instantiatedBody
+    ] using
+      psKernelExprInstantiateRev_lam
+        name type body binderInfo prefix
+  have hResult :
+      psKernelExprInstantiate1
+          instantiatedBody
+          arg =
+        psKernelExprInstantiateRev
+          body
+          (List.append
+            prefix
+            (List.cons arg List.nil)) := by
+    simpa [instantiatedBody] using
+      psKernelExprInstantiateRev_append_singleton_beta
+        body arg prefix
+  have hStep :
+      PsKernelReductionStep
+        context.environment
+        context.localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.lam
+            name
+            instantiatedType
+            instantiatedBody
+            binderInfo)
+          arg)
+        (psKernelExprInstantiate1
+          instantiatedBody
+          arg) :=
+    PsKernelReductionStep.beta
+      name
+      instantiatedType
+      instantiatedBody
+      arg
+      binderInfo
+  have hOne :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.lam
+            name
+            instantiatedType
+            instantiatedBody
+            binderInfo)
+          arg)
+        (psKernelExprInstantiate1
+          instantiatedBody
+          arg) :=
+    PsKernelReductionClosure.cons
+      (PsKernelExpr.app
+        (PsKernelExpr.lam
+          name
+          instantiatedType
+          instantiatedBody
+          binderInfo)
+        arg)
+      (psKernelExprInstantiate1
+        instantiatedBody
+        arg)
+      (psKernelExprInstantiate1
+        instantiatedBody
+        arg)
+      hStep
+      (PsKernelReductionClosure.refl
+        (psKernelExprInstantiate1
+          instantiatedBody
+          arg))
+  have hLift :=
+    psKernelReductionClosure_applyArgsCheap
+      context.environment
+      context.localContext
+      rest
+      (PsKernelExpr.app
+        (PsKernelExpr.lam
+          name
+          instantiatedType
+          instantiatedBody
+          binderInfo)
+        arg)
+      (psKernelExprInstantiate1
+        instantiatedBody
+        arg)
+      hOne
+  simpa [
+    psKernelExprApplyArgsCheap,
+    psKernelExprApplyArgsCheapWorker,
+    hLam,
+    hResult
+  ] using hLift

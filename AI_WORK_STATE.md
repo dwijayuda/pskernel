@@ -20,6 +20,42 @@
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
+### Reconciled Arena semantic fixes — 2026-10-07
+The Arena/Mathlib lane remains on `pscv/pskernel-core-arena-v1`, but confirmed
+production-kernel fixes are reconciled into this proof branch promptly. Arena
+transport, hosted-runner workarounds, historical metadata replay, and the
+high-fuel empirical compatibility profile remain isolated from the verified
+kernel source.
+
+Confirmed fixes now present in this branch:
+- **Semantic-cache fvar scope:** reject semantic-cache keys containing fvars;
+  this was discovered by metatheory and fixed earlier.
+- **Lean-compatible universe max normalization:** distribute a common successor
+  offset across normalized `max` branches. Arena first exposed this through
+  `Functor.mk`; the exact Functor universe shape is locked by a differential
+  regression.
+- **Mutual recursive-argument checker fuel:** structural traversal fuel and
+  checker/WHNF fuel are now separate. Arena exposed the defect on the nested
+  `Lean.Syntax` declaration; the focused multi-unfold regression is green.
+- **Raw constructor Pi spine:** ordinary and mutual constructor admission no
+  longer WHNF the outer constructor spine to manufacture binders. Binder
+  domains may still be checked/reduced as Lean requires. Upstream Lean Kernel
+  Arena Tutorial moved from 140/141 to **141/141** after this fix. Proof-side
+  equations lock rejection/preservation for non-raw-Pi constructor spines.
+
+Empirical validation for the reconciled semantic source:
+- full pinned `Init.Prelude`: accepted;
+- upstream Arena Tutorial: **141/141 correct**, zero false accepts/rejects;
+- historical bug corpus before historical-metadata replay: zero false accepts
+  among evaluated cases; current host-only replay/classification work is
+  intentionally not merged into this proof branch.
+
+The full package proof gate remains red only at the already-active
+`Metatheory/RecursorReduction.lean` transport/composition frontier. Run #470
+fails on localized recursor-prefix rewrite alignment; the reconciled
+constructor/level/mutual-analysis source modules compile successfully and do
+not introduce a new proof blocker.
+
 ## Acceptance criteria
 The work is complete only when all of the following hold:
 

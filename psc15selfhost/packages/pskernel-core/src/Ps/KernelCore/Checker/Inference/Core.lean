@@ -39,7 +39,7 @@ def psKernelInferLambdaSpineWithFuel
     Except String (Prod PsKernelExpr PsKernelCheckerState) :=
   match fuel with
   | Nat.zero =>
-      fun _ _ _ _ _ _ _ =>
+      fun _ _ _ _ _ _ _ _ =>
         Except.error "kernel inference lambda-spine budget exhausted"
   | Nat.succ remaining =>
       let smaller := psKernelInferLambdaSpineWithFuel remaining
@@ -165,7 +165,7 @@ def psKernelInferForallSpineWithFuel
     Except String (Prod PsKernelExpr PsKernelCheckerState) :=
   match fuel with
   | Nat.zero =>
-      fun _ _ _ _ _ _ _ =>
+      fun _ _ _ _ _ _ _ _ =>
         Except.error "kernel inference forall-spine budget exhausted"
   | Nat.succ remaining =>
       let smaller := psKernelInferForallSpineWithFuel remaining
@@ -290,7 +290,7 @@ def psKernelInferLetSpineWithFuel
     Except String (Prod PsKernelExpr PsKernelCheckerState) :=
   match fuel with
   | Nat.zero =>
-      fun _ _ _ _ _ _ _ _ =>
+      fun _ _ _ _ _ _ _ _ _ =>
         Except.error "kernel inference let-spine budget exhausted"
   | Nat.succ remaining =>
       let smaller := psKernelInferLetSpineWithFuel remaining

@@ -1677,6 +1677,151 @@ theorem psKernelToConstructorWhenK_configuration_sound_of_components
                     ⟩
 
 
+theorem psKernelStructureEtaCandidate_refines
+    (context : PsKernelCheckerContext)
+    (major majorType : PsKernelExpr)
+    (inductName typeName ctorName : PsKernelName)
+    (levels : List PsKernelLevel)
+    (inductInfo : PsKernelInductiveInfo)
+    (ctorInfo : PsKernelConstructorInfo)
+    (hIndex :
+      PsKernelEnvironmentIndexRefines
+        context.environment)
+    (hNonRecStructure :
+      psKernelEnvironmentIsNonRecStructure
+          context.environment
+          inductName =
+        true)
+    (hTypeHead :
+      psKernelExprGetAppFn majorType =
+        PsKernelExpr.const typeName levels)
+    (hTypeName :
+      psKernelNameEq typeName inductName = true)
+    (hInductFind :
+      psKernelEnvironmentFind
+          context.environment
+          inductName =
+        Option.some
+          (PsKernelConstantInfo.inductInfo inductInfo))
+    (hCtors :
+      inductInfo.ctors =
+        List.cons ctorName List.nil)
+    (hCtorFind :
+      psKernelEnvironmentFind
+          context.environment
+          ctorName =
+        Option.some
+          (PsKernelConstantInfo.ctorInfo ctorInfo))
+    (hParamBound :
+      Nat.ble
+          ctorInfo.numParams
+          (psKernelExprListLength
+            (psKernelExprGetAppArgs majorType)) =
+        true) :
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      major
+      (psKernelApplyArgs
+        (PsKernelExpr.const ctorName levels)
+        (psKernelExprListAppend
+          (psKernelExprListTake
+            ctorInfo.numParams
+            (psKernelExprGetAppArgs majorType))
+          (psKernelStructureFieldsWithFuel
+            (Nat.succ ctorInfo.numFields)
+            inductName
+            major
+            ctorInfo.numFields
+            0))) := by
+  have hInductAuthoritative :
+      psKernelFindConstantInList
+          inductName
+          context.environment.constants =
+        Option.some
+          (PsKernelConstantInfo.inductInfo inductInfo) :=
+    psKernelEnvironmentFind_some_authoritative
+      context.environment
+      inductName
+      (PsKernelConstantInfo.inductInfo inductInfo)
+      hIndex
+      hInductFind
+  have hCtorAuthoritative :
+      psKernelFindConstantInList
+          ctorName
+          context.environment.constants =
+        Option.some
+          (PsKernelConstantInfo.ctorInfo ctorInfo) :=
+    psKernelEnvironmentFind_some_authoritative
+      context.environment
+      ctorName
+      (PsKernelConstantInfo.ctorInfo ctorInfo)
+      hIndex
+      hCtorFind
+  have hFields :
+      PsKernelStructureEtaFields
+        inductName
+        major
+        0
+        ctorInfo.numFields
+        (psKernelStructureFieldsWithFuel
+          (Nat.succ ctorInfo.numFields)
+          inductName
+          major
+          ctorInfo.numFields
+          0) :=
+    psKernelStructureFieldsWithFuel_refines_eta_fields
+      (Nat.succ ctorInfo.numFields)
+      inductName
+      major
+      ctorInfo.numFields
+      0
+      (by simp)
+  exact
+    PsKernelDefEqJudgment.recursorStructureEta
+      major
+      majorType
+      (psKernelApplyArgs
+        (PsKernelExpr.const ctorName levels)
+        (psKernelExprListAppend
+          (psKernelExprListTake
+            ctorInfo.numParams
+            (psKernelExprGetAppArgs majorType))
+          (psKernelStructureFieldsWithFuel
+            (Nat.succ ctorInfo.numFields)
+            inductName
+            major
+            ctorInfo.numFields
+            0)))
+      inductName
+      typeName
+      ctorName
+      levels
+      (psKernelExprGetAppArgs majorType)
+      (psKernelExprListTake
+        ctorInfo.numParams
+        (psKernelExprGetAppArgs majorType))
+      (psKernelStructureFieldsWithFuel
+        (Nat.succ ctorInfo.numFields)
+        inductName
+        major
+        ctorInfo.numFields
+        0)
+      inductInfo
+      ctorInfo
+      hNonRecStructure
+      hTypeHead
+      hTypeName
+      rfl
+      hInductAuthoritative
+      hCtors
+      hCtorAuthoritative
+      hParamBound
+      rfl
+      hFields
+      rfl
+
+
 theorem psKernelFindRecursorRule_some_matches_metatheory
     (ctorName : PsKernelName)
     (rules : List PsKernelRecursorRule)

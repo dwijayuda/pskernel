@@ -287,6 +287,7 @@ test('actual source signatures produce direct declarations accepted by the pinne
   assert.equal(executable.answer, 42n);
   assert.equal(executable.applyNat(executable.echoNat, 17n), 17n);
   assert.deepEqual(executable.echoArray([3n]), [3n]);
+  assert.deepEqual(Buffer.from(staged.portableDeclarations), product.declarations.bytes);
   await checkDeclarationConsumer(product, [
       'import { answer, echoNat, applyNat, echoArray, greeting } from "./module.js";',
       'const a: bigint = echoNat(answer);',
@@ -317,6 +318,7 @@ test('uniform JS representation retains generic exports and strips only checked 
     runtimeIr: snapshots.runtimeIr, verifiedIr: snapshots.verifiedIr, uniformSpecializedIr: selected,
     jsIr: targets.jsIr, javaScript: record(staged.javaScript, 'javascript-output', 'psc-direct-javascript/es2022'),
   } });
+  assert.deepEqual(Buffer.from(staged.portableDeclarations), product.declarations.bytes);
   await checkDeclarationConsumer(product, [
     'import { forward, unused, applyValue, echoArray, mapValues, answer, choice } from "./module.js";',
     'const a: bigint = forward(answer);',
@@ -393,4 +395,8 @@ test('uniform JS representation retains generic exports and strips only checked 
 
 test('portable source projection rejects ambiguous, dependent, higher-rank and exhausted products', () => {
   assert.equal(emitted('--source-signature-errors').toString(), 'PSCV_SOURCE_SIGNATURE_FAILURES: PASS');
+});
+
+test('portable declaration writer rejects invalid bindings and enforces exact resource bounds', () => {
+  assert.match(emitted('--declaration-writer-errors'), /PSCV_PORTABLE_DECLARATIONS: PASS/);
 });

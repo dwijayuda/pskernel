@@ -85,6 +85,10 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.Specialize
   ]
 
+lean_lib PsInterfaceTs where
+  srcDir := "packages/interface-ts/src"
+  roots := #[`Ps.InterfaceTs.Declarations]
+
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
   roots := #[

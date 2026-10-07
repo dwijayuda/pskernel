@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "contract": "psc-direct-javascript-declarations/1",
   "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
-  "implementation": "host-adapter-with-portable-source-producer",
+  "implementation": "portable-source-producer-and-candidate-writer-with-host-correspondence-checker",
   "source": "Exact pre-erasure PublicApiIR types. Runtime/Specialized/JsIR are used only to validate correspondence and bind actual exports, never to infer the source API.",
   "products": [
     {
@@ -48,7 +48,7 @@
     "Generic runtime exports under the current closed specializer",
     "Dependent value types, proposition erasure inference, higher-rank generics",
     "Named type aliases, structures/inductives and type-level computation",
-    "Declaration position maps and portable declaration serializer",
+    "Declaration position maps and live portable-writer service routing",
     "Runtime refinements, independently proved source projection or executable preservation",
     "Generic constants that would require inventing a callable factory"
   ],
@@ -72,6 +72,18 @@
     "algorithm": "Explicit task/value worklist and bounded prefix scan; curried structural fuel recursion; lexical scope markers preserve source generic indices and reject dependent runtime values.",
     "resourcePolicy": "At most 128 prefix binders/scope entries/type depth; caller-selected positive work-step budget (default 400000) plus separately bounded prefix work. The host comparator counts source nodes, so resource units are intentionally not equated.",
     "output": "Canonical psc-source-signature-structural/1 signature objects retain exact source binder names and visibility. No source normalization, target inference, live authority or semantic theorem.",
-    "status": "portable-producer-and-native-host-comparison-implemented-declaration-writer-integration-pending"
+    "status": "portable-producer-and-native-host-comparison-implemented"
+  },
+  "portableDeclarationWriter": {
+    "path": "packages/interface-ts/src/Ps/InterfaceTs/Declarations.lean",
+    "owner": "interface-ts",
+    "entry": "psTsEmitDeclarations",
+    "profile": "PSC1-portable-selfhost/1",
+    "inputs": "Body-free PublicApiIR plus increasing source-index/exact-export-name requests from independently checked erasure/export binding; closed or uniform JavaScript64 profile.",
+    "algorithm": "Single forward declaration scan and explicit type/output worklist; structural fuel recursion and balanced text builder. Generic indices, ASCII export names, source-index order/range and output budgets reject explicitly.",
+    "resourcePolicy": "Positive caller-selected writer steps and output bytes; default 1000000 steps and 64 MiB. Each selected source projection separately uses its 400000-step/128-depth limit. Identifier scanning is bounded by its output-sized byte length. Projection resource units are not writer steps.",
+    "authority": "Candidate bytes only: caller must validate complete source/runtime/export correspondence and uniqueness; no standalone inventory or type-preservation authority.",
+    "status": "portable-writer-and-native-host-byte-comparison-implemented-live-service-routing-pending",
+    "validation": "Actual compiled closed/generic/higher-order/Array declarations compare exact bytes with the independent host writer and use the existing pinned TypeScript consumer. Focused sparse alias, empty module, request order/range, malformed name, generic policy and exact budget checks are added; cloud run pending."
   }
 }

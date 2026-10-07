@@ -1,3 +1,4 @@
+import Ps.InterfaceTs.Declarations
 import Ps.CompilerIr.SourceSignatureEncode
 import Ps.DriverTs.Stages
 import Ps.DriverJs.Stages
@@ -63,8 +64,80 @@ def psSourceSignatureFailureFixture : IO Unit := do
   | _ => throw (IO.userError "SIGNATURE_DEPTH_LIMIT")
   IO.println "PSCV_SOURCE_SIGNATURE_FAILURES: PASS"
 
+-- Requests use the actual observed erasure names; the host independently checks
+-- these bytes against complete source/runtime/target inventories.
+def psTsDeclarationFixture
+    (profile : PsTsDeclarationProfile) (api : PsPublicApiModule)
+    (erasureTable : String) : IO String := do
+  let .ok (.array [.string _, .string _, .array entries]) := psJsonParse erasureTable
+    | throw (IO.userError "DECLARATION_FIXTURE_ERASURE_TABLE")
+  let requests := entries.zipIdx.filterMap fun (entry, index) =>
+    match entry with
+    | .array [_, .array [.string "runtime", .string name]] =>
+        some (PsTsDeclarationRequest.mk index name)
+    | _ => none
+  let .ok declarations := psTsEmitDeclarations profile api requests
+    | throw (IO.userError "DECLARATION_PORTABLE_WRITER")
+  pure declarations
+
+def psTsDeclarationFailureFixture : IO Unit := do
+  let nat := PsExpr.constE (PsName.str .anonymous "Nat") []
+  let binder := PsName.str .anonymous "A"
+  let simple := PsPublicApiDeclaration.constant .definition binder [] nat
+  let api := PsPublicApiModule.mk [simple, simple]
+  let selected := [PsTsDeclarationRequest.mk 1 "Array"]
+  let .ok sparse := psTsEmitDeclarations .closedJavaScript64 api selected
+    | throw (IO.userError "DECLARATION_SPARSE_FAILED")
+  if sparse != "declare const $pscDeclaration1: bigint;\nexport { $pscDeclaration1 as Array };\n" then
+    throw (IO.userError "DECLARATION_ALIAS_OR_SOURCE_INDEX")
+  let .ok empty := psTsEmitDeclarations .closedJavaScript64 api []
+    | throw (IO.userError "DECLARATION_EMPTY_FAILED")
+  if empty != "export {};\n" then throw (IO.userError "DECLARATION_EMPTY_MODULE")
+  for requests in [[PsTsDeclarationRequest.mk 2 "missing"],
+      [PsTsDeclarationRequest.mk 0 "x", PsTsDeclarationRequest.mk 0 "y"],
+      [PsTsDeclarationRequest.mk 1 "x", PsTsDeclarationRequest.mk 0 "y"]] do
+    match psTsEmitDeclarations .closedJavaScript64 api requests with
+    | .error .requestOrderOrRange => pure ()
+    | _ => throw (IO.userError "DECLARATION_REQUEST_ORDER_OR_RANGE")
+  for name in ["", "0bad", "x\ny", "é", "😀", "x-y", "x; export {}"] do
+    match psTsEmitDeclarations .closedJavaScript64 api [PsTsDeclarationRequest.mk 0 name] with
+    | .error .exportName => pure ()
+    | _ => throw (IO.userError "DECLARATION_IDENTIFIER")
+  match psTsEmitDeclarationsWithLimits .closedJavaScript64 0 1000 api selected with
+  | .error .resourcePolicy => pure ()
+  | _ => throw (IO.userError "DECLARATION_POLICY")
+  match psTsEmitDeclarationsWithLimits .closedJavaScript64 1 1000 api selected with
+  | .error .resourceExhausted => pure ()
+  | _ => throw (IO.userError "DECLARATION_STEPS")
+  match psTsEmitDeclarationsWithLimits .closedJavaScript64 1000 (sparse.utf8ByteSize - 1) api selected with
+  | .error .resourceExhausted => pure ()
+  | _ => throw (IO.userError "DECLARATION_BYTES")
+  let .ok exact := psTsEmitDeclarationsWithLimits .closedJavaScript64 1000 sparse.utf8ByteSize api selected
+    | throw (IO.userError "DECLARATION_EXACT_BYTES")
+  if exact != sparse then throw (IO.userError "DECLARATION_EXACT_OUTPUT")
+  let type := PsExpr.sortE (.succ .zero)
+  let generic := PsExpr.forallE binder type (.forallE binder (.bvar 0) (.bvar 1) .explicit) .explicit
+  let genericApi := PsPublicApiModule.mk [PsPublicApiDeclaration.constant .definition binder [] generic]
+  let request := [PsTsDeclarationRequest.mk 0 "identity"]
+  match psTsEmitDeclarations .closedJavaScript64 genericApi request with
+  | .error .genericExportUnavailable => pure ()
+  | _ => throw (IO.userError "DECLARATION_CLOSED_GENERIC")
+  let genericValue := PsPublicApiModule.mk [
+    PsPublicApiDeclaration.constant .definition binder [] (.forallE binder type nat .explicit)]
+  match psTsEmitDeclarations .uniformJavaScript64 genericValue request with
+  | .error .genericValueUnsupported => pure ()
+  | _ => throw (IO.userError "DECLARATION_GENERIC_VALUE")
+  let unsupported := PsPublicApiModule.mk [
+    PsPublicApiDeclaration.constant .definition binder [] (.fvar 0)]
+  match psTsEmitDeclarations .uniformJavaScript64 unsupported request with
+  | .error (.sourceSignature .typeFormUnsupported) => pure ()
+  | _ => throw (IO.userError "DECLARATION_SOURCE_FAILURE")
+  IO.println "PSCV_PORTABLE_DECLARATIONS: PASS"
+
 def main (args : List String) : IO Unit := do
-  if args == ["--source-signature-errors"] then
+  if args == ["--declaration-writer-errors"] then
+    psTsDeclarationFailureFixture
+  else if args == ["--source-signature-errors"] then
     psSourceSignatureFailureFixture
   else if args == ["--raw"] then
     match psIrEncodeModule psIrEncodingFixture with
@@ -164,7 +237,12 @@ def main (args : List String) : IO Unit := do
     let .ok api := psCompilerPublicApiFromPrepared prepared
       | throw (IO.userError "STAGE_PUBLIC_API_FAILED")
     let signatures <- psSourceSignatureFixtureJson (psPublicApiProjectModule prepared.declarations)
+    let declarations <- if args == ["--js-declaration-stages"] then
+      psTsDeclarationFixture .closedJavaScript64
+        (psPublicApiProjectModule prepared.declarations) staged.erasureCorrespondence
+      else pure ""
     IO.println (psJsonObject [
+      ("portableDeclarations", psJsonQuote declarations),
       ("sourceSignatures", psJsonQuote signatures),
       ("source", psJsonQuote source),
       ("declarationOrigins", psJsonQuote observed.origins),
@@ -200,7 +278,10 @@ def main (args : List String) : IO Unit := do
     let .ok api := psCompilerPublicApiFromPrepared prepared
       | throw (IO.userError "UNIFORM_PUBLIC_API_FAILED")
     let signatures <- psSourceSignatureFixtureJson (psPublicApiProjectModule prepared.declarations)
+    let declarations <- psTsDeclarationFixture .uniformJavaScript64
+      (psPublicApiProjectModule prepared.declarations) staged.erasureCorrespondence
     IO.println (psJsonObject [
+      ("portableDeclarations", psJsonQuote declarations),
       ("sourceSignatures", psJsonQuote signatures),
       ("source", psJsonQuote source),
       ("publicApi", psJsonQuote api),

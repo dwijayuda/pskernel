@@ -2,7 +2,11 @@ import Ps.Project.QueryGraphV2
 
 def queryV2Name (text : String) : PsName := PsName.str PsName.anonymous text
 def queryV2Stamp (stage : PsQueryStage) (artifact semantic : String) : PsQueryStageFingerprint :=
-  PsQueryStageFingerprint.mk stage artifact "fixture-interface/1" semantic
+  PsQueryStageFingerprint.mk
+    stage
+    artifact
+    psCertifiedModuleInterfaceFingerprintContract
+    semantic
 def queryV2Dependency (artifact semantic : String) : PsQueryStageDependency :=
   PsQueryStageDependency.mk (queryV2Name "Dependency") (queryV2Stamp PsQueryStage.certifiedBehavioral artifact semantic)
 def queryV2Request : PsQueryStageRequest :=
@@ -11,7 +15,9 @@ def queryV2Request : PsQueryStageRequest :=
 def queryV2Record : PsQueryStageRecord :=
   PsQueryStageRecord.mk queryV2Request (queryV2Stamp PsQueryStage.target "output" "output-meaning") "pass-execution"
 def queryV2Rule : PsQueryReuseRule :=
-  PsQueryReuseRule.mk PsQueryStage.target PsQueryStage.certifiedBehavioral "fixture-interface/1" "rule-artifact" "checker"
+  psCertifiedModuleInterfaceReuseRule
+    PsQueryStage.target
+    "rule-artifact"
 def queryV2CandidateCount (rules : List PsQueryReuseRule) (request : PsQueryStageRequest) (count : Nat) : Bool :=
   match psQueryPlanStage rules [queryV2Record] request with
   | .rebuild _ => false
@@ -31,7 +37,8 @@ def main : IO Unit := do
     | _ => false;
   let preservedSubject := match psQueryPlanStage [queryV2Rule] [queryV2Record] changedBytes with
     | .validateCandidate candidate => match candidate.semanticReuse with
-      | [obligation] => obligation.previous.artifactKey == "dependency-v1" && obligation.current.artifactKey == "dependency-v2" && obligation.rule.ruleArtifactKey == "rule-artifact"
+      | [obligation] => obligation.previous.artifactKey == "dependency-v1" && obligation.current.artifactKey == "dependency-v2" && obligation.rule.ruleArtifactKey == "rule-artifact" &&
+        obligation.rule.checkerId == psExactBehavioralInterfaceReuseChecker
       | _ => false
     | _ => false;
   let cases : List (String × Bool) := [

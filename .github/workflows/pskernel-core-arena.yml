@@ -72,3 +72,88 @@ jobs:
           set -euo pipefail
           /usr/bin/time -v .lake/build/bin/psc_kernel_core_arena \
             < ../oracle/fixtures/lean434-init-prelude.ndjson
+
+
+  arena-tutorial:
+    needs: arena-native
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PSKERNEL_SHA: ${{ github.sha }}
+    steps:
+      - name: Install Arena tool dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Clone upstream Lean Kernel Arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/leanprover/lean-kernel-arena.git arena
+
+      - name: Register PSKernel Core checker
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > checkers/pskernel-core.yaml <<EOF
+          description: |
+            PSKernel Core Arena development checker. The host adapter parses
+            Lean4Export 3.1.0 and routes all semantic decisions through the
+            canonical KernelContract-v1 PSKernel Core implementation.
+          url: https://github.com/dwijayuda/pskernel
+          ref: pscv/pskernel-core-arena-v1
+          rev: $PSKERNEL_SHA
+          build: |
+            cd psc15selfhost
+            lake build psc_kernel_core_arena
+          run: |
+            ulimit -s 65536
+            psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "$IN"
+          EOF
+          cat checkers/pskernel-core.yaml
+
+      - name: Build upstream tutorial corpus
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test tutorial --cache
+
+      - name: Build PSKernel through Arena
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-checker pskernel-core
+
+      - name: Run upstream tutorial corpus
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py run --checker pskernel-core --test 'tutorial/*'
+          python3 - <<'PY'
+          import glob, json, sys
+          rows = [json.load(open(p, encoding='utf-8'))
+                  for p in glob.glob('_results/pskernel-core_*.json')]
+          counts = {}
+          for row in rows:
+              counts[row['correctness']] = counts.get(row['correctness'], 0) + 1
+          print('PSKernel Arena tutorial summary:', counts, 'total=', len(rows))
+          bad = [r for r in rows if r['correctness'] in ('incorrect', 'error')]
+          for row in bad:
+              print(row['test'], row['status'], row['correctness'],
+                    row.get('stderr', '')[-1000:])
+          if bad:
+              sys.exit(1)
+          if not rows:
+              print('no tutorial results produced')
+              sys.exit(1)
+          PY

@@ -494,7 +494,6 @@ theorem psKernelDefEqApp_configuration_sound
                       have hRight :=
                         psKernelSemanticApplyArgs_getApp_reconstruct
                           right
-                      simpa [
-                        leftArgs,
-                        rightArgs
-                      ] using hApplied
+                      dsimp [leftArgs, rightArgs] at hApplied
+                      rw [hLeft, hRight] at hApplied
+                      exact hApplied

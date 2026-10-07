@@ -211,7 +211,8 @@
     "test:semantic-query-cache": "node --test scripts/module-interface-evidence.test.mjs scripts/semantic-query-cache.test.mjs",
     "test:savef-retrieval": "node --test scripts/savef-retrieval-session.test.mjs",
     "test:ddc": "node --test scripts/diverse-bootstrap.test.mjs",
-    "test:js-ir-validator": "lake build psc1_backend_js_validate_tests && lake exe psc1_backend_js_validate_tests && lake exe psc1 check packages/backend-js/src/Ps/BackendJs/Validate.lean"
+    "test:js-ir-validator": "lake build psc1_backend_js_validate_tests && lake exe psc1_backend_js_validate_tests && lake exe psc1 check packages/backend-js/src/Ps/BackendJs/Validate.lean",
+    "test:wasm-ir-validator": "lake build psc1_backend_wasm_ir_tests && lake exe psc1_backend_wasm_ir_tests && lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean && lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/Encode.lean"
   },
   "devDependencies": {
     "typescript": "7.0.2"

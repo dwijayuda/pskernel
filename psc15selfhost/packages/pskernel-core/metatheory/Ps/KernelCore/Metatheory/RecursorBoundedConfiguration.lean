@@ -176,3 +176,154 @@ theorem psKernelReduceRecursorBoundedWithFuel_configuration_sound
         coreWhnf,
         inferType
       ] using hRecursor
+
+
+theorem psKernelWhnfWithRecursorFuel_configuration_sound_of_defeq
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq :
+      PsKernelDefEqConfigurationSound defeq)
+    (hBeta :
+      PsKernelBetaSpineSoundLaw)
+    (hNative :
+      PsKernelNativeReductionSoundLaw) :
+    PsKernelWhnfConfigurationSound
+      (psKernelWhnfWithRecursorFuel
+        fuel
+        defeq) := by
+  unfold psKernelWhnfWithRecursorFuel
+  exact
+    psKernelWhnfWithFuel_configuration_sound_contract
+      fuel
+      (psKernelReduceRecursorBoundedWithFuel
+        fuel
+        defeq)
+      (psKernelReduceRecursorBoundedWithFuel_configuration_sound
+        fuel
+        defeq
+        hDefEq
+        hBeta
+        hNative)
+      hBeta
+      hNative
+
+
+theorem psKernelWhnfCoreWithRecursorFuel_configuration_sound_of_defeq
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq :
+      PsKernelDefEqConfigurationSound defeq)
+    (hBeta :
+      PsKernelBetaSpineSoundLaw)
+    (hNative :
+      PsKernelNativeReductionSoundLaw) :
+    PsKernelWhnfCoreConfigurationSound
+      (psKernelWhnfCoreWithRecursorFuel
+        fuel
+        defeq) := by
+  let reducer :=
+    psKernelReduceRecursorBoundedWithFuel
+      fuel
+      defeq
+  have hReducer :
+      PsKernelRecursorReductionConfigurationSound
+        reducer := by
+    simpa [reducer] using
+      (psKernelReduceRecursorBoundedWithFuel_configuration_sound
+        fuel
+        defeq
+        hDefEq
+        hBeta
+        hNative)
+  have hWhnf :
+      PsKernelWhnfConfigurationSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          defeq) :=
+    psKernelWhnfWithRecursorFuel_configuration_sound_of_defeq
+      fuel
+      defeq
+      hDefEq
+      hBeta
+      hNative
+  simpa [
+    psKernelWhnfCoreWithRecursorFuel,
+    reducer
+  ] using
+    (psKernelWhnfCoreWithFuel_configuration_sound_contract
+      fuel
+      (psKernelWhnfWithRecursorFuel
+        fuel
+        defeq)
+      reducer
+      hWhnf
+      hReducer
+      hBeta)
+
+
+theorem psKernelInferWithRecursorFuel_configuration_preserves_of_defeq
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq :
+      PsKernelDefEqConfigurationSound defeq)
+    (hBeta :
+      PsKernelBetaSpineSoundLaw)
+    (hNative :
+      PsKernelNativeReductionSoundLaw) :
+    PsKernelInferOnlyConfigurationPreserves
+      (psKernelInferWithRecursorFuel
+        fuel
+        defeq) := by
+  have hWhnf :
+      PsKernelWhnfConfigurationSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          defeq) :=
+    psKernelWhnfWithRecursorFuel_configuration_sound_of_defeq
+      fuel
+      defeq
+      hDefEq
+      hBeta
+      hNative
+  have hCore :
+      PsKernelInferOnlyCoreConfigurationPreserves
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          defeq)
+        defeq :=
+    psKernelInferOnlyCoreConfigurationPreserves_contract
+      (psKernelWhnfWithRecursorFuel
+        fuel
+        defeq)
+      defeq
+      hWhnf
+  intro
+    context state nextState expr result
+    hConfig hSuccess
+  unfold psKernelInferWithRecursorFuel at hSuccess
+  unfold psKernelInferWithFuel at hSuccess
+  exact
+    hCore
+      fuel
+      context
+      state
+      nextState
+      expr
+      result
+      hConfig
+      hSuccess

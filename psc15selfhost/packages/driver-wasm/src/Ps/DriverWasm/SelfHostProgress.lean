@@ -6,6 +6,7 @@ import Ps.DriverWasm.Bootstrap
 inductive PsCompilerWasmProgress where
   | failed
   | preparing (state : PsCompilerSourcePreparationState)
+  | parsed (step : PsCompilerParsedSourceStep)
   | prepared (module : PsCompilerAdmissionReadyModule)
   | validated (module : PsValidatedIrModule)
   | specialized (module : PsSpecializedIrModule)
@@ -20,14 +21,46 @@ def psCompilerWasmProgressFailed (state : PsCompilerWasmProgress) : Bool :=
   | PsCompilerWasmProgress.failed => true
   | _ => false
 
-def psCompilerWasmProgressPrepare
-    (state : PsCompilerWasmProgress) (source : String) : PsCompilerWasmProgress :=
+def psCompilerWasmProgressParse
+    (state : PsCompilerWasmProgress)
+    (source : String) :
+    PsCompilerWasmProgress :=
   match state with
   | PsCompilerWasmProgress.preparing preparation =>
-      match psCompilerPrepareSourceStep PsCompilerSourceKind.proofScript preparation source with
-      | Except.error _ => PsCompilerWasmProgress.failed
-      | Except.ok next => PsCompilerWasmProgress.preparing next
-  | _ => PsCompilerWasmProgress.failed
+      match
+          psCompilerParseSourceStep
+            PsCompilerSourceKind.proofScript
+            preparation
+            source with
+      | Except.error _ =>
+          PsCompilerWasmProgress.failed
+      | Except.ok parsed =>
+          PsCompilerWasmProgress.parsed parsed
+  | _ =>
+      PsCompilerWasmProgress.failed
+
+def psCompilerWasmProgressElaborate
+    (state : PsCompilerWasmProgress) :
+    PsCompilerWasmProgress :=
+  match state with
+  | PsCompilerWasmProgress.parsed parsed =>
+      match psCompilerElaborateParsedSourceStep parsed with
+      | Except.error _ =>
+          PsCompilerWasmProgress.failed
+      | Except.ok next =>
+          PsCompilerWasmProgress.preparing next
+  | _ =>
+      PsCompilerWasmProgress.failed
+
+def psCompilerWasmProgressPrepare
+    (state : PsCompilerWasmProgress)
+    (source : String) :
+    PsCompilerWasmProgress :=
+  match psCompilerWasmProgressParse state source with
+  | PsCompilerWasmProgress.failed =>
+      PsCompilerWasmProgress.failed
+  | parsed =>
+      psCompilerWasmProgressElaborate parsed
 
 def psCompilerWasmProgressFinish (state : PsCompilerWasmProgress) : PsCompilerWasmProgress :=
   match state with

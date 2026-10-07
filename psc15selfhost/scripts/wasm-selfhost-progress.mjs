@@ -6,7 +6,7 @@ function required(exports, name) {
 export async function loadWasmSelfhostCompiler(bytes) {
   const module = await WebAssembly.compile(bytes), instance = await WebAssembly.instantiate(module, {});
   const api = {};
-  for (const name of ['Initial', 'Failed', 'Prepare', 'Finish', 'Validate', 'Specialize', 'Lower', 'Encode', 'Output'])
+  for (const name of ['Initial', 'Failed', 'Parse', 'Elaborate', 'Prepare', 'Finish', 'Validate', 'Specialize', 'Lower', 'Encode', 'Output'])
     api[name] = required(instance.exports, 'psCompilerWasmProgress' + name);
   for (const [key, name] of Object.entries({ stringNew: '__ps_selfhost_string_new', stringSet: '__ps_selfhost_string_set',
     bytesIsNil: '__ps_selfhost_bytes_is_nil', bytesHead: '__ps_selfhost_bytes_head', bytesTail: '__ps_selfhost_bytes_tail',
@@ -45,8 +45,11 @@ export function compileWasmSelfhostProgress(api, sourceItems, phase = () => {}) 
   };
   for (let index = 0; index < sourceItems.length; index++) {
     const item = sourceItems[index];
-    phase('prepare:' + String(index + 1) + '/' + String(sourceItems.length) + ':' + item.path);
-    accept(api.Prepare(state, wasmString(api, item.source)), 'prepare:' + item.path);
+    const position = String(index + 1) + '/' + String(sourceItems.length) + ':' + item.path;
+    phase('parse:' + position);
+    accept(api.Parse(state, wasmString(api, item.source)), 'parse:' + item.path);
+    phase('elaborate:' + position);
+    accept(api.Elaborate(state), 'elaborate:' + item.path);
   }
   for (const [name, method] of [['prepare:finish', 'Finish'], ['validated-ir', 'Validate'],
     ['specialize', 'Specialize'], ['lower', 'Lower'], ['encode', 'Encode']]) {

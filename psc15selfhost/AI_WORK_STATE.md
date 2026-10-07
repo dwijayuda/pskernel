@@ -488,3 +488,10 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Implemented the pipeline handoff ExecutableArtifact -> EvidenceEnvelope. Production checked builds now identify the actual final JavaScript/direct-JS/direct-Wasm artifact and bind it to the exact PSCV-CERT, CertifiedSource, observed build graph/archive, runtime interface where present, selected provider/tool inputs and host-observed resource records.
 - The new psc-evidence-envelope/1 verifier re-hashes the envelope and every caller-resolved referenced artifact. It deliberately separates source semantic acceptance from executable preservation: current source acceptance is kernel-checked, while executablePreservation remains not-established until later backend/preservation assurance closes it.
 - EvidenceEnvelope is audit-record-only, releaseAccepted=false and cannot mint CheckedCore/CertifiedSource/cache authority. Production receipts expose the envelope identity and builds emit .evidence-envelope.json beside the executable evidence. This closes the implementation box ExecutableArtifact -> EvidenceEnvelope without overclaiming the still-deferred preservation proof.
+
+
+## 2026-10-07 direct-Wasm parse/elaborate phase split
+
+- Pipeline-first performance diagnosis now splits each portable source-preparation step into the exact parser and elaborator transitions while preserving the monolithic psCompilerPrepareSourceStep as their composition.
+- The generated Wasm progress API exposes parse and elaborate as separate fail-closed states. The fixed-point runner still compares exact generation bytes and uses the same source order, semantic functions, fuel/resource policies and output limits.
+- This is an implementation/performance observability checkpoint, not an assurance upgrade. The next cloud run will identify whether the dominant generation-2 cost is syntax parsing or environment/type elaboration before optimization is applied.

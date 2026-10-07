@@ -37,24 +37,55 @@ def psCompilerSourcePreparationInitial :
     psSelfHostProdPreludeEnvironment
     List.nil
 
+structure PsCompilerParsedSourceStep where
+  state : PsCompilerSourcePreparationState
+  sourceModule : PsSyntaxModule
+
+def psCompilerParseSourceStep
+    (sourceKind : PsCompilerSourceKind)
+    (state : PsCompilerSourcePreparationState)
+    (source : String) :
+    Except PsCompilerError PsCompilerParsedSourceStep :=
+  match psCompilerParseSource sourceKind source with
+  | Except.error error =>
+      Except.error error
+  | Except.ok sourceModule =>
+      Except.ok
+        (PsCompilerParsedSourceStep.mk
+          state
+          sourceModule)
+
+def psCompilerElaborateParsedSourceStep
+    (parsed : PsCompilerParsedSourceStep) :
+    Except PsCompilerError PsCompilerSourcePreparationState :=
+  match
+      psElabModule
+        parsed.state.environment
+        parsed.sourceModule with
+  | Except.error error =>
+      Except.error (PsCompilerError.elaboration error)
+  | Except.ok elaborated =>
+      Except.ok
+        (PsCompilerSourcePreparationState.mk
+          elaborated.environment
+          (psListAppend
+            (psListReverse elaborated.declarations)
+            parsed.state.declarationsRev))
+
 def psCompilerPrepareSourceStep
     (sourceKind : PsCompilerSourceKind)
     (state : PsCompilerSourcePreparationState)
     (source : String) :
     Except PsCompilerError PsCompilerSourcePreparationState :=
-  match psCompilerParseSource sourceKind source with
-  | Except.error error => Except.error error
-  | Except.ok sourceModule =>
-      match psElabModule state.environment sourceModule with
-      | Except.error error =>
-          Except.error (PsCompilerError.elaboration error)
-      | Except.ok elaborated =>
-          Except.ok
-            (PsCompilerSourcePreparationState.mk
-              elaborated.environment
-              (psListAppend
-                (psListReverse elaborated.declarations)
-                state.declarationsRev))
+  match
+      psCompilerParseSourceStep
+        sourceKind
+        state
+        source with
+  | Except.error error =>
+      Except.error error
+  | Except.ok parsed =>
+      psCompilerElaborateParsedSourceStep parsed
 
 def psCompilerFinishSourcePreparation
     (state : PsCompilerSourcePreparationState) :

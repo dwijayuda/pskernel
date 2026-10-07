@@ -1109,8 +1109,6 @@ theorem psKernelDefEqStringLitExpansionWith_true_refines
           | false =>
               simp at hSuccess
           | true =>
-              simp at hSuccess
-              rcases hSuccess with ⟨rfl, rfl⟩
               exact
                 psKernelDefEqStringLitExpansionCoreWith_true_refines
                   defeq whnf hDefEq hWhnf
@@ -1135,8 +1133,6 @@ theorem psKernelDefEqStringLitExpansionWith_true_refines
                   | false =>
                       simp at hSuccess
                   | true =>
-                      simp at hSuccess
-                      rcases hSuccess with ⟨rfl, rfl⟩
                       exact
                         PsKernelDefEqJudgment.symm
                           right

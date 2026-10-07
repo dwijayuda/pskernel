@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
+import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { createCertifiedSourceSession } from './certified-source.mjs';
 
@@ -51,6 +52,7 @@ export function createCheckedCompilerService({
     if (emission.stages && bytes.byteLength + Object.values(emission.stages).reduce((sum, value) => sum + Buffer.byteLength(value), 0)
         > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     const stages = checkedIrStageArtifacts(emission.stages, { maxBytes: maxOutputBytes });
+    const targetStages = checkedTargetIrStageArtifacts(emission.stages, { maxBytes: maxOutputBytes });
     if (stages && !stages.runtimeIr.bytes.equals(stages.verifiedIr.bytes)) throw new Error('PSC_CHECKED_VALIDATION_CHANGED_IR');
     const specialization = stages?.specializedIr ?
       verifySpecializationCorrespondence(stages.verifiedIr, stages.specializedIr, { maxBytes: maxOutputBytes }) : undefined;
@@ -63,7 +65,9 @@ export function createCheckedCompilerService({
       certifiedSource,
       ...(specialization ? { specializationCorrespondence: specialization } : {}),
       ...(emission.stages ? { stages: emission.stages,
-        stageArtifacts: Object.freeze(Object.fromEntries(Object.entries(stages).map(([key, value]) => [key, value.identity]))) } : {}),
+        stageArtifacts: Object.freeze(Object.fromEntries(
+          [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {})]
+            .map(([key, value]) => [key, value.identity]))) } : {}),
       transformationAssurance: 'trusted-implementation-global-preservation-unproved',
     });
   }

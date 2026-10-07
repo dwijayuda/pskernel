@@ -1,20 +1,32 @@
-# PSC2 minimal self-host architecture
+# PSCV compiler bootstrap/self-host architecture
 
 Status: bootstrap architecture for `psc15selfhost/`.
 
-This directory owns the smallest stable PSC2 self-host compiler. Everything outside
-`psc15selfhost/` is reference material only and is not a bootstrap dependency.
+This directory owns the smallest stable compiler/bootstrap implementation used by
+the PSCV workstream. The current executable compiler milestone remains
+`psc2-compiler-v1`; the normative target language/profile authority is PSCV.
+Everything outside `psc15selfhost/` is reference material only and is not a
+bootstrap dependency.
 
-## Bootstrap contract
+## Bootstrap and language-authority contract
 
-The active source-language identities are now fixed by the root
-`PSC2_COMPLETE_LANGUAGE_AND_JS_PLATFORM.md` reference:
+The normative verified-language target is fixed by
+`PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md` and `language-authority.json`.
+The current compiler source continues to use the inherited PSC2/PSC1 bootstrap
+profiles until the complete PSCV gates are implemented; changing the authority
+document does not fabricate PSCV conformance.
 
 ```text
 languageEdition = ps-0.9-r3
 sourceProfile = ps-standard-0.9-r3
 requiredLanguageProfile = psc2-language-v1
 standardLanguageProfile = psc2-standard-language-v1
+verificationProfile = pscv-v1
+verificationSemantics = PSCV-VERIFY-v1
+certificatePolicy = PSCV-CERT-v1
+currentCompilerMilestone = psc2-compiler-v1
+targetCompilerConformance = pscv-compiler-v1
+normativeLean = 4.35.0-rc3 @ 470d5ce1400764999581fd26d5d72b00d990b0f4
 implementationProfile = PSC1-selfhost-stable/1
 bootstrapHost = official Lean 4 + Lake
 selfHostBackend = TypeScript / JavaScript

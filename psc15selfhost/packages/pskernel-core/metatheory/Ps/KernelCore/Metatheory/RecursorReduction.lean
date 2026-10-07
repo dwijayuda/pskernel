@@ -1677,6 +1677,128 @@ theorem psKernelToConstructorWhenK_configuration_sound_of_components
                     ⟩
 
 
+theorem psKernelEnvironmentIsNonRecStructure_true_view
+    (environment : PsKernelEnvironment)
+    (inductName : PsKernelName)
+    (hStructure :
+      psKernelEnvironmentIsNonRecStructure
+          environment
+          inductName =
+        true) :
+    ∃
+      (inductInfo : PsKernelInductiveInfo)
+      (ctorName : PsKernelName),
+      psKernelEnvironmentFind
+          environment
+          inductName =
+        Option.some
+          (PsKernelConstantInfo.inductInfo inductInfo) ∧
+      inductInfo.isRec = false ∧
+      inductInfo.numIndices = 0 ∧
+      inductInfo.ctors =
+        List.cons ctorName List.nil := by
+  cases hFind :
+      psKernelEnvironmentFind
+        environment
+        inductName with
+  | none =>
+      simp [
+        psKernelEnvironmentIsNonRecStructure,
+        hFind
+      ] at hStructure
+  | some info =>
+      cases info with
+      | inductInfo inductInfo =>
+          cases hRec : inductInfo.isRec with
+          | true =>
+              simp [
+                psKernelEnvironmentIsNonRecStructure,
+                hFind,
+                hRec
+              ] at hStructure
+          | false =>
+              cases hIndices :
+                  Nat.beq inductInfo.numIndices 0 with
+              | false =>
+                  simp [
+                    psKernelEnvironmentIsNonRecStructure,
+                    hFind,
+                    hRec,
+                    hIndices
+                  ] at hStructure
+              | true =>
+                  have hIndexZero :
+                      inductInfo.numIndices = 0 :=
+                    Nat.eq_of_beq_eq_true hIndices
+                  cases hCtors :
+                      inductInfo.ctors with
+                  | nil =>
+                      simp [
+                        psKernelEnvironmentIsNonRecStructure,
+                        hFind,
+                        hRec,
+                        hIndices,
+                        hCtors,
+                        psKernelNameListLength
+                      ] at hStructure
+                  | cons ctorName ctorRest =>
+                      cases ctorRest with
+                      | nil =>
+                          exact
+                            ⟨
+                              inductInfo,
+                              ctorName,
+                              hFind,
+                              hRec,
+                              hIndexZero,
+                              hCtors
+                            ⟩
+                      | cons second tail =>
+                          simp [
+                            psKernelEnvironmentIsNonRecStructure,
+                            hFind,
+                            hRec,
+                            hIndices,
+                            hCtors,
+                            psKernelNameListLength
+                          ] at hStructure
+      | axiomInfo value =>
+          simp [
+            psKernelEnvironmentIsNonRecStructure,
+            hFind
+          ] at hStructure
+      | defnInfo value =>
+          simp [
+            psKernelEnvironmentIsNonRecStructure,
+            hFind
+          ] at hStructure
+      | thmInfo value =>
+          simp [
+            psKernelEnvironmentIsNonRecStructure,
+            hFind
+          ] at hStructure
+      | opaqueInfo value =>
+          simp [
+            psKernelEnvironmentIsNonRecStructure,
+            hFind
+          ] at hStructure
+      | ctorInfo value =>
+          simp [
+            psKernelEnvironmentIsNonRecStructure,
+            hFind
+          ] at hStructure
+      | recInfo value =>
+          simp [
+            psKernelEnvironmentIsNonRecStructure,
+            hFind
+          ] at hStructure
+      | quotInfo value =>
+          simp [
+            psKernelEnvironmentIsNonRecStructure,
+            hFind
+          ] at hStructure
+
+
 theorem psKernelStructureEtaCandidate_refines
     (context : PsKernelCheckerContext)
     (major majorType : PsKernelExpr)

@@ -213,7 +213,9 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.Kernel,
     `PSC1Kernel.Inductive,
     `PSC1Kernel.MutualInductive,
-    `PSC1Kernel.NestedInductive
+    `PSC1Kernel.NestedInductive,
+    `PSC1Kernel.Replay,
+    `PSC1Kernel.ReplayJson
   ]
 
 lean_lib PsKernelCore where

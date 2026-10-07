@@ -296,3 +296,56 @@ theorem psKernelExprLiftOne_then_instantiate_cancel
   exact
     psKernelExprLiftOne_then_instantiateReference_cancel
       expr replacement offset
+
+
+theorem psKernelExprInstantiateRevReference_singleton
+    (expr replacement : PsKernelExpr) :
+    psKernelExprInstantiateRevReference
+        expr
+        (List.cons replacement List.nil) =
+      psKernelExprInstantiate1Reference
+        expr
+        replacement := by
+  cases hLoose : psKernelExprHasLooseBVar expr with
+  | true =>
+      simp [
+        psKernelExprInstantiateRevReference,
+        psKernelExprInstantiate1Reference,
+        psKernelExprInstantiateReference,
+        psKernelExprListReverse,
+        psKernelExprListReverseWorker,
+        hLoose
+      ]
+  | false =>
+      have hClosed :
+          psKernelExprHasLooseAt expr 0 = false := by
+        simpa [psKernelExprHasLooseBVar] using hLoose
+      have hInst :=
+        psKernelExprInstantiateAtReference_closed_core
+          expr
+          (List.cons replacement List.nil)
+          0
+          hClosed
+      simpa [
+        psKernelExprInstantiateRevReference,
+        psKernelExprInstantiateReference,
+        psKernelExprInstantiate1Reference,
+        psKernelExprListReverse,
+        psKernelExprListReverseWorker,
+        hLoose
+      ] using hInst
+
+
+theorem psKernelExprInstantiateRev_singleton
+    (expr replacement : PsKernelExpr) :
+    psKernelExprInstantiateRev
+        expr
+        (List.cons replacement List.nil) =
+      psKernelExprInstantiate1
+        expr
+        replacement := by
+  rw [psKernelExprInstantiateRev_refines_reference_core]
+  rw [psKernelExprInstantiate1_refines_reference_core]
+  exact
+    psKernelExprInstantiateRevReference_singleton
+      expr replacement

@@ -568,3 +568,93 @@ theorem psKernelDefEqUnfold_preserves_semantic_sound
                         hReduction,
                       hSuccess
                     ⟩)
+
+
+/-
+Definition lookup must retain authoritative name provenance. The index-based
+environment lookup searches by name, but a successful result is only useful
+for semantic head equality after proving that the returned declaration's
+own stored name satisfies that query.
+-/
+theorem psKernelEnvironmentFind_defn_name_eq
+    (environment : PsKernelEnvironment)
+    (name : PsKernelName)
+    (definition : PsKernelDefinitionInfo)
+    (hFind :
+      psKernelEnvironmentFind environment name =
+        Option.some (PsKernelConstantInfo.defnInfo definition)) :
+    psKernelNameEq definition.base.name name = true := by
+  unfold psKernelEnvironmentFind at hFind
+  generalize hBucket :
+      psKernelEnvironmentIndexFind environment.index name = bucket
+    at hFind
+  induction bucket with
+  | nil =>
+      simp [psKernelFindConstantInList] at hFind
+  | cons head tail ih =>
+      cases hMatch :
+          psKernelNameEq
+            (psKernelConstantInfoName head) name with
+      | false =>
+          have hTail :
+              psKernelFindConstantInList name tail =
+                Option.some
+                  (PsKernelConstantInfo.defnInfo definition) := by
+            simpa [psKernelFindConstantInList, hMatch] using hFind
+          exact ih hTail
+      | true =>
+          have hInfo :
+              head = PsKernelConstantInfo.defnInfo definition := by
+            simpa [psKernelFindConstantInList, hMatch] using hFind
+          subst head
+          simpa [psKernelConstantInfoName] using hMatch
+
+
+theorem psKernelDeltaDefinition_some_head_matches
+    (context : PsKernelCheckerContext)
+    (expr : PsKernelExpr)
+    (definition : PsKernelDefinitionInfo)
+    (hResult :
+      psKernelDeltaDefinition context expr = Option.some definition) :
+    ∃ (name : PsKernelName) (levels : List PsKernelLevel),
+      psKernelExprGetAppFn expr =
+        PsKernelExpr.const name levels ∧
+      psKernelEnvironmentFind context.environment name =
+        Option.some (PsKernelConstantInfo.defnInfo definition) ∧
+      psKernelNameEq definition.base.name name = true := by
+  cases hHead : psKernelExprGetAppFn expr with
+  | const name levels =>
+      cases hLookup :
+          psKernelEnvironmentFind context.environment name with
+      | none =>
+          simp [psKernelDeltaDefinition, hHead, hLookup] at hResult
+      | some info =>
+          cases info with
+          | defnInfo found =>
+              cases hArity :
+                  Nat.beq
+                    (psKernelNameListLength found.base.levelParams)
+                    (psKernelLevelListLength levels) with
+              | false =>
+                  simp [
+                    psKernelDeltaDefinition, hHead,
+                    hLookup, hArity
+                  ] at hResult
+              | true =>
+                  have hDefinition :
+                      found = definition := by
+                    simpa [
+                      psKernelDeltaDefinition, hHead,
+                      hLookup, hArity
+                    ] using hResult
+                  subst definition
+                  exact
+                    ⟨
+                      name, levels, hHead, hLookup,
+                      psKernelEnvironmentFind_defn_name_eq
+                        context.environment name found hLookup
+                    ⟩
+          | _ =>
+              simp [psKernelDeltaDefinition, hHead, hLookup] at hResult
+  | _ =>
+      simp [psKernelDeltaDefinition, hHead] at hResult

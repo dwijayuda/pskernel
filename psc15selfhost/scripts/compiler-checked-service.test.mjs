@@ -6,6 +6,8 @@ import { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 
 const ok = value => ({ $ps$tag: 'ok', $ps$fields: { value } });
 const emptyIr = '["psc-runtime-ir-json/1",[],[],[],[]]';
+const emptyJsIr = '["psc-js-ir-json/1",[],[]]';
+const emptyWasmIr = '["psc-wasm-ir-json/1",[],[],[],[],[],[]]';
 const wasm = [0, 97, 115, 109, 1, 0, 0, 0];
 const list = values => values.reduceRight((tail, head) =>
   ({ $ps$tag: 'cons', $ps$fields: { head, tail } }), { $ps$tag: 'nil', $ps$fields: {} });
@@ -120,7 +122,7 @@ test('stage emission uses the exact live checked object without legacy fallback'
 
 test('staged JavaScript output binds actual stage domains and rejects missing, changed or oversized stages', async () => {
   const { service, compiler, emitted } = fixture();
-  const good = { javaScript: 'export const value = 7;', runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr };
+  const good = { javaScript: 'export const value = 7;', runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr, jsIr: emptyJsIr };
   let prepared;
   compiler.psCompilerJavaScriptStagesFromPrepared = value => { prepared = value; return ok(good); };
   const handle = await service.check('lean', 'checked JS source');
@@ -130,6 +132,7 @@ test('staged JavaScript output binds actual stage domains and rejects missing, c
   assert.equal(output.stageArtifacts.runtimeIr.domain, 'runtime-ir');
   assert.equal(output.stageArtifacts.verifiedIr.domain, 'verified-ir');
   assert.equal(output.stageArtifacts.specializedIr.domain, 'specialized-ir');
+  assert.equal(output.stageArtifacts.jsIr.domain, 'js-ir');
   assert.equal(output.specializationCorrespondence.correspondenceChecked, true);
   assert.equal(emitted.length, 0);
   compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, specializedIr: undefined });
@@ -154,7 +157,7 @@ test('staged JavaScript output binds actual stage domains and rejects missing, c
 
 test('staged Wasm uses the pinned target and exact checked object, with bounded byte copying and no failure fallback', async () => {
   const { service, compiler, emitted } = fixture();
-  const good = { wasm: list(wasm), runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr };
+  const good = { wasm: list(wasm), runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr, wasmIr: emptyWasmIr };
   compiler.psCompilerWasmStagesFromPrepared = (profile, prepared) => {
     assert.equal(profile, compiler.psCompilerWasm32Target);
     assert.equal(prepared.source, 'checked Wasm source');
@@ -166,6 +169,7 @@ test('staged Wasm uses the pinned target and exact checked object, with bounded 
   assert.deepEqual(output.payload, Uint8Array.from(wasm));
   assert.equal(output.specializationCorrespondence.correspondenceChecked, true);
   assert.equal(output.stageArtifacts.specializedIr.domain, 'specialized-ir');
+  assert.equal(output.stageArtifacts.wasmIr.domain, 'wasm-ir');
   good.wasm.$ps$fields.head = 255;
   assert.equal(output.payload[0], 0);
   compiler.psCompilerWasmStagesFromPrepared = () => ok({ ...good, wasm: 'wrong' });

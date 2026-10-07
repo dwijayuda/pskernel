@@ -650,6 +650,88 @@ inductive PsKernelReductionClosure
         localContext
         (PsKernelExpr.proj typeName index left)
         (PsKernelExpr.proj typeName index right)
+  | quotLift
+      (expr : PsKernelExpr)
+      (levels mkLevels : List PsKernelLevel)
+      (args mkArgs : List PsKernelExpr)
+      (major majorReduced representative fnValue : PsKernelExpr)
+      (hInitialized :
+        environment.quotInitialized = true)
+      (hHead :
+        psKernelExprGetAppFn expr =
+          PsKernelExpr.const psKernelQuotLiftName levels)
+      (hArgs :
+        psKernelExprGetAppArgs expr = args)
+      (hMajor :
+        psKernelExprListGet args 5 =
+          Option.some major)
+      (hMajorReduction :
+        PsKernelReductionClosure
+          environment localContext major majorReduced)
+      (hMkHead :
+        psKernelExprGetAppFn majorReduced =
+          PsKernelExpr.const psKernelQuotMkName mkLevels)
+      (hMkArity :
+        Nat.beq
+            (psKernelExprGetAppNumArgs majorReduced)
+            3 =
+          true)
+      (hMkArgs :
+        psKernelExprGetAppArgs majorReduced = mkArgs)
+      (hRepresentative :
+        psKernelExprListGet mkArgs 2 =
+          Option.some representative)
+      (hFnValue :
+        psKernelExprListGet args 3 =
+          Option.some fnValue) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        expr
+        (psKernelApplyArgs
+          (PsKernelExpr.app fnValue representative)
+          (psKernelExprListDrop 6 args))
+  | quotInd
+      (expr : PsKernelExpr)
+      (levels mkLevels : List PsKernelLevel)
+      (args mkArgs : List PsKernelExpr)
+      (major majorReduced representative fnValue : PsKernelExpr)
+      (hInitialized :
+        environment.quotInitialized = true)
+      (hHead :
+        psKernelExprGetAppFn expr =
+          PsKernelExpr.const psKernelQuotIndName levels)
+      (hArgs :
+        psKernelExprGetAppArgs expr = args)
+      (hMajor :
+        psKernelExprListGet args 4 =
+          Option.some major)
+      (hMajorReduction :
+        PsKernelReductionClosure
+          environment localContext major majorReduced)
+      (hMkHead :
+        psKernelExprGetAppFn majorReduced =
+          PsKernelExpr.const psKernelQuotMkName mkLevels)
+      (hMkArity :
+        Nat.beq
+            (psKernelExprGetAppNumArgs majorReduced)
+            3 =
+          true)
+      (hMkArgs :
+        psKernelExprGetAppArgs majorReduced = mkArgs)
+      (hRepresentative :
+        psKernelExprListGet mkArgs 2 =
+          Option.some representative)
+      (hFnValue :
+        psKernelExprListGet args 3 =
+          Option.some fnValue) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        expr
+        (psKernelApplyArgs
+          (PsKernelExpr.app fnValue representative)
+          (psKernelExprListDrop 5 args))
 
 inductive PsKernelDefEqJudgment
     (environment : PsKernelEnvironment)

@@ -67,6 +67,8 @@ lean_lib PsBridge where
 lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
+    `Ps.CompilerIr.PublicApi,
+    `Ps.CompilerIr.PublicApiEncode,
     `Ps.CompilerIr.Model,
     `Ps.CompilerIr.Encode,
     `Ps.CompilerIr.Decode,

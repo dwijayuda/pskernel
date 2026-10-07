@@ -7,6 +7,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
+import { decodePublicApi } from './public-api-artifact.mjs';
 import { verifyArtifact } from './artifact-evidence.mjs';
 import { verifyObservedBuildArchive } from './observed-build-archive.mjs';
 
@@ -56,6 +57,7 @@ test('explicit owned kernel checks dependent source before emission and executio
     assertPasses(graph, [
       'psc-prepare-and-check/1',
       'psc-certify-checked-core/1',
+      'psc-project-public-api/1',
       'psc-erase-checked-core/1',
       'psc-validate-runtime-ir/1',
       'psc-project-runtime-interface/1',
@@ -175,7 +177,10 @@ for (const [kind, source] of [
       assert.deepEqual(bundle.backendDescriptorId, receipt.backendDescriptor);
       assert.deepEqual(bundle.claimSetId, receipt.claimSet);
       assert.deepEqual(bundle.executableArtifacts.map(item => item.role), ['target-source', 'javascript']);
-      assert.equal(bundle.publicApiArtifacts.length, 1);
+      assert.deepEqual(bundle.publicApiArtifacts.map(item => item.role), ['source-api', 'declaration']);
+      const apiBytes = await readFile(path.join(dir, 'out.public-api.json'));
+      verifyArtifact(apiBytes, receipt.publicApi);
+      assert.equal(decodePublicApi(apiBytes)[0], 'psc-public-api-ir/1');
       assert.equal(bundle.debugArtifacts.length, 1);
       assert.ok(existsSync(path.join(dir, 'out.admissions.json')));
       assert.ok(existsSync(path.join(dir, 'out.pscv-cert.json')));
@@ -186,6 +191,7 @@ for (const [kind, source] of [
       assertPasses(graph, [
         'psc-prepare-and-check/1',
         'psc-certify-checked-core/1',
+      'psc-project-public-api/1',
         'psc-erase-checked-core/1',
         'psc-validate-runtime-ir/1',
         'psc-project-runtime-interface/1',

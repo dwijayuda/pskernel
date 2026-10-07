@@ -101,12 +101,15 @@ def psCheckedSeedPreparedSession
       | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
     if currentAdmissions != admissions then
       throw (IO.userError "PSC2_CHECKED_PAYLOAD_CHANGED")
+    let .ok publicApi := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "PSC2_CHECKED_PUBLIC_API_FAILED")
     match psCompilerTypeScriptStagesFromPrepared prepared with
     | .error _ => throw (IO.userError "PSC2_CHECKED_EMISSION_FAILED")
     | .ok output =>
         stdout.putStrLn (Lean.Json.mkObj [
           ("phase", Lean.Json.str "emitted"), ("typescript", Lean.Json.str output.typeScript),
-          ("runtimeIr", Lean.Json.str output.runtimeIr), ("verifiedIr", Lean.Json.str output.verifiedIr)]).compress
+          ("runtimeIr", Lean.Json.str output.runtimeIr), ("verifiedIr", Lean.Json.str output.verifiedIr),
+          ("publicApi", Lean.Json.str publicApi)]).compress
         stdout.flush
   else
     throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")

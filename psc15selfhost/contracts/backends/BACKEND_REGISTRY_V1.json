@@ -45,6 +45,12 @@
         ],
         "publicApiArtifacts": [
           {
+            "role": "source-api",
+            "domain": "public-api",
+            "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          },
+          {
             "role": "declaration",
             "domain": "declarations-output",
             "contract": "typescript-emitted-file/1",
@@ -102,7 +108,14 @@
             "requiresToolchain": false
           }
         ],
-        "publicApiArtifacts": [],
+        "publicApiArtifacts": [
+          {
+            "role": "source-api",
+            "domain": "public-api",
+            "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          }
+        ],
         "debugArtifacts": [],
         "interfaceArtifacts": [
           {
@@ -113,7 +126,7 @@
           }
         ]
       },
-      "ownershipDebt": "PublicApiIR/interface-ts and OriginGraph products are not yet implemented; no tsc substitution or promotion is implied."
+      "ownershipDebt": "Portable source PublicApiIR is projected before erasure and published by checked emission. Direct declarations still require explicit generic export correspondence; OriginGraph/debug products and promotion remain incomplete."
     },
     {
       "backendId": "wasm",
@@ -156,7 +169,14 @@
             "requiresToolchain": false
           }
         ],
-        "publicApiArtifacts": [],
+        "publicApiArtifacts": [
+          {
+            "role": "source-api",
+            "domain": "public-api",
+            "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          }
+        ],
         "debugArtifacts": [],
         "interfaceArtifacts": [
           {
@@ -212,7 +232,14 @@
             "requiresToolchain": true
           }
         ],
-        "publicApiArtifacts": [],
+        "publicApiArtifacts": [
+          {
+            "role": "source-api",
+            "domain": "public-api",
+            "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          }
+        ],
         "debugArtifacts": [],
         "interfaceArtifacts": []
       },

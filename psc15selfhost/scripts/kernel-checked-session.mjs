@@ -175,6 +175,17 @@ export function createKernelCheckedSession(
       if (target !== 'wasm' && typeof output !== 'string') throw new Error('PSC2_CHECKED_EMIT_RESULT_SHAPE');
       return Object.freeze({ output });
   }
+  // Legacy selected compiler modules can lack this product. Presence with a
+  // malformed or failing API is never treated as an optional-product absence.
+  function publicApi(handle) {
+    const item = checkedItem(handle);
+    if (admissionsFrom(compiler, item.prepared) !== item.admissions) throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
+    if (!('psCompilerPublicApiFromPrepared' in compiler)) return undefined;
+    if (typeof compiler.psCompilerPublicApiFromPrepared !== 'function') throw new Error('PSC2_CHECKED_PUBLIC_API_API_SHAPE');
+    const output = unwrapCompilerResult(compiler.psCompilerPublicApiFromPrepared(item.prepared), 'PUBLIC_API');
+    if (typeof output !== 'string') throw new Error('PSC2_CHECKED_PUBLIC_API_RESULT_SHAPE');
+    return output;
+  }
   function emitTarget(handle, target) { return emitTargetWithStages(handle, target).output; }
   return Object.freeze({
     async check(sourceKind, source) {
@@ -203,6 +214,7 @@ export function createKernelCheckedSession(
     },
     emitTarget,
     emitTargetWithStages,
+    publicApi,
     describe(handle) { checkedItem(handle); return handle; },
     certificationSubject(handle) {
       const item = checkedItem(handle);

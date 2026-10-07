@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@proofscript/bridge-next": "0.0.0-dev",
-    "@proofscript/foundation": "0.0.0-dev"
+    "@proofscript/foundation": "0.0.0-dev",
+    "@proofscript/core": "0.0.0-dev"
   }
 }

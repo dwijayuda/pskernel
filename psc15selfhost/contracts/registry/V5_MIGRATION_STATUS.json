@@ -1020,6 +1020,18 @@
       "logicalOwner": "interface-ts",
       "rationale": "JS-specific scalar adapter planning; logical ownership exception, no move in this checkpoint.",
       "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/PublicApi.lean",
+      "logicalOwner": "public-api",
+      "rationale": "Exact source-semantic body-free projection before erasure and its codec; no target export or preservation authority.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/PublicApiEncode.lean",
+      "logicalOwner": "public-api",
+      "rationale": "Exact source-semantic body-free projection before erasure and its codec; no target export or preservation authority.",
+      "physicalMove": "deferred"
     }
   ],
   "backendLanes": [
@@ -1110,7 +1122,7 @@
         "backend",
         "authority-firewall-broker"
       ],
-      "status": "static-guards-cloud-validated-at-32b5aa6",
+      "status": "static-guards-cloud-validated-at-331ab54",
       "requirement": "Package identity/dependency/backend isolation/authority checks; enumerate current debt and reject new drift."
     },
     {
@@ -1149,7 +1161,7 @@
       "classifications": [
         "public-api-ir"
       ],
-      "status": "planned",
+      "status": "portable-source-producer-live-service-native-build-and-bundle-implemented-independent-correspondence-and-export-selection-pending",
       "requirement": "Portable checked-Core/module-interface projection preserves public source generics and contracts; never infer from SpecializedIR."
     },
     {
@@ -1367,6 +1379,13 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/QUERY_CONTEXT_V1.json",
       "classification": "querygraph-incremental"
+    },
+    {
+      "id": "psc-public-api-ir/1",
+      "kind": "public-api",
+      "status": "current-producer",
+      "canonicalPath": "contracts/compiler/PUBLIC_API_IR_V1.json",
+      "classification": "public-api-ir"
     }
   ]
 }

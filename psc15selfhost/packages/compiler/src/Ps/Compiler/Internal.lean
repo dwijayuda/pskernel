@@ -1,6 +1,7 @@
 import Ps.Compiler.Candidate
 import Ps.Erasure.Definition
 import Ps.CompilerIr.Validate
+import Ps.CompilerIr.PublicApiEncode
 
 -- Unchecked transformation implementation. Only bootstrap drivers and the trusted
 -- checked host composition may invoke this layer; candidate preparation cannot.
@@ -68,3 +69,15 @@ def psCompilerVerifiedIrSource
       Except.error error
   | Except.ok prepared =>
       psCompilerVerifiedIrFromPrepared prepared
+
+-- Exact source-semantic projection before erasure/specialization. Like every
+-- Internal transform, this is candidate data until selected by a live host
+-- checked session; the JSON itself carries no authority.
+def psCompilerPublicApiFromPrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerError String :=
+  match psPublicApiEncodeModule (psPublicApiProjectModule prepared.declarations) with
+  | Except.error error =>
+      Except.error (PsCompilerError.admission error)
+  | Except.ok encoded =>
+      Except.ok encoded

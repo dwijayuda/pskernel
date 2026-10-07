@@ -187,3 +187,42 @@ test('staged Wasm uses the pinned target and exact checked object, with bounded 
   assert.throws(() => small.service.emitArtifact(smallHandle, 'wasm'), /OUTPUT_RESOURCE_EXHAUSTED/);
   assert.equal(emitted.length, 0);
 });
+
+test('PublicApiIR uses the same accepted object and remains independent of executable lowering', async () => {
+  const { service, compiler } = fixture();
+  const api = '["psc-public-api-ir/1","all-prepared-declarations",[]]';
+  let prepared;
+  compiler.psCompilerPublicApiFromPrepared = value => {
+    prepared = value; return ok(api);
+  };
+  const handle = await service.check('lean', 'generic source');
+  const product = service.emitPublicApiArtifact(handle);
+  assert.equal(product.payload, api);
+  assert.equal(product.artifact.domain, 'public-api');
+  assert.equal(Object.isFrozen(prepared), true);
+  assert.equal(prepared.source, 'generic source');
+  assert.deepEqual(product.pscvCert, service.certificate(handle).identity);
+  const emitted = service.emitArtifact(handle, 'javascript');
+  assert.equal(emitted.publicApi, api);
+  assert.deepEqual(emitted.publicApiArtifact, product.artifact);
+  compiler.psCompilerJavaScriptFromPrepared = () => ({ $ps$tag: 'error' });
+  assert.equal(service.emitPublicApiArtifact(handle).payload, api);
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /EMIT_FAILED/);
+  assert.throws(() => service.emitPublicApiArtifact({ ...handle }), /CERTIFIED_SOURCE_NOT_LIVE/);
+  compiler.psCompilerPublicApiFromPrepared = () => ok('["wrong"]');
+  assert.throws(() => service.emitPublicApiArtifact(handle), /PUBLIC_API_SCHEMA/);
+  compiler.psCompilerPublicApiFromPrepared = undefined;
+  assert.throws(() => service.emitPublicApiArtifact(handle), /PUBLIC_API_API_SHAPE/);
+  delete compiler.psCompilerPublicApiFromPrepared;
+  assert.throws(() => service.emitPublicApiArtifact(handle), /PUBLIC_API_UNSUPPORTED/);
+  service.revoke(handle);
+  assert.throws(() => service.emitPublicApiArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
+});
+
+test('PublicApiIR bytes count against the combined emission budget', async () => {
+  const { service, compiler } = fixture({ maxOutputBytes: 60 });
+  compiler.psCompilerPublicApiFromPrepared = () => ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
+  const handle = await service.check('lean', 'accepted');
+  assert.equal(service.emitPublicApiArtifact(handle).artifact.domain, 'public-api');
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /OUTPUT_RESOURCE_EXHAUSTED/);
+});

@@ -158,3 +158,55 @@ relations. The static host TrustManifest explicitly includes the added
 projection/codec/signature-inspection dependencies. Production checked-driver
 selection routing and output/EvidenceEnvelope publication remain separate
 implementation work. No serialized adapter data creates source authority.
+
+## Public API and origin design, 2026-10-08
+
+TypeScript research was refreshed against exact main commit
+`91521cf2299d54a40d46fcf500130d273ddfc947`. Its current compiler sources
+are in `tsc/internal`. Relevant primary implementation references:
+
+- [Declaration transformer](https://github.com/microsoft/TypeScript/blob/91521cf2299d54a40d46fcf500130d273ddfc947/tsc/internal/transformers/declarations/transform.go):
+  `ensureType`, `ensureTypeParams`, `ensureParameter`, and
+  `transformFunctionDeclaration` retain the semantic signature and remove
+  implementation bodies. Type serialization consults the checked resolver.
+- [Symbol accessibility tracker](https://github.com/microsoft/TypeScript/blob/91521cf2299d54a40d46fcf500130d273ddfc947/tsc/internal/transformers/declarations/tracker.go):
+  exported signatures require name visibility/import closure, not only printing
+  whatever names occurred in an implementation.
+- [Source-map generator](https://github.com/microsoft/TypeScript/blob/91521cf2299d54a40d46fcf500130d273ddfc947/tsc/internal/sourcemap/generator.go):
+  generated positions, source positions, optional names and pending mappings
+  are separate writer state.
+
+PSC design conclusions: portable PublicApiIR retains exact source Core types,
+universe parameters and binder visibility before erasure. It omits definition
+bodies and target layouts. The current language has no public/private modifier,
+so version 1 explicitly includes all prepared declarations and generated members.
+A declaration adapter must select an export surface, resolve accessible names,
+and check runtime representation. Unsupported signatures must reject explicitly;
+TypeScript's permissive fallback types are not a correctness argument for PSC.
+
+The actual direct-JS path specializes and removes generic roots while preserving
+only requested closed instances. Therefore a generic declaration projected from
+Core cannot yet promise a JavaScript export with the same name. The existing
+closed specialization path remains intact; open generic exports require a
+deliberate ABI/lowering strategy and correspondence validation. The new source API
+product is independently available through a live checked service even when a
+target cannot lower that API. This separation is useful for tools, but confers no
+runtime compatibility or behavioral reuse claim.
+
+The [ECMA-426 draft](https://tc39.es/ecma426/) inspected is dated 2026-09-11.
+JavaScript columns count UTF-16 code units; Wasm positions use byte indices.
+Version 3 mapping segments and their state resets must follow that distinction.
+Generated helpers need explicit unmapped segments. Proposed scopes/ranges are
+not silently assumed part of the selected mapping contract.
+
+Origins must come from actual parser/elaborator events and pass correspondence.
+Current source preparation removes imports and trims text; a map to original
+files requires an exact preparation map. Core currently discards syntax spans.
+The next OriginGraph work must carry a separate stable origin table through
+preparation and transformation, with preserve/merge/synthesize/drop reasons,
+and pass exact generated text positions from the writer. Searching source text
+after code generation cannot recover those relations reliably.
+
+All new products remain descriptive artifacts. Checked-session association,
+source-to-admissions normalization, public projection fidelity, runtime export
+correspondence and global preservation are distinct obligations.

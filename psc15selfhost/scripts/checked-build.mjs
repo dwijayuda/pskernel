@@ -68,6 +68,7 @@ export async function buildChecked({
   let compilerIdentity;
   let compilerBytes;
   let irStages;
+  let publicApi;
   let seedResources;
   let parity;
   let providerToolInputs = [];
@@ -116,6 +117,7 @@ export async function buildChecked({
     certifiedSourceArtifact = result.certifiedSourceArtifact;
     typeScript = result.typeScript;
     irStages = result.stages;
+    publicApi = result.publicApi;
     seedResources = result.resourceObservation;
   } else {
     const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
@@ -137,6 +139,7 @@ export async function buildChecked({
       const emitted = session.emitArtifact(handle);
       typeScript = emitted.payload;
       irStages = emitted.stages;
+      publicApi = emitted.publicApi;
     }
   }
 
@@ -199,7 +202,7 @@ export async function buildChecked({
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
-      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy,
+      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     const evidence = bindObservedBuildContext(observed, { languageAuthority, backendRegistry, backendId: 'typescript' });
     receipt.profileEnvironment = evidence.profileEnvironment.identity;
@@ -210,6 +213,7 @@ export async function buildChecked({
     receipt.claimSet = evidence.claimSet.identity;
     receipt.buildGraph = evidence.identity;
     if (evidence.runtimeInterface) receipt.runtimeInterface = evidence.runtimeInterface;
+    if (evidence.publicApi) receipt.publicApi = evidence.publicApi.identity;
     if (evidence.jsAbi) {
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
       receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;
@@ -242,6 +246,7 @@ export async function buildChecked({
     await writeFile(path.join(staging, stem + '.certified-source.json'), certifiedSourceArtifact.bytes);
     await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);
     await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
+    if (evidence.publicApi) await writeFile(path.join(staging, stem + '.public-api.json'), evidence.publicApi.bytes);
     await writeFile(path.join(staging, stem + '.profile-environment.json'), evidence.profileEnvironment.bytes);
     await writeFile(path.join(staging, stem + '.backend-descriptor.json'), evidence.backendDescriptor.bytes);
     await writeFile(path.join(staging, stem + '.artifact-bundle.json'), evidence.artifactBundle.bytes);

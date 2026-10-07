@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { publicApiArtifact } from './public-api-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
@@ -38,7 +39,7 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -163,6 +164,15 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       [...baseDependencies, cert.identity], ['trusted-host-certification-binding']);
     certifiedInput = certified;
     certification = { pscvCert: cert.identity, certifiedSource: certified.identity };
+  }
+  let sourceApi;
+  if (publicApi !== undefined) {
+    if (!certification || typeof publicApi !== 'string') throw new Error('PSC_BUILD_GRAPH_PUBLIC_API_SUBJECT');
+    sourceApi = add(publicApiArtifact(publicApi), { kind: 'output-file', suffix: '.public-api.json' });
+    execute('psc-project-public-api/1', certifiedInput, [sourceApi], implementation, 'psc-source-public-api-projection/1',
+      { observedStages: ['source-signature-projection-before-erasure'], visibilityPolicy: 'all-prepared-declarations',
+        sourceGenericsRetained: true, declarationBodiesRetained: false, targetCorrespondenceVerified: false,
+        independentProjectionChecked: false }, baseDependencies, ['trusted-source-public-api-projection']);
   }
   const stages = checkedIrStageArtifacts(irStages);
   const targetStages = checkedTargetIrStageArtifacts(irStages);
@@ -307,6 +317,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
     ...(certification ? { certification } : {}),
+    ...(sourceApi ? { publicApi: sourceApi } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

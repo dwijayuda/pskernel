@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { checkedSeedLimits, checkedSeedFrames, checkedSeedExhausted, checkSeedBytes } from './checked-seed-protocol.mjs';
+import { decodePublicApi } from './public-api-artifact.mjs';
 import { createPscvCertification } from './certified-source.mjs';
 
 function withTimeout(promise, timeoutMs, child, label) {
@@ -124,10 +125,13 @@ export async function runCheckedSeedSession({
           (typeof completed.runtimeIr !== 'string' || typeof completed.verifiedIr !== 'string')) {
         throw new Error('PSC2_CHECKED_SEED_SESSION_STAGES_RESULT');
       }
-      observation.generatedBytes = Buffer.byteLength(completed.typescript) +
+      if (Object.hasOwn(completed, 'publicApi') && typeof completed.publicApi !== 'string')
+        throw new Error('PSC2_CHECKED_SEED_SESSION_PUBLIC_API_RESULT');
+      observation.generatedBytes = Buffer.byteLength(completed.publicApi ?? '') + Buffer.byteLength(completed.typescript) +
         Buffer.byteLength(completed.runtimeIr ?? '') + Buffer.byteLength(completed.verifiedIr ?? '');
       if (observation.generatedBytes > limits.generatedBytes)
         throw checkedSeedExhausted('generatedBytes', limits.generatedBytes, observation.generatedBytes);
+      if (completed.publicApi !== undefined) decodePublicApi(completed.publicApi, { maxBytes: limits.generatedBytes });
     } else if (completed?.phase !== 'checked') {
       throw new Error('PSC2_CHECKED_SEED_SESSION_CHECK_RESULT');
     }
@@ -143,6 +147,7 @@ export async function runCheckedSeedSession({
         limits: Object.freeze({ ...limits, phaseTimeMs: timeoutMs }), observed: Object.freeze({ ...observation }),
         unobserved: Object.freeze(['compiler-internal-work', 'cpu-time', 'peak-memory', 'descendants', 'host-stack']) }),
       ...(emit ? { typeScript: completed.typescript } : {}),
+      ...(emit && completed.publicApi !== undefined ? { publicApi: completed.publicApi } : {}),
       ...(emit && completed.runtimeIr !== undefined
         ? { stages: Object.freeze({ runtimeIr: completed.runtimeIr, verifiedIr: completed.verifiedIr }) } : {}),
       ...(certification ? {

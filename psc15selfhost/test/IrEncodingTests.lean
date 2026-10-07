@@ -16,6 +16,23 @@ def main (args : List String) : IO Unit := do
     match psIrEncodeModule psIrEncodingFixture with
     | .error _ => throw (IO.userError "IR_ENCODE_FAILED")
     | .ok encoded => IO.println encoded
+  else if args == ["--public-api"] then
+    let source := "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := 42\n"
+    let changedBody := "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := 43\n"
+    let .ok prepared := psCompilerPrepareSource .lean source
+      | throw (IO.userError "PUBLIC_API_PREPARE_FAILED")
+    let .ok changed := psCompilerPrepareSource .lean changedBody
+      | throw (IO.userError "PUBLIC_API_PREPARE_FAILED")
+    let .ok api := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "PUBLIC_API_PROJECTION_FAILED")
+    let .ok changedApi := psCompilerPublicApiFromPrepared changed
+      | throw (IO.userError "PUBLIC_API_PROJECTION_FAILED")
+    if api != changedApi then throw (IO.userError "PUBLIC_API_RETAINS_IMPLEMENTATION_BODY")
+    let .ok stages := psCompilerJavaScriptStagesFromPrepared prepared
+      | throw (IO.userError "PUBLIC_API_JS_STAGES_FAILED")
+    IO.println (psJsonObject [
+      ("publicApi", psJsonQuote api),
+      ("specializedIr", psJsonQuote stages.specializedIr)])
   else if args == ["--interface"] then
     let .ok prepared := psCompilerPrepareSource .lean "def answer : Nat := 42\n"
       | throw (IO.userError "PREPARE_FAILED")

@@ -583,6 +583,45 @@ inductive PsKernelRecursorMajorNormalization :
             (PsKernelLiteral.nat predecessor)))
 
 
+
+/--
+Independent field spine used by the structure-eta conversion rule.
+
+This relation is intentionally structural: it specifies the sequence of
+projections without referring to the executable fuel worker used by
+`psKernelToConstructorWhenStructure`.
+-/
+inductive PsKernelStructureEtaFields
+    (inductName : PsKernelName)
+    (value : PsKernelExpr) :
+    Nat -> Nat -> List PsKernelExpr -> Prop
+  | done
+      (index fieldCount : Nat)
+      (hDone : psKernelNatLt index fieldCount = false) :
+      PsKernelStructureEtaFields
+        inductName value index fieldCount List.nil
+  | step
+      (index fieldCount : Nat)
+      (rest : List PsKernelExpr)
+      (hMore : psKernelNatLt index fieldCount = true)
+      (hRest :
+        PsKernelStructureEtaFields
+          inductName
+          value
+          (Nat.succ index)
+          fieldCount
+          rest) :
+      PsKernelStructureEtaFields
+        inductName
+        value
+        index
+        fieldCount
+        (List.cons
+          (PsKernelExpr.proj inductName index value)
+          rest)
+
+
+mutual
 inductive PsKernelReductionClosure
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext) :
@@ -769,7 +808,7 @@ inductive PsKernelReductionClosure
       (recArgs majorArgs : List PsKernelExpr)
       (recursor : PsKernelRecursorInfo)
       (rule : PsKernelRecursorRule)
-      (major0 majorReduced major : PsKernelExpr)
+      (major0 prepared majorReduced major : PsKernelExpr)
       (hHead :
         Prod.fst (psKernelExprGetAppFnArgs expr) =
           PsKernelExpr.const recName recLevels)
@@ -793,9 +832,12 @@ inductive PsKernelReductionClosure
                   recursor.numMinors
                   recursor.numIndices))) =
           Option.some major0)
-      (hMajorReduction :
-        PsKernelReductionClosure
-          environment localContext major0 majorReduced)
+      (hPrepared :
+        PsKernelDefEqJudgment
+          environment localContext major0 prepared)
+      (hMajorConversion :
+        PsKernelDefEqJudgment
+          environment localContext prepared majorReduced)
       (hNormalize :
         PsKernelRecursorMajorNormalization
           majorReduced major)
@@ -972,6 +1014,80 @@ inductive PsKernelDefEqJudgment
         localContext
         (PsKernelExpr.app leftFn leftArg)
         (PsKernelExpr.app rightFn rightArg)
+  | proofIrrelevance
+      {localContext : PsKernelLocalContext}
+      (left right leftType rightType : PsKernelExpr)
+      (level : PsKernelLevel)
+      (hLeft :
+        PsKernelTypingJudgment
+          environment localContext left leftType)
+      (hRight :
+        PsKernelTypingJudgment
+          environment localContext right rightType)
+      (hLeftType :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          leftType
+          (PsKernelExpr.sort level))
+      (hProp :
+        psKernelLevelNormalizesToZero level = true)
+      (hTypes :
+        PsKernelDefEqJudgment
+          environment localContext leftType rightType) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+  | structureEta
+      {localContext : PsKernelLocalContext}
+      (value valueType etaValue : PsKernelExpr)
+      (inductName ctorName : PsKernelName)
+      (levels : List PsKernelLevel)
+      (typeArgs params fields : List PsKernelExpr)
+      (inductInfo : PsKernelInductiveInfo)
+      (ctorInfo : PsKernelConstructorInfo)
+      (hValue :
+        PsKernelTypingJudgment
+          environment localContext value valueType)
+      (hTypeHead :
+        psKernelExprGetAppFn valueType =
+          PsKernelExpr.const inductName levels)
+      (hTypeArgs :
+        psKernelExprGetAppArgs valueType = typeArgs)
+      (hInduct :
+        psKernelFindConstantInList
+            inductName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.inductInfo inductInfo))
+      (hNonRec : inductInfo.isRec = false)
+      (hNoIndices : inductInfo.numIndices = 0)
+      (hCtors : inductInfo.ctors = List.cons ctorName List.nil)
+      (hCtor :
+        psKernelFindConstantInList
+            ctorName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.ctorInfo ctorInfo))
+      (hCtorInduct :
+        psKernelNameEq ctorInfo.induct inductName = true)
+      (hParams :
+        params = List.take ctorInfo.numParams typeArgs)
+      (hFields :
+        PsKernelStructureEtaFields
+          inductName value 0 ctorInfo.numFields fields)
+      (hEta :
+        etaValue =
+          psKernelApplyArgs
+            (PsKernelExpr.const ctorName levels)
+            (List.append params fields)) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        value
+        etaValue
   | metadataLeft
       (metadata : Nat)
       (left right : PsKernelExpr)
@@ -1000,30 +1116,6 @@ inductive PsKernelDefEqJudgment
         localContext
         left
         (PsKernelExpr.mdata metadata right)
-
-def PsKernelExprEqSound
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext) : Prop :=
-  ∀ (left right : PsKernelExpr),
-    psKernelExprEq left right = true ->
-      PsKernelDefEqJudgment
-        environment
-        localContext
-        left
-        right
-
-def PsKernelDefEqCacheSound
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext)
-    (cache : PsKernelExprPairSet) : Prop :=
-  ∀ (left right : PsKernelExpr),
-    psKernelExprPairSetContains cache left right = true ->
-      PsKernelDefEqJudgment
-        environment
-        localContext
-        left
-        right
-
 
 inductive PsKernelProjectionApplyParamsJudgment
     (environment : PsKernelEnvironment)
@@ -1582,6 +1674,32 @@ inductive PsKernelTypingJudgment
         localContext
         (PsKernelExpr.proj typeName index structValue)
         result
+
+end
+
+def PsKernelExprEqSound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) : Prop :=
+  ∀ (left right : PsKernelExpr),
+    psKernelExprEq left right = true ->
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+
+def PsKernelDefEqCacheSound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (cache : PsKernelExprPairSet) : Prop :=
+  ∀ (left right : PsKernelExpr),
+    psKernelExprPairSetContains cache left right = true ->
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+
 
 def PsKernelReductionCacheSound
     (environment : PsKernelEnvironment)

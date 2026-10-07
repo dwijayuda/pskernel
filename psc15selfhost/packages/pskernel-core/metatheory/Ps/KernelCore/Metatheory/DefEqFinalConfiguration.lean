@@ -360,6 +360,7 @@ theorem psKernelDefEqEtaStructFieldsWithFuel_true_refines
                           simpa [Nat.succ_eq_add_one] using hSuccess))
                 · rw [if_neg hEqValue] at hSuccess
                   simp at hSuccess
+                  exact (hEqValue hSuccess.1).elim
       · rw [if_neg hMore] at hSuccess
         have hDone :
             psKernelNatLt
@@ -789,6 +790,7 @@ theorem psKernelDefEqEtaStructCoreWith_true_refines
                                     hFields
                               · rw [if_neg hTypesEqual] at hSuccess
                                 simp at hSuccess
+                                exact (hTypesEqual hSuccess.1).elim
                 · rw [if_neg hStructure] at hSuccess
                   simp at hSuccess
               · rw [if_neg hArity] at hSuccess

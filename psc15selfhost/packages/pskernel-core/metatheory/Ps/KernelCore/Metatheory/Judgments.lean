@@ -563,6 +563,26 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.proj rightName rightIndex right)
 
 
+inductive PsKernelRecursorMajorNormalization :
+    PsKernelExpr -> PsKernelExpr -> Prop
+  | identity
+      (expr : PsKernelExpr) :
+      PsKernelRecursorMajorNormalization expr expr
+  | natZero :
+      PsKernelRecursorMajorNormalization
+        (PsKernelExpr.lit (PsKernelLiteral.nat 0))
+        (PsKernelExpr.const psKernelNatZeroName List.nil)
+  | natSucc
+      (predecessor : Nat) :
+      PsKernelRecursorMajorNormalization
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat (Nat.succ predecessor)))
+        (PsKernelExpr.app
+          (PsKernelExpr.const psKernelNatSuccName List.nil)
+          (PsKernelExpr.lit
+            (PsKernelLiteral.nat predecessor)))
+
+
 inductive PsKernelReductionClosure
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext) :
@@ -742,6 +762,100 @@ inductive PsKernelReductionClosure
         (psKernelApplyArgs
           (PsKernelExpr.app fnValue representative)
           (psKernelExprListDrop 5 args))
+  | recursorIota
+      (expr : PsKernelExpr)
+      (recName ctorName : PsKernelName)
+      (recLevels ctorLevels : List PsKernelLevel)
+      (recArgs majorArgs : List PsKernelExpr)
+      (recursor : PsKernelRecursorInfo)
+      (rule : PsKernelRecursorRule)
+      (major0 majorReduced major : PsKernelExpr)
+      (hHead :
+        Prod.fst (psKernelExprGetAppFnArgs expr) =
+          PsKernelExpr.const recName recLevels)
+      (hArgs :
+        Prod.snd (psKernelExprGetAppFnArgs expr) =
+          recArgs)
+      (hFind :
+        psKernelFindConstantInList
+            recName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.recInfo recursor))
+      (hMajor :
+        psKernelExprListGet
+            recArgs
+            (Nat.add
+              recursor.numParams
+              (Nat.add
+                recursor.numMotives
+                (Nat.add
+                  recursor.numMinors
+                  recursor.numIndices))) =
+          Option.some major0)
+      (hMajorReduction :
+        PsKernelReductionClosure
+          environment localContext major0 majorReduced)
+      (hNormalize :
+        PsKernelRecursorMajorNormalization
+          majorReduced major)
+      (hCtorHead :
+        Prod.fst (psKernelExprGetAppFnArgs major) =
+          PsKernelExpr.const ctorName ctorLevels)
+      (hMajorArgs :
+        Prod.snd (psKernelExprGetAppFnArgs major) =
+          majorArgs)
+      (hRule :
+        psKernelFindRecursorRule
+            ctorName
+            recursor.rules =
+          Option.some rule)
+      (hFields :
+        psKernelNatGt
+            rule.nFields
+            (psKernelExprListLength majorArgs) =
+          false)
+      (hLevels :
+        Nat.beq
+            (psKernelLevelListLength recLevels)
+            (psKernelNameListLength
+              recursor.base.levelParams) =
+          true) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        expr
+        (psKernelApplyArgs
+          (psKernelApplyArgs
+            (psKernelApplyArgs
+              (psKernelExprInstantiateLevelParams
+                rule.rhs
+                recursor.base.levelParams
+                recLevels)
+              (psKernelExprListTake
+                (Nat.add
+                  recursor.numParams
+                  (Nat.add
+                    recursor.numMotives
+                    recursor.numMinors))
+                recArgs))
+            (psKernelExprListTake
+              rule.nFields
+              (psKernelExprListDrop
+                (Nat.sub
+                  (psKernelExprListLength majorArgs)
+                  rule.nFields)
+                majorArgs)))
+          (psKernelExprListDrop
+            (Nat.succ
+              (Nat.add
+                recursor.numParams
+                (Nat.add
+                  recursor.numMotives
+                  (Nat.add
+                    recursor.numMinors
+                    recursor.numIndices))))
+            recArgs))
 
 inductive PsKernelDefEqJudgment
     (environment : PsKernelEnvironment)

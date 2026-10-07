@@ -3,6 +3,7 @@ import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtif
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyDeclarationOriginGraph } from './declaration-origins.mjs';
 import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
+import { verifyErasureDeclarationMap } from './erasure-declarations.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
@@ -180,6 +181,17 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
       executions.push(result);
       const execution = JSON.parse(resolveArtifact(identity));
       const definition = JSON.parse(resolveArtifact(execution.passDefinitionId));
+      if (definition.passId === 'psc-capture-erasure-declarations/1') {
+        const dependencies = execution.action.dependencies;
+        const api = dependencies.filter(id => id.domain === 'public-api' && id.contract === 'psc-public-api-ir/1');
+        const runtime = dependencies.filter(id => id.domain === 'runtime-ir' && id.contract === 'psc-runtime-ir-json/1');
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            execution.inputs[0].domain !== 'certified-source' || execution.inputs[0].contract !== 'psc-certified-source/1' ||
+            definition.semanticRelationId !== 'psc-source-runtime-declaration-inventory/1' ||
+            api.length !== 1 || runtime.length !== 1) fail('ERASURE_DECLARATION_SUBJECT');
+        await verifyErasureDeclarationMap({ identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) },
+          { resolveArtifact, expectedPublicApiId: api[0], expectedRuntimeIrId: runtime[0], maxBytes: bound.maxArtifactBytes });
+      }
       if (definition.passId === 'psc-capture-declaration-origins/1') {
         const dependencies = execution.action.dependencies;
         const api = dependencies.filter(id => id.domain === 'public-api' && id.contract === 'psc-public-api-ir/1');

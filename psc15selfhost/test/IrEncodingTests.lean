@@ -16,6 +16,25 @@ def main (args : List String) : IO Unit := do
     match psIrEncodeModule psIrEncodingFixture with
     | .error _ => throw (IO.userError "IR_ENCODE_FAILED")
     | .ok encoded => IO.println encoded
+  else if args == ["--erasure-declarations"] then
+    let source := "structure Box where\n  value : Nat\ndef forward (A : Type) (value : A) : A := value\ndef proofId (p : Prop) (h : p) : p := h\ndef answer : Nat := forward Nat 42\n"
+    let .ok prepared := psCompilerPrepareSource .lean source
+      | throw (IO.userError "ERASURE_MAP_PREPARE_FAILED")
+    let .ok legacy := psCompilerErasedIrFromPrepared prepared
+      | throw (IO.userError "ERASURE_MAP_LEGACY_FAILED")
+    let .ok observed := psCompilerErasureProductFromPrepared prepared
+      | throw (IO.userError "ERASURE_MAP_OBSERVED_FAILED")
+    let .ok legacyIr := psIrEncodeModule legacy.raw
+      | throw (IO.userError "ERASURE_MAP_LEGACY_ENCODE_FAILED")
+    let .ok observedIr := psIrEncodeModule observed.erased.raw
+      | throw (IO.userError "ERASURE_MAP_OBSERVED_ENCODE_FAILED")
+    if legacyIr != observedIr then throw (IO.userError "OBSERVATION_CHANGED_ERASURE")
+    let .ok api := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "ERASURE_MAP_API_FAILED")
+    IO.println (psJsonObject [
+      ("publicApi", psJsonQuote api),
+      ("runtimeIr", psJsonQuote observedIr),
+      ("erasureCorrespondence", psJsonQuote observed.correspondence)])
   else if args == ["--origins"] then
     let sources := [
       "def greeting : String := \"😀\"\r\n",
@@ -70,7 +89,11 @@ def main (args : List String) : IO Unit := do
       | throw (IO.userError "JS_LEGACY_FAILED")
     if legacy != staged.javaScript || staged.runtimeIr != staged.verifiedIr then
       throw (IO.userError "JS_STAGES_CHANGED_OUTPUT")
+    let .ok api := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "STAGE_PUBLIC_API_FAILED")
     IO.println (psJsonObject [
+      ("publicApi", psJsonQuote api),
+      ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
       ("runtimeIr", psJsonQuote staged.runtimeIr),
       ("javaScript", psJsonQuote staged.javaScript),
       ("verifiedIr", psJsonQuote staged.verifiedIr),
@@ -86,7 +109,11 @@ def main (args : List String) : IO Unit := do
       | throw (IO.userError "WASM_LEGACY_FAILED")
     if legacy != staged.wasm || staged.runtimeIr != staged.verifiedIr then
       throw (IO.userError "WASM_STAGES_CHANGED_OUTPUT")
+    let .ok api := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "STAGE_PUBLIC_API_FAILED")
     IO.println (psJsonObject [
+      ("publicApi", psJsonQuote api),
+      ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
       ("runtimeIr", psJsonQuote staged.runtimeIr),
       ("wasm", psJsonArray (staged.wasm.map (fun byte => toString byte.toNat))),
       ("verifiedIr", psJsonQuote staged.verifiedIr),
@@ -101,7 +128,11 @@ def main (args : List String) : IO Unit := do
       | throw (IO.userError "LEGACY_FAILED")
     if legacy != staged.typeScript || staged.runtimeIr != staged.verifiedIr then
       throw (IO.userError "STAGES_CHANGED_OUTPUT")
+    let .ok api := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "STAGE_PUBLIC_API_FAILED")
     IO.println (psJsonObject [
+      ("publicApi", psJsonQuote api),
+      ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
       ("runtimeIr", psJsonQuote staged.runtimeIr),
       ("typeScript", psJsonQuote staged.typeScript),
       ("verifiedIr", psJsonQuote staged.verifiedIr)])

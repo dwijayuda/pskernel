@@ -183,13 +183,16 @@ for (const [kind, source] of [
       const apiBytes = await readFile(path.join(dir, 'out.public-api.json'));
       verifyArtifact(apiBytes, receipt.publicApi);
       assert.equal(decodePublicApi(apiBytes)[0], 'psc-public-api-ir/1');
-      assert.deepEqual(bundle.debugArtifacts.map(item => item.role), ['source-origins', 'origin-graph', 'source-map']);
+      assert.deepEqual(bundle.debugArtifacts.map(item => item.role), ['source-origins', 'origin-graph', 'erasure-map', 'source-map']);
       const origins = await readFile(path.join(dir, 'out.source-origins.json'));
       verifyArtifact(origins, receipt.sourceOrigins);
       assert.equal(JSON.parse(origins).coordinateUnit, 'utf8-byte');
       const originGraph = await readFile(path.join(dir, 'out.origin-graph.json'));
       verifyArtifact(originGraph, receipt.originGraph);
       assert.equal(JSON.parse(originGraph).granularity, 'declaration-batch');
+      const erasureMap = await readFile(path.join(dir, 'out.erasure-map.json'));
+      verifyArtifact(erasureMap, receipt.erasureMap);
+      assert.equal(JSON.parse(erasureMap).semanticPreservationProved, false);
       assert.ok(existsSync(path.join(dir, 'out.admissions.json')));
       assert.ok(existsSync(path.join(dir, 'out.pscv-cert.json')));
       assert.ok(existsSync(path.join(dir, 'out.certified-source.json')));
@@ -203,6 +206,7 @@ for (const [kind, source] of [
       'psc-project-public-api/1',
       'psc-capture-declaration-origins/1',
         'psc-erase-checked-core/1',
+        'psc-capture-erasure-declarations/1',
         'psc-validate-runtime-ir/1',
         'psc-project-runtime-interface/1',
         'psc-verified-ir-to-js-abi-plan/1',

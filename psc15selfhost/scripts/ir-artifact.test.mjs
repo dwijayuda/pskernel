@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { spawnSync } from 'node:child_process';
 import { canonicalBytes, canonicalArtifact, artifactKey, artifactId, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
 import { runtimeInterfaceArtifact, verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
+import { decodeErasureDeclarations } from './erasure-declarations.mjs';
 import { decodeIrArtifact, checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
@@ -34,6 +35,8 @@ test('portable IR encoding preserves exact constructor shape, Unicode and arbitr
 
 test('actual erasure/validation/emission snapshots form separately bound archived pass edges', async () => {
   const staged = JSON.parse(emitted('--stages'));
+  decodeErasureDeclarations(Buffer.from(staged.erasureCorrespondence),
+    { publicApi: Buffer.from(staged.publicApi), runtimeIr: Buffer.from(staged.runtimeIr) });
   assert.match(staged.typeScript, /export const answer/);
   const snapshots = checkedIrStageArtifacts(staged);
   assert.deepEqual(snapshots.runtimeIr.bytes, snapshots.verifiedIr.bytes);
@@ -67,6 +70,8 @@ test('actual erasure/validation/emission snapshots form separately bound archive
 
 test('actual direct JavaScript specialization is revalidated, executed and archived as a separate pass', async () => {
   const staged = JSON.parse(emitted('--js-stages'));
+  decodeErasureDeclarations(Buffer.from(staged.erasureCorrespondence),
+    { publicApi: Buffer.from(staged.publicApi), runtimeIr: Buffer.from(staged.runtimeIr) });
   const snapshots = checkedIrStageArtifacts(staged);
   const targets = checkedTargetIrStageArtifacts(staged);
   assert.deepEqual(snapshots.runtimeIr.bytes, snapshots.verifiedIr.bytes);
@@ -108,6 +113,8 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
 
 test('actual direct Wasm retains specialization snapshots and replays correspondence with unchanged emitted bytes', async () => {
   const staged = JSON.parse(emitted('--wasm-stages')), binary = Uint8Array.from(staged.wasm);
+  decodeErasureDeclarations(Buffer.from(staged.erasureCorrespondence),
+    { publicApi: Buffer.from(staged.publicApi), runtimeIr: Buffer.from(staged.runtimeIr) });
   const snapshots = checkedIrStageArtifacts(staged);
   const targets = checkedTargetIrStageArtifacts(staged);
   assert.notDeepEqual(snapshots.verifiedIr.bytes, snapshots.specializedIr.bytes);

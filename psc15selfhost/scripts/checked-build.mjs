@@ -71,6 +71,7 @@ export async function buildChecked({
   let irStages;
   let publicApi;
   let declarationOrigins;
+  let erasureCorrespondence;
   let seedResources;
   let parity;
   let providerToolInputs = [];
@@ -121,6 +122,7 @@ export async function buildChecked({
     irStages = result.stages;
     publicApi = result.publicApi;
     declarationOrigins = result.declarationOrigins;
+    erasureCorrespondence = result.erasureCorrespondence;
     seedResources = result.resourceObservation;
   } else {
     const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
@@ -144,6 +146,7 @@ export async function buildChecked({
       irStages = emitted.stages;
       publicApi = emitted.publicApi;
       declarationOrigins = emitted.declarationOrigins;
+      erasureCorrespondence = emitted.erasureCorrespondence;
     }
   }
 
@@ -206,7 +209,7 @@ export async function buildChecked({
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
-      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi, sourceOrigins: snapshot.sourceOrigins, declarationOrigins,
+      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi, sourceOrigins: snapshot.sourceOrigins, declarationOrigins, erasureCorrespondence,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     const evidence = bindObservedBuildContext(observed, { languageAuthority, backendRegistry, backendId: 'typescript' });
     receipt.profileEnvironment = evidence.profileEnvironment.identity;
@@ -220,6 +223,7 @@ export async function buildChecked({
     if (evidence.publicApi) receipt.publicApi = evidence.publicApi.identity;
     if (evidence.sourceOrigins) receipt.sourceOrigins = evidence.sourceOrigins.identity;
     if (evidence.originGraph) receipt.originGraph = evidence.originGraph.identity;
+    if (evidence.erasureMap) receipt.erasureMap = evidence.erasureMap.identity;
     if (evidence.jsAbi) {
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
       receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;

@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { createErasureDeclarationMap } from './erasure-declarations.mjs';
 import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { createSourcePreparationArtifacts } from './source-preparation-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
@@ -41,7 +42,7 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -207,6 +208,9 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   const stages = checkedIrStageArtifacts(irStages);
   const targetStages = checkedTargetIrStageArtifacts(irStages);
   let verifiedIr;
+  let erasureMap;
+  if (erasureCorrespondence !== undefined && (!stages || !sourceApi || !certification || (typeScript === undefined && !directBackend)))
+    throw new Error('PSC_BUILD_GRAPH_ERASURE_SUBJECT');
   if (stages && (typeScript !== undefined || directBackend)) {
       const runtimeIr = add(stages.runtimeIr, { kind: 'archive-required', role: 'actual-erasure-output' });
       verifiedIr = add(stages.verifiedIr, { kind: 'archive-required', role: 'actual-validation-output' });
@@ -215,6 +219,19 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         certifiedInput === core ? 'psc-core-runtime-refinement/1' : 'psc-certified-source-runtime-refinement/1',
         { observedStages: ['erase'], certifiedSourceRequired: certifiedInput !== core }, baseDependencies,
         ['trusted-erasure-implementation']);
+      if (erasureCorrespondence !== undefined) {
+        const projection = createErasureDeclarationMap({ table: erasureCorrespondence, publicApi: sourceApi, runtimeIr });
+        for (const item of projection.artifacts) add(item, { kind: 'archive-required', role: 'erasure-declaration-subject' });
+        erasureMap = add(projection.map, { kind: 'output-file', suffix: '.erasure-map.json' });
+        execute('psc-capture-erasure-declarations/1', certifiedInput, [erasureMap], implementation,
+          'psc-source-runtime-declaration-inventory/1',
+          { observedStages: ['observe-actual-erasure-fold', 'check-source-and-runtime-inventories'],
+            inventoryCorrespondenceChecked: true, proofDispositionIndependentlyChecked: false, semanticPreservationProved: false },
+          [...baseDependencies, ...projection.artifacts.map(item => item.identity),
+            ...(declarationOriginGraph ? [declarationOriginGraph.identity] : [])], [], undefined,
+          { originPolicy: 'synthesize', authorityEffect: 'none',
+            originReason: 'Record actual source declaration dispositions and runtime names; expression, layout and target origins remain unmapped.' });
+      }
       execute('psc-validate-runtime-ir/1', runtimeIr, [verifiedIr], implementation, 'psc-runtime-ir-invariants/1',
         { observedStages: ['validate-ir'], bytesPreserved: true }, baseDependencies, ['trusted-strict-ir-validator']);
       runtimeInterface = add(runtimeInterfaceArtifact(verifiedIr), { kind: 'archive-required', role: 'runtime-structural-interface' });
@@ -350,6 +367,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...(sourceApi ? { publicApi: sourceApi } : {}),
     ...(preparationOrigins ? { sourceOrigins: preparationOrigins } : {}),
     ...(declarationOriginGraph ? { originGraph: declarationOriginGraph } : {}),
+    ...(erasureMap ? { erasureMap } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

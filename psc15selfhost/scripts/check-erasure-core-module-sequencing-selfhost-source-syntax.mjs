@@ -9,7 +9,7 @@ const source = await readFile(
 );
 
 const match = source.match(
-  /def psEraseCoreModuleWithRuntimePrelude[\s\S]*?(?=\ndef psEraseCoreModule)/,
+  /def psEraseCoreModuleObserved[\s\S]*?(?=\ndef psEraseCoreModuleWithRuntimePrelude)/,
 );
 if (match === null) {
   throw new Error(

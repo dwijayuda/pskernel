@@ -18,11 +18,12 @@ structure PsCompilerWasmStages where
   verifiedIr : String
   specializedIr : String
   wasmIr : String
+  erasureCorrespondence : String
 
 -- A single execution retains the module values actually used for emission.
 -- Checked host authority is required before production access to this API.
 def psCompilerWasmStagesFromSpecialized
-    (profile : PsWasmTargetProfile) (runtime verified : String)
+    (profile : PsWasmTargetProfile) (runtime verified erasureCorrespondence : String)
     (specialized : PsSpecializedIrModule) : Except PsCompilerWasmStagesError PsCompilerWasmStages :=
   match psValidateErasedIrModule (PsErasedIrModule.mk specialized.raw) with
   | Except.error error =>
@@ -61,28 +62,29 @@ def psCompilerWasmStagesFromSpecialized
                               runtime
                               verified
                               encoded
-                              targetIr)
+                              targetIr
+                              erasureCorrespondence)
 
 def psCompilerWasmStagesFromValidated
-    (profile : PsWasmTargetProfile) (runtime verified : String)
+    (profile : PsWasmTargetProfile) (runtime verified erasureCorrespondence : String)
     (validated : PsValidatedIrModule) : Except PsCompilerWasmStagesError PsCompilerWasmStages :=
   match psIrSpecializeValidatedModule validated with
   | Except.error error => Except.error (PsCompilerWasmStagesError.specialize error)
-  | Except.ok specialized => psCompilerWasmStagesFromSpecialized profile runtime verified specialized
+  | Except.ok specialized => psCompilerWasmStagesFromSpecialized profile runtime verified erasureCorrespondence specialized
 
 def psCompilerWasmStagesFromPrepared
     (profile : PsWasmTargetProfile)
     (prepared : PsCompilerAdmissionReadyModule) : Except PsCompilerWasmStagesError PsCompilerWasmStages :=
-  match psCompilerErasedIrFromPrepared prepared with
+  match psCompilerErasureProductFromPrepared prepared with
   | Except.error error => Except.error (PsCompilerWasmStagesError.compiler error)
-  | Except.ok erased =>
-      match psIrEncodeModule erased.raw with
+  | Except.ok product =>
+      match psIrEncodeModule product.erased.raw with
       | Except.error error => Except.error (PsCompilerWasmStagesError.snapshot error)
       | Except.ok runtime =>
-          match psValidateErasedIrModule erased with
+          match psValidateErasedIrModule product.erased with
           | Except.error error =>
               Except.error (PsCompilerWasmStagesError.compiler (PsCompilerError.irValidation error))
           | Except.ok validated =>
               match psIrEncodeModule validated.raw with
               | Except.error error => Except.error (PsCompilerWasmStagesError.snapshot error)
-              | Except.ok verified => psCompilerWasmStagesFromValidated profile runtime verified validated
+              | Except.ok verified => psCompilerWasmStagesFromValidated profile runtime verified product.correspondence validated

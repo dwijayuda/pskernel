@@ -15,11 +15,12 @@ structure PsCompilerJavaScriptStages where
   verifiedIr : String
   specializedIr : String
   jsIr : String
+  erasureCorrespondence : String
 
 -- The snapshots come from one actual pipeline execution. A checked host
 -- capability is still required for production access to this internal API.
 def psCompilerJavaScriptStagesFromValidated
-    (runtime verified : String)
+    (runtime verified erasureCorrespondence : String)
     (validated : PsValidatedIrModule) :
     Except PsCompilerJavaScriptStagesError PsCompilerJavaScriptStages :=
   match psCompilerJavaScriptSpecializeValidatedIr validated with
@@ -66,21 +67,22 @@ def psCompilerJavaScriptStagesFromValidated
                                   runtime
                                   verified
                                   encoded
-                                  targetIr)
+                                  targetIr
+                                  erasureCorrespondence)
 
 def psCompilerJavaScriptStagesFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :
     Except PsCompilerJavaScriptStagesError PsCompilerJavaScriptStages :=
-  match psCompilerErasedIrFromPrepared prepared with
+  match psCompilerErasureProductFromPrepared prepared with
   | Except.error error => Except.error (PsCompilerJavaScriptStagesError.compiler error)
-  | Except.ok erased =>
-      match psIrEncodeModule erased.raw with
+  | Except.ok product =>
+      match psIrEncodeModule product.erased.raw with
       | Except.error error => Except.error (PsCompilerJavaScriptStagesError.encode error)
       | Except.ok runtime =>
-          match psValidateErasedIrModule erased with
+          match psValidateErasedIrModule product.erased with
           | Except.error error =>
               Except.error (PsCompilerJavaScriptStagesError.compiler (PsCompilerError.irValidation error))
           | Except.ok validated =>
               match psIrEncodeModule validated.raw with
               | Except.error error => Except.error (PsCompilerJavaScriptStagesError.encode error)
-              | Except.ok verified => psCompilerJavaScriptStagesFromValidated runtime verified validated
+              | Except.ok verified => psCompilerJavaScriptStagesFromValidated runtime verified product.correspondence validated

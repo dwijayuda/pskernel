@@ -81,3 +81,55 @@ def psCompilerPublicApiFromPrepared
       Except.error (PsCompilerError.admission error)
   | Except.ok encoded =>
       Except.ok encoded
+
+-- Actual source-declaration to RuntimeIR-declaration inventory. This records
+-- names/dispositions, not expression correspondence or preservation evidence.
+structure PsCompilerErasureProduct where
+  erased : PsErasedIrModule
+  correspondence : String
+
+def psCompilerErasureDispositionJson
+    (disposition : PsErasureDeclarationDisposition) : String :=
+  match disposition with
+  | PsErasureDeclarationDisposition.runtime name =>
+      psJsonArray [psJsonQuote "runtime", psJsonQuote name]
+  | PsErasureDeclarationDisposition.proofErased =>
+      psJsonArray [psJsonQuote "proof-erased"]
+  | PsErasureDeclarationDisposition.noRuntimeDeclaration =>
+      psJsonArray [psJsonQuote "no-runtime-declaration"]
+
+def psCompilerErasureCorrespondenceEntries
+    (entries : List PsErasureDeclarationCorrespondence) : List String :=
+  match entries with
+  | List.nil => List.nil
+  | List.cons entry rest =>
+      List.cons
+        (psJsonArray [
+          psEncodeCodecName entry.sourceName,
+          psCompilerErasureDispositionJson entry.disposition
+        ])
+        (psCompilerErasureCorrespondenceEntries rest)
+
+def psCompilerErasureProductFromPrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerError PsCompilerErasureProduct :=
+  match psCompilerEnvironmentFromPrepared prepared with
+  | Except.error error => Except.error error
+  | Except.ok environment =>
+      match
+          psEraseCoreModuleObserved
+            true
+            environment
+            psSelfHostRuntimePreludeDeclarationsWithProd
+            prepared.declarations with
+      | Except.error error => Except.error (PsCompilerError.erasure error)
+      | Except.ok product =>
+          Except.ok
+            (PsCompilerErasureProduct.mk
+              (PsErasedIrModule.mk product.raw)
+              (psJsonArray [
+                psJsonQuote "psc-erasure-declarations/1",
+                psJsonQuote "declaration-inventory",
+                psJsonArray
+                  (psCompilerErasureCorrespondenceEntries product.correspondence)
+              ]))

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { checkedSeedLimits, checkedSeedFrames, checkedSeedExhausted, checkSeedBytes } from './checked-seed-protocol.mjs';
+import { decodeErasureDeclarations } from './erasure-declarations.mjs';
 import { decodeDeclarationOrigins } from './declaration-origins.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { createPscvCertification } from './certified-source.mjs';
@@ -132,10 +133,15 @@ export async function runCheckedSeedSession({
       if (Object.hasOwn(completed, 'declarationOrigins') &&
           (typeof completed.declarationOrigins !== 'string' || typeof completed.publicApi !== 'string'))
         throw new Error('PSC2_CHECKED_SEED_SESSION_ORIGINS_RESULT');
-      observation.generatedBytes = Buffer.byteLength(completed.declarationOrigins ?? '') + Buffer.byteLength(completed.publicApi ?? '') + Buffer.byteLength(completed.typescript) +
+      if (Object.hasOwn(completed, 'erasureCorrespondence') &&
+          (typeof completed.erasureCorrespondence !== 'string' || typeof completed.publicApi !== 'string' ||
+           typeof completed.runtimeIr !== 'string')) throw new Error('PSC2_CHECKED_SEED_SESSION_ERASURE_RESULT');
+      observation.generatedBytes = Buffer.byteLength(completed.erasureCorrespondence ?? '') + Buffer.byteLength(completed.declarationOrigins ?? '') + Buffer.byteLength(completed.publicApi ?? '') + Buffer.byteLength(completed.typescript) +
         Buffer.byteLength(completed.runtimeIr ?? '') + Buffer.byteLength(completed.verifiedIr ?? '');
       if (observation.generatedBytes > limits.generatedBytes)
         throw checkedSeedExhausted('generatedBytes', limits.generatedBytes, observation.generatedBytes);
+      if (completed.erasureCorrespondence !== undefined) decodeErasureDeclarations(Buffer.from(completed.erasureCorrespondence),
+        { publicApi: Buffer.from(completed.publicApi), runtimeIr: Buffer.from(completed.runtimeIr), maxBytes: limits.generatedBytes });
       if (completed.declarationOrigins !== undefined) decodeDeclarationOrigins(Buffer.from(completed.declarationOrigins),
         { sources: inputSources, publicApi: Buffer.from(completed.publicApi), maxBytes: limits.generatedBytes });
       if (completed.publicApi !== undefined) decodePublicApi(Buffer.from(completed.publicApi), { maxBytes: limits.generatedBytes });
@@ -155,6 +161,7 @@ export async function runCheckedSeedSession({
         unobserved: Object.freeze(['compiler-internal-work', 'cpu-time', 'peak-memory', 'descendants', 'host-stack']) }),
       ...(emit ? { typeScript: completed.typescript } : {}),
       ...(emit && completed.publicApi !== undefined ? { publicApi: completed.publicApi } : {}),
+      ...(emit && completed.erasureCorrespondence !== undefined ? { erasureCorrespondence: completed.erasureCorrespondence } : {}),
       ...(emit && completed.declarationOrigins !== undefined ? { declarationOrigins: completed.declarationOrigins } : {}),
       ...(emit && completed.runtimeIr !== undefined
         ? { stages: Object.freeze({ runtimeIr: completed.runtimeIr, verifiedIr: completed.verifiedIr }) } : {}),

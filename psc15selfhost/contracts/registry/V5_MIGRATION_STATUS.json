@@ -1161,7 +1161,7 @@
       "classifications": [
         "public-api-ir"
       ],
-      "status": "portable-source-producer-live-service-native-build-and-bundle-implemented-independent-correspondence-and-export-selection-pending",
+      "status": "portable-source-producer-and-observed-runtime-name-inventory-implemented-semantic-correspondence-and-export-policy-pending",
       "requirement": "Portable checked-Core/module-interface projection preserves public source generics and contracts; never infer from SpecializedIR."
     },
     {
@@ -1170,7 +1170,7 @@
       "classifications": [
         "origin-source-maps"
       ],
-      "status": "preparation-and-declaration-batch-edges-produced-bound-and-replayed-expression-and-runtime-target-transfer-pending",
+      "status": "preparation-declaration-and-erasure-inventory-edges-produced-bound-and-replayed-expression-specialization-target-transfer-pending",
       "requirement": "Exact source-to-target origins and per-pass preserve/merge/synthesize/drop reasons; separate non-authoritative metadata."
     },
     {
@@ -1406,6 +1406,20 @@
       "kind": "origin-graph",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/DECLARATION_ORIGINS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-erasure-declarations/1",
+      "kind": "declaration-correspondence",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-erasure-declaration-map/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json",
       "classification": "origin-source-maps"
     }
   ]

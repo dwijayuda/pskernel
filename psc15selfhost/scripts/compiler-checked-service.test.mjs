@@ -260,3 +260,28 @@ test('ordered origin inputs are captured before asynchronous checking', async ()
   const result = service.emitOriginGraph(await pending);
   assert.equal(result.artifacts.find(item => item.identity.domain === 'prepared-source').bytes.toString(), 'before');
 });
+
+test('erasure inventory comes from the single checked emission and malformed metadata never falls back', async () => {
+  const { compiler, service, emitted } = fixture();
+  const api = '["psc-public-api-ir/1","all-prepared-declarations",[]]';
+  const table = '["psc-erasure-declarations/1","declaration-inventory",[]]';
+  let count = 0;
+  compiler.psCompilerPublicApiFromPrepared = () => ok(api);
+  compiler.psCompilerTypeScriptStagesFromPrepared = () => {
+    count++;
+    return ok({ typeScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr, erasureCorrespondence: table });
+  };
+  const handle = await service.check('lean', '');
+  const result = service.emitArtifact(handle);
+  assert.equal(count, 1);
+  assert.equal(result.erasureCorrespondence, table);
+  assert.equal(result.erasureMap.domain, 'erasure-map');
+  assert.equal(emitted.length, 0);
+  compiler.psCompilerTypeScriptStagesFromPrepared = () =>
+    ok({ typeScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr, erasureCorrespondence: 0 });
+  assert.throws(() => service.emitArtifact(handle), /ERASURE_CORRESPONDENCE_SHAPE/);
+  compiler.psCompilerTypeScriptStagesFromPrepared = () =>
+    ok({ typeScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr, erasureCorrespondence: '[]' });
+  assert.throws(() => service.emitArtifact(handle), /PSC_ERASURE_DECL_/);
+  assert.equal(emitted.length, 0);
+});

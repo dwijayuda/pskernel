@@ -71,6 +71,12 @@
             "requiresToolchain": false
           },
           {
+            "role": "erasure-map",
+            "domain": "erasure-map",
+            "contract": "psc-erasure-declaration-map/1",
+            "requiresToolchain": false
+          },
+          {
             "role": "source-map",
             "domain": "source-map-output",
             "contract": "typescript-emitted-file/1",
@@ -139,6 +145,12 @@
             "role": "origin-graph",
             "domain": "origin-graph",
             "contract": "psc-origin-graph/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "erasure-map",
+            "domain": "erasure-map",
+            "contract": "psc-erasure-declaration-map/1",
             "requiresToolchain": false
           }
         ],
@@ -213,6 +225,12 @@
             "role": "origin-graph",
             "domain": "origin-graph",
             "contract": "psc-origin-graph/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "erasure-map",
+            "domain": "erasure-map",
+            "contract": "psc-erasure-declaration-map/1",
             "requiresToolchain": false
           }
         ],
@@ -289,6 +307,12 @@
             "role": "origin-graph",
             "domain": "origin-graph",
             "contract": "psc-origin-graph/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "erasure-map",
+            "domain": "erasure-map",
+            "contract": "psc-erasure-declaration-map/1",
             "requiresToolchain": false
           }
         ],

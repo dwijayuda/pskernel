@@ -163,7 +163,10 @@ export function createKernelCheckedSession(
             (target === 'wasm' && typeof staged.wasmIr !== 'string')) {
           throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
         }
+        if (Object.hasOwn(staged, 'erasureCorrespondence') && typeof staged.erasureCorrespondence !== 'string')
+          throw new Error('PSC2_CHECKED_ERASURE_CORRESPONDENCE_SHAPE');
         return Object.freeze({ output: staged[outputKey],
+          ...(Object.hasOwn(staged, 'erasureCorrespondence') ? { erasureCorrespondence: staged.erasureCorrespondence } : {}),
           stages: Object.freeze({
             runtimeIr: staged.runtimeIr,
             verifiedIr: staged.verifiedIr,

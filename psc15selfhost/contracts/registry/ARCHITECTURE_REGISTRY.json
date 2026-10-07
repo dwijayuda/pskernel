@@ -393,6 +393,18 @@
       "kind": "origin-graph",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/DECLARATION_ORIGINS_V1.json"
+    },
+    {
+      "id": "psc-erasure-declarations/1",
+      "kind": "declaration-correspondence",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-erasure-declaration-map/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

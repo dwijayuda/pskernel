@@ -109,7 +109,8 @@ def psCheckedSeedPreparedSession
         stdout.putStrLn (Lean.Json.mkObj [
           ("phase", Lean.Json.str "emitted"), ("typescript", Lean.Json.str output.typeScript),
           ("runtimeIr", Lean.Json.str output.runtimeIr), ("verifiedIr", Lean.Json.str output.verifiedIr),
-          ("publicApi", Lean.Json.str publicApi), ("declarationOrigins", Lean.Json.str origins)]).compress
+          ("publicApi", Lean.Json.str publicApi), ("declarationOrigins", Lean.Json.str origins),
+          ("erasureCorrespondence", Lean.Json.str output.erasureCorrespondence)]).compress
         stdout.flush
   else
     throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")

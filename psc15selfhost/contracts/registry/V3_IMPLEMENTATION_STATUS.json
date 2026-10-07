@@ -280,6 +280,8 @@
         "scripts/savef-object.mjs",
         "scripts/savef-graph.mjs",
         "scripts/savef-lifecycle.mjs",
+        "scripts/savef-wasm-literal.mjs",
+        "contracts/archive/SAVEF_WASM_LITERAL_REUSE_V1.json",
         "contracts/archive/SAVEF_LIFECYCLE_V1.json"
       ],
       "completion": "Typed graphs, ValidUnder checks, migrations, supersession, failure knowledge and accepted reuse events operate end to end.",

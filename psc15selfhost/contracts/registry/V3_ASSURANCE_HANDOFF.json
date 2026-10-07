@@ -48,7 +48,7 @@
     {
       "id": "savef-offline-replay",
       "status": "pending",
-      "required": "Replay actual compiler-preservation proof/validator certificates, trust closure and pinned release archives offline; metadata/hash closure is insufficient. A standalone pinned Lean Wasm profile now checks a real closed implication-identity proof and rejects an invalid proof of the same statement outside the checkout. That focused fixture does not discharge compiler preservation, diverse checking, paranoid runtime hardening, signed release or global assurance obligations."
+      "required": "Replay actual compiler-preservation proof/validator certificates, trust closure and pinned release archives offline; metadata/hash closure is insufficient. A standalone pinned Lean Wasm profile checks a real closed implication-identity proof and rejects an invalid proof outside the checkout. A scoped SAVEF operation now replays actual Wasm literal certificates and records real artifact reuse only after fresh output validation, including actual PSC-emitted bytes. These focused fixtures do not discharge source preservation, broader theorem/interface reuse, diverse checking, runtime hardening, signed release or global assurance obligations."
     },
     {
       "id": "factorybench-holdout",

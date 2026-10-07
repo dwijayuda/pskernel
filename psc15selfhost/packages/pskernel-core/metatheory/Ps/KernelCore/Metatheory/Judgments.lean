@@ -1054,6 +1054,147 @@ inductive PsKernelDefEqJudgment
         localContext
         (PsKernelExpr.app leftFn leftArg)
         (PsKernelExpr.app rightFn rightArg)
+  /-
+  Algorithmic K conversion used by recursor WHNF.
+
+  This rule records the independent control/metadata facts needed by the K
+  path without claiming that infer-only itself is a typing certificate.
+  The checked-soundness layer may refine this rule to `proofIrrelevance`
+  once admitted-recursors and checked inputs provide full typing evidence.
+  -/
+  | recursorKConversion
+      {localContext : PsKernelLocalContext}
+      (recursor : PsKernelRecursorInfo)
+      (major appType candidate candidateType : PsKernelExpr)
+      (majorInduct typeInduct ctorName : PsKernelName)
+      (typeLevels : List PsKernelLevel)
+      (indices params : List PsKernelExpr)
+      (inductInfo : PsKernelInductiveInfo)
+      (ctorRest : List PsKernelName)
+      (hK : recursor.k = true)
+      (hMajorInduct :
+        psKernelRecursorMajorInduct recursor =
+          Option.some majorInduct)
+      (hTypeHead :
+        psKernelExprGetAppFn appType =
+          PsKernelExpr.const typeInduct typeLevels)
+      (hTypeInduct :
+        psKernelNameEq typeInduct majorInduct = true)
+      (hIndices :
+        indices =
+          psKernelExprListDrop
+            recursor.numParams
+            (psKernelExprGetAppArgs appType))
+      (hNoUnresolvedIndex :
+        (if psKernelExprHasMVarForK appType then
+           psKernelExprListAnyMVar indices
+         else
+           false) =
+          false)
+      (hInduct :
+        psKernelFindConstantInList
+            typeInduct
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.inductInfo inductInfo))
+      (hCtors :
+        inductInfo.ctors =
+          List.cons ctorName ctorRest)
+      (hParams :
+        params =
+          psKernelExprListTake
+            recursor.numParams
+            (psKernelExprGetAppArgs appType))
+      (hParamCount :
+        Nat.beq
+            (psKernelExprListLength params)
+            recursor.numParams =
+          true)
+      (hCandidate :
+        candidate =
+          psKernelApplyArgs
+            (PsKernelExpr.const ctorName typeLevels)
+            params)
+      (hTypeDefEq :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          appType
+          candidateType) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        major
+        candidate
+
+  /-
+  Algorithmic non-recursive structure eta conversion used by recursor WHNF.
+
+  The rule is driven by authoritative inductive/constructor metadata plus an
+  independent projection-field spine.  It is intentionally separate from the
+  stronger typed `structureEta` rule below.
+  -/
+  | recursorStructureEta
+      {localContext : PsKernelLocalContext}
+      (major majorType etaValue : PsKernelExpr)
+      (inductName ctorName : PsKernelName)
+      (levels : List PsKernelLevel)
+      (typeArgs params fields : List PsKernelExpr)
+      (inductInfo : PsKernelInductiveInfo)
+      (ctorInfo : PsKernelConstructorInfo)
+      (hNonRecStructure :
+        psKernelEnvironmentIsNonRecStructure
+            environment
+            inductName =
+          true)
+      (hTypeHead :
+        psKernelExprGetAppFn majorType =
+          PsKernelExpr.const inductName levels)
+      (hTypeArgs :
+        psKernelExprGetAppArgs majorType = typeArgs)
+      (hInduct :
+        psKernelFindConstantInList
+            inductName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.inductInfo inductInfo))
+      (hCtors :
+        inductInfo.ctors =
+          List.cons ctorName List.nil)
+      (hCtor :
+        psKernelFindConstantInList
+            ctorName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.ctorInfo ctorInfo))
+      (hParamBound :
+        Nat.ble
+            ctorInfo.numParams
+            (psKernelExprListLength typeArgs) =
+          true)
+      (hParams :
+        params =
+          psKernelExprListTake
+            ctorInfo.numParams
+            typeArgs)
+      (hFields :
+        PsKernelStructureEtaFields
+          inductName
+          major
+          0
+          ctorInfo.numFields
+          fields)
+      (hEta :
+        etaValue =
+          psKernelApplyArgs
+            (PsKernelExpr.const ctorName levels)
+            (psKernelExprListAppend params fields)) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        major
+        etaValue
+
   | proofIrrelevance
       {localContext : PsKernelLocalContext}
       (left right leftType rightType : PsKernelExpr)

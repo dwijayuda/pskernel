@@ -90,14 +90,23 @@ def psCompilerWasmProgressLower (state : PsCompilerWasmProgress) : PsCompilerWas
   match state with
   | PsCompilerWasmProgress.specialized module =>
       match psWasmLowerSpecializedValidatedModule psCompilerWasm32Target module with
-      | Except.error _ => PsCompilerWasmProgress.failed
-      | Except.ok lowered => PsCompilerWasmProgress.lowered lowered
-  | _ => PsCompilerWasmProgress.failed
+      | Except.error _ =>
+          PsCompilerWasmProgress.failed
+      | Except.ok lowered =>
+          let target : PsWasmModule :=
+            psWasmAddSelfHostGcAbi lowered;
+          match psWasmIrValidateModule target with
+          | Except.error _ =>
+              PsCompilerWasmProgress.failed
+          | Except.ok _ =>
+              PsCompilerWasmProgress.lowered target
+  | _ =>
+      PsCompilerWasmProgress.failed
 
 def psCompilerWasmProgressEncode (state : PsCompilerWasmProgress) : PsCompilerWasmProgress :=
   match state with
   | PsCompilerWasmProgress.lowered module =>
-      match psWasmEncodeModule (psWasmAddSelfHostGcAbi module) with
+      match psWasmEncodeModule module with
       | Except.error _ => PsCompilerWasmProgress.failed
       | Except.ok bytes => PsCompilerWasmProgress.encoded bytes
   | _ => PsCompilerWasmProgress.failed

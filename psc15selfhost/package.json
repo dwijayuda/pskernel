@@ -210,7 +210,8 @@
     "test:ir-artifacts": "lake build pscv_ir_encoding_tests psc1_ir_specialize_tests && lake exe pscv_ir_encoding_tests && node --test scripts/ir-artifact.test.mjs scripts/specialization-correspondence.test.mjs",
     "test:semantic-query-cache": "node --test scripts/module-interface-evidence.test.mjs scripts/semantic-query-cache.test.mjs",
     "test:savef-retrieval": "node --test scripts/savef-retrieval-session.test.mjs",
-    "test:ddc": "node --test scripts/diverse-bootstrap.test.mjs"
+    "test:ddc": "node --test scripts/diverse-bootstrap.test.mjs",
+    "test:js-ir-validator": "lake build psc1_backend_js_validate_tests && lake exe psc1_backend_js_validate_tests && lake exe psc1 check packages/backend-js/src/Ps/BackendJs/Validate.lean"
   },
   "devDependencies": {
     "typescript": "7.0.2"

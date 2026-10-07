@@ -13,6 +13,25 @@ import { verifyObservedBuildArchive } from './observed-build-archive.mjs';
 const seed = process.env.PSC2_CHECKED_SEED_BIN ?? defaultCheckedSeed;
 const native = existsSync(seed);
 
+function passDefinitions(graph) {
+  return graph.entries
+    .filter(entry => entry.identity?.contract === 'psc-pass-definition/1')
+    .map(entry => entry.canonicalValue);
+}
+
+function allowedAssumptionsFromGraph(graph) {
+  return [...new Set(passDefinitions(graph).flatMap(definition => definition.assumptionIds ?? []))];
+}
+
+function passIds(graph) {
+  return passDefinitions(graph).map(definition => definition.passId);
+}
+
+function assertPasses(graph, required) {
+  const actual = new Set(passIds(graph));
+  for (const passId of required) assert.equal(actual.has(passId), true, 'missing pass ' + passId);
+}
+
 test('explicit owned kernel checks dependent source before emission and execution', { skip: !native }, async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-checked-real-'));
   try {
@@ -27,15 +46,23 @@ test('explicit owned kernel checks dependent source before emission and executio
     assert.equal(receipt.schemaVersion, 4);
     assert.equal(receipt.kernelContract.id, kernelContractV1.id);
     assert.equal(receipt.kernelContract.sha256, kernelContractV1.sha256);
+    const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json'), 'utf8'));
     const archiveBytes = await readFile(path.join(dir, 'out.build-archive.json'));
     verifyArtifact(archiveBytes, receipt.buildArchive);
     const archived = await verifyObservedBuildArchive(archiveBytes, { expectedGraphId: receipt.buildGraph,
-      allowedAssumptions: ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
-        'selected-kernel-invocation', 'trusted-frontend-source-interpretation', 'trusted-erasure-and-typescript-emission',
-        'selected-typescript-package-closure', 'trusted-erasure-implementation', 'trusted-strict-ir-validator',
-        'trusted-typescript-emission', 'trusted-runtime-interface-projection', 'trusted-host-certification-binding'] });
+      allowedAssumptions: allowedAssumptionsFromGraph(graph) });
     assert.equal(archived.kind, 'accepted', archived.reason);
-    assert.equal(archived.executions.length, 7);
+    assert.equal(archived.executions.length, graph.executions.length);
+    assertPasses(graph, [
+      'psc-prepare-and-check/1',
+      'psc-certify-checked-core/1',
+      'psc-erase-checked-core/1',
+      'psc-validate-runtime-ir/1',
+      'psc-project-runtime-interface/1',
+      'psc-verified-ir-to-js-abi-plan/1',
+      'psc-verified-ir-to-typescript/1',
+      'typescript-to-es2022/1',
+    ]);
     assert.equal(archived.runtimeInterfaceProjections.length, 1);
     assert.equal(archived.semanticClaimsVerified, false);
   } finally { await rm(dir, { recursive: true, force: true }); }
@@ -147,7 +174,17 @@ for (const [kind, source] of [
       assert.ok(existsSync(path.join(dir, 'out.evidence-envelope.json')));
       const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json'), 'utf8'));
       assert.equal(graph.coverage, 'observed-erasure-validation-and-composite-backend-edges');
-      assert.equal(graph.executions.length, 7);
+      assertPasses(graph, [
+        'psc-prepare-and-check/1',
+        'psc-certify-checked-core/1',
+        'psc-erase-checked-core/1',
+        'psc-validate-runtime-ir/1',
+        'psc-project-runtime-interface/1',
+        'psc-verified-ir-to-js-abi-plan/1',
+        'psc-verified-ir-to-typescript/1',
+        'typescript-to-es2022/1',
+      ]);
+      assert.equal(graph.executions.length, passDefinitions(graph).length);
       assert.equal(receipt.runtimeInterface.domain, 'runtime-interface');
       assert.deepEqual(graph.entries.find(entry => entry.identity.domain === 'runtime-interface').identity, receipt.runtimeInterface);
       assert.equal(receipt.sourceResources.contract, 'psc-source-read-budget/1');

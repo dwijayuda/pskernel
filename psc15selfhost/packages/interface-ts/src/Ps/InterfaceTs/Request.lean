@@ -76,13 +76,18 @@ def psTsDecodeDeclarationNatural (digits : Nat) (value : PsJsonValue) :
 def psTsDecodeDeclarationRequest (value : PsJsonValue) :
     Except PsTsDeclarationRequestError PsTsDeclarationRequest :=
   match value with
-  | PsJsonValue.array [index, PsJsonValue.string name] =>
-      match psTsDecodeDeclarationNatural 7 index with
-      | Except.error error => Except.error error
-      | Except.ok sourceIndex =>
-          if Nat.ble sourceIndex 1000000 then
-            Except.ok (PsTsDeclarationRequest.mk sourceIndex name)
-          else Except.error PsTsDeclarationRequestError.resource
+  | PsJsonValue.array values =>
+      if Nat.beq (psListLength values) 2 then
+        match psIrDecodeItem 1 values with
+        | PsJsonValue.string name =>
+            match psTsDecodeDeclarationNatural 7 (psIrDecodeItem 0 values) with
+            | Except.error error => Except.error error
+            | Except.ok sourceIndex =>
+                if Nat.ble sourceIndex 1000000 then
+                  Except.ok (PsTsDeclarationRequest.mk sourceIndex name)
+                else Except.error PsTsDeclarationRequestError.resource
+        | _ => Except.error PsTsDeclarationRequestError.schema
+      else Except.error PsTsDeclarationRequestError.schema
   | _ => Except.error PsTsDeclarationRequestError.schema
 
 def psTsDecodeDeclarationProfile (text : String) :
@@ -93,25 +98,40 @@ def psTsDecodeDeclarationProfile (text : String) :
     Except.ok PsTsDeclarationProfile.uniformJavaScript64
   else Except.error PsTsDeclarationRequestError.schema
 
+def psTsDecodeDeclarationCommandFields
+    (profileText : String) (byteLimit : PsJsonValue) (values : List PsJsonValue) :
+    Except PsTsDeclarationRequestError PsTsDeclarationCommand :=
+  match psTsDecodeDeclarationProfile profileText with
+  | Except.error error => Except.error error
+  | Except.ok profile =>
+      match psTsDecodeDeclarationNatural 8 byteLimit with
+      | Except.error error => Except.error error
+      | Except.ok maxBytes =>
+          if Nat.blt 0 maxBytes then
+            if Nat.ble maxBytes 67108864 then
+              match psListMapExcept psTsDecodeDeclarationRequest values with
+              | Except.error error => Except.error error
+              | Except.ok requests => Except.ok (PsTsDeclarationCommand.mk profile maxBytes requests)
+            else Except.error PsTsDeclarationRequestError.resource
+          else Except.error PsTsDeclarationRequestError.resource
+
 def psTsDecodeDeclarationCommandValue (value : PsJsonValue) :
     Except PsTsDeclarationRequestError PsTsDeclarationCommand :=
   match value with
-  | PsJsonValue.array [PsJsonValue.string tag, PsJsonValue.string profileText,
-      byteLimit, PsJsonValue.array values] =>
-      if psStringEq tag "psc-ts-declaration-request/1" then
-        match psTsDecodeDeclarationProfile profileText with
-        | Except.error error => Except.error error
-        | Except.ok profile =>
-            match psTsDecodeDeclarationNatural 8 byteLimit with
-            | Except.error error => Except.error error
-            | Except.ok maxBytes =>
-                if Nat.blt 0 maxBytes then
-                  if Nat.ble maxBytes 67108864 then
-                    match psListMapExcept psTsDecodeDeclarationRequest values with
-                    | Except.error error => Except.error error
-                    | Except.ok requests => Except.ok (PsTsDeclarationCommand.mk profile maxBytes requests)
-                  else Except.error PsTsDeclarationRequestError.resource
-                else Except.error PsTsDeclarationRequestError.resource
+  | PsJsonValue.array fields =>
+      if Nat.beq (psListLength fields) 4 then
+        match psIrDecodeItem 0 fields with
+        | PsJsonValue.string tag =>
+            if psStringEq tag "psc-ts-declaration-request/1" then
+              match psIrDecodeItem 1 fields with
+              | PsJsonValue.string profileText =>
+                  match psIrDecodeItem 3 fields with
+                  | PsJsonValue.array values =>
+                      psTsDecodeDeclarationCommandFields profileText (psIrDecodeItem 2 fields) values
+                  | _ => Except.error PsTsDeclarationRequestError.schema
+              | _ => Except.error PsTsDeclarationRequestError.schema
+            else Except.error PsTsDeclarationRequestError.schema
+        | _ => Except.error PsTsDeclarationRequestError.schema
       else Except.error PsTsDeclarationRequestError.schema
   | _ => Except.error PsTsDeclarationRequestError.schema
 

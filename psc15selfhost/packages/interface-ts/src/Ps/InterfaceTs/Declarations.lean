@@ -144,11 +144,14 @@ def psTsDeclarationSignatureTasks
     | PsTsDeclarationProfile.uniformJavaScript64 =>
         if Nat.ble count 128 then
           match signature.type with
-          | PsSourceSignatureType.function (List.cons _ _) _ =>
-              Except.ok
-                (List.cons (PsTsDeclarationTask.text "<")
-                  (List.cons (PsTsDeclarationTask.generics signature.typeParameters 0)
-                    (List.cons (PsTsDeclarationTask.text ">") body)))
+          | PsSourceSignatureType.function parameters _ =>
+              match parameters with
+              | List.nil => Except.error PsTsDeclarationError.genericValueUnsupported
+              | List.cons _ _ =>
+                  Except.ok
+                    (List.cons (PsTsDeclarationTask.text "<")
+                      (List.cons (PsTsDeclarationTask.generics signature.typeParameters 0)
+                        (List.cons (PsTsDeclarationTask.text ">") body)))
           | _ => Except.error PsTsDeclarationError.genericValueUnsupported
         else Except.error PsTsDeclarationError.resourceExhausted
 

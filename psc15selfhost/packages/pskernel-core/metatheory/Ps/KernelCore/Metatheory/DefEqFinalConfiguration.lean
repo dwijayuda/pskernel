@@ -1816,6 +1816,77 @@ theorem psKernelDefEqUnitLikeWith_true_refines
               simp at hSuccess
 
 
+
+theorem psKernelDefEqUnitLikeWith_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqUnitLikeWith
+          defeq inferType whnf
+          context state left right =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right) := by
+  constructor
+  · exact
+      psKernelDefEqUnitLikeWith_configuration_preserves
+        defeq
+        inferType
+        whnf
+        hDefEq
+        hInfer
+        hWhnf
+        context
+        state
+        nextState
+        left
+        right
+        value
+        hConfig
+        hSuccess
+  · intro hValue
+    cases value with
+    | false =>
+        simp at hValue
+    | true =>
+        exact
+          psKernelDefEqUnitLikeWith_true_refines
+            defeq
+            inferType
+            whnf
+            hDefEq
+            hInfer
+            hWhnf
+            context
+            state
+            nextState
+            left
+            right
+            hConfig
+            hSuccess
+
 theorem psKernelDefEqStringLitExpansionCoreWith_true_refines
     (defeq :
       PsKernelCheckerContext ->

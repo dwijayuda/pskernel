@@ -1510,6 +1510,42 @@ inductive PsKernelDefEqJudgment
         left
         (PsKernelExpr.mdata metadata right)
 
+inductive PsKernelBinderDomainJudgment
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext ->
+    PsKernelExpr ->
+    PsKernelExpr ->
+    List PsKernelExpr ->
+    Prop
+  | structural
+      {localContext : PsKernelLocalContext}
+      (leftDomain rightDomain : PsKernelExpr)
+      (subst : List PsKernelExpr)
+      (hEq :
+        psKernelExprEq leftDomain rightDomain = true) :
+      PsKernelBinderDomainJudgment
+        environment
+        localContext
+        leftDomain
+        rightDomain
+        subst
+  | defeq
+      {localContext : PsKernelLocalContext}
+      (leftDomain rightDomain : PsKernelExpr)
+      (subst : List PsKernelExpr)
+      (hDefEq :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          (psKernelExprInstantiateRev leftDomain subst)
+          (psKernelExprInstantiateRev rightDomain subst)) :
+      PsKernelBinderDomainJudgment
+        environment
+        localContext
+        leftDomain
+        rightDomain
+        subst
+
 inductive PsKernelLambdaSpineJudgment
     (environment : PsKernelEnvironment) :
     PsKernelLocalContext ->
@@ -1540,12 +1576,12 @@ inductive PsKernelLambdaSpineJudgment
       (leftInfo rightInfo : PsKernelBinderInfo)
       (subst : List PsKernelExpr)
       (hDomain :
-        psKernelExprEq leftDomain rightDomain = true ∨
-          PsKernelDefEqJudgment
-            environment
-            localContext
-            (psKernelExprInstantiateRev leftDomain subst)
-            (psKernelExprInstantiateRev rightDomain subst))
+        PsKernelBinderDomainJudgment
+          environment
+          localContext
+          leftDomain
+          rightDomain
+          subst)
       (hDependent :
         psKernelExprHasLooseBVar leftBody = true ∨
           psKernelExprHasLooseBVar rightBody = true)
@@ -1583,12 +1619,12 @@ inductive PsKernelLambdaSpineJudgment
       (leftInfo rightInfo : PsKernelBinderInfo)
       (subst : List PsKernelExpr)
       (hDomain :
-        psKernelExprEq leftDomain rightDomain = true ∨
-          PsKernelDefEqJudgment
-            environment
-            localContext
-            (psKernelExprInstantiateRev leftDomain subst)
-            (psKernelExprInstantiateRev rightDomain subst))
+        PsKernelBinderDomainJudgment
+          environment
+          localContext
+          leftDomain
+          rightDomain
+          subst)
       (hLeftClosed :
         psKernelExprHasLooseBVar leftBody = false)
       (hRightClosed :
@@ -1643,12 +1679,12 @@ inductive PsKernelForallSpineJudgment
       (leftInfo rightInfo : PsKernelBinderInfo)
       (subst : List PsKernelExpr)
       (hDomain :
-        psKernelExprEq leftDomain rightDomain = true ∨
-          PsKernelDefEqJudgment
-            environment
-            localContext
-            (psKernelExprInstantiateRev leftDomain subst)
-            (psKernelExprInstantiateRev rightDomain subst))
+        PsKernelBinderDomainJudgment
+          environment
+          localContext
+          leftDomain
+          rightDomain
+          subst)
       (hDependent :
         psKernelExprHasLooseBVar leftBody = true ∨
           psKernelExprHasLooseBVar rightBody = true)
@@ -1686,12 +1722,12 @@ inductive PsKernelForallSpineJudgment
       (leftInfo rightInfo : PsKernelBinderInfo)
       (subst : List PsKernelExpr)
       (hDomain :
-        psKernelExprEq leftDomain rightDomain = true ∨
-          PsKernelDefEqJudgment
-            environment
-            localContext
-            (psKernelExprInstantiateRev leftDomain subst)
-            (psKernelExprInstantiateRev rightDomain subst))
+        PsKernelBinderDomainJudgment
+          environment
+          localContext
+          leftDomain
+          rightDomain
+          subst)
       (hLeftClosed :
         psKernelExprHasLooseBVar leftBody = false)
       (hRightClosed :

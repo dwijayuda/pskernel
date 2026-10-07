@@ -29,7 +29,7 @@
   "validatorSoundness": "unproved",
   "independenceLimit": "Independent relation implementation, shared canonical decoder/host and runtime assumptions; no diverse toolchain or complete TCB independence claim.",
   "remaining": [
-    "fix producer scope/collision cases discovered during relation design",
+    "producer now preserves declaration/lambda/let/match scopes and rejects generated-callee capture; audit other generated-name collisions and generic escape cases",
     "exercise complete compiler instances and adversarial campaign during assurance pass",
     "prove adequacy of this relation for declared runtime semantics or supply independent assurance",
     "global erasure relation and other target lowering validators"

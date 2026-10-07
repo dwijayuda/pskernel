@@ -130,6 +130,39 @@ def psIrSpecializeFindDeclaration
       else
         psIrSpecializeFindDeclaration rest name
 
+def psIrSpecializeScopeContains (locals : List String) (name : String) : Bool :=
+  match locals with
+  | List.nil => false
+  | List.cons boundName rest =>
+      if psStringEq boundName name then true else psIrSpecializeScopeContains rest name
+
+def psIrSpecializeParameterNames (parameters : List PsVerifiedIrParameter) : List String :=
+  match parameters with
+  | List.nil => List.nil
+  | List.cons parameter rest => List.cons parameter.name (psIrSpecializeParameterNames rest)
+
+def psIrSpecializeBindingNames (bindings : List PsVerifiedIrMatchBinding) : List String :=
+  match bindings with
+  | List.nil => List.nil
+  | List.cons binding rest => List.cons binding.name (psIrSpecializeBindingNames rest)
+
+def psIrSpecializeFindFreeDeclaration
+    (declarations : List PsVerifiedIrDeclaration) (locals : List String)
+    (name : String) : Option PsVerifiedIrDeclaration :=
+  if psIrSpecializeScopeContains locals name then Option.none
+  else psIrSpecializeFindDeclaration declarations name
+
+-- Generated global names must not change a call's lexical binding. The
+-- current naming contract rejects capture instead of silently renaming locals.
+def psIrSpecializeInstanceCall
+    (locals : List String) (name : String) (arguments : List PsVerifiedIrExpr)
+    (requests : List PsIrSpecializeRequest) : Except PsIrSpecializeError PsIrSpecializeExprResult :=
+  if psIrSpecializeScopeContains locals name then
+    Except.error PsIrSpecializeError.unsupportedGenericCall
+  else
+    Except.ok (PsIrSpecializeExprResult.mk
+      (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var name) List.nil arguments) requests)
+
 def psIrSpecializeJoinKeys
     (keys : List (Option String)) : Option String :=
   match keys with
@@ -607,10 +640,12 @@ def psIrSpecializeRewriteMatchBindings
 
 def psIrSpecializeRewriteAlternativesWith
     (rewrite :
+      List String ->
       PsVerifiedIrExpr ->
       Except PsIrSpecializeError PsIrSpecializeExprResult)
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType))
+    (locals : List String)
     (alternatives :
       List
         (String ×
@@ -631,7 +666,9 @@ def psIrSpecializeRewriteAlternativesWith
             (Prod.fst (Prod.snd alternative)) with
       | Except.error error => Except.error error
       | Except.ok loweredBindings =>
-          match rewrite (Prod.snd (Prod.snd alternative)) with
+          match rewrite
+              (psListAppend (psIrSpecializeBindingNames (Prod.fst (Prod.snd alternative))) locals)
+              (Prod.snd (Prod.snd alternative)) with
           | Except.error error => Except.error error
           | Except.ok loweredBody =>
               match
@@ -639,6 +676,7 @@ def psIrSpecializeRewriteAlternativesWith
                     rewrite
                     module
                     substitution
+                    locals
                     rest with
               | Except.error error => Except.error error
               | Except.ok loweredRest =>
@@ -655,19 +693,22 @@ def psIrSpecializeRewriteAlternativesWith
                       psListAppend loweredBindings.requests (psListAppend loweredBody.requests loweredRest.requests)
                   }
 
-def psIrSpecializeRewriteExprWithFuel
+-- Fuel decreases before the scope/expression continuation, following the
+-- PSC1 portable worker pattern. Binder scopes apply only to their bodies.
+def psIrSpecializeRewriteExprScopedWithFuel
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType))
     (remainingFuel : Nat) :
+    List String ->
     PsVerifiedIrExpr ->
     Except PsIrSpecializeError PsIrSpecializeExprResult :=
   match remainingFuel with
   | 0 =>
-      fun (_expression : PsVerifiedIrExpr) =>
+      fun (_locals : List String) (_expression : PsVerifiedIrExpr) =>
         Except.error PsIrSpecializeError.fuelExhausted
   | fuel + 1 =>
-      let rewrite : PsVerifiedIrExpr -> Except PsIrSpecializeError PsIrSpecializeExprResult :=
-        psIrSpecializeRewriteExprWithFuel
+      let rewriteScoped : List String -> PsVerifiedIrExpr -> Except PsIrSpecializeError PsIrSpecializeExprResult :=
+        psIrSpecializeRewriteExprScopedWithFuel
           module
           substitution
           fuel;
@@ -675,7 +716,8 @@ def psIrSpecializeRewriteExprWithFuel
         psIrSpecializeRewriteType
           module
           substitution;
-      fun (expression : PsVerifiedIrExpr) =>
+      fun (locals : List String) (expression : PsVerifiedIrExpr) =>
+        let rewrite : PsVerifiedIrExpr -> Except PsIrSpecializeError PsIrSpecializeExprResult := rewriteScoped locals;
         match expression with
         | .literal literal =>
             Except.ok {
@@ -720,7 +762,7 @@ def psIrSpecializeRewriteExprWithFuel
                 match rewriteType resultType with
                 | Except.error error => Except.error error
                 | Except.ok loweredResult =>
-                    match rewrite body with
+                    match rewriteScoped (psListAppend (psIrSpecializeParameterNames parameters) locals) body with
                     | Except.error error => Except.error error
                     | Except.ok loweredBody =>
                         Except.ok {
@@ -751,8 +793,9 @@ def psIrSpecializeRewriteExprWithFuel
                         match fn with
                         | .var name =>
                             match
-                                psIrSpecializeFindDeclaration
+                                psIrSpecializeFindFreeDeclaration
                                   module.declarations
+                                  locals
                                   name with
                             | Option.some declaration =>
                                 match declaration.typeParameters with
@@ -796,16 +839,8 @@ def psIrSpecializeRewriteExprWithFuel
                                             name := name
                                             arguments := loweredTypes.types
                                           };
-                                          Except.ok {
-                                            expr :=
-                                              PsVerifiedIrExpr.call
-                                                (PsVerifiedIrExpr.var
-                                                  specializedName)
-                                                []
-                                                loweredArguments.expressions
-                                            requests :=
-                                              psListAppend loweredFn.requests (psListAppend loweredTypes.requests (psListAppend loweredArguments.requests [request]))
-                                          }
+                                          psIrSpecializeInstanceCall locals specializedName loweredArguments.expressions
+                                            (psListAppend loweredFn.requests (psListAppend loweredTypes.requests (psListAppend loweredArguments.requests [request])))
                             | Option.none =>
                                 Except.ok {
                                   expr :=
@@ -837,7 +872,7 @@ def psIrSpecializeRewriteExprWithFuel
                 match rewrite value with
                 | Except.error error => Except.error error
                 | Except.ok loweredValue =>
-                    match rewrite body with
+                    match rewriteScoped (List.cons name locals) body with
                     | Except.error error => Except.error error
                     | Except.ok loweredBody =>
                         Except.ok {
@@ -1074,9 +1109,10 @@ def psIrSpecializeRewriteExprWithFuel
                 | Except.ok loweredScrutinee =>
                     match
                         psIrSpecializeRewriteAlternativesWith
-                          rewrite
+                          rewriteScoped
                           module
                           substitution
+                          locals
                           alternatives with
                     | Except.error error => Except.error error
                     | Except.ok loweredAlternatives =>
@@ -1134,6 +1170,14 @@ def psIrSpecializeRewriteExprWithFuel
                             Except.error
                               (PsIrSpecializeError.unknownTarget
                                 inductiveName)
+
+def psIrSpecializeRewriteExprWithFuel
+    (module : PsVerifiedIrModule)
+    (substitution : List (String × PsVerifiedIrType))
+    (remainingFuel : Nat)
+    (expression : PsVerifiedIrExpr) :
+    Except PsIrSpecializeError PsIrSpecializeExprResult :=
+  psIrSpecializeRewriteExprScopedWithFuel module substitution remainingFuel List.nil expression
 
 def psIrSpecializeRewriteExpr
     (module : PsVerifiedIrModule)
@@ -1383,9 +1427,11 @@ def psIrSpecializeSeedDeclarations
                   | Except.error error => Except.error error
                   | Except.ok loweredResult =>
                       match
-                          psIrSpecializeRewriteExpr
+                          psIrSpecializeRewriteExprScopedWithFuel
                             module
                             []
+                            4096
+                            (psIrSpecializeParameterNames declaration.parameters)
                             declaration.body with
                       | Except.error error => Except.error error
                       | Except.ok loweredBody =>
@@ -1683,9 +1729,11 @@ def psIrSpecializeProcessDeclaration
                     | Except.error error => Except.error error
                     | Except.ok loweredResult =>
                         match
-                            psIrSpecializeRewriteExpr
+                            psIrSpecializeRewriteExprScopedWithFuel
                               module
                               substitution
+                              4096
+                              (psIrSpecializeParameterNames declaration.parameters)
                               declaration.body with
                         | Except.error error => Except.error error
                         | Except.ok loweredBody =>

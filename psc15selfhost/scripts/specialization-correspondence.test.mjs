@@ -17,9 +17,9 @@ function artifact(value, domain) {
 function check(input, output, limits) {
   return verifySpecializationCorrespondence(artifact(input, 'verified-ir'), artifact(output, 'specialized-ir'), limits);
 }
-function actual() {
+function actual(flag = '--artifacts') {
   const result = spawnSync('.lake/build/bin/psc1_ir_specialize_tests' + (process.platform === 'win32' ? '.exe' : ''),
-    ['--artifacts'], { encoding: 'utf8', timeout: 30000, maxBuffer: 16 * 1024 * 1024 });
+    [flag], { encoding: 'utf8', timeout: 30000, maxBuffer: 16 * 1024 * 1024 });
   assert.equal(result.status, 0, result.error?.message ?? result.stderr);
   const stages = JSON.parse(result.stdout);
   return [JSON.parse(stages.verifiedIr), JSON.parse(stages.specializedIr)];
@@ -57,6 +57,9 @@ test('changed computations, layouts, signatures, missing roots and unjustified i
 });
 
 test('lexical shadowing is preserved and generated global names cannot capture local calls', () => {
+  const [scopeSource, scopeTarget] = actual('--scope-artifacts');
+  assert.equal(check(scopeSource, scopeTarget).observed.instances, 5);
+  assert.deepEqual(scopeTarget[4].map(item => item[0]), ['parameterScope', 'letScope', 'lambdaScope', 'matchScope']);
   const fnType = ['function', [nat], nat];
   const localBody = ['let', 'id', fnType, ['lambda', [['x', nat]], nat, ref('x')],
     ['if', ['literal', ['bool', true]], call('id', [], [lit(42)]), lit(0)]];

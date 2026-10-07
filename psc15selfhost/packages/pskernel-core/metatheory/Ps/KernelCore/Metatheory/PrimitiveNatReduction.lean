@@ -626,12 +626,23 @@ theorem psKernelReduceNatWith_some_refines
                             hLiteral
                           ] at hSuccess
                       | some value =>
-                          have hRightShape :=
-                            psKernelExprNatLiteralValue_some_shape
+                          have hRightLiteralReduction :=
+                            psKernelExprNatLiteralValue_some_refines_literal
+                              context.environment
+                              context.localContext
                               rightReduced
                               value
                               hLiteral
-                          subst rightReduced
+                          have hRightToLiteral :=
+                            psKernelReductionClosure_transitive
+                              context.environment
+                              context.localContext
+                              right
+                              rightReduced
+                              (PsKernelExpr.lit
+                                (PsKernelLiteral.nat value))
+                              hRightSemantic.1
+                              hRightLiteralReduction
                           cases hSize :
                               psKernelCheckNatSize
                                 context.maxNatSize
@@ -641,7 +652,7 @@ theorem psKernelReduceNatWith_some_refines
                                 psKernelReduceNatWith,
                                 hSucc,
                                 hRight,
-                                psKernelExprNatLiteralValue,
+                                hLiteral,
                                 hSize
                               ] at hSuccess
                           | ok checked =>
@@ -649,7 +660,7 @@ theorem psKernelReduceNatWith_some_refines
                                 psKernelReduceNatWith,
                                 hSucc,
                                 hRight,
-                                psKernelExprNatLiteralValue,
+                                hLiteral,
                                 hSize
                               ] at hSuccess
                               rcases hSuccess with ⟨rfl, rfl⟩
@@ -669,7 +680,7 @@ theorem psKernelReduceNatWith_some_refines
                                   right
                                   (PsKernelExpr.lit
                                     (PsKernelLiteral.nat value))
-                                  hRightSemantic.1
+                                  hRightToLiteral
                               have hPrimitive :
                                   PsKernelReductionClosure
                                     context.environment
@@ -765,12 +776,23 @@ theorem psKernelReduceNatWith_some_refines
                                 hLeftLiteral
                               ] at hSuccess
                           | some leftValue =>
-                              have hLeftShape :=
-                                psKernelExprNatLiteralValue_some_shape
+                              have hLeftLiteralReduction :=
+                                psKernelExprNatLiteralValue_some_refines_literal
+                                  context.environment
+                                  context.localContext
                                   leftReduced
                                   leftValue
                                   hLeftLiteral
-                              subst leftReduced
+                              have hLeftToLiteral :=
+                                psKernelReductionClosure_transitive
+                                  context.environment
+                                  context.localContext
+                                  left
+                                  leftReduced
+                                  (PsKernelExpr.lit
+                                    (PsKernelLiteral.nat leftValue))
+                                  hLeftSemantic.1
+                                  hLeftLiteralReduction
                               cases hRightLiteral :
                                   psKernelExprNatLiteralValue rightReduced with
                               | none =>
@@ -778,16 +800,27 @@ theorem psKernelReduceNatWith_some_refines
                                     psKernelReduceNatWith,
                                     hLeft,
                                     hRight,
-                                    psKernelExprNatLiteralValue,
+                                    hLeftLiteral,
                                     hRightLiteral
                                   ] at hSuccess
                               | some rightValue =>
-                                  have hRightShape :=
-                                    psKernelExprNatLiteralValue_some_shape
+                                  have hRightLiteralReduction :=
+                                    psKernelExprNatLiteralValue_some_refines_literal
+                                      context.environment
+                                      context.localContext
                                       rightReduced
                                       rightValue
                                       hRightLiteral
-                                  subst rightReduced
+                                  have hRightToLiteral :=
+                                    psKernelReductionClosure_transitive
+                                      context.environment
+                                      context.localContext
+                                      right
+                                      rightReduced
+                                      (PsKernelExpr.lit
+                                        (PsKernelLiteral.nat rightValue))
+                                      hRightSemantic.1
+                                      hRightLiteralReduction
                                   cases hBinary :
                                       psKernelReduceNatBinary
                                         context.maxNatSize
@@ -809,7 +842,8 @@ theorem psKernelReduceNatWith_some_refines
                                             psKernelReduceNatWith,
                                             hLeft,
                                             hRight,
-                                            psKernelExprNatLiteralValue,
+                                            hLeftLiteral,
+                                            hRightLiteral,
                                             hBinary
                                           ] at hSuccess
                                       | some binaryResult =>
@@ -827,7 +861,8 @@ theorem psKernelReduceNatWith_some_refines
                                             psKernelReduceNatWith,
                                             hLeft,
                                             hRight,
-                                            psKernelExprNatLiteralValue,
+                                            hLeftLiteral,
+                                            hRightLiteral,
                                             hBinary
                                           ] at hSuccess
                                           rcases hSuccess with ⟨rfl, rfl⟩
@@ -849,7 +884,7 @@ theorem psKernelReduceNatWith_some_refines
                                               (PsKernelExpr.lit
                                                 (PsKernelLiteral.nat
                                                   leftValue))
-                                              hLeftSemantic.1
+                                              hLeftToLiteral
                                           have hLeftOuter :
                                               PsKernelReductionClosure
                                                 context.environment
@@ -907,7 +942,7 @@ theorem psKernelReduceNatWith_some_refines
                                               (PsKernelExpr.lit
                                                 (PsKernelLiteral.nat
                                                   rightValue))
-                                              hRightSemantic.1
+                                              hRightToLiteral
                                           have hOperands :=
                                             psKernelReductionClosure_transitive
                                               context.environment

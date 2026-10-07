@@ -21,9 +21,14 @@ concurrency:
 jobs:
   init-prefix:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        prefix: [100000, 200000, 300000, 400000]
     env:
       PSKERNEL_SHA: ${{ github.sha }}
+      PREFIX: ${{ matrix.prefix }}
     steps:
       - name: Install toolchains
         shell: bash
@@ -64,8 +69,8 @@ jobs:
           set -euo pipefail
           uv run lka.py build-test init --cache
           uv run lka.py build-checker pskernel-core
-          head -n 100000 _build/tests/init.ndjson > /tmp/init-prefix-100k.ndjson
-          wc -l -c /tmp/init-prefix-100k.ndjson
+          head -n "$PREFIX" _build/tests/init.ndjson > "/tmp/init-prefix-${PREFIX}.ndjson"
+          wc -l -c "/tmp/init-prefix-${PREFIX}.ndjson"
 
       - name: Measure canonical and legacy prefix
         working-directory: arena
@@ -74,12 +79,12 @@ jobs:
           set -u
           CURRENT=_build/checkers/pskernel-core/src/psc15selfhost/.lake/build/bin/psc_kernel_core_arena
           LEGACY=_build/checkers/pskernel-core/src/psc15selfhost/.lake/build/bin/psc_kernel_legacy_arena
-          echo "=== canonical 100k ==="
+          echo "=== canonical prefix=$PREFIX ==="
           /usr/bin/time -f 'canonical_wall=%e canonical_rss_kb=%M canonical_exit=%x' \
-            timeout 300 "$CURRENT" < /tmp/init-prefix-100k.ndjson
+            timeout 600 "$CURRENT" < "/tmp/init-prefix-${PREFIX}.ndjson"
           echo "canonical_shell_exit=$?"
-          echo "=== legacy 100k ==="
+          echo "=== legacy prefix=$PREFIX ==="
           /usr/bin/time -f 'legacy_wall=%e legacy_rss_kb=%M legacy_exit=%x' \
-            timeout 300 "$LEGACY" < /tmp/init-prefix-100k.ndjson
+            timeout 120 "$LEGACY" < "/tmp/init-prefix-${PREFIX}.ndjson"
           echo "legacy_shell_exit=$?"
           exit 0

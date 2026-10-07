@@ -66,6 +66,32 @@ theorem psKernelReductionClosure_contextWeaken
       exact
         PsKernelReductionClosure.projectionMajor
           typeName index left right ih
+  | quotLift
+      expr fnName mkName levels mkLevels args mkArgs
+      major majorReduced representative fnValue
+      hInitialized hHead hLift hArgs hMajor
+      hMajorReduction ihMajor
+      hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue =>
+      exact
+        PsKernelReductionClosure.quotLift
+          expr fnName mkName levels mkLevels args mkArgs
+          major majorReduced representative fnValue
+          hInitialized hHead hLift hArgs hMajor
+          ihMajor
+          hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue
+  | quotInd
+      expr fnName mkName levels mkLevels args mkArgs
+      major majorReduced representative fnValue
+      hInitialized hHead hInd hArgs hMajor
+      hMajorReduction ihMajor
+      hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue =>
+      exact
+        PsKernelReductionClosure.quotInd
+          expr fnName mkName levels mkLevels args mkArgs
+          major majorReduced representative fnValue
+          hInitialized hHead hInd hArgs hMajor
+          ihMajor
+          hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue
 
 theorem psKernelDefEqJudgment_contextWeaken
     (environment : PsKernelEnvironment)

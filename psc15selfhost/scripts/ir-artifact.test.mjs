@@ -5,6 +5,7 @@ import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { resolveTypeScriptCli, pinnedTypeScriptVersionText } from './typescript-cli.mjs';
+import { uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { createDirectJsDeclarations } from './js-declarations.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { spawnSync } from 'node:child_process';
@@ -282,4 +283,36 @@ test('actual source signatures produce direct declarations accepted by the pinne
     assert.equal(JSON.parse(product.binding.bytes).declarationTargetAccepted, false);
     assert.equal(JSON.parse(product.binding.bytes).globalPreservationProved, false);
   } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test('uniform JS representation retains generic exports and strips only checked static type arguments', async () => {
+  const staged = JSON.parse(emitted('--js-uniform-stages'));
+  const snapshots = checkedIrStageArtifacts(staged), targets = checkedTargetIrStageArtifacts(staged);
+  const selected = uniformSpecializationArtifact(staged.uniformSpecializedIr);
+  const relation = verifyUniformSpecialization(snapshots.verifiedIr, selected);
+  assert.equal(relation.bytesPreserved, true);
+  assert.equal(relation.targetRepresentationAdequacyProved, false);
+  const runtime = JSON.parse(staged.runtimeIr), uniform = JSON.parse(staged.uniformSpecializedIr);
+  assert.deepEqual(uniform[2], runtime);
+  assert.ok(runtime[4].some(item => item[0] === 'unused' && item[1].length === 1));
+  assert.deepEqual(JSON.parse(targets.jsIr.bytes)[2].map(item => item[0]), runtime[4].map(item => item[0]));
+  decodeJsGeneratedPositions(Buffer.from(staged.generatedPositions),
+    { javaScript: staged.javaScript, jsIr: Buffer.from(staged.jsIr) });
+  const executable = await import('data:text/javascript;base64,' + Buffer.from(staged.javaScript).toString('base64'));
+  const closed = await import('data:text/javascript;base64,' + Buffer.from(staged.closedJavaScript).toString('base64'));
+  assert.equal(executable.answer, 42n); assert.equal(executable.choice, true);
+  assert.equal(executable.answer, closed.answer); assert.equal(executable.choice, closed.choice);
+  assert.equal(typeof executable.forward, 'function'); assert.equal(typeof executable.unused, 'function');
+  assert.equal(closed.unused, undefined);
+  const value = Object.freeze({ marker: 7 });
+  assert.equal(executable.forward(value), value); assert.equal(executable.unused('retained'), 'retained');
+  assert.equal(executable.applyValue(n => n.toString(), 17n), '17');
+  assert.deepEqual(executable.echoArray([1n, 2n]), [1n, 2n]);
+  assert.deepEqual(executable.mapValues(n => n.toString(), [1n, 2n]), ['1', '2']);
+  const forgedValue = structuredClone(uniform); forgedValue[2][4].pop();
+  const forgedBytes = canonicalBytes(forgedValue);
+  const forged = { bytes: forgedBytes, identity: artifactId(forgedBytes, selected.identity.domain, selected.identity.contract) };
+  assert.throws(() => verifyUniformSpecialization(snapshots.verifiedIr, forged), /PAYLOAD_CHANGED/);
+  assert.throws(() => uniformSpecializationArtifact(canonicalBytes(['psc-uniform-specialized-ir/1', 'unknown', runtime])), /PROFILE/);
+  assert.throws(() => verifyUniformSpecialization(snapshots.verifiedIr, selected, { maxBytes: 1 }), /RESOURCE_POLICY/);
 });

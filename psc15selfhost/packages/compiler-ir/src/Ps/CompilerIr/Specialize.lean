@@ -1921,3 +1921,30 @@ def psIrSpecializeValidatedModuleWithExecution
             inputIdentity
             outputIdentity
             List.nil))
+
+-- A distinct representation strategy: retain every validated generic body and
+-- its static type parameters for a target with uniform runtime values. This is
+-- an identity selection, not closed monomorphization or a live authority token.
+-- Target lowering must explicitly accept the uniform representation contract.
+structure PsUniformSpecializedIrModule where
+  raw : PsVerifiedIrModule
+
+def psIrSelectUniformSpecialization
+    (validated : PsValidatedIrModule) : PsUniformSpecializedIrModule :=
+  PsUniformSpecializedIrModule.mk validated.raw
+
+def psUniformSpecializationPassDefinition : PsPassDefinition :=
+  PsPassDefinition.mk
+    "psc-pass-uniform-specialize/1"
+    1
+    "psc-verified-ir/1"
+    "psc-uniform-specialized-ir/1"
+    "psc-uniform-representation-selection/1"
+    "psc-resource-specialization/1"
+    "identity-selection-target-representation-unproved"
+    "deterministic-under-declared-inputs"
+    "total-selection"
+    "source:packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean"
+    Option.none
+    List.nil
+    ["target-uniform-runtime-representation"]

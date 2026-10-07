@@ -120,6 +120,40 @@ def main (args : List String) : IO Unit := do
       ("verifiedIr", psJsonQuote staged.verifiedIr),
       ("specializedIr", psJsonQuote staged.specializedIr),
       ("jsIr", psJsonQuote staged.jsIr)])
+  else if args == ["--js-uniform-stages"] then
+    let source := "def forward (A : Type) (value : A) : A := value\ndef unused (A : Type) (value : A) : A := value\ndef applyValue (A : Type) (B : Type) (fn : A -> B) (value : A) : B := fn value\ndef echoArray (A : Type) (values : Array A) : Array A := values\ndef mapValues (A : Type) (B : Type) (fn : A -> B) (values : Array A) : Array B := Array.map fn values\ndef answer : Nat := forward Nat 42\ndef choice : Bool := forward Bool true\n"
+    let .ok prepared := psCompilerPrepareSource .lean source
+      | throw (IO.userError "UNIFORM_PREPARE_FAILED")
+    let .ok inputs := psCompilerJavaScriptValidatedInputsFromPrepared prepared
+      | throw (IO.userError "UNIFORM_VALIDATION_FAILED")
+    if psJsTypeSupportedWithProfile (some psCompilerJavaScriptTarget64) (.typeParameter "T0") then
+      throw (IO.userError "CLOSED_TYPE_POLICY_WEAKENED")
+    if psJsTypeSupportedWithPolicy (some psCompilerJavaScriptTarget64) true .unknown then
+      throw (IO.userError "UNIFORM_UNKNOWN_TYPE_ACCEPTED")
+    let first :: _ := inputs.validated.raw.declarations
+      | throw (IO.userError "UNIFORM_DECLARATIONS_MISSING")
+    match psJsLowerDeclarationWithProfile (some psCompilerJavaScriptTarget64) first with
+    | .error (.genericDeclarationUnsupported _) => pure ()
+    | _ => throw (IO.userError "CLOSED_DECLARATION_POLICY_WEAKENED")
+    let .ok staged := psCompilerUniformJavaScriptStagesFromValidated
+        inputs.runtimeIr inputs.verifiedIr inputs.erasureCorrespondence inputs.validated
+      | throw (IO.userError "UNIFORM_JS_STAGES_FAILED")
+    let .ok closed := psCompilerJavaScriptStagesFromValidated
+        inputs.runtimeIr inputs.verifiedIr inputs.erasureCorrespondence inputs.validated
+      | throw (IO.userError "CLOSED_JS_STAGES_FAILED")
+    let .ok api := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "UNIFORM_PUBLIC_API_FAILED")
+    IO.println (psJsonObject [
+      ("source", psJsonQuote source),
+      ("publicApi", psJsonQuote api),
+      ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
+      ("runtimeIr", psJsonQuote staged.runtimeIr),
+      ("verifiedIr", psJsonQuote staged.verifiedIr),
+      ("uniformSpecializedIr", psJsonQuote staged.uniformSpecializedIr),
+      ("jsIr", psJsonQuote staged.jsIr),
+      ("javaScript", psJsonQuote staged.javaScript),
+      ("generatedPositions", psJsonQuote staged.generatedPositions),
+      ("closedJavaScript", psJsonQuote closed.javaScript)])
   else if args == ["--wasm-stages"] then
     let source := "def forward (A : Type) (value : A) : A := value\ndef answer (value : UInt32) : UInt32 := forward UInt32 value\n"
     let .ok prepared := psCompilerPrepareSource .lean source

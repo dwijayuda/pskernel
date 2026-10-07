@@ -477,6 +477,30 @@
       "kind": "declaration-binding",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-uniform-specialized-ir/1",
+      "kind": "specialized-ir",
+      "status": "current-portable-selected-profile",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-js-uniform-values/1",
+      "kind": "representation-profile",
+      "status": "current-portable-selected-profile",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-uniform-specialization-correspondence/1",
+      "kind": "representation-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-pass-uniform-specialize/1",
+      "kind": "compiler-pass",
+      "status": "current-portable-selected-profile",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

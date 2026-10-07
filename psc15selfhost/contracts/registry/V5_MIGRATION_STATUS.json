@@ -1182,7 +1182,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "host-source-maps-and-selected-closed-structural-declarations-implemented-generic-exports-declaration-maps-portable-serializers-and-cli-routing-pending",
+      "status": "closed-declarations-and-source-maps-host-integrated-uniform-generic-runtime-producer-added-host-profile-routing-generic-declarations-and-portable-serializers-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1505,6 +1505,34 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
       "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-uniform-specialized-ir/1",
+      "kind": "specialized-ir",
+      "status": "current-portable-selected-profile",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-js-uniform-values/1",
+      "kind": "representation-profile",
+      "status": "current-portable-selected-profile",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-uniform-specialization-correspondence/1",
+      "kind": "representation-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-pass-uniform-specialize/1",
+      "kind": "compiler-pass",
+      "status": "current-portable-selected-profile",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
     }
   ]
 }

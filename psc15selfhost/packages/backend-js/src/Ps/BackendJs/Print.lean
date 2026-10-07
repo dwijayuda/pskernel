@@ -1113,20 +1113,20 @@ def psJsAdvanceGeneratedChar
   let codePoint : Nat := Char.toNat char;
   let nextByte : Nat := Nat.add position.byteOffset byteWidth;
   if Nat.beq codePoint 10 then
-    PsJsGeneratedPosition.mk
-      nextByte
-      (if position.previousCR then position.line else Nat.succ position.line)
-      0
-      false
+    if position.previousCR then
+      PsJsGeneratedPosition.mk nextByte position.line 0 false
+    else
+      PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 false
   else if Nat.beq codePoint 13 then
     PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 true
   else if Nat.beq codePoint 8232 then
     PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 false
   else if Nat.beq codePoint 8233 then
     PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 false
+  else if Nat.ble codePoint 65535 then
+    PsJsGeneratedPosition.mk nextByte position.line (Nat.succ position.column) false
   else
-    let width : Nat := if Nat.ble codePoint 65535 then 1 else 2;
-    PsJsGeneratedPosition.mk nextByte position.line (Nat.add position.column width) false
+    PsJsGeneratedPosition.mk nextByte position.line (Nat.add position.column 2) false
 
 def psJsAdvanceGeneratedTextWorker
     (fuel : Nat) :

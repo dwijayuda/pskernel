@@ -907,7 +907,7 @@ theorem psKernelLazyDelta_same_definition_head_sound
       leftName rightName leftLevels rightLevels
       hLeftHead hRightHead hLevels
   rw [hLeftHead, hRightHead]
-  subst rightName
+  rw [← hHeadNameEq]
   exact
     PsKernelDefEqJudgment.constLevels
       leftName leftLevels rightLevels hNormalized

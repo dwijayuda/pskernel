@@ -4,6 +4,7 @@ import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.m
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
 import { decodeJsIrArtifact, decodeWasmIrArtifact } from './target-ir-artifact.mjs';
+import { verifyCheckedSourceClosure } from './source-closure-artifact.mjs';
 
 const contract = 'psc-observed-build-archive/1';
 const defaults = Object.freeze({ maxArchiveBytes: 256 * 1024 * 1024, maxArtifactBytes: 128 * 1024 * 1024,
@@ -121,7 +122,15 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     const graph = graphValue(resolveArtifact(archive.graphId), bound);
     if (graph.entries.length + 1 !== blobs.size) fail('ARTIFACT_SET');
     for (const entry of graph.entries) resolveArtifact(entry.identity);
-    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [];
+    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [], sourceClosures = [];
+    for (const entry of graph.entries) {
+      if (entry.identity.domain === 'source-closure' && entry.identity.contract === 'psc-source-closure/1') {
+        sourceClosures.push(verifyCheckedSourceClosure(
+          { identity: entry.identity, bytes: resolveArtifact(entry.identity) },
+          { resolveArtifact }
+        ));
+      }
+    }
     for (const identity of graph.executions) {
       const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions });
       executions.push(result);
@@ -172,7 +181,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     }
     return { kind: 'accepted', contract: 'psc-observed-build-verification/1', graphId: archive.graphId,
       acceptanceScope: 'observed-artifact-integrity-only', integrityVerified: true, artifactCount: blobs.size,
-      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts,
+      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts, sourceClosures,
       fullInputClosureEstablished: false, semanticClaimsVerified: false,
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {

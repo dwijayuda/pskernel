@@ -132,7 +132,6 @@ def psKernelDefEqLambdaEtaLeftWith
                     other
                     (PsKernelExpr.bvar 0))
                   binderInfo;
-              dbg_trace "PSK_ETA_LEFT type=forall";
               match
                   defeq
                     context
@@ -142,7 +141,6 @@ def psKernelDefEqLambdaEtaLeftWith
               | Except.error error =>
                   Except.error error
               | Except.ok result =>
-                  dbg_trace ("PSK_ETA_LEFT result=" ++ toString (Prod.fst result));
                   if Prod.fst result then
                     Except.ok
                       (Prod.mk
@@ -154,7 +152,6 @@ def psKernelDefEqLambdaEtaLeftWith
                         Option.none
                         (Prod.snd result))
           | _ =>
-              dbg_trace "PSK_ETA_LEFT type=nonforall";
               Except.ok
                 (Prod.mk
                   Option.none
@@ -210,7 +207,6 @@ def psKernelDefEqLambdaEtaRightWith
                     other
                     (PsKernelExpr.bvar 0))
                   binderInfo;
-              dbg_trace "PSK_ETA_RIGHT type=forall";
               match
                   defeq
                     context
@@ -220,7 +216,6 @@ def psKernelDefEqLambdaEtaRightWith
               | Except.error error =>
                   Except.error error
               | Except.ok result =>
-                  dbg_trace ("PSK_ETA_RIGHT result=" ++ toString (Prod.fst result));
                   if Prod.fst result then
                     Except.ok
                       (Prod.mk
@@ -232,7 +227,6 @@ def psKernelDefEqLambdaEtaRightWith
                         Option.none
                         (Prod.snd result))
           | _ =>
-              dbg_trace "PSK_ETA_RIGHT type=nonforall";
               Except.ok
                 (Prod.mk
                   Option.none

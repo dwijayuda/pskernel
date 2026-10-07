@@ -100,7 +100,7 @@ def psKernelAddSimpleMutualInductive
                                 firstSession
                                 first.type with
                           | Except.error error =>
-                              Except.error (String.Internal.append "mutual first type check: " error)
+                              Except.error error
                           | Except.ok firstTypeType =>
                               match
                                   psKernelSessionEnsureSort
@@ -108,7 +108,7 @@ def psKernelAddSimpleMutualInductive
                                     (Prod.snd firstTypeType)
                                     (Prod.fst firstTypeType) with
                               | Except.error error =>
-                                  Except.error (String.Internal.append "mutual first sort: " error)
+                                  Except.error error
                               | Except.ok firstSort =>
                                   match
                                       psKernelOpenSimpleHeaderParams
@@ -117,7 +117,7 @@ def psKernelAddSimpleMutualInductive
                                         first.type
                                         decl.numParams with
                                   | Except.error error =>
-                                      Except.error (String.Internal.append "mutual open parameters: " error)
+                                      Except.error error
                                   | Except.ok paramResult =>
                                       match
                                           psKernelOpenSimpleHeaderIndices
@@ -125,7 +125,7 @@ def psKernelAddSimpleMutualInductive
                                             paramResult.session
                                             paramResult.result with
                                       | Except.error error =>
-                                          Except.error (String.Internal.append "mutual open first indices: " error)
+                                          Except.error error
                                       | Except.ok firstIndices =>
                                           match firstIndices.result with
                                           | PsKernelExpr.sort resultLevel =>
@@ -148,7 +148,7 @@ def psKernelAddSimpleMutualInductive
                                                     params
                                                     resultLevel with
                                               | Except.error error =>
-                                                  Except.error (String.Internal.append "mutual remaining type headers: " error)
+                                                  Except.error error
                                               | Except.ok tailShapes =>
                                                   let typeShapes :=
                                                     List.cons
@@ -177,7 +177,7 @@ def psKernelAddSimpleMutualInductive
                                                         work0
                                                         0 with
                                                   | Except.error error =>
-                                                      Except.error (String.Internal.append "mutual constructor admission: " error)
+                                                      Except.error error
                                                   | Except.ok ctorResult =>
                                                       let ctorShapes :=
                                                         ctorResult.shapes;
@@ -229,7 +229,7 @@ def psKernelAddSimpleMutualInductive
                                                             motives
                                                             ctorShapes with
                                                       | Except.error error =>
-                                                          Except.error (String.Internal.append "mutual minor construction: " error)
+                                                          Except.error error
                                                       | Except.ok minors =>
                                                           let ruleBinders :=
                                                             psKernelOpenBinderListAppend
@@ -252,7 +252,7 @@ def psKernelAddSimpleMutualInductive
                                                                 0
                                                                 decl.isUnsafe with
                                                           | Except.error error =>
-                                                              Except.error (String.Internal.append "mutual recursor construction: " error)
+                                                              Except.error error
                                                           | Except.ok recInfos =>
                                                               let work2 :=
                                                                 psKernelAddMutualRecursorInfos
@@ -275,7 +275,7 @@ def psKernelAddSimpleMutualInductive
                                                                     ctorShapes
                                                                     0 with
                                                               | Except.error error =>
-                                                                  Except.error (String.Internal.append "mutual recursor validation: " error)
+                                                                  Except.error error
                                                               | Except.ok _ =>
                                                                   Except.ok
                                                                     work2

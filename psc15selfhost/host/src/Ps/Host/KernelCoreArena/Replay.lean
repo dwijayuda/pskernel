@@ -38,7 +38,7 @@ def stripNestedStagePrefix? (message : String) : Option String :=
     | [] => none
     | stagePrefix :: rest =>
         if message.startsWith stagePrefix then
-          some (message.drop stagePrefix.length)
+          some (message.drop stagePrefix.length).copy
         else
           go rest
   go prefixes

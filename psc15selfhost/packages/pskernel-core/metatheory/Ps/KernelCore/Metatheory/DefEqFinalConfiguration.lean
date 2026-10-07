@@ -264,6 +264,126 @@ theorem psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
         rcases hSuccess with ⟨rfl, rfl⟩
         exact hConfig
 
+
+theorem psKernelDefEqEtaStructFieldsWithFuel_true_refines
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (induct : PsKernelName)
+    (term : PsKernelExpr)
+    (args : List PsKernelExpr)
+    (numParams index : Nat)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqEtaStructFieldsWithFuel
+          fuel defeq context state
+          induct term args numParams index =
+        Except.ok (Prod.mk true nextState)) :
+    PsKernelStructureEtaCompareJudgment
+      context.environment
+      context.localContext
+      induct
+      term
+      args
+      numParams
+      index := by
+  induction fuel generalizing state nextState index with
+  | zero =>
+      simp [psKernelDefEqEtaStructFieldsWithFuel] at hSuccess
+  | succ remaining ih =>
+      simp only [psKernelDefEqEtaStructFieldsWithFuel] at hSuccess
+      by_cases hMore :
+          psKernelNatLt
+              index
+              (Nat.sub
+                (psKernelExprListLength args)
+                numParams) =
+            true
+      · rw [if_pos hMore] at hSuccess
+        cases hArg :
+            psKernelExprListGet
+              args
+              (Nat.add numParams index) with
+        | none =>
+            simp only [hArg] at hSuccess
+            simp at hSuccess
+        | some arg =>
+            simp only [hArg] at hSuccess
+            cases hRun :
+                defeq
+                  context
+                  state
+                  (PsKernelExpr.proj induct index term)
+                  arg with
+            | error error =>
+                simp only [hRun] at hSuccess
+                simp at hSuccess
+            | ok run =>
+                rcases run with ⟨eqValue, eqState⟩
+                simp only [hRun] at hSuccess
+                have hEq :=
+                  hDefEq
+                    context
+                    state
+                    eqState
+                    (PsKernelExpr.proj induct index term)
+                    arg
+                    eqValue
+                    hConfig
+                    hRun
+                by_cases hEqValue : eqValue = true
+                · rw [if_pos hEqValue] at hSuccess
+                  exact
+                    PsKernelStructureEtaCompareJudgment.step
+                      induct
+                      term
+                      args
+                      numParams
+                      index
+                      arg
+                      hMore
+                      hArg
+                      (hEq.2 hEqValue)
+                      (ih
+                        eqState
+                        nextState
+                        (Nat.succ index)
+                        hEq.1
+                        (by
+                          simpa [Nat.succ_eq_add_one] using hSuccess))
+                · rw [if_neg hEqValue] at hSuccess
+                  simp at hSuccess
+      · rw [if_neg hMore] at hSuccess
+        have hDone :
+            psKernelNatLt
+                index
+                (Nat.sub
+                  (psKernelExprListLength args)
+                  numParams) =
+              false := by
+          cases hValue :
+              psKernelNatLt
+                index
+                (Nat.sub
+                  (psKernelExprListLength args)
+                  numParams) <;>
+            simp_all
+        exact
+          PsKernelStructureEtaCompareJudgment.done
+            induct
+            term
+            args
+            numParams
+            index
+            hDone
+
 theorem psKernelDefEqEtaStructCoreWith_configuration_preserves
     (defeq :
       PsKernelCheckerContext ->

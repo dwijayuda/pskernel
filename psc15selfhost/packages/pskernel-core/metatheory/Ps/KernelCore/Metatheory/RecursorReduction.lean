@@ -1999,9 +1999,10 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                     psKernelReduceInductiveRecFactoredWith,
                     recSpine,
                     hHead,
-                    hFind,
-                    hShortRaw
+                    hFind
                   ] at hSuccess
+                  rw [hShortRaw] at hSuccess
+                  simp at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | false =>
@@ -2024,10 +2025,12 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                         psKernelReduceInductiveRecFactoredWith,
                         recSpine,
                         hHead,
-                        hFind,
-                        hShortRaw,
-                        hMajorRaw
+                        hFind
                       ] at hSuccess
+                      rw [hShortRaw] at hSuccess
+                      simp at hSuccess
+                      rw [hMajorRaw] at hSuccess
+                      simp at hSuccess
                       rcases hSuccess with ⟨rfl, rfl⟩
                       exact ⟨hConfig, trivial⟩
                   | some major0 =>
@@ -2036,10 +2039,12 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                         psKernelReduceInductiveRecFactoredWith,
                         recSpine,
                         hHead,
-                        hFind,
-                        hShortRaw,
-                        hMajorRaw
+                        hFind
                       ] at hSuccess
+                      rw [hShortRaw] at hSuccess
+                      simp at hSuccess
+                      rw [hMajorRaw] at hSuccess
+                      simp at hSuccess
                       have hInline :
                           psKernelReduceInductiveRecMajorInlineTailWith
                               publicWhnf

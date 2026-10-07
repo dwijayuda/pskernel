@@ -40,6 +40,12 @@ const bytesIsNilExport = "__ps_selfhost_bytes_is_nil";
 const bytesHeadExport = "__ps_selfhost_bytes_head";
 const bytesTailExport = "__ps_selfhost_bytes_tail";
 
+const startedAt = performance.now();
+function phase(name) {
+  process.stdout.write("PSC2_DIRECT_WASM_SELFHOST_PHASE: " + name +
+    " elapsedMs=" + String(Math.round(performance.now() - startedAt)) + "\n");
+}
+
 function run(command, args) {
   const result = spawnSync(command, args, {
     cwd: root,
@@ -124,11 +130,17 @@ function sourceList(api, sources) {
   return result;
 }
 
-function compileWith(api, sources) {
-  const output = byteList(api, api.compile(sourceList(api, sources)));
+function compileWith(api, sources, generation) {
+  phase(generation + ":marshal-sources:" + String(sources.length));
+  const input = sourceList(api, sources);
+  phase(generation + ":compile");
+  const value = api.compile(input);
+  phase(generation + ":read-output");
+  const output = byteList(api, value);
   if (output.length === 0) {
     throw new Error("PSC2_DIRECT_WASM_SELFHOST_COMPILE_FAILED_OR_EMPTY");
   }
+  phase(generation + ":output-bytes:" + String(output.length));
   return output;
 }
 
@@ -143,6 +155,7 @@ function bytesEqual(left, right) {
 await rm(outRoot, { recursive: true, force: true });
 await mkdir(outRoot, { recursive: true });
 
+phase("bootstrap-workspace");
 run(process.execPath, [
   "scripts/bootstrap-project.mjs",
   path.relative(root, entryLean),
@@ -166,6 +179,7 @@ const nativeArgs = existsSync(nativeCompiler)
       "--out",
       path.relative(root, generation1),
     ];
+phase("native-generation-1");
 run(nativeCommand, nativeArgs);
 
 const closure = await readGeneratedSourceClosure(entryPs, workspace);
@@ -173,23 +187,28 @@ if (!closure || closure.ordered.length === 0) {
   throw new Error("PSC2_DIRECT_WASM_SELFHOST_CLOSURE_EMPTY");
 }
 const sources = closure.ordered.map((item) => item.source);
+phase("source-closure:" + String(sources.length) + ":" + closure.closureSha256);
 
 const generation1Bytes = new Uint8Array(await readFile(generation1));
+phase("load-generation-1:bytes:" + String(generation1Bytes.length));
 const compiler1 = await loadCompiler(generation1Bytes);
-const generation2Bytes = compileWith(compiler1, sources);
+const generation2Bytes = compileWith(compiler1, sources, "generation-2");
 await writeFile(generation2, generation2Bytes);
 
 if (!bytesEqual(generation1Bytes, generation2Bytes)) {
   throw new Error("PSC2_DIRECT_WASM_SELFHOST_BOOTSTRAP_FIXED_POINT_MISMATCH");
 }
+phase("generation-1-equals-2");
 
+phase("load-generation-2");
 const compiler2 = await loadCompiler(generation2Bytes);
-const generation3Bytes = compileWith(compiler2, sources);
+const generation3Bytes = compileWith(compiler2, sources, "generation-3");
 await writeFile(generation3, generation3Bytes);
 
 if (!bytesEqual(generation2Bytes, generation3Bytes)) {
   throw new Error("PSC2_DIRECT_WASM_SELFHOST_SELF_FIXED_POINT_MISMATCH");
 }
+phase("generation-2-equals-3");
 
 process.stdout.write(
   [

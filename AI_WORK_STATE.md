@@ -4,10 +4,12 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation checkpoint before this state commit: `ce35d36214d7df4fd7d386cf9ce0f0514cf73a6a`.
-- Last green package proof checkpoint: `ce35d36214d7df4fd7d386cf9ce0f0514cf73a6a` (run #485).
+- Current proof implementation checkpoint before this state commit: `a381b2b330ba632c0a4cd920a514f06d46d14f53`.
+- Last green package proof checkpoint: `a381b2b330ba632c0a4cd920a514f06d46d14f53` (run #538).
 - Run #485 is green for the refactored Assurance Plane: reduction/DefEq/typing/projection judgments coexist in one uniform environment-indexed mutual block, recursor iota carries explicit major-conversion evidence, context weakening is an explicit admissible semantic rule, and projection consumers remain source-compatible.
 - Run #476 is green for the callback-driven ordinary/Quot recursor configuration/refinement composition. The ordinary reducer now has an explicit prefix dispatcher, independently proved iota tail semantics, and a named optional-reduction postcondition that prevents executable-success proof terms from leaking into semantic theorem types.
+- Run #538 is green for the current concrete DefEq foundation: scoped lambda/forall binder comparison restores parent semantic caches on scope exit; binder-spine configuration/refinement is registered; Quick DefEq configuration soundness is registered; and the symmetric function-eta metatheory is registered and compiles together with the checker stack.
+- Confirmed Arena function-eta fix `0dd5d4db43a78be020f2257c226761ef4849d763`: full-shape DefEq now routes lambda/non-lambda in both orientations. `DefEqEtaConfiguration.lean` proves left-eta and right-eta configuration/refinement plus generic bidirectional full-shape routing; companion regressions cover app/const ↔ lambda shapes. Arena evidence: focused Init/Std targets green, Tutorial 141/141, soundness/readiness green.
 - Run #456 remains the earlier green checkpoint for the independent ordinary recursor iota/rule-search metatheory, including executable recursor-rule search refinement.
 - Run #420 is green for the registered beta substitution/lowering algebra.
 - Run #438 is green for the complete `PsKernelBetaSpineSoundLaw`: the optimized multi-lambda `InstantiateRev` path refines ordinary beta-reduction closure and is no longer an unresolved WHNF assumption.
@@ -70,11 +72,7 @@ Empirical validation for the reconciled semantic source:
   among evaluated cases; current host-only replay/classification work is
   intentionally not merged into this proof branch.
 
-The full package proof gate is green at run #485. The ordinary recursor prefix
-transport/composition frontier remains closed, and the stronger conversion-aware
-Assurance Plane compiles together with the reconciled constructor/level/
-mutual-analysis source modules. The next semantic frontier is concrete K/structure
-conversion soundness plus bounded recursor/checker-knot fuel composition.
+The full package proof gate is green at run #538. Ordinary/Quot recursor composition, concrete K/structure conversion, bounded recursor configuration, recursor-aware WHNF/core-WHNF callbacks, symmetric function eta, binder-spine configuration/refinement, and Quick DefEq configuration are all registered and green together. The next semantic frontier is full-shape/application DefEq, LazyDelta/final rules, and the concrete `psKernelIsDefEqWithFuel` checker-knot theorem.
 
 ## Acceptance criteria
 The work is complete only when all of the following hold:
@@ -145,11 +143,11 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- beta-spine is closed: run #438 validates `PsKernelBetaSpineSoundLaw` as a real proof obligation, not a TCB assumption;
-- quotient reduction and ordinary recursor iota/rule-search semantics are modeled independently; callback-driven `psKernelReduceInductiveRecWith` and `psKernelReduceRecursorWith` configuration/refinement composition are now green in run #476;
-- the next recursor dependency is concrete helper soundness for K-like conversion and non-recursive-structure conversion, followed by `PsKernelRecursorReductionConfigurationSound` for `psKernelReduceRecursorBoundedWithFuel`;
-- K/structure conversion must be connected to explicit independent semantic evidence rather than treated as syntactic identity. Lean's K flag is restricted to Prop-valued, single-constructor, zero-field inductive predicates; structure conversion is the non-Prop structure-eta path;
-- after helper semantics, build the shared smaller-fuel recursor/WHNF/inference/DefEq knot, instantiate the green public-WHNF theorem, then close concrete DefEq.
+- recursor/K/structure/bounded-WHNF work is closed and green;
+- confirmed symmetric function eta is formally incorporated in the registered Assurance Plane and green at run #538;
+- binder-scope DefEq now restores parent caches with `psKernelCheckerStateExitLocalScope`; binder-spine configuration/refinement and Quick DefEq are green;
+- next close full-shape/application congruence configuration/refinement, then reflection/LazyDelta/projection/full-WHNF/final rules;
+- prove `PsKernelDefEqConfigurationSound (psKernelIsDefEqWithFuel fuel)`, then instantiate the already-prepared concrete WHNF/checker-knot composition.
 
 Architectural blockers still remaining:
 - compose the already-proved checked/infer-only core and public-wrapper contracts with concrete WHNF/DefEq components in the checker knot;
@@ -160,13 +158,12 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Prove concrete state/configuration + independent semantic contracts for `psKernelToConstructorWhenK`, `psKernelRecursorIsPropWith`, and `psKernelToConstructorWhenStructure`; model K/structure conversion in the Assurance Plane without restating executable success.
-2. Instantiate the green callback-driven recursor theorem for `psKernelReduceRecursorBoundedWithFuel` using one shared fuel/configuration induction over the smaller-fuel WHNF/core-WHNF/inference/DefEq dependencies.
-3. Instantiate the public WHNF contract in the concrete checker knot using the proved beta-spine law and bounded recursor theorem.
-4. Close remaining concrete DefEq configuration/stateful soundness obligations, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success/failure cache paths.
-5. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
-6. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
-7. Add the final explicit implementation-refinement theorem/family, refresh the semantic audit, reconcile against current integration, and rerun the full proof/conformance gates.
+1. Prove application-spine/list DefEq refinement and compose the full-shape helper, reusing the green binder, Quick, and symmetric eta contracts.
+2. Close reflection, LazyDelta/projection, proof irrelevance, structure eta, string expansion, and unit-like final-rule configuration/refinement.
+3. Prove the concrete fuel induction for `PsKernelDefEqConfigurationSound (psKernelIsDefEqWithFuel fuel)`.
+4. Instantiate concrete recursor-aware WHNF, checked inference, infer-only, and public checker contracts from the DefEq theorem.
+5. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
+6. Add the final explicit implementation-refinement theorem/family, refresh the semantic audit, reconcile against current integration, and rerun the final proof/conformance gates.
 
 ## Work discipline
 - Preserve GitHub history and concurrent proof work.

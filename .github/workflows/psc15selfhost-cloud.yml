@@ -111,6 +111,7 @@ jobs:
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
             psc1_backend_js_tests \
+            psc1_backend_js_validate_tests \
             psc1_backend_js_diff_fixture \
             psc1_backend_rust_source_tests \
             psc1_backend_wasm_tests \
@@ -146,6 +147,12 @@ jobs:
           lake exe psc1 check packages/driver-wasm/src/Ps/DriverWasm/Stages.lean
           lake exe psc1 check packages/driver-wasm/src/Ps/DriverWasm/SelfHostProgress.lean
           node --test scripts/ir-artifact.test.mjs
+
+      - name: Run JsIR target validation corpus
+        working-directory: psc15selfhost
+        run: |
+          lake exe psc1_backend_js_validate_tests
+          lake exe psc1 check packages/backend-js/src/Ps/BackendJs/Validate.lean
 
       - name: Check generalized erasure source equality guard
         working-directory: psc15selfhost

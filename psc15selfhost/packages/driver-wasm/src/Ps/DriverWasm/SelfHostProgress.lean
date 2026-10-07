@@ -57,10 +57,11 @@ def psCompilerWasmProgressPrepare
     (source : String) :
     PsCompilerWasmProgress :=
   match psCompilerWasmProgressParse state source with
-  | PsCompilerWasmProgress.failed =>
+  | PsCompilerWasmProgress.parsed parsed =>
+      psCompilerWasmProgressElaborate
+        (PsCompilerWasmProgress.parsed parsed)
+  | _ =>
       PsCompilerWasmProgress.failed
-  | parsed =>
-      psCompilerWasmProgressElaborate parsed
 
 def psCompilerWasmProgressFinish (state : PsCompilerWasmProgress) : PsCompilerWasmProgress :=
   match state with

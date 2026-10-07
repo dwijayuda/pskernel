@@ -228,6 +228,7 @@ export async function buildChecked({
     if (evidence.erasureMap) receipt.erasureMap = evidence.erasureMap.identity;
     if (evidence.specializationInstances) receipt.specializationInstances = evidence.specializationInstances.identity;
     if (evidence.generatedPositionMap) receipt.generatedPositionMap = evidence.generatedPositionMap.identity;
+    if (evidence.declarationLineage) receipt.declarationLineage = evidence.declarationLineage.identity;
     if (evidence.jsAbi) {
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
       receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;

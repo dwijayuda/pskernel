@@ -423,6 +423,12 @@
       "kind": "generated-positions",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/JS_GENERATED_POSITIONS_V1.json"
+    },
+    {
+      "id": "psc-js-declaration-lineage/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_DECLARATION_LINEAGE_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

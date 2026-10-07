@@ -3,6 +3,7 @@ import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtif
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyDeclarationOriginGraph } from './declaration-origins.mjs';
 import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
+import { verifyJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { verifyJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { verifyErasureDeclarationMap } from './erasure-declarations.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
@@ -239,6 +240,19 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
               { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
               { resolveArtifact, expectedInputId: input.identity, expectedOutputId: output.identity,
                 resourceLimits: { maxBytes: bound.maxArtifactBytes } }));
+      }
+      if (definition.passId === 'psc-compose-js-declaration-lineage/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            definition.semanticRelationId !== 'psc-source-js-declaration-lineage/1') fail('JS_LINEAGE_SUBJECT');
+        const expectedParents = { originGraphId: execution.inputs[0] };
+        for (const [key, domain] of [['erasureMapId', 'erasure-map'], ['specializationMapId', 'specialization-map'],
+            ['generatedPositionMapId', 'generated-position-map'], ['verifiedIrId', 'verified-ir']]) {
+          const ids = execution.action.dependencies.filter(id => id.domain === domain);
+          if (ids.length !== 1) fail('JS_LINEAGE_SUBJECT');
+          expectedParents[key] = ids[0];
+        }
+        await verifyJsDeclarationLineage({ identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) },
+          { resolveArtifact, expectedParents, maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes });
       }
       if (definition.passId === 'psc-js-ir-to-javascript/1') {
         if (execution.inputs.length !== 1 || ![1, 2].includes(execution.outputs.length) ||

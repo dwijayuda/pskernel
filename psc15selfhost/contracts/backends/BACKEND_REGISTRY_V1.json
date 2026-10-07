@@ -164,6 +164,12 @@
             "domain": "generated-position-map",
             "contract": "psc-js-generated-position-map/1",
             "requiresToolchain": false
+          },
+          {
+            "role": "declaration-lineage",
+            "domain": "declaration-lineage",
+            "contract": "psc-js-declaration-lineage/1",
+            "requiresToolchain": false
           }
         ],
         "interfaceArtifacts": [

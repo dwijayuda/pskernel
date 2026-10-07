@@ -277,3 +277,9 @@ original-node/location metadata for partially emitted expressions. It is a
 useful design reference for future JS representation sharing, but is not proof
 that PSC dependent types, erasure classifications or runtime layouts can be
 discarded without their own validation policy.
+
+## Exact declaration lineage
+
+The direct-JS path now composes source declaration batches through the actual erasure name table, independent specialization-instance witnesses and actual printer chunks. The composition reconstructs every parent and binds the identical PublicApiIR, byte-preserving validation boundary and complete target declaration/parameter inventory. It deliberately checks no expression-lowering or erasure semantic theorem. No emitted-name parsing or source-name flattening is needed. Live builds retain a separately identified debug artifact; archive replay uses caller-pinned parents and bounded fixed-depth artifact resolution.
+
+ECMA-426 emission remains the next consumer. Coarse declaration anchors must end at the first generated line boundary (or chunk end), with explicit unmapped segments for synthetic code because source-map lookup can carry prior positions across lines. Source preparation and parser coordinates remain distinct from generated ECMAScript coordinates. Direct declarations and generic export semantics remain separate PublicApiIR work.

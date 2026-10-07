@@ -108,6 +108,23 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   assert.equal(replay.targetIrArtifacts[0].kind, 'js-ir');
   assert.equal(replay.specializationCorrespondences[0].correspondenceChecked, true);
   assert.equal(built.generatedPositionMap.identity.contract, 'psc-js-generated-position-map/1');
+  const canonicalAdmissionsId = artifactId(Buffer.from(inputs.admissions), 'canonical-admissions', 'proofscript-checked-admissions/2');
+  const pscvCertificate = canonicalArtifact({ contract: 'pscv-cert/1', canonicalAdmissionsId, fixture: true }, 'pscv-cert', 'pscv-cert/1');
+  const certifiedSourceArtifact = canonicalArtifact({ contract: 'psc-certified-source/1', canonicalAdmissionsId,
+    certificateId: pscvCertificate.identity, fixture: true }, 'certified-source', 'psc-certified-source/1');
+  const observed = createCheckedBuildGraph({ ...inputs, sources: [staged.source], publicApi: staged.publicApi,
+    declarationOrigins: staged.declarationOrigins, erasureCorrespondence: staged.erasureCorrespondence,
+    pscvCertificate, certifiedSourceArtifact });
+  const lineage = JSON.parse(observed.declarationLineage.bytes);
+  assert.equal(lineage.edges.length, specialized[4].length);
+  assert.ok(lineage.edges.some(edge => edge[2] === 0));
+  assert.equal(lineage.expressionCorrespondenceChecked, false);
+  const observedDefinitions = observed.graph.entries.filter(entry => entry.identity.domain === 'pass-definition').map(entry => entry.canonicalValue);
+  const observedArchive = packObservedBuildArchive(observed);
+  const observedReplay = await verifyObservedBuildArchive(observedArchive.bytes, { expectedGraphId: observed.identity,
+    allowedAssumptions: [...new Set(observedDefinitions.flatMap(item => item.assumptionIds))] });
+  assert.equal(observedReplay.kind, 'accepted', observedReplay.reason);
+  assert.equal(observedReplay.preservationVerified, false);
   const map = JSON.parse(built.artifacts.get(artifactKey(built.specializationInstances.identity)));
   assert.ok(map.instances.some(item => item[0] === 'declaration' && item[1] === 'forward'));
   assert.deepEqual(map.outputId, snapshots.specializedIr.identity);

@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { createJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { createErasureDeclarationMap } from './erasure-declarations.mjs';
 import { createDeclarationOriginGraph } from './declaration-origins.mjs';
@@ -57,6 +58,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   let executableArtifact;
   let specializationInstances;
   let generatedPositionMap;
+  let declarationLineage;
   if (generatedPositions !== undefined && directBackend !== 'javascript') throw new Error('PSC_BUILD_GRAPH_GENERATED_POSITION_TARGET');
   let jsAbiPlan;
   let jsAbiPolicyArtifact;
@@ -329,6 +331,22 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         printDependencies, ['trusted-javascript-printer'], undefined,
         generatedPositionMap ? { originPolicy: 'synthesize',
           originReason: 'Capture actual declaration-chunk generated positions; source attribution and fine-grained expression origins remain separate.' } : {});
+      if (declarationOriginGraph && erasureMap && generatedPositionMap) {
+        const parents = { originGraphId: declarationOriginGraph.identity, erasureMapId: erasureMap.identity,
+          specializationMapId: specializationInstances.identity, generatedPositionMapId: generatedPositionMap.identity,
+          verifiedIrId: verifiedIr.identity };
+        const composed = createJsDeclarationLineage({ parents,
+          resolveArtifact: id => artifacts.get(artifactKey(id)) });
+        declarationLineage = add(composed.lineage, { kind: 'output-file', suffix: '.declaration-lineage.json' });
+        execute('psc-compose-js-declaration-lineage/1', declarationOriginGraph, [declarationLineage], implementation,
+          'psc-source-js-declaration-lineage/1',
+          { observedStages: ['reconstruct-metadata-parents', 'join-exact-declaration-inventories'],
+            granularity: 'declaration-batch-to-emission-chunk', expressionCorrespondenceChecked: false,
+            semanticPreservationProved: false },
+          [...baseDependencies, erasureMap.identity, specializationInstances.identity, generatedPositionMap.identity, verifiedIr.identity],
+          [], undefined, { originPolicy: 'synthesize', authorityEffect: 'none',
+            originReason: 'Compose exact source, erasure, specialization and generated-position records at declaration granularity.' });
+      }
     } else {
       if (!targetStages.wasmIr) throw new Error('PSC_BUILD_GRAPH_WASM_TARGET_IR_REQUIRED');
       const wasmIr = add(targetStages.wasmIr, { kind: 'archive-required', role: 'actual-validated-wasm-ir' });
@@ -388,6 +406,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...(erasureMap ? { erasureMap } : {}),
     ...(specializationInstances ? { specializationInstances } : {}),
     ...(generatedPositionMap ? { generatedPositionMap } : {}),
+    ...(declarationLineage ? { declarationLineage } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

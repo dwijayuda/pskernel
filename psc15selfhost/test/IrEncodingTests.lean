@@ -96,8 +96,9 @@ def main (args : List String) : IO Unit := do
     IO.println interface
   else if args == ["--js-stages"] then
     let source := "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := forward Nat 42\n"
-    let .ok prepared := psCompilerPrepareSource .lean source
+    let .ok observed := psCompilerPrepareSourceWithOrigins .lean source
       | throw (IO.userError "PREPARE_FAILED")
+    let prepared := observed.prepared
     let .ok staged := psCompilerJavaScriptStagesFromPrepared prepared
       | throw (IO.userError "JS_STAGES_FAILED")
     let .ok legacy := psCompilerJavaScriptFromPrepared prepared
@@ -107,6 +108,8 @@ def main (args : List String) : IO Unit := do
     let .ok api := psCompilerPublicApiFromPrepared prepared
       | throw (IO.userError "STAGE_PUBLIC_API_FAILED")
     IO.println (psJsonObject [
+      ("source", psJsonQuote source),
+      ("declarationOrigins", psJsonQuote observed.origins),
       ("publicApi", psJsonQuote api),
       ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
       ("runtimeIr", psJsonQuote staged.runtimeIr),

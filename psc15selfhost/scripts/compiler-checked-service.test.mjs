@@ -302,3 +302,26 @@ test('generated positions remain exact checked emission metadata and malformed f
   compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, generatedPositions: '[]' });
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /PSC_JS_POSITION_/);
 });
+
+test('live direct-JS composition uses one emission and binds all exact metadata parents', async () => {
+  const { service, compiler, emitted } = fixture();
+  compiler.psCompilerPrepareSourceWithOrigins = (kind, source) => ok({ prepared: { kind, source },
+    origins: '["psc-declaration-origins/1","declaration-batch",1,[]]' });
+  compiler.psCompilerPublicApiFromPrepared = () => ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
+  let count = 0;
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => {
+    count++;
+    return ok({ javaScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr, jsIr: emptyJsIr,
+      generatedPositions: '["psc-js-generated-positions/1","declaration-emission-chunk",[]]',
+      erasureCorrespondence: '["psc-erasure-declarations/1","declaration-inventory",[]]' });
+  };
+  const handle = await service.check('lean', '');
+  const result = service.emitArtifact(handle, 'javascript');
+  assert.equal(count, 1);
+  assert.equal(emitted.length, 0);
+  assert.equal(result.declarationLineage.contract, 'psc-js-declaration-lineage/1');
+  assert.equal(result.transformationAssurance, 'trusted-implementation-global-preservation-unproved');
+  service.revoke(handle);
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /CERTIFIED_SOURCE_NOT_LIVE/);
+  assert.equal(count, 1);
+});

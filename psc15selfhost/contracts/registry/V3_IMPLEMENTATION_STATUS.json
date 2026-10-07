@@ -295,7 +295,7 @@
         36,
         37
       ],
-      "status": "partial",
+      "status": "implementation-available-index-retrieval-reuse-acceptance",
       "owners": [
         "scripts/savef-object.mjs",
         "scripts/savef-graph.mjs",
@@ -304,7 +304,8 @@
         "contracts/archive/SAVEF_WASM_LITERAL_REUSE_V1.json",
         "contracts/archive/SAVEF_LIFECYCLE_V1.json",
         "scripts/savef-index.mjs",
-        "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json"
+        "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json",
+        "scripts/savef-retrieval-session.mjs"
       ],
       "completion": "Typed graphs, ValidUnder checks, migrations, supersession, failure knowledge, accepted reuse events and a persistent rebuildable non-authoritative semantic index operate end to end.",
       "assurance": "pending"
@@ -856,7 +857,7 @@
       },
       {
         "id": "evidence-to-query-trust-theory",
-        "status": "partial"
+        "status": "implementation-available-exact-behavioral-reuse-assurance-pending"
       },
       {
         "id": "evidence-to-savef-index",
@@ -864,7 +865,7 @@
       },
       {
         "id": "savef-index-to-next-untrusted-proposal",
-        "status": "partial"
+        "status": "implementation-available"
       }
     ]
   }

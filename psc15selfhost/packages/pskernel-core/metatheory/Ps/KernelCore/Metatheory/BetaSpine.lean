@@ -2642,12 +2642,10 @@ theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
                   (List.cons replacement (List.cons head tail))
                   (Nat.sub index (Nat.add 0 offset)) =
                 Option.some found := by
-            change
-              psKernelExprListGet
-                  (List.cons replacement (List.cons head tail))
-                  (Nat.sub index offset) =
-                Option.some found
-            rw [hRelativeSucc]
+            have hZero :
+                Nat.add 0 offset = offset :=
+              Nat.zero_add offset
+            rw [hZero, hRelativeSucc]
             simpa [psKernelExprListGet] using hGet
           rw [
             psKernelExprInstantiateAtReference_bvar_hit_cons
@@ -2703,8 +2701,9 @@ theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
                   (psKernelExprListLength (List.cons head tail))
                   offset <
                 index := by
-            apply Nat.lt_of_succ_le
-            simpa [Nat.add_succ] using hLengthPlusThreshold
+            have hThreshold := hLengthPlusThreshold
+            rw [Nat.add_succ] at hThreshold
+            exact Nat.lt_of_succ_le hThreshold
           have hOffsetPlusLengthLt :
               Nat.add
                   offset
@@ -2733,12 +2732,10 @@ theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
                   (List.cons replacement (List.cons head tail))
                   (Nat.sub index (Nat.add 0 offset)) =
                 Option.none := by
-            change
-              psKernelExprListGet
-                  (List.cons replacement (List.cons head tail))
-                  (Nat.sub index offset) =
-                Option.none
-            rw [hRelativeSucc]
+            have hZero :
+                Nat.add 0 offset = offset :=
+              Nat.zero_add offset
+            rw [hZero, hRelativeSucc]
             simpa [psKernelExprListGet] using hGet
           rw [
             psKernelExprInstantiateAtReference_bvar_miss_cons

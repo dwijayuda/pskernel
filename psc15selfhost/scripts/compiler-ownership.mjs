@@ -1,29 +1,8 @@
+import { maskLeanSource } from './lean-source-mask.mjs';
 const fail = (code, detail) => { throw new Error('PSC_OWNERSHIP_' + code + ': ' + detail); };
 
-/** Lexical filtering for a static topology audit, not a Lean parser or sandbox. */
 export function leanCode(source) {
-  let result = '', block = 0, string = false, line = false;
-  for (let index = 0; index < source.length; index++) {
-    const char = source[index], next = source[index + 1];
-    if (line) { if (char === '\n') line = false; result += char === '\n' ? '\n' : ' '; continue; }
-    if (block) {
-      if (char === '/' && next === '-') { block++; result += '  '; index++; }
-      else if (char === '-' && next === '/') { block--; result += '  '; index++; }
-      else result += char === '\n' ? '\n' : ' ';
-      continue;
-    }
-    if (string) {
-      if (char === '\\') { result += '  '; index++; }
-      else { if (char === '"') string = false; result += char === '\n' ? '\n' : ' '; }
-      continue;
-    }
-    if (char === '-' && next === '-') { line = true; result += '  '; index++; }
-    else if (char === '/' && next === '-') { block = 1; result += '  '; index++; }
-    else if (char === '"') { string = true; result += ' '; }
-    else result += char;
-  }
-  if (block || string) fail('LEXICAL', 'unterminated comment/string');
-  return result;
+  return maskLeanSource(source, { strict: true });
 }
 
 export function auditCompilerOwnership({ policy, packages, backendRegistry, primaryBootstrapEntry }) {

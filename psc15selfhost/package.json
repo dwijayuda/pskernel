@@ -219,7 +219,7 @@
     "check:v5-migration": "node scripts/v5-migration-audit.mjs",
     "test:claim-set": "node --test scripts/claim-set.test.mjs",
     "test:backend-contract": "node --test scripts/backend-contract.test.mjs",
-    "check:compiler-ownership": "node --test scripts/compiler-ownership.test.mjs && node scripts/compiler-ownership-audit.mjs"
+    "check:compiler-ownership": "node --test scripts/compiler-ownership.test.mjs scripts/lean-source-mask.test.mjs && node scripts/compiler-ownership-audit.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

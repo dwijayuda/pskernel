@@ -49,3 +49,9 @@ test('cycles, target leakage, lowering in drivers and unregistered emitters reje
   ];
   for (const mutate of mutations) { const f = fixture(); mutate(f); assert.throws(() => auditCompilerOwnership(f), /PSC_OWNERSHIP_/); }
 });
+
+test('character quote does not hide a forbidden target dependency from ownership', () => {
+  const f = fixture();
+  f.packages[1].modules[0].source += "\ndef quote : Char := '\"'\ndef x := PsJsExpr.literal";
+  assert.throws(() => auditCompilerOwnership(f), /TARGET_LEAK/);
+});

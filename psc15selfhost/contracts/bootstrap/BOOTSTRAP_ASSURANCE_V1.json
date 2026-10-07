@@ -51,7 +51,7 @@
     {
       "id": "B9",
       "name": "diverse-bootstrap-ddc",
-      "status": "target-not-yet-ddc"
+      "status": "campaign-runner-implemented-real-diverse-evidence-pending"
     },
     {
       "id": "B10",
@@ -77,6 +77,10 @@
     "B6": [
       "psc-erasure-preservation/0",
       "psc-specialization-literal-preservation/1"
+    ],
+    "B9": [
+      "scripts/diverse-bootstrap.mjs",
+      "scripts/diverse-bootstrap.test.mjs"
     ]
   },
   "antiConflation": [
@@ -87,5 +91,12 @@
   ],
   "observedEvidence": [
     "contracts/bootstrap/RUST_FIXED_POINT_V1.json"
-  ]
+  ],
+  "b9Implementation": {
+    "contract": "psc-diverse-bootstrap-campaign/1",
+    "relation": "caller-selected exact or independently checked same-target relation",
+    "diversity": "required axes must differ explicitly; different backend alone is not accepted as diversity",
+    "authority": "audit-record-only",
+    "remaining": "run genuinely diverse compiler/toolchain routes against the same compiler source and comparison artifact"
+  }
 }

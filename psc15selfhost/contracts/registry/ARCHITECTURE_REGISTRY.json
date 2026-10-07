@@ -303,6 +303,12 @@
       "kind": "release-lock-producer",
       "status": "current-host",
       "canonicalPath": "scripts/release-semantic-lock.mjs"
+    },
+    {
+      "id": "psc-release-evidence-bundle/1",
+      "kind": "release-evidence",
+      "status": "current-host",
+      "canonicalPath": "scripts/release-evidence-bundle.mjs"
     }
   ]
 }

@@ -1,6 +1,7 @@
 import Ps.KernelCore.Checker.Knot
 import Ps.KernelCore.Metatheory.Judgments
 import Ps.KernelCore.Metatheory.CheckerContracts
+import Ps.KernelCore.Metatheory.RecursorBoundedConfiguration
 
 theorem psKernelIsDefEqWithFuel_zero
     (context : PsKernelCheckerContext)

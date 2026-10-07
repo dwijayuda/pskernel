@@ -24,27 +24,32 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
   | zero =>
       simpa [
         psKernelExprLiftLooseBVarsReferenceChanged
-      ] using hRun
+      ] using hRun.symm
   | succ remaining =>
       cases expr with
       | bvar index =>
-          cases hGe :
-              psKernelNatGe index start <;>
-            simp [
-              psKernelExprLiftLooseBVarsReferenceChanged,
-              hGe
-            ] at hRun
-          exact hRun.1
+          cases hGe : psKernelNatGe index start with
+          | false =>
+              simp [
+                psKernelExprLiftLooseBVarsReferenceChanged,
+                hGe
+              ] at hRun
+              exact hRun.symm
+          | true =>
+              simp [
+                psKernelExprLiftLooseBVarsReferenceChanged,
+                hGe
+              ] at hRun
       | fvar name =>
-          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun
+          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun.symm
       | mvar name =>
-          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun
+          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun.symm
       | sort level =>
-          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun
+          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun.symm
       | const name levels =>
-          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun
+          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun.symm
       | lit literal =>
-          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun
+          simpa [psKernelExprLiftLooseBVarsReferenceChanged] using hRun.symm
       | app fn arg =>
           cases hFn :
               psKernelExprLiftLooseBVarsReferenceChanged
@@ -61,7 +66,7 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
                       hFn,
                       hArg
                     ] at hRun
-                  exact hRun.1
+                  exact hRun.symm
       | lam name type body binderInfo =>
           cases hType :
               psKernelExprLiftLooseBVarsReferenceChanged
@@ -78,7 +83,7 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
                       hType,
                       hBody
                     ] at hRun
-                  exact hRun.1
+                  exact hRun.symm
       | forallE name type body binderInfo =>
           cases hType :
               psKernelExprLiftLooseBVarsReferenceChanged
@@ -95,7 +100,7 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
                       hType,
                       hBody
                     ] at hRun
-                  exact hRun.1
+                  exact hRun.symm
       | letE name type value body nondep =>
           cases hType :
               psKernelExprLiftLooseBVarsReferenceChanged
@@ -118,7 +123,7 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
                           hValue,
                           hBody
                         ] at hRun
-                      exact hRun.1
+                      exact hRun.symm
       | mdata metadata body =>
           cases hBody :
               psKernelExprLiftLooseBVarsReferenceChanged
@@ -129,7 +134,7 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
                   psKernelExprLiftLooseBVarsReferenceChanged,
                   hBody
                 ] at hRun
-              exact hRun.1
+              exact hRun.symm
       | proj typeName index body =>
           cases hBody :
               psKernelExprLiftLooseBVarsReferenceChanged
@@ -140,8 +145,7 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
                   psKernelExprLiftLooseBVarsReferenceChanged,
                   hBody
                 ] at hRun
-              exact hRun.1
-
+              exact hRun.symm
 
 theorem psKernelExprInstantiateAtReferenceChanged_false_fst
     (expr : PsKernelExpr)
@@ -352,32 +356,39 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
             simpa [psKernelNatGe] using hGe
           have hLe : offset ≤ index :=
             Nat.le_of_ble_eq_true hBleTrue
-          have hGt : offset < Nat.add index 1 := by
-            omega
+          have hGt : offset < Nat.add index 1 :=
+            Nat.lt_succ_of_le hLe
           have hBeq :
               Nat.beq (Nat.add index 1) offset = false := by
             cases hEq :
                 Nat.beq (Nat.add index 1) offset with
             | false => rfl
             | true =>
-                have hEqual := Nat.eq_of_beq_eq_true hEq
-                omega
+                have hEqual :
+                    Nat.add index 1 = offset :=
+                  Nat.eq_of_beq_eq_true hEq
+                rw [hEqual] at hGt
+                exact (Nat.lt_irrefl offset hGt).elim
           have hBle :
               Nat.ble (Nat.add index 1) offset = false := by
             cases hEq :
                 Nat.ble (Nat.add index 1) offset with
             | false => rfl
             | true =>
-                have hWrong :=
+                have hWrong :
+                    Nat.add index 1 ≤ offset :=
                   Nat.le_of_ble_eq_true hEq
-                omega
+                exact (Nat.not_le_of_gt hGt hWrong).elim
           have hNatLt :
               psKernelNatLt (Nat.add index 1) offset = false := by
             simp [psKernelNatLt, hBeq, hBle]
           have hRelative :
               Nat.sub (Nat.add index 1) offset =
                 Nat.succ (Nat.sub index offset) := by
-            omega
+            have hAssoc :=
+              Nat.add_sub_assoc hLe 1
+            simpa [Nat.add_comm] using hAssoc
+          rw [hRelative]
           simp [
             psKernelExprLiftLooseBVarsReference,
             psKernelExprLiftLooseBVarsReferenceChanged,
@@ -386,7 +397,6 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
             psKernelExprInstantiateAtReferenceChanged,
             psKernelExprListIsEmpty,
             hNatLt,
-            hRelative,
             psKernelExprListGet,
             psKernelExprListLength
           ]

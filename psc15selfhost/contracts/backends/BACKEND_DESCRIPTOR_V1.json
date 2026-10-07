@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-backend-descriptor/1",
+  "registry": "contracts/backends/BACKEND_REGISTRY_V1.json",
+  "implementation": "scripts/backend-contract.mjs",
+  "authority": "audit-record-only",
+  "binding": "Canonical descriptor binds one exact registry, implementation, target profile, optional external toolchain and optional interface adapter. Replay reconstructs the descriptor from the exact registry; arbitrary descriptor edits reject.",
+  "fourLanes": [
+    "typescript",
+    "javascript",
+    "wasm",
+    "rust"
+  ],
+  "currentAssurance": "trustedImplementation; no global semantic-preservation claim",
+  "inputScope": "Current TS/Rust generic validated RuntimeIR and direct JS/Wasm SpecializedIR inputs are recorded honestly. Shared SpecializedIR source-backend migration remains explicit.",
+  "unsupported": "Unknown backend/product/capability combinations fail closed; direct JS currently advertises no declaration or map emitter.",
+  "validation": "scripts/backend-contract.test.mjs; focused data-contract tests, not backend preservation or actual toolchain execution"
+}

@@ -1027,32 +1027,32 @@
       "backendId": "typescript",
       "backendKind": "sourceTarget",
       "role": "minimal bootstrap; ecosystem and differential oracle",
-      "descriptorStatus": "planned",
-      "bundleStatus": "planned",
+      "descriptorStatus": "implemented",
+      "bundleStatus": "shared-contract-implemented-production-routing-pending",
       "preservation": "not-established-globally"
     },
     {
       "backendId": "javascript",
       "backendKind": "directTargetIR",
       "role": "long-term JS/npm lane; complete declaration/debug bundle pending",
-      "descriptorStatus": "planned",
-      "bundleStatus": "planned",
+      "descriptorStatus": "implemented",
+      "bundleStatus": "shared-contract-implemented-production-routing-pending",
       "preservation": "not-established-globally"
     },
     {
       "backendId": "wasm",
       "backendKind": "directTargetIR",
       "role": "Core Wasm; private self-host ABI and Canonical ABI remain distinct",
-      "descriptorStatus": "planned",
-      "bundleStatus": "planned",
+      "descriptorStatus": "implemented",
+      "bundleStatus": "shared-contract-implemented-production-routing-pending",
       "preservation": "not-established-globally"
     },
     {
       "backendId": "rust",
       "backendKind": "sourceTarget",
       "role": "first-class native and diverse bootstrap lane; no persistent RustIR required",
-      "descriptorStatus": "planned",
-      "bundleStatus": "planned",
+      "descriptorStatus": "implemented",
+      "bundleStatus": "shared-contract-implemented-production-routing-pending",
       "preservation": "not-established-globally"
     }
   ],
@@ -1090,7 +1090,7 @@
       "classifications": [
         "backend"
       ],
-      "status": "planned",
+      "status": "four-lane-registry-and-exact-descriptor-binding-implemented",
       "requirement": "TS/direct JS/Wasm/Rust descriptors identify contracts, implementation, toolchains, capabilities and assurance."
     },
     {
@@ -1099,7 +1099,7 @@
       "classifications": [
         "artifact-bundle"
       ],
-      "status": "planned",
+      "status": "typed-products-and-verifier-implemented-production-routing-pending",
       "requirement": "Common typed independently identified executable/public/debug/interface/toolchain/evidence products."
     },
     {
@@ -1304,6 +1304,27 @@
       "status": "current-host",
       "canonicalPath": "contracts/passes/PASS_DEFINITION_V2.json",
       "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-backend-registry/1",
+      "kind": "backend-registry",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_REGISTRY_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-backend-descriptor/1",
+      "kind": "backend-descriptor",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_DESCRIPTOR_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-artifact-bundle/1",
+      "kind": "artifact-bundle",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/ARTIFACT_BUNDLE_V1.json",
+      "classification": "artifact-bundle"
     }
   ]
 }

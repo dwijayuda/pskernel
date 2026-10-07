@@ -315,6 +315,24 @@
       "kind": "compiler-pass",
       "status": "current-host",
       "canonicalPath": "contracts/passes/PASS_DEFINITION_V2.json"
+    },
+    {
+      "id": "psc-backend-registry/1",
+      "kind": "backend-registry",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_REGISTRY_V1.json"
+    },
+    {
+      "id": "psc-backend-descriptor/1",
+      "kind": "backend-descriptor",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_DESCRIPTOR_V1.json"
+    },
+    {
+      "id": "psc-artifact-bundle/1",
+      "kind": "artifact-bundle",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/ARTIFACT_BUNDLE_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

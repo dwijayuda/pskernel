@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-backend-registry/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "backendVersion": "0.0.0-dev",
+  "artifactBundleContract": "psc-artifact-bundle/1",
+  "backends": [
+    {
+      "backendId": "typescript",
+      "backendKind": "sourceTarget",
+      "packagePath": "packages/backend-ts",
+      "inputDomain": "verified-ir",
+      "inputContract": "psc-runtime-ir-json/1",
+      "lowerPassId": "psc-verified-ir-to-typescript/1",
+      "targetRepresentationId": null,
+      "targetValidatorId": null,
+      "emitterId": "psTsEmitValidatedModule",
+      "runtimeContractId": "psc-runtime-semantics/1",
+      "selfHostRole": "minimal-bootstrap-ecosystem-differential",
+      "assuranceClass": "trustedImplementation",
+      "supportedCapabilities": [
+        "target-source",
+        "javascript-via-pinned-tsc",
+        "declarations-via-pinned-tsc",
+        "source-maps-via-pinned-tsc"
+      ],
+      "unsupportedCapabilities": [
+        "global-preservation",
+        "public-api-correspondence"
+      ],
+      "products": {
+        "executableArtifacts": [
+          {
+            "role": "target-source",
+            "domain": "typescript-source",
+            "contract": "psc-typescript-source/es2022",
+            "requiresToolchain": false
+          },
+          {
+            "role": "javascript",
+            "domain": "javascript-output",
+            "contract": "typescript-emitted-file/1",
+            "requiresToolchain": true
+          }
+        ],
+        "publicApiArtifacts": [
+          {
+            "role": "declaration",
+            "domain": "declarations-output",
+            "contract": "typescript-emitted-file/1",
+            "requiresToolchain": true
+          }
+        ],
+        "debugArtifacts": [
+          {
+            "role": "source-map",
+            "domain": "source-map-output",
+            "contract": "typescript-emitted-file/1",
+            "requiresToolchain": true
+          }
+        ],
+        "interfaceArtifacts": [
+          {
+            "role": "javascript-scalar-binding",
+            "domain": "abi-plan",
+            "contract": "psc-js-scalar-abi-plan/1",
+            "requiresToolchain": false
+          }
+        ]
+      },
+      "ownershipDebt": "Current generic RuntimeIR source backend is preserved. V5.1 SpecializedIR input and PublicApiIR declaration correspondence remain migration obligations."
+    },
+    {
+      "backendId": "javascript",
+      "backendKind": "directTargetIR",
+      "packagePath": "packages/backend-js",
+      "inputDomain": "specialized-ir",
+      "inputContract": "psc-runtime-ir-json/1",
+      "lowerPassId": "psc-specialized-ir-to-js-ir/1",
+      "targetRepresentationId": "psc-js-ir-json/1",
+      "targetValidatorId": "psc-js-ir-validator/1",
+      "emitterId": "psJsEmitValidatedModuleStackSafeWithTargetProfile",
+      "runtimeContractId": "psc-runtime-semantics/1",
+      "selfHostRole": "direct-js-fixed-point-long-term-npm",
+      "assuranceClass": "trustedImplementation",
+      "supportedCapabilities": [
+        "direct-esm",
+        "target-ir-validation"
+      ],
+      "unsupportedCapabilities": [
+        "direct-declarations",
+        "direct-source-maps",
+        "direct-declaration-maps",
+        "global-preservation"
+      ],
+      "products": {
+        "executableArtifacts": [
+          {
+            "role": "javascript",
+            "domain": "javascript-output",
+            "contract": "psc-direct-javascript/es2022",
+            "requiresToolchain": false
+          }
+        ],
+        "publicApiArtifacts": [],
+        "debugArtifacts": [],
+        "interfaceArtifacts": [
+          {
+            "role": "javascript-scalar-binding",
+            "domain": "abi-plan",
+            "contract": "psc-js-scalar-abi-plan/1",
+            "requiresToolchain": false
+          }
+        ]
+      },
+      "ownershipDebt": "PublicApiIR/interface-ts and OriginGraph products are not yet implemented; no tsc substitution or promotion is implied."
+    },
+    {
+      "backendId": "wasm",
+      "backendKind": "directTargetIR",
+      "packagePath": "packages/backend-wasm",
+      "inputDomain": "specialized-ir",
+      "inputContract": "psc-runtime-ir-json/1",
+      "lowerPassId": "psc-specialized-ir-to-wasm-ir/1",
+      "targetRepresentationId": "psc-wasm-ir-json/1",
+      "targetValidatorId": "psc-wasm-ir-validator/1",
+      "emitterId": "psWasmEncodeModule",
+      "runtimeContractId": "psc-runtime-semantics/1",
+      "selfHostRole": "direct-wasm-fixed-point-private-abi",
+      "assuranceClass": "trustedImplementation",
+      "supportedCapabilities": [
+        "core-wasm",
+        "gc-runtime",
+        "target-ir-validation",
+        "private-selfhost-abi",
+        "closed-canonical-scalar-exports"
+      ],
+      "unsupportedCapabilities": [
+        "general-component-runtime",
+        "async-canonical-abi",
+        "resource-handle-runtime",
+        "global-preservation"
+      ],
+      "products": {
+        "executableArtifacts": [
+          {
+            "role": "private-selfhost-binary",
+            "domain": "wasm-output",
+            "contract": "psc-direct-wasm/wasm32",
+            "requiresToolchain": false
+          },
+          {
+            "role": "canonical-scalar-binary",
+            "domain": "wasm-binary",
+            "contract": "webassembly-core/1",
+            "requiresToolchain": false
+          }
+        ],
+        "publicApiArtifacts": [],
+        "debugArtifacts": [],
+        "interfaceArtifacts": [
+          {
+            "role": "foreign-interface",
+            "domain": "interface-ir",
+            "contract": "psc-interface-ir-json/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "canonical-binding",
+            "domain": "abi-plan",
+            "contract": "psc-wasm-canonical-scalar-exports/1",
+            "requiresToolchain": false
+          }
+        ]
+      },
+      "ownershipDebt": "Core Wasm, private self-host ABI and Component/Canonical ABI remain separate target profiles; checked Canonical driver routing remains pending."
+    },
+    {
+      "backendId": "rust",
+      "backendKind": "sourceTarget",
+      "packagePath": "packages/backend-rust",
+      "inputDomain": "verified-ir",
+      "inputContract": "psc-runtime-ir-json/1",
+      "lowerPassId": "psc-verified-ir-to-rust/1",
+      "targetRepresentationId": null,
+      "targetValidatorId": null,
+      "emitterId": "psRustEmitValidatedModule",
+      "runtimeContractId": "psc-runtime-semantics/1",
+      "selfHostRole": "native-systems-diverse-bootstrap",
+      "assuranceClass": "trustedImplementation",
+      "supportedCapabilities": [
+        "target-source",
+        "source-generics",
+        "native-via-pinned-rustc"
+      ],
+      "unsupportedCapabilities": [
+        "independent-source-validator",
+        "global-preservation"
+      ],
+      "products": {
+        "executableArtifacts": [
+          {
+            "role": "target-source",
+            "domain": "rust-source",
+            "contract": "psc-rust-source/2021",
+            "requiresToolchain": false
+          },
+          {
+            "role": "native-binary",
+            "domain": "native-output",
+            "contract": "psc-rust-native/1",
+            "requiresToolchain": true
+          }
+        ],
+        "publicApiArtifacts": [],
+        "debugArtifacts": [],
+        "interfaceArtifacts": []
+      },
+      "ownershipDebt": "Generic validated RuntimeIR input remains current. Rust source emission has no persistent RustIR; observed production graph and exact native toolchain closure remain pending."
+    }
+  ]
+}

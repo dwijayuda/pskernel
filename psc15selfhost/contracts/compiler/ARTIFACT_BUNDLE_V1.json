@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-artifact-bundle/1",
+  "implementation": "scripts/backend-contract.mjs",
+  "authority": "audit-record-only",
+  "productGroups": [
+    "executableArtifacts",
+    "publicApiArtifacts",
+    "debugArtifacts",
+    "interfaceArtifacts",
+    "targetToolchainArtifacts",
+    "evidenceArtifacts"
+  ],
+  "bindings": [
+    "backend descriptor identity",
+    "source subject identity",
+    "ProfileEnvironment identity",
+    "ClaimSet identity",
+    "independently identified products with explicit roles"
+  ],
+  "consumer": "verifyArtifactBundle requires the consumer's exact expected bundle identity, rehashes all immediate dependencies/products, replays descriptor registration, validates supported products/toolchain dependencies and binds claim subjects/profile. Claim evidence replay is opt-in through independently selected checker implementations.",
+  "limits": {
+    "bytes": 2097152,
+    "depth": 32,
+    "nodes": 60000,
+    "itemsPerGroup": 1024
+  },
+  "claims": "No claim is inferred from product presence. Empty ClaimSets are permitted for unassured artifacts. Preservation and release acceptance remain false after an integrity-only check.",
+  "profileEnvironment": "Identity binding only at this checkpoint; complete producer-observed ProfileEnvironment/extension/import closure remains required before production release use.",
+  "remaining": [
+    "Wire current checked/native and generated backend producers and release consumers to this common bundle",
+    "Observe and bind complete ProfileEnvironment and toolchain closures",
+    "PublicApiIR-derived direct-JS declarations and OriginGraph-derived maps",
+    "Actual claim checkers and assured release policy",
+    "No global preservation, conformance or promotion claim"
+  ]
+}

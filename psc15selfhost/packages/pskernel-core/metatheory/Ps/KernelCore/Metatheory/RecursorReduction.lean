@@ -45,7 +45,7 @@ def PsKernelRecursorKConversionConfigurationSound
         major =
       Except.ok (Prod.mk result nextState) ->
     PsKernelCheckerConfigurationSound context nextState ∧
-      PsKernelReductionClosure
+      PsKernelDefEqJudgment
         context.environment
         context.localContext
         major
@@ -78,11 +78,28 @@ def PsKernelRecursorStructureConversionConfigurationSound
         major =
       Except.ok (Prod.mk result nextState) ->
     PsKernelCheckerConfigurationSound context nextState ∧
-      PsKernelReductionClosure
+      PsKernelDefEqJudgment
         context.environment
         context.localContext
         major
         result
+
+
+def PsKernelRecursorPreparedMajor
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (input output : PsKernelExpr) : Prop :=
+  ∃ converted : PsKernelExpr,
+    PsKernelDefEqJudgment
+        environment
+        localContext
+        input
+        converted ∧
+      PsKernelReductionClosure
+        environment
+        localContext
+        converted
+        output
 
 
 def psKernelRecursorPrepareMajorWith
@@ -202,7 +219,7 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
           cheapRec
           cheapProj =
         Except.ok (Prod.mk result nextState)) :
-    PsKernelReductionClosure
+    PsKernelRecursorPreparedMajor
         context.environment
         context.localContext
         major0
@@ -212,13 +229,13 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
         nextState := by
   cases hKFlag : recursor.k with
   | false =>
-      have hBaseReduction :
-          PsKernelReductionClosure
+      have hBaseConversion :
+          PsKernelDefEqJudgment
             context.environment
             context.localContext
             major0
             major0 :=
-        PsKernelReductionClosure.refl major0
+        PsKernelDefEqJudgment.refl major0
       cases hCtor :
           psKernelIsConstructorApp
             context.environment
@@ -230,7 +247,15 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
             hCtor
           ] at hSuccess
           rcases hSuccess with ⟨rfl, rfl⟩
-          exact ⟨hBaseReduction, hConfig⟩
+          exact
+            ⟨
+              ⟨
+                major0,
+                hBaseConversion,
+                PsKernelReductionClosure.refl major0
+              ⟩,
+              hConfig
+            ⟩
       | false =>
           cases cheapRec with
           | false =>
@@ -260,7 +285,11 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
                     hRun
                   ] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
-                  exact hSemantic
+                  exact
+                    ⟨
+                      ⟨major0, hBaseConversion, hSemantic.1⟩,
+                      hSemantic.2
+                    ⟩
           | true =>
               cases hRun :
                   coreWhnf
@@ -291,7 +320,11 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
                     hRun
                   ] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
-                  exact hSemantic
+                  exact
+                    ⟨
+                      ⟨major0, hBaseConversion, hSemantic.1⟩,
+                      hSemantic.2
+                    ⟩
   | true =>
       cases hKRun :
           psKernelToConstructorWhenK
@@ -327,7 +360,15 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
                 hCtor
               ] at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
-              exact ⟨hKSemantic.2, hKSemantic.1⟩
+              exact
+                ⟨
+                  ⟨
+                    majorK,
+                    hKSemantic.2,
+                    PsKernelReductionClosure.refl majorK
+                  ⟩,
+                  hKSemantic.1
+                ⟩
           | false =>
               cases cheapRec with
               | false =>
@@ -362,12 +403,11 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
                       rcases hSuccess with ⟨rfl, rfl⟩
                       exact
                         ⟨
-                          psKernelReductionClosure_transitive
-                            context.environment
-                            context.localContext
-                            major0 majorK reduced
-                            hKSemantic.2
-                            hReducedSemantic.1,
+                          ⟨
+                            majorK,
+                            hKSemantic.2,
+                            hReducedSemantic.1
+                          ⟩,
                           hReducedSemantic.2
                         ⟩
               | true =>
@@ -405,12 +445,11 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
                       rcases hSuccess with ⟨rfl, rfl⟩
                       exact
                         ⟨
-                          psKernelReductionClosure_transitive
-                            context.environment
-                            context.localContext
-                            major0 majorK reduced
-                            hKSemantic.2
-                            hReducedSemantic.1,
+                          ⟨
+                            majorK,
+                            hKSemantic.2,
+                            hReducedSemantic.1
+                          ⟩,
                           hReducedSemantic.2
                         ⟩
 
@@ -419,14 +458,14 @@ def PsKernelRecursorNormalizedMajor
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)
     (input output : PsKernelExpr) : Prop :=
-  ∃ reduced : PsKernelExpr,
-    PsKernelReductionClosure
+  ∃ converted : PsKernelExpr,
+    PsKernelDefEqJudgment
         environment
         localContext
         input
-        reduced ∧
+        converted ∧
       PsKernelRecursorMajorNormalization
-        reduced
+        converted
         output
 
 
@@ -537,7 +576,7 @@ theorem psKernelRecursorNormalizeMajorWith_configuration_sound
                   ⟨
                     PsKernelExpr.lit
                       (PsKernelLiteral.nat 0),
-                    PsKernelReductionClosure.refl
+                    PsKernelDefEqJudgment.refl
                       (PsKernelExpr.lit
                         (PsKernelLiteral.nat 0)),
                     PsKernelRecursorMajorNormalization.natZero
@@ -554,7 +593,7 @@ theorem psKernelRecursorNormalizeMajorWith_configuration_sound
                     PsKernelExpr.lit
                       (PsKernelLiteral.nat
                         (Nat.succ predecessor)),
-                    PsKernelReductionClosure.refl
+                    PsKernelDefEqJudgment.refl
                       (PsKernelExpr.lit
                         (PsKernelLiteral.nat
                           (Nat.succ predecessor))),
@@ -624,7 +663,11 @@ theorem psKernelRecursorNormalizeMajorWith_configuration_sound
                   hWhnfSemantic.2,
                   ⟨
                     result,
-                    hCombined,
+                    PsKernelDefEqJudgment.reductionClosure
+                      (PsKernelExpr.lit
+                        (PsKernelLiteral.str value))
+                      result
+                      hCombined,
                     PsKernelRecursorMajorNormalization.identity
                       result
                   ⟩
@@ -871,7 +914,7 @@ theorem psKernelRecursorIota_refines
     (recArgs majorArgs : List PsKernelExpr)
     (recursor : PsKernelRecursorInfo)
     (rule : PsKernelRecursorRule)
-    (major0 prepared majorReduced major : PsKernelExpr)
+    (major0 majorK majorReduced semanticReduced major : PsKernelExpr)
     (hIndex :
       PsKernelEnvironmentIndexRefines
         context.environment)
@@ -898,21 +941,27 @@ theorem psKernelRecursorIota_refines
                 recursor.numMinors
                 recursor.numIndices))) =
         Option.some major0)
-    (hPrepared :
+    (hKConversion :
       PsKernelDefEqJudgment
         context.environment
         context.localContext
         major0
-        prepared)
-    (hMajorConversion :
+        majorK)
+    (hMajorReduction :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        majorK
+        majorReduced)
+    (hNormalizeConversion :
       PsKernelDefEqJudgment
         context.environment
         context.localContext
-        prepared
-        majorReduced)
+        majorReduced
+        semanticReduced)
     (hNormalize :
       PsKernelRecursorMajorNormalization
-        majorReduced major)
+        semanticReduced major)
     (hCtorHead :
       Prod.fst (psKernelExprGetAppFnArgs major) =
         PsKernelExpr.const ctorName ctorLevels)
@@ -982,8 +1031,9 @@ theorem psKernelRecursorIota_refines
       recursor
       rule
       major0
-      prepared
+      majorK
       majorReduced
+      semanticReduced
       major
       hHead
       hArgs
@@ -994,8 +1044,9 @@ theorem psKernelRecursorIota_refines
         hIndex
         hFind)
       hMajor
-      hPrepared
-      hMajorConversion
+      hKConversion
+      hMajorReduction
+      hNormalizeConversion
       hNormalize
       hCtorHead
       hMajorArgs
@@ -1315,30 +1366,14 @@ theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
               normalized
               hPreparedSemantic.2
               hNormalized
+          rcases hPreparedSemantic.1 with
+            ⟨majorK,
+              hKConversion,
+              hMajorReduction⟩
           rcases hNormalizedSemantic.2 with
             ⟨semanticReduced,
-              hNormalizeReduction,
+              hNormalizeConversion,
               hNormalize⟩
-          have hPreparedDefEq :
-              PsKernelDefEqJudgment
-                context.environment
-                context.localContext
-                major0
-                prepared :=
-            PsKernelDefEqJudgment.reductionClosure
-              major0
-              prepared
-              hPreparedSemantic.1
-          have hNormalizeDefEq :
-              PsKernelDefEqJudgment
-                context.environment
-                context.localContext
-                prepared
-                semanticReduced :=
-            PsKernelDefEqJudgment.reductionClosure
-              prepared
-              semanticReduced
-              hNormalizeReduction
           cases hCtorHead :
               Prod.fst
                 (psKernelExprGetAppFnArgs normalized) with
@@ -1423,6 +1458,7 @@ theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
                                 recursor
                                 rule
                                 major0
+                                majorK
                                 prepared
                                 semanticReduced
                                 normalized
@@ -1431,8 +1467,9 @@ theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
                                 hArgs
                                 hFind
                                 hMajor
-                                hPreparedDefEq
-                                hNormalizeDefEq
+                                hKConversion
+                                hMajorReduction
+                                hNormalizeConversion
                                 hNormalize
                                 hCtorHead
                                 rfl

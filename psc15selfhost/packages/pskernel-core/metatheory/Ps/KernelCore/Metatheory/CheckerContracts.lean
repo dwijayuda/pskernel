@@ -1393,8 +1393,16 @@ theorem psKernelDefEqFinish_result_sound
   rw [hResult] at hFinishConfig
   have hValueEq : inputValue = outputValue := by
     have hFst := congrArg Prod.fst hResult
-    cases inputValue <;>
-      simpa [psKernelDefEqFinish] using hFst
+    cases inputValue with
+    | false =>
+        simpa [psKernelDefEqFinish] using hFst
+    | true =>
+        cases hEligible :
+            psKernelSemanticPairCacheEligible left right with
+        | false =>
+            simpa [psKernelDefEqFinish, hEligible] using hFst
+        | true =>
+            simpa [psKernelDefEqFinish, hEligible] using hFst
   refine ⟨hFinishConfig, ?_⟩
   intro hOutput
   apply hDefEq

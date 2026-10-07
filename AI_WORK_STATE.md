@@ -51,11 +51,11 @@ Empirical validation for the reconciled semantic source:
   among evaluated cases; current host-only replay/classification work is
   intentionally not merged into this proof branch.
 
-The full package proof gate remains red only at the already-active
-`Metatheory/RecursorReduction.lean` transport/composition frontier. Run #470
-fails on localized recursor-prefix rewrite alignment; the reconciled
-constructor/level/mutual-analysis source modules compile successfully and do
-not introduce a new proof blocker.
+The full package proof gate is green at run #476. The ordinary recursor prefix
+transport/composition frontier is closed. The reconciled constructor/level/
+mutual-analysis source modules compile successfully and do not introduce a new
+proof blocker. The next semantic frontier is concrete K/structure conversion
+soundness plus bounded recursor/checker-knot fuel composition.
 
 ## Acceptance criteria
 The work is complete only when all of the following hold:

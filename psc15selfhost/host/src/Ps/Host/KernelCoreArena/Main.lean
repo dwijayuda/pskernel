@@ -6,10 +6,16 @@ partial def replayStream
     (stream : IO.FS.Stream)
     (state : State)
     (lineNo : Nat) : IO (Except Failure Stats) := do
-  if Nat.beq (Nat.mod lineNo 1000000) 0 then
+  if Nat.beq (Nat.mod lineNo 100000) 0 then
     IO.eprintln (
       "pskernel-core arena progress: records=" ++ toString state.records ++
-      " declarations=" ++ toString state.declarations)
+      " declarations=" ++ toString state.declarations ++
+      " names=" ++ toString state.transport.names.count ++
+      "/" ++ toString state.transport.names.dense.size ++
+      " levels=" ++ toString state.transport.levels.count ++
+      "/" ++ toString state.transport.levels.dense.size ++
+      " exprs=" ++ toString state.transport.exprs.count ++
+      "/" ++ toString state.transport.exprs.dense.size)
   let line ← stream.getLine
   if line.isEmpty then
     pure state.finish

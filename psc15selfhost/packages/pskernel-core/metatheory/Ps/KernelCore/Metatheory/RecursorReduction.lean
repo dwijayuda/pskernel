@@ -1232,15 +1232,11 @@ theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
           cheapRec
           cheapProj =
         Except.ok (Prod.mk answer nextState)) :
-    PsKernelCheckerConfigurationSound context nextState ∧
-      match answer with
-      | Option.none => True
-      | Option.some result =>
-          PsKernelReductionClosure
-            context.environment
-            context.localContext
-            expr
-            result := by
+    PsKernelOptionalReductionPostcondition
+      context
+      nextState
+      expr
+      answer := by
   cases hPrepared :
       psKernelRecursorPrepareMajorWith
         publicWhnf
@@ -2027,15 +2023,11 @@ theorem psKernelReduceInductiveRecPrefixWith_configuration_sound
           cheapRec
           cheapProj =
         Except.ok (Prod.mk answer nextState)) :
-    PsKernelCheckerConfigurationSound context nextState ∧
-      match answer with
-      | Option.none => True
-      | Option.some result =>
-          PsKernelReductionClosure
-            context.environment
-            context.localContext
-            expr
-            result := by
+    PsKernelOptionalReductionPostcondition
+      context
+      nextState
+      expr
+      answer := by
   let majorIndex :=
     Nat.add
       recursor.numParams
@@ -2102,9 +2094,9 @@ theorem psKernelReduceInductiveRecPrefixWith_configuration_sound
       cases hLookup :
           psKernelExprListGet recArgs majorIndex with
       | none =>
-          exact Or.inl hLookup
+          exact Or.inl rfl
       | some major0 =>
-          exact Or.inr ⟨major0, hLookup⟩
+          exact Or.inr ⟨major0, rfl⟩
     rcases hMajorCases with hMajor | ⟨major0, hMajor⟩
     · rw [hMajor] at hRun
       simp at hRun

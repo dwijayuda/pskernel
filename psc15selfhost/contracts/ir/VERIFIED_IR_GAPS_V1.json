@@ -56,7 +56,7 @@
       "directJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
       "rust": "external imports fail closed with externalImportUnsupported; native adapter implementation remains pending",
       "coreWasm": "external imports fail closed with unsupportedModuleFeature; Component Model adapter is separate and remains pending",
-      "componentModel": "Portable InterfaceIR/WIT, synchronous Canonical ABI layout/signature planning and caller-pinned actual-memory value codecs exist. Flat call conversion, resource/call lifetimes, component binary lowering, production binding and independent component-runtime validation remain pending."
+      "componentModel": "Portable InterfaceIR/WIT, synchronous Canonical ABI layout/signature planning, caller-pinned memory codecs and direct/indirect core-value conversion exist. Resource/call lifetimes, component binary lowering, production binding and independent component-runtime validation remain pending."
     }
   },
   "policy": {

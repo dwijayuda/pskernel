@@ -16,7 +16,8 @@ function setup({pointerBits=32,limits={},grow=false,realloc:override,sourceArtif
     calls++;
     assert.equal(old,pointerBits===32?0:0n);assert.equal(size,pointerBits===32?0:0n);
     if(grow)memory.grow(1);
-    const pointer=Math.ceil(next/alignment)*alignment;next=pointer+Number(length);
+    assert.equal(typeof alignment,pointerBits===32?'number':'bigint');
+    const boundary=Number(alignment), pointer=Math.ceil(next/boundary)*boundary;next=pointer+Number(length);
     return pointerBits===32?pointer:BigInt(pointer);
   });
   const codec=createCanonicalMemoryCodec({interfaceArtifact:sourceArtifact,expectedInterfaceId:sourceArtifact.identity,
@@ -126,4 +127,64 @@ test('cyclic definitions and handles cannot become raw value codecs',()=>{
   handles[5][0][1].push(['file',['resource']],['handle',['alias',['own','file']]]);
   const {codec}=setup({sourceArtifact:artifact(handles)});
   assert.throws(()=>codec.store('handle',1,0),/HANDLE_TABLE_REQUIRED/);
+});
+
+test('memory64 realloc uses four i64 arguments against an actual Wasm function',()=>{
+  const bytes=new Uint8Array([0,97,115,109,1,0,0,0,
+    1,9,1,96,4,126,126,126,126,1,126,3,2,1,0,
+    7,11,1,7,114,101,97,108,108,111,99,0,0,10,7,1,5,0,66,128,8,11]);
+  const instance=new WebAssembly.Instance(new WebAssembly.Module(bytes));
+  const {codec}=setup({pointerBits:64,realloc:instance.exports.realloc});
+  codec.store('text','abc',0);assert.equal(codec.load('text',0),'abc');
+});
+
+test('core integer values use the Wasm JS signed bit representation',()=>{
+  const {codec}=setup();
+  const echo=new WebAssembly.Instance(new WebAssembly.Module(new Uint8Array([
+    0,97,115,109,1,0,0,0,1,6,1,96,1,126,1,126,3,2,1,0,
+    7,8,1,4,101,99,104,111,0,0,10,6,1,4,0,32,0,11]))).exports.echo;
+  const core=codec.lowerValue('wide',(1n<<64n)-1n);
+  assert.deepEqual(core,[-1n]);
+  assert.equal(codec.liftValue('wide',[echo(...core)]),(1n<<64n)-1n);
+  assert.deepEqual(codec.lowerValue('signed',-32768),[-32768]);
+  assert.equal(codec.liftValue('signed',[0x12348000]),-32768);
+  assert.equal(codec.liftValue('boolean',[-1]),true);
+  assert.throws(()=>codec.liftValue('wide',[1]),/CORE_I64/);
+  assert.throws(()=>codec.liftValue('signed',[4294967295]),/CORE_I32/);
+});
+
+test('variant joins use bit reinterpretation and zero extension, then discard unused payloads',()=>{
+  const {codec}=setup();
+  assert.deepEqual(codec.lowerValue('mixed',{tag:'narrow',value:-0}),[0,2147483648n]);
+  assert.deepEqual(codec.lowerValue('mixed',{tag:'wide',value:-0}),[1,-(1n<<63n)]);
+  assert.deepEqual(codec.lowerValue('mixed',{tag:'count',value:4294967295}),[2,4294967295n]);
+  assert.deepEqual(codec.lowerValue('mixed',{tag:'absent'}),[3,0n]);
+  assert.ok(Object.is(codec.liftValue('mixed',[0,2147483648n]).value,-0));
+  assert.ok(Object.is(codec.liftValue('mixed',[1,-(1n<<63n)]).value,-0));
+  assert.deepEqual(codec.liftValue('mixed',[3,-1n]),{tag:'absent'});
+  assert.deepEqual(codec.liftValue('mixed',[2,-1n]),{tag:'count',value:4294967295});
+  assert.throws(()=>codec.liftValue('mixed',[4,0n]),/VARIANT_TAG/);
+});
+
+test('flat and indirect aggregate paths share memory/value semantics',()=>{
+  for(const pointerBits of [32,64]){
+    const {codec}=setup({pointerBits});
+    const pair=[7,99n,65535];
+    const direct=codec.lowerValue('pair',pair);
+    assert.deepEqual(direct,pair);assert.deepEqual(codec.liftValue('pair',direct),pair);
+    const indirect=codec.lowerValue('pair',pair,{maxFlat:1});
+    assert.equal(indirect.length,1);
+    assert.deepEqual(codec.liftValue('pair',indirect,{maxFlat:1}),pair);
+    assert.deepEqual(codec.lowerValue('pair',pair,{maxFlat:1,outPointer:256}),[]);
+    assert.deepEqual(codec.load('pair',256),pair);
+    const bulk=Array.from({length:17},(_,i)=>i);
+    const pointer=codec.lowerValue('bulk',bulk);
+    assert.equal(pointer.length,1);assert.deepEqual(codec.liftValue('bulk',pointer),bulk);
+    const text=codec.lowerValue('text','λ🙂');
+    assert.equal(text.length,2);assert.equal(codec.liftValue('text',text),'λ🙂');
+    const list=codec.lowerValue('bytes',[0,127,255]);
+    assert.deepEqual(codec.liftValue('bytes',list),[0,127,255]);
+    assert.throws(()=>codec.lowerValue('pair',pair,{outPointer:256}),/UNEXPECTED_OUT_POINTER/);
+    assert.throws(()=>codec.liftValue('pair',direct,{maxFlat:2}),/FLAT_LIMIT/);
+  }
 });

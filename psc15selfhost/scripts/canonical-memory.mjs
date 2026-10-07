@@ -2,6 +2,7 @@ import { artifactKey, verifyArtifact } from './artifact-evidence.mjs';
 import { decodeInterfaceIrArtifact, interfaceIrEncodingContract } from './interface-ir-artifact.mjs';
 
 export const canonicalMemoryContract = 'psc-canonical-memory-sync-utf8/1';
+export const canonicalCoreValuesContract = 'psc-canonical-core-values-sync-utf8/1';
 const fail = code => { throw new TypeError('PSC_CANONICAL_MEMORY_' + code); };
 const maximumValueBytes = 268435455;
 const align = (size, alignment) => Math.ceil(size / alignment) * alignment;
@@ -178,7 +179,7 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
   }
   function allocation(size,alignment){
     if(!realloc)fail('REALLOC_REQUIRED');
-    const result=pointerBits===32?realloc(0,0,alignment,size):realloc(0n,0n,alignment,BigInt(size));
+    const result=pointerBits===32?realloc(0,0,alignment,size):realloc(0n,0n,BigInt(alignment),BigInt(size));
     let pointer;
     if(pointerBits===32){
       // Wasm JS i32 results are signed; interpret their bits as a pointer.
@@ -248,19 +249,27 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
     const v=view(at,size,size);
     return size===8?v[signed?'getBigInt64':'getBigUint64'](0,true):v[(signed?'getInt':'getUint')+(size*8)](0,true);
   }
+  function storeStringRange(value){
+    const ptr=allocation(value.length,1);
+    new Uint8Array(range(ptr,value.length),ptr,value.length).set(value);
+    return [ptr,value.length];
+  }
+  function storeListRange(node,value){
+    const ptr=allocation(value.length*node.element.size,node.element.alignment);
+    for(let i=0;i<value.length;i++)store(node.element,value[i],ptr+i*node.element.size);
+    return [ptr,value.length];
+  }
   function store(node,value,at){
     range(at,node.size,node.alignment);
     switch(node.tag){
       case 'named': store(node.target,value,at); break;
       case 'string': {
-        const ptr=allocation(value.length,1);
-        new Uint8Array(range(ptr,value.length),ptr,value.length).set(value);
-        pointerWrite(at,ptr);pointerWrite(at+pointerSize,value.length);break;
+        const [ptr,length]=storeStringRange(value);
+        pointerWrite(at,ptr);pointerWrite(at+pointerSize,length);break;
       }
       case 'list': {
-        const ptr=allocation(value.length*node.element.size,node.element.alignment);
-        for(let i=0;i<value.length;i++)store(node.element,value[i],ptr+i*node.element.size);
-        pointerWrite(at,ptr);pointerWrite(at+pointerSize,value.length);break;
+        const [ptr,length]=storeListRange(node,value);
+        pointerWrite(at,ptr);pointerWrite(at+pointerSize,length);break;
       }
       case 'record': case 'tuple':
         for(let i=0;i<node.children.length;i++)store(node.children[i],value[i],at+node.offsets[i]);
@@ -282,21 +291,26 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
     }
   }
   const decoder=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true});
+  function loadStringRange(ptr,length,state){
+    byteBudget(state,length);const source=new Uint8Array(range(ptr,length),ptr,length);
+    let result;try{result=decoder.decode(source);}catch{fail('UTF8');}
+    if(result.length>maxStringCodeUnits)fail('STRING_LIMIT');return result;
+  }
+  function loadListRange(node,ptr,length,state){
+    const size=length*node.element.size;
+    if(length>maxNodes-state.nodes)fail('NODE_LIMIT');
+    byteBudget(state,size);range(ptr,size,node.element.alignment);
+    const result=[];for(let i=0;i<length;i++)result.push(load(node.element,ptr+i*node.element.size,state));return result;
+  }
   function load(node,at,state){
     nodeBudget(state);range(at,node.size,node.alignment);
     switch(node.tag){
       case 'named': return load(node.target,at,state);
       case 'string': {
-        const ptr=pointerRead(at), length=pointerRead(at+pointerSize);
-        byteBudget(state,length);const source=new Uint8Array(range(ptr,length),ptr,length);
-        let result;try{result=decoder.decode(source);}catch{fail('UTF8');}
-        if(result.length>maxStringCodeUnits)fail('STRING_LIMIT');return result;
+        return loadStringRange(pointerRead(at),pointerRead(at+pointerSize),state);
       }
       case 'list': {
-        const ptr=pointerRead(at), length=pointerRead(at+pointerSize), size=length*node.element.size;
-        if(length>maxNodes-state.nodes)fail('NODE_LIMIT');
-        byteBudget(state,size);range(ptr,size,node.element.alignment);
-        const result=[];for(let i=0;i<length;i++)result.push(load(node.element,ptr+i*node.element.size,state));return result;
+        return loadListRange(node,pointerRead(at),pointerRead(at+pointerSize),state);
       }
       case 'tuple': return node.children.map((child,i)=>load(child,at+node.offsets[i],state));
       case 'record': {
@@ -324,6 +338,118 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
       default:return readInteger(at,node.size,node.tag[0]==='s');
     }
   }
+  const reinterpret=new DataView(new ArrayBuffer(8));
+  function floatBits(kind,value){
+    if(kind==='f32'){
+      if(Number.isNaN(value))return 0x7fc00000;
+      reinterpret.setFloat32(0,value,true);return reinterpret.getUint32(0,true);
+    }
+    if(Number.isNaN(value))return 0x7ff8000000000000n;
+    reinterpret.setFloat64(0,value,true);return reinterpret.getBigUint64(0,true);
+  }
+  function bitsFloat(kind,value){
+    if(kind==='f32'){
+      reinterpret.setUint32(0,value,true);
+      const result=reinterpret.getFloat32(0,true);return Number.isNaN(result)?NaN:result;
+    }
+    reinterpret.setBigUint64(0,value,true);
+    const result=reinterpret.getFloat64(0,true);return Number.isNaN(result)?NaN:result;
+  }
+  // The reference uses unsigned integer bits internally. The WebAssembly JS
+  // boundary exposes signed Number/BigInt core values; normalize only there.
+  function coreBits(kind,value){
+    if(kind==='i32'){
+      if(!integer(value,-2147483648,2147483647))fail('CORE_I32');
+      return value>>>0;
+    }
+    if(kind==='i64'){
+      if(typeof value!=='bigint' || value<-(1n<<63n) || value>=(1n<<63n))fail('CORE_I64');
+      return BigInt.asUintN(64,value);
+    }
+    return scalarValue(kind,value);
+  }
+  const coreValue=(kind,value)=>kind==='i32'?value|0:kind==='i64'?BigInt.asIntN(64,value):value;
+  const pointerType=pointerBits===32?'i32':'i64';
+  const pointerCore=value=>coreValue(pointerType,pointerBits===32?value:BigInt(value));
+  function address(value){
+    if(typeof value==='bigint'){
+      if(value>BigInt(Number.MAX_SAFE_INTEGER))fail('MEMORY_RANGE');
+      return Number(value);
+    }
+    return value;
+  }
+  function lowerCoercion(value,have,want){
+    if(have===want)return value;
+    if(have==='f32' && want==='i32')return floatBits(have,value);
+    if(have==='i32' && want==='i64')return BigInt(value);
+    if(have==='f32' && want==='i64')return BigInt(floatBits(have,value));
+    if(have==='f64' && want==='i64')return floatBits(have,value);
+    fail('FLAT_JOIN');
+  }
+  function liftCoercion(value,have,want){
+    if(have===want)return value;
+    if(have==='i32' && want==='f32')return bitsFloat(want,value);
+    if(have==='i64' && want==='i32')return Number(BigInt.asUintN(32,value));
+    if(have==='i64' && want==='f32')return bitsFloat(want,Number(BigInt.asUintN(32,value)));
+    if(have==='i64' && want==='f64')return bitsFloat(want,value);
+    fail('FLAT_JOIN');
+  }
+  function lowerFlat(node,value){
+    switch(node.tag){
+      case 'named':return lowerFlat(node.target,value);
+      case 'string':return storeStringRange(value).map(item=>pointerBits===32?item:BigInt(item));
+      case 'list':return storeListRange(node,value).map(item=>pointerBits===32?item:BigInt(item));
+      case 'record':case 'tuple':return node.children.flatMap((child,i)=>lowerFlat(child,value[i]));
+      case 'variant':case 'enum':{
+        const child=node.children[value.index],payload=child===null?[]:lowerFlat(child,value.value);
+        const joined=payload.map((item,i)=>lowerCoercion(item,child.flat[i],node.flat[i+1]));
+        for(let i=joined.length+1;i<node.flatCount;i++)joined.push(node.flat[i]==='i64'?0n:0);
+        return [value.index,...joined];
+      }
+      case 'bool':return [value?1:0];
+      case 'char':return [value.codePointAt(0)];
+      case 'f32':case 'f64':return [Number.isNaN(value)?bitsFloat(node.tag,floatBits(node.tag,value)):value];
+      default:return [node.size===8?BigInt.asUintN(64,value):value>>>0];
+    }
+  }
+  function liftFlat(node,read,state){
+    nodeBudget(state);
+    switch(node.tag){
+      case 'named':return liftFlat(node.target,read,state);
+      case 'string':return loadStringRange(address(read(pointerType)),address(read(pointerType)),state);
+      case 'list':return loadListRange(node,address(read(pointerType)),address(read(pointerType)),state);
+      case 'tuple':return node.children.map(child=>liftFlat(child,read,state));
+      case 'record':{
+        const result=Object.create(null);
+        for(let i=0;i<node.children.length;i++)Object.defineProperty(result,node.names[i],{
+          value:liftFlat(node.children[i],read,state),enumerable:true});
+        return result;
+      }
+      case 'variant':case 'enum':{
+        const index=read('i32');if(index>=node.names.length)fail('VARIANT_TAG');
+        const child=node.children[index];let consumed=0;
+        const coerce=want=>{
+          const have=node.flat[1+consumed++];return liftCoercion(read(have),have,want);
+        };
+        const value=child===null?undefined:liftFlat(child,coerce,state);
+        while(consumed<node.flatCount-1)read(node.flat[1+consumed++]);
+        if(node.tag==='enum')return node.names[index];
+        return child===null?{tag:node.names[index]}:{tag:node.names[index],value};
+      }
+      case 'bool':return read('i32')!==0;
+      case 'char':{
+        const value=read('i32');if(value>0x10ffff || (value>=0xd800 && value<=0xdfff))fail('CHAR');
+        return String.fromCodePoint(value);
+      }
+      case 'f32':case 'f64':{const value=read(node.tag);return Number.isNaN(value)?NaN:value;}
+      default:{
+        if(node.size===8){const bits=read('i64');return node.tag==='s64'?BigInt.asIntN(64,bits):bits;}
+        const width=node.size*8, bits=read('i32')%(2**width);
+        return node.tag[0]==='s' && bits>=2**(width-1)?bits-2**width:bits;
+      }
+    }
+  }
+  function flatLimit(value){if(value!==1 && value!==16)fail('FLAT_LIMIT');return value;}
   function selected(name){
     const result=layouts.get(name);
     if(!result)fail('TYPE_NAME');
@@ -336,9 +462,37 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
   }
   return Object.freeze({
     contract:canonicalMemoryContract,
+    coreValuesContract:canonicalCoreValuesContract,
     layout(name){const node=selected(name);return Object.freeze({alignment:node.alignment,byteSize:node.size,
       flatCount:node.flatCount,flatPrefix:Object.freeze([...node.flat]),fieldOffsets:Object.freeze([...node.offsets]),
       payloadOffset:node.payloadOffset,needsMemory:node.memory,needsHandleTable:node.handles});},
+    lowerValue(name,value,{maxFlat=16,outPointer}={}){return transaction(()=>{
+      const node=selected(name),indirect=node.flatCount>flatLimit(maxFlat),state={nodes:0,bytes:0};
+      if(outPointer!==undefined){
+        if(!indirect)fail('UNEXPECTED_OUT_POINTER');
+        range(outPointer,node.size,node.alignment);
+      }
+      if(indirect)byteBudget(state,node.size);
+      const prepared=prepare(node,value,state);
+      if(indirect){
+        const at=outPointer===undefined?allocation(node.size,node.alignment):outPointer;
+        store(node,prepared,at);return outPointer===undefined?[pointerCore(at)]:[];
+      }
+      return lowerFlat(node,prepared).map((item,i)=>coreValue(node.flat[i],item));
+    });},
+    liftValue(name,values,{maxFlat=16}={}){return transaction(()=>{
+      const node=selected(name),indirect=node.flatCount>flatLimit(maxFlat),state={nodes:0,bytes:0};
+      const types=indirect?[pointerType]:node.flat;
+      const input=arrayValues(values,types.length,16).map((item,i)=>coreBits(types[i],item));
+      if(indirect){byteBudget(state,node.size);return load(node,address(input[0]),state);}
+      let index=0;
+      const result=liftFlat(node,kind=>{
+        if(kind!==types[index])fail('FLAT_TYPE');
+        return input[index++];
+      },state);
+      if(index!==input.length)fail('FLAT_ARITY');
+      return result;
+    });},
     load(name,at){return transaction(()=>{const node=selected(name),state={nodes:0,bytes:0};byteBudget(state,node.size);return load(node,at,state);});},
     store(name,value,at){return transaction(()=>{
       const node=selected(name),state={nodes:0,bytes:0};range(at,node.size,node.alignment);byteBudget(state,node.size);

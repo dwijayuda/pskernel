@@ -80,3 +80,12 @@ The pinned reference requires nonzero Boolean bytes to lift as true, integer loa
 Before stores, a bounded snapshot validates input shapes and own data properties; invalid input does not call realloc or write memory. Allocator failures after this point can leave writes and allocations. Realloc is an explicit trusted capability required to provide owned, disjoint regions, with its returned range checked again after possible memory growth. Shared memory, resource handles, borrowed values and asynchronous values fail closed. Proxy behavior and host allocator effects are not a sandbox boundary.
 
 This layer does not bind foreign functions, flatten core call values, execute canon-lift/canon-lower state transitions, perform post-return cleanup or emit components. Those operations remain separate implementation obligations; no layout or memory round trip establishes global adapter preservation.
+
+
+## Core-value conversion and indirect transport
+
+`psc-canonical-core-values-sync-utf8/1` adds direct and indirect value transport on top of the same memory codec. Core i32/i64 arrays use the signed JavaScript WebAssembly representation at the public boundary and unsigned bits internally, as in the pinned reference. Variant payloads are joined by bit reinterpretation and zero-extension, not numeric float/integer conversion. Narrow integer lifts discard unused high bits; unselected payload slots are consumed without reading their pointed-to data.
+
+The caller explicitly selects the synchronous 16-parameter or one-result threshold. Larger values are transported through aligned memory: lowering either allocates and returns a pointer or uses a supplied result out-pointer and returns no core values. Direct values reject an unused out-pointer. Memory32/memory64 string and list paths share the existing range/UTF-8/budget implementation.
+
+Further source review of canonopt validation identified that the pinned memory64 realloc signature uses four address-width parameters, including alignment. The runtime now passes four BigInts and a focused fixture calls an actual four-i64 Wasm function. The earlier host-only allocator fixture shared the incorrect Number-alignment assumption; passing those tests did not establish ABI correctness. Function binding, post-return and instance state are still distinct, unimplemented obligations.

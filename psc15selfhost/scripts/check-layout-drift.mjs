@@ -29,6 +29,10 @@ for (const name of consumers) {
 }
 
 const layout = await import(pathToFileURL(layoutPath).href);
+if (!(layout.packageBySection instanceof Map) || layout.packageBySection.size === 0) {
+  throw new Error("PSC2_LAYOUT_SHARED_MAP_SHAPE");
+}
+// Preserve the established section assignments as well as checking new ones.
 const expected = new Map([
   ["Bootstrap", "bootstrap"],
   ["Foundation", "foundation"],
@@ -60,14 +64,23 @@ const hostProjectCompiler = await readFile(
   path.join(root, "host", "src", "Ps", "Host", "ProjectCompiler.lean"),
   "utf8",
 );
-for (const [section, packageName] of expected) {
-  const marker =
-    `| "Ps" :: "${section}" :: _ => some "${packageName}"`;
-  if (!hostProjectCompiler.includes(marker)) {
-    throw new Error(`PSC2_LAYOUT_HOST_SECTION_MISMATCH: ${section}`);
-  }
+// Check the entire native resolver against the shared catalog. A hand-written
+// expected subset let newly added package namespaces escape this comparison.
+const nativeBody = hostProjectCompiler.match(
+  /^def psHostPackageDirectory\b[\s\S]*?(?=^def |^partial def |$(?![\s\S]))/mu,
+)?.[0];
+if (!nativeBody) throw new Error("PSC2_LAYOUT_HOST_RESOLVER_MISSING");
+const nativeEntries = [...nativeBody.matchAll(
+  /^\s*\| "Ps" :: "([^"]+)" :: _ => some "([^"]+)"/gmu,
+)].map(match => [match[1], match[2]]);
+if (new Set(nativeEntries.map(([section]) => section)).size !== nativeEntries.length) {
+  throw new Error("PSC2_LAYOUT_HOST_DUPLICATE_SECTION");
+}
+const ordered = entries => [...entries].sort(([left], [right]) => left.localeCompare(right));
+if (JSON.stringify(ordered(nativeEntries)) !== JSON.stringify(ordered(layout.packageBySection))) {
+  throw new Error("PSC2_LAYOUT_HOST_CATALOG_MISMATCH");
 }
 
 process.stdout.write(
-  `PSC2_LAYOUT_DRIFT: PASS (${expected.size} module sections; ${consumers.length} consumers)\n`,
+  `PSC2_LAYOUT_DRIFT: PASS (${layout.packageBySection.size} module sections; ${consumers.length} consumers)\n`,
 );

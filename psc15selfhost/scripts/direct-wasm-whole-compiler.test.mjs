@@ -1,3 +1,4 @@
+import { wasmFunctionExports, describeWasmFailure } from './wasm-function-diagnostics.mjs';
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { loadWasmSelfhostCompiler, compileWasmSelfhostProgress, compileWasmSelfhostMonolithic } from './wasm-selfhost-progress.mjs';
@@ -83,6 +84,10 @@ const module = await WebAssembly.compile(bytes);
 await WebAssembly.instantiate(module, {});
 
 const api = await loadWasmSelfhostCompiler(bytes);
+const functionNames = wasmFunctionExports(bytes);
+const finishIndex = [...functionNames].find(([, names]) => names.includes('psCompilerWasmProgressFinish'))?.[0];
+if (finishIndex === undefined || !describeWasmFailure({ stack: 'wasm-function[' + finishIndex + ']' }, functionNames)[0]?.exports.includes('psCompilerWasmProgressFinish'))
+  throw new Error('PSC_WASM_FUNCTION_DIAGNOSTICS_FAILED');
 const smokeLean = path.join(outRoot, 'progress-smoke.lean');
 await writeFile(smokeLean, 'def forward (A : Type) (value : A) : A := value\ndef answer (value : UInt32) : UInt32 := forward UInt32 value\n');
 const emitArgs = ['emit-ps', path.relative(root, smokeLean)];

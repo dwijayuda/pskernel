@@ -1,3 +1,5 @@
+import { wasmFunctionExports, describeWasmFailure } from './wasm-function-diagnostics.mjs';
+
 function required(exports, name) {
   if (typeof exports[name] !== 'function') throw new Error('PSC_WASM_PROGRESS_EXPORT_MISSING: ' + name);
   return exports[name];
@@ -5,7 +7,8 @@ function required(exports, name) {
 
 export async function loadWasmSelfhostCompiler(bytes) {
   const module = await WebAssembly.compile(bytes), instance = await WebAssembly.instantiate(module, {});
-  const api = {};
+  const names = wasmFunctionExports(bytes);
+  const api = { describeFailure: error => describeWasmFailure(error, names) };
   for (const name of ['Initial', 'Failed', 'Parse', 'Elaborate', 'Prepare', 'Finish', 'Validate', 'Specialize', 'Lower', 'Encode', 'Output'])
     api[name] = required(instance.exports, 'psCompilerWasmProgress' + name);
   for (const [key, name] of Object.entries({ stringNew: '__ps_selfhost_string_new', stringSet: '__ps_selfhost_string_set',
@@ -54,7 +57,12 @@ export function compileWasmSelfhostProgress(api, sourceItems, phase = () => {}) 
   }
   for (const [name, method] of [['prepare:finish', 'Finish'], ['validated-ir', 'Validate'],
     ['specialize', 'Specialize'], ['lower', 'Lower'], ['encode', 'Encode']]) {
-    phase(name); accept(api[method](state), name);
+    phase(name);
+    try { accept(api[method](state), name); }
+    catch (error) {
+      phase('failure-functions:' + JSON.stringify(api.describeFailure(error)));
+      throw error;
+    }
   }
   phase('read-output');
   const bytes = byteList(api, api.Output(state));

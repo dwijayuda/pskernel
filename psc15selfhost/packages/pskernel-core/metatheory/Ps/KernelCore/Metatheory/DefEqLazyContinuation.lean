@@ -790,12 +790,13 @@ theorem psKernelDefEqLazyStepBoth_equal_hint_configuration_sound
         psKernelReducibilityHintsIsRegular leftDef.hints <;>
       cases hLevels :
         psKernelAppHeadLevelsEquivalent left right <;>
-      simpa [
+      simp [
         psKernelDefEqLazyStepBoth,
         hNoLeft, hNoRight,
         sameShortcut, argsResult,
         hLeftArgs, hRightArgs, hSame, hRegular, hLevels
-      ] using hRun
+      ] at hRun ⊢
+      exact hRun
   cases hArgs :
       argsResult with
   | error error =>

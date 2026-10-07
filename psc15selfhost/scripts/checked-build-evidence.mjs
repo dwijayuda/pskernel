@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { createSourcePreparationArtifacts } from './source-preparation-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
@@ -40,7 +41,7 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -188,6 +189,21 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         sourceGenericsRetained: true, declarationBodiesRetained: false, targetCorrespondenceVerified: false,
         independentProjectionChecked: false }, baseDependencies, ['trusted-source-public-api-projection']);
   }
+  let declarationOriginGraph;
+  if (declarationOrigins !== undefined) {
+    if (!sourceApi || !certification || typeof declarationOrigins !== 'string') throw new Error('PSC_BUILD_GRAPH_ORIGIN_SUBJECT');
+    const projection = createDeclarationOriginGraph({ table: declarationOrigins, sources, publicApi: sourceApi });
+    for (const item of projection.artifacts) add(item, { kind: 'archive-required', role: 'declaration-origin-subject' });
+    declarationOriginGraph = add(projection.graph, { kind: 'output-file', suffix: '.origin-graph.json' });
+    execute('psc-capture-declaration-origins/1', certifiedInput, [declarationOriginGraph], implementation,
+      'psc-source-declaration-origins/1',
+      { observedStages: ['observe-actual-elaboration-batches', 'bind-source-and-public-api'],
+        granularity: 'declaration-batch', expressionCorrespondenceChecked: false, semanticPreservationProved: false },
+      [...baseDependencies, source.identity, ...projection.artifacts.map(item => item.identity),
+        ...(preparationOrigins ? [preparationOrigins.identity] : [])], [], undefined,
+      { originPolicy: 'synthesize', authorityEffect: 'none',
+        originReason: 'Bind actual declaration-batch parser spans to source Core names; expressions and later IR stages remain unmapped.' });
+  }
   const stages = checkedIrStageArtifacts(irStages);
   const targetStages = checkedTargetIrStageArtifacts(irStages);
   let verifiedIr;
@@ -333,6 +349,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...(certification ? { certification } : {}),
     ...(sourceApi ? { publicApi: sourceApi } : {}),
     ...(preparationOrigins ? { sourceOrigins: preparationOrigins } : {}),
+    ...(declarationOriginGraph ? { originGraph: declarationOriginGraph } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

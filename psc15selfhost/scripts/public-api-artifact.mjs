@@ -16,7 +16,7 @@ const text = value => { if (typeof value !== 'string' || !value.isWellFormed()) 
 const decimal = value => { if (typeof value !== 'string' || !/^(?:0|[1-9][0-9]*)(?![\s\S])/u.test(value)) fail('DECIMAL'); };
 
 /** Full structured names, including numerical components. No lossy flattening. */
-function nameKey(value) {
+export function publicApiNameKey(value) {
   const parts = [];
   for (let cursor = value; ; cursor = cursor.p) {
     if (cursor?.k === 'a') { fields(cursor, 'k'); break; }
@@ -60,7 +60,7 @@ export function decodePublicApi(bytes, limits = {}) {
           if (typeof declaration[7] !== 'boolean') fail('SCHEMA');
           break;
         case 'constructor':
-          array(declaration, 9); nameKey(declaration[4]);
+          array(declaration, 9); publicApiNameKey(declaration[4]);
           declaration.slice(5, 8).forEach(natural); array(declaration[8]).forEach(natural);
           break;
         case 'recursor':
@@ -68,7 +68,7 @@ export function decodePublicApi(bytes, limits = {}) {
         default: fail('KIND');
       }
     }
-    const key = nameKey(name);
+    const key = publicApiNameKey(name);
     if (key === '[]' || declared.has(key)) fail('DUPLICATE_DECLARATION');
     declared.add(key);
     pending.push(['expr', type, 0, new Set(names(levels))]);
@@ -83,7 +83,7 @@ export function decodePublicApi(bytes, limits = {}) {
         case 'max': case 'imax':
           fields(value, 'k,l,r'); push('level', value.l); push('level', value.r); break;
         case 'p':
-          fields(value, 'k,n'); if (!levels.has(nameKey(value.n))) fail('UNBOUND_LEVEL'); break;
+          fields(value, 'k,n'); if (!levels.has(publicApiNameKey(value.n))) fail('UNBOUND_LEVEL'); break;
         default: fail('LEVEL');
       }
       continue;
@@ -93,20 +93,20 @@ export function decodePublicApi(bytes, limits = {}) {
         fields(value, 'k,i'); natural(value.i); if (value.i >= depth) fail('UNBOUND_VARIABLE'); break;
       case 'sort': fields(value, 'k,l'); push('level', value.l); break;
       case 'const':
-        fields(value, 'k,n,ls'); nameKey(value.n); array(value.ls).forEach(level => push('level', level)); break;
+        fields(value, 'k,n,ls'); publicApiNameKey(value.n); array(value.ls).forEach(level => push('level', level)); break;
       case 'app':
         fields(value, 'k,a,f'); push('expr', value.a); push('expr', value.f); break;
       case 'lam': case 'forall':
-        fields(value, 'k,n,t,b,bi'); nameKey(value.n);
+        fields(value, 'k,n,t,b,bi'); publicApiNameKey(value.n);
         if (!['default', 'implicit', 'strictImplicit', 'instImplicit'].includes(value.bi)) fail('BINDER');
         push('expr', value.t); push('expr', value.b, depth + 1); break;
       case 'let':
-        fields(value, 'k,n,t,v,b'); nameKey(value.n);
+        fields(value, 'k,n,t,v,b'); publicApiNameKey(value.n);
         push('expr', value.t); push('expr', value.v); push('expr', value.b, depth + 1); break;
       case 'nat': fields(value, 'k,v'); decimal(value.v); break;
       case 'str': fields(value, 'k,v'); text(value.v); break;
       case 'proj':
-        fields(value, 'k,n,i,e'); nameKey(value.n); natural(value.i); push('expr', value.e); break;
+        fields(value, 'k,n,i,e'); publicApiNameKey(value.n); natural(value.i); push('expr', value.e); break;
       default: fail('EXPRESSION');
     }
   }

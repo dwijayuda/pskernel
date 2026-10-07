@@ -55,6 +55,7 @@
       "scripts/claim-set.mjs",
       "scripts/comparator-export.mjs",
       "scripts/compiler-checked-service.mjs",
+      "scripts/declaration-origins.mjs",
       "scripts/evidence-envelope.mjs",
       "scripts/interface-ir-artifact.mjs",
       "scripts/ir-artifact.mjs",

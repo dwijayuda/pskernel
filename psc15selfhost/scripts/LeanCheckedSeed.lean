@@ -86,7 +86,7 @@ def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do
 -- prepared Lean value remains alive while the host checks its canonical
 -- admissions. Erasure/emission runs only after the host replies `emit`.
 def psCheckedSeedPreparedSession
-    (prepared : PsCompilerAdmissionReadyModule) : IO Unit := do
+    (prepared : PsCompilerAdmissionReadyModule) (origins : String) : IO Unit := do
   let .ok admissions := psCompilerAdmissionsFromPrepared prepared
     | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
   let stdout ← IO.getStdout
@@ -109,7 +109,7 @@ def psCheckedSeedPreparedSession
         stdout.putStrLn (Lean.Json.mkObj [
           ("phase", Lean.Json.str "emitted"), ("typescript", Lean.Json.str output.typeScript),
           ("runtimeIr", Lean.Json.str output.runtimeIr), ("verifiedIr", Lean.Json.str output.verifiedIr),
-          ("publicApi", Lean.Json.str publicApi)]).compress
+          ("publicApi", Lean.Json.str publicApi), ("declarationOrigins", Lean.Json.str origins)]).compress
         stdout.flush
   else
     throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")
@@ -117,9 +117,9 @@ def psCheckedSeedPreparedSession
 def psCheckedSeedSession
     (kind : PsCompilerSourceKind) (sourcePath : String) : IO Unit := do
   let source ← IO.FS.readFile sourcePath
-  let .ok prepared := psCompilerPrepareSource kind source
+  let .ok product := psCompilerPrepareSourceWithOrigins kind source
     | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
-  psCheckedSeedPreparedSession prepared
+  psCheckedSeedPreparedSession product.prepared product.origins
 
 def psCheckedSeedModulesSession
     (kind : PsCompilerSourceKind) (sourcePath : String) : IO Unit := do
@@ -132,9 +132,9 @@ def psCheckedSeedModulesSession
     match entry.getStr? with
     | .error _ => throw (IO.userError "PSC2_CHECKED_MODULES_SOURCE")
     | .ok text => pure text
-  let .ok prepared := psCompilerPrepareSources kind sources
+  let .ok product := psCompilerPrepareSourcesWithOrigins kind sources
     | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
-  psCheckedSeedPreparedSession prepared
+  psCheckedSeedPreparedSession product.prepared product.origins
 
 def psCheckedSeedDiagnoseAdmissions (sourcePath : String) : IO Unit := do
   let source ← IO.FS.readFile sourcePath

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { checkedSeedLimits, checkedSeedFrames, checkedSeedExhausted, checkSeedBytes } from './checked-seed-protocol.mjs';
+import { decodeDeclarationOrigins } from './declaration-origins.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { createPscvCertification } from './certified-source.mjs';
 
@@ -42,7 +43,8 @@ export async function runCheckedSeedSession({
   if (typeof checkAdmissions !== 'function') throw new TypeError('Expected kernel checker');
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 2147483647) throw new TypeError('timeoutMs must be a positive timer interval');
 
-  const snapshot = sources === undefined ? source : JSON.stringify(sources);
+  const inputSources = Object.freeze(sources === undefined ? [source] : [...sources]);
+  const snapshot = sources === undefined ? source : JSON.stringify(inputSources);
   observation.snapshotBytes = checkSeedBytes(snapshot, 'snapshotBytes', limits);
 
   const directory = await mkdtemp(path.join(tmpdir(), 'psc2-checked-seed-'));
@@ -127,10 +129,15 @@ export async function runCheckedSeedSession({
       }
       if (Object.hasOwn(completed, 'publicApi') && typeof completed.publicApi !== 'string')
         throw new Error('PSC2_CHECKED_SEED_SESSION_PUBLIC_API_RESULT');
-      observation.generatedBytes = Buffer.byteLength(completed.publicApi ?? '') + Buffer.byteLength(completed.typescript) +
+      if (Object.hasOwn(completed, 'declarationOrigins') &&
+          (typeof completed.declarationOrigins !== 'string' || typeof completed.publicApi !== 'string'))
+        throw new Error('PSC2_CHECKED_SEED_SESSION_ORIGINS_RESULT');
+      observation.generatedBytes = Buffer.byteLength(completed.declarationOrigins ?? '') + Buffer.byteLength(completed.publicApi ?? '') + Buffer.byteLength(completed.typescript) +
         Buffer.byteLength(completed.runtimeIr ?? '') + Buffer.byteLength(completed.verifiedIr ?? '');
       if (observation.generatedBytes > limits.generatedBytes)
         throw checkedSeedExhausted('generatedBytes', limits.generatedBytes, observation.generatedBytes);
+      if (completed.declarationOrigins !== undefined) decodeDeclarationOrigins(Buffer.from(completed.declarationOrigins),
+        { sources: inputSources, publicApi: Buffer.from(completed.publicApi), maxBytes: limits.generatedBytes });
       if (completed.publicApi !== undefined) decodePublicApi(Buffer.from(completed.publicApi), { maxBytes: limits.generatedBytes });
     } else if (completed?.phase !== 'checked') {
       throw new Error('PSC2_CHECKED_SEED_SESSION_CHECK_RESULT');
@@ -148,6 +155,7 @@ export async function runCheckedSeedSession({
         unobserved: Object.freeze(['compiler-internal-work', 'cpu-time', 'peak-memory', 'descendants', 'host-stack']) }),
       ...(emit ? { typeScript: completed.typescript } : {}),
       ...(emit && completed.publicApi !== undefined ? { publicApi: completed.publicApi } : {}),
+      ...(emit && completed.declarationOrigins !== undefined ? { declarationOrigins: completed.declarationOrigins } : {}),
       ...(emit && completed.runtimeIr !== undefined
         ? { stages: Object.freeze({ runtimeIr: completed.runtimeIr, verifiedIr: completed.verifiedIr }) } : {}),
       ...(certification ? {

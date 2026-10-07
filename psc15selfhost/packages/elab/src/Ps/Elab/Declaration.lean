@@ -1371,41 +1371,101 @@ def psPrependBatchReverse
     (psElabReverseDeclarations declarations)
     declarationsRev
 
+-- Non-authoritative declaration-level metadata from actual elaboration events.
+-- Generated constructors/recursors share their originating declaration batch;
+-- this does not pretend to provide expression-level correspondence.
+structure PsElabDeclarationOrigin where
+  declarationName : PsName
+  sourceSpan : PsSourceSpan
+
+structure PsElabOriginModuleResult where
+  semantic : PsElabModuleResult
+  origins : List PsElabDeclarationOrigin
+
+def psElabPrependBatchOrigins
+    (span : PsSourceSpan)
+    (declarations : List PsDeclaration) :
+    List PsElabDeclarationOrigin -> List PsElabDeclarationOrigin :=
+  match declarations with
+  | List.nil =>
+      fun (originsRev : List PsElabDeclarationOrigin) => originsRev
+  | List.cons declaration rest =>
+      let smaller :
+          List PsElabDeclarationOrigin -> List PsElabDeclarationOrigin :=
+        psElabPrependBatchOrigins span rest;
+      fun (originsRev : List PsElabDeclarationOrigin) =>
+        smaller
+          (List.cons
+            (PsElabDeclarationOrigin.mk (psDeclarationName declaration) span)
+            originsRev)
+
+-- One elaboration fold serves both paths. Observation changes only metadata;
+-- declaration batches and environment updates are the same operations.
+def psElabDeclarationsObservedWorker
+    (sources : List PsSyntaxDeclaration) :
+    Bool ->
+    PsEnvironment ->
+    List PsDeclaration ->
+    List PsElabDeclarationOrigin ->
+    Except PsElabError PsElabOriginModuleResult :=
+  match sources with
+  | List.nil =>
+      fun (_observe : Bool)
+          (environment : PsEnvironment)
+          (declarationsRev : List PsDeclaration)
+          (originsRev : List PsElabDeclarationOrigin) =>
+        Except.ok
+          (PsElabOriginModuleResult.mk
+            (PsElabModuleResult.mk
+              environment
+              (psElabReverseDeclarations declarationsRev))
+            (psListReverse originsRev))
+  | List.cons source rest =>
+      let smaller :
+          Bool ->
+          PsEnvironment ->
+          List PsDeclaration ->
+          List PsElabDeclarationOrigin ->
+          Except PsElabError PsElabOriginModuleResult :=
+        psElabDeclarationsObservedWorker rest;
+      fun (observe : Bool)
+          (environment : PsEnvironment)
+          (declarationsRev : List PsDeclaration)
+          (originsRev : List PsElabDeclarationOrigin) =>
+        match psElabDeclarationBatch environment source with
+        | Except.error error => Except.error error
+        | Except.ok result =>
+            match psAddDeclarationList environment result.declarations with
+            | Except.error error => Except.error error
+            | Except.ok nextEnvironment =>
+                let nextOrigins : List PsElabDeclarationOrigin :=
+                  if observe then
+                    psElabPrependBatchOrigins
+                      (psSyntaxDeclarationSpan source)
+                      result.declarations
+                      originsRev
+                  else originsRev;
+                smaller
+                  observe
+                  nextEnvironment
+                  (psPrependBatchReverse result.declarations declarationsRev)
+                  nextOrigins
+
 def psElabDeclarationsWorker
     (sources : List PsSyntaxDeclaration) :
     PsEnvironment ->
     List PsDeclaration ->
     Except PsElabError PsElabModuleResult :=
-  match sources with
-  | List.nil =>
-      fun (environment : PsEnvironment) =>
-        fun (declarationsRev : List PsDeclaration) =>
-          Except.ok
-            (PsElabModuleResult.mk
-              environment
-              (psElabReverseDeclarations declarationsRev))
-  | List.cons source rest =>
-      let smaller :
-          PsEnvironment ->
-          List PsDeclaration ->
-          Except PsElabError PsElabModuleResult :=
-        psElabDeclarationsWorker rest;
-      fun (environment : PsEnvironment) =>
-        fun (declarationsRev : List PsDeclaration) =>
-          match psElabDeclarationBatch environment source with
-          | Except.error error => Except.error error
-          | Except.ok result =>
-              match
-                  psAddDeclarationList
-                    environment
-                    result.declarations with
-              | Except.error error => Except.error error
-              | Except.ok nextEnvironment =>
-                  smaller
-                    nextEnvironment
-                    (psPrependBatchReverse
-                      result.declarations
-                      declarationsRev)
+  fun (environment : PsEnvironment) (declarationsRev : List PsDeclaration) =>
+    match
+        psElabDeclarationsObservedWorker
+          sources
+          false
+          environment
+          declarationsRev
+          List.nil with
+    | Except.error error => Except.error error
+    | Except.ok result => Except.ok result.semantic
 
 def psElabDeclarations
     (environment : PsEnvironment)
@@ -1422,3 +1482,14 @@ def psElabModule
     (module : PsSyntaxModule) :
     Except PsElabError PsElabModuleResult :=
   psElabDeclarations environment module.declarations []
+
+def psElabModuleWithOrigins
+    (environment : PsEnvironment)
+    (sourceModule : PsSyntaxModule) :
+    Except PsElabError PsElabOriginModuleResult :=
+  psElabDeclarationsObservedWorker
+    sourceModule.declarations
+    true
+    environment
+    List.nil
+    List.nil

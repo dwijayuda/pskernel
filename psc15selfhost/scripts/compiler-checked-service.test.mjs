@@ -226,3 +226,37 @@ test('PublicApiIR bytes count against the combined emission budget', async () =>
   assert.equal(service.emitPublicApiArtifact(handle).artifact.domain, 'public-api');
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /OUTPUT_RESOURCE_EXHAUSTED/);
 });
+
+test('origin-aware preparation is single-pass, immutable, optional only when absent and live-gated', async () => {
+  const { compiler, service } = fixture();
+  compiler.psCompilerPrepareSource = () => { throw new Error('LEGACY_PREPARATION_MUST_NOT_RUN'); };
+  compiler.psCompilerPrepareSourceWithOrigins = (kind, source) => ok({ prepared: { kind, source },
+    origins: '["psc-declaration-origins/1","declaration-batch",1,[]]' });
+  compiler.psCompilerPublicApiFromPrepared = () => ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
+  const handle = await service.check('lean', 'source text');
+  const result = service.emitOriginGraph(handle);
+  assert.equal(result.graph.identity.domain, 'origin-graph');
+  assert.equal(JSON.parse(result.graph.bytes).granularity, 'declaration-batch');
+  assert.equal(service.emitArtifact(handle).originGraph.digest, result.graph.identity.digest);
+  assert.throws(() => service.emitOriginGraph({ ...handle }), /CERTIFIED_SOURCE_NOT_LIVE/);
+  compiler.psCompilerPrepareSourceWithOrigins = undefined;
+  await assert.rejects(service.check('lean', 'again'), /ORIGIN_PREPARE_API_SHAPE/);
+  service.close();
+  assert.throws(() => service.emitOriginGraph(handle), /SESSION_CLOSED/);
+});
+
+test('ordered origin inputs are captured before asynchronous checking', async () => {
+  let accept;
+  const { compiler, service } = fixture({ checkAdmissions: () => new Promise(resolve => { accept = resolve; }) });
+  compiler.List = { nil: () => [], cons: (head, tail) => [head, ...tail] };
+  compiler.psCompilerPrepareSources = () => { throw new Error('LEGACY_MUST_NOT_RUN'); };
+  compiler.psCompilerPrepareSourcesWithOrigins = (kind, values) => ok({ prepared: { kind, source: values.join('') },
+    origins: '["psc-declaration-origins/1","declaration-batch",1,[]]' });
+  compiler.psCompilerPublicApiFromPrepared = () => ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
+  const sources = ['before'];
+  const pending = service.checkSources('lean', sources);
+  sources[0] = 'after';
+  accept({ ...leanCheckedIdentity, accepted: true });
+  const result = service.emitOriginGraph(await pending);
+  assert.equal(result.artifacts.find(item => item.identity.domain === 'prepared-source').bytes.toString(), 'before');
+});

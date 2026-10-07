@@ -1,4 +1,4 @@
-import Ps.Compiler.Candidate
+import Ps.Compiler.Origins
 import Ps.Erasure.Definition
 import Ps.CompilerIr.Validate
 import Ps.CompilerIr.PublicApiEncode

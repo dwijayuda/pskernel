@@ -98,8 +98,19 @@ export function createKernelCheckedSession(
     if (!item) throw new Error('PSC2_CHECKED_UNCHECKED_MODULE');
     return item;
   }
-  async function checkPrepared(prepared, source) {
+  function prepare(name, ...args) {
+    const observed = name + 'WithOrigins';
+    if (!(observed in compiler)) return { prepared: unwrapCompilerResult(compiler[name](...args), 'PREPARE') };
+    if (typeof compiler[observed] !== 'function') throw new Error('PSC2_CHECKED_ORIGIN_PREPARE_API_SHAPE');
+    const product = unwrapCompilerResult(compiler[observed](...args), 'PREPARE_ORIGINS');
+    if (!product || typeof product !== 'object' || !product.prepared || typeof product.prepared !== 'object' ||
+        typeof product.origins !== 'string') throw new Error('PSC2_CHECKED_ORIGIN_PREPARE_RESULT_SHAPE');
+    freezeGraph(product);
+    return { prepared: product.prepared, origins: product.origins };
+  }
+  async function checkPrepared(prepared, source, origins, inputs) {
       requireOpen();
+      const sourceInputs = Object.freeze([...inputs]);
       if (prepared === null || typeof prepared !== 'object') throw new Error('PSC2_CHECKED_PREPARE_RESULT_SHAPE');
       freezeGraph(prepared);
       const admissions = admissionsFrom(compiler, prepared);
@@ -124,7 +135,7 @@ export function createKernelCheckedSession(
         provider: identity,
         providerSecurity: security,
       });
-      modules.set(handle, { prepared, admissions, source });
+      modules.set(handle, { prepared, admissions, source, origins, inputs: sourceInputs });
       return handle;
   }
   function emitTargetWithStages(handle, target) {
@@ -191,8 +202,8 @@ export function createKernelCheckedSession(
     async check(sourceKind, source) {
       requireOpen();
       if (typeof source !== 'string') throw new TypeError('Expected immutable source text');
-      const prepared = unwrapCompilerResult(compiler.psCompilerPrepareSource(sourceKind, source), 'PREPARE');
-      return checkPrepared(prepared, source);
+      const product = prepare('psCompilerPrepareSource', sourceKind, source);
+      return checkPrepared(product.prepared, source, product.origins, [source]);
     },
     async checkSources(sourceKind, sources) {
       requireOpen();
@@ -206,8 +217,8 @@ export function createKernelCheckedSession(
       const source = sources.join('\n\n') + '\n';
       let values = compiler.List.nil();
       for (let index = sources.length - 1; index >= 0; index--) values = compiler.List.cons(sources[index], values);
-      const prepared = unwrapCompilerResult(compiler.psCompilerPrepareSources(sourceKind, values), 'PREPARE');
-      return checkPrepared(prepared, source);
+      const product = prepare('psCompilerPrepareSources', sourceKind, values);
+      return checkPrepared(product.prepared, source, product.origins, sources);
     },
     emit(handle) {
       return emitTarget(handle, 'typescript');
@@ -215,6 +226,10 @@ export function createKernelCheckedSession(
     emitTarget,
     emitTargetWithStages,
     publicApi,
+    declarationOrigins(handle) {
+      const item = checkedItem(handle);
+      return item.origins === undefined ? undefined : Object.freeze({ text: item.origins, sources: item.inputs });
+    },
     describe(handle) { checkedItem(handle); return handle; },
     certificationSubject(handle) {
       const item = checkedItem(handle);

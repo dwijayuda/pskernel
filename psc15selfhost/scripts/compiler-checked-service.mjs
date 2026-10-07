@@ -3,6 +3,7 @@ import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { createCertifiedSourceSession } from './certified-source.mjs';
@@ -46,6 +47,22 @@ export function createCheckedCompilerService({
     if (Buffer.byteLength(text) > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return { text, record: publicApiArtifact(text, { maxBytes: maxOutputBytes }) };
   }
+  function originProduct(handle, api) {
+    const captured = session.declarationOrigins(certified.checkedCore(handle));
+    if (captured === undefined) return undefined;
+    if (!api) throw new Error('PSC_CHECKED_ORIGIN_PUBLIC_API_REQUIRED');
+    if (Buffer.byteLength(captured.text) > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
+    return { table: captured.text,
+      ...createDeclarationOriginGraph({ table: captured.text, sources: captured.sources, publicApi: api.record, maxBytes: maxOutputBytes }) };
+  }
+  function emitOriginGraph(handle) {
+    const product = originProduct(handle, apiProduct(handle));
+    if (!product) throw new Error('PSC_CHECKED_ORIGINS_UNSUPPORTED');
+    if (product.graph.bytes.byteLength + product.artifacts.reduce((sum, item) => sum + item.bytes.byteLength, 0) > maxOutputBytes)
+      throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
+    return Object.freeze({ ...product, certifiedSource: certified.describe(handle),
+      pscvCert: certified.certificate(handle).identity });
+  }
   function emitPublicApiArtifact(handle) {
     const product = apiProduct(handle);
     if (!product) throw new Error('PSC_CHECKED_PUBLIC_API_UNSUPPORTED');
@@ -63,11 +80,13 @@ export function createCheckedCompilerService({
     const capability = session.describe(checkedCoreHandle);
     const emission = session.emitTargetWithStages(checkedCoreHandle, target);
     const api = apiProduct(handle);
+    const origins = originProduct(handle, api);
     const raw = emission.output;
     const payload = target === 'wasm' ? byteList(raw, maxOutputBytes) : raw;
     const bytes = typeof payload === 'string' ? Buffer.from(payload, 'utf8') : payload;
     if (bytes.byteLength > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     if (bytes.byteLength + (api?.record.bytes.byteLength ?? 0) +
+        (origins ? origins.graph.bytes.byteLength + Buffer.byteLength(origins.table) : 0) +
         Object.values(emission.stages ?? {}).reduce((sum, value) => sum + Buffer.byteLength(value), 0) > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     const stages = checkedIrStageArtifacts(emission.stages, { maxBytes: maxOutputBytes });
     const targetStages = checkedTargetIrStageArtifacts(emission.stages, { maxBytes: maxOutputBytes });
@@ -87,6 +106,7 @@ export function createCheckedCompilerService({
           [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {})]
             .map(([key, value]) => [key, value.identity]))) } : {}),
       ...(api ? { publicApi: api.text, publicApiArtifact: api.record.identity } : {}),
+      ...(origins ? { declarationOrigins: origins.table, originGraph: origins.graph.identity } : {}),
       transformationAssurance: 'trusted-implementation-global-preservation-unproved',
     });
   }
@@ -95,6 +115,7 @@ export function createCheckedCompilerService({
     emit: handle => emitArtifact(handle, 'typescript').payload,
     emitArtifact,
     emitPublicApiArtifact,
+    emitOriginGraph,
     describe: certified.describe,
     certificate: certified.certificate,
     certifiedSourceArtifact: certified.certifiedSourceArtifact,

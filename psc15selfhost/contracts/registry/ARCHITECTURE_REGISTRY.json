@@ -381,6 +381,18 @@
       "kind": "source-origins",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/SOURCE_PREPARATION_ORIGINS_V1.json"
+    },
+    {
+      "id": "psc-declaration-origins/1",
+      "kind": "source-origins",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/DECLARATION_ORIGINS_V1.json"
+    },
+    {
+      "id": "psc-origin-graph/1",
+      "kind": "origin-graph",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DECLARATION_ORIGINS_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

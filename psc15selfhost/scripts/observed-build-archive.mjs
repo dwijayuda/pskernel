@@ -1,6 +1,7 @@
 import { verifyObservedContextProducts } from './observed-build-context.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
+import { verifyDeclarationOriginGraph } from './declaration-origins.mjs';
 import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
@@ -179,6 +180,17 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
       executions.push(result);
       const execution = JSON.parse(resolveArtifact(identity));
       const definition = JSON.parse(resolveArtifact(execution.passDefinitionId));
+      if (definition.passId === 'psc-capture-declaration-origins/1') {
+        const dependencies = execution.action.dependencies;
+        const api = dependencies.filter(id => id.domain === 'public-api' && id.contract === 'psc-public-api-ir/1');
+        const source = dependencies.filter(id => id.domain === 'source-snapshot' && id.contract === 'psc-source-snapshot/1');
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            execution.inputs[0].domain !== 'certified-source' || execution.inputs[0].contract !== 'psc-certified-source/1' ||
+            definition.semanticRelationId !== 'psc-source-declaration-origins/1' || api.length !== 1 || source.length !== 1) fail('DECLARATION_ORIGIN_SUBJECT');
+        const sourceValue = decodeComparatorJson(resolveArtifact(source[0]), { maxBytes: bound.maxArtifactBytes });
+        await verifyDeclarationOriginGraph({ identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) },
+          { resolveArtifact, expectedPublicApiId: api[0], expectedSources: sourceValue.sources, maxBytes: bound.maxArtifactBytes });
+      }
       if (definition.passId === 'psc-source-preparation-origins/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
             definition.semanticRelationId !== 'psc-source-preparation-origin-projection/1') fail('SOURCE_ORIGIN_SUBJECT');

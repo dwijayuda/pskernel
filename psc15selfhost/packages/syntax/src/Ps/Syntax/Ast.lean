@@ -101,3 +101,12 @@ inductive PsSyntaxDeclaration where
 structure PsSyntaxModule where
   imports : List PsSyntaxImport
   declarations : List PsSyntaxDeclaration
+
+def psSyntaxDeclarationSpan
+    (declaration : PsSyntaxDeclaration) : PsSourceSpan :=
+  match declaration with
+  | PsSyntaxDeclaration.definition _ _ _ _ span => span
+  | PsSyntaxDeclaration.partialDefinition _ _ _ _ span => span
+  | PsSyntaxDeclaration.theoremDecl _ _ _ _ span => span
+  | PsSyntaxDeclaration.inductiveDecl _ _ _ _ span => span
+  | PsSyntaxDeclaration.structureDecl _ _ _ span => span

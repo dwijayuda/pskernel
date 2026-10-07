@@ -16,6 +16,25 @@ def main (args : List String) : IO Unit := do
     match psIrEncodeModule psIrEncodingFixture with
     | .error _ => throw (IO.userError "IR_ENCODE_FAILED")
     | .ok encoded => IO.println encoded
+  else if args == ["--origins"] then
+    let sources := [
+      "def greeting : String := \"😀\"\r\n",
+      "structure Box where\n  value : Nat\ndef forward (A : Type) (value : A) : A := value\n"]
+    let .ok legacy := psCompilerPrepareSources .lean sources
+      | throw (IO.userError "ORIGIN_LEGACY_PREPARE_FAILED")
+    let .ok product := psCompilerPrepareSourcesWithOrigins .lean sources
+      | throw (IO.userError "ORIGIN_PREPARE_FAILED")
+    let .ok legacyAdmissions := psCompilerAdmissionsFromPrepared legacy
+      | throw (IO.userError "ORIGIN_LEGACY_ADMISSIONS_FAILED")
+    let .ok admissions := psCompilerAdmissionsFromPrepared product.prepared
+      | throw (IO.userError "ORIGIN_ADMISSIONS_FAILED")
+    if legacyAdmissions != admissions then throw (IO.userError "ORIGINS_CHANGED_ADMISSIONS")
+    let .ok api := psCompilerPublicApiFromPrepared product.prepared
+      | throw (IO.userError "ORIGIN_API_FAILED")
+    IO.println (psJsonObject [
+      ("sources", psJsonArray (sources.map psJsonQuote)),
+      ("publicApi", psJsonQuote api),
+      ("origins", psJsonQuote product.origins)])
   else if args == ["--public-api"] then
     let source := "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := 42\n"
     let changedBody := "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := 43\n"

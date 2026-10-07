@@ -422,14 +422,50 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       rightBody
                       nextSubst with
                 | error error =>
-                    simp [
-                      opened,
-                      fresh,
-                      child,
-                      freshState,
-                      nextSubst,
-                      hRest
-                    ] at hSuccess
+                    have hRestRaw :
+                        psKernelDefEqLambdaSpineWithFuel
+                            remaining
+                            defeq
+                            (Prod.fst
+                              (Prod.snd
+                                (psKernelDefEqWithLocal
+                                  context
+                                  domainState
+                                  rightName
+                                  rightOpened
+                                  rightInfo)))
+                            (Prod.snd
+                              (Prod.snd
+                                (psKernelDefEqWithLocal
+                                  context
+                                  domainState
+                                  rightName
+                                  rightOpened
+                                  rightInfo)))
+                            leftBody
+                            rightBody
+                            (psKernelExprListAppend
+                              subst
+                              (List.cons
+                                (PsKernelExpr.fvar
+                                  (Prod.fst
+                                    (psKernelDefEqWithLocal
+                                      context
+                                      domainState
+                                      rightName
+                                      rightOpened
+                                      rightInfo)))
+                                List.nil)) =
+                          Except.error error := by
+                      simpa [
+                        opened,
+                        fresh,
+                        child,
+                        freshState,
+                        nextSubst
+                      ] using hRest
+                    rw [hRestRaw] at hSuccess
+                    simp at hSuccess
                 | ok rest =>
                     rcases rest with ⟨restValue, childFinal⟩
                     have hRestSemantic :=
@@ -454,14 +490,51 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                         freshState
                         childFinal
                         hParentFresh
-                    simp [
-                      opened,
-                      fresh,
-                      child,
-                      freshState,
-                      nextSubst,
-                      hRest
-                    ] at hSuccess
+                    have hRestRaw :
+                        psKernelDefEqLambdaSpineWithFuel
+                            remaining
+                            defeq
+                            (Prod.fst
+                              (Prod.snd
+                                (psKernelDefEqWithLocal
+                                  context
+                                  domainState
+                                  rightName
+                                  rightOpened
+                                  rightInfo)))
+                            (Prod.snd
+                              (Prod.snd
+                                (psKernelDefEqWithLocal
+                                  context
+                                  domainState
+                                  rightName
+                                  rightOpened
+                                  rightInfo)))
+                            leftBody
+                            rightBody
+                            (psKernelExprListAppend
+                              subst
+                              (List.cons
+                                (PsKernelExpr.fvar
+                                  (Prod.fst
+                                    (psKernelDefEqWithLocal
+                                      context
+                                      domainState
+                                      rightName
+                                      rightOpened
+                                      rightInfo)))
+                                List.nil)) =
+                          Except.ok
+                            (Prod.mk restValue childFinal) := by
+                      simpa [
+                        opened,
+                        fresh,
+                        child,
+                        freshState,
+                        nextSubst
+                      ] using hRest
+                    rw [hRestRaw] at hSuccess
+                    simp at hSuccess
                     rcases hSuccess with ⟨rfl, rfl⟩
                     refine ⟨hExit, ?_⟩
                     intro hTrue
@@ -851,14 +924,50 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       rightBody
                       nextSubst with
                 | error error =>
-                    simp [
-                      opened,
-                      fresh,
-                      child,
-                      freshState,
-                      nextSubst,
-                      hRest
-                    ] at hSuccess
+                    have hRestRaw :
+                        psKernelDefEqForallSpineWithFuel
+                            remaining
+                            defeq
+                            (Prod.fst
+                              (Prod.snd
+                                (psKernelDefEqWithLocal
+                                  context
+                                  domainState
+                                  rightName
+                                  rightOpened
+                                  rightInfo)))
+                            (Prod.snd
+                              (Prod.snd
+                                (psKernelDefEqWithLocal
+                                  context
+                                  domainState
+                                  rightName
+                                  rightOpened
+                                  rightInfo)))
+                            leftBody
+                            rightBody
+                            (psKernelExprListAppend
+                              subst
+                              (List.cons
+                                (PsKernelExpr.fvar
+                                  (Prod.fst
+                                    (psKernelDefEqWithLocal
+                                      context
+                                      domainState
+                                      rightName
+                                      rightOpened
+                                      rightInfo)))
+                                List.nil)) =
+                          Except.error error := by
+                      simpa [
+                        opened,
+                        fresh,
+                        child,
+                        freshState,
+                        nextSubst
+                      ] using hRest
+                    rw [hRestRaw] at hSuccess
+                    simp at hSuccess
                 | ok rest =>
                     rcases rest with ⟨restValue, childFinal⟩
                     have hRestSemantic :=
@@ -883,14 +992,51 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                         freshState
                         childFinal
                         hParentFresh
-                    simp [
-                      opened,
-                      fresh,
-                      child,
-                      freshState,
-                      nextSubst,
-                      hRest
-                    ] at hSuccess
+                    have hRestRaw :
+                        psKernelDefEqForallSpineWithFuel
+                            remaining
+                            defeq
+                            (Prod.fst
+                              (Prod.snd
+                                (psKernelDefEqWithLocal
+                                  context
+                                  domainState
+                                  rightName
+                                  rightOpened
+                                  rightInfo)))
+                            (Prod.snd
+                              (Prod.snd
+                                (psKernelDefEqWithLocal
+                                  context
+                                  domainState
+                                  rightName
+                                  rightOpened
+                                  rightInfo)))
+                            leftBody
+                            rightBody
+                            (psKernelExprListAppend
+                              subst
+                              (List.cons
+                                (PsKernelExpr.fvar
+                                  (Prod.fst
+                                    (psKernelDefEqWithLocal
+                                      context
+                                      domainState
+                                      rightName
+                                      rightOpened
+                                      rightInfo)))
+                                List.nil)) =
+                          Except.ok
+                            (Prod.mk restValue childFinal) := by
+                      simpa [
+                        opened,
+                        fresh,
+                        child,
+                        freshState,
+                        nextSubst
+                      ] using hRest
+                    rw [hRestRaw] at hSuccess
+                    simp at hSuccess
                     rcases hSuccess with ⟨rfl, rfl⟩
                     refine ⟨hExit, ?_⟩
                     intro hTrue

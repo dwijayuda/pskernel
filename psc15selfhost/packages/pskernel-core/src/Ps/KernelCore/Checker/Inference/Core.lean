@@ -886,311 +886,84 @@ def psKernelInferCoreWithFuel
                                                         (Prod.fst expectedWhnf)
                                                         (Prod.fst actualWhnf))
                 | PsKernelExpr.lam name domain body binderInfo =>
-                    let checkedDomain :=
-                      if inferOnly then
-                        Except.ok
-                          (Prod.mk
-                            domain
-                            state)
-                      else
-                        match
-                            smaller
-                              whnf
-                              defeq
-                              nextContext
-                              state
-                              domain
-                              false with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok domainResult =>
-                            match
-                                psKernelEnsureSortWith
-                                  whnf
-                                  nextContext
-                                  (Prod.snd domainResult)
-                                  (Prod.fst domainResult) with
-                            | Except.error error =>
-                                Except.error error
-                            | Except.ok sortResult =>
-                                Except.ok
-                                  (Prod.mk
-                                    domain
-                                    (Prod.snd sortResult));
-                    match checkedDomain with
+                    match
+                        psKernelInferLambdaSpineWithFuel
+                          (Nat.succ
+                            (psKernelExprNodeCount expr))
+                          (smaller whnf defeq)
+                          whnf
+                          nextContext
+                          state
+                          expr
+                          inferOnly
+                          List.nil
+                          List.nil with
                     | Except.error error =>
                         Except.error error
-                    | Except.ok domainState =>
-                        let freshResult :=
-                          psKernelCheckerStateFreshName
-                            (Prod.snd domainState)
-                            name;
-                        let fresh :=
-                          Prod.fst freshResult;
-                        let state1 :=
-                          Prod.snd freshResult;
-                        let childLocal :=
-                          psKernelLocalContextAddLocal
-                            nextContext.localContext
-                            fresh
-                            name
-                            domain
-                            binderInfo;
-                        let child :=
-                          psKernelCheckerContextWithLocalContext
-                            nextContext
-                            childLocal;
-                        let openedBody :=
-                          psKernelExprInstantiate1
-                            body
-                            (PsKernelExpr.fvar fresh);
-                        match
-                            smaller
-                              whnf
-                              defeq
-                              child
-                              state1
-                              openedBody
-                              inferOnly with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok bodyResult =>
-                            let bodyType :=
-                              psKernelExprCheapBetaReduce
-                                (Prod.fst bodyResult);
-                            let closedBody :=
-                              psKernelExprAbstractFVars
-                                bodyType
-                                (List.cons
-                                  fresh
-                                  List.nil);
-                            let result :=
-                              PsKernelExpr.forallE
-                                name
-                                domain
-                                closedBody
-                                binderInfo;
-                            let scopedState :=
-                              psKernelCheckerStateExitLocalScope
-                                state1
-                                (Prod.snd bodyResult);
-                            Except.ok
-                              (Prod.mk
-                                result
-                                (psKernelCacheInferResult
-                                  scopedState
-                                  inferOnly
-                                  expr
-                                  result))
+                    | Except.ok spineResult =>
+                        let result :=
+                          Prod.fst spineResult
+                        Except.ok
+                          (Prod.mk
+                            result
+                            (psKernelCacheInferResult
+                              (Prod.snd spineResult)
+                              inferOnly
+                              expr
+                              result))
                 | PsKernelExpr.forallE name domain body binderInfo =>
                     match
-                        smaller
+                        psKernelInferForallSpineWithFuel
+                          (Nat.succ
+                            (psKernelExprNodeCount expr))
+                          (smaller whnf defeq)
+                          whnf
+                          nextContext
+                          state
+                          expr
+                          inferOnly
+                          List.nil
+                          List.nil with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok spineResult =>
+                        let result :=
+                          Prod.fst spineResult
+                        Except.ok
+                          (Prod.mk
+                            result
+                            (psKernelCacheInferResult
+                              (Prod.snd spineResult)
+                              inferOnly
+                              expr
+                              result))
+                | PsKernelExpr.letE name type value body nondep =>
+                    match
+                        psKernelInferLetSpineWithFuel
+                          (Nat.succ
+                            (psKernelExprNodeCount expr))
+                          (smaller whnf defeq)
                           whnf
                           defeq
                           nextContext
                           state
-                          domain
-                          inferOnly with
+                          expr
+                          inferOnly
+                          List.nil
+                          List.nil with
                     | Except.error error =>
                         Except.error error
-                    | Except.ok domainResult =>
-                        match
-                            psKernelEnsureSortWith
-                              whnf
-                              nextContext
-                              (Prod.snd domainResult)
-                              (Prod.fst domainResult) with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok domainSort =>
-                            let freshResult :=
-                              psKernelCheckerStateFreshName
-                                (Prod.snd domainSort)
-                                name;
-                            let fresh :=
-                              Prod.fst freshResult;
-                            let state1 :=
-                              Prod.snd freshResult;
-                            let childLocal :=
-                              psKernelLocalContextAddLocal
-                                nextContext.localContext
-                                fresh
-                                name
-                                domain
-                                binderInfo;
-                            let child :=
-                              psKernelCheckerContextWithLocalContext
-                                nextContext
-                                childLocal;
-                            let openedBody :=
-                              psKernelExprInstantiate1
-                                body
-                                (PsKernelExpr.fvar fresh);
-                            match
-                                smaller
-                                  whnf
-                                  defeq
-                                  child
-                                  state1
-                                  openedBody
-                                  inferOnly with
-                            | Except.error error =>
-                                Except.error error
-                            | Except.ok bodyResult =>
-                                match
-                                    psKernelEnsureSortWith
-                                      whnf
-                                      child
-                                      (Prod.snd bodyResult)
-                                      (Prod.fst bodyResult) with
-                                | Except.error error =>
-                                    Except.error error
-                                | Except.ok bodySort =>
-                                    let result :=
-                                      PsKernelExpr.sort
-                                        (psKernelLevelMkIMax
-                                          (Prod.fst domainSort)
-                                          (Prod.fst bodySort));
-                                    let scopedState :=
-                                      psKernelCheckerStateExitLocalScope
-                                        state1
-                                        (Prod.snd bodySort);
-                                    Except.ok
-                                      (Prod.mk
-                                        result
-                                        (psKernelCacheInferResult
-                                          scopedState
-                                          inferOnly
-                                          expr
-                                          result))
-                | PsKernelExpr.letE name type value body nondep =>
-                    let checked :=
-                      if inferOnly then
+                    | Except.ok spineResult =>
+                        let result :=
+                          Prod.fst spineResult
                         Except.ok
                           (Prod.mk
-                            type
-                            state)
-                      else
-                        match
-                            smaller
-                              whnf
-                              defeq
-                              nextContext
-                              state
-                              type
-                              false with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok typeResult =>
-                            match
-                                psKernelEnsureSortWith
-                                  whnf
-                                  nextContext
-                                  (Prod.snd typeResult)
-                                  (Prod.fst typeResult) with
-                            | Except.error error =>
-                                Except.error error
-                            | Except.ok typeSort =>
-                                match
-                                    smaller
-                                      whnf
-                                      defeq
-                                      nextContext
-                                      (Prod.snd typeSort)
-                                      value
-                                      false with
-                                | Except.error error =>
-                                    Except.error error
-                                | Except.ok valueResult =>
-                                    match
-                                        defeq
-                                          nextContext
-                                          (Prod.snd valueResult)
-                                          (Prod.fst valueResult)
-                                          type with
-                                    | Except.error error =>
-                                        Except.error error
-                                    | Except.ok eqResult =>
-                                        if Prod.fst eqResult then
-                                          Except.ok
-                                            (Prod.mk
-                                              type
-                                              (Prod.snd eqResult))
-                                        else
-                                          Except.error
-                                            "let value type mismatch";
-                    match checked with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok checkedResult =>
-                        let freshResult :=
-                          psKernelCheckerStateFreshName
-                            (Prod.snd checkedResult)
-                            name;
-                        let fresh :=
-                          Prod.fst freshResult;
-                        let state1 :=
-                          Prod.snd freshResult;
-                        let childLocal :=
-                          psKernelLocalContextAddLet
-                            nextContext.localContext
-                            fresh
-                            name
-                            type
-                            value;
-                        let child :=
-                          psKernelCheckerContextWithLocalContext
-                            nextContext
-                            childLocal;
-                        let openedBody :=
-                          psKernelExprInstantiate1
-                            body
-                            (PsKernelExpr.fvar fresh);
-                        match
-                            smaller
-                              whnf
-                              defeq
-                              child
-                              state1
-                              openedBody
-                              inferOnly with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok bodyResult =>
-                            let bodyType :=
-                              psKernelExprCheapBetaReduce
-                                (Prod.fst bodyResult);
-                            let closedBody :=
-                              psKernelExprAbstractFVars
-                                bodyType
-                                (List.cons
-                                  fresh
-                                  List.nil);
-                            let result :=
-                              if
-                                  psKernelExprHasLooseBVarAt
-                                    closedBody
-                                    0 then
-                                PsKernelExpr.letE
-                                  name
-                                  type
-                                  value
-                                  closedBody
-                                  nondep
-                              else
-                                bodyType;
-                            let scopedState :=
-                              psKernelCheckerStateExitLocalScope
-                                state1
-                                (Prod.snd bodyResult);
-                            Except.ok
-                              (Prod.mk
-                                result
-                                (psKernelCacheInferResult
-                                  scopedState
-                                  inferOnly
-                                  expr
-                                  result))
+                            result
+                            (psKernelCacheInferResult
+                              (Prod.snd spineResult)
+                              inferOnly
+                              expr
+                              result))
                 | PsKernelExpr.proj typeName index structValue =>
                     let inferType :=
                       fun

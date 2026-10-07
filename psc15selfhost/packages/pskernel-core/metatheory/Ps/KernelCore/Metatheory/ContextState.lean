@@ -99,7 +99,7 @@ theorem psKernelReductionClosure_contextWeaken
       recursor rule major0 majorReduced major
       hHead hArgs hFind hMajor
       hMajorReduction
-      hNormalize hCtorHead hMajorArgs hRule hFields hLevels
+      hNormalize hCtorHead hMajorArgs hRuleMem hRuleCtor hFields hLevels
       ihMajor =>
       exact
         PsKernelReductionClosure.recursorIota
@@ -107,7 +107,7 @@ theorem psKernelReductionClosure_contextWeaken
           recursor rule major0 majorReduced major
           hHead hArgs hFind hMajor
           ihMajor
-          hNormalize hCtorHead hMajorArgs hRule hFields hLevels
+          hNormalize hCtorHead hMajorArgs hRuleMem hRuleCtor hFields hLevels
 
 theorem psKernelDefEqJudgment_contextWeaken
     (environment : PsKernelEnvironment)

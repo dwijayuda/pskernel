@@ -4,9 +4,9 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `ac0566b5837cc6f60d7bf074f527a618b90d1ea3`
+- Current proof implementation HEAD reconciled in this state: `ac24a67aa175421976bd6b337f9963c82a83e725`
 - Last green package proof checkpoint: `dc6ab92367b6b2aaabddad6b76a54f83020647dd` (run #396).
-- Current beta-spine proof HEAD: `ac0566b5...`; run #406 is validating a structural reduction of the capture-cancellation proof after runs #401-#405 exposed proof-algebra/normalization issues only.
+- Current beta-spine proof HEAD: `ac24a67a...`; run #420 is green and validates the registered substitution/lowering algebra required by `PsKernelBetaSpineSoundLaw`.
 - Run #381 is green: the registered `WhnfCoreConfiguration.lean` fuel induction and its public `false/false` specialization compile on the full package proof gate.
 - Run #396 is green: complete primitive-Nat refinement, `psKernelReduceNatWith` optional-reduction soundness, post-core native/Nat/delta/cache composition, and `psKernelWhnfWithFuel_configuration_sound_contract` all compile as registered metatheory.
 - Run #328 validated the eager-reduce context transport fix.
@@ -86,7 +86,8 @@ Confirmed production-kernel semantic defect:
 
 Immediate blocker:
 - discharge `PsKernelBetaSpineSoundLaw` as a real proof obligation (not a TCB assumption); the current work is isolating substitution/capture-cancellation algebra in `Metatheory/BetaSpine.lean`;
-- run #397 proved the initial reference substitution algebra base green; runs #398-#405 exposed only proof-normalization/invariant gaps, not a production semantic defect; run #406 validates the latest structural cancellation reduction;
+- run #397 proved the initial reference substitution algebra base; runs #398-#419 progressively closed structural substitution, singleton lookup, capture-cancellation, and lift-lowering obligations without finding a production semantic defect; run #420 is green for the complete current beta algebra root;
+- next: define/prove a fuel-free lambda-count reference semantics, prove the production count worker refines it under sufficient fuel, and compose the final multi-beta reduction closure;
 - once beta-spine is green, instantiate the green public-WHNF theorem in the concrete mutually recursive checker knot;
 - prove `PsKernelRecursorReductionConfigurationSound` for the bounded concrete recursor together with concrete DefEq/inference dependencies by a shared fuel/configuration argument;
 - then close concrete DefEq stateful soundness and compose public checked/infer-only/WHNF/DefEq contracts through `Checker/Knot`.

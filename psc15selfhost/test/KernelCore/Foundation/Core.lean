@@ -202,6 +202,16 @@ def psKernelCoreLevelTests : Bool :=
     PsKernelLevel.imax
       psKernelLevelParamV
       (PsKernelLevel.succ PsKernelLevel.zero)
+  let functorResult :=
+    PsKernelLevel.succ
+      (PsKernelLevel.max
+        (PsKernelLevel.succ psKernelLevelParamU)
+        psKernelLevelParamV)
+  let functorFieldNormalized :=
+    PsKernelLevel.max
+      (PsKernelLevel.succ
+        (PsKernelLevel.succ psKernelLevelParamU))
+      (PsKernelLevel.succ psKernelLevelParamV)
   Bool.and
     (psKernelLevelDifferentialCase
       PsKernelLevel.zero
@@ -210,9 +220,17 @@ def psKernelCoreLevelTests : Bool :=
       (psKernelLevelDifferentialCase
         left
         left)
-      (psKernelLevelDifferentialCase
-        left
-        right))
+      (Bool.and
+        (psKernelLevelDifferentialCase
+          left
+          right)
+        (Bool.and
+          (psKernelLevelDifferentialCase
+            functorResult
+            functorFieldNormalized)
+          (psKernelLevelLe
+            functorFieldNormalized
+            functorResult))))
 
 def psKernelBinderInfoToReference
     (info : PsKernelBinderInfo) : PSC1Kernel.BinderInfo :=

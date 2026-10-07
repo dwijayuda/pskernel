@@ -34,7 +34,7 @@ export function projectSourceSignature(expression, { maxNodes = 100000, maxDepth
       return ['parameter', binding.index];
     }
     if (value.k === 'app' && value.f.k === 'const' &&
-        publicApiNameKey(value.f.n) === rootName('Array') && value.f.ls.length === 1) {
+        publicApiNameKey(value.f.n) === rootName('Array') && value.f.ls.length === 0) {
       return ['array', type(value.a, scope, depth + 1)];
     }
     if (value.k === 'forall') {

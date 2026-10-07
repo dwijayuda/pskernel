@@ -25,7 +25,7 @@
   "supportedSourceTypes": [
     "Exact built-in scalar constants with no universe arguments",
     "Nondependent runtime function binders, including higher-order function parameters",
-    "Array with its explicit universe argument and a supported element type"
+    "Array with zero universe arguments and a supported element type, matching psPreludeEnvArray0 / psPreludeArrayOf"
   ],
   "genericProjection": "The separate structural source-signature projection retains a prefix of syntactically non-Prop type binders, structured source names and de Bruijn references. Declaration publication rejects generics until an actual generic export strategy is selected.",
   "validation": [

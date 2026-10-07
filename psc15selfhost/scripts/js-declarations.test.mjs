@@ -50,9 +50,10 @@ test('source signatures preserve generic binders and reject unsupported source t
   assert.equal(projected.typeParameters[0].sourceName.v, 'A');
   assert.deepEqual(projected.type, ['function', [['parameter', 0]], ['parameter', 0]]);
   assert.equal(printSourceSignatureType(projected.type), '(_arg0: T0) => T0');
-  const array = { k: 'app', f: { ...constant('Array'), ls: [{ k: 'z' }] }, a: constant('Nat') };
+  const array = { k: 'app', f: constant('Array'), a: constant('Nat') };
   assert.equal(printSourceSignatureType(projectSourceSignature(forall('values', array, array)).type),
     '(_arg0: Array<bigint>) => Array<bigint>');
+  assert.throws(() => projectSourceSignature({ ...array, f: { ...array.f, ls: [{ k: 'z' }] } }), /TYPE_FORM_UNSUPPORTED/);
   assert.throws(() => projectSourceSignature(forall('x', constant('Nat'), { k: 'b', i: 0 })), /DEPENDENT_VALUE/);
   assert.throws(() => projectSourceSignature(forall('P', { k: 'sort', l: { k: 'z' } }, constant('Nat'))), /AMBIGUOUS_SORT/);
   assert.throws(() => projectSourceSignature(constant('UnresolvedAlias')), /NAMED_TYPE_UNSUPPORTED/);

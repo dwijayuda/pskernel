@@ -122,75 +122,73 @@ theorem psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
   | succ remaining ih =>
       let fieldCount :=
         Nat.sub (psKernelExprListLength args) numParams
-      cases hMore : psKernelNatLt index fieldCount with
-      | false =>
-          simp [
-            psKernelDefEqEtaStructFieldsWithFuel,
-            fieldCount,
-            hMore
-          ] at hSuccess
-          rcases hSuccess with ⟨rfl, rfl⟩
-          exact hConfig
-      | true =>
-          cases hArg :
-              psKernelExprListGet args (Nat.add numParams index) with
-          | none =>
-              simp [
-                psKernelDefEqEtaStructFieldsWithFuel,
-                fieldCount,
-                hMore,
-                hArg
-              ] at hSuccess
-              rcases hSuccess with ⟨rfl, rfl⟩
-              exact hConfig
-          | some arg =>
-              cases hRun :
-                  defeq context state
+      by_cases hMore :
+          psKernelNatLt index fieldCount = true
+      · cases hArg :
+            psKernelExprListGet args (Nat.add numParams index) with
+        | none =>
+            simp [
+              psKernelDefEqEtaStructFieldsWithFuel,
+              fieldCount,
+              hMore,
+              hArg
+            ] at hSuccess
+            rcases hSuccess with ⟨rfl, rfl⟩
+            exact hConfig
+        | some arg =>
+            cases hRun :
+                defeq context state
+                  (PsKernelExpr.proj induct index term)
+                  arg with
+            | error error =>
+                simp [
+                  psKernelDefEqEtaStructFieldsWithFuel,
+                  fieldCount,
+                  hMore,
+                  hArg,
+                  hRun
+                ] at hSuccess
+            | ok run =>
+                rcases run with ⟨eqValue, eqState⟩
+                have hEq :=
+                  hDefEq
+                    context state eqState
                     (PsKernelExpr.proj induct index term)
-                    arg with
-              | error error =>
-                  simp [
-                    psKernelDefEqEtaStructFieldsWithFuel,
-                    fieldCount,
-                    hMore,
-                    hArg,
-                    hRun
-                  ] at hSuccess
-              | ok run =>
-                  rcases run with ⟨eqValue, eqState⟩
-                  have hEq :=
-                    hDefEq
-                      context state eqState
-                      (PsKernelExpr.proj induct index term)
-                      arg eqValue
-                      hConfig hRun
-                  cases eqValue with
-                  | false =>
-                      simp [
-                        psKernelDefEqEtaStructFieldsWithFuel,
-                        fieldCount,
-                        hMore,
-                        hArg,
-                        hRun
-                      ] at hSuccess
-                      rcases hSuccess with ⟨rfl, rfl⟩
-                      exact hEq.1
-                  | true =>
-                      apply
-                        ih
-                          eqState
-                          nextState
-                          (Nat.succ index)
-                          value
-                          hEq.1
-                      simpa [
-                        psKernelDefEqEtaStructFieldsWithFuel,
-                        fieldCount,
-                        hMore,
-                        hArg,
-                        hRun
-                      ] using hSuccess
-
+                    arg eqValue
+                    hConfig hRun
+                cases eqValue with
+                | false =>
+                    simp [
+                      psKernelDefEqEtaStructFieldsWithFuel,
+                      fieldCount,
+                      hMore,
+                      hArg,
+                      hRun
+                    ] at hSuccess
+                    rcases hSuccess with ⟨rfl, rfl⟩
+                    exact hEq.1
+                | true =>
+                    apply
+                      ih
+                        eqState
+                        nextState
+                        (Nat.succ index)
+                        value
+                        hEq.1
+                    simpa [
+                      psKernelDefEqEtaStructFieldsWithFuel,
+                      fieldCount,
+                      hMore,
+                      hArg,
+                      hRun
+                    ] using hSuccess
+      · simp [
+          psKernelDefEqEtaStructFieldsWithFuel,
+          fieldCount,
+          hMore
+        ] at hSuccess
+        rcases hSuccess with ⟨rfl, rfl⟩
+        exact hConfig
 
 theorem psKernelDefEqEtaStructCoreWith_configuration_preserves
     (defeq :

@@ -871,7 +871,7 @@ theorem psKernelRecursorIota_refines
     (recArgs majorArgs : List PsKernelExpr)
     (recursor : PsKernelRecursorInfo)
     (rule : PsKernelRecursorRule)
-    (major0 majorReduced major : PsKernelExpr)
+    (major0 prepared majorReduced major : PsKernelExpr)
     (hIndex :
       PsKernelEnvironmentIndexRefines
         context.environment)
@@ -898,11 +898,17 @@ theorem psKernelRecursorIota_refines
                 recursor.numMinors
                 recursor.numIndices))) =
         Option.some major0)
-    (hMajorReduction :
-      PsKernelReductionClosure
+    (hPrepared :
+      PsKernelDefEqJudgment
         context.environment
         context.localContext
         major0
+        prepared)
+    (hMajorConversion :
+      PsKernelDefEqJudgment
+        context.environment
+        context.localContext
+        prepared
         majorReduced)
     (hNormalize :
       PsKernelRecursorMajorNormalization
@@ -976,6 +982,7 @@ theorem psKernelRecursorIota_refines
       recursor
       rule
       major0
+      prepared
       majorReduced
       major
       hHead
@@ -987,7 +994,8 @@ theorem psKernelRecursorIota_refines
         hIndex
         hFind)
       hMajor
-      hMajorReduction
+      hPrepared
+      hMajorConversion
       hNormalize
       hCtorHead
       hMajorArgs

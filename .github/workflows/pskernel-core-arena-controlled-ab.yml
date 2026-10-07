@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
-      BASE_SHA: cb1126f195d950ff0d572f588a4f81e211c7fd2e
+      BASE_SHA: 253832714dac058604e1cf3bd669e89fd8200b76
     steps:
       - uses: actions/checkout@v4
         with:

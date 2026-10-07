@@ -1096,3 +1096,113 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                               hDomainResult,
                               ite_true
                             ] using hSuccess)
+
+
+theorem psKernelDefEqLambdaSpine_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hString : PsKernelStringEqSoundLaw)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqLambdaSpine
+          defeq context state left right =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right) := by
+  have hSpine :=
+    psKernelDefEqLambdaSpineWithFuel_configuration_sound
+      defeq
+      hDefEq
+      hString
+      (Nat.succ
+        (Nat.add
+          (psKernelExprNodeCount left)
+          (psKernelExprNodeCount right)))
+      context
+      state
+      nextState
+      left
+      right
+      List.nil
+      value
+      hConfig
+      (by
+        simpa [psKernelDefEqLambdaSpine]
+          using hSuccess)
+  refine ⟨hSpine.1, ?_⟩
+  intro hTrue
+  exact
+    PsKernelDefEqJudgment.lambdaSpine
+      left
+      right
+      (hSpine.2 hTrue)
+
+
+theorem psKernelDefEqForallSpine_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hString : PsKernelStringEqSoundLaw)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqForallSpine
+          defeq context state left right =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right) := by
+  have hSpine :=
+    psKernelDefEqForallSpineWithFuel_configuration_sound
+      defeq
+      hDefEq
+      hString
+      (Nat.succ
+        (Nat.add
+          (psKernelExprNodeCount left)
+          (psKernelExprNodeCount right)))
+      context
+      state
+      nextState
+      left
+      right
+      List.nil
+      value
+      hConfig
+      (by
+        simpa [psKernelDefEqForallSpine]
+          using hSuccess)
+  refine ⟨hSpine.1, ?_⟩
+  intro hTrue
+  exact
+    PsKernelDefEqJudgment.forallSpine
+      left
+      right
+      (hSpine.2 hTrue)

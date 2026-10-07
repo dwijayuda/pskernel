@@ -503,6 +503,10 @@ lean_exe psc_kernel_core_arena where
   srcDir := "host/src"
   root := `Ps.Host.KernelCoreArena.Main
 
+lean_exe psc_kernel_legacy_arena where
+  srcDir := "host/src"
+  root := `Ps.Host.KernelCoreArena.LegacyMain
+
 lean_exe psc_kernel_core_provider_tests where
   srcDir := "test"
   root := `KernelCoreProviderTests

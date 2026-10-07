@@ -30,6 +30,51 @@ theorem psKernelOpenSimpleConstructorParamsWithFuel_zero
         "simple inductive constructor parameter budget exhausted" := by
   rfl
 
+theorem psKernelOpenSimpleConstructorParamsWithFuel_app_rejects
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (param : PsKernelOpenBinder)
+    (rest : List PsKernelOpenBinder)
+    (fn arg : PsKernelExpr) :
+    psKernelOpenSimpleConstructorParamsWithFuel
+        (Nat.succ fuel)
+        session
+        (List.cons param rest)
+        (PsKernelExpr.app fn arg) =
+      Except.error
+        "simple inductive constructor has fewer parameters than the datatype" := by
+  rfl
+
+theorem psKernelOpenSimpleConstructorFieldsWithFuel_app_preserves_raw
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (resultLevel : PsKernelLevel)
+    (fn arg : PsKernelExpr)
+    (revFields : List PsKernelOpenBinder)
+    (revRecursive : List PsKernelSimpleRecursiveField) :
+    psKernelOpenSimpleConstructorFieldsWithFuel
+        (Nat.succ fuel)
+        session
+        target
+        levels
+        params
+        numIndices
+        resultLevel
+        (PsKernelExpr.app fn arg)
+        revFields
+        revRecursive =
+      Except.ok
+        (PsKernelOpenFieldsResult.mk
+          session
+          (psKernelReverseOpenBinders revFields)
+          (psKernelReverseRecursiveFields revRecursive)
+          (PsKernelExpr.app fn arg)) := by
+  rfl
+
 theorem psKernelOpenSimpleConstructorFieldsWithFuel_zero
     (session : PsKernelCheckerSession)
     (target : PsKernelName)

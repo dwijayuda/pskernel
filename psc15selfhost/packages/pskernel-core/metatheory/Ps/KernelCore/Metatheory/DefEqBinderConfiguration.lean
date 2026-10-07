@@ -544,7 +544,8 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       leftOpened,
                       rightOpened,
                       hDomainEq,
-                      Bool.true_eq
+                      Bool.true_eq,
+                      ite_true
                     ] using hSuccess)
           | false =>
               cases hDomainRun :
@@ -613,7 +614,8 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                               hDomainEq,
                               hDomainRun,
                               Bool.false_eq_true,
-                              ite_false
+                              ite_false,
+                              ite_true
                             ] using hSuccess)
 
 
@@ -1001,7 +1003,8 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       leftOpened,
                       rightOpened,
                       hDomainEq,
-                      Bool.true_eq
+                      Bool.true_eq,
+                      ite_true
                     ] using hSuccess)
           | false =>
               cases hDomainRun :
@@ -1070,5 +1073,6 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                               hDomainEq,
                               hDomainRun,
                               Bool.false_eq_true,
-                              ite_false
+                              ite_false,
+                              ite_true
                             ] using hSuccess)

@@ -2,6 +2,7 @@ import Ps.KernelCore.Checker.DefEq.LazyDelta
 import Ps.KernelCore.Metatheory.CheckerContracts
 import Ps.KernelCore.Metatheory.ProjectionReduction
 import Ps.KernelCore.Metatheory.Delta
+import Ps.KernelCore.Metatheory.Comparator
 
 /-
 Independent refinement of the terminal projection comparison used by
@@ -782,3 +783,76 @@ theorem psKernelDefEqLazyStepBoth_right_hint_configuration_sound
           (PsKernelReductionClosure.refl left)
           hDeltaSound.1
           hFinish
+
+
+/-
+Same-definition lazy-delta can elide a head comparison only with independent
+head-name and universe evidence. The string comparison assumption is explicit:
+it is not hidden inside the equality judgment or inferred from an optimized
+cache hit.
+-/
+theorem psKernelLevelListsEquivalent_normalized_sound
+    (hString : PsKernelStringEqSoundLaw)
+    (left right : List PsKernelLevel)
+    (hEquivalent :
+      psKernelLevelListsEquivalent left right = true) :
+    List.map psKernelLevelNormalize left =
+      List.map psKernelLevelNormalize right := by
+  induction left generalizing right with
+  | nil =>
+      cases right with
+      | nil => rfl
+      | cons head tail =>
+          simp [psKernelLevelListsEquivalent] at hEquivalent
+  | cons leftHead leftTail ih =>
+      cases right with
+      | nil =>
+          simp [psKernelLevelListsEquivalent] at hEquivalent
+      | cons rightHead rightTail =>
+          cases hHead :
+              psKernelLevelEquivalent leftHead rightHead with
+          | false =>
+              simp [psKernelLevelListsEquivalent, hHead] at hEquivalent
+          | true =>
+              have hTail :
+                  psKernelLevelListsEquivalent
+                      leftTail rightTail = true := by
+                simpa [psKernelLevelListsEquivalent, hHead] using hEquivalent
+              have hNormalized :=
+                psKernelLevelEquivalent_sound_of_string_law
+                  hString leftHead rightHead hHead
+              have hRest := ih rightTail hTail
+              simp [hNormalized, hRest]
+
+
+theorem psKernelAppHeadLevelsEquivalent_normalized_sound
+    (hString : PsKernelStringEqSoundLaw)
+    (left right : PsKernelExpr)
+    (leftName rightName : PsKernelName)
+    (leftLevels rightLevels : List PsKernelLevel)
+    (hLeft :
+      psKernelExprGetAppFn left =
+        PsKernelExpr.const leftName leftLevels)
+    (hRight :
+      psKernelExprGetAppFn right =
+        PsKernelExpr.const rightName rightLevels)
+    (hLevels :
+      psKernelAppHeadLevelsEquivalent left right = true) :
+    List.map psKernelLevelNormalize leftLevels =
+      List.map psKernelLevelNormalize rightLevels := by
+  unfold psKernelAppHeadLevelsEquivalent at hLevels
+  rw [hLeft, hRight] at hLevels
+  exact
+    psKernelLevelListsEquivalent_normalized_sound
+      hString leftLevels rightLevels hLevels
+
+
+theorem psKernelSameDeltaDefinition_name_sound
+    (hString : PsKernelStringEqSoundLaw)
+    (left right : PsKernelDefinitionInfo)
+    (hSame : psKernelSameDeltaDefinition left right = true) :
+    left.base.name = right.base.name := by
+  exact
+    psKernelNameEq_sound_of_string_law
+      hString left.base.name right.base.name
+      (by simpa [psKernelSameDeltaDefinition] using hSame)

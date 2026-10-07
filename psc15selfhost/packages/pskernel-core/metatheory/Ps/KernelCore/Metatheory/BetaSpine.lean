@@ -3,6 +3,46 @@ import Ps.KernelCore.Metatheory.SubstitutionRefinement
 import Ps.KernelCore.Metatheory.ReductionCongruence
 import Ps.KernelCore.Metatheory.CheckerContracts
 
+theorem psKernelNatLt_true_of_lt
+    (left right : Nat)
+    (hLt : left < right) :
+    psKernelNatLt left right = true := by
+  have hNe : left ≠ right :=
+    Nat.ne_of_lt hLt
+  have hBeq :
+      Nat.beq left right = false := by
+    cases hEq : Nat.beq left right with
+    | false => rfl
+    | true =>
+        exact (hNe (Nat.eq_of_beq_eq_true hEq)).elim
+  have hBle :
+      Nat.ble left right = true :=
+    Nat.ble_eq_true_of_le (Nat.le_of_lt hLt)
+  simp [psKernelNatLt, hBeq, hBle]
+
+
+theorem psKernelNatLt_false_of_le
+    (left right : Nat)
+    (hLe : right ≤ left) :
+    psKernelNatLt left right = false := by
+  cases hEq : Nat.beq left right with
+  | true =>
+      simp [psKernelNatLt, hEq]
+  | false =>
+      have hBle :
+          Nat.ble left right = false := by
+        cases h : Nat.ble left right with
+        | false => rfl
+        | true =>
+            have hLeftLeRight :=
+              Nat.le_of_ble_eq_true h
+            have hEqual :=
+              Nat.le_antisymm hLeftLeRight hLe
+            exact (Bool.noConfusion (by
+              simpa [hEqual] using hEq))
+      simp [psKernelNatLt, hEq, hBle]
+
+
 /-
 Metatheory for WHNF's optimized multi-lambda beta spine.
 

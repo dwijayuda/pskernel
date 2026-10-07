@@ -761,7 +761,7 @@ def psKernelInferCoreWithFuel
                         psKernelInferLambdaSpineWithFuel
                           (Nat.succ
                             (psKernelExprNodeCount expr))
-                          smaller
+                          (smaller whnf defeq)
                           whnf
                           nextContext
                           state

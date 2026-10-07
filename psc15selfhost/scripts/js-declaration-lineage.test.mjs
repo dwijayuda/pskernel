@@ -1,3 +1,4 @@
+import { uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes } from './artifact-evidence.mjs';
@@ -78,4 +79,29 @@ test('actual graph producer publishes typed lineage and archive replay reconstru
     allowedAssumptions: [...new Set(definitions.flatMap(item => item.assumptionIds))] });
   assert.equal(replay.kind, 'accepted', replay.reason);
   assert.equal(replay.preservationVerified, false);
+});
+
+test('uniform lineage joins retained generic declarations without specialization witnesses', async () => {
+  const f = fixture({ uniform: true }), product = createJsDeclarationLineage(f);
+  const value = JSON.parse(product.lineage.bytes);
+  assert.equal(product.lineage.identity.contract, 'psc-js-uniform-declaration-lineage/1');
+  assert.equal(value.edgeOrder, 'generated-position-runtime-declaration-erasure-entry-source-origin-entry');
+  assert.deepEqual(value.edges, [[0, 0, 0, 0], [1, 1, 1, 1]]);
+  assert.equal(value.specializationMapId, undefined);
+  assert.equal(product.artifacts.some(item => item.identity.domain === 'specialization-map'), false);
+  assert.equal((await verifyJsDeclarationLineage(product.lineage, {
+    resolveArtifact: f.resolveArtifact, expectedParents: f.parents, profile: uniformJsRepresentationProfile,
+  })).semanticPreservationProved, false);
+  await assert.rejects(verifyJsDeclarationLineage(product.lineage, {
+    resolveArtifact: f.resolveArtifact, expectedParents: f.parents }), /PARENTS/);
+  const changed = JSON.parse(f.uniformSpecializedIr.bytes); changed[2][4].pop();
+  const wrong = canonicalArtifact(changed, 'uniform-specialized-ir', 'psc-uniform-specialized-ir/1');
+  f.artifacts.set(artifactKey(wrong.identity), wrong.bytes);
+  assert.throws(() => createJsDeclarationLineage({ ...f,
+    parents: { ...f.parents, uniformSpecializedIrId: wrong.identity } }), /PAYLOAD_CHANGED/);
+  assert.throws(() => createJsDeclarationLineage(fixture({ uniform: true, parameter: 'renamed' })), /TARGET_DECLARATION_INVENTORY/);
+  const falseEdge = structuredClone(value); falseEdge.edges[0][1] = 1;
+  await assert.rejects(verifyJsDeclarationLineage(
+    canonicalArtifact(falseEdge, 'declaration-lineage', 'psc-js-uniform-declaration-lineage/1'), {
+      resolveArtifact: f.resolveArtifact, expectedParents: f.parents, profile: uniformJsRepresentationProfile }), /BINDING/);
 });

@@ -46,9 +46,8 @@
     "metadataCreatesAuthority": false
   },
   "remaining": [
-    "ECMA-426 source-map emission with explicit unmapped synthetic code",
     "expression and synthetic helper origin events",
-    "PublicApiIR direct declarations and generic export policy",
     "global preservation and independent source-to-runtime semantic checking"
-  ]
+  ],
+  "uniformCompanion": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json"
 }

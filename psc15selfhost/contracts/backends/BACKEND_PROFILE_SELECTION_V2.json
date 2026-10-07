@@ -4,9 +4,9 @@
   "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
   "status": "versioned-derivation-producer-and-exact-replay-implemented",
   "purpose": "Preserve backend emitter ownership while binding explicit uniform pipeline composition and versioned capabilities.",
-  "derivationId": "psc-uniform-js-backend-derivation/2",
+  "derivationId": "psc-uniform-js-backend-derivation/3",
   "base": "Exact separately identified four-lane backend-registry/1. Only the JavaScript lane is selected; other lanes remain exact.",
-  "derivation": "Retain the frozen v1 uniform input/lowerer/products policy, restore the backend-owned psJsEmitValidatedModuleStackSafeWithTargetProfile emitter, advertise the implemented portable structural declaration writer and update the precise remaining ownership debt. No uniform source maps are advertised yet.",
+  "derivation": "Preserve backend-owned emission and separately identified driver composition. The current derivation adds exact uniform declaration lineage, standalone source maps and recipe/2 debug products; no closed specialization-map product is added.",
   "pipelineEntry": {
     "packagePath": "packages/driver-js",
     "entryId": "psCompilerUniformJavaScriptStagesFromPrepared"
@@ -33,8 +33,18 @@
     "releaseAccepted": false
   },
   "remaining": [
-    "Uniform source-origin composition and maps",
     "Named/dependent public types and explicit CLI product/profile selection",
-    "Independent preservation, bootstrap diversity and full assurance"
+    "Independent preservation, bootstrap diversity and full assurance",
+    "Fine-grained expression origins, portable maps, declaration maps and automatic sourceMappingURL packaging"
+  ],
+  "retainedDerivations": [
+    {
+      "id": "psc-uniform-js-backend-derivation/2",
+      "policy": "Frozen backend-owned writer and portable declarations; no uniform lineage/source-map capabilities."
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/3",
+      "policy": "Adds real uniform declaration lineage and standalone source maps; expression origins, declaration maps and linking remain unsupported."
+    }
   ]
 }

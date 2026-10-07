@@ -48,12 +48,24 @@
     "Expression/synthetic helper origin events and fine-grained token/name mappings",
     "Automatic sourceMappingURL packaging with an explicit linked-output identity",
     "Portable map serializer and direct checked CLI backend selection",
-    "PublicApiIR direct declarations, generic export policy and declaration maps",
+    "Declaration position maps and broader named/dependent public types",
     "Global preservation and complete V5 conformance"
   ],
   "references": [
     "https://tc39.es/ecma426/",
     "https://tc39.es/ecma262/2026/multipage/ecmascript-language-lexical-grammar.html#sec-line-terminators",
     "https://github.com/nodejs/node/blob/v22.23.3/lib/internal/source_map/source_map.js"
-  ]
+  ],
+  "recipeContracts": [
+    "psc-direct-javascript-source-map-recipe/1",
+    "psc-direct-javascript-source-map-recipe/2"
+  ],
+  "uniformRecipe": {
+    "contract": "psc-direct-javascript-source-map-recipe/2",
+    "schemaVersion": 2,
+    "profile": "psc-js-uniform-values/1",
+    "lineage": "psc-js-uniform-declaration-lineage/1",
+    "compatibility": "The output ECMA-426 map format and encoding policy remain source-map/1. Recipe/2 has an explicit uniform profile and distinct lineage; recipe/1 is preserved for closed records.",
+    "producerAndReplay": "Shared host composer reconstructs exact profile-specific metadata before encoding; common service/graph/bundle/query/archive routing consumes uniform maps without fabricated specialization products."
+  }
 }

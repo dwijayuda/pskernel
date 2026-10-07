@@ -384,21 +384,23 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           undefined, { originPolicy: 'drop-with-reason', authorityEffect: 'none',
             originReason: 'This selected declaration profile has no declaration-position map yet; source identities remain in a separate signature product.' });
       }
-      if (declarationOriginGraph && erasureMap && specializationInstances && generatedPositionMap) {
+      if (declarationOriginGraph && erasureMap && (specializationInstances || uniformJavaScript) && generatedPositionMap) {
         const parents = { originGraphId: declarationOriginGraph.identity, erasureMapId: erasureMap.identity,
-          specializationMapId: specializationInstances.identity, generatedPositionMapId: generatedPositionMap.identity,
+          ...(uniformJavaScript ? { uniformSpecializedIrId: specializedIr.identity } : { specializationMapId: specializationInstances.identity }),
+          generatedPositionMapId: generatedPositionMap.identity,
           verifiedIrId: verifiedIr.identity };
-        const composed = createJsDeclarationLineage({ parents,
+        const composed = createJsDeclarationLineage({ parents, profile: javaScriptRepresentation,
           resolveArtifact: id => artifacts.get(artifactKey(id)) });
         declarationLineage = add(composed.lineage, { kind: 'output-file', suffix: '.declaration-lineage.json' });
-        execute('psc-compose-js-declaration-lineage/1', declarationOriginGraph, [declarationLineage], implementation,
-          'psc-source-js-declaration-lineage/1',
-          { observedStages: ['reconstruct-metadata-parents', 'join-exact-declaration-inventories'],
+        execute(uniformJavaScript ? 'psc-compose-uniform-js-declaration-lineage/1' : 'psc-compose-js-declaration-lineage/1', declarationOriginGraph, [declarationLineage], implementation,
+          uniformJavaScript ? 'psc-source-uniform-js-declaration-lineage/1' : 'psc-source-js-declaration-lineage/1',
+          { ...(uniformJavaScript ? { profile: javaScriptRepresentation } : {}), observedStages: ['reconstruct-metadata-parents', 'join-exact-declaration-inventories'],
             granularity: 'declaration-batch-to-emission-chunk', expressionCorrespondenceChecked: false,
             semanticPreservationProved: false },
-          [...baseDependencies, erasureMap.identity, specializationInstances.identity, generatedPositionMap.identity, verifiedIr.identity],
+          [...baseDependencies, erasureMap.identity, (uniformJavaScript ? specializedIr : specializationInstances).identity, generatedPositionMap.identity, verifiedIr.identity],
           [], undefined, { originPolicy: 'synthesize', authorityEffect: 'none',
-            originReason: 'Compose exact source, erasure, specialization and generated-position records at declaration granularity.' });
+            originReason: uniformJavaScript ? 'Compose exact source, erasure, retained uniform declaration and generated-position records at declaration granularity.' :
+              'Compose exact source, erasure, specialization and generated-position records at declaration granularity.' });
         const mapped = createDirectJsSourceMap({ lineage: declarationLineage,
           resolveArtifact: id => artifacts.get(artifactKey(id)),
           preparationOrigins: preparationOrigins ?? null, sourceSnapshot: preparationOrigins ? source : null,
@@ -406,9 +408,9 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         const mapOutput = add(mapped.sourceMap, { kind: 'output-file', suffix: '.js.map' });
         const recipe = add(mapped.recipe, { kind: 'output-file', suffix: '.source-map-recipe.json' });
         directSourceMap = { sourceMap: mapOutput, recipe };
-        execute('psc-emit-direct-js-source-map/1', declarationLineage, [mapOutput, recipe], implementation,
-          'psc-declaration-lineage-to-ecma426/1',
-          { outputFile: outputStem ? outputStem + '.js' : null,
+        execute(uniformJavaScript ? 'psc-emit-uniform-js-source-map/1' : 'psc-emit-direct-js-source-map/1', declarationLineage, [mapOutput, recipe], implementation,
+          uniformJavaScript ? 'psc-uniform-declaration-lineage-to-ecma426/1' : 'psc-declaration-lineage-to-ecma426/1',
+          { ...(uniformJavaScript ? { profile: javaScriptRepresentation } : {}), outputFile: outputStem ? outputStem + '.js' : null,
             granularity: 'declaration-first-generated-line', executableUnchanged: true,
             observedStages: ['reconstruct-lineage', 'compose-original-byte-anchors', 'encode-ecma426-mappings'],
             expressionCorrespondenceChecked: false, semanticPreservationProved: false },
@@ -466,7 +468,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     remaining: [directBackend ? 'global backend preservation, target-validator soundness and target-specific assurance gates' :
       irStages ? 'specialization and backend-interior artifacts' : 'per-IR-stage artifacts',
       'complete toolchain closure', 'independent preservation evidence',
-      ...(uniformJavaScript ? ['uniform declaration-origin composition and source maps'] : [])] };
+      ...(uniformJavaScript ? ['uniform expression origins and declaration-position maps'] : [])] };
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
     ...(certification ? { certification } : {}),

@@ -537,6 +537,36 @@
       "kind": "backend-profile-derivation",
       "status": "current-host",
       "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
+    },
+    {
+      "id": "psc-js-uniform-declaration-lineage/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-source-map-recipe/2",
+      "kind": "source-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/3",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
+    },
+    {
+      "id": "psc-compose-uniform-js-declaration-lineage/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json"
+    },
+    {
+      "id": "psc-emit-uniform-js-source-map/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

@@ -132,13 +132,15 @@ export function createCheckedCompilerService({
       generatedPositionMap = generatedPositionProduct.map;
     }
     let declarationLineage, directSourceMap;
-    if (origins && erasureMap && specializationProduct && generatedPositionMap) {
+    if (origins && erasureMap && (specializationProduct || uniform) && generatedPositionMap) {
       const records = [...origins.artifacts, origins.graph, ...erasureProduct.artifacts, erasureMap,
-        ...Object.values(stages), specializationProduct.map, ...generatedPositionProduct.artifacts, generatedPositionMap];
+        ...Object.values(stages), ...(uniform ? [uniform] : [specializationProduct.map]),
+        ...generatedPositionProduct.artifacts, generatedPositionMap];
       const artifacts = new Map(records.map(item => [artifactKey(item.identity), item.bytes]));
-      declarationLineage = createJsDeclarationLineage({
+      declarationLineage = createJsDeclarationLineage({ profile: javaScriptRepresentation,
         parents: { originGraphId: origins.graph.identity, erasureMapId: erasureMap.identity,
-          specializationMapId: specializationProduct.map.identity, generatedPositionMapId: generatedPositionMap.identity,
+          ...(uniform ? { uniformSpecializedIrId: uniform.identity } : { specializationMapId: specializationProduct.map.identity }),
+          generatedPositionMapId: generatedPositionMap.identity,
           verifiedIrId: stages.verifiedIr.identity },
         resolveArtifact: id => artifacts.get(artifactKey(id)), maxBytes: maxOutputBytes, maxTotalBytes: maxOutputBytes,
       }).lineage;

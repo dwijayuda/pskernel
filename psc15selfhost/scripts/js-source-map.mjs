@@ -1,15 +1,16 @@
+import { uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
-import { createJsDeclarationLineage, loadJsDeclarationLineageSubjects, jsDeclarationLineageContract } from './js-declaration-lineage.mjs';
+import { createJsDeclarationLineage, loadJsDeclarationLineageSubjects, jsDeclarationLineageProfile, jsDeclarationLineageParentKeys } from './js-declaration-lineage.mjs';
 import { createSourcePreparationArtifacts, mapPreparedOffset, sourcePreparationContract } from './source-preparation-origins.mjs';
 import { encodeSourceMapMappings } from './source-map-encoding.mjs';
 
 export const directJsSourceMapContract = 'psc-direct-javascript-source-map/1';
 export const directJsSourceMapRecipeContract = 'psc-direct-javascript-source-map-recipe/1';
+export const directJsUniformSourceMapRecipeContract = 'psc-direct-javascript-source-map-recipe/2';
 const fail = code => { throw new Error('PSC_JS_SOURCE_MAP_' + code); };
 const same = (a, b) => artifactKey(a) === artifactKey(b);
 const utf8 = bytes => new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
-const parentKeys = ['originGraphId', 'erasureMapId', 'specializationMapId', 'generatedPositionMapId', 'verifiedIrId'];
 const read = (record, maxBytes) => decodeComparatorJson(record.bytes, { maxBytes, maxDepth: 512, maxNodes: 2000000 });
 function policy(file, maxBytes, maxTotalBytes) {
   if (![maxBytes, maxTotalBytes].every(n => Number.isSafeInteger(n) && n > 0)) fail('RESOURCE_POLICY');
@@ -63,10 +64,13 @@ export function createDirectJsSourceMap({ lineage, resolveArtifact, preparationO
   }
   const resolve = identity => cache.get(artifactKey(identity)) ?? add({ identity, bytes: resolveArtifact(identity) });
   lineage = add(lineage);
-  if (lineage.identity.domain !== 'declaration-lineage' || lineage.identity.contract !== jsDeclarationLineageContract) fail('LINEAGE_ID');
+  if (lineage.identity.domain !== 'declaration-lineage') fail('LINEAGE_ID');
+  const profile = jsDeclarationLineageProfile(lineage.identity.contract);
+  const uniform = profile === uniformJsRepresentationProfile;
+  const recipeContract = uniform ? directJsUniformSourceMapRecipeContract : directJsSourceMapRecipeContract;
   const value = read(lineage, maxBytes);
-  const parents = Object.fromEntries(parentKeys.map(key => [key, value[key]]));
-  const rebuilt = createJsDeclarationLineage({ parents, resolveArtifact: id => resolve(id).bytes, maxBytes, maxTotalBytes });
+  const parents = Object.fromEntries(jsDeclarationLineageParentKeys(profile).map(key => [key, value[key]]));
+  const rebuilt = createJsDeclarationLineage({ parents, profile, resolveArtifact: id => resolve(id).bytes, maxBytes, maxTotalBytes });
   if (!same(rebuilt.lineage.identity, lineage.identity)) fail('LINEAGE_BINDING');
   const origin = read(resolve(value.originGraphId), maxBytes);
   const positions = read(resolve(value.generatedPositionMapId), maxBytes);
@@ -130,12 +134,13 @@ export function createDirectJsSourceMap({ lineage, resolveArtifact, preparationO
     x_psc_sourceCoordinateContract: 'zero-based-lf-line+utf16-column',
     x_psc_expressionOrigins: false }, { maxBytes, maxNodes: 2000000 });
   const sourceMap = { bytes: mapBytes, identity: artifactId(mapBytes, 'source-map-output', directJsSourceMapContract) };
-  const recipe = canonicalArtifact({ schemaVersion: 1, contract: directJsSourceMapRecipeContract,
+  const recipe = canonicalArtifact({ schemaVersion: uniform ? 2 : 1, contract: recipeContract,
+    ...(uniform ? { profile } : {}),
     lineageId: lineage.identity, javascriptId: positions.javascriptId, sourceMapId: sourceMap.identity,
     preparationOriginsId: preparationOrigins?.identity ?? null, sourceSnapshotId: sourceSnapshot?.identity ?? null,
     file, granularity: 'declaration-first-generated-line', linking: 'standalone-map-executable-unchanged',
     expressionCorrespondenceChecked: false, semanticPreservationProved: false, authority: 'debug-metadata-only'
-  }, 'source-map-recipe', directJsSourceMapRecipeContract);
+  }, 'source-map-recipe', recipeContract);
   if (recipe.bytes.byteLength > maxBytes || total + mapBytes.byteLength + recipe.bytes.byteLength > maxTotalBytes) fail('RESOURCE');
   return { sourceMap, recipe, artifacts: [...cache.values()] };
 }
@@ -148,8 +153,10 @@ export async function verifyDirectJsSourceMap({ sourceMap, recipe }, { resolveAr
   maxBytes = 128 * 1024 * 1024, maxTotalBytes = 512 * 1024 * 1024 } = {}) {
   policy(expectedFile, maxBytes, maxTotalBytes);
   for (const record of [sourceMap, recipe]) verifyArtifact(record.bytes, record.identity);
+  const profile = jsDeclarationLineageProfile(expectedLineageId?.contract);
+  const recipeContract = profile === uniformJsRepresentationProfile ? directJsUniformSourceMapRecipeContract : directJsSourceMapRecipeContract;
   if (sourceMap.identity.domain !== 'source-map-output' || sourceMap.identity.contract !== directJsSourceMapContract ||
-      recipe.identity.domain !== 'source-map-recipe' || recipe.identity.contract !== directJsSourceMapRecipeContract) fail('IDENTITY');
+      recipe.identity.domain !== 'source-map-recipe' || recipe.identity.contract !== recipeContract) fail('IDENTITY');
   const value = read(recipe, maxBytes);
   const nullableSame = (a, b) => a === null || b === null ? a === b : same(a, b);
   if (!same(value.lineageId, expectedLineageId) || !same(value.javascriptId, expectedJavaScriptId) ||
@@ -176,7 +183,7 @@ export async function verifyDirectJsSourceMap({ sourceMap, recipe }, { resolveAr
   const rebuilt = createDirectJsSourceMap({ lineage, preparationOrigins, sourceSnapshot, file: expectedFile,
     resolveArtifact: id => cache.get(artifactKey(id))?.bytes, maxBytes, maxTotalBytes });
   if (!same(rebuilt.sourceMap.identity, sourceMap.identity) || !same(rebuilt.recipe.identity, recipe.identity)) fail('BINDING');
-  return { contract: directJsSourceMapRecipeContract, declarationMapReconstructed: true,
+  return { contract: recipeContract, declarationMapReconstructed: true,
     granularity: 'declaration-first-generated-line', expressionCorrespondenceChecked: false,
     semanticPreservationProved: false, authority: 'debug-metadata-only' };
 }

@@ -338,7 +338,8 @@ test('uniform JS representation retains generic exports and strips only checked 
   const certifiedSourceArtifact = canonicalArtifact({ contract: 'psc-certified-source/1', canonicalAdmissionsId,
     certificateId: pscvCertificate.identity, fixture: true }, 'certified-source', 'psc-certified-source/1');
   const observed = createCheckedBuildGraph({
-    sourceKind: 'lean', sources: ['Actual native generic stage outputs with synthetic audit provenance.'], admissions,
+    sourceKind: 'lean', sources: [staged.source], admissions,
+    declarationOrigins: staged.declarationOrigins,
     directJavaScript: staged.javaScript, irStages: staged, generatedPositions: staged.generatedPositions,
     publicApi: staged.publicApi, erasureCorrespondence: staged.erasureCorrespondence,
     declarationProfile: directJsUniformDeclarationProfile, javaScriptRepresentation: uniformJsRepresentationProfile,
@@ -353,7 +354,15 @@ test('uniform JS representation retains generic exports and strips only checked 
   const built = bindObservedBuildContext(observed, { backendRegistry, languageAuthority,
     backendId: 'javascript', javaScriptRepresentation: uniformJsRepresentationProfile });
   assert.deepEqual(built.directDeclarations.declarations.bytes, product.declarations.bytes);
-  assert.equal(built.directSourceMap, undefined);
+  assert.equal(built.declarationLineage.identity.contract, 'psc-js-uniform-declaration-lineage/1');
+  assert.equal(built.directSourceMap.recipe.identity.contract, 'psc-direct-javascript-source-map-recipe/2');
+  const sourceMap = new SourceMap(JSON.parse(built.directSourceMap.sourceMap.bytes));
+  const sourceOrigins = JSON.parse(staged.declarationOrigins)[3], generated = JSON.parse(staged.generatedPositions)[2];
+  generated.forEach((entry, index) => {
+    const mapped = sourceMap.findEntry(entry[1][1], entry[1][2]);
+    assert.equal(mapped.originalLine, sourceOrigins[index][2][1] - 1);
+    assert.equal(mapped.originalColumn, sourceOrigins[index][2][2] - 1);
+  });
   assert.equal(built.specializationInstances, undefined);
   assert.ok(built.generatedPositionMap);
   const archive = packObservedBuildArchive(built);

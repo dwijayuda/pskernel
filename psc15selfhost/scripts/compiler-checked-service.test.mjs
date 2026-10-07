@@ -1,3 +1,4 @@
+import { fixture as originFixture } from './js-origin-test-fixture.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
@@ -502,4 +503,28 @@ test('uniform representation is fixed by host policy, cannot fall back, and reta
   service.revoke(handle);
   assert.throws(() => service.emitDeclarationsArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
   assert.throws(() => fixture({ javaScriptRepresentation: 'invented' }), /JAVASCRIPT_REPRESENTATION/);
+});
+
+test('uniform live metadata composes real retained declarations without closed instance products', async () => {
+  const f = originFixture({ uniform: true });
+  const { service, compiler } = fixture({ javaScriptRepresentation: uniformJsRepresentationProfile });
+  compiler.psCompilerPrepareSourceWithOrigins = (kind, source) => ok({
+    prepared: { kind, source }, origins: f.sourceTable.toString() });
+  compiler.psCompilerPublicApiFromPrepared = () => ok(f.publicApi.bytes.toString());
+  compiler.psCompilerUniformJavaScriptStagesFromPrepared = () => ok({
+    javaScript: f.javaScript, runtimeIr: f.runtimeIr.bytes.toString(), verifiedIr: f.verifiedIr.bytes.toString(),
+    uniformSpecializedIr: f.uniformSpecializedIr.bytes.toString(), jsIr: f.jsIr.bytes.toString(),
+    erasureCorrespondence: f.erasureTable.toString(), generatedPositions: f.generatedTable.toString(),
+  });
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = () => { throw new Error('UNREQUESTED_DECLARATIONS'); };
+  const handle = await service.check('lean', f.sources[0]);
+  const product = service.emitArtifact(handle, 'javascript');
+  assert.equal(product.payload, f.javaScript);
+  assert.equal(product.specializationInstances, undefined);
+  assert.equal(product.directDeclarations, undefined);
+  assert.equal(product.declarationLineage.contract, 'psc-js-uniform-declaration-lineage/1');
+  assert.equal(product.sourceMapRecipe.contract, 'psc-direct-javascript-source-map-recipe/2');
+  assert.deepEqual(JSON.parse(product.sourceMap).sourcesContent, f.sources);
+  service.revoke(handle);
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /CERTIFIED_SOURCE_NOT_LIVE/);
 });

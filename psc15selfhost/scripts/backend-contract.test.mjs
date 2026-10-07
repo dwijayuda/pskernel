@@ -115,7 +115,7 @@ test('uniform selection derives one lane and freshly rejects rehashed registry d
   assert.equal(js.packagePath, 'packages/backend-js');
   assert.equal(js.emitterId, base.backends.find(item => item.backendId === 'javascript').emitterId);
   assert.equal(JSON.parse(selected.selection.bytes).pipelineEntry.packagePath, 'packages/driver-js');
-  assert.equal(js.products.debugArtifacts.some(item => item.role === 'source-map'), false);
+  assert.equal(js.products.debugArtifacts.some(item => item.role === 'source-map'), true);
   const old = decodeBackendDescriptor(f.descriptor);
   const fields = Object.fromEntries(['backendId', 'implementationId', 'targetProfileId', 'externalToolchainId', 'interfaceAdapterId']
     .map(key => [key, old[key]]));
@@ -165,4 +165,20 @@ test('historical uniform selections replay under their frozen derivation and can
     await assert.rejects(verifyBackendProfileSelection(changed, {
       expectedRegistryId: value.selectedRegistryId, resolveArtifact: f.policy.resolveArtifact }), /SELECTION_/);
   }
+});
+
+test('earlier selection/2 derivation remains replayable without newly implemented uniform maps', async () => {
+  const f = fixture('javascript');
+  const historical = selectUniformJavaScriptRegistry(f.registry, { derivationId: 'psc-uniform-js-backend-derivation/2' });
+  const current = selectUniformJavaScriptRegistry(f.registry);
+  for (const selected of [historical, current]) {
+    f.add(selected.registry); f.add(selected.selection);
+    assert.equal((await verifyBackendProfileSelection(selected.selection, {
+      expectedRegistryId: selected.registry.identity, resolveArtifact: f.policy.resolveArtifact })).bindingVerified, true);
+  }
+  assert.equal(JSON.parse(historical.registry.bytes).backends.find(item => item.backendId === 'javascript').products.debugArtifacts
+    .some(item => item.role === 'source-map'), false);
+  assert.equal(JSON.parse(current.registry.bytes).backends.find(item => item.backendId === 'javascript').products.debugArtifacts
+    .find(item => item.role === 'source-map-recipe').contract, 'psc-direct-javascript-source-map-recipe/2');
+  assert.notEqual(artifactKey(historical.registry.identity), artifactKey(current.registry.identity));
 });

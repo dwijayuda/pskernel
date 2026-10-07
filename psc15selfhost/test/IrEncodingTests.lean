@@ -282,8 +282,9 @@ def main (args : List String) : IO Unit := do
       ("jsIr", psJsonQuote staged.jsIr)])
   else if args == ["--js-uniform-stages"] then
     let source := "def forward (A : Type) (value : A) : A := value\ndef unused (A : Type) (value : A) : A := value\ndef applyValue (A : Type) (B : Type) (fn : A -> B) (value : A) : B := fn value\ndef echoArray (A : Type) (values : Array A) : Array A := values\ndef mapValues (A : Type) (B : Type) (fn : A -> B) (values : Array A) : Array B := Array.map fn values\ndef answer : Nat := forward Nat 42\ndef choice : Bool := forward Bool true\n"
-    let .ok prepared := psCompilerPrepareSource .lean source
+    let .ok observed := psCompilerPrepareSourceWithOrigins .lean source
       | throw (IO.userError "UNIFORM_PREPARE_FAILED")
+    let prepared := observed.prepared
     let .ok inputs := psCompilerJavaScriptValidatedInputsFromPrepared prepared
       | throw (IO.userError "UNIFORM_VALIDATION_FAILED")
     if psJsTypeSupportedWithProfile (some psCompilerJavaScriptTarget64) (.typeParameter "T0") then
@@ -310,6 +311,7 @@ def main (args : List String) : IO Unit := do
       ("portableDeclarations", psJsonQuote declarations),
       ("sourceSignatures", psJsonQuote signatures),
       ("source", psJsonQuote source),
+      ("declarationOrigins", psJsonQuote observed.origins),
       ("publicApi", psJsonQuote api),
       ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
       ("runtimeIr", psJsonQuote staged.runtimeIr),

@@ -31,8 +31,8 @@ test('ECMA-426 VLQ limits and cross-line delta state match specification vectors
   assert.throws(() => encodeSourceMapMappings([[0, 0, 1]]), /SEGMENT/);
 });
 
-function productFixture(original = false) {
-  const f = fixture(), lineage = createJsDeclarationLineage(f).lineage;
+function productFixture(original = false, uniform = false) {
+  const f = fixture({ uniform }), lineage = createJsDeclarationLineage(f).lineage;
   let preparationOrigins = null, sourceSnapshot = null, originalText = null;
   if (original) {
     originalText = '\ufeffimport Lib\r\n' + f.sources[0].replace('\n', '\r\nimport Hidden\r\n') + '  \r\n';
@@ -124,4 +124,16 @@ test('source anchors convert observed scalar columns to actual UTF-16 columns', 
   assert.equal(consumer.findEntry(1, 0).originalLine, 0);
   assert.equal(consumer.findEntry(1, 0).originalColumn, 2);
   assert.equal(consumer.findEntry(4, 0).originalColumn, 0);
+});
+
+test('uniform generic source maps reconstruct their distinct lineage and preserve original-source coordinates', async () => {
+  const f = productFixture(true, true), value = JSON.parse(f.product.sourceMap.bytes), consumer = new SourceMap(value);
+  assert.equal(f.product.recipe.identity.contract, 'psc-direct-javascript-source-map-recipe/2');
+  assert.equal(JSON.parse(f.product.recipe.bytes).lineageId.contract, 'psc-js-uniform-declaration-lineage/1');
+  assert.equal(consumer.findEntry(1, 0).originalLine, 1);
+  assert.equal(consumer.findEntry(4, 0).originalLine, 3);
+  assert.equal(consumer.findEntry(2, 2).originalSource, undefined);
+  assert.equal((await verifyDirectJsSourceMap(f.product, f.policy)).declarationMapReconstructed, true);
+  const downgrade = canonicalArtifact(JSON.parse(f.product.recipe.bytes), 'source-map-recipe', 'psc-direct-javascript-source-map-recipe/1');
+  await assert.rejects(verifyDirectJsSourceMap({ ...f.product, recipe: downgrade }, f.policy), /IDENTITY/);
 });

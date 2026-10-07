@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "contract": "psc-uniform-specialized-ir/1",
   "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
-  "status": "portable-producer-checked-service-generic-declarations-and-descriptor-archive-routing-implemented",
+  "status": "portable-producer-live-declarations-and-uniform-origin-map-descriptor-archive-routing-implemented",
   "problem": "Closed monomorphization does not preserve an arbitrary generic public export. Direct declarations require a source generic API to have an actual callable export.",
   "representationProfile": "psc-js-uniform-values/1",
   "input": "The same PsValidatedIrModule obtained by strict RuntimeIR validation; no weakening of generic scope, type or invariant checks.",
@@ -19,7 +19,6 @@
   "unsupported": [
     "Foreign/imported functions in this initial uniform profile",
     "Dependent runtime values or new runtime representation primitives",
-    "Uniform source-origin composition and source maps until an exact uniform correspondence parent is supported",
     "Higher-rank/named public types and generic constant declarations without a runtime function",
     "Automatic representation selection and production checked CLI routing"
   ],
@@ -35,12 +34,14 @@
     "serializedAuthority": false
   },
   "remaining": [
-    "Production checked CLI selection and uniform source-origin composition",
-    "Uniform source-origin composition, portable declaration serialization and higher-rank/named public type policies",
+    "Production checked CLI selection",
+    "Higher-rank/named public types and generic constant policies",
+    "Expression and declaration-position maps, portable map serialization and automatic linking",
     "Uniform source/target preservation argument and later independent assurance"
   ],
   "closedRepresentationProfile": "psc-js-closed-instances/1",
   "hostSelection": "createCheckedCompilerService selects javaScriptRepresentation once at construction; default is closed. A uniform session requires its exact selected staged API, checks every required stage and exact VerifiedIR/envelope identity, and cannot fall back to closed or legacy APIs. Logical source certificates remain separate from representation selection.",
-  "declarations": "The explicitly paired psc-direct-js-declarations-uniform-structural/1 profile consumes exact source PublicApiIR and uniform selection subjects. It retains prefix source generics, checks alpha-correspondence with RuntimeIR, and binds complete JsIR export inventory without inferring signatures from instances.",
-  "archive": "The common graph records psc-pass-uniform-specialize/1 and psc-uniform-ir-to-js-ir/1 with exact profile parameters. Explicit context selection derives the JS registry; descriptors, target profiles, actions, queries and bundles bind it. Fresh archive replay checks the exact envelope relation, complete target inventory and all declaration subjects."
+  "declarations": "The explicitly paired psc-direct-js-declarations-uniform-structural/1 profile consumes exact source PublicApiIR and uniform selection subjects. It retains prefix source generics, checks alpha-correspondence with RuntimeIR, and binds complete JsIR export inventory without inferring signatures from instances. The same frozen prepared source feeds the portable interface-ts writer; the checked service requires exact agreement with independently checked host bytes before publication.",
+  "archive": "The common graph records psc-pass-uniform-specialize/1 and psc-uniform-ir-to-js-ir/1 with exact profile parameters. Explicit context selection derives the JS registry; descriptors, target profiles, actions, queries and bundles bind it. Fresh archive replay checks the exact envelope relation, complete target inventory and all declaration subjects.",
+  "origins": "Shared declaration composition reconstructs exact observed source/erasure/print metadata and pins the uniform artifact plus VerifiedIR. Edges identify actual retained RuntimeIR declarations, without synthetic specialization instances. Standalone ECMA-426 maps use recipe/2 and selected derivation/3; archived earlier derivations remain unchanged."
 }

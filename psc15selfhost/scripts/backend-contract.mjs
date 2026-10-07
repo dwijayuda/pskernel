@@ -64,7 +64,8 @@ export function decodeBackendRegistry(record) {
 
 export const legacyBackendSelectionContract = 'psc-backend-profile-selection/1';
 export const backendSelectionContract = 'psc-backend-profile-selection/2';
-export const uniformJavaScriptDerivation = 'psc-uniform-js-backend-derivation/2';
+export const uniformJavaScriptDerivationV2 = 'psc-uniform-js-backend-derivation/2';
+export const uniformJavaScriptDerivation = 'psc-uniform-js-backend-derivation/3';
 
 /** A deterministic specialization of the existing registry, not a fifth lane.
  * The base remains a separately identified input. A selected registry does not
@@ -111,12 +112,21 @@ export function selectUniformJavaScriptRegistryV1(baseRecord) {
  * Future capabilities require a new derivation identity and retained readers.
  */
 export function selectUniformJavaScriptRegistry(baseRecord, { derivationId = uniformJavaScriptDerivation } = {}) {
-  if (derivationId !== uniformJavaScriptDerivation) fail('SELECTION_DERIVATION');
+  if (![uniformJavaScriptDerivationV2, uniformJavaScriptDerivation].includes(derivationId)) fail('SELECTION_DERIVATION');
   const value = decodeBackendRegistry(selectUniformJavaScriptRegistryV1(baseRecord).registry);
   const backend = value.backends.find(item => item.backendId === 'javascript');
   backend.emitterId = 'psJsEmitValidatedModuleStackSafeWithTargetProfile';
   backend.supportedCapabilities.push('portable-structural-source-declarations');
   backend.ownershipDebt = 'Explicit uniform representation retains validated generic RuntimeIR. The backend owns the shared validated JsIR writer; interface-ts owns portable source declarations and the driver composes them. Uniform source-map composition, named/dependent public types, checked CLI selection and global preservation remain pending.';
+  if (derivationId === uniformJavaScriptDerivation) {
+    backend.supportedCapabilities.push('standalone-declaration-source-maps');
+    backend.unsupportedCapabilities = backend.unsupportedCapabilities.filter(capability => capability !== 'uniform-source-map-composition');
+    backend.products.debugArtifacts.push(
+      { role: 'declaration-lineage', domain: 'declaration-lineage', contract: 'psc-js-uniform-declaration-lineage/1', requiresToolchain: false },
+      { role: 'source-map', domain: 'source-map-output', contract: 'psc-direct-javascript-source-map/1', requiresToolchain: false },
+      { role: 'source-map-recipe', domain: 'source-map-recipe', contract: 'psc-direct-javascript-source-map-recipe/2', requiresToolchain: false });
+    backend.ownershipDebt = 'The backend owns the validated JsIR writer, interface-ts owns portable source declarations and the driver composes them. Uniform declaration origins use exact retained RuntimeIR inventory with shared source-map encoding. Expression origins, declaration maps, named/dependent public types, checked CLI selection and global preservation remain pending.';
+  }
   const registry = canonicalArtifact(value, 'backend-registry', 'psc-backend-registry/1');
   decodeBackendRegistry(registry);
   const selection = canonicalArtifact({ schemaVersion: 2, contract: backendSelectionContract,

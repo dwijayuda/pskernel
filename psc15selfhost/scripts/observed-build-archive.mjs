@@ -1,4 +1,4 @@
-import { uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
+import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { verifyObservedContextProducts } from './observed-build-context.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
@@ -271,9 +271,12 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
         await verifyDirectJsDeclarations(product, { resolveArtifact, expectedSubjects,
           expectedProfile: execution.action.parameters.profile, maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes });
       }
-      if (definition.passId === 'psc-emit-direct-js-source-map/1') {
+      if (['psc-emit-direct-js-source-map/1', 'psc-emit-uniform-js-source-map/1'].includes(definition.passId)) {
+        const uniformMap = definition.passId === 'psc-emit-uniform-js-source-map/1';
         if (execution.inputs.length !== 1 || execution.outputs.length !== 2 ||
-            definition.semanticRelationId !== 'psc-declaration-lineage-to-ecma426/1') fail('JS_SOURCE_MAP_SUBJECT');
+            definition.semanticRelationId !== (uniformMap ? 'psc-uniform-declaration-lineage-to-ecma426/1' : 'psc-declaration-lineage-to-ecma426/1') ||
+            execution.inputs[0].contract !== (uniformMap ? 'psc-js-uniform-declaration-lineage/1' : 'psc-js-declaration-lineage/1') ||
+            (uniformMap && execution.action.parameters.profile !== uniformJsRepresentationProfile)) fail('JS_SOURCE_MAP_SUBJECT');
         const dependency = (domain, required) => {
           const ids = execution.action.dependencies.filter(id => id.domain === domain);
           if (ids.length > 1 || (required && ids.length !== 1)) fail('JS_SOURCE_MAP_SUBJECT');
@@ -289,18 +292,22 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
           expectedFile: execution.action.parameters.outputFile,
           maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes });
       }
-      if (definition.passId === 'psc-compose-js-declaration-lineage/1') {
+      if (['psc-compose-js-declaration-lineage/1', 'psc-compose-uniform-js-declaration-lineage/1'].includes(definition.passId)) {
+        const uniformLineage = definition.passId === 'psc-compose-uniform-js-declaration-lineage/1';
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
-            definition.semanticRelationId !== 'psc-source-js-declaration-lineage/1') fail('JS_LINEAGE_SUBJECT');
+            definition.semanticRelationId !== (uniformLineage ? 'psc-source-uniform-js-declaration-lineage/1' : 'psc-source-js-declaration-lineage/1') ||
+            (uniformLineage && execution.action.parameters.profile !== uniformJsRepresentationProfile)) fail('JS_LINEAGE_SUBJECT');
         const expectedParents = { originGraphId: execution.inputs[0] };
-        for (const [key, domain] of [['erasureMapId', 'erasure-map'], ['specializationMapId', 'specialization-map'],
+        for (const [key, domain] of [['erasureMapId', 'erasure-map'],
+            uniformLineage ? ['uniformSpecializedIrId', 'uniform-specialized-ir'] : ['specializationMapId', 'specialization-map'],
             ['generatedPositionMapId', 'generated-position-map'], ['verifiedIrId', 'verified-ir']]) {
           const ids = execution.action.dependencies.filter(id => id.domain === domain);
           if (ids.length !== 1) fail('JS_LINEAGE_SUBJECT');
           expectedParents[key] = ids[0];
         }
         await verifyJsDeclarationLineage({ identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) },
-          { resolveArtifact, expectedParents, maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes });
+          { resolveArtifact, expectedParents, profile: uniformLineage ? uniformJsRepresentationProfile : closedJsRepresentationProfile,
+            maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes });
       }
       if (definition.passId === 'psc-js-ir-to-javascript/1') {
         if (execution.inputs.length !== 1 || ![1, 2].includes(execution.outputs.length) ||

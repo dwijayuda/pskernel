@@ -165,7 +165,11 @@ export function createKernelCheckedSession(
         }
         if (Object.hasOwn(staged, 'erasureCorrespondence') && typeof staged.erasureCorrespondence !== 'string')
           throw new Error('PSC2_CHECKED_ERASURE_CORRESPONDENCE_SHAPE');
+        if (Object.hasOwn(staged, 'generatedPositions') &&
+            (target !== 'javascript' || typeof staged.generatedPositions !== 'string'))
+          throw new Error('PSC2_CHECKED_GENERATED_POSITIONS_SHAPE');
         return Object.freeze({ output: staged[outputKey],
+          ...(Object.hasOwn(staged, 'generatedPositions') ? { generatedPositions: staged.generatedPositions } : {}),
           ...(Object.hasOwn(staged, 'erasureCorrespondence') ? { erasureCorrespondence: staged.erasureCorrespondence } : {}),
           stages: Object.freeze({
             runtimeIr: staged.runtimeIr,

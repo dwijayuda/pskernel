@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { spawnSync } from 'node:child_process';
 import { canonicalBytes, canonicalArtifact, artifactKey, artifactId, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
 import { runtimeInterfaceArtifact, verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
+import { decodeJsGeneratedPositions } from './js-generated-positions.mjs';
 import { decodeErasureDeclarations } from './erasure-declarations.mjs';
 import { decodeIrArtifact, checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
@@ -70,6 +71,8 @@ test('actual erasure/validation/emission snapshots form separately bound archive
 
 test('actual direct JavaScript specialization is revalidated, executed and archived as a separate pass', async () => {
   const staged = JSON.parse(emitted('--js-stages'));
+  decodeJsGeneratedPositions(Buffer.from(staged.generatedPositions),
+    { javaScript: staged.javaScript, jsIr: Buffer.from(staged.jsIr) });
   decodeErasureDeclarations(Buffer.from(staged.erasureCorrespondence),
     { publicApi: Buffer.from(staged.publicApi), runtimeIr: Buffer.from(staged.runtimeIr) });
   const snapshots = checkedIrStageArtifacts(staged);
@@ -83,7 +86,7 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   assert.equal(executable.answer, 42n);
   const inputs = { sourceKind: 'lean', sources: ['actual source is in the native fixture; this graph uses synthetic audit metadata'],
     admissions: '{"admissions":[],"format":"proofscript-checked-admissions","version":2}',
-    directJavaScript: staged.javaScript, irStages: staged,
+    directJavaScript: staged.javaScript, irStages: staged, generatedPositions: staged.generatedPositions,
     compilerBytes: Buffer.from('actual stage/output bytes with synthetic admission and implementation provenance'),
     compilerKind: 'fixture', provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' },
     kernelContract: { id: 'fixture' }, hostSources: [], runtime: { implementation: 'fixture' } };
@@ -104,6 +107,7 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   assert.equal(replay.targetIrArtifacts.length, 1);
   assert.equal(replay.targetIrArtifacts[0].kind, 'js-ir');
   assert.equal(replay.specializationCorrespondences[0].correspondenceChecked, true);
+  assert.equal(built.generatedPositionMap.identity.contract, 'psc-js-generated-position-map/1');
   const map = JSON.parse(built.artifacts.get(artifactKey(built.specializationInstances.identity)));
   assert.ok(map.instances.some(item => item[0] === 'declaration' && item[1] === 'forward'));
   assert.deepEqual(map.outputId, snapshots.specializedIr.identity);
@@ -194,4 +198,8 @@ test('portable and independent runtime-interface projections agree and distingui
   const rejected = await verifyObservedBuildArchive(archive.bytes, { expectedGraphId: graph.identity, allowedAssumptions: [] });
   assert.equal(rejected.kind, 'rejectedInvalid');
   assert.match(rejected.reason, /RUNTIME_INTERFACE_PROJECTION/);
+});
+
+test('native generated coordinates count UTF-16, all ECMAScript line terminators and CRLF across chunks', () => {
+  assert.deepEqual(JSON.parse(emitted('--generated-position-cursor')), [[5, 0, 3], [16, 3, 1]]);
 });

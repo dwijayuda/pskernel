@@ -1095,22 +1095,140 @@ def psJsPrintDeclaration
               ") { return "
               (psJsConcat2 body "; }\n"))
 
+-- Generated coordinates are separate from parser positions: UTF-8 byte
+-- offsets plus zero-based ECMAScript lines and UTF-16 columns.
+structure PsJsGeneratedPosition where
+  byteOffset : Nat
+  line : Nat
+  column : Nat
+  previousCR : Bool
+
+def psJsGeneratedPositionZero : PsJsGeneratedPosition :=
+  PsJsGeneratedPosition.mk 0 0 0 false
+
+def psJsAdvanceGeneratedChar
+    (position : PsJsGeneratedPosition)
+    (char : Char)
+    (byteWidth : Nat) : PsJsGeneratedPosition :=
+  let codePoint : Nat := Char.toNat char;
+  let nextByte : Nat := Nat.add position.byteOffset byteWidth;
+  if Nat.beq codePoint 10 then
+    PsJsGeneratedPosition.mk
+      nextByte
+      (if position.previousCR then position.line else Nat.succ position.line)
+      0
+      false
+  else if Nat.beq codePoint 13 then
+    PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 true
+  else if Nat.beq codePoint 8232 then
+    PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 false
+  else if Nat.beq codePoint 8233 then
+    PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 false
+  else
+    let width : Nat := if Nat.ble codePoint 65535 then 1 else 2;
+    PsJsGeneratedPosition.mk nextByte position.line (Nat.add position.column width) false
+
+def psJsAdvanceGeneratedTextWorker
+    (fuel : Nat) :
+    String -> Nat -> PsJsGeneratedPosition ->
+    Except PsJsEmitError PsJsGeneratedPosition :=
+  match fuel with
+  | Nat.zero =>
+      fun (text : String) (offset : Nat) (position : PsJsGeneratedPosition) =>
+        if String.Internal.atEnd text (String.Pos.Raw.mk offset) then Except.ok position
+        else Except.error PsJsEmitError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          String -> Nat -> PsJsGeneratedPosition ->
+          Except PsJsEmitError PsJsGeneratedPosition :=
+        psJsAdvanceGeneratedTextWorker remaining;
+      fun (text : String) (offset : Nat) (position : PsJsGeneratedPosition) =>
+        if String.Internal.atEnd text (String.Pos.Raw.mk offset) then Except.ok position
+        else
+          let char : Char := String.Internal.get text (String.Pos.Raw.mk offset);
+          let next : Nat := String.Pos.Raw.byteIdx
+            (String.Internal.next text (String.Pos.Raw.mk offset));
+          smaller text next (psJsAdvanceGeneratedChar position char (Nat.sub next offset))
+
+def psJsAdvanceGeneratedText
+    (position : PsJsGeneratedPosition)
+    (text : String) : Except PsJsEmitError PsJsGeneratedPosition :=
+  psJsAdvanceGeneratedTextWorker (Nat.succ (String.utf8ByteSize text)) text 0 position
+
+structure PsJsGeneratedDeclarationSpan where
+  name : String
+  start : PsJsGeneratedPosition
+  stop : PsJsGeneratedPosition
+
+structure PsJsPrintedModule where
+  text : String
+  spans : List PsJsGeneratedDeclarationSpan
+
+def psJsEncodeGeneratedPosition (position : PsJsGeneratedPosition) : String :=
+  psJsonArray [
+    psNatToString position.byteOffset,
+    psNatToString position.line,
+    psNatToString position.column
+  ]
+
+def psJsEncodeGeneratedSpan (span : PsJsGeneratedDeclarationSpan) : String :=
+  psJsonArray [
+    psJsonQuote span.name,
+    psJsEncodeGeneratedPosition span.start,
+    psJsEncodeGeneratedPosition span.stop
+  ]
+
+def psJsEncodeGeneratedPositions (spans : List PsJsGeneratedDeclarationSpan) : String :=
+  psJsonArray [
+    psJsonQuote "psc-js-generated-positions/1",
+    psJsonQuote "declaration-emission-chunk",
+    psJsonArray (psListMap psJsEncodeGeneratedSpan spans)
+  ]
+
+-- One actual printing fold. Legacy callers collect no spans and do not scan
+-- text for coordinates. Observed callers measure each actual chunk once.
+def psJsPrintDeclarationsObservedWith
+    (print : PsJsIrDeclaration -> Except PsJsEmitError String)
+    (declarations : List PsJsIrDeclaration) :
+    Bool -> PsTextBuilder -> PsJsGeneratedPosition ->
+    List PsJsGeneratedDeclarationSpan -> Except PsJsEmitError PsJsPrintedModule :=
+  match declarations with
+  | List.nil =>
+      fun (_observe : Bool) (builder : PsTextBuilder)
+          (_position : PsJsGeneratedPosition) (spansRev : List PsJsGeneratedDeclarationSpan) =>
+        Except.ok
+          (PsJsPrintedModule.mk (psTextBuilderFinish builder) (psListReverse spansRev))
+  | List.cons declaration rest =>
+      let smaller :
+          Bool -> PsTextBuilder -> PsJsGeneratedPosition ->
+          List PsJsGeneratedDeclarationSpan -> Except PsJsEmitError PsJsPrintedModule :=
+        psJsPrintDeclarationsObservedWith print rest;
+      fun (observe : Bool) (builder : PsTextBuilder)
+          (position : PsJsGeneratedPosition) (spansRev : List PsJsGeneratedDeclarationSpan) =>
+        match print declaration with
+        | Except.error error => Except.error error
+        | Except.ok printed =>
+            let nextBuilder : PsTextBuilder := psTextBuilderAppend builder printed;
+            if observe then
+              match psJsAdvanceGeneratedText position printed with
+              | Except.error error => Except.error error
+              | Except.ok nextPosition =>
+                  smaller true nextBuilder nextPosition
+                    (List.cons
+                      (PsJsGeneratedDeclarationSpan.mk declaration.name position nextPosition)
+                      spansRev)
+            else smaller false nextBuilder position spansRev
+
 def psJsPrintDeclarationsWith
     (print : PsJsIrDeclaration -> Except PsJsEmitError String)
     (declarations : List PsJsIrDeclaration) :
     PsTextBuilder -> Except PsJsEmitError String :=
-  match declarations with
-  | List.nil =>
-      fun (builder : PsTextBuilder) =>
-        Except.ok (psTextBuilderFinish builder)
-  | List.cons declaration rest =>
-      let smaller : PsTextBuilder -> Except PsJsEmitError String :=
-        psJsPrintDeclarationsWith print rest;
-      fun (builder : PsTextBuilder) =>
-        match print declaration with
-        | Except.error error => Except.error error
-        | Except.ok printed =>
-            smaller (psTextBuilderAppend builder printed)
+  fun (builder : PsTextBuilder) =>
+    match
+        psJsPrintDeclarationsObservedWith print declarations
+          false builder psJsGeneratedPositionZero List.nil with
+    | Except.error error => Except.error error
+    | Except.ok product => Except.ok product.text
 
 def psJsPrintDeclarations
     (declarations : List PsJsIrDeclaration) :
@@ -1519,24 +1637,30 @@ def psJsPrintDeclarationsStackSafe
     psJsPrintDeclarationStackSafe declarations psTextBuilderEmpty
 
 
+def psJsPrintStackSafePrelude (module : PsJsIrModule) : String :=
+  psJsJoin "" [
+    "// generated by ProofScript direct JsIR v1 stack-safe\n",
+    psJsPrintImports module.imports,
+    psJsStringRuntimeSupport,
+    psJsStackRuntimeSupport
+  ]
+
+def psJsPrintModuleStackSafeWithPositions
+    (module : PsJsIrModule) : Except PsJsEmitError PsJsPrintedModule :=
+  let prelude : String := psJsPrintStackSafePrelude module;
+  match psJsAdvanceGeneratedText psJsGeneratedPositionZero prelude with
+  | Except.error error => Except.error error
+  | Except.ok position =>
+      psJsPrintDeclarationsObservedWith psJsPrintDeclarationStackSafe module.declarations
+        true (psTextBuilderAppend psTextBuilderEmpty prelude) position List.nil
+
 def psJsPrintModuleStackSafe
     (module : PsJsIrModule) :
     Except PsJsEmitError String :=
   match psJsPrintDeclarationsStackSafe module.declarations with
   | Except.error error => Except.error error
   | Except.ok declarations =>
-      let imports : String :=
-        psJsPrintImports module.imports;
-      Except.ok
-        (psJsJoin
-          ""
-          [
-            "// generated by ProofScript direct JsIR v1 stack-safe\n",
-            imports,
-            psJsStringRuntimeSupport,
-            psJsStackRuntimeSupport,
-            declarations
-          ])
+      Except.ok (psJsConcat2 (psJsPrintStackSafePrelude module) declarations)
 
 def psJsPrintModule
     (module : PsJsIrModule) :

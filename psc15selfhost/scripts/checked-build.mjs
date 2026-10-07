@@ -72,6 +72,7 @@ export async function buildChecked({
   let publicApi;
   let declarationOrigins;
   let erasureCorrespondence;
+  let generatedPositions;
   let seedResources;
   let parity;
   let providerToolInputs = [];
@@ -147,6 +148,7 @@ export async function buildChecked({
       publicApi = emitted.publicApi;
       declarationOrigins = emitted.declarationOrigins;
       erasureCorrespondence = emitted.erasureCorrespondence;
+      generatedPositions = emitted.generatedPositions;
     }
   }
 
@@ -209,7 +211,7 @@ export async function buildChecked({
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
-      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi, sourceOrigins: snapshot.sourceOrigins, declarationOrigins, erasureCorrespondence,
+      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi, sourceOrigins: snapshot.sourceOrigins, declarationOrigins, erasureCorrespondence, generatedPositions,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     const evidence = bindObservedBuildContext(observed, { languageAuthority, backendRegistry, backendId: 'typescript' });
     receipt.profileEnvironment = evidence.profileEnvironment.identity;
@@ -225,6 +227,7 @@ export async function buildChecked({
     if (evidence.originGraph) receipt.originGraph = evidence.originGraph.identity;
     if (evidence.erasureMap) receipt.erasureMap = evidence.erasureMap.identity;
     if (evidence.specializationInstances) receipt.specializationInstances = evidence.specializationInstances.identity;
+    if (evidence.generatedPositionMap) receipt.generatedPositionMap = evidence.generatedPositionMap.identity;
     if (evidence.jsAbi) {
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
       receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;

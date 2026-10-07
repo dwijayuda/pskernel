@@ -411,6 +411,18 @@
       "kind": "declaration-correspondence",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/SPECIALIZATION_INSTANCE_MAP_V1.json"
+    },
+    {
+      "id": "psc-js-generated-positions/1",
+      "kind": "generated-positions",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/JS_GENERATED_POSITIONS_V1.json"
+    },
+    {
+      "id": "psc-js-generated-position-map/1",
+      "kind": "generated-positions",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_GENERATED_POSITIONS_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

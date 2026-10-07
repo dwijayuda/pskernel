@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-js-generated-positions/1",
+  "mapContract": "psc-js-generated-position-map/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "granularity": "declaration-emission-chunk",
+  "table": [
+    "contract",
+    "granularity",
+    "entries"
+  ],
+  "entry": [
+    "actualJsIrDeclarationName",
+    "start",
+    "stop"
+  ],
+  "position": [
+    "zeroBasedUtf8ByteOffset",
+    "zeroBasedEcmascriptLine",
+    "zeroBasedUtf16Column"
+  ],
+  "producer": "Optional coordinate observation in the shared declaration-printing fold; direct-JS stage uses the actual stack-safe printer result and side table together. Legacy printing collects no spans and does not measure text.",
+  "coordinates": "CRLF counts once; isolated CR, LF, U+2028 and U+2029 advance a line. Supplementary code points contribute two UTF-16 columns. Internal cursor state handles CRLF across chunks, but exposed declaration boundaries cannot split CRLF.",
+  "validation": [
+    "Exact JsIR declaration order and complete inventory, nonempty ordered non-overlapping emitted chunks.",
+    "Every endpoint is a UTF-8 boundary with exact ECMAScript line and UTF-16 column in the actual output text, checked with one linear scan.",
+    "Exact target IR, generated JS and table ArtifactIds are pinned in the map; archive replay reconstructs the whole map."
+  ],
+  "unmapped": "All code outside declaration chunks, including the shared runtime prelude, remains unmapped. A chunk includes code emitted for a declaration and is not an expression-level location or source attribution.",
+  "consumers": [
+    "checked direct-JS service",
+    "actual observed print pass",
+    "typed debug ArtifactBundle",
+    "graph-driven output publication",
+    "observed archive exact replay"
+  ],
+  "compatibility": "Historical selected compilers and one-output print records may omit position products. Invalid present products reject their requested emission/debug product, while kernel acceptance remains a separate live capability.",
+  "assurance": {
+    "generatedCoordinatesChecked": true,
+    "sourceAttributionChecked": false,
+    "expressionCorrespondenceChecked": false,
+    "semanticPreservationProved": false,
+    "metadataCreatesAuthority": false
+  },
+  "remaining": [
+    "Compose exact declaration origin, erasure, specialization and target identities",
+    "Emit ECMA-426 mappings with explicit unmapped generated code",
+    "Finer expression and synthetic helper origin events",
+    "Direct-JS declarations and declaration maps"
+  ]
+}

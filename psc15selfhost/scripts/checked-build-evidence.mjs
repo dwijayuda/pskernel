@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { createErasureDeclarationMap } from './erasure-declarations.mjs';
 import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { createSourcePreparationArtifacts } from './source-preparation-origins.mjs';
@@ -42,7 +43,7 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence, generatedPositions }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -55,6 +56,8 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   let runtimeInterface;
   let executableArtifact;
   let specializationInstances;
+  let generatedPositionMap;
+  if (generatedPositions !== undefined && directBackend !== 'javascript') throw new Error('PSC_BUILD_GRAPH_GENERATED_POSITION_TARGET');
   let jsAbiPlan;
   let jsAbiPolicyArtifact;
   function add(item, source, inline = false) {
@@ -311,9 +314,21 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         baseDependencies, ['trusted-javascript-lowering', 'trusted-js-ir-validator']);
       const js = bytes(directJavaScript, 'javascript-output', 'psc-direct-javascript/es2022', { kind: 'output-file', suffix: '.js' });
       executableArtifact = js.identity;
-      execute('psc-js-ir-to-javascript/1', jsIr, [js], implementation, 'psc-js-ir-printing/1',
-        { target: 'javascript', observedStages: ['stack-safe-print'], productionPromotion: false },
-        baseDependencies, ['trusted-javascript-printer']);
+      const printOutputs = [js], printDependencies = [...baseDependencies];
+      if (generatedPositions !== undefined) {
+        const projection = createJsGeneratedPositionMap({ table: generatedPositions, javaScript: directJavaScript, jsIr });
+        for (const item of projection.artifacts) add(item, { kind: 'archive-required', role: 'javascript-generated-position-subject' });
+        generatedPositionMap = add(projection.map, { kind: 'output-file', suffix: '.generated-positions.json' });
+        printOutputs.push(generatedPositionMap);
+        printDependencies.push(...projection.artifacts.map(item => item.identity).filter(id => id.domain === 'generated-position-table'));
+      }
+      execute('psc-js-ir-to-javascript/1', jsIr, printOutputs, implementation, 'psc-js-ir-printing/1',
+        { target: 'javascript', observedStages: ['stack-safe-print',
+          ...(generatedPositionMap ? ['observe-actual-declaration-chunks', 'check-generated-positions'] : [])],
+          productionPromotion: false },
+        printDependencies, ['trusted-javascript-printer'], undefined,
+        generatedPositionMap ? { originPolicy: 'synthesize',
+          originReason: 'Capture actual declaration-chunk generated positions; source attribution and fine-grained expression origins remain separate.' } : {});
     } else {
       if (!targetStages.wasmIr) throw new Error('PSC_BUILD_GRAPH_WASM_TARGET_IR_REQUIRED');
       const wasmIr = add(targetStages.wasmIr, { kind: 'archive-required', role: 'actual-validated-wasm-ir' });
@@ -372,6 +387,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...(declarationOriginGraph ? { originGraph: declarationOriginGraph } : {}),
     ...(erasureMap ? { erasureMap } : {}),
     ...(specializationInstances ? { specializationInstances } : {}),
+    ...(generatedPositionMap ? { generatedPositionMap } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

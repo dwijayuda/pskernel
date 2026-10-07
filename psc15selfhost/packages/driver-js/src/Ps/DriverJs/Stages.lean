@@ -16,6 +16,7 @@ structure PsCompilerJavaScriptStages where
   specializedIr : String
   jsIr : String
   erasureCorrespondence : String
+  generatedPositions : String
 
 -- The snapshots come from one actual pipeline execution. A checked host
 -- capability is still required for production access to this internal API.
@@ -55,7 +56,7 @@ def psCompilerJavaScriptStagesFromValidated
                             (PsCompilerJavaScriptStagesError.targetSnapshot
                               error)
                       | Except.ok targetIr =>
-                          match psJsPrintModuleStackSafe jsIr with
+                          match psJsPrintModuleStackSafeWithPositions jsIr with
                           | Except.error error =>
                               Except.error
                                 (PsCompilerJavaScriptStagesError.javaScript
@@ -63,12 +64,13 @@ def psCompilerJavaScriptStagesFromValidated
                           | Except.ok output =>
                               Except.ok
                                 (PsCompilerJavaScriptStages.mk
-                                  output
+                                  output.text
                                   runtime
                                   verified
                                   encoded
                                   targetIr
-                                  erasureCorrespondence)
+                                  erasureCorrespondence
+                                  (psJsEncodeGeneratedPositions output.spans))
 
 def psCompilerJavaScriptStagesFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :

@@ -3,6 +3,7 @@ import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { createErasureDeclarationMap } from './erasure-declarations.mjs';
 import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
@@ -86,7 +87,7 @@ export function createCheckedCompilerService({
     const payload = target === 'wasm' ? byteList(raw, maxOutputBytes) : raw;
     const bytes = typeof payload === 'string' ? Buffer.from(payload, 'utf8') : payload;
     if (bytes.byteLength > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
-    const productByteLength = bytes.byteLength + Buffer.byteLength(emission.erasureCorrespondence ?? '') + (api?.record.bytes.byteLength ?? 0) +
+    const productByteLength = bytes.byteLength + Buffer.byteLength(emission.generatedPositions ?? '') + Buffer.byteLength(emission.erasureCorrespondence ?? '') + (api?.record.bytes.byteLength ?? 0) +
         (origins ? origins.graph.bytes.byteLength + Buffer.byteLength(origins.table) : 0) +
         Object.values(emission.stages ?? {}).reduce((sum, value) => sum + Buffer.byteLength(value), 0);
     if (productByteLength > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
@@ -104,7 +105,14 @@ export function createCheckedCompilerService({
     const specializationProduct = stages?.specializedIr ?
       createSpecializationInstanceMap(stages.verifiedIr, stages.specializedIr, { maxBytes: maxOutputBytes }) : undefined;
     const specialization = specializationProduct?.result;
-    if (productByteLength + (erasureMap?.bytes.byteLength ?? 0) + (specializationProduct?.map.bytes.byteLength ?? 0) > maxOutputBytes)
+    let generatedPositionMap;
+    if (emission.generatedPositions !== undefined) {
+      if (target !== 'javascript' || !targetStages?.jsIr) throw new Error('PSC_CHECKED_GENERATED_POSITION_SUBJECT');
+      generatedPositionMap = createJsGeneratedPositionMap({ table: emission.generatedPositions, javaScript: payload,
+        jsIr: targetStages.jsIr, maxBytes: maxOutputBytes }).map;
+    }
+    if (productByteLength + (erasureMap?.bytes.byteLength ?? 0) + (specializationProduct?.map.bytes.byteLength ?? 0) +
+        (generatedPositionMap?.bytes.byteLength ?? 0) > maxOutputBytes)
       throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
@@ -119,6 +127,7 @@ export function createCheckedCompilerService({
         stageArtifacts: Object.freeze(Object.fromEntries(
           [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {})]
             .map(([key, value]) => [key, value.identity]))) } : {}),
+      ...(generatedPositionMap ? { generatedPositions: emission.generatedPositions, generatedPositionMap: generatedPositionMap.identity } : {}),
       ...(erasureMap ? { erasureCorrespondence: emission.erasureCorrespondence, erasureMap: erasureMap.identity } : {}),
       ...(api ? { publicApi: api.text, publicApiArtifact: api.record.identity } : {}),
       ...(origins ? { declarationOrigins: origins.table, originGraph: origins.graph.identity } : {}),

@@ -16,6 +16,21 @@ def main (args : List String) : IO Unit := do
     match psIrEncodeModule psIrEncodingFixture with
     | .error _ => throw (IO.userError "IR_ENCODE_FAILED")
     | .ok encoded => IO.println encoded
+  else if args == ["--generated-position-cursor"] then
+    let .ok first := psJsAdvanceGeneratedText psJsGeneratedPositionZero "a😀"
+      | throw (IO.userError "POSITION_FIRST_FAILED")
+    let .ok middle := psJsAdvanceGeneratedText first "\r"
+      | throw (IO.userError "POSITION_CR_FAILED")
+    let .ok final := psJsAdvanceGeneratedText middle "\nx y z"
+      | throw (IO.userError "POSITION_TAIL_FAILED")
+    let .ok whole := psJsAdvanceGeneratedText psJsGeneratedPositionZero "a😀\r\nx y z"
+      | throw (IO.userError "POSITION_WHOLE_FAILED")
+    if psJsEncodeGeneratedPosition final != psJsEncodeGeneratedPosition whole then
+      throw (IO.userError "POSITION_CHUNK_DRIFT")
+    match psJsAdvanceGeneratedTextWorker 0 "x" 0 psJsGeneratedPositionZero with
+    | .error .fuelExhausted => pure ()
+    | _ => throw (IO.userError "POSITION_EXHAUSTION_IGNORED")
+    IO.println (psJsonArray [psJsEncodeGeneratedPosition first, psJsEncodeGeneratedPosition final])
   else if args == ["--erasure-declarations"] then
     let source := "structure Box where\n  value : Nat\ndef forward (A : Type) (value : A) : A := value\ndef proofId (p : Prop) (h : p) : p := h\ndef answer : Nat := forward Nat 42\n"
     let .ok prepared := psCompilerPrepareSource .lean source
@@ -96,6 +111,7 @@ def main (args : List String) : IO Unit := do
       ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
       ("runtimeIr", psJsonQuote staged.runtimeIr),
       ("javaScript", psJsonQuote staged.javaScript),
+      ("generatedPositions", psJsonQuote staged.generatedPositions),
       ("verifiedIr", psJsonQuote staged.verifiedIr),
       ("specializedIr", psJsonQuote staged.specializedIr),
       ("jsIr", psJsonQuote staged.jsIr)])

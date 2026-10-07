@@ -3,6 +3,7 @@ import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtif
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyDeclarationOriginGraph } from './declaration-origins.mjs';
 import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
+import { verifyJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { verifyErasureDeclarationMap } from './erasure-declarations.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
@@ -238,6 +239,16 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
               { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
               { resolveArtifact, expectedInputId: input.identity, expectedOutputId: output.identity,
                 resourceLimits: { maxBytes: bound.maxArtifactBytes } }));
+      }
+      if (definition.passId === 'psc-js-ir-to-javascript/1') {
+        if (execution.inputs.length !== 1 || ![1, 2].includes(execution.outputs.length) ||
+            execution.inputs[0].domain !== 'js-ir' || execution.inputs[0].contract !== 'psc-js-ir-json/1' ||
+            execution.outputs[0].domain !== 'javascript-output' || execution.outputs[0].contract !== 'psc-direct-javascript/es2022' ||
+            definition.semanticRelationId !== 'psc-js-ir-printing/1') fail('JS_PRINT_SUBJECT');
+        if (execution.outputs.length === 2) await verifyJsGeneratedPositionMap(
+          { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
+          { resolveArtifact, expectedJsIrId: execution.inputs[0], expectedJavaScriptId: execution.outputs[0],
+            maxBytes: bound.maxArtifactBytes });
       }
       if (definition.passId === 'psc-specialized-ir-to-js-ir/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||

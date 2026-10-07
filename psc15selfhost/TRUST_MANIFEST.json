@@ -63,6 +63,7 @@
       "scripts/ir-invariant-replay.mjs",
       "scripts/ir-link-artifact.mjs",
       "scripts/js-abi-artifact.mjs",
+      "scripts/js-generated-positions.mjs",
       "scripts/kernel-checked-session.mjs",
       "scripts/kernel-contract.mjs",
       "scripts/observed-build-archive.mjs",

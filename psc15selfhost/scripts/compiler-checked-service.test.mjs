@@ -287,3 +287,18 @@ test('erasure inventory comes from the single checked emission and malformed met
   assert.throws(() => service.emitArtifact(handle), /PSC_ERASURE_DECL_/);
   assert.equal(emitted.length, 0);
 });
+
+test('generated positions remain exact checked emission metadata and malformed fields reject', async () => {
+  const { service, compiler } = fixture();
+  const good = { javaScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr, jsIr: emptyJsIr,
+    generatedPositions: '["psc-js-generated-positions/1","declaration-emission-chunk",[]]' };
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok(good);
+  const handle = await service.check('lean', '');
+  const result = service.emitArtifact(handle, 'javascript');
+  assert.equal(result.generatedPositionMap.contract, 'psc-js-generated-position-map/1');
+  assert.equal(result.generatedPositions, good.generatedPositions);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, generatedPositions: null });
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /GENERATED_POSITIONS_SHAPE/);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, generatedPositions: '[]' });
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /PSC_JS_POSITION_/);
+});

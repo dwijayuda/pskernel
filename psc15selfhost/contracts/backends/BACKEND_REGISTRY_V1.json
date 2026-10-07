@@ -158,6 +158,12 @@
             "domain": "specialization-map",
             "contract": "psc-specialization-instance-map/1",
             "requiresToolchain": false
+          },
+          {
+            "role": "generated-positions",
+            "domain": "generated-position-map",
+            "contract": "psc-js-generated-position-map/1",
+            "requiresToolchain": false
           }
         ],
         "interfaceArtifacts": [

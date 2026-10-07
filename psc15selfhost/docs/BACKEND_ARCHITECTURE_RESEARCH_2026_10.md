@@ -251,3 +251,29 @@ This provides the declaration-level links needed for origin composition and
 public export selection. The next target edge must capture positions in the
 actual writer. Generic public exports still require a deliberate representation
 strategy; the closed specialization contract is unchanged.
+
+
+## Generated-position writer contract
+
+The stack-safe JS printer now observes its actual emitted declaration chunks
+through the shared printing fold. Byte offsets and zero-based UTF-16 columns
+are distinct; the internal cursor handles CRLF across chunks and counts CR,
+LF, line separator and paragraph separator according to
+[ECMAScript line terminators](https://tc39.es/ecma262/2026/multipage/ecmascript-language-lexical-grammar.html#sec-line-terminators).
+Exposed chunk boundaries cannot split CRLF. The
+[ECMA-426 position model](https://tc39.es/ecma426/#sec-terms-and-definitions)
+requires UTF-16 JS columns; parser scalar columns must not be copied into maps.
+
+The metadata records chunk boundaries, not expression positions or source
+attribution. Shared runtime helpers outside the chunks remain unmapped. The
+next map emitter must compose exact source/preparation, erasure and
+specialization identities, retain explicit unmapped segments, and keep coarse
+declaration mapping separate from future precise expression events.
+
+TypeScript's pinned
+[type eraser](https://github.com/microsoft/TypeScript/blob/91521cf2299d54a40d46fcf500130d273ddfc947/tsc/internal/transformers/tstransforms/typeeraser.go)
+removes type parameters/arguments while preserving runtime bodies and retains
+original-node/location metadata for partially emitted expressions. It is a
+useful design reference for future JS representation sharing, but is not proof
+that PSC dependent types, erasure classifications or runtime layouts can be
+discarded without their own validation policy.

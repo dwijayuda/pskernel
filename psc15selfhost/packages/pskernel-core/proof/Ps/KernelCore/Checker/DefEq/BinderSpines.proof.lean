@@ -160,10 +160,8 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
           let continueAfterDomain :=
             fun (domainState : PsKernelCheckerState) =>
               if
-                  if psKernelExprHasLooseBVar leftBody then
-                    true
-                  else
-                    psKernelExprHasLooseBVar rightBody then
+                  psKernelExprHasLooseBVar leftBody = true ∨
+                    psKernelExprHasLooseBVar rightBody = true then
                 let openedLocal :=
                   psKernelDefEqWithLocal
                     context
@@ -768,64 +766,6 @@ theorem psKernelDefEqFinish_value
       exact psKernelDefEqFinish_true_value state left right
 
 
-theorem psKernelDefEqFinish_preserves_configuration
-    (context : PsKernelCheckerContext)
-    (state : PsKernelCheckerState)
-    (left right : PsKernelExpr)
-    (value : Bool)
-    (hConfig :
-      PsKernelCheckerConfigurationSound
-        context
-        state)
-    (hDefEq :
-      PsKernelDefEqJudgment
-        context.environment
-        context.localContext
-        left
-        right) :
-    PsKernelCheckerConfigurationSound
-      context
-      (Prod.snd
-        (psKernelDefEqFinish
-          state
-          left
-          right
-          value)) := by
-  rcases hConfig with
-    ⟨hIndex, hFresh, hState⟩
-  refine ⟨hIndex, ?_, ?_⟩
-  · have hNext :
-        (Prod.snd
-          (psKernelDefEqFinish
-            state left right value)).nextFresh =
-          state.nextFresh := by
-      cases value with
-      | false =>
-          rfl
-      | true =>
-          cases hEligible :
-              psKernelSemanticPairCacheEligible
-                left
-                right <;>
-            simp [
-              psKernelDefEqFinish,
-              hEligible,
-              psKernelCheckerStateWithSuccess
-            ]
-    simpa [hNext] using hFresh
-  · exact
-      psKernelDefEqFinish_preserves_semantic_sound
-        context.environment
-        context.localContext
-        state
-        left
-        right
-        value
-        psKernelDefEqCacheInsertLaw_all
-        hState
-        hDefEq
-
-
 theorem psKernelDefEqFinish_configuration_refines
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
@@ -866,7 +806,8 @@ theorem psKernelDefEqFinish_configuration_refines
       constructor
       · exact
           psKernelDefEqFinish_preserves_configuration
-            context state left right true hConfig hSemantic
+            context state left right true hConfig
+            (fun _ => hSemantic)
       · intro _
         exact hSemantic
 

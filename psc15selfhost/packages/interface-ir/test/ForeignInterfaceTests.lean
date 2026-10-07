@@ -1,4 +1,5 @@
 import Ps.InterfaceIr.Wit
+import Ps.InterfaceIr.Encode
 
 def foreignPolicy : PsForeignPolicy :=
   PsForeignPolicy.mk "component-model" ["storage"] ["storage"] true 32
@@ -34,6 +35,14 @@ def foreignIsExhausted : Bool :=
   | Except.error PsForeignError.resourceExhausted => true
   | _ => false
 
+def foreignEncoding : Bool :=
+  match
+      psForeignEncodeWorld
+        foreignPolicy.typeDepth
+        foreignWorld with
+  | Except.error _ => false
+  | Except.ok _ => true
+
 def foreignEmission : Bool :=
   match psForeignEmitWit foreignPolicy foreignWorld with
   | Except.error _ => false
@@ -47,6 +56,7 @@ def main : IO Unit := do
     ("records variants results and resource borrowing", foreignAccepts foreignPolicy foreignWorld),
     ("owned resource result", foreignAccepts foreignPolicy (foreignWith foreignDefinitions owned)),
     ("future stream and async function", foreignAccepts foreignPolicy (foreignWith foreignDefinitions future)),
+    ("canonical InterfaceIR encoding", foreignEncoding),
     ("WIT boundary output", foreignEmission),
     ("explicit exhaustion", foreignIsExhausted),
     ("import capability cannot be laundered through provider", !foreignAccepts { foreignPolicy with allowedImports := [] } foreignWorld),

@@ -22,6 +22,17 @@
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
+## Latest checkpoint — 2026-10-07
+- Current proof HEAD before this state update: `e5b17a28885149065e37dcd93afb9e3514e62301`.
+- Last completed green full proof gate: run **#510** at `10bf4a71fad2f158667406505ef3a67df34c63cc`.
+- Run #503 independently validated the reconciled production **symmetric function-eta** fix `0dd5d4db43a78be020f2257c226761ef4849d763`.
+- Concrete K conversion, non-recursive structure eta conversion, bounded recursor configuration, and recursor-aware public/core WHNF callback contracts are now proved and registered; runs #499, #502, and #503 are green checkpoints for that closure.
+- The Assurance Plane now has explicit left/right function-eta algorithmic judgments. Proof commits `5d8bda7c...` and `6c32bf27...` add symmetric eta-helper refinement plus bidirectional application/constant full-shape dispatch locks.
+- The experimental lambda-spine configuration proof was rolled back to its last green proof blob only; the production binder-scope cache restoration fix `d991e72d...` and its semantic judgment changes remain.
+- Run **#521** is queued for the combined eta/metatheory state because the parallel `PSKernel Core Arena Init Std` job currently occupies the available runner. This is CI scheduling, not a known proof failure.
+- Current semantic frontier: concrete DefEq configuration/state soundness (binder spines, quick/full-shape, proof irrelevance, eta/final rules, LazyDelta, cache publication), then concrete checker-knot composition and admission refinement.
+- Later full Init/Std Arena discrepancies remain unclassified; do **not** change metatheory for them unless the Arena lane confirms a production semantic defect.
+
 ### Reconciled Arena semantic fixes — 2026-10-07
 The Arena/Mathlib lane remains on `pscv/pskernel-core-arena-v1`, but confirmed
 production-kernel fixes are reconciled into this proof branch promptly. Arena
@@ -44,6 +55,13 @@ Confirmed fixes now present in this branch:
   domains may still be checked/reduced as Lean requires. Upstream Lean Kernel
   Arena Tutorial moved from 140/141 to **141/141** after this fix. Proof-side
   equations lock rejection/preservation for non-raw-Pi constructor spines.
+- **Symmetric function eta:** `psKernelDefEqFullShapeWith` now checks the
+  right-lambda eta case before non-lambda left-shape dispatch can return.
+  This matches Lean 4.34 in both directions and fixes the confirmed false
+  rejections `Std.PRange.UpwardEnumerable.succMany?_add` and
+  `Nat.Internal.Linear.Expr.denote_toPoly_go`. The Assurance Plane records
+  separate left/right eta rules and full-shape regression equations for both
+  partial-application orientations.
 
 Empirical validation for the reconciled semantic source:
 - full pinned `Init.Prelude`: accepted;

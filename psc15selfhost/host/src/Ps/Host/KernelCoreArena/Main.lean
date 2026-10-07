@@ -6,7 +6,7 @@ partial def replayStream
     (stream : IO.FS.Stream)
     (state : State)
     (lineNo : Nat) : IO (Except Failure Stats) := do
-  let line <- stream.getLine
+  let line ← stream.getLine
   if line.isEmpty then
     pure state.finish
   else
@@ -24,14 +24,14 @@ def statsLine (stats : Stats) : String :=
     " constants=" ++ toString stats.constants
 
 def runChecker : IO UInt32 := do
-  let stderr <- IO.getStderr
+  let stderr ← IO.getStderr
   match State.empty with
   | .error failure =>
       stderr.putStrLn ("pskernel-core arena initialization failed: " ++ failure.message)
       pure failure.exitCode
   | .ok initial =>
-      let stream <- IO.getStdin
-      match <- replayStream stream initial 1 with
+      let stream ← IO.getStdin
+      match ← replayStream stream initial 1 with
       | .ok stats =>
           stderr.putStrLn (statsLine stats)
           pure 0

@@ -70,7 +70,7 @@ jobs:
             lake build psc_kernel_core_arena
           run: |
             ulimit -s 65536
-            psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "\$IN"
+            psc15selfhost/.lake/build/bin/psc_kernel_core_arena --check-historical < "\$IN"
           EOF
 
       - name: Build historical bug corpus

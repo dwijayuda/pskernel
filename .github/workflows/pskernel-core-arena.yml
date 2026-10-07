@@ -57,6 +57,14 @@ jobs:
           set -euo pipefail
           lake exe psc_kernel_core_arena_level_tests
 
+      - name: Run portable foundation differential regressions
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build psc1_kernel_core_foundation_tests
+          lake exe psc1_kernel_core_foundation_tests
+
       - name: Smoke Arena metadata stream
         working-directory: psc15selfhost
         shell: bash

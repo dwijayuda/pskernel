@@ -217,7 +217,7 @@
         29,
         32
       ],
-      "status": "implementation-available-js-validated-wasm-validation-partial",
+      "status": "implementation-available-exact-js-wasm-target-ir-assurance-pending",
       "owners": [
         "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean",
         "scripts/wasm-literal-binary-validator.mjs",
@@ -226,9 +226,13 @@
         "packages/backend-rust/src/Ps/BackendRust/TailAlias.lean",
         "packages/backend-js/src/Ps/BackendJs/TailAlias.lean",
         "packages/backend-js/src/Ps/BackendJs/Print.lean",
-        "packages/backend-js/src/Ps/BackendJs/Validate.lean"
+        "packages/backend-js/src/Ps/BackendJs/Validate.lean",
+        "packages/backend-js/src/Ps/BackendJs/Encode.lean",
+        "packages/backend-wasm/src/Ps/BackendWasm/Encode.lean",
+        "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean",
+        "scripts/target-ir-artifact.mjs"
       ],
-      "completion": "Supported JS/Wasm/TS/Rust paths compile, validate and report unsupported cases deterministically.",
+      "completion": "Direct JS and direct Wasm lower once, validate the exact target IR consumed by printing/encoding, retain canonical target snapshots, and expose them through checked emission/build evidence. Global target preservation remains deferred.",
       "assurance": "pending"
     },
     {
@@ -848,7 +852,7 @@
       },
       {
         "id": "specialized-ir-to-target-ir",
-        "status": "implementation-available-js-wasm-assurance-pending"
+        "status": "implementation-available-exact-target-artifacts-assurance-pending"
       },
       {
         "id": "target-ir-to-executable-artifact",

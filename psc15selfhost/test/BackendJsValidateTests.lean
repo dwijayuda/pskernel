@@ -204,7 +204,7 @@ def psRunJsValidationTests
           (String.Internal.append
             "PSCV_JS_IR_VALIDATION_FAIL: "
             test.name)
-      let tailPassed <-
+      let tailPassed ←
         psRunJsValidationTests rest
       pure
         (if test.passed then
@@ -213,7 +213,7 @@ def psRunJsValidationTests
           false)
 
 def main : IO Unit := do
-  let passed <-
+  let passed ←
     psRunJsValidationTests
       psJsValidationTests
   if passed then

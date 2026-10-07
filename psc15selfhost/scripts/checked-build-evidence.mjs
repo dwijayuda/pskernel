@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
+import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
@@ -153,6 +154,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     certification = { pscvCert: cert.identity, certifiedSource: certified.identity };
   }
   const stages = checkedIrStageArtifacts(irStages);
+  const targetStages = checkedTargetIrStageArtifacts(irStages);
   let verifiedIr;
   if (stages && (typeScript !== undefined || directBackend)) {
       const runtimeIr = add(stages.runtimeIr, { kind: 'archive-required', role: 'actual-erasure-output' });
@@ -229,25 +231,37 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       baseDependencies, ['trusted-specialization-implementation', 'trusted-strict-ir-validator',
         'trusted-specialization-correspondence-checker'], correspondence);
     if (directBackend === 'javascript') {
+      if (!targetStages.jsIr) throw new Error('PSC_BUILD_GRAPH_JS_TARGET_IR_REQUIRED');
+      const jsIr = add(targetStages.jsIr, { kind: 'archive-required', role: 'actual-validated-js-ir' });
+      execute('psc-specialized-ir-to-js-ir/1', specializedIr, [jsIr], implementation, 'psc-specialized-ir-js-ir/1',
+        { target: 'javascript', wordSize: 64,
+          observedStages: ['javascript-lower', 'validate-js-ir', 'snapshot-js-ir'],
+          validator: 'psc-js-ir-validator/1', globalPreservationProved: false },
+        baseDependencies, ['trusted-javascript-lowering', 'trusted-js-ir-validator']);
       const js = bytes(directJavaScript, 'javascript-output', 'psc-direct-javascript/es2022', { kind: 'output-file', suffix: '.js' });
       executableArtifact = js.identity;
-      execute('psc-specialized-ir-to-javascript/1', specializedIr, [js], implementation, 'psc-ir-javascript-refinement/1',
-        { target: 'javascript', wordSize: 64, observedStages: ['javascript-lower-and-stack-safe-print'],
-          unobservedInteriorStages: ['javascript-target-ir'], productionPromotion: false },
-        baseDependencies, ['trusted-javascript-lowering-and-printing']);
+      execute('psc-js-ir-to-javascript/1', jsIr, [js], implementation, 'psc-js-ir-printing/1',
+        { target: 'javascript', observedStages: ['stack-safe-print'], productionPromotion: false },
+        baseDependencies, ['trusted-javascript-printer']);
     } else {
+      if (!targetStages.wasmIr) throw new Error('PSC_BUILD_GRAPH_WASM_TARGET_IR_REQUIRED');
+      const wasmIr = add(targetStages.wasmIr, { kind: 'archive-required', role: 'actual-validated-wasm-ir' });
+      execute('psc-specialized-ir-to-wasm-ir/1', specializedIr, [wasmIr], implementation, 'psc-specialized-ir-wasm-ir/1',
+        { target: 'wasm', wordSize: 32,
+          observedStages: ['wasm-lower', 'selfhost-abi', 'validate-wasm-ir', 'snapshot-wasm-ir'],
+          validator: 'psc-wasm-ir-validator/1', globalPreservationProved: false },
+        baseDependencies, ['trusted-wasm-lowering-and-abi', 'trusted-wasm-ir-validator']);
       const wasm = bytes(directWasm, 'wasm-output', 'psc-direct-wasm/wasm32', { kind: 'output-file', suffix: '.wasm' });
       executableArtifact = wasm.identity;
-      execute('psc-specialized-ir-to-wasm/1', specializedIr, [wasm], implementation, 'psc-ir-wasm-refinement/1',
-        { target: 'wasm', wordSize: 32, observedStages: ['wasm-lower-selfhost-abi-and-encode'],
-          unobservedInteriorStages: ['wasm-target-ir'], globalPreservationProved: false },
-        baseDependencies, ['trusted-wasm-lowering-abi-and-encoding']);
+      execute('psc-wasm-ir-to-wasm/1', wasmIr, [wasm], implementation, 'psc-wasm-ir-encoding/1',
+        { target: 'wasm', observedStages: ['wasm-binary-encode'], globalPreservationProved: false },
+        baseDependencies, ['trusted-wasm-binary-encoder']);
     }
   }
   const graph = { schemaVersion: 1, contract: 'psc-observed-build-graph/1', authority: 'audit-record-only',
-    entries, executions, coverage: directBackend ? 'observed-erasure-validation-specialization-and-composite-backend-edges' :
+    entries, executions, coverage: directBackend ? 'observed-erasure-validation-specialization-target-ir-and-executable-edges' :
       irStages ? 'observed-erasure-validation-and-composite-backend-edges' : 'observed-composite-edges',
-    remaining: [directBackend ? 'backend-interior artifacts and target-specific assurance gates' :
+    remaining: [directBackend ? 'global backend preservation, target-validator soundness and target-specific assurance gates' :
       irStages ? 'specialization and backend-interior artifacts' : 'per-IR-stage artifacts',
       'complete toolchain closure', 'independent preservation evidence'] };
   const encoded = canonicalBytes(graph);

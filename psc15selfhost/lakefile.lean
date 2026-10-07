@@ -341,6 +341,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.DefEqReflectionConfiguration,
     `Ps.KernelCore.Metatheory.DefEqFinalConfiguration,
     `Ps.KernelCore.Metatheory.DefEqLazyConfiguration,
+    `Ps.KernelCore.Metatheory.DefEqLazyContinuation,
     `Ps.KernelCore.Metatheory.ProjectionConfiguration,
     `Ps.KernelCore.Metatheory.CheckedProjectionConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionSemantics,

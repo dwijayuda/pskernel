@@ -1,0 +1,103 @@
+name: PSKernel Core Arena corpus
+
+on:
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Arena test or glob: tutorial/*, bugs/*, init, std, mathlib"
+        required: true
+        default: "tutorial/*"
+      timeout_minutes:
+        description: "Job timeout in minutes"
+        required: true
+        default: "180"
+
+permissions:
+  contents: read
+
+jobs:
+  corpus:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Clone pinned Lean Kernel Arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+
+      - name: Register current PSKernel commit as local Arena checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA="$(git rev-parse HEAD)"
+          cat > arena/checkers/pskernel-core-local.yaml <<EOF
+          description: |
+            PSKernel Core local validation lane. Semantic kernel decisions are
+            made by packages/pskernel-core; the host adapter only decodes
+            lean4export 3.1.0 and maps records to KernelContract-v1.
+          version: "arena-v1"
+          url: https://github.com/dwijayuda/pskernel
+          ref: pscv/pskernel-core-arena-v1
+          rev: $SHA
+          build: |
+            cd psc15selfhost
+            lake build PSC1KernelReferenceFoundations PsKernelCore psc_kernel_core_arena
+          run: psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "$IN"
+          EOF
+          cat arena/checkers/pskernel-core-local.yaml
+
+      - name: Build selected Arena test
+        working-directory: arena
+        shell: bash
+        env:
+          TEST: ${{ inputs.test }}
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test "$TEST" --cache
+
+      - name: Build PSKernel Arena checker
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-checker pskernel-core-local
+
+      - name: Run selected Arena corpus
+        working-directory: arena
+        shell: bash
+        env:
+          TEST: ${{ inputs.test }}
+        run: |
+          set -euo pipefail
+          uv run lka.py run --checker pskernel-core-local --test "$TEST"
+
+      - name: Build result site
+        if: always()
+        working-directory: arena
+        shell: bash
+        run: |
+          uv run lka.py build-site || true
+
+      - name: Upload Arena results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-core-arena-${{ github.run_id }}
+          path: |
+            arena/_out
+            arena/_results
+          if-no-files-found: ignore

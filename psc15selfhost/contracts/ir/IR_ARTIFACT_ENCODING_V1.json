@@ -81,6 +81,13 @@
     "resourceScope": "Each context is bounded in bytes/depth/nodes/native wall time/output; aggregate context bytes and count use archive limits. This is not a process sandbox or a globally proved cost bound.",
     "authority": "none",
     "preservation": "unproved",
-    "validationStatus": "implementation-pending-cloud-validation"
+    "validationStatus": "focused-cloud-and-portable-validated",
+    "validationEvidence": {
+      "commit": "55270430412cf3bebce73249a4e64aab78890f28",
+      "workflowRun": 37647567801,
+      "job": 112882220062,
+      "conclusion": "success",
+      "scope": "complete main cloud workflow, native link/archive corpus and explicit PSC1 LinkArtifact source check"
+    }
   }
 }

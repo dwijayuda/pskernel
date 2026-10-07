@@ -554,7 +554,7 @@ lean_lib PsTheoryBridge where
 
 lean_lib PsInterfaceIr where
   srcDir := "packages/interface-ir/src"
-  roots := #[`Ps.InterfaceIr.Model, `Ps.InterfaceIr.Validate, `Ps.InterfaceIr.Encode, `Ps.InterfaceIr.Wit]
+  roots := #[`Ps.InterfaceIr.Model, `Ps.InterfaceIr.Validate, `Ps.InterfaceIr.Encode, `Ps.InterfaceIr.Wit, `Ps.InterfaceIr.CanonicalAbi]
 
 lean_exe pscv_foreign_interface_tests where
   srcDir := "packages/interface-ir/test"
@@ -567,3 +567,7 @@ lean_exe pscv_theory_bridge_tests where
 lean_exe pscv_ir_replay where
   srcDir := "host/src"
   root := `Ps.Host.IrReplay
+
+lean_exe pscv_canonical_abi_tests where
+  srcDir := "test"
+  root := `CanonicalAbiTests

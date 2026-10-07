@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contract": "psc-foreign-interface/1",
-  "status": "portable-interface-canonical-artifact-and-wit-relation-implemented-runtime-adapters-pending",
+  "status": "portable-interface-wit-and-synchronous-canonical-layout-planning-implemented-runtime-adapters-pending",
   "owner": "packages/interface-ir/src/Ps/InterfaceIr",
   "profiles": [
     "PSC1-selfhost-stable/1",
@@ -38,7 +38,7 @@
       "flags",
       "resource methods and constructors",
       "component binary generation",
-      "canonical ABI lowering and lifting"
+      "canonical ABI runtime lowering and lifting"
     ],
     "independentParserValidation": "pending external Component Model parser; independent in-repo renderer relation implemented",
     "independentRelationValidation": "scripts/interface-ir-artifact.mjs independently decodes canonical InterfaceIR, re-renders deterministic WIT, and requires exact supplied WIT bytes; psc-interface-ir-wit-rendering/1 does not establish Canonical ABI or runtime behavior."
@@ -56,5 +56,33 @@
     "producer": "packages/interface-ir/src/Ps/InterfaceIr/Encode.lean",
     "independentDecoder": "scripts/interface-ir-artifact.mjs",
     "authority": "interface-data-not-runtime-or-kernel-authority"
+  },
+  "canonicalAbi": {
+    "profile": "psc-canonical-abi-sync-layout/1",
+    "owner": "packages/interface-ir/src/Ps/InterfaceIr/CanonicalAbi.lean",
+    "reference": "https://github.com/WebAssembly/component-model/blob/a25fc0b372dd21f07f0242c46e98bd0f1ea0c0e1/design/mvp/CanonicalABI.md",
+    "referenceKind": "Component Model design revision; distinct from Core Wasm specification",
+    "scope": "Pure synchronous memory32/memory64 layout and lift/lower core-signature planning from validated InterfaceIR.",
+    "rules": [
+      "exact scalar alignment/size and pointer-width string/list pairs",
+      "record/tuple offsets and trailing alignment",
+      "variant minimal discriminant width, aligned payload area and flat-type joins",
+      "16-flat-parameter/1-flat-result limits with direction-specific indirect result convention",
+      "every declared value type is sized under memory64 and rejected at 2^28 bytes",
+      "topological named-layout cache with exact flat counts and a 17-slot prefix",
+      "owned/borrowed resource slots flag the need for a separate handle table; raw resources reject",
+      "async/future/stream planning rejects under this synchronous profile"
+    ],
+    "resources": "Depth fuel and type-size limits fail closed. Named layout computation is memoized; flat prefixes are capped at 17 while arities remain exact. Input metadata, field-offset lists and the existing structural foreign validator remain host-budget obligations; no total work bound or global resource theorem is claimed.",
+    "remaining": [
+      "actual linear-memory lifting/lowering and realloc/post-return integration",
+      "resource handle ownership, borrow scope and drop runtime",
+      "component binary emission and independent parser/runtime validation",
+      "async state machine and cancellation profile",
+      "memoized analysis of the older foreign-interface structural validator",
+      "global adapter preservation"
+    ],
+    "validation": "focused native/portable cloud validation pending",
+    "authority": "layout/signature data only; no executable adapter, CheckedCore, source preservation or lifetime proof"
   }
 }

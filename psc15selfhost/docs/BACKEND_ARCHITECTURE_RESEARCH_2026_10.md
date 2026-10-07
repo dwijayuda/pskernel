@@ -56,3 +56,16 @@ Both direct-JS printer modes now emit all source data fields with computed strin
 The shared validated fixture is emitted through ordinary JS, stack-safe JS and TS-to-tsc. Runtime checks assert independently expected own properties, prototype identity, record projection, constructor matching and single ordered callback evaluation. Backend agreement alone is insufficient because both emitters previously shared the same semantic error. Source preservation remains unproved.
 
 Canonical target archive decoding separately rejects noncanonical numeric text and negative Nat indices while preserving arbitrary precision decimal strings. Decoding establishes schema/encoding validity; it does not imply target typing, source authority or semantic equivalence.
+
+
+## Component Model boundary and synchronous Canonical ABI planning
+
+Research pin: [Component Model Canonical ABI a25fc0b](https://github.com/WebAssembly/component-model/blob/a25fc0b372dd21f07f0242c46e98bd0f1ea0c0e1/design/mvp/CanonicalABI.md). This is a Component Model design revision, separate from the Core Wasm specification and the compiler's private GC bootstrap ABI.
+
+A pure InterfaceIR planner now computes memory32/memory64 sizes, alignments, record offsets, variant discriminants/payload placement and synchronous lift/lower core signatures. It retains exact flat arities and at most 17 flat slots: this suffices to apply the pinned 16-parameter and one-result thresholds without constructing huge flat lists. Overflowing types are rejected using the required memory64 element-size bound, even when selected memory uses 32-bit pointers. Shared named layouts are resolved once in dependency order.
+
+Imported functions use canon-lower conventions; exported functions use canon-lift conventions. An indirect result becomes an extra pointer parameter on lower, but a pointer result on lift. Owned and borrowed resources produce handle-table obligations, not raw integer authority. The existing policy still rejects borrowed returns/nested borrows; the new profile also rejects async/future/stream planning.
+
+The planner provides data for later adapters. It does not perform memory reads/writes, allocation, string transcoding, post-return cleanup, resource-table operations or component binary generation. Those operations must follow the selected value and ownership contract; reusing the internal GC representation as a Canonical ABI representation would be unsound.
+
+The older structural foreign validator recursively unfolds shared named definitions before planning. It still needs memoized dependency/depth analysis to avoid repeated work; the new layout cache does not conceal that separate resource obligation.

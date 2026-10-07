@@ -486,6 +486,42 @@ def psKernelInferCoreWithFuel
                                                 expr
                                                 result))
                                         else
+                                          let forwardFreshDebug :=
+                                            match
+                                                defeq
+                                                  eqContext
+                                                  (Prod.snd argResult)
+                                                  argType
+                                                  view.domain with
+                                            | Except.ok retryResult =>
+                                                "forward-fresh=" ++
+                                                  toString (Prod.fst retryResult)
+                                            | Except.error retryError =>
+                                                "forward-fresh-error=" ++ retryError;
+                                          let forwardRetryDebug :=
+                                            match
+                                                defeq
+                                                  eqContext
+                                                  (Prod.snd eqResult)
+                                                  argType
+                                                  view.domain with
+                                            | Except.ok retryResult =>
+                                                "forward-retry=" ++
+                                                  toString (Prod.fst retryResult)
+                                            | Except.error retryError =>
+                                                "forward-retry-error=" ++ retryError;
+                                          let reverseFreshDebug :=
+                                            match
+                                                defeq
+                                                  eqContext
+                                                  (Prod.snd argResult)
+                                                  view.domain
+                                                  argType with
+                                            | Except.ok reverseResult =>
+                                                "reverse-fresh=" ++
+                                                  toString (Prod.fst reverseResult)
+                                            | Except.error reverseError =>
+                                                "reverse-fresh-error=" ++ reverseError;
                                           let reverseDebug :=
                                             match
                                                 defeq
@@ -494,10 +530,10 @@ def psKernelInferCoreWithFuel
                                                   view.domain
                                                   argType with
                                             | Except.ok reverseResult =>
-                                                "reverse-defeq=" ++
+                                                "reverse-retry=" ++
                                                   toString (Prod.fst reverseResult)
                                             | Except.error reverseError =>
-                                                "reverse-defeq-error=" ++ reverseError;
+                                                "reverse-retry-error=" ++ reverseError;
                                           let terminalDebug :=
                                             psKernelInferenceDebugForallTerminalWithFuel
                                               (Nat.succ
@@ -572,6 +608,9 @@ def psKernelInferCoreWithFuel
                                                       psKernelInferenceDebugExprDiff
                                                         (Prod.fst expectedWhnf)
                                                         (Prod.fst actualWhnf) ++
+                                                      "; " ++ forwardFreshDebug ++
+                                                      "; " ++ forwardRetryDebug ++
+                                                      "; " ++ reverseFreshDebug ++
                                                       "; " ++ reverseDebug ++
                                                       "; " ++
                                                       (match terminalDebug with

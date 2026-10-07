@@ -48,9 +48,9 @@
     "contract": "contracts/ir/INTERFACE_LINK_V1.json",
     "previousExternalGap": "external-import-interface-and-abi-compatibility",
     "closedPart": "Declared interface, signature, nominal recursive layout, runtime-values profile, target and capability compatibility.",
-    "remainingPart": "Actual target-specific ABI adapters and independent evidence of their behavior. Host implementation behavior remains an explicit assumption.",
+    "remainingPart": "Aggregate/resource/async JavaScript adapters, Wasm Component canonical ABI and native Rust/C adapters, plus global adapter preservation/host-behavior assurance.",
     "moduleLinkProfile": "Complete acyclic graph with monomorphic exports derived from actual validated module bodies; unsupported generic exports and cycles reject.",
-    "scalarAdapter": "contracts/ir/JS_SCALAR_ABI_V1.json: actual synchronous JavaScript primitive adapter, exact plan pinning, per-call representation checks and emitted-client integration. Aggregate/ownership/async/other-target adapters, production binding and whole-adapter evidence remain open."
+    "scalarAdapter": "contracts/ir/JS_SCALAR_ABI_V1.json: synchronous primitive JavaScript adapter is production-bound to exact VerifiedIR, capability policy, build graph/archive and EvidenceEnvelope with independent offline plan replay."
   },
   "policy": {
     "unknownMeaningMustNotBeAddedSilently": true,
@@ -71,6 +71,7 @@
       "step": "Run strict VerifiedIR invariant corpus",
       "conclusion": "success"
     },
-    "scope": "Implemented executable checks, not a proof of validator soundness or completed global preservation. Full self-host fixed points remain pending."
+    "scope": "Implemented executable checks, not a proof of validator soundness or completed global preservation. Full self-host fixed points remain pending.",
+    "jsScalarProductionBinding": "scripts/js-abi-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs + EvidenceEnvelope targetAdapters"
   }
 }

@@ -72,12 +72,12 @@ jobs:
           cd pskernel
           git checkout "$PSKERNEL_SHA"
 
-      - name: Build current PSKernel
+      - name: Build current and legacy PSKernel
         working-directory: pskernel/psc15selfhost
         shell: bash
         run: |
           set -euo pipefail
-          lake build psc_kernel_core_arena
+          lake build psc_kernel_core_arena psc_kernel_legacy_arena
 
       - name: Run focused targets
         shell: bash
@@ -87,7 +87,11 @@ jobs:
             INPUT="arena/_build/tests/${id}.ndjson"
             echo "=== ${id} ==="
             wc -l -c "$INPUT"
+            echo "--- current pskernel-core ---"
             pskernel/psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "$INPUT"
-            echo "exit=$?"
+            echo "current-exit=$?"
+            echo "--- legacy PSC1 oracle ---"
+            pskernel/psc15selfhost/.lake/build/bin/psc_kernel_legacy_arena < "$INPUT"
+            echo "legacy-exit=$?"
           done
           exit 0

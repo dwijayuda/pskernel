@@ -346,7 +346,10 @@ theorem psKernelDefEqFullShape_lambda_nonlambda_uses_eta_left
         (PsKernelExpr.lam name domain body binderInfo)
         other := by
   cases other <;>
-    simp [PsKernelExprIsLambdaView] at hOther ⊢
+    simp [
+      PsKernelExprIsLambdaView,
+      psKernelDefEqFullShapeWith
+    ] at hOther ⊢
 
 
 theorem psKernelDefEqFullShape_nonlambda_lambda_uses_eta_right
@@ -377,7 +380,10 @@ theorem psKernelDefEqFullShape_nonlambda_lambda_uses_eta_right
         other
         (PsKernelExpr.lam name domain body binderInfo) := by
   cases other <;>
-    simp [PsKernelExprIsLambdaView] at hOther ⊢
+    simp [
+      PsKernelExprIsLambdaView,
+      psKernelDefEqFullShapeWith
+    ] at hOther ⊢
 
 
 theorem psKernelDefEqFullShape_lambda_nonlambda_eta_configuration_sound

@@ -486,6 +486,18 @@ def psKernelInferCoreWithFuel
                                                 expr
                                                 result))
                                         else
+                                          let reverseDebug :=
+                                            match
+                                                defeq
+                                                  eqContext
+                                                  (Prod.snd eqResult)
+                                                  view.domain
+                                                  argType with
+                                            | Except.ok reverseResult =>
+                                                "reverse-defeq=" ++
+                                                  toString (Prod.fst reverseResult)
+                                            | Except.error reverseError =>
+                                                "reverse-defeq-error=" ++ reverseError;
                                           let terminalDebug :=
                                             psKernelInferenceDebugForallTerminalWithFuel
                                               (Nat.succ
@@ -560,6 +572,7 @@ def psKernelInferCoreWithFuel
                                                       psKernelInferenceDebugExprDiff
                                                         (Prod.fst expectedWhnf)
                                                         (Prod.fst actualWhnf) ++
+                                                      "; " ++ reverseDebug ++
                                                       "; " ++
                                                       (match terminalDebug with
                                                        | Except.ok message => message

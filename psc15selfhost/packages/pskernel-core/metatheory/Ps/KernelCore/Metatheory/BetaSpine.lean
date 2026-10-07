@@ -3114,7 +3114,6 @@ theorem psKernelExprInstantiateRev_append_singleton_beta
       arg
       (psKernelExprListReverse priorArgs)
       0
-  simp only [Nat.succ_zero] at hFuse
   rw [hFuse]
   unfold psKernelExprInstantiateRev
   unfold psKernelExprInstantiate

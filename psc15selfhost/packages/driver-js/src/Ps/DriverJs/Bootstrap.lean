@@ -191,8 +191,14 @@ def psCompilerJavaScriptEmitSpecialized
         (PsCompilerJavaScriptError.emit
           (PsJsEmitError.lower error))
   | Except.ok jsIr =>
-      match psJsPrintModuleStackSafe jsIr with
+      match psJsValidateModule jsIr with
       | Except.error error =>
-          Except.error (PsCompilerJavaScriptError.emit error)
-      | Except.ok output =>
-          Except.ok output
+          Except.error
+            (PsCompilerJavaScriptError.emit
+              (PsJsEmitError.targetValidation error))
+      | Except.ok _ =>
+          match psJsPrintModuleStackSafe jsIr with
+          | Except.error error =>
+              Except.error (PsCompilerJavaScriptError.emit error)
+          | Except.ok output =>
+              Except.ok output

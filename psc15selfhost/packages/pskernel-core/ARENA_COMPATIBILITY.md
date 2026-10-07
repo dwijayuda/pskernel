@@ -67,3 +67,4 @@ intended to catch semantic regressions (including DefEq directionality) before
 large-corpus replay. Contract-gate failures are reported by subfamily
 (diagnostics, admission, expression, resource policy, provider identity) so a
 failure is classified before any production semantic change is considered.
+- Foundation readiness now reports expression-contract result categories explicitly when that boundary fails.

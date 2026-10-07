@@ -66,12 +66,19 @@ test('reuse permits new proof bytes for identical subjects and rejects changed s
   });
   assert.equal(accepted.verified, true);
   const changedStructural = artifact(['changed'], 'runtime-interface', 'psc-runtime-interface-json/1');
+  const changedEvidence = artifact({
+    checkerId: 'fixture-interface-checker',
+    label: 'changed-structure-proof',
+    structuralInterface: changedStructural.identity,
+    behavioral: Object.fromEntries(Object.entries(right.subjects).map(([key,item]) => [key,item.identity])),
+  }, 'certificate', 'fixture-interface-evidence/1');
   const changed = certifiedModuleInterfaceArtifact({
     structuralInterface: changedStructural.identity,
     behavioral: Object.fromEntries(Object.entries(right.subjects).map(([key,item]) => [key,item.identity])),
-    evidence: [right.evidence.identity],
+    evidence: [changedEvidence.identity],
   });
   blobs.set(artifactKey(changedStructural.identity), changedStructural.bytes);
+  blobs.set(artifactKey(changedEvidence.identity), changedEvidence.bytes);
   blobs.set(artifactKey(changed.identity), changed.bytes);
   await assert.rejects(verifyExactBehavioralInterfaceReuse({
     previous: left.iface, current: changed, rule,

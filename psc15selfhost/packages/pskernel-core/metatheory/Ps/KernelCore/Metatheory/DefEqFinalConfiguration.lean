@@ -948,3 +948,247 @@ theorem psKernelDefEqUnitLikeWith_configuration_preserves
               simp at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact hReducedConfig
+
+
+theorem psKernelDefEqStringLitExpansionCoreWith_true_refines
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqStringLitExpansionCoreWith
+          defeq whnf context state left right =
+        Except.ok (Prod.mk (Option.some true) nextState)) :
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  simp only [psKernelDefEqStringLitExpansionCoreWith] at hSuccess
+  cases left with
+  | lit literal =>
+      cases literal with
+      | str value =>
+          by_cases hString :
+              psKernelExprIsStringOfListApp right = true
+          · rw [if_pos hString] at hSuccess
+            cases hWhnfRun :
+                whnf
+                  context
+                  state
+                  (psKernelStringLitToConstructor value) with
+            | error error =>
+                simp only [hWhnfRun] at hSuccess
+                simp at hSuccess
+            | ok whnfRun =>
+                simp only [hWhnfRun] at hSuccess
+                rcases whnfRun with ⟨expanded, whnfState⟩
+                have hWhnfSemantic :=
+                  hWhnf
+                    context state whnfState
+                    (psKernelStringLitToConstructor value)
+                    expanded
+                    hConfig hWhnfRun
+                cases hEqRun :
+                    defeq
+                      context
+                      whnfState
+                      expanded
+                      right with
+                | error error =>
+                    simp only [hEqRun] at hSuccess
+                    simp at hSuccess
+                | ok eqRun =>
+                    simp only [hEqRun] at hSuccess
+                    rcases eqRun with ⟨eqValue, eqState⟩
+                    simp at hSuccess
+                    rcases hSuccess with ⟨rfl, rfl⟩
+                    have hEqSemantic :=
+                      (hDefEq
+                        context
+                        whnfState
+                        eqState
+                        expanded
+                        right
+                        true
+                        hWhnfSemantic.2
+                        hEqRun).2 rfl
+                    have hLiteralReduction :
+                        PsKernelReductionClosure
+                          context.environment
+                          context.localContext
+                          (PsKernelExpr.lit
+                            (PsKernelLiteral.str value))
+                          expanded :=
+                      PsKernelReductionClosure.cons
+                        (PsKernelExpr.lit
+                          (PsKernelLiteral.str value))
+                        (psKernelStringLitToConstructor value)
+                        expanded
+                        (PsKernelReductionStep.stringLiteral value)
+                        hWhnfSemantic.1
+                    exact
+                      PsKernelDefEqJudgment.reduceCompare
+                        (PsKernelExpr.lit
+                          (PsKernelLiteral.str value))
+                        right
+                        expanded
+                        right
+                        hLiteralReduction
+                        (PsKernelReductionClosure.refl right)
+                        hEqSemantic
+          · rw [if_neg hString] at hSuccess
+            simp at hSuccess
+      | nat value =>
+          simp at hSuccess
+  | _ =>
+      simp at hSuccess
+
+
+theorem psKernelDefEqStringLitExpansionWith_true_refines
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqStringLitExpansionWith
+          defeq whnf context state left right =
+        Except.ok (Prod.mk (Option.some true) nextState)) :
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  simp only [psKernelDefEqStringLitExpansionWith] at hSuccess
+  cases hFirst :
+      psKernelDefEqStringLitExpansionCoreWith
+        defeq whnf context state left right with
+  | error error =>
+      simp only [hFirst] at hSuccess
+      simp at hSuccess
+  | ok firstRun =>
+      simp only [hFirst] at hSuccess
+      rcases firstRun with ⟨firstAnswer, firstState⟩
+      have hFirstConfig :=
+        psKernelDefEqStringLitExpansionCoreWith_configuration_preserves
+          defeq whnf hDefEq hWhnf
+          context state firstState
+          left right firstAnswer
+          hConfig hFirst
+      cases firstAnswer with
+      | some firstValue =>
+          cases firstValue with
+          | false =>
+              simp at hSuccess
+          | true =>
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact
+                psKernelDefEqStringLitExpansionCoreWith_true_refines
+                  defeq whnf hDefEq hWhnf
+                  context state firstState
+                  left right hConfig hFirst
+      | none =>
+          cases hSecond :
+              psKernelDefEqStringLitExpansionCoreWith
+                defeq whnf
+                context firstState right left with
+          | error error =>
+              simp only [hSecond] at hSuccess
+              simp at hSuccess
+          | ok secondRun =>
+              simp only [hSecond] at hSuccess
+              rcases secondRun with ⟨secondAnswer, secondState⟩
+              cases secondAnswer with
+              | none =>
+                  simp at hSuccess
+              | some secondValue =>
+                  cases secondValue with
+                  | false =>
+                      simp at hSuccess
+                  | true =>
+                      simp at hSuccess
+                      rcases hSuccess with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelDefEqJudgment.symm
+                          right
+                          left
+                          (psKernelDefEqStringLitExpansionCoreWith_true_refines
+                            defeq whnf hDefEq hWhnf
+                            context firstState secondState
+                            right left hFirstConfig hSecond)
+
+
+theorem psKernelDefEqStringLitExpansionWith_optional_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : Option Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqStringLitExpansionWith
+          defeq whnf context state left right =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelOptionalDefEqPostcondition
+      context nextState left right answer := by
+  refine
+    ⟨
+      psKernelDefEqStringLitExpansionWith_configuration_preserves
+        defeq whnf hDefEq hWhnf
+        context state nextState
+        left right answer
+        hConfig hSuccess,
+      ?_
+    ⟩
+  cases answer with
+  | none =>
+      trivial
+  | some value =>
+      cases value with
+      | false =>
+          trivial
+      | true =>
+          exact
+            psKernelDefEqStringLitExpansionWith_true_refines
+              defeq whnf hDefEq hWhnf
+              context state nextState
+              left right hConfig hSuccess

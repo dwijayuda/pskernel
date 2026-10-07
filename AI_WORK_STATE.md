@@ -4,9 +4,10 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `786f99bf5a4bbd5496d4de4c35bd0d06c0ea9e21`
-- Last green package proof checkpoint: `60138932a8b7671c6db9c0c0e1f689a05445f938` (run #381).
+- Current proof implementation HEAD reconciled in this state: `dc6ab92367b6b2aaabddad6b76a54f83020647dd`
+- Last green package proof checkpoint: `dc6ab92367b6b2aaabddad6b76a54f83020647dd` (run #396).
 - Run #381 is green: the registered `WhnfCoreConfiguration.lean` fuel induction and its public `false/false` specialization compile on the full package proof gate.
+- Run #396 is green: complete primitive-Nat refinement, `psKernelReduceNatWith` optional-reduction soundness, post-core native/Nat/delta/cache composition, and `psKernelWhnfWithFuel_configuration_sound_contract` all compile as registered metatheory.
 - Run #328 validated the eager-reduce context transport fix.
 - The checked-inference fuel proof now closes projection recursion through the smaller-fuel induction hypothesis and configuration-aware projection semantics.
 - Checked projection is fully registered and green as of run #346.
@@ -73,7 +74,9 @@ The audit is conservative relative to newer cross-module checker-contract/contex
 - Runs #371-#379 progressively isolated WHNF branch equation alignment; no production semantic defect was found.
 - Run #380 is green: `WhnfCoreApplication.lean` and `WhnfCoreProjection.lean` compile together after naming the application-tail operational runs and mirroring production control flow.
 - WHNF core is now split into independent Assurance Plane modules for application and projection refinement instead of one monolithic proof.
-- `WhnfCoreConfiguration.lean` is registered as a metatheory root and owns the composed fuel induction. It also exposes the `false/false` core specialization consumed by public WHNF. Run #381 is validating this layer.
+- `WhnfCoreConfiguration.lean` is registered as a metatheory root and owns the composed fuel induction. It exposes the `false/false` core specialization consumed by public WHNF.
+- `PrimitiveNatReduction.lean` now proves the full Nat primitive table, Nat constructor/literal normalization, `psKernelReduceNatWith` state preservation, semantic success refinement, and the optional-reduction configuration contract.
+- `WhnfConfiguration.lean` is registered and green. It proves post-core composition and the full public WHNF fuel theorem under explicit recursor, beta-spine, and native-reduction contracts. Native reduction remains an intentional TCB law; recursor and beta-spine remain proof obligations.
 - The semantic audit remains conservatively A=44/B=9/C=19/D=7 until a criteria-based refresh after concrete checker closure.
 
 ## Current blocker
@@ -81,10 +84,10 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- close the public WHNF post-core composition now that WHNF-core is green;
-- first complete a reusable `psKernelReduceNatWith` optional-reduction configuration theorem, including the currently unmodeled Pow/GCD/bitwise/shift result forms, so public WHNF does not hide primitive Nat behavior behind an assumption;
-- compose core reduction + explicit `PsKernelNativeReductionSoundLaw` TCB + Nat optional reduction + delta unfolding + `psKernelWhnfFinish` cache publication into the public WHNF fuel theorem;
-- after public WHNF, continue to concrete DefEq, checker-knot composition, admission refinement, final implementation refinement, and integration reconciliation.
+- instantiate the green public-WHNF theorem in the concrete mutually recursive checker knot;
+- discharge `PsKernelBetaSpineSoundLaw` as a real proof obligation (not a TCB assumption);
+- prove `PsKernelRecursorReductionConfigurationSound` for the bounded concrete recursor together with concrete DefEq/inference dependencies by a shared fuel/configuration argument;
+- then close concrete DefEq stateful soundness and compose public checked/infer-only/WHNF/DefEq contracts through `Checker/Knot`.
 
 Architectural blockers still remaining:
 - compose the already-proved checked/infer-only core and public-wrapper contracts with concrete WHNF/DefEq components in the checker knot;
@@ -95,9 +98,9 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Prove complete `psKernelReduceNatWith` optional-reduction configuration soundness, adding independent reduction constructors/lemmas for the remaining primitive Nat operations as needed.
-2. Lift the green WHNF-core theorem to public WHNF including native/Nat/delta post-core semantics and cache publication.
-3. Prove concrete DefEq configuration/stateful soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
+1. Prove `PsKernelBetaSpineSoundLaw` from substitution/list/reduction metatheory.
+2. Build the shared fuel/configuration theorem for the concrete recursor/WHNF/inference/DefEq knot, reusing the now-green public WHNF theorem rather than reproving WHNF branches.
+3. Close remaining concrete DefEq configuration/stateful soundness obligations, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
 4. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
 5. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
 6. Add the final explicit implementation-refinement theorem/family and refresh the semantic audit.

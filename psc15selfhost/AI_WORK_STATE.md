@@ -528,3 +528,13 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - The direct-Wasm progress/diagnostic path now uses the same ABI-completed validated target module as production before encoding, so performance telemetry measures the intended pipeline.
 - Added portable target-IR source/corpus gates. These are implementation boundaries only: SpecializedIR->target semantics, target-validator soundness and printer/encoder preservation remain assurance obligations.
 - Kernel implementation/proof work remains external and untouched by this branch.
+
+
+## 2026-10-07 target-stage/interoperability integration checkpoint
+
+- Kernel implementation/proof work remains external and untouched on this branch.
+- Repaired shared target-stage integration failures at their source: exhaustive JsIR validation error rendering, portable backend root registration, PSC1-safe Bool encoding, exhaustive Wasm parse->elaborate progress transition, and independently valid changed-interface evidence.
+- Direct JS now has one lower -> ValidateJsIR -> canonical JsIR -> print-same-value pipeline. Direct Wasm has one lower -> self-host ABI -> ValidateWasmIR -> canonical WasmIR -> encode-same-value pipeline. Checked host/build/archive evidence binds exact target IR artifacts and splits SpecializedIR -> target IR -> executable edges.
+- Added independent host target-IR decoders and portable JsIR/WasmIR structural corpora. These are implementation validation boundaries; global target preservation remains assurance work.
+- Added canonical InterfaceIR artifact encoding plus independent host InterfaceIR->WIT reproduction. This binds the exact interface/world object underlying WIT while keeping Canonical ABI/runtime behavior explicitly pending and separate from core Wasm.
+- Current next gate: restore full self-host matrix on the portable target encoders; then use direct-Wasm parse-vs-elaborate timing to optimize the dominant subsystem family without changing fixed-point equality.

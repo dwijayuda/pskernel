@@ -129,3 +129,18 @@ Architectural blockers still remaining:
 - Cache-policy regression proofs cover direct and nested fvar keys plus pair-cache ineligibility.
 - Run #304 is the first full proof-tree validation of the source fix.
 - Do not weaken `PsKernelCheckerStateSemanticSound` to hide cache-scope issues.
+
+
+## Arena/Mathlib validation lane — 2026-10-07
+
+- Branch: `pscv/pskernel-core-arena-v1`.
+- Base: green PSKernel proof checkpoint `f470e89395a58b34ba1a76219d484b8612abca38` (proof run #397 succeeded).
+- Purpose: empirical Lean compatibility/adversarial/large-corpus validation only. This lane does not weaken or replace the metatheory acceptance criteria.
+- Added host-only `Ps.Host.KernelCoreArena` adapter. It reuses the archived `PSC1Kernel.ReplayJson` only for Lean4Export 3.1.0 parsing/intern-table transport, converts transport values to canonical `PsKernel*` values, and sends declaration requests through `psKernelV1AdmitDeclaration`. It does not call the archived kernel checker for semantic decisions.
+- Added `psc_kernel_core_arena` with Arena exit semantics: 0 accepted, 1 rejected-invalid, 2 declined/resource bound, 3 adapter/internal failure.
+- Added explicit Lean 4.34.1 Arena metadata compatibility bridge. GitHub comparison `leanprover/lean4 v4.34.0..v4.34.1` has no `src/kernel/**` changes; the kernel contract remains pinned to 4.34.0 while the adapter accepts 4.34.1 exports under that audited semantic delta.
+- Registered replay transport modules and the Arena executable in Lake.
+- Added `.github/workflows/pskernel-core-arena.yml` to build the checker, verify the pinned semantic Lean hash, run a metadata smoke stream, and replay the full checked-in Lean 4.34.0 `Init.Prelude` export.
+- Current validation run: Arena readiness run #7 at `021c692a0378c098702d0a6701b739b06466a6ae`, active while this state was written.
+- Next after the native/Prelude gate is green: add a pinned-prelude bootstrap for Arena streams that omit `Init.Prelude`; run tutorial and soundness/bug corpora; then Init/Std; finally stream the Arena Mathlib export and record wall time/peak RSS/verdict counts.
+- No Mathlib-complete or Arena-complete claim has been made yet.

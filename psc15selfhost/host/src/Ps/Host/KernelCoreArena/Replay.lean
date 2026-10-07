@@ -31,7 +31,11 @@ def fromKernelError : PsKernelError -> Failure
   | .rejectedInvalid message => .rejected message
   | .declinedUnsupported message => .declined message
   | .resourceExhausted _ message => .resource message
-  | .internalError message => .internal message
+  | .internalError message =>
+      if message.endsWith "budget exhausted" then
+        .resource message
+      else
+        .internal message
 
 def liftKernel (result : Except PsKernelError α) : Except Failure α :=
   match result with
@@ -157,7 +161,10 @@ def orderDefinitions
 
 def arenaResources : PsKernelResourcePolicy :=
   { psKernelResourcePolicyDefault with
-    fuel := 262144
+    -- Arena supplies an external wall-clock timeout. This high internal bound
+    -- avoids turning PSKernel's portable recursion fuel into a semantic
+    -- incompatibility with Lean's kernel on large valid declarations.
+    fuel := 16777216
     maxDeclarations := 0 }
 
 structure State where

@@ -1900,3 +1900,265 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
                 start
                 (Nat.succ remaining) := by
                   rw [psKernelExprLiftLooseBVarsReference_proj]
+
+
+/-
+Fuel-free reference semantics for the lambda-prefix counter used by WHNF.
+The executable counter is fuel-bounded only for portability; semantically it
+walks a structurally decreasing chain of nested lambda bodies.
+-/
+def psKernelWhnfCountLambdasReference
+    (current : PsKernelExpr)
+    (argCount count : Nat) :
+    Prod PsKernelExpr Nat :=
+  match current with
+  | PsKernelExpr.lam _ _ body _ =>
+      if psKernelNatLt count argCount then
+        let nextCount := Nat.succ count
+        if psKernelNatLt nextCount argCount then
+          match body with
+          | PsKernelExpr.lam _ _ _ _ =>
+              psKernelWhnfCountLambdasReference
+                body argCount nextCount
+          | _ =>
+              Prod.mk current nextCount
+        else
+          Prod.mk current nextCount
+      else
+        Prod.mk current count
+  | _ =>
+      Prod.mk current count
+termination_by current
+
+
+theorem psKernelWhnfCountLambdasWithFuel_refines_reference
+    (current : PsKernelExpr)
+    (argCount count fuel : Nat)
+    (hFuel :
+      psKernelExprNodeCount current < fuel) :
+    psKernelWhnfCountLambdasWithFuel
+        fuel current argCount count =
+      psKernelWhnfCountLambdasReference
+        current argCount count := by
+  induction current generalizing fuel count with
+  | bvar index =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | fvar name =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | mvar name =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | sort level =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | const name levels =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | app fn arg ihFn ihArg =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | forallE name type body binderInfo ihType ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | letE name type value body nondep ihType ihValue ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | lit literal =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | mdata metadata body ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | proj typeName index body ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          rfl
+  | lam name type body binderInfo ihType ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          cases hCount :
+              psKernelNatLt count argCount with
+          | false =>
+              simp [
+                psKernelWhnfCountLambdasWithFuel,
+                psKernelWhnfCountLambdasReference,
+                hCount
+              ]
+          | true =>
+              let nextCount := Nat.succ count
+              cases hNext :
+                  psKernelNatLt nextCount argCount with
+              | false =>
+                  simp [
+                    psKernelWhnfCountLambdasWithFuel,
+                    psKernelWhnfCountLambdasReference,
+                    hCount,
+                    nextCount,
+                    hNext
+                  ]
+              | true =>
+                  cases body with
+                  | lam bodyName bodyType bodyBody bodyInfo =>
+                      have hBodyFuel :
+                          psKernelExprNodeCount
+                              (PsKernelExpr.lam
+                                bodyName
+                                bodyType
+                                bodyBody
+                                bodyInfo) <
+                            remaining := by
+                        simp [psKernelExprNodeCount] at hFuel
+                        omega
+                      have ih :=
+                        ihBody
+                          remaining
+                          nextCount
+                          hBodyFuel
+                      simpa [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ] using ih
+                  | bvar index =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | fvar bodyName =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | mvar bodyName =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | sort bodyLevel =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | const bodyName bodyLevels =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | app bodyFn bodyArg =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | forallE bodyName bodyType bodyBody bodyInfo =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | letE bodyName bodyType bodyValue bodyBody bodyNondep =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | lit bodyLiteral =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | mdata bodyMetadata bodyBody =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+                  | proj bodyTypeName bodyIndex bodyBody =>
+                      simp [
+                        psKernelWhnfCountLambdasWithFuel,
+                        psKernelWhnfCountLambdasReference,
+                        hCount,
+                        nextCount,
+                        hNext
+                      ]
+
+
+theorem psKernelWhnfCountLambdas_refines_reference
+    (current : PsKernelExpr)
+    (argCount : Nat) :
+    psKernelWhnfCountLambdas current argCount =
+      psKernelWhnfCountLambdasReference
+        current argCount 0 := by
+  unfold psKernelWhnfCountLambdas
+  exact
+    psKernelWhnfCountLambdasWithFuel_refines_reference
+      current
+      argCount
+      0
+      (Nat.succ (psKernelExprNodeCount current))
+      (Nat.lt_succ_self
+        (psKernelExprNodeCount current))

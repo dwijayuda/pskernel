@@ -1318,6 +1318,133 @@ theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
               exact ⟨hNormalizedSemantic.1, trivial⟩
 
 
+def psKernelReduceInductiveRecFactoredWith
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (cheapRec cheapProj : Bool) :
+    Except String
+      (Prod (Option PsKernelExpr) PsKernelCheckerState) :=
+  let recSpine :=
+    psKernelExprGetAppFnArgs expr
+  match Prod.fst recSpine with
+  | PsKernelExpr.const recName recLevels =>
+      match
+          psKernelEnvironmentFind
+            context.environment
+            recName with
+      | Option.some info =>
+          match info with
+          | PsKernelConstantInfo.recInfo recursor =>
+              let recArgs :=
+                Prod.snd recSpine
+              let majorIndex :=
+                Nat.add
+                  recursor.numParams
+                  (Nat.add
+                    recursor.numMotives
+                    (Nat.add
+                      recursor.numMinors
+                      recursor.numIndices))
+              if
+                  psKernelNatGe
+                    majorIndex
+                    (psKernelExprListLength recArgs) then
+                Except.ok
+                  (Prod.mk Option.none state)
+              else
+                match
+                    psKernelExprListGet
+                      recArgs
+                      majorIndex with
+                | Option.none =>
+                    Except.ok
+                      (Prod.mk Option.none state)
+                | Option.some major0 =>
+                    psKernelReduceInductiveRecMajorTailWith
+                      publicWhnf
+                      coreWhnf
+                      inferType
+                      defeq
+                      context
+                      state
+                      recursor
+                      recLevels
+                      recArgs
+                      major0
+                      cheapRec
+                      cheapProj
+          | _ =>
+              Except.ok
+                (Prod.mk Option.none state)
+      | Option.none =>
+          Except.ok
+            (Prod.mk Option.none state)
+  | _ =>
+      Except.ok
+        (Prod.mk Option.none state)
+
+
+theorem psKernelReduceInductiveRecWith_eq_factored
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (cheapRec cheapProj : Bool) :
+    psKernelReduceInductiveRecWith
+        publicWhnf coreWhnf inferType defeq
+        context state expr cheapRec cheapProj =
+      psKernelReduceInductiveRecFactoredWith
+        publicWhnf coreWhnf inferType defeq
+        context state expr cheapRec cheapProj := by
+  rfl
+
+
 theorem psKernelEnvironmentFind_some_authoritative
     (environment : PsKernelEnvironment)
     (name : PsKernelName)

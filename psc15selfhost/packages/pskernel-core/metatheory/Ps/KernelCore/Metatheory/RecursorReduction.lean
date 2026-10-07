@@ -1981,30 +1981,20 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                       recursor.numMinors
                       recursor.numIndices))
               revert hSuccess
-              cases hShort :
+              cases hShortRaw :
                   psKernelNatGe
-                    majorIndex
-                    (psKernelExprListLength recArgs) with
+                    (Nat.add
+                      recursor.numParams
+                      (Nat.add
+                        recursor.numMotives
+                        (Nat.add
+                          recursor.numMinors
+                          recursor.numIndices)))
+                    (psKernelExprListLength
+                      (Prod.snd
+                        (psKernelExprGetAppFnArgs expr))) with
               | true =>
                   intro hSuccess
-                  have hShortRaw :
-                      psKernelNatGe
-                          (Nat.add
-                            recursor.numParams
-                            (Nat.add
-                              recursor.numMotives
-                              (Nat.add
-                                recursor.numMinors
-                                recursor.numIndices)))
-                          (psKernelExprListLength
-                            (Prod.snd
-                              (psKernelExprGetAppFnArgs expr))) =
-                        true := by
-                    simpa [
-                      majorIndex,
-                      recArgs,
-                      recSpine
-                    ] using hShort
                   simp [
                     psKernelReduceInductiveRecFactoredWith,
                     recSpine,
@@ -2016,48 +2006,20 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                   exact ⟨hConfig, trivial⟩
               | false =>
                   intro hSuccess
-                  have hShortRaw :
-                      psKernelNatGe
-                          (Nat.add
-                            recursor.numParams
-                            (Nat.add
-                              recursor.numMotives
-                              (Nat.add
-                                recursor.numMinors
-                                recursor.numIndices)))
-                          (psKernelExprListLength
-                            (Prod.snd
-                              (psKernelExprGetAppFnArgs expr))) =
-                        false := by
-                    simpa [
-                      majorIndex,
-                      recArgs,
-                      recSpine
-                    ] using hShort
                   revert hSuccess
-                  cases hMajor :
+                  cases hMajorRaw :
                       psKernelExprListGet
-                        recArgs
-                        majorIndex with
+                        (Prod.snd
+                          (psKernelExprGetAppFnArgs expr))
+                        (Nat.add
+                          recursor.numParams
+                          (Nat.add
+                            recursor.numMotives
+                            (Nat.add
+                              recursor.numMinors
+                              recursor.numIndices))) with
                   | none =>
                       intro hSuccess
-                      have hMajorRaw :
-                          psKernelExprListGet
-                              (Prod.snd
-                                (psKernelExprGetAppFnArgs expr))
-                              (Nat.add
-                                recursor.numParams
-                                (Nat.add
-                                  recursor.numMotives
-                                  (Nat.add
-                                    recursor.numMinors
-                                    recursor.numIndices))) =
-                            Option.none := by
-                        simpa [
-                          majorIndex,
-                          recArgs,
-                          recSpine
-                        ] using hMajor
                       simp [
                         psKernelReduceInductiveRecFactoredWith,
                         recSpine,
@@ -2070,23 +2032,14 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                       exact ⟨hConfig, trivial⟩
                   | some major0 =>
                       intro hSuccess
-                      have hMajorRaw :
-                          psKernelExprListGet
-                              (Prod.snd
-                                (psKernelExprGetAppFnArgs expr))
-                              (Nat.add
-                                recursor.numParams
-                                (Nat.add
-                                  recursor.numMotives
-                                  (Nat.add
-                                    recursor.numMinors
-                                    recursor.numIndices))) =
-                            Option.some major0 := by
-                        simpa [
-                          majorIndex,
-                          recArgs,
-                          recSpine
-                        ] using hMajor
+                      simp [
+                        psKernelReduceInductiveRecFactoredWith,
+                        recSpine,
+                        hHead,
+                        hFind,
+                        hShortRaw,
+                        hMajorRaw
+                      ] at hSuccess
                       have hInline :
                           psKernelReduceInductiveRecMajorInlineTailWith
                               publicWhnf
@@ -2104,12 +2057,8 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                             Except.ok
                               (Prod.mk answer nextState) := by
                         simpa [
-                          psKernelReduceInductiveRecFactoredWith,
-                          recSpine,
-                          hHead,
-                          hFind,
-                          hShortRaw,
-                          hMajorRaw
+                          recArgs,
+                          recSpine
                         ] using hSuccess
                       have hTail :
                           psKernelReduceInductiveRecMajorTailWith
@@ -2172,7 +2121,11 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                             rfl)
                           hFind
                           (by
-                            simpa [majorIndex] using hMajor)
+                            simpa [
+                              majorIndex,
+                              recArgs,
+                              recSpine
+                            ] using hMajorRaw)
                           hTail
                       cases answer with
                       | none =>

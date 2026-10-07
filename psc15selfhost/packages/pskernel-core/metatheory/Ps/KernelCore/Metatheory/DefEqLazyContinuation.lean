@@ -422,3 +422,135 @@ theorem psKernelDefEqLazyStep_configuration_sound_of_branches
               context state nextState
               left right leftDef rightDef answer
               hLeftDef hRightDef hConfig hBranch
+
+
+/-
+Fuel induction for projection-sensitive lazy comparison.
+
+A terminal computed-field comparison is justified by projection reduction.
+A direct equal result is justified by projection congruence. Recursive or
+terminal residual comparisons are transported through *projection-major
+reduction closures* and the specific reduceCompare semantic constructor.
+No general transitivity of algorithmic DefEq is assumed.
+-/
+theorem psKernelDefEqLazyProjReductionWithFuel_configuration_sound
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hStep :
+      PsKernelDeltaStepConfigurationSound
+        (psKernelDefEqLazyStep defeq coreWhnf))
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (typeName : PsKernelName)
+    (index : Nat)
+    (value : Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqLazyProjReductionWithFuel
+          fuel defeq coreWhnf
+          context state left right typeName index =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext
+          (PsKernelExpr.proj typeName index left)
+          (PsKernelExpr.proj typeName index right)) := by
+  induction fuel generalizing state nextState left right with
+  | zero =>
+      simp [psKernelDefEqLazyProjReductionWithFuel] at hRun
+  | succ remaining ih =>
+      have liftResult
+          (nextLeft nextRight : PsKernelExpr)
+          (hLeft :
+            PsKernelReductionClosure
+              context.environment context.localContext
+              left nextLeft)
+          (hRight :
+            PsKernelReductionClosure
+              context.environment context.localContext
+              right nextRight)
+          (hResult :
+            PsKernelCheckerConfigurationSound context nextState ∧
+              (value = true ->
+                PsKernelDefEqJudgment
+                  context.environment context.localContext
+                  (PsKernelExpr.proj typeName index nextLeft)
+                  (PsKernelExpr.proj typeName index nextRight))) :
+          PsKernelCheckerConfigurationSound context nextState ∧
+            (value = true ->
+              PsKernelDefEqJudgment
+                context.environment context.localContext
+                (PsKernelExpr.proj typeName index left)
+                (PsKernelExpr.proj typeName index right)) := by
+        refine ⟨hResult.1, ?_⟩
+        intro hTrue
+        exact
+          PsKernelDefEqJudgment.reduceCompare
+            (PsKernelExpr.proj typeName index left)
+            (PsKernelExpr.proj typeName index right)
+            (PsKernelExpr.proj typeName index nextLeft)
+            (PsKernelExpr.proj typeName index nextRight)
+            (PsKernelReductionClosure.projectionMajor
+              typeName index left nextLeft hLeft)
+            (PsKernelReductionClosure.projectionMajor
+              typeName index right nextRight hRight)
+            (hResult.2 hTrue)
+      simp only [psKernelDefEqLazyProjReductionWithFuel] at hRun
+      cases hStepRun :
+          psKernelDefEqLazyStep
+            defeq coreWhnf context state left right with
+      | error error =>
+          simp only [hStepRun] at hRun
+          simp at hRun
+      | ok stepRun =>
+          simp only [hStepRun] at hRun
+          rcases stepRun with ⟨answer, stepState⟩
+          have hStepSound :=
+            hStep context state stepState left right answer
+              hConfig hStepRun
+          cases answer with
+          | «continue» nextLeft nextRight =>
+              exact
+                liftResult nextLeft nextRight
+                  hStepSound.2.1 hStepSound.2.2
+                  (ih stepState nextState nextLeft nextRight
+                    hStepSound.1 hRun)
+          | equal =>
+              simp at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              refine ⟨hStepSound.1, ?_⟩
+              intro _
+              exact
+                PsKernelDefEqJudgment.projection
+                  typeName index left right hStepSound.2
+          | unknown nextLeft nextRight =>
+              exact
+                liftResult nextLeft nextRight
+                  hStepSound.2.1 hStepSound.2.2
+                  (psKernelDefEqLazyProjFinish_configuration_sound
+                    defeq hDefEq context stepState nextState
+                    nextLeft nextRight typeName index value
+                    hStepSound.1 hRun)
+          | different nextLeft nextRight =>
+              exact
+                liftResult nextLeft nextRight
+                  hStepSound.2.1 hStepSound.2.2
+                  (psKernelDefEqLazyProjFinish_configuration_sound
+                    defeq hDefEq context stepState nextState
+                    nextLeft nextRight typeName index value
+                    hStepSound.1 hRun)

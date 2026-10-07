@@ -1,4 +1,5 @@
 import Ps.BackendJs.Lower
+import Ps.BackendJs.Validate
 import Ps.BackendJs.TailAlias
 import Ps.Bridge.Json
 import Ps.Foundation.List
@@ -6,6 +7,7 @@ import Ps.Foundation.Name
 
 inductive PsJsEmitError where
   | lower (error : PsJsLowerError)
+  | targetValidation (error : PsJsIrValidationError)
   | fuelExhausted
   | malformedIr
 
@@ -1581,7 +1583,11 @@ def psJsEmitValidatedModuleStackSafeWithTargetProfile
   | Except.error error =>
       Except.error (PsJsEmitError.lower error)
   | Except.ok jsIr =>
-      psJsPrintModuleStackSafe jsIr
+      match psJsValidateModule jsIr with
+      | Except.error error =>
+          Except.error (PsJsEmitError.targetValidation error)
+      | Except.ok _ =>
+          psJsPrintModuleStackSafe jsIr
 
 def psJsEmitValidatedModuleWithTargetProfile
     (profile : PsJsTargetProfile)
@@ -1594,7 +1600,11 @@ def psJsEmitValidatedModuleWithTargetProfile
   | Except.error error =>
       Except.error (PsJsEmitError.lower error)
   | Except.ok jsIr =>
-      psJsPrintModule jsIr
+      match psJsValidateModule jsIr with
+      | Except.error error =>
+          Except.error (PsJsEmitError.targetValidation error)
+      | Except.ok _ =>
+          psJsPrintModule jsIr
 
 def psJsEmitValidatedModule
     (module : PsValidatedIrModule) :
@@ -1603,4 +1613,8 @@ def psJsEmitValidatedModule
   | Except.error error =>
       Except.error (PsJsEmitError.lower error)
   | Except.ok jsIr =>
-      psJsPrintModule jsIr
+      match psJsValidateModule jsIr with
+      | Except.error error =>
+          Except.error (PsJsEmitError.targetValidation error)
+      | Except.ok _ =>
+          psJsPrintModule jsIr

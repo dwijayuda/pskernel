@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Inference.Core
 import Ps.KernelCore.Checker.Reduction.Whnf
+import Ps.KernelCore.Checker.Recursor.Analysis
 import Ps.KernelCore.Metatheory.Context
 
 /-

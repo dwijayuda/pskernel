@@ -386,7 +386,8 @@ def psKernelReverseMutualRecursiveFields
     List.nil
 
 def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
-    (fuel : Nat) :
+    (fuel : Nat)
+    (checkerFuel : Nat) :
     PsKernelCheckerSession ->
     List PsKernelName ->
     List PsKernelSimpleMutualTypeShape ->
@@ -414,7 +415,8 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
   | Nat.succ remaining =>
       let smaller :=
         psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
-          remaining;
+          remaining
+          checkerFuel;
       fun
         (session : PsKernelCheckerSession)
         (targets : List PsKernelName)
@@ -445,7 +447,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
         | Option.none =>
             match
                 psKernelSessionWhnf
-                  remaining
+                  checkerFuel
                   session
                   domain with
             | Except.error error =>
@@ -535,6 +537,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
                           Option.none)
 
 def psKernelAnalyzeSimpleMutualRecursiveArgument
+    (checkerFuel : Nat)
     (session : PsKernelCheckerSession)
     (targets : List PsKernelName)
     (shapes : List PsKernelSimpleMutualTypeShape)
@@ -545,6 +548,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgument
     Except String PsKernelMutualRecursiveArgumentResult :=
   psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
     (Nat.succ (psKernelExprNodeCount domain))
+    checkerFuel
     session
     targets
     shapes
@@ -655,6 +659,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                               binderInfo;
                           match
                               psKernelAnalyzeSimpleMutualRecursiveArgument
+                                remaining
                                 child
                                 targets
                                 shapes

@@ -79,6 +79,17 @@ def coreName : PSC1Kernel.Name -> PsKernelName
   | .str parent value => .str (coreName parent) value
   | .num parent value => .num (coreName parent) value
 
+def coreNameText : PsKernelName -> String
+  | .anonymous => "_"
+  | .str parent value =>
+      match parent with
+      | .anonymous => value
+      | _ => coreNameText parent ++ "." ++ value
+  | .num parent value =>
+      match parent with
+      | .anonymous => toString value
+      | _ => coreNameText parent ++ "." ++ toString value
+
 def coreLevel : PSC1Kernel.Level -> PsKernelLevel
   | .zero => .zero
   | .succ level => .succ (coreLevel level)
@@ -351,6 +362,28 @@ def State.validateQuotRecord
     throw (.rejected "exported Quot kind mismatch")
   pure prepared
 
+def State.declarationLabel
+    (state : State)
+    (record : PSC1Kernel.Replay.Record) : Except Failure String := do
+  match record with
+  | .axiomR value =>
+      pure ("axiom " ++ coreNameText (← state.nameAt value.name))
+  | .definitionR value =>
+      pure ("definition " ++ coreNameText (← state.nameAt value.name))
+  | .theoremR value =>
+      pure ("theorem " ++ coreNameText (← state.nameAt value.name))
+  | .opaqueR value =>
+      pure ("opaque " ++ coreNameText (← state.nameAt value.name))
+  | .quotR value =>
+      pure ("quot " ++ coreNameText (← state.nameAt value.name))
+  | .inductiveR value =>
+      match value.types with
+      | [] => pure "inductive <empty>"
+      | first :: _ =>
+          pure ("inductive " ++ coreNameText (← state.nameAt first.name))
+  | _ =>
+      pure "non-declaration"
+
 def State.addDeclaration
     (state : State)
     (record : PSC1Kernel.Replay.Record) : Except Failure State := do
@@ -442,12 +475,16 @@ def State.replayRecord
       .quotR _ | .inductiveR _ => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
-      let next ← state.addDeclaration record
-      pure {
-        next with
-        records := state.records + 1
-        declarations := state.declarations + 1
-      }
+      let label ← state.declarationLabel record
+      match state.addDeclaration record with
+      | .error failure =>
+          throw (failure.withContext (label ++ ": "))
+      | .ok next =>
+          pure {
+            next with
+            records := state.records + 1
+            declarations := state.declarations + 1
+          }
 
 def State.replayLine
     (state : State)

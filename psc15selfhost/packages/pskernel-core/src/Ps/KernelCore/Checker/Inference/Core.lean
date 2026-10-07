@@ -9,6 +9,19 @@ threads checker state through recursive calls. The public distinction between
 is cached separately.
 -/
 
+/--
+Universe substitution is the identity when a constant has no level parameters.
+Avoid rebuilding a potentially large dependent type on every inference lookup.
+The nonempty-parameter path uses the unchanged general substitution operation.
+-/
+def psKernelInstantiateConstantType
+    (type : PsKernelExpr)
+    (params : List PsKernelName)
+    (levels : List PsKernelLevel) : PsKernelExpr :=
+  match params with
+  | List.nil => type
+  | List.cons _ _ => psKernelExprInstantiateLevelParams type params levels
+
 def psKernelInferenceDebugForallTerminalWithFuel
     (fuel : Nat)
     (whnf :
@@ -236,7 +249,7 @@ def psKernelInferCoreWithFuel
                               (psKernelLevelListLength levels) then
                           if inferOnly then
                             let result :=
-                              psKernelExprInstantiateLevelParams
+                              psKernelInstantiateConstantType
                                 (psKernelConstantInfoType info)
                                 params
                                 levels;
@@ -254,7 +267,7 @@ def psKernelInferCoreWithFuel
                                 psKernelDefinitionSafetyIsUnsafe
                                   nextContext.safety then
                               let result :=
-                                psKernelExprInstantiateLevelParams
+                                psKernelInstantiateConstantType
                                   (psKernelConstantInfoType info)
                                   params
                                   levels;
@@ -278,7 +291,7 @@ def psKernelInferCoreWithFuel
                                 "safe declaration uses partial constant"
                             else
                               let result :=
-                                psKernelExprInstantiateLevelParams
+                                psKernelInstantiateConstantType
                                   (psKernelConstantInfoType info)
                                   params
                                   levels;
@@ -292,7 +305,7 @@ def psKernelInferCoreWithFuel
                                     result))
                           else
                             let result :=
-                              psKernelExprInstantiateLevelParams
+                              psKernelInstantiateConstantType
                                 (psKernelConstantInfoType info)
                                 params
                                 levels;

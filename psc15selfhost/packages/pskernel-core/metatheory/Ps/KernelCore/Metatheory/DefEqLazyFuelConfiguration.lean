@@ -219,3 +219,92 @@ theorem psKernelDefEqLazyReductionAfterPred_configuration_sound
                           context rightState nextState
                           left right answer
                           hRightSound.1 hNativeRun
+
+
+/-
+The fast zero shortcut does not equate arbitrary syntactic expressions.
+Its supported representations are exactly Nat literal zero or an uninstantiated
+Nat.zero constructor. Each reduces to the same literal by a separately
+enumerated semantic reduction rule.
+-/
+theorem psKernelExprIsNatZero_reduces_to_literal
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (expr : PsKernelExpr)
+    (hZero : psKernelExprIsNatZero expr = true) :
+    PsKernelReductionClosure
+      environment localContext
+      expr
+      (PsKernelExpr.lit (PsKernelLiteral.nat 0)) := by
+  cases expr with
+  | lit literal =>
+      cases literal with
+      | nat value =>
+          cases value with
+          | zero =>
+              exact
+                PsKernelReductionClosure.refl
+                  (PsKernelExpr.lit (PsKernelLiteral.nat 0))
+          | succ predecessor =>
+              simp [psKernelExprIsNatZero] at hZero
+      | str value =>
+          simp [psKernelExprIsNatZero] at hZero
+  | const name levels =>
+      cases levels with
+      | nil =>
+          have hName :
+              psKernelNameEq name psKernelNatZeroName = true := by
+            simpa [psKernelExprIsNatZero] using hZero
+          exact
+            PsKernelReductionClosure.cons
+              (PsKernelExpr.const name List.nil)
+              (PsKernelExpr.lit (PsKernelLiteral.nat 0))
+              (PsKernelExpr.lit (PsKernelLiteral.nat 0))
+              (PsKernelReductionStep.natZeroLiteral name hName)
+              (PsKernelReductionClosure.refl
+                (PsKernelExpr.lit (PsKernelLiteral.nat 0)))
+      | cons level rest =>
+          simp [psKernelExprIsNatZero] at hZero
+  | bvar index =>
+      simp [psKernelExprIsNatZero] at hZero
+  | fvar name =>
+      simp [psKernelExprIsNatZero] at hZero
+  | mvar name =>
+      simp [psKernelExprIsNatZero] at hZero
+  | sort level =>
+      simp [psKernelExprIsNatZero] at hZero
+  | app fn arg =>
+      simp [psKernelExprIsNatZero] at hZero
+  | lam name type body binderInfo =>
+      simp [psKernelExprIsNatZero] at hZero
+  | forallE name type body binderInfo =>
+      simp [psKernelExprIsNatZero] at hZero
+  | letE name type value body nondep =>
+      simp [psKernelExprIsNatZero] at hZero
+  | mdata metadata body =>
+      simp [psKernelExprIsNatZero] at hZero
+  | proj typeName index body =>
+      simp [psKernelExprIsNatZero] at hZero
+
+
+theorem psKernelNatZeroPair_defeq
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (left right : PsKernelExpr)
+    (hLeft : psKernelExprIsNatZero left = true)
+    (hRight : psKernelExprIsNatZero right = true) :
+    PsKernelDefEqJudgment
+      environment localContext left right := by
+  exact
+    PsKernelDefEqJudgment.reduceCompare
+      left right
+      (PsKernelExpr.lit (PsKernelLiteral.nat 0))
+      (PsKernelExpr.lit (PsKernelLiteral.nat 0))
+      (psKernelExprIsNatZero_reduces_to_literal
+        environment localContext left hLeft)
+      (psKernelExprIsNatZero_reduces_to_literal
+        environment localContext right hRight)
+      (PsKernelDefEqJudgment.literal
+        (PsKernelLiteral.nat 0)
+        (PsKernelLiteral.nat 0)
+        rfl)

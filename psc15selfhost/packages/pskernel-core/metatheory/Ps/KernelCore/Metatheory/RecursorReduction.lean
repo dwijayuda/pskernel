@@ -84,6 +84,167 @@ def PsKernelRecursorStructureConversionConfigurationSound
         result
 
 
+theorem psKernelEnvironmentFind_some_authoritative
+    (environment : PsKernelEnvironment)
+    (name : PsKernelName)
+    (info : PsKernelConstantInfo)
+    (hIndex :
+      PsKernelEnvironmentIndexRefines environment)
+    (hFind :
+      psKernelEnvironmentFind environment name =
+        Option.some info) :
+    psKernelFindConstantInList
+        name
+        environment.constants =
+      Option.some info := by
+  have hRefines := hIndex name
+  unfold psKernelEnvironmentFind at hFind
+  calc
+    psKernelFindConstantInList
+        name
+        environment.constants =
+      psKernelFindConstantInList
+        name
+        (psKernelEnvironmentIndexFind
+          environment.index
+          name) := hRefines.symm
+    _ = Option.some info := hFind
+
+
+theorem psKernelRecursorIota_refines
+    (context : PsKernelCheckerContext)
+    (expr : PsKernelExpr)
+    (recName ctorName : PsKernelName)
+    (recLevels ctorLevels : List PsKernelLevel)
+    (recArgs majorArgs : List PsKernelExpr)
+    (recursor : PsKernelRecursorInfo)
+    (rule : PsKernelRecursorRule)
+    (major0 majorReduced major : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        (psKernelCheckerStateEmpty))
+    (hHead :
+      Prod.fst (psKernelExprGetAppFnArgs expr) =
+        PsKernelExpr.const recName recLevels)
+    (hArgs :
+      Prod.snd (psKernelExprGetAppFnArgs expr) =
+        recArgs)
+    (hFind :
+      psKernelEnvironmentFind
+          context.environment
+          recName =
+        Option.some
+          (PsKernelConstantInfo.recInfo recursor))
+    (hMajor :
+      psKernelExprListGet
+          recArgs
+          (Nat.add
+            recursor.numParams
+            (Nat.add
+              recursor.numMotives
+              (Nat.add
+                recursor.numMinors
+                recursor.numIndices))) =
+        Option.some major0)
+    (hMajorReduction :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        major0
+        majorReduced)
+    (hNormalize :
+      PsKernelRecursorMajorNormalization
+        majorReduced major)
+    (hCtorHead :
+      Prod.fst (psKernelExprGetAppFnArgs major) =
+        PsKernelExpr.const ctorName ctorLevels)
+    (hMajorArgs :
+      Prod.snd (psKernelExprGetAppFnArgs major) =
+        majorArgs)
+    (hRule :
+      psKernelFindRecursorRule
+          ctorName
+          recursor.rules =
+        Option.some rule)
+    (hFields :
+      psKernelNatGt
+          rule.nFields
+          (psKernelExprListLength majorArgs) =
+        false)
+    (hLevels :
+      Nat.beq
+          (psKernelLevelListLength recLevels)
+          (psKernelNameListLength
+            recursor.base.levelParams) =
+        true) :
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      expr
+      (psKernelApplyArgs
+        (psKernelApplyArgs
+          (psKernelApplyArgs
+            (psKernelExprInstantiateLevelParams
+              rule.rhs
+              recursor.base.levelParams
+              recLevels)
+            (psKernelExprListTake
+              (Nat.add
+                recursor.numParams
+                (Nat.add
+                  recursor.numMotives
+                  recursor.numMinors))
+              recArgs))
+          (psKernelExprListTake
+            rule.nFields
+            (psKernelExprListDrop
+              (Nat.sub
+                (psKernelExprListLength majorArgs)
+                rule.nFields)
+              majorArgs)))
+        (psKernelExprListDrop
+          (Nat.succ
+            (Nat.add
+              recursor.numParams
+              (Nat.add
+                recursor.numMotives
+                (Nat.add
+                  recursor.numMinors
+                  recursor.numIndices))))
+          recArgs)) := by
+  exact
+    PsKernelReductionClosure.recursorIota
+      expr
+      recName
+      ctorName
+      recLevels
+      ctorLevels
+      recArgs
+      majorArgs
+      recursor
+      rule
+      major0
+      majorReduced
+      major
+      hHead
+      hArgs
+      (psKernelEnvironmentFind_some_authoritative
+        context.environment
+        recName
+        (PsKernelConstantInfo.recInfo recursor)
+        hConfig.1
+        hFind)
+      hMajor
+      hMajorReduction
+      hNormalize
+      hCtorHead
+      hMajorArgs
+      hRule
+      hFields
+      hLevels
+
+
 theorem psKernelReduceRecursorWith_configuration_sound_of_inductive
     (publicWhnf :
       PsKernelCheckerContext ->

@@ -1,5 +1,21 @@
 # AI Work State
 
+## Arena native scaling continuation — 2026-10-08
+
+- Arena branch checkpoint before this state write: `fcf57da83b7d9a9e9a22c36a4e76fa331d6cf8f2`. Canonical GitHub branch and CI are the source of truth.
+- Full Init and Std remain limited by Lean Kernel Arena's per-test wall-clock budgets (Init 500 seconds, Std 590 seconds). These were `timeout` results (exit -9), not a proven semantic rejection. Full Mathlib has **not** started.
+- Pinned Init prefix replay first isolated a severe cost jump around exported line 362,000, including `_private.Init.Data.Array.Extract.0.Array.extract_append_extract._proof_1_1`. Direct-export DAG interning and removal of duplicate PSC1 transport preserve accepted test semantics but did not by themselves close the large-corpus timeout.
+- Current candidate acceleration fixes:
+  - `b34447d7d718daed1f038a05388ac2bf81879be9`: move `psKernelExprEq` subexpression recursion after matching the right expression's shape; same equality rules, less unnecessary traversal.
+  - `696eb83c4f08bebc450e0205d92f3b03004f4d06`: add a differential comparison grid against the archived PSC1 structural equality oracle, including binders, applications, lets, literals, metadata, and projections.
+  - `d108395c43ce8e116a20b2145612c74decb81496`: treat empty universe-parameter substitution during constant-type inference as identity; nonempty parameter cases use the unchanged algorithm.
+  - `96faeddd27002b81068b60d996ccfb0e63f4bbf5`: add identity and nonempty substitution regression.
+- One prior 361,500-record timing comparison (41.3s before, 23.6s after equality update) is **not conclusive** because independent GitHub-hosted runners showed high timing variance, including the opposite pattern at 361,900 records. Avoid claiming a causal speedup before controlled measurements.
+- `fcf57da83b7d9a9e9a22c36a4e76fa331d6cf8f2` adds an independent same-runner native A/B workflow, comparing pinned baseline `cb1126f195d950ff0d572f588a4f81e211c7fd2e` to the candidate on identical 200,000 and 362,100 record prefixes with reversed execution order. Workflow run `37674949382` was started.
+- Correctness evidence at the preceding commit: Tutorial 141/141, historical corpus 17 correct + 1 conservative decline, focused eta targets green, portable foundation/Init.Prelude green. The latest new source/test commit requires a completed green readiness gate before it becomes a correctness checkpoint.
+- No newly confirmed production semantic-rule defect; do **not** send a new metatheory semantic-fix notification for performance or CI changes.
+- Next sequence: confirm latest foundation/Tutorial/soundness; inspect controlled baseline/candidate timing; retain only justified acceleration; reach full Init and full Std acceptance within pinned upstream timeouts without weakening checks; then begin Mathlib and capture evidence.
+
 ## Arena large-corpus performance checkpoint — 2026-10-08
 
 - Current Arena implementation checkpoint before this state write: `8286d80fc010c90e556bc39a7920b8b0ee2a96f5`.
@@ -47,7 +63,7 @@ Immediate Arena plan:
 6. Only then start full streamed Mathlib and classify any Mathlib discrepancies.
 
 ## Arena operational continuation — canonical corpus result visibility
-- **External execution blocker:** the available GitHub connector can read/write repository contents and inspect/rerun existing Actions jobs, but exposes no workflow-dispatch operation. The canonical-only workflow has no historical runs to rerun. A user must start `PSKernel Core Arena corpus` once with branch `pscv/pskernel-core-arena-v1`, `test=init`, `timeout_minutes=180`. That workflow uploads `arena/_results`, including exact stderr. After Init is classified/fixed/green, repeat with `test=std`; only after both are green run `test=mathlib` (use at least 180 minutes). This is an execution-control blocker, not a semantic blocker and not evidence of a new PSKernel bug.
+- **Historical workflow issue resolved:** the branch-only manual dispatch link did not exist on the default branch. Arena-branch push workflows now automatically test Init/Std, and bounded PSC1 diagnostic replay allows canonical `_results` to be surfaced. No user dispatch is required; the remaining blocker is real checker performance within official Arena test timeouts.
 - Full Init/Std run #36 completed by timeout/cancellation. Canonical PSKernel returned before the timeout but Arena classified both results as `error` (not `rejected` or `declined`): Init ~8.3 min, Std ~9.8 min. The subsequent legacy replay consumed the remainder of the 90-minute jobs and was cancelled. No workflow artifacts were uploaded, so exact canonical stderr from `_results` is not recoverable from run #36.
 
 - Latest green empirical checkpoint remains `108f376ac6d8034952354bdb7398bf9f0bf6019a`:

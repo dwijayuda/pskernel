@@ -50,6 +50,8 @@ def fromKernelError : PsKernelError -> Failure
   | .internalError message =>
       if message.endsWith "budget exhausted" then
         .resource message
+      else if message.startsWith "application type mismatch;" then
+        .rejected message
       else
         match stripNestedStagePrefix? message with
         | some payload =>

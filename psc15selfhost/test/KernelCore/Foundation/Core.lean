@@ -313,6 +313,41 @@ def psKernelExprDifferentialPair
     ((psKernelExprEqual left right) ==
       PSC1Kernel.Expr.equal referenceLeft referenceRight)
 
+/--
+Exercise every portable expression equality constructor against the independent
+PSC1 structural reference in both operand orders. In particular, binder
+display names and annotations are ignored only by Expr.eq, not Expr.equal.
+-/
+def psKernelCoreExprEqualityGrid : Bool :=
+  let a := PsKernelName.str PsKernelName.anonymous "a"
+  let b := PsKernelName.str PsKernelName.anonymous "b"
+  let z := PsKernelExpr.sort PsKernelLevel.zero
+  let b0 := PsKernelExpr.bvar 0
+  let b1 := PsKernelExpr.bvar 1
+  let base := PsKernelExpr.const a List.nil
+  let l0 := PsKernelExpr.lam a z b0 PsKernelBinderInfo.default
+  let l1 := PsKernelExpr.lam b z b0 PsKernelBinderInfo.implicit
+  let p0 := PsKernelExpr.forallE a z b0 PsKernelBinderInfo.default
+  let p1 := PsKernelExpr.forallE b z b0 PsKernelBinderInfo.instImplicit
+  let items : List PsKernelExpr := [
+    b0, b1, z, PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero),
+    PsKernelExpr.fvar a, PsKernelExpr.mvar a,
+    base, PsKernelExpr.const a [PsKernelLevel.zero],
+    PsKernelExpr.app base b0, PsKernelExpr.app base b1,
+    l0, l1, p0, p1,
+    PsKernelExpr.letE a z b0 b1 false,
+    PsKernelExpr.letE b z b0 b1 true,
+    PsKernelExpr.lit (PsKernelLiteral.nat 7),
+    PsKernelExpr.lit (PsKernelLiteral.str "seven"),
+    PsKernelExpr.mdata 1 l0, PsKernelExpr.mdata 2 l0,
+    PsKernelExpr.proj a 0 base, PsKernelExpr.proj a 1 base,
+    PsKernelExpr.proj b 0 base
+  ]
+  items.all (fun left =>
+    items.all (fun right =>
+      psKernelExprDifferentialPair left right &&
+        psKernelExprDifferentialPair right left))
+
 def psKernelCoreExprTests : Bool :=
   let typeExpr := PsKernelExpr.sort PsKernelLevel.zero
   let alphaName := PsKernelName.str PsKernelName.anonymous "alpha"
@@ -350,7 +385,7 @@ def psKernelCoreExprTests : Bool :=
           (psKernelExprToReference
             (psKernelExprGetAppFn app))
           (psKernelExprToReference
-            (PsKernelExpr.const alphaName List.nil)))))
+            (PsKernelExpr.const alphaName List.nil))))) && psKernelCoreExprEqualityGrid
 
 def psKernelExprListToReference
     (values : List PsKernelExpr) :

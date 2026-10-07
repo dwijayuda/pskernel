@@ -351,14 +351,14 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                         psKernelExprHasLooseBVar leftBody = false := by
                       cases hLeft :
                           psKernelExprHasLooseBVar leftBody with
-                      | false => exact hLeft
+                      | false => rfl
                       | true =>
                           simp [hLeft] at hDependent
                     have hRightClosed :
                         psKernelExprHasLooseBVar rightBody = false := by
                       cases hRight :
                           psKernelExprHasLooseBVar rightBody with
-                      | false => exact hRight
+                      | false => rfl
                       | true =>
                           simp [hLeftClosed, hRight] at hDependent
                     exact
@@ -504,7 +504,10 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                           rightBody
                           nextSubst := by
                       simpa [
+                        opened,
+                        fresh,
                         child,
+                        psKernelDefEqWithLocal,
                         psKernelCheckerContextWithLocalContext
                       ] using hRestSemantic.2 hTrue
                     exact
@@ -536,11 +539,12 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                   hConfig
                   hDomain
                   (by
-                    simpa [
+                    simpa only [
                       psKernelDefEqLambdaSpineWithFuel,
                       leftOpened,
                       rightOpened,
-                      hDomainEq
+                      hDomainEq,
+                      Bool.true_eq
                     ] using hSuccess)
           | false =>
               cases hDomainRun :
@@ -602,12 +606,14 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                           hDomainSemantic.1
                           hDomain
                           (by
-                            simpa [
+                            simpa only [
                               psKernelDefEqLambdaSpineWithFuel,
                               leftOpened,
                               rightOpened,
                               hDomainEq,
-                              hDomainRun
+                              hDomainRun,
+                              Bool.false_eq_true,
+                              ite_false
                             ] using hSuccess)
 
 
@@ -802,14 +808,14 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                         psKernelExprHasLooseBVar leftBody = false := by
                       cases hLeft :
                           psKernelExprHasLooseBVar leftBody with
-                      | false => exact hLeft
+                      | false => rfl
                       | true =>
                           simp [hLeft] at hDependent
                     have hRightClosed :
                         psKernelExprHasLooseBVar rightBody = false := by
                       cases hRight :
                           psKernelExprHasLooseBVar rightBody with
-                      | false => exact hRight
+                      | false => rfl
                       | true =>
                           simp [hLeftClosed, hRight] at hDependent
                     exact
@@ -955,7 +961,10 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                           rightBody
                           nextSubst := by
                       simpa [
+                        opened,
+                        fresh,
                         child,
+                        psKernelDefEqWithLocal,
                         psKernelCheckerContextWithLocalContext
                       ] using hRestSemantic.2 hTrue
                     exact
@@ -987,11 +996,12 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                   hConfig
                   hDomain
                   (by
-                    simpa [
+                    simpa only [
                       psKernelDefEqForallSpineWithFuel,
                       leftOpened,
                       rightOpened,
-                      hDomainEq
+                      hDomainEq,
+                      Bool.true_eq
                     ] using hSuccess)
           | false =>
               cases hDomainRun :
@@ -1053,10 +1063,12 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                           hDomainSemantic.1
                           hDomain
                           (by
-                            simpa [
+                            simpa only [
                               psKernelDefEqForallSpineWithFuel,
                               leftOpened,
                               rightOpened,
                               hDomainEq,
-                              hDomainRun
+                              hDomainRun,
+                              Bool.false_eq_true,
+                              ite_false
                             ] using hSuccess)

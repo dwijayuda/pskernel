@@ -1,10 +1,14 @@
 import Ps.DriverWasm.Bootstrap
 import Ps.CompilerIr.Encode
+import Ps.BackendWasm.Encode
+import Ps.BackendWasm.ValidateIr
 
 inductive PsCompilerWasmStagesError where
   | compiler (error : PsCompilerError)
   | specialize (error : PsIrSpecializeError)
   | lower (error : PsWasmLowerError)
+  | targetValidation (error : PsWasmIrValidationError)
+  | targetSnapshot (error : PsWasmIrEncodeError)
   | encode (error : PsWasmEncodeError)
   | snapshot (error : PsIrEncodeError)
 
@@ -13,6 +17,7 @@ structure PsCompilerWasmStages where
   runtimeIr : String
   verifiedIr : String
   specializedIr : String
+  wasmIr : String
 
 -- A single execution retains the module values actually used for emission.
 -- Checked host authority is required before production access to this API.
@@ -27,11 +32,36 @@ def psCompilerWasmStagesFromSpecialized
       | Except.error error => Except.error (PsCompilerWasmStagesError.snapshot error)
       | Except.ok encoded =>
           match psWasmLowerSpecializedValidatedModule profile specialized with
-          | Except.error error => Except.error (PsCompilerWasmStagesError.lower error)
-          | Except.ok module =>
-              match psWasmEncodeModule (psWasmAddSelfHostGcAbi module) with
-              | Except.error error => Except.error (PsCompilerWasmStagesError.encode error)
-              | Except.ok output => Except.ok (PsCompilerWasmStages.mk output runtime verified encoded)
+          | Except.error error =>
+              Except.error (PsCompilerWasmStagesError.lower error)
+          | Except.ok lowered =>
+              let module : PsWasmModule :=
+                psWasmAddSelfHostGcAbi lowered;
+              match psWasmIrValidateModule module with
+              | Except.error error =>
+                  Except.error
+                    (PsCompilerWasmStagesError.targetValidation
+                      error)
+              | Except.ok _ =>
+                  match psWasmIrEncodeModule module with
+                  | Except.error error =>
+                      Except.error
+                        (PsCompilerWasmStagesError.targetSnapshot
+                          error)
+                  | Except.ok targetIr =>
+                      match psWasmEncodeModule module with
+                      | Except.error error =>
+                          Except.error
+                            (PsCompilerWasmStagesError.encode
+                              error)
+                      | Except.ok output =>
+                          Except.ok
+                            (PsCompilerWasmStages.mk
+                              output
+                              runtime
+                              verified
+                              encoded
+                              targetIr)
 
 def psCompilerWasmStagesFromValidated
     (profile : PsWasmTargetProfile) (runtime verified : String)

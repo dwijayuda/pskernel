@@ -31,9 +31,11 @@
         "scripts/compiler-checked-service.mjs",
         "scripts/production-authority-audit.mjs",
         "packages/compiler/src/Ps/Compiler/Candidate.lean",
-        "packages/compiler/src/Ps/Compiler/Internal.lean"
+        "packages/compiler/src/Ps/Compiler/Internal.lean",
+        "scripts/certified-source.mjs",
+        "contracts/ir/PSCV_CERT_V1.json"
       ],
-      "completion": "Production drivers accept only live checked handles; raw preparation/erasure has explicit bootstrap/internal ownership.",
+      "completion": "Production authority is explicit Candidate -> CheckedCoreCapability -> PSCV-CERT -> live CertifiedSource; serialized certificates are evidence only and transformations require session-bound authority.",
       "assurance": "pending"
     },
     {
@@ -787,5 +789,67 @@
         "indexing-layout"
       ]
     }
-  ]
+  ],
+  "pipelineExecution": {
+    "policy": "Complete real pipeline capabilities and typed/validated handoffs before expensive global proofs. Proof obligations may remain pending only when the implemented boundary remains semantically honest and fail-closed.",
+    "implementationCompleteRequires": [
+      "real producer for every pipeline stage",
+      "typed or independently validated handoff",
+      "exact subject and implementation identity hooks",
+      "explicit assumptions and resource policy",
+      "real downstream consumer",
+      "no serialized evidence may mint live authority",
+      "unsupported semantics fail closed"
+    ],
+    "orderedStages": [
+      {
+        "id": "untrusted-producers-to-candidate",
+        "status": "implementation-available"
+      },
+      {
+        "id": "candidate-to-checked-core",
+        "status": "implementation-available"
+      },
+      {
+        "id": "checked-core-to-certified-source",
+        "status": "implementation-available"
+      },
+      {
+        "id": "certified-source-to-runtime-ir",
+        "status": "implementation-available-assurance-pending"
+      },
+      {
+        "id": "runtime-ir-to-verified-ir",
+        "status": "implementation-available-assurance-pending"
+      },
+      {
+        "id": "verified-ir-to-specialized-ir",
+        "status": "implementation-available-assurance-pending"
+      },
+      {
+        "id": "specialized-ir-to-target-ir",
+        "status": "partial"
+      },
+      {
+        "id": "target-ir-to-executable-artifact",
+        "status": "partial"
+      },
+      {
+        "id": "artifact-to-evidence-envelope",
+        "status": "partial"
+      },
+      {
+        "id": "evidence-to-query-trust-theory",
+        "status": "partial"
+      },
+      {
+        "id": "evidence-to-savef-index",
+        "status": "partial"
+      },
+      {
+        "id": "savef-index-to-next-untrusted-proposal",
+        "status": "partial"
+      }
+    ]
+  }
 }

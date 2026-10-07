@@ -51,5 +51,9 @@ while (pending.length) {
     pending.push(dependency);
   }
 }
-if (!visited.has('scripts/compiler-checked-service.mjs') || !visited.has('scripts/kernel-checked-session.mjs')) throw new Error('PSC_CHECKED_SERVICE_TOPOLOGY');
-process.stdout.write('PSCV_AUTHORITY_TOPOLOGY: PASS (candidate/internal separation; checked host production imports)\n');
+if (!visited.has('scripts/compiler-checked-service.mjs') || !visited.has('scripts/kernel-checked-session.mjs') ||
+    !visited.has('scripts/certified-source.mjs')) throw new Error('PSC_CHECKED_SERVICE_TOPOLOGY');
+const certification = await read('scripts/certified-source.mjs');
+if (!certification.includes('pscv-cert/1') || !certification.includes('psc-certified-source-capability/1') ||
+    !certification.includes('WeakMap')) throw new Error('PSC_CERTIFIED_SOURCE_AUTHORITY_BOUNDARY');
+process.stdout.write('PSCV_AUTHORITY_TOPOLOGY: PASS (candidate/internal separation; checked/certified host production imports)\n');

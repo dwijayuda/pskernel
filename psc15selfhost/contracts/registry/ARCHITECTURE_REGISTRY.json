@@ -219,6 +219,18 @@
       "kind": "bootstrap-assurance",
       "status": "current",
       "canonicalPath": "contracts/bootstrap/BOOTSTRAP_ASSURANCE_V1.json"
+    },
+    {
+      "id": "pscv-cert/1",
+      "kind": "source-certificate",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/PSCV_CERT_V1.json"
+    },
+    {
+      "id": "psc-certified-source/1",
+      "kind": "certified-source",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/PSCV_CERT_V1.json"
     }
   ]
 }

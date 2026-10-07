@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "contract": "pscv-certification-boundary/1",
+  "certificate": "pscv-cert/1",
+  "certifiedSource": "psc-certified-source/1",
+  "liveCapability": "psc-certified-source-capability/1",
+  "implementation": "scripts/certified-source.mjs",
+  "pipeline": [
+    "CheckedCoreCapability",
+    "PSCV-CERT",
+    "CertifiedSource",
+    "RuntimeIR"
+  ],
+  "rules": [
+    "PSCV-CERT binds exact source bytes, canonical admissions, semantic profile, KernelContract, selected provider identity, ProviderSecurityProfile, assumption/resource policies, target set and execution boundary.",
+    "The serializable certificate is evidence only and never recreates CheckedCoreCapability or CertifiedSource authority.",
+    "A live CertifiedSource capability is minted only from the exact live CheckedCoreCapability in the same host session.",
+    "Production generated-JS transformations consume the live CertifiedSource capability; the native checked-seed route creates the same certificate before its already-checked session authorizes emission.",
+    "Certification establishes kernel acceptance of canonical admissions produced from the exact source under the declared frontend/encoding trust boundary. It does not imply erasure, specialization or backend preservation."
+  ],
+  "assurance": {
+    "sourceCertification": "implementation-available",
+    "frontendRefinement": "trusted-current-boundary",
+    "executablePreservation": "not-implied",
+    "globalProofs": "deferred-to-assurance-phase"
+  }
+}

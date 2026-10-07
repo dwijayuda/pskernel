@@ -27,7 +27,9 @@
     "hostBoundary": "scripts/kernel-checked-session.mjs",
     "checkedBuildBoundary": "scripts/checked-build.mjs",
     "failClosed": true,
-    "semanticFallbackForbidden": true
+    "semanticFallbackForbidden": true,
+    "certificationContract": "pscv-cert/1",
+    "certifiedSourceCapability": "psc-certified-source-capability/1"
   },
   "hostSourceClosure": {
     "coverage": "static-relative-esm-imports/1",
@@ -35,6 +37,7 @@
     "declared": [
       "scripts/artifact-evidence.mjs",
       "scripts/bootstrap-manifest.mjs",
+      "scripts/certified-source.mjs",
       "scripts/checked-build-evidence.mjs",
       "scripts/checked-build.mjs",
       "scripts/checked-kernel-dual.mjs",

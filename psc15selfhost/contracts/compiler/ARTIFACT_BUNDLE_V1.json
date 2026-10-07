@@ -26,12 +26,13 @@
     "itemsPerGroup": 1024
   },
   "claims": "No claim is inferred from product presence. Empty ClaimSets are permitted for unassured artifacts. Preservation and release acceptance remain false after an integrity-only check.",
-  "profileEnvironment": "Identity binding only at this checkpoint; complete producer-observed ProfileEnvironment/extension/import closure remains required before production release use.",
+  "profileEnvironment": "Typed ProfileEnvironment/ExtensionSet decoding and exact declared-input replay are required during bundle verification. Complete observed closure and hermetic execution remain unproved.",
   "remaining": [
-    "Wire current checked/native and generated backend producers and release consumers to this common bundle",
+    "Complete direct JS/Wasm service and Rust producer routing, plus release-policy consumers",
     "Observe and bind complete ProfileEnvironment and toolchain closures",
     "PublicApiIR-derived direct-JS declarations and OriginGraph-derived maps",
     "Actual claim checkers and assured release policy",
     "No global preservation, conformance or promotion claim"
-  ]
+  ],
+  "production": "The checked TypeScript builder publishes a descriptor, profile, empty ClaimSet and ArtifactBundle containing the actual TS/JS/declaration/map/ABI outputs. The archive independently verifies all V5 products and one BuildAction binding per observed execution."
 }

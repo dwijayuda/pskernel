@@ -1099,7 +1099,7 @@
       "classifications": [
         "artifact-bundle"
       ],
-      "status": "typed-products-and-verifier-implemented-production-routing-pending",
+      "status": "production-typescript-bundles-and-archive-replay-implemented-direct-service-and-rust-routing-pending",
       "requirement": "Common typed independently identified executable/public/debug/interface/toolchain/evidence products."
     },
     {
@@ -1110,7 +1110,7 @@
         "backend",
         "authority-firewall-broker"
       ],
-      "status": "static-package-import-backend-driver-guards-implemented-cloud-validation-pending",
+      "status": "static-guards-cloud-validated-at-32b5aa6",
       "requirement": "Package identity/dependency/backend isolation/authority checks; enumerate current debt and reject new drift."
     },
     {
@@ -1140,7 +1140,7 @@
       "classifications": [
         "querygraph-incremental"
       ],
-      "status": "planned",
+      "status": "profile-action-observed-producers-and-replay-implemented-query-effects-hermetic-executor-pending",
       "requirement": "ProfileEnvironment/extension set, hermetic BuildAction/ActionId and consumed semantic fingerprint classes govern reuse."
     },
     {
@@ -1332,6 +1332,34 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/COMPILER_OWNERSHIP_V1.json",
       "classification": "semantic-compiler-spine"
+    },
+    {
+      "id": "psc-profile-environment/1",
+      "kind": "profile-environment",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PROFILE_ENVIRONMENT_V1.json",
+      "classification": "querygraph-incremental"
+    },
+    {
+      "id": "psc-extension-set/1",
+      "kind": "extension-set",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PROFILE_ENVIRONMENT_V1.json",
+      "classification": "extension-system"
+    },
+    {
+      "id": "psc-build-action/1",
+      "kind": "build-action",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json",
+      "classification": "querygraph-incremental"
+    },
+    {
+      "id": "psc-observed-action-binding/1",
+      "kind": "action-binding",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json",
+      "classification": "compiler-pass"
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { verifyProfileEnvironment } from './build-context.mjs';
 import { artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 import { decodeClaimSet, verifyClaimSet } from './claim-set.mjs';
 
@@ -150,6 +151,8 @@ export async function verifyArtifactBundle(record, { expectedBundleId, resolveAr
     ...(descriptor.interfaceAdapterId ? [descriptor.interfaceAdapterId] : []),
     value.sourceSubjectId, value.profileEnvironmentId, ...value.targetToolchainArtifacts, ...value.evidenceArtifacts,
     ...productGroups.flatMap(group => value[group].map(item => item.artifact))]) await resolve(identity);
+  await verifyProfileEnvironment(await resolve(value.profileEnvironmentId), {
+    expectedProfileEnvironmentId: value.profileEnvironmentId, resolveArtifact: async identity => (await resolve(identity)).bytes });
   const claimRecord = await resolve(value.claimSetId), claims = decodeClaimSet(claimRecord);
   const subjects = new Set([value.sourceSubjectId, ...value.evidenceArtifacts,
     ...productGroups.flatMap(group => value[group].map(item => item.artifact))].map(id));

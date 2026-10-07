@@ -90,7 +90,7 @@ test('behaviorally equal independently checked interfaces permit a validated cac
         currentInterface: current.iface.identity, rule: rule.identity }],
     });
     const hit = await readSemanticEvidenceCache({
-      root, candidate, resolveArtifact: async id => blobs.get(artifactKey(id)),
+      root, candidate, expectedCandidateId: candidate.identity, expectedActionId: cached.record.action.identity, resolveArtifact: async id => blobs.get(artifactKey(id)),
       evidenceCheckers, requiredEvidenceKinds: ['translation-validation'],
     });
     assert.equal(hit.hit, true);
@@ -122,13 +122,29 @@ test('changed behavioral subject or absent evidence checker rejects before reuse
   try {
     await storeEvidenceCache({ root, record: cached.record, artifacts: cached.artifacts });
     await assert.rejects(readSemanticEvidenceCache({
-      root, candidate, resolveArtifact: async id => blobs.get(artifactKey(id)),
+      root, candidate, expectedCandidateId: candidate.identity, expectedActionId: cached.record.action.identity, resolveArtifact: async id => blobs.get(artifactKey(id)),
       evidenceCheckers: new Map(), requiredEvidenceKinds: ['translation-validation'],
     }), /EVIDENCE_CHECKER/);
     const checker = new Map([['test-interface-checker', async () => ({ verified: true })]]);
     await assert.rejects(readSemanticEvidenceCache({
-      root, candidate, resolveArtifact: async id => blobs.get(artifactKey(id)),
+      root, candidate, expectedCandidateId: candidate.identity, expectedActionId: cached.record.action.identity, resolveArtifact: async id => blobs.get(artifactKey(id)),
       evidenceCheckers: checker, requiredEvidenceKinds: ['translation-validation'],
     }), /BEHAVIORAL_CHANGED/);
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('a cached proposal cannot select its own action or erase consumer obligations', async () => {
+  const cached = cacheFixture();
+  const candidate = semanticReuseCandidateArtifact({ actionId: cached.record.action.identity });
+  const otherAction = artifact({ unrelated: true }, 'action', 'psc-action/1');
+  const altered = semanticReuseCandidateArtifact({ actionId: otherAction.identity });
+  const policy = { root: 'must-not-read', candidate, expectedCandidateId: candidate.identity,
+    expectedActionId: cached.record.action.identity, requiredEvidenceKinds: ['translation-validation'],
+    resolveArtifact: () => { throw new Error('must reject before resolving'); } };
+  await assert.rejects(readSemanticEvidenceCache({ ...policy, expectedCandidateId: undefined }), /CONSUMER_SELECTION_REQUIRED/);
+  await assert.rejects(readSemanticEvidenceCache({ ...policy, candidate: altered }), /CANDIDATE_SELECTION/);
+  await assert.rejects(readSemanticEvidenceCache({ ...policy, expectedActionId: otherAction.identity }), /ACTION_SELECTION/);
+  const omitted = semanticReuseCandidateArtifact({ actionId: cached.record.action.identity,
+    obligations: [{ previousInterface: otherAction.identity, currentInterface: otherAction.identity, rule: otherAction.identity }] });
+  await assert.rejects(readSemanticEvidenceCache({ ...policy, expectedCandidateId: omitted.identity }), /CANDIDATE_SELECTION/);
 });

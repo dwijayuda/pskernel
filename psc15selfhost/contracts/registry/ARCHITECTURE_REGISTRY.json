@@ -339,6 +339,30 @@
       "kind": "compiler-ownership",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/COMPILER_OWNERSHIP_V1.json"
+    },
+    {
+      "id": "psc-profile-environment/1",
+      "kind": "profile-environment",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PROFILE_ENVIRONMENT_V1.json"
+    },
+    {
+      "id": "psc-extension-set/1",
+      "kind": "extension-set",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PROFILE_ENVIRONMENT_V1.json"
+    },
+    {
+      "id": "psc-build-action/1",
+      "kind": "build-action",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json"
+    },
+    {
+      "id": "psc-observed-action-binding/1",
+      "kind": "action-binding",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

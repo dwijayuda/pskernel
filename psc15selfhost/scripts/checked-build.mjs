@@ -1,3 +1,5 @@
+import { canonicalArtifact } from './artifact-evidence.mjs';
+import { bindObservedBuildContext } from './observed-build-context.mjs';
 import { readFile, writeFile, mkdir, mkdtemp, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -54,6 +56,12 @@ export async function buildChecked({
   if (dualCheck) checkedKernelDescriptor(dualCheck);
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
+  const [languageAuthorityValue, backendRegistryValue] = await Promise.all([
+    readFile(path.join(root, 'language-authority.json'), 'utf8'),
+    readFile(path.join(root, 'contracts/backends/BACKEND_REGISTRY_V1.json'), 'utf8'),
+  ]);
+  const languageAuthority = canonicalArtifact(JSON.parse(languageAuthorityValue), 'language-authority', 'psc-language-authority-snapshot/1');
+  const backendRegistry = canonicalArtifact(JSON.parse(backendRegistryValue), 'backend-registry', 'psc-backend-registry/1');
   const snapshot = await readCheckedSourceSnapshot(entryPath, sourceResourceLimits);
   let admissions;
   let typeScript;
@@ -187,12 +195,18 @@ export async function buildChecked({
     ]);
     const typeScriptCompilerBytes = typeScriptToolInputs.files.find(item => item.path === typeScriptToolInputs.details.entryPath).bytes;
     receipt.javaScriptSha256 = digest(javaScript);
-    const evidence = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
+    const observed = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
       hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
+    const evidence = bindObservedBuildContext(observed, { languageAuthority, backendRegistry, backendId: 'typescript' });
+    receipt.profileEnvironment = evidence.profileEnvironment.identity;
+    receipt.buildActions = evidence.buildActions.map(item => item.action.identity);
+    receipt.backendDescriptor = evidence.backendDescriptor.identity;
+    receipt.artifactBundle = evidence.artifactBundle.identity;
+    receipt.claimSet = evidence.claimSet.identity;
     receipt.buildGraph = evidence.identity;
     if (evidence.runtimeInterface) receipt.runtimeInterface = evidence.runtimeInterface;
     if (evidence.jsAbi) {
@@ -227,8 +241,13 @@ export async function buildChecked({
     await writeFile(path.join(staging, stem + '.certified-source.json'), certifiedSourceArtifact.bytes);
     await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);
     await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
+    await writeFile(path.join(staging, stem + '.profile-environment.json'), evidence.profileEnvironment.bytes);
+    await writeFile(path.join(staging, stem + '.backend-descriptor.json'), evidence.backendDescriptor.bytes);
+    await writeFile(path.join(staging, stem + '.artifact-bundle.json'), evidence.artifactBundle.bytes);
+    await writeFile(path.join(staging, stem + '.claim-set.json'), evidence.claimSet.bytes);
     await writeFile(path.join(staging, stem + '.admissions.json'), admissions);
     const outputSuffixes = ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.pscv-cert.json', '.certified-source.json', '.build-graph.json', '.build-archive.json', '.evidence-envelope.json'];
+    outputSuffixes.push('.profile-environment.json', '.backend-descriptor.json', '.artifact-bundle.json', '.claim-set.json');
     if (evidence.jsAbi) outputSuffixes.push('.abi-plan.json', '.abi-policy.json');
     for (const suffix of outputSuffixes) {
       await rename(path.join(staging, stem + suffix), path.join(path.dirname(output), stem + suffix));

@@ -36,18 +36,31 @@ export function semanticReuseCandidateArtifact({ actionId, obligations = [] }) {
 export async function readSemanticEvidenceCache({
   root,
   candidate,
+  expectedCandidateId,
+  expectedActionId,
   resolveArtifact,
   evidenceCheckers = new Map(),
   requiredEvidenceKinds,
   allowedAssumptions = [],
   limits,
 }) {
+  // Both selections come from the current consumer/planner, not cached bytes.
+  // The candidate ID binds every obligation, including their number and order.
+  if (expectedCandidateId?.domain !== 'semantic-reuse-candidate' ||
+      expectedCandidateId.contract !== semanticReuseCandidateContract ||
+      expectedActionId?.domain !== 'action' || expectedActionId.contract !== 'psc-action/1')
+    fail('CONSUMER_SELECTION_REQUIRED');
+  if (artifactKey(expectedCandidateId) !== artifactKey(candidate.identity)) fail('CANDIDATE_SELECTION');
+  if (!(candidate.bytes instanceof Uint8Array) || candidate.bytes.byteLength > 2 * 1024 * 1024) fail('RESOURCE_EXHAUSTED');
   verifyArtifact(candidate.bytes, candidate.identity);
   const value = JSON.parse(candidate.bytes);
   if (!canonicalBytes(value).equals(Buffer.from(candidate.bytes)) ||
       value.schemaVersion !== 1 || value.contract !== semanticReuseCandidateContract ||
       value.authority !== 'reuse-candidate-not-authority' || !Array.isArray(value.obligations))
     fail('CANDIDATE');
+  const rebuilt = semanticReuseCandidateArtifact({ actionId: value.actionId, obligations: value.obligations });
+  if (artifactKey(rebuilt.identity) !== artifactKey(candidate.identity)) fail('CANDIDATE');
+  if (artifactKey(value.actionId) !== artifactKey(expectedActionId)) fail('ACTION_SELECTION');
   if (typeof resolveArtifact !== 'function') fail('RESOLVER');
   const replay = [];
   for (const obligation of value.obligations) {
@@ -60,7 +73,7 @@ export async function readSemanticEvidenceCache({
   }
   const cache = await readEvidenceCache({
     root,
-    actionId: value.actionId,
+    actionId: expectedActionId,
     requiredEvidenceKinds,
     allowedAssumptions,
     evidenceCheckers,

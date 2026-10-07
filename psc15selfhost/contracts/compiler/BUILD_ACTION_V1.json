@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-build-action/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "owner": "scripts/build-context.mjs",
+  "fields": [
+    "actionKind",
+    "passDefinitionId",
+    "implementationId",
+    "semanticProfileId",
+    "profileEnvironmentId",
+    "exactInputArtifactIds",
+    "exactToolchainIds",
+    "targetProfileId",
+    "extensionSetId",
+    "declaredEnvironment",
+    "resourcePolicyId",
+    "outputContracts"
+  ],
+  "identity": "Domain-separated ArtifactId over bounded canonical declaration bytes; ordered inputs/products and sorted unique environment names participate.",
+  "producer": "scripts/observed-build-context.mjs projects every observed PassExecution into a BuildAction, binding the legacy action as an exact input so its parameters and context cannot be dropped. Tool captures, exact implementation, profile and resource policies remain referenced artifacts.",
+  "bindingContract": "psc-observed-action-binding/1",
+  "consumer": "scripts/observed-build-archive.mjs independently replays action/execution/output/profile bindings and requires complete one-to-one coverage whenever V5 products are present.",
+  "authority": "audit-record-only; hermeticityVerified=false. The inherited runner still has ambient inputs. Empty declaredEnvironment is not an assertion of no ambient reads. Cache and release consumers must separately verify isolation and input closure.",
+  "remaining": [
+    "hermetic action executor rejects undeclared filesystem/environment/network inputs",
+    "portable QueryGraph consumes exact V5 request and pass effect declarations",
+    "independent reproducibility and semantic evidence"
+  ]
+}

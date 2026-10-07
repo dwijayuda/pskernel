@@ -1,3 +1,4 @@
+import { verifyObservedContextProducts } from './observed-build-context.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
@@ -39,6 +40,8 @@ function graphValue(bytes, bound) {
   if (graph.entries.length + 1 > bound.maxArtifacts) fail('RESOURCE_EXHAUSTED');
   const keys = new Set();
   const structuredContracts = new Set(['psc-pass-definition/1', 'psc-pass-definition/2', 'psc-pass-execution/1', 'psc-action/1',
+    'psc-profile-environment/1', 'psc-extension-set/1', 'psc-build-action/1', 'psc-observed-action-binding/1',
+    'psc-artifact-bundle/1', 'psc-backend-descriptor/1', 'psc-claim-set/1',
     'psc-hosted-compiler-implementation/1', 'psc-acceptance-context/1', 'psc-typescript-tool-inputs/1', 'psc-checked-provider-inputs/1']);
   for (const entry of graph.entries) {
     exact(entry, Object.hasOwn(entry, 'canonicalValue') ? ['identity', 'source', 'canonicalValue'] : ['identity', 'source']);
@@ -124,6 +127,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     const graph = graphValue(resolveArtifact(archive.graphId), bound);
     if (graph.entries.length + 1 !== blobs.size) fail('ARTIFACT_SET');
     for (const entry of graph.entries) resolveArtifact(entry.identity);
+    const buildContext = await verifyObservedContextProducts(graph, { resolveArtifact });
     const irInvariantReplays = [], irLinkInvariantReplays = [];
     if (irValidation !== undefined && irLinkValidation !== undefined) fail('IR_VALIDATION_POLICY');
     if (irLinkValidation !== undefined) {
@@ -247,7 +251,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
       linkedIrInvariantsVerified: irLinkValidation !== undefined, irLinkInvariantReplays,
       closedIrInvariantsVerified: irValidation !== undefined, irInvariantReplays, integrityVerified: true, artifactCount: blobs.size,
       artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts, wasmCanonicalProjections, wasmCanonicalSignatures,
-      fullInputClosureEstablished: false, semanticClaimsVerified: false,
+      buildContext, fullInputClosureEstablished: false, semanticClaimsVerified: false,
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {
     return { kind: error.kind === 'resourceExhausted' || /EXHAUSTED/u.test(error.message) ? 'resourceExhausted' : 'rejectedInvalid',

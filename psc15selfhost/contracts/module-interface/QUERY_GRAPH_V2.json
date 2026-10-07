@@ -37,6 +37,7 @@
     "semanticCache": "scripts/semantic-query-cache.mjs",
     "evidenceCache": "scripts/evidence-cache.mjs",
     "ruleChecker": "psc-exact-behavioral-interface-reuse/1",
-    "authority": "validated-data-not-kernel-capability"
+    "authority": "validated-data-not-kernel-capability",
+    "consumerSelection": "The caller independently selects both expectedCandidateId and expectedActionId. The exact candidate digest binds the entire ordered obligation set; untrusted cached bytes cannot select an action or remove reuse checks."
   }
 }

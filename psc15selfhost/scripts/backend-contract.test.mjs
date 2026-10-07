@@ -1,3 +1,4 @@
+import { createProfileEnvironment, createExtensionSet } from './build-context.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
@@ -20,7 +21,12 @@ function fixture(backendId) {
   const product = selected.products.executableArtifacts[0];
   const executable = artifact('fixture target bytes', product.domain, product.contract);
   const sourceSubjectId = artifact('fixture source').identity;
-  const profileEnvironmentId = artifact({ fixture: true }, 'profile-environment', 'psc-profile-environment/1').identity;
+  const extensionSet = add(createExtensionSet());
+  const profileEnvironmentId = add(createProfileEnvironment({
+    languageEdition: 'test-edition', semanticProfileId: artifact('test profile', 'semantic-profile', 'test-profile/1').identity,
+    standardEnvironmentId: artifact('test standard').identity, extensionSetId: extensionSet.identity,
+    importedStructuralInterfaceIds: [], importedBehavioralInterfaceIds: [], semanticOptions: {},
+  })).identity;
   const claims = add(createClaimSet());
   const fields = { descriptor, sourceSubjectId, profileEnvironmentId, claimSetId: claims.identity,
     executableArtifacts: [{ role: product.role, artifact: executable.identity }],

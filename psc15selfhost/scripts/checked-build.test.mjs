@@ -168,6 +168,15 @@ for (const [kind, source] of [
       assert.equal(receipt.pscvCert.contract, 'pscv-cert/1');
       assert.equal(receipt.certifiedSource.contract, 'psc-certified-source/1');
       assert.equal(receipt.evidenceEnvelope.contract, 'psc-evidence-envelope/1');
+      assert.equal(receipt.profileEnvironment.contract, 'psc-profile-environment/1');
+      assert.equal(receipt.artifactBundle.contract, 'psc-artifact-bundle/1');
+      const bundle = JSON.parse(await readFile(path.join(dir, 'out.artifact-bundle.json'), 'utf8'));
+      assert.deepEqual(bundle.profileEnvironmentId, receipt.profileEnvironment);
+      assert.deepEqual(bundle.backendDescriptorId, receipt.backendDescriptor);
+      assert.deepEqual(bundle.claimSetId, receipt.claimSet);
+      assert.deepEqual(bundle.executableArtifacts.map(item => item.role), ['target-source', 'javascript']);
+      assert.equal(bundle.publicApiArtifacts.length, 1);
+      assert.equal(bundle.debugArtifacts.length, 1);
       assert.ok(existsSync(path.join(dir, 'out.admissions.json')));
       assert.ok(existsSync(path.join(dir, 'out.pscv-cert.json')));
       assert.ok(existsSync(path.join(dir, 'out.certified-source.json')));

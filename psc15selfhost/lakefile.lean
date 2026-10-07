@@ -108,6 +108,7 @@ lean_lib PsBackendJs where
   roots := #[
     `Ps.BackendJs.Model,
     `Ps.BackendJs.Lower,
+    `Ps.BackendJs.Validate,
     `Ps.BackendJs.Print,
     `Ps.BackendJs.TailAlias
   ]
@@ -397,6 +398,10 @@ lean_lib PsBackendJsTestSupport where
 lean_exe psc1_backend_js_tests where
   srcDir := "test"
   root := `BackendJsTests
+
+lean_exe psc1_backend_js_validate_tests where
+  srcDir := "test"
+  root := `BackendJsValidateTests
 
 lean_exe psc1_backend_js_diff_fixture where
   srcDir := "test"

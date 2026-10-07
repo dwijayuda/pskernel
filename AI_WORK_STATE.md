@@ -1,6 +1,7 @@
 # AI Work State
 
 ## Arena operational continuation — canonical corpus result visibility
+- Full Init/Std run #36 completed by timeout/cancellation. Canonical PSKernel returned before the timeout but Arena classified both results as `error` (not `rejected` or `declined`): Init ~8.3 min, Std ~9.8 min. The subsequent legacy replay consumed the remainder of the 90-minute jobs and was cancelled. No workflow artifacts were uploaded, so exact canonical stderr from `_results` is not recoverable from run #36.
 
 - Latest green empirical checkpoint remains `108f376ac6d8034952354bdb7398bf9f0bf6019a`:
   readiness green, Tutorial 141/141, historical bugs 17 correct + 1 conservative

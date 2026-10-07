@@ -41,14 +41,15 @@
     "production executable EvidenceEnvelope target-adapter identities preserved for downstream audit",
     "actual validated JsIR retained between specialization and JavaScript printing",
     "actual ABI-completed validated WasmIR retained between specialization and Wasm binary encoding",
-    "direct backend build graphs split SpecializedIR -> target IR -> executable artifact edges and offline archive replay decodes target IR schemas"
+    "direct backend build graphs split SpecializedIR -> target IR -> executable artifact edges and offline archive replay decodes target IR schemas",
+    "exact path-bound checked source closure and individual source-file artifacts retained as prepare/check dependencies and replayed from the observed build archive"
   ],
   "remaining": [
     "backend-interior stage artifacts, other-target specialization snapshots and default-build direct-JS integration after promotion gates",
     "complete generated compiler/runtime closure and ambient inputs beyond captured provider profiles and TypeScript packages",
     "independent complete preservation evidence",
     "full resource budget coverage",
-    "archive release semantic lock, licenses and provenance beyond the observed build records"
+    "release SemanticLock V1 generation from observed source closure, interfaces, tool/provider/context artifacts, licenses and provenance"
   ],
   "portableDigestRule": "A portable record supplied with artifact labels remains requiresByteVerification. Legacy specialization records remain unbound. Neither implies byte verification or a proof.",
   "stageEncoding": "contracts/ir/IR_ARTIFACT_ENCODING_V1.json",
@@ -70,5 +71,6 @@
       "validator": "psc-wasm-ir-validator/1",
       "preservation": "not-established"
     }
-  }
+  },
+  "sourceClosure": "psc-source-closure/1 binds checked source paths, exact file bytes, entry, source kind, preparation order and the checked reader's closure digest. It is source identity/provenance only, not semantic acceptance."
 }

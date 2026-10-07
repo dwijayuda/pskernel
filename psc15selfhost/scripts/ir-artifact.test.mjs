@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { canonicalBytes, canonicalArtifact, artifactKey, artifactId, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
 import { runtimeInterfaceArtifact, verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
 import { decodeIrArtifact, checkedIrStageArtifacts } from './ir-artifact.mjs';
+import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
 import { packObservedBuildArchive, verifyObservedBuildArchive } from './observed-build-archive.mjs';
 
@@ -67,8 +68,10 @@ test('actual erasure/validation/emission snapshots form separately bound archive
 test('actual direct JavaScript specialization is revalidated, executed and archived as a separate pass', async () => {
   const staged = JSON.parse(emitted('--js-stages'));
   const snapshots = checkedIrStageArtifacts(staged);
+  const targets = checkedTargetIrStageArtifacts(staged);
   assert.deepEqual(snapshots.runtimeIr.bytes, snapshots.verifiedIr.bytes);
   assert.notDeepEqual(snapshots.verifiedIr.bytes, snapshots.specializedIr.bytes);
+  assert.equal(targets.jsIr.identity.contract, 'psc-js-ir-json/1');
   const specialized = decodeIrArtifact(snapshots.specializedIr.bytes);
   assert.ok(specialized[4].every(declaration => declaration[1].length === 0));
   const executable = await import('data:text/javascript;base64,' + Buffer.from(staged.javaScript).toString('base64'));
@@ -82,8 +85,10 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   const built = createCheckedBuildGraph(inputs);
   const definitions = built.graph.entries.filter(entry => entry.identity.contract === 'psc-pass-definition/1').map(entry => entry.canonicalValue);
   assert.deepEqual(definitions.map(item => item.passId), ['psc-prepare-and-check/1', 'psc-erase-checked-core/1',
-    'psc-validate-runtime-ir/1', 'psc-project-runtime-interface/1', 'psc-pass-specialize/1', 'psc-specialized-ir-to-javascript/1']);
-  for (const snapshot of Object.values(snapshots)) assert.deepEqual(built.artifacts.get(artifactKey(snapshot.identity)), snapshot.bytes);
+    'psc-validate-runtime-ir/1', 'psc-project-runtime-interface/1', 'psc-verified-ir-to-js-abi-plan/1',
+    'psc-pass-specialize/1', 'psc-specialized-ir-to-js-ir/1', 'psc-js-ir-to-javascript/1']);
+  for (const snapshot of [...Object.values(snapshots), ...Object.values(targets)])
+    assert.deepEqual(built.artifacts.get(artifactKey(snapshot.identity)), snapshot.bytes);
   const archive = packObservedBuildArchive(built);
   const replay = await verifyObservedBuildArchive(archive.bytes, { expectedGraphId: built.identity,
     allowedAssumptions: [...new Set(definitions.flatMap(item => item.assumptionIds))] });
@@ -91,6 +96,8 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   assert.equal(replay.preservationVerified, false);
   assert.equal(replay.semanticClaimsVerified, false);
   assert.equal(replay.specializationCorrespondences.length, 1);
+  assert.equal(replay.targetIrArtifacts.length, 1);
+  assert.equal(replay.targetIrArtifacts[0].kind, 'js-ir');
   assert.equal(replay.specializationCorrespondences[0].correspondenceChecked, true);
   const specializationPass = definitions.find(item => item.passId === 'psc-pass-specialize/1');
   assert.equal(specializationPass.validatorId, 'psc-specialization-correspondence/1');
@@ -102,7 +109,9 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
 test('actual direct Wasm retains specialization snapshots and replays correspondence with unchanged emitted bytes', async () => {
   const staged = JSON.parse(emitted('--wasm-stages')), binary = Uint8Array.from(staged.wasm);
   const snapshots = checkedIrStageArtifacts(staged);
+  const targets = checkedTargetIrStageArtifacts(staged);
   assert.notDeepEqual(snapshots.verifiedIr.bytes, snapshots.specializedIr.bytes);
+  assert.equal(targets.wasmIr.identity.contract, 'psc-wasm-ir-json/1');
   assert.equal(WebAssembly.validate(binary), true);
   const { instance } = await WebAssembly.instantiate(binary, {});
   assert.equal(instance.exports.answer(42), 42);
@@ -114,12 +123,17 @@ test('actual direct Wasm retains specialization snapshots and replays correspond
     hostSources: [], runtime: { implementation: 'fixture' } };
   const built = createCheckedBuildGraph(inputs), archive = packObservedBuildArchive(built);
   const definitions = built.graph.entries.filter(entry => entry.identity.contract === 'psc-pass-definition/1').map(entry => entry.canonicalValue);
-  assert.equal(definitions.length, 6);
-  assert.equal(definitions.at(-1).passId, 'psc-specialized-ir-to-wasm/1');
+  assert.equal(definitions.length, 7);
+  assert.deepEqual(definitions.slice(-2).map(item => item.passId), [
+    'psc-specialized-ir-to-wasm-ir/1',
+    'psc-wasm-ir-to-wasm/1',
+  ]);
   const replay = await verifyObservedBuildArchive(archive.bytes, { expectedGraphId: built.identity,
     allowedAssumptions: [...new Set(definitions.flatMap(item => item.assumptionIds))] });
   assert.equal(replay.kind, 'accepted', replay.reason);
   assert.equal(replay.specializationCorrespondences.length, 1);
+  assert.equal(replay.targetIrArtifacts.length, 1);
+  assert.equal(replay.targetIrArtifacts[0].kind, 'wasm-ir');
   assert.equal(replay.preservationVerified, false);
   assert.equal(replay.semanticClaimsVerified, false);
   assert.throws(() => createCheckedBuildGraph({ ...inputs, directJavaScript: 'competing output' }), /MIXED_BACKEND_PATHS/);

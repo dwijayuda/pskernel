@@ -188,3 +188,12 @@ Architectural blockers still remaining:
 - Cache-policy regression proofs cover direct and nested fvar keys plus pair-cache ineligibility.
 - Run #304 is the first full proof-tree validation of the source fix.
 - Do not weaken `PsKernelCheckerStateSemanticSound` to hide cache-scope issues.
+
+
+## Live DefEq checkpoint — 2026-10-07 late
+- Live proof branch observed at `ab8121fa5b6230d82d7f382cc94a924a434f20b8`.
+- Run #544 is green at `af35d856989942031040bb6d96d80a9661c688b9`; the follow-up commit registers `DefEqFinalConfiguration.lean`.
+- Confirmed Arena function-eta fix `0dd5d4db43a78be020f2257c226761ef4849d763` is fully incorporated in the Assurance Plane: independent left/right eta rules, helper configuration/refinement in both directions, generic full-shape routing in both orientations, and app/const ↔ lambda regression locks.
+- Concrete Quick, application, full-shape, reflection, binder-spine, K/structure-recursion, bounded recursor, and recursor-aware WHNF configuration layers are now present.
+- Current DefEq frontier is the remaining final-rule family (structure eta fields/core, string expansion, unit-like equality, proof irrelevance), followed by lazy delta and the concrete `psKernelIsDefEqWithFuel` knot theorem.
+- Metatheory correction to make during proof-irrelevance closure: `psKernelDefEqIsPropWith` classifies an expression by inferring its type and WHNF-reducing that inferred type to a sort; do not model this as the classified expression itself reducing to `Sort 0`.

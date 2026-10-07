@@ -306,12 +306,15 @@ def psCanonicalSignature (width : PsCanonicalPointerWidth)
   let coreResults : List PsCanonicalFlatType := if indirectResult then List.nil else result.flatPrefix;
   match direction with
   | PsCanonicalDirection.lift =>
+      let liftedResults : List PsCanonicalFlatType :=
+        if indirectResult then [psCanonicalPointerType width] else coreResults;
       PsCanonicalFunctionPlan.mk interfaceName functionName direction parameters result coreParameters
-        (if indirectResult then [psCanonicalPointerType width] else coreResults) indirectParameters indirectResult
+        liftedResults indirectParameters indirectResult
   | PsCanonicalDirection.lower =>
+      let loweredParameters : List PsCanonicalFlatType :=
+        if indirectResult then psListAppend coreParameters [psCanonicalPointerType width] else coreParameters;
       PsCanonicalFunctionPlan.mk interfaceName functionName direction parameters result
-        (if indirectResult then psListAppend coreParameters [psCanonicalPointerType width] else coreParameters)
-        coreResults indirectParameters indirectResult
+        loweredParameters coreResults indirectParameters indirectResult
 
 def psCanonicalPlanFunction (policy : PsForeignPolicy) (width : PsCanonicalPointerWidth)
     (maximumLayouts selectedLayouts : List (Prod String PsCanonicalLayout))

@@ -1,6 +1,7 @@
 import Ps.KernelCore.Checker.Recursor.Reduction
 import Ps.KernelCore.Metatheory.CheckerContracts
 import Ps.KernelCore.Metatheory.QuotReduction
+import Ps.KernelCore.Metatheory.ReductionCongruence
 
 /-
 Configuration-aware semantics for recursor computation.
@@ -82,6 +83,336 @@ def PsKernelRecursorStructureConversionConfigurationSound
         context.localContext
         major
         result
+
+
+def psKernelRecursorPrepareMajorWith
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (recursor : PsKernelRecursorInfo)
+    (major0 : PsKernelExpr)
+    (cheapRec cheapProj : Bool) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  let majorKResult :
+      Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+    if recursor.k then
+      psKernelToConstructorWhenK
+        publicWhnf
+        inferType
+        defeq
+        context
+        state
+        recursor
+        major0
+    else
+      Except.ok (Prod.mk major0 state)
+  match majorKResult with
+  | Except.error error =>
+      Except.error error
+  | Except.ok majorK =>
+      if
+          psKernelIsConstructorApp
+            context.environment
+            (Prod.fst majorK) then
+        Except.ok majorK
+      else if cheapRec then
+        coreWhnf
+          context
+          (Prod.snd majorK)
+          (Prod.fst majorK)
+          cheapRec
+          cheapProj
+      else
+        publicWhnf
+          context
+          (Prod.snd majorK)
+          (Prod.fst majorK)
+
+
+theorem psKernelRecursorPrepareMajorWith_configuration_sound
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (hCore :
+      PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (hK :
+      PsKernelRecursorKConversionConfigurationSound
+        publicWhnf inferType defeq)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (recursor : PsKernelRecursorInfo)
+    (major0 result : PsKernelExpr)
+    (cheapRec cheapProj : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelRecursorPrepareMajorWith
+          publicWhnf
+          coreWhnf
+          inferType
+          defeq
+          context
+          state
+          recursor
+          major0
+          cheapRec
+          cheapProj =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelReductionClosure
+        context.environment
+        context.localContext
+        major0
+        result ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState := by
+  cases hKFlag : recursor.k with
+  | false =>
+      have hBaseReduction :
+          PsKernelReductionClosure
+            context.environment
+            context.localContext
+            major0
+            major0 :=
+        PsKernelReductionClosure.refl major0
+      cases hCtor :
+          psKernelIsConstructorApp
+            context.environment
+            major0 with
+      | true =>
+          simp [
+            psKernelRecursorPrepareMajorWith,
+            hKFlag,
+            hCtor
+          ] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact ⟨hBaseReduction, hConfig⟩
+      | false =>
+          cases cheapRec with
+          | false =>
+              cases hRun :
+                  publicWhnf
+                    context
+                    state
+                    major0 with
+              | error error =>
+                  simp [
+                    psKernelRecursorPrepareMajorWith,
+                    hKFlag,
+                    hCtor,
+                    hRun
+                  ] at hSuccess
+              | ok run =>
+                  rcases run with ⟨reduced, reducedState⟩
+                  have hSemantic :=
+                    hWhnf
+                      context state reducedState
+                      major0 reduced
+                      hConfig hRun
+                  simp [
+                    psKernelRecursorPrepareMajorWith,
+                    hKFlag,
+                    hCtor,
+                    hRun
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact hSemantic
+          | true =>
+              cases hRun :
+                  coreWhnf
+                    context
+                    state
+                    major0
+                    true
+                    cheapProj with
+              | error error =>
+                  simp [
+                    psKernelRecursorPrepareMajorWith,
+                    hKFlag,
+                    hCtor,
+                    hRun
+                  ] at hSuccess
+              | ok run =>
+                  rcases run with ⟨reduced, reducedState⟩
+                  have hSemantic :=
+                    hCore
+                      context state reducedState
+                      major0 reduced
+                      true cheapProj
+                      hConfig hRun
+                  simp [
+                    psKernelRecursorPrepareMajorWith,
+                    hKFlag,
+                    hCtor,
+                    hRun
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact hSemantic
+  | true =>
+      cases hKRun :
+          psKernelToConstructorWhenK
+            publicWhnf
+            inferType
+            defeq
+            context
+            state
+            recursor
+            major0 with
+      | error error =>
+          simp [
+            psKernelRecursorPrepareMajorWith,
+            hKFlag,
+            hKRun
+          ] at hSuccess
+      | ok run =>
+          rcases run with ⟨majorK, stateK⟩
+          have hKSemantic :=
+            hK
+              context state stateK
+              recursor major0 majorK
+              hConfig hKRun
+          cases hCtor :
+              psKernelIsConstructorApp
+                context.environment
+                majorK with
+          | true =>
+              simp [
+                psKernelRecursorPrepareMajorWith,
+                hKFlag,
+                hKRun,
+                hCtor
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hKSemantic.2, hKSemantic.1⟩
+          | false =>
+              cases cheapRec with
+              | false =>
+                  cases hRun :
+                      publicWhnf
+                        context
+                        stateK
+                        majorK with
+                  | error error =>
+                      simp [
+                        psKernelRecursorPrepareMajorWith,
+                        hKFlag,
+                        hKRun,
+                        hCtor,
+                        hRun
+                      ] at hSuccess
+                  | ok reducedRun =>
+                      rcases reducedRun with
+                        ⟨reduced, reducedState⟩
+                      have hReducedSemantic :=
+                        hWhnf
+                          context stateK reducedState
+                          majorK reduced
+                          hKSemantic.1 hRun
+                      simp [
+                        psKernelRecursorPrepareMajorWith,
+                        hKFlag,
+                        hKRun,
+                        hCtor,
+                        hRun
+                      ] at hSuccess
+                      rcases hSuccess with ⟨rfl, rfl⟩
+                      exact
+                        ⟨
+                          psKernelReductionClosure_transitive
+                            context.environment
+                            context.localContext
+                            major0 majorK reduced
+                            hKSemantic.2
+                            hReducedSemantic.1,
+                          hReducedSemantic.2
+                        ⟩
+              | true =>
+                  cases hRun :
+                      coreWhnf
+                        context
+                        stateK
+                        majorK
+                        true
+                        cheapProj with
+                  | error error =>
+                      simp [
+                        psKernelRecursorPrepareMajorWith,
+                        hKFlag,
+                        hKRun,
+                        hCtor,
+                        hRun
+                      ] at hSuccess
+                  | ok reducedRun =>
+                      rcases reducedRun with
+                        ⟨reduced, reducedState⟩
+                      have hReducedSemantic :=
+                        hCore
+                          context stateK reducedState
+                          majorK reduced
+                          true cheapProj
+                          hKSemantic.1 hRun
+                      simp [
+                        psKernelRecursorPrepareMajorWith,
+                        hKFlag,
+                        hKRun,
+                        hCtor,
+                        hRun
+                      ] at hSuccess
+                      rcases hSuccess with ⟨rfl, rfl⟩
+                      exact
+                        ⟨
+                          psKernelReductionClosure_transitive
+                            context.environment
+                            context.localContext
+                            major0 majorK reduced
+                            hKSemantic.2
+                            hReducedSemantic.1,
+                          hReducedSemantic.2
+                        ⟩
 
 
 def PsKernelRecursorNormalizedMajor

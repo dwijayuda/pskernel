@@ -16,6 +16,8 @@ def psKernelContractResultTag {Value : Type} (result : Except PsKernelError Valu
 def psKernelContractDiagnosticTests : Bool :=
   Nat.beq (psKernelContractOutcomeTag (psKernelErrorOutcome (psKernelErrorFromMessage "already declared"))) 1 &&
   Nat.beq (psKernelContractOutcomeTag (psKernelErrorOutcome (psKernelErrorFromMessage "application type mismatch"))) 1 &&
+  Nat.beq (psKernelContractOutcomeTag (psKernelErrorOutcome
+    (psKernelErrorFromMessage "application type mismatch; fn=const test; expected=sort; actual=sort"))) 1 &&
   Nat.beq (psKernelContractOutcomeTag (psKernelErrorOutcome (psKernelErrorFromMessage "declaration has free variables"))) 1 &&
   Nat.beq (psKernelContractOutcomeTag (psKernelErrorOutcome (psKernelErrorFromMessage "declaration has metavariables"))) 1 &&
   Nat.beq (psKernelContractOutcomeTag (psKernelErrorOutcome (psKernelErrorFromMessage "deep recursion detected, use maxRecDepth to increase the limit"))) 3 &&

@@ -1429,9 +1429,10 @@ theorem psKernelDefEqFinish_result_sound_ok
           left
           right)
     (hResult :
-      Except.ok
+      (Except.ok
         (psKernelDefEqFinish
-          state left right inputValue) =
+          state left right inputValue) :
+        Except String (Prod Bool PsKernelCheckerState)) =
       Except.ok (Prod.mk outputValue nextState)) :
     PsKernelCheckerConfigurationSound context nextState ∧
       (outputValue = true ->

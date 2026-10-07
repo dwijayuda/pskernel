@@ -1,20 +1,60 @@
 {
   "schemaVersion": 1,
   "contract": "psc-foreign-interface/1",
-  "status": "portable-interface-and-wit-declaration-adapter-runtime-pending",
+  "status": "portable-interface-canonical-artifact-and-wit-relation-implemented-runtime-adapters-pending",
   "owner": "packages/interface-ir/src/Ps/InterfaceIr",
-  "profiles": ["PSC1-selfhost-stable/1", "PSC1-portable-selfhost/1"],
+  "profiles": [
+    "PSC1-selfhost-stable/1",
+    "PSC1-portable-selfhost/1"
+  ],
   "separation": "This is a new foreign value/ownership contract. It does not silently extend psc-runtime-values/1, change VerifiedIR meanings, or close the external ABI validation gap.",
-  "model": ["typed functions", "scalar and named types", "records", "variants", "enums", "lists", "options", "results and typed errors", "tuples", "owned resources", "borrowed resources", "futures", "streams", "async functions", "target availability", "capability imports and exports"],
+  "model": [
+    "typed functions",
+    "scalar and named types",
+    "records",
+    "variants",
+    "enums",
+    "lists",
+    "options",
+    "results and typed errors",
+    "tuples",
+    "owned resources",
+    "borrowed resources",
+    "futures",
+    "streams",
+    "async functions",
+    "target availability",
+    "capability imports and exports"
+  ],
   "validation": "Unique conservative lowercase kebab identifiers, resolved acyclic type graph, resource-only handles, supported target presence, exact imported/exported interface resolution and declared capability policy. Depth exhaustion is a separate failure. Every WIT emission freshly validates its raw input.",
   "borrowProfile": "Only direct synchronous function parameters may borrow a resource. Borrowed results, nested borrows and async borrows are unsupported and rejected. Resource values require explicit own or borrow in the model.",
   "wit": {
     "source": "https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md",
     "target": "component-model",
     "output": "Deterministic package, interface and world declarations with percent-escaped identifiers, named aggregates, resource handles, results, futures and streams. Owned resources use the WIT resource-name shorthand.",
-    "unsupported": ["cross-package use/imported types", "package versions", "flags", "resource methods and constructors", "component binary generation", "canonical ABI lowering and lifting"],
-    "independentParserValidation": "pending"
+    "unsupported": [
+      "cross-package use/imported types",
+      "package versions",
+      "flags",
+      "resource methods and constructors",
+      "component binary generation",
+      "canonical ABI lowering and lifting"
+    ],
+    "independentParserValidation": "pending external Component Model parser; independent in-repo renderer relation implemented",
+    "independentRelationValidation": "scripts/interface-ir-artifact.mjs independently decodes canonical InterfaceIR, re-renders deterministic WIT, and requires exact supplied WIT bytes; psc-interface-ir-wit-rendering/1 does not establish Canonical ABI or runtime behavior."
   },
   "authority": "A validated interface and emitted declaration are data, not CheckedCore, executable compatibility evidence, a preservation theorem or release acceptance.",
-  "remaining": ["target runtime adapters", "canonical artifact and semantic-lock binding", "VerifiedIR link integration with actual target adapters", "independent WIT parser and runtime behavior checks", "global preservation and ownership soundness"]
+  "remaining": [
+    "Canonical ABI/component binary lowering and runtime adapters",
+    "target runtime adapters",
+    "VerifiedIR link integration with actual target adapters",
+    "independent WIT parser and runtime behavior checks",
+    "global preservation and ownership soundness"
+  ],
+  "canonicalArtifact": {
+    "contract": "psc-interface-ir-json/1",
+    "producer": "packages/interface-ir/src/Ps/InterfaceIr/Encode.lean",
+    "independentDecoder": "scripts/interface-ir-artifact.mjs",
+    "authority": "interface-data-not-runtime-or-kernel-authority"
+  }
 }

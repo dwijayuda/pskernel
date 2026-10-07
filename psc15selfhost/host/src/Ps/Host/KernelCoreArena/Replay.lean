@@ -1,5 +1,6 @@
 import PSC1Kernel.ReplayJson
 import Ps.KernelCore.API.Kernel
+import Ps.Host.KernelCoreArena.CoreIntern
 
 namespace PsKernelCoreArena
 
@@ -209,6 +210,7 @@ def arenaResources : PsKernelResourcePolicy :=
 
 structure State where
   transport : PSC1Kernel.Replay.State
+  coreTransport : PsKernelCoreArena.CoreIntern.State
   session : PsKernelKernelSession
   allowHistoricalMetadata : Bool
   sawMeta : Bool
@@ -222,6 +224,7 @@ def State.empty
   let session ← liftKernel (psKernelKernelSessionEmpty arenaResources psKernelProviderDefault)
   pure {
     transport := PSC1Kernel.Replay.State.empty
+    coreTransport := PsKernelCoreArena.CoreIntern.State.empty
     session := session
     allowHistoricalMetadata := allowHistoricalMetadata
     sawMeta := false
@@ -231,11 +234,11 @@ def State.empty
     pendingMutual := []
   }
 
-def State.nameAt (state : State) (index : Nat) : Except Failure PsKernelName := do
-  pure (coreName (← liftTransport (state.transport.nameAt index)))
+def State.nameAt (state : State) (index : Nat) : Except Failure PsKernelName :=
+  liftTransport (state.coreTransport.nameAt index)
 
-def State.exprAt (state : State) (index : Nat) : Except Failure PsKernelExpr := do
-  pure (coreExpr (← liftTransport (state.transport.exprAt index)))
+def State.exprAt (state : State) (index : Nat) : Except Failure PsKernelExpr :=
+  liftTransport (state.coreTransport.exprAt index)
 
 def State.resolveNames (state : State) : List Nat -> Except Failure (List PsKernelName)
   | [] => pure []
@@ -482,17 +485,35 @@ def State.replayRecord
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
       let transport ← liftTransport (state.transport.addNameRecord value)
-      pure { state with transport := transport, records := state.records + 1 }
+      let coreTransport ← liftTransport (state.coreTransport.addNameRecord value)
+      pure {
+        state with
+          transport := transport
+          coreTransport := coreTransport
+          records := state.records + 1
+      }
   | .levelR value => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
       let transport ← liftTransport (state.transport.addLevelRecord value)
-      pure { state with transport := transport, records := state.records + 1 }
+      let coreTransport ← liftTransport (state.coreTransport.addLevelRecord value)
+      pure {
+        state with
+          transport := transport
+          coreTransport := coreTransport
+          records := state.records + 1
+      }
   | .exprR value => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
       let transport ← liftTransport (state.transport.addExprRecord value)
-      pure { state with transport := transport, records := state.records + 1 }
+      let coreTransport ← liftTransport (state.coreTransport.addExprRecord value)
+      pure {
+        state with
+          transport := transport
+          coreTransport := coreTransport
+          records := state.records + 1
+      }
   | .axiomR _ | .definitionR _ | .theoremR _ | .opaqueR _ |
       .quotR _ | .inductiveR _ => do
       unless state.sawMeta do

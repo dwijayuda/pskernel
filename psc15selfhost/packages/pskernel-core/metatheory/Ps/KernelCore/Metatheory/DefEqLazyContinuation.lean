@@ -839,3 +839,90 @@ theorem psKernelDefEqLazyStepBoth_equal_hint_configuration_sound
             context afterFailure nextState
             left right answer hAfterConfig
             (by simpa [afterFailure] using hMain)
+
+
+/-
+The complete two-definition lazy-delta step discharges every reducibility-hint
+branch, including the equal-hint optimized argument path. The authoritative
+lookup premises supplied by the dispatcher are retained in the semantic
+contract, and the string comparator is an explicit named soundness law.
+-/
+theorem psKernelDefEqLazyStepBoth_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (hString : PsKernelStringEqSoundLaw) :
+    PsKernelDeltaStepBothConfigurationSound
+      defeq coreWhnf := by
+  intro context state nextState left right
+    leftDef rightDef answer hLeftDef hRightDef hConfig hRun
+  cases hLeftHint :
+      psKernelReducibilityHintsLt leftDef.hints rightDef.hints with
+  | true =>
+      exact
+        psKernelDefEqLazyStepBoth_left_hint_configuration_sound
+          defeq coreWhnf hQuick hCore
+          context state nextState
+          left right leftDef rightDef answer
+          hLeftHint hConfig hRun
+  | false =>
+      cases hRightHint :
+          psKernelReducibilityHintsLt rightDef.hints leftDef.hints with
+      | true =>
+          exact
+            psKernelDefEqLazyStepBoth_right_hint_configuration_sound
+              defeq coreWhnf hQuick hCore
+              context state nextState
+              left right leftDef rightDef answer
+              hLeftHint hRightHint hConfig hRun
+      | false =>
+          exact
+            psKernelDefEqLazyStepBoth_equal_hint_configuration_sound
+              defeq coreWhnf hDefEq hQuick hCore hString
+              context state nextState
+              left right leftDef rightDef answer
+              hLeftHint hRightHint hLeftDef hRightDef
+              hConfig hRun
+
+
+theorem psKernelDefEqLazyStep_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (hString : PsKernelStringEqSoundLaw) :
+    PsKernelDeltaStepConfigurationSound
+      (psKernelDefEqLazyStep defeq coreWhnf) :=
+  psKernelDefEqLazyStep_configuration_sound_of_branches
+    defeq coreWhnf hQuick hCore
+    (psKernelDefEqLazyStepBoth_configuration_sound
+      defeq coreWhnf hDefEq hQuick hCore hString)

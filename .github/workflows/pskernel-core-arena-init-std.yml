@@ -71,7 +71,7 @@ jobs:
           rev: $PSKERNEL_SHA
           build: |
             cd psc15selfhost
-            lake build psc_kernel_core_arena
+            lake build psc_kernel_core_arena psc_kernel_legacy_arena
           run: |
             ulimit -s 65536
             psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "\$IN"
@@ -97,6 +97,9 @@ jobs:
         run: |
           set -euo pipefail
           uv run lka.py run --checker pskernel-core --test "${{ matrix.test }}"
+          echo "=== legacy PSC1 replay oracle ==="
+          _build/checkers/pskernel-core/src/psc15selfhost/.lake/build/bin/psc_kernel_legacy_arena \
+            < "_build/tests/${{ matrix.test }}.ndjson" || true
           TEST_NAME="${{ matrix.test }}" python3 - <<'PY'
           import glob, json, os, sys
           name=os.environ['TEST_NAME']

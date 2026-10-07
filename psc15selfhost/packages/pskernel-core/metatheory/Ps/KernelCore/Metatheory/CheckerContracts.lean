@@ -1408,6 +1408,45 @@ theorem psKernelDefEqFinish_result_sound
   apply hDefEq
   exact hValueEq.trans hOutput
 
+
+/-
+The final DefEq dispatcher returns its successful result inside Except.ok.
+Provide one reusable transport into the finish-result contract, so callers
+only have to normalize their deterministic match branches.
+-/
+theorem psKernelDefEqFinish_result_sound_ok
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (inputValue outputValue : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hDefEq :
+      inputValue = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right)
+    (hResult :
+      Except.ok
+        (psKernelDefEqFinish
+          state left right inputValue) =
+      Except.ok (Prod.mk outputValue nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (outputValue = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right) := by
+  injection hResult with hPair
+  exact
+    psKernelDefEqFinish_result_sound
+      context state nextState left right
+      inputValue outputValue
+      hConfig hDefEq hPair
+
 theorem psKernelInferenceConfigurationSound_preserves
     (infer :
       PsKernelCheckerContext ->

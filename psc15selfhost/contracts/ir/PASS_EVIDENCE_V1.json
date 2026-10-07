@@ -38,7 +38,10 @@
     "independent bounded specialization correspondence replay in checked service, build graph and offline archive; validator global soundness remains unproved",
     "actual VerifiedIR to canonical JavaScript scalar ABI policy/plan artifact, with policy identity bound to the pass and offline relation replay",
     "certified behavioral-interface reuse obligations validated before untrusted evidence-cache hits",
-    "production executable EvidenceEnvelope target-adapter identities preserved for downstream audit"
+    "production executable EvidenceEnvelope target-adapter identities preserved for downstream audit",
+    "actual validated JsIR retained between specialization and JavaScript printing",
+    "actual ABI-completed validated WasmIR retained between specialization and Wasm binary encoding",
+    "direct backend build graphs split SpecializedIR -> target IR -> executable artifact edges and offline archive replay decodes target IR schemas"
   ],
   "remaining": [
     "backend-interior stage artifacts, other-target specialization snapshots and default-build direct-JS integration after promotion gates",
@@ -53,5 +56,19 @@
   "providerInputs": "contracts/ir/CHECKED_PROVIDER_INPUTS_V1.json",
   "sourceResources": "contracts/resource/SOURCE_READ_BUDGET_V1.json",
   "semanticReuse": "QueryGraphV2 candidates require exact certified-interface reuse-rule replay before the ordinary ActionId/pass-evidence cache validator can return cached outputs.",
-  "targetAdapterEvidence": "psc-verified-ir-to-js-abi-plan/1 is the first production target-adapter evidence edge; broader target profiles reuse the same PassExecution/Envelope model."
+  "targetAdapterEvidence": "psc-verified-ir-to-js-abi-plan/1 is the first production target-adapter evidence edge; broader target profiles reuse the same PassExecution/Envelope model.",
+  "targetIrEvidence": {
+    "javascript": {
+      "stage": "jsIr",
+      "contract": "psc-js-ir-json/1",
+      "validator": "psc-js-ir-validator/1",
+      "preservation": "not-established"
+    },
+    "wasm": {
+      "stage": "wasmIr",
+      "contract": "psc-wasm-ir-json/1",
+      "validator": "psc-wasm-ir-validator/1",
+      "preservation": "not-established"
+    }
+  }
 }

@@ -33,9 +33,10 @@ test('explicit owned kernel checks dependent source before emission and executio
       allowedAssumptions: ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
         'selected-kernel-invocation', 'trusted-frontend-source-interpretation', 'trusted-erasure-and-typescript-emission',
         'selected-typescript-package-closure', 'trusted-erasure-implementation', 'trusted-strict-ir-validator',
-        'trusted-typescript-emission'] });
+        'trusted-typescript-emission', 'trusted-runtime-interface-projection'] });
     assert.equal(archived.kind, 'accepted', archived.reason);
-    assert.equal(archived.executions.length, 5);
+    assert.equal(archived.executions.length, 6);
+    assert.equal(archived.runtimeInterfaceProjections.length, 1);
     assert.equal(archived.semanticClaimsVerified, false);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -140,7 +141,9 @@ for (const [kind, source] of [
       assert.ok(existsSync(path.join(dir, 'out.admissions.json')));
       const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json'), 'utf8'));
       assert.equal(graph.coverage, 'observed-erasure-validation-and-composite-backend-edges');
-      assert.equal(graph.executions.length, 5);
+      assert.equal(graph.executions.length, 6);
+      assert.equal(receipt.runtimeInterface.domain, 'runtime-interface');
+      assert.deepEqual(graph.entries.find(entry => entry.identity.domain === 'runtime-interface').identity, receipt.runtimeInterface);
       assert.equal(receipt.sourceResources.contract, 'psc-source-read-budget/1');
       assert.equal(receipt.sourceResources.observed.sourceBytes, Buffer.byteLength(source));
       assert.equal(receipt.sourceResources.observed.moduleCount, 1);

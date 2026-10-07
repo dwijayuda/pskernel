@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { buildVerifierDistribution } from './build-verifier-distribution.mjs';
+import { buildVerifierDistribution, staticModuleDependencies } from './build-verifier-distribution.mjs';
 import { semanticLockFixture } from './semantic-lock-fixture.mjs';
 import { artifactId, canonicalArtifact } from './artifact-evidence.mjs';
 import { wasmLiteralCertificateChecker } from './wasm-literal-certificate.mjs';
@@ -42,6 +42,16 @@ function capsuleFixture() {
     claims: [{ claimId: 'literal', subjectId: selected.subject.identity, checkerId: 'wasm-literal', claimClass: selected.checker.claimClass }] };
   return { capsule, policy };
 }
+
+test('distribution inventory parses actual ESM declarations without executing source or mistaking IR tags for imports', () => {
+  const source = "import { readFile } from 'node:fs/promises';\n" +
+    "export { value } from './dependency.mjs';\n" +
+    "const tags = ['import', 'from']; /* import 'fictional.mjs'; */\n" +
+    "throw new Error('must not execute');\n";
+  assert.deepEqual(staticModuleDependencies(source), ['node:fs/promises', './dependency.mjs']);
+  assert.deepEqual(staticModuleDependencies("const deferred = () => import('./dynamic.mjs');"), []);
+  assert.throws(() => staticModuleDependencies('import {'), /PARSE_FAILED/);
+});
 
 test('standalone verifier replays real supported evidence outside checkout and rejects tampering/unshipped providers', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'psc-verifier-dist-'));

@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
+import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
 
 export async function readCheckedBuildHostSources() {
   const root = path.dirname(fileURLToPath(import.meta.url));
@@ -37,6 +38,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   if (directJavaScript !== undefined && [typeScript, javaScript, declarations, sourceMap].some(value => value !== undefined))
     throw new Error('PSC_BUILD_GRAPH_MIXED_BACKEND_PATHS');
   let toolInputs;
+  let runtimeInterface;
   function add(item, source, inline = false) {
     const key = artifactKey(item.identity);
     if (!artifacts.has(key)) {
@@ -99,11 +101,11 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       semanticIdentity, dependencies, resourcePolicy: { contract: 'psc-checked-host-resource/1',
         enforcement: 'existing-stage-specific-limits', completeBudgetCoverage: false,
         ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.limits } : {}),
-        ...(id !== 'typescript-to-es2022/1' && seedResources ? { nativeSession: seedResources.limits } : {}) },
+        ...(id !== 'typescript-to-es2022/1' && id !== 'psc-project-runtime-interface/1' && seedResources ? { nativeSession: seedResources.limits } : {}) },
       resourceObservation: { hostObserved: true, inputBytes: input.bytes.byteLength,
         outputBytes: outputs.reduce((sum, output) => sum + output.bytes.byteLength, 0),
         ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.observed } : {}),
-        ...(id !== 'typescript-to-es2022/1' && seedResources ? { nativeSession: seedResources.observed,
+        ...(id !== 'typescript-to-es2022/1' && id !== 'psc-project-runtime-interface/1' && seedResources ? { nativeSession: seedResources.observed,
           nativeSessionScope: 'whole-shared-session-not-per-pass-attribution' } : {}),
         unobserved: ['cpu', 'peak-memory', 'kernel-steps', 'ir-nodes'] },
       diagnostics: ['Global preservation is unproved; these records describe the executed composite edges.'], evidence: [] });
@@ -123,6 +125,10 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         { observedStages: ['erase'] }, baseDependencies, ['trusted-erasure-implementation']);
       execute('psc-validate-runtime-ir/1', runtimeIr, [verifiedIr], implementation, 'psc-runtime-ir-invariants/1',
         { observedStages: ['validate-ir'], bytesPreserved: true }, baseDependencies, ['trusted-strict-ir-validator']);
+      runtimeInterface = add(runtimeInterfaceArtifact(verifiedIr), { kind: 'archive-required', role: 'runtime-structural-interface' });
+      execute('psc-project-runtime-interface/1', verifiedIr, [runtimeInterface], implementation, 'psc-runtime-interface-projection/1',
+        { observedStages: ['runtime-interface-projection'], excludes: ['declaration-bodies'],
+          behavioralReuse: false }, baseDependencies, ['trusted-runtime-interface-projection']);
   }
   if (typeScript !== undefined) {
     const ts = bytes(typeScript, 'typescript-source', 'psc-typescript-source/es2022', { kind: 'output-file', suffix: '.ts' });
@@ -178,7 +184,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       irStages ? 'specialization and backend-interior artifacts' : 'per-IR-stage artifacts',
       'complete toolchain closure', 'independent preservation evidence'] };
   const encoded = canonicalBytes(graph);
-  return { graph, artifacts, bytes: encoded,
+  return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1'),
     ...(providerInputs.length ? { providerInputs: providerInputs.map(item => item.identity) } : {}),
     ...(toolInputs ? { typeScriptToolInputs: toolInputs.identity } : {}) };

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -23,6 +24,21 @@ function relative(from, reference) {
   return resolved;
 }
 
+// Ask Node's actual ESM parser for static dependencies without linking or
+// evaluating source. Regex matching mistook the IR tag string 'import' for a
+// declaration. Dynamic-provider/data inventories remain separately restricted.
+export function staticModuleDependencies(source) {
+  const program = "import { SourceTextModule } from 'node:vm'; let source = ''; " +
+    "process.stdin.setEncoding('utf8'); process.stdin.on('data', part => { source += part; }); " +
+    "process.stdin.on('end', () => { const module = new SourceTextModule(source); " +
+    "process.stdout.write(JSON.stringify(module.dependencySpecifiers)); });";
+  const result = spawnSync(process.execPath, ['--experimental-vm-modules', '--input-type=module', '--eval', program],
+    { input: source, encoding: 'utf8', maxBuffer: 1024 * 1024, timeout: 10000, windowsHide: true });
+  if (result.error || result.status !== 0) throw new Error('PSC_VERIFIER_BUILD_PARSE_FAILED: ' +
+    (result.error?.message ?? result.stderr));
+  return JSON.parse(result.stdout);
+}
+
 /** Packages the actual reviewed static ESM/data closure for this explicit
  * checker profile. Only the explicit Lean Wasm profile supplies that provider;
  * all other dynamic providers remain unshipped and policy-disabled.
@@ -43,8 +59,7 @@ export async function buildVerifierDistribution(destination, { profile = 'wasm-l
     files.set(name, bytes);
     if (!name.endsWith('.mjs')) continue;
     const source = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-    for (const match of source.matchAll(/(?:\bfrom\s*|\bimport\s*)['"]([^'"]+)['"]/gu)) {
-      const reference = match[1];
+    for (const reference of staticModuleDependencies(source)) {
       if (reference.startsWith('node:')) continue;
       if (!reference.startsWith('.') || !reference.endsWith('.mjs')) throw new Error('PSC_VERIFIER_BUILD_EXTERNAL_DEPENDENCY: ' + reference);
       pending.push(relative(name, reference));

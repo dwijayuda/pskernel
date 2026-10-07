@@ -1,5 +1,6 @@
 import Ps.DriverTs.Stages
 import Ps.DriverJs.Stages
+import Ps.CompilerIr.InterfaceArtifact
 
 def psIrEncodingFixture : PsVerifiedIrModule :=
   PsVerifiedIrModule.mk [] [] [] [
@@ -14,6 +15,14 @@ def main (args : List String) : IO Unit := do
     match psIrEncodeModule psIrEncodingFixture with
     | .error _ => throw (IO.userError "IR_ENCODE_FAILED")
     | .ok encoded => IO.println encoded
+  else if args == ["--interface"] then
+    let .ok prepared := psCompilerPrepareSource .lean "def answer : Nat := 42\n"
+      | throw (IO.userError "PREPARE_FAILED")
+    let .ok validated := psCompilerVerifiedIrFromPrepared prepared
+      | throw (IO.userError "VALIDATION_FAILED")
+    let .ok interface := psIrEncodeRuntimeInterface validated
+      | throw (IO.userError "INTERFACE_FAILED")
+    IO.println interface
   else if args == ["--js-stages"] then
     let source := "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := forward Nat 42\n"
     let .ok prepared := psCompilerPrepareSource .lean source

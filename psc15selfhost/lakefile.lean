@@ -68,6 +68,7 @@ lean_lib PsCompilerIr where
   roots := #[
     `Ps.CompilerIr.Model,
     `Ps.CompilerIr.Encode,
+    `Ps.CompilerIr.InterfaceArtifact,
     `Ps.CompilerIr.Validate,
     `Ps.CompilerIr.Interface,
     `Ps.CompilerIr.JsAbi,

@@ -118,6 +118,9 @@
       "owners": [
         "packages/project/src/Ps/Project/QueryGraph.lean",
         "packages/project/src/Ps/Project/QueryGraphV2.lean",
+        "packages/compiler-ir/src/Ps/CompilerIr/InterfaceArtifact.lean",
+        "scripts/runtime-interface-artifact.mjs",
+        "contracts/module-interface/RUNTIME_INTERFACE_ARTIFACT_V1.json",
         "contracts/module-interface/QUERY_GRAPH_V2.json"
       ],
       "completion": "Structural and behavioral interfaces drive actual invalidation and dependency compatibility.",

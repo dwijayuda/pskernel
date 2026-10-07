@@ -168,6 +168,7 @@ export async function buildChecked({
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
       hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     receipt.buildGraph = evidence.identity;
+    if (evidence.runtimeInterface) receipt.runtimeInterface = evidence.runtimeInterface;
     receipt.typeScriptToolInputs = evidence.typeScriptToolInputs;
     receipt.providerInputs = evidence.providerInputs;
     const archive = packObservedBuildArchive(evidence);

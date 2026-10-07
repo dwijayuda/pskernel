@@ -46,16 +46,17 @@ def psIrDecodeLinkPolicy (value : PsJsonValue) : Except PsIrDecodeError PsInterf
 def psIrDecodeLinkOrigin (value : PsJsonValue) : Except PsIrDecodeError PsInterfaceIrOrigin :=
   match value with
   | PsJsonValue.array values =>
-      match values with
-      | List.cons (PsJsonValue.string tag) rest =>
+      match psIrDecodeItem 0 values with
+      | PsJsonValue.string tag =>
           if psStringEq tag "linked" then
-            if psListIsEmpty rest then Except.ok PsInterfaceIrOrigin.linkedModule
-            else Except.error PsIrDecodeError.schema
+            let build : List PsJsonValue -> Except PsIrDecodeError PsInterfaceIrOrigin :=
+              fun (_items : List PsJsonValue) => Except.ok PsInterfaceIrOrigin.linkedModule;
+            psIrDecodeTuple 1 build value
           else if psStringEq tag "host" then
-            match rest with
-            | List.cons (PsJsonValue.string assumption) List.nil =>
-                Except.ok (PsInterfaceIrOrigin.host assumption)
-            | _ => Except.error PsIrDecodeError.schema
+            let build : List PsJsonValue -> Except PsIrDecodeError PsInterfaceIrOrigin :=
+              fun (items : List PsJsonValue) =>
+                psIrDecodeMap1 PsInterfaceIrOrigin.host (psIrDecodeText (psIrDecodeItem 1 items));
+            psIrDecodeTuple 2 build value
           else Except.error PsIrDecodeError.schema
       | _ => Except.error PsIrDecodeError.schema
   | _ => Except.error PsIrDecodeError.schema

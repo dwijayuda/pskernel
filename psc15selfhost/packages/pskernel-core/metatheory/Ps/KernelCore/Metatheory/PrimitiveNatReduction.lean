@@ -7,6 +7,47 @@ WHNF.  This module deliberately proves the executable primitive table rather
 than postulating it as a soundness assumption.
 -/
 
+
+theorem psKernelExprNatLiteralValue_some_shape
+    (expr : PsKernelExpr)
+    (value : Nat)
+    (hValue :
+      psKernelExprNatLiteralValue expr =
+        Option.some value) :
+    expr =
+      PsKernelExpr.lit (PsKernelLiteral.nat value) := by
+  cases expr with
+  | lit literal =>
+      cases literal with
+      | nat candidate =>
+          simp [psKernelExprNatLiteralValue] at hValue
+          subst candidate
+          rfl
+      | str text =>
+          simp [psKernelExprNatLiteralValue] at hValue
+  | bvar index =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | fvar name =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | mvar name =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | sort level =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | const name levels =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | app fn arg =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | lam name type body binderInfo =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | forallE name type body binderInfo =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | letE name type value body nondep =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | mdata metadata body =>
+      simp [psKernelExprNatLiteralValue] at hValue
+  | proj typeName index body =>
+      simp [psKernelExprNatLiteralValue] at hValue
+
 theorem psKernelReduceNatBinary_some_refines_step
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)

@@ -158,3 +158,454 @@ def PsKernelForallSpineConfigurationSound
           left
           right
           subst)
+
+
+theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq :
+      PsKernelDefEqConfigurationSound defeq)
+    (hString : PsKernelStringEqSoundLaw) :
+    PsKernelLambdaSpineConfigurationSound defeq := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro
+        context state nextState left right subst value
+        hConfig hSuccess
+      simp [psKernelDefEqLambdaSpineWithFuel] at hSuccess
+  | succ remaining ih =>
+      intro
+        context state nextState left right subst value
+        hConfig hSuccess
+      cases left <;> try
+        · have hCore :=
+            hDefEq
+              context state nextState
+              (psKernelExprInstantiateRev _ subst)
+              (psKernelExprInstantiateRev right subst)
+              value
+              hConfig
+              (by
+                simpa [psKernelDefEqLambdaSpineWithFuel]
+                  using hSuccess)
+          refine ⟨hCore.1, ?_⟩
+          intro hTrue
+          exact
+            PsKernelLambdaSpineJudgment.terminal
+              _ _ subst
+              (hCore.2 hTrue)
+      case lam leftName leftDomain leftBody leftInfo =>
+        cases right <;> try
+          · have hCore :=
+              hDefEq
+                context state nextState
+                (psKernelExprInstantiateRev
+                  (PsKernelExpr.lam
+                    leftName leftDomain leftBody leftInfo)
+                  subst)
+                (psKernelExprInstantiateRev _ subst)
+                value
+                hConfig
+                (by
+                  simpa [psKernelDefEqLambdaSpineWithFuel]
+                    using hSuccess)
+            refine ⟨hCore.1, ?_⟩
+            intro hTrue
+            exact
+              PsKernelLambdaSpineJudgment.terminal
+                _ _ subst
+                (hCore.2 hTrue)
+        case lam rightName rightDomain rightBody rightInfo =>
+          let leftOpened :=
+            psKernelExprInstantiateRev leftDomain subst
+          let rightOpened :=
+            psKernelExprInstantiateRev rightDomain subst
+          have finishAfterDomain :
+              ∀
+                (domainState : PsKernelCheckerState),
+                PsKernelCheckerConfigurationSound
+                    context domainState ->
+                PsKernelBinderDomainJudgment
+                    context.environment
+                    context.localContext
+                    leftDomain
+                    rightDomain
+                    subst ->
+                (if
+                    if psKernelExprHasLooseBVar leftBody then
+                      true
+                    else
+                      psKernelExprHasLooseBVar rightBody then
+                  let opened :=
+                    psKernelDefEqWithLocal
+                      context
+                      domainState
+                      rightName
+                      rightOpened
+                      rightInfo
+                  let fresh := Prod.fst opened
+                  let child := Prod.fst (Prod.snd opened)
+                  let freshState := Prod.snd (Prod.snd opened)
+                  match
+                      psKernelDefEqLambdaSpineWithFuel
+                        remaining
+                        defeq
+                        child
+                        freshState
+                        leftBody
+                        rightBody
+                        (psKernelExprListAppend
+                          subst
+                          (List.cons
+                            (PsKernelExpr.fvar fresh)
+                            List.nil)) with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok childResult =>
+                      Except.ok
+                        (Prod.mk
+                          (Prod.fst childResult)
+                          (psKernelCheckerStateExitLocalScope
+                            freshState
+                            (Prod.snd childResult)))
+                else
+                  psKernelDefEqLambdaSpineWithFuel
+                    remaining
+                    defeq
+                    context
+                    domainState
+                    leftBody
+                    rightBody
+                    (psKernelExprListAppend
+                      subst
+                      (List.cons
+                        (PsKernelExpr.sort PsKernelLevel.zero)
+                        List.nil))) =
+                  Except.ok (Prod.mk value nextState) ->
+                PsKernelCheckerConfigurationSound
+                    context nextState ∧
+                  (value = true ->
+                    PsKernelLambdaSpineJudgment
+                      context.environment
+                      context.localContext
+                      (PsKernelExpr.lam
+                        leftName leftDomain leftBody leftInfo)
+                      (PsKernelExpr.lam
+                        rightName rightDomain rightBody rightInfo)
+                      subst) := by
+            intro domainState hDomainConfig hDomain hTail
+            cases hDependent :
+                (if psKernelExprHasLooseBVar leftBody then
+                   true
+                 else
+                   psKernelExprHasLooseBVar rightBody) with
+            | false =>
+                let nextSubst :=
+                  psKernelExprListAppend
+                    subst
+                    (List.cons
+                      (PsKernelExpr.sort PsKernelLevel.zero)
+                      List.nil)
+                cases hRest :
+                    psKernelDefEqLambdaSpineWithFuel
+                      remaining
+                      defeq
+                      context
+                      domainState
+                      leftBody
+                      rightBody
+                      nextSubst with
+                | error error =>
+                    simp [
+                      hDependent,
+                      nextSubst,
+                      hRest
+                    ] at hTail
+                | ok rest =>
+                    rcases rest with ⟨restValue, restState⟩
+                    have hRestSemantic :=
+                      ih
+                        context
+                        domainState
+                        restState
+                        leftBody
+                        rightBody
+                        nextSubst
+                        restValue
+                        hDomainConfig
+                        hRest
+                    simp [
+                      hDependent,
+                      nextSubst,
+                      hRest
+                    ] at hTail
+                    rcases hTail with ⟨rfl, rfl⟩
+                    refine ⟨hRestSemantic.1, ?_⟩
+                    intro hTrue
+                    have hLeftClosed :
+                        psKernelExprHasLooseBVar leftBody = false := by
+                      cases hLeft :
+                          psKernelExprHasLooseBVar leftBody with
+                      | false => exact hLeft
+                      | true =>
+                          simp [hLeft] at hDependent
+                    have hRightClosed :
+                        psKernelExprHasLooseBVar rightBody = false := by
+                      cases hRight :
+                          psKernelExprHasLooseBVar rightBody with
+                      | false => exact hRight
+                      | true =>
+                          simp [hLeftClosed, hRight] at hDependent
+                    exact
+                      PsKernelLambdaSpineJudgment.stepClosed
+                        leftName rightName
+                        leftDomain rightDomain
+                        leftBody rightBody
+                        leftInfo rightInfo
+                        subst
+                        hDomain
+                        hLeftClosed
+                        hRightClosed
+                        (hRestSemantic.2 hTrue)
+            | true =>
+                let opened :=
+                  psKernelDefEqWithLocal
+                    context
+                    domainState
+                    rightName
+                    rightOpened
+                    rightInfo
+                let fresh := Prod.fst opened
+                let child := Prod.fst (Prod.snd opened)
+                let freshState := Prod.snd (Prod.snd opened)
+                let nextSubst :=
+                  psKernelExprListAppend
+                    subst
+                    (List.cons
+                      (PsKernelExpr.fvar fresh)
+                      List.nil)
+                have hParentFresh :
+                    PsKernelCheckerConfigurationSound
+                      context freshState := by
+                  simpa [
+                    opened,
+                    freshState
+                  ] using
+                    psKernelDefEqWithLocal_parent_configuration
+                      context
+                      domainState
+                      rightName
+                      rightOpened
+                      rightInfo
+                      hDomainConfig
+                have hChild :
+                    PsKernelCheckerConfigurationSound
+                      child freshState := by
+                  simpa [
+                    opened,
+                    child,
+                    freshState
+                  ] using
+                    psKernelDefEqWithLocal_child_configuration
+                      context
+                      domainState
+                      rightName
+                      rightOpened
+                      rightInfo
+                      hString
+                      hDomainConfig
+                have hFresh :
+                    psKernelLocalContextFind
+                        context.localContext
+                        fresh =
+                      Option.none := by
+                  simpa [
+                    opened,
+                    fresh
+                  ] using
+                    psKernelDefEqWithLocal_fresh_absent
+                      context
+                      domainState
+                      rightName
+                      rightOpened
+                      rightInfo
+                      hString
+                      hDomainConfig
+                cases hRest :
+                    psKernelDefEqLambdaSpineWithFuel
+                      remaining
+                      defeq
+                      child
+                      freshState
+                      leftBody
+                      rightBody
+                      nextSubst with
+                | error error =>
+                    simp [
+                      hDependent,
+                      opened,
+                      fresh,
+                      child,
+                      freshState,
+                      nextSubst,
+                      hRest
+                    ] at hTail
+                | ok rest =>
+                    rcases rest with ⟨restValue, childFinal⟩
+                    have hRestSemantic :=
+                      ih
+                        child
+                        freshState
+                        childFinal
+                        leftBody
+                        rightBody
+                        nextSubst
+                        restValue
+                        hChild
+                        hRest
+                    have hExit :
+                        PsKernelCheckerConfigurationSound
+                          context
+                          (psKernelCheckerStateExitLocalScope
+                            freshState
+                            childFinal) :=
+                      psKernelCheckerStateExitLocalScope_preserves_configuration
+                        context
+                        freshState
+                        childFinal
+                        hParentFresh
+                    simp [
+                      hDependent,
+                      opened,
+                      fresh,
+                      child,
+                      freshState,
+                      nextSubst,
+                      hRest
+                    ] at hTail
+                    rcases hTail with ⟨rfl, rfl⟩
+                    refine ⟨hExit, ?_⟩
+                    intro hTrue
+                    have hRestJudgment :
+                        PsKernelLambdaSpineJudgment
+                          context.environment
+                          (psKernelLocalContextAddLocal
+                            context.localContext
+                            fresh
+                            rightName
+                            rightOpened
+                            rightInfo)
+                          leftBody
+                          rightBody
+                          nextSubst := by
+                      simpa [
+                        child,
+                        psKernelCheckerContextWithLocalContext
+                      ] using hRestSemantic.2 hTrue
+                    exact
+                      PsKernelLambdaSpineJudgment.stepOpen
+                        leftName rightName fresh
+                        leftDomain rightDomain
+                        leftBody rightBody
+                        leftInfo rightInfo
+                        subst
+                        hDomain
+                        hDependent
+                        hFresh
+                        hRestJudgment
+          cases hDomainEq :
+              psKernelExprEq leftDomain rightDomain with
+          | true =>
+              have hDomain :
+                  PsKernelBinderDomainJudgment
+                    context.environment
+                    context.localContext
+                    leftDomain
+                    rightDomain
+                    subst :=
+                PsKernelBinderDomainJudgment.structural
+                  leftDomain rightDomain subst hDomainEq
+              exact
+                finishAfterDomain
+                  state
+                  hConfig
+                  hDomain
+                  (by
+                    simpa [
+                      psKernelDefEqLambdaSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainEq
+                    ] using hSuccess)
+          | false =>
+              cases hDomainRun :
+                  defeq
+                    context
+                    state
+                    leftOpened
+                    rightOpened with
+              | error error =>
+                  simp [
+                    psKernelDefEqLambdaSpineWithFuel,
+                    leftOpened,
+                    rightOpened,
+                    hDomainEq,
+                    hDomainRun
+                  ] at hSuccess
+              | ok domainRun =>
+                  rcases domainRun with
+                    ⟨domainValue, domainState⟩
+                  have hDomainSemantic :=
+                    hDefEq
+                      context
+                      state
+                      domainState
+                      leftOpened
+                      rightOpened
+                      domainValue
+                      hConfig
+                      hDomainRun
+                  cases domainValue with
+                  | false =>
+                      simp [
+                        psKernelDefEqLambdaSpineWithFuel,
+                        leftOpened,
+                        rightOpened,
+                        hDomainEq,
+                        hDomainRun
+                      ] at hSuccess
+                      rcases hSuccess with ⟨rfl, rfl⟩
+                      refine ⟨hDomainSemantic.1, ?_⟩
+                      intro hImpossible
+                      simp at hImpossible
+                  | true =>
+                      have hDomain :
+                          PsKernelBinderDomainJudgment
+                            context.environment
+                            context.localContext
+                            leftDomain
+                            rightDomain
+                            subst :=
+                        PsKernelBinderDomainJudgment.defeq
+                          leftDomain
+                          rightDomain
+                          subst
+                          (hDomainSemantic.2 rfl)
+                      exact
+                        finishAfterDomain
+                          domainState
+                          hDomainSemantic.1
+                          hDomain
+                          (by
+                            simpa [
+                              psKernelDefEqLambdaSpineWithFuel,
+                              leftOpened,
+                              rightOpened,
+                              hDomainEq,
+                              hDomainRun
+                            ] using hSuccess)

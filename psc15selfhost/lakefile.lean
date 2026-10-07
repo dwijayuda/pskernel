@@ -69,6 +69,8 @@ lean_lib PsCompilerIr where
   roots := #[
     `Ps.CompilerIr.PublicApi,
     `Ps.CompilerIr.PublicApiEncode,
+    `Ps.CompilerIr.SourceSignature,
+    `Ps.CompilerIr.SourceSignatureEncode,
     `Ps.CompilerIr.Model,
     `Ps.CompilerIr.Encode,
     `Ps.CompilerIr.Decode,

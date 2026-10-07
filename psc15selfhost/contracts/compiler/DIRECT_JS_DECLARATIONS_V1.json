@@ -64,5 +64,14 @@
   "selectedProfiles": [
     "psc-direct-js-declarations-closed-structural/1",
     "psc-direct-js-declarations-uniform-structural/1"
-  ]
+  ],
+  "portableSourceProjection": {
+    "model": "packages/compiler-ir/src/Ps/CompilerIr/SourceSignature.lean",
+    "codec": "packages/compiler-ir/src/Ps/CompilerIr/SourceSignatureEncode.lean",
+    "logicalOwner": "public-api",
+    "algorithm": "Explicit task/value worklist and bounded prefix scan; curried structural fuel recursion; lexical scope markers preserve source generic indices and reject dependent runtime values.",
+    "resourcePolicy": "At most 128 prefix binders/scope entries/type depth; caller-selected positive work-step budget (default 400000) plus separately bounded prefix work. The host comparator counts source nodes, so resource units are intentionally not equated.",
+    "output": "Canonical psc-source-signature-structural/1 signature objects retain exact source binder names and visibility. No source normalization, target inference, live authority or semantic theorem.",
+    "status": "portable-producer-and-native-host-comparison-implemented-declaration-writer-integration-pending"
+  }
 }

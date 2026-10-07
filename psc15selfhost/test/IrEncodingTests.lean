@@ -1,3 +1,4 @@
+import Ps.CompilerIr.SourceSignatureEncode
 import Ps.DriverTs.Stages
 import Ps.DriverJs.Stages
 import Ps.DriverWasm.Stages
@@ -11,8 +12,61 @@ def psIrEncodingFixture : PsVerifiedIrModule :=
     PsVerifiedIrDeclaration.mk "unicode" [] [] (.primitive .string) (.literal (.string "a\n\"😀")),
     PsVerifiedIrDeclaration.mk "unknown" [] [] .unknown (.var "unresolved")]
 
+
+-- Native consumer fixture: the semantic producer above remains portable.
+def psSourceSignatureFixtureJson (api : PsPublicApiModule) : IO String := do
+  let entries <- api.declarations.mapM fun declaration => do
+    match declaration with
+    | .constant _ _ _ type =>
+        let .ok encoded := psProjectSourceSignatureJson type
+          | throw (IO.userError "SOURCE_SIGNATURE_PROJECTION_FAILED")
+        pure encoded
+    | _ => throw (IO.userError "SOURCE_SIGNATURE_FIXTURE_NON_CONSTANT")
+  pure (psJsonArray entries)
+
+def psSourceSignatureFailureFixture : IO Unit := do
+  let nat := PsExpr.constE (PsName.str .anonymous "Nat") []
+  let type := PsExpr.sortE (.succ .zero)
+  let binder := PsName.str .anonymous "x"
+  match psProjectSourceSignatureWithLimits 0 128 nat with
+  | .error .resourcePolicy => pure ()
+  | _ => throw (IO.userError "SIGNATURE_INVALID_POLICY")
+  match psProjectSourceSignatureWithLimits 1 128 nat with
+  | .error .resourceExhausted => pure ()
+  | _ => throw (IO.userError "SIGNATURE_WORK_LIMIT")
+  match psProjectSourceSignatureWithLimits 20 129 nat with
+  | .error .resourcePolicy => pure ()
+  | _ => throw (IO.userError "SIGNATURE_DEPTH_POLICY")
+  match psProjectSourceSignature (.forallE binder nat (.bvar 0) .explicit) with
+  | .error .dependentValueTypeUnsupported => pure ()
+  | _ => throw (IO.userError "SIGNATURE_DEPENDENT_VALUE")
+  match psProjectSourceSignature (.forallE binder (.sortE .zero) nat .explicit) with
+  | .error .propositionOrAmbiguousSort => pure ()
+  | _ => throw (IO.userError "SIGNATURE_PROP_GUESSED")
+  let higherRank := PsExpr.forallE binder type (.bvar 0) .implicit
+  match psProjectSourceSignature (.forallE binder higherRank nat .explicit) with
+  | .error .higherRankTypeUnsupported => pure ()
+  | _ => throw (IO.userError "SIGNATURE_HIGHER_RANK")
+  let array := PsExpr.app (.constE (PsName.str .anonymous "Array") [.zero]) nat
+  match psProjectSourceSignature array with
+  | .error .typeFormUnsupported => pure ()
+  | _ => throw (IO.userError "SIGNATURE_ARRAY_UNIVERSE")
+  match psProjectSourceSignature (.constE (PsName.str (PsName.str .anonymous "Other") "Nat") []) with
+  | .error .namedTypeUnsupported => pure ()
+  | _ => throw (IO.userError "SIGNATURE_QUALIFIED_NAME")
+  match psProjectSourceSignature (.fvar 0) with
+  | .error .typeFormUnsupported => pure ()
+  | _ => throw (IO.userError "SIGNATURE_FREE_VARIABLE")
+  let deep := (List.range 129).foldl (fun acc _ => PsExpr.app (.constE (PsName.str .anonymous "Array") []) acc) nat
+  match psProjectSourceSignature deep with
+  | .error .resourceExhausted => pure ()
+  | _ => throw (IO.userError "SIGNATURE_DEPTH_LIMIT")
+  IO.println "PSCV_SOURCE_SIGNATURE_FAILURES: PASS"
+
 def main (args : List String) : IO Unit := do
-  if args == ["--raw"] then
+  if args == ["--source-signature-errors"] then
+    psSourceSignatureFailureFixture
+  else if args == ["--raw"] then
     match psIrEncodeModule psIrEncodingFixture with
     | .error _ => throw (IO.userError "IR_ENCODE_FAILED")
     | .ok encoded => IO.println encoded
@@ -109,7 +163,9 @@ def main (args : List String) : IO Unit := do
       throw (IO.userError "JS_STAGES_CHANGED_OUTPUT")
     let .ok api := psCompilerPublicApiFromPrepared prepared
       | throw (IO.userError "STAGE_PUBLIC_API_FAILED")
+    let signatures <- psSourceSignatureFixtureJson (psPublicApiProjectModule prepared.declarations)
     IO.println (psJsonObject [
+      ("sourceSignatures", psJsonQuote signatures),
       ("source", psJsonQuote source),
       ("declarationOrigins", psJsonQuote observed.origins),
       ("publicApi", psJsonQuote api),
@@ -143,7 +199,9 @@ def main (args : List String) : IO Unit := do
       | throw (IO.userError "CLOSED_JS_STAGES_FAILED")
     let .ok api := psCompilerPublicApiFromPrepared prepared
       | throw (IO.userError "UNIFORM_PUBLIC_API_FAILED")
+    let signatures <- psSourceSignatureFixtureJson (psPublicApiProjectModule prepared.declarations)
     IO.println (psJsonObject [
+      ("sourceSignatures", psJsonQuote signatures),
       ("source", psJsonQuote source),
       ("publicApi", psJsonQuote api),
       ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),

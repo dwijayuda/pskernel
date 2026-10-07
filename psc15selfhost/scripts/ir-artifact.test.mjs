@@ -1,3 +1,4 @@
+import { projectSourceSignature } from './public-api-signature.mjs';
 import { bindObservedBuildContext } from './observed-build-context.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -18,6 +19,16 @@ import { decodeIrArtifact, checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
 import { packObservedBuildArchive, verifyObservedBuildArchive } from './observed-build-archive.mjs';
+
+
+function checkPortableSourceSignatures(staged) {
+  const api = JSON.parse(staged.publicApi);
+  const expected = api[2].map(declaration => {
+    assert.equal(declaration[0], 'constant');
+    return projectSourceSignature(declaration[4]);
+  });
+  assert.deepEqual(Buffer.from(staged.sourceSignatures), canonicalBytes(expected));
+}
 
 async function checkDeclarationConsumer(product, consumer) {
   const directory = await mkdtemp(path.join(tmpdir(), 'psc-direct-declarations-'));
@@ -261,6 +272,7 @@ test('native generated coordinates count UTF-16, all ECMAScript line terminators
 
 test('actual source signatures produce direct declarations accepted by the pinned TypeScript consumer', async () => {
   const staged = JSON.parse(emitted('--js-declaration-stages'));
+  checkPortableSourceSignatures(staged);
   const snapshots = checkedIrStageArtifacts(staged), targets = checkedTargetIrStageArtifacts(staged);
   const textRecord = (text, domain, contract) => {
     const bytes = Buffer.from(text); return { bytes, identity: artifactId(bytes, domain, contract) };
@@ -292,6 +304,7 @@ test('actual source signatures produce direct declarations accepted by the pinne
 
 test('uniform JS representation retains generic exports and strips only checked static type arguments', async () => {
   const staged = JSON.parse(emitted('--js-uniform-stages'));
+  checkPortableSourceSignatures(staged);
   const snapshots = checkedIrStageArtifacts(staged), targets = checkedTargetIrStageArtifacts(staged);
   const selected = uniformSpecializationArtifact(staged.uniformSpecializedIr);
   const relation = verifyUniformSpecialization(snapshots.verifiedIr, selected);
@@ -376,4 +389,8 @@ test('uniform JS representation retains generic exports and strips only checked 
   assert.throws(() => verifyUniformSpecialization(snapshots.verifiedIr, forged), /PAYLOAD_CHANGED/);
   assert.throws(() => uniformSpecializationArtifact(canonicalBytes(['psc-uniform-specialized-ir/1', 'unknown', runtime])), /PROFILE/);
   assert.throws(() => verifyUniformSpecialization(snapshots.verifiedIr, selected, { maxBytes: 1 }), /RESOURCE_POLICY/);
+});
+
+test('portable source projection rejects ambiguous, dependent, higher-rank and exhausted products', () => {
+  assert.equal(emitted('--source-signature-errors').toString(), 'PSCV_SOURCE_SIGNATURE_FAILURES: PASS');
 });

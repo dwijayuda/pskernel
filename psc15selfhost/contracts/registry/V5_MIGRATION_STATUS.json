@@ -1032,6 +1032,18 @@
       "logicalOwner": "public-api",
       "rationale": "Exact source-semantic body-free projection before erasure and its codec; no target export or preservation authority.",
       "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/SourceSignature.lean",
+      "logicalOwner": "public-api",
+      "rationale": "Portable bounded structural source signature projection and codec; target-neutral and separate from executable/export binding.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/SourceSignatureEncode.lean",
+      "logicalOwner": "public-api",
+      "rationale": "Portable bounded structural source signature projection and codec; target-neutral and separate from executable/export binding.",
+      "physicalMove": "deferred"
     }
   ],
   "backendLanes": [
@@ -1182,7 +1194,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "closed-products-and-uniform-generic-declarations-descriptor-graph-archive-integrated-uniform-origins-portable-serializers-and-cli-pending",
+      "status": "closed-and-uniform-products-host-integrated-portable-source-signature-projection-added-portable-writer-uniform-origins-and-cli-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {

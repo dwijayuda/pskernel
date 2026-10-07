@@ -20,6 +20,7 @@
   ],
   "optionalBindings": [
     "runtime structural interface",
+    "target adapter policy/plan artifacts",
     "selected provider input manifests",
     "TypeScript tool input manifest",
     "source and checked-session resource observations"
@@ -29,12 +30,19 @@
     "The envelope records source semantic acceptance separately from executable preservation.",
     "Current executable preservation remains not-established unless a later evidence class proves or independently validates it.",
     "The envelope is audit-record-only and can never mint CheckedCoreCapability, CertifiedSource capability, cache authority or release acceptance.",
-    "Production build receipts bind the exact envelope identity and emit the envelope beside the executable evidence."
+    "Production build receipts bind the exact envelope identity and emit the envelope beside the executable evidence.",
+    "Target adapter evidence is generic: JavaScript/Wasm/native adapter identities use the same targetAdapters binding rather than target-specific envelope schemas."
   ],
   "assurance": {
     "integrity": "implementation-available",
     "sourceSemanticAcceptance": "bound-to-PSCV-CERT",
     "executablePreservation": "not-established",
     "releaseAccepted": false
+  },
+  "implementationCoverage": {
+    "runtimeInterface": "implemented",
+    "targetAdapters": "implemented generic identity binding; JavaScript synchronous scalar profile production-bound",
+    "providerInputs": "implemented",
+    "typeScriptToolInputs": "implemented"
   }
 }

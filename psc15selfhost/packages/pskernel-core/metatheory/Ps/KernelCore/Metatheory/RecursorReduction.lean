@@ -35,6 +35,7 @@ def PsKernelRecursorKConversionConfigurationSound
     (state nextState : PsKernelCheckerState)
     (recursor : PsKernelRecursorInfo)
     (major result : PsKernelExpr),
+    recursor.k = true ->
     PsKernelCheckerConfigurationSound context state ->
     psKernelToConstructorWhenK
         publicWhnf
@@ -423,7 +424,7 @@ theorem psKernelRecursorPrepareMajorWith_configuration_sound
             hK
               context state stateK
               recursor major0 majorK
-              hConfig hKRun
+              hKFlag hConfig hKRun
           cases hCtor :
               psKernelIsConstructorApp
                 context.environment

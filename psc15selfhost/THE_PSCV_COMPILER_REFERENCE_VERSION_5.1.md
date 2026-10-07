@@ -774,3 +774,611 @@ Current explicit target IRs:
 - WasmIR.
 
 Rust and TypeScript remain source backends unless independent validation/proof needs justify persistent target IRs.
+
+
+---
+
+# 15. Public API and interface products
+
+V5.1 distinguishes three interface products.
+
+## StructuralModuleInterface
+
+Public names/types/data shape/transparency/capabilities required by ProofScript dependents.
+
+## BehavioralModuleInterface
+
+Contracts, invariants, effects, assumptions, resource claims, theorem/spec identities.
+
+## PublicApiIR
+
+A stable projection of checked/certified public source semantics suitable for declaration-language emitters.
+
+PublicApiIR is derived from checked Core/module interfaces, **not from SpecializedIR**.
+
+This preserves source-level generics and public API semantics even when runtime code is specialized.
+
+Consumers include:
+
+- direct JS `.d.ts` emitter;
+- TypeScript declaration parity checks;
+- Rust/other target bindings where appropriate;
+- IDE/package index.
+
+---
+
+# 16. Foreign InterfaceIR
+
+`InterfaceIR` remains separate from PublicApiIR.
+
+It models executable foreign boundaries:
+
+- functions;
+- records;
+- variants;
+- resources/handles;
+- ownership;
+- future/stream;
+- capability imports/exports;
+- target availability.
+
+Outputs may include:
+
+- WIT;
+- Canonical ABI plans;
+- Rust/C/native bindings;
+- TypeScript foreign bindings.
+
+Behavioral proof remains PSCV evidence, not WIT semantics.
+
+The current `packages/interface-ir` implementation is the seed for this subsystem.
+
+---
+
+# 17. OriginGraph and debug artifacts
+
+Every relevant source construct receives stable origin metadata.
+
+Conceptually:
+
+~~~text
+Origin {
+  sourceArtifactId
+  sourceSpan
+  sourceSemanticId?
+}
+~~~
+
+Transformations maintain an `OriginGraph`:
+
+~~~text
+source node
+ -> Core
+ -> RuntimeIR
+ -> SpecializedIR
+ -> TargetIR / target source
+~~~
+
+Passes declare:
+
+~~~text
+originPolicy =
+  preserve
+  merge
+  synthesize
+  drop-with-reason
+~~~
+
+OriginGraph is developer metadata, not semantic authority.
+
+It is bound to exact source and target artifacts.
+
+---
+
+# 18. Source maps and declaration maps
+
+JavaScript source maps follow ECMA-426-compatible output.
+
+Direct JS source map:
+
+~~~text
+JsIR positions
+ + OriginGraph
+ -> module.js.map
+~~~
+
+Declaration map:
+
+~~~text
+PublicApiIR positions
+ + source origins
+ -> module.d.ts.map
+~~~
+
+Maps must not alter executable semantics.
+
+Malformed/missing maps may fail a debug-artifact requirement but never cause semantic acceptance/rejection of code unless a selected release policy explicitly requires them.
+
+Wasm may use ECMA-426-compatible Wasm mappings or DWARF-like debug artifacts as a separate target profile.
+
+---
+
+# 19. BuildAction identity and hermeticity
+
+Every cacheable/reproducible compiler action is described by:
+
+~~~text
+BuildAction {
+  actionKind
+  implementationId
+  semanticProfileId
+  profileEnvironmentId
+  exactInputArtifactIds[]
+  exactToolchainIds[]
+  targetProfileId?
+  extensionSetId
+  declaredEnvironment[]
+  resourcePolicyId
+  outputContracts[]
+}
+~~~
+
+`ActionId` is the canonical digest of this declaration.
+
+Forbidden undeclared semantic inputs include:
+
+- current working directory;
+- mtime;
+- locale;
+- host PATH resolution;
+- undeclared environment variables;
+- network responses;
+- nondeterministic map iteration;
+- unpinned target compiler.
+
+Edit builds may be less hermetic but must record that status.
+
+Assured/reproducible release actions require hermetic execution or an explicit assumption.
+
+---
+
+# 20. Pass architecture
+
+~~~text
+PassDefinition<I,O> {
+  passId
+  version
+  inputContract
+  outputContract
+  semanticRelationId
+  implementationId
+  supportedProfiles[]
+
+  requiresAnalyses[]
+  preservesAnalyses[]
+  invalidatesAnalyses[]
+
+  preservesInterfaces[]
+  invalidatesInterfaces[]
+
+  originPolicy
+  authorityEffect
+  assuranceClass
+
+  validatorId?
+  theoremIds[]
+  assumptionIds[]
+}
+~~~
+
+`authorityEffect`:
+
+~~~text
+none
+requiresRevalidation
+preservesByProof
+preservesByValidator
+trustExpanding
+~~~
+
+`assuranceClass`:
+
+~~~text
+trustedImplementation
+proofPreserved
+certificateValidated
+translationValidated
+targetAcceptedOnly
+differentialOnly
+unassured
+~~~
+
+A trust-expanding pass cannot hide behind semantic fingerprints.
+
+---
+
+# 21. QueryGraph and incremental compilation
+
+~~~text
+QueryKey {
+  queryKind
+  subjectIdentity
+  profileEnvironmentId
+  implementationId
+  declaredInputs[]
+}
+
+QueryResult<T> {
+  value
+  artifactId?
+  semanticFingerprint?
+  interfaceFingerprint?
+  dependencyKeys[]
+  evidenceClass
+}
+~~~
+
+A query remains green only if:
+
+1. exact dependency/fingerprint classes it consumed remain valid;
+2. implementation identity is compatible;
+3. ProfileEnvironment matches;
+4. pass/query reuse policy permits reuse.
+
+Green status is never authority.
+
+A reused capability must satisfy its own capability-revalidation contract.
+
+---
+
+# 22. BackendDescriptor
+
+Every backend provides:
+
+~~~text
+BackendDescriptor {
+  backendId
+  backendVersion
+  backendKind
+
+  inputContract
+  targetProfileId
+  implementationId
+
+  lowerPassId
+  targetRepresentationId?
+  targetValidatorId?
+  emitterId
+
+  externalToolchainId?
+  runtimeContractId
+  interfaceAdapterId?
+
+  supportedCapabilities[]
+  unsupportedCapabilities[]
+
+  artifactBundleContract
+  selfHostRole
+  assuranceClass
+}
+~~~
+
+Backend kinds:
+
+~~~text
+directTargetIR
+sourceTarget
+externalCodegenAdapter
+~~~
+
+---
+
+# 23. ArtifactBundle
+
+All backends return a typed bundle.
+
+~~~text
+ArtifactBundle {
+  backendId
+  sourceSubjectId
+  profileEnvironmentId
+
+  executableArtifacts[]
+  publicApiArtifacts[]
+  debugArtifacts[]
+  interfaceArtifacts[]
+
+  targetToolchainArtifacts[]
+  evidenceArtifacts[]
+
+  claimSet
+}
+~~~
+
+Artifacts are independently identified.
+
+A missing debug artifact never masquerades as missing semantic evidence.
+
+---
+
+# 24. TypeScript backend
+
+Kind:
+
+~~~text
+sourceTarget
+~~~
+
+Pipeline:
+
+~~~text
+Validated<SpecializedIR>
+ -> TypeScriptSource
+ -> canonical/source validation
+ -> pinned tsc
+ -> JavaScript
+ -> declarations/maps according to policy
+~~~
+
+Primary outputs may include:
+
+~~~text
+module.ts
+module.js
+module.d.ts
+module.js.map
+module.d.ts.map
+~~~
+
+Roles:
+
+- minimal/current bootstrap;
+- JS/TS ecosystem compatibility;
+- readable target source;
+- differential oracle against direct JS;
+- target toolchain evidence.
+
+`tsc` acceptance establishes TypeScript target acceptance only.
+
+For PSCV public API fidelity, emitted declaration surface must correspond to PublicApiIR.
+
+The implementation may:
+
+1. use the shared ProofScript PublicApiIR declaration emitter; or
+2. use `tsc` declarations and independently compare their public semantic surface to PublicApiIR.
+
+---
+
+# 25. Direct JavaScript backend
+
+Kind:
+
+~~~text
+directTargetIR
+~~~
+
+Pipeline:
+
+~~~text
+Validated<SpecializedIR>
+ -> JsIR
+ -> ValidateJsIR
+ -> Validated<JsIR>
+ -> deterministic ESM printer
+ -> module.js
+~~~
+
+V5.1 requires the direct JS artifact bundle to support:
+
+~~~text
+module.js
+module.d.ts
+module.js.map
+module.d.ts.map   # optional/profile-controlled but architecturally supported
+~~~
+
+No `tsc` dependency is required.
+
+Ownership:
+
+~~~text
+backend-js
+  -> JS code / JsIR
+
+public-api-ir + interface-ts
+  -> .d.ts
+
+origin-map + source-map emitter
+  -> .js.map / .d.ts.map
+~~~
+
+`.d.ts` is derived from PublicApiIR, not inferred from printed JavaScript.
+
+`.js.map` is derived from target positions plus OriginGraph.
+
+This keeps runtime emission, public type API, and debug mapping consistent but independently checkable.
+
+Direct JS is the preferred long-term canonical npm/JS artifact lane.
+
+---
+
+# 26. WebAssembly backend
+
+Kind:
+
+~~~text
+directTargetIR
+~~~
+
+Pipeline:
+
+~~~text
+Validated<SpecializedIR>
+ -> WasmIR
+ -> structural validation
+ -> operand/control typing
+ -> target-profile validation
+ -> Validated<WasmIR>
+ -> binary encoder
+ -> module.wasm
+~~~
+
+Target contracts distinguish:
+
+- Core Wasm binary/runtime semantics;
+- private self-host ABI;
+- Component Model / Canonical ABI;
+- WIT interface bindings.
+
+Current implementation already contains:
+
+- WasmIR model;
+- lowerer;
+- type mapping;
+- structural validation;
+- operand/control typing;
+- binary encoder;
+- runtime representation modules;
+- self-host ABI;
+- synchronous Canonical ABI planning/binding work.
+
+Potential artifact bundle:
+
+~~~text
+module.wasm
+module.wit? / component interface artifacts?
+module.wasm.map?    # optional profile
+evidence artifacts
+~~~
+
+A Component/WASI plugin runtime is separate from the program target profile.
+
+---
+
+# 27. Rust backend
+
+Kind:
+
+~~~text
+sourceTarget
+~~~
+
+Pipeline:
+
+~~~text
+Validated<SpecializedIR>
+ -> RustTargetPlan?
+ -> RustSource
+ -> pinned rustc/Cargo
+ -> native/library artifact
+~~~
+
+Roles:
+
+- native/systems deployment;
+- diverse bootstrap lane;
+- independent target type/ownership feedback;
+- readable target code.
+
+Current implementation owners include captures, expression emission, identifiers, runtime, tail handling, types, and value references.
+
+`RustTargetPlan` is an optional internal target plan for:
+
+- ownership/storage class;
+- Rc/shared representation;
+- closure captures;
+- callback representation;
+- tail strategy;
+- runtime helpers;
+- identifier mapping;
+- generic bounds.
+
+Promote it to persistent RustIR only if a validator, proof, or second consumer needs stable serialized structure.
+
+`rustc` acceptance does not prove ProofScript semantic preservation.
+
+---
+
+# 28. Backend capabilities
+
+Backends advertise explicit capabilities:
+
+~~~text
+TargetCapability {
+  featureId
+  representationClass
+  runtimeRequirement?
+  interfaceRequirement?
+}
+~~~
+
+Examples:
+
+- machine integer widths;
+- Float32;
+- higher-order functions;
+- tail-worker strategy;
+- GC references;
+- native threads;
+- async;
+- component resources.
+
+Unsupported capabilities fail closed.
+
+Target-specific features remain Backend/InterfaceAdapter extensions unless promoted into a target-independent SemanticProfile revision.
+
+---
+
+# 29. CompilerService
+
+CompilerService is the persistent human/AI/IDE interface.
+
+Operations include:
+
+~~~text
+parse
+resolve
+elaborate
+typeOf
+goal
+holes
+tryCandidate
+validate
+compileStage
+runPass
+dependencies
+moduleInterface
+publicApi
+originInfo
+semanticDiff
+affectedQueries
+diagnosticDetails
+~~~
+
+Structured diagnostics are primary.
+
+CompilerService does not mint authority independently; it delegates authority-changing operations to the Authority Firewall/Broker.
+
+Partial program/proof checking is preferred when safe.
+
+---
+
+# 30. Security and soundness-security invariants
+
+Normative invariants:
+
+1. third-party extensions cannot construct Checked/Certified/Validated capabilities;
+2. receipts cannot recreate live authority;
+3. authority is always bound to exact subject identity;
+4. target output cannot be substituted after validation without identity change;
+5. closed-profile extension sets cannot change through ordinary dependency loading;
+6. proof producers cannot install axioms or bypass the kernel;
+7. semantic elaborators are profile-bound SourceFidelityTCB components unless independently validated;
+8. pass/backend preservation claims require declared evidence class;
+9. timeout/crash/unsupported/malformed output never becomes acceptance;
+10. cache/SAVEF corruption can cause recomputation/rejection, not false authority;
+11. third-party plugins receive no ambient network/filesystem/process authority in assured profiles;
+12. plugin code is not loaded into AuthorityBroker process;
+13. source backend toolchains are pinned by exact identity;
+14. signatures/provenance do not upgrade semantic claims;
+15. unknown evidence classes cannot satisfy assured-release policy.

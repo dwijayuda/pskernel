@@ -2895,3 +2895,45 @@ theorem psKernelExprInstantiateAt_fuse_singleton
   exact
     psKernelExprInstantiateAtReference_fuse_singleton
       expr replacement subst offset
+
+
+theorem psKernelExprList_split_at
+    (args : List PsKernelExpr)
+    (count : Nat)
+    (hAvailable :
+      count < psKernelExprListLength args) :
+    ∃ (arg : PsKernelExpr) (rest : List PsKernelExpr),
+      psKernelExprListDrop count args =
+          List.cons arg rest ∧
+      psKernelExprListDrop (Nat.succ count) args =
+          rest ∧
+      psKernelExprListTake (Nat.succ count) args =
+          List.append
+            (psKernelExprListTake count args)
+            (List.cons arg List.nil) := by
+  induction count generalizing args with
+  | zero =>
+      cases args with
+      | nil =>
+          simp [psKernelExprListLength] at hAvailable
+      | cons head tail =>
+          refine ⟨head, tail, ?_, ?_, ?_⟩
+          · rfl
+          · rfl
+          · rfl
+  | succ remaining ih =>
+      cases args with
+      | nil =>
+          simp [psKernelExprListLength] at hAvailable
+      | cons head tail =>
+          have hTailAvailable :
+              remaining <
+                psKernelExprListLength tail := by
+            simpa [psKernelExprListLength] using
+              (Nat.lt_of_succ_lt_succ hAvailable)
+          rcases ih tail hTailAvailable with
+            ⟨arg, rest, hDrop, hDropNext, hTake⟩
+          refine ⟨arg, rest, ?_, ?_, ?_⟩
+          · simpa [psKernelExprListDrop] using hDrop
+          · simpa [psKernelExprListDrop] using hDropNext
+          · simpa [psKernelExprListTake, hTake]

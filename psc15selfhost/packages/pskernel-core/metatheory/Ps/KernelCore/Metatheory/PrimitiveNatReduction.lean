@@ -507,3 +507,409 @@ theorem psKernelReduceNatWith_preserves_configuration
       simp [psKernelReduceNatWith] at hSuccess
       rcases hSuccess with ⟨rfl, rfl⟩
       exact hConfig
+
+
+theorem psKernelReduceNatWith_some_refines
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelReduceNatWith
+          publicWhnf
+          context
+          state
+          expr =
+        Except.ok
+          (Prod.mk (Option.some result) nextState)) :
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      expr
+      result := by
+  cases expr with
+  | app fn right =>
+      cases fn with
+      | const op levels =>
+          cases levels with
+          | nil =>
+              cases hSucc :
+                  psKernelNameEq op psKernelNatSuccName with
+              | false =>
+                  simp [psKernelReduceNatWith, hSucc] at hSuccess
+              | true =>
+                  cases hRight :
+                      publicWhnf context state right with
+                  | error error =>
+                      simp [
+                        psKernelReduceNatWith,
+                        hSucc,
+                        hRight
+                      ] at hSuccess
+                  | ok rightRun =>
+                      rcases rightRun with ⟨rightReduced, state1⟩
+                      have hRightSemantic :=
+                        hWhnf
+                          context
+                          state
+                          state1
+                          right
+                          rightReduced
+                          hConfig
+                          hRight
+                      cases hLiteral :
+                          psKernelExprNatLiteralValue rightReduced with
+                      | none =>
+                          simp [
+                            psKernelReduceNatWith,
+                            hSucc,
+                            hRight,
+                            hLiteral
+                          ] at hSuccess
+                      | some value =>
+                          have hRightShape :=
+                            psKernelExprNatLiteralValue_some_shape
+                              rightReduced
+                              value
+                              hLiteral
+                          subst rightReduced
+                          cases hSize :
+                              psKernelCheckNatSize
+                                context.maxNatSize
+                                (Nat.succ value) with
+                          | error error =>
+                              simp [
+                                psKernelReduceNatWith,
+                                hSucc,
+                                hRight,
+                                psKernelExprNatLiteralValue,
+                                hSize
+                              ] at hSuccess
+                          | ok checked =>
+                              simp [
+                                psKernelReduceNatWith,
+                                hSucc,
+                                hRight,
+                                psKernelExprNatLiteralValue,
+                                hSize
+                              ] at hSuccess
+                              rcases hSuccess with ⟨rfl, rfl⟩
+                              have hArg :
+                                  PsKernelReductionClosure
+                                    context.environment
+                                    context.localContext
+                                    (PsKernelExpr.app
+                                      (PsKernelExpr.const op List.nil)
+                                      right)
+                                    (PsKernelExpr.app
+                                      (PsKernelExpr.const op List.nil)
+                                      (PsKernelExpr.lit
+                                        (PsKernelLiteral.nat value))) :=
+                                PsKernelReductionClosure.appArg
+                                  (PsKernelExpr.const op List.nil)
+                                  right
+                                  (PsKernelExpr.lit
+                                    (PsKernelLiteral.nat value))
+                                  hRightSemantic.1
+                              have hPrimitive :
+                                  PsKernelReductionClosure
+                                    context.environment
+                                    context.localContext
+                                    (PsKernelExpr.app
+                                      (PsKernelExpr.const op List.nil)
+                                      (PsKernelExpr.lit
+                                        (PsKernelLiteral.nat value)))
+                                    (PsKernelExpr.lit
+                                      (PsKernelLiteral.nat
+                                        (Nat.succ value))) :=
+                                PsKernelReductionClosure.cons
+                                  (PsKernelExpr.app
+                                    (PsKernelExpr.const op List.nil)
+                                    (PsKernelExpr.lit
+                                      (PsKernelLiteral.nat value)))
+                                  (PsKernelExpr.lit
+                                    (PsKernelLiteral.nat
+                                      (Nat.succ value)))
+                                  (PsKernelExpr.lit
+                                    (PsKernelLiteral.nat
+                                      (Nat.succ value)))
+                                  (PsKernelReductionStep.natSucc
+                                    op value hSucc)
+                                  (PsKernelReductionClosure.refl
+                                    (PsKernelExpr.lit
+                                      (PsKernelLiteral.nat
+                                        (Nat.succ value))))
+                              exact
+                                psKernelReductionClosure_transitive
+                                  context.environment
+                                  context.localContext
+                                  (PsKernelExpr.app
+                                    (PsKernelExpr.const op List.nil)
+                                    right)
+                                  (PsKernelExpr.app
+                                    (PsKernelExpr.const op List.nil)
+                                    (PsKernelExpr.lit
+                                      (PsKernelLiteral.nat value)))
+                                  (PsKernelExpr.lit
+                                    (PsKernelLiteral.nat
+                                      (Nat.succ value)))
+                                  hArg
+                                  hPrimitive
+          | cons level rest =>
+              simp [psKernelReduceNatWith] at hSuccess
+      | app binaryHead left =>
+          cases binaryHead with
+          | const op levels =>
+              cases levels with
+              | nil =>
+                  cases hLeft :
+                      publicWhnf context state left with
+                  | error error =>
+                      simp [psKernelReduceNatWith, hLeft] at hSuccess
+                  | ok leftRun =>
+                      rcases leftRun with ⟨leftReduced, state1⟩
+                      have hLeftSemantic :=
+                        hWhnf
+                          context
+                          state
+                          state1
+                          left
+                          leftReduced
+                          hConfig
+                          hLeft
+                      cases hRight :
+                          publicWhnf context state1 right with
+                      | error error =>
+                          simp [
+                            psKernelReduceNatWith,
+                            hLeft,
+                            hRight
+                          ] at hSuccess
+                      | ok rightRun =>
+                          rcases rightRun with ⟨rightReduced, state2⟩
+                          have hRightSemantic :=
+                            hWhnf
+                              context
+                              state1
+                              state2
+                              right
+                              rightReduced
+                              hLeftSemantic.2
+                              hRight
+                          cases hLeftLiteral :
+                              psKernelExprNatLiteralValue leftReduced with
+                          | none =>
+                              simp [
+                                psKernelReduceNatWith,
+                                hLeft,
+                                hRight,
+                                hLeftLiteral
+                              ] at hSuccess
+                          | some leftValue =>
+                              have hLeftShape :=
+                                psKernelExprNatLiteralValue_some_shape
+                                  leftReduced
+                                  leftValue
+                                  hLeftLiteral
+                              subst leftReduced
+                              cases hRightLiteral :
+                                  psKernelExprNatLiteralValue rightReduced with
+                              | none =>
+                                  simp [
+                                    psKernelReduceNatWith,
+                                    hLeft,
+                                    hRight,
+                                    psKernelExprNatLiteralValue,
+                                    hRightLiteral
+                                  ] at hSuccess
+                              | some rightValue =>
+                                  have hRightShape :=
+                                    psKernelExprNatLiteralValue_some_shape
+                                      rightReduced
+                                      rightValue
+                                      hRightLiteral
+                                  subst rightReduced
+                                  cases hBinary :
+                                      psKernelReduceNatBinary
+                                        context.maxNatSize
+                                        op
+                                        leftValue
+                                        rightValue with
+                                  | error error =>
+                                      simp [
+                                        psKernelReduceNatWith,
+                                        hLeft,
+                                        hRight,
+                                        psKernelExprNatLiteralValue,
+                                        hBinary
+                                      ] at hSuccess
+                                  | ok binaryAnswer =>
+                                      cases binaryAnswer with
+                                      | none =>
+                                          simp [
+                                            psKernelReduceNatWith,
+                                            hLeft,
+                                            hRight,
+                                            psKernelExprNatLiteralValue,
+                                            hBinary
+                                          ] at hSuccess
+                                      | some binaryResult =>
+                                          have hBinarySemantic :=
+                                            psKernelReduceNatBinary_some_refines
+                                              context.environment
+                                              context.localContext
+                                              context.maxNatSize
+                                              op
+                                              leftValue
+                                              rightValue
+                                              binaryResult
+                                              hBinary
+                                          simp [
+                                            psKernelReduceNatWith,
+                                            hLeft,
+                                            hRight,
+                                            psKernelExprNatLiteralValue,
+                                            hBinary
+                                          ] at hSuccess
+                                          rcases hSuccess with ⟨rfl, rfl⟩
+                                          have hLeftInner :
+                                              PsKernelReductionClosure
+                                                context.environment
+                                                context.localContext
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.const op List.nil)
+                                                  left)
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.const op List.nil)
+                                                  (PsKernelExpr.lit
+                                                    (PsKernelLiteral.nat
+                                                      leftValue))) :=
+                                            PsKernelReductionClosure.appArg
+                                              (PsKernelExpr.const op List.nil)
+                                              left
+                                              (PsKernelExpr.lit
+                                                (PsKernelLiteral.nat
+                                                  leftValue))
+                                              hLeftSemantic.1
+                                          have hLeftOuter :
+                                              PsKernelReductionClosure
+                                                context.environment
+                                                context.localContext
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.app
+                                                    (PsKernelExpr.const op List.nil)
+                                                    left)
+                                                  right)
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.app
+                                                    (PsKernelExpr.const op List.nil)
+                                                    (PsKernelExpr.lit
+                                                      (PsKernelLiteral.nat
+                                                        leftValue)))
+                                                  right) :=
+                                            PsKernelReductionClosure.appFn
+                                              (PsKernelExpr.app
+                                                (PsKernelExpr.const op List.nil)
+                                                left)
+                                              (PsKernelExpr.app
+                                                (PsKernelExpr.const op List.nil)
+                                                (PsKernelExpr.lit
+                                                  (PsKernelLiteral.nat
+                                                    leftValue)))
+                                              right
+                                              hLeftInner
+                                          have hRightOuter :
+                                              PsKernelReductionClosure
+                                                context.environment
+                                                context.localContext
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.app
+                                                    (PsKernelExpr.const op List.nil)
+                                                    (PsKernelExpr.lit
+                                                      (PsKernelLiteral.nat
+                                                        leftValue)))
+                                                  right)
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.app
+                                                    (PsKernelExpr.const op List.nil)
+                                                    (PsKernelExpr.lit
+                                                      (PsKernelLiteral.nat
+                                                        leftValue)))
+                                                  (PsKernelExpr.lit
+                                                    (PsKernelLiteral.nat
+                                                      rightValue))) :=
+                                            PsKernelReductionClosure.appArg
+                                              (PsKernelExpr.app
+                                                (PsKernelExpr.const op List.nil)
+                                                (PsKernelExpr.lit
+                                                  (PsKernelLiteral.nat
+                                                    leftValue)))
+                                              right
+                                              (PsKernelExpr.lit
+                                                (PsKernelLiteral.nat
+                                                  rightValue))
+                                              hRightSemantic.1
+                                          have hOperands :=
+                                            psKernelReductionClosure_transitive
+                                              context.environment
+                                              context.localContext
+                                              (PsKernelExpr.app
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.const op List.nil)
+                                                  left)
+                                                right)
+                                              (PsKernelExpr.app
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.const op List.nil)
+                                                  (PsKernelExpr.lit
+                                                    (PsKernelLiteral.nat
+                                                      leftValue)))
+                                                right)
+                                              (PsKernelExpr.app
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.const op List.nil)
+                                                  (PsKernelExpr.lit
+                                                    (PsKernelLiteral.nat
+                                                      leftValue)))
+                                                (PsKernelExpr.lit
+                                                  (PsKernelLiteral.nat
+                                                    rightValue)))
+                                              hLeftOuter
+                                              hRightOuter
+                                          exact
+                                            psKernelReductionClosure_transitive
+                                              context.environment
+                                              context.localContext
+                                              (PsKernelExpr.app
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.const op List.nil)
+                                                  left)
+                                                right)
+                                              (PsKernelExpr.app
+                                                (PsKernelExpr.app
+                                                  (PsKernelExpr.const op List.nil)
+                                                  (PsKernelExpr.lit
+                                                    (PsKernelLiteral.nat
+                                                      leftValue)))
+                                                (PsKernelExpr.lit
+                                                  (PsKernelLiteral.nat
+                                                    rightValue)))
+                                              binaryResult
+                                              hOperands
+                                              hBinarySemantic
+              | cons level rest =>
+                  simp [psKernelReduceNatWith] at hSuccess
+          | _ =>
+              simp [psKernelReduceNatWith] at hSuccess
+      | _ =>
+          simp [psKernelReduceNatWith] at hSuccess
+  | _ =>
+      simp [psKernelReduceNatWith] at hSuccess

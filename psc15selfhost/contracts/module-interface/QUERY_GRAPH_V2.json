@@ -39,5 +39,6 @@
     "ruleChecker": "psc-exact-behavioral-interface-reuse/1",
     "authority": "validated-data-not-kernel-capability",
     "consumerSelection": "The caller independently selects both expectedCandidateId and expectedActionId. The exact candidate digest binds the entire ordered obligation set; untrusted cached bytes cannot select an action or remove reuse checks."
-  }
+  },
+  "v5IdentityGate": "contracts/compiler/QUERY_CONTEXT_V1.json; PsQueryPlanBoundStage explicitly gates old staged planning by profile/extension/action/pass/query identities and rejects trust-expanding/unassured/unknown effects. Host query keys cover every action input, and effect consumption invalidates all undeclared preservation."
 }

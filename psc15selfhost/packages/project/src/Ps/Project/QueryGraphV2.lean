@@ -244,3 +244,96 @@ def psCertifiedModuleInterfaceReuseRule
     psCertifiedModuleInterfaceFingerprintContract
     ruleArtifactKey
     psExactBehavioralInterfaceReuseChecker
+
+
+-- V5 identity gate around the existing stage planner. Each key is supplied by
+-- the host after canonical artifact verification. The action/query keys bind
+-- exact input coverage; a changed action needs a fresh execution/validation.
+structure PsQueryBoundContext where
+  profileEnvironmentKey : String
+  extensionSetKey : String
+  buildActionKey : String
+  passDefinitionKey : String
+  queryKey : String
+  authorityEffect : String
+  assuranceClass : String
+
+structure PsQueryBoundRecord where
+  context : PsQueryBoundContext
+  record : PsQueryStageRecord
+
+structure PsQueryBoundCandidate where
+  context : PsQueryBoundContext
+  candidate : PsQueryReuseCandidate
+
+inductive PsQueryBoundDecision where
+  | rebuild (reason : String)
+  | validateCandidate (candidate : PsQueryBoundCandidate)
+
+def psQueryBoundContextValid (context : PsQueryBoundContext) : Bool :=
+  if psQueryV2Nonempty context.profileEnvironmentKey then
+    if psQueryV2Nonempty context.extensionSetKey then
+      if psQueryV2Nonempty context.buildActionKey then
+        if psQueryV2Nonempty context.passDefinitionKey then
+          if psQueryV2Nonempty context.queryKey then
+            if psQueryV2Nonempty context.authorityEffect then
+              psQueryV2Nonempty context.assuranceClass
+            else false
+          else false
+        else false
+      else false
+    else false
+  else false
+
+def psQueryBoundContextEq (left right : PsQueryBoundContext) : Bool :=
+  if psStringEq left.profileEnvironmentKey right.profileEnvironmentKey then
+    if psStringEq left.extensionSetKey right.extensionSetKey then
+      if psStringEq left.buildActionKey right.buildActionKey then
+        if psStringEq left.passDefinitionKey right.passDefinitionKey then
+          if psStringEq left.queryKey right.queryKey then
+            if psStringEq left.authorityEffect right.authorityEffect then
+              psStringEq left.assuranceClass right.assuranceClass
+            else false
+          else false
+        else false
+      else false
+    else false
+  else false
+
+-- The portable planner accepts only known effect/assurance classes. Even a
+-- proof/validator label never mints a capability or bypasses host replay.
+def psQueryBoundEffectAllowsCandidate (effect : String) : Bool :=
+  if psStringEq effect "none" then true
+  else if psStringEq effect "requiresRevalidation" then true
+  else if psStringEq effect "preservesByProof" then true
+  else psStringEq effect "preservesByValidator"
+
+def psQueryBoundAssuranceAllowsCandidate (assurance : String) : Bool :=
+  if psStringEq assurance "trustedImplementation" then true
+  else if psStringEq assurance "proofPreserved" then true
+  else if psStringEq assurance "certificateValidated" then true
+  else if psStringEq assurance "translationValidated" then true
+  else if psStringEq assurance "targetAcceptedOnly" then true
+  else psStringEq assurance "differentialOnly"
+
+def psQueryPlanBoundStage
+    (rules : List PsQueryReuseRule)
+    (previous : PsQueryBoundRecord)
+    (context : PsQueryBoundContext)
+    (current : PsQueryStageRequest) :
+    PsQueryBoundDecision :=
+  if psQueryBoundContextValid context then
+    if psQueryBoundContextValid previous.context then
+      if psQueryBoundContextEq previous.context context then
+        if psQueryBoundEffectAllowsCandidate context.authorityEffect then
+          if psQueryBoundAssuranceAllowsCandidate context.assuranceClass then
+            match psQueryPlanStage rules (List.cons previous.record List.nil) current with
+            | PsQueryStageDecision.rebuild _ =>
+                PsQueryBoundDecision.rebuild "stage-dependency-changed"
+            | PsQueryStageDecision.validateCandidate candidate =>
+                PsQueryBoundDecision.validateCandidate (PsQueryBoundCandidate.mk context candidate)
+          else PsQueryBoundDecision.rebuild "unassured-or-unknown-pass"
+        else PsQueryBoundDecision.rebuild "trust-expanding-or-unknown-effect"
+      else PsQueryBoundDecision.rebuild "profile-extension-action-query-changed"
+    else PsQueryBoundDecision.rebuild "malformed-previous-context"
+  else PsQueryBoundDecision.rebuild "malformed-current-context"

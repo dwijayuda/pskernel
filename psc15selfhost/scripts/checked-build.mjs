@@ -204,6 +204,7 @@ export async function buildChecked({
     const evidence = bindObservedBuildContext(observed, { languageAuthority, backendRegistry, backendId: 'typescript' });
     receipt.profileEnvironment = evidence.profileEnvironment.identity;
     receipt.buildActions = evidence.buildActions.map(item => item.action.identity);
+    receipt.queryKeys = evidence.queryKeys.map(item => item.identity);
     receipt.backendDescriptor = evidence.backendDescriptor.identity;
     receipt.artifactBundle = evidence.artifactBundle.identity;
     receipt.claimSet = evidence.claimSet.identity;

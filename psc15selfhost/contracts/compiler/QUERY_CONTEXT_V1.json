@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-query-key/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "portableOwner": "packages/project/src/Ps/Project/QueryGraphV2.lean",
+  "hostOwner": "scripts/query-context.mjs",
+  "cacheAdapter": "scripts/query-evidence-cache.mjs",
+  "fields": [
+    "queryKind",
+    "subjectIdentity",
+    "profileEnvironmentId",
+    "implementationId",
+    "buildActionId",
+    "declaredInputs"
+  ],
+  "declaredInputFields": [
+    "role",
+    "fingerprintClass",
+    "artifactId"
+  ],
+  "rule": "Consumer selects expectedQueryId. Every exact BuildAction input must appear once with an explicit consumed class. Subject is an actual input; profile and implementation must match the action. A changed class, input, implementation, extension environment or action changes the key.",
+  "portableGate": "PsQueryPlanBoundStage compares verified host projections of profile/extension/action/pass/query IDs before the existing staged dependency planner. It returns rebuild or validateCandidate only. Unknown, trust-expanding and unassured effect classes cannot produce candidates.",
+  "invalidation": "applyPassEffects enforces supported profiles and required analyses, retains only explicitly preserved available facts, and discards all facts for trust-expanding/unassured passes. Names/metadata do not constitute preservation evidence or reconstitute live capabilities.",
+  "production": "All newly observed passes declare v2 effects. The checked builder produces one query per observed BuildAction; archive replay validates full coverage when queries are present. Historical records without queries remain identified as such.",
+  "cache": "The separate filesystem adapter derives the old action from the verified current query and preserves independent candidate/obligation selection, evidence replay and input-closure gates. Exact action matching is conservative; changed-input reuse needs a new checked execution and is not obtained by relabelling an old record.",
+  "remaining": [
+    "connect portable planner projections to a persistent live compiler-service query store",
+    "per-module public/structural/behavioral fingerprint producers and adequacy validators",
+    "incremental update scheduling beyond conservative exact action reuse",
+    "global incremental correctness and hermetic execution assurance"
+  ],
+  "authority": "validated-data-not-kernel-capability",
+  "globalIncrementalCorrectnessProved": false
+}

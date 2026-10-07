@@ -1131,7 +1131,7 @@
       "classifications": [
         "compiler-pass"
       ],
-      "status": "typed-product-effects-implemented-query-consumption-pending",
+      "status": "all-observed-passes-declare-effects-consumed-by-query-invalidation",
       "requirement": "Explicit analyses/interfaces/fingerprint preservation and invalidation, origin policy and authority effects."
     },
     {
@@ -1140,7 +1140,7 @@
       "classifications": [
         "querygraph-incremental"
       ],
-      "status": "profile-action-observed-producers-and-replay-implemented-query-effects-hermetic-executor-pending",
+      "status": "observed-producers-portable-identity-gate-and-host-query-cache-bindings-implemented-persistent-service-and-hermetic-executor-pending",
       "requirement": "ProfileEnvironment/extension set, hermetic BuildAction/ActionId and consumed semantic fingerprint classes govern reuse."
     },
     {
@@ -1360,6 +1360,13 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json",
       "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-query-key/1",
+      "kind": "query-context",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/QUERY_CONTEXT_V1.json",
+      "classification": "querygraph-incremental"
     }
   ]
 }

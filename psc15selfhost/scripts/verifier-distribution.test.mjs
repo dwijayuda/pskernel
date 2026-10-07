@@ -77,7 +77,7 @@ test('standalone verifier replays real supported evidence outside checkout and r
     const buildArchive = packObservedBuildArchive(build), buildPath = path.join(directory, 'build.json'), buildPolicyPath = path.join(directory, 'build-policy.json');
     await writeFile(buildPath, buildArchive.bytes);
     await writeFile(buildPolicyPath, JSON.stringify({ contract: 'psc-observed-build-consumer-policy/1', expectedGraphId: build.identity,
-      allowedAssumptions: build.graph.entries.find(entry => entry.identity.contract === 'psc-pass-definition/1').canonicalValue.assumptionIds }));
+      allowedAssumptions: build.graph.entries.find(entry => entry.identity.domain === 'pass-definition').canonicalValue.assumptionIds }));
     const buildResult = spawnSync(process.execPath, [path.join(distribution.directory, 'pscv-verify.mjs'),
       '--manifest-sha256', distribution.manifestSha256, '--build-archive', buildPath, '--policy', buildPolicyPath],
     { cwd: directory, encoding: 'utf8', maxBuffer: 1024 * 1024, timeout: 30000, env: { ...process.env, NODE_PATH: '', NODE_OPTIONS: '' } });

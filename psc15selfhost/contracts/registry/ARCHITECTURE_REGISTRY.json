@@ -363,6 +363,12 @@
       "kind": "action-binding",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json"
+    },
+    {
+      "id": "psc-query-key/1",
+      "kind": "query-context",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/QUERY_CONTEXT_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

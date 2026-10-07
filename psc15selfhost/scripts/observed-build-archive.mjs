@@ -40,7 +40,7 @@ function graphValue(bytes, bound) {
   if (graph.entries.length + 1 > bound.maxArtifacts) fail('RESOURCE_EXHAUSTED');
   const keys = new Set();
   const structuredContracts = new Set(['psc-pass-definition/1', 'psc-pass-definition/2', 'psc-pass-execution/1', 'psc-action/1',
-    'psc-profile-environment/1', 'psc-extension-set/1', 'psc-build-action/1', 'psc-observed-action-binding/1',
+    'psc-query-key/1', 'psc-profile-environment/1', 'psc-extension-set/1', 'psc-build-action/1', 'psc-observed-action-binding/1',
     'psc-artifact-bundle/1', 'psc-backend-descriptor/1', 'psc-claim-set/1',
     'psc-hosted-compiler-implementation/1', 'psc-acceptance-context/1', 'psc-typescript-tool-inputs/1', 'psc-checked-provider-inputs/1']);
   for (const entry of graph.entries) {

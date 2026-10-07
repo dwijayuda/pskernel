@@ -105,17 +105,15 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   const assumptions = ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
     'selected-kernel-invocation'];
   function execute(id, input, outputs, impl, relation, parameters, dependencies, extraAssumptions = [], validation) {
-    const heterogeneous = outputs.some(output => output.identity.contract !== outputs[0].identity.contract ||
-      output.identity.domain !== outputs[0].identity.domain);
     const product = (item, index) => ({ role: 'artifact-' + index, domain: item.identity.domain, contract: item.identity.contract });
-    const signature = heterogeneous ? {
+    const signature = {
       schemaVersion: 2, contract: 'psc-pass-definition/2',
       inputArtifacts: [product(input, 0)], outputArtifacts: outputs.map(product),
       effects: { supportedProfiles: [provider.profile], requiresAnalyses: [], preservesAnalyses: [], invalidatesAnalyses: ['*'],
         preservesInterfaces: [], invalidatesInterfaces: ['*'], preservesFingerprints: [], invalidatesFingerprints: ['*'],
         originPolicy: 'drop-with-reason', originReason: 'OriginGraph is not yet produced for this projection.',
         authorityEffect: 'requiresRevalidation', assuranceClass: 'trustedImplementation' },
-    } : { inputContract: input.identity.contract, outputContract: outputs[0].identity.contract };
+    };
     const definition = add(passDefinition({ passId: id, version: 1, ...signature, semanticRelationId: relation,
       resourceContractId: 'psc-compilation-resource/1', determinismClass: 'declared-inputs-with-trusted-host',
       totalityClass: 'partial-host-bounded', implementationId: impl.identity,

@@ -27,6 +27,20 @@ def queryV2Rebuilds (request : PsQueryStageRequest) : Bool :=
   | .rebuild _ => true
   | .validateCandidate _ => false
 
+
+def queryBoundContext : PsQueryBoundContext :=
+  PsQueryBoundContext.mk "profile" "extensions" "action" "definition" "query" "requiresRevalidation" "trustedImplementation"
+
+def queryBoundCandidate (context : PsQueryBoundContext) : Bool :=
+  match psQueryPlanBoundStage [] (PsQueryBoundRecord.mk queryBoundContext queryV2Record) context queryV2Request with
+  | .rebuild _ => false
+  | .validateCandidate candidate => psStringEq candidate.context.buildActionKey "action"
+
+def queryBoundRejectsPass (context : PsQueryBoundContext) : Bool :=
+  match psQueryPlanBoundStage [] (PsQueryBoundRecord.mk context queryV2Record) context queryV2Request with
+  | .rebuild _ => true
+  | .validateCandidate _ => false
+
 def main : IO Unit := do
   let changedBytes := { queryV2Request with dependencies := [queryV2Dependency "dependency-v2" "meaning"] };
   let noRule := match psQueryPlanStage [] [queryV2Record] changedBytes with
@@ -42,6 +56,16 @@ def main : IO Unit := do
       | _ => false
     | _ => false;
   let cases : List (String × Bool) := [
+    ("V5 exact context still requires validation", queryBoundCandidate queryBoundContext),
+    ("V5 environment change rebuilds", !queryBoundCandidate { queryBoundContext with profileEnvironmentKey := "changed" }),
+    ("V5 extension change rebuilds", !queryBoundCandidate { queryBoundContext with extensionSetKey := "changed" }),
+    ("V5 action change rebuilds", !queryBoundCandidate { queryBoundContext with buildActionKey := "changed" }),
+    ("V5 query input change rebuilds", !queryBoundCandidate { queryBoundContext with queryKey := "changed" }),
+    ("V5 definition change rebuilds", !queryBoundCandidate { queryBoundContext with passDefinitionKey := "changed" }),
+    ("V5 trust expansion cannot reuse", queryBoundRejectsPass { queryBoundContext with authorityEffect := "trustExpanding" }),
+    ("V5 unknown effect cannot reuse", queryBoundRejectsPass { queryBoundContext with authorityEffect := "unknown" }),
+    ("V5 unassured cannot reuse", queryBoundRejectsPass { queryBoundContext with assuranceClass := "unassured" }),
+    ("V5 malformed context cannot reuse", queryBoundRejectsPass { queryBoundContext with profileEnvironmentKey := "" }),
     ("unchanged dependencies still require validation", queryV2CandidateCount [] queryV2Request 0),
     ("changed artifact same certified interface needs rule", noRule),
     ("semantic reuse creates exact replay obligation", queryV2CandidateCount [queryV2Rule] changedBytes 1 && preservedSubject),

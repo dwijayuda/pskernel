@@ -1,3 +1,4 @@
+import { createQueryKey, verifyQueryKey, applyPassEffects } from './query-context.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 import { createExtensionSet, createProfileEnvironment, createBuildAction, decodeBuildAction,
   verifyBuildAction } from './build-context.mjs';
@@ -66,7 +67,10 @@ export function bindObservedBuildContext(build, { languageAuthority, backendRegi
   const targetProfile = json({ backendId, observedActionIds: build.graph.executions.map(identity => resolve(identity).actionId) },
     'target-profile', 'psc-observed-target-profile/1');
   const toolchains = entries.filter(entry => ['tool-inputs', 'typescript-compiler-entry'].includes(entry.identity.domain)).map(entry => entry.identity);
-  const buildActions = [];
+  const buildActions = [], queryKeys = [];
+  const inputClasses = { 'source-snapshot': 'source', 'canonical-admissions': 'checked-structural',
+    'certified-source': 'certified-source', 'runtime-ir': 'runtime', 'verified-ir': 'verified-ir',
+    'specialized-ir': 'specialized-ir', 'js-ir': 'target', 'wasm-ir': 'target', 'runtime-interface': 'runtime-interface' };
   for (const executionId of build.graph.executions) {
     const execution = resolve(executionId), definition = resolve(execution.passDefinitionId);
     const resource = json(execution.action.resourcePolicy, 'resource-policy', 'psc-observed-resource-policy/1');
@@ -87,6 +91,13 @@ export function bindObservedBuildContext(build, { languageAuthority, backendRegi
       actionId: action.identity, executionId, hermeticityVerified: false, authority: 'audit-record-only' },
     'action-binding', 'psc-observed-action-binding/1');
     buildActions.push({ action, binding });
+    const declaration = decodeBuildAction(action);
+    queryKeys.push(add(createQueryKey({ queryKind: definition.passId, subjectIdentity: execution.inputs[0],
+      profileEnvironmentId: profileEnvironment.identity, implementationId: definition.implementationId,
+      buildActionId: action.identity, declaredInputs: declaration.exactInputArtifactIds.map((artifactId, index) => ({
+        role: 'input-' + index, fingerprintClass: inputClasses[artifactId.domain] ?? 'action-configuration', artifactId,
+      })),
+    })));
   }
   const toolchain = backendId === 'typescript' ?
     toolchains.find(identity => identity.contract === 'psc-typescript-tool-inputs/1') ??
@@ -108,11 +119,11 @@ export function bindObservedBuildContext(build, { languageAuthority, backendRegi
   const artifactBundle = add(createArtifactBundle({
     descriptor, sourceSubjectId, profileEnvironmentId: profileEnvironment.identity, claimSetId: claimSet.identity,
     ...products, targetToolchainArtifacts: uniqueIds(toolchains),
-    evidenceArtifacts: [...build.graph.executions, ...buildActions.flatMap(item => [item.action.identity, item.binding.identity])],
+    evidenceArtifacts: [...build.graph.executions, ...buildActions.flatMap(item => [item.action.identity, item.binding.identity]), ...queryKeys.map(item => item.identity)],
   }));
   const graph = { ...build.graph, entries }, bytes = canonicalBytes(graph);
   return { ...build, graph, artifacts, bytes, identity: artifactId(bytes, 'build-graph', 'psc-observed-build-graph/1'),
-    profileEnvironment, buildActions, backendDescriptor: descriptor, artifactBundle, claimSet };
+    profileEnvironment, buildActions, queryKeys, backendDescriptor: descriptor, artifactBundle, claimSet };
 }
 
 /** Replay the relation from an exact old execution to its V5 declaration.
@@ -150,7 +161,7 @@ export async function verifyObservedActionBinding(record, { resolveArtifact } = 
 export async function verifyObservedContextProducts(graph, { resolveArtifact }) {
   const entries = graph.entries;
   const scoped = entries.filter(entry => ['build-action', 'action-binding', 'profile-environment',
-    'backend-descriptor', 'artifact-bundle'].includes(entry.identity.domain));
+    'backend-descriptor', 'artifact-bundle', 'query-key'].includes(entry.identity.domain));
   if (!scoped.length) return { present: false, hermeticityVerified: false };
   const select = domain => entries.filter(entry => entry.identity.domain === domain).map(entry => entry.identity);
   const single = domain => { const ids = select(domain); if (ids.length !== 1) fail('SINGLE_' + domain); return ids[0]; };
@@ -174,6 +185,18 @@ export async function verifyObservedContextProducts(graph, { resolveArtifact }) 
     coveredExecutions.add(executionKey); coveredActions.add(actionKey); bindings.push(binding);
   }
   if (coveredExecutions.size !== executions.size || coveredActions.size !== actions.size) fail('ACTION_COVERAGE');
+  const queries = [], queryActions = new Set();
+  for (const queryId of select('query-key')) {
+    if (!evidenceKeys.has(artifactKey(queryId))) fail('QUERY_EVIDENCE');
+    const query = await verifyQueryKey(await record(queryId), { expectedQueryId: queryId, resolveArtifact });
+    const key = artifactKey(query.value.buildActionId);
+    if (!coveredActions.has(key) || queryActions.has(key)) fail('QUERY_COVERAGE');
+    queryActions.add(key);
+    const effects = applyPassEffects(query.definition, { semanticProfile: query.semanticProfile });
+    queries.push({ queryId, actionId: query.value.buildActionId, effects });
+  }
+  if (queries.length && queryActions.size !== coveredActions.size) fail('QUERY_COVERAGE');
   return { present: true, profileEnvironmentId: profileId, artifactBundle: bundleResult,
-    bindings, hermeticityVerified: false, authority: 'audit-record-only' };
+    bindings, queries, queryKeysVerified: queries.length === coveredActions.size,
+    hermeticityVerified: false, authority: 'audit-record-only' };
 }

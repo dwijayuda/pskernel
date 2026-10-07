@@ -150,7 +150,7 @@ def psWasmTypingOperandMatches
 
 def psWasmTypingPush (type : PsWasmOperandType) (state : PsWasmTypingState) :
     PsWasmTypingState :=
-  { state with operands := List.cons type state.operands }
+  PsWasmTypingState.mk (List.cons type state.operands) state.unreachable state.initialized state.frames
 
 def psWasmTypingPushValues (types : List PsWasmValueType) :
     PsWasmTypingState -> PsWasmTypingState :=
@@ -166,7 +166,7 @@ def psWasmTypingPop (state : PsWasmTypingState) :
   | List.nil =>
       if state.unreachable then Option.some (Prod.mk PsWasmOperandType.bottom state)
       else Option.none
-  | List.cons value rest => Option.some (Prod.mk value { state with operands := rest })
+  | List.cons value rest => Option.some (Prod.mk value (PsWasmTypingState.mk rest state.unreachable state.initialized state.frames))
 
 def psWasmTypingPopValue
     (module : PsWasmModule) (expected : PsWasmValueType) (state : PsWasmTypingState) :
@@ -199,7 +199,7 @@ def psWasmTypingApply
   | Option.some next => Option.some (psWasmTypingPushValues results next)
 
 def psWasmTypingUnreachable (state : PsWasmTypingState) : PsWasmTypingState :=
-  { state with operands := List.nil, unreachable := true }
+  PsWasmTypingState.mk List.nil true state.initialized state.frames
 
 def psWasmTypingFinish
     (module : PsWasmModule) (results : List PsWasmValueType)
@@ -250,7 +250,7 @@ def psWasmTypingElse (module : PsWasmModule) (state : PsWasmTypingState) :
           operands := List.nil
           unreachable := false
           initialized := frame.initialized
-          frames := List.cons { frame with seenElse := true } rest
+          frames := List.cons (PsWasmTypingFrame.mk frame.outer frame.outerUnreachable frame.initialized frame.results true) rest
         }
       else Option.none
 
@@ -296,7 +296,7 @@ def psWasmTypingLocalSet
       | Option.some next =>
           if psWasmTypingDefaultable type then Option.some next
           else if psWasmTypingNatIn next.initialized index then Option.some next
-          else Option.some { next with initialized := List.cons index next.initialized }
+          else Option.some (PsWasmTypingState.mk next.operands next.unreachable (List.cons index next.initialized) next.frames)
 
 def psWasmTypingCall
     (module : PsWasmModule) (function : PsWasmFunction) (name : String)

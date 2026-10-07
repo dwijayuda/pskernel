@@ -100,14 +100,50 @@ def psCompilerWasmLowerErrorCode
       | PsIrSpecializeError.unsupportedGenericCall =>
           "lower.specialization:unsupported-generic-call"
 
+def psCompilerWasmTargetValidationErrorCode
+    (error : PsWasmIrValidationError) : String :=
+  match error with
+  | PsWasmIrValidationError.duplicateTypeName name =>
+      String.Internal.append "target-validation.duplicate-type:" name
+  | PsWasmIrValidationError.duplicateFunctionName name =>
+      String.Internal.append "target-validation.duplicate-function:" name
+  | PsWasmIrValidationError.duplicateExportName name =>
+      String.Internal.append "target-validation.duplicate-export:" name
+  | PsWasmIrValidationError.duplicateFunctionRef name =>
+      String.Internal.append "target-validation.duplicate-function-ref:" name
+  | PsWasmIrValidationError.unknownHeapType name =>
+      String.Internal.append "target-validation.unknown-heap-type:" name
+  | PsWasmIrValidationError.unknownStructure name =>
+      String.Internal.append "target-validation.unknown-structure:" name
+  | PsWasmIrValidationError.unknownArray name =>
+      String.Internal.append "target-validation.unknown-array:" name
+  | PsWasmIrValidationError.unknownFunctionType name =>
+      String.Internal.append "target-validation.unknown-function-type:" name
+  | PsWasmIrValidationError.unknownFunction name =>
+      String.Internal.append "target-validation.unknown-function:" name
+  | PsWasmIrValidationError.invalidFieldIndex name _index =>
+      String.Internal.append "target-validation.invalid-field:" name
+  | PsWasmIrValidationError.invalidLocalIndex name _index =>
+      String.Internal.append "target-validation.invalid-local:" name
+  | PsWasmIrValidationError.functionTypeMismatch name =>
+      String.Internal.append "target-validation.function-type:" name
+  | PsWasmIrValidationError.invalidControlFlow name =>
+      String.Internal.append "target-validation.control-flow:" name
+  | PsWasmIrValidationError.invalidValueType =>
+      "target-validation.value-type"
+  | PsWasmIrValidationError.invalidTypeDeclaration name =>
+      String.Internal.append "target-validation.type-declaration:" name
+  | PsWasmIrValidationError.invalidFunctionBody name =>
+      String.Internal.append "target-validation.function-body:" name
+
 def psCompilerWasmErrorCode
     (error : PsCompilerWasmError) : String :=
   match error with
   | PsCompilerWasmError.compiler _ => "compiler"
   | PsCompilerWasmError.lower lowerError =>
       psCompilerWasmLowerErrorCode lowerError
-  | PsCompilerWasmError.targetValidation _ =>
-      "target-validation"
+  | PsCompilerWasmError.targetValidation validationError =>
+      psCompilerWasmTargetValidationErrorCode validationError
   | PsCompilerWasmError.encode _ => "encode"
 
 def psCompilerWasmFromPrepared

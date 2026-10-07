@@ -29,7 +29,7 @@ export function publicApiNameKey(value) {
   return JSON.stringify(parts.reverse());
 }
 function names(values) {
-  const keys = array(values).map(nameKey);
+  const keys = array(values).map(publicApiNameKey);
   if (new Set(keys).size !== keys.length) fail('DUPLICATE_NAME');
   return keys;
 }

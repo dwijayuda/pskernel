@@ -4,9 +4,10 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `d930cbad9d8b794c94b729a1314f2f869af773a8`
-- Last green package proof checkpoint: `9ccac6e5ca655298cff49c616a9db366400da987` (run #456).
-- Run #456 is green for the independent ordinary recursor iota/rule-search metatheory, including executable recursor-rule search refinement.
+- Current proof implementation checkpoint before this state commit: `ca57738b7248b0cb4884fb2cc59745e0a8af21c1`.
+- Last green package proof checkpoint: `ca57738b7248b0cb4884fb2cc59745e0a8af21c1` (run #476).
+- Run #476 is green for the callback-driven ordinary/Quot recursor configuration/refinement composition. The ordinary reducer now has an explicit prefix dispatcher, independently proved iota tail semantics, and a named optional-reduction postcondition that prevents executable-success proof terms from leaking into semantic theorem types.
+- Run #456 remains the earlier green checkpoint for the independent ordinary recursor iota/rule-search metatheory, including executable recursor-rule search refinement.
 - Run #420 is green for the registered beta substitution/lowering algebra.
 - Run #438 is green for the complete `PsKernelBetaSpineSoundLaw`: the optimized multi-lambda `InstantiateRev` path refines ordinary beta-reduction closure and is no longer an unresolved WHNF assumption.
 - Run #381 is green: the registered `WhnfCoreConfiguration.lean` fuel induction and its public `false/false` specialization compile on the full package proof gate.
@@ -124,12 +125,10 @@ Confirmed production-kernel semantic defect:
 
 Immediate blocker:
 - beta-spine is closed: run #438 validates `PsKernelBetaSpineSoundLaw` as a real proof obligation, not a TCB assumption;
-- quotient reduction and ordinary recursor iota/rule-search semantics are modeled in independent metatheory; run #456 is green for the recursor rule-search/iota layer;
-- current run #463 fails only in the factored ordinary-recursion prefix/inline-tail transport: three localized dependent-elimination/type-alignment obligations remain in `RecursorReduction.lean`, with no new production semantic defect identified;
-- close that prefix-to-tail transport, then prove `psKernelReduceRecursorWith` configuration/refinement from the component contracts;
-- prove `PsKernelRecursorReductionConfigurationSound` for `psKernelReduceRecursorBoundedWithFuel` together with the concrete smaller-fuel WHNF/inference/DefEq dependencies;
-- instantiate the green public-WHNF theorem in the concrete mutually recursive checker knot using the proved beta law and recursor theorem;
-- then close concrete DefEq stateful soundness and compose public checked/infer-only/WHNF/DefEq contracts through `Checker/Knot`.
+- quotient reduction and ordinary recursor iota/rule-search semantics are modeled independently; callback-driven `psKernelReduceInductiveRecWith` and `psKernelReduceRecursorWith` configuration/refinement composition are now green in run #476;
+- the next recursor dependency is concrete helper soundness for K-like conversion and non-recursive-structure conversion, followed by `PsKernelRecursorReductionConfigurationSound` for `psKernelReduceRecursorBoundedWithFuel`;
+- K/structure conversion must be connected to explicit independent semantic evidence rather than treated as syntactic identity. Lean's K flag is restricted to Prop-valued, single-constructor, zero-field inductive predicates; structure conversion is the non-Prop structure-eta path;
+- after helper semantics, build the shared smaller-fuel recursor/WHNF/inference/DefEq knot, instantiate the green public-WHNF theorem, then close concrete DefEq.
 
 Architectural blockers still remaining:
 - compose the already-proved checked/infer-only core and public-wrapper contracts with concrete WHNF/DefEq components in the checker knot;
@@ -140,13 +139,13 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Finish the three remaining factored-prefix → inline-tail transport obligations in `RecursorReduction.lean` and close `psKernelReduceInductiveRecWith`/`psKernelReduceRecursorWith` configuration-refinement composition.
-2. Build the shared fuel/configuration theorem for the concrete bounded recursor/WHNF/inference/DefEq knot, reusing the green public WHNF theorem and proved beta-spine law rather than reproving WHNF branches.
-3. Close remaining concrete DefEq configuration/stateful soundness obligations, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
-4. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
-5. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
-6. Add the final explicit implementation-refinement theorem/family and refresh the semantic audit.
-7. Reconcile against current integration, rerun the full proof/conformance gates, and commit the final `AI_WORK_STATE.md`.
+1. Prove concrete state/configuration + independent semantic contracts for `psKernelToConstructorWhenK`, `psKernelRecursorIsPropWith`, and `psKernelToConstructorWhenStructure`; model K/structure conversion in the Assurance Plane without restating executable success.
+2. Instantiate the green callback-driven recursor theorem for `psKernelReduceRecursorBoundedWithFuel` using one shared fuel/configuration induction over the smaller-fuel WHNF/core-WHNF/inference/DefEq dependencies.
+3. Instantiate the public WHNF contract in the concrete checker knot using the proved beta-spine law and bounded recursor theorem.
+4. Close remaining concrete DefEq configuration/stateful soundness obligations, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success/failure cache paths.
+5. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
+6. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
+7. Add the final explicit implementation-refinement theorem/family, refresh the semantic audit, reconcile against current integration, and rerun the full proof/conformance gates.
 
 ## Work discipline
 - Preserve GitHub history and concurrent proof work.

@@ -206,7 +206,7 @@ def psKernelReduceInductiveRecWith
                                               (psKernelNameListLength
                                                 recursor.base.levelParams) then
                                           let rhs0 :=
-                                            psKernelExprInstantiateLevelParams
+                                            psKernelExprInstantiateLevelParamsIfNeeded
                                               rule.rhs
                                               recursor.base.levelParams
                                               recLevels;

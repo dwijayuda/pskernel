@@ -236,8 +236,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                           leftOpened,
                           rightOpened,
                           continueAfterDomain,
-                          hDomainEq,
-                          Bool.true_eq
+                          hDomainEq
                         ] using hSuccess
                     ⟩
             | false =>
@@ -292,8 +291,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                                   rightOpened,
                                   continueAfterDomain,
                                   hDomainEq,
-                                  hDomainRun,
-                                  Bool.true_eq
+                                  hDomainRun
                                 ] using hSuccess
                             ⟩
           rcases hReady with

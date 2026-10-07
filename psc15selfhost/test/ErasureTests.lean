@@ -125,8 +125,8 @@ def psTestDualSourceLeanNativeMaybeMatch : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export type Maybe<T0>"
-        && leanOutput.contains "\"none\": <T0>(): Maybe<T0>"
-        && leanOutput.contains "\"some\": <T0>(__field0: T0): Maybe<T0>"
+        && leanOutput.contains "[\"none\"]: <T0>(): Maybe<T0>"
+        && leanOutput.contains "[\"some\"]: <T0>(__field0: T0): Maybe<T0>"
         && leanOutput.contains "export const present: Maybe<bigint>"
         && leanOutput.contains "Maybe[\"some\"]<bigint>(1n)"
         && leanOutput.contains "export function getOrZero(m: Maybe<bigint>): bigint"
@@ -148,7 +148,7 @@ def psTestDualSourceLeanNativeStructureProjection : Bool :=
         && leanOutput.contains "export interface User"
         && leanOutput.contains "readonly age: bigint;"
         && leanOutput.contains "export const user: User"
-        && leanOutput.contains "age: 33n"
+        && leanOutput.contains "[\"age\"]: 33n"
         && leanOutput.contains
           "export function ageOf(u: User): bigint { while (true) { return u.age; } }"
   | _, _ => false

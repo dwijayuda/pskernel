@@ -401,7 +401,7 @@ lean_exe psc1_backend_ts_tests where
 
 lean_lib PsBackendJsTestSupport where
   srcDir := "test"
-  roots := #[`BackendJsFixture, `BackendJsTailFixture]
+  roots := #[`BackendJsFixture, `BackendJsTailFixture, `BackendJsPropertyFixture]
 
 lean_exe psc1_backend_js_tests where
   srcDir := "test"

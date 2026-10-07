@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contract": "psc-js-scalar-abi-plan/1",
-  "status": "implemented-synchronous-scalar-profile",
+  "status": "implemented-production-bound-synchronous-scalar-profile",
   "planner": "packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean",
   "runtimeAdapter": "scripts/js-scalar-abi.mjs",
   "runtimeSemantics": "psc-runtime-semantics/1",
@@ -31,7 +31,8 @@
     "leanCases": 8,
     "hostGroups": 4,
     "actualTargetClient": "PSC-emitted JavaScript linked to the real adapter in the VM-module integration fixture",
-    "portable": "PSC1 source check plus structural rules; broad/global assurance pending"
+    "portable": "PSC1 source check plus structural rules; broad/global assurance pending",
+    "productionBinding": "checked build graph records exact VerifiedIR -> ABI plan pass, archives policy/plan, EvidenceEnvelope references both, and offline archive replay recomputes the relation"
   },
   "unsupported": [
     "aggregate/named/generic values",
@@ -43,10 +44,11 @@
   ],
   "authority": "Adapter conformance to primitive representation does not prove foreign behavior, confine capabilities, validate host Proxy behavior, establish CheckedCore authority, promote direct JS or close the global external-ABI gap.",
   "remaining": [
-    "production checked-service binding of actual module/plan artifacts",
+    "aggregate/resource/async JavaScript adapter profiles",
     "independent whole-adapter preservation evidence",
     "other value profiles and target ABIs",
-    "global link preservation"
+    "global link preservation",
+    "Wasm Component and native Rust/C adapter profiles"
   ],
   "globalPreservation": "unproved"
 }

@@ -3260,3 +3260,263 @@ theorem psKernelBetaPrefixStep
     hLam,
     hResult
   ] using hLift
+
+
+theorem psKernelExprInstantiateRev_nil_metatheory
+    (expr : PsKernelExpr) :
+    psKernelExprInstantiateRev expr List.nil = expr := by
+  rfl
+
+
+theorem psKernelWhnfCountLambdasRelation_refines_beta
+    (context : PsKernelCheckerContext)
+    (args : List PsKernelExpr)
+    (current lastLam : PsKernelExpr)
+    (count consumed : Nat)
+    (targetName : PsKernelName)
+    (targetType targetBody : PsKernelExpr)
+    (targetBinderInfo : PsKernelBinderInfo)
+    (hRelation :
+      PsKernelWhnfCountLambdasRelation
+        current
+        (psKernelExprListLength args)
+        count
+        lastLam
+        consumed)
+    (hAvailable :
+      count < psKernelExprListLength args)
+    (hLast :
+      lastLam =
+        PsKernelExpr.lam
+          targetName
+          targetType
+          targetBody
+          targetBinderInfo) :
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      (psKernelExprApplyArgsCheap
+        (psKernelExprInstantiateRev
+          current
+          (psKernelExprListTake count args))
+        (psKernelExprListDrop count args))
+      (psKernelExprApplyArgsCheap
+        (psKernelExprInstantiateRev
+          targetBody
+          (psKernelExprListTake consumed args))
+        (psKernelExprListDrop consumed args)) := by
+  induction hRelation
+      generalizing
+        targetName
+        targetType
+        targetBody
+        targetBinderInfo with
+  | nonLambda current argCount count hNotLam =>
+      rw [hLast] at hNotLam
+      simp [psKernelExprIsLambda] at hNotLam
+  | lamNoArg name type body binderInfo argCount count hCount =>
+      have hCountTrue :
+          psKernelNatLt count
+              (psKernelExprListLength args) =
+            true :=
+        psKernelNatLt_true_of_lt
+          count
+          (psKernelExprListLength args)
+          hAvailable
+      rw [hCountTrue] at hCount
+      contradiction
+  | lamLast name type body binderInfo argCount count hCount hNext =>
+      injection hLast with
+        hName hType hBody hBinder
+      subst targetName
+      subst targetType
+      subst targetBody
+      subst targetBinderInfo
+      rcases
+          psKernelExprList_split_at
+            args
+            count
+            hAvailable with
+        ⟨arg, rest, hDrop, hDropNext, hTake⟩
+      have hStep :=
+        psKernelBetaPrefixStep
+          context
+          name
+          type
+          body
+          binderInfo
+          (psKernelExprListTake count args)
+          arg
+          rest
+      simpa [
+        hDrop,
+        hDropNext,
+        hTake
+      ] using hStep
+  | lamBodyStop
+      name type body binderInfo
+      argCount count
+      hCount hNext hBodyNotLam =>
+      injection hLast with
+        hName hType hBody hBinder
+      subst targetName
+      subst targetType
+      subst targetBody
+      subst targetBinderInfo
+      rcases
+          psKernelExprList_split_at
+            args
+            count
+            hAvailable with
+        ⟨arg, rest, hDrop, hDropNext, hTake⟩
+      have hStep :=
+        psKernelBetaPrefixStep
+          context
+          name
+          type
+          body
+          binderInfo
+          (psKernelExprListTake count args)
+          arg
+          rest
+      simpa [
+        hDrop,
+        hDropNext,
+        hTake
+      ] using hStep
+  | lamRecurse
+      name type body binderInfo
+      argCount count
+      lastLam consumed
+      hCount hNext hBodyLam hRest ih =>
+      have hNextAvailable :
+          Nat.succ count <
+            psKernelExprListLength args :=
+        psKernelNatLt_lt_of_true
+          (Nat.succ count)
+          (psKernelExprListLength args)
+          hNext
+      have hRestReduction :=
+        ih
+          targetName
+          targetType
+          targetBody
+          targetBinderInfo
+          hNextAvailable
+          hLast
+      rcases
+          psKernelExprList_split_at
+            args
+            count
+            hAvailable with
+        ⟨arg, rest, hDrop, hDropNext, hTake⟩
+      have hFirstRaw :=
+        psKernelBetaPrefixStep
+          context
+          name
+          type
+          body
+          binderInfo
+          (psKernelExprListTake count args)
+          arg
+          rest
+      have hFirst :
+          PsKernelReductionClosure
+            context.environment
+            context.localContext
+            (psKernelExprApplyArgsCheap
+              (psKernelExprInstantiateRev
+                (PsKernelExpr.lam
+                  name type body binderInfo)
+                (psKernelExprListTake count args))
+              (psKernelExprListDrop count args))
+            (psKernelExprApplyArgsCheap
+              (psKernelExprInstantiateRev
+                body
+                (psKernelExprListTake
+                  (Nat.succ count)
+                  args))
+              (psKernelExprListDrop
+                (Nat.succ count)
+                args)) := by
+        simpa [
+          hDrop,
+          hDropNext,
+          hTake
+        ] using hFirstRaw
+      exact
+        psKernelReductionClosure_transitive
+          context.environment
+          context.localContext
+          (psKernelExprApplyArgsCheap
+            (psKernelExprInstantiateRev
+              (PsKernelExpr.lam
+                name type body binderInfo)
+              (psKernelExprListTake count args))
+            (psKernelExprListDrop count args))
+          (psKernelExprApplyArgsCheap
+            (psKernelExprInstantiateRev
+              body
+              (psKernelExprListTake
+                (Nat.succ count)
+                args))
+            (psKernelExprListDrop
+              (Nat.succ count)
+              args))
+          (psKernelExprApplyArgsCheap
+            (psKernelExprInstantiateRev
+              targetBody
+              (psKernelExprListTake consumed args))
+            (psKernelExprListDrop consumed args))
+          hFirst
+          hRestReduction
+
+
+theorem psKernelBetaSpineSound_contract :
+    PsKernelBetaSpineSoundLaw := by
+  intro
+    context
+    fn
+    lastLam
+    body
+    args
+    consumed
+    name
+    type
+    binderInfo
+    hCount
+    hArgsNonempty
+    hLast
+  have hRelation :=
+    psKernelWhnfCountLambdas_refines_relation
+      fn
+      (psKernelExprListLength args)
+      lastLam
+      consumed
+      hCount
+  have hAvailable :
+      0 < psKernelExprListLength args :=
+    psKernelNatLt_lt_of_true
+      0
+      (psKernelExprListLength args)
+      hArgsNonempty
+  have hReduction :=
+    psKernelWhnfCountLambdasRelation_refines_beta
+      context
+      args
+      fn
+      lastLam
+      0
+      consumed
+      name
+      type
+      body
+      binderInfo
+      hRelation
+      hAvailable
+      hLast
+  simpa [
+    psKernelExprListTake,
+    psKernelExprListDrop,
+    psKernelExprInstantiateRev_nil_metatheory
+  ] using hReduction

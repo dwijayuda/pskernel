@@ -1,0 +1,66 @@
+name: PSKernel Core Arena readiness
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-v1
+    paths:
+      - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
+      - "psc15selfhost/packages/pskernel-core/**"
+      - "psc15selfhost/packages/pskernel/PSC1Kernel/Replay*.lean"
+      - "psc15selfhost/lakefile.lean"
+      - ".github/workflows/pskernel-core-arena.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pskernel-core-arena-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  arena-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Verify semantic Lean identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Build Arena checker
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build psc_kernel_core_arena
+          .lake/build/bin/psc_kernel_core_arena --version
+
+      - name: Smoke Arena metadata stream
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          head -n 1 ../oracle/fixtures/lean434-init-prelude.ndjson \
+            | .lake/build/bin/psc_kernel_core_arena
+
+      - name: Replay pinned Init.Prelude export
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v .lake/build/bin/psc_kernel_core_arena \
+            < ../oracle/fixtures/lean434-init-prelude.ndjson

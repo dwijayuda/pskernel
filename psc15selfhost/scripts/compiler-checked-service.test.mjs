@@ -115,7 +115,7 @@ test('stage emission uses the exact live checked object without legacy fallback'
   compiler.psCompilerTypeScriptStagesFromPrepared = () => ok({ typeScript: 'output', runtimeIr: 'missing verified' });
   assert.throws(() => service.emitArtifact(handle), /STAGES_SHAPE/);
   service.revoke(handle);
-  assert.throws(() => service.emitArtifact(handle), /UNCHECKED_MODULE/);
+  assert.throws(() => service.emitArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
 });
 
 test('staged JavaScript output binds actual stage domains and rejects missing, changed or oversized stages', async () => {

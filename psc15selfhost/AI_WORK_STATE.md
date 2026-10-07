@@ -475,3 +475,9 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Implemented the missing persistent derived SAVEF index as a bounded, rebuildable, explicitly non-authoritative host subsystem. It indexes only canonical/hash-valid psc-knowledge-object/2 records and persists semantic identity, scope, kind, assumptions, claims, dependencies, payload and license references in deterministic object-id order.
 - Queries perform exact domain-separated semantic-identity/scope matching plus kind/claim/assumption filtering and return candidate KnowledgeObject identities only. Every result is labeled untrusted-derived-index and requires a fresh SAVEF ValidUnder/certificate check before reuse; the index cannot mint live validity or semantic authority.
 - Writes use same-directory temporary files and canonical bytes; reads reject malformed/noncanonical/duplicate/resource-exhausted state. A focused persistence/query/tamper corpus is wired into test:savef. This closes the implementation box SAVEF -> derived semantic index; connecting retrieved candidates into real AI/tool proposal production remains a separate downstream implementation task.
+
+
+## 2026-10-07 certification focused-CI correction
+
+- Fresh cloud architecture/trust/semantic/authority gates passed with the new certification handoff. The pass-evidence suite exposed one stale negative-test expectation after revocation: production now rejects the same invalid handle one layer earlier as PSCV_CERTIFIED_SOURCE_NOT_LIVE rather than PSC2_CHECKED_UNCHECKED_MODULE. Updated the test only; no authority rule or implementation behavior was weakened.
+- Hardened staged SAVEF-index query argument validation so malformed kind/assumption inputs are classified by the index boundary before constructing host Sets.

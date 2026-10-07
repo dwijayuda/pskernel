@@ -115,10 +115,11 @@ export async function querySavefSemanticIndex({ root, semanticIdentity, scope, k
   const bound = bounds(limits);
   if (limit > bound.maxResults || !Array.isArray(requiredClaimIds) || requiredClaimIds.some(value => typeof value !== 'string'))
     fail('QUERY_LIMIT');
+  if (kinds !== undefined && (!Array.isArray(kinds) || kinds.some(kind => !knowledgeKinds.includes(kind)))) fail('QUERY_KIND');
   const requestedKinds = kinds === undefined ? null : new Set(kinds);
-  if (requestedKinds && (!Array.isArray(kinds) || kinds.some(kind => !knowledgeKinds.includes(kind)))) fail('QUERY_KIND');
+  if (allowedAssumptions !== undefined &&
+      (!Array.isArray(allowedAssumptions) || allowedAssumptions.some(value => typeof value !== 'string'))) fail('QUERY_ASSUMPTION');
   const allowed = allowedAssumptions === undefined ? null : new Set(allowedAssumptions);
-  if (allowed && (!Array.isArray(allowedAssumptions) || allowedAssumptions.some(value => typeof value !== 'string'))) fail('QUERY_ASSUMPTION');
   const directory = await realpath(root), bytes = await boundedRead(path.join(directory, fileName), bound.maxIndexBytes);
   const { value, artifact } = validateIndex(bytes, bound);
   const semanticIdentityId = semanticIdentity === undefined ? null :

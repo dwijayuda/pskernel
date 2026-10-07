@@ -191,6 +191,143 @@ def PsKernelSimpleConstructorResultValid
       false
 
 
+/--
+Independent raw constructor-parameter spine semantics.
+
+A parameter is consumed only when the constructor type is syntactically a
+`forallE`.  The domain is compared by ordinary definitional equality, but the
+outer binder itself is never manufactured by WHNF.
+-/
+inductive PsKernelRawConstructorParamSpineValid
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    List PsKernelOpenBinder ->
+    PsKernelExpr ->
+    PsKernelExpr ->
+    Prop
+  | nil
+      (type : PsKernelExpr) :
+      PsKernelRawConstructorParamSpineValid
+        environment localContext List.nil type type
+  | cons
+      (param : PsKernelOpenBinder)
+      (rest : List PsKernelOpenBinder)
+      (userName : PsKernelName)
+      (domain body residual : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (hDomain :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          domain
+          param.type)
+      (hRest :
+        PsKernelRawConstructorParamSpineValid
+          environment
+          localContext
+          rest
+          (psKernelExprInstantiate1
+            body
+            (PsKernelExpr.fvar param.internalName))
+          residual) :
+      PsKernelRawConstructorParamSpineValid
+        environment
+        localContext
+        (List.cons param rest)
+        (PsKernelExpr.forallE
+          userName domain body binderInfo)
+        residual
+
+
+def PsKernelRawConstructorPiHead
+    (expr : PsKernelExpr) : Bool :=
+  match expr with
+  | PsKernelExpr.forallE _ _ _ _ => true
+  | _ => false
+
+
+/--
+Independent raw field-spine semantics.
+
+Field domains are checked with the ordinary typing judgment and universe rule.
+Only a syntactic `forallE` contributes a field.  A non-`forallE` head ends
+the spine with the exact residual expression, making the no-WHNF-at-the-outer-
+constructor-boundary rule explicit.
+-/
+inductive PsKernelRawConstructorFieldSpineValid
+    (environment : PsKernelEnvironment)
+    (resultLevel : PsKernelLevel) :
+    PsKernelLocalContext ->
+    PsKernelExpr ->
+    PsKernelLocalContext ->
+    List PsKernelOpenBinder ->
+    PsKernelExpr ->
+    Prop
+  | done
+      (localContext : PsKernelLocalContext)
+      (type : PsKernelExpr)
+      (hTerminal :
+        PsKernelRawConstructorPiHead type = false) :
+      PsKernelRawConstructorFieldSpineValid
+        environment
+        resultLevel
+        localContext
+        type
+        localContext
+        List.nil
+        type
+  | cons
+      (localContext finalContext : PsKernelLocalContext)
+      (fresh userName : PsKernelName)
+      (domain body residual : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (fieldLevel : PsKernelLevel)
+      (fields : List PsKernelOpenBinder)
+      (hFresh :
+        psKernelLocalContextFind localContext fresh =
+          Option.none)
+      (hDomain :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          domain
+          (PsKernelExpr.sort fieldLevel))
+      (hUniverse :
+        psKernelLevelLe fieldLevel resultLevel = true ∨
+          psKernelLevelNormalizesToZero resultLevel = true)
+      (hRest :
+        PsKernelRawConstructorFieldSpineValid
+          environment
+          resultLevel
+          (psKernelLocalContextAddLocal
+            localContext
+            fresh
+            userName
+            (psKernelExprConsumeTypeAnnotations domain)
+            binderInfo)
+          (psKernelExprInstantiate1
+            body
+            (PsKernelExpr.fvar fresh))
+          finalContext
+          fields
+          residual) :
+      PsKernelRawConstructorFieldSpineValid
+        environment
+        resultLevel
+        localContext
+        (PsKernelExpr.forallE
+          userName domain body binderInfo)
+        finalContext
+        (List.cons
+          (PsKernelOpenBinder.mk
+            fresh
+            userName
+            (psKernelExprConsumeTypeAnnotations domain)
+            binderInfo)
+          fields)
+        residual
+
+
 def PsKernelSessionCheckSoundAtFuel
     (fuel : Nat) : Prop :=
   ∀

@@ -980,3 +980,74 @@ theorem psKernelLazyDelta_same_shortcut_head_sound
                       hString
                       context left right leftDef rightDef
                       hLeftDef hRightDef hSame hLevels
+
+
+/-
+Semantic/result contract of the fuel-driven lazy-delta engine.
+
+A positive decision must have independent algorithmic DefEq evidence, but a
+negative decision is not a completeness theorem. Residuals are justified
+through two ordinary reduction closures. The contract deliberately has no
+unrestricted DefEq transitivity.
+-/
+def PsKernelDeltaResultPostcondition
+    (context : PsKernelCheckerContext)
+    (nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : PsKernelDeltaResult) : Prop :=
+  PsKernelCheckerConfigurationSound context nextState ∧
+    match answer with
+    | PsKernelDeltaResult.decided true =>
+        PsKernelDefEqJudgment
+          context.environment context.localContext left right
+    | PsKernelDeltaResult.decided false =>
+        True
+    | PsKernelDeltaResult.residual nextLeft nextRight =>
+        PsKernelReductionClosure
+          context.environment context.localContext left nextLeft ∧
+        PsKernelReductionClosure
+          context.environment context.localContext right nextRight
+
+
+theorem psKernelDeltaResultPostcondition_transport
+    (context : PsKernelCheckerContext)
+    (nextState : PsKernelCheckerState)
+    (originalLeft originalRight left right : PsKernelExpr)
+    (answer : PsKernelDeltaResult)
+    (hLeft :
+      PsKernelReductionClosure
+        context.environment context.localContext
+        originalLeft left)
+    (hRight :
+      PsKernelReductionClosure
+        context.environment context.localContext
+        originalRight right)
+    (hResult :
+      PsKernelDeltaResultPostcondition
+        context nextState left right answer) :
+    PsKernelDeltaResultPostcondition
+      context nextState originalLeft originalRight answer := by
+  rcases hResult with ⟨hConfig, hSemantic⟩
+  refine ⟨hConfig, ?_⟩
+  cases answer with
+  | decided value =>
+      cases value with
+      | false =>
+          trivial
+      | true =>
+          exact
+            PsKernelDefEqJudgment.reduceCompare
+              originalLeft originalRight left right
+              hLeft hRight hSemantic
+  | residual nextLeft nextRight =>
+      exact
+        ⟨
+          psKernelReductionClosure_trans
+            context.environment context.localContext
+            originalLeft left nextLeft
+            hLeft hSemantic.1,
+          psKernelReductionClosure_trans
+            context.environment context.localContext
+            originalRight right nextRight
+            hRight hSemantic.2
+        ⟩

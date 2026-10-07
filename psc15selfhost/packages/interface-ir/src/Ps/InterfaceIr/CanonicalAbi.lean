@@ -272,83 +272,29 @@ def psCanonicalTypeWithFuel (width : PsCanonicalPointerWidth)
         | PsForeignType.future _ => Except.error PsForeignError.invalidOrUnsupportedType
         | PsForeignType.stream _ => Except.error PsForeignError.invalidOrUnsupportedType
 
--- Named layouts are memoized in topological order. Repeated references do not
--- exponentially unfold shared definition graphs.
-def psCanonicalReadyWithFuel (layouts : List (Prod String PsCanonicalLayout)) (fuel : Nat) :
-    PsForeignType -> Except PsForeignError Unit :=
-  match fuel with
-  | Nat.zero => fun (_type : PsForeignType) => Except.error PsForeignError.resourceExhausted
-  | Nat.succ remaining =>
-      let smaller : PsForeignType -> Except PsForeignError Unit := psCanonicalReadyWithFuel layouts remaining;
-      fun (type : PsForeignType) =>
-        match type with
-        | PsForeignType.named name =>
-            match psCanonicalFindLayout layouts name with
-            | Option.none => Except.error PsForeignError.invalidOrUnsupportedType
-            | Option.some _ => Except.ok Unit.unit
-        | PsForeignType.list element => smaller element
-        | PsForeignType.option element => smaller element
-        | PsForeignType.result ok error =>
-            match psForeignOptionTypeValid smaller ok with
-            | Except.error failure => Except.error failure
-            | Except.ok _ => psForeignOptionTypeValid smaller error
-        | PsForeignType.tuple elements => psForeignForEach smaller elements
-        | PsForeignType.future _ => Except.error PsForeignError.invalidOrUnsupportedType
-        | PsForeignType.stream _ => Except.error PsForeignError.invalidOrUnsupportedType
-        | _ => Except.ok Unit.unit
-
-structure PsCanonicalResolveState where
-  layouts : List (Prod String PsCanonicalLayout)
-  deferredReverse : List PsForeignDefinition
-
-def psCanonicalResolvePass (width : PsCanonicalPointerWidth) (definitions : List PsForeignDefinition)
-    (depth : Nat) (pending : List PsForeignDefinition) :
-    PsCanonicalResolveState -> Except PsForeignError PsCanonicalResolveState :=
-  match pending with
-  | List.nil => fun (state : PsCanonicalResolveState) => Except.ok state
+-- Reuse the validated type graph's dependency order; each named layout is
+-- computed once per pointer width without expanding shared definition bodies.
+def psCanonicalResolveOrdered (width : PsCanonicalPointerWidth)
+    (definitions : List PsForeignDefinition) (depth : Nat) (ordered : List PsForeignDefinition) :
+    List (Prod String PsCanonicalLayout) -> Except PsForeignError (List (Prod String PsCanonicalLayout)) :=
+  match ordered with
+  | List.nil => fun (layouts : List (Prod String PsCanonicalLayout)) => Except.ok layouts
   | List.cons definition rest =>
-      let smaller : PsCanonicalResolveState -> Except PsForeignError PsCanonicalResolveState :=
-        psCanonicalResolvePass width definitions depth rest;
-      fun (state : PsCanonicalResolveState) =>
+      let smaller : List (Prod String PsCanonicalLayout) -> Except PsForeignError (List (Prod String PsCanonicalLayout)) :=
+        psCanonicalResolveOrdered width definitions depth rest;
+      fun (layouts : List (Prod String PsCanonicalLayout)) =>
         match definition.body with
-        | PsForeignDefinitionBody.resource => smaller state
+        | PsForeignDefinitionBody.resource => smaller layouts
         | _ =>
-            match psForeignBodyValid (psCanonicalReadyWithFuel state.layouts depth) definition.body with
-            | Except.error error =>
-                match error with
-                | PsForeignError.resourceExhausted => Except.error error
-                | _ => smaller (PsCanonicalResolveState.mk state.layouts (List.cons definition state.deferredReverse))
-            | Except.ok _ =>
-                match psCanonicalBodyWith (psCanonicalTypeWithFuel width definitions state.layouts depth) definition.body with
-                | Except.error error => Except.error error
-                | Except.ok layout =>
-                    smaller (PsCanonicalResolveState.mk (List.cons (Prod.mk definition.name layout) state.layouts) state.deferredReverse)
-
-def psCanonicalResolveWithFuel (width : PsCanonicalPointerWidth) (definitions : List PsForeignDefinition)
-    (depth fuel : Nat) : List PsForeignDefinition -> List (Prod String PsCanonicalLayout) ->
-      Except PsForeignError (List (Prod String PsCanonicalLayout)) :=
-  match fuel with
-  | Nat.zero =>
-      fun (_pending : List PsForeignDefinition) (_layouts : List (Prod String PsCanonicalLayout)) =>
-        Except.error PsForeignError.invalidOrUnsupportedType
-  | Nat.succ remaining =>
-      let smaller : List PsForeignDefinition -> List (Prod String PsCanonicalLayout) ->
-          Except PsForeignError (List (Prod String PsCanonicalLayout)) :=
-        psCanonicalResolveWithFuel width definitions depth remaining;
-      fun (pending : List PsForeignDefinition) (layouts : List (Prod String PsCanonicalLayout)) =>
-        match pending with
-        | List.nil => Except.ok layouts
-        | List.cons _ _ =>
-            match psCanonicalResolvePass width definitions depth pending (PsCanonicalResolveState.mk layouts List.nil) with
+            match psCanonicalBodyWith (psCanonicalTypeWithFuel width definitions layouts depth) definition.body with
             | Except.error error => Except.error error
-            | Except.ok state =>
-                if Nat.beq (psListLength pending) (psListLength state.deferredReverse) then
-                  Except.error PsForeignError.invalidOrUnsupportedType
-                else smaller (psListReverse state.deferredReverse) state.layouts
+            | Except.ok layout => smaller (List.cons (Prod.mk definition.name layout) layouts)
 
 def psCanonicalResolve (width : PsCanonicalPointerWidth) (definitions : List PsForeignDefinition)
     (depth : Nat) : Except PsForeignError (List (Prod String PsCanonicalLayout)) :=
-  psCanonicalResolveWithFuel width definitions depth (Nat.succ (psListLength definitions)) definitions List.nil
+  match psForeignAnalyzeDefinitions false depth definitions with
+  | Except.error error => Except.error error
+  | Except.ok graph => psCanonicalResolveOrdered width definitions depth graph.ordered List.nil
 
 def psCanonicalSignature (width : PsCanonicalPointerWidth)
     (interfaceName functionName : String) (direction : PsCanonicalDirection)

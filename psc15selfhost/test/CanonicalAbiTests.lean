@@ -105,6 +105,38 @@ def sharedGraphAndSizeBound : Bool :=
       | .none => false
   | _, _ => false
 
+def graphWorld (definitions : List PsForeignDefinition) (argument : PsForeignType) : PsForeignWorld :=
+  let fn := PsForeignFunction.mk "call" [PsForeignField.mk "x" argument] none false ["component-model"]
+  let iface := PsForeignInterface.mk "host" definitions [fn] [] []
+  PsForeignWorld.mk "psc-foreign-interface/1" "psc" "abi" "world" [iface] ["host"] []
+
+def sharedGraphPublicBoundary : Bool :=
+  let world := graphWorld (doubling 27).reverse (.named "t27")
+  match psCanonicalPlanWorld { policy with typeDepth := 29 } .memory32 world,
+      psCanonicalPlanWorld { policy with typeDepth := 28 } .memory32 world with
+  | .ok [plan], .error .resourceExhausted =>
+      plan.indirectParameters && !plan.indirectResult &&
+        codes plan.coreParameters == [0] && plan.parameterLayout.byteSize == 134217728
+  | _, _ => false
+
+def graphFailures : Bool :=
+  let rejects := fun (definitions : List PsForeignDefinition) =>
+    match psForeignAnalyzeDefinitions false 64 definitions with | .error _ => true | .ok _ => false
+  rejects [PsForeignDefinition.mk "a" (.alias (.named "b")), PsForeignDefinition.mk "b" (.alias (.named "a"))] &&
+    rejects [PsForeignDefinition.mk "a" (.alias (.named "missing"))] &&
+    rejects [PsForeignDefinition.mk "file" .resource, PsForeignDefinition.mk "alias" (.alias (.borrow "file"))]
+
+-- A zero-depth enum body still consumes one node at a named reference.
+def graphDepthEdges : Bool :=
+  let choice := PsForeignDefinition.mk "choice" (.enumeration ["one"])
+  let defs := [choice,
+    PsForeignDefinition.mk "maybe" (.alias (.option (.named "choice")))]
+  match psForeignValidateWorld { policy with typeDepth := 1 } (graphWorld [choice] (.named "choice")),
+      psForeignValidateWorld { policy with typeDepth := 3 } (graphWorld defs (.named "maybe")),
+      psForeignValidateWorld { policy with typeDepth := 2 } (graphWorld defs (.named "maybe")) with
+  | .ok _, .ok _, .error .resourceExhausted => true
+  | _, _, _ => false
+
 def handleObligation : Bool :=
   let resource := PsForeignDefinition.mk "file" .resource
   match psCanonicalTypeWithFuel .memory64 [resource] [] 64 (.own "file") with
@@ -125,6 +157,8 @@ def main : IO Unit := do
     ("tag bounds", noTagOverflow), ("indirect lift/lower", indirect),
     ("direct threshold", directThreshold), ("world plans", worldPlans),
     ("policy rejection", rejectedProfiles), ("shared graph/size bound", sharedGraphAndSizeBound),
+    ("shared graph public boundary/depth", sharedGraphPublicBoundary),
+    ("cycles/missing/borrow aliases", graphFailures), ("exact named depth edges", graphDepthEdges),
     ("handle-table obligation", handleObligation), ("unsupported/fuel", malformedAndFuel)]
   for (name, passed) in tests do
     if !passed then throw (IO.userError ("PSC_CANONICAL_ABI_FAIL: " ++ name))

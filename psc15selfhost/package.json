@@ -213,7 +213,9 @@
     "test:ddc": "node --test scripts/diverse-bootstrap.test.mjs",
     "test:js-ir-validator": "lake build psc1_backend_js_validate_tests && lake exe psc1_backend_js_validate_tests && lake exe psc1 check packages/backend-js/src/Ps/BackendJs/Validate.lean",
     "test:wasm-ir-validator": "lake build psc1_backend_wasm_ir_tests && lake exe psc1_backend_wasm_ir_tests && lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean && lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/Encode.lean",
-    "test:target-ir-artifacts": "node --test scripts/target-ir-artifact.test.mjs"
+    "test:target-ir-artifacts": "node --test scripts/target-ir-artifact.test.mjs",
+    "test:ir-invariant-replay": "lake build pscv_ir_replay pscv_ir_encoding_tests && node --test scripts/ir-invariant-replay.test.mjs",
+    "test:wasm-runtime-strings": "lake build psc1_wasm_string_runtime_fixture && node scripts/backend-wasm-strings.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

@@ -435,49 +435,60 @@ theorem psKernelDefEqEtaStructWith_configuration_preserves
           defeq inferType context state left right =
         Except.ok (Prod.mk value nextState)) :
     PsKernelCheckerConfigurationSound context nextState := by
+  simp only [psKernelDefEqEtaStructWith] at hSuccess
   cases hFirst :
       psKernelDefEqEtaStructCoreWith
         defeq inferType context state left right with
   | error error =>
-      simp [psKernelDefEqEtaStructWith, hFirst] at hSuccess
+      simp only [hFirst] at hSuccess
+      simp at hSuccess
   | ok firstRun =>
+      simp only [hFirst] at hSuccess
       rcases firstRun with ⟨firstValue, firstState⟩
       have hFirstConfig :=
         psKernelDefEqEtaStructCoreWith_configuration_preserves
-          defeq inferType
-          hDefEq hInfer
-          context state firstState
-          left right firstValue
-          hConfig hFirst
-      cases firstValue with
-      | true =>
-          simp [psKernelDefEqEtaStructWith, hFirst] at hSuccess
-          rcases hSuccess with ⟨rfl, rfl⟩
-          exact hFirstConfig
-      | false =>
-          cases hSecond :
-              psKernelDefEqEtaStructCoreWith
-                defeq inferType
-                context firstState right left with
-          | error error =>
-              simp [
-                psKernelDefEqEtaStructWith,
-                hFirst,
+          defeq
+          inferType
+          hDefEq
+          hInfer
+          context
+          state
+          firstState
+          left
+          right
+          firstValue
+          hConfig
+          hFirst
+      by_cases hFirstTrue : firstValue = true
+      · rw [if_pos hFirstTrue] at hSuccess
+        simp at hSuccess
+        rcases hSuccess with ⟨rfl, rfl⟩
+        exact hFirstConfig
+      · rw [if_neg hFirstTrue] at hSuccess
+        cases hSecond :
+            psKernelDefEqEtaStructCoreWith
+              defeq inferType
+              context firstState right left with
+        | error error =>
+            simp only [hSecond] at hSuccess
+            simp at hSuccess
+        | ok secondRun =>
+            simp only [hSecond] at hSuccess
+            rcases secondRun with ⟨secondValue, secondState⟩
+            have hSecondConfig :=
+              psKernelDefEqEtaStructCoreWith_configuration_preserves
+                defeq
+                inferType
+                hDefEq
+                hInfer
+                context
+                firstState
+                secondState
+                right
+                left
+                secondValue
+                hFirstConfig
                 hSecond
-              ] at hSuccess
-          | ok secondRun =>
-              rcases secondRun with ⟨secondValue, secondState⟩
-              have hSecondConfig :=
-                psKernelDefEqEtaStructCoreWith_configuration_preserves
-                  defeq inferType
-                  hDefEq hInfer
-                  context firstState secondState
-                  right left secondValue
-                  hFirstConfig hSecond
-              simp [
-                psKernelDefEqEtaStructWith,
-                hFirst,
-                hSecond
-              ] at hSuccess
-              rcases hSuccess with ⟨rfl, rfl⟩
-              exact hSecondConfig
+            simp at hSuccess
+            rcases hSuccess with ⟨rfl, rfl⟩
+            exact hSecondConfig

@@ -242,6 +242,53 @@ def PsKernelRecursorReductionConfigurationSound
       answer
 
 
+/-
+Reusable postcondition for DefEq helpers that may return "undecided".
+
+Only a positive decision carries semantic equality evidence.  Negative and
+undecided outcomes still have to preserve the checker configuration.
+-/
+def PsKernelOptionalDefEqPostcondition
+    (context : PsKernelCheckerContext)
+    (nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : Option Bool) : Prop :=
+  PsKernelCheckerConfigurationSound context nextState ∧
+    match answer with
+    | Option.some true =>
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right
+    | _ =>
+        True
+
+
+def PsKernelOptionalDefEqConfigurationSound
+    (check :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod (Option Bool) PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : Option Bool),
+    PsKernelCheckerConfigurationSound context state ->
+    check context state left right =
+      Except.ok (Prod.mk answer nextState) ->
+    PsKernelOptionalDefEqPostcondition
+      context
+      nextState
+      left
+      right
+      answer
+
+
 def PsKernelDefEqConfigurationSound
     (defeq :
       PsKernelCheckerContext ->

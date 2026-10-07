@@ -236,57 +236,11 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                     leftDomain
                     rightDomain
                     subst ->
-                (if
-                    if psKernelExprHasLooseBVar leftBody then
-                      true
-                    else
-                      psKernelExprHasLooseBVar rightBody then
-                  let opened :=
-                    psKernelDefEqWithLocal
-                      context
-                      domainState
-                      rightName
-                      rightOpened
-                      rightInfo
-                  let fresh := Prod.fst opened
-                  let child := Prod.fst (Prod.snd opened)
-                  let freshState := Prod.snd (Prod.snd opened)
-                  match
-                      psKernelDefEqLambdaSpineWithFuel
-                        remaining
-                        defeq
-                        child
-                        freshState
-                        leftBody
-                        rightBody
-                        (psKernelExprListAppend
-                          subst
-                          (List.cons
-                            (PsKernelExpr.fvar fresh)
-                            List.nil)) with
-                  | Except.error error =>
-                      Except.error error
-                  | Except.ok childResult =>
-                      Except.ok
-                        (Prod.mk
-                          (Prod.fst childResult)
-                          (psKernelCheckerStateExitLocalScope
-                            freshState
-                            (Prod.snd childResult)))
-                else
-                  psKernelDefEqLambdaSpineWithFuel
-                    remaining
-                    defeq
-                    context
-                    domainState
-                    leftBody
-                    rightBody
-                    (psKernelExprListAppend
-                      subst
-                      (List.cons
-                        (PsKernelExpr.sort PsKernelLevel.zero)
-                        List.nil))) =
-                  Except.ok (Prod.mk value nextState) ->
+                (if psKernelExprEq leftDomain rightDomain then
+                   Except.ok (Prod.mk true state)
+                 else
+                   defeq context state leftOpened rightOpened) =
+                  Except.ok (Prod.mk true domainState) ->
                 PsKernelCheckerConfigurationSound
                     context nextState ∧
                   (value = true ->
@@ -298,7 +252,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       (PsKernelExpr.lam
                         rightName rightDomain rightBody rightInfo)
                       subst) := by
-            intro domainState hDomainConfig hDomain hTail
+            intro domainState hDomainConfig hDomain hDomainResult
             cases hDependent :
                 (if psKernelExprHasLooseBVar leftBody then
                    true
@@ -322,10 +276,14 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       nextSubst with
                 | error error =>
                     simp [
+                      psKernelDefEqLambdaSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainResult,
                       hDependent,
                       nextSubst,
                       hRest
-                    ] at hTail
+                    ] at hSuccess
                 | ok rest =>
                     rcases rest with ⟨restValue, restState⟩
                     have hRestSemantic :=
@@ -340,11 +298,15 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                         hDomainConfig
                         hRest
                     simp [
+                      psKernelDefEqLambdaSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainResult,
                       hDependent,
                       nextSubst,
                       hRest
-                    ] at hTail
-                    rcases hTail with ⟨rfl, rfl⟩
+                    ] at hSuccess
+                    rcases hSuccess with ⟨rfl, rfl⟩
                     refine ⟨hRestSemantic.1, ?_⟩
                     intro hTrue
                     have hLeftClosed :
@@ -447,6 +409,10 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       nextSubst with
                 | error error =>
                     simp [
+                      psKernelDefEqLambdaSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainResult,
                       hDependent,
                       opened,
                       fresh,
@@ -454,7 +420,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       freshState,
                       nextSubst,
                       hRest
-                    ] at hTail
+                    ] at hSuccess
                 | ok rest =>
                     rcases rest with ⟨restValue, childFinal⟩
                     have hRestSemantic :=
@@ -480,6 +446,10 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                         childFinal
                         hParentFresh
                     simp [
+                      psKernelDefEqLambdaSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainResult,
                       hDependent,
                       opened,
                       fresh,
@@ -487,8 +457,8 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       freshState,
                       nextSubst,
                       hRest
-                    ] at hTail
-                    rcases hTail with ⟨rfl, rfl⟩
+                    ] at hSuccess
+                    rcases hSuccess with ⟨rfl, rfl⟩
                     refine ⟨hExit, ?_⟩
                     intro hTrue
                     have hRestJudgment :
@@ -545,14 +515,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                   state
                   hConfig
                   hDomain
-                  (by
-                    simpa only [
-                      psKernelDefEqLambdaSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      if_pos True.intro
-                    ] using hSuccess)
+                  hDomainResult
           | false =>
               cases hDomainRun :
                   defeq
@@ -619,14 +582,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                           domainState
                           hDomainSemantic.1
                           hDomain
-                          (by
-                            simpa only [
-                              psKernelDefEqLambdaSpineWithFuel,
-                              leftOpened,
-                              rightOpened,
-                              hDomainResult,
-                              if_pos True.intro
-                            ] using hSuccess)
+                          hDomainResult
 
 
 theorem psKernelDefEqForallSpineWithFuel_configuration_sound
@@ -705,57 +661,11 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                     leftDomain
                     rightDomain
                     subst ->
-                (if
-                    if psKernelExprHasLooseBVar leftBody then
-                      true
-                    else
-                      psKernelExprHasLooseBVar rightBody then
-                  let opened :=
-                    psKernelDefEqWithLocal
-                      context
-                      domainState
-                      rightName
-                      rightOpened
-                      rightInfo
-                  let fresh := Prod.fst opened
-                  let child := Prod.fst (Prod.snd opened)
-                  let freshState := Prod.snd (Prod.snd opened)
-                  match
-                      psKernelDefEqForallSpineWithFuel
-                        remaining
-                        defeq
-                        child
-                        freshState
-                        leftBody
-                        rightBody
-                        (psKernelExprListAppend
-                          subst
-                          (List.cons
-                            (PsKernelExpr.fvar fresh)
-                            List.nil)) with
-                  | Except.error error =>
-                      Except.error error
-                  | Except.ok childResult =>
-                      Except.ok
-                        (Prod.mk
-                          (Prod.fst childResult)
-                          (psKernelCheckerStateExitLocalScope
-                            freshState
-                            (Prod.snd childResult)))
-                else
-                  psKernelDefEqForallSpineWithFuel
-                    remaining
-                    defeq
-                    context
-                    domainState
-                    leftBody
-                    rightBody
-                    (psKernelExprListAppend
-                      subst
-                      (List.cons
-                        (PsKernelExpr.sort PsKernelLevel.zero)
-                        List.nil))) =
-                  Except.ok (Prod.mk value nextState) ->
+                (if psKernelExprEq leftDomain rightDomain then
+                   Except.ok (Prod.mk true state)
+                 else
+                   defeq context state leftOpened rightOpened) =
+                  Except.ok (Prod.mk true domainState) ->
                 PsKernelCheckerConfigurationSound
                     context nextState ∧
                   (value = true ->
@@ -767,7 +677,7 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       (PsKernelExpr.forallE
                         rightName rightDomain rightBody rightInfo)
                       subst) := by
-            intro domainState hDomainConfig hDomain hTail
+            intro domainState hDomainConfig hDomain hDomainResult
             cases hDependent :
                 (if psKernelExprHasLooseBVar leftBody then
                    true
@@ -791,10 +701,14 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       nextSubst with
                 | error error =>
                     simp [
+                      psKernelDefEqForallSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainResult,
                       hDependent,
                       nextSubst,
                       hRest
-                    ] at hTail
+                    ] at hSuccess
                 | ok rest =>
                     rcases rest with ⟨restValue, restState⟩
                     have hRestSemantic :=
@@ -809,11 +723,15 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                         hDomainConfig
                         hRest
                     simp [
+                      psKernelDefEqForallSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainResult,
                       hDependent,
                       nextSubst,
                       hRest
-                    ] at hTail
-                    rcases hTail with ⟨rfl, rfl⟩
+                    ] at hSuccess
+                    rcases hSuccess with ⟨rfl, rfl⟩
                     refine ⟨hRestSemantic.1, ?_⟩
                     intro hTrue
                     have hLeftClosed :
@@ -916,6 +834,10 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       nextSubst with
                 | error error =>
                     simp [
+                      psKernelDefEqForallSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainResult,
                       hDependent,
                       opened,
                       fresh,
@@ -923,7 +845,7 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       freshState,
                       nextSubst,
                       hRest
-                    ] at hTail
+                    ] at hSuccess
                 | ok rest =>
                     rcases rest with ⟨restValue, childFinal⟩
                     have hRestSemantic :=
@@ -949,6 +871,10 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                         childFinal
                         hParentFresh
                     simp [
+                      psKernelDefEqForallSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainResult,
                       hDependent,
                       opened,
                       fresh,
@@ -956,8 +882,8 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       freshState,
                       nextSubst,
                       hRest
-                    ] at hTail
-                    rcases hTail with ⟨rfl, rfl⟩
+                    ] at hSuccess
+                    rcases hSuccess with ⟨rfl, rfl⟩
                     refine ⟨hExit, ?_⟩
                     intro hTrue
                     have hRestJudgment :
@@ -1014,14 +940,7 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                   state
                   hConfig
                   hDomain
-                  (by
-                    simpa only [
-                      psKernelDefEqForallSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      if_pos True.intro
-                    ] using hSuccess)
+                  hDomainResult
           | false =>
               cases hDomainRun :
                   defeq
@@ -1088,14 +1007,7 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                           domainState
                           hDomainSemantic.1
                           hDomain
-                          (by
-                            simpa only [
-                              psKernelDefEqForallSpineWithFuel,
-                              leftOpened,
-                              rightOpened,
-                              hDomainResult,
-                              if_pos True.intro
-                            ] using hSuccess)
+                          hDomainResult
 
 
 theorem psKernelDefEqLambdaSpine_configuration_sound

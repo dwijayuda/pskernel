@@ -177,9 +177,9 @@ theorem psKernelReduceNatBinary_some_refines_step
                           | true =>
                               simp_all [psKernelReduceNatBinary]
                               subst result
-                              exact
-                                PsKernelReductionStep.natPowZero
-                                  op left right hPow hZero
+                              simpa [hZero] using
+                                (PsKernelReductionStep.natPowZero
+                                  op left right hPow hZero)
                           | false =>
                               cases hTooBig :
                                   psKernelNatGt
@@ -208,18 +208,18 @@ theorem psKernelReduceNatBinary_some_refines_step
                       | true =>
                           simp_all [psKernelReduceNatBinary]
                           subst result
-                          exact
-                            PsKernelReductionStep.natMod
-                              op left right hMod
+                          simpa using
+                            (PsKernelReductionStep.natMod
+                              op left right hMod)
                       | false =>
                           cases hDiv :
                               psKernelNameEq op psKernelNatDivName with
                           | true =>
                               simp_all [psKernelReduceNatBinary]
                               subst result
-                              exact
-                                PsKernelReductionStep.natDiv
-                                  op left right hDiv
+                              simpa using
+                                (PsKernelReductionStep.natDiv
+                                  op left right hDiv)
                           | false =>
                               cases hBeq :
                                   psKernelNameEq op psKernelNatBeqName with
@@ -274,9 +274,9 @@ theorem psKernelReduceNatBinary_some_refines_step
                                                       | true =>
                                                           simp_all [psKernelReduceNatBinary]
                                                           subst result
-                                                          exact
-                                                            PsKernelReductionStep.natShiftLeftZero
-                                                              op left right hShiftLeft hLeftZero
+                                                          simpa [hLeftZero] using
+                                                            (PsKernelReductionStep.natShiftLeftZero
+                                                              op left right hShiftLeft hLeftZero)
                                                       | false =>
                                                           cases hCount :
                                                               psKernelCheckCountArg
@@ -832,7 +832,8 @@ theorem psKernelReduceNatWith_some_refines
                                         psKernelReduceNatWith,
                                         hLeft,
                                         hRight,
-                                        psKernelExprNatLiteralValue,
+                                        hLeftLiteral,
+                                        hRightLiteral,
                                         hBinary
                                       ] at hSuccess
                                   | ok binaryAnswer =>

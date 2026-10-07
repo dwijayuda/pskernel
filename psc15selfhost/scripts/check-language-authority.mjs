@@ -7,11 +7,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const authority = JSON.parse(
   await readFile(path.join(root, "language-authority.json"), "utf8"),
 );
+
+if (authority.schemaVersion !== 2) {
+  throw new Error(
+    `PSCV_LANGUAGE_AUTHORITY_SCHEMA: expected 2, got ${authority.schemaVersion}`,
+  );
+}
+
 const document = await readFile(path.join(root, authority.document));
 const actualSha = createHash("sha256").update(document).digest("hex");
 if (actualSha !== authority.sha256) {
   throw new Error(
-    `PSC2_LANGUAGE_AUTHORITY_HASH: expected ${authority.sha256}, got ${actualSha}`,
+    `PSCV_LANGUAGE_AUTHORITY_HASH: expected ${authority.sha256}, got ${actualSha}`,
   );
 }
 
@@ -21,45 +28,64 @@ for (const value of [
   authority.sourceProfile,
   authority.requiredLanguageProfile,
   authority.standardLanguageProfile,
-  authority.javaScriptPlatformProfile,
-  authority.leanCommit,
+  authority.leanCompatibilityProfile,
+  authority.verificationProfile,
+  authority.closedAssurancePolicy,
+  authority.boundaryAssurancePolicy,
+  authority.verificationSemantics,
+  authority.certificatePolicy,
+  authority.currentCompilerMilestone,
+  authority.targetCompilerConformance,
+  authority.normativeLeanVersion,
+  authority.normativeLeanCommit,
 ]) {
   if (!text.includes(value)) {
-    throw new Error(`PSC2_LANGUAGE_AUTHORITY_IDENTITY_MISSING: ${value}`);
+    throw new Error(`PSCV_LANGUAGE_AUTHORITY_IDENTITY_MISSING: ${value}`);
   }
 }
 
 const psconfig = JSON.parse(
   await readFile(path.join(root, "psconfig.json"), "utf8"),
 );
+
+// The current self-host compiler remains on the inherited PSC2/bootstrap
+// implementation closure until pscv-v1 conformance is actually implemented.
+// Do not make the target PSCV profile look current merely by changing config.
 for (const [key, expected] of [
   ["languageEdition", authority.languageEdition],
   ["sourceProfile", authority.sourceProfile],
   ["requiredLanguageProfile", authority.requiredLanguageProfile],
   ["standardLanguageProfile", authority.standardLanguageProfile],
+  ["implementationProfile", authority.implementationProfile],
 ]) {
   if (psconfig[key] !== expected) {
     throw new Error(
-      `PSC2_LANGUAGE_AUTHORITY_CONFIG_DRIFT: ${key} expected ${expected}, got ${psconfig[key]}`,
+      `PSCV_LANGUAGE_AUTHORITY_CONFIG_DRIFT: ${key} expected ${expected}, got ${psconfig[key]}`,
     );
   }
 }
+
 if ("acceptedLanguageProfile" in psconfig) {
   throw new Error(
-    "PSC2_LANGUAGE_AUTHORITY_LEGACY_PROFILE: acceptedLanguageProfile is retired",
+    "PSCV_LANGUAGE_AUTHORITY_LEGACY_PROFILE: acceptedLanguageProfile is retired",
   );
 }
 if (JSON.stringify(psconfig).includes("PSC2-bootstrap")) {
-  throw new Error("PSC2_LANGUAGE_AUTHORITY_LEGACY_PROFILE: PSC2-bootstrap is retired");
+  throw new Error(
+    "PSCV_LANGUAGE_AUTHORITY_LEGACY_PROFILE: PSC2-bootstrap is retired",
+  );
 }
 
 process.stdout.write(
   [
-    "PSC2_LANGUAGE_AUTHORITY: PASS",
+    "PSCV_LANGUAGE_AUTHORITY: PASS",
     `document=${authority.document}`,
     `sha256=${actualSha}`,
     `edition=${authority.languageEdition}`,
-    `standard=${authority.standardLanguageProfile}`,
-    `compilerConformance=${authority.compilerConformance}`,
+    `baseProfile=${authority.requiredLanguageProfile}`,
+    `verificationProfile=${authority.verificationProfile}`,
+    `currentCompiler=${authority.currentCompilerMilestone}`,
+    `targetCompiler=${authority.targetCompilerConformance}`,
+    `normativeLean=${authority.normativeLeanVersion}@${authority.normativeLeanCommit}`,
   ].join("\n") + "\n",
 );

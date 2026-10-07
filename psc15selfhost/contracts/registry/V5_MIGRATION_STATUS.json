@@ -1071,7 +1071,8 @@
     "failedCheck": "observed build archive scalar Canonical projection",
     "rootCause": "psc-pass-definition/1 accepts homogeneous output contracts but interface and binding outputs have distinct contracts; recorder rejects correctly.",
     "repair": "Introduce strict positional output contracts without relaxing legacy homogeneous checks.",
-    "proofImplication": "none"
+    "proofImplication": "none",
+    "repairStatus": "strict-v2-typed-product-implementation-awaiting-cloud-validation"
   },
   "orderedImplementation": [
     {
@@ -1080,7 +1081,7 @@
       "classifications": [
         "claimset-evidence"
       ],
-      "status": "planned",
+      "status": "implemented-contract-and-policy-verifier-consumer-integration-pending",
       "requirement": "Machine-readable exact-subject claims, explicit selected-checker evidence policies, no automatic cross-claim promotion."
     },
     {
@@ -1130,7 +1131,7 @@
       "classifications": [
         "compiler-pass"
       ],
-      "status": "planned",
+      "status": "typed-product-effects-implemented-query-consumption-pending",
       "requirement": "Explicit analyses/interfaces/fingerprint preservation and invalidation, origin policy and authority effects."
     },
     {
@@ -1288,5 +1289,21 @@
     "assuredRelease": false,
     "globalPreservationProved": false,
     "requires": "Real producers, exact typed handoffs and real consumers for target capabilities; focused cloud checks and explicit remaining assumptions. Extensive formal/independent assurance is tracked separately and cannot be asserted from implementation."
-  }
+  },
+  "targetSubsystems": [
+    {
+      "id": "psc-claim-set/1",
+      "kind": "claim-set",
+      "status": "current-host",
+      "canonicalPath": "contracts/claims/CLAIM_SET_V1.json",
+      "classification": "claimset-evidence"
+    },
+    {
+      "id": "psc-pass-definition/2",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/passes/PASS_DEFINITION_V2.json",
+      "classification": "compiler-pass"
+    }
+  ]
 }

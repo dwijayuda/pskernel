@@ -181,7 +181,7 @@
     "test:direct-rust-whole-compiler": "node scripts/direct-rust-whole-compiler.test.mjs",
     "test:direct-rust-selfhost": "node scripts/direct-rust-selfhost-fixed-point.mjs",
     "test:architecture-contracts": "node --test scripts/architecture-contracts.test.mjs scripts/provider-security.test.mjs scripts/comparator-v1.test.mjs",
-    "check:architecture-contracts": "npm run test:architecture-contracts && npm run test:architecture-delta && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs && npm run check:semantic-contracts && npm run check:production-authority && npm run check:defeq-cache-source && npm run check:resource-contract && npm run check:independence && npm run check:semantic-lock && npm run check:archive-profile && npm run check:direct-js-promotion && npm run check:bootstrap-assurance && npm run check:theory-seed && npm run check:theory-bridge && npm run test:savef && npm run check:v3-acceptance && npm run check:v5-migration",
+    "check:architecture-contracts": "npm run test:architecture-contracts && npm run test:architecture-delta && node scripts/architecture-registry.mjs && node scripts/trust-manifest.mjs && npm run check:semantic-contracts && npm run check:production-authority && npm run check:defeq-cache-source && npm run check:resource-contract && npm run check:independence && npm run check:semantic-lock && npm run check:archive-profile && npm run check:direct-js-promotion && npm run check:bootstrap-assurance && npm run check:theory-seed && npm run check:theory-bridge && npm run test:savef && npm run check:v3-acceptance && npm run check:v5-migration && npm run test:claim-set",
     "check:semantic-contracts": "node scripts/semantic-contract-audit.mjs",
     "check:production-authority": "node scripts/production-authority-audit.mjs",
     "test:comparator-v1": "node --test scripts/comparator-v1.test.mjs scripts/comparator-export.test.mjs scripts/comparator-session.test.mjs scripts/certificate-boundary.test.mjs",
@@ -216,7 +216,8 @@
     "test:target-ir-artifacts": "node --test scripts/target-ir-artifact.test.mjs",
     "test:ir-invariant-replay": "lake build pscv_ir_replay pscv_ir_encoding_tests && node --test scripts/ir-invariant-replay.test.mjs",
     "test:wasm-runtime-strings": "lake build psc1_wasm_string_runtime_fixture && node scripts/backend-wasm-strings.test.mjs",
-    "check:v5-migration": "node scripts/v5-migration-audit.mjs"
+    "check:v5-migration": "node scripts/v5-migration-audit.mjs",
+    "test:claim-set": "node --test scripts/claim-set.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

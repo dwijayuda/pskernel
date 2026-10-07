@@ -92,3 +92,39 @@ def psPassExecutionWithArtifacts
   PsPassExecution.mk definition.passId "" "" evidence
     PsPassBindingState.requiresByteVerification inputs outputs
     inputFingerprints outputFingerprints (Option.some action) resources diagnostics
+
+-- Versioned typed products preserve the legacy homogeneous pass contract.
+-- These declarations carry data only; host artifact/evidence checks are required.
+structure PsPassArtifactContract where
+  role : String
+  domain : String
+  contract : String
+
+structure PsPassEffects where
+  supportedProfiles : List String
+  requiresAnalyses : List String
+  preservesAnalyses : List String
+  invalidatesAnalyses : List String
+  preservesInterfaces : List String
+  invalidatesInterfaces : List String
+  preservesFingerprints : List String
+  invalidatesFingerprints : List String
+  originPolicy : String
+  originReason : String
+  authorityEffect : String
+  assuranceClass : String
+
+structure PsPassDefinitionV2 where
+  passId : String
+  version : Nat
+  inputArtifacts : List PsPassArtifactContract
+  outputArtifacts : List PsPassArtifactContract
+  semanticRelation : String
+  resourceContract : String
+  determinismClass : String
+  totalityClass : String
+  implementationId : String
+  validatorId : Option String
+  theoremIds : List String
+  assumptionIds : List String
+  effects : PsPassEffects

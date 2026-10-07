@@ -73,3 +73,52 @@ test('evidence must use a configured checker and bind the exact execution subjec
     kind: 'global-preservation', subject: { ...subject, outputs: [] } })]]);
   await assert.rejects(verifyPassExecution(record, { ...options, evidenceCheckers: wrong }), /EVIDENCE_REJECTED/);
 });
+
+function productFixture() {
+  const f = fixture();
+  const old = JSON.parse(f.record.definition.bytes);
+  const { inputContract, outputContract, ...common } = old;
+  const extra = f.add(canonicalArtifact({ binding: 7 }, 'binding', 'test-binding/1'));
+  const effects = { supportedProfiles: ['fixture-only'], requiresAnalyses: [], preservesAnalyses: [], invalidatesAnalyses: ['*'],
+    preservesInterfaces: [], invalidatesInterfaces: ['*'], preservesFingerprints: [], invalidatesFingerprints: ['*'],
+    originPolicy: 'drop-with-reason', originReason: 'Fixture has no source origins.',
+    authorityEffect: 'requiresRevalidation', assuranceClass: 'trustedImplementation' };
+  const spec = (artifact, role) => ({ role, domain: artifact.identity.domain, contract: artifact.identity.contract });
+  const fields = { ...common, schemaVersion: 2, contract: 'psc-pass-definition/2',
+    inputArtifacts: [spec(f.input, 'source')], outputArtifacts: [spec(f.output, 'interface'), spec(extra, 'binding')], effects };
+  const definition = f.add(passDefinition(fields));
+  const args = { definition, inputs: [f.input], outputs: [f.output, extra],
+    semanticIdentity: { contract: 'test-semantics/1' }, resourcePolicy: { maxSteps: 10 } };
+  const record = f.add(recordPassExecution(args)); f.add(record.action);
+  return { ...f, extra, fields, args, record };
+}
+
+test('typed product passes bind each output domain, contract, position and cardinality', async () => {
+  const f = productFixture();
+  const verified = await verifyPassExecution(f.record, f.options);
+  assert.equal(verified.integrityVerified, true);
+  assert.equal(verified.preservationVerified, false);
+  for (const outputs of [[f.extra, f.output], [f.output], [f.output, f.extra, f.extra],
+    [f.output, f.add(canonicalArtifact({ binding: 7 }, 'wrong-domain', 'test-binding/1'))]]) {
+    assert.throws(() => recordPassExecution({ ...f.args, outputs }), /PASS_ARTIFACT/);
+  }
+  const changed = JSON.parse(f.record.bytes); changed.outputs.reverse();
+  await assert.rejects(verifyPassExecution(canonicalArtifact(changed, 'pass-execution', 'psc-pass-execution/1'), f.options), /PASS_ARTIFACT_CONTRACT/);
+});
+
+test('legacy homogeneous passes still reject mixed output contracts', () => {
+  const f = productFixture();
+  const old = fixture();
+  assert.throws(() => recordPassExecution({ ...f.args, definition: old.record.definition }), /PASS_ARTIFACT_CONTRACT/);
+});
+
+test('preservation metadata must be explicit and internally consistent', () => {
+  const f = productFixture();
+  for (const effects of [
+    { ...f.fields.effects, preservesAnalyses: ['liveness'] },
+    { ...f.fields.effects, preservesFingerprints: ['*'] },
+    { ...f.fields.effects, authorityEffect: 'preservesByProof' },
+    { ...f.fields.effects, assuranceClass: 'translationValidated' },
+    { ...f.fields.effects, originReason: '' },
+  ]) assert.throws(() => passDefinition({ ...f.fields, effects }), /PASS_/);
+});

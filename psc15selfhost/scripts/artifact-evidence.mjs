@@ -96,27 +96,80 @@ export function exactFingerprint(identity) {
 
 export function passDefinition(fields) {
   const value = JSON.parse(canonicalBytes(fields));
-  if (Object.hasOwn(value, 'schemaVersion') && value.schemaVersion !== 1) fail('PASS_DEFINITION_SCHEMA');
-  if (Object.hasOwn(value, 'contract') && value.contract !== 'psc-pass-definition/1') fail('PASS_DEFINITION_SCHEMA');
-  for (const key of ['passId', 'inputContract', 'outputContract', 'semanticRelationId', 'resourceContractId',
-    'determinismClass', 'totalityClass']) if (!text(value[key])) fail('PASS_DEFINITION_' + key);
+  const schema = value.schemaVersion ?? 1;
+  const contract = schema === 1 ? 'psc-pass-definition/1' : schema === 2 ? 'psc-pass-definition/2' : null;
+  if (!contract || (Object.hasOwn(value, 'contract') && value.contract !== contract)) fail('PASS_DEFINITION_SCHEMA');
+  const common = ['passId', 'semanticRelationId', 'resourceContractId', 'determinismClass', 'totalityClass'];
+  for (const key of schema === 1 ? [...common, 'inputContract', 'outputContract'] : common)
+    if (!text(value[key])) fail('PASS_DEFINITION_' + key);
   if (!natural(value.version) || value.version < 1) fail('PASS_VERSION');
   assertArtifactId(value.implementationId);
   if (value.validatorId !== null && !text(value.validatorId)) fail('PASS_VALIDATOR');
   for (const key of ['theoremIds', 'assumptionIds']) {
     if (!Array.isArray(value[key]) || !value[key].every(text) || new Set(value[key]).size !== value[key].length) fail('PASS_' + key);
   }
-  return canonicalArtifact({ schemaVersion: 1, contract: 'psc-pass-definition/1', ...value },
-    'pass-definition', 'psc-pass-definition/1');
+  if (schema === 2) {
+    const keys = ['schemaVersion', 'contract', 'version', ...common, 'implementationId', 'validatorId',
+      'theoremIds', 'assumptionIds', 'inputArtifacts', 'outputArtifacts', 'effects'];
+    if (Object.keys(value).sort().join(',') !== keys.sort().join(',')) fail('PASS_DEFINITION_FIELDS');
+    for (const key of ['inputArtifacts', 'outputArtifacts']) {
+      const specs = value[key];
+      if (!Array.isArray(specs) || !specs.length || specs.length > 256) fail('PASS_ARTIFACTS');
+      const roles = new Set();
+      for (const spec of specs) {
+        if (!spec || Object.keys(spec).sort().join(',') !== 'contract,domain,role' ||
+            ![spec.role, spec.domain, spec.contract].every(text) || roles.has(spec.role)) fail('PASS_ARTIFACT_SPEC');
+        roles.add(spec.role);
+      }
+    }
+    const effects = value.effects;
+    const lists = ['requiresAnalyses', 'preservesAnalyses', 'invalidatesAnalyses',
+      'preservesInterfaces', 'invalidatesInterfaces', 'preservesFingerprints', 'invalidatesFingerprints', 'supportedProfiles'];
+    if (!effects || Object.keys(effects).sort().join(',') !==
+        [...lists, 'originPolicy', 'originReason', 'authorityEffect', 'assuranceClass'].sort().join(',')) fail('PASS_EFFECTS');
+    for (const key of lists) {
+      if (!Array.isArray(effects[key]) || !effects[key].every(text) || new Set(effects[key]).size !== effects[key].length) fail('PASS_EFFECTS');
+    }
+    if (!effects.supportedProfiles.length ||
+        !['preserve', 'merge', 'synthesize', 'drop-with-reason'].includes(effects.originPolicy) ||
+        !text(effects.originReason) ||
+        !['none', 'requiresRevalidation', 'preservesByProof', 'preservesByValidator', 'trustExpanding'].includes(effects.authorityEffect) ||
+        !['trustedImplementation', 'proofPreserved', 'certificateValidated', 'translationValidated',
+          'targetAcceptedOnly', 'differentialOnly', 'unassured'].includes(effects.assuranceClass)) fail('PASS_EFFECTS');
+    for (const [kept, invalid] of [['preservesAnalyses', 'invalidatesAnalyses'],
+      ['preservesInterfaces', 'invalidatesInterfaces'], ['preservesFingerprints', 'invalidatesFingerprints']]) {
+      if (effects[kept].includes('*') || effects[kept].some(id => effects[invalid].includes(id)) ||
+          (effects[invalid].includes('*') && effects[kept].length)) fail('PASS_EFFECT_CONFLICT');
+    }
+    // Metadata cannot silently assert a proof or validator that is absent.
+    if ((effects.authorityEffect === 'preservesByProof' || effects.assuranceClass === 'proofPreserved') && !value.theoremIds.length)
+      fail('PASS_PROOF_REQUIRED');
+    if ((effects.authorityEffect === 'preservesByValidator' ||
+        ['certificateValidated', 'translationValidated'].includes(effects.assuranceClass)) && value.validatorId === null)
+      fail('PASS_VALIDATOR_REQUIRED');
+  }
+  return canonicalArtifact({ schemaVersion: schema, contract, ...value }, 'pass-definition', contract);
 }
 
-function ids(items, expectedContract) {
+function checkIds(items, declared, direction) {
   if (!Array.isArray(items) || items.length === 0) fail('PASS_ARTIFACTS');
-  return items.map(item => {
-    verifyArtifact(item.bytes, item.identity);
-    if (item.identity.contract !== expectedContract) fail('PASS_ARTIFACT_CONTRACT');
-    return item.identity;
-  });
+  if (declared.schemaVersion === 2) {
+    const specs = declared[direction + 'Artifacts'];
+    if (items.length !== specs.length) fail('PASS_ARTIFACT_ARITY');
+    for (let index = 0; index < specs.length; index++) {
+      if (items[index].contract !== specs[index].contract || items[index].domain !== specs[index].domain)
+        fail('PASS_ARTIFACT_CONTRACT');
+    }
+  } else {
+    for (const item of items) if (item.contract !== declared[direction + 'Contract']) fail('PASS_ARTIFACT_CONTRACT');
+  }
+}
+
+function ids(items, declared, direction) {
+  if (!Array.isArray(items)) fail('PASS_ARTIFACTS');
+  const result = items.map(item => { verifyArtifact(item.bytes, item.identity); return item.identity; });
+  checkIds(result, declared, direction);
+  return result;
 }
 
 function actionPayload(definitionId, inputs, parameters, semanticIdentity, resourcePolicy, dependencies) {
@@ -129,7 +182,7 @@ export function recordPassExecution({ definition, inputs, outputs, parameters = 
   verifyArtifact(definition.bytes, definition.identity);
   const declared = JSON.parse(definition.bytes);
   if (artifactKey(passDefinition(declared).identity) !== artifactKey(definition.identity)) fail('PASS_DEFINITION_BYTES');
-  const inputIds = ids(inputs, declared.inputContract), outputIds = ids(outputs, declared.outputContract);
+  const inputIds = ids(inputs, declared, 'input'), outputIds = ids(outputs, declared, 'output');
   if (!semanticIdentity || !resourcePolicy) fail('PASS_CONTEXT');
   for (const dependency of dependencies) assertArtifactId(dependency);
   const action = canonicalArtifact(actionPayload(definition.identity, inputIds, parameters,
@@ -163,8 +216,9 @@ export async function verifyPassExecution(record, { resolveArtifact, evidenceChe
   const declared = JSON.parse(definition.bytes);
   await resolve(declared.implementationId);
   if (!Array.isArray(value.inputs) || !value.inputs.length || !Array.isArray(value.outputs) || !value.outputs.length) fail('PASS_ARTIFACTS');
-  for (const [items, contract] of [[value.inputs, declared.inputContract], [value.outputs, declared.outputContract]]) {
-    for (const item of items) { if (item.contract !== contract) fail('PASS_ARTIFACT_CONTRACT'); await resolve(item); }
+  for (const [items, direction] of [[value.inputs, 'input'], [value.outputs, 'output']]) {
+    checkIds(items, declared, direction);
+    for (const item of items) await resolve(item);
   }
   if (!canonicalBytes(value.assumptionIds).equals(canonicalBytes(declared.assumptionIds))) fail('PASS_ASSUMPTIONS');
   if (declared.assumptionIds.some(id => !allowedAssumptions.includes(id))) fail('ASSUMPTION_DENIED');

@@ -303,6 +303,18 @@
       "kind": "migration-registry",
       "status": "current-host",
       "canonicalPath": "contracts/registry/V5_MIGRATION_STATUS.json"
+    },
+    {
+      "id": "psc-claim-set/1",
+      "kind": "claim-set",
+      "status": "current-host",
+      "canonicalPath": "contracts/claims/CLAIM_SET_V1.json"
+    },
+    {
+      "id": "psc-pass-definition/2",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/passes/PASS_DEFINITION_V2.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

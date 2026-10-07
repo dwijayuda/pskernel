@@ -31,8 +31,9 @@ for (const item of migration.workstreams) {
 }
 unique(migration.registeredSubsystems.map(item => item.id), 'duplicate subsystem');
 const additions = new Set(['pscv-architecture/v5.1', 'psc-v5-migration-status/1']);
-same(migration.registeredSubsystems.map(item => item.id), registry.entries.filter(item => !additions.has(item.id)).map(item => item.id), 'registered subsystem coverage');
-for (const item of migration.registeredSubsystems) assert.ok(migration.classificationVocabulary.includes(item.classification));
+unique(migration.targetSubsystems.map(item => item.id), 'duplicate target subsystem');
+same([...migration.registeredSubsystems, ...migration.targetSubsystems].map(item => item.id), registry.entries.filter(item => !additions.has(item.id)).map(item => item.id), 'registered subsystem coverage');
+for (const item of [...migration.registeredSubsystems, ...migration.targetSubsystems]) assert.ok(migration.classificationVocabulary.includes(item.classification));
 same(migration.assuranceObligations.map(item => item.id), handoff.obligations.map(item => item.id), 'lost assurance obligation');
 const directory = 'packages/compiler-ir/src/Ps/CompilerIr/';
 const files = (await readdir(new URL(directory, root))).filter(name => name.endsWith('.lean')).map(name => directory + name);

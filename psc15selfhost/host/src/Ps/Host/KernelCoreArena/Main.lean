@@ -12,7 +12,7 @@ partial def replayStream
   else
     match state.replayLine line with
     | .error failure =>
-        pure (.error (.rejected ("line " ++ toString lineNo ++ ": " ++ failure.message)))
+        pure (.error (failure.withContext ("line " ++ toString lineNo ++ ": ")))
     | .ok next =>
         replayStream stream next (lineNo + 1)
 

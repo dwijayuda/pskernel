@@ -89,3 +89,99 @@ theorem psKernelDefEqLazyProjFinish_configuration_sound
                 context typeName index right rightValue
                 hConfig.1 hRight)
               (hEq.2 hTrue)
+
+
+/-
+The one-step lazy-delta dispatcher preserves reductions for each residual pair.
+Its successful equal case carries independent algorithmic DefEq evidence;
+negative comparisons and non-decisions do not assert equality.
+
+This is a relational contract (rather than an executable equation) and can be
+composed through fuel induction without assuming DefEq transitivity.
+-/
+def PsKernelDeltaStepPostcondition
+    (context : PsKernelCheckerContext)
+    (nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : PsKernelDeltaStepResult) : Prop :=
+  PsKernelCheckerConfigurationSound context nextState ∧
+    match answer with
+    | PsKernelDeltaStepResult.equal =>
+        PsKernelDefEqJudgment
+          context.environment context.localContext left right
+    | PsKernelDeltaStepResult.continue nextLeft nextRight =>
+        PsKernelReductionClosure
+          context.environment context.localContext left nextLeft ∧
+        PsKernelReductionClosure
+          context.environment context.localContext right nextRight
+    | PsKernelDeltaStepResult.unknown nextLeft nextRight =>
+        PsKernelReductionClosure
+          context.environment context.localContext left nextLeft ∧
+        PsKernelReductionClosure
+          context.environment context.localContext right nextRight
+    | PsKernelDeltaStepResult.different nextLeft nextRight =>
+        PsKernelReductionClosure
+          context.environment context.localContext left nextLeft ∧
+        PsKernelReductionClosure
+          context.environment context.localContext right nextRight
+
+
+theorem psKernelDefEqFinishLazyStep_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : PsKernelDeltaStepResult)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqFinishLazyStep
+          defeq context state left right =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelDeltaStepPostcondition
+      context nextState left right answer := by
+  simp only [psKernelDefEqFinishLazyStep] at hRun
+  cases hQuickRun :
+      psKernelDefEqQuick defeq context state left right with
+  | error error =>
+      simp only [hQuickRun] at hRun
+      simp at hRun
+  | ok quickRun =>
+      simp only [hQuickRun] at hRun
+      rcases quickRun with ⟨quickAnswer, quickState⟩
+      have hQuickSound :=
+        hQuick
+          context state quickState left right quickAnswer
+          hConfig hQuickRun
+      cases quickAnswer with
+      | none =>
+          simp at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            ⟨
+              hQuickSound.1,
+              PsKernelReductionClosure.refl left,
+              PsKernelReductionClosure.refl right
+            ⟩
+      | some quickValue =>
+          cases quickValue with
+          | false =>
+              simp at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              exact
+                ⟨
+                  hQuickSound.1,
+                  PsKernelReductionClosure.refl left,
+                  PsKernelReductionClosure.refl right
+                ⟩
+          | true =>
+              simp at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              exact ⟨hQuickSound.1, hQuickSound.2⟩

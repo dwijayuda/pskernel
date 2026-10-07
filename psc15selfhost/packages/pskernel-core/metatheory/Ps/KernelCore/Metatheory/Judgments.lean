@@ -1232,6 +1232,36 @@ inductive PsKernelDefEqJudgment
         left
         right
 
+  | lambdaSpine
+      {localContext : PsKernelLocalContext}
+      (left right : PsKernelExpr)
+      (h :
+        PsKernelLambdaSpineJudgment
+          environment
+          localContext
+          left
+          right
+          List.nil) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+  | forallSpine
+      {localContext : PsKernelLocalContext}
+      (left right : PsKernelExpr)
+      (h :
+        PsKernelForallSpineJudgment
+          environment
+          localContext
+          left
+          right
+          List.nil) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
   /-
   Algorithmic K conversion used by recursor WHNF.
 
@@ -1479,6 +1509,212 @@ inductive PsKernelDefEqJudgment
         localContext
         left
         (PsKernelExpr.mdata metadata right)
+
+inductive PsKernelLambdaSpineJudgment
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext ->
+    PsKernelExpr ->
+    PsKernelExpr ->
+    List PsKernelExpr ->
+    Prop
+  | terminal
+      {localContext : PsKernelLocalContext}
+      (left right : PsKernelExpr)
+      (subst : List PsKernelExpr)
+      (hCore :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          (psKernelExprInstantiateRev left subst)
+          (psKernelExprInstantiateRev right subst)) :
+      PsKernelLambdaSpineJudgment
+        environment
+        localContext
+        left
+        right
+        subst
+  | stepOpen
+      {localContext : PsKernelLocalContext}
+      (leftName rightName fresh : PsKernelName)
+      (leftDomain rightDomain leftBody rightBody : PsKernelExpr)
+      (leftInfo rightInfo : PsKernelBinderInfo)
+      (subst : List PsKernelExpr)
+      (hDomain :
+        psKernelExprEq leftDomain rightDomain = true ∨
+          PsKernelDefEqJudgment
+            environment
+            localContext
+            (psKernelExprInstantiateRev leftDomain subst)
+            (psKernelExprInstantiateRev rightDomain subst))
+      (hDependent :
+        psKernelExprHasLooseBVar leftBody = true ∨
+          psKernelExprHasLooseBVar rightBody = true)
+      (hFresh :
+        psKernelLocalContextFind localContext fresh =
+          Option.none)
+      (hRest :
+        PsKernelLambdaSpineJudgment
+          environment
+          (psKernelLocalContextAddLocal
+            localContext
+            fresh
+            rightName
+            (psKernelExprInstantiateRev rightDomain subst)
+            rightInfo)
+          leftBody
+          rightBody
+          (psKernelExprListAppend
+            subst
+            (List.cons
+              (PsKernelExpr.fvar fresh)
+              List.nil))) :
+      PsKernelLambdaSpineJudgment
+        environment
+        localContext
+        (PsKernelExpr.lam
+          leftName leftDomain leftBody leftInfo)
+        (PsKernelExpr.lam
+          rightName rightDomain rightBody rightInfo)
+        subst
+  | stepClosed
+      {localContext : PsKernelLocalContext}
+      (leftName rightName : PsKernelName)
+      (leftDomain rightDomain leftBody rightBody : PsKernelExpr)
+      (leftInfo rightInfo : PsKernelBinderInfo)
+      (subst : List PsKernelExpr)
+      (hDomain :
+        psKernelExprEq leftDomain rightDomain = true ∨
+          PsKernelDefEqJudgment
+            environment
+            localContext
+            (psKernelExprInstantiateRev leftDomain subst)
+            (psKernelExprInstantiateRev rightDomain subst))
+      (hLeftClosed :
+        psKernelExprHasLooseBVar leftBody = false)
+      (hRightClosed :
+        psKernelExprHasLooseBVar rightBody = false)
+      (hRest :
+        PsKernelLambdaSpineJudgment
+          environment
+          localContext
+          leftBody
+          rightBody
+          (psKernelExprListAppend
+            subst
+            (List.cons
+              (PsKernelExpr.sort PsKernelLevel.zero)
+              List.nil))) :
+      PsKernelLambdaSpineJudgment
+        environment
+        localContext
+        (PsKernelExpr.lam
+          leftName leftDomain leftBody leftInfo)
+        (PsKernelExpr.lam
+          rightName rightDomain rightBody rightInfo)
+        subst
+
+inductive PsKernelForallSpineJudgment
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext ->
+    PsKernelExpr ->
+    PsKernelExpr ->
+    List PsKernelExpr ->
+    Prop
+  | terminal
+      {localContext : PsKernelLocalContext}
+      (left right : PsKernelExpr)
+      (subst : List PsKernelExpr)
+      (hCore :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          (psKernelExprInstantiateRev left subst)
+          (psKernelExprInstantiateRev right subst)) :
+      PsKernelForallSpineJudgment
+        environment
+        localContext
+        left
+        right
+        subst
+  | stepOpen
+      {localContext : PsKernelLocalContext}
+      (leftName rightName fresh : PsKernelName)
+      (leftDomain rightDomain leftBody rightBody : PsKernelExpr)
+      (leftInfo rightInfo : PsKernelBinderInfo)
+      (subst : List PsKernelExpr)
+      (hDomain :
+        psKernelExprEq leftDomain rightDomain = true ∨
+          PsKernelDefEqJudgment
+            environment
+            localContext
+            (psKernelExprInstantiateRev leftDomain subst)
+            (psKernelExprInstantiateRev rightDomain subst))
+      (hDependent :
+        psKernelExprHasLooseBVar leftBody = true ∨
+          psKernelExprHasLooseBVar rightBody = true)
+      (hFresh :
+        psKernelLocalContextFind localContext fresh =
+          Option.none)
+      (hRest :
+        PsKernelForallSpineJudgment
+          environment
+          (psKernelLocalContextAddLocal
+            localContext
+            fresh
+            rightName
+            (psKernelExprInstantiateRev rightDomain subst)
+            rightInfo)
+          leftBody
+          rightBody
+          (psKernelExprListAppend
+            subst
+            (List.cons
+              (PsKernelExpr.fvar fresh)
+              List.nil))) :
+      PsKernelForallSpineJudgment
+        environment
+        localContext
+        (PsKernelExpr.forallE
+          leftName leftDomain leftBody leftInfo)
+        (PsKernelExpr.forallE
+          rightName rightDomain rightBody rightInfo)
+        subst
+  | stepClosed
+      {localContext : PsKernelLocalContext}
+      (leftName rightName : PsKernelName)
+      (leftDomain rightDomain leftBody rightBody : PsKernelExpr)
+      (leftInfo rightInfo : PsKernelBinderInfo)
+      (subst : List PsKernelExpr)
+      (hDomain :
+        psKernelExprEq leftDomain rightDomain = true ∨
+          PsKernelDefEqJudgment
+            environment
+            localContext
+            (psKernelExprInstantiateRev leftDomain subst)
+            (psKernelExprInstantiateRev rightDomain subst))
+      (hLeftClosed :
+        psKernelExprHasLooseBVar leftBody = false)
+      (hRightClosed :
+        psKernelExprHasLooseBVar rightBody = false)
+      (hRest :
+        PsKernelForallSpineJudgment
+          environment
+          localContext
+          leftBody
+          rightBody
+          (psKernelExprListAppend
+            subst
+            (List.cons
+              (PsKernelExpr.sort PsKernelLevel.zero)
+              List.nil))) :
+      PsKernelForallSpineJudgment
+        environment
+        localContext
+        (PsKernelExpr.forallE
+          leftName leftDomain leftBody leftInfo)
+        (PsKernelExpr.forallE
+          rightName rightDomain rightBody rightInfo)
+        subst
 
 inductive PsKernelProjectionApplyParamsJudgment
     (environment : PsKernelEnvironment) :

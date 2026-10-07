@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
 
 export async function readCheckedBuildHostSources() {
   const root = path.dirname(fileURLToPath(import.meta.url));
@@ -35,7 +36,7 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -45,6 +46,8 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   let toolInputs;
   let runtimeInterface;
   let executableArtifact;
+  let jsAbiPlan;
+  let jsAbiPolicyArtifact;
   function add(item, source, inline = false) {
     const key = artifactKey(item.identity);
     if (!artifacts.has(key)) {
@@ -166,6 +169,16 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         { observedStages: ['runtime-interface-projection'], excludes: ['declaration-bodies'],
           behavioralReuse: false }, baseDependencies, ['trusted-runtime-interface-projection']);
   }
+  if (verifiedIr && (javaScript !== undefined || directBackend === 'javascript')) {
+    const derived = jsAbiArtifactsFromVerifiedIr(verifiedIr, jsAbiPolicy);
+    jsAbiPolicyArtifact = add(derived.policy, { kind: 'archive-required', role: 'javascript-abi-host-policy' });
+    jsAbiPlan = add(derived.plan, { kind: 'output-file', suffix: '.abi-plan.json' });
+    execute('psc-verified-ir-to-js-abi-plan/1', verifiedIr, [jsAbiPlan], implementation,
+      derived.relation, { target: 'javascript', policyId: jsAbiPolicyArtifact.identity,
+        observedStages: ['independent-verified-ir-abi-plan-derivation'], adapterAuthority: derived.authority },
+      [...baseDependencies, jsAbiPolicyArtifact.identity],
+      ['selected-host-abi-policy', 'trusted-js-abi-plan-derivation']);
+  }
   if (typeScript !== undefined) {
     const ts = bytes(typeScript, 'typescript-source', 'psc-typescript-source/es2022', { kind: 'output-file', suffix: '.ts' });
     if (verifiedIr) {
@@ -241,6 +254,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
     ...(certification ? { certification } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
+    ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1'),
     ...(providerInputs.length ? { providerInputs: providerInputs.map(item => item.identity) } : {}),
     ...(toolInputs ? { typeScriptToolInputs: toolInputs.identity } : {}) };

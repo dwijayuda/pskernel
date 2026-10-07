@@ -148,6 +148,33 @@ def psKernelDefEqDifferential
   | _, _ =>
       false
 
+def psKernelCachePolicyLargeClosedExpr : Nat -> PsKernelExpr
+  | Nat.zero =>
+      PsKernelExpr.sort PsKernelLevel.zero
+  | Nat.succ remaining =>
+      PsKernelExpr.mdata
+        0
+        (psKernelCachePolicyLargeClosedExpr remaining)
+
+def psKernelCachePolicyTests : Bool :=
+  let smallClosed :=
+    PsKernelExpr.app
+      (PsKernelExpr.const psKernelNatName List.nil)
+      (PsKernelExpr.lit (PsKernelLiteral.nat 1))
+  let local :=
+    PsKernelExpr.fvar
+      (PsKernelName.str PsKernelName.anonymous "cacheLocal")
+  let largeClosed :=
+    psKernelCachePolicyLargeClosedExpr
+      (Nat.succ psKernelSemanticCacheNodeBudget)
+  Bool.and
+    (psKernelSemanticCacheEligible smallClosed)
+    (Bool.and
+      (!psKernelSemanticCacheEligible local)
+      (Bool.and
+        (!psKernelSemanticCacheEligible largeClosed)
+        (!psKernelSemanticPairCacheEligible largeClosed smallClosed)))
+
 def psKernelCoreDefEqTests : Bool :=
   let portableBase :=
     psKernelCheckerContextEmpty
@@ -389,13 +416,15 @@ def psKernelCoreDefEqTests : Bool :=
     | _, _, _, _ =>
         false;
   Bool.and
-    (psKernelDefEqDifferential
-      portableBase
-      referenceBase
-      betaLeft
-      betaRight)
+    psKernelCachePolicyTests
     (Bool.and
       (psKernelDefEqDifferential
+        portableBase
+        referenceBase
+        betaLeft
+        betaRight)
+      (Bool.and
+        (psKernelDefEqDifferential
         portableBase
         referenceBase
         deltaLeft
@@ -407,8 +436,8 @@ def psKernelCoreDefEqTests : Bool :=
           (PsKernelExpr.fvar proofLeftName)
           (PsKernelExpr.fvar proofRightName))
         (Bool.and
-          etaDifferential
-          etaApplicationDifferential)))
+            etaDifferential
+            etaApplicationDifferential))))
 
 
 def psKernelConstantListUsesNestedPrefix

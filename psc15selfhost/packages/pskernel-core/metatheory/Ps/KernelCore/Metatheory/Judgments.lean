@@ -623,10 +623,10 @@ inductive PsKernelStructureEtaFields
 
 mutual
 inductive PsKernelReductionClosure
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext) :
-    PsKernelExpr -> PsKernelExpr -> Prop
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext -> PsKernelExpr -> PsKernelExpr -> Prop
   | refl
+      {localContext : PsKernelLocalContext}
       (expr : PsKernelExpr) :
       PsKernelReductionClosure
         environment
@@ -634,6 +634,7 @@ inductive PsKernelReductionClosure
         expr
         expr
   | presentationSource
+      {localContext : PsKernelLocalContext}
       (source query result : PsKernelExpr)
       (hPresentation :
         PsKernelStructuralExprEq source query)
@@ -649,6 +650,7 @@ inductive PsKernelReductionClosure
         query
         result
   | cons
+      {localContext : PsKernelLocalContext}
       (left middle right : PsKernelExpr)
       (hStep :
         PsKernelReductionStep
@@ -668,6 +670,7 @@ inductive PsKernelReductionClosure
         left
         right
   | trans
+      {localContext : PsKernelLocalContext}
       (left middle right : PsKernelExpr)
       (hLeft :
         PsKernelReductionClosure
@@ -678,6 +681,7 @@ inductive PsKernelReductionClosure
       PsKernelReductionClosure
         environment localContext left right
   | appFn
+      {localContext : PsKernelLocalContext}
       (leftFn rightFn arg : PsKernelExpr)
       (hFn :
         PsKernelReductionClosure
@@ -688,6 +692,7 @@ inductive PsKernelReductionClosure
         (PsKernelExpr.app leftFn arg)
         (PsKernelExpr.app rightFn arg)
   | appArg
+      {localContext : PsKernelLocalContext}
       (fn leftArg rightArg : PsKernelExpr)
       (hArg :
         PsKernelReductionClosure
@@ -698,6 +703,7 @@ inductive PsKernelReductionClosure
         (PsKernelExpr.app fn leftArg)
         (PsKernelExpr.app fn rightArg)
   | projectionMajor
+      {localContext : PsKernelLocalContext}
       (typeName : PsKernelName)
       (index : Nat)
       (left right : PsKernelExpr)
@@ -710,6 +716,7 @@ inductive PsKernelReductionClosure
         (PsKernelExpr.proj typeName index left)
         (PsKernelExpr.proj typeName index right)
   | quotLift
+      {localContext : PsKernelLocalContext}
       (expr : PsKernelExpr)
       (fnName mkName : PsKernelName)
       (levels mkLevels : List PsKernelLevel)
@@ -756,6 +763,7 @@ inductive PsKernelReductionClosure
           (PsKernelExpr.app fnValue representative)
           (psKernelExprListDrop 6 args))
   | quotInd
+      {localContext : PsKernelLocalContext}
       (expr : PsKernelExpr)
       (fnName mkName : PsKernelName)
       (levels mkLevels : List PsKernelLevel)
@@ -802,6 +810,7 @@ inductive PsKernelReductionClosure
           (PsKernelExpr.app fnValue representative)
           (psKernelExprListDrop 5 args))
   | recursorIota
+      {localContext : PsKernelLocalContext}
       (expr : PsKernelExpr)
       (recName ctorName : PsKernelName)
       (recLevels ctorLevels : List PsKernelLevel)
@@ -899,10 +908,10 @@ inductive PsKernelReductionClosure
             recArgs))
 
 inductive PsKernelDefEqJudgment
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext) :
-    PsKernelExpr -> PsKernelExpr -> Prop
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext -> PsKernelExpr -> PsKernelExpr -> Prop
   | refl
+      {localContext : PsKernelLocalContext}
       (expr : PsKernelExpr) :
       PsKernelDefEqJudgment
         environment
@@ -910,6 +919,7 @@ inductive PsKernelDefEqJudgment
         expr
         expr
   | symm
+      {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
       (h :
         PsKernelDefEqJudgment
@@ -923,6 +933,7 @@ inductive PsKernelDefEqJudgment
         right
         left
   | presentation
+      {localContext : PsKernelLocalContext}
       (storedLeft storedRight queryLeft queryRight : PsKernelExpr)
       (hLeft :
         PsKernelStructuralExprEq
@@ -944,6 +955,7 @@ inductive PsKernelDefEqJudgment
         queryLeft
         queryRight
   | structural
+      {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
       (h : PsKernelStructuralExprEq left right) :
       PsKernelDefEqJudgment
@@ -952,6 +964,7 @@ inductive PsKernelDefEqJudgment
         left
         right
   | reduction
+      {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
       (h :
         PsKernelReductionStep
@@ -965,6 +978,7 @@ inductive PsKernelDefEqJudgment
         left
         right
   | reductionClosure
+      {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
       (h :
         PsKernelReductionClosure
@@ -978,6 +992,7 @@ inductive PsKernelDefEqJudgment
         left
         right
   | sort
+      {localContext : PsKernelLocalContext}
       (left right : PsKernelLevel)
       (h :
         psKernelLevelEquivalent left right = true) :
@@ -987,6 +1002,7 @@ inductive PsKernelDefEqJudgment
         (PsKernelExpr.sort left)
         (PsKernelExpr.sort right)
   | literal
+      {localContext : PsKernelLocalContext}
       (left right : PsKernelLiteral)
       (h :
         psKernelLiteralEq left right = true) :
@@ -996,6 +1012,7 @@ inductive PsKernelDefEqJudgment
         (PsKernelExpr.lit left)
         (PsKernelExpr.lit right)
   | app
+      {localContext : PsKernelLocalContext}
       (leftFn leftArg rightFn rightArg : PsKernelExpr)
       (hFn :
         PsKernelDefEqJudgment
@@ -1089,6 +1106,7 @@ inductive PsKernelDefEqJudgment
         value
         etaValue
   | metadataLeft
+      {localContext : PsKernelLocalContext}
       (metadata : Nat)
       (left right : PsKernelExpr)
       (h :
@@ -1103,6 +1121,7 @@ inductive PsKernelDefEqJudgment
         (PsKernelExpr.mdata metadata left)
         right
   | metadataRight
+      {localContext : PsKernelLocalContext}
       (metadata : Nat)
       (left right : PsKernelExpr)
       (h :
@@ -1118,11 +1137,13 @@ inductive PsKernelDefEqJudgment
         (PsKernelExpr.mdata metadata right)
 
 inductive PsKernelProjectionApplyParamsJudgment
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext)
-    (args : List PsKernelExpr) :
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext ->
+    List PsKernelExpr ->
     Nat -> Nat -> PsKernelExpr -> PsKernelExpr -> Prop
   | done
+      {localContext : PsKernelLocalContext}
+      (args : List PsKernelExpr)
       (index numParams : Nat)
       (current : PsKernelExpr)
       (hDone : psKernelNatLt index numParams = false) :
@@ -1135,6 +1156,8 @@ inductive PsKernelProjectionApplyParamsJudgment
         current
         current
   | step
+      {localContext : PsKernelLocalContext}
+      (args : List PsKernelExpr)
       (index numParams : Nat)
       (current domain body result argument : PsKernelExpr)
       (name : PsKernelName)
@@ -1168,13 +1191,17 @@ inductive PsKernelProjectionApplyParamsJudgment
         result
 
 inductive PsKernelProjectionSkipFieldsJudgment
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext)
-    (inductName : PsKernelName)
-    (structValue : PsKernelExpr)
-    (targetIndex : Nat) :
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext ->
+    PsKernelName ->
+    PsKernelExpr ->
+    Nat ->
     Nat -> PsKernelExpr -> PsKernelExpr -> Prop
   | done
+      {localContext : PsKernelLocalContext}
+      (inductName : PsKernelName)
+      (structValue : PsKernelExpr)
+      (targetIndex : Nat)
       (index : Nat)
       (current : PsKernelExpr)
       (hDone : psKernelNatLt index targetIndex = false) :
@@ -1188,6 +1215,10 @@ inductive PsKernelProjectionSkipFieldsJudgment
         current
         current
   | stepClosed
+      {localContext : PsKernelLocalContext}
+      (inductName : PsKernelName)
+      (structValue : PsKernelExpr)
+      (targetIndex : Nat)
       (index : Nat)
       (current domain body result : PsKernelExpr)
       (name : PsKernelName)
@@ -1220,6 +1251,10 @@ inductive PsKernelProjectionSkipFieldsJudgment
         current
         result
   | stepDependent
+      {localContext : PsKernelLocalContext}
+      (inductName : PsKernelName)
+      (structValue : PsKernelExpr)
+      (targetIndex : Nat)
       (index : Nat)
       (current domain body result : PsKernelExpr)
       (name : PsKernelName)
@@ -1258,8 +1293,8 @@ inductive PsKernelProjectionSkipFieldsJudgment
         result
 
 inductive PsKernelProjectionResultJudgment
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext) :
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext ->
     PsKernelName ->
     Nat ->
     PsKernelExpr ->
@@ -1267,6 +1302,7 @@ inductive PsKernelProjectionResultJudgment
     PsKernelExpr ->
     Prop
   | intro
+      {localContext : PsKernelLocalContext}
       (typeName inductName ctorName fieldName : PsKernelName)
       (index : Nat)
       (structValue structType typeWhnf : PsKernelExpr)

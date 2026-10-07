@@ -333,3 +333,23 @@ test('layout-only lets are rejected while explicit sequencing remains valid', ()
   ].join('\n');
   assert(!ids(good).includes('layout-let-sequencing'));
 });
+
+test('record updates require explicit portable constructors without rejecting record literals', () => {
+  for (const source of [
+    'def f := { state with operands := rest }',
+    'def f := { (choose state) with value := next }',
+    'def f := { state\n  with value := next }',
+    'def f := { outer := { inner with value := next } }',
+  ]) assert(ids(source).includes('record-update'), source);
+  for (const source of [
+    'def f := State.mk rest state.flag',
+    'def f := { value := next, flag := false }',
+    'def f := { value := match state with | Option.none => 0 | Option.some value => value }',
+    'def f := { value := { inner := next } }',
+    'def f := "{ state with value := next }"',
+    '-- { state with value := next }\ndef f := 0',
+    "/- { state with value := next } -/\ndef f := 0",
+    "def brace : Char := '{'\ndef f := match x with | _ => 0",
+  ]) assert(!ids(source).includes('record-update'), source);
+  assert.equal(findSelfhostStructuralViolations('def f := { state with x := next }', []).length, 0);
+});

@@ -24,6 +24,7 @@ export const portableSelfhostStructuralRuleIds = Object.freeze([
   'untyped-match-let',
   'untyped-numeric-choice-let',
   'layout-let-sequencing',
+  'record-update',
 ]);
 
 function maskLean(source, preserveStrings) {
@@ -517,6 +518,36 @@ function scalarMemberViolations(lines) {
   return hits;
 }
 
+
+function recordUpdateViolations(code) {
+  // Strings/comments have already been masked. Mask character literals too so
+  // braces in a lexer implementation are not mistaken for record delimiters.
+  const masked = code.replace(/'(?:\\(?:x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|.)|[^'\\])'/gu,
+    match => ' '.repeat(match.length));
+  const frames = [];
+  const hits = [];
+  let grouping = 0;
+  for (const token of masked.matchAll(/\{|\}|\(|\)|\[|\]|:=|\bwith\b/gu)) {
+    const text = token[0];
+    if (text === '(' || text === '[') { grouping++; continue; }
+    if (text === ')' || text === ']') { grouping--; continue; }
+    if (text === '{') {
+      frames.push({ offset: token.index, grouping, assigned: false });
+      continue;
+    }
+    if (text === '}') { frames.pop(); continue; }
+    const frame = frames.at(-1);
+    if (!frame || frame.grouping !== grouping) continue;
+    if (text === ':=') frame.assigned = true;
+    if (text === 'with' && !frame.assigned) {
+      hits.push({ id: 'record-update', line: lineNumberAt(code, frame.offset),
+        text: code.slice(frame.offset, token.index + 4).trim() });
+      frame.assigned = true;
+    }
+  }
+  return hits;
+}
+
 export function findSelfhostStructuralViolations(
   source,
   enabledRuleIds = portableSelfhostStructuralRuleIds,
@@ -682,6 +713,9 @@ export function findSelfhostStructuralViolations(
     }
   }
 
+  if (enabled.has('record-update')) {
+    hits.push(...recordUpdateViolations(code));
+  }
   if (enabled.has('tuple-construction')) {
     hits.push(...tupleConstructionViolations(code));
   }

@@ -27,7 +27,8 @@
     "untyped-lambda-let",
     "untyped-match-let",
     "untyped-numeric-choice-let",
-    "layout-let-sequencing"
+    "layout-let-sequencing",
+    "record-update"
   ],
   "executableContract": {
     "pscCheckSourceRoots": true,

@@ -225,19 +225,9 @@ def psWasmTypingEnterIf
         match result with
         | Option.none => List.nil
         | Option.some value => [value];
-      let frame : PsWasmTypingFrame := {
-        outer := next.operands
-        outerUnreachable := next.unreachable
-        initialized := next.initialized
-        results := results
-        seenElse := false
-      };
-      Option.some {
-        operands := List.nil
-        unreachable := false
-        initialized := next.initialized
-        frames := List.cons frame next.frames
-      }
+      let frame : PsWasmTypingFrame :=
+        PsWasmTypingFrame.mk next.operands next.unreachable next.initialized results false;
+      Option.some (PsWasmTypingState.mk List.nil false next.initialized (List.cons frame next.frames))
 
 def psWasmTypingElse (module : PsWasmModule) (state : PsWasmTypingState) :
     Option PsWasmTypingState :=
@@ -246,12 +236,8 @@ def psWasmTypingElse (module : PsWasmModule) (state : PsWasmTypingState) :
   | List.cons frame rest =>
       if frame.seenElse then Option.none
       else if psWasmTypingFinish module frame.results state then
-        Option.some {
-          operands := List.nil
-          unreachable := false
-          initialized := frame.initialized
-          frames := List.cons (PsWasmTypingFrame.mk frame.outer frame.outerUnreachable frame.initialized frame.results true) rest
-        }
+        Option.some (PsWasmTypingState.mk List.nil false frame.initialized
+          (List.cons (PsWasmTypingFrame.mk frame.outer frame.outerUnreachable frame.initialized frame.results true) rest))
       else Option.none
 
 def psWasmTypingEnd (module : PsWasmModule) (state : PsWasmTypingState) :
@@ -263,12 +249,8 @@ def psWasmTypingEnd (module : PsWasmModule) (state : PsWasmTypingState) :
         if frame.seenElse then true else psListIsEmpty frame.results;
       if implicitElseValid then
         if psWasmTypingFinish module frame.results state then
-          Option.some (psWasmTypingPushValues frame.results {
-            operands := frame.outer
-            unreachable := frame.outerUnreachable
-            initialized := frame.initialized
-            frames := rest
-          })
+          Option.some (psWasmTypingPushValues frame.results
+            (PsWasmTypingState.mk frame.outer frame.outerUnreachable frame.initialized rest))
         else Option.none
       else Option.none
 
@@ -689,12 +671,8 @@ def psWasmTypingInstructions
 
 def psWasmTypingValidateFunction
     (module : PsWasmModule) (function : PsWasmFunction) : Bool :=
-  let initial : PsWasmTypingState := {
-    operands := List.nil
-    unreachable := false
-    initialized := List.nil
-    frames := List.nil
-  };
+  let initial : PsWasmTypingState :=
+    PsWasmTypingState.mk List.nil false List.nil List.nil;
   let locals : List PsWasmValueType := psListAppend function.parameters function.locals;
   match psWasmTypingInstructions module function locals function.body initial with
   | Option.none => false

@@ -817,6 +817,52 @@ theorem psKernelEnvironmentFind_some_authoritative
     _ = Option.some info := hFind
 
 
+theorem psKernelFindRecursorRule_some_matches_metatheory
+    (ctorName : PsKernelName)
+    (rules : List PsKernelRecursorRule)
+    (rule : PsKernelRecursorRule)
+    (hSearch :
+      psKernelFindRecursorRule ctorName rules =
+        Option.some rule) :
+    psKernelNameEq rule.ctor ctorName = true := by
+  induction rules with
+  | nil =>
+      simp [psKernelFindRecursorRule] at hSearch
+  | cons head tail ih =>
+      cases hEq :
+          psKernelNameEq head.ctor ctorName with
+      | false =>
+          simp [psKernelFindRecursorRule, hEq] at hSearch
+          exact ih hSearch
+      | true =>
+          simp [psKernelFindRecursorRule, hEq] at hSearch
+          subst rule
+          exact hEq
+
+
+theorem psKernelFindRecursorRule_some_mem_metatheory
+    (ctorName : PsKernelName)
+    (rules : List PsKernelRecursorRule)
+    (rule : PsKernelRecursorRule)
+    (hSearch :
+      psKernelFindRecursorRule ctorName rules =
+        Option.some rule) :
+    rule ∈ rules := by
+  induction rules with
+  | nil =>
+      simp [psKernelFindRecursorRule] at hSearch
+  | cons head tail ih =>
+      cases hEq :
+          psKernelNameEq head.ctor ctorName with
+      | false =>
+          simp [psKernelFindRecursorRule, hEq] at hSearch
+          exact List.mem_cons_of_mem head (ih hSearch)
+      | true =>
+          simp [psKernelFindRecursorRule, hEq] at hSearch
+          subst rule
+          exact List.mem_cons_self
+
+
 theorem psKernelRecursorIota_refines
     (context : PsKernelCheckerContext)
     (expr : PsKernelExpr)
@@ -945,7 +991,10 @@ theorem psKernelRecursorIota_refines
       hNormalize
       hCtorHead
       hMajorArgs
-      hRule
+      (psKernelFindRecursorRule_some_mem_metatheory
+        ctorName recursor.rules rule hRule)
+      (psKernelFindRecursorRule_some_matches_metatheory
+        ctorName recursor.rules rule hRule)
       hFields
       hLevels
 

@@ -266,15 +266,15 @@ def psProjectSourceSignatureWithLimits
         psSourceSignaturePrefixWorker maxDepth (Nat.succ maxDepth)
           (PsSourceSignaturePrefix.mk expression List.nil List.nil 0) with
     | Except.error error => Except.error error
-    | Except.ok prefix =>
+    | Except.ok prefixState =>
         match
             psSourceSignatureWorker maxDepth maxSteps
               (PsSourceSignatureState.mk
-                (List.cons (PsSourceSignatureTask.project prefix.body prefix.scope 0) List.nil)
+                (List.cons (PsSourceSignatureTask.project prefixState.body prefixState.scope 0) List.nil)
                 List.nil) with
         | Except.error error => Except.error error
         | Except.ok type =>
-            Except.ok (PsSourceSignature.mk (psListReverse prefix.parametersRev) type)
+            Except.ok (PsSourceSignature.mk (psListReverse prefixState.parametersRev) type)
 
 def psProjectSourceSignature (expression : PsExpr) :
     Except PsSourceSignatureError PsSourceSignature :=

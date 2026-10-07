@@ -1111,7 +1111,7 @@
       "classifications": [
         "artifact-bundle"
       ],
-      "status": "production-typescript-bundles-and-archive-replay-implemented-direct-service-and-rust-routing-pending",
+      "status": "production-typescript-bundles-archive-and-live-independent-product-selection-implemented-direct-cli-native-selection-and-rust-routing-pending",
       "requirement": "Common typed independently identified executable/public/debug/interface/toolchain/evidence products."
     },
     {
@@ -1463,6 +1463,13 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json",
       "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-compiler-product-selection/1",
+      "kind": "product-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PRODUCT_SELECTION_V1.json",
+      "classification": "artifact-bundle"
     }
   ]
 }

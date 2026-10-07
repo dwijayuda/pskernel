@@ -329,3 +329,80 @@ test('live direct-JS composition uses one emission and binds all exact metadata 
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /CERTIFIED_SOURCE_NOT_LIVE/);
   assert.equal(count, 1);
 });
+
+test('malformed optional origins do not decide logical acceptance or executable-only output', async () => {
+  let checked = 0, preparedCount = 0, stageCount = 0, originGetterCalls = 0;
+  const { service, compiler, emitted } = fixture({ checkAdmissions: () => {
+    checked++; return { ...leanCheckedIdentity, accepted: true };
+  } });
+  compiler.psCompilerPrepareSource = () => { throw new Error('LEGACY_PREPARATION_FORBIDDEN'); };
+  compiler.psCompilerPrepareSourceWithOrigins = (kind, source) => {
+    preparedCount++;
+    return ok(Object.defineProperty({ prepared: { kind, source } }, 'origins', {
+      get() { originGetterCalls++; throw new Error('OPTIONAL_GETTER_MUST_NOT_RUN'); }, enumerable: true,
+    }));
+  };
+  compiler.psCompilerPublicApiFromPrepared = () => ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
+  compiler.psCompilerJavaScriptStagesFromPrepared = prepared => {
+    stageCount++; assert.equal(Object.isFrozen(prepared), true); assert.equal(prepared.source, 'source');
+    return ok({ javaScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr, jsIr: emptyJsIr });
+  };
+  const handle = await service.check('lean', 'source');
+  assert.equal(checked, 1); assert.equal(preparedCount, 1); assert.equal(originGetterCalls, 0);
+  assert.throws(() => service.emitOriginGraph(handle), /ORIGIN_PREPARE_RESULT_SHAPE/);
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /ORIGIN_PREPARE_RESULT_SHAPE/);
+  assert.equal(stageCount, 1);
+  const output = service.emitExecutableArtifact(handle, 'javascript');
+  assert.equal(stageCount, 2);
+  assert.equal(output.payload, '');
+  assert.equal(output.requestedProducts, 'executable-only');
+  assert.equal(output.specializationCorrespondence.correspondenceChecked, true);
+  assert.equal(output.specializationInstances, undefined);
+  assert.equal(output.originGraph, undefined); assert.equal(output.publicApi, undefined);
+  assert.equal(emitted.length, 0); assert.equal(preparedCount, 1); assert.equal(checked, 1);
+  assert.equal(originGetterCalls, 0);
+  assert.equal(service.describe(handle).contract, 'psc-certified-source/1');
+  service.revoke(handle);
+  assert.throws(() => service.emitExecutableArtifact(handle, 'javascript'), /CERTIFIED_SOURCE_NOT_LIVE/);
+});
+
+test('executable selection ignores unrequested metadata accessors and budgets while preserving stage checks', async () => {
+  const { service, compiler, emitted } = fixture();
+  let count = 0, getters = 0;
+  compiler.psCompilerPublicApiFromPrepared = () => { throw new Error('API_PRODUCT_NOT_REQUESTED'); };
+  const good = { javaScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr, jsIr: emptyJsIr };
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => {
+    count++;
+    return ok(Object.defineProperty({ ...good }, 'generatedPositions', {
+      get() { getters++; throw new Error('DEBUG_GETTER_NOT_REQUESTED'); }, enumerable: true,
+    }));
+  };
+  const handle = await service.check('lean', '');
+  assert.equal(service.emitExecutableArtifact(handle, 'javascript').payload, '');
+  assert.equal(count, 1); assert.equal(getters, 0); assert.equal(emitted.length, 0);
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /STAGES_SHAPE/);
+  assert.equal(count, 2); assert.equal(getters, 0); assert.equal(emitted.length, 0);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok(Object.defineProperty({ ...good }, 'runtimeIr', {
+    get() { getters++; return emptyIr; }, enumerable: true,
+  }));
+  assert.throws(() => service.emitExecutableArtifact(handle, 'javascript'), /STAGES_SHAPE/);
+  assert.equal(getters, 0);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, verifiedIr: 'malformed' });
+  assert.throws(() => service.emitExecutableArtifact(handle, 'javascript'), /export-json/);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ({ $ps$tag: 'error' });
+  assert.throws(() => service.emitExecutableArtifact(handle, 'javascript'), /EMIT_STAGES_FAILED/);
+  assert.equal(emitted.length, 0);
+  const small = fixture({ maxOutputBytes: 4096 });
+  small.compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, generatedPositions: 'x'.repeat(8192) });
+  const smallHandle = await small.service.check('lean', '');
+  assert.equal(small.service.emitExecutableArtifact(smallHandle, 'javascript').payload, '');
+  assert.throws(() => small.service.emitArtifact(smallHandle, 'javascript'), /OUTPUT_RESOURCE_EXHAUSTED/);
+});
+
+test('the convenience executable emitter does not request source API projection', async () => {
+  const { service, compiler } = fixture();
+  compiler.psCompilerPublicApiFromPrepared = () => { throw new Error('API_PRODUCT_FAILED'); };
+  const handle = await service.check('lean', 'source');
+  assert.match(service.emit(handle), /export const value/);
+  assert.throws(() => service.emitArtifact(handle), /API_PRODUCT_FAILED/);
+});

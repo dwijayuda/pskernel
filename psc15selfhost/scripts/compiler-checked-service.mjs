@@ -10,7 +10,7 @@ import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { createErasureDeclarationMap } from './erasure-declarations.mjs';
 import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
-import { createSpecializationInstanceMap } from './specialization-correspondence.mjs';
+import { createSpecializationInstanceMap, verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { createCertifiedSourceSession } from './certified-source.mjs';
 
 function byteList(value, limit) {
@@ -78,14 +78,14 @@ export function createCheckedCompilerService({
       transformationAssurance: 'trusted-source-projection-target-correspondence-unproved',
     });
   }
-  function emitArtifact(handle, target = 'typescript') {
+  function emitProduct(handle, target, includeMetadata) {
     const certifiedSource = certified.describe(handle);
     const certificate = certified.certificate(handle);
     const checkedCoreHandle = certified.checkedCore(handle);
     const capability = session.describe(checkedCoreHandle);
-    const emission = session.emitTargetWithStages(checkedCoreHandle, target);
-    const api = apiProduct(handle);
-    const origins = originProduct(handle, api);
+    const emission = session.emitTargetWithStages(checkedCoreHandle, target, { includeMetadata });
+    const api = includeMetadata ? apiProduct(handle) : undefined;
+    const origins = includeMetadata ? originProduct(handle, api) : undefined;
     const raw = emission.output;
     const payload = target === 'wasm' ? byteList(raw, maxOutputBytes) : raw;
     const bytes = typeof payload === 'string' ? Buffer.from(payload, 'utf8') : payload;
@@ -106,9 +106,10 @@ export function createCheckedCompilerService({
         throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     }
     if (stages && !stages.runtimeIr.bytes.equals(stages.verifiedIr.bytes)) throw new Error('PSC_CHECKED_VALIDATION_CHANGED_IR');
-    const specializationProduct = stages?.specializedIr ?
+    const specializationProduct = includeMetadata && stages?.specializedIr ?
       createSpecializationInstanceMap(stages.verifiedIr, stages.specializedIr, { maxBytes: maxOutputBytes }) : undefined;
-    const specialization = specializationProduct?.result;
+    const specialization = specializationProduct?.result ?? (stages?.specializedIr ?
+      verifySpecializationCorrespondence(stages.verifiedIr, stages.specializedIr, { maxBytes: maxOutputBytes }) : undefined);
     let generatedPositionMap, generatedPositionProduct;
     if (emission.generatedPositions !== undefined) {
       if (target !== 'javascript' || !targetStages?.jsIr) throw new Error('PSC_CHECKED_GENERATED_POSITION_SUBJECT');
@@ -136,13 +137,14 @@ export function createCheckedCompilerService({
       throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
+      requestedProducts: includeMetadata ? 'executable-and-available-metadata' : 'executable-only',
       artifact: Object.freeze({ algorithm: 'sha256', domain: 'target-bytes', schemaVersion: 1,
         digest: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength }),
       checkedCore: capability,
       pscvCert: certificate.identity,
       certifiedSource,
-      ...(specialization ? { specializationCorrespondence: specialization,
-        specializationInstances: specializationProduct.map.identity } : {}),
+      ...(specialization ? { specializationCorrespondence: specialization } : {}),
+      ...(specializationProduct ? { specializationInstances: specializationProduct.map.identity } : {}),
       ...(emission.stages ? { stages: emission.stages,
         stageArtifacts: Object.freeze(Object.fromEntries(
           [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {})]
@@ -157,9 +159,12 @@ export function createCheckedCompilerService({
       transformationAssurance: 'trusted-implementation-global-preservation-unproved',
     });
   }
+  function emitArtifact(handle, target = 'typescript') { return emitProduct(handle, target, true); }
+  function emitExecutableArtifact(handle, target = 'typescript') { return emitProduct(handle, target, false); }
   return Object.freeze({
     check, checkSources,
-    emit: handle => emitArtifact(handle, 'typescript').payload,
+    emit: handle => emitExecutableArtifact(handle, 'typescript').payload,
+    emitExecutableArtifact,
     emitArtifact,
     emitPublicApiArtifact,
     emitOriginGraph,

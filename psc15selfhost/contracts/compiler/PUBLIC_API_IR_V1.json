@@ -62,7 +62,7 @@
     "observed graph/archive",
     "typed backend ArtifactBundle publicApiArtifacts"
   ],
-  "compatibility": "Selected historical compiler modules/seeds may omit this product. A present malformed API or payload rejects; missing source API is never inferred from SpecializedIR or target bytes.",
+  "compatibility": "Selected historical compiler modules/seeds may omit this product. When requested, a present malformed API or payload rejects; missing source API is never inferred from SpecializedIR or target bytes. Live executable-only emission does not invoke source API projection.",
   "distinctions": [
     "Source PublicApiIR is not the runtime structural interface, behavioral interface or foreign InterfaceIR.",
     "Current projection includes every prepared declaration, including generated members; a future explicit source export/visibility policy must version the contract.",
@@ -80,5 +80,6 @@
   "authority": "descriptive-source-signature-artifact-only",
   "globalPreservationProved": false,
   "targetCorrespondenceVerified": false,
-  "releasePromotion": false
+  "releasePromotion": false,
+  "productSelectionContract": "psc-compiler-product-selection/1"
 }

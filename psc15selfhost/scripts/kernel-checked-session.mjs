@@ -103,12 +103,17 @@ export function createKernelCheckedSession(
     if (!(observed in compiler)) return { prepared: unwrapCompilerResult(compiler[name](...args), 'PREPARE') };
     if (typeof compiler[observed] !== 'function') throw new Error('PSC2_CHECKED_ORIGIN_PREPARE_API_SHAPE');
     const product = unwrapCompilerResult(compiler[observed](...args), 'PREPARE_ORIGINS');
-    if (!product || typeof product !== 'object' || !product.prepared || typeof product.prepared !== 'object' ||
-        typeof product.origins !== 'string') throw new Error('PSC2_CHECKED_ORIGIN_PREPARE_RESULT_SHAPE');
-    freezeGraph(product);
-    return { prepared: product.prepared, origins: product.origins };
+    if (!product || typeof product !== 'object') throw new Error('PSC2_CHECKED_ORIGIN_PREPARE_RESULT_SHAPE');
+    const prepared = Object.getOwnPropertyDescriptor(product, 'prepared');
+    if (!prepared || !Object.hasOwn(prepared, 'value') || !prepared.value || typeof prepared.value !== 'object')
+      throw new Error('PSC2_CHECKED_ORIGIN_PREPARE_RESULT_SHAPE');
+    const origins = Object.getOwnPropertyDescriptor(product, 'origins');
+    const originMalformed = !origins || !Object.hasOwn(origins, 'value') || typeof origins.value !== 'string';
+    // Only prepared Core participates in logical acceptance. Malformed debug
+    // data is retained as a lazy product error; no fallback/repreparation occurs.
+    return { prepared: prepared.value, origins: originMalformed ? undefined : origins.value, originMalformed };
   }
-  async function checkPrepared(prepared, source, origins, inputs) {
+  async function checkPrepared(prepared, source, origins, inputs, originMalformed = false) {
       requireOpen();
       const sourceInputs = Object.freeze([...inputs]);
       if (prepared === null || typeof prepared !== 'object') throw new Error('PSC2_CHECKED_PREPARE_RESULT_SHAPE');
@@ -135,10 +140,11 @@ export function createKernelCheckedSession(
         provider: identity,
         providerSecurity: security,
       });
-      modules.set(handle, { prepared, admissions, source, origins, inputs: sourceInputs });
+      modules.set(handle, { prepared, admissions, source, origins, originMalformed, inputs: sourceInputs });
       return handle;
   }
-  function emitTargetWithStages(handle, target) {
+  function emitTargetWithStages(handle, target, { includeMetadata = true } = {}) {
+      if (typeof includeMetadata !== 'boolean') throw new Error('PSC2_CHECKED_PRODUCT_SELECTION');
       const item = checkedItem(handle);
       if (!targets.includes(target)) throw new Error('PSC2_CHECKED_TARGET_FORBIDDEN');
       if (admissionsFrom(compiler, item.prepared) !== item.admissions) {
@@ -150,9 +156,21 @@ export function createKernelCheckedSession(
       if (stageApi && stageApi in compiler) {
         if (typeof compiler[stageApi] !== 'function') throw new Error('PSC2_CHECKED_EMIT_STAGES_API_SHAPE');
         if (target === 'wasm' && !compiler.psCompilerWasm32Target) throw new Error('PSC2_CHECKED_WASM_TARGET_MISSING');
-        const staged = unwrapCompilerResult(target === 'wasm' ?
+        const product = unwrapCompilerResult(target === 'wasm' ?
           compiler[stageApi](compiler.psCompilerWasm32Target, item.prepared) : compiler[stageApi](item.prepared), 'EMIT_STAGES');
         const outputKey = target === 'typescript' ? 'typeScript' : target === 'wasm' ? 'wasm' : 'javaScript';
+        if (!product || typeof product !== 'object') throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
+        const fields = [outputKey, 'runtimeIr', 'verifiedIr',
+          ...(target !== 'typescript' ? ['specializedIr'] : []),
+          ...(target === 'javascript' ? ['jsIr'] : []), ...(target === 'wasm' ? ['wasmIr'] : []),
+          ...(includeMetadata ? ['erasureCorrespondence', 'generatedPositions'] : [])];
+        const staged = {};
+        for (const field of fields) {
+          const descriptor = Object.getOwnPropertyDescriptor(product, field);
+          if (!descriptor) continue;
+          if (!Object.hasOwn(descriptor, 'value')) throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
+          staged[field] = descriptor.value;
+        }
         // The service copies/validates the Wasm linked byte list under its byte
         // budget; avoid an unbounded deep-freeze traversal before that boundary.
         if (target !== 'wasm') freezeGraph(staged);
@@ -204,13 +222,13 @@ export function createKernelCheckedSession(
     if (typeof output !== 'string') throw new Error('PSC2_CHECKED_PUBLIC_API_RESULT_SHAPE');
     return output;
   }
-  function emitTarget(handle, target) { return emitTargetWithStages(handle, target).output; }
+  function emitTarget(handle, target) { return emitTargetWithStages(handle, target, { includeMetadata: false }).output; }
   return Object.freeze({
     async check(sourceKind, source) {
       requireOpen();
       if (typeof source !== 'string') throw new TypeError('Expected immutable source text');
       const product = prepare('psCompilerPrepareSource', sourceKind, source);
-      return checkPrepared(product.prepared, source, product.origins, [source]);
+      return checkPrepared(product.prepared, source, product.origins, [source], product.originMalformed);
     },
     async checkSources(sourceKind, sources) {
       requireOpen();
@@ -225,7 +243,7 @@ export function createKernelCheckedSession(
       let values = compiler.List.nil();
       for (let index = sources.length - 1; index >= 0; index--) values = compiler.List.cons(sources[index], values);
       const product = prepare('psCompilerPrepareSources', sourceKind, values);
-      return checkPrepared(product.prepared, source, product.origins, sources);
+      return checkPrepared(product.prepared, source, product.origins, sources, product.originMalformed);
     },
     emit(handle) {
       return emitTarget(handle, 'typescript');
@@ -235,6 +253,7 @@ export function createKernelCheckedSession(
     publicApi,
     declarationOrigins(handle) {
       const item = checkedItem(handle);
+      if (item.originMalformed) throw new Error('PSC2_CHECKED_ORIGIN_PREPARE_RESULT_SHAPE');
       return item.origins === undefined ? undefined : Object.freeze({ text: item.origins, sources: item.inputs });
     },
     describe(handle) { checkedItem(handle); return handle; },

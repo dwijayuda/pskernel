@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-compiler-product-selection/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "scope": "Live checked compiler host product selection; not a semantic profile or live authority capability.",
+  "operations": {
+    "emitArtifact": "Executable and all metadata available from the selected compiler; present malformed requested metadata rejects this product request.",
+    "emitExecutableArtifact": "Executable and required IR evidence only; optional PublicApiIR/origin/erasure/generated-position products are not read or decoded.",
+    "emit": "TypeScript executable-only convenience operation.",
+    "emitPublicApiArtifact": "Independent requested source API product.",
+    "emitOriginGraph": "Independent requested declaration origin product, with required PublicApiIR dependency."
+  },
+  "acceptance": [
+    "Kernel acceptance uses the same frozen prepared Core and exact admissions, independently of optional origin-table shape.",
+    "A present malformed/failing origin-aware preparation API or missing/malformed prepared Core rejects without duplicate preparation or fallback.",
+    "Malformed origin-table data becomes an error only when origins are requested; accessors are not invoked.",
+    "Selected target-stage APIs execute once per emission. Failure, malformed required stage data, changed RuntimeIR/VerifiedIR bytes and failed specialization correspondence still reject executable-only output.",
+    "Selected stage fields must be own data properties. Unrequested metadata fields are neither read nor recursively frozen.",
+    "Source API projection and debug reconstruction are not invoked for executable-only output. Only selected returned products count against the output byte budget.",
+    "Revocation, session identity, CertifiedSource binding and target authorization apply to every selection."
+  ],
+  "specialization": "Executable-only emission runs the existing independent exact-instantiation relation without allocating a debug witness map. Full metadata emission retains witnesses from the same relation.",
+  "compatibility": "emitArtifact keeps its strict all-available-metadata behavior. No automatic fallback follows a requested-product failure. A caller explicitly requests executable-only output on its existing live handle.",
+  "limits": [
+    "This host selection does not stop a selected portable staged producer from internally computing observation tables.",
+    "Native two-phase transport and build-graph product selection still require explicit routing.",
+    "This is not a hostile-JavaScript sandbox or a resource theorem."
+  ],
+  "authority": "selection-does-not-create-or-expand-authority",
+  "globalPreservationProved": false,
+  "releasePromotion": false
+}

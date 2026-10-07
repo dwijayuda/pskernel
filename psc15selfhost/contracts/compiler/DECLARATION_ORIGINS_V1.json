@@ -42,7 +42,7 @@
     "specialized-ir",
     "target-ir"
   ],
-  "compatibility": "Selected historical compiler modules/seeds may omit origin support. A malformed or failing present origin-aware API rejects without falling back to duplicate preparation. No serialized debug record can construct a live checked capability.",
+  "compatibility": "Selected historical compiler modules/seeds may omit origin support. A present malformed/failing preparation API or missing/malformed prepared Core rejects without duplicate preparation. In the live host, malformed origin-table shape is retained as a lazy requested-product error and does not decide kernel acceptance or executable-only emission. Native transport selection remains pending. No debug record can construct a live capability.",
   "assurance": {
     "declarationBoundsAndCoverageChecked": true,
     "expressionCorrespondenceChecked": false,
@@ -54,5 +54,6 @@
     "Explicit origin transfer through erasure and specialization",
     "JsIR/declaration writer generated positions and ECMA-426 mapping emission",
     "Independent frontend/Core semantic correspondence evidence"
-  ]
+  ],
+  "productSelectionContract": "psc-compiler-product-selection/1"
 }

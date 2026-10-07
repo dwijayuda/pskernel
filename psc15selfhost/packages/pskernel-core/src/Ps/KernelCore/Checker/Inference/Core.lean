@@ -9,6 +9,82 @@ threads checker state through recursive calls. The public distinction between
 is cached separately.
 -/
 
+def psKernelInferenceDebugForallTerminalWithFuel
+    (fuel : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) :
+    Except String String :=
+  match fuel with
+  | Nat.zero =>
+      Except.ok "forall-terminal diagnostic budget exhausted"
+  | Nat.succ remaining =>
+      match left, right with
+      | PsKernelExpr.forallE _ _ leftBody _,
+          PsKernelExpr.forallE rightName rightDomain rightBody rightBinderInfo =>
+          let freshResult :=
+            psKernelCheckerStateFreshName state rightName
+          let fresh := Prod.fst freshResult
+          let nextState := Prod.snd freshResult
+          let childLocal :=
+            psKernelLocalContextAddLocal
+              context.localContext
+              fresh
+              rightName
+              rightDomain
+              rightBinderInfo
+          let child :=
+            psKernelCheckerContextWithLocalContext
+              context
+              childLocal
+          psKernelInferenceDebugForallTerminalWithFuel
+            remaining
+            whnf
+            child
+            nextState
+            (psKernelExprInstantiate1
+              leftBody
+              (PsKernelExpr.fvar fresh))
+            (psKernelExprInstantiate1
+              rightBody
+              (PsKernelExpr.fvar fresh))
+      | _, _ =>
+          match whnf context state left with
+          | Except.error error =>
+              Except.ok
+                ("terminal-left-whnf-error=" ++ error)
+          | Except.ok leftResult =>
+              match
+                  whnf
+                    context
+                    (Prod.snd leftResult)
+                    right with
+              | Except.error error =>
+                  Except.ok
+                    ("terminal-right-whnf-error=" ++ error)
+              | Except.ok rightResult =>
+                  Except.ok
+                    ("terminal-before=" ++
+                      psKernelInferenceDebugExprHead left ++
+                      " vs " ++
+                      psKernelInferenceDebugExprHead right ++
+                      "; terminal-after=" ++
+                      psKernelInferenceDebugExprHead
+                        (Prod.fst leftResult) ++
+                      " vs " ++
+                      psKernelInferenceDebugExprHead
+                        (Prod.fst rightResult) ++
+                      "; terminal-diff=" ++
+                      psKernelInferenceDebugExprDiff
+                        (Prod.fst leftResult)
+                        (Prod.fst rightResult))
+
 def psKernelInferCoreWithFuel
     (fuel : Nat) :
     (PsKernelCheckerContext ->
@@ -410,6 +486,17 @@ def psKernelInferCoreWithFuel
                                                 expr
                                                 result))
                                         else
+                                          let terminalDebug :=
+                                            psKernelInferenceDebugForallTerminalWithFuel
+                                              (Nat.succ
+                                                (Nat.add
+                                                  (psKernelExprNodeCount view.domain)
+                                                  (psKernelExprNodeCount argType)))
+                                              whnf
+                                              eqContext
+                                              (Prod.snd eqResult)
+                                              view.domain
+                                              argType
                                           match
                                               whnf
                                                 eqContext
@@ -472,7 +559,12 @@ def psKernelInferCoreWithFuel
                                                       "; whnf-diff=" ++
                                                       psKernelInferenceDebugExprDiff
                                                         (Prod.fst expectedWhnf)
-                                                        (Prod.fst actualWhnf))
+                                                        (Prod.fst actualWhnf) ++
+                                                      "; " ++
+                                                      (match terminalDebug with
+                                                       | Except.ok message => message
+                                                       | Except.error message =>
+                                                           "terminal-debug-error=" ++ message))
                 | PsKernelExpr.lam name domain body binderInfo =>
                     let checkedDomain :=
                       if inferOnly then

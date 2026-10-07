@@ -163,10 +163,11 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
       cases hBefore :
           psKernelNatLt index (Nat.add start offset) with
       | true =>
-          simpa [
+          simp [
             psKernelExprInstantiateAtReferenceChanged,
             hBefore
-          ] using hRun
+          ] at hRun
+          exact hRun.symm
       | false =>
           cases hGet :
               psKernelExprListGet
@@ -182,12 +183,13 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
               cases hEmpty :
                   psKernelExprListIsEmpty subst with
               | true =>
-                  simpa [
+                  simp [
                     psKernelExprInstantiateAtReferenceChanged,
                     hBefore,
                     hGet,
                     hEmpty
-                  ] using hRun
+                  ] at hRun
+                  exact hRun.symm
               | false =>
                   simp [
                     psKernelExprInstantiateAtReferenceChanged,
@@ -196,15 +198,15 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
                     hEmpty
                   ] at hRun
   | fvar name =>
-      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun.symm
   | mvar name =>
-      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun.symm
   | sort level =>
-      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun.symm
   | const name levels =>
-      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun.symm
   | lit literal =>
-      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun.symm
   | app fn arg =>
       cases hFn :
           psKernelExprInstantiateAtReferenceChanged
@@ -221,7 +223,7 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
                   hFn,
                   hArg
                 ] at hRun
-              exact hRun.1
+              exact hRun.symm
   | lam name type body binderInfo =>
       cases hType :
           psKernelExprInstantiateAtReferenceChanged
@@ -238,7 +240,7 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
                   hType,
                   hBody
                 ] at hRun
-              exact hRun.1
+              exact hRun.symm
   | forallE name type body binderInfo =>
       cases hType :
           psKernelExprInstantiateAtReferenceChanged
@@ -255,7 +257,7 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
                   hType,
                   hBody
                 ] at hRun
-              exact hRun.1
+              exact hRun.symm
   | letE name type value body nondep =>
       cases hType :
           psKernelExprInstantiateAtReferenceChanged
@@ -278,7 +280,7 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
                       hValue,
                       hBody
                     ] at hRun
-                  exact hRun.1
+                  exact hRun.symm
   | mdata metadata body =>
       cases hBody :
           psKernelExprInstantiateAtReferenceChanged
@@ -289,7 +291,7 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
               psKernelExprInstantiateAtReferenceChanged,
               hBody
             ] at hRun
-          exact hRun.1
+          exact hRun.symm
   | proj typeName index body =>
       cases hBody :
           psKernelExprInstantiateAtReferenceChanged
@@ -300,8 +302,7 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
               psKernelExprInstantiateAtReferenceChanged,
               hBody
             ] at hRun
-          exact hRun.1
-
+          exact hRun.symm
 
 theorem psKernelExprLiftOne_then_instantiateReference_cancel
     (expr replacement : PsKernelExpr)

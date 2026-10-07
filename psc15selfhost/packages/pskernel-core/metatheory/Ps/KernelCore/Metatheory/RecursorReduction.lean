@@ -84,6 +84,381 @@ def PsKernelRecursorStructureConversionConfigurationSound
         result
 
 
+def PsKernelRecursorNormalizedMajor
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (input output : PsKernelExpr) : Prop :=
+  ∃ reduced : PsKernelExpr,
+    PsKernelReductionClosure
+        environment
+        localContext
+        input
+        reduced ∧
+      PsKernelRecursorMajorNormalization
+        reduced
+        output
+
+
+def psKernelRecursorNormalizeMajorWith
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (recursor : PsKernelRecursorInfo)
+    (majorReduced : PsKernelExpr) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  match majorReduced with
+  | PsKernelExpr.lit literal =>
+      match literal with
+      | PsKernelLiteral.nat value =>
+          match value with
+          | Nat.zero =>
+              Except.ok
+                (Prod.mk
+                  (PsKernelExpr.const
+                    psKernelNatZeroName
+                    List.nil)
+                  state)
+          | Nat.succ predecessor =>
+              Except.ok
+                (Prod.mk
+                  (PsKernelExpr.app
+                    (PsKernelExpr.const
+                      psKernelNatSuccName
+                      List.nil)
+                    (PsKernelExpr.lit
+                      (PsKernelLiteral.nat predecessor)))
+                  state)
+      | PsKernelLiteral.str value =>
+          publicWhnf
+            context
+            state
+            (psKernelStringLitToConstructor value)
+  | _ =>
+      psKernelToConstructorWhenStructure
+        publicWhnf
+        inferType
+        context
+        state
+        recursor
+        majorReduced
+
+
+theorem psKernelRecursorNormalizeMajorWith_configuration_sound
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (hStructure :
+      PsKernelRecursorStructureConversionConfigurationSound
+        publicWhnf
+        inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (recursor : PsKernelRecursorInfo)
+    (majorReduced normalized : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelRecursorNormalizeMajorWith
+          publicWhnf
+          inferType
+          context
+          state
+          recursor
+          majorReduced =
+        Except.ok (Prod.mk normalized nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      PsKernelRecursorNormalizedMajor
+        context.environment
+        context.localContext
+        majorReduced
+        normalized := by
+  cases majorReduced with
+  | lit literal =>
+      cases literal with
+      | nat value =>
+          cases value with
+          | zero =>
+              simp [
+                psKernelRecursorNormalizeMajorWith
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              constructor
+              · exact hConfig
+              · exact
+                  ⟨
+                    PsKernelExpr.lit
+                      (PsKernelLiteral.nat 0),
+                    PsKernelReductionClosure.refl
+                      (PsKernelExpr.lit
+                        (PsKernelLiteral.nat 0)),
+                    PsKernelRecursorMajorNormalization.natZero
+                  ⟩
+          | succ predecessor =>
+              simp [
+                psKernelRecursorNormalizeMajorWith
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              constructor
+              · exact hConfig
+              · exact
+                  ⟨
+                    PsKernelExpr.lit
+                      (PsKernelLiteral.nat
+                        (Nat.succ predecessor)),
+                    PsKernelReductionClosure.refl
+                      (PsKernelExpr.lit
+                        (PsKernelLiteral.nat
+                          (Nat.succ predecessor))),
+                    PsKernelRecursorMajorNormalization.natSucc
+                      predecessor
+                  ⟩
+      | str value =>
+          cases hWhnfRun :
+              publicWhnf
+                context
+                state
+                (psKernelStringLitToConstructor value) with
+          | error error =>
+              simp [
+                psKernelRecursorNormalizeMajorWith,
+                hWhnfRun
+              ] at hSuccess
+          | ok run =>
+              rcases run with ⟨result, resultState⟩
+              have hWhnfSemantic :=
+                hWhnf
+                  context
+                  state
+                  resultState
+                  (psKernelStringLitToConstructor value)
+                  result
+                  hConfig
+                  hWhnfRun
+              simp [
+                psKernelRecursorNormalizeMajorWith,
+                hWhnfRun
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              have hStringStep :
+                  PsKernelReductionClosure
+                    context.environment
+                    context.localContext
+                    (PsKernelExpr.lit
+                      (PsKernelLiteral.str value))
+                    (psKernelStringLitToConstructor value) :=
+                PsKernelReductionClosure.cons
+                  (PsKernelExpr.lit
+                    (PsKernelLiteral.str value))
+                  (psKernelStringLitToConstructor value)
+                  (psKernelStringLitToConstructor value)
+                  (PsKernelReductionStep.stringLiteral value)
+                  (PsKernelReductionClosure.refl
+                    (psKernelStringLitToConstructor value))
+              have hCombined :
+                  PsKernelReductionClosure
+                    context.environment
+                    context.localContext
+                    (PsKernelExpr.lit
+                      (PsKernelLiteral.str value))
+                    result :=
+                psKernelReductionClosure_transitive
+                  context.environment
+                  context.localContext
+                  (PsKernelExpr.lit
+                    (PsKernelLiteral.str value))
+                  (psKernelStringLitToConstructor value)
+                  result
+                  hStringStep
+                  hWhnfSemantic.1
+              exact
+                ⟨
+                  hWhnfSemantic.2,
+                  ⟨
+                    result,
+                    hCombined,
+                    PsKernelRecursorMajorNormalization.identity
+                      result
+                  ⟩
+                ⟩
+  | bvar index =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.bvar index)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨
+          hStructureSemantic.1,
+          ⟨
+            normalized,
+            hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized
+          ⟩
+        ⟩
+  | fvar name =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.fvar name)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | mvar name =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.mvar name)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | sort level =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.sort level)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | const name levels =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.const name levels)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | app fn arg =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.app fn arg)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | lam name type body binderInfo =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.lam name type body binderInfo)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | forallE name type body binderInfo =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.forallE name type body binderInfo)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | letE name type value body nondep =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.letE name type value body nondep)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | mdata metadata body =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.mdata metadata body)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+  | proj typeName index body =>
+      have hStructureSemantic :=
+        hStructure
+          context state nextState recursor
+          (PsKernelExpr.proj typeName index body)
+          normalized
+          hConfig
+          (by
+            simpa [psKernelRecursorNormalizeMajorWith]
+              using hSuccess)
+      exact
+        ⟨hStructureSemantic.1,
+          ⟨normalized, hStructureSemantic.2,
+            PsKernelRecursorMajorNormalization.identity normalized⟩⟩
+
+
 theorem psKernelEnvironmentFind_some_authoritative
     (environment : PsKernelEnvironment)
     (name : PsKernelName)

@@ -141,6 +141,14 @@ for (const [kind, source] of [
       const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json'), 'utf8'));
       assert.equal(graph.coverage, 'observed-erasure-validation-and-composite-backend-edges');
       assert.equal(graph.executions.length, 5);
+      assert.equal(receipt.sourceResources.contract, 'psc-source-read-budget/1');
+      assert.equal(receipt.sourceResources.observed.sourceBytes, Buffer.byteLength(source));
+      assert.equal(receipt.sourceResources.observed.moduleCount, 1);
+      const preparation = graph.entries.find(entry => entry.identity.contract === 'psc-pass-execution/1' &&
+        entry.canonicalValue.action.parameters.observedStages.includes('prepare')).canonicalValue;
+      assert.deepEqual(preparation.action.resourcePolicy.sourceReading, receipt.sourceResources.limits);
+      assert.deepEqual(preparation.resourceObservation.sourceReading, receipt.sourceResources.observed);
+      assert.equal(preparation.action.resourcePolicy.completeBudgetCoverage, false);
       assert.equal(graph.entries.filter(entry => entry.identity.domain === 'runtime-ir').length, 1);
       assert.equal(graph.entries.filter(entry => entry.identity.domain === 'verified-ir').length, 1);
       const tool = graph.entries.find(entry => entry.identity.contract === 'psc-typescript-tool-inputs/1');
@@ -187,6 +195,17 @@ test('real frontend failure creates no requested output or checked receipt', { s
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test('source resource exhaustion precedes compiler loading and output publication', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'psc2-source-budget-'));
+  try {
+    const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'never', 'out.js');
+    await writeFile(entryPath, 'def answer : Nat := 42\n');
+    await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: path.join(dir, 'missing-seed'),
+      sourceResourceLimits: { sourceBytes: 1 } }), error => error.kind === 'resourceExhausted' && error.resource === 'sourceBytes');
+    assert.equal(existsSync(path.dirname(outputPath)), false);
+  } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
 test('no unchecked or alternative-kernel fallback in checked profile', async () => {

@@ -150,6 +150,8 @@
       "owners": [
         "contracts/resource/COMPILATION_RESOURCE_V1.json",
         "scripts/bounded-process.mjs",
+        "scripts/source-read-budget.mjs",
+        "contracts/resource/SOURCE_READ_BUDGET_V1.json",
         "scripts/isolated-producer.mjs",
         "contracts/resource/BOUNDED_HOST_EXECUTION_V1.json"
       ],

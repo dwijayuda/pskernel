@@ -29,7 +29,8 @@
     "actual validated IR to TypeScript as a composite lowering/printing edge",
     "TypeScript to JavaScript/declarations/source map with actual flags and output basename",
     "installed TypeScript and selected native platform package trees retained as byte-bound pass implementation inputs, with complete before/after inventory checks",
-    "selected kernel provider runtime-file profiles captured around checking and bound to acceptance-context/action dependencies"
+    "selected kernel provider runtime-file profiles captured around checking and bound to acceptance-context/action dependencies",
+    "enforced source-reading limits and observed byte/module/import counts bound to the preparation action and execution record"
   ],
   "remaining": [
     "SpecializedIR and backend-interior stage artifacts for other targets",
@@ -41,5 +42,6 @@
   "portableDigestRule": "A portable record supplied with artifact labels remains requiresByteVerification. Legacy specialization records remain unbound. Neither implies byte verification or a proof.",
   "stageEncoding": "contracts/ir/IR_ARTIFACT_ENCODING_V1.json",
   "typeScriptToolInputs": "contracts/ir/TYPESCRIPT_TOOL_INPUTS_V1.json",
-  "providerInputs": "contracts/ir/CHECKED_PROVIDER_INPUTS_V1.json"
+  "providerInputs": "contracts/ir/CHECKED_PROVIDER_INPUTS_V1.json",
+  "sourceResources": "contracts/resource/SOURCE_READ_BUDGET_V1.json"
 }

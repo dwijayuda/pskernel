@@ -40,6 +40,7 @@ export async function buildChecked({
   kernel = defaultCheckedKernel,
   dualCheck,
   securityProfile = defaultProviderSecurityProfile,
+  sourceResourceLimits,
 }) {
   const kernelDescriptor = checkedKernelDescriptor(kernel);
   const selectedProviderSecurity = assertProviderSecurity(kernel, securityProfile);
@@ -49,7 +50,7 @@ export async function buildChecked({
   if (dualCheck) checkedKernelDescriptor(dualCheck);
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
-  const snapshot = await readCheckedSourceSnapshot(entryPath);
+  const snapshot = await readCheckedSourceSnapshot(entryPath, sourceResourceLimits);
   let admissions;
   let typeScript;
   let compilerIdentity;
@@ -116,6 +117,7 @@ export async function buildChecked({
     sourceClosureSha256: snapshot.closureSha256,
     flattenedSourceSha256: digest(snapshot.source),
     sourceCount: snapshot.ordered.length,
+    sourceResources: snapshot.resourceObservation,
     canonicalAdmissionsSha256: digest(admissions),
     providerInputObservations: providerToolInputs.map(item => item.details),
     ...(parity ? { dualCheck: parity } : {}),
@@ -156,7 +158,7 @@ export async function buildChecked({
     const typeScriptCompilerBytes = typeScriptToolInputs.files.find(item => item.path === typeScriptToolInputs.details.entryPath).bytes;
     receipt.javaScriptSha256 = digest(javaScript);
     const evidence = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
-      admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes,
+      admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
       hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });

@@ -1,5 +1,6 @@
 import { existsSync, lstatSync } from "node:fs";
-import { readFile, realpath } from "node:fs/promises";
+import { realpath } from "node:fs/promises";
+import { createSourceReadBudget } from './source-read-budget.mjs';
 import path from "node:path";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
 import {
@@ -66,6 +67,7 @@ export async function readGeneratedSourceClosure(
   workspaceRoot = findSourceWorkspaceRoot(entryPath),
   options = {},
 ) {
+  const budget = createSourceReadBudget(options.resourceLimits);
   const root = path.resolve(workspaceRoot);
   const candidates = (
     options.allowProjectManifest === true
@@ -80,8 +82,9 @@ export async function readGeneratedSourceClosure(
   try {
     const manifestPath = await realpath(path.join(root, manifestName));
     assertInside(realRoot, manifestPath);
-    manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    manifest = JSON.parse(await budget.read(manifestPath, 'manifest'));
   } catch (error) {
+    if (error.kind === 'resourceExhausted') throw error;
     throw new Error(`PSC2_SELFHOST_MANIFEST_INVALID: ${manifestName}: ${error.message}`, { cause: error });
   }
   const generated =
@@ -103,6 +106,7 @@ export async function readGeneratedSourceClosure(
           return files;
         })()
       : assertBootstrapManifestShape(manifest, generation);
+  budget.declaredModules(generated.length);
   const absoluteEntry = path.resolve(entryPath);
   assertInside(root, absoluteEntry);
   if (slash(path.relative(root, absoluteEntry)) !== manifest.entry) {
@@ -112,13 +116,14 @@ export async function readGeneratedSourceClosure(
   const visiting = new Set();
   const consumed = new Map();
   const ordered = [];
-  async function visit(file) {
+  async function visit(file, depth) {
     const absolute = path.resolve(file);
     assertInside(root, absolute);
     const relative = slash(path.relative(root, absolute));
     if (!allowed.has(relative)) throw new Error(`PSC2_SELFHOST_SOURCE_NOT_IN_MANIFEST: ${relative}`);
     if (visiting.has(relative)) throw new Error(`PSC2_SELFHOST_IMPORT_CYCLE: ${relative}`);
     if (consumed.has(relative)) return;
+    budget.module(depth);
     let resolved;
     try {
       resolved = await realpath(absolute);
@@ -126,14 +131,15 @@ export async function readGeneratedSourceClosure(
       throw new Error(`PSC2_SELFHOST_SOURCE_MISSING: ${relative}`, { cause: error });
     }
     assertInside(realRoot, resolved);
-    const source = await readFile(resolved, "utf8");
+    const source = await budget.read(resolved);
     visiting.add(relative);
-    for (const moduleName of parseImports(source)) await visit(generatedModulePath(root, moduleName));
+    const imports = parseImports(source); budget.imports(imports.length);
+    for (const moduleName of imports) await visit(generatedModulePath(root, moduleName), depth + 1);
     visiting.delete(relative);
     consumed.set(relative, source);
     ordered.push(Object.freeze({ path: absolute, source }));
   }
-  await visit(absoluteEntry);
+  await visit(absoluteEntry, 0);
   if (JSON.stringify([...consumed.keys()].sort()) !== JSON.stringify(generated)) {
     throw new Error("PSC2_SELFHOST_SOURCE_FILESET_MISMATCH");
   }
@@ -154,5 +160,6 @@ export async function readGeneratedSourceClosure(
     workspaceRoot: root,
     closureSha256,
     ordered: Object.freeze(ordered),
+    resourceObservation: budget.snapshot(),
   });
 }

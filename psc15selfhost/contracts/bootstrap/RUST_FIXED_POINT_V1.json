@@ -21,6 +21,9 @@
     },
     "checkedBy": "scripts/direct-rust-selfhost-fixed-point.mjs"
   },
+  "repeatObservations": [
+    { "commit": "8d2c070d87ce6ce46e8d3bb0a50151575465be29", "runId": 37547807862, "jobId": 112556211734, "conclusion": "success", "sameSourceClosureAndGeneratedBytes": true }
+  ],
   "scope": "Byte equality of generated Rust source across native generations for this exact source closure and cloud toolchain. Native executable byte reproducibility was not checked.",
   "notEstablished": [
     "global compiler correctness",

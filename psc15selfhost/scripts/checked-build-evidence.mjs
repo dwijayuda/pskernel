@@ -32,7 +32,7 @@ export async function readCheckedBuildHostSources() {
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
-  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [] }) {
+  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources }) {
   const artifacts = new Map(), entries = [], executions = [];
   let toolInputs;
   function add(item, source, inline = false) {
@@ -95,9 +95,11 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       validatorId: null, theoremIds: [], assumptionIds: [...assumptions, ...extraAssumptions] }), { kind: 'inline' }, true);
     const record = recordPassExecution({ definition, inputs: [input], outputs, parameters,
       semanticIdentity, dependencies, resourcePolicy: { contract: 'psc-checked-host-resource/1',
-        enforcement: 'existing-stage-specific-limits', completeBudgetCoverage: false },
+        enforcement: 'existing-stage-specific-limits', completeBudgetCoverage: false,
+        ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.limits } : {}) },
       resourceObservation: { hostObserved: true, inputBytes: input.bytes.byteLength,
         outputBytes: outputs.reduce((sum, output) => sum + output.bytes.byteLength, 0),
+        ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.observed } : {}),
         unobserved: ['cpu', 'peak-memory', 'kernel-steps', 'ir-nodes'] },
       diagnostics: ['Global preservation is unproved; these records describe the executed composite edges.'], evidence: [] });
     add(record.action, { kind: 'inline' }, true); add(record, { kind: 'inline' }, true);

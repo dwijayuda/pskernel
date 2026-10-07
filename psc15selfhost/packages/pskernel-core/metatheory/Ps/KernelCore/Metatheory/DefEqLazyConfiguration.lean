@@ -219,7 +219,7 @@ theorem psKernelDeltaStepPostcondition_transport
         PsKernelDefEqJudgment.reduceCompare
           originalLeft originalRight left right
           hLeft hRight hResult
-  | continue nextLeft nextRight =>
+  | «continue» nextLeft nextRight =>
       exact
         ⟨
           psKernelReductionClosure_trans

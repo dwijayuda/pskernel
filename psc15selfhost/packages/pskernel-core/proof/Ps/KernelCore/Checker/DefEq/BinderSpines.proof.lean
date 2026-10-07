@@ -231,12 +231,13 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                       state,
                       hConfig,
                       by
-                        simpa [
+                        simpa only [
                           psKernelDefEqLambdaSpineWithFuel,
                           leftOpened,
                           rightOpened,
                           continueAfterDomain,
-                          hDomainEq
+                          hDomainEq,
+                          Bool.true_eq
                         ] using hSuccess
                     ⟩
             | false =>
@@ -285,13 +286,14 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                               domainState,
                               hDomainSemantic.1,
                               by
-                                simpa [
+                                simpa only [
                                   psKernelDefEqLambdaSpineWithFuel,
                                   leftOpened,
                                   rightOpened,
                                   continueAfterDomain,
                                   hDomainEq,
-                                  hDomainRun
+                                  hDomainRun,
+                                  Bool.true_eq
                                 ] using hSuccess
                             ⟩
           rcases hReady with

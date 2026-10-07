@@ -1182,6 +1182,18 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
               psKernelExprLiftLooseBVarsReferenceChanged,
               hGe
             ]
+          have hNatLt0 :
+              psKernelNatLt
+                  (Nat.add index 1)
+                  (Nat.add 0 offset) =
+                false := by
+            simpa using hNatLt
+          have hRelative0 :
+              Nat.sub
+                  (Nat.add index 1)
+                  (Nat.add 0 offset) =
+                Nat.succ (Nat.sub index offset) := by
+            simpa using hRelative
           rw [hLift]
           simp only [
             psKernelExprInstantiateAtReference,
@@ -1192,12 +1204,12 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
           simp only [
             psKernelExprInstantiateAtReferenceChanged
           ]
-          rw [hNatLt]
+          rw [hNatLt0]
           simp only [
             Bool.false_eq_true,
             ite_false
           ]
-          rw [hRelative]
+          rw [hRelative0]
           simp [
             psKernelExprListGet,
             psKernelExprListLength

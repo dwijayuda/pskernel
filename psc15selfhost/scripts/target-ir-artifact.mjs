@@ -42,7 +42,7 @@ function jsBinary(value) {
     default: fail('JS_BINARY');
   }
 }
-function decodeJs(bytes, limits) {
+export function decodeJsIrArtifact(bytes, limits) {
   const root = decodeComparatorJson(bytes, { maxBytes: 128*1024*1024, maxDepth: 512, maxNodes: 3000000, ...limits });
   arr(root,3); if (root[0] !== jsIrEncodingContract) fail('JS_CONTRACT');
   const work = [];
@@ -116,7 +116,7 @@ function wasmInstruction(value){
   if(tag==='structGet'||tag==='structGetS'||tag==='structGetU'){arr(value,3);text(value[1]);decimal(value[2]);return;}
   fail('WASM_INSTRUCTION');
 }
-function decodeWasm(bytes,limits){
+export function decodeWasmIrArtifact(bytes,limits){
   const root=decodeComparatorJson(bytes,{maxBytes:128*1024*1024,maxDepth:512,maxNodes:4000000,...limits});
   arr(root,7); if(root[0]!==wasmIrEncodingContract)fail('WASM_CONTRACT');
   const work=[]; const push=(kind,value)=>work.push([kind,value]); const many=(kind,values)=>{for(const value of arr(values))push(kind,value);};
@@ -141,8 +141,8 @@ export function checkedTargetIrStageArtifacts(stages,{maxBytes=128*1024*1024}={}
   if(!stages||typeof stages!=='object')return Object.freeze({});
   const result={};
   for(const [field,domain,contract,decode] of [
-    ['jsIr','js-ir',jsIrEncodingContract,decodeJs],
-    ['wasmIr','wasm-ir',wasmIrEncodingContract,decodeWasm],
+    ['jsIr','js-ir',jsIrEncodingContract,decodeJsIrArtifact],
+    ['wasmIr','wasm-ir',wasmIrEncodingContract,decodeWasmIrArtifact],
   ]){
     if(!Object.hasOwn(stages,field))continue;
     if(typeof stages[field]!=='string')fail('STAGE_TYPE');

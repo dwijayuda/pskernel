@@ -827,7 +827,7 @@ inductive PsKernelReductionClosure
       (recArgs majorArgs : List PsKernelExpr)
       (recursor : PsKernelRecursorInfo)
       (rule : PsKernelRecursorRule)
-      (major0 prepared majorReduced major : PsKernelExpr)
+      (major0 majorK majorReduced semanticReduced major : PsKernelExpr)
       (hHead :
         Prod.fst (psKernelExprGetAppFnArgs expr) =
           PsKernelExpr.const recName recLevels)
@@ -851,15 +851,18 @@ inductive PsKernelReductionClosure
                   recursor.numMinors
                   recursor.numIndices))) =
           Option.some major0)
-      (hPrepared :
+      (hKConversion :
         PsKernelDefEqJudgment
-          environment localContext major0 prepared)
-      (hMajorConversion :
+          environment localContext major0 majorK)
+      (hMajorReduction :
+        PsKernelReductionClosure
+          environment localContext majorK majorReduced)
+      (hNormalizeConversion :
         PsKernelDefEqJudgment
-          environment localContext prepared majorReduced)
+          environment localContext majorReduced semanticReduced)
       (hNormalize :
         PsKernelRecursorMajorNormalization
-          majorReduced major)
+          semanticReduced major)
       (hCtorHead :
         Prod.fst (psKernelExprGetAppFnArgs major) =
           PsKernelExpr.const ctorName ctorLevels)

@@ -263,3 +263,206 @@ theorem psKernelReduceNatBinary_some_refines
       result
       hSuccess)
     (PsKernelReductionClosure.refl result)
+
+
+theorem psKernelReduceNatWith_preserves_configuration
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (answer : Option PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelReduceNatWith
+          publicWhnf
+          context
+          state
+          expr =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelCheckerConfigurationSound context nextState := by
+  cases expr with
+  | app fn right =>
+      cases fn with
+      | const op levels =>
+          cases levels with
+          | nil =>
+              cases hSucc :
+                  psKernelNameEq op psKernelNatSuccName with
+              | false =>
+                  simp [psKernelReduceNatWith, hSucc] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact hConfig
+              | true =>
+                  cases hRight :
+                      publicWhnf context state right with
+                  | error error =>
+                      simp [
+                        psKernelReduceNatWith,
+                        hSucc,
+                        hRight
+                      ] at hSuccess
+                  | ok rightRun =>
+                      rcases rightRun with ⟨rightReduced, state1⟩
+                      have hRightSemantic :=
+                        hWhnf
+                          context
+                          state
+                          state1
+                          right
+                          rightReduced
+                          hConfig
+                          hRight
+                      cases hLiteral :
+                          psKernelExprNatLiteralValue rightReduced with
+                      | none =>
+                          simp [
+                            psKernelReduceNatWith,
+                            hSucc,
+                            hRight,
+                            hLiteral
+                          ] at hSuccess
+                          rcases hSuccess with ⟨rfl, rfl⟩
+                          exact hRightSemantic.2
+                      | some value =>
+                          cases hSize :
+                              psKernelCheckNatSize
+                                context.maxNatSize
+                                (Nat.succ value) with
+                          | error error =>
+                              simp [
+                                psKernelReduceNatWith,
+                                hSucc,
+                                hRight,
+                                hLiteral,
+                                hSize
+                              ] at hSuccess
+                          | ok checked =>
+                              simp [
+                                psKernelReduceNatWith,
+                                hSucc,
+                                hRight,
+                                hLiteral,
+                                hSize
+                              ] at hSuccess
+                              rcases hSuccess with ⟨rfl, rfl⟩
+                              exact hRightSemantic.2
+          | cons level rest =>
+              simp [psKernelReduceNatWith] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+      | app binaryHead left =>
+          cases binaryHead with
+          | const op levels =>
+              cases levels with
+              | nil =>
+                  cases hLeft :
+                      publicWhnf context state left with
+                  | error error =>
+                      simp [
+                        psKernelReduceNatWith,
+                        hLeft
+                      ] at hSuccess
+                  | ok leftRun =>
+                      rcases leftRun with ⟨leftReduced, state1⟩
+                      have hLeftSemantic :=
+                        hWhnf
+                          context
+                          state
+                          state1
+                          left
+                          leftReduced
+                          hConfig
+                          hLeft
+                      cases hRight :
+                          publicWhnf context state1 right with
+                      | error error =>
+                          simp [
+                            psKernelReduceNatWith,
+                            hLeft,
+                            hRight
+                          ] at hSuccess
+                      | ok rightRun =>
+                          rcases rightRun with ⟨rightReduced, state2⟩
+                          have hRightSemantic :=
+                            hWhnf
+                              context
+                              state1
+                              state2
+                              right
+                              rightReduced
+                              hLeftSemantic.2
+                              hRight
+                          cases hLeftLiteral :
+                              psKernelExprNatLiteralValue leftReduced with
+                          | none =>
+                              simp [
+                                psKernelReduceNatWith,
+                                hLeft,
+                                hRight,
+                                hLeftLiteral
+                              ] at hSuccess
+                              rcases hSuccess with ⟨rfl, rfl⟩
+                              exact hRightSemantic.2
+                          | some leftValue =>
+                              cases hRightLiteral :
+                                  psKernelExprNatLiteralValue rightReduced with
+                              | none =>
+                                  simp [
+                                    psKernelReduceNatWith,
+                                    hLeft,
+                                    hRight,
+                                    hLeftLiteral,
+                                    hRightLiteral
+                                  ] at hSuccess
+                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                  exact hRightSemantic.2
+                              | some rightValue =>
+                                  cases hBinary :
+                                      psKernelReduceNatBinary
+                                        context.maxNatSize
+                                        op
+                                        leftValue
+                                        rightValue with
+                                  | error error =>
+                                      simp [
+                                        psKernelReduceNatWith,
+                                        hLeft,
+                                        hRight,
+                                        hLeftLiteral,
+                                        hRightLiteral,
+                                        hBinary
+                                      ] at hSuccess
+                                  | ok binaryAnswer =>
+                                      simp [
+                                        psKernelReduceNatWith,
+                                        hLeft,
+                                        hRight,
+                                        hLeftLiteral,
+                                        hRightLiteral,
+                                        hBinary
+                                      ] at hSuccess
+                                      rcases hSuccess with ⟨rfl, rfl⟩
+                                      exact hRightSemantic.2
+              | cons level rest =>
+                  simp [psKernelReduceNatWith] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact hConfig
+          | _ =>
+              simp [psKernelReduceNatWith] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+      | _ =>
+          simp [psKernelReduceNatWith] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact hConfig
+  | _ =>
+      simp [psKernelReduceNatWith] at hSuccess
+      rcases hSuccess with ⟨rfl, rfl⟩
+      exact hConfig

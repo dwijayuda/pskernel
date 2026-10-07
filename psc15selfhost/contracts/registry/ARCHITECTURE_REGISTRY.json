@@ -429,6 +429,18 @@
       "kind": "declaration-correspondence",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/JS_DECLARATION_LINEAGE_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-source-map/1",
+      "kind": "source-map",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-source-map-recipe/1",
+      "kind": "source-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

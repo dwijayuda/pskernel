@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
 import { prepareSourceWithOrigins, sourcePreparationRecord, createSourcePreparationArtifacts,
-  mapPreparedRange, verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
+  mapPreparedRange, mapPreparedOffset, verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
 
 test('preparation records exact copied bytes across CRLF, imports, Unicode and trimming', () => {
   const source = '\ufeff  \r\nimport Lib\r\ndef λ : String := "😀"\r\nimport More;\r\ndef b : Nat := 2  \r\n';
@@ -13,8 +13,11 @@ test('preparation records exact copied bytes across CRLF, imports, Unicode and t
   for (const [from, to, originalFrom, originalTo] of result.segments) {
     assert.equal(from, end); end = to;
     assert.deepEqual(prepared.subarray(from, to), original.subarray(originalFrom, originalTo));
+    assert.equal(mapPreparedOffset(result.segments, from), originalFrom);
+    assert.equal(mapPreparedOffset(result.segments, to - 1), originalTo - 1);
   }
   assert.equal(end, prepared.length);
+  assert.throws(() => mapPreparedOffset(result.segments, prepared.length), /RANGE/);
   const fragments = mapPreparedRange(result.segments, 0, prepared.length);
   assert.ok(fragments.length > 1, 'removed imports must remain a source gap');
   assert.deepEqual(Buffer.concat(fragments.map(([from, to]) => original.subarray(from, to))), prepared);

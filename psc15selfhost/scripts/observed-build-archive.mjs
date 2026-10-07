@@ -3,6 +3,7 @@ import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtif
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyDeclarationOriginGraph } from './declaration-origins.mjs';
 import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
+import { verifyDirectJsSourceMap } from './js-source-map.mjs';
 import { verifyJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { verifyJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { verifyErasureDeclarationMap } from './erasure-declarations.mjs';
@@ -240,6 +241,24 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
               { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
               { resolveArtifact, expectedInputId: input.identity, expectedOutputId: output.identity,
                 resourceLimits: { maxBytes: bound.maxArtifactBytes } }));
+      }
+      if (definition.passId === 'psc-emit-direct-js-source-map/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 2 ||
+            definition.semanticRelationId !== 'psc-declaration-lineage-to-ecma426/1') fail('JS_SOURCE_MAP_SUBJECT');
+        const dependency = (domain, required) => {
+          const ids = execution.action.dependencies.filter(id => id.domain === domain);
+          if (ids.length > 1 || (required && ids.length !== 1)) fail('JS_SOURCE_MAP_SUBJECT');
+          return ids[0] ?? null;
+        };
+        await verifyDirectJsSourceMap({
+          sourceMap: { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) },
+          recipe: { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
+        }, { resolveArtifact, expectedLineageId: execution.inputs[0],
+          expectedJavaScriptId: dependency('javascript-output', true),
+          expectedPreparationOriginsId: dependency('source-origins', false),
+          expectedSourceSnapshotId: dependency('source-snapshot', false),
+          expectedFile: execution.action.parameters.outputFile,
+          maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes });
       }
       if (definition.passId === 'psc-compose-js-declaration-lineage/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||

@@ -229,6 +229,8 @@ export async function buildChecked({
     if (evidence.specializationInstances) receipt.specializationInstances = evidence.specializationInstances.identity;
     if (evidence.generatedPositionMap) receipt.generatedPositionMap = evidence.generatedPositionMap.identity;
     if (evidence.declarationLineage) receipt.declarationLineage = evidence.declarationLineage.identity;
+    if (evidence.directSourceMap) receipt.directSourceMap = {
+      sourceMap: evidence.directSourceMap.sourceMap.identity, recipe: evidence.directSourceMap.recipe.identity };
     if (evidence.jsAbi) {
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
       receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;

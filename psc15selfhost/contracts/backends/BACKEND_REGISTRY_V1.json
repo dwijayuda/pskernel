@@ -109,11 +109,13 @@
       "assuranceClass": "trustedImplementation",
       "supportedCapabilities": [
         "direct-esm",
-        "target-ir-validation"
+        "target-ir-validation",
+        "standalone-declaration-source-maps"
       ],
       "unsupportedCapabilities": [
         "direct-declarations",
-        "direct-source-maps",
+        "expression-source-maps",
+        "automatic-source-map-linking",
         "direct-declaration-maps",
         "global-preservation"
       ],
@@ -170,6 +172,18 @@
             "domain": "declaration-lineage",
             "contract": "psc-js-declaration-lineage/1",
             "requiresToolchain": false
+          },
+          {
+            "role": "source-map",
+            "domain": "source-map-output",
+            "contract": "psc-direct-javascript-source-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "source-map-recipe",
+            "domain": "source-map-recipe",
+            "contract": "psc-direct-javascript-source-map-recipe/1",
+            "requiresToolchain": false
           }
         ],
         "interfaceArtifacts": [
@@ -181,7 +195,7 @@
           }
         ]
       },
-      "ownershipDebt": "Portable source PublicApiIR is projected before erasure and published by checked emission. Direct declarations still require explicit generic export correspondence; OriginGraph/debug products and promotion remain incomplete."
+      "ownershipDebt": "Source PublicApiIR and exact declaration-to-emission lineage feed standalone declaration-level ECMA-426 maps. Expression origins, automatic source-map linking, direct declarations, generic export correspondence, production checked CLI direct-backend selection and promotion remain pending."
     },
     {
       "backendId": "wasm",

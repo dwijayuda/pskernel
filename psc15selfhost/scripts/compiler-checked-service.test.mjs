@@ -320,6 +320,10 @@ test('live direct-JS composition uses one emission and binds all exact metadata 
   assert.equal(count, 1);
   assert.equal(emitted.length, 0);
   assert.equal(result.declarationLineage.contract, 'psc-js-declaration-lineage/1');
+  assert.equal(result.sourceMapArtifact.contract, 'psc-direct-javascript-source-map/1');
+  assert.equal(JSON.parse(result.sourceMap).version, 3);
+  assert.equal(JSON.parse(result.sourceMap).mappings, '');
+  assert.equal(result.sourceMapRecipe.contract, 'psc-direct-javascript-source-map-recipe/1');
   assert.equal(result.transformationAssurance, 'trusted-implementation-global-preservation-unproved');
   service.revoke(handle);
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /CERTIFIED_SOURCE_NOT_LIVE/);

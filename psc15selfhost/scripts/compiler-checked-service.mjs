@@ -4,6 +4,7 @@ import { kernelContractV1 } from './kernel-contract.mjs';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { artifactKey } from './artifact-evidence.mjs';
+import { createDirectJsSourceMap } from './js-source-map.mjs';
 import { createJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { createErasureDeclarationMap } from './erasure-declarations.mjs';
@@ -115,7 +116,7 @@ export function createCheckedCompilerService({
         jsIr: targetStages.jsIr, maxBytes: maxOutputBytes });
       generatedPositionMap = generatedPositionProduct.map;
     }
-    let declarationLineage;
+    let declarationLineage, directSourceMap;
     if (origins && erasureMap && specializationProduct && generatedPositionMap) {
       const records = [...origins.artifacts, origins.graph, ...erasureProduct.artifacts, erasureMap,
         ...Object.values(stages), specializationProduct.map, ...generatedPositionProduct.artifacts, generatedPositionMap];
@@ -126,9 +127,12 @@ export function createCheckedCompilerService({
           verifiedIrId: stages.verifiedIr.identity },
         resolveArtifact: id => artifacts.get(artifactKey(id)), maxBytes: maxOutputBytes, maxTotalBytes: maxOutputBytes,
       }).lineage;
+      directSourceMap = createDirectJsSourceMap({ lineage: declarationLineage,
+        resolveArtifact: id => artifacts.get(artifactKey(id)), maxBytes: maxOutputBytes, maxTotalBytes: maxOutputBytes });
     }
     if (productByteLength + (erasureMap?.bytes.byteLength ?? 0) + (specializationProduct?.map.bytes.byteLength ?? 0) +
-        (generatedPositionMap?.bytes.byteLength ?? 0) + (declarationLineage?.bytes.byteLength ?? 0) > maxOutputBytes)
+        (generatedPositionMap?.bytes.byteLength ?? 0) + (declarationLineage?.bytes.byteLength ?? 0) + (directSourceMap?.sourceMap.bytes.byteLength ?? 0) +
+        (directSourceMap?.recipe.bytes.byteLength ?? 0) > maxOutputBytes)
       throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
@@ -143,6 +147,8 @@ export function createCheckedCompilerService({
         stageArtifacts: Object.freeze(Object.fromEntries(
           [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {})]
             .map(([key, value]) => [key, value.identity]))) } : {}),
+      ...(directSourceMap ? { sourceMap: directSourceMap.sourceMap.bytes.toString('utf8'),
+        sourceMapArtifact: directSourceMap.sourceMap.identity, sourceMapRecipe: directSourceMap.recipe.identity } : {}),
       ...(declarationLineage ? { declarationLineage: declarationLineage.identity } : {}),
       ...(generatedPositionMap ? { generatedPositions: emission.generatedPositions, generatedPositionMap: generatedPositionMap.identity } : {}),
       ...(erasureMap ? { erasureCorrespondence: emission.erasureCorrespondence, erasureMap: erasureMap.identity } : {}),

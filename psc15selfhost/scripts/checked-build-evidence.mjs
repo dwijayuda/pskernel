@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { createDirectJsSourceMap } from './js-source-map.mjs';
 import { createJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
 import { createErasureDeclarationMap } from './erasure-declarations.mjs';
@@ -59,6 +60,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   let specializationInstances;
   let generatedPositionMap;
   let declarationLineage;
+  let directSourceMap;
   if (generatedPositions !== undefined && directBackend !== 'javascript') throw new Error('PSC_BUILD_GRAPH_GENERATED_POSITION_TARGET');
   let jsAbiPlan;
   let jsAbiPolicyArtifact;
@@ -346,6 +348,22 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           [...baseDependencies, erasureMap.identity, specializationInstances.identity, generatedPositionMap.identity, verifiedIr.identity],
           [], undefined, { originPolicy: 'synthesize', authorityEffect: 'none',
             originReason: 'Compose exact source, erasure, specialization and generated-position records at declaration granularity.' });
+        const mapped = createDirectJsSourceMap({ lineage: declarationLineage,
+          resolveArtifact: id => artifacts.get(artifactKey(id)),
+          preparationOrigins: preparationOrigins ?? null, sourceSnapshot: preparationOrigins ? source : null,
+          file: outputStem ? outputStem + '.js' : null });
+        const mapOutput = add(mapped.sourceMap, { kind: 'output-file', suffix: '.js.map' });
+        const recipe = add(mapped.recipe, { kind: 'output-file', suffix: '.source-map-recipe.json' });
+        directSourceMap = { sourceMap: mapOutput, recipe };
+        execute('psc-emit-direct-js-source-map/1', declarationLineage, [mapOutput, recipe], implementation,
+          'psc-declaration-lineage-to-ecma426/1',
+          { outputFile: outputStem ? outputStem + '.js' : null,
+            granularity: 'declaration-first-generated-line', executableUnchanged: true,
+            observedStages: ['reconstruct-lineage', 'compose-original-byte-anchors', 'encode-ecma426-mappings'],
+            expressionCorrespondenceChecked: false, semanticPreservationProved: false },
+          [...baseDependencies, js.identity, ...(preparationOrigins ? [preparationOrigins.identity, source.identity] : [])],
+          [], undefined, { originPolicy: 'synthesize', authorityEffect: 'none',
+            originReason: 'Emit coarse declaration anchors with explicit unmapped generated code and exact optional source-preparation composition.' });
       }
     } else {
       if (!targetStages.wasmIr) throw new Error('PSC_BUILD_GRAPH_WASM_TARGET_IR_REQUIRED');
@@ -407,6 +425,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...(specializationInstances ? { specializationInstances } : {}),
     ...(generatedPositionMap ? { generatedPositionMap } : {}),
     ...(declarationLineage ? { declarationLineage } : {}),
+    ...(directSourceMap ? { directSourceMap } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

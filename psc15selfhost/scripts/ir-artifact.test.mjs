@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { SourceMap } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import { canonicalBytes, canonicalArtifact, artifactKey, artifactId, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
 import { runtimeInterfaceArtifact, verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
@@ -119,6 +120,16 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   assert.equal(lineage.edges.length, specialized[4].length);
   assert.ok(lineage.edges.some(edge => edge[2] === 0));
   assert.equal(lineage.expressionCorrespondenceChecked, false);
+  const sourceMapValue = JSON.parse(observed.directSourceMap.sourceMap.bytes), sourceMapConsumer = new SourceMap(sourceMapValue);
+  const originTable = JSON.parse(staged.declarationOrigins), positionsTable = JSON.parse(staged.generatedPositions);
+  for (const edge of lineage.edges) {
+    const start = positionsTable[2][edge[0]][1], source = originTable[3][edge[3]];
+    const found = sourceMapConsumer.findEntry(start[1], start[2]);
+    assert.equal(found.originalLine, source[2][1] - 1);
+    assert.equal(found.originalColumn, 0);
+  }
+  assert.equal(sourceMapValue.x_psc_expressionOrigins, false);
+  assert.ok(observed.graph.entries.some(entry => entry.source.suffix === '.js.map'));
   const observedDefinitions = observed.graph.entries.filter(entry => entry.identity.domain === 'pass-definition').map(entry => entry.canonicalValue);
   const observedArchive = packObservedBuildArchive(observed);
   const observedReplay = await verifyObservedBuildArchive(observedArchive.bytes, { expectedGraphId: observed.identity,

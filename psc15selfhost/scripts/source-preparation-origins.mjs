@@ -97,6 +97,22 @@ export function mapPreparedRange(segments, start, stop) {
   return result;
 }
 
+/** Map one byte offset in an already validated copied-segment inventory.
+ * Binary search keeps declaration-anchor composition O(log segmentCount).
+ * The caller reconstructs/validates the preparation product before this query.
+ */
+export function mapPreparedOffset(segments, offset) {
+  if (!Number.isSafeInteger(offset) || offset < 0 || !Array.isArray(segments)) fail('RANGE');
+  let low = 0, high = segments.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (segments[middle][1] <= offset) low = middle + 1; else high = middle;
+  }
+  const segment = segments[low];
+  if (!segment || offset < segment[0] || offset >= segment[1]) fail('RANGE');
+  return segment[2] + offset - segment[0];
+}
+
 /** Replays exact preparation from archived source bytes, including input order.
  * This is a text transformation/origin check, not a semantic frontend theorem.
  */

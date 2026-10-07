@@ -116,16 +116,21 @@ export function createJsDeclarationLineage({ parents, resolveArtifact,
   return { lineage, artifacts: [...cache.values()] };
 }
 
-/** Async archive replay still requires caller-pinned parents. Serialized edges
- * never authorize a source attribution: reconstruct and compare all bytes.
+/** Load the fixed subject closure for any async consumer. Loading alone is
+ * not validation: consumers must reconstruct the lineage before using edges.
  */
-export async function verifyJsDeclarationLineage(record, { resolveArtifact, expectedParents,
+export async function loadJsDeclarationLineageSubjects(record, { resolveArtifact, expectedParents,
   maxBytes = 128 * 1024 * 1024, maxTotalBytes = 512 * 1024 * 1024 } = {}) {
-  limits(maxBytes, maxTotalBytes); parentIds(expectedParents);
+  limits(maxBytes, maxTotalBytes);
   verifyArtifact(record.bytes, record.identity);
   if (record.identity.domain !== 'declaration-lineage' || record.identity.contract !== jsDeclarationLineageContract) fail('IDENTITY');
   const value = decode(record, maxBytes);
-  for (const key of Object.keys(parentKinds)) if (!same(value[key], expectedParents[key])) fail('PARENT_SUBJECT');
+  const parents = Object.fromEntries(Object.keys(parentKinds).map(key => [key, value[key]]));
+  parentIds(parents);
+  if (expectedParents !== undefined) {
+    parentIds(expectedParents);
+    for (const key of Object.keys(parentKinds)) if (!same(parents[key], expectedParents[key])) fail('PARENT_SUBJECT');
+  }
   const cache = new Map(); let total = record.bytes.byteLength;
   async function resolve(identity) {
     const key = artifactKey(identity);
@@ -134,12 +139,22 @@ export async function verifyJsDeclarationLineage(record, { resolveArtifact, expe
     const bytes = await resolveArtifact(identity); verifyArtifact(bytes, identity);
     const artifact = { bytes, identity }; cache.set(key, artifact); return artifact;
   }
-  for (const id of Object.values(expectedParents)) await resolve(id);
-  const parent = key => decode(cache.get(artifactKey(expectedParents[key])), maxBytes);
+  for (const id of Object.values(parents)) await resolve(id);
+  const parent = key => decode(cache.get(artifactKey(parents[key])), maxBytes);
   for (const id of childIds(parent('originGraphId'), parent('erasureMapId'),
       parent('specializationMapId'), parent('generatedPositionMapId'))) await resolve(id);
+  return { parents, artifacts: [...cache.values()] };
+}
+
+/** Replay requires caller-pinned parents and reconstruction of every edge. */
+export async function verifyJsDeclarationLineage(record, { resolveArtifact, expectedParents,
+  maxBytes = 128 * 1024 * 1024, maxTotalBytes = 512 * 1024 * 1024 } = {}) {
+  parentIds(expectedParents);
+  const loaded = await loadJsDeclarationLineageSubjects(record, { resolveArtifact, expectedParents, maxBytes, maxTotalBytes });
+  for (const key of Object.keys(parentKinds)) if (!same(loaded.parents[key], expectedParents[key])) fail('PARENT_SUBJECT');
+  const cache = new Map(loaded.artifacts.map(item => [artifactKey(item.identity), item.bytes]));
   const rebuilt = createJsDeclarationLineage({ parents: expectedParents, maxBytes, maxTotalBytes,
-    resolveArtifact: id => cache.get(artifactKey(id))?.bytes });
+    resolveArtifact: id => cache.get(artifactKey(id)) });
   if (!same(rebuilt.lineage.identity, record.identity)) fail('BINDING');
   return { contract: jsDeclarationLineageContract, declarationCompositionChecked: true,
     targetInventoryChecked: true, granularity: 'declaration-batch-to-emission-chunk',

@@ -411,7 +411,18 @@ def psKernelInferCoreWithFuel
                                                 result))
                                         else
                                           Except.error
-                                            "application type mismatch"
+                                            ("application type mismatch; fn=" ++
+                                              psKernelInferenceDebugExprHead fn ++
+                                              "; arg=" ++
+                                              psKernelInferenceDebugExprHead arg ++
+                                              "; expected=" ++
+                                              psKernelInferenceDebugExprHead view.domain ++
+                                              "; actual=" ++
+                                              psKernelInferenceDebugExprHead argType ++
+                                              "; diff=" ++
+                                              psKernelInferenceDebugExprDiff
+                                                view.domain
+                                                argType)
                 | PsKernelExpr.lam name domain body binderInfo =>
                     let checkedDomain :=
                       if inferOnly then

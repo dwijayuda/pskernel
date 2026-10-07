@@ -1,16 +1,20 @@
 import Ps.DriverJs.Bootstrap
 import Ps.CompilerIr.Encode
+import Ps.BackendJs.Encode
 
 inductive PsCompilerJavaScriptStagesError where
   | compiler (error : PsCompilerError)
   | javaScript (error : PsCompilerJavaScriptError)
   | encode (error : PsIrEncodeError)
+  | targetValidation (error : PsJsIrValidationError)
+  | targetSnapshot (error : PsJsIrEncodeError)
 
 structure PsCompilerJavaScriptStages where
   javaScript : String
   runtimeIr : String
   verifiedIr : String
   specializedIr : String
+  jsIr : String
 
 -- The snapshots come from one actual pipeline execution. A checked host
 -- capability is still required for production access to this internal API.
@@ -28,9 +32,41 @@ def psCompilerJavaScriptStagesFromValidated
           match psIrEncodeModule specialized.raw with
           | Except.error error => Except.error (PsCompilerJavaScriptStagesError.encode error)
           | Except.ok encoded =>
-              match psCompilerJavaScriptEmitSpecialized specialized with
-              | Except.error error => Except.error (PsCompilerJavaScriptStagesError.javaScript error)
-              | Except.ok output => Except.ok (PsCompilerJavaScriptStages.mk output runtime verified encoded)
+              match
+                  psJsLowerSpecializedValidatedModuleWithProfile
+                    (Option.some psCompilerJavaScriptTarget64)
+                    specialized with
+              | Except.error error =>
+                  Except.error
+                    (PsCompilerJavaScriptStagesError.javaScript
+                      (PsCompilerJavaScriptError.emit
+                        (PsJsEmitError.lower error)))
+              | Except.ok jsIr =>
+                  match psJsValidateModule jsIr with
+                  | Except.error error =>
+                      Except.error
+                        (PsCompilerJavaScriptStagesError.targetValidation
+                          error)
+                  | Except.ok _ =>
+                      match psJsIrEncodeModule jsIr with
+                      | Except.error error =>
+                          Except.error
+                            (PsCompilerJavaScriptStagesError.targetSnapshot
+                              error)
+                      | Except.ok targetIr =>
+                          match psJsPrintModuleStackSafe jsIr with
+                          | Except.error error =>
+                              Except.error
+                                (PsCompilerJavaScriptStagesError.javaScript
+                                  (PsCompilerJavaScriptError.emit error))
+                          | Except.ok output =>
+                              Except.ok
+                                (PsCompilerJavaScriptStages.mk
+                                  output
+                                  runtime
+                                  verified
+                                  encoded
+                                  targetIr)
 
 def psCompilerJavaScriptStagesFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :

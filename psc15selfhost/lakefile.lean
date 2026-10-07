@@ -459,6 +459,10 @@ lean_exe psc1_kernel_core_foundation_tests where
   srcDir := "test"
   root := `PsKernelCoreFoundationTests
 
+lean_exe psc_kernel_core_arena_level_tests where
+  srcDir := "test"
+  root := `KernelCoreArenaLevelTests
+
 lean_exe psc1_kernel_core_bench where
   srcDir := "test"
   root := `PsKernelCoreBench

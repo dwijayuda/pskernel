@@ -911,3 +911,72 @@ theorem psKernelLazyDelta_same_definition_head_sound
   exact
     PsKernelDefEqJudgment.constLevels
       leftName leftLevels rightLevels hNormalized
+
+
+/-
+The full same-definition fast-path guard certifies actual head equality only
+when backed by both authoritative lookup results. The nonempty-spine and
+regular-hint checks remain explicit control guards; the independent equality
+evidence comes from stored declaration names and normalized universes.
+-/
+theorem psKernelLazyDelta_same_shortcut_head_sound
+    (hString : PsKernelStringEqSoundLaw)
+    (context : PsKernelCheckerContext)
+    (left right : PsKernelExpr)
+    (leftDef rightDef : PsKernelDefinitionInfo)
+    (hLeftDef :
+      psKernelDeltaDefinition context left = Option.some leftDef)
+    (hRightDef :
+      psKernelDeltaDefinition context right = Option.some rightDef)
+    (hShortcut :
+      (if
+          (if psKernelNatGt (psKernelExprGetAppNumArgs left) 0 then
+             psKernelNatGt (psKernelExprGetAppNumArgs right) 0
+           else
+             false) then
+          if psKernelSameDeltaDefinition leftDef rightDef then
+            if psKernelReducibilityHintsIsRegular leftDef.hints then
+              psKernelAppHeadLevelsEquivalent left right
+            else
+              false
+          else
+            false
+       else
+         false) = true) :
+    PsKernelDefEqJudgment
+      context.environment context.localContext
+      (psKernelExprGetAppFn left)
+      (psKernelExprGetAppFn right) := by
+  cases hLeftMore :
+      psKernelNatGt (psKernelExprGetAppNumArgs left) 0 with
+  | false =>
+      simp [hLeftMore] at hShortcut
+  | true =>
+      cases hRightMore :
+          psKernelNatGt (psKernelExprGetAppNumArgs right) 0 with
+      | false =>
+          simp [hLeftMore, hRightMore] at hShortcut
+      | true =>
+          cases hSame :
+              psKernelSameDeltaDefinition leftDef rightDef with
+          | false =>
+              simp [hLeftMore, hRightMore, hSame] at hShortcut
+          | true =>
+              cases hRegular :
+                  psKernelReducibilityHintsIsRegular leftDef.hints with
+              | false =>
+                  simp [
+                    hLeftMore, hRightMore, hSame, hRegular
+                  ] at hShortcut
+              | true =>
+                  have hLevels :
+                      psKernelAppHeadLevelsEquivalent left right =
+                        true := by
+                    simpa [
+                      hLeftMore, hRightMore, hSame, hRegular
+                    ] using hShortcut
+                  exact
+                    psKernelLazyDelta_same_definition_head_sound
+                      hString
+                      context left right leftDef rightDef
+                      hLeftDef hRightDef hSame hLevels

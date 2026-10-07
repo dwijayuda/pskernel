@@ -21,6 +21,7 @@ import { pinnedTypeScriptVersionText, resolveTypeScriptCli } from './typescript-
 import { captureTypeScriptToolInputs, verifyTypeScriptToolInputs } from './typescript-tool-inputs.mjs';
 import { captureCheckedProviderInputs, verifyCheckedProviderInputs } from './checked-provider-inputs.mjs';
 import { assertProviderSecurity, defaultProviderSecurityProfile } from './provider-security.mjs';
+import { decodeJsAbiPolicy } from './js-abi-artifact.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -43,6 +44,7 @@ export async function buildChecked({
   securityProfile = defaultProviderSecurityProfile,
   sourceResourceLimits,
   seedResourceLimits,
+  jsAbiPolicyPath,
 }) {
   const kernelDescriptor = checkedKernelDescriptor(kernel);
   const selectedProviderSecurity = assertProviderSecurity(kernel, securityProfile);
@@ -63,6 +65,11 @@ export async function buildChecked({
   let providerToolInputs = [];
   let pscvCertificate;
   let certifiedSourceArtifact;
+  let jsAbiPolicy;
+  if (jsAbiPolicyPath !== undefined) {
+    const policyBytes = await readFile(path.resolve(jsAbiPolicyPath));
+    jsAbiPolicy = decodeJsAbiPolicy(policyBytes);
+  }
   const checkAdmissions = async text => {
     const captures = await Promise.all([kernel, ...(dualCheck ? [dualCheck] : [])].map(selector => captureCheckedProviderInputs(selector)));
     const pinnedOptions = Object.assign({}, ...captures.map(captured => captured.invocationOptions));
@@ -184,10 +191,14 @@ export async function buildChecked({
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
-      hostSources, pscvCertificate, certifiedSourceArtifact,
+      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     receipt.buildGraph = evidence.identity;
     if (evidence.runtimeInterface) receipt.runtimeInterface = evidence.runtimeInterface;
+    if (evidence.jsAbi) {
+      receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
+      receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;
+    }
     receipt.typeScriptToolInputs = evidence.typeScriptToolInputs;
     receipt.providerInputs = evidence.providerInputs;
     const archive = packObservedBuildArchive(evidence);
@@ -200,6 +211,7 @@ export async function buildChecked({
       buildGraph: evidence.identity,
       buildArchive: archive.identity,
       runtimeInterface: evidence.runtimeInterface,
+      targetAdapters: evidence.jsAbi ? [evidence.jsAbi.policy.identity, evidence.jsAbi.plan.identity] : [],
       providerInputs: evidence.providerInputs ?? [],
       typeScriptToolInputs: evidence.typeScriptToolInputs,
       sourceResources: snapshot.resourceObservation,
@@ -207,12 +219,18 @@ export async function buildChecked({
     });
     receipt.evidenceEnvelope = envelope.identity;
     await writeFile(path.join(staging, stem + '.evidence-envelope.json'), envelope.bytes);
+    if (evidence.jsAbi) {
+      await writeFile(path.join(staging, stem + '.abi-plan.json'), evidence.jsAbi.plan.bytes);
+      await writeFile(path.join(staging, stem + '.abi-policy.json'), evidence.jsAbi.policy.bytes);
+    }
     await writeFile(path.join(staging, stem + '.pscv-cert.json'), pscvCertificate.bytes);
     await writeFile(path.join(staging, stem + '.certified-source.json'), certifiedSourceArtifact.bytes);
     await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);
     await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
     await writeFile(path.join(staging, stem + '.admissions.json'), admissions);
-    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.pscv-cert.json', '.certified-source.json', '.build-graph.json', '.build-archive.json', '.evidence-envelope.json']) {
+    const outputSuffixes = ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.pscv-cert.json', '.certified-source.json', '.build-graph.json', '.build-archive.json', '.evidence-envelope.json'];
+    if (evidence.jsAbi) outputSuffixes.push('.abi-plan.json', '.abi-policy.json');
+    for (const suffix of outputSuffixes) {
       await rename(path.join(staging, stem + suffix), path.join(path.dirname(output), stem + suffix));
     }
     // This receipt is an audit record, not a transferable proof/capability.
@@ -231,14 +249,14 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   while (args.length) {
     const flag = args.shift();
     if (flag === '--check') options.checkOnly = true;
-    else if (['--out', '--compiler', '--seed', '--kernel', '--dual-check', '--security-profile'].includes(flag)) {
+    else if (['--out', '--compiler', '--seed', '--kernel', '--dual-check', '--security-profile', '--js-abi-policy'].includes(flag)) {
       const value = args.shift();
       if (!value || value.startsWith('--')) throw new Error(`Missing value for ${flag}`);
-      options[{ '--out': 'outputPath', '--compiler': 'compilerPath', '--seed': 'seedPath', '--kernel': 'kernel', '--dual-check': 'dualCheck', '--security-profile': 'securityProfile' }[flag]] = value;
+      options[{ '--out': 'outputPath', '--compiler': 'compilerPath', '--seed': 'seedPath', '--kernel': 'kernel', '--dual-check': 'dualCheck', '--security-profile': 'securityProfile', '--js-abi-policy': 'jsAbiPolicyPath' }[flag]] = value;
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json]');
   }
   const receipt = await buildChecked(options);
   console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));

@@ -61,6 +61,7 @@
       "scripts/selfhost-source-workspace.mjs",
       "scripts/source-read-budget.mjs",
       "scripts/specialization-correspondence.mjs",
+      "scripts/target-ir-artifact.mjs",
       "scripts/typescript-cli.mjs",
       "scripts/typescript-tool-inputs.mjs",
       "scripts/workspace-layout.mjs"

@@ -1,4 +1,5 @@
 import { canonicalArtifact } from './artifact-evidence.mjs';
+import { collectBuildOutputFiles } from './build-output-files.mjs';
 import { bindObservedBuildContext } from './observed-build-context.mjs';
 import { readFile, writeFile, mkdir, mkdtemp, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
@@ -238,27 +239,19 @@ export async function buildChecked({
       seedResources,
     });
     receipt.evidenceEnvelope = envelope.identity;
-    await writeFile(path.join(staging, stem + '.evidence-envelope.json'), envelope.bytes);
-    if (evidence.jsAbi) {
-      await writeFile(path.join(staging, stem + '.abi-plan.json'), evidence.jsAbi.plan.bytes);
-      await writeFile(path.join(staging, stem + '.abi-policy.json'), evidence.jsAbi.policy.bytes);
-    }
-    await writeFile(path.join(staging, stem + '.pscv-cert.json'), pscvCertificate.bytes);
-    await writeFile(path.join(staging, stem + '.certified-source.json'), certifiedSourceArtifact.bytes);
-    await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);
-    await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
-    if (evidence.sourceOrigins) await writeFile(path.join(staging, stem + '.source-origins.json'), evidence.sourceOrigins.bytes);
-    if (evidence.publicApi) await writeFile(path.join(staging, stem + '.public-api.json'), evidence.publicApi.bytes);
-    await writeFile(path.join(staging, stem + '.profile-environment.json'), evidence.profileEnvironment.bytes);
-    await writeFile(path.join(staging, stem + '.backend-descriptor.json'), evidence.backendDescriptor.bytes);
-    await writeFile(path.join(staging, stem + '.artifact-bundle.json'), evidence.artifactBundle.bytes);
-    await writeFile(path.join(staging, stem + '.claim-set.json'), evidence.claimSet.bytes);
-    await writeFile(path.join(staging, stem + '.admissions.json'), admissions);
-    const outputSuffixes = ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.pscv-cert.json', '.certified-source.json', '.build-graph.json', '.build-archive.json', '.evidence-envelope.json'];
-    outputSuffixes.push('.profile-environment.json', '.backend-descriptor.json', '.artifact-bundle.json', '.claim-set.json');
-    if (evidence.jsAbi) outputSuffixes.push('.abi-plan.json', '.abi-policy.json');
-    for (const suffix of outputSuffixes) {
-      await rename(path.join(staging, stem + suffix), path.join(path.dirname(output), stem + suffix));
+    const outputFiles = collectBuildOutputFiles(evidence, [
+      { suffix: '.evidence-envelope.json', record: envelope },
+      { suffix: '.build-archive.json', record: archive },
+      { suffix: '.build-graph.json', record: evidence },
+      { suffix: '.profile-environment.json', record: evidence.profileEnvironment },
+      { suffix: '.backend-descriptor.json', record: evidence.backendDescriptor },
+      { suffix: '.artifact-bundle.json', record: evidence.artifactBundle },
+      { suffix: '.claim-set.json', record: evidence.claimSet },
+      ...(evidence.jsAbi ? [{ suffix: '.abi-policy.json', record: evidence.jsAbi.policy }] : []),
+    ]);
+    for (const file of outputFiles) await writeFile(path.join(staging, stem + file.suffix), file.bytes);
+    for (const file of outputFiles) {
+      await rename(path.join(staging, stem + file.suffix), path.join(path.dirname(output), stem + file.suffix));
     }
     // This receipt is an audit record, not a transferable proof/capability.
     await writeFile(path.join(staging, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n');

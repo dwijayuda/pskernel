@@ -40,6 +40,7 @@
       "scripts/bootstrap-manifest.mjs",
       "scripts/bounded-process.mjs",
       "scripts/build-context.mjs",
+      "scripts/build-output-files.mjs",
       "scripts/canonical-memory.mjs",
       "scripts/certified-source.mjs",
       "scripts/checked-build-evidence.mjs",

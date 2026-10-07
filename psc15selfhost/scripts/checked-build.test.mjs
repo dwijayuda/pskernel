@@ -5,7 +5,8 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
+import { buildChecked, defaultCheckedSeed, selectCheckedBuildProducts } from './checked-build.mjs';
+import { closedJsRepresentationProfile, uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { verifyArtifact } from './artifact-evidence.mjs';
@@ -307,4 +308,126 @@ for (const kind of ['lean','ps']) test(`actual ${kind} closed record passes owne
     assert.equal(result.left,7n);assert.equal(result.right,11n);
     assert.equal(receipt.kernel.selector,'pskernel-core.old3');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
   } finally {await rm(dir,{recursive:true,force:true});}
+});
+
+test('build target and product combinations reject before source loading', async () => {
+  assert.equal(selectCheckedBuildProducts().backend, 'typescript');
+  assert.equal(selectCheckedBuildProducts().products, 'metadata');
+  assert.equal(selectCheckedBuildProducts({ backend: 'javascript' }).products, 'executable');
+  for (const options of [
+    { backend: 'unknown' }, { backend: 'javascript', products: 'unknown' },
+    { backend: 'typescript', products: 'all' }, { backend: 'wasm', products: 'declarations' },
+    { backend: 'wasm', javaScriptRepresentation: uniformJsRepresentationProfile },
+    { backend: 'javascript', javaScriptRepresentation: 'unknown' },
+    { backend: 'javascript', seedPath: 'missing-seed' },
+  ]) await assert.rejects(buildChecked({ entryPath: 'missing-source', outputPath: 'out.js', ...options }),
+    /PSC2_CHECKED_(BACKEND|PRODUCTS|PRODUCT_TARGET|JAVASCRIPT_REPRESENTATION|SEED_TARGET_UNSUPPORTED)/);
+  await assert.rejects(buildChecked({ entryPath: 'missing-source', outputPath: 'out.ts', backend: 'javascript' }),
+    /PSC2_CHECKED_OUTPUT_KIND/);
+});
+
+// These fixtures test host routing with real acceptance of empty admissions.
+// Actual compiler source/backend correspondence is covered by IrEncodingTests;
+// no preservation claim follows from this transport/publication test double.
+function buildRoutingCompiler({ uniform, executableOnly, malformed = false }) {
+  const ir = '["psc-runtime-ir-json/1",[],[],[],[]]';
+  return [
+    "const ok = value => ({ $ps$tag: 'ok', $ps$fields: { value } });",
+    "const nil = () => ({ $ps$tag: 'nil', $ps$fields: {} });",
+    "const cons = (head, tail) => ({ $ps$tag: 'cons', $ps$fields: { head, tail } });",
+    "export const List = { nil, cons };",
+    "export const PsCompilerSourceKind = { lean: 'lean', proofScript: 'ps' };",
+    "let preparations = 0, emissions = 0, declarations = 0;",
+    "export const counts = () => ({ preparations, emissions, declarations });",
+    "export const psCompilerPrepareSource = (kind, source) => ok({kind, source});",
+    "export const psCompilerPrepareSources = (kind, sources) => { preparations++; return ok({kind, sources}); };",
+    "export const psCompilerPrepareSourcesWithOrigins = (kind, sources) => { preparations++; return ok({ prepared: {kind, sources}, origins: " +
+      JSON.stringify(executableOnly ? null : '["psc-declaration-origins/1","declaration-batch",1,[]]') + " }); };",
+    "export const psCompilerAdmissionsFromPrepared = () => ok(" +
+      JSON.stringify('{"admissions":[],"format":"proofscript-checked-admissions","version":2}') + ");",
+    "const ir = " + JSON.stringify(ir) + ";",
+    "export const psCompilerPublicApiFromPrepared = () => " +
+      (executableOnly ? "{ throw new Error('UNREQUESTED_API'); };" :
+        "ok(" + JSON.stringify('["psc-public-api-ir/1","all-prepared-declarations",[]]') + ");"),
+    "function js() { emissions++; const value = { javaScript: '', runtimeIr: ir, verifiedIr: ir, " +
+      (uniform ? "uniformSpecializedIr: " + JSON.stringify(JSON.stringify(['psc-uniform-specialized-ir/1', uniformJsRepresentationProfile, JSON.parse(ir)])) :
+        "specializedIr: ir") + ", jsIr: " + JSON.stringify(malformed ? 'malformed' : '["psc-js-ir-json/1",[],[]]') +
+      ", erasureCorrespondence: " + JSON.stringify('["psc-erasure-declarations/1","declaration-inventory",[]]') + " }; " +
+      (executableOnly ? "Object.defineProperty(value, 'generatedPositions', { get() { throw new Error('UNREQUESTED_POSITIONS'); } });" :
+        "value.generatedPositions = " + JSON.stringify('["psc-js-generated-positions/1","declaration-emission-chunk",[]]') + ";") +
+      "return ok(value); }",
+    "export const " + (uniform ? "psCompilerUniformJavaScriptStagesFromPrepared" : "psCompilerJavaScriptStagesFromPrepared") + " = js;",
+    "export const psCompilerJavaScriptDeclarationsFromPrepared = () => { declarations++; return ok(" +
+      JSON.stringify('export {};\n') + "); };",
+    "export const psCompilerWasm32Target = { wordSize: 'wasm32' };",
+    "export const psCompilerWasmStagesFromPrepared = () => { emissions++; return ok({ runtimeIr: ir, verifiedIr: ir, specializedIr: ir, wasmIr: " +
+      JSON.stringify('["psc-wasm-ir-json/1",[],[],[],[],[],[]]') +
+      ", wasm: [0,97,115,109,1,0,0,0].reduceRight((tail, head) => cons(head, tail), nil()) }); };",
+  ].join('\n');
+}
+
+for (const [backend, products, representation] of [
+  ['javascript', 'all', closedJsRepresentationProfile],
+  ['javascript', 'all', uniformJsRepresentationProfile],
+  ['javascript', 'source-map', closedJsRepresentationProfile],
+  ['javascript', 'executable', closedJsRepresentationProfile],
+  ['wasm', 'executable', closedJsRepresentationProfile],
+]) test(`direct ${backend}/${products}/${representation} publishes selected graph products without TypeScript`,
+  { skip: !native }, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'psc-checked-direct-routing-'));
+    const previousCli = process.env.PSC_TYPESCRIPT_CLI;
+    try {
+      process.env.PSC_TYPESCRIPT_CLI = path.join(dir, 'typescript-must-not-be-loaded');
+      const entryPath = path.join(dir, 'Empty.lean'), compilerPath = path.join(dir, 'fixture.mjs');
+      const outputPath = path.join(dir, backend === 'wasm' ? 'out.wasm' : 'out.js');
+      await writeFile(entryPath, '-- no declarations\n');
+      await writeFile(compilerPath, buildRoutingCompiler({ uniform: representation === uniformJsRepresentationProfile,
+        executableOnly: products === 'executable' }));
+      const receipt = await buildChecked({ entryPath, outputPath, compilerPath, backend, products,
+        javaScriptRepresentation: representation, kernel: 'lean434' });
+      assert.equal(receipt.backend, backend); assert.equal(receipt.requestedProducts, products);
+      assert.equal(receipt.typeScriptToolInputs, undefined); assert.equal(receipt.typeScriptSha256, undefined);
+      assert.equal(existsSync(path.join(dir, 'out.ts')), false);
+      const counts = (await import(pathToFileURL(compilerPath).href)).counts();
+      assert.deepEqual(counts, { preparations: 1, emissions: 1, declarations: products === 'all' ? 1 : 0 });
+      const certificate = JSON.parse(await readFile(path.join(dir, 'out.pscv-cert.json')));
+      assert.deepEqual(certificate.context.targets, [backend]);
+      const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json')));
+      assert.equal(passIds(graph).includes('typescript-to-es2022/1'), false);
+      assert.equal(graph.entries.some(entry => entry.identity.domain === 'typescript-compiler-entry'), false);
+      const archived = await verifyObservedBuildArchive(await readFile(path.join(dir, 'out.build-archive.json')),
+        { expectedGraphId: receipt.buildGraph, allowedAssumptions: allowedAssumptionsFromGraph(graph) });
+      assert.equal(archived.kind, 'accepted', archived.reason); assert.equal(archived.semanticClaimsVerified, false);
+      if (products === 'all') {
+        assert.equal(await readFile(path.join(dir, 'out.d.ts'), 'utf8'), 'export {};\n');
+        assert.equal(JSON.parse(await readFile(path.join(dir, 'out.js.map'))).version, 3);
+        assert.equal(receipt.declarationProduction.hostBytesCompared, true);
+      } else if (products === 'source-map') {
+        assert.equal(existsSync(path.join(dir, 'out.d.ts')), false);
+        assert.equal(JSON.parse(await readFile(path.join(dir, 'out.js.map'))).version, 3);
+      } else {
+        assert.equal(receipt.publicApi, undefined); assert.equal(receipt.sourceOrigins, undefined);
+        assert.equal(receipt.specializationInstances, undefined);
+        assert.equal(existsSync(path.join(dir, 'out.d.ts')), false);
+        assert.equal(existsSync(path.join(dir, 'out.js.map')), false);
+      }
+      if (backend === 'wasm') assert.equal(WebAssembly.validate(await readFile(outputPath)), true);
+    } finally {
+      if (previousCli === undefined) delete process.env.PSC_TYPESCRIPT_CLI;
+      else process.env.PSC_TYPESCRIPT_CLI = previousCli;
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+test('a malformed direct stage does not publish executable or receipt files', { skip: !native }, async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'psc-checked-direct-reject-'));
+  try {
+    const entryPath = path.join(dir, 'Empty.lean'), compilerPath = path.join(dir, 'fixture.mjs');
+    const outputPath = path.join(dir, 'never', 'out.js');
+    await writeFile(entryPath, '-- no declarations\n');
+    await writeFile(compilerPath, buildRoutingCompiler({ executableOnly: true, malformed: true }));
+    await assert.rejects(buildChecked({ entryPath, outputPath, compilerPath, backend: 'javascript', kernel: 'lean434' }),
+      /export-json/);
+    assert.equal(existsSync(path.dirname(outputPath)), false);
+  } finally { await rm(dir, { recursive: true, force: true }); }
 });

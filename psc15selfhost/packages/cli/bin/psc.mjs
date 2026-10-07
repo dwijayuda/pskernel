@@ -31,7 +31,7 @@ function usage() {
     "",
     "usage:",
     "  psc bootstrap",
-    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>] [--kernel <provider>] [--security-profile <profile>]",
+    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts|output.wasm> [--backend typescript|javascript|wasm] [--products executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--compiler <compiler.js> | --seed <binary>] [--kernel <provider>] [--security-profile <profile>]",
     "  psc build-unchecked <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]  # bootstrap/internal",
     "  psc translate <input.lean|input.ps> --to <lean|ps> [--out <output>] [--compiler <compiler.js>]",
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",
@@ -73,25 +73,10 @@ if (!command || command === "--help" || command === "-h") {
   run(npm, ["run", "fixed-point"]);
 } else if (command === "build") {
   const entry = args[1];
-  const output = option(args, "--out");
-  const compiler = option(args, "--compiler") ?? defaultCompiler;
-  const kernel = option(args, "--kernel") ?? "lean434-wasm";
-  const securityProfile = option(args, "--security-profile") ?? "development-v1";
-
-  if (!entry || !output) throw new Error(usage());
-
-  run(node, [
-    "scripts/checked-build.mjs",
-    entry,
-    "--out",
-    output,
-    "--compiler",
-    compiler,
-    "--kernel",
-    kernel,
-    "--security-profile",
-    securityProfile,
-  ]);
+  if (!entry || entry.startsWith("--") || !args.includes("--out")) throw new Error(usage());
+  // The checked builder owns option validation and provider-specific defaults.
+  // Forward the explicit request intact instead of supplying a bootstrap module.
+  run(node, ["scripts/checked-build.mjs", ...args.slice(1)]);
 } else if (command === "build-unchecked") {
   const entry = args[1];
   const output = option(args, "--out");

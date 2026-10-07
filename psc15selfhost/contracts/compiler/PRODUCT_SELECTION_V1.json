@@ -26,10 +26,32 @@
   "compatibility": "emitArtifact keeps its strict all-available-metadata behavior. No automatic fallback follows a requested-product failure. A caller explicitly requests executable-only output on its existing live handle.",
   "limits": [
     "This host selection does not stop a selected portable staged producer from internally computing observation tables.",
-    "Native two-phase transport and build-graph product selection still require explicit routing.",
-    "This is not a hostile-JavaScript sandbox or a resource theorem."
+    "This is not a hostile-JavaScript sandbox or a resource theorem.",
+    "Native two-phase direct routing, Rust checked build routing, canonical Wasm export selection and broader named/dependent declaration types remain pending."
   ],
   "authority": "selection-does-not-create-or-expand-authority",
   "globalPreservationProved": false,
-  "releasePromotion": false
+  "releasePromotion": false,
+  "buildRouting": {
+    "owner": "scripts/checked-build.mjs",
+    "cli": "packages/cli/bin/psc.mjs",
+    "backend": "Explicit typescript/javascript/wasm; default typescript, never inferred from a file suffix.",
+    "products": {
+      "typescript": "metadata preserves the existing TS+tsc executable/declaration/source-map bundle; other product modes reject.",
+      "javascript": "executable (default), metadata (all available metadata), declarations (required portable source declarations), source-map (required standalone map without declarations), or all (declarations and required map).",
+      "wasm": "executable (default) or metadata under the existing private wasm32 self-host ABI; canonical export routing remains separate."
+    },
+    "representation": "--js-representation closed|uniform pins the live JavaScript profile before checking; other backends reject uniform.",
+    "compiler": "An explicitly selected generated module must expose its selected staged API. The checked provider-specific default is retained; the CLI no longer injects an unrelated bootstrap compiler.",
+    "validation": [
+      "Target/product/profile/suffix and unsupported native-seed selections reject before source/compiler loading.",
+      "One live checked source session emits the selected direct products; session is closed after capture.",
+      "The graph compares all three requested declaration product identities and bytes with the live portable-comparison result.",
+      "Required source maps use the live declaration lineage, then compose captured original-source preparation coordinates and output filename.",
+      "Only the TypeScript lane resolves or invokes tsc; direct lanes retain all graph/archive/descriptor/bundle/envelope checks.",
+      "Executable-only closed graphs check specialization correspondence without constructing a debug witness map."
+    ],
+    "publication": "The existing single graph output inventory drives staged writes and per-file publication; receipt is last. No directory-atomic transaction or cleanup of pre-existing unselected files is claimed.",
+    "nativeTransport": "Existing seed protocol remains TypeScript metadata-only; explicit direct seed selections reject until versioned native product routing is implemented."
+  }
 }

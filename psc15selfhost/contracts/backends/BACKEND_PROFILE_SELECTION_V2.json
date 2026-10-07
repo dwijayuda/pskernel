@@ -33,7 +33,7 @@
     "releaseAccepted": false
   },
   "remaining": [
-    "Named/dependent public types and explicit CLI product/profile selection",
+    "Named/dependent public types and native-seed product/profile routing",
     "Independent preservation, bootstrap diversity and full assurance",
     "Fine-grained expression origins, portable maps, declaration maps and automatic sourceMappingURL packaging"
   ],

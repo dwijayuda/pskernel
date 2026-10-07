@@ -1052,15 +1052,15 @@
       "backendKind": "sourceTarget",
       "role": "minimal bootstrap; ecosystem and differential oracle",
       "descriptorStatus": "implemented",
-      "bundleStatus": "shared-contract-implemented-production-routing-pending",
+      "bundleStatus": "production-checked-build-routing-implemented",
       "preservation": "not-established-globally"
     },
     {
       "backendId": "javascript",
       "backendKind": "directTargetIR",
-      "role": "long-term JS/npm lane; complete declaration/debug bundle pending",
+      "role": "long-term JS/npm lane; selected closed/uniform declarations and declaration-granularity maps",
       "descriptorStatus": "implemented",
-      "bundleStatus": "shared-contract-implemented-production-routing-pending",
+      "bundleStatus": "generated-checked-build-routing-implemented-native-routing-pending",
       "preservation": "not-established-globally"
     },
     {
@@ -1068,7 +1068,7 @@
       "backendKind": "directTargetIR",
       "role": "Core Wasm; private self-host ABI and Canonical ABI remain distinct",
       "descriptorStatus": "implemented",
-      "bundleStatus": "shared-contract-implemented-production-routing-pending",
+      "bundleStatus": "generated-private-wasm32-checked-build-routing-implemented-canonical-and-native-routing-pending",
       "preservation": "not-established-globally"
     },
     {
@@ -1123,7 +1123,7 @@
       "classifications": [
         "artifact-bundle"
       ],
-      "status": "production-typescript-bundles-archive-and-live-independent-product-selection-implemented-direct-cli-native-selection-and-rust-routing-pending",
+      "status": "typescript-and-generated-direct-js-wasm-checked-build-routing-implemented-native-direct-and-rust-routing-pending",
       "requirement": "Common typed independently identified executable/public/debug/interface/toolchain/evidence products."
     },
     {
@@ -1194,7 +1194,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "closed-and-uniform-portable-declarations-and-host-source-maps-live-graph-bundle-archive-integrated-cli-and-finer-origins-pending",
+      "status": "closed-and-uniform-portable-declarations-host-source-maps-and-explicit-generated-build-routing-implemented-native-routing-and-finer-origins-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {

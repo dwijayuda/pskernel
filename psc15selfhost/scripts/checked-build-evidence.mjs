@@ -15,7 +15,7 @@ import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { createSourcePreparationArtifacts } from './source-preparation-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
-import { createSpecializationInstanceMap } from './specialization-correspondence.mjs';
+import { createSpecializationInstanceMap, verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
 import { verifyWasmCanonicalProjection, verifyWasmCanonicalBinary } from './wasm-canonical-artifact.mjs';
 
@@ -47,7 +47,9 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence, generatedPositions, declarationProfile, javaScriptRepresentation = closedJsRepresentationProfile }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence, generatedPositions, declarationProfile, javaScriptRepresentation = closedJsRepresentationProfile,
+  includeSpecializationInstances = true }) {
+  if (typeof includeSpecializationInstances !== 'boolean') throw new Error('PSC_BUILD_GRAPH_PRODUCT_SELECTION');
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -321,10 +323,10 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           globalPreservationProved: false },
         baseDependencies, ['trusted-strict-ir-validator', 'trusted-uniform-representation-selection'], correspondence);
     } else {
-      const projection = createSpecializationInstanceMap(verifiedIr, specializedIr);
-      const correspondence = projection.result;
-      specializationInstances = add(projection.map, { kind: 'output-file', suffix: '.specialization-instances.json' });
-      execute('psc-pass-specialize/1', verifiedIr, [specializedIr, specializationInstances], implementation, 'psc-specialization-runtime-refinement/1',
+      const projection = includeSpecializationInstances ? createSpecializationInstanceMap(verifiedIr, specializedIr) : undefined;
+      const correspondence = projection?.result ?? verifySpecializationCorrespondence(verifiedIr, specializedIr);
+      if (projection) specializationInstances = add(projection.map, { kind: 'output-file', suffix: '.specialization-instances.json' });
+      execute('psc-pass-specialize/1', verifiedIr, [specializedIr, ...(specializationInstances ? [specializationInstances] : [])], implementation, 'psc-specialization-runtime-refinement/1',
         { observedStages: ['specialize', 'validate-specialized-ir', 'check-specialization-correspondence'],
           postcondition: 'strict-runtime-ir-invariants', correspondenceRelation: correspondence.relation,
           globalPreservationProved: false },

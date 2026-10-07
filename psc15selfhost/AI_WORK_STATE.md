@@ -538,3 +538,11 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Added independent host target-IR decoders and portable JsIR/WasmIR structural corpora. These are implementation validation boundaries; global target preservation remains assurance work.
 - Added canonical InterfaceIR artifact encoding plus independent host InterfaceIR->WIT reproduction. This binds the exact interface/world object underlying WIT while keeping Canonical ABI/runtime behavior explicitly pending and separate from core Wasm.
 - Current next gate: restore full self-host matrix on the portable target encoders; then use direct-Wasm parse-vs-elaborate timing to optimize the dominant subsystem family without changing fixed-point equality.
+
+
+## 2026-10-07 checked-build evidence consumer repair
+
+- Main-cloud checked-build failures were caused by consumer fixtures assuming the older fixed graph size/assumption list after the build pipeline gained certification, ABI-plan and richer pass edges.
+- Replaced hard-coded execution counts and assumption arrays with semantic graph inspection: tests now derive the exact allowed assumption closure from archived PassDefinitions and require named pass IDs for the checked TypeScript/JavaScript route.
+- Production assumption policy, PassExecution verification and archive fail-closed behavior were not weakened. This is a consumer-policy/test repair aligned with the actual explicit pipeline.
+- Kernel workstream remains external and untouched.

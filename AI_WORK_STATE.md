@@ -209,3 +209,28 @@ Architectural blockers still remaining:
 - Current implementation frontier: transport and compose full delta-step operations (one-sided, two-sided, native/Nat branches), prove lazy reduction/projection fuel contracts, and then complete the concrete `PsKernelDefEqConfigurationSound (psKernelIsDefEqWithFuel fuel)` mutually recursive checker knot.
 - Admission refinement, final public implementation-refinement theorem, semantic audit refresh, integration reconciliation, and final gates remain open.
 - No additional production semantic defect was diagnosed in this checkpoint; no production source was changed for proof convenience.
+
+## Lazy-delta assurance checkpoint — 2026-10-08
+- GitHub remains canonical; refresh branch tip and CI before further proof writes.
+- Latest independently green full proof gate before this checkpoint: run #588 at
+  4330aa6c177f82bdaabdc5dec0e81775daaaf41f. Runs #584-#587 also green.
+- Run #585 proves both one-sided lazy-delta steps, transporting positive DefEq
+  over explicit projection/delta reduction closures.
+- Run #586 proves both ordered reducibility-hint branches without transitivity.
+- Run #587 proves psKernelDefEqArgsWithFuel_configuration_sound and wrapper:
+  optimized argument comparison refines whole-expression DefEq only under
+  independently supplied function-head equality.
+- Run #588 proves normalized universe-list guards and name-equality soundness
+  for same-definition lazy delta, with PsKernelStringEqSoundLaw explicit.
+- Checkpoint 016b99f9d58b2c45e6e7b7a7352a2c3137ac117d adds definition
+  lookup provenance and composes metadata, name and universe head guards.
+  Its full CI was in flight when this state was authored: verify before claiming green.
+- No production semantic defect confirmed, and no production source changed.
+- Next: equal-hint optimized argument comparison, failure-cache configuration
+  preservation, complete two-definition lazy-step result, then lazy step/fuel
+  reduction and projection contracts.
+- Later: concrete psKernelIsDefEqWithFuel soundness; mutually recursive
+  recursor/WHNF/inference checker-knot proof; ordinary/mutual/nested admission;
+  API/session implementation-refinement; audit refresh; integration and gates.
+- Preserve non-transitive algorithmic DefEq. No sorry, axioms, hidden trust
+  assumptions, acceptance weakening, or Arena host infrastructure leakage.

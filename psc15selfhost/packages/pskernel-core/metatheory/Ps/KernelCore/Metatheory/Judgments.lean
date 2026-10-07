@@ -177,6 +177,17 @@ inductive PsKernelReductionStep
             levels)
           (psKernelExprGetAppArgs expr))
 
+  | natZeroLiteral
+      (name : PsKernelName)
+      (hName :
+        psKernelNameEq name psKernelNatZeroName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.const name List.nil)
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat 0))
+
   | natAdd
       (op : PsKernelName)
       (left right : Nat)
@@ -319,7 +330,7 @@ inductive PsKernelReductionStep
       (hOp :
         psKernelNameEq op psKernelNatPowName = true)
       (hZero :
-        Nat.beq right 0 = true) :
+        right = 0) :
       PsKernelReductionStep
         environment
         localContext
@@ -425,7 +436,7 @@ inductive PsKernelReductionStep
       (hOp :
         psKernelNameEq op psKernelNatShiftLeftName = true)
       (hZero :
-        Nat.beq left 0 = true) :
+        left = 0) :
       PsKernelReductionStep
         environment
         localContext

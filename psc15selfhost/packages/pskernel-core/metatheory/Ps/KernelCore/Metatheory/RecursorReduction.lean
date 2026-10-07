@@ -2044,124 +2044,154 @@ theorem psKernelReduceInductiveRecPrefixWith_configuration_sound
         (Nat.add
           recursor.numMinors
           recursor.numIndices))
-  revert hSuccess
-  cases hShort :
-      psKernelNatGe
-        majorIndex
-        (psKernelExprListLength recArgs) with
-  | true =>
-      intro hSuccess
-      simp [
-        psKernelReduceInductiveRecPrefixWith,
-        majorIndex,
-        hShort
-      ] at hSuccess
-      rcases hSuccess with ⟨rfl, rfl⟩
-      exact ⟨hConfig, trivial⟩
-  | false =>
-      intro hSuccess
-      revert hSuccess
-      cases hMajor :
-          psKernelExprListGet
-            recArgs
-            majorIndex with
-      | none =>
-          intro hSuccess
-          simp [
-            psKernelReduceInductiveRecPrefixWith,
-            majorIndex,
-            hShort,
-            hMajor
-          ] at hSuccess
-          rcases hSuccess with ⟨rfl, rfl⟩
-          exact ⟨hConfig, trivial⟩
-      | some major0 =>
-          intro hSuccess
-          have hInline :
-              psKernelReduceInductiveRecMajorInlineTailWith
-                  publicWhnf
-                  coreWhnf
-                  inferType
-                  defeq
-                  context
-                  state
-                  recursor
-                  recLevels
-                  recArgs
-                  major0
-                  cheapRec
-                  cheapProj =
-                Except.ok
-                  (Prod.mk answer nextState) := by
-            simpa [
-              psKernelReduceInductiveRecPrefixWith,
-              majorIndex,
-              hShort,
-              hMajor
-            ] using hSuccess
-          have hTail :
-              psKernelReduceInductiveRecMajorTailWith
-                  publicWhnf
-                  coreWhnf
-                  inferType
-                  defeq
-                  context
-                  state
-                  recursor
-                  recLevels
-                  recArgs
-                  major0
-                  cheapRec
-                  cheapProj =
-                Except.ok
-                  (Prod.mk answer nextState) := by
-            rw [
-              ← psKernelReduceInductiveRecMajorInlineTailWith_eq_factored
-                publicWhnf
-                coreWhnf
-                inferType
-                defeq
-                context
-                state
-                recursor
-                recLevels
-                recArgs
-                major0
-                cheapRec
-                cheapProj
-            ]
-            exact hInline
-          have hTailSemantic :=
-            psKernelReduceInductiveRecMajorTailWith_configuration_sound
+  have hExecutable :
+      (if
+          psKernelNatGe
+              majorIndex
+              (psKernelExprListLength recArgs) =
+            true then
+        Except.ok
+          (Prod.mk Option.none state)
+       else
+        match
+            psKernelExprListGet
+              recArgs
+              majorIndex with
+        | Option.none =>
+            Except.ok
+              (Prod.mk Option.none state)
+        | Option.some major0 =>
+            psKernelReduceInductiveRecMajorInlineTailWith
               publicWhnf
               coreWhnf
               inferType
               defeq
-              hWhnf
-              hCore
-              hK
-              hStructure
               context
               state
-              nextState
-              expr
-              recName
+              recursor
               recLevels
               recArgs
-              recursor
               major0
               cheapRec
-              cheapProj
-              answer
-              hConfig
-              hHead
-              hArgs
-              hFind
-              (by
-                simpa [majorIndex] using hMajor)
-              hTail
-          exact hTailSemantic
-
+              cheapProj) =
+        Except.ok (Prod.mk answer nextState) := by
+    simpa [
+      psKernelReduceInductiveRecPrefixWith,
+      majorIndex
+    ] using hSuccess
+  by_cases hShort :
+      psKernelNatGe
+          majorIndex
+          (psKernelExprListLength recArgs) =
+        true
+  · have hRun := hExecutable
+    rw [if_pos hShort] at hRun
+    simp at hRun
+    rcases hRun with ⟨hAnswer, hState⟩
+    subst answer
+    subst nextState
+    exact ⟨hConfig, trivial⟩
+  · have hRun := hExecutable
+    rw [if_neg hShort] at hRun
+    have hMajorCases :
+        psKernelExprListGet recArgs majorIndex =
+            Option.none ∨
+          ∃ major0 : PsKernelExpr,
+            psKernelExprListGet recArgs majorIndex =
+              Option.some major0 := by
+      cases hLookup :
+          psKernelExprListGet recArgs majorIndex with
+      | none =>
+          exact Or.inl hLookup
+      | some major0 =>
+          exact Or.inr ⟨major0, hLookup⟩
+    rcases hMajorCases with hMajor | ⟨major0, hMajor⟩
+    · rw [hMajor] at hRun
+      simp at hRun
+      rcases hRun with ⟨hAnswer, hState⟩
+      subst answer
+      subst nextState
+      exact ⟨hConfig, trivial⟩
+    · rw [hMajor] at hRun
+      have hInline :
+          psKernelReduceInductiveRecMajorInlineTailWith
+              publicWhnf
+              coreWhnf
+              inferType
+              defeq
+              context
+              state
+              recursor
+              recLevels
+              recArgs
+              major0
+              cheapRec
+              cheapProj =
+            Except.ok
+              (Prod.mk answer nextState) :=
+        hRun
+      have hTail :
+          psKernelReduceInductiveRecMajorTailWith
+              publicWhnf
+              coreWhnf
+              inferType
+              defeq
+              context
+              state
+              recursor
+              recLevels
+              recArgs
+              major0
+              cheapRec
+              cheapProj =
+            Except.ok
+              (Prod.mk answer nextState) := by
+        rw [
+          ← psKernelReduceInductiveRecMajorInlineTailWith_eq_factored
+            publicWhnf
+            coreWhnf
+            inferType
+            defeq
+            context
+            state
+            recursor
+            recLevels
+            recArgs
+            major0
+            cheapRec
+            cheapProj
+        ]
+        exact hInline
+      have hTailSemantic :=
+        psKernelReduceInductiveRecMajorTailWith_configuration_sound
+          publicWhnf
+          coreWhnf
+          inferType
+          defeq
+          hWhnf
+          hCore
+          hK
+          hStructure
+          context
+          state
+          nextState
+          expr
+          recName
+          recLevels
+          recArgs
+          recursor
+          major0
+          cheapRec
+          cheapProj
+          answer
+          hConfig
+          hHead
+          hArgs
+          hFind
+          (by
+            simpa [majorIndex] using hMajor)
+          hTail
+      simpa using hTailSemantic
 
 theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
     (publicWhnf :

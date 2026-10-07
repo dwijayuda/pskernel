@@ -410,19 +410,69 @@ def psKernelInferCoreWithFuel
                                                 expr
                                                 result))
                                         else
-                                          Except.error
-                                            ("application type mismatch; fn=" ++
-                                              psKernelInferenceDebugExprHead fn ++
-                                              "; arg=" ++
-                                              psKernelInferenceDebugExprHead arg ++
-                                              "; expected=" ++
-                                              psKernelInferenceDebugExprHead view.domain ++
-                                              "; actual=" ++
-                                              psKernelInferenceDebugExprHead argType ++
-                                              "; diff=" ++
-                                              psKernelInferenceDebugExprDiff
-                                                view.domain
-                                                argType)
+                                          match
+                                              whnf
+                                                eqContext
+                                                (Prod.snd eqResult)
+                                                view.domain with
+                                          | Except.error _ =>
+                                              Except.error
+                                                ("application type mismatch; fn=" ++
+                                                  psKernelInferenceDebugExprHead fn ++
+                                                  "; arg=" ++
+                                                  psKernelInferenceDebugExprHead arg ++
+                                                  "; expected=" ++
+                                                  psKernelInferenceDebugExprHead view.domain ++
+                                                  "; actual=" ++
+                                                  psKernelInferenceDebugExprHead argType ++
+                                                  "; diff=" ++
+                                                  psKernelInferenceDebugExprDiff
+                                                    view.domain
+                                                    argType)
+                                          | Except.ok expectedWhnf =>
+                                              match
+                                                  whnf
+                                                    eqContext
+                                                    (Prod.snd expectedWhnf)
+                                                    argType with
+                                              | Except.error _ =>
+                                                  Except.error
+                                                    ("application type mismatch; fn=" ++
+                                                      psKernelInferenceDebugExprHead fn ++
+                                                      "; arg=" ++
+                                                      psKernelInferenceDebugExprHead arg ++
+                                                      "; expected=" ++
+                                                      psKernelInferenceDebugExprHead view.domain ++
+                                                      "; actual=" ++
+                                                      psKernelInferenceDebugExprHead argType ++
+                                                      "; diff=" ++
+                                                      psKernelInferenceDebugExprDiff
+                                                        view.domain
+                                                        argType)
+                                              | Except.ok actualWhnf =>
+                                                  Except.error
+                                                    ("application type mismatch; fn=" ++
+                                                      psKernelInferenceDebugExprHead fn ++
+                                                      "; arg=" ++
+                                                      psKernelInferenceDebugExprHead arg ++
+                                                      "; expected=" ++
+                                                      psKernelInferenceDebugExprHead view.domain ++
+                                                      "; actual=" ++
+                                                      psKernelInferenceDebugExprHead argType ++
+                                                      "; diff=" ++
+                                                      psKernelInferenceDebugExprDiff
+                                                        view.domain
+                                                        argType ++
+                                                      "; whnf-expected=" ++
+                                                      psKernelInferenceDebugExprHead
+                                                        (Prod.fst expectedWhnf) ++
+                                                      "; whnf-actual=" ++
+                                                      psKernelInferenceDebugExprHead
+                                                        (Prod.fst actualWhnf) ++
+                                                      "; whnf-diff=" ++
+                                                      psKernelInferenceDebugExprDiff
+                                                        (Prod.fst expectedWhnf)
+                                                        (Prod.fst actualWhnf))
                 | PsKernelExpr.lam name domain body binderInfo =>
                     let checkedDomain :=
                       if inferOnly then

@@ -584,30 +584,34 @@ theorem psKernelEnvironmentFind_defn_name_eq
       psKernelEnvironmentFind environment name =
         Option.some (PsKernelConstantInfo.defnInfo definition)) :
     psKernelNameEq definition.base.name name = true := by
-  unfold psKernelEnvironmentFind at hFind
-  generalize hBucket :
-      psKernelEnvironmentIndexFind environment.index name = bucket
-    at hFind
-  induction bucket with
-  | nil =>
-      simp [psKernelFindConstantInList] at hFind
-  | cons head tail ih =>
-      cases hMatch :
-          psKernelNameEq
-            (psKernelConstantInfoName head) name with
-      | false =>
-          have hTail :
-              psKernelFindConstantInList name tail =
-                Option.some
-                  (PsKernelConstantInfo.defnInfo definition) := by
-            simpa [psKernelFindConstantInList, hMatch] using hFind
-          exact ih hTail
-      | true =>
-          have hInfo :
-              head = PsKernelConstantInfo.defnInfo definition := by
-            simpa [psKernelFindConstantInList, hMatch] using hFind
-          subst head
-          simpa [psKernelConstantInfoName] using hMatch
+  have hList :
+      ∀ (values : List PsKernelConstantInfo),
+        psKernelFindConstantInList name values =
+          Option.some (PsKernelConstantInfo.defnInfo definition) ->
+        psKernelNameEq definition.base.name name = true := by
+    intro values
+    induction values with
+    | nil =>
+        intro hEmpty
+        simp [psKernelFindConstantInList] at hEmpty
+    | cons head tail ih =>
+        intro hResult
+        cases hMatch :
+            psKernelNameEq (psKernelConstantInfoName head) name with
+        | false =>
+            apply ih
+            simpa [psKernelFindConstantInList, hMatch] using hResult
+        | true =>
+            have hInfo :
+                head = PsKernelConstantInfo.defnInfo definition := by
+              simpa [psKernelFindConstantInList, hMatch] using hResult
+            subst head
+            simpa [
+              psKernelConstantInfoName,
+              psKernelConstantInfoBase
+            ] using hMatch
+  apply hList (psKernelEnvironmentIndexFind environment.index name)
+  simpa [psKernelEnvironmentFind] using hFind
 
 
 theorem psKernelDeltaDefinition_some_head_matches
@@ -650,7 +654,7 @@ theorem psKernelDeltaDefinition_some_head_matches
                   subst definition
                   exact
                     ⟨
-                      name, levels, hHead, hLookup,
+                      name, levels, rfl, hLookup,
                       psKernelEnvironmentFind_defn_name_eq
                         context.environment name found hLookup
                     ⟩

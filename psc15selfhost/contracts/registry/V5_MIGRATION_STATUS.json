@@ -1114,7 +1114,7 @@
       "classifications": [
         "backend"
       ],
-      "status": "four-lane-registry-and-exact-descriptor-binding-implemented",
+      "status": "four-lane-registry-exact-descriptor-binding-and-versioned-profile-derivations-implemented",
       "requirement": "TS/direct JS/Wasm/Rust descriptors identify contracts, implementation, toolchains, capabilities and assurance."
     },
     {
@@ -1573,6 +1573,20 @@
       "status": "experimental",
       "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
       "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-backend-profile-selection/2",
+      "kind": "backend-profile-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/2",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
     }
   ]
 }

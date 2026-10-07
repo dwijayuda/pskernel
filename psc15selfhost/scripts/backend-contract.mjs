@@ -62,13 +62,15 @@ export function decodeBackendRegistry(record) {
   return value;
 }
 
-export const backendSelectionContract = 'psc-backend-profile-selection/1';
+export const legacyBackendSelectionContract = 'psc-backend-profile-selection/1';
+export const backendSelectionContract = 'psc-backend-profile-selection/2';
+export const uniformJavaScriptDerivation = 'psc-uniform-js-backend-derivation/2';
 
 /** A deterministic specialization of the existing registry, not a fifth lane.
  * The base remains a separately identified input. A selected registry does not
  * establish runtime preservation or authorize a checked-session policy.
  */
-export function selectUniformJavaScriptRegistry(baseRecord) {
+export function selectUniformJavaScriptRegistryV1(baseRecord) {
   const value = decodeBackendRegistry(baseRecord);
   if (value.backends.map(item => item.backendId).sort().join(',') !== 'javascript,rust,typescript,wasm')
     fail('SELECTION_BASE_LANES');
@@ -97,25 +99,58 @@ export function selectUniformJavaScriptRegistry(baseRecord) {
   backend.ownershipDebt = 'Explicit uniform JS representation retains validated generic RuntimeIR. Generic function declarations are source-derived. Uniform source-map composition, named/dependent public types, portable declaration serializers, checked CLI selection and global preservation remain pending.';
   const registry = canonicalArtifact(value, 'backend-registry', 'psc-backend-registry/1');
   decodeBackendRegistry(registry);
-  const selection = canonicalArtifact({ schemaVersion: 1, contract: backendSelectionContract,
+  const selection = canonicalArtifact({ schemaVersion: 1, contract: legacyBackendSelectionContract,
     backendId: 'javascript', profile: uniformJsRepresentationProfile,
+    baseRegistryId: baseRecord.identity, selectedRegistryId: registry.identity, authority: 'audit-record-only' },
+  'backend-profile-selection', legacyBackendSelectionContract);
+  return { registry, selection };
+}
+
+/** Versioned derivations preserve historical selection bytes. The backend
+ * emitter remains backend-owned; driver composition is separately identified.
+ * Future capabilities require a new derivation identity and retained readers.
+ */
+export function selectUniformJavaScriptRegistry(baseRecord, { derivationId = uniformJavaScriptDerivation } = {}) {
+  if (derivationId !== uniformJavaScriptDerivation) fail('SELECTION_DERIVATION');
+  const value = decodeBackendRegistry(selectUniformJavaScriptRegistryV1(baseRecord).registry);
+  const backend = value.backends.find(item => item.backendId === 'javascript');
+  backend.emitterId = 'psJsEmitValidatedModuleStackSafeWithTargetProfile';
+  backend.supportedCapabilities.push('portable-structural-source-declarations');
+  backend.ownershipDebt = 'Explicit uniform representation retains validated generic RuntimeIR. The backend owns the shared validated JsIR writer; interface-ts owns portable source declarations and the driver composes them. Uniform source-map composition, named/dependent public types, checked CLI selection and global preservation remain pending.';
+  const registry = canonicalArtifact(value, 'backend-registry', 'psc-backend-registry/1');
+  decodeBackendRegistry(registry);
+  const selection = canonicalArtifact({ schemaVersion: 2, contract: backendSelectionContract,
+    backendId: 'javascript', profile: uniformJsRepresentationProfile, derivationId,
+    pipelineEntry: { packagePath: 'packages/driver-js', entryId: 'psCompilerUniformJavaScriptStagesFromPrepared' },
     baseRegistryId: baseRecord.identity, selectedRegistryId: registry.identity, authority: 'audit-record-only' },
   'backend-profile-selection', backendSelectionContract);
   return { registry, selection };
 }
 
 export async function verifyBackendProfileSelection(record, { expectedRegistryId, resolveArtifact }) {
-  const value = read(record, 'backend-profile-selection', backendSelectionContract);
-  exact(value, ['schemaVersion', 'contract', 'backendId', 'profile', 'baseRegistryId', 'selectedRegistryId', 'authority']);
-  if (value.schemaVersion !== 1 || value.contract !== backendSelectionContract ||
+  const contract = record?.identity?.contract;
+  if (![legacyBackendSelectionContract, backendSelectionContract].includes(contract)) fail('SELECTION_VERSION');
+  const current = contract === backendSelectionContract;
+  const value = read(record, 'backend-profile-selection', contract);
+  exact(value, ['schemaVersion', 'contract', 'backendId', 'profile', 'baseRegistryId', 'selectedRegistryId', 'authority',
+    ...(current ? ['derivationId', 'pipelineEntry'] : [])]);
+  if (value.schemaVersion !== (current ? 2 : 1) || value.contract !== contract ||
       value.backendId !== 'javascript' || value.profile !== uniformJsRepresentationProfile ||
       value.authority !== 'audit-record-only' || id(value.selectedRegistryId) !== id(expectedRegistryId)) fail('SELECTION');
+  if (current) {
+    exact(value.pipelineEntry, ['packagePath', 'entryId']);
+    if (value.pipelineEntry.packagePath !== 'packages/driver-js' ||
+        value.pipelineEntry.entryId !== 'psCompilerUniformJavaScriptStagesFromPrepared') fail('SELECTION_PIPELINE');
+  }
   const base = { identity: value.baseRegistryId, bytes: await resolveArtifact(value.baseRegistryId) };
-  const rebuilt = selectUniformJavaScriptRegistry(base);
+  const rebuilt = current ? selectUniformJavaScriptRegistry(base, { derivationId: value.derivationId }) :
+    selectUniformJavaScriptRegistryV1(base);
   if (!equal(rebuilt.selection.identity, record.identity) || !equal(rebuilt.registry.identity, expectedRegistryId))
     fail('SELECTION_BINDING');
   const selected = await resolveArtifact(expectedRegistryId); verifyArtifact(selected, expectedRegistryId);
   return { profile: value.profile, selectionId: record.identity, registryId: expectedRegistryId,
+    selectionContract: contract, ...(current ? { derivationId: value.derivationId } : {}),
+    emitterRole: current ? 'backend-writer' : 'historical-driver-entry',
     bindingVerified: true, authority: 'audit-record-only', preservationVerified: false };
 }
 

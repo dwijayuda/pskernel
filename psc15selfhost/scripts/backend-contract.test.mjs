@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
 import { createClaimSet } from './claim-set.mjs';
 import { createBackendDescriptor, decodeBackendDescriptor, createArtifactBundle, verifyArtifactBundle,
-  selectUniformJavaScriptRegistry, verifyBackendProfileSelection } from './backend-contract.mjs';
+  selectUniformJavaScriptRegistry, selectUniformJavaScriptRegistryV1, backendSelectionContract, verifyBackendProfileSelection } from './backend-contract.mjs';
 
 const registryValue = JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V1.json', import.meta.url), 'utf8'));
 function fixture(backendId) {
@@ -112,6 +112,9 @@ test('uniform selection derives one lane and freshly rejects rehashed registry d
     base.backends.filter(item => item.backendId !== 'javascript'));
   const js = registry.backends.find(item => item.backendId === 'javascript');
   assert.equal(js.inputDomain, 'uniform-specialized-ir');
+  assert.equal(js.packagePath, 'packages/backend-js');
+  assert.equal(js.emitterId, base.backends.find(item => item.backendId === 'javascript').emitterId);
+  assert.equal(JSON.parse(selected.selection.bytes).pipelineEntry.packagePath, 'packages/driver-js');
   assert.equal(js.products.debugArtifacts.some(item => item.role === 'source-map'), false);
   const old = decodeBackendDescriptor(f.descriptor);
   const fields = Object.fromEntries(['backendId', 'implementationId', 'targetProfileId', 'externalToolchainId', 'interfaceAdapterId']
@@ -127,11 +130,39 @@ test('uniform selection derives one lane and freshly rejects rehashed registry d
   badValue.backends.find(item => item.backendId === 'javascript').emitterId = 'invented-emitter';
   const badRegistry = f.add(canonicalArtifact(badValue, 'backend-registry', 'psc-backend-registry/1'));
   const badSelection = f.add(canonicalArtifact({ ...JSON.parse(selected.selection.bytes), selectedRegistryId: badRegistry.identity },
-    'backend-profile-selection', 'psc-backend-profile-selection/1'));
+    'backend-profile-selection', backendSelectionContract));
   await assert.rejects(verifyBackendProfileSelection(badSelection, {
     expectedRegistryId: badRegistry.identity, resolveArtifact: f.policy.resolveArtifact }), /SELECTION_BINDING/);
   const badDescriptor = f.add(createBackendDescriptor(badRegistry, fields));
   const badBundle = f.add(createArtifactBundle({ ...f.fields, descriptor: badDescriptor, evidenceArtifacts: [badSelection.identity] }));
   await assert.rejects(verifyArtifactBundle(badBundle, { ...f.policy, expectedBundleId: badBundle.identity }), /SELECTION_BINDING/);
   assert.throws(() => selectUniformJavaScriptRegistry(selected.registry), /SELECTION_BASE/);
+});
+
+test('historical uniform selections replay under their frozen derivation and cannot acquire current ownership metadata', async () => {
+  const f = fixture('javascript');
+  const historical = selectUniformJavaScriptRegistryV1(f.registry);
+  const current = selectUniformJavaScriptRegistry(f.registry);
+  for (const item of [historical, current]) { f.add(item.registry); f.add(item.selection); }
+  assert.notEqual(artifactKey(historical.registry.identity), artifactKey(current.registry.identity));
+  assert.equal(JSON.parse(historical.registry.bytes).backends.find(item => item.backendId === 'javascript').emitterId,
+    'psCompilerUniformJavaScriptStagesFromPrepared');
+  const replay = await verifyBackendProfileSelection(historical.selection, {
+    expectedRegistryId: historical.registry.identity, resolveArtifact: f.policy.resolveArtifact });
+  assert.equal(replay.emitterRole, 'historical-driver-entry');
+  const fields = Object.fromEntries(['backendId', 'implementationId', 'targetProfileId', 'externalToolchainId', 'interfaceAdapterId']
+    .map(key => [key, decodeBackendDescriptor(f.descriptor)[key]]));
+  const descriptor = f.add(createBackendDescriptor(historical.registry, fields));
+  const bundle = f.add(createArtifactBundle({ ...f.fields, descriptor, evidenceArtifacts: [historical.selection.identity] }));
+  assert.equal((await verifyArtifactBundle(bundle, { ...f.policy, expectedBundleId: bundle.identity })).profileSelection.bindingVerified, true);
+  for (const mutate of [
+    value => { value.derivationId = 'unknown-derivation'; },
+    value => { value.pipelineEntry.packagePath = 'packages/backend-js'; },
+    value => { value.selectedRegistryId = historical.registry.identity; },
+  ]) {
+    const value = JSON.parse(current.selection.bytes); mutate(value);
+    const changed = f.add(canonicalArtifact(value, 'backend-profile-selection', backendSelectionContract));
+    await assert.rejects(verifyBackendProfileSelection(changed, {
+      expectedRegistryId: value.selectedRegistryId, resolveArtifact: f.policy.resolveArtifact }), /SELECTION_/);
+  }
 });

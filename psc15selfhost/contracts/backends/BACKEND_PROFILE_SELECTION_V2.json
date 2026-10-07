@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "contract": "psc-backend-profile-selection/2",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "status": "versioned-derivation-producer-and-exact-replay-implemented",
+  "purpose": "Preserve backend emitter ownership while binding explicit uniform pipeline composition and versioned capabilities.",
+  "derivationId": "psc-uniform-js-backend-derivation/2",
+  "base": "Exact separately identified four-lane backend-registry/1. Only the JavaScript lane is selected; other lanes remain exact.",
+  "derivation": "Retain the frozen v1 uniform input/lowerer/products policy, restore the backend-owned psJsEmitValidatedModuleStackSafeWithTargetProfile emitter, advertise the implemented portable structural declaration writer and update the precise remaining ownership debt. No uniform source maps are advertised yet.",
+  "pipelineEntry": {
+    "packagePath": "packages/driver-js",
+    "entryId": "psCompilerUniformJavaScriptStagesFromPrepared"
+  },
+  "record": [
+    "schemaVersion",
+    "contract",
+    "backendId",
+    "profile",
+    "derivationId",
+    "pipelineEntry",
+    "baseRegistryId",
+    "selectedRegistryId",
+    "authority"
+  ],
+  "producer": "scripts/backend-contract.mjs: selectUniformJavaScriptRegistry",
+  "verification": "Bounded reader accepts only known selection versions and derivation identities, reconstructs the exact selected registry and selection bytes, and compares their identities. Bundle/context/query/archive binding remains exact. Static ownership audit checks emitter definitions for both the base registry and current uniform selection.",
+  "compatibility": "Version-1 derivation code and record bytes remain unchanged. New capability derivations require distinct identities with retained readers. Registry/descriptor/bundle/graph schemas are not changed and no fifth lane is introduced.",
+  "assurance": {
+    "authority": "audit-record-only",
+    "staticOwnershipIsNotPreservation": true,
+    "preservationVerified": false,
+    "hermeticityVerified": false,
+    "releaseAccepted": false
+  },
+  "remaining": [
+    "Uniform source-origin composition and maps",
+    "Named/dependent public types and explicit CLI product/profile selection",
+    "Independent preservation, bootstrap diversity and full assurance"
+  ]
+}

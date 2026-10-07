@@ -1,5 +1,6 @@
 import Ps.DriverTs.Stages
 import Ps.DriverJs.Stages
+import Ps.DriverWasm.Stages
 import Ps.CompilerIr.InterfaceArtifact
 
 def psIrEncodingFixture : PsVerifiedIrModule :=
@@ -36,6 +37,21 @@ def main (args : List String) : IO Unit := do
     IO.println (psJsonObject [
       ("runtimeIr", psJsonQuote staged.runtimeIr),
       ("javaScript", psJsonQuote staged.javaScript),
+      ("verifiedIr", psJsonQuote staged.verifiedIr),
+      ("specializedIr", psJsonQuote staged.specializedIr)])
+  else if args == ["--wasm-stages"] then
+    let source := "def forward (A : Type) (value : A) : A := value\ndef answer (value : UInt32) : UInt32 := forward UInt32 value\n"
+    let .ok prepared := psCompilerPrepareSource .lean source
+      | throw (IO.userError "PREPARE_FAILED")
+    let .ok staged := psCompilerWasmStagesFromPrepared psCompilerWasm32Target prepared
+      | throw (IO.userError "WASM_STAGES_FAILED")
+    let .ok legacy := psCompilerWasmFromPrepared psCompilerWasm32Target prepared
+      | throw (IO.userError "WASM_LEGACY_FAILED")
+    if legacy != staged.wasm || staged.runtimeIr != staged.verifiedIr then
+      throw (IO.userError "WASM_STAGES_CHANGED_OUTPUT")
+    IO.println (psJsonObject [
+      ("runtimeIr", psJsonQuote staged.runtimeIr),
+      ("wasm", psJsonArray (staged.wasm.map (fun byte => toString byte.toNat))),
       ("verifiedIr", psJsonQuote staged.verifiedIr),
       ("specializedIr", psJsonQuote staged.specializedIr)])
   else if args == ["--stages"] then

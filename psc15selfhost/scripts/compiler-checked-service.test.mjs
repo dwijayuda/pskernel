@@ -141,3 +141,35 @@ test('staged JavaScript output binds actual stage domains and rejects missing, c
   assert.throws(() => small.service.emitArtifact(smallHandle, 'javascript'), /OUTPUT_RESOURCE_EXHAUSTED/);
   assert.equal(emitted.length, 0);
 });
+
+test('staged Wasm uses the pinned target and exact checked object, with bounded byte copying and no failure fallback', async () => {
+  const { service, compiler, emitted } = fixture();
+  const good = { wasm: list(wasm), runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr };
+  compiler.psCompilerWasmStagesFromPrepared = (profile, prepared) => {
+    assert.equal(profile, compiler.psCompilerWasm32Target);
+    assert.equal(prepared.source, 'checked Wasm source');
+    assert.equal(Object.isFrozen(prepared), true);
+    return ok(good);
+  };
+  const handle = await service.check('lean', 'checked Wasm source');
+  const output = service.emitArtifact(handle, 'wasm');
+  assert.deepEqual(output.payload, Uint8Array.from(wasm));
+  assert.equal(output.specializationCorrespondence.correspondenceChecked, true);
+  assert.equal(output.stageArtifacts.specializedIr.domain, 'specialized-ir');
+  good.wasm.$ps$fields.head = 255;
+  assert.equal(output.payload[0], 0);
+  compiler.psCompilerWasmStagesFromPrepared = () => ok({ ...good, wasm: 'wrong' });
+  assert.throws(() => service.emitArtifact(handle, 'wasm'), /STAGES_SHAPE/);
+  const cyclic = list([0]); cyclic.$ps$fields.tail = cyclic;
+  compiler.psCompilerWasmStagesFromPrepared = () => ok({ ...good, wasm: cyclic });
+  assert.throws(() => service.emitArtifact(handle, 'wasm'), /BYTES_CYCLE/);
+  compiler.psCompilerWasmStagesFromPrepared = () => ({ $ps$tag: 'error' });
+  assert.throws(() => service.emitArtifact(handle, 'wasm'), /EMIT_STAGES_FAILED/);
+  compiler.psCompilerWasmStagesFromPrepared = null;
+  assert.throws(() => service.emitArtifact(handle, 'wasm'), /STAGES_API_SHAPE/);
+  const small = fixture({ maxOutputBytes: 7 });
+  small.compiler.psCompilerWasmStagesFromPrepared = () => ok(good);
+  const smallHandle = await small.service.check('lean', 'small');
+  assert.throws(() => small.service.emitArtifact(smallHandle, 'wasm'), /OUTPUT_RESOURCE_EXHAUSTED/);
+  assert.equal(emitted.length, 0);
+});

@@ -22,14 +22,20 @@
   "directJavaScriptPipeline": {
     "implementation": "packages/driver-js/src/Ps/DriverJs/Stages.lean",
     "meaning": "One erasure/strict-validation/specialization/post-specialization-strict-validation/lowering/printing execution returns actual RuntimeIR, VerifiedIR and SpecializedIR snapshots plus JavaScript. The existing checked service gates this API on a live matching handle and checks canonical stage schemas, byte identities and output budgets.",
-    "graph": "The graph/archive builder can retain the five observed source-check/erase/validate/specialize/JavaScript edges, using the same specialization pass ID and semantic relation as the portable definition. The specialization postcondition check is not a preservation proof.",
+    "graph": "The graph/archive builder retains six source-check/erase/validate/runtime-interface/specialize/JavaScript edges, using the portable specialization pass ID. The host independently checks specialization correspondence; strict postconditions and correspondence do not establish global preservation.",
     "remaining": "The default checked-build CLI remains on TypeScript; direct-JS promotion, target-interior artifacts, complete source-to-stage evidence integration and independent preservation evidence are still required."
+  },
+  "directWasmPipeline": {
+    "implementation": "packages/driver-wasm/src/Ps/DriverWasm/Stages.lean",
+    "meaning": "One erasure/strict-validation/specialization/post-specialization-strict-validation/lowering/ABI/encoding execution returns actual stage snapshots and Wasm bytes. The checked service supplies its pinned wasm32 target and live checked object, then copies the byte list under its budget and independently checks specialization correspondence.",
+    "graph": "Six actual graph edges retain all stage/binary bytes. Offline replay checks runtime-interface projection and specialization correspondence. Wasm target IR, ABI insertion and binary encoding remain a composite edge with explicit implementation assumptions.",
+    "remaining": "Default checked-build CLI target integration, complete target-interior evidence and global lowering/ABI/encoding preservation. No direct-JS promotion or Wasm fixed point follows."
   },
   "assurance": "Encoding/schema integrity and observed stage provenance only. The strict validator, erasure and emitter remain explicitly trusted unless independent evidence is attached.",
   "globalPreservation": "unproved",
   "remaining": [
     "independent erasure/specialization/backend preservation evidence",
-    "SpecializedIR and target-interior snapshots for other backends",
+    "Rust SpecializedIR and target-interior snapshots for all backends",
     "complete generated compiler/provider/runtime/tsc input closure",
     "portable total resource policy"
   ]

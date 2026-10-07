@@ -99,6 +99,34 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   assert.throws(() => createCheckedBuildGraph({ ...inputs, typeScript: 'competing backend' }), /MIXED_BACKEND_PATHS/);
 });
 
+test('actual direct Wasm retains specialization snapshots and replays correspondence with unchanged emitted bytes', async () => {
+  const staged = JSON.parse(emitted('--wasm-stages')), binary = Uint8Array.from(staged.wasm);
+  const snapshots = checkedIrStageArtifacts(staged);
+  assert.notDeepEqual(snapshots.verifiedIr.bytes, snapshots.specializedIr.bytes);
+  assert.equal(WebAssembly.validate(binary), true);
+  const { instance } = await WebAssembly.instantiate(binary, {});
+  assert.equal(instance.exports.answer(42), 42);
+  const inputs = { sourceKind: 'lean', sources: ['actual generic UInt32 fixture with synthetic archive admission/implementation metadata'],
+    admissions: '{"admissions":[],"format":"proofscript-checked-admissions","version":2}',
+    directWasm: binary, irStages: staged,
+    compilerBytes: Buffer.from('actual stage/output bytes; synthetic provenance'), compilerKind: 'fixture',
+    provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' }, kernelContract: { id: 'fixture' },
+    hostSources: [], runtime: { implementation: 'fixture' } };
+  const built = createCheckedBuildGraph(inputs), archive = packObservedBuildArchive(built);
+  const definitions = built.graph.entries.filter(entry => entry.identity.contract === 'psc-pass-definition/1').map(entry => entry.canonicalValue);
+  assert.equal(definitions.length, 6);
+  assert.equal(definitions.at(-1).passId, 'psc-specialized-ir-to-wasm/1');
+  const replay = await verifyObservedBuildArchive(archive.bytes, { expectedGraphId: built.identity,
+    allowedAssumptions: [...new Set(definitions.flatMap(item => item.assumptionIds))] });
+  assert.equal(replay.kind, 'accepted', replay.reason);
+  assert.equal(replay.specializationCorrespondences.length, 1);
+  assert.equal(replay.preservationVerified, false);
+  assert.equal(replay.semanticClaimsVerified, false);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, directJavaScript: 'competing output' }), /MIXED_BACKEND_PATHS/);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, directWasm: staged.wasm }), /WASM_BYTES/);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, irStages: undefined }), /WASM_STAGES_REQUIRED/);
+});
+
 test('portable and independent runtime-interface projections agree and distinguish signature drift from body edits', async () => {
   const staged = JSON.parse(emitted('--stages'));
   const verified = checkedIrStageArtifacts(staged).verifiedIr;

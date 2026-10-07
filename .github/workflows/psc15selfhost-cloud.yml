@@ -143,6 +143,7 @@ jobs:
           lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/InterfaceArtifact.lean
           lake exe psc1 check packages/driver-ts/src/Ps/DriverTs/Stages.lean
           lake exe psc1 check packages/driver-js/src/Ps/DriverJs/Stages.lean
+          lake exe psc1 check packages/driver-wasm/src/Ps/DriverWasm/Stages.lean
           node --test scripts/ir-artifact.test.mjs
 
       - name: Check generalized erasure source equality guard

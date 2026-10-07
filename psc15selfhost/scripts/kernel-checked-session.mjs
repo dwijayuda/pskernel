@@ -134,19 +134,25 @@ export function createKernelCheckedSession(
         throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
       }
       const stageApi = target === 'typescript' ? 'psCompilerTypeScriptStagesFromPrepared' :
-        target === 'javascript' ? 'psCompilerJavaScriptStagesFromPrepared' : undefined;
+        target === 'javascript' ? 'psCompilerJavaScriptStagesFromPrepared' :
+        target === 'wasm' ? 'psCompilerWasmStagesFromPrepared' : undefined;
       if (stageApi && stageApi in compiler) {
         if (typeof compiler[stageApi] !== 'function') throw new Error('PSC2_CHECKED_EMIT_STAGES_API_SHAPE');
-        const staged = unwrapCompilerResult(compiler[stageApi](item.prepared), 'EMIT_STAGES');
-        freezeGraph(staged);
-        const outputKey = target === 'typescript' ? 'typeScript' : 'javaScript';
-        if (typeof staged?.[outputKey] !== 'string' || typeof staged.runtimeIr !== 'string' || typeof staged.verifiedIr !== 'string' ||
-            (target === 'javascript' && typeof staged.specializedIr !== 'string')) {
+        if (target === 'wasm' && !compiler.psCompilerWasm32Target) throw new Error('PSC2_CHECKED_WASM_TARGET_MISSING');
+        const staged = unwrapCompilerResult(target === 'wasm' ?
+          compiler[stageApi](compiler.psCompilerWasm32Target, item.prepared) : compiler[stageApi](item.prepared), 'EMIT_STAGES');
+        const outputKey = target === 'typescript' ? 'typeScript' : target === 'wasm' ? 'wasm' : 'javaScript';
+        // The service copies/validates the Wasm linked byte list under its byte
+        // budget; avoid an unbounded deep-freeze traversal before that boundary.
+        if (target !== 'wasm') freezeGraph(staged);
+        if ((target === 'wasm' ? !staged?.[outputKey] || typeof staged[outputKey] !== 'object' : typeof staged?.[outputKey] !== 'string') ||
+            typeof staged.runtimeIr !== 'string' || typeof staged.verifiedIr !== 'string' ||
+            (target !== 'typescript' && typeof staged.specializedIr !== 'string')) {
           throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
         }
         return Object.freeze({ output: staged[outputKey],
           stages: Object.freeze({ runtimeIr: staged.runtimeIr, verifiedIr: staged.verifiedIr,
-            ...(target === 'javascript' ? { specializedIr: staged.specializedIr } : {}) }) });
+            ...(target !== 'typescript' ? { specializedIr: staged.specializedIr } : {}) }) });
       }
       const names = { typescript: 'psCompilerTypeScriptFromPrepared', javascript: 'psCompilerJavaScriptFromPrepared',
         rust: 'psCompilerRustFromPrepared', wasm: 'psCompilerWasmFromPrepared' };

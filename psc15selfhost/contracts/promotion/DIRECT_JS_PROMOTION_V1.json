@@ -22,5 +22,12 @@
     "noAutomaticPromotion": true,
     "fixedPointAloneInsufficient": true,
     "fallbackForbidden": true
+  },
+  "targetIrValidation": {
+    "status": "implemented-structural-validator-assurance-pending",
+    "implementation": "packages/backend-js/src/Ps/BackendJs/Validate.lean",
+    "productionBoundary": "Ps.BackendJs.Print validates JsIR before printing",
+    "regression": "test/BackendJsValidateTests.lean",
+    "preservation": "not-established"
   }
 }

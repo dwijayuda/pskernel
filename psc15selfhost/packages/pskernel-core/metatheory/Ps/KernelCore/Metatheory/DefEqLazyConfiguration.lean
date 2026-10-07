@@ -1,6 +1,7 @@
 import Ps.KernelCore.Checker.DefEq.LazyDelta
 import Ps.KernelCore.Metatheory.CheckerContracts
 import Ps.KernelCore.Metatheory.ProjectionReduction
+import Ps.KernelCore.Metatheory.Delta
 
 /-
 Independent refinement of the terminal projection comparison used by
@@ -185,3 +186,72 @@ theorem psKernelDefEqFinishLazyStep_configuration_sound
               simp at hRun
               rcases hRun with ⟨rfl, rfl⟩
               exact ⟨hQuickSound.1, hQuickSound.2⟩
+
+
+/-
+Transport a complete delta-step result across previously justified reductions.
+The equal branch composes by the *specific* reduce-then-compare rule.
+Other branches compose reduction closures, not algorithmic DefEq proofs.
+-/
+theorem psKernelDeltaStepPostcondition_transport
+    (context : PsKernelCheckerContext)
+    (nextState : PsKernelCheckerState)
+    (originalLeft originalRight left right : PsKernelExpr)
+    (answer : PsKernelDeltaStepResult)
+    (hLeft :
+      PsKernelReductionClosure
+        context.environment context.localContext
+        originalLeft left)
+    (hRight :
+      PsKernelReductionClosure
+        context.environment context.localContext
+        originalRight right)
+    (hStep :
+      PsKernelDeltaStepPostcondition
+        context nextState left right answer) :
+    PsKernelDeltaStepPostcondition
+      context nextState originalLeft originalRight answer := by
+  rcases hStep with ⟨hConfig, hResult⟩
+  refine ⟨hConfig, ?_⟩
+  cases answer with
+  | equal =>
+      exact
+        PsKernelDefEqJudgment.reduceCompare
+          originalLeft originalRight left right
+          hLeft hRight hResult
+  | continue nextLeft nextRight =>
+      exact
+        ⟨
+          psKernelReductionClosure_trans
+            context.environment context.localContext
+            originalLeft left nextLeft
+            hLeft hResult.1,
+          psKernelReductionClosure_trans
+            context.environment context.localContext
+            originalRight right nextRight
+            hRight hResult.2
+        ⟩
+  | unknown nextLeft nextRight =>
+      exact
+        ⟨
+          psKernelReductionClosure_trans
+            context.environment context.localContext
+            originalLeft left nextLeft
+            hLeft hResult.1,
+          psKernelReductionClosure_trans
+            context.environment context.localContext
+            originalRight right nextRight
+            hRight hResult.2
+        ⟩
+  | different nextLeft nextRight =>
+      exact
+        ⟨
+          psKernelReductionClosure_trans
+            context.environment context.localContext
+            originalLeft left nextLeft
+            hLeft hResult.1,
+          psKernelReductionClosure_trans
+            context.environment context.localContext
+            originalRight right nextRight
+            hRight hResult.2
+        ⟩

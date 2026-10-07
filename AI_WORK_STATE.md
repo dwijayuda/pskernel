@@ -197,3 +197,15 @@ Architectural blockers still remaining:
 - Concrete Quick, application, full-shape, reflection, binder-spine, K/structure-recursion, bounded recursor, and recursor-aware WHNF configuration layers are now present.
 - Current DefEq frontier is the remaining final-rule family (structure eta fields/core, string expansion, unit-like equality, proof irrelevance), followed by lazy delta and the concrete `psKernelIsDefEqWithFuel` knot theorem.
 - Metatheory correction to make during proof-irrelevance closure: `psKernelDefEqIsPropWith` classifies an expression by inferring its type and WHNF-reducing that inferred type to a sort; do not model this as the classified expression itself reducing to `Sort 0`.
+
+
+## DefEq / LazyDelta verified checkpoint — 2026-10-08
+- Last independently confirmed full proof gate: **#579**, commit `10f854bd41ae66688bb05c910ef67e66b635a72b`.
+- Run **#578** is also green at `a7aa85153b97a057f51cdbef0485cfc8287f43fc`.
+- The full final-stage continuation `psKernelIsDefEqAfterFullShape_configuration_sound` is registered and green. Eta-structure, string expansion, and unit-like equality are composed through explicit original-to-reduced closures, rather than unrestricted DefEq transitivity.
+- `psKernelDefEqIsPropWith_true_refines` correctly observes the inferred type of the classified expression and reduces that inferred type to a `Sort`; it does not claim that the classified expression itself reduces to `Sort 0`.
+- `DefEqLazyConfiguration.lean` is a new registered semantic module. Its terminal projection-finish theorem refines either a pair of computed projection fields or a major-term comparison to the independent projection DefEq judgment.
+- `PsKernelDeltaStepPostcondition` and `psKernelDefEqFinishLazyStep_configuration_sound` are green: a positive lazy-step result has algorithmic DefEq evidence, while continue/unknown/different results carry only reduction closures.
+- Current implementation frontier: transport and compose full delta-step operations (one-sided, two-sided, native/Nat branches), prove lazy reduction/projection fuel contracts, and then complete the concrete `PsKernelDefEqConfigurationSound (psKernelIsDefEqWithFuel fuel)` mutually recursive checker knot.
+- Admission refinement, final public implementation-refinement theorem, semantic audit refresh, integration reconciliation, and final gates remain open.
+- No additional production semantic defect was diagnosed in this checkpoint; no production source was changed for proof convenience.

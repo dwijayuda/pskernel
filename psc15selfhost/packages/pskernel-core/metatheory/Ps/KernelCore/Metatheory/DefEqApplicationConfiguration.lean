@@ -497,3 +497,146 @@ theorem psKernelDefEqApp_configuration_sound
                       dsimp [leftArgs, rightArgs] at hApplied
                       rw [hLeft, hRight] at hApplied
                       exact hApplied
+
+
+/-
+The specialized argument-spine comparison intentionally does not recheck
+application heads. It is sound as a whole-expression comparison *only* when
+the caller independently establishes equality of the application heads.
+This is precisely the precondition that the lazy-delta same-definition
+shortcut must prove from authoritative metadata and universe comparison.
+
+The fuel induction keeps that obligation explicit rather than silently
+treating the optimized arguments-only routine as a general DefEq checker.
+-/
+theorem psKernelDefEqArgsWithFuel_configuration_sound
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hHead :
+      PsKernelDefEqJudgment
+        context.environment
+        context.localContext
+        (psKernelExprGetAppFn left)
+        (psKernelExprGetAppFn right))
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqArgsWithFuel
+          fuel defeq context state left right =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext left right) := by
+  induction fuel generalizing state nextState left right value with
+  | zero =>
+      simp [psKernelDefEqArgsWithFuel] at hRun
+  | succ remaining ih =>
+      cases left with
+      | app leftFn leftArg =>
+          cases right with
+          | app rightFn rightArg =>
+              cases hArgRun :
+                  defeq context state leftArg rightArg with
+              | error error =>
+                  simp [psKernelDefEqArgsWithFuel, hArgRun] at hRun
+              | ok argRun =>
+                  rcases argRun with ⟨argValue, argState⟩
+                  have hArgSound :=
+                    hDefEq
+                      context state argState
+                      leftArg rightArg argValue
+                      hConfig hArgRun
+                  cases argValue with
+                  | false =>
+                      simp [psKernelDefEqArgsWithFuel, hArgRun] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact ⟨hArgSound.1, by simp⟩
+                  | true =>
+                      have hRest :
+                          psKernelDefEqArgsWithFuel
+                              remaining defeq context argState
+                              leftFn rightFn =
+                            Except.ok (Prod.mk value nextState) := by
+                        simpa [psKernelDefEqArgsWithFuel, hArgRun] using hRun
+                      have hHeadFn :
+                          PsKernelDefEqJudgment
+                            context.environment context.localContext
+                            (psKernelExprGetAppFn leftFn)
+                            (psKernelExprGetAppFn rightFn) := by
+                        simpa [psKernelExprGetAppFn] using hHead
+                      have hRestSound :=
+                        ih
+                          argState nextState
+                          leftFn rightFn value
+                          hHeadFn hArgSound.1 hRest
+                      refine ⟨hRestSound.1, ?_⟩
+                      intro hTrue
+                      exact
+                        PsKernelDefEqJudgment.app
+                          leftFn leftArg rightFn rightArg
+                          (hRestSound.2 hTrue)
+                          (hArgSound.2 rfl)
+          | _ =>
+              simp [psKernelDefEqArgsWithFuel] at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              exact ⟨hConfig, by simp⟩
+      | _ =>
+          cases right with
+          | app rightFn rightArg =>
+              simp [psKernelDefEqArgsWithFuel] at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              exact ⟨hConfig, by simp⟩
+          | _ =>
+              simp [psKernelDefEqArgsWithFuel] at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              refine ⟨hConfig, ?_⟩
+              intro _
+              simpa [psKernelExprGetAppFn] using hHead
+
+
+theorem psKernelDefEqArgs_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hHead :
+      PsKernelDefEqJudgment
+        context.environment
+        context.localContext
+        (psKernelExprGetAppFn left)
+        (psKernelExprGetAppFn right))
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqArgs
+          defeq context state left right =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext left right) := by
+  exact
+    psKernelDefEqArgsWithFuel_configuration_sound
+      (Nat.succ
+        (Nat.add
+          (psKernelExprNodeCount left)
+          (psKernelExprNodeCount right)))
+      defeq hDefEq
+      context state nextState left right value
+      hHead hConfig hRun

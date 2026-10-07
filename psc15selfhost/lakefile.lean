@@ -414,6 +414,10 @@ lean_exe psc1_backend_wasm_tests where
   srcDir := "test"
   root := `BackendWasmTests
 
+lean_exe psc1_backend_wasm_ir_tests where
+  srcDir := "test"
+  root := `BackendWasmIrTests
+
 lean_exe psc1_ir_specialize_tests where
   srcDir := "test"
   root := `IrSpecializeTests

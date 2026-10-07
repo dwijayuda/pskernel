@@ -4,8 +4,9 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `bb125e10b7fefb8b7151f1fadf4d2a9ed8a7c35c`
-- Last green package proof checkpoint: `bb125e10b7fefb8b7151f1fadf4d2a9ed8a7c35c` (run #438).
+- Current proof implementation HEAD reconciled in this state: `d930cbad9d8b794c94b729a1314f2f869af773a8`
+- Last green package proof checkpoint: `9ccac6e5ca655298cff49c616a9db366400da987` (run #456).
+- Run #456 is green for the independent ordinary recursor iota/rule-search metatheory, including executable recursor-rule search refinement.
 - Run #420 is green for the registered beta substitution/lowering algebra.
 - Run #438 is green for the complete `PsKernelBetaSpineSoundLaw`: the optimized multi-lambda `InstantiateRev` path refines ordinary beta-reduction closure and is no longer an unresolved WHNF assumption.
 - Run #381 is green: the registered `WhnfCoreConfiguration.lean` fuel induction and its public `false/false` specialization compile on the full package proof gate.
@@ -87,7 +88,9 @@ Confirmed production-kernel semantic defect:
 
 Immediate blocker:
 - beta-spine is closed: run #438 validates `PsKernelBetaSpineSoundLaw` as a real proof obligation, not a TCB assumption;
-- model quotient and ordinary inductive recursor computation in the independent reduction relation and prove `psKernelReduceRecursorWith` configuration/refinement from component contracts;
+- quotient reduction and ordinary recursor iota/rule-search semantics are modeled in independent metatheory; run #456 is green for the recursor rule-search/iota layer;
+- current run #463 fails only in the factored ordinary-recursion prefix/inline-tail transport: three localized dependent-elimination/type-alignment obligations remain in `RecursorReduction.lean`, with no new production semantic defect identified;
+- close that prefix-to-tail transport, then prove `psKernelReduceRecursorWith` configuration/refinement from the component contracts;
 - prove `PsKernelRecursorReductionConfigurationSound` for `psKernelReduceRecursorBoundedWithFuel` together with the concrete smaller-fuel WHNF/inference/DefEq dependencies;
 - instantiate the green public-WHNF theorem in the concrete mutually recursive checker knot using the proved beta law and recursor theorem;
 - then close concrete DefEq stateful soundness and compose public checked/infer-only/WHNF/DefEq contracts through `Checker/Knot`.
@@ -101,7 +104,7 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Add independent quotient/iota recursor reduction judgments and prove `psKernelReduceRecursorWith` configuration/refinement composition.
+1. Finish the three remaining factored-prefix → inline-tail transport obligations in `RecursorReduction.lean` and close `psKernelReduceInductiveRecWith`/`psKernelReduceRecursorWith` configuration-refinement composition.
 2. Build the shared fuel/configuration theorem for the concrete bounded recursor/WHNF/inference/DefEq knot, reusing the green public WHNF theorem and proved beta-spine law rather than reproving WHNF branches.
 3. Close remaining concrete DefEq configuration/stateful soundness obligations, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
 4. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.

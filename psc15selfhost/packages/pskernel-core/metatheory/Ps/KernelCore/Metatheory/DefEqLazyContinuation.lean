@@ -554,3 +554,98 @@ theorem psKernelDefEqLazyProjReductionWithFuel_configuration_sound
                     defeq hDefEq context stepState nextState
                     nextLeft nextRight typeName index value
                     hStepSound.1 hRun)
+
+
+/-
+Shared fallback when equal-hint argument comparison cannot decide equality.
+
+The executable lazy-delta fallback unfolds both operands in order, carrying
+the resulting checker state into each subsequent stage. This theorem composes
+two independent delta closures with the terminal quick comparison through
+the dedicated reduction-transport judgment.
+-/
+theorem psKernelLazyDelta_two_sided_fallback_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : PsKernelDeltaStepResult)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      (match
+          psKernelDefEqDeltaOnce
+            coreWhnf context state left with
+       | Except.error error =>
+           Except.error error
+       | Except.ok leftRun =>
+           match
+               psKernelDefEqDeltaOnce
+                 coreWhnf context
+                 (Prod.snd leftRun)
+                 right with
+           | Except.error error =>
+               Except.error error
+           | Except.ok rightRun =>
+               psKernelDefEqFinishLazyStep
+                 defeq context
+                 (Prod.snd rightRun)
+                 (Prod.fst leftRun)
+                 (Prod.fst rightRun)) =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelDeltaStepPostcondition
+      context nextState left right answer := by
+  cases hLeft :
+      psKernelDefEqDeltaOnce
+        coreWhnf context state left with
+  | error error =>
+      simp only [hLeft] at hRun
+      simp at hRun
+  | ok leftRun =>
+      simp only [hLeft] at hRun
+      rcases leftRun with ⟨leftValue, leftState⟩
+      have hLeftSound :=
+        psKernelDefEqDeltaOnce_configuration_sound
+          coreWhnf hCore
+          context state leftState left leftValue
+          hConfig hLeft
+      cases hRight :
+          psKernelDefEqDeltaOnce
+            coreWhnf context leftState right with
+      | error error =>
+          simp only [hRight] at hRun
+          simp at hRun
+      | ok rightRun =>
+          simp only [hRight] at hRun
+          rcases rightRun with ⟨rightValue, rightState⟩
+          have hRightSound :=
+            psKernelDefEqDeltaOnce_configuration_sound
+              coreWhnf hCore
+              context leftState rightState right rightValue
+              hLeftSound.2 hRight
+          have hFinishSound :=
+            psKernelDefEqFinishLazyStep_configuration_sound
+              defeq hQuick
+              context rightState nextState
+              leftValue rightValue answer
+              hRightSound.2 hRun
+          exact
+            psKernelDeltaStepPostcondition_transport
+              context nextState
+              left right leftValue rightValue answer
+              hLeftSound.1 hRightSound.1 hFinishSound

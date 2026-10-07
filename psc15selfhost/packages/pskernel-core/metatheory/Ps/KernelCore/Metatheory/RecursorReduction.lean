@@ -790,6 +790,534 @@ theorem psKernelRecursorNormalizeMajorWith_configuration_sound
             PsKernelRecursorMajorNormalization.identity normalized⟩⟩
 
 
+def psKernelReduceInductiveRecMajorTailWith
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (recursor : PsKernelRecursorInfo)
+    (recLevels : List PsKernelLevel)
+    (recArgs : List PsKernelExpr)
+    (major0 : PsKernelExpr)
+    (cheapRec cheapProj : Bool) :
+    Except String
+      (Prod (Option PsKernelExpr) PsKernelCheckerState) :=
+  match
+      psKernelRecursorPrepareMajorWith
+        publicWhnf
+        coreWhnf
+        inferType
+        defeq
+        context
+        state
+        recursor
+        major0
+        cheapRec
+        cheapProj with
+  | Except.error error =>
+      Except.error error
+  | Except.ok prepared =>
+      match
+          psKernelRecursorNormalizeMajorWith
+            publicWhnf
+            inferType
+            context
+            (Prod.snd prepared)
+            recursor
+            (Prod.fst prepared) with
+      | Except.error error =>
+          Except.error error
+      | Except.ok normalized =>
+          let major :=
+            Prod.fst normalized
+          let majorSpine :=
+            psKernelExprGetAppFnArgs major
+          match Prod.fst majorSpine with
+          | PsKernelExpr.const ctorName _ =>
+              match
+                  psKernelFindRecursorRule
+                    ctorName
+                    recursor.rules with
+              | Option.none =>
+                  Except.ok
+                    (Prod.mk
+                      Option.none
+                      (Prod.snd normalized))
+              | Option.some rule =>
+                  let majorArgs :=
+                    Prod.snd majorSpine
+                  if
+                      psKernelNatGt
+                        rule.nFields
+                        (psKernelExprListLength majorArgs) then
+                    Except.ok
+                      (Prod.mk
+                        Option.none
+                        (Prod.snd normalized))
+                  else if
+                      Nat.beq
+                        (psKernelLevelListLength recLevels)
+                        (psKernelNameListLength
+                          recursor.base.levelParams) then
+                    let rhs0 :=
+                      psKernelExprInstantiateLevelParams
+                        rule.rhs
+                        recursor.base.levelParams
+                        recLevels
+                    let fixedCount :=
+                      Nat.add
+                        recursor.numParams
+                        (Nat.add
+                          recursor.numMotives
+                          recursor.numMinors)
+                    let rhs1 :=
+                      psKernelApplyArgs
+                        rhs0
+                        (psKernelExprListTake
+                          fixedCount
+                          recArgs)
+                    let ctorParamCount :=
+                      Nat.sub
+                        (psKernelExprListLength majorArgs)
+                        rule.nFields
+                    let rhs2 :=
+                      psKernelApplyArgs
+                        rhs1
+                        (psKernelExprListTake
+                          rule.nFields
+                          (psKernelExprListDrop
+                            ctorParamCount
+                            majorArgs))
+                    let majorIndex :=
+                      Nat.add
+                        recursor.numParams
+                        (Nat.add
+                          recursor.numMotives
+                          (Nat.add
+                            recursor.numMinors
+                            recursor.numIndices))
+                    Except.ok
+                      (Prod.mk
+                        (Option.some
+                          (psKernelApplyArgs
+                            rhs2
+                            (psKernelExprListDrop
+                              (Nat.succ majorIndex)
+                              recArgs)))
+                        (Prod.snd normalized))
+                  else
+                    Except.ok
+                      (Prod.mk
+                        Option.none
+                        (Prod.snd normalized))
+          | _ =>
+              Except.ok
+                (Prod.mk
+                  Option.none
+                  (Prod.snd normalized))
+
+
+theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (hCore :
+      PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (hK :
+      PsKernelRecursorKConversionConfigurationSound
+        publicWhnf inferType defeq)
+    (hStructure :
+      PsKernelRecursorStructureConversionConfigurationSound
+        publicWhnf inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (recName : PsKernelName)
+    (recLevels : List PsKernelLevel)
+    (recArgs : List PsKernelExpr)
+    (recursor : PsKernelRecursorInfo)
+    (major0 : PsKernelExpr)
+    (cheapRec cheapProj : Bool)
+    (answer : Option PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hHead :
+      Prod.fst (psKernelExprGetAppFnArgs expr) =
+        PsKernelExpr.const recName recLevels)
+    (hArgs :
+      Prod.snd (psKernelExprGetAppFnArgs expr) =
+        recArgs)
+    (hFind :
+      psKernelEnvironmentFind
+          context.environment
+          recName =
+        Option.some
+          (PsKernelConstantInfo.recInfo recursor))
+    (hMajor :
+      psKernelExprListGet
+          recArgs
+          (Nat.add
+            recursor.numParams
+            (Nat.add
+              recursor.numMotives
+              (Nat.add
+                recursor.numMinors
+                recursor.numIndices))) =
+        Option.some major0)
+    (hSuccess :
+      psKernelReduceInductiveRecMajorTailWith
+          publicWhnf
+          coreWhnf
+          inferType
+          defeq
+          context
+          state
+          recursor
+          recLevels
+          recArgs
+          major0
+          cheapRec
+          cheapProj =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      match answer with
+      | Option.none => True
+      | Option.some result =>
+          PsKernelReductionClosure
+            context.environment
+            context.localContext
+            expr
+            result := by
+  cases hPrepared :
+      psKernelRecursorPrepareMajorWith
+        publicWhnf
+        coreWhnf
+        inferType
+        defeq
+        context
+        state
+        recursor
+        major0
+        cheapRec
+        cheapProj with
+  | error error =>
+      simp [
+        psKernelReduceInductiveRecMajorTailWith,
+        hPrepared
+      ] at hSuccess
+  | ok preparedRun =>
+      rcases preparedRun with
+        ⟨prepared, preparedState⟩
+      have hPreparedSemantic :=
+        psKernelRecursorPrepareMajorWith_configuration_sound
+          publicWhnf
+          coreWhnf
+          inferType
+          defeq
+          hWhnf
+          hCore
+          hK
+          context
+          state
+          preparedState
+          recursor
+          major0
+          prepared
+          cheapRec
+          cheapProj
+          hConfig
+          hPrepared
+      cases hNormalized :
+          psKernelRecursorNormalizeMajorWith
+            publicWhnf
+            inferType
+            context
+            preparedState
+            recursor
+            prepared with
+      | error error =>
+          simp [
+            psKernelReduceInductiveRecMajorTailWith,
+            hPrepared,
+            hNormalized
+          ] at hSuccess
+      | ok normalizedRun =>
+          rcases normalizedRun with
+            ⟨normalized, normalizedState⟩
+          have hNormalizedSemantic :=
+            psKernelRecursorNormalizeMajorWith_configuration_sound
+              publicWhnf
+              inferType
+              hWhnf
+              hStructure
+              context
+              preparedState
+              normalizedState
+              recursor
+              prepared
+              normalized
+              hPreparedSemantic.2
+              hNormalized
+          rcases hNormalizedSemantic.2 with
+            ⟨semanticReduced,
+              hNormalizeReduction,
+              hNormalize⟩
+          have hMajorReduction :
+              PsKernelReductionClosure
+                context.environment
+                context.localContext
+                major0
+                semanticReduced :=
+            psKernelReductionClosure_transitive
+              context.environment
+              context.localContext
+              major0
+              prepared
+              semanticReduced
+              hPreparedSemantic.1
+              hNormalizeReduction
+          cases hCtorHead :
+              Prod.fst
+                (psKernelExprGetAppFnArgs normalized) with
+          | const ctorName ctorLevels =>
+              cases hRule :
+                  psKernelFindRecursorRule
+                    ctorName
+                    recursor.rules with
+              | none =>
+                  simp [
+                    psKernelReduceInductiveRecMajorTailWith,
+                    hPrepared,
+                    hNormalized,
+                    hCtorHead,
+                    hRule
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact ⟨hNormalizedSemantic.1, trivial⟩
+              | some rule =>
+                  let majorArgs :=
+                    Prod.snd
+                      (psKernelExprGetAppFnArgs normalized)
+                  cases hFields :
+                      psKernelNatGt
+                        rule.nFields
+                        (psKernelExprListLength majorArgs) with
+                  | true =>
+                      simp [
+                        psKernelReduceInductiveRecMajorTailWith,
+                        hPrepared,
+                        hNormalized,
+                        hCtorHead,
+                        hRule,
+                        majorArgs,
+                        hFields
+                      ] at hSuccess
+                      rcases hSuccess with ⟨rfl, rfl⟩
+                      exact ⟨hNormalizedSemantic.1, trivial⟩
+                  | false =>
+                      cases hLevels :
+                          Nat.beq
+                            (psKernelLevelListLength recLevels)
+                            (psKernelNameListLength
+                              recursor.base.levelParams) with
+                      | false =>
+                          simp [
+                            psKernelReduceInductiveRecMajorTailWith,
+                            hPrepared,
+                            hNormalized,
+                            hCtorHead,
+                            hRule,
+                            majorArgs,
+                            hFields,
+                            hLevels
+                          ] at hSuccess
+                          rcases hSuccess with ⟨rfl, rfl⟩
+                          exact ⟨hNormalizedSemantic.1, trivial⟩
+                      | true =>
+                          simp [
+                            psKernelReduceInductiveRecMajorTailWith,
+                            hPrepared,
+                            hNormalized,
+                            hCtorHead,
+                            hRule,
+                            majorArgs,
+                            hFields,
+                            hLevels
+                          ] at hSuccess
+                          rcases hSuccess with ⟨rfl, rfl⟩
+                          constructor
+                          · exact hNormalizedSemantic.1
+                          · exact
+                              psKernelRecursorIota_refines
+                                context
+                                expr
+                                recName
+                                ctorName
+                                recLevels
+                                ctorLevels
+                                recArgs
+                                majorArgs
+                                recursor
+                                rule
+                                major0
+                                semanticReduced
+                                normalized
+                                hConfig.1
+                                hHead
+                                hArgs
+                                hFind
+                                hMajor
+                                hMajorReduction
+                                hNormalize
+                                hCtorHead
+                                rfl
+                                hRule
+                                hFields
+                                hLevels
+          | bvar index =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | fvar name =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | mvar name =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | sort level =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | app fn arg =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | lam name type body binderInfo =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | forallE name type body binderInfo =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | letE name type value body nondep =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | lit literal =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | mdata metadata body =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+          | proj typeName index body =>
+              simp [
+                psKernelReduceInductiveRecMajorTailWith,
+                hPrepared,
+                hNormalized,
+                hCtorHead
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact ⟨hNormalizedSemantic.1, trivial⟩
+
+
 theorem psKernelEnvironmentFind_some_authoritative
     (environment : PsKernelEnvironment)
     (name : PsKernelName)

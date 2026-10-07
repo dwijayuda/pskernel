@@ -21,11 +21,11 @@ def Failure.exitCode : Failure -> UInt32
   | .resource _ => 2
   | .internal _ => 3
 
-def Failure.withContext (prefix : String) : Failure -> Failure
-  | .rejected message => .rejected (prefix ++ message)
-  | .declined message => .declined (prefix ++ message)
-  | .resource message => .resource (prefix ++ message)
-  | .internal message => .internal (prefix ++ message)
+def Failure.withContext (context : String) : Failure -> Failure
+  | .rejected message => .rejected (context ++ message)
+  | .declined message => .declined (context ++ message)
+  | .resource message => .resource (context ++ message)
+  | .internal message => .internal (context ++ message)
 
 def fromKernelError : PsKernelError -> Failure
   | .rejectedInvalid message => .rejected message
@@ -415,7 +415,7 @@ def State.replayRecord
 def State.replayLine
     (state : State)
     (raw : String) : Except Failure State := do
-  if raw.trim.isEmpty then
+  if raw.trimAscii.isEmpty then
     pure state
   else
     let record ← liftTransport (PSC1Kernel.ReplayJson.decodeLine raw)

@@ -239,6 +239,8 @@ def PsKernelDeltaStepBothConfigurationSound
     (left right : PsKernelExpr)
     (leftDef rightDef : PsKernelDefinitionInfo)
     (answer : PsKernelDeltaStepResult),
+    psKernelDeltaDefinition context left = Option.some leftDef ->
+    psKernelDeltaDefinition context right = Option.some rightDef ->
     PsKernelCheckerConfigurationSound context state ->
     psKernelDefEqLazyStepBoth
         defeq coreWhnf context state
@@ -334,4 +336,4 @@ theorem psKernelDefEqLazyStep_configuration_sound_of_branches
             hBoth
               context state nextState
               left right leftDef rightDef answer
-              hConfig hBranch
+              hLeftDef hRightDef hConfig hBranch

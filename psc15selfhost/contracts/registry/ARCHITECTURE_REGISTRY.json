@@ -333,6 +333,12 @@
       "kind": "artifact-bundle",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/ARTIFACT_BUNDLE_V1.json"
+    },
+    {
+      "id": "psc-compiler-ownership/1",
+      "kind": "compiler-ownership",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_OWNERSHIP_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

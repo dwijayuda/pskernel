@@ -1110,7 +1110,7 @@
         "backend",
         "authority-firewall-broker"
       ],
-      "status": "planned",
+      "status": "static-package-import-backend-driver-guards-implemented-cloud-validation-pending",
       "requirement": "Package identity/dependency/backend isolation/authority checks; enumerate current debt and reject new drift."
     },
     {
@@ -1325,6 +1325,13 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/ARTIFACT_BUNDLE_V1.json",
       "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-compiler-ownership/1",
+      "kind": "compiler-ownership",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_OWNERSHIP_V1.json",
+      "classification": "semantic-compiler-spine"
     }
   ]
 }

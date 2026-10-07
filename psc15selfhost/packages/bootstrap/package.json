@@ -13,7 +13,18 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "psc2-selfhost-composition"
+    "role": "psc2-selfhost-composition",
+    "entryDependencies": {
+      "src/Ps/Bootstrap/SelfHostJs.lean": {
+        "@proofscript/driver-js-next": "0.0.0-dev"
+      },
+      "src/Ps/Bootstrap/SelfHostRust.lean": {
+        "@proofscript/driver-rust-next": "0.0.0-dev"
+      },
+      "src/Ps/Bootstrap/SelfHostWasm.lean": {
+        "@proofscript/driver-wasm-next": "0.0.0-dev"
+      }
+    }
   },
   "dependencies": {
     "@proofscript/driver-ts-next": "0.0.0-dev"

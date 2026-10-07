@@ -124,14 +124,17 @@
         18,
         24
       ],
-      "status": "partial",
+      "status": "implementation-available-exact-behavioral-reuse-assurance-pending",
       "owners": [
         "packages/project/src/Ps/Project/QueryGraph.lean",
         "packages/project/src/Ps/Project/QueryGraphV2.lean",
         "packages/compiler-ir/src/Ps/CompilerIr/InterfaceArtifact.lean",
         "scripts/runtime-interface-artifact.mjs",
         "contracts/module-interface/RUNTIME_INTERFACE_ARTIFACT_V1.json",
-        "contracts/module-interface/QUERY_GRAPH_V2.json"
+        "contracts/module-interface/QUERY_GRAPH_V2.json",
+        "scripts/module-interface-evidence.mjs",
+        "scripts/semantic-query-cache.mjs",
+        "scripts/evidence-cache.mjs"
       ],
       "completion": "Structural and behavioral interfaces drive actual invalidation and dependency compatibility.",
       "assurance": "pending"
@@ -142,11 +145,13 @@
         19,
         30
       ],
-      "status": "partial",
+      "status": "implementation-available-semantic-reuse-validation-assurance-pending",
       "owners": [
         "scripts/cache-utils.mjs",
         "scripts/evidence-cache.mjs",
-        "contracts/ir/EVIDENCE_CACHE_V1.json"
+        "contracts/ir/EVIDENCE_CACHE_V1.json",
+        "scripts/semantic-query-cache.mjs",
+        "scripts/module-interface-evidence.mjs"
       ],
       "completion": "Untrusted cache reads verify canonical bytes, action, schema, evidence class and fingerprint provenance.",
       "assurance": "pending"

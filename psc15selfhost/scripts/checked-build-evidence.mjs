@@ -32,7 +32,7 @@ export async function readCheckedBuildHostSources() {
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
-  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources }) {
+  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources }) {
   const artifacts = new Map(), entries = [], executions = [];
   let toolInputs;
   function add(item, source, inline = false) {
@@ -96,10 +96,13 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     const record = recordPassExecution({ definition, inputs: [input], outputs, parameters,
       semanticIdentity, dependencies, resourcePolicy: { contract: 'psc-checked-host-resource/1',
         enforcement: 'existing-stage-specific-limits', completeBudgetCoverage: false,
-        ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.limits } : {}) },
+        ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.limits } : {}),
+        ...(id !== 'typescript-to-es2022/1' && seedResources ? { nativeSession: seedResources.limits } : {}) },
       resourceObservation: { hostObserved: true, inputBytes: input.bytes.byteLength,
         outputBytes: outputs.reduce((sum, output) => sum + output.bytes.byteLength, 0),
         ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.observed } : {}),
+        ...(id !== 'typescript-to-es2022/1' && seedResources ? { nativeSession: seedResources.observed,
+          nativeSessionScope: 'whole-shared-session-not-per-pass-attribution' } : {}),
         unobserved: ['cpu', 'peak-memory', 'kernel-steps', 'ir-nodes'] },
       diagnostics: ['Global preservation is unproved; these records describe the executed composite edges.'], evidence: [] });
     add(record.action, { kind: 'inline' }, true); add(record, { kind: 'inline' }, true);

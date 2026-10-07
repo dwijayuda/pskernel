@@ -203,7 +203,7 @@
     "test:verified-ir-strict": "lake exe psc1_verified_ir_strict_tests",
     "test:erasure-eta": "node scripts/erasure-eta-runtime.test.mjs",
     "test:interface-ir": "lake exe pscv_interface_ir_tests",
-    "test:pass-evidence": "node --test scripts/artifact-evidence.test.mjs scripts/checked-build-evidence.test.mjs scripts/observed-build-archive.test.mjs scripts/typescript-tool-inputs.test.mjs scripts/checked-provider-inputs.test.mjs scripts/checked-source-snapshot.test.mjs scripts/compiler-checked-service.test.mjs scripts/evidence-cache.test.mjs scripts/bounded-process.test.mjs scripts/isolated-producer.test.mjs",
+    "test:pass-evidence": "node --test scripts/artifact-evidence.test.mjs scripts/checked-build-evidence.test.mjs scripts/observed-build-archive.test.mjs scripts/typescript-tool-inputs.test.mjs scripts/checked-provider-inputs.test.mjs scripts/checked-source-snapshot.test.mjs scripts/checked-seed-protocol.test.mjs scripts/compiler-checked-service.test.mjs scripts/evidence-cache.test.mjs scripts/bounded-process.test.mjs scripts/isolated-producer.test.mjs",
     "test:factorybench": "node --test scripts/factory-bench.test.mjs",
     "check:foreign-interface": "lake exe pscv_foreign_interface_tests && lake exe psc1 check packages/interface-ir/src/Ps/InterfaceIr/Wit.lean",
     "test:js-scalar-abi": "lake build pscv_js_abi_tests && lake exe pscv_js_abi_tests && lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean && node --experimental-vm-modules --test scripts/js-scalar-abi.test.mjs",

@@ -41,6 +41,7 @@
       "scripts/checked-kernel-identity.mjs",
       "scripts/checked-kernel-provider.mjs",
       "scripts/checked-provider-inputs.mjs",
+      "scripts/checked-seed-protocol.mjs",
       "scripts/checked-seed-session.mjs",
       "scripts/checked-source-snapshot.mjs",
       "scripts/comparator-export.mjs",

@@ -30,7 +30,8 @@
     "TypeScript to JavaScript/declarations/source map with actual flags and output basename",
     "installed TypeScript and selected native platform package trees retained as byte-bound pass implementation inputs, with complete before/after inventory checks",
     "selected kernel provider runtime-file profiles captured around checking and bound to acceptance-context/action dependencies",
-    "enforced source-reading limits and observed byte/module/import counts bound to the preparation action and execution record"
+    "enforced source-reading limits and observed byte/module/import counts bound to the preparation action and execution record",
+    "native-session protocol limits and whole-session byte observations bound to affected passes without claiming per-pass attribution"
   ],
   "remaining": [
     "SpecializedIR and backend-interior stage artifacts for other targets",

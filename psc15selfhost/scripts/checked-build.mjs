@@ -41,6 +41,7 @@ export async function buildChecked({
   dualCheck,
   securityProfile = defaultProviderSecurityProfile,
   sourceResourceLimits,
+  seedResourceLimits,
 }) {
   const kernelDescriptor = checkedKernelDescriptor(kernel);
   const selectedProviderSecurity = assertProviderSecurity(kernel, securityProfile);
@@ -56,6 +57,7 @@ export async function buildChecked({
   let compilerIdentity;
   let compilerBytes;
   let irStages;
+  let seedResources;
   let parity;
   let providerToolInputs = [];
   const checkAdmissions = async text => {
@@ -80,10 +82,12 @@ export async function buildChecked({
       sources: snapshot.sources,
       checkAdmissions,
       emit: !checkOnly,
+      resourceLimits: seedResourceLimits,
     });
     admissions = result.admissions;
     typeScript = result.typeScript;
     irStages = result.stages;
+    seedResources = result.resourceObservation;
   } else {
     const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
     compilerBytes = await readFile(file);
@@ -118,6 +122,7 @@ export async function buildChecked({
     flattenedSourceSha256: digest(snapshot.source),
     sourceCount: snapshot.ordered.length,
     sourceResources: snapshot.resourceObservation,
+    ...(seedResources ? { seedResources } : {}),
     canonicalAdmissionsSha256: digest(admissions),
     providerInputObservations: providerToolInputs.map(item => item.details),
     ...(parity ? { dualCheck: parity } : {}),
@@ -158,7 +163,7 @@ export async function buildChecked({
     const typeScriptCompilerBytes = typeScriptToolInputs.files.find(item => item.path === typeScriptToolInputs.details.entryPath).bytes;
     receipt.javaScriptSha256 = digest(javaScript);
     const evidence = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
-      admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation,
+      admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
       hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });

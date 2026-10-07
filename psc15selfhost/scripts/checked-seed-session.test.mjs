@@ -28,6 +28,8 @@ for (const sourceKind of ['lean', 'ps']) {
     assert.match(result.typeScript, /export const second/);
     assert.equal(typeof result.stages.runtimeIr, 'string');
     assert.equal(result.stages.runtimeIr, result.stages.verifiedIr);
+    assert.equal(result.resourceObservation.observed.frames, 2);
+    assert.equal(result.resourceObservation.observed.sourceCount, 2);
   });
   test(`real ${sourceKind} module session blocks emission on rejection`, { skip: !available }, async () => {
     await assert.rejects(runCheckedSeedSession({
@@ -41,4 +43,34 @@ test('module partition must exactly reproduce the immutable source', async () =>
     binaryPath, sourceKind: 'lean', source: 'different', sources: ['original'],
     emit: true, checkAdmissions: () => { throw new Error('must not be called'); },
   }), /PSC2_CHECKED_SEED_SOURCE_PARTITION/);
+});
+
+test('native session enforces admissions/output limits and never calls checker after input/frame exhaustion', { skip: !available }, async () => {
+  for (const [resource, resourceLimits, calls] of [
+    ['sourceBytes', { sourceBytes: 0 }, 0], ['sourceCount', { sourceCount: 0 }, 0],
+    ['snapshotBytes', { snapshotBytes: 0 }, 0], ['frameBytes', { frameBytes: 0 }, 0],
+    ['stdoutBytes', { stdoutBytes: 0 }, 0], ['admissionsBytes', { admissionsBytes: 0 }, 0],
+    ['generatedBytes', { generatedBytes: 0 }, 1],
+  ]) {
+    let invoked = 0;
+    await assert.rejects(runCheckedSeedSession({ binaryPath, sourceKind: 'lean', source: 'def answer : Nat := 42\n',
+      emit: true, resourceLimits, checkAdmissions: async admissions => {
+        invoked++; return (await checkAdmissionsWithKernel(admissions, 'lean434-wasm')).result;
+      } }), error => error.kind === 'resourceExhausted' && error.resource === resource);
+    assert.equal(invoked, calls, resource);
+  }
+});
+
+test('native session times out stalled kernel waits and confirms child termination', { skip: !available }, async () => {
+  let invoked = false;
+  await assert.rejects(runCheckedSeedSession({ binaryPath, sourceKind: 'lean', source: 'def answer : Nat := 42\n',
+    emit: true, timeoutMs: 2000, checkAdmissions: () => { invoked = true; return new Promise(() => {}); } }),
+    error => error.kind === 'resourceExhausted' && error.resource === 'phaseTimeMs' && error.phase === 'kernel-check');
+  assert.equal(invoked, true);
+});
+
+test('native session bounds stderr from a process that rejects the protocol arguments', async () => {
+  await assert.rejects(runCheckedSeedSession({ binaryPath: process.execPath, sourceKind: 'lean', source: '',
+    emit: false, resourceLimits: { stderrBytes: 0 }, checkAdmissions: () => { throw new Error('must not check'); } }),
+    error => error.kind === 'resourceExhausted' && error.resource === 'stderrBytes');
 });

@@ -152,6 +152,8 @@
         "scripts/bounded-process.mjs",
         "scripts/source-read-budget.mjs",
         "contracts/resource/SOURCE_READ_BUDGET_V1.json",
+        "scripts/checked-seed-protocol.mjs",
+        "contracts/resource/CHECKED_SEED_RESOURCES_V1.json",
         "scripts/isolated-producer.mjs",
         "contracts/resource/BOUNDED_HOST_EXECUTION_V1.json"
       ],

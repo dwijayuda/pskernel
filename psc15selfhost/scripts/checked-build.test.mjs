@@ -149,6 +149,9 @@ for (const [kind, source] of [
       assert.deepEqual(preparation.action.resourcePolicy.sourceReading, receipt.sourceResources.limits);
       assert.deepEqual(preparation.resourceObservation.sourceReading, receipt.sourceResources.observed);
       assert.equal(preparation.action.resourcePolicy.completeBudgetCoverage, false);
+      assert.deepEqual(preparation.action.resourcePolicy.nativeSession, receipt.seedResources.limits);
+      assert.deepEqual(preparation.resourceObservation.nativeSession, receipt.seedResources.observed);
+      assert.equal(receipt.seedResources.observed.frames, 2);
       assert.equal(graph.entries.filter(entry => entry.identity.domain === 'runtime-ir').length, 1);
       assert.equal(graph.entries.filter(entry => entry.identity.domain === 'verified-ir').length, 1);
       const tool = graph.entries.find(entry => entry.identity.contract === 'psc-typescript-tool-inputs/1');

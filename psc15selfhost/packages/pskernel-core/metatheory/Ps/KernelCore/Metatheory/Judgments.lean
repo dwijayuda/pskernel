@@ -1149,21 +1149,24 @@ inductive PsKernelDefEqJudgment
   /-
   Algorithmic proof-irrelevance view.
 
-  The concrete checker first obtains a type candidate for the left term,
-  reduces that type to Prop, obtains a type candidate for the right term, and
-  recursively compares the two types.  The stronger `proofIrrelevance` rule
-  below additionally carries full typing derivations and is the target of the
-  checked-input refinement layer.
+  The concrete checker already has `leftType` as the inferred type candidate
+  for the left term.  To classify that candidate as a proposition it infers
+  the type of `leftType` itself, then WHNF-reduces that second-order type to
+  a sort whose level normalizes to zero.  This rule records that executable
+  classification shape without pretending that `leftType` itself reduces
+  to `Sort 0`.  The stronger `proofIrrelevance` rule below additionally
+  carries full typing derivations and is the target of the checked-input
+  refinement layer.
   -/
   | proofIrrelevanceAlgorithmic
       {localContext : PsKernelLocalContext}
-      (left right leftType rightType : PsKernelExpr)
+      (left right leftType rightType leftTypeType : PsKernelExpr)
       (level : PsKernelLevel)
-      (hLeftTypeProp :
+      (hLeftTypeTypeProp :
         PsKernelReductionClosure
           environment
           localContext
-          leftType
+          leftTypeType
           (PsKernelExpr.sort level))
       (hProp :
         psKernelLevelNormalizesToZero level = true)

@@ -247,8 +247,28 @@ def State.resolveNames (state : State) : List Nat -> Except Failure (List PsKern
 def State.admitRequest
     (state : State)
     (request : PsKernelDeclarationRequest) : Except Failure State := do
-  let result ← liftKernel (psKernelV1AdmitDeclaration state.session request)
-  pure { state with session := result.session }
+  if Nat.beq state.session.resources.maxDeclarations 0 then
+    /-
+    Arena's validation profile has an unlimited declaration-count policy.
+    Preserve the same KernelContract-v1 preflight and semantic dispatch, but
+    avoid the three full persistent-environment size traversals performed by
+    checked-environment/receipt bookkeeping. All semantic acceptance decisions
+    remain in canonical pskernel-core declaration dispatch.
+    -/
+    let _ ← liftKernel (psKernelKernelSessionPreflight state.session)
+    let environment ← liftKernel (psKernelV1DispatchDeclaration state.session request)
+    let environment := psKernelEnvironmentWithNativeEvaluator environment Option.none
+    pure {
+      state with
+      session :=
+        PsKernelKernelSession.mk
+          environment
+          state.session.resources
+          state.session.provider
+    }
+  else
+    let result ← liftKernel (psKernelV1AdmitDeclaration state.session request)
+    pure { state with session := result.session }
 
 def State.addDefinitionRecord
     (state : State)

@@ -1,4 +1,5 @@
 import Ps.CompilerIr.JsAbi
+import Ps.CompilerIr.Encode
 import Ps.BackendJs.Print
 
 def psJsAbiTestPrimitives : List PsVerifiedIrPrimitiveType :=
@@ -60,6 +61,10 @@ def main (args : List String) : IO Unit := do
     match psJsAbiTestPlan (if args == ["--plan32"] then 32 else 64) with
     | .error _ => throw (IO.userError "ABI_PLAN_FAILED")
     | .ok plan => IO.println plan
+  else if args == ["--ir"] then
+    match psIrEncodeModule psJsAbiTestModule.raw with
+    | .error _ => throw (IO.userError "ABI_IR_FAILED")
+    | .ok encoded => IO.println encoded
   else if args == ["--js"] then
     -- Actual compiled scalar client for runtime adapter integration. The
     -- broader all-scalar plan is tested separately, including target words.

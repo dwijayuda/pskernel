@@ -1968,7 +1968,10 @@ def psKernelWhnfCountLambdasReference
         Prod.mk current count
   | _ =>
       Prod.mk current count
-termination_by current
+termination_by psKernelExprNodeCount current
+decreasing_by
+  simp [psKernelExprNodeCount]
+  omega
 
 
 theorem psKernelWhnfCountLambdasWithFuel_refines_reference

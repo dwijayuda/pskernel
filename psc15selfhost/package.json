@@ -199,7 +199,7 @@
     "check:semantic-lock": "node scripts/semantic-lock-audit.mjs",
     "check:archive-profile": "node scripts/archive-profile-audit.mjs && node scripts/pscv-verify.mjs",
     "check:direct-js-promotion": "node scripts/direct-js-promotion-audit.mjs",
-    "check:bootstrap-assurance": "node scripts/bootstrap-assurance-audit.mjs",
+    "check:bootstrap-assurance": "node scripts/bootstrap-assurance-audit.mjs && npm run test:ddc",
     "test:verified-ir-strict": "lake exe psc1_verified_ir_strict_tests",
     "test:erasure-eta": "node scripts/erasure-eta-runtime.test.mjs",
     "test:interface-ir": "lake exe pscv_interface_ir_tests",
@@ -209,7 +209,8 @@
     "test:js-scalar-abi": "lake build pscv_js_abi_tests && lake exe pscv_js_abi_tests && lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean && node --experimental-vm-modules --test scripts/js-scalar-abi.test.mjs",
     "test:ir-artifacts": "lake build pscv_ir_encoding_tests psc1_ir_specialize_tests && lake exe pscv_ir_encoding_tests && node --test scripts/ir-artifact.test.mjs scripts/specialization-correspondence.test.mjs",
     "test:semantic-query-cache": "node --test scripts/module-interface-evidence.test.mjs scripts/semantic-query-cache.test.mjs",
-    "test:savef-retrieval": "node --test scripts/savef-retrieval-session.test.mjs"
+    "test:savef-retrieval": "node --test scripts/savef-retrieval-session.test.mjs",
+    "test:ddc": "node --test scripts/diverse-bootstrap.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

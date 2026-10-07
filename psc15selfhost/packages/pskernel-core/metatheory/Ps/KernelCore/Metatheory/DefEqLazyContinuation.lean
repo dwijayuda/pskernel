@@ -780,24 +780,22 @@ theorem psKernelDefEqLazyStepBoth_equal_hint_configuration_sound
                        (Prod.fst leftResult)
                        (Prod.fst rightResult)) =
         Except.ok (Prod.mk answer nextState) := by
-    calc
-      _ = psKernelDefEqLazyStepBoth
-            defeq coreWhnf context state
-            left right leftDef rightDef := by
-          cases hShortcut : sameShortcut with
-          | false =>
-              simp [
-                psKernelDefEqLazyStepBoth,
-                hNoLeft, hNoRight,
-                sameShortcut, argsResult, hShortcut
-              ]
-          | true =>
-              simp [
-                psKernelDefEqLazyStepBoth,
-                hNoLeft, hNoRight,
-                sameShortcut, argsResult, hShortcut
-              ]
-      _ = Except.ok (Prod.mk answer nextState) := hRun
+    cases hLeftArgs :
+        psKernelNatGt (psKernelExprGetAppNumArgs left) 0 <;>
+      cases hRightArgs :
+        psKernelNatGt (psKernelExprGetAppNumArgs right) 0 <;>
+      cases hSame :
+        psKernelSameDeltaDefinition leftDef rightDef <;>
+      cases hRegular :
+        psKernelReducibilityHintsIsRegular leftDef.hints <;>
+      cases hLevels :
+        psKernelAppHeadLevelsEquivalent left right <;>
+      simpa [
+        psKernelDefEqLazyStepBoth,
+        hNoLeft, hNoRight,
+        sameShortcut, argsResult,
+        hLeftArgs, hRightArgs, hSame, hRegular, hLevels
+      ] using hRun
   cases hArgs :
       argsResult with
   | error error =>

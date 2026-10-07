@@ -38,7 +38,8 @@ def main (args : List String) : IO Unit := do
       ("runtimeIr", psJsonQuote staged.runtimeIr),
       ("javaScript", psJsonQuote staged.javaScript),
       ("verifiedIr", psJsonQuote staged.verifiedIr),
-      ("specializedIr", psJsonQuote staged.specializedIr)])
+      ("specializedIr", psJsonQuote staged.specializedIr),
+      ("jsIr", psJsonQuote staged.jsIr)])
   else if args == ["--wasm-stages"] then
     let source := "def forward (A : Type) (value : A) : A := value\ndef answer (value : UInt32) : UInt32 := forward UInt32 value\n"
     let .ok prepared := psCompilerPrepareSource .lean source
@@ -53,7 +54,8 @@ def main (args : List String) : IO Unit := do
       ("runtimeIr", psJsonQuote staged.runtimeIr),
       ("wasm", psJsonArray (staged.wasm.map (fun byte => toString byte.toNat))),
       ("verifiedIr", psJsonQuote staged.verifiedIr),
-      ("specializedIr", psJsonQuote staged.specializedIr)])
+      ("specializedIr", psJsonQuote staged.specializedIr),
+      ("wasmIr", psJsonQuote staged.wasmIr)])
   else if args == ["--stages"] then
     let .ok prepared := psCompilerPrepareSource .lean "def answer : Nat := 42\n"
       | throw (IO.userError "PREPARE_FAILED")

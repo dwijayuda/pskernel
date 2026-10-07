@@ -21,6 +21,12 @@ def Failure.exitCode : Failure -> UInt32
   | .resource _ => 2
   | .internal _ => 3
 
+def Failure.withContext (prefix : String) : Failure -> Failure
+  | .rejected message => .rejected (prefix ++ message)
+  | .declined message => .declined (prefix ++ message)
+  | .resource message => .resource (prefix ++ message)
+  | .internal message => .internal (prefix ++ message)
+
 def fromKernelError : PsKernelError -> Failure
   | .rejectedInvalid message => .rejected message
   | .declinedUnsupported message => .declined message
@@ -227,8 +233,8 @@ def State.addDefinitionRecord
     let pending := removePending all state.pendingMutual ++ [group]
     if group.defs.length == all.length then
       let ordered ← orderDefinitions all group.defs
-      let next ← { state with pendingMutual := removePending all pending }.admitRequest
-        (.mutualDefinitions ordered)
+      let prepared := { state with pendingMutual := removePending all pending }
+      let next ← prepared.admitRequest (.mutualDefinitions ordered)
       pure next
     else
       pure { state with pendingMutual := pending }

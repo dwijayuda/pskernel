@@ -18,7 +18,9 @@ concurrency:
 jobs:
   init-window:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    env:
+      PSKERNEL_SHA: ${{ github.sha }}
     steps:
       - name: Install toolchains
         shell: bash
@@ -98,3 +100,55 @@ jobs:
                               f"names={','.join(type_names) or '<unknown>'}"
                           )
           PY
+
+      - name: Register hot declaration target and PSKernel
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > tests/init-hot.yaml <<'EOF'
+          description: Focused export for the Init Array.extract performance cliff.
+          module: Init
+          export-decls:
+            - _private.Init.Data.Array.Extract.0.Array.extract_append_extract._proof_1_3
+          outcome: accept
+          EOF
+          cat > checkers/pskernel-core.yaml <<EOF
+          description: PSKernel Core focused Init hot declaration diagnostic.
+          url: https://github.com/dwijayuda/pskernel
+          ref: pscv/pskernel-core-arena-v1
+          rev: $PSKERNEL_SHA
+          build: |
+            cd psc15selfhost
+            lake build psc_kernel_core_arena psc_kernel_legacy_arena
+          run: psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "\$IN"
+          EOF
+
+      - name: Build focused hot export and checker
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test init-hot --cache
+          uv run lka.py build-checker pskernel-core
+          wc -l -c _build/tests/init-hot.ndjson
+
+      - name: Measure focused hot declaration
+        working-directory: arena
+        shell: bash
+        run: |
+          set -u
+          CURRENT=_build/checkers/pskernel-core/src/psc15selfhost/.lake/build/bin/psc_kernel_core_arena
+          LEGACY=_build/checkers/pskernel-core/src/psc15selfhost/.lake/build/bin/psc_kernel_legacy_arena
+          echo "=== canonical hot declaration ==="
+          set +e
+          /usr/bin/time -f 'canonical_hot_wall=%e canonical_hot_rss_kb=%M canonical_hot_exit=%x' \
+            timeout 600 "$CURRENT" < _build/tests/init-hot.ndjson
+          echo "canonical_hot_shell_exit=$?"
+          echo "=== legacy hot declaration ==="
+          /usr/bin/time -f 'legacy_hot_wall=%e legacy_hot_rss_kb=%M legacy_hot_exit=%x' \
+            timeout 120 "$LEGACY" < _build/tests/init-hot.ndjson
+          echo "legacy_hot_shell_exit=$?"
+          set -e
+          exit 0
+

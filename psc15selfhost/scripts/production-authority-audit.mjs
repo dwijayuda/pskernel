@@ -44,7 +44,10 @@ while (pending.length) {
   if (file === 'scripts/compile-with-generated.mjs') throw new Error('PSC_PRODUCTION_IMPORTS_UNCHECKED_DRIVER');
   if (file === 'scripts/cache-utils.mjs' || file === 'scripts/compile-typescript-cached.mjs') throw new Error('PSC_PRODUCTION_IMPORTS_BOOTSTRAP_LOCAL_CACHE');
   const rawCalls = /\bpsCompiler(?:ErasedIr|VerifiedIr|TypeScript(?:Stages)?|JavaScript(?:Stages)?|Rust|Wasm)FromPrepared\b/u;
-  if (rawCalls.test(source) && file !== 'scripts/kernel-checked-session.mjs') throw new Error('PSC_RAW_EMITTER_OUTSIDE_AUTHORITY: ' + file);
+  // Additional product APIs also stay at the checked boundary. Literal property
+  // accesses distinguish executable authority access from descriptor metadata.
+  const productAccess = /(?:\.\s*psCompiler(?:PublicApi|UniformJavaScriptStages|JavaScriptDeclarations|WasmStages)FromPrepared\b|\[\s*['"]psCompiler(?:PublicApi|UniformJavaScriptStages|JavaScriptDeclarations|WasmStages)FromPrepared['"]\s*\])/u;
+  if ((rawCalls.test(source) || productAccess.test(source)) && file !== 'scripts/kernel-checked-session.mjs') throw new Error('PSC_RAW_EMITTER_OUTSIDE_AUTHORITY: ' + file);
   for (const match of source.matchAll(/(?:from\s*|import\s*)['"](\.[^'"]+\.mjs)['"]/gu)) {
     const dependency = path.posix.normalize(path.posix.join(path.posix.dirname(file), match[1]));
     if (dependency.startsWith('../')) throw new Error('PSC_AUTHORITY_IMPORT_ESCAPE');

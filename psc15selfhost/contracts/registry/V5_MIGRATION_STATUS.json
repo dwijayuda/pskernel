@@ -1194,7 +1194,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "closed-and-uniform-products-host-integrated-portable-source-projection-and-writer-added-live-portable-routing-uniform-origins-and-cli-pending",
+      "status": "closed-and-uniform-declarations-portable-and-live-integrated-uniform-origins-and-cli-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1566,6 +1566,13 @@
       "status": "current-host",
       "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V1.json",
       "classification": "backend"
+    },
+    {
+      "id": "psc-ts-declaration-request/1",
+      "kind": "declaration-request",
+      "status": "experimental",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
     }
   ]
 }

@@ -398,5 +398,5 @@ test('portable source projection rejects ambiguous, dependent, higher-rank and e
 });
 
 test('portable declaration writer rejects invalid bindings and enforces exact resource bounds', () => {
-  assert.match(emitted('--declaration-writer-errors'), /PSCV_PORTABLE_DECLARATIONS: PASS/);
+  assert.match(emitted('--declaration-writer-errors').toString('utf8'), /PSCV_PORTABLE_DECLARATIONS: PASS/);
 });

@@ -6,6 +6,10 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
+- **2026-10-08 live portable declaration routing:** added a canonical, bounded request codec and a JS driver entry over the same admitted prepared source. Requested declarations now require that portable API and compare its bytes with the independently checked host source/runtime/export product; absent, malformed, failing or mismatching producers do not fall back. Session target/profile policy, budgets and pre/post liveness checks remain explicit. The new interop import is permitted only for the JS driver, with semantic/backend rejection checks. Native actual-source requests and focused host resource/revocation/failure cases are added; cloud validation is pending. Uniform descriptor ownership/versioning and origin composition remain next. No kernel implementation or global proof claim changes.
+
+- **2026-10-08 writer native comparisons:** `fba48e8` run 37701826924/job 113066825936 compiled all semantic code and passed actual closed/generic portable `.d.ts` byte comparisons plus the pinned TypeScript consumer. The native negative fixture also printed PASS; its host assertion incorrectly passed a Buffer to a text-only matcher, stopping step 15. Corrected that assertion without changing writer behavior or acceptance requirements. Full validation remains pending.
+
 - **2026-10-08 writer fixture correction:** `f011fea` passed source/profile/ownership checks and compiled `Ps.InterfaceTs.Declarations`. Main run 37701335594/job 113065221045 then rejected four native fixture constructors: the source API enum is `definitionValue`, while the JSON tag is `definition`. Corrected only those fixture constructors. Writer behavior and acceptance rules are unchanged; downstream validation is pending.
 
 - **2026-10-08 confirmed source projector checkpoint:** `087d820` completed full main run 37700738960/job 113063310562 and provider-parity run 37700738923/job 113063310124 successfully. This confirms the executed native/portable checks only, with no global theorem or promotion implication.

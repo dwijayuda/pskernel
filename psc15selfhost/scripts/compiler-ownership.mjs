@@ -37,7 +37,8 @@ export function auditCompilerOwnership({ policy, packages, backendRegistry, prim
     if (owner.role === 'backend' && !['semantic', 'interop'].includes(to.role)) fail('BACKEND_DEPENDENCY', from + ' -> ' + to.folder);
     if (owner.role === 'backend' && !['compiler-ir', 'foundation', 'bridge', 'interface-ir'].includes(to.folder)) fail('BACKEND_FRONTEND_DEPENDENCY', from + ' -> ' + to.folder);
     if (owner.role === 'driver' && !(['compiler', 'compiler-ir', 'foundation', 'interface-ir'].includes(to.folder) ||
-        to.folder === from.replace('driver-', 'backend-'))) fail('DRIVER_DEPENDENCY', from + ' -> ' + to.folder);
+        to.folder === from.replace('driver-', 'backend-') ||
+        (from === 'driver-js' && to.folder === 'interface-ts'))) fail('DRIVER_DEPENDENCY', from + ' -> ' + to.folder);
     if (to.role !== 'external') edges.get(from).add(to.folder);
   }
   for (const item of packages) {

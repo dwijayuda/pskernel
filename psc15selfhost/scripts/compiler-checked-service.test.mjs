@@ -411,8 +411,10 @@ test('the convenience executable emitter does not request source API projection'
 
 test('requested declarations share the checked emission and do not require optional debug products', async () => {
   const { service, compiler } = fixture();
-  let emissions = 0, debugReads = 0;
-  compiler.psCompilerPrepareSourceWithOrigins = (kind, source) => ok({ prepared: { kind, source }, origins: null });
+  let emissions = 0, debugReads = 0, declarations = 0, acceptedPrepared;
+  compiler.psCompilerPrepareSourceWithOrigins = (kind, source) => {
+    acceptedPrepared = { kind, source }; return ok({ prepared: acceptedPrepared, origins: null });
+  };
   compiler.psCompilerPublicApiFromPrepared = () => ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
   compiler.psCompilerJavaScriptStagesFromPrepared = () => {
     emissions++;
@@ -422,14 +424,31 @@ test('requested declarations share the checked emission and do not require optio
       get() { debugReads++; throw new Error('UNREQUESTED_DEBUG'); },
     }));
   };
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = (request, prepared) => {
+    assert.equal(prepared, acceptedPrepared); assert.equal(Object.isFrozen(prepared), true); declarations++;
+    assert.deepEqual(JSON.parse(request), ['psc-ts-declaration-request/1',
+      'psc-direct-js-declarations-closed-structural/1', '67108864', []]);
+    return ok('export {};\n');
+  };
   const handle = await service.check('lean', '');
   const product = service.emitDeclarationsArtifact(handle);
   assert.equal(product.requestedProducts, 'executable-and-source-declarations');
   assert.equal(product.directDeclarations.declarations.bytes.toString(), 'export {};\n');
   assert.equal(product.originGraph, undefined); assert.equal(product.generatedPositions, undefined);
-  assert.equal(emissions, 1); assert.equal(debugReads, 0);
+  assert.equal(emissions, 1); assert.equal(debugReads, 0); assert.equal(declarations, 1);
+  assert.equal(product.declarationProduction.hostBytesCompared, true);
   assert.throws(() => service.emitDeclarationsArtifact(handle, { profile: 'invented' }), /PROFILE/);
   assert.equal(emissions, 1);
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = () => ok('export {};\n// unexpected');
+  assert.throws(() => service.emitDeclarationsArtifact(handle), /DECLARATION_PRODUCER_MISMATCH/);
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = () => ({ $ps$tag: 'error' });
+  assert.throws(() => service.emitDeclarationsArtifact(handle), /DECLARATIONS_FAILED/);
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = () => ok({});
+  assert.throws(() => service.emitDeclarationsArtifact(handle), /DECLARATIONS_RESULT_SHAPE/);
+  delete compiler.psCompilerJavaScriptDeclarationsFromPrepared;
+  assert.throws(() => service.emitDeclarationsArtifact(handle), /DECLARATIONS_API_REQUIRED/);
+  assert.equal(service.emitExecutableArtifact(handle, 'javascript').payload, '');
+  assert.equal(debugReads, 0);
   service.revoke(handle);
   assert.throws(() => service.emitDeclarationsArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
 });
@@ -459,6 +478,12 @@ test('uniform representation is fixed by host policy, cannot fall back, and reta
   };
   compiler.psCompilerUniformJavaScriptStagesFromPrepared = prepared => {
     assert.equal(Object.isFrozen(prepared), true); calls++; return ok(good);
+  };
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = (request, prepared) => {
+    assert.equal(Object.isFrozen(prepared), true);
+    assert.deepEqual(JSON.parse(request), ['psc-ts-declaration-request/1',
+      'psc-direct-js-declarations-uniform-structural/1', '67108864', [['0', 'forward']]]);
+    return ok('declare const $pscDeclaration0: <T0>(_arg0: T0) => T0;\nexport { $pscDeclaration0 as forward };\n');
   };
   const product = service.emitDeclarationsArtifact(handle);
   assert.equal(calls, 1);

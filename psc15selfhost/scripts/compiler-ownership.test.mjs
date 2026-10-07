@@ -55,3 +55,19 @@ test('character quote does not hide a forbidden target dependency from ownership
   f.packages[1].modules[0].source += "\ndef quote : Char := '\"'\ndef x := PsJsExpr.literal";
   assert.throws(() => auditCompilerOwnership(f), /TARGET_LEAK/);
 });
+
+test('source declaration interop is available to the JS driver but cannot enter semantic or backend layers', () => {
+  const f = fixture();
+  f.policy.packages.push({ folder: 'interface-ts', name: '@fixture/declarations', role: 'interop' });
+  f.packages.push({ folder: 'interface-ts',
+    manifest: { name: '@fixture/declarations', version: '1', proofscript: {}, dependencies: { '@fixture/ir': '1' } },
+    modules: [{ path: 'packages/interface-ts/src/Ps/InterfaceTs.lean', source: 'import Ps.Ir\ndef declarations : Nat := irValue' }] });
+  f.packages[3].manifest.dependencies['@fixture/declarations'] = '1';
+  f.packages[3].modules[0].source += '\nimport Ps.InterfaceTs';
+  assert.equal(auditCompilerOwnership(f).packages, 5);
+  for (const index of [1, 2]) {
+    const changed = structuredClone(f);
+    changed.packages[index].manifest.dependencies['@fixture/declarations'] = '1';
+    assert.throws(() => auditCompilerOwnership(changed), /SEMANTIC_DEPENDENCY|BACKEND_FRONTEND_DEPENDENCY/);
+  }
+});

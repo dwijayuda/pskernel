@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "contract": "psc-direct-javascript-declarations/1",
   "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
-  "implementation": "portable-source-producer-and-candidate-writer-with-host-correspondence-checker",
+  "implementation": "portable-source-producer-and-writer-with-live-checked-session-routing-and-host-correspondence-checker",
   "source": "Exact pre-erasure PublicApiIR types. Runtime/Specialized/JsIR are used only to validate correspondence and bind actual exports, never to infer the source API.",
   "products": [
     {
@@ -48,7 +48,7 @@
     "Generic runtime exports under the current closed specializer",
     "Dependent value types, proposition erasure inference, higher-rank generics",
     "Named type aliases, structures/inductives and type-level computation",
-    "Declaration position maps and live portable-writer service routing",
+    "Declaration position maps and direct CLI product selection",
     "Runtime refinements, independently proved source projection or executable preservation",
     "Generic constants that would require inventing a callable factory"
   ],
@@ -83,7 +83,17 @@
     "algorithm": "Single forward declaration scan and explicit type/output worklist; structural fuel recursion and balanced text builder. Generic indices, ASCII export names, source-index order/range and output budgets reject explicitly.",
     "resourcePolicy": "Positive caller-selected writer steps and output bytes; default 1000000 steps and 64 MiB. Each selected source projection separately uses its 400000-step/128-depth limit. Identifier scanning is bounded by its output-sized byte length. Projection resource units are not writer steps.",
     "authority": "Candidate bytes only: caller must validate complete source/runtime/export correspondence and uniqueness; no standalone inventory or type-preservation authority.",
-    "status": "portable-writer-and-native-host-byte-comparison-implemented-live-service-routing-pending",
-    "validation": "Actual compiled closed/generic/higher-order/Array declarations compare exact bytes with the independent host writer and use the existing pinned TypeScript consumer. Focused sparse alias, empty module, request order/range, malformed name, generic policy and exact budget checks are added; cloud run pending."
+    "status": "portable-producer-live-checked-service-routing-and-independent-host-byte-check-implemented",
+    "validation": "Actual native closed/generic/higher-order/Array byte comparisons and pinned TypeScript consumer passed at fba48e8; that run later failed only because the success-marker host assertion received a Buffer rather than text. Corrected the assertion. New live routing, same-prepared-object, missing/failing API, byte mismatch, resource and revocation checks await cloud validation."
+  },
+  "livePortableRouting": {
+    "requestContract": "psc-ts-declaration-request/1",
+    "codec": "packages/interface-ts/src/Ps/InterfaceTs/Request.lean",
+    "driver": "packages/driver-js/src/Ps/DriverJs/Declarations.lean",
+    "entry": "psCompilerJavaScriptDeclarationsFromPrepared",
+    "selection": "Only explicitly requested declarations call this entry. The immutable checked-session JS representation policy determines its declaration profile; absent/failing/malformed API rejects the requested product without a fallback.",
+    "flow": "Independent host factory checks exact source/runtime/export subjects, supplies its ordered binding requests, then compares portable bytes exactly before publication. The same frozen admitted prepared module is used; no re-preparation or second executable emission.",
+    "limits": "Canonical four-item JSON array [contract, declarationProfile, decimal-string outputByteLimit, [decimal-string sourceIndex, exportName][]]. Input <=1 MiB, nesting <=3 and <=4098 arrays before parsing, at most 4096 requests, source indices <=1000000, output limit 1..64 MiB, writer steps <=1000000. Host checks request and output budgets and fresh liveness.",
+    "authority": "Descriptive product only. Exact byte agreement is not source/runtime semantic preservation or declaration target acceptance."
   }
 }

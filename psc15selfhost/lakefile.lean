@@ -87,7 +87,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsInterfaceTs where
   srcDir := "packages/interface-ts/src"
-  roots := #[`Ps.InterfaceTs.Declarations]
+  roots := #[`Ps.InterfaceTs.Declarations, `Ps.InterfaceTs.Request]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -132,7 +132,7 @@ lean_lib PsDriverTs where
 
 lean_lib PsDriverJs where
   srcDir := "packages/driver-js/src"
-  roots := #[`Ps.DriverJs.Compiler, `Ps.DriverJs.Bootstrap, `Ps.DriverJs.Stages]
+  roots := #[`Ps.DriverJs.Compiler, `Ps.DriverJs.Bootstrap, `Ps.DriverJs.Stages, `Ps.DriverJs.Declarations]
 
 lean_lib PsDriverWasm where
   srcDir := "packages/driver-wasm/src"

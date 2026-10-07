@@ -1,4 +1,4 @@
-import Ps.InterfaceTs.Declarations
+import Ps.DriverJs.Declarations
 import Ps.CompilerIr.SourceSignatureEncode
 import Ps.DriverTs.Stages
 import Ps.DriverJs.Stages
@@ -67,8 +67,9 @@ def psSourceSignatureFailureFixture : IO Unit := do
 -- Requests use the actual observed erasure names; the host independently checks
 -- these bytes against complete source/runtime/target inventories.
 def psTsDeclarationFixture
-    (profile : PsTsDeclarationProfile) (api : PsPublicApiModule)
+    (profile : PsTsDeclarationProfile) (prepared : PsCompilerAdmissionReadyModule)
     (erasureTable : String) : IO String := do
+  let api := psPublicApiProjectModule prepared.declarations
   let .ok (.array [.string _, .string _, .array entries]) := psJsonParse erasureTable
     | throw (IO.userError "DECLARATION_FIXTURE_ERASURE_TABLE")
   let requests := entries.zipIdx.filterMap fun (entry, index) =>
@@ -78,7 +79,11 @@ def psTsDeclarationFixture
     | _ => none
   let .ok declarations := psTsEmitDeclarations profile api requests
     | throw (IO.userError "DECLARATION_PORTABLE_WRITER")
-  pure declarations
+  let request := psTsEncodeDeclarationCommand (PsTsDeclarationCommand.mk profile 67108864 requests)
+  let .ok emitted := psCompilerJavaScriptDeclarationsFromPrepared request prepared
+    | throw (IO.userError "DECLARATION_DRIVER_REQUEST")
+  if emitted != declarations then throw (IO.userError "DECLARATION_DRIVER_CHANGED_BYTES")
+  pure emitted
 
 def psTsDeclarationFailureFixture : IO Unit := do
   let nat := PsExpr.constE (PsName.str .anonymous "Nat") []
@@ -132,6 +137,27 @@ def psTsDeclarationFailureFixture : IO Unit := do
   match psTsEmitDeclarations .uniformJavaScript64 unsupported request with
   | .error (.sourceSignature .typeFormUnsupported) => pure ()
   | _ => throw (IO.userError "DECLARATION_SOURCE_FAILURE")
+  let emptyRequest := psTsEncodeDeclarationCommand (PsTsDeclarationCommand.mk .closedJavaScript64 1000 [])
+  let .ok _ := psTsDecodeDeclarationCommand emptyRequest
+    | throw (IO.userError "DECLARATION_REQUEST_VALID")
+  for invalid in [
+      emptyRequest ++ "\n",
+      "[\"wrong\",\"psc-direct-js-declarations-closed-structural/1\",\"1000\",[]]",
+      "[\"psc-ts-declaration-request/1\",\"wrong\",\"1000\",[]]",
+      "[\"psc-ts-declaration-request/1\",\"psc-direct-js-declarations-closed-structural/1\",\"0\",[]]",
+      "[\"psc-ts-declaration-request/1\",\"psc-direct-js-declarations-closed-structural/1\",\"67108865\",[]]",
+      "[\"psc-ts-declaration-request/1\",\"psc-direct-js-declarations-closed-structural/1\",\"1000\",[[0,\"x\"]]]",
+      "[\"psc-ts-declaration-request/1\",\"psc-direct-js-declarations-closed-structural/1\",\"1000\",[[\"00\",\"x\"]]]",
+      "[\"psc-ts-declaration-request/1\",\"psc-direct-js-declarations-closed-structural/1\",\"1000\",[[\"-1\",\"x\"]]]",
+      "[[[[]]]]", "{}", "]"] do
+    match psTsDecodeDeclarationCommand invalid with
+    | .error _ => pure ()
+    | .ok _ => throw (IO.userError "DECLARATION_REQUEST_ACCEPTED")
+  let overCount := psTsEncodeDeclarationCommand
+    (PsTsDeclarationCommand.mk .closedJavaScript64 1000 (List.replicate 4097 (PsTsDeclarationRequest.mk 0 "x")))
+  match psTsDecodeDeclarationCommand overCount with
+  | .error .resource => pure ()
+  | _ => throw (IO.userError "DECLARATION_REQUEST_COUNT")
   IO.println "PSCV_PORTABLE_DECLARATIONS: PASS"
 
 def main (args : List String) : IO Unit := do
@@ -239,7 +265,7 @@ def main (args : List String) : IO Unit := do
     let signatures <- psSourceSignatureFixtureJson (psPublicApiProjectModule prepared.declarations)
     let declarations <- if args == ["--js-declaration-stages"] then
       psTsDeclarationFixture .closedJavaScript64
-        (psPublicApiProjectModule prepared.declarations) staged.erasureCorrespondence
+        prepared staged.erasureCorrespondence
       else pure ""
     IO.println (psJsonObject [
       ("portableDeclarations", psJsonQuote declarations),
@@ -279,7 +305,7 @@ def main (args : List String) : IO Unit := do
       | throw (IO.userError "UNIFORM_PUBLIC_API_FAILED")
     let signatures <- psSourceSignatureFixtureJson (psPublicApiProjectModule prepared.declarations)
     let declarations <- psTsDeclarationFixture .uniformJavaScript64
-      (psPublicApiProjectModule prepared.declarations) staged.erasureCorrespondence
+      prepared staged.erasureCorrespondence
     IO.println (psJsonObject [
       ("portableDeclarations", psJsonQuote declarations),
       ("sourceSignatures", psJsonQuote signatures),

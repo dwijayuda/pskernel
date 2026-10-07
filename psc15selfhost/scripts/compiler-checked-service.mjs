@@ -155,6 +155,10 @@ export function createCheckedCompilerService({
         ...(uniform ? { uniformSpecializedIr: uniform } : { specializedIr: stages.specializedIr }),
         jsIr: targetStages.jsIr, javaScript: { bytes, identity: artifactId(bytes, 'javascript-output', 'psc-direct-javascript/es2022') },
       }, maxBytes: maxOutputBytes, maxTotalBytes: maxOutputBytes });
+      const bindings = JSON.parse(directDeclarations.binding.bytes).bindings;
+      const portable = session.javaScriptDeclarations(checkedCoreHandle, bindings, maxOutputBytes);
+      if (!Buffer.from(portable).equals(directDeclarations.declarations.bytes))
+        throw new Error('PSC_CHECKED_DECLARATION_PRODUCER_MISMATCH');
     }
     if (productByteLength + (directDeclarations ? Object.values(directDeclarations).reduce((sum, item) => sum + item.bytes.byteLength, 0) : 0) +
         (erasureMap?.bytes.byteLength ?? 0) + (specializationProduct?.map.bytes.byteLength ?? 0) +
@@ -177,7 +181,9 @@ export function createCheckedCompilerService({
         stageArtifacts: Object.freeze(Object.fromEntries(
           [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {}), ...(uniform ? [['uniformSpecializedIr', uniform]] : [])]
             .map(([key, value]) => [key, value.identity]))) } : {}),
-      ...(directDeclarations ? { directDeclarations } : {}),
+      ...(directDeclarations ? { directDeclarations, declarationProduction: Object.freeze({
+        producer: 'portable-source-signature-writer/1', hostBytesCompared: true,
+        globalPreservationProved: false, authority: 'descriptive-product-only' }) } : {}),
       ...(directSourceMap ? { sourceMap: directSourceMap.sourceMap.bytes.toString('utf8'),
         sourceMapArtifact: directSourceMap.sourceMap.identity, sourceMapRecipe: directSourceMap.recipe.identity } : {}),
       ...(declarationLineage ? { declarationLineage: declarationLineage.identity } : {}),

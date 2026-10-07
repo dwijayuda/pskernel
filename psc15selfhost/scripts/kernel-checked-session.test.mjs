@@ -188,3 +188,35 @@ test('source text is a value, not a file read between check and emit', async () 
   source = 'changed'; session.emit(checked);
   assert.equal(getPrepared().declarations[0].value, 'original');
 });
+
+test('portable declaration requests require live JS authority, bounded inputs and exact frozen preparation', async () => {
+  let calls = 0, prepared;
+  const compiler = {
+    psCompilerPrepareSource: () => { prepared = {}; return ok(prepared); },
+    psCompilerAdmissionsFromPrepared: value => { assert.equal(value, prepared); return ok(wire([])); },
+    psCompilerJavaScriptDeclarationsFromPrepared: (request, value) => {
+      assert.equal(value, prepared); assert.equal(Object.isFrozen(value), true); calls++;
+      assert.deepEqual(JSON.parse(request), ['psc-ts-declaration-request/1',
+        'psc-direct-js-declarations-closed-structural/1', '512', []]);
+      return ok('export {};\n');
+    },
+  };
+  const session = createKernelCheckedSession(compiler, () => identity, leanCheckedIdentity,
+    kernelContractV1, undefined, { targets: ['javascript'] });
+  const handle = await session.check('lean', '');
+  assert.equal(session.javaScriptDeclarations(handle, [], 512), 'export {};\n');
+  assert.equal(calls, 1);
+  assert.throws(() => session.javaScriptDeclarations({ ...handle }, [], 512), /UNCHECKED_MODULE/);
+  assert.throws(() => session.javaScriptDeclarations(handle, [], 0), /REQUEST_RESOURCE/);
+  assert.throws(() => session.javaScriptDeclarations(handle, Array(4097).fill({ sourceIndex: 0, exportName: 'x' }), 512), /REQUEST_RESOURCE/);
+  assert.throws(() => session.javaScriptDeclarations(handle, [{ sourceIndex: 1000001, exportName: 'x' }], 512), /REQUEST_SHAPE/);
+  assert.throws(() => session.javaScriptDeclarations(handle, [{ sourceIndex: 0, exportName: 'x'.repeat(512) }], 512), /REQUEST_RESOURCE/);
+  assert.equal(calls, 1);
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = () => ok('x'.repeat(513));
+  assert.throws(() => session.javaScriptDeclarations(handle, [], 512), /OUTPUT_RESOURCE/);
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = () => { session.revoke(handle); return ok('export {};\n'); };
+  assert.throws(() => session.javaScriptDeclarations(handle, [], 512), /UNCHECKED_MODULE/);
+  const denied = fixture();
+  const deniedHandle = await denied.session.check('lean', '');
+  assert.throws(() => denied.session.javaScriptDeclarations(deniedHandle, [], 512), /TARGET_FORBIDDEN/);
+});

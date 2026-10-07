@@ -212,3 +212,126 @@ theorem psKernelDefEqNativeThenLazyStep_configuration_sound_of_components
                           simp at hRun
                           rcases hRun with ⟨rfl, rfl⟩
                           exact ⟨hStepSound.1, trivial⟩
+
+
+/-
+The public lazy-delta one-step dispatcher only selects among the independent
+one-sided and two-definition comparison workers. Its proof therefore needs
+one explicit contract for the still-open two-definition family; it does not
+inline or re-specify the sorted-hint, same-definition, or cache algorithms.
+-/
+def PsKernelDeltaStepBothConfigurationSound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀ (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (leftDef rightDef : PsKernelDefinitionInfo)
+    (answer : PsKernelDeltaStepResult),
+    PsKernelCheckerConfigurationSound context state ->
+    psKernelDefEqLazyStepBoth
+        defeq coreWhnf context state
+        left right leftDef rightDef =
+      Except.ok (Prod.mk answer nextState) ->
+    PsKernelDeltaStepPostcondition
+      context nextState left right answer
+
+
+theorem psKernelDefEqLazyStep_configuration_sound_of_branches
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (hBoth :
+      PsKernelDeltaStepBothConfigurationSound defeq coreWhnf) :
+    PsKernelDeltaStepConfigurationSound
+      (psKernelDefEqLazyStep defeq coreWhnf) := by
+  intro context state nextState left right answer hConfig hRun
+  cases hLeftDef : psKernelDeltaDefinition context left with
+  | none =>
+      cases hRightDef : psKernelDeltaDefinition context right with
+      | none =>
+          simp [
+            psKernelDefEqLazyStep,
+            hLeftDef,
+            hRightDef
+          ] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            ⟨
+              hConfig,
+              PsKernelReductionClosure.refl left,
+              PsKernelReductionClosure.refl right
+            ⟩
+      | some rightDef =>
+          have hBranch :
+              psKernelDefEqLazyStepRightOnly
+                  defeq coreWhnf context state left right =
+                Except.ok (Prod.mk answer nextState) := by
+            simpa [
+              psKernelDefEqLazyStep,
+              hLeftDef,
+              hRightDef
+            ] using hRun
+          exact
+            psKernelDefEqLazyStepRightOnly_configuration_sound
+              defeq coreWhnf hQuick hCore
+              context state nextState left right answer
+              hConfig hBranch
+  | some leftDef =>
+      cases hRightDef : psKernelDeltaDefinition context right with
+      | none =>
+          have hBranch :
+              psKernelDefEqLazyStepLeftOnly
+                  defeq coreWhnf context state left right =
+                Except.ok (Prod.mk answer nextState) := by
+            simpa [
+              psKernelDefEqLazyStep,
+              hLeftDef,
+              hRightDef
+            ] using hRun
+          exact
+            psKernelDefEqLazyStepLeftOnly_configuration_sound
+              defeq coreWhnf hQuick hCore
+              context state nextState left right answer
+              hConfig hBranch
+      | some rightDef =>
+          have hBranch :
+              psKernelDefEqLazyStepBoth
+                  defeq coreWhnf context state
+                  left right leftDef rightDef =
+                Except.ok (Prod.mk answer nextState) := by
+            simpa [
+              psKernelDefEqLazyStep,
+              hLeftDef,
+              hRightDef
+            ] using hRun
+          exact
+            hBoth
+              context state nextState
+              left right leftDef rightDef answer
+              hConfig hBranch

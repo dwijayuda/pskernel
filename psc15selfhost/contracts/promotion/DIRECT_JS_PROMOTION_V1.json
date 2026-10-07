@@ -24,10 +24,11 @@
     "fallbackForbidden": true
   },
   "targetIrValidation": {
-    "status": "implemented-structural-validator-assurance-pending",
+    "status": "implemented-exact-retained-target-ir-assurance-pending",
     "implementation": "packages/backend-js/src/Ps/BackendJs/Validate.lean",
     "productionBoundary": "Ps.BackendJs.Print validates JsIR before printing",
     "regression": "test/BackendJsValidateTests.lean",
-    "preservation": "not-established"
+    "preservation": "not-established",
+    "exactArtifact": "Ps.CompilerJavaScriptStages retains canonical jsIr produced by the same lowering execution consumed by validation/printing; checked host/archive evidence binds psc-js-ir-json/1."
   }
 }

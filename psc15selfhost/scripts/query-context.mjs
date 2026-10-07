@@ -70,7 +70,7 @@ export function createQueryKey(fields) {
 }
 export function decodeQueryKey(record) {
   if (!(record?.bytes instanceof Uint8Array) || record.bytes.byteLength > bound.maxBytes) fail('RESOURCE_EXHAUSTED');
-  verifyArtifact(record.bytes, record.identity);
+  id(record.identity); verifyArtifact(record.bytes, record.identity);
   if (record.identity.domain !== 'query-key' || record.identity.contract !== 'psc-query-key/1') fail('IDENTITY');
   const value = JSON.parse(record.bytes); validate(value);
   if (!canonicalBytes(value, bound).equals(Buffer.from(record.bytes))) fail('CANONICAL');
@@ -83,6 +83,8 @@ export async function verifyQueryKey(record, { expectedQueryId, resolveArtifact 
   const value = decodeQueryKey(record);
   if (id(expectedQueryId) !== id(record.identity) || typeof resolveArtifact !== 'function') fail('CONSUMER_SELECTION');
   const resolve = async identity => {
+    id(identity);
+    if (identity.byteLength > bound.maxBytes) fail('RESOURCE_EXHAUSTED');
     const bytes = await resolveArtifact(copy(identity)); verifyArtifact(bytes, identity); return { identity, bytes };
   };
   const actionRecord = await resolve(value.buildActionId), action = decodeBuildAction(actionRecord);

@@ -75,7 +75,7 @@ test('offline archive opt-in replays exact verified IR and rejects a fully rehas
   }
   async function replay(built, strict) {
     const allowedAssumptions = [...new Set(built.graph.entries
-      .filter(entry => entry.identity.contract === 'psc-pass-definition/1')
+      .filter(entry => entry.identity.domain === 'pass-definition')
       .flatMap(entry => entry.canonicalValue.assumptionIds))];
     return verifyObservedBuildArchive(packObservedBuildArchive(built).bytes,
       { expectedGraphId: built.identity, allowedAssumptions, ...(strict ? { irValidation: configuration } : {}) });
@@ -170,7 +170,7 @@ test('linked archive replay covers every exact retained IR subject and rejects r
     provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' },
     kernelContract: { id: 'fixture' }, hostSources: [], runtime: { implementation: 'fixture' } });
   const allowedAssumptions = [...new Set(built.graph.entries
-    .filter(entry => entry.identity.contract === 'psc-pass-definition/1')
+    .filter(entry => entry.identity.domain === 'pass-definition')
     .flatMap(entry => entry.canonicalValue.assumptionIds))];
   const archive = packObservedBuildArchive(built).bytes;
   const options = { expectedGraphId: built.identity, allowedAssumptions };

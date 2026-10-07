@@ -48,7 +48,7 @@ test('actual erasure/validation/emission snapshots form separately bound archive
   assert.equal(built.graph.coverage, 'observed-erasure-validation-and-composite-backend-edges');
   assert.equal(built.graph.executions.length, 5);
   for (const artifact of Object.values(snapshots)) assert.deepEqual(built.artifacts.get(artifactKey(artifact.identity)), artifact.bytes);
-  const definitions = built.graph.entries.filter(entry => entry.identity.contract === 'psc-pass-definition/1').map(entry => entry.canonicalValue);
+  const definitions = built.graph.entries.filter(entry => entry.identity.domain === 'pass-definition').map(entry => entry.canonicalValue);
   assert.deepEqual(definitions.map(item => item.passId), [
     'psc-prepare-and-check/1', 'psc-erase-checked-core/1', 'psc-validate-runtime-ir/1', 'psc-project-runtime-interface/1', 'psc-verified-ir-to-typescript/1',
   ]);
@@ -83,7 +83,7 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
     compilerKind: 'fixture', provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' },
     kernelContract: { id: 'fixture' }, hostSources: [], runtime: { implementation: 'fixture' } };
   const built = createCheckedBuildGraph(inputs);
-  const definitions = built.graph.entries.filter(entry => entry.identity.contract === 'psc-pass-definition/1').map(entry => entry.canonicalValue);
+  const definitions = built.graph.entries.filter(entry => entry.identity.domain === 'pass-definition').map(entry => entry.canonicalValue);
   assert.deepEqual(definitions.map(item => item.passId), ['psc-prepare-and-check/1', 'psc-erase-checked-core/1',
     'psc-validate-runtime-ir/1', 'psc-project-runtime-interface/1', 'psc-verified-ir-to-js-abi-plan/1',
     'psc-pass-specialize/1', 'psc-specialized-ir-to-js-ir/1', 'psc-js-ir-to-javascript/1']);
@@ -122,7 +122,7 @@ test('actual direct Wasm retains specialization snapshots and replays correspond
     provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' }, kernelContract: { id: 'fixture' },
     hostSources: [], runtime: { implementation: 'fixture' } };
   const built = createCheckedBuildGraph(inputs), archive = packObservedBuildArchive(built);
-  const definitions = built.graph.entries.filter(entry => entry.identity.contract === 'psc-pass-definition/1').map(entry => entry.canonicalValue);
+  const definitions = built.graph.entries.filter(entry => entry.identity.domain === 'pass-definition').map(entry => entry.canonicalValue);
   assert.equal(definitions.length, 7);
   assert.deepEqual(definitions.slice(-2).map(item => item.passId), [
     'psc-specialized-ir-to-wasm-ir/1',

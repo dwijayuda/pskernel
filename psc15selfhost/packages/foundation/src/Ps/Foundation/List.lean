@@ -72,3 +72,39 @@ def psListZip {alpha beta : Type} (left : List alpha) : List beta -> List (Prod 
         match right with
         | List.nil => List.nil
         | List.cons other others => List.cons (Prod.mk value other) (smaller others)
+
+-- Right folds evaluate the tail before the head without keeping a native frame
+-- per list cell. This preserves rightmost-error precedence for Except folds.
+def psListFoldLeftWorker {alpha beta : Type}
+    (combine : alpha -> beta -> beta)
+    (values : List alpha) : beta -> beta :=
+  match values with
+  | List.nil => fun (acc : beta) => acc
+  | List.cons value rest =>
+      let smaller : beta -> beta := psListFoldLeftWorker combine rest;
+      fun (acc : beta) => smaller (combine value acc)
+
+def psListFoldRight {alpha beta : Type}
+    (combine : alpha -> beta -> beta)
+    (values : List alpha)
+    (initial : beta) : beta :=
+  psListFoldLeftWorker combine (psListReverse values) initial
+
+def psListFoldLeftExceptWorker {alpha beta error : Type}
+    (combine : alpha -> beta -> Except error beta)
+    (values : List alpha) : beta -> Except error beta :=
+  match values with
+  | List.nil => fun (acc : beta) => Except.ok acc
+  | List.cons value rest =>
+      let smaller : beta -> Except error beta :=
+        psListFoldLeftExceptWorker combine rest;
+      fun (acc : beta) =>
+        match combine value acc with
+        | Except.error failure => Except.error failure
+        | Except.ok next => smaller next
+
+def psListFoldRightExcept {alpha beta error : Type}
+    (combine : alpha -> beta -> Except error beta)
+    (values : List alpha)
+    (initial : beta) : Except error beta :=
+  psListFoldLeftExceptWorker combine (psListReverse values) initial

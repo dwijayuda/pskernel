@@ -1,3 +1,4 @@
+import Ps.Foundation.Text
 def psJsonConcat2
     (left right : String) : String :=
   String.Internal.append left right
@@ -169,15 +170,7 @@ def psJsonQuote (value : String) : String :=
 def psJsonJoin
     (separator : String)
     (values : List String) : String :=
-  match values with
-  | List.nil =>
-      ""
-  | List.cons value rest =>
-      match rest with
-      | List.nil =>
-          value
-      | List.cons _ _ =>
-          psJsonConcat3 value separator (psJsonJoin separator rest)
+  psTextJoin separator values
 
 def psJsonArray (values : List String) : String :=
   psJsonConcat3 "[" (psJsonJoin "," values) "]"

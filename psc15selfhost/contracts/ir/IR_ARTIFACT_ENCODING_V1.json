@@ -21,15 +21,15 @@
   },
   "directJavaScriptPipeline": {
     "implementation": "packages/driver-js/src/Ps/DriverJs/Stages.lean",
-    "meaning": "One erasure/strict-validation/specialization/post-specialization-strict-validation/lowering/printing execution returns actual RuntimeIR, VerifiedIR and SpecializedIR snapshots plus JavaScript. The existing checked service gates this API on a live matching handle and checks canonical stage schemas, byte identities and output budgets.",
-    "graph": "The graph/archive builder retains six source-check/erase/validate/runtime-interface/specialize/JavaScript edges, using the portable specialization pass ID. The host independently checks specialization correspondence; strict postconditions and correspondence do not establish global preservation.",
-    "remaining": "The default checked-build CLI remains on TypeScript; direct-JS promotion, target-interior artifacts, complete source-to-stage evidence integration and independent preservation evidence are still required."
+    "meaning": "A single staged execution strictly validates erasure and specialization output, lowers once to JsIR, structurally validates and snapshots that exact JsIR, and prints the same value.",
+    "graph": "Observed graph edges separately retain source checking/certification where present, erasure, strict IR validation, runtime interface, ABI plan, specialization, JsIR lowering and JavaScript printing. The archive replays supported scoped relations; global preservation is unproved.",
+    "remaining": "Direct-JS promotion, complete lowering/printer preservation and independently established assurance remain pending."
   },
   "directWasmPipeline": {
     "implementation": "packages/driver-wasm/src/Ps/DriverWasm/Stages.lean",
-    "meaning": "One erasure/strict-validation/specialization/post-specialization-strict-validation/lowering/ABI/encoding execution returns actual stage snapshots and Wasm bytes. The checked service supplies its pinned wasm32 target and live checked object, then copies the byte list under its budget and independently checks specialization correspondence.",
-    "graph": "Six actual graph edges retain all stage/binary bytes. Offline replay checks runtime-interface projection and specialization correspondence. Wasm target IR, ABI insertion and binary encoding remain a composite edge with explicit implementation assumptions.",
-    "remaining": "Default checked-build CLI target integration, complete target-interior evidence and global lowering/ABI/encoding preservation. No direct-JS promotion or Wasm fixed point follows."
+    "meaning": "A single staged execution strictly validates erasure and specialization output, lowers once, completes the private bootstrap ABI, validates and snapshots the exact WasmIR, and encodes the same value.",
+    "graph": "Observed graph edges separately retain source checking/certification where present, erasure, strict validation, runtime interface, specialization, WasmIR lowering/ABI completion, and binary encoding.",
+    "remaining": "Full Wasm operand/control-stack typing, broad target ABI adapters and lowering/ABI/encoder preservation remain pending. Current runtime/integration success is not a full fixed point."
   },
   "assurance": "Encoding/schema integrity and observed stage provenance only. The strict validator, erasure and emitter remain explicitly trusted unless independent evidence is attached.",
   "globalPreservation": "unproved",
@@ -38,5 +38,16 @@
     "Rust SpecializedIR and target-interior snapshots for all backends",
     "complete generated compiler/provider/runtime/tsc input closure",
     "portable total resource policy"
-  ]
+  ],
+  "portableDecoder": "packages/compiler-ir/src/Ps/CompilerIr/Decode.lean",
+  "closedInvariantReplay": {
+    "contract": "psc-closed-ir-invariant-replay/1",
+    "portableOwner": "packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean",
+    "nativeEntry": "host/src/Ps/Host/IrReplay.lean",
+    "hostOwner": "scripts/ir-invariant-replay.mjs",
+    "constructionBoundary": "Decoding yields construction IR only. Exact canonical re-encoding is required before fresh strict validation.",
+    "scope": "Closed modules only. External imports require separate link-context replay and decline rather than accept.",
+    "authority": "No serialized artifact creates CheckedCore or CertifiedSource; a successful report checks IR invariants only.",
+    "trust": "Caller pins native validator bytes and selects a stable executable path/runtime. Global decoder/validator soundness and hostile-host isolation are unproved."
+  }
 }

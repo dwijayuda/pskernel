@@ -3,8 +3,16 @@ import KernelCore.Foundation.AdmissionRuntime
 import KernelCore.Foundation.CheckerOps
 
 def main : IO Unit :=
-  if !psKernelContractTests then
-    throw (IO.userError "PSC1_KERNEL_CONTRACT_V1: FAIL")
+  if !psKernelContractDiagnosticTests then
+    throw (IO.userError "PSC1_KERNEL_CONTRACT_DIAGNOSTICS: FAIL")
+  else if !psKernelContractAdmissionTests then
+    throw (IO.userError "PSC1_KERNEL_CONTRACT_ADMISSION: FAIL")
+  else if !psKernelContractExpressionTests then
+    throw (IO.userError "PSC1_KERNEL_CONTRACT_EXPRESSION: FAIL")
+  else if !psKernelContractResourceTests then
+    throw (IO.userError "PSC1_KERNEL_CONTRACT_RESOURCE: FAIL")
+  else if !psKernelContractProviderTests then
+    throw (IO.userError "PSC1_KERNEL_CONTRACT_PROVIDER: FAIL")
   else if !psKernelCheckerOpsTests then
     throw
       (IO.userError

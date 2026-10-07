@@ -634,7 +634,7 @@ def psKernelUnfoldDefinition
                     (psKernelLevelListLength levels) then
                 Option.some
                   (psKernelApplyArgs
-                    (psKernelExprInstantiateLevelParams
+                    (psKernelExprInstantiateLevelParamsIfNeeded
                       value
                       params
                       levels)

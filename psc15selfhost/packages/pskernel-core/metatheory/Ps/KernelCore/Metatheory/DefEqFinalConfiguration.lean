@@ -688,3 +688,263 @@ theorem psKernelDefEqStringLitExpansionWith_configuration_preserves
               simp at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact hSecondConfig
+
+
+theorem psKernelDefEqUnitLikeWith_configuration_preserves
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqUnitLikeWith
+          defeq inferType whnf
+          context state left right =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState := by
+  simp only [psKernelDefEqUnitLikeWith] at hSuccess
+  cases hLeftInfer :
+      inferType context state left with
+  | error error =>
+      simp only [hLeftInfer] at hSuccess
+      simp at hSuccess
+  | ok leftRun =>
+      simp only [hLeftInfer] at hSuccess
+      rcases leftRun with ⟨leftType, leftState⟩
+      have hLeftConfig :=
+        hInfer
+          context state leftState
+          left leftType
+          hConfig hLeftInfer
+      cases hTypeWhnf :
+          whnf context leftState leftType with
+      | error error =>
+          simp only [hTypeWhnf] at hSuccess
+          simp at hSuccess
+      | ok reducedRun =>
+          simp only [hTypeWhnf] at hSuccess
+          rcases reducedRun with ⟨reducedType, reducedState⟩
+          have hReducedConfig :=
+            (hWhnf
+              context leftState reducedState
+              leftType reducedType
+              hLeftConfig hTypeWhnf).2
+          cases hHead : psKernelExprGetAppFn reducedType with
+          | const inductName levels =>
+              simp only [hHead] at hSuccess
+              by_cases hStructure :
+                  psKernelEnvironmentIsNonRecStructure
+                      context.environment
+                      inductName =
+                    true
+              · rw [if_pos hStructure] at hSuccess
+                cases hFind :
+                    psKernelEnvironmentFind
+                      context.environment
+                      inductName with
+                | none =>
+                    simp only [hFind] at hSuccess
+                    simp at hSuccess
+                    rcases hSuccess with ⟨rfl, rfl⟩
+                    exact hReducedConfig
+                | some info =>
+                    simp only [hFind] at hSuccess
+                    cases info with
+                    | inductInfo inductInfo =>
+                        simp only at hSuccess
+                        cases hCtors : inductInfo.ctors with
+                        | nil =>
+                            simp only [hCtors] at hSuccess
+                            simp at hSuccess
+                            rcases hSuccess with ⟨rfl, rfl⟩
+                            exact hReducedConfig
+                        | cons ctorName ctorTail =>
+                            simp only [hCtors] at hSuccess
+                            cases ctorTail with
+                            | nil =>
+                                simp only at hSuccess
+                                cases hCtorFind :
+                                    psKernelEnvironmentFind
+                                      context.environment
+                                      ctorName with
+                                | none =>
+                                    simp only [hCtorFind] at hSuccess
+                                    simp at hSuccess
+                                    rcases hSuccess with ⟨rfl, rfl⟩
+                                    exact hReducedConfig
+                                | some ctorValue =>
+                                    simp only [hCtorFind] at hSuccess
+                                    cases ctorValue with
+                                    | ctorInfo ctor =>
+                                        simp only at hSuccess
+                                        by_cases hNoFields :
+                                            Nat.beq ctor.numFields 0 = true
+                                        · rw [if_pos hNoFields] at hSuccess
+                                          cases hRightInfer :
+                                              inferType
+                                                context
+                                                reducedState
+                                                right with
+                                          | error error =>
+                                              simp only [hRightInfer] at hSuccess
+                                              simp at hSuccess
+                                          | ok rightRun =>
+                                              simp only [hRightInfer] at hSuccess
+                                              rcases rightRun with
+                                                ⟨rightType, rightState⟩
+                                              have hRightConfig :=
+                                                hInfer
+                                                  context
+                                                  reducedState
+                                                  rightState
+                                                  right
+                                                  rightType
+                                                  hReducedConfig
+                                                  hRightInfer
+                                              exact
+                                                (hDefEq
+                                                  context
+                                                  rightState
+                                                  nextState
+                                                  reducedType
+                                                  rightType
+                                                  value
+                                                  hRightConfig
+                                                  hSuccess).1
+                                        · rw [if_neg hNoFields] at hSuccess
+                                          simp at hSuccess
+                                          rcases hSuccess with ⟨rfl, rfl⟩
+                                          exact hReducedConfig
+                                    | axiomInfo infoValue =>
+                                        simp at hSuccess
+                                        rcases hSuccess with ⟨rfl, rfl⟩
+                                        exact hReducedConfig
+                                    | defnInfo infoValue =>
+                                        simp at hSuccess
+                                        rcases hSuccess with ⟨rfl, rfl⟩
+                                        exact hReducedConfig
+                                    | thmInfo infoValue =>
+                                        simp at hSuccess
+                                        rcases hSuccess with ⟨rfl, rfl⟩
+                                        exact hReducedConfig
+                                    | opaqueInfo infoValue =>
+                                        simp at hSuccess
+                                        rcases hSuccess with ⟨rfl, rfl⟩
+                                        exact hReducedConfig
+                                    | inductInfo infoValue =>
+                                        simp at hSuccess
+                                        rcases hSuccess with ⟨rfl, rfl⟩
+                                        exact hReducedConfig
+                                    | recInfo infoValue =>
+                                        simp at hSuccess
+                                        rcases hSuccess with ⟨rfl, rfl⟩
+                                        exact hReducedConfig
+                                    | quotInfo infoValue =>
+                                        simp at hSuccess
+                                        rcases hSuccess with ⟨rfl, rfl⟩
+                                        exact hReducedConfig
+                            | cons second tail =>
+                                simp at hSuccess
+                                rcases hSuccess with ⟨rfl, rfl⟩
+                                exact hReducedConfig
+                    | axiomInfo infoValue =>
+                        simp at hSuccess
+                        rcases hSuccess with ⟨rfl, rfl⟩
+                        exact hReducedConfig
+                    | defnInfo infoValue =>
+                        simp at hSuccess
+                        rcases hSuccess with ⟨rfl, rfl⟩
+                        exact hReducedConfig
+                    | thmInfo infoValue =>
+                        simp at hSuccess
+                        rcases hSuccess with ⟨rfl, rfl⟩
+                        exact hReducedConfig
+                    | opaqueInfo infoValue =>
+                        simp at hSuccess
+                        rcases hSuccess with ⟨rfl, rfl⟩
+                        exact hReducedConfig
+                    | ctorInfo infoValue =>
+                        simp at hSuccess
+                        rcases hSuccess with ⟨rfl, rfl⟩
+                        exact hReducedConfig
+                    | recInfo infoValue =>
+                        simp at hSuccess
+                        rcases hSuccess with ⟨rfl, rfl⟩
+                        exact hReducedConfig
+                    | quotInfo infoValue =>
+                        simp at hSuccess
+                        rcases hSuccess with ⟨rfl, rfl⟩
+                        exact hReducedConfig
+              · rw [if_neg hStructure] at hSuccess
+                simp at hSuccess
+                rcases hSuccess with ⟨rfl, rfl⟩
+                exact hReducedConfig
+          | bvar index =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | fvar name =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | mvar name =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | sort level =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | app fn arg =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | lam name type body binderInfo =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | forallE name type body binderInfo =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | letE name type value body nondep =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | lit literal =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | mdata metadata body =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig
+          | proj typeName index body =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReducedConfig

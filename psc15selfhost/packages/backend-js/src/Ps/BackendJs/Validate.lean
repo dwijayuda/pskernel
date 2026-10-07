@@ -210,20 +210,6 @@ def psJsValidationExprListWith
             validate
             rest
 
-def psJsValidationFieldsWith
-    (validate :
-      PsJsIrExpr ->
-        Except PsJsIrValidationError Unit)
-    (fields : List (String × PsJsIrExpr)) :
-    Except PsJsIrValidationError Unit :=
-  if
-      psJsValidationUnique
-        (psJsValidationFieldNames fields) then
-    psJsValidationFieldValuesWith validate fields
-  else
-    Except.error
-      (PsJsIrValidationError.duplicateField "")
-
 def psJsValidationFieldValuesWith
     (validate :
       PsJsIrExpr ->
@@ -241,6 +227,20 @@ def psJsValidationFieldValuesWith
           psJsValidationFieldValuesWith
             validate
             rest
+
+def psJsValidationFieldsWith
+    (validate :
+      PsJsIrExpr ->
+        Except PsJsIrValidationError Unit)
+    (fields : List (String × PsJsIrExpr)) :
+    Except PsJsIrValidationError Unit :=
+  if
+      psJsValidationUnique
+        (psJsValidationFieldNames fields) then
+    psJsValidationFieldValuesWith validate fields
+  else
+    Except.error
+      (PsJsIrValidationError.duplicateField "")
 
 def psJsValidationAddBindings
     (bindings : List PsJsIrMatchBinding) :
@@ -265,29 +265,6 @@ def psJsValidationBindingIdentifiers
         psJsValidationBindingIdentifiers rest
       else
         false
-
-def psJsValidationAlternativesWith
-    (validate :
-      List String ->
-      PsJsIrExpr ->
-        Except PsJsIrValidationError Unit)
-    (locals : List String)
-    (alternatives :
-      List
-        (String ×
-          List PsJsIrMatchBinding ×
-          PsJsIrExpr)) :
-    Except PsJsIrValidationError Unit :=
-  if
-      psJsValidationUnique
-        (psJsValidationAlternativeNames alternatives) then
-    psJsValidationAlternativeBodiesWith
-      validate
-      locals
-      alternatives
-  else
-    Except.error
-      (PsJsIrValidationError.duplicateAlternative "")
 
 def psJsValidationAlternativeBodiesWith
     (validate :
@@ -338,6 +315,40 @@ def psJsValidationAlternativeBodiesWith
       else
         Except.error
           (PsJsIrValidationError.duplicateParameter "")
+
+def psJsValidationAlternativesWith
+    (validate :
+      List String ->
+      PsJsIrExpr ->
+        Except PsJsIrValidationError Unit)
+    (locals : List String)
+    (alternatives :
+      List
+        (String ×
+          List PsJsIrMatchBinding ×
+          PsJsIrExpr)) :
+    Except PsJsIrValidationError Unit :=
+  if
+      psJsValidationUnique
+        (psJsValidationAlternativeNames alternatives) then
+    psJsValidationAlternativeBodiesWith
+      validate
+      locals
+      alternatives
+  else
+    Except.error
+      (PsJsIrValidationError.duplicateAlternative "")
+
+def psJsValidationNamesSupported
+    (names : List String) : Bool :=
+  match names with
+  | List.nil =>
+      true
+  | List.cons name rest =>
+      if psJsIdentifierSupported name then
+        psJsValidationNamesSupported rest
+      else
+        false
 
 def psJsValidateExprWithFuel
     (globals : List String)
@@ -462,17 +473,6 @@ def psJsValidateExprWithFuel
                   locals
                   alternatives
 
-def psJsValidationNamesSupported
-    (names : List String) : Bool :=
-  match names with
-  | List.nil =>
-      true
-  | List.cons name rest =>
-      if psJsIdentifierSupported name then
-        psJsValidationNamesSupported rest
-      else
-        false
-
 def psJsValidateImport
     (value : PsJsIrImport) :
     Except PsJsIrValidationError Unit :=
@@ -562,3 +562,4 @@ def psJsValidateModule
   else
     Except.error
       (PsJsIrValidationError.duplicateGlobal "")
+

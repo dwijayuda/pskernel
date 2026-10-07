@@ -150,7 +150,7 @@ test('explicit uniform subjects retain source generics and replay without inferr
     runtimeIr: generic.runtimeIr, verifiedIr: generic.verifiedIr, uniformSpecializedIr: uniform,
     jsIr: record(['psc-js-ir-json/1', [], [
       ['g', ['x'], ['var', 'x']], ['answer', [], ['call', ['var', 'g'], [['literal', ['natural', '7']]]]],
-    ], 'js-ir', 'psc-js-ir-json/1'),
+    ]], 'js-ir', 'psc-js-ir-json/1'),
     javaScript: textRecord('export function g(x) { return x; }\nexport const answer = g(7n);\n',
       'javascript-output', 'psc-direct-javascript/es2022'),
   };

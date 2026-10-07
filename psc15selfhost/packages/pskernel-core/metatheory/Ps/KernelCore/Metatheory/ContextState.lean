@@ -839,3 +839,24 @@ theorem psKernelCheckerStateExitLocalScope_preserves_configuration
     ⟩
   unfold PsKernelCheckerStateSemanticSound at hState ⊢
   simpa [psKernelCheckerStateExitLocalScope] using hState
+
+
+/-
+Failure-cache writes are deliberately separate from sound success-cache
+publication. They may record an unsuccessful algorithmic comparison but do
+not change the authoritative index, fresh-name bound, or any semantic cache.
+-/
+theorem psKernelCheckerStateWithFailure_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (failure : PsKernelExprPairSet)
+    (hConfig : PsKernelCheckerConfigurationSound context state) :
+    PsKernelCheckerConfigurationSound
+      context (psKernelCheckerStateWithFailure state failure) := by
+  rcases hConfig with ⟨hIndex, hFresh, hSemantic⟩
+  refine ⟨hIndex, ?_, ?_⟩
+  · simpa [psKernelCheckerStateWithFailure] using hFresh
+  · simpa [
+      psKernelCheckerStateWithFailure,
+      PsKernelCheckerStateSemanticSound
+    ] using hSemantic

@@ -9,6 +9,7 @@ on:
       - "psc15selfhost/packages/pskernel-core/**"
       - "psc15selfhost/packages/pskernel/PSC1Kernel/Replay*.lean"
       - "psc15selfhost/lakefile.lean"
+      - "psc15selfhost/test/KernelCoreArena*.lean"
       - ".github/workflows/pskernel-core-arena.yml"
   workflow_dispatch:
 

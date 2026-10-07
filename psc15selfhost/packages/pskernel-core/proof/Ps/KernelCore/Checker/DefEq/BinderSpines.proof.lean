@@ -160,8 +160,10 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
           let continueAfterDomain :=
             fun (domainState : PsKernelCheckerState) =>
               if
-                  psKernelExprHasLooseBVar leftBody = true ∨
-                    psKernelExprHasLooseBVar rightBody = true then
+                  if psKernelExprHasLooseBVar leftBody then
+                    true
+                  else
+                    psKernelExprHasLooseBVar rightBody then
                 let openedLocal :=
                   psKernelDefEqWithLocal
                     context

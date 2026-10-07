@@ -3271,19 +3271,21 @@ theorem psKernelWhnfCountLambdasRelation_refines_beta
     (context : PsKernelCheckerContext)
     (args : List PsKernelExpr)
     (current lastLam : PsKernelExpr)
-    (count consumed : Nat)
+    (argCount count consumed : Nat)
     (targetName : PsKernelName)
     (targetType targetBody : PsKernelExpr)
     (targetBinderInfo : PsKernelBinderInfo)
     (hRelation :
       PsKernelWhnfCountLambdasRelation
         current
-        (psKernelExprListLength args)
+        argCount
         count
         lastLam
         consumed)
+    (hArgCount :
+      argCount = psKernelExprListLength args)
     (hAvailable :
-      count < psKernelExprListLength args)
+      count < argCount)
     (hLast :
       lastLam =
         PsKernelExpr.lam
@@ -3306,6 +3308,7 @@ theorem psKernelWhnfCountLambdasRelation_refines_beta
         (psKernelExprListDrop consumed args)) := by
   induction hRelation
       generalizing
+        args
         targetName
         targetType
         targetBody
@@ -3315,12 +3318,10 @@ theorem psKernelWhnfCountLambdasRelation_refines_beta
       simp [psKernelExprIsLambda] at hNotLam
   | lamNoArg name type body binderInfo argCount count hCount =>
       have hCountTrue :
-          psKernelNatLt count
-              (psKernelExprListLength args) =
-            true :=
+          psKernelNatLt count argCount = true :=
         psKernelNatLt_true_of_lt
           count
-          (psKernelExprListLength args)
+          argCount
           hAvailable
       rw [hCountTrue] at hCount
       contradiction
@@ -3331,11 +3332,14 @@ theorem psKernelWhnfCountLambdasRelation_refines_beta
       subst targetType
       subst targetBody
       subst targetBinderInfo
+      have hAvailableArgs :
+          count < psKernelExprListLength args := by
+        simpa [hArgCount] using hAvailable
       rcases
           psKernelExprList_split_at
             args
             count
-            hAvailable with
+            hAvailableArgs with
         ⟨arg, rest, hDrop, hDropNext, hTake⟩
       have hStep :=
         psKernelBetaPrefixStep
@@ -3362,11 +3366,14 @@ theorem psKernelWhnfCountLambdasRelation_refines_beta
       subst targetType
       subst targetBody
       subst targetBinderInfo
+      have hAvailableArgs :
+          count < psKernelExprListLength args := by
+        simpa [hArgCount] using hAvailable
       rcases
           psKernelExprList_split_at
             args
             count
-            hAvailable with
+            hAvailableArgs with
         ⟨arg, rest, hDrop, hDropNext, hTake⟩
       have hStep :=
         psKernelBetaPrefixStep
@@ -3389,25 +3396,29 @@ theorem psKernelWhnfCountLambdasRelation_refines_beta
       lastLam consumed
       hCount hNext hBodyLam hRest ih =>
       have hNextAvailable :
-          Nat.succ count <
-            psKernelExprListLength args :=
+          Nat.succ count < argCount :=
         psKernelNatLt_lt_of_true
           (Nat.succ count)
-          (psKernelExprListLength args)
+          argCount
           hNext
       have hRestReduction :=
         ih
-          targetName
-          targetType
-          targetBody
-          targetBinderInfo
+          (args := args)
+          (targetName := targetName)
+          (targetType := targetType)
+          (targetBody := targetBody)
+          (targetBinderInfo := targetBinderInfo)
+          hArgCount
           hNextAvailable
           hLast
+      have hAvailableArgs :
+          count < psKernelExprListLength args := by
+        simpa [hArgCount] using hAvailable
       rcases
           psKernelExprList_split_at
             args
             count
-            hAvailable with
+            hAvailableArgs with
         ⟨arg, rest, hDrop, hDropNext, hTake⟩
       have hFirstRaw :=
         psKernelBetaPrefixStep
@@ -3470,7 +3481,6 @@ theorem psKernelWhnfCountLambdasRelation_refines_beta
           hFirst
           hRestReduction
 
-
 theorem psKernelBetaSpineSound_contract :
     PsKernelBetaSpineSoundLaw := by
   intro
@@ -3505,6 +3515,7 @@ theorem psKernelBetaSpineSound_contract :
       args
       fn
       lastLam
+      (psKernelExprListLength args)
       0
       consumed
       name
@@ -3512,6 +3523,7 @@ theorem psKernelBetaSpineSound_contract :
       body
       binderInfo
       hRelation
+      rfl
       hAvailable
       hLast
   simpa [

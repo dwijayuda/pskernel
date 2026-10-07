@@ -197,17 +197,20 @@ def arenaResources : PsKernelResourcePolicy :=
 structure State where
   transport : PSC1Kernel.Replay.State
   session : PsKernelKernelSession
+  allowHistoricalMetadata : Bool
   sawMeta : Bool
   records : Nat
   declarations : Nat
   inputLeanVersion : String
   pendingMutual : List PendingMutual
 
-def State.empty : Except Failure State := do
+def State.empty
+    (allowHistoricalMetadata : Bool := false) : Except Failure State := do
   let session ← liftKernel (psKernelKernelSessionEmpty arenaResources psKernelProviderDefault)
   pure {
     transport := PSC1Kernel.Replay.State.empty
     session := session
+    allowHistoricalMetadata := allowHistoricalMetadata
     sawMeta := false
     records := 0
     declarations := 0
@@ -405,7 +408,7 @@ def State.acceptMeta
   let compatible341 :=
     value.leanVersion == lean341Version &&
       value.leanGitHash == lean341Commit
-  unless pinned434 || compatible341 do
+  unless pinned434 || compatible341 || state.allowHistoricalMetadata do
     throw (.declined "Lean version is outside the audited 4.34.0/4.34.1 Arena profile")
   pure {
     state with

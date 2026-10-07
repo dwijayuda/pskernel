@@ -325,6 +325,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.WhnfCoreApplication,
     `Ps.KernelCore.Metatheory.WhnfCoreConfiguration,
     `Ps.KernelCore.Metatheory.WhnfConfiguration,
+    `Ps.KernelCore.Metatheory.BetaSpine,
     `Ps.KernelCore.Metatheory.Inductive,
     `Ps.KernelCore.Metatheory.Context,
     `Ps.KernelCore.Metatheory.ContextState,

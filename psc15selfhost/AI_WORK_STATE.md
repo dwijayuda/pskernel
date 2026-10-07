@@ -5,11 +5,11 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
-Mode: implementation first, as requested on 2026-10-07. Continue research and implementation with focused compilation, portable-profile and boundary checks. Extensive regression campaigns, fixed-point reruns and formal assurance are deferred to the later assurance pass; existing CI failures remain recorded and actionable. No implementation milestone implies final V3 acceptance.
+Mode: implementation first, as requested on 2026-10-07. All subsequent edits/commits use GitHub APIs and validation runs in GitHub Actions; no local execution. Continue research and implementation with focused compilation, portable-profile and boundary checks. Extensive regression campaigns, fixed-point reruns and formal assurance are deferred to the later assurance pass; existing CI failures remain recorded and actionable. No implementation milestone implies final V3 acceptance.
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: selected provider runtime-byte observations and archive binding. Recent checkpoints: TypeScript native tool inputs 0068a2b; JS portable worker loops 8d2c070; actual IR stage archives e8518a5; JS scalar ABI e71feb4; Rust fixed-point repair 9c61a5e; standalone proof verifier ae66024. Earlier milestones are recorded below and in the implementation ledger.
+- Current checkpoint: GitHub/cloud-only portable text builder and direct-JS module writer (cloud validation pending). Recent checkpoints: TypeScript native tool inputs 0068a2b; JS portable worker loops 8d2c070; actual IR stage archives e8518a5; JS scalar ABI e71feb4; Rust fixed-point repair 9c61a5e; standalone proof verifier ae66024. Earlier milestones are recorded below and in the implementation ledger.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
@@ -546,3 +546,11 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Replaced hard-coded execution counts and assumption arrays with semantic graph inspection: tests now derive the exact allowed assumption closure from archived PassDefinitions and require named pass IDs for the checked TypeScript/JavaScript route.
 - Production assumption policy, PassExecution verification and archive fail-closed behavior were not weakened. This is a consumer-policy/test repair aligned with the actual explicit pipeline.
 - Kernel workstream remains external and untouched.
+
+## 2026-10-07 cloud-only backend writer checkpoint
+
+- Resumed exact GitHub HEAD 59ef0e066aa66e2b432f26eb09772d9155610009 on pscv/v3-execution. Prior unpublished local experiments remain preserved and are not counted as GitHub implementation/evidence. Subsequent work is GitHub/cloud only, per the user's instruction.
+- Added a reusable PSC1-portable immutable text builder. A binary carry forest preserves fragment order while avoiding repeated copying of the entire module suffix. Direct-JS ordinary and stack-safe declaration emission share one forward traversal, preserving the first diagnostic; joins/import output use the same builder.
+- Added focused cloud regressions for empty fragments, separator semantics, Unicode, carry boundaries, persistent snapshots, declaration order and first-error order. Existing portable, differential, backend and fixed-point gates remain unchanged. No cloud success is claimed before these changes run.
+- Rechecked prior cloud evidence: main run 37606032902 and Rust run 37606032933 passed at 59ef0e0; direct-JS job 112741843159 passed, while direct-Wasm job 112741843506 timed out during generation 2. The direct-selfhost workflow as a whole failed. No Wasm fixed point is established.
+- Research/design record: docs/BACKEND_ARCHITECTURE_RESEARCH_2026_10.md. Next: cloud validation of this writer, then Wasm UTF-8 cursor representation to address repeated prefix scans; full Wasm operand/control-stack validation and remaining target adapters stay explicit implementation gaps. Kernel implementation and proofs remain external. Global preservation, direct-JS promotion, B9/B10 and final acceptance remain unestablished.

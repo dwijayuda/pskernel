@@ -4,6 +4,7 @@ import Ps.BackendJs.TailAlias
 import Ps.Bridge.Json
 import Ps.Foundation.List
 import Ps.Foundation.Name
+import Ps.Foundation.Text
 
 inductive PsJsEmitError where
   | lower (error : PsJsLowerError)
@@ -14,17 +15,8 @@ inductive PsJsEmitError where
 def psJsJoin
     (separator : String)
     (values : List String) : String :=
-  match values with
-  | List.nil => ""
-  | List.cons value rest =>
-      match rest with
-      | List.nil => value
-      | List.cons _ _ =>
-          String.Internal.append
-            value
-            (String.Internal.append
-              separator
-              (psJsJoin separator rest))
+  psTextJoin separator values
+
 
 def psJsConcat2
     (a b : String) : String :=
@@ -1067,12 +1059,8 @@ def psJsPrintImport
 
 def psJsPrintImports
     (imports : List PsJsIrImport) : String :=
-  match imports with
-  | List.nil => ""
-  | List.cons importInfo rest =>
-      psJsConcat2
-        (psJsPrintImport importInfo)
-        (psJsPrintImports rest)
+  psTextJoin "" (psListMap psJsPrintImport imports)
+
 
 def psJsParameterName
     (parameter : PsJsIrParameter) : String :=
@@ -1106,23 +1094,29 @@ def psJsPrintDeclaration
               ") { return "
               (psJsConcat2 body "; }\n"))
 
+def psJsPrintDeclarationsWith
+    (print : PsJsIrDeclaration -> Except PsJsEmitError String)
+    (declarations : List PsJsIrDeclaration) :
+    PsTextBuilder -> Except PsJsEmitError String :=
+  match declarations with
+  | List.nil =>
+      fun (builder : PsTextBuilder) =>
+        Except.ok (psTextBuilderFinish builder)
+  | List.cons declaration rest =>
+      let smaller : PsTextBuilder -> Except PsJsEmitError String :=
+        psJsPrintDeclarationsWith print rest;
+      fun (builder : PsTextBuilder) =>
+        match print declaration with
+        | Except.error error => Except.error error
+        | Except.ok printed =>
+            smaller (psTextBuilderAppend builder printed)
+
 def psJsPrintDeclarations
     (declarations : List PsJsIrDeclaration) :
     Except PsJsEmitError String :=
-  match declarations with
-  | List.nil =>
-      Except.ok ""
-  | List.cons declaration rest =>
-      match psJsPrintDeclaration declaration with
-      | Except.error error => Except.error error
-      | Except.ok printed =>
-          match psJsPrintDeclarations rest with
-          | Except.error error => Except.error error
-          | Except.ok printedRest =>
-              Except.ok
-                (psJsConcat2
-                  printed
-                  printedRest)
+  psJsPrintDeclarationsWith
+    psJsPrintDeclaration declarations psTextBuilderEmpty
+
 
 def psJsStringRuntimeSupport : String :=
   "let __ps$utf8Cache;\nfunction __ps$utf8(source) { if (__ps$utf8Cache?.source === source) return __ps$utf8Cache; const entries = new Map(); let size = 0n; for (const char of source) { const cp = char.codePointAt(0) ?? 0; const width = BigInt(cp <= 0x7f ? 1 : cp <= 0x7ff ? 2 : cp <= 0xffff ? 3 : 4); entries.set(size, [char, width]); size += width; } return (__ps$utf8Cache = { source, entries, size }); }\n"
@@ -1520,20 +1514,9 @@ def psJsPrintDeclarationStackSafe
 def psJsPrintDeclarationsStackSafe
     (declarations : List PsJsIrDeclaration) :
     Except PsJsEmitError String :=
-  match declarations with
-  | List.nil =>
-      Except.ok ""
-  | List.cons declaration rest =>
-      match psJsPrintDeclarationStackSafe declaration with
-      | Except.error error => Except.error error
-      | Except.ok printed =>
-          match psJsPrintDeclarationsStackSafe rest with
-          | Except.error error => Except.error error
-          | Except.ok printedRest =>
-              Except.ok
-                (psJsConcat2
-                  printed
-                  printedRest)
+  psJsPrintDeclarationsWith
+    psJsPrintDeclarationStackSafe declarations psTextBuilderEmpty
+
 
 def psJsPrintModuleStackSafe
     (module : PsJsIrModule) :

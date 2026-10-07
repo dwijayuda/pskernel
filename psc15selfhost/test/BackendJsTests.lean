@@ -510,11 +510,55 @@ def psTestBackendJsNestedTailMatchHygiene : Bool :=
           "__ps$tail$state = [next2]; continue;"
 
 
+def psTestBackendJsTextJoin : Bool :=
+  let lengths : List Nat := [0, 1, 2, 3, 4, 7, 8, 9, 31, 32, 33, 1025]
+  lengths.all fun count =>
+    let chunks : List String := (List.range count).map fun index =>
+      if index % 3 == 0 then "" else "λ😀:" ++ toString index
+    ["", ", ", "界"].all fun separator =>
+      psTextJoin separator chunks == String.intercalate separator chunks
+
+def psTestBackendJsTextPersistence : Bool :=
+  let first := psTextBuilderAppend psTextBuilderEmpty "first"
+  let second := psTextBuilderAppend first "λ"
+  let third := psTextBuilderAppend second "😀"
+  psTextBuilderFinish first == "first" &&
+    psTextBuilderFinish second == "firstλ" &&
+    psTextBuilderFinish third == "firstλ😀"
+
+def psBackendJsWriterDeclarations : List PsJsIrDeclaration := [
+  { name := "first", parameters := [], body := PsJsIrExpr.literal (PsJsIrLiteral.natural 1) },
+  { name := "second", parameters := [], body := PsJsIrExpr.literal (PsJsIrLiteral.natural 2) },
+  { name := "third", parameters := [], body := PsJsIrExpr.literal (PsJsIrLiteral.natural 3) }
+]
+
+def psTestBackendJsWriterOrder : Bool :=
+  let expected := "export const first = 1n;\nexport const second = 2n;\nexport const third = 3n;\n"
+  match psJsPrintDeclarations psBackendJsWriterDeclarations with
+  | Except.error _ => false
+  | Except.ok ordinary =>
+      match psJsPrintDeclarationsStackSafe psBackendJsWriterDeclarations with
+      | Except.error _ => false
+      | Except.ok stackSafe => ordinary == expected && stackSafe == expected
+
+def psTestBackendJsWriterFirstError : Bool :=
+  let reject : PsJsIrDeclaration -> Except PsJsEmitError String :=
+    fun declaration =>
+      if declaration.name == "first" then Except.error PsJsEmitError.malformedIr
+      else Except.error PsJsEmitError.fuelExhausted
+  match psJsPrintDeclarationsWith reject psBackendJsWriterDeclarations psTextBuilderEmpty with
+  | Except.error PsJsEmitError.malformedIr => true
+  | _ => false
+
 structure PsBackendJsNamedTest where
   name : String
   passed : Bool
 
 def psBackendJsTests : List PsBackendJsNamedTest := [
+  { name := "portable text join boundaries and Unicode", passed := psTestBackendJsTextJoin },
+  { name := "persistent text builder snapshots", passed := psTestBackendJsTextPersistence },
+  { name := "normal and stack-safe writer declaration order", passed := psTestBackendJsWriterOrder },
+  { name := "writer preserves first diagnostic", passed := psTestBackendJsWriterFirstError },
   { name := "removed worker aliases cannot be captured as values", passed := psJsTailFixtureCapturedAliasDeclined },
   { name := "fixture emission", passed := psTestBackendJsFixtureEmission },
   { name := "UTF-8 runtime name rejection", passed := !psJsIdentifierSupported "__ps$utf8" && !psJsIdentifierSupported "__ps$utf8Cache" },

@@ -8,6 +8,7 @@ lean_lib PsFoundation where
   roots := #[
     `Ps.Foundation.List,
     `Ps.Foundation.Name,
+    `Ps.Foundation.Text,
     `Ps.Foundation.Source,
     `Ps.Foundation.Diagnostic
   ]

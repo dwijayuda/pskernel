@@ -33,7 +33,7 @@
     {
       "id": "selfhost-fixed-points",
       "status": "partial",
-      "required": "Rust whole-compiler fixed point passed at 9c61a5e and 8d2c070: 66 modules, generation 1=2=3 Rust source, 2810845 bytes. JavaScript passed at 8d2c070 in run 37547807880/job 112556123955 step 38: 63 modules, generation 1=2=3 JavaScript source, 2429673 bytes; the job later timed out during Wasm. See contracts/bootstrap/RUST_FIXED_POINT_V1.json and JS_FIXED_POINT_V1.json. Recheck changed closures and complete the still-failing Wasm fixed point. This does not establish native binary reproducibility, global compiler correctness, promotion or DDC."
+      "required": "Rust whole-compiler fixed point passed at 9c61a5e, 8d2c070 and 66ee434: 66 modules, generation 1=2=3 Rust source, 2810845 bytes. JavaScript passed at 8d2c070 for 63 modules, then the complete dedicated JS job passed at 66ee434 (run 37552329402/job 112570474936): 65 modules, generation 1=2=3, 2485478 bytes. The separate Wasm job timed out inside generation-2 compilation. See contracts/bootstrap/RUST_FIXED_POINT_V1.json and JS_FIXED_POINT_V1.json. Recheck changed closures and complete the still-failing Wasm fixed point. This does not establish native binary reproducibility, global compiler correctness, promotion or DDC."
     },
     {
       "id": "bootstrap-diversity",

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-wasm-fixed-point-observation/1",
+  "status": "not-established",
+  "observation": {
+    "commit": "66ee434217ab1b4bf2501790ada813434cfdd93f",
+    "runId": 37552329402,
+    "jobId": 112570475310,
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37552329402",
+    "conclusion": "failure-step-timeout",
+    "modules": 72,
+    "sourceClosureSha256": "faf7dcf60c707d0387a115ab301e4bd4a4b7f7cb9b5c1d5fc9bf8c1fb34d114b",
+    "generation1Bytes": 668059,
+    "generation2CompileStartedAt": "2026-10-07T00:32:33.4408179Z",
+    "timeoutAt": "2026-10-07T01:02:36.8407189Z",
+    "lastPhase": "generation-2:compile",
+    "generation1Equals2": "not-observed",
+    "generation2Equals3": "not-observed"
+  },
+  "diagnosticImplementation": [
+    "packages/driver-wasm/src/Ps/DriverWasm/SelfHostProgress.lean",
+    "scripts/wasm-selfhost-progress.mjs",
+    "scripts/direct-wasm-selfhost-fixed-point.mjs"
+  ],
+  "diagnosticContract": "Bootstrap-only explicit state transitions call the same candidate preparation, validation, specialization, lowerer, self-host ABI insertion and encoder. Errors propagate to a failed state; out-of-phase transitions reject. Host progress records each preparation module and each later phase. No kernel authority follows.",
+  "focusedCheck": "Actual generated whole Wasm compiler executes both monolithic and progress APIs on generic UInt32 forwarding; exact bytes agree and execute. Invalid source and invalid phase transitions reject. This small fixture is not a whole-compiler fixed point.",
+  "unchangedGates": ["generation1=2 exact Wasm bytes", "generation2=3 exact Wasm bytes", "generation2 imported/executed", "portable compiler profiles", "existing 30-minute cloud step limit", "existing output byte limit"],
+  "remaining": ["diagnose slow generated compilation subphase", "complete actual whole-compiler fixed point", "global preservation", "verified/diverse bootstrap"],
+  "releaseAccepted": false
+}

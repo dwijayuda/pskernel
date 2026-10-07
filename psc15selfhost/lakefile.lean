@@ -122,7 +122,7 @@ lean_lib PsDriverJs where
 
 lean_lib PsDriverWasm where
   srcDir := "packages/driver-wasm/src"
-  roots := #[`Ps.DriverWasm.Compiler, `Ps.DriverWasm.Bootstrap, `Ps.DriverWasm.Stages]
+  roots := #[`Ps.DriverWasm.Compiler, `Ps.DriverWasm.Bootstrap, `Ps.DriverWasm.Stages, `Ps.DriverWasm.SelfHostProgress]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"

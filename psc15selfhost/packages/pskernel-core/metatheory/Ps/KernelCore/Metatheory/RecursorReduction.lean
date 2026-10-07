@@ -137,10 +137,21 @@ theorem psKernelStructureFieldsWithFuel_refines_eta_fields
                   subst fieldCount
                   simp at hEq
                 exact Nat.lt_of_le_of_ne hLe hNe
+          have hDrop :
+              Nat.sub fieldCount (Nat.succ index) <
+                Nat.sub fieldCount index := by
+            simpa [Nat.add_comm] using
+              Nat.sub_succ_lt_self
+                fieldCount
+                index
+                hLt
+          have hEnoughLe :
+              Nat.sub fieldCount index ≤ remaining :=
+            Nat.le_of_lt_succ hEnough
           have hEnoughRest :
               Nat.sub fieldCount (Nat.succ index) <
-                remaining := by
-            omega
+                remaining :=
+            Nat.lt_of_lt_of_le hDrop hEnoughLe
           have hRest :=
             ih
               (Nat.succ index)
@@ -1748,7 +1759,7 @@ theorem psKernelEnvironmentIsNonRecStructure_true_view
                             ⟨
                               inductInfo,
                               ctorName,
-                              hFind,
+                              rfl,
                               hRec,
                               hIndexZero,
                               hCtors

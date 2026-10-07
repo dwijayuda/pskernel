@@ -92,6 +92,19 @@ theorem psKernelReductionClosure_contextWeaken
           hInitialized hHead hInd hArgs hMajor
           ihMajor
           hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue
+  | recursorIota
+      expr recName ctorName recLevels ctorLevels recArgs majorArgs
+      recursor rule major0 majorReduced major
+      hHead hArgs hFind hMajor
+      hMajorReduction ihMajor
+      hNormalize hCtorHead hMajorArgs hRule hFields hLevels =>
+      exact
+        PsKernelReductionClosure.recursorIota
+          expr recName ctorName recLevels ctorLevels recArgs majorArgs
+          recursor rule major0 majorReduced major
+          hHead hArgs hFind hMajor
+          ihMajor
+          hNormalize hCtorHead hMajorArgs hRule hFields hLevels
 
 theorem psKernelDefEqJudgment_contextWeaken
     (environment : PsKernelEnvironment)

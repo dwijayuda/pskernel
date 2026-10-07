@@ -186,7 +186,7 @@
     "check:production-authority": "node scripts/production-authority-audit.mjs",
     "test:comparator-v1": "node --test scripts/comparator-v1.test.mjs scripts/comparator-export.test.mjs scripts/comparator-session.test.mjs scripts/certificate-boundary.test.mjs",
     "check:theory-seed": "node scripts/theory-contract-audit.mjs && lake build PsPscvTheory PsPscvTheoryProof pscv_theory_seed_tests && lake exe pscv_theory_seed_tests && lake exe psc1 check packages/pscv-theory/src/Ps/Theory/Core.lean",
-    "test:savef": "node --test scripts/savef-object.test.mjs scripts/pscv-verify.test.mjs scripts/offline-capsule.test.mjs scripts/savef-lifecycle.test.mjs scripts/semantic-lock.test.mjs scripts/verifier-distribution.test.mjs scripts/savef-index.test.mjs",
+    "test:savef": "node --test scripts/savef-object.test.mjs scripts/pscv-verify.test.mjs scripts/offline-capsule.test.mjs scripts/savef-lifecycle.test.mjs scripts/semantic-lock.test.mjs scripts/verifier-distribution.test.mjs scripts/savef-index.test.mjs scripts/savef-retrieval-session.test.mjs",
     "build:offline-verifier": "node scripts/build-verifier-distribution.mjs",
     "verify:offline-prototype": "node scripts/pscv-verify.mjs",
     "check:wasm-translation-validator": "lake exe psc1_backend_wasm_tests && lake exe pscv_wasm_literal_validation_tests && lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/LiteralEvidence.lean && node --test scripts/wasm-literal-binary-validator.test.mjs scripts/savef-wasm-literal.test.mjs",
@@ -208,7 +208,8 @@
     "check:foreign-interface": "lake exe pscv_foreign_interface_tests && lake exe psc1 check packages/interface-ir/src/Ps/InterfaceIr/Wit.lean",
     "test:js-scalar-abi": "lake build pscv_js_abi_tests && lake exe pscv_js_abi_tests && lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean && node --experimental-vm-modules --test scripts/js-scalar-abi.test.mjs",
     "test:ir-artifacts": "lake build pscv_ir_encoding_tests psc1_ir_specialize_tests && lake exe pscv_ir_encoding_tests && node --test scripts/ir-artifact.test.mjs scripts/specialization-correspondence.test.mjs",
-    "test:semantic-query-cache": "node --test scripts/module-interface-evidence.test.mjs scripts/semantic-query-cache.test.mjs"
+    "test:semantic-query-cache": "node --test scripts/module-interface-evidence.test.mjs scripts/semantic-query-cache.test.mjs",
+    "test:savef-retrieval": "node --test scripts/savef-retrieval-session.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

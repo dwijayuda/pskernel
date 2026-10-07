@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contract": "psc-wasm-ir-validation/1",
-  "status": "implementation-pending-cloud-validation",
+  "status": "implemented-focused-cloud-validated",
   "scope": "The closed GC/tail-call instruction and value-type vocabulary represented by PsWasmModule, before Binary.lean encoding.",
   "owners": [
     "packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.lean",
@@ -56,6 +56,14 @@
     "focusedCorpus": "test/BackendWasmIrTests.lean",
     "externalOracle": "existing emitted-byte engine validation and whole-compiler instantiation",
     "selfHostProfile": "PSC1-portable-selfhost/1",
-    "acceptanceLimits": "unchanged"
+    "acceptanceLimits": "unchanged",
+    "evidence": {
+      "commit": "0cc3b538233c48dcaac742834fc4716b1e9d3871",
+      "workflowRun": 37642313758,
+      "job": 112864213822,
+      "conclusion": "success",
+      "scope": "native target-IR corpus, portable source/profile checks, backend engine validation, whole-Wasm generation and instantiation",
+      "fixedPoint": "not-established"
+    }
   }
 }

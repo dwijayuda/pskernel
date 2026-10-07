@@ -23,8 +23,9 @@ const jsRuntime = new Set('uint8OfNat natSub natDiv natMod intNegSucc intRepr ch
 function jsLiteral(value) {
   arr(value);
   switch (value[0]) {
-    case 'natural': case 'integer': arr(value,2); text(value[1]); break;
-    case 'machineInteger': arr(value,3); oneOf(value[1],jsMachineTypes); text(value[2]); break;
+    case 'natural': arr(value,2); natural(value[1]); break;
+    case 'integer': arr(value,2); decimal(value[1]); break;
+    case 'machineInteger': arr(value,3); oneOf(value[1],jsMachineTypes); decimal(value[2]); break;
     case 'string': arr(value,2); text(value[1]); break;
     case 'bool': arr(value,2); bool(value[1]); break;
     case 'unit': arr(value,1); break;
@@ -97,7 +98,16 @@ function wasmStorage(value){
   fail('WASM_STORAGE');
 }
 function optionText(value){arr(value);if(value[0]==='none'){arr(value,1);return;}if(value[0]==='some'){arr(value,2);text(value[1]);return;}fail('OPTION');}
-function decimal(value){text(value);if(!/^-?(?:0|[1-9][0-9]*)$/u.test(value))fail('DECIMAL');}
+// These are the exact Nat/Int text domains emitted by the portable encoders.
+// Do not narrow through Number or accept spellings such as -0, 01 or 1e3.
+function decimal(value){
+  text(value);
+  if(!/^(?:0|-?[1-9][0-9]*)(?![\s\S])/u.test(value))fail('DECIMAL');
+}
+function natural(value){
+  text(value);
+  if(!/^(?:0|[1-9][0-9]*)(?![\s\S])/u.test(value))fail('NATURAL');
+}
 function wasmInstruction(value){
   arr(value); const tag=value[0];
   if(wasmNoArgInstructions.has(tag)){arr(value,1);return;}
@@ -111,9 +121,9 @@ function wasmInstruction(value){
     case 'i32Const':case 'i64Const':arr(value,2);decimal(value[1]);return;
     case 'ifStart': { arr(value,2); const option=arr(value[1]); if(option[0]==='some'){arr(option,2);wasmValueType(option[1]);} else optionText(option); return; }
   }
-  if(tag==='localGet'||tag==='localSet'){arr(value,2);decimal(value[1]);return;}
-  if(tag==='arrayNewFixed'){arr(value,3);text(value[1]);decimal(value[2]);return;}
-  if(tag==='structGet'||tag==='structGetS'||tag==='structGetU'){arr(value,3);text(value[1]);decimal(value[2]);return;}
+  if(tag==='localGet'||tag==='localSet'){arr(value,2);natural(value[1]);return;}
+  if(tag==='arrayNewFixed'){arr(value,3);text(value[1]);natural(value[2]);return;}
+  if(tag==='structGet'||tag==='structGetS'||tag==='structGetU'){arr(value,3);text(value[1]);natural(value[2]);return;}
   fail('WASM_INSTRUCTION');
 }
 export function decodeWasmIrArtifact(bytes,limits){

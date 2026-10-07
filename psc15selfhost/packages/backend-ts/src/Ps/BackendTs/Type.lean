@@ -21,6 +21,9 @@ def psTsJoin (separator : String) (values : List String) : String :=
       | List.cons _ _ =>
           String.Internal.append value (String.Internal.append separator (psTsJoin separator rest))
 
+-- Computed names always define own data properties, including "__proto__".
+def psTsDataPropertyKey (name : String) : String :=
+  psTsJoin "" ["[", psJsonQuote name, "]"]
 
 def psTsEmitPrimitiveType
     (type : PsVerifiedIrPrimitiveType) : String :=

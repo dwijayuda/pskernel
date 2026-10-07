@@ -72,12 +72,17 @@ try {
   );
   await writeFile(directPath, emit("js"));
   await writeFile(typeScriptPath, emit("ts"));
+  const propertyTypeScriptPath = path.join(directory, "properties.ts");
+  await writeFile(propertyTypeScriptPath, emit("properties-ts"));
+  await writeFile(path.join(directory, "properties-direct.js"), emit("properties-js"));
+  await writeFile(path.join(directory, "properties-stack.js"), emit("properties-js-stack"));
 
   const compile = spawnSync(
     process.execPath,
     [
       tsc,
       typeScriptPath,
+      propertyTypeScriptPath,
       "--ignoreConfig",
       "--target", "ES2022",
       "--module", "ES2022",
@@ -107,6 +112,46 @@ try {
     pathToFileURL(path.join(directory, "reference.js")).href +
       "?reference"
   );
+
+  // Assert independent property semantics, rather than only backend agreement.
+  // ECMAScript non-computed "__proto__" keys set the prototype or ignore scalars.
+  for (const filename of ["properties.js", "properties-direct.js", "properties-stack.js"]) {
+    const backend = await import(pathToFileURL(path.join(directory, filename)).href);
+    const own = (object, key, expected) => {
+      assert.equal(Object.getPrototypeOf(object), Object.prototype, filename);
+      const descriptor = Object.getOwnPropertyDescriptor(object, key);
+      assert.ok(descriptor, `${filename}: missing own field ${key}`);
+      assert.equal(descriptor.value, expected);
+      assert.equal(descriptor.enumerable, true);
+      assert.equal(descriptor.get, undefined);
+    };
+    const record = backend.primitiveRecord(42n);
+    for (const key of ["__proto__", "constructor", "prototype", "toString"])
+      own(record, key, 42n);
+    assert.equal(backend.readRecord(42n), 42n);
+    const objectRecord = backend.objectRecord(17n);
+    assert.ok(Object.hasOwn(objectRecord, "__proto__"));
+    own(objectRecord, "__proto__", objectRecord.__proto__);
+    own(objectRecord.__proto__, "__proto__", 17n);
+    const payload = backend.payload(23n);
+    const fields = Object.hasOwn(payload, "$ps$fields") ? payload.$ps$fields : payload;
+    own(fields, "__proto__", 23n);
+    assert.equal(backend.readPayload(23n), 23n);
+    for (const value of [backend.emptyPayload, backend.emptyProto]) {
+      assert.equal(Object.getPrototypeOf(value), Object.prototype);
+      assert.ok(Reflect.ownKeys(value).length > 0, "constructor value must carry its own tag");
+    }
+    if (Object.hasOwn(backend, "PropertySum")) {
+      assert.equal(Object.getPrototypeOf(backend.PropertySum), Object.prototype);
+      assert.equal(Object.hasOwn(backend.PropertySum, "__proto__"), true);
+      assert.equal(Object.hasOwn(backend.PropertyEmpty, "__proto__"), true);
+    }
+    const order = [];
+    const ordered = backend.orderedRecord(value => { order.push(value); return value * 10n; });
+    assert.deepEqual(order, [1n, 2n, 3n, 4n]);
+    for (const [key, value] of [["__proto__", 10n], ["constructor", 20n],
+      ["prototype", 30n], ["toString", 40n]]) own(ordered, key, value);
+  }
 
   assert.equal(direct.answer, reference.answer);
   assert.equal(direct.answer, 42n);

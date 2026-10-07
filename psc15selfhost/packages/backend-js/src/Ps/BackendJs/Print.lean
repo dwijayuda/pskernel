@@ -665,8 +665,9 @@ def psJsPrintFieldWith
             (psJsJoin
               ""
               [
+                "[",
                 psJsonQuote name,
-                ": ",
+                "]: ",
                 printedValue
               ])
 

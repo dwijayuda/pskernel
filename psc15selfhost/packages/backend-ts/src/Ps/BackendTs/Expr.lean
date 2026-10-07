@@ -602,7 +602,7 @@ def psTsEmitExprWithFuel
                             fieldValue with
                       | Except.error error => Except.error error
                       | Except.ok value =>
-                          Except.ok (psTsJoin "" [fieldName, ": ", value]);
+                          Except.ok (psTsJoin "" [psTsDataPropertyKey fieldName, ": ", value]);
               match psListMapExcept printField fields with
               | Except.error error => Except.error error
               | Except.ok printedFields =>

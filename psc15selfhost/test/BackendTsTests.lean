@@ -83,7 +83,7 @@ def psTestBackendTsInductive : Bool :=
   | Except.error _ => false
   | Except.ok output =>
       output.contains "export type Maybe<A>"
-        && output.contains "\"some\": <A>(__field0: A): Maybe<A>"
+        && output.contains "[\"some\"]: <A>(__field0: A): Maybe<A>"
         && output.contains "export const someNat: Maybe<bigint>"
         && output.contains "Maybe[\"some\"]<bigint>(1n)"
 

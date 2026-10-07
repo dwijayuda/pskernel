@@ -45,3 +45,14 @@ The represented Wasm profile now has two validation layers: structural context c
 The encoder uses non-null concrete GC references and nullable abstract funcref. Consequently, GC locals require definite initialization and GC arrays cannot default-initialize non-defaultable elements. Structure inheritance follows declared earlier non-final parents and immutable field-prefix covariance. Packed loads, mutable stores/copies, declared function references, call signatures and final results have separate rules.
 
 The profile deliberately uses exact named function-reference identity and exact tail-result sequences. It does not claim arbitrary recursive-type equivalence or completeness for all Core Wasm. No new target representation is introduced. Typed validation, translation preservation, binary encoding correctness and external engine acceptance remain distinct claims. See contracts/target/WASM_IR_VALIDATION_V1.json for scope and pending assurance.
+
+
+## Own data properties across the JavaScript paths
+
+ECMAScript's [object initializer evaluation](https://tc39.es/ecma262/multipage/ecmascript-language-expressions.html#sec-object-initializer-runtime-semantics-propertydefinitionevaluation) treats a non-computed "__proto__" key as a prototype setter even when quoted. A scalar value creates no field; an object value changes the prototype. Neither behavior represents a ProofScript field.
+
+Both direct-JS printer modes now emit all source data fields with computed string keys. The TypeScript emitter uses the same rule for records, constructor payload fields and constructor-table entries, including nullary constructors. This preserves left-to-right value evaluation and ordinary own-property descriptors without filtering valid names, changing object prototypes or adding runtime helpers. Compiler-owned tag/brand keys retain their existing layouts.
+
+The shared validated fixture is emitted through ordinary JS, stack-safe JS and TS-to-tsc. Runtime checks assert independently expected own properties, prototype identity, record projection, constructor matching and single ordered callback evaluation. Backend agreement alone is insufficient because both emitters previously shared the same semantic error. Source preservation remains unproved.
+
+Canonical target archive decoding separately rejects noncanonical numeric text and negative Nat indices while preserving arbitrary precision decimal strings. Decoding establishes schema/encoding validity; it does not imply target typing, source authority or semantic equivalence.

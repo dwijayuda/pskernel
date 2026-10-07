@@ -10,7 +10,7 @@ Mode: implementation first, as requested on 2026-10-07. All subsequent edits/com
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: portable text builder/direct-JS writer d3ecb0e plus Wasm UTF-8 runtime transfer (combined cloud validation pending). Recent checkpoints: TypeScript native tool inputs 0068a2b; JS portable worker loops 8d2c070; actual IR stage archives e8518a5; JS scalar ABI e71feb4; Rust fixed-point repair 9c61a5e; standalone proof verifier ae66024. Earlier milestones are recorded below and in the implementation ledger.
+- Current checkpoint: portable Wasm target typing and source guard 0cc3b53 passed the complete main cloud workflow. Own-data-property emission and exact target numeric schema validation are implemented below and await their fresh cloud run. Earlier milestones remain recorded in this file and the implementation ledger.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
@@ -609,3 +609,12 @@ Mode: implementation first, as requested on 2026-10-07. All subsequent edits/com
 - The canceled 1967a58 direct-Wasm run completed generation 2 and progressed through generation-3 lowering into encoding (run 37638943951/job 112852654073). This is progress evidence only; cancellation preceded final byte equality.
 
 - 7263bdb native/profile/identity checks passed but portable source parsing also exposed record-literal argument ambiguity in the new control-frame restoration. All state/frame construction in the typing pass now uses explicit constructors, including initial and branch states. Added a general structural guard for unsupported record-update syntax, with comment/string/nested-literal regression coverage, so the earlier class is rejected before expensive compilation.
+
+
+## 2026-10-07 target data representation fidelity
+
+- 0cc3b53 passed the complete main cloud workflow 37642313758/job 112864213822, including native compiler/target corpora, the new portable source guard, whole-Wasm generation/instantiation, portable round trips and host boundary checks. Separate direct fixed-point workflow 37642313797 was still queued at this checkpoint; no new fixed-point or proof claim follows.
+- Reviewed ECMAScript object initializer semantics and the entire JS/TS field-emission family. Quoted non-computed "__proto__" still invokes prototype-setter semantics. Both direct-JS modes now emit computed string keys for source fields; TS does so for records, constructor payloads and constructor tables, including nullary values. No valid source names are banned and no representation-specific runtime helper is needed.
+- A shared strict-validated fixture runs through ordinary JS, stack-safe JS and TS-to-tsc. Assertions independently check own descriptors, unchanged prototypes, primitive/object payloads, projection/matching and callback evaluation order. Existing exact output tests are updated for the intentional computed-key syntax. Fresh cloud compilation/runtime validation is pending.
+- Tightened target artifact schema decoding: Nat fields require canonical unsigned decimal text and Int fields canonical signed decimal text. Negative zero, leading zeros, exponent/decimal syntax and trailing line terminators fail closed; arbitrary precision strings are retained exactly. Shape/canonical decoding remains distinct from portable target typing and source authority.
+- GitHub/cloud-only execution remains in force; no local files or commands were used. Kernel implementation, provider internals and kernel proofs remain untouched. Global preservation, linked replay, broader ABI adapters, production comparator isolation and final acceptance remain open.

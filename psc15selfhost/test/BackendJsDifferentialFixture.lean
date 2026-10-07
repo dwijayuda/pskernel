@@ -1,5 +1,6 @@
 import BackendJsFixture
 import BackendJsTailFixture
+import BackendJsPropertyFixture
 import Ps.BackendJs.Print
 import Ps.BackendTs.Module
 
@@ -43,6 +44,12 @@ def main (args : List String) : IO Unit := do
                 target))
       | Except.ok output =>
           IO.print output
+  | [target] =>
+      if target == "properties-js" || target == "properties-js-stack" || target == "properties-ts" then
+        match psPropertyEmit target with
+        | Except.error error => throw (IO.userError error)
+        | Except.ok output => IO.print output
+      else throw (IO.userError "unknown fixture target")
   | _ =>
       throw
         (IO.userError

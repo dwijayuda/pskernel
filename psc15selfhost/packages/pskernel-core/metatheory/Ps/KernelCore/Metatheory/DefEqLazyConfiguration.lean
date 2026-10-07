@@ -649,3 +649,136 @@ theorem psKernelDefEqLazyStepLeftOnly_configuration_sound
                   hDeltaSound.1
                   (PsKernelReductionClosure.refl right)
                   hFinish
+
+
+/-
+When one definition has strictly lower reducibility hints, the executable
+lazy-delta step unfolds exactly that side before its terminal comparison.
+These laws transport the resulting positive decision back through the
+independently certified delta reduction; they do not require transitivity.
+-/
+theorem psKernelDefEqLazyStepBoth_left_hint_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (leftDef rightDef : PsKernelDefinitionInfo)
+    (answer : PsKernelDeltaStepResult)
+    (hLeftHint :
+      psKernelReducibilityHintsLt
+        leftDef.hints rightDef.hints = true)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqLazyStepBoth
+          defeq coreWhnf context state
+          left right leftDef rightDef =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelDeltaStepPostcondition
+      context nextState left right answer := by
+  simp [psKernelDefEqLazyStepBoth, hLeftHint] at hRun
+  cases hDelta :
+      psKernelDefEqDeltaOnce coreWhnf context state left with
+  | error error =>
+      simp only [hDelta] at hRun
+      simp at hRun
+  | ok deltaRun =>
+      simp only [hDelta] at hRun
+      rcases deltaRun with ⟨leftValue, deltaState⟩
+      have hDeltaSound :=
+        psKernelDefEqDeltaOnce_configuration_sound
+          coreWhnf hCore
+          context state deltaState left leftValue
+          hConfig hDelta
+      have hFinish :=
+        psKernelDefEqFinishLazyStep_configuration_sound
+          defeq hQuick
+          context deltaState nextState
+          leftValue right answer
+          hDeltaSound.2 hRun
+      exact
+        psKernelDeltaStepPostcondition_transport
+          context nextState left right leftValue right answer
+          hDeltaSound.1
+          (PsKernelReductionClosure.refl right)
+          hFinish
+
+
+theorem psKernelDefEqLazyStepBoth_right_hint_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (leftDef rightDef : PsKernelDefinitionInfo)
+    (answer : PsKernelDeltaStepResult)
+    (hNoLeft :
+      psKernelReducibilityHintsLt
+        leftDef.hints rightDef.hints = false)
+    (hRightHint :
+      psKernelReducibilityHintsLt
+        rightDef.hints leftDef.hints = true)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqLazyStepBoth
+          defeq coreWhnf context state
+          left right leftDef rightDef =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelDeltaStepPostcondition
+      context nextState left right answer := by
+  simp [psKernelDefEqLazyStepBoth, hNoLeft, hRightHint] at hRun
+  cases hDelta :
+      psKernelDefEqDeltaOnce coreWhnf context state right with
+  | error error =>
+      simp only [hDelta] at hRun
+      simp at hRun
+  | ok deltaRun =>
+      simp only [hDelta] at hRun
+      rcases deltaRun with ⟨rightValue, deltaState⟩
+      have hDeltaSound :=
+        psKernelDefEqDeltaOnce_configuration_sound
+          coreWhnf hCore
+          context state deltaState right rightValue
+          hConfig hDelta
+      have hFinish :=
+        psKernelDefEqFinishLazyStep_configuration_sound
+          defeq hQuick
+          context deltaState nextState
+          left rightValue answer
+          hDeltaSound.2 hRun
+      exact
+        psKernelDeltaStepPostcondition_transport
+          context nextState left right left rightValue answer
+          (PsKernelReductionClosure.refl left)
+          hDeltaSound.1
+          hFinish

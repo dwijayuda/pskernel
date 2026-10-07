@@ -1034,6 +1034,257 @@ theorem psKernelDefEqUnitLikeWith_configuration_preserves
               exact hReducedConfig
 
 
+
+theorem psKernelDefEqUnitLikeWith_true_refines
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqUnitLikeWith
+          defeq inferType whnf
+          context state left right =
+        Except.ok (Prod.mk true nextState)) :
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  simp only [psKernelDefEqUnitLikeWith] at hSuccess
+  cases hLeftInfer :
+      inferType context state left with
+  | error error =>
+      simp only [hLeftInfer] at hSuccess
+      simp at hSuccess
+  | ok leftRun =>
+      simp only [hLeftInfer] at hSuccess
+      rcases leftRun with ⟨leftType, leftState⟩
+      have hLeftConfig :=
+        hInfer
+          context state leftState
+          left leftType
+          hConfig hLeftInfer
+      cases hTypeWhnf :
+          whnf context leftState leftType with
+      | error error =>
+          simp only [hTypeWhnf] at hSuccess
+          simp at hSuccess
+      | ok reducedRun =>
+          simp only [hTypeWhnf] at hSuccess
+          rcases reducedRun with ⟨reducedType, reducedState⟩
+          have hReduced :=
+            hWhnf
+              context leftState reducedState
+              leftType reducedType
+              hLeftConfig hTypeWhnf
+          cases hHead : psKernelExprGetAppFn reducedType with
+          | const inductName levels =>
+              simp only [hHead] at hSuccess
+              by_cases hStructure :
+                  psKernelEnvironmentIsNonRecStructure
+                      context.environment
+                      inductName =
+                    true
+              · rw [if_pos hStructure] at hSuccess
+                cases hFind :
+                    psKernelEnvironmentFind
+                      context.environment
+                      inductName with
+                | none =>
+                    simp only [hFind] at hSuccess
+                    simp at hSuccess
+                | some info =>
+                    simp only [hFind] at hSuccess
+                    cases info with
+                    | inductInfo inductInfo =>
+                        simp only at hSuccess
+                        cases hCtors : inductInfo.ctors with
+                        | nil =>
+                            simp only [hCtors] at hSuccess
+                            simp at hSuccess
+                        | cons ctorName ctorTail =>
+                            simp only [hCtors] at hSuccess
+                            cases ctorTail with
+                            | nil =>
+                                simp only at hSuccess
+                                cases hCtorFind :
+                                    psKernelEnvironmentFind
+                                      context.environment
+                                      ctorName with
+                                | none =>
+                                    simp only [hCtorFind] at hSuccess
+                                    simp at hSuccess
+                                | some ctorValue =>
+                                    simp only [hCtorFind] at hSuccess
+                                    cases ctorValue with
+                                    | ctorInfo ctor =>
+                                        simp only at hSuccess
+                                        by_cases hNoFields :
+                                            Nat.beq ctor.numFields 0 = true
+                                        · rw [if_pos hNoFields] at hSuccess
+                                          cases hRightInfer :
+                                              inferType
+                                                context
+                                                reducedState
+                                                right with
+                                          | error error =>
+                                              simp only [hRightInfer] at hSuccess
+                                              simp at hSuccess
+                                          | ok rightRun =>
+                                              simp only [hRightInfer] at hSuccess
+                                              rcases rightRun with
+                                                ⟨rightType, rightState⟩
+                                              have hRightConfig :=
+                                                hInfer
+                                                  context
+                                                  reducedState
+                                                  rightState
+                                                  right
+                                                  rightType
+                                                  hReduced.2
+                                                  hRightInfer
+                                              have hTypes :=
+                                                (hDefEq
+                                                  context
+                                                  rightState
+                                                  nextState
+                                                  reducedType
+                                                  rightType
+                                                  true
+                                                  hRightConfig
+                                                  hSuccess).2 rfl
+                                              have hLookup :=
+                                                psKernelEnvironmentIndexRefines_lookup_sound
+                                                  context.environment
+                                                  hConfig.1
+                                              have hInduct :=
+                                                hLookup
+                                                  inductName
+                                                  (PsKernelConstantInfo.inductInfo
+                                                    inductInfo)
+                                                  hFind
+                                              have hCtor :=
+                                                hLookup
+                                                  ctorName
+                                                  (PsKernelConstantInfo.ctorInfo
+                                                    ctor)
+                                                  hCtorFind
+                                              have hTypeHead :
+                                                  psKernelExprGetAppFn reducedType =
+                                                    PsKernelExpr.const
+                                                      inductName
+                                                      (match
+                                                        psKernelExprGetAppFn
+                                                          reducedType with
+                                                       | PsKernelExpr.const _ foundLevels =>
+                                                           foundLevels
+                                                       | _ => List.nil) := by
+                                                simpa [hHead] using hHead
+                                              have hNoFieldsEq :
+                                                  ctor.numFields = 0 := by
+                                                simpa using hNoFields
+                                              exact
+                                                PsKernelDefEqJudgment.unitLike
+                                                  left
+                                                  right
+                                                  leftType
+                                                  rightType
+                                                  reducedType
+                                                  inductName
+                                                  ctorName
+                                                  inductInfo
+                                                  ctor
+                                                  hReduced.1
+                                                  hTypeHead
+                                                  hStructure
+                                                  hInduct
+                                                  hCtors
+                                                  hCtor
+                                                  hNoFieldsEq
+                                                  hTypes
+                                        · rw [if_neg hNoFields] at hSuccess
+                                          simp at hSuccess
+                                    | axiomInfo infoValue =>
+                                        simp at hSuccess
+                                    | defnInfo infoValue =>
+                                        simp at hSuccess
+                                    | thmInfo infoValue =>
+                                        simp at hSuccess
+                                    | opaqueInfo infoValue =>
+                                        simp at hSuccess
+                                    | inductInfo infoValue =>
+                                        simp at hSuccess
+                                    | recInfo infoValue =>
+                                        simp at hSuccess
+                                    | quotInfo infoValue =>
+                                        simp at hSuccess
+                            | cons second tail =>
+                                simp at hSuccess
+                    | axiomInfo infoValue =>
+                        simp at hSuccess
+                    | defnInfo infoValue =>
+                        simp at hSuccess
+                    | thmInfo infoValue =>
+                        simp at hSuccess
+                    | opaqueInfo infoValue =>
+                        simp at hSuccess
+                    | ctorInfo infoValue =>
+                        simp at hSuccess
+                    | recInfo infoValue =>
+                        simp at hSuccess
+                    | quotInfo infoValue =>
+                        simp at hSuccess
+              · rw [if_neg hStructure] at hSuccess
+                simp at hSuccess
+          | bvar index =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | fvar name =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | mvar name =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | sort level =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | app fn arg =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | lam name type body binderInfo =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | forallE name type body binderInfo =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | letE name type value body nondep =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | lit literal =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | mdata metadata body =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+          | proj typeName index body =>
+              simp only [hHead] at hSuccess
+              simp at hSuccess
+
+
 theorem psKernelDefEqStringLitExpansionCoreWith_true_refines
     (defeq :
       PsKernelCheckerContext ->

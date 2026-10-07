@@ -34,7 +34,7 @@
     "Complete selected IR/JsIR declaration and parameter inventories agree.",
     "Each source-derived signature equals its observed RuntimeIR signature, including generic alpha-correspondence and flattened runtime calling convention.",
     "Every JsIR declaration has exactly one source-owned export; actual names come from observation, not name-mangling guesses.",
-    "Bounded verification pins all seven profile-specific subjects and selected profile, then reconstructs all three products. Common graph/archive routing currently supports closed declarations only; uniform routing is pending."
+    "Bounded verification pins all seven profile-specific subjects and selected profile, then reconstructs all three products. Common graph/bundle/archive routing supports both closed and explicitly selected uniform profiles."
   ],
   "representation": {
     "wordSize": 64,
@@ -50,7 +50,7 @@
     "Named type aliases, structures/inductives and type-level computation",
     "Declaration position maps and portable declaration serializer",
     "Runtime refinements, independently proved source projection or executable preservation",
-    "Uniform common graph/archive routing; generic constants that would require inventing a callable factory"
+    "Generic constants that would require inventing a callable factory"
   ],
   "assumptions": [
     "Exact checked PublicApiIR projection",

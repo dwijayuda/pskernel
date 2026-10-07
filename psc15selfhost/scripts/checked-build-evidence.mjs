@@ -1,11 +1,12 @@
+import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, passDefinition, recordPassExecution, verifyArtifact } from './artifact-evidence.mjs';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkedIrStageArtifacts } from './ir-artifact.mjs';
-import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
-import { createDirectJsDeclarations, directJsDeclarationProfile } from './js-declarations.mjs';
+import { checkedIrStageArtifacts, decodeIrArtifact } from './ir-artifact.mjs';
+import { checkedTargetIrStageArtifacts, decodeJsIrArtifact, assertJsDeclarationInventory } from './target-ir-artifact.mjs';
+import { createDirectJsDeclarations, directJsDeclarationProfile, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 import { createDirectJsSourceMap } from './js-source-map.mjs';
 import { createJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
@@ -46,7 +47,7 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence, generatedPositions, declarationProfile }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence, generatedPositions, declarationProfile, javaScriptRepresentation = closedJsRepresentationProfile }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -54,6 +55,14 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     throw new Error('PSC_BUILD_GRAPH_MIXED_BACKEND_PATHS');
   if (directWasm !== undefined && !(directWasm instanceof Uint8Array)) throw new Error('PSC_BUILD_GRAPH_WASM_BYTES');
   if (wasmCanonical !== undefined && directBackend !== 'wasm') throw new Error('PSC_BUILD_GRAPH_CANONICAL_TARGET');
+  if (![closedJsRepresentationProfile, uniformJsRepresentationProfile].includes(javaScriptRepresentation) ||
+      (javaScriptRepresentation === uniformJsRepresentationProfile && directBackend !== 'javascript'))
+    throw new Error('PSC_BUILD_GRAPH_JAVASCRIPT_REPRESENTATION');
+  const uniformJavaScript = javaScriptRepresentation === uniformJsRepresentationProfile;
+  if (irStages?.uniformSpecializedIr !== undefined && !uniformJavaScript)
+    throw new Error('PSC_BUILD_GRAPH_UNSELECTED_UNIFORM_STAGE');
+  if (uniformJavaScript && irStages?.specializedIr !== undefined)
+    throw new Error('PSC_BUILD_GRAPH_MIXED_SPECIALIZATION');
   let canonicalAdapter;
   let toolInputs;
   let runtimeInterface;
@@ -63,7 +72,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   let declarationLineage;
   let directSourceMap;
   let directDeclarations;
-  if (declarationProfile !== undefined && (directBackend !== 'javascript' || declarationProfile !== directJsDeclarationProfile))
+  if (declarationProfile !== undefined && (directBackend !== 'javascript' || declarationProfile !== (uniformJavaScript ? directJsUniformDeclarationProfile : directJsDeclarationProfile)))
     throw new Error('PSC_BUILD_GRAPH_DECLARATION_PROFILE');
   if (generatedPositions !== undefined && directBackend !== 'javascript') throw new Error('PSC_BUILD_GRAPH_GENERATED_POSITION_TARGET');
   let jsAbiPlan;
@@ -137,11 +146,11 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     const record = recordPassExecution({ definition, inputs: [input], outputs, parameters,
       semanticIdentity, dependencies, resourcePolicy: { contract: 'psc-checked-host-resource/1',
         enforcement: 'existing-stage-specific-limits', completeBudgetCoverage: false,
-        ...(validation ? { correspondence: validation.resourcePolicy } : {}),
+        ...(validation?.resourcePolicy !== undefined ? { correspondence: validation.resourcePolicy } : {}),
         ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.limits } : {}),
         ...(id !== 'typescript-to-es2022/1' && id !== 'psc-project-runtime-interface/1' && seedResources ? { nativeSession: seedResources.limits } : {}) },
       resourceObservation: { hostObserved: true, inputBytes: input.bytes.byteLength,
-        ...(validation ? { correspondence: validation.observed } : {}),
+        ...(validation?.observed !== undefined ? { correspondence: validation.observed } : {}),
         outputBytes: outputs.reduce((sum, output) => sum + output.bytes.byteLength, 0),
         ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.observed } : {}),
         ...(id !== 'typescript-to-es2022/1' && id !== 'psc-project-runtime-interface/1' && seedResources ? { nativeSession: seedResources.observed,
@@ -300,23 +309,35 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     }
   }
   if (directBackend) {
-    if (!verifiedIr || !stages?.specializedIr)
+    if (!verifiedIr || (uniformJavaScript ? irStages?.uniformSpecializedIr === undefined : !stages?.specializedIr))
       throw new Error(directBackend === 'javascript' ? 'PSC_BUILD_GRAPH_JS_STAGES_REQUIRED' : 'PSC_BUILD_GRAPH_WASM_STAGES_REQUIRED');
-    const specializedIr = add(stages.specializedIr, { kind: 'archive-required', role: 'actual-specialization-output' });
-    const projection = createSpecializationInstanceMap(verifiedIr, specializedIr);
-    const correspondence = projection.result;
-    specializationInstances = add(projection.map, { kind: 'output-file', suffix: '.specialization-instances.json' });
-    execute('psc-pass-specialize/1', verifiedIr, [specializedIr, specializationInstances], implementation, 'psc-specialization-runtime-refinement/1',
-      { observedStages: ['specialize', 'validate-specialized-ir', 'check-specialization-correspondence'],
-        postcondition: 'strict-runtime-ir-invariants', correspondenceRelation: correspondence.relation,
-        globalPreservationProved: false },
-      baseDependencies, ['trusted-specialization-implementation', 'trusted-strict-ir-validator',
-        'trusted-specialization-correspondence-checker'], correspondence);
+    const specializedIr = uniformJavaScript
+      ? add(uniformSpecializationArtifact(irStages.uniformSpecializedIr), { kind: 'archive-required', role: 'actual-uniform-selection-output' })
+      : add(stages.specializedIr, { kind: 'archive-required', role: 'actual-specialization-output' });
+    if (uniformJavaScript) {
+      const correspondence = verifyUniformSpecialization(verifiedIr, specializedIr);
+      execute('psc-pass-uniform-specialize/1', verifiedIr, [specializedIr], implementation, 'psc-uniform-representation-selection/1',
+        { profile: javaScriptRepresentation, observedStages: ['select-uniform-representation', 'check-exact-generic-ir-identity'],
+          globalPreservationProved: false },
+        baseDependencies, ['trusted-strict-ir-validator', 'trusted-uniform-representation-selection'], correspondence);
+    } else {
+      const projection = createSpecializationInstanceMap(verifiedIr, specializedIr);
+      const correspondence = projection.result;
+      specializationInstances = add(projection.map, { kind: 'output-file', suffix: '.specialization-instances.json' });
+      execute('psc-pass-specialize/1', verifiedIr, [specializedIr, specializationInstances], implementation, 'psc-specialization-runtime-refinement/1',
+        { observedStages: ['specialize', 'validate-specialized-ir', 'check-specialization-correspondence'],
+          postcondition: 'strict-runtime-ir-invariants', correspondenceRelation: correspondence.relation,
+          globalPreservationProved: false },
+        baseDependencies, ['trusted-specialization-implementation', 'trusted-strict-ir-validator',
+          'trusted-specialization-correspondence-checker'], correspondence);
+    }
     if (directBackend === 'javascript') {
       if (!targetStages.jsIr) throw new Error('PSC_BUILD_GRAPH_JS_TARGET_IR_REQUIRED');
       const jsIr = add(targetStages.jsIr, { kind: 'archive-required', role: 'actual-validated-js-ir' });
-      execute('psc-specialized-ir-to-js-ir/1', specializedIr, [jsIr], implementation, 'psc-specialized-ir-js-ir/1',
-        { target: 'javascript', wordSize: 64,
+      if (uniformJavaScript) assertJsDeclarationInventory(decodeIrArtifact(verifiedIr.bytes), decodeJsIrArtifact(jsIr.bytes));
+      execute(uniformJavaScript ? 'psc-uniform-ir-to-js-ir/1' : 'psc-specialized-ir-to-js-ir/1',
+        specializedIr, [jsIr], implementation, uniformJavaScript ? 'psc-uniform-ir-js-ir/1' : 'psc-specialized-ir-js-ir/1',
+        { target: 'javascript', wordSize: 64, ...(uniformJavaScript ? { profile: javaScriptRepresentation } : {}),
           observedStages: ['javascript-lower', 'validate-js-ir', 'snapshot-js-ir'],
           validator: 'psc-js-ir-validator/1', globalPreservationProved: false },
         baseDependencies, ['trusted-javascript-lowering', 'trusted-js-ir-validator']);
@@ -344,7 +365,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         const erasureTable = { bytes: tableBytes, identity: artifactId(tableBytes, 'erasure-table', 'psc-erasure-declarations/1') };
         const product = createDirectJsDeclarations({ profile: declarationProfile, subjects: {
           publicApi: sourceApi, erasureTable, runtimeIr: stages.runtimeIr, verifiedIr,
-          specializedIr, jsIr, javaScript: js,
+          ...(uniformJavaScript ? { uniformSpecializedIr: specializedIr } : { specializedIr }), jsIr, javaScript: js,
         } });
         directDeclarations = {
           declarations: add(product.declarations, { kind: 'output-file', suffix: '.d.ts' }),
@@ -363,7 +384,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           undefined, { originPolicy: 'drop-with-reason', authorityEffect: 'none',
             originReason: 'This selected declaration profile has no declaration-position map yet; source identities remain in a separate signature product.' });
       }
-      if (declarationOriginGraph && erasureMap && generatedPositionMap) {
+      if (declarationOriginGraph && erasureMap && specializationInstances && generatedPositionMap) {
         const parents = { originGraphId: declarationOriginGraph.identity, erasureMapId: erasureMap.identity,
           specializationMapId: specializationInstances.identity, generatedPositionMapId: generatedPositionMap.identity,
           verifiedIrId: verifiedIr.identity };
@@ -444,7 +465,8 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       irStages ? 'observed-erasure-validation-and-composite-backend-edges' : 'observed-composite-edges',
     remaining: [directBackend ? 'global backend preservation, target-validator soundness and target-specific assurance gates' :
       irStages ? 'specialization and backend-interior artifacts' : 'per-IR-stage artifacts',
-      'complete toolchain closure', 'independent preservation evidence'] };
+      'complete toolchain closure', 'independent preservation evidence',
+      ...(uniformJavaScript ? ['uniform declaration-origin composition and source maps'] : [])] };
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
     ...(certification ? { certification } : {}),

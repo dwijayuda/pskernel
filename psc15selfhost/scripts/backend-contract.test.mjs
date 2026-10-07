@@ -4,7 +4,8 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
 import { createClaimSet } from './claim-set.mjs';
-import { createBackendDescriptor, decodeBackendDescriptor, createArtifactBundle, verifyArtifactBundle } from './backend-contract.mjs';
+import { createBackendDescriptor, decodeBackendDescriptor, createArtifactBundle, verifyArtifactBundle,
+  selectUniformJavaScriptRegistry, verifyBackendProfileSelection } from './backend-contract.mjs';
 
 const registryValue = JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V1.json', import.meta.url), 'utf8'));
 function fixture(backendId) {
@@ -101,4 +102,36 @@ test('ClaimSet subjects and profiles cannot be transplanted into another bundle'
     const bundle = f.add(createArtifactBundle({ ...f.fields, claimSetId: claims.identity }));
     await assert.rejects(verifyArtifactBundle(bundle, { ...f.policy, expectedBundleId: bundle.identity }), /CLAIM_SUBJECT/);
   }
+});
+
+test('uniform selection derives one lane and freshly rejects rehashed registry drift or missing selection', async () => {
+  const f = fixture('javascript'), selected = selectUniformJavaScriptRegistry(f.registry);
+  f.add(selected.registry); f.add(selected.selection);
+  const base = JSON.parse(f.registry.bytes), registry = JSON.parse(selected.registry.bytes);
+  assert.deepEqual(registry.backends.filter(item => item.backendId !== 'javascript'),
+    base.backends.filter(item => item.backendId !== 'javascript'));
+  const js = registry.backends.find(item => item.backendId === 'javascript');
+  assert.equal(js.inputDomain, 'uniform-specialized-ir');
+  assert.equal(js.products.debugArtifacts.some(item => item.role === 'source-map'), false);
+  const old = decodeBackendDescriptor(f.descriptor);
+  const fields = Object.fromEntries(['backendId', 'implementationId', 'targetProfileId', 'externalToolchainId', 'interfaceAdapterId']
+    .map(key => [key, old[key]]));
+  const descriptor = f.add(createBackendDescriptor(selected.registry, fields));
+  const bundle = f.add(createArtifactBundle({ ...f.fields, descriptor, evidenceArtifacts: [selected.selection.identity] }));
+  const result = await verifyArtifactBundle(bundle, { ...f.policy, expectedBundleId: bundle.identity });
+  assert.equal(result.profileSelection.bindingVerified, true);
+  assert.equal(result.preservationVerified, false);
+  const omitted = f.add(createArtifactBundle({ ...f.fields, descriptor }));
+  await assert.rejects(verifyArtifactBundle(omitted, { ...f.policy, expectedBundleId: omitted.identity }), /SELECTION_REQUIRED/);
+  const badValue = JSON.parse(selected.registry.bytes);
+  badValue.backends.find(item => item.backendId === 'javascript').emitterId = 'invented-emitter';
+  const badRegistry = f.add(canonicalArtifact(badValue, 'backend-registry', 'psc-backend-registry/1'));
+  const badSelection = f.add(canonicalArtifact({ ...JSON.parse(selected.selection.bytes), selectedRegistryId: badRegistry.identity },
+    'backend-profile-selection', 'psc-backend-profile-selection/1'));
+  await assert.rejects(verifyBackendProfileSelection(badSelection, {
+    expectedRegistryId: badRegistry.identity, resolveArtifact: f.policy.resolveArtifact }), /SELECTION_BINDING/);
+  const badDescriptor = f.add(createBackendDescriptor(badRegistry, fields));
+  const badBundle = f.add(createArtifactBundle({ ...f.fields, descriptor: badDescriptor, evidenceArtifacts: [badSelection.identity] }));
+  await assert.rejects(verifyArtifactBundle(badBundle, { ...f.policy, expectedBundleId: badBundle.identity }), /SELECTION_BINDING/);
+  assert.throws(() => selectUniformJavaScriptRegistry(selected.registry), /SELECTION_BASE/);
 });

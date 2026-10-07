@@ -8,7 +8,7 @@ import { projectSourceSignature, printSourceSignatureType } from './public-api-s
 import { createDirectJsDeclarations, verifyDirectJsDeclarations, directJsDeclarationProfile, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
 import { packObservedBuildArchive, verifyObservedBuildArchive } from './observed-build-archive.mjs';
-import { uniformSpecializationArtifact } from './uniform-specialization.mjs';
+import { uniformSpecializationArtifact, uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import { fixture as genericFixture } from './js-origin-test-fixture.mjs';
 
 const name = v => ({ k: 's', p: { k: 'a' }, v });
@@ -103,8 +103,10 @@ test('signature drift, target drift and generic instance names cannot create a f
   } }), /GENERIC_EXPORT_UNAVAILABLE/);
 });
 
-test('requested direct declaration products publish through the shared graph and replay without origins or tsc', async () => {
-  const subjects = fixture();
+async function checkDeclarationGraph(subjects, profile) {
+  const uniform = profile === directJsUniformDeclarationProfile;
+  const selection = uniform ? { javaScriptRepresentation: uniformJsRepresentationProfile } : {};
+  const selectedStage = uniform ? 'uniformSpecializedIr' : 'specializedIr';
   const admissions = '{"admissions":[],"format":"proofscript-checked-admissions","version":2}';
   const canonicalAdmissionsId = artifactId(Buffer.from(admissions), 'canonical-admissions', 'proofscript-checked-admissions/2');
   const pscvCertificate = canonicalArtifact({ contract: 'pscv-cert/1', canonicalAdmissionsId, fixture: true }, 'pscv-cert', 'pscv-cert/1');
@@ -113,8 +115,8 @@ test('requested direct declaration products publish through the shared graph and
   const inputs = {
     sourceKind: 'lean', sources: ['synthetic source/authority fixture; exact independent product checks only'], admissions,
     publicApi: subjects.publicApi.bytes.toString(), erasureCorrespondence: subjects.erasureTable.bytes.toString(),
-    irStages: Object.fromEntries(['runtimeIr', 'verifiedIr', 'specializedIr', 'jsIr'].map(key => [key, subjects[key].bytes.toString()])),
-    directJavaScript: subjects.javaScript.bytes.toString(), declarationProfile: directJsDeclarationProfile,
+    irStages: Object.fromEntries(['runtimeIr', 'verifiedIr', selectedStage, 'jsIr'].map(key => [key, subjects[key].bytes.toString()])),
+    directJavaScript: subjects.javaScript.bytes.toString(), declarationProfile: profile, ...selection,
     pscvCertificate, certifiedSourceArtifact, compilerBytes: Buffer.from('synthetic compiler'), compilerKind: 'fixture',
     provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' }, kernelContract: { id: 'fixture' },
     hostSources: [], runtime: { implementation: 'fixture' },
@@ -122,7 +124,16 @@ test('requested direct declaration products publish through the shared graph and
   const backendRegistry = canonicalArtifact(JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V1.json', import.meta.url))),
     'backend-registry', 'psc-backend-registry/1');
   const languageAuthority = canonicalArtifact({ languageEdition: 'fixture' }, 'language-authority', 'psc-language-authority-snapshot/1');
-  const build = bindObservedBuildContext(createCheckedBuildGraph(inputs), { backendRegistry, languageAuthority, backendId: 'javascript' });
+  const observed = createCheckedBuildGraph(inputs);
+  const context = { backendRegistry, languageAuthority, backendId: 'javascript', ...selection };
+  const build = bindObservedBuildContext(observed, context);
+  if (uniform) {
+    assert.throws(() => createCheckedBuildGraph({ ...inputs, javaScriptRepresentation: undefined }), /UNSELECTED_UNIFORM_STAGE/);
+    assert.throws(() => createCheckedBuildGraph({ ...inputs, irStages: { ...inputs.irStages, specializedIr: inputs.irStages.verifiedIr } }), /MIXED_SPECIALIZATION/);
+    assert.throws(() => bindObservedBuildContext(observed, { ...context, javaScriptRepresentation: undefined }), /REPRESENTATION_GRAPH/);
+    assert.equal(JSON.parse(build.backendDescriptor.bytes).inputDomain, 'uniform-specialized-ir');
+    assert.equal(build.specializationInstances, undefined);
+  }
   const bundle = JSON.parse(build.artifactBundle.bytes);
   assert.deepEqual(bundle.publicApiArtifacts.map(item => item.role),
     ['source-api', 'declarations', 'declaration-signatures', 'declaration-binding']);
@@ -139,6 +150,17 @@ test('requested direct declaration products publish through the shared graph and
   assert.equal(replay.kind, 'accepted', replay.reason);
   assert.equal(replay.preservationVerified, false);
   assert.throws(() => createCheckedBuildGraph({ ...inputs, declarationProfile: 'unknown' }), /DECLARATION_PROFILE/);
+  if (uniform) {
+    assert.equal(replay.uniformSpecializationCorrespondences.length, 1);
+    assert.equal(replay.uniformSpecializationCorrespondences[0].bytesPreserved, true);
+    assert.equal(replay.specializationCorrespondences.length, 0);
+    assert.equal(replay.buildContext.artifactBundle.profileSelection.profile, uniformJsRepresentationProfile);
+    assert.equal(replay.buildContext.queryKeysVerified, true);
+  }
+  return build;
+}
+test('requested direct declaration products publish through the shared graph and replay without origins or tsc', async () => {
+  await checkDeclarationGraph(fixture(), directJsDeclarationProfile);
 });
 
 test('explicit uniform subjects retain source generics and replay without inferring them from instances', async () => {
@@ -154,6 +176,7 @@ test('explicit uniform subjects retain source generics and replay without inferr
     javaScript: textRecord('export function g(x) { return x; }\nexport const answer = g(7n);\n',
       'javascript-output', 'psc-direct-javascript/es2022'),
   };
+  await checkDeclarationGraph(subjects, directJsUniformDeclarationProfile);
   const product = createDirectJsDeclarations({ subjects, profile: directJsUniformDeclarationProfile });
   assert.match(product.declarations.bytes.toString(), /<T0>\(_arg0: T0\) => T0/);
   assert.match(product.declarations.bytes.toString(), / as g }/);

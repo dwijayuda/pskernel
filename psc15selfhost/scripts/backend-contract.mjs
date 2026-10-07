@@ -1,3 +1,4 @@
+import { uniformJsRepresentationProfile, uniformSpecializationContract } from './uniform-specialization.mjs';
 import { verifyProfileEnvironment } from './build-context.mjs';
 import { artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 import { decodeClaimSet, verifyClaimSet } from './claim-set.mjs';
@@ -60,6 +61,64 @@ export function decodeBackendRegistry(record) {
   text(value.masterPlan); text(value.backendVersion); list(value.backends, registration, 1);
   return value;
 }
+
+export const backendSelectionContract = 'psc-backend-profile-selection/1';
+
+/** A deterministic specialization of the existing registry, not a fifth lane.
+ * The base remains a separately identified input. A selected registry does not
+ * establish runtime preservation or authorize a checked-session policy.
+ */
+export function selectUniformJavaScriptRegistry(baseRecord) {
+  const value = decodeBackendRegistry(baseRecord);
+  if (value.backends.map(item => item.backendId).sort().join(',') !== 'javascript,rust,typescript,wasm')
+    fail('SELECTION_BASE_LANES');
+  const backend = value.backends.find(item => item.backendId === 'javascript');
+  if (backend.backendKind !== 'directTargetIR' || backend.inputDomain !== 'specialized-ir' ||
+      backend.inputContract !== 'psc-runtime-ir-json/1' ||
+      backend.lowerPassId !== 'psc-specialized-ir-to-js-ir/1' ||
+      backend.targetRepresentationId !== 'psc-js-ir-json/1' ||
+      backend.targetValidatorId !== 'psc-js-ir-validator/1' ||
+      backend.emitterId !== 'psJsEmitValidatedModuleStackSafeWithTargetProfile') fail('SELECTION_BASE');
+  backend.inputDomain = 'uniform-specialized-ir';
+  backend.inputContract = uniformSpecializationContract;
+  backend.lowerPassId = 'psc-uniform-ir-to-js-ir/1';
+  // The selected staged API consumes the uniform wrapper; its final writer is
+  // the same validated JsIR writer used by the closed profile.
+  backend.emitterId = 'psCompilerUniformJavaScriptStagesFromPrepared';
+  backend.supportedCapabilities = backend.supportedCapabilities.filter(capability =>
+    !['standalone-declaration-source-maps', 'closed-structural-source-declarations'].includes(capability));
+  backend.supportedCapabilities.push('uniform-generic-runtime-exports', 'uniform-structural-source-declarations');
+  backend.unsupportedCapabilities = backend.unsupportedCapabilities.filter(capability =>
+    capability !== 'generic-and-dependent-source-declarations');
+  backend.unsupportedCapabilities.push('dependent-and-higher-rank-source-declarations', 'generic-constant-declarations',
+    'uniform-source-map-composition', 'uniform-imports');
+  backend.products.debugArtifacts = backend.products.debugArtifacts.filter(product =>
+    !['specialization-instances', 'declaration-lineage', 'source-map', 'source-map-recipe'].includes(product.role));
+  backend.ownershipDebt = 'Explicit uniform JS representation retains validated generic RuntimeIR. Generic function declarations are source-derived. Uniform source-map composition, named/dependent public types, portable declaration serializers, checked CLI selection and global preservation remain pending.';
+  const registry = canonicalArtifact(value, 'backend-registry', 'psc-backend-registry/1');
+  decodeBackendRegistry(registry);
+  const selection = canonicalArtifact({ schemaVersion: 1, contract: backendSelectionContract,
+    backendId: 'javascript', profile: uniformJsRepresentationProfile,
+    baseRegistryId: baseRecord.identity, selectedRegistryId: registry.identity, authority: 'audit-record-only' },
+  'backend-profile-selection', backendSelectionContract);
+  return { registry, selection };
+}
+
+export async function verifyBackendProfileSelection(record, { expectedRegistryId, resolveArtifact }) {
+  const value = read(record, 'backend-profile-selection', backendSelectionContract);
+  exact(value, ['schemaVersion', 'contract', 'backendId', 'profile', 'baseRegistryId', 'selectedRegistryId', 'authority']);
+  if (value.schemaVersion !== 1 || value.contract !== backendSelectionContract ||
+      value.backendId !== 'javascript' || value.profile !== uniformJsRepresentationProfile ||
+      value.authority !== 'audit-record-only' || id(value.selectedRegistryId) !== id(expectedRegistryId)) fail('SELECTION');
+  const base = { identity: value.baseRegistryId, bytes: await resolveArtifact(value.baseRegistryId) };
+  const rebuilt = selectUniformJavaScriptRegistry(base);
+  if (!equal(rebuilt.selection.identity, record.identity) || !equal(rebuilt.registry.identity, expectedRegistryId))
+    fail('SELECTION_BINDING');
+  const selected = await resolveArtifact(expectedRegistryId); verifyArtifact(selected, expectedRegistryId);
+  return { profile: value.profile, selectionId: record.identity, registryId: expectedRegistryId,
+    bindingVerified: true, authority: 'audit-record-only', preservationVerified: false };
+}
+
 const bindings = ['backendId', 'implementationId', 'targetProfileId', 'externalToolchainId', 'interfaceAdapterId'];
 export function createBackendDescriptor(registryRecord, fields) {
   const registry = decodeBackendRegistry(registryRecord), selected = copy(fields);
@@ -153,6 +212,14 @@ export async function verifyArtifactBundle(record, { expectedBundleId, resolveAr
     ...productGroups.flatMap(group => value[group].map(item => item.artifact))]) await resolve(identity);
   await verifyProfileEnvironment(await resolve(value.profileEnvironmentId), {
     expectedProfileEnvironmentId: value.profileEnvironmentId, resolveArtifact: async identity => (await resolve(identity)).bytes });
+  const selections = value.evidenceArtifacts.filter(identity => identity.domain === 'backend-profile-selection');
+  let profileSelection;
+  if (descriptor.inputDomain === 'uniform-specialized-ir') {
+    if (descriptor.backendId !== 'javascript' || descriptor.inputContract !== uniformSpecializationContract ||
+        selections.length !== 1) fail('SELECTION_REQUIRED');
+    profileSelection = await verifyBackendProfileSelection(await resolve(selections[0]), {
+      expectedRegistryId: descriptor.registryId, resolveArtifact: async identity => (await resolve(identity)).bytes });
+  } else if (selections.length) fail('SELECTION_UNEXPECTED');
   const claimRecord = await resolve(value.claimSetId), claims = decodeClaimSet(claimRecord);
   const subjects = new Set([value.sourceSubjectId, ...value.evidenceArtifacts,
     ...productGroups.flatMap(group => value[group].map(item => item.artifact))].map(id));
@@ -162,5 +229,6 @@ export async function verifyArtifactBundle(record, { expectedBundleId, resolveAr
     await verifyClaimSet(claimRecord, { ...claimVerification, resolveArtifact: async identity => (await resolve(identity)).bytes });
   return Object.freeze({ bundleId: bundleIdentity, backendId: value.backendId, integrityVerified: true,
     claimsVerified: verifiedClaims !== undefined, ...(verifiedClaims ? { verifiedClaims } : {}),
+    ...(profileSelection ? { profileSelection } : {}),
     authority: 'audit-record-only', preservationVerified: false, releaseAccepted: false });
 }

@@ -1,11 +1,12 @@
+import { bindObservedBuildContext } from './observed-build-context.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { SourceMap } from 'node:module';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { resolveTypeScriptCli, pinnedTypeScriptVersionText } from './typescript-cli.mjs';
-import { uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
+import { uniformSpecializationArtifact, verifyUniformSpecialization, uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import { createDirectJsDeclarations, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { spawnSync } from 'node:child_process';
@@ -315,6 +316,40 @@ test('uniform JS representation retains generic exports and strips only checked 
     '// @ts-expect-error generic array mapping checks callback element type',
     'mapValues((value: string): string => value, [1n]);',
   ].join('\n'));
+
+  const admissions = '{"admissions":[],"format":"proofscript-checked-admissions","version":2}';
+  const canonicalAdmissionsId = artifactId(Buffer.from(admissions), 'canonical-admissions', 'proofscript-checked-admissions/2');
+  const pscvCertificate = canonicalArtifact({ contract: 'pscv-cert/1', canonicalAdmissionsId, fixture: true }, 'pscv-cert', 'pscv-cert/1');
+  const certifiedSourceArtifact = canonicalArtifact({ contract: 'psc-certified-source/1', canonicalAdmissionsId,
+    certificateId: pscvCertificate.identity, fixture: true }, 'certified-source', 'psc-certified-source/1');
+  const observed = createCheckedBuildGraph({
+    sourceKind: 'lean', sources: ['Actual native generic stage outputs with synthetic audit provenance.'], admissions,
+    directJavaScript: staged.javaScript, irStages: staged, generatedPositions: staged.generatedPositions,
+    publicApi: staged.publicApi, erasureCorrespondence: staged.erasureCorrespondence,
+    declarationProfile: directJsUniformDeclarationProfile, javaScriptRepresentation: uniformJsRepresentationProfile,
+    pscvCertificate, certifiedSourceArtifact,
+    compilerBytes: Buffer.from('synthetic provenance; no live acceptance claim'), compilerKind: 'fixture',
+    provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' }, kernelContract: { id: 'fixture' },
+    hostSources: [], runtime: { implementation: 'fixture' },
+  });
+  const backendRegistry = canonicalArtifact(JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V1.json', import.meta.url))),
+    'backend-registry', 'psc-backend-registry/1');
+  const languageAuthority = canonicalArtifact({ languageEdition: 'fixture' }, 'language-authority', 'psc-language-authority-snapshot/1');
+  const built = bindObservedBuildContext(observed, { backendRegistry, languageAuthority,
+    backendId: 'javascript', javaScriptRepresentation: uniformJsRepresentationProfile });
+  assert.deepEqual(built.directDeclarations.declarations.bytes, product.declarations.bytes);
+  assert.equal(built.directSourceMap, undefined);
+  assert.equal(built.specializationInstances, undefined);
+  assert.ok(built.generatedPositionMap);
+  const archive = packObservedBuildArchive(built);
+  const definitions = built.graph.entries.filter(entry => entry.identity.domain === 'pass-definition').map(entry => entry.canonicalValue);
+  const replay = await verifyObservedBuildArchive(archive.bytes, { expectedGraphId: built.identity,
+    allowedAssumptions: [...new Set(definitions.flatMap(item => item.assumptionIds))] });
+  assert.equal(replay.kind, 'accepted', replay.reason);
+  assert.equal(replay.uniformSpecializationCorrespondences.length, 1);
+  assert.equal(replay.buildContext.artifactBundle.profileSelection.bindingVerified, true);
+  assert.equal(replay.buildContext.queryKeysVerified, true);
+  assert.equal(replay.preservationVerified, false);
 
   assert.equal(relation.bytesPreserved, true);
   assert.equal(relation.targetRepresentationAdequacyProved, false);

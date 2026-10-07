@@ -1,19 +1,46 @@
+import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationContract } from './uniform-specialization.mjs';
 import { createQueryKey, verifyQueryKey, applyPassEffects } from './query-context.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 import { createExtensionSet, createProfileEnvironment, createBuildAction, decodeBuildAction,
   verifyBuildAction } from './build-context.mjs';
 import { createClaimSet } from './claim-set.mjs';
-import { createBackendDescriptor, decodeBackendRegistry, createArtifactBundle, verifyArtifactBundle } from './backend-contract.mjs';
+import { createBackendDescriptor, decodeBackendRegistry, decodeBackendDescriptor, selectUniformJavaScriptRegistry, createArtifactBundle, verifyArtifactBundle } from './backend-contract.mjs';
 
 const fail = code => { throw new Error('PSC_OBSERVED_CONTEXT_' + code); };
 const equal = (a, b) => canonicalBytes(a).equals(canonicalBytes(b));
 const uniqueIds = values => [...new Map(values.map(value => [artifactKey(value), value])).values()];
 
+
+/** A selected profile must describe the connected observed pipeline. Registry
+ * metadata alone cannot turn a closed or unrelated execution into uniform JS.
+ */
+function checkUniformPipeline(graph, resolve) {
+  const uniformEntries = graph.entries.filter(entry => entry.identity.domain === 'uniform-specialized-ir');
+  if (uniformEntries.length !== 1 || uniformEntries[0].identity.contract !== uniformSpecializationContract ||
+      graph.entries.some(entry => entry.identity.domain === 'specialized-ir')) fail('UNIFORM_PIPELINE');
+  const executions = graph.executions.map(resolve);
+  const find = passId => {
+    const selected = executions.filter(execution => resolve(execution.passDefinitionId).passId === passId);
+    if (selected.length !== 1) fail('UNIFORM_PIPELINE');
+    return selected[0];
+  };
+  const selection = find('psc-pass-uniform-specialize/1'), lower = find('psc-uniform-ir-to-js-ir/1');
+  const print = find('psc-js-ir-to-javascript/1');
+  if (selection.inputs.length !== 1 || selection.outputs.length !== 1 ||
+      selection.inputs[0].domain !== 'verified-ir' || !equal(selection.outputs[0], uniformEntries[0].identity) ||
+      lower.inputs.length !== 1 || lower.outputs.length !== 1 ||
+      !equal(lower.inputs[0], selection.outputs[0]) || lower.outputs[0].domain !== 'js-ir' ||
+      print.inputs.length !== 1 || !equal(print.inputs[0], lower.outputs[0]) ||
+      selection.action.parameters.profile !== uniformJsRepresentationProfile ||
+      lower.action.parameters.profile !== uniformJsRepresentationProfile) fail('UNIFORM_PIPELINE');
+}
+
 /** Enrich already captured edges. No source/compiler is re-executed, and no
  * successful pass/proof claim is inferred. Historical graph records remain
  * exact inputs to the new declarations, rather than being reinterpreted.
  */
-export function bindObservedBuildContext(build, { languageAuthority, backendRegistry, backendId }) {
+export function bindObservedBuildContext(build, { languageAuthority, backendRegistry, backendId,
+  javaScriptRepresentation = closedJsRepresentationProfile }) {
   verifyArtifact(build.bytes, build.identity);
   if (!equal(build.graph, JSON.parse(build.bytes)) || build.identity.contract !== 'psc-observed-build-graph/1') fail('GRAPH');
   if (build.graph.entries.some(entry => entry.identity.contract === 'psc-build-action/1')) fail('ALREADY_BOUND');
@@ -40,7 +67,19 @@ export function bindObservedBuildContext(build, { languageAuthority, backendRegi
   if (languageAuthority.identity.domain !== 'language-authority' || languageAuthority.identity.contract !== 'psc-language-authority-snapshot/1') fail('LANGUAGE_AUTHORITY');
   const authority = resolve(languageAuthority.identity);
   if (typeof authority.languageEdition !== 'string' || !authority.languageEdition) fail('LANGUAGE_EDITION');
-  const registry = decodeBackendRegistry(backendRegistry); add(backendRegistry);
+  if (![closedJsRepresentationProfile, uniformJsRepresentationProfile].includes(javaScriptRepresentation) ||
+      (javaScriptRepresentation === uniformJsRepresentationProfile && backendId !== 'javascript')) fail('JAVASCRIPT_REPRESENTATION');
+  const uniform = javaScriptRepresentation === uniformJsRepresentationProfile;
+  const hasUniform = entries.some(entry => entry.identity.domain === 'uniform-specialized-ir');
+  if (uniform !== hasUniform) fail('REPRESENTATION_GRAPH');
+  add(backendRegistry);
+  let selection;
+  if (uniform) {
+    checkUniformPipeline(build.graph, resolve);
+    const selected = selectUniformJavaScriptRegistry(backendRegistry);
+    backendRegistry = add(selected.registry); selection = add(selected.selection);
+  }
+  const registry = decodeBackendRegistry(backendRegistry);
   const registration = registry.backends.find(entry => entry.backendId === backendId);
   if (!registration) fail('BACKEND');
   const implementationId = one('implementation', 'psc-hosted-compiler-implementation/1');
@@ -64,13 +103,13 @@ export function bindObservedBuildContext(build, { languageAuthority, backendRegi
     importedStructuralInterfaceIds: [], importedBehavioralInterfaceIds: [],
     semanticOptions: { sourceKind: source.sourceKind, importMode: 'flattened-ordered-source-closure' },
   }));
-  const targetProfile = json({ backendId, observedActionIds: build.graph.executions.map(identity => resolve(identity).actionId) },
+  const targetProfile = json({ backendId, ...(selection ? { backendProfileSelectionId: selection.identity } : {}), observedActionIds: build.graph.executions.map(identity => resolve(identity).actionId) },
     'target-profile', 'psc-observed-target-profile/1');
   const toolchains = entries.filter(entry => ['tool-inputs', 'typescript-compiler-entry'].includes(entry.identity.domain)).map(entry => entry.identity);
   const buildActions = [], queryKeys = [];
   const inputClasses = { 'source-snapshot': 'source', 'canonical-admissions': 'checked-structural',
     'certified-source': 'certified-source', 'runtime-ir': 'runtime', 'verified-ir': 'verified-ir',
-    'specialized-ir': 'specialized-ir', 'js-ir': 'target', 'wasm-ir': 'target', 'runtime-interface': 'runtime-interface' };
+    'specialized-ir': 'specialized-ir', 'uniform-specialized-ir': 'specialized-ir', 'js-ir': 'target', 'wasm-ir': 'target', 'runtime-interface': 'runtime-interface' };
   for (const executionId of build.graph.executions) {
     const execution = resolve(executionId), definition = resolve(execution.passDefinitionId);
     const resource = json(execution.action.resourcePolicy, 'resource-policy', 'psc-observed-resource-policy/1');
@@ -119,11 +158,12 @@ export function bindObservedBuildContext(build, { languageAuthority, backendRegi
   const artifactBundle = add(createArtifactBundle({
     descriptor, sourceSubjectId, profileEnvironmentId: profileEnvironment.identity, claimSetId: claimSet.identity,
     ...products, targetToolchainArtifacts: uniqueIds(toolchains),
-    evidenceArtifacts: [...build.graph.executions, ...buildActions.flatMap(item => [item.action.identity, item.binding.identity]), ...queryKeys.map(item => item.identity)],
+    evidenceArtifacts: [...(selection ? [selection.identity] : []), ...build.graph.executions, ...buildActions.flatMap(item => [item.action.identity, item.binding.identity]), ...queryKeys.map(item => item.identity)],
   }));
   const graph = { ...build.graph, entries }, bytes = canonicalBytes(graph);
   return { ...build, graph, artifacts, bytes, identity: artifactId(bytes, 'build-graph', 'psc-observed-build-graph/1'),
-    profileEnvironment, buildActions, queryKeys, backendDescriptor: descriptor, artifactBundle, claimSet };
+    profileEnvironment, buildActions, queryKeys, backendDescriptor: descriptor, artifactBundle, claimSet,
+    ...(selection ? { backendProfileSelection: selection } : {}) };
 }
 
 /** Replay the relation from an exact old execution to its V5 declaration.
@@ -172,6 +212,23 @@ export async function verifyObservedContextProducts(graph, { resolveArtifact }) 
   const bundleResult = await verifyArtifactBundle(bundleRecord, { expectedBundleId: bundleId, resolveArtifact });
   if (!equal(bundle.profileEnvironmentId, profileId) || !equal(bundle.backendDescriptorId, descriptorId) ||
       !equal(bundle.sourceSubjectId, sourceId)) fail('BUNDLE_BINDING');
+  const hasUniform = entries.some(entry => entry.identity.domain === 'uniform-specialized-ir');
+  if (hasUniform !== Boolean(bundleResult.profileSelection)) fail('REPRESENTATION_GRAPH');
+  let selectedTargetProfileId;
+  if (hasUniform) {
+    const values = new Map();
+    for (const executionId of graph.executions) {
+      const execution = JSON.parse((await record(executionId)).bytes);
+      values.set(artifactKey(executionId), execution);
+      values.set(artifactKey(execution.passDefinitionId), JSON.parse((await record(execution.passDefinitionId)).bytes));
+    }
+    checkUniformPipeline(graph, identity => values.get(artifactKey(identity)));
+    const descriptor = decodeBackendDescriptor(await record(descriptorId));
+    selectedTargetProfileId = descriptor.targetProfileId;
+    const profile = JSON.parse((await record(descriptor.targetProfileId)).bytes);
+    if (profile.backendId !== 'javascript' ||
+        !equal(profile.backendProfileSelectionId, bundleResult.profileSelection.selectionId)) fail('REPRESENTATION_PROFILE');
+  }
   const executions = new Set(graph.executions.map(artifactKey)), actions = new Set(select('build-action').map(artifactKey));
   const coveredExecutions = new Set(), coveredActions = new Set(), bindings = [];
   const evidenceKeys = new Set(bundle.evidenceArtifacts.map(artifactKey));
@@ -182,6 +239,7 @@ export async function verifyObservedContextProducts(graph, { resolveArtifact }) 
         coveredActions.has(actionKey) || ![executionKey, actionKey, artifactKey(bindingId)].every(key => evidenceKeys.has(key))) fail('ACTION_COVERAGE');
     const action = decodeBuildAction(await record(binding.actionId));
     if (!equal(action.profileEnvironmentId, profileId)) fail('ACTION_ENVIRONMENT');
+    if (selectedTargetProfileId && !equal(action.targetProfileId, selectedTargetProfileId)) fail('REPRESENTATION_PROFILE');
     coveredExecutions.add(executionKey); coveredActions.add(actionKey); bindings.push(binding);
   }
   if (coveredExecutions.size !== executions.size || coveredActions.size !== actions.size) fail('ACTION_COVERAGE');

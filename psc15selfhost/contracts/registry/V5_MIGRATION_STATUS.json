@@ -1182,7 +1182,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "closed-products-integrated-uniform-generic-runtime-and-checked-service-declarations-implemented-uniform-descriptor-archive-origins-and-portable-serializers-pending",
+      "status": "closed-products-and-uniform-generic-declarations-descriptor-graph-archive-integrated-uniform-origins-portable-serializers-and-cli-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1547,6 +1547,13 @@
       "status": "experimental",
       "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
       "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-backend-profile-selection/1",
+      "kind": "backend-profile-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V1.json",
+      "classification": "backend"
     }
   ]
 }

@@ -1,9 +1,10 @@
+import { uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { verifyObservedContextProducts } from './observed-build-context.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyDeclarationOriginGraph } from './declaration-origins.mjs';
 import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
-import { verifyDirectJsDeclarations } from './js-declarations.mjs';
+import { verifyDirectJsDeclarations, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 import { verifyDirectJsSourceMap } from './js-source-map.mjs';
 import { verifyJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { verifyJsGeneratedPositionMap } from './js-generated-positions.mjs';
@@ -14,7 +15,9 @@ import { verifySpecializationCorrespondence, verifySpecializationInstanceMap } f
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
 import { verifyWasmCanonicalProjection, verifyWasmCanonicalBinary } from './wasm-canonical-artifact.mjs';
 import { replayClosedIrArtifact, replayIrLinkArtifact } from './ir-invariant-replay.mjs';
-import { decodeJsIrArtifact, decodeWasmIrArtifact } from './target-ir-artifact.mjs';
+import { decodeJsIrArtifact, decodeWasmIrArtifact, assertJsDeclarationInventory } from './target-ir-artifact.mjs';
+
+import { decodeIrArtifact } from './ir-artifact.mjs';
 
 const contract = 'psc-observed-build-archive/1';
 const defaults = Object.freeze({ maxArchiveBytes: 256 * 1024 * 1024, maxArtifactBytes: 128 * 1024 * 1024,
@@ -179,7 +182,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
         irInvariantReplays.push(replay);
       }
     }
-    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [], wasmCanonicalProjections = [], wasmCanonicalSignatures = [];
+    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], uniformSpecializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [], wasmCanonicalProjections = [], wasmCanonicalSignatures = [];
     for (const identity of graph.executions) {
       const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions });
       executions.push(result);
@@ -243,12 +246,21 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
               { resolveArtifact, expectedInputId: input.identity, expectedOutputId: output.identity,
                 resourceLimits: { maxBytes: bound.maxArtifactBytes } }));
       }
+      if (definition.passId === 'psc-pass-uniform-specialize/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            definition.semanticRelationId !== 'psc-uniform-representation-selection/1' ||
+            execution.action.parameters.profile !== uniformJsRepresentationProfile) fail('UNIFORM_SELECTION_SUBJECT');
+        uniformSpecializationCorrespondences.push(verifyUniformSpecialization(
+          { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) },
+          { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) }, { maxBytes: bound.maxArtifactBytes }));
+      }
       if (definition.passId === 'psc-emit-direct-js-declarations/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 3 || typeof execution.action.parameters.profile !== 'string' ||
             definition.semanticRelationId !== 'psc-source-api-to-bound-js-declarations/1') fail('JS_DECLARATIONS_SUBJECT');
         const expectedSubjects = { publicApi: execution.inputs[0] };
         for (const [key, domain] of [['erasureTable', 'erasure-table'], ['runtimeIr', 'runtime-ir'],
-            ['verifiedIr', 'verified-ir'], ['specializedIr', 'specialized-ir'],
+            ['verifiedIr', 'verified-ir'], execution.action.parameters.profile === directJsUniformDeclarationProfile
+              ? ['uniformSpecializedIr', 'uniform-specialized-ir'] : ['specializedIr', 'specialized-ir'],
             ['jsIr', 'js-ir'], ['javaScript', 'javascript-output']]) {
           const ids = execution.action.dependencies.filter(id => id.domain === domain);
           if (ids.length !== 1) fail('JS_DECLARATIONS_SUBJECT');
@@ -299,6 +311,20 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
           { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
           { resolveArtifact, expectedJsIrId: execution.inputs[0], expectedJavaScriptId: execution.outputs[0],
             maxBytes: bound.maxArtifactBytes });
+      }
+      if (definition.passId === 'psc-uniform-ir-to-js-ir/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            execution.inputs[0].domain !== 'uniform-specialized-ir' ||
+            execution.outputs[0].domain !== 'js-ir' || execution.outputs[0].contract !== 'psc-js-ir-json/1' ||
+            definition.semanticRelationId !== 'psc-uniform-ir-js-ir/1' ||
+            execution.action.parameters.profile !== uniformJsRepresentationProfile) fail('UNIFORM_JS_IR_SUBJECT');
+        const input = uniformSpecializationArtifact(resolveArtifact(execution.inputs[0]), { maxBytes: bound.maxArtifactBytes });
+        if (artifactKey(input.identity) !== artifactKey(execution.inputs[0])) fail('UNIFORM_JS_IR_SUBJECT');
+        const raw = canonicalBytes(JSON.parse(input.bytes)[2]);
+        assertJsDeclarationInventory(decodeIrArtifact(raw, { maxBytes: bound.maxArtifactBytes }),
+          decodeJsIrArtifact(resolveArtifact(execution.outputs[0]), { maxBytes: bound.maxArtifactBytes }));
+        targetIrArtifacts.push(Object.freeze({ kind: 'js-ir', profile: uniformJsRepresentationProfile,
+          inputId: execution.inputs[0], outputId: execution.outputs[0] }));
       }
       if (definition.passId === 'psc-specialized-ir-to-js-ir/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
@@ -359,7 +385,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
         irValidation === undefined ? 'observed-artifact-integrity-only' : 'observed-artifact-integrity-and-closed-ir-invariants',
       linkedIrInvariantsVerified: irLinkValidation !== undefined, irLinkInvariantReplays,
       closedIrInvariantsVerified: irValidation !== undefined, irInvariantReplays, integrityVerified: true, artifactCount: blobs.size,
-      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts, wasmCanonicalProjections, wasmCanonicalSignatures,
+      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, uniformSpecializationCorrespondences, jsAbiPlans, targetIrArtifacts, wasmCanonicalProjections, wasmCanonicalSignatures,
       buildContext, fullInputClosureEstablished: false, semanticClaimsVerified: false,
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {

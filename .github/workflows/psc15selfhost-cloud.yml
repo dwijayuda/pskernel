@@ -148,6 +148,13 @@ jobs:
           lake exe psc1 check packages/driver-wasm/src/Ps/DriverWasm/SelfHostProgress.lean
           node --test scripts/ir-artifact.test.mjs
 
+      - name: Run WasmIR target validation corpus
+        working-directory: psc15selfhost
+        run: |
+          lake exe psc1_backend_wasm_ir_tests
+          lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean
+          lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/Encode.lean
+
       - name: Run JsIR target validation corpus
         working-directory: psc15selfhost
         run: |

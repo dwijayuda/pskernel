@@ -280,3 +280,19 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
               psKernelExprInstantiateAtReferenceChanged,
               psKernelExprListIsEmpty
             ]
+
+
+theorem psKernelExprLiftOne_then_instantiate_cancel
+    (expr replacement : PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAt
+        (psKernelExprLiftLooseBVars expr offset 1)
+        0
+        (List.cons replacement List.nil)
+        offset =
+      expr := by
+  rw [psKernelExprLiftLooseBVars_refines_reference_core]
+  rw [psKernelExprInstantiateAt_refines_reference_core]
+  exact
+    psKernelExprLiftOne_then_instantiateReference_cancel
+      expr replacement offset

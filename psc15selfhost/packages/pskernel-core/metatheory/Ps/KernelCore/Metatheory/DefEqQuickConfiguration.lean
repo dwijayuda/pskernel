@@ -74,7 +74,7 @@ theorem psKernelDefEqQuick_configuration_sound
             | false =>
                 simp [h] at hFast
             | true =>
-                exact h
+                rfl
           have hCache :
               psKernelExprPairSetContains
                   state.success

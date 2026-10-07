@@ -154,6 +154,39 @@ def psKernelArenaRawConstructorSpineTest : Bool :=
   | Except.error _ => true
   | Except.ok _ => false
 
+def psKernelArenaLambdaFuelPair
+    (expr : PsKernelExpr)
+    (argCount : Nat) : Bool :=
+  let reference :=
+    psKernelWhnfCountLambdasWithFuel
+      (Nat.succ (psKernelExprNodeCount expr))
+      expr
+      argCount
+      0
+  let bounded := psKernelWhnfCountLambdas expr argCount
+  psKernelExprEq (Prod.fst reference) (Prod.fst bounded) &&
+    Nat.beq (Prod.snd reference) (Prod.snd bounded)
+
+/-- Compare structural fuel to argument-count fuel on nested lambda spines. -/
+def psKernelArenaLambdaSpineFuelTests : Bool :=
+  let name := PsKernelName.str PsKernelName.anonymous "spine"
+  let domain := PsKernelExpr.sort PsKernelLevel.zero
+  let base := PsKernelExpr.bvar 0
+  let single := PsKernelExpr.lam name domain base PsKernelBinderInfo.default
+  let nested :=
+    PsKernelExpr.lam name domain
+      (PsKernelExpr.lam name domain
+        (PsKernelExpr.lam name domain base PsKernelBinderInfo.default)
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default
+  psKernelArenaLambdaFuelPair base 4 &&
+    psKernelArenaLambdaFuelPair single 0 &&
+    psKernelArenaLambdaFuelPair single 1 &&
+    psKernelArenaLambdaFuelPair nested 1 &&
+    psKernelArenaLambdaFuelPair nested 2 &&
+    psKernelArenaLambdaFuelPair nested 3 &&
+    psKernelArenaLambdaFuelPair nested 4
+
 def main : IO Unit :=
   if !psKernelCoreLevelTests then
     throw (IO.userError "PSKERNEL_CORE_ARENA_LEVEL_REGRESSION: FAIL")
@@ -163,5 +196,7 @@ def main : IO Unit :=
     throw (IO.userError "PSKERNEL_CORE_ARENA_MUTUAL_ANALYSIS_FUEL: FAIL")
   else if !psKernelArenaRawConstructorSpineTest then
     throw (IO.userError "PSKERNEL_CORE_ARENA_RAW_CONSTRUCTOR_SPINE: FAIL")
+  else if !psKernelArenaLambdaSpineFuelTests then
+    throw (IO.userError "PSKERNEL_CORE_ARENA_LAMBDA_SPINE_FUEL: FAIL")
   else
     IO.println "PSKERNEL_CORE_ARENA_COMPATIBILITY_REGRESSIONS: PASS"

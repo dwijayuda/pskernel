@@ -17,7 +17,6 @@ theorem psKernelReductionStep_contextWeaken
     apply hExt <;>
     assumption
 
-mutual
 theorem psKernelReductionClosure_contextWeaken
     (environment : PsKernelEnvironment)
     (older newer : PsKernelLocalContext)
@@ -27,92 +26,10 @@ theorem psKernelReductionClosure_contextWeaken
       PsKernelReductionClosure
         environment older left right) :
     PsKernelReductionClosure
-      environment newer left right := by
-  cases hReduction with
-  | refl expr =>
-      exact PsKernelReductionClosure.refl expr
-  | presentationSource source query result hPresentation hStored =>
-      exact
-        PsKernelReductionClosure.presentationSource
-          source query result
-          hPresentation
-          (psKernelReductionClosure_contextWeaken
-            environment older newer source result hExt hStored)
-  | cons first middle last hStep hRest =>
-      exact
-        PsKernelReductionClosure.cons
-          first middle last
-          (psKernelReductionStep_contextWeaken
-            environment older newer first middle hExt hStep)
-          (psKernelReductionClosure_contextWeaken
-            environment older newer middle last hExt hRest)
-  | trans first middle last hLeft hRight =>
-      exact
-        PsKernelReductionClosure.trans
-          first middle last
-          (psKernelReductionClosure_contextWeaken
-            environment older newer first middle hExt hLeft)
-          (psKernelReductionClosure_contextWeaken
-            environment older newer middle last hExt hRight)
-  | appFn leftFn rightFn arg hFn =>
-      exact
-        PsKernelReductionClosure.appFn
-          leftFn rightFn arg
-          (psKernelReductionClosure_contextWeaken
-            environment older newer leftFn rightFn hExt hFn)
-  | appArg fn leftArg rightArg hArg =>
-      exact
-        PsKernelReductionClosure.appArg
-          fn leftArg rightArg
-          (psKernelReductionClosure_contextWeaken
-            environment older newer leftArg rightArg hExt hArg)
-  | projectionMajor typeName index left right hMajor =>
-      exact
-        PsKernelReductionClosure.projectionMajor
-          typeName index left right
-          (psKernelReductionClosure_contextWeaken
-            environment older newer left right hExt hMajor)
-  | quotLift
-      expr fnName mkName levels mkLevels args mkArgs
-      major majorReduced representative fnValue
-      hInitialized hHead hLift hArgs hMajor hMajorReduction
-      hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue =>
-      exact
-        PsKernelReductionClosure.quotLift
-          expr fnName mkName levels mkLevels args mkArgs
-          major majorReduced representative fnValue
-          hInitialized hHead hLift hArgs hMajor
-          (psKernelReductionClosure_contextWeaken
-            environment older newer major majorReduced hExt hMajorReduction)
-          hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue
-  | quotInd
-      expr fnName mkName levels mkLevels args mkArgs
-      major majorReduced representative fnValue
-      hInitialized hHead hInd hArgs hMajor hMajorReduction
-      hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue =>
-      exact
-        PsKernelReductionClosure.quotInd
-          expr fnName mkName levels mkLevels args mkArgs
-          major majorReduced representative fnValue
-          hInitialized hHead hInd hArgs hMajor
-          (psKernelReductionClosure_contextWeaken
-            environment older newer major majorReduced hExt hMajorReduction)
-          hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue
-  | recursorIota
-      expr recName ctorName recLevels ctorLevels recArgs majorArgs
-      recursor rule major0 prepared majorReduced major
-      hHead hArgs hFind hMajor hPrepared hMajorConversion
-      hNormalize hCtorHead hMajorArgs hRuleMem hRuleCtor hFields hLevels =>
-      exact
-        PsKernelReductionClosure.recursorIota
-          expr recName ctorName recLevels ctorLevels recArgs majorArgs
-          recursor rule major0 prepared majorReduced major
-          hHead hArgs hFind hMajor
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer major0 prepared hExt hPrepared)
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer prepared majorReduced hExt hMajorConversion)
-          hNormalize hCtorHead hMajorArgs hRuleMem hRuleCtor hFields hLevels
+      environment newer left right :=
+  PsKernelReductionClosure.contextWeaken
+    left right hExt hReduction
+
 
 theorem psKernelDefEqJudgment_contextWeaken
     (environment : PsKernelEnvironment)
@@ -123,90 +40,9 @@ theorem psKernelDefEqJudgment_contextWeaken
       PsKernelDefEqJudgment
         environment older left right) :
     PsKernelDefEqJudgment
-      environment newer left right := by
-  cases hDefEq with
-  | refl expr =>
-      exact PsKernelDefEqJudgment.refl expr
-  | symm left right h =>
-      exact
-        PsKernelDefEqJudgment.symm
-          left right
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer left right hExt h)
-  | presentation storedLeft storedRight queryLeft queryRight hLeft hStored hRight =>
-      exact
-        PsKernelDefEqJudgment.presentation
-          storedLeft storedRight queryLeft queryRight
-          hLeft
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer storedLeft storedRight hExt hStored)
-          hRight
-  | structural left right h =>
-      exact PsKernelDefEqJudgment.structural left right h
-  | reduction left right h =>
-      exact
-        PsKernelDefEqJudgment.reduction
-          left right
-          (psKernelReductionStep_contextWeaken
-            environment older newer left right hExt h)
-  | reductionClosure left right h =>
-      exact
-        PsKernelDefEqJudgment.reductionClosure
-          left right
-          (psKernelReductionClosure_contextWeaken
-            environment older newer left right hExt h)
-  | sort left right h =>
-      exact PsKernelDefEqJudgment.sort left right h
-  | literal left right h =>
-      exact PsKernelDefEqJudgment.literal left right h
-  | app leftFn leftArg rightFn rightArg hFn hArg =>
-      exact
-        PsKernelDefEqJudgment.app
-          leftFn leftArg rightFn rightArg
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer leftFn rightFn hExt hFn)
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer leftArg rightArg hExt hArg)
-  | proofIrrelevance left right leftType rightType level
-      hLeft hRight hLeftType hProp hTypes =>
-      exact
-        PsKernelDefEqJudgment.proofIrrelevance
-          left right leftType rightType level
-          (PsKernelTypingJudgment.contextWeaken
-            left leftType hExt hLeft)
-          (PsKernelTypingJudgment.contextWeaken
-            right rightType hExt hRight)
-          (PsKernelTypingJudgment.contextWeaken
-            leftType (PsKernelExpr.sort level) hExt hLeftType)
-          hProp
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer leftType rightType hExt hTypes)
-  | structureEta
-      value valueType etaValue inductName ctorName levels
-      typeArgs params fields inductInfo ctorInfo
-      hValue hTypeHead hTypeArgs hInduct hNonRec hNoIndices
-      hCtors hCtor hCtorInduct hParams hFields hEta =>
-      exact
-        PsKernelDefEqJudgment.structureEta
-          value valueType etaValue inductName ctorName levels
-          typeArgs params fields inductInfo ctorInfo
-          (PsKernelTypingJudgment.contextWeaken
-            value valueType hExt hValue)
-          hTypeHead hTypeArgs hInduct hNonRec hNoIndices
-          hCtors hCtor hCtorInduct hParams hFields hEta
-  | metadataLeft metadata left right h =>
-      exact
-        PsKernelDefEqJudgment.metadataLeft
-          metadata left right
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer left right hExt h)
-  | metadataRight metadata left right h =>
-      exact
-        PsKernelDefEqJudgment.metadataRight
-          metadata left right
-          (psKernelDefEqJudgment_contextWeaken
-            environment older newer left right hExt h)
-end
+      environment newer left right :=
+  PsKernelDefEqJudgment.contextWeaken
+    left right hExt hDefEq
 
 
 theorem psKernelInferenceCacheSound_contextWeaken

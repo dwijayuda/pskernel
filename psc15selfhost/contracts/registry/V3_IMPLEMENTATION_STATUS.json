@@ -75,14 +75,18 @@
       "sections": [
         14
       ],
-      "status": "partial",
+      "status": "implementation-available-scalar-js-abi-broader-adapters-pending",
       "owners": [
         "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
         "packages/compiler-ir/src/Ps/CompilerIr/Interface.lean",
         "packages/compiler-ir/src/Ps/CompilerIr/Link.lean",
         "contracts/ir/INTERFACE_LINK_V1.json",
         "packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean",
-        "scripts/js-scalar-abi.mjs"
+        "scripts/js-scalar-abi.mjs",
+        "scripts/js-abi-artifact.mjs",
+        "scripts/checked-build-evidence.mjs",
+        "scripts/observed-build-archive.mjs",
+        "scripts/evidence-envelope.mjs"
       ],
       "completion": "All declared executable invariants including capabilities, interfaces, ABI and links are checked.",
       "assurance": "pending"
@@ -108,7 +112,8 @@
         "packages/driver-wasm/src/Ps/DriverWasm/Stages.lean",
         "scripts/ir-artifact.mjs",
         "scripts/evidence-envelope.mjs",
-        "contracts/archive/EVIDENCE_ENVELOPE_V1.json"
+        "contracts/archive/EVIDENCE_ENVELOPE_V1.json",
+        "scripts/js-abi-artifact.mjs"
       ],
       "completion": "Every transformation records canonical action/input/output IDs; production executable artifacts are packaged with source certification, build graph/archive, interfaces, tool/provider inputs and resource observations in a non-authoritative EvidenceEnvelope.",
       "assurance": "pending"

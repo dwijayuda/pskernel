@@ -53,3 +53,33 @@ theorem psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel_zero
         0 checkerFuel session targets shapes levels params field domain revArgs applied =
       Except.error "mutual recursive-argument budget exhausted" := by
   rfl
+
+theorem psKernelOpenSimpleMutualConstructorFieldsWithFuel_app_preserves_raw
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (targets : List PsKernelName)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (resultLevel : PsKernelLevel)
+    (fn arg : PsKernelExpr)
+    (revFields : List PsKernelOpenBinder)
+    (revRecursive : List PsKernelSimpleMutualRecursiveField) :
+    psKernelOpenSimpleMutualConstructorFieldsWithFuel
+        (Nat.succ fuel)
+        session
+        targets
+        shapes
+        levels
+        params
+        resultLevel
+        (PsKernelExpr.app fn arg)
+        revFields
+        revRecursive =
+      Except.ok
+        (PsKernelMutualOpenFieldsResult.mk
+          session
+          (psKernelReverseOpenBinders revFields)
+          (psKernelReverseMutualRecursiveFields revRecursive)
+          (PsKernelExpr.app fn arg)) := by
+  rfl

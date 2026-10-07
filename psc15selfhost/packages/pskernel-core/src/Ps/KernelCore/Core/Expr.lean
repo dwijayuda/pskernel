@@ -917,3 +917,18 @@ def psKernelExprInstantiateLevelParams
         (_values : List PsKernelLevel) =>
         expr
 
+/--
+Universe substitution is structurally the identity when the parameter list
+is empty. This fast path avoids rebuilding an entire proof/type DAG at every
+constant inference or delta unfolding. Nonempty substitutions retain the
+original semantics and implementation.
+-/
+def psKernelExprInstantiateLevelParamsIfNeeded
+    (expr : PsKernelExpr)
+    (params : List PsKernelName)
+    (values : List PsKernelLevel) : PsKernelExpr :=
+  match params with
+  | List.nil => expr
+  | List.cons _ _ =>
+      psKernelExprInstantiateLevelParams expr params values
+

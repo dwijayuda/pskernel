@@ -1,6 +1,7 @@
 import KernelCore.Foundation.Core
 import Ps.KernelCore.Admission.Inductive.Mutual.Analysis
 import Ps.KernelCore.Admission.Inductive.Ordinary.Admission
+import Ps.Host.KernelCoreArena.Replay
 
 def psKernelArenaFuelName (value : String) : PsKernelName :=
   PsKernelName.str PsKernelName.anonymous value
@@ -17,6 +18,33 @@ def psKernelArenaFuelDefinition
     hints := PsKernelReducibilityHints.regular 0
     safety := PsKernelDefinitionSafety.safe
   }
+
+def psKernelArenaAdmissionFastPathTest : Bool :=
+  match PsKernelCoreArena.State.empty false with
+  | Except.error _ => false
+  | Except.ok state =>
+      let name := psKernelArenaFuelName "ArenaAdmissionFastPath"
+      let request : PsKernelDeclarationRequest :=
+        PsKernelDeclarationRequest.axiomDecl {
+          base := {
+            name := name
+            levelParams := []
+            type := PsKernelExpr.sort PsKernelLevel.zero
+          }
+          isUnsafe := false
+        }
+      match
+          PsKernelCoreArena.State.admitRequest state request,
+          psKernelV1AdmitDeclaration state.session request with
+      | Except.ok fast, Except.ok reference =>
+          Bool.and
+            (psKernelEnvironmentContains fast.session.environment name)
+            (Bool.and
+              (psKernelEnvironmentContains reference.session.environment name)
+              (Nat.beq
+                (psKernelEnvironmentSize fast.session.environment)
+                (psKernelEnvironmentSize reference.session.environment)))
+      | _, _ => false
 
 def psKernelArenaMutualAnalysisFuelTest : Bool :=
   let target := psKernelArenaFuelName "ArenaFuelTarget"
@@ -129,6 +157,8 @@ def psKernelArenaRawConstructorSpineTest : Bool :=
 def main : IO Unit :=
   if !psKernelCoreLevelTests then
     throw (IO.userError "PSKERNEL_CORE_ARENA_LEVEL_REGRESSION: FAIL")
+  else if !psKernelArenaAdmissionFastPathTest then
+    throw (IO.userError "PSKERNEL_CORE_ARENA_ADMISSION_FAST_PATH: FAIL")
   else if !psKernelArenaMutualAnalysisFuelTest then
     throw (IO.userError "PSKERNEL_CORE_ARENA_MUTUAL_ANALYSIS_FUEL: FAIL")
   else if !psKernelArenaRawConstructorSpineTest then

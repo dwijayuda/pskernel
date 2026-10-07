@@ -3,89 +3,6 @@ import PSC1Kernel.TypeChecker
 
 namespace PSC1Kernel
 
-partial def arenaLegacyDebugName : Name -> String
-  | .anonymous => "_"
-  | .str .anonymous value => value
-  | .str parent value => arenaLegacyDebugName parent ++ "." ++ value
-  | .num .anonymous value => toString value
-  | .num parent value => arenaLegacyDebugName parent ++ "." ++ toString value
-
-partial def arenaLegacyDebugExprHead (expr : Expr) : String :=
-  let args := expr.getAppArgs.length
-  match expr.getAppFn with
-  | .const name _ =>
-      "const " ++ arenaLegacyDebugName name ++ " (args=" ++ toString args ++ ")"
-  | .fvar name =>
-      "fvar " ++ arenaLegacyDebugName name ++ " (args=" ++ toString args ++ ")"
-  | .bvar index =>
-      "bvar " ++ toString index ++ " (args=" ++ toString args ++ ")"
-  | .mvar name =>
-      "mvar " ++ arenaLegacyDebugName name ++ " (args=" ++ toString args ++ ")"
-  | .sort _ => "sort"
-  | .lam _ _ _ _ => "lambda"
-  | .forallE _ _ _ _ => "forall"
-  | .letE _ _ _ _ _ => "let"
-  | .lit _ => "literal"
-  | .mdata _ _ => "metadata"
-  | .proj name index _ =>
-      "projection " ++ arenaLegacyDebugName name ++ "." ++ toString index
-  | .app _ _ => "application"
-
-partial def arenaLegacyDebugExprDiffAt
-    (path : String)
-    (left right : Expr) : Option String :=
-  if Expr.eq left right then
-    none
-  else
-    match left, right with
-    | .app lf la, .app rf ra =>
-        match arenaLegacyDebugExprDiffAt (path ++ ".fn") lf rf with
-        | some diff => some diff
-        | none => arenaLegacyDebugExprDiffAt (path ++ ".arg") la ra
-    | .lam _ lt lb _, .lam _ rt rb _ =>
-        match arenaLegacyDebugExprDiffAt (path ++ ".lamType") lt rt with
-        | some diff => some diff
-        | none => arenaLegacyDebugExprDiffAt (path ++ ".lamBody") lb rb
-    | .forallE _ lt lb _, .forallE _ rt rb _ =>
-        match arenaLegacyDebugExprDiffAt (path ++ ".forallType") lt rt with
-        | some diff => some diff
-        | none => arenaLegacyDebugExprDiffAt (path ++ ".forallBody") lb rb
-    | .letE _ lt lv lb lnd, .letE _ rt rv rb rnd =>
-        if lnd != rnd then
-          some (path ++ ": let nondep mismatch")
-        else
-          match arenaLegacyDebugExprDiffAt (path ++ ".letType") lt rt with
-          | some diff => some diff
-          | none =>
-              match arenaLegacyDebugExprDiffAt (path ++ ".letValue") lv rv with
-              | some diff => some diff
-              | none => arenaLegacyDebugExprDiffAt (path ++ ".letBody") lb rb
-    | .mdata _ le, .mdata _ re =>
-        arenaLegacyDebugExprDiffAt (path ++ ".mdata") le re
-    | .proj ln li le, .proj rn ri re =>
-        if Name.eq ln rn && li == ri then
-          arenaLegacyDebugExprDiffAt (path ++ ".proj") le re
-        else
-          some (path ++ ": projection metadata mismatch")
-    | _, _ =>
-        some (
-          path ++ ": " ++ arenaLegacyDebugExprHead left ++
-          " != " ++ arenaLegacyDebugExprHead right)
-
-def arenaLegacyDebugExprDiff (left right : Expr) : String :=
-  (arenaLegacyDebugExprDiffAt "root" left right).getD
-    "no structural difference"
-
-def arenaLegacyIsNamedHead (nameText : String) (expr : Expr) : Bool :=
-  match expr.getAppFn with
-  | .const name _ => arenaLegacyDebugName name == nameText
-  | _ => false
-
-def arenaLegacyInterestingApp (fn arg : Expr) : Bool :=
-  (arenaLegacyIsNamedHead "congrArg" fn ||
-    arenaLegacyIsNamedHead "congr" fn) &&
-  arenaLegacyIsNamedHead "funext" arg
-
 /--
 Pure declaration-scoped stateful counterpart of the recursive checker layer.
 The established TypeChecker remains the semantic reference; this module adds
@@ -355,25 +272,12 @@ partial def inferCoreStatefulWith
             let .forallE _ domain body _ := fnTypeWhnf
               | throw "expected function type"
             let (argType, state3) ← inferCoreStatefulWith defeq ctx state2 arg false
-            let interesting := arenaLegacyInterestingApp fn arg
-            if interesting then
-              dbg_trace (
-                "LEGACY_TARGET pre-defeq fn=" ++ arenaLegacyDebugExprHead fn ++
-                "; arg=" ++ arenaLegacyDebugExprHead arg ++
-                "; expected=" ++ arenaLegacyDebugExprHead domain ++
-                "; actual=" ++ arenaLegacyDebugExprHead argType ++
-                "; diff=" ++ arenaLegacyDebugExprDiff domain argType)
             let eqCtx :=
               if isEagerReduceExpr arg then
                 { ctx with eagerReduce := true }
               else
                 ctx
             let (ok, state4) ← defeq eqCtx state3 argType domain
-            if interesting then
-              dbg_trace (
-                "LEGACY_TARGET defeq=" ++ toString ok ++
-                "; expected=" ++ arenaLegacyDebugExprHead domain ++
-                "; actual=" ++ arenaLegacyDebugExprHead argType)
             if !ok then
               throw "application type mismatch"
             let result := body.instantiate1 arg

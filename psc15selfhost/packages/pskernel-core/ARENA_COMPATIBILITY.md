@@ -57,3 +57,13 @@ mint checked authority.
   peak memory.
 - This branch is an empirical compatibility lane. It does not weaken or replace
   the separate metatheory acceptance criteria.
+
+
+## Arena readiness foundation gate
+
+The Arena readiness workflow also executes the portable PSKernel Core foundation
+differential suite before replaying the pinned `Init.Prelude` stream. This gate is
+intended to catch semantic regressions (including DefEq directionality) before
+large-corpus replay. Contract-gate failures are reported by subfamily
+(diagnostics, admission, expression, resource policy, provider identity) so a
+failure is classified before any production semantic change is considered.

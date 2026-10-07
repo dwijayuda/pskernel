@@ -11,13 +11,19 @@
     "ordered inductives",
     "ordered declarations"
   ],
-  "roles": "RuntimeIR, VerifiedIR and later SpecializedIR use distinct artifact domains. The encoding carries no checked flag or transferable authority; even invalid construction IR is encodable.",
+  "roles": "RuntimeIR, VerifiedIR and SpecializedIR use distinct artifact domains. The encoding carries no checked flag or transferable authority; even invalid construction IR is encodable.",
   "bounds": "Portable type/expression encoding uses decreasing depth fuel; exhaustion is an error. Host decoding enforces byte/depth/node bounds and iteratively validates the complete schema. The current pure encoder does not claim a global allocation/CPU budget.",
   "pipeline": {
     "implementation": "packages/driver-ts/src/Ps/DriverTs/Stages.lean",
     "meaning": "A single actual erasure, validation and TypeScript-emission execution returns snapshots of its stage values plus the target. The host requires the original live checked handle and re-derives admissions before invoking it. The native seed emits stage fields only after the explicit checked-host emit response.",
     "production": "checked-build records separate source-check, Core-to-RuntimeIR, RuntimeIR-validation, and VerifiedIR-to-TypeScript edges, then the existing tsc edge. All listed stage bytes are retained in the archive.",
     "compatibility": "Older compiler/seed APIs with no stage fields retain explicitly composite coverage. A present but malformed/failing staged API cannot fall back to a legacy emitter. Validation snapshots must preserve exact IR bytes; backend interior lowering/printing remain composite."
+  },
+  "directJavaScriptPipeline": {
+    "implementation": "packages/driver-js/src/Ps/DriverJs/Stages.lean",
+    "meaning": "One erasure/strict-validation/specialization/post-specialization-strict-validation/lowering/printing execution returns actual RuntimeIR, VerifiedIR and SpecializedIR snapshots plus JavaScript. The existing checked service gates this API on a live matching handle and checks canonical stage schemas, byte identities and output budgets.",
+    "graph": "The graph/archive builder can retain the five observed source-check/erase/validate/specialize/JavaScript edges, using the same specialization pass ID and semantic relation as the portable definition. The specialization postcondition check is not a preservation proof.",
+    "remaining": "The default checked-build CLI remains on TypeScript; direct-JS promotion, target-interior artifacts, complete source-to-stage evidence integration and independent preservation evidence are still required."
   },
   "assurance": "Encoding/schema integrity and observed stage provenance only. The strict validator, erasure and emitter remain explicitly trusted unless independent evidence is attached.",
   "globalPreservation": "unproved",

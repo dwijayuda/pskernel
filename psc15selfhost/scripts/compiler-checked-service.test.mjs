@@ -5,6 +5,7 @@ import { createCheckedCompilerService } from './compiler-checked-service.mjs';
 import { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 
 const ok = value => ({ $ps$tag: 'ok', $ps$fields: { value } });
+const emptyIr = '["psc-runtime-ir-json/1",[],[],[],[]]';
 const wasm = [0, 97, 115, 109, 1, 0, 0, 0];
 const list = values => values.reduceRight((tail, head) =>
   ({ $ps$tag: 'cons', $ps$fields: { head, tail } }), { $ps$tag: 'nil', $ps$fields: {} });
@@ -89,13 +90,13 @@ test('stage emission uses the exact live checked object without legacy fallback'
   let observed;
   compiler.psCompilerTypeScriptStagesFromPrepared = prepared => {
     observed = prepared;
-    return ok({ typeScript: 'export const answer = 42n;', runtimeIr: 'runtime bytes', verifiedIr: 'verified bytes' });
+    return ok({ typeScript: 'export const answer = 42n;', runtimeIr: emptyIr, verifiedIr: emptyIr });
   };
   const handle = await service.check('lean', 'checked source');
   const result = service.emitArtifact(handle);
   assert.equal(observed.source, 'checked source');
   assert.equal(Object.isFrozen(observed), true);
-  assert.deepEqual(result.stages, { runtimeIr: 'runtime bytes', verifiedIr: 'verified bytes' });
+  assert.deepEqual(result.stages, { runtimeIr: emptyIr, verifiedIr: emptyIr });
   assert.equal(Object.isFrozen(result.stages), true);
   assert.equal(emitted.length, 0);
   compiler.psCompilerTypeScriptStagesFromPrepared = () => ({ $ps$tag: 'error' });
@@ -105,4 +106,34 @@ test('stage emission uses the exact live checked object without legacy fallback'
   assert.throws(() => service.emitArtifact(handle), /STAGES_SHAPE/);
   service.revoke(handle);
   assert.throws(() => service.emitArtifact(handle), /UNCHECKED_MODULE/);
+});
+
+test('staged JavaScript output binds actual stage domains and rejects missing, changed or oversized stages', async () => {
+  const { service, compiler, emitted } = fixture();
+  const good = { javaScript: 'export const value = 7;', runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr };
+  let prepared;
+  compiler.psCompilerJavaScriptStagesFromPrepared = value => { prepared = value; return ok(good); };
+  const handle = await service.check('lean', 'checked JS source');
+  const output = service.emitArtifact(handle, 'javascript');
+  assert.equal(prepared.source, 'checked JS source');
+  assert.equal(Object.isFrozen(prepared), true);
+  assert.equal(output.stageArtifacts.runtimeIr.domain, 'runtime-ir');
+  assert.equal(output.stageArtifacts.verifiedIr.domain, 'verified-ir');
+  assert.equal(output.stageArtifacts.specializedIr.domain, 'specialized-ir');
+  assert.equal(emitted.length, 0);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, specializedIr: undefined });
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /STAGES_SHAPE/);
+  compiler.psCompilerJavaScriptStagesFromPrepared = undefined;
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /STAGES_API_SHAPE/);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, specializedIr: 'malformed' });
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /export-json/);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good,
+    verifiedIr: '["psc-runtime-ir-json/1",[],[],[],[["extra",[],[],["primitive","nat"],["literal",["natural","1"]]]]]' });
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /VALIDATION_CHANGED_IR/);
+  const small = fixture({ maxOutputBytes: 100 });
+  small.compiler.psCompilerJavaScriptStagesFromPrepared = () => ok(good);
+  assert.throws(() => small.service.emitArtifact(handle, 'javascript'), /UNCHECKED_MODULE/);
+  const smallHandle = await small.service.check('lean', 'same');
+  assert.throws(() => small.service.emitArtifact(smallHandle, 'javascript'), /OUTPUT_RESOURCE_EXHAUSTED/);
+  assert.equal(emitted.length, 0);
 });

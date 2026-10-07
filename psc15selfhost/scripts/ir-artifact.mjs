@@ -93,7 +93,12 @@ export function checkedIrStageArtifacts(stages, { maxBytes = 128 * 1024 * 1024 }
   if (stages === undefined) return undefined;
   if (!stages || typeof stages.runtimeIr !== 'string' || typeof stages.verifiedIr !== 'string') fail();
   const result = {};
-  for (const [field, domain] of [['runtimeIr', 'runtime-ir'], ['verifiedIr', 'verified-ir']]) {
+  const fields = [['runtimeIr', 'runtime-ir'], ['verifiedIr', 'verified-ir']];
+  if (Object.hasOwn(stages, 'specializedIr')) {
+    if (typeof stages.specializedIr !== 'string') fail();
+    fields.push(['specializedIr', 'specialized-ir']);
+  }
+  for (const [field, domain] of fields) {
     if (Buffer.byteLength(stages[field]) > maxBytes) throw new Error('PSC_IR_ENCODING_BYTES_LIMIT');
     const bytes = Buffer.from(stages[field]);
     decodeIrArtifact(bytes, { maxBytes });

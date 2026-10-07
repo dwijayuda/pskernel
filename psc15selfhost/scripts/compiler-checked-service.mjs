@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
+import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 
 function byteList(value, limit) {
   const bytes = [], seen = new WeakSet();
@@ -35,14 +36,17 @@ export function createCheckedCompilerService({
     const payload = target === 'wasm' ? byteList(raw, maxOutputBytes) : raw;
     const bytes = typeof payload === 'string' ? Buffer.from(payload, 'utf8') : payload;
     if (bytes.byteLength > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
-    if (emission.stages && bytes.byteLength + Buffer.byteLength(emission.stages.runtimeIr) +
-        Buffer.byteLength(emission.stages.verifiedIr) > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
+    if (emission.stages && bytes.byteLength + Object.values(emission.stages).reduce((sum, value) => sum + Buffer.byteLength(value), 0)
+        > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
+    const stages = checkedIrStageArtifacts(emission.stages, { maxBytes: maxOutputBytes });
+    if (stages && !stages.runtimeIr.bytes.equals(stages.verifiedIr.bytes)) throw new Error('PSC_CHECKED_VALIDATION_CHANGED_IR');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
       artifact: Object.freeze({ algorithm: 'sha256', domain: 'target-bytes', schemaVersion: 1,
         digest: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength }),
       checkedCore: capability,
-      ...(emission.stages ? { stages: emission.stages } : {}),
+      ...(emission.stages ? { stages: emission.stages,
+        stageArtifacts: Object.freeze(Object.fromEntries(Object.entries(stages).map(([key, value]) => [key, value.identity]))) } : {}),
       transformationAssurance: 'trusted-implementation-global-preservation-unproved',
     });
   }

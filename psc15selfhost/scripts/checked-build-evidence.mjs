@@ -31,9 +31,11 @@ export async function readCheckedBuildHostSources() {
  * The checked builder packages every listed byte snapshot in its build archive.
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
-  javaScript, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
+  javaScript, directJavaScript, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources }) {
   const artifacts = new Map(), entries = [], executions = [];
+  if (directJavaScript !== undefined && [typeScript, javaScript, declarations, sourceMap].some(value => value !== undefined))
+    throw new Error('PSC_BUILD_GRAPH_MIXED_BACKEND_PATHS');
   let toolInputs;
   function add(item, source, inline = false) {
     const key = artifactKey(item.identity);
@@ -111,17 +113,20 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   execute('psc-prepare-and-check/1', source, [core], implementation, 'psc-source-checked-admissions/1',
     { sourceKind, sourceCount: sources.length, observedStages: ['prepare', 'kernel-check'] }, baseDependencies,
     ['trusted-frontend-source-interpretation']);
-  if (typeScript !== undefined) {
-    const ts = bytes(typeScript, 'typescript-source', 'psc-typescript-source/es2022', { kind: 'output-file', suffix: '.ts' });
-    const stages = checkedIrStageArtifacts(irStages);
-    if (stages) {
+  const stages = checkedIrStageArtifacts(irStages);
+  let verifiedIr;
+  if (stages && (typeScript !== undefined || directJavaScript !== undefined)) {
       const runtimeIr = add(stages.runtimeIr, { kind: 'archive-required', role: 'actual-erasure-output' });
-      const verifiedIr = add(stages.verifiedIr, { kind: 'archive-required', role: 'actual-validation-output' });
+      verifiedIr = add(stages.verifiedIr, { kind: 'archive-required', role: 'actual-validation-output' });
       if (!runtimeIr.bytes.equals(verifiedIr.bytes)) throw new Error('PSC_BUILD_GRAPH_VALIDATION_CHANGED_IR');
       execute('psc-erase-checked-core/1', core, [runtimeIr], implementation, 'psc-core-runtime-refinement/1',
         { observedStages: ['erase'] }, baseDependencies, ['trusted-erasure-implementation']);
       execute('psc-validate-runtime-ir/1', runtimeIr, [verifiedIr], implementation, 'psc-runtime-ir-invariants/1',
         { observedStages: ['validate-ir'], bytesPreserved: true }, baseDependencies, ['trusted-strict-ir-validator']);
+  }
+  if (typeScript !== undefined) {
+    const ts = bytes(typeScript, 'typescript-source', 'psc-typescript-source/es2022', { kind: 'output-file', suffix: '.ts' });
+    if (verifiedIr) {
       execute('psc-verified-ir-to-typescript/1', verifiedIr, [ts], implementation, 'psc-ir-typescript-refinement/1',
         { target: 'typescript', observedStages: ['typescript-emission'],
           unobservedInteriorStages: ['typescript-lower', 'typescript-print'] }, baseDependencies,
@@ -154,9 +159,23 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         toolInputs ? [...baseDependencies, toolInputs.identity] : baseDependencies, ['selected-typescript-package-closure']);
     }
   }
+  if (directJavaScript !== undefined) {
+    if (!verifiedIr || !stages?.specializedIr) throw new Error('PSC_BUILD_GRAPH_JS_STAGES_REQUIRED');
+    const specializedIr = add(stages.specializedIr, { kind: 'archive-required', role: 'actual-specialization-output' });
+    execute('psc-pass-specialize/1', verifiedIr, [specializedIr], implementation, 'psc-specialization-runtime-refinement/1',
+      { observedStages: ['specialize', 'validate-specialized-ir'], postcondition: 'strict-runtime-ir-invariants' },
+      baseDependencies, ['trusted-specialization-implementation', 'trusted-strict-ir-validator']);
+    const js = bytes(directJavaScript, 'javascript-output', 'psc-direct-javascript/es2022', { kind: 'output-file', suffix: '.js' });
+    execute('psc-specialized-ir-to-javascript/1', specializedIr, [js], implementation, 'psc-ir-javascript-refinement/1',
+      { target: 'javascript', wordSize: 64, observedStages: ['javascript-lower-and-stack-safe-print'],
+        unobservedInteriorStages: ['javascript-target-ir'], productionPromotion: false },
+      baseDependencies, ['trusted-javascript-lowering-and-printing']);
+  }
   const graph = { schemaVersion: 1, contract: 'psc-observed-build-graph/1', authority: 'audit-record-only',
-    entries, executions, coverage: irStages ? 'observed-erasure-validation-and-composite-backend-edges' : 'observed-composite-edges',
-    remaining: [irStages ? 'specialization and backend-interior artifacts' : 'per-IR-stage artifacts',
+    entries, executions, coverage: directJavaScript !== undefined ? 'observed-erasure-validation-specialization-and-composite-backend-edges' :
+      irStages ? 'observed-erasure-validation-and-composite-backend-edges' : 'observed-composite-edges',
+    remaining: [directJavaScript !== undefined ? 'backend-interior artifacts and production promotion' :
+      irStages ? 'specialization and backend-interior artifacts' : 'per-IR-stage artifacts',
       'complete toolchain closure', 'independent preservation evidence'] };
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded,

@@ -133,14 +133,20 @@ export function createKernelCheckedSession(
       if (admissionsFrom(compiler, item.prepared) !== item.admissions) {
         throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
       }
-      if (target === 'typescript' && typeof compiler.psCompilerTypeScriptStagesFromPrepared === 'function') {
-        const staged = unwrapCompilerResult(compiler.psCompilerTypeScriptStagesFromPrepared(item.prepared), 'EMIT_STAGES');
+      const stageApi = target === 'typescript' ? 'psCompilerTypeScriptStagesFromPrepared' :
+        target === 'javascript' ? 'psCompilerJavaScriptStagesFromPrepared' : undefined;
+      if (stageApi && stageApi in compiler) {
+        if (typeof compiler[stageApi] !== 'function') throw new Error('PSC2_CHECKED_EMIT_STAGES_API_SHAPE');
+        const staged = unwrapCompilerResult(compiler[stageApi](item.prepared), 'EMIT_STAGES');
         freezeGraph(staged);
-        if (typeof staged?.typeScript !== 'string' || typeof staged.runtimeIr !== 'string' || typeof staged.verifiedIr !== 'string') {
+        const outputKey = target === 'typescript' ? 'typeScript' : 'javaScript';
+        if (typeof staged?.[outputKey] !== 'string' || typeof staged.runtimeIr !== 'string' || typeof staged.verifiedIr !== 'string' ||
+            (target === 'javascript' && typeof staged.specializedIr !== 'string')) {
           throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
         }
-        return Object.freeze({ output: staged.typeScript,
-          stages: Object.freeze({ runtimeIr: staged.runtimeIr, verifiedIr: staged.verifiedIr }) });
+        return Object.freeze({ output: staged[outputKey],
+          stages: Object.freeze({ runtimeIr: staged.runtimeIr, verifiedIr: staged.verifiedIr,
+            ...(target === 'javascript' ? { specializedIr: staged.specializedIr } : {}) }) });
       }
       const names = { typescript: 'psCompilerTypeScriptFromPrepared', javascript: 'psCompilerJavaScriptFromPrepared',
         rust: 'psCompilerRustFromPrepared', wasm: 'psCompilerWasmFromPrepared' };

@@ -60,3 +60,34 @@ test('actual erasure/validation/emission snapshots form separately bound archive
   assert.throws(() => createCheckedBuildGraph({ ...inputs, irStages: { ...staged, verifiedIr: canonicalBytes(changed).toString() } }),
     /VALIDATION_CHANGED_IR/);
 });
+
+test('actual direct JavaScript specialization is revalidated, executed and archived as a separate pass', async () => {
+  const staged = JSON.parse(emitted('--js-stages'));
+  const snapshots = checkedIrStageArtifacts(staged);
+  assert.deepEqual(snapshots.runtimeIr.bytes, snapshots.verifiedIr.bytes);
+  assert.notDeepEqual(snapshots.verifiedIr.bytes, snapshots.specializedIr.bytes);
+  const specialized = decodeIrArtifact(snapshots.specializedIr.bytes);
+  assert.ok(specialized[4].every(declaration => declaration[1].length === 0));
+  const executable = await import('data:text/javascript;base64,' + Buffer.from(staged.javaScript).toString('base64'));
+  assert.equal(executable.answer, 42n);
+  const inputs = { sourceKind: 'lean', sources: ['actual source is in the native fixture; this graph uses synthetic audit metadata'],
+    admissions: '{"admissions":[],"format":"proofscript-checked-admissions","version":2}',
+    directJavaScript: staged.javaScript, irStages: staged,
+    compilerBytes: Buffer.from('actual stage/output bytes with synthetic admission and implementation provenance'),
+    compilerKind: 'fixture', provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' },
+    kernelContract: { id: 'fixture' }, hostSources: [], runtime: { implementation: 'fixture' } };
+  const built = createCheckedBuildGraph(inputs);
+  const definitions = built.graph.entries.filter(entry => entry.identity.contract === 'psc-pass-definition/1').map(entry => entry.canonicalValue);
+  assert.deepEqual(definitions.map(item => item.passId), ['psc-prepare-and-check/1', 'psc-erase-checked-core/1',
+    'psc-validate-runtime-ir/1', 'psc-pass-specialize/1', 'psc-specialized-ir-to-javascript/1']);
+  for (const snapshot of Object.values(snapshots)) assert.deepEqual(built.artifacts.get(artifactKey(snapshot.identity)), snapshot.bytes);
+  const archive = packObservedBuildArchive(built);
+  const replay = await verifyObservedBuildArchive(archive.bytes, { expectedGraphId: built.identity,
+    allowedAssumptions: [...new Set(definitions.flatMap(item => item.assumptionIds))] });
+  assert.equal(replay.kind, 'accepted', replay.reason);
+  assert.equal(replay.preservationVerified, false);
+  assert.equal(replay.semanticClaimsVerified, false);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, irStages: { runtimeIr: staged.runtimeIr, verifiedIr: staged.verifiedIr } }),
+    /JS_STAGES_REQUIRED/);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, typeScript: 'competing backend' }), /MIXED_BACKEND_PATHS/);
+});

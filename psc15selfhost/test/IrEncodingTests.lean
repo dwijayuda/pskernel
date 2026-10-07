@@ -1,4 +1,5 @@
 import Ps.DriverTs.Stages
+import Ps.DriverJs.Stages
 
 def psIrEncodingFixture : PsVerifiedIrModule :=
   PsVerifiedIrModule.mk [] [] [] [
@@ -13,6 +14,21 @@ def main (args : List String) : IO Unit := do
     match psIrEncodeModule psIrEncodingFixture with
     | .error _ => throw (IO.userError "IR_ENCODE_FAILED")
     | .ok encoded => IO.println encoded
+  else if args == ["--js-stages"] then
+    let source := "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := forward Nat 42\n"
+    let .ok prepared := psCompilerPrepareSource .lean source
+      | throw (IO.userError "PREPARE_FAILED")
+    let .ok staged := psCompilerJavaScriptStagesFromPrepared prepared
+      | throw (IO.userError "JS_STAGES_FAILED")
+    let .ok legacy := psCompilerJavaScriptFromPrepared prepared
+      | throw (IO.userError "JS_LEGACY_FAILED")
+    if legacy != staged.javaScript || staged.runtimeIr != staged.verifiedIr then
+      throw (IO.userError "JS_STAGES_CHANGED_OUTPUT")
+    IO.println (psJsonObject [
+      ("runtimeIr", psJsonQuote staged.runtimeIr),
+      ("javaScript", psJsonQuote staged.javaScript),
+      ("verifiedIr", psJsonQuote staged.verifiedIr),
+      ("specializedIr", psJsonQuote staged.specializedIr)])
   else if args == ["--stages"] then
     let .ok prepared := psCompilerPrepareSource .lean "def answer : Nat := 42\n"
       | throw (IO.userError "PREPARE_FAILED")

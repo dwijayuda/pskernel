@@ -8,8 +8,10 @@
     "assumptionKey"
   ],
   "composition": "psc-certified-module-interface/1",
-  "authority": "interface-evidence-only",
-  "currentStatus": "typed-contract-scaffold",
-  "reusePolicy": "behavioral compatibility requires equality of contract and every behavioral key until refinement evidence permits a weaker relation",
-  "implementation": "packages/project/src/Ps/Project/ModuleInterface.lean"
+  "authority": "interface-evidence-only; reuse validation and cache hits cannot mint CheckedCore/CertifiedSource authority",
+  "currentStatus": "implemented-evidence-bound-exact-reuse",
+  "reusePolicy": "QueryGraphV2 emits consumer-selected exact behavioral reuse obligations; host replay verifies structural projection, all four behavioral subjects and configured evidence before evidence-cache validation.",
+  "implementation": "packages/project/src/Ps/Project/ModuleInterface.lean",
+  "hostEvidence": "scripts/module-interface-evidence.mjs",
+  "cacheIntegration": "scripts/semantic-query-cache.mjs"
 }

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { spawnSync } from 'node:child_process';
 import { artifactId, artifactKey, canonicalBytes, canonicalArtifact, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
-import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { verifySpecializationCorrespondence, createSpecializationInstanceMap, verifySpecializationInstanceMap } from './specialization-correspondence.mjs';
 import { packObservedBuildArchive, verifyObservedBuildArchive } from './observed-build-archive.mjs';
 
 const nat = ['primitive', 'nat'], bool = ['primitive', 'bool'], unit = ['primitive', 'unit'], aType = ['typeParameter', 'A'];
@@ -25,7 +25,7 @@ function actual(flag = '--artifacts') {
   return [JSON.parse(stages.verifiedIr), JSON.parse(stages.specializedIr)];
 }
 
-test('actual strictly validated recursive List, Box and function specializations satisfy independent correspondence', () => {
+test('actual strictly validated recursive List, Box and function specializations satisfy independent correspondence', async () => {
   const [source, target] = actual(), checked = check(source, target);
   assert.equal(checked.correspondenceChecked, true);
   assert.equal(checked.observed.instances, 7);
@@ -37,6 +37,24 @@ test('actual strictly validated recursive List, Box and function specializations
   const renamed = JSON.parse(JSON.stringify(target), (_key, value) => typeof value === 'string' ? names.get(value) ?? value : value);
   renamed[4].reverse();
   assert.equal(check(source, renamed).correspondenceChecked, true);
+  const input = artifact(source, 'verified-ir'), output = artifact(renamed, 'specialized-ir');
+  const { map, result } = createSpecializationInstanceMap(input, output);
+  const value = JSON.parse(map.bytes);
+  assert.equal(value.instances.length, result.observed.instances);
+  assert.deepEqual(value.instances.filter(item => item[0] === 'declaration').map(item => item[3]), renamed[4].map(item => item[0]));
+  assert.deepEqual(value.instances.find(item => item[3] === 'different.id'),
+    ['declaration', 'id', [['primitive', 'uint32']], 'different.id']);
+  const artifacts = new Map([input, output].map(item => [artifactKey(item.identity), item.bytes]));
+  const policy = { resolveArtifact: id => artifacts.get(artifactKey(id)), expectedInputId: input.identity, expectedOutputId: output.identity };
+  const replay = await verifySpecializationInstanceMap(map, policy);
+  assert.equal(replay.correspondenceChecked, true);
+  assert.equal(replay.globalPreservationProved, false);
+  const changed = structuredClone(value); changed.instances.find(item => item[3] === 'different.id')[1] = 'wrong-source';
+  await assert.rejects(verifySpecializationInstanceMap(
+    canonicalArtifact(changed, 'specialization-map', 'psc-specialization-instance-map/1'), policy), /WITNESS_CORRESPONDENCE/);
+  await assert.rejects(verifySpecializationInstanceMap(map, { ...policy, expectedOutputId: input.identity }), /WITNESS_SUBJECT/);
+  await assert.rejects(verifySpecializationInstanceMap(map, { ...policy, resourceLimits: { maxWork: 0 } }),
+    error => error.kind === 'resourceExhausted');
 });
 
 test('changed computations, layouts, signatures, missing roots and unjustified instances reject', () => {

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-specialization-instance-map/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "domain": "specialization-map",
+  "producer": "Optional witness capture inside the existing independent bounded specialization correspondence checker; every witness is retained only after the complete relation succeeds.",
+  "entry": [
+    "category: structure|inductive|declaration",
+    "sourceRuntimeName",
+    "groundSourceTypeArguments",
+    "actualSpecializedName"
+  ],
+  "order": "structure-inductive-declaration-then-target-module-order",
+  "subjects": {
+    "input": "verified-ir / psc-runtime-ir-json/1",
+    "output": "specialized-ir / psc-runtime-ir-json/1"
+  },
+  "validation": [
+    "Exhaustive bijective target ownership is checked by psc-specialization-correspondence/1; names are taken from exact compared artifacts, never inferred from mangling.",
+    "Replay re-resolves caller-pinned exact subjects and reruns the relation, then compares the complete canonical map identity.",
+    "Witness bytes, instance count, composed type depth, instance key bytes and relation work remain bounded. The legacy report-only API does not collect witness metadata."
+  ],
+  "consumers": [
+    "checked direct-JS/direct-Wasm service emission",
+    "second typed output of actual specialization pass",
+    "debug ArtifactBundle and graph-driven publication",
+    "observed archive relation replay"
+  ],
+  "compatibility": "Historical one-output specialization passes keep their original records. New passes publish SpecializedIR and its exact map in ordered typed outputs; maps are not trusted as a replacement for relation replay.",
+  "assurance": {
+    "correspondence": "exact-instantiation-with-bijective-instance-names",
+    "requires": [
+      "strict-input-ir-validity",
+      "strict-output-ir-validity",
+      "runtime-instantiation-semantics"
+    ],
+    "invariantValidation": false,
+    "globalPreservationProved": false,
+    "serializedMetadataCreatesAuthority": false
+  },
+  "remaining": [
+    "Compose source declaration origins through exact erasure and specialization identities",
+    "JsIR generated positions and ECMA-426 maps",
+    "Fine-grained expression origins",
+    "Representation-sharing direct-JS generic export policy"
+  ]
+}

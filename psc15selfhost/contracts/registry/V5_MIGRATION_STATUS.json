@@ -1170,7 +1170,7 @@
       "classifications": [
         "origin-source-maps"
       ],
-      "status": "preparation-declaration-and-erasure-inventory-edges-produced-bound-and-replayed-expression-specialization-target-transfer-pending",
+      "status": "preparation-declaration-erasure-and-specialization-maps-implemented-composition-expression-and-target-positions-pending",
       "requirement": "Exact source-to-target origins and per-pass preserve/merge/synthesize/drop reasons; separate non-authoritative metadata."
     },
     {
@@ -1420,6 +1420,13 @@
       "kind": "declaration-correspondence",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-specialization-instance-map/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/SPECIALIZATION_INSTANCE_MAP_V1.json",
       "classification": "origin-source-maps"
     }
   ]

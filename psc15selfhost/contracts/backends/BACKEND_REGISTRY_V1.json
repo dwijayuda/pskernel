@@ -152,6 +152,12 @@
             "domain": "erasure-map",
             "contract": "psc-erasure-declaration-map/1",
             "requiresToolchain": false
+          },
+          {
+            "role": "specialization-instances",
+            "domain": "specialization-map",
+            "contract": "psc-specialization-instance-map/1",
+            "requiresToolchain": false
           }
         ],
         "interfaceArtifacts": [
@@ -231,6 +237,12 @@
             "role": "erasure-map",
             "domain": "erasure-map",
             "contract": "psc-erasure-declaration-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "specialization-instances",
+            "domain": "specialization-map",
+            "contract": "psc-specialization-instance-map/1",
             "requiresToolchain": false
           }
         ],

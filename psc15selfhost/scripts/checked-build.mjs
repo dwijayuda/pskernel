@@ -224,6 +224,7 @@ export async function buildChecked({
     if (evidence.sourceOrigins) receipt.sourceOrigins = evidence.sourceOrigins.identity;
     if (evidence.originGraph) receipt.originGraph = evidence.originGraph.identity;
     if (evidence.erasureMap) receipt.erasureMap = evidence.erasureMap.identity;
+    if (evidence.specializationInstances) receipt.specializationInstances = evidence.specializationInstances.identity;
     if (evidence.jsAbi) {
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
       receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;

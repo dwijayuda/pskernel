@@ -104,6 +104,9 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   assert.equal(replay.targetIrArtifacts.length, 1);
   assert.equal(replay.targetIrArtifacts[0].kind, 'js-ir');
   assert.equal(replay.specializationCorrespondences[0].correspondenceChecked, true);
+  const map = JSON.parse(built.artifacts.get(artifactKey(built.specializationInstances.identity)));
+  assert.ok(map.instances.some(item => item[0] === 'declaration' && item[1] === 'forward'));
+  assert.deepEqual(map.outputId, snapshots.specializedIr.identity);
   const specializationPass = definitions.find(item => item.passId === 'psc-pass-specialize/1');
   assert.equal(specializationPass.validatorId, 'psc-specialization-correspondence/1');
   assert.throws(() => createCheckedBuildGraph({ ...inputs, irStages: { runtimeIr: staged.runtimeIr, verifiedIr: staged.verifiedIr } }),
@@ -131,6 +134,7 @@ test('actual direct Wasm retains specialization snapshots and replays correspond
   const built = createCheckedBuildGraph(inputs), archive = packObservedBuildArchive(built);
   const definitions = built.graph.entries.filter(entry => entry.identity.domain === 'pass-definition').map(entry => entry.canonicalValue);
   assert.equal(definitions.length, 7);
+  assert.equal(built.specializationInstances.identity.contract, 'psc-specialization-instance-map/1');
   assert.deepEqual(definitions.slice(-2).map(item => item.passId), [
     'psc-specialized-ir-to-wasm-ir/1',
     'psc-wasm-ir-to-wasm/1',

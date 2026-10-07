@@ -229,3 +229,25 @@ second frontend. Declaration-level origins must be labeled as such until finer
 expression mappings are emitted. Core and target transformations must explicitly
 record preservation, merging, synthesis or loss; the preparation map alone cannot
 supply generated-code positions.
+
+
+## Observed declaration and instance correspondence
+
+Declaration origins now come from the single actual elaboration fold. Generated
+members share their originating declaration batch span. The shared erasure fold
+records each source declaration's actual runtime name, proof omission, or absence
+of a RuntimeIR declaration. Host maps bind the exact ordered PublicApiIR and
+RuntimeIR inventories; they do not independently prove proof classification,
+type/body erasure or constructor layout correspondence.
+
+Specialization metadata now retains the witnesses established by the existing
+bounded correspondence checker, including source definitions, concrete type
+arguments and actual specialized names. Every target definition must have an
+owner. The metadata uses target module order and is independent of producer name
+mangling. Archive replay reruns the relation against exact subject identities;
+serialized witnesses are never a substitute for that check.
+
+This provides the declaration-level links needed for origin composition and
+public export selection. The next target edge must capture positions in the
+actual writer. Generic public exports still require a deliberate representation
+strategy; the closed specialization contract is unchanged.

@@ -6,7 +6,7 @@ import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { createErasureDeclarationMap } from './erasure-declarations.mjs';
 import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
-import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { createSpecializationInstanceMap } from './specialization-correspondence.mjs';
 import { createCertifiedSourceSession } from './certified-source.mjs';
 
 function byteList(value, limit) {
@@ -101,8 +101,11 @@ export function createCheckedCompilerService({
         throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     }
     if (stages && !stages.runtimeIr.bytes.equals(stages.verifiedIr.bytes)) throw new Error('PSC_CHECKED_VALIDATION_CHANGED_IR');
-    const specialization = stages?.specializedIr ?
-      verifySpecializationCorrespondence(stages.verifiedIr, stages.specializedIr, { maxBytes: maxOutputBytes }) : undefined;
+    const specializationProduct = stages?.specializedIr ?
+      createSpecializationInstanceMap(stages.verifiedIr, stages.specializedIr, { maxBytes: maxOutputBytes }) : undefined;
+    const specialization = specializationProduct?.result;
+    if (productByteLength + (erasureMap?.bytes.byteLength ?? 0) + (specializationProduct?.map.bytes.byteLength ?? 0) > maxOutputBytes)
+      throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
       artifact: Object.freeze({ algorithm: 'sha256', domain: 'target-bytes', schemaVersion: 1,
@@ -110,7 +113,8 @@ export function createCheckedCompilerService({
       checkedCore: capability,
       pscvCert: certificate.identity,
       certifiedSource,
-      ...(specialization ? { specializationCorrespondence: specialization } : {}),
+      ...(specialization ? { specializationCorrespondence: specialization,
+        specializationInstances: specializationProduct.map.identity } : {}),
       ...(emission.stages ? { stages: emission.stages,
         stageArtifacts: Object.freeze(Object.fromEntries(
           [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {})]

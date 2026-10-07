@@ -6,7 +6,7 @@ import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs
 import { verifyErasureDeclarationMap } from './erasure-declarations.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
-import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { verifySpecializationCorrespondence, verifySpecializationInstanceMap } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
 import { verifyWasmCanonicalProjection, verifyWasmCanonicalBinary } from './wasm-canonical-artifact.mjs';
 import { replayClosedIrArtifact, replayIrLinkArtifact } from './ir-invariant-replay.mjs';
@@ -226,11 +226,18 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
           { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) }, { maxBytes: bound.maxArtifactBytes }));
       }
       if (definition.passId === 'psc-pass-specialize/1') {
-        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+        if (execution.inputs.length !== 1 || ![1, 2].includes(execution.outputs.length) ||
             definition.semanticRelationId !== 'psc-specialization-runtime-refinement/1') fail('SPECIALIZATION_SUBJECT');
-        specializationCorrespondences.push(verifySpecializationCorrespondence(
-          { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) },
-          { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) }, { maxBytes: bound.maxArtifactBytes }));
+        const input = { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) };
+        const output = { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) };
+        // Old archives retain their original one-output pass. New maps are
+        // replayed through the same relation check, never trusted as evidence.
+        specializationCorrespondences.push(execution.outputs.length === 1
+          ? verifySpecializationCorrespondence(input, output, { maxBytes: bound.maxArtifactBytes })
+          : await verifySpecializationInstanceMap(
+              { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
+              { resolveArtifact, expectedInputId: input.identity, expectedOutputId: output.identity,
+                resourceLimits: { maxBytes: bound.maxArtifactBytes } }));
       }
       if (definition.passId === 'psc-specialized-ir-to-js-ir/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||

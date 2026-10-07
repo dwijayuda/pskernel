@@ -1,4 +1,5 @@
-import { verifyArtifact, artifactKey } from './artifact-evidence.mjs';
+import { verifyArtifact, artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
+import { decodeComparatorJson } from './comparator-export.mjs';
 import { decodeIrArtifact, irEncodingContract } from './ir-artifact.mjs';
 
 export const specializationCorrespondenceContract = 'psc-specialization-correspondence/1';
@@ -8,6 +9,14 @@ function fail(code, kind = 'rejectedInvalid') {
   const error = new Error('PSC_SPECIALIZATION_' + code); error.kind = kind; throw error;
 }
 
+function specializationLimits(resourceLimits) {
+  if (Object.keys(resourceLimits).some(key => !Object.hasOwn(defaults, key))) fail('LIMIT_POLICY');
+  const bound = { ...defaults, ...resourceLimits };
+  if (Object.values(bound).some(value => !Number.isSafeInteger(value) || value < 0)) fail('LIMIT_POLICY');
+  if (bound.maxTypeDepth > 512) fail('LIMIT_POLICY');
+  return bound;
+}
+
 /** Relational checker, independent of the Lean producer and its name mangling.
  * Each target definition must have exactly one source/ground-argument witness.
  * Expression syntax is preserved except generic calls and layout references;
@@ -15,11 +24,8 @@ function fail(code, kind = 'rejectedInvalid') {
  * This is conditional on strict input/output IR validity. It neither establishes
  * those invariants nor proves the relation sound for the runtime semantics.
  */
-export function verifySpecializationCorrespondence(input, output, resourceLimits = {}) {
-  if (Object.keys(resourceLimits).some(key => !Object.hasOwn(defaults, key))) fail('LIMIT_POLICY');
-  const bound = { ...defaults, ...resourceLimits };
-  if (Object.values(bound).some(value => !Number.isSafeInteger(value) || value < 0)) fail('LIMIT_POLICY');
-  if (bound.maxTypeDepth > 512) fail('LIMIT_POLICY');
+function inspectSpecializationCorrespondence(input, output, resourceLimits, observeInstances) {
+  const bound = specializationLimits(resourceLimits);
   const decode = (item, domain) => {
     if (!(item?.bytes instanceof Uint8Array) || item.bytes.byteLength > bound.maxBytes)
       fail('BYTES_EXHAUSTED', 'resourceExhausted');
@@ -51,6 +57,8 @@ export function verifySpecializationCorrespondence(input, output, resourceLimits
     for (const name of table[0].keys()) if (table[1].has(name)) fail('AMBIGUOUS_TYPE');
   for (const table of proposed) for (const item of table.values()) if (item[1].length) fail('TARGET_GENERIC');
   const pending = [], instances = new Map(), owners = new Map();
+  const witnesses = observeInstances ? new Map() : undefined;
+  let witnessBytes = 0;
   const schedule = task => { tick(); pending.push(task); };
   function scope(parent, names) {
     tick(names.length); return { parent, names: new Set(names) };
@@ -87,6 +95,12 @@ export function verifySpecializationCorrespondence(input, output, resourceLimits
     if (owners.has(owner)) fail('INSTANCE_COLLISION');
     if (instances.size >= bound.maxInstances) fail('INSTANCES_EXHAUSTED', 'resourceExhausted');
     instances.set(key, targetName); owners.set(owner, key);
+    if (witnesses) {
+      const witness = [['structure', 'inductive', 'declaration'][kind], name, arguments_, targetName];
+      witnessBytes += Buffer.byteLength(JSON.stringify(witness)) + 1;
+      if (witnessBytes > bound.maxBytes) fail('WITNESS_BYTES_EXHAUSTED', 'resourceExhausted');
+      witnesses.set(owner, witness);
+    }
     schedule({ kind: 'definition', category: kind, a: definition, b: result,
       env: new Map(definition[1].map((binder, index) => [binder, arguments_[index]])) });
   }
@@ -209,10 +223,61 @@ export function verifySpecializationCorrespondence(input, output, resourceLimits
   }
   for (let kind = 0; kind < 3; kind++)
     for (const name of proposed[kind].keys()) if (!owners.has(JSON.stringify([kind, name]))) fail('UNJUSTIFIED_TARGET');
-  return Object.freeze({ contract: specializationCorrespondenceContract,
+  const result = Object.freeze({ contract: specializationCorrespondenceContract,
     inputId: input.identity, outputId: output.identity, inputKey: artifactKey(input.identity), outputKey: artifactKey(output.identity),
     relation: 'exact-instantiation-with-bijective-instance-names', correspondenceChecked: true,
     resourcePolicy: bound, observed: { work, instances: instances.size },
     requires: ['strict-input-ir-validity', 'strict-output-ir-validity', 'runtime-instantiation-semantics'],
     invariantValidation: false, globalPreservationProved: false, kernelAuthority: false, releaseAccepted: false });
+  // Stable target-module order, independently of discovery/worklist order.
+  const entries = witnesses ? proposed.flatMap((table, kind) =>
+    [...table.keys()].map(name => witnesses.get(JSON.stringify([kind, name])))) : undefined;
+  return { result, entries, bound };
+}
+
+export function verifySpecializationCorrespondence(input, output, resourceLimits = {}) {
+  return inspectSpecializationCorrespondence(input, output, resourceLimits, false).result;
+}
+
+export const specializationInstanceMapContract = 'psc-specialization-instance-map/1';
+
+/** Retain witnesses already established by this same bounded relation check.
+ * No name-mangling heuristic, producer-supplied witness, or unchecked serialized
+ * report can stand in for the relation check.
+ */
+export function createSpecializationInstanceMap(input, output, resourceLimits = {}) {
+  const { result, entries, bound } = inspectSpecializationCorrespondence(input, output, resourceLimits, true);
+  const map = canonicalArtifact({ schemaVersion: 1, contract: specializationInstanceMapContract,
+    inputId: input.identity, outputId: output.identity, instances: entries,
+    order: 'structure-inductive-declaration-then-target-module-order',
+    correspondenceContract: specializationCorrespondenceContract,
+    invariantValidation: false, globalPreservationProved: false, authority: 'debug-metadata-only'
+  }, 'specialization-map', specializationInstanceMapContract);
+  if (map.bytes.byteLength > bound.maxBytes) fail('WITNESS_BYTES_EXHAUSTED', 'resourceExhausted');
+  return { result, map };
+}
+
+export async function verifySpecializationInstanceMap(record, {
+  resolveArtifact, expectedInputId, expectedOutputId, resourceLimits = {},
+} = {}) {
+  verifyArtifact(record.bytes, record.identity);
+  if (record.identity.domain !== 'specialization-map' || record.identity.contract !== specializationInstanceMapContract)
+    fail('WITNESS_IDENTITY');
+  const { maxBytes } = specializationLimits(resourceLimits);
+  const value = decodeComparatorJson(record.bytes, { maxBytes, maxDepth: 512, maxNodes: 2000000 });
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      Object.keys(value).sort().join(',') !==
+        'authority,contract,correspondenceContract,globalPreservationProved,inputId,instances,invariantValidation,order,outputId,schemaVersion' ||
+      value.contract !== specializationInstanceMapContract || value.schemaVersion !== 1 ||
+      artifactKey(value.inputId) !== artifactKey(expectedInputId) || artifactKey(value.outputId) !== artifactKey(expectedOutputId))
+    fail('WITNESS_SUBJECT');
+  async function resolve(identity) {
+    if (!Number.isSafeInteger(identity?.byteLength) || identity.byteLength < 0 || identity.byteLength > maxBytes)
+      fail('BYTES_EXHAUSTED', 'resourceExhausted');
+    const bytes = await resolveArtifact(identity); verifyArtifact(bytes, identity); return { bytes, identity };
+  }
+  const input = await resolve(value.inputId), output = await resolve(value.outputId);
+  const rebuilt = createSpecializationInstanceMap(input, output, resourceLimits);
+  if (artifactKey(rebuilt.map.identity) !== artifactKey(record.identity)) fail('WITNESS_CORRESPONDENCE');
+  return rebuilt.result;
 }

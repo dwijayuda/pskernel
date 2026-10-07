@@ -10,7 +10,7 @@ import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { createSourcePreparationArtifacts } from './source-preparation-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
-import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { createSpecializationInstanceMap } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
 import { verifyWasmCanonicalProjection, verifyWasmCanonicalBinary } from './wasm-canonical-artifact.mjs';
 
@@ -54,6 +54,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   let toolInputs;
   let runtimeInterface;
   let executableArtifact;
+  let specializationInstances;
   let jsAbiPlan;
   let jsAbiPolicyArtifact;
   function add(item, source, inline = false) {
@@ -291,8 +292,10 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     if (!verifiedIr || !stages?.specializedIr)
       throw new Error(directBackend === 'javascript' ? 'PSC_BUILD_GRAPH_JS_STAGES_REQUIRED' : 'PSC_BUILD_GRAPH_WASM_STAGES_REQUIRED');
     const specializedIr = add(stages.specializedIr, { kind: 'archive-required', role: 'actual-specialization-output' });
-    const correspondence = verifySpecializationCorrespondence(verifiedIr, specializedIr);
-    execute('psc-pass-specialize/1', verifiedIr, [specializedIr], implementation, 'psc-specialization-runtime-refinement/1',
+    const projection = createSpecializationInstanceMap(verifiedIr, specializedIr);
+    const correspondence = projection.result;
+    specializationInstances = add(projection.map, { kind: 'output-file', suffix: '.specialization-instances.json' });
+    execute('psc-pass-specialize/1', verifiedIr, [specializedIr, specializationInstances], implementation, 'psc-specialization-runtime-refinement/1',
       { observedStages: ['specialize', 'validate-specialized-ir', 'check-specialization-correspondence'],
         postcondition: 'strict-runtime-ir-invariants', correspondenceRelation: correspondence.relation,
         globalPreservationProved: false },
@@ -368,6 +371,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...(preparationOrigins ? { sourceOrigins: preparationOrigins } : {}),
     ...(declarationOriginGraph ? { originGraph: declarationOriginGraph } : {}),
     ...(erasureMap ? { erasureMap } : {}),
+    ...(specializationInstances ? { specializationInstances } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

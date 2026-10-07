@@ -134,6 +134,7 @@ test('staged JavaScript output binds actual stage domains and rejects missing, c
   assert.equal(output.stageArtifacts.specializedIr.domain, 'specialized-ir');
   assert.equal(output.stageArtifacts.jsIr.domain, 'js-ir');
   assert.equal(output.specializationCorrespondence.correspondenceChecked, true);
+  assert.equal(output.specializationInstances.contract, 'psc-specialization-instance-map/1');
   assert.equal(emitted.length, 0);
   compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, specializedIr: undefined });
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /STAGES_SHAPE/);
@@ -168,6 +169,7 @@ test('staged Wasm uses the pinned target and exact checked object, with bounded 
   const output = service.emitArtifact(handle, 'wasm');
   assert.deepEqual(output.payload, Uint8Array.from(wasm));
   assert.equal(output.specializationCorrespondence.correspondenceChecked, true);
+  assert.equal(output.specializationInstances.contract, 'psc-specialization-instance-map/1');
   assert.equal(output.stageArtifacts.specializedIr.domain, 'specialized-ir');
   assert.equal(output.stageArtifacts.wasmIr.domain, 'wasm-ir');
   good.wasm.$ps$fields.head = 255;

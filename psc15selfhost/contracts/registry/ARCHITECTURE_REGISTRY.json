@@ -405,6 +405,12 @@
       "kind": "declaration-correspondence",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-specialization-instance-map/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/SPECIALIZATION_INSTANCE_MAP_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

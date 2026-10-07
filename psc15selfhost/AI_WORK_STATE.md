@@ -519,3 +519,12 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - This compiler branch consumes only the frozen KernelContract/provider interfaces, provider/security identities and imported kernel evidence identities. Comparator calls through provider interfaces remain in scope; changing provider internals does not.
 - THE_PSCV_COMPILER_REFERENCE_VERSION_3.md section 49/50, V3_IMPLEMENTATION_STATUS and V3_ASSURANCE_HANDOFF now encode this ownership boundary. Final V3 acceptance may depend on imported kernel evidence, but producing it is not part of this branch's plan.
 - Current compiler-only priority remains: restore the JsIR integration gates, retain exact WasmIR, finish target-adapter/semantic-reuse/SAVEF/DDC connections, then solve direct-Wasm generation-2 performance without weakening exact fixed-point equality.
+
+
+## 2026-10-07 exact target IR pipeline checkpoint
+
+- Direct JavaScript and direct Wasm now both retain the exact target IR value consumed by final emission. JavaScript lowers once -> validates JsIR -> canonical psc-js-ir-json/1 snapshot -> prints the same JsIR. Wasm lowers once -> applies self-host ABI -> validates that exact WasmIR -> canonical psc-wasm-ir-json/1 snapshot -> binary-encodes the same WasmIR.
+- The checked host service independently decodes target snapshots into distinct js-ir/wasm-ir ArtifactIds. Observed build graphs now split SpecializedIR -> target IR and target IR -> executable edges instead of composite backend edges; offline archive replay validates the target artifact schema.
+- The direct-Wasm progress/diagnostic path now uses the same ABI-completed validated target module as production before encoding, so performance telemetry measures the intended pipeline.
+- Added portable target-IR source/corpus gates. These are implementation boundaries only: SpecializedIR->target semantics, target-validator soundness and printer/encoder preservation remain assurance obligations.
+- Kernel implementation/proof work remains external and untouched by this branch.

@@ -9,6 +9,418 @@ threads checker state through recursive calls. The public distinction between
 is cached separately.
 -/
 
+def psKernelInferenceFoldIMax
+    (levels : List PsKernelLevel)
+    (result : PsKernelLevel) : PsKernelLevel :=
+  match levels with
+  | List.nil => result
+  | List.cons level rest =>
+      psKernelLevelMkIMax
+        level
+        (psKernelInferenceFoldIMax rest result)
+
+def psKernelInferLambdaSpineWithFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) ->
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    PsKernelExpr ->
+    Bool ->
+    List PsKernelExpr ->
+    List PsKernelCheckerCloseBinder ->
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  match fuel with
+  | Nat.zero =>
+      fun _ _ _ _ _ _ _ =>
+        Except.error "kernel inference lambda-spine budget exhausted"
+  | Nat.succ remaining =>
+      let smaller := psKernelInferLambdaSpineWithFuel remaining
+      fun inferCore whnf context state current inferOnly fvars binders =>
+        match current with
+        | PsKernelExpr.lam name domain body binderInfo =>
+            let openedDomain :=
+              psKernelExprInstantiateRev domain fvars
+            let checkedState :
+                Except String PsKernelCheckerState :=
+              if inferOnly then
+                Except.ok state
+              else
+                match
+                    inferCore
+                      context
+                      state
+                      openedDomain
+                      false with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok domainResult =>
+                    match
+                        psKernelEnsureSortWith
+                          whnf
+                          context
+                          (Prod.snd domainResult)
+                          (Prod.fst domainResult) with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok sortResult =>
+                        Except.ok (Prod.snd sortResult)
+            match checkedState with
+            | Except.error error =>
+                Except.error error
+            | Except.ok state1 =>
+                let freshResult :=
+                  psKernelCheckerStateFreshName state1 name
+                let fresh := Prod.fst freshResult
+                let state2 := Prod.snd freshResult
+                let childLocal :=
+                  psKernelLocalContextAddLocal
+                    context.localContext
+                    fresh
+                    name
+                    openedDomain
+                    binderInfo
+                let child :=
+                  psKernelCheckerContextWithLocalContext
+                    context
+                    childLocal
+                let binder : PsKernelCheckerCloseBinder := {
+                  internalName := fresh
+                  userName := name
+                  type := openedDomain
+                  binderInfo := binderInfo
+                  value := Option.none
+                  nondep := false
+                }
+                match
+                    smaller
+                      inferCore
+                      whnf
+                      child
+                      state2
+                      body
+                      inferOnly
+                      (List.append
+                        fvars
+                        (List.cons
+                          (PsKernelExpr.fvar fresh)
+                          List.nil))
+                      (List.append
+                        binders
+                        (List.cons binder List.nil)) with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok result =>
+                    Except.ok
+                      (Prod.mk
+                        (Prod.fst result)
+                        (psKernelCheckerStateExitLocalScope
+                          state2
+                          (Prod.snd result)))
+        | tail =>
+            let openedTail :=
+              psKernelExprInstantiateRev tail fvars
+            match
+                inferCore
+                  context
+                  state
+                  openedTail
+                  inferOnly with
+            | Except.error error =>
+                Except.error error
+            | Except.ok tailResult =>
+                let result :=
+                  psKernelCloseCheckerBinders
+                    binders
+                    (psKernelExprCheapBetaReduce
+                      (Prod.fst tailResult))
+                    false
+                Except.ok
+                  (Prod.mk result (Prod.snd tailResult))
+
+def psKernelInferForallSpineWithFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) ->
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    PsKernelExpr ->
+    Bool ->
+    List PsKernelExpr ->
+    List PsKernelLevel ->
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  match fuel with
+  | Nat.zero =>
+      fun _ _ _ _ _ _ _ =>
+        Except.error "kernel inference forall-spine budget exhausted"
+  | Nat.succ remaining =>
+      let smaller := psKernelInferForallSpineWithFuel remaining
+      fun inferCore whnf context state current inferOnly fvars levels =>
+        match current with
+        | PsKernelExpr.forallE name domain body binderInfo =>
+            let openedDomain :=
+              psKernelExprInstantiateRev domain fvars
+            match
+                inferCore
+                  context
+                  state
+                  openedDomain
+                  inferOnly with
+            | Except.error error =>
+                Except.error error
+            | Except.ok domainResult =>
+                match
+                    psKernelEnsureSortWith
+                      whnf
+                      context
+                      (Prod.snd domainResult)
+                      (Prod.fst domainResult) with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok domainSort =>
+                    let freshResult :=
+                      psKernelCheckerStateFreshName
+                        (Prod.snd domainSort)
+                        name
+                    let fresh := Prod.fst freshResult
+                    let state1 := Prod.snd freshResult
+                    let childLocal :=
+                      psKernelLocalContextAddLocal
+                        context.localContext
+                        fresh
+                        name
+                        openedDomain
+                        binderInfo
+                    let child :=
+                      psKernelCheckerContextWithLocalContext
+                        context
+                        childLocal
+                    match
+                        smaller
+                          inferCore
+                          whnf
+                          child
+                          state1
+                          body
+                          inferOnly
+                          (List.append
+                            fvars
+                            (List.cons
+                              (PsKernelExpr.fvar fresh)
+                              List.nil))
+                          (List.append
+                            levels
+                            (List.cons
+                              (Prod.fst domainSort)
+                              List.nil)) with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok result =>
+                        Except.ok
+                          (Prod.mk
+                            (Prod.fst result)
+                            (psKernelCheckerStateExitLocalScope
+                              state1
+                              (Prod.snd result)))
+        | tail =>
+            let openedTail :=
+              psKernelExprInstantiateRev tail fvars
+            match
+                inferCore
+                  context
+                  state
+                  openedTail
+                  inferOnly with
+            | Except.error error =>
+                Except.error error
+            | Except.ok tailResult =>
+                match
+                    psKernelEnsureSortWith
+                      whnf
+                      context
+                      (Prod.snd tailResult)
+                      (Prod.fst tailResult) with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok resultSort =>
+                    Except.ok
+                      (Prod.mk
+                        (PsKernelExpr.sort
+                          (psKernelInferenceFoldIMax
+                            levels
+                            (Prod.fst resultSort)))
+                        (Prod.snd resultSort))
+
+def psKernelInferLetSpineWithFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) ->
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) ->
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    PsKernelExpr ->
+    Bool ->
+    List PsKernelExpr ->
+    List PsKernelCheckerCloseBinder ->
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  match fuel with
+  | Nat.zero =>
+      fun _ _ _ _ _ _ _ _ =>
+        Except.error "kernel inference let-spine budget exhausted"
+  | Nat.succ remaining =>
+      let smaller := psKernelInferLetSpineWithFuel remaining
+      fun inferCore whnf defeq context state current inferOnly fvars binders =>
+        match current with
+        | PsKernelExpr.letE name type value body nondep =>
+            let openedType :=
+              psKernelExprInstantiateRev type fvars
+            let openedValue :=
+              psKernelExprInstantiateRev value fvars
+            let checkedState :
+                Except String PsKernelCheckerState :=
+              if inferOnly then
+                Except.ok state
+              else
+                match
+                    inferCore
+                      context
+                      state
+                      openedType
+                      false with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok typeResult =>
+                    match
+                        psKernelEnsureSortWith
+                          whnf
+                          context
+                          (Prod.snd typeResult)
+                          (Prod.fst typeResult) with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok typeSort =>
+                        match
+                            inferCore
+                              context
+                              (Prod.snd typeSort)
+                              openedValue
+                              false with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok valueResult =>
+                            match
+                                defeq
+                                  context
+                                  (Prod.snd valueResult)
+                                  (Prod.fst valueResult)
+                                  openedType with
+                            | Except.error error =>
+                                Except.error error
+                            | Except.ok equal =>
+                                if Prod.fst equal then
+                                  Except.ok (Prod.snd equal)
+                                else
+                                  Except.error
+                                    "let value type mismatch"
+            match checkedState with
+            | Except.error error =>
+                Except.error error
+            | Except.ok state1 =>
+                let freshResult :=
+                  psKernelCheckerStateFreshName state1 name
+                let fresh := Prod.fst freshResult
+                let state2 := Prod.snd freshResult
+                let childLocal :=
+                  psKernelLocalContextAddLet
+                    context.localContext
+                    fresh
+                    name
+                    openedType
+                    openedValue
+                let child :=
+                  psKernelCheckerContextWithLocalContext
+                    context
+                    childLocal
+                let binder : PsKernelCheckerCloseBinder := {
+                  internalName := fresh
+                  userName := name
+                  type := openedType
+                  binderInfo := PsKernelBinderInfo.default
+                  value := Option.some openedValue
+                  nondep := nondep
+                }
+                match
+                    smaller
+                      inferCore
+                      whnf
+                      defeq
+                      child
+                      state2
+                      body
+                      inferOnly
+                      (List.append
+                        fvars
+                        (List.cons
+                          (PsKernelExpr.fvar fresh)
+                          List.nil))
+                      (List.append
+                        binders
+                        (List.cons binder List.nil)) with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok result =>
+                    Except.ok
+                      (Prod.mk
+                        (Prod.fst result)
+                        (psKernelCheckerStateExitLocalScope
+                          state2
+                          (Prod.snd result)))
+        | tail =>
+            let openedTail :=
+              psKernelExprInstantiateRev tail fvars
+            match
+                inferCore
+                  context
+                  state
+                  openedTail
+                  inferOnly with
+            | Except.error error =>
+                Except.error error
+            | Except.ok tailResult =>
+                let result :=
+                  psKernelCloseCheckerBinders
+                    binders
+                    (psKernelExprCheapBetaReduce
+                      (Prod.fst tailResult))
+                    true
+                Except.ok
+                  (Prod.mk result (Prod.snd tailResult))
+
 def psKernelInferCoreWithFuel
     (fuel : Nat) :
     (PsKernelCheckerContext ->

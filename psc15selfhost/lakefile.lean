@@ -315,6 +315,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.PrimitiveNatReduction,
     `Ps.KernelCore.Metatheory.QuotReduction,
     `Ps.KernelCore.Metatheory.RecursorReduction,
+    `Ps.KernelCore.Metatheory.RecursorBoundedConfiguration,
     `Ps.KernelCore.Metatheory.Substitution,
     `Ps.KernelCore.Metatheory.SubstitutionRefinement,
     `Ps.KernelCore.Metatheory.Admission,

@@ -62,7 +62,9 @@ test('standalone direct maps retain executable bytes and leave prefix, helper li
   assert.equal(consumer.findEntry(0, 0).originalSource, undefined);
   assert.equal(consumer.findEntry(1, 0).originalLine, 0);
   assert.equal(consumer.findEntry(1, 20).originalLine, 0);
-  assert.equal(consumer.findEntry(1, 26).originalSource, undefined); // first generated newline
+  const firstLineEnd = f.javaScript.split('\n')[1].length;
+  assert.equal(consumer.findEntry(1, firstLineEnd - 1).originalLine, 0);
+  assert.equal(consumer.findEntry(1, firstLineEnd).originalSource, undefined);
   assert.equal(consumer.findEntry(2, 2).originalSource, undefined);
   assert.equal(consumer.findEntry(3, 0).originalSource, undefined);
   assert.equal(consumer.findEntry(4, 0).originalLine, 1);

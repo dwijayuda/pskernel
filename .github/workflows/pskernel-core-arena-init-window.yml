@@ -6,6 +6,9 @@ on:
       - pscv/pskernel-core-arena-v1
     paths:
       - ".github/workflows/pskernel-core-arena-init-window.yml"
+      - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
+      - "psc15selfhost/packages/pskernel-core/**"
+      - "psc15selfhost/lakefile.lean"
   workflow_dispatch:
 
 permissions:

@@ -113,12 +113,15 @@ def psJsIrEncodeLiteral
         "string"
         [psJsIrEncodeText value]
   | PsJsIrLiteral.bool value =>
-      psJsIrEncodeNode
-        "bool"
-        [
-          Except.ok
-            (if value then "true" else "false")
-        ]
+      match value with
+      | true =>
+          psJsIrEncodeNode
+            "bool"
+            [Except.ok "true"]
+      | false =>
+          psJsIrEncodeNode
+            "bool"
+            [Except.ok "false"]
   | PsJsIrLiteral.unit =>
       psJsIrEncodeNode
         "unit"

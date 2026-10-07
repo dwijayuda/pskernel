@@ -170,6 +170,6 @@ def psKernelCheckerStateExitLocalScope
     whnfCore := parent.whnfCore
     whnf := parent.whnf
     unfold := parent.unfold
-    success := parent.success
+    success := child.success
     failure := parent.failure
   }

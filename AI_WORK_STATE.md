@@ -4,9 +4,10 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `ac24a67aa175421976bd6b337f9963c82a83e725`
-- Last green package proof checkpoint: `dc6ab92367b6b2aaabddad6b76a54f83020647dd` (run #396).
-- Current beta-spine proof HEAD: `ac24a67a...`; run #420 is green and validates the registered substitution/lowering algebra required by `PsKernelBetaSpineSoundLaw`.
+- Current proof implementation HEAD reconciled in this state: `bb125e10b7fefb8b7151f1fadf4d2a9ed8a7c35c`
+- Last green package proof checkpoint: `bb125e10b7fefb8b7151f1fadf4d2a9ed8a7c35c` (run #438).
+- Run #420 is green for the registered beta substitution/lowering algebra.
+- Run #438 is green for the complete `PsKernelBetaSpineSoundLaw`: the optimized multi-lambda `InstantiateRev` path refines ordinary beta-reduction closure and is no longer an unresolved WHNF assumption.
 - Run #381 is green: the registered `WhnfCoreConfiguration.lean` fuel induction and its public `false/false` specialization compile on the full package proof gate.
 - Run #396 is green: complete primitive-Nat refinement, `psKernelReduceNatWith` optional-reduction soundness, post-core native/Nat/delta/cache composition, and `psKernelWhnfWithFuel_configuration_sound_contract` all compile as registered metatheory.
 - Run #328 validated the eager-reduce context transport fix.
@@ -77,7 +78,7 @@ The audit is conservative relative to newer cross-module checker-contract/contex
 - WHNF core is now split into independent Assurance Plane modules for application and projection refinement instead of one monolithic proof.
 - `WhnfCoreConfiguration.lean` is registered as a metatheory root and owns the composed fuel induction. It exposes the `false/false` core specialization consumed by public WHNF.
 - `PrimitiveNatReduction.lean` now proves the full Nat primitive table, Nat constructor/literal normalization, `psKernelReduceNatWith` state preservation, semantic success refinement, and the optional-reduction configuration contract.
-- `WhnfConfiguration.lean` is registered and green. It proves post-core composition and the full public WHNF fuel theorem under explicit recursor, beta-spine, and native-reduction contracts. Native reduction remains an intentional TCB law; recursor and beta-spine remain proof obligations.
+- `WhnfConfiguration.lean` is registered and green. It proves post-core composition and the full public WHNF fuel theorem under explicit recursor, beta-spine, and native-reduction contracts. Native reduction remains an intentional TCB law; beta-spine is now discharged by the green run #438 theorem, leaving concrete recursor soundness as the remaining WHNF knot dependency.
 - The semantic audit remains conservatively A=44/B=9/C=19/D=7 until a criteria-based refresh after concrete checker closure.
 
 ## Current blocker
@@ -85,11 +86,10 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- discharge `PsKernelBetaSpineSoundLaw` as a real proof obligation (not a TCB assumption); the current work is isolating substitution/capture-cancellation algebra in `Metatheory/BetaSpine.lean`;
-- run #397 proved the initial reference substitution algebra base; runs #398-#419 progressively closed structural substitution, singleton lookup, capture-cancellation, and lift-lowering obligations without finding a production semantic defect; run #420 is green for the complete current beta algebra root;
-- next: define/prove a fuel-free lambda-count reference semantics, prove the production count worker refines it under sufficient fuel, and compose the final multi-beta reduction closure;
-- once beta-spine is green, instantiate the green public-WHNF theorem in the concrete mutually recursive checker knot;
-- prove `PsKernelRecursorReductionConfigurationSound` for the bounded concrete recursor together with concrete DefEq/inference dependencies by a shared fuel/configuration argument;
+- beta-spine is closed: run #438 validates `PsKernelBetaSpineSoundLaw` as a real proof obligation, not a TCB assumption;
+- model quotient and ordinary inductive recursor computation in the independent reduction relation and prove `psKernelReduceRecursorWith` configuration/refinement from component contracts;
+- prove `PsKernelRecursorReductionConfigurationSound` for `psKernelReduceRecursorBoundedWithFuel` together with the concrete smaller-fuel WHNF/inference/DefEq dependencies;
+- instantiate the green public-WHNF theorem in the concrete mutually recursive checker knot using the proved beta law and recursor theorem;
 - then close concrete DefEq stateful soundness and compose public checked/infer-only/WHNF/DefEq contracts through `Checker/Knot`.
 
 Architectural blockers still remaining:
@@ -101,8 +101,8 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Prove `PsKernelBetaSpineSoundLaw` from substitution/list/reduction metatheory.
-2. Build the shared fuel/configuration theorem for the concrete recursor/WHNF/inference/DefEq knot, reusing the now-green public WHNF theorem rather than reproving WHNF branches.
+1. Add independent quotient/iota recursor reduction judgments and prove `psKernelReduceRecursorWith` configuration/refinement composition.
+2. Build the shared fuel/configuration theorem for the concrete bounded recursor/WHNF/inference/DefEq knot, reusing the green public WHNF theorem and proved beta-spine law rather than reproving WHNF branches.
 3. Close remaining concrete DefEq configuration/stateful soundness obligations, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
 4. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
 5. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.

@@ -24,6 +24,7 @@ export function createSavefRetrievalSession({
       typeof resolveArtifact !== 'function') fail('CONFIGURATION');
   let closed = false;
   const handles = new Map();
+  const uses = new Map();
   function open() { if (closed) fail('CLOSED'); }
   return Object.freeze({
     async retrieve(query = {}) {
@@ -70,11 +71,30 @@ export function createSavefRetrievalSession({
       const result = await reuseSession.apply(selected.handle, { operationId, task, input });
       open();
       if (!handles.has(token)) fail('REVOKED');
+      const useToken = randomUUID();
+      uses.set(useToken, result.execution);
       return Object.freeze({
-        ...result,
+        useToken,
+        record: result.record,
+        output: result.output,
         knowledgeObjectId: copy(selected.objectId),
         authority: 'observed-validated-knowledge-operation',
       });
+    },
+    async accept({ task, output, useTokens = [], counterfactualArm, costObservation }) {
+      open();
+      if (!Array.isArray(useTokens) || new Set(useTokens).size !== useTokens.length) fail('USE_TOKENS');
+      const executions = useTokens.map(token => {
+        const execution = uses.get(token);
+        if (!execution) fail('USE_TOKEN');
+        return execution;
+      });
+      const result = await reuseSession.accept({
+        task, output, uses: executions, counterfactualArm, costObservation,
+      });
+      open();
+      if (result?.kind === 'accepted') for (const token of useTokens) uses.delete(token);
+      return result;
     },
     revoke(token) {
       open();
@@ -87,6 +107,7 @@ export function createSavefRetrievalSession({
     close() {
       if (!closed) {
         handles.clear();
+        uses.clear();
         reuseSession.close();
         closed = true;
       }

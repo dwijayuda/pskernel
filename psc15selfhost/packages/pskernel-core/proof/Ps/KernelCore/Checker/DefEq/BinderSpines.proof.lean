@@ -1,6 +1,513 @@
 import Ps.KernelCore.Checker.DefEq.BinderSpines
 import Ps.KernelCore.Metatheory.ContextState
 import Ps.KernelCore.Metatheory.CacheSemantic
+import Ps.KernelCore.Metatheory.CheckerContracts
+
+theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq :
+      PsKernelDefEqConfigurationSound defeq)
+    (hString : PsKernelStringEqSoundLaw)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (subst : List PsKernelExpr)
+    (value : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqLambdaSpineWithFuel
+          fuel defeq context state left right subst =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState := by
+  induction fuel generalizing
+      context state nextState left right subst value with
+  | zero =>
+      simp [psKernelDefEqLambdaSpineWithFuel] at hSuccess
+  | succ remaining ih =>
+      cases left <;> try
+        exact
+          (hDefEq
+            context
+            state
+            nextState
+            _
+            _
+            value
+            hConfig
+            (by
+              simpa [psKernelDefEqLambdaSpineWithFuel]
+                using hSuccess)).1
+      case lam leftName leftDomain leftBody leftInfo =>
+        cases right <;> try
+          exact
+            (hDefEq
+              context
+              state
+              nextState
+              _
+              _
+              value
+              hConfig
+              (by
+                simpa [psKernelDefEqLambdaSpineWithFuel]
+                  using hSuccess)).1
+        case lam rightName rightDomain rightBody rightInfo =>
+          let leftOpened :=
+            psKernelExprInstantiateRev leftDomain subst
+          let rightOpened :=
+            psKernelExprInstantiateRev rightDomain subst
+          let continueAfterDomain :=
+            fun (domainState : PsKernelCheckerState) =>
+              if
+                  if psKernelExprHasLooseBVar leftBody then
+                    true
+                  else
+                    psKernelExprHasLooseBVar rightBody then
+                let openedLocal :=
+                  psKernelDefEqWithLocal
+                    context
+                    domainState
+                    rightName
+                    rightOpened
+                    rightInfo
+                let fresh :=
+                  Prod.fst openedLocal
+                let child :=
+                  Prod.fst (Prod.snd openedLocal)
+                let freshState :=
+                  Prod.snd (Prod.snd openedLocal)
+                match
+                    psKernelDefEqLambdaSpineWithFuel
+                      remaining
+                      defeq
+                      child
+                      freshState
+                      leftBody
+                      rightBody
+                      (psKernelExprListAppend
+                        subst
+                        (List.cons
+                          (PsKernelExpr.fvar fresh)
+                          List.nil)) with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok childResult =>
+                    Except.ok
+                      (Prod.mk
+                        (Prod.fst childResult)
+                        (psKernelCheckerStateExitLocalScope
+                          freshState
+                          (Prod.snd childResult)))
+              else
+                psKernelDefEqLambdaSpineWithFuel
+                  remaining
+                  defeq
+                  context
+                  domainState
+                  leftBody
+                  rightBody
+                  (psKernelExprListAppend
+                    subst
+                    (List.cons
+                      (PsKernelExpr.sort PsKernelLevel.zero)
+                      List.nil))
+          have hReady :
+              (∃ domainState : PsKernelCheckerState,
+                PsKernelCheckerConfigurationSound
+                    context
+                    domainState ∧
+                  continueAfterDomain domainState =
+                    Except.ok (Prod.mk value nextState)) ∨
+                PsKernelCheckerConfigurationSound
+                  context
+                  nextState := by
+            cases hDomainEq :
+                psKernelExprEq leftDomain rightDomain with
+            | true =>
+                exact
+                  Or.inl
+                    ⟨
+                      state,
+                      hConfig,
+                      by
+                        simpa [
+                          psKernelDefEqLambdaSpineWithFuel,
+                          leftOpened,
+                          rightOpened,
+                          continueAfterDomain,
+                          hDomainEq
+                        ] using hSuccess
+                    ⟩
+            | false =>
+                cases hDomainRun :
+                    defeq
+                      context
+                      state
+                      leftOpened
+                      rightOpened with
+                | error error =>
+                    simp [
+                      psKernelDefEqLambdaSpineWithFuel,
+                      leftOpened,
+                      rightOpened,
+                      hDomainEq,
+                      hDomainRun
+                    ] at hSuccess
+                | ok domainRun =>
+                    rcases domainRun with
+                      ⟨domainValue, domainState⟩
+                    have hDomainSemantic :=
+                      hDefEq
+                        context
+                        state
+                        domainState
+                        leftOpened
+                        rightOpened
+                        domainValue
+                        hConfig
+                        hDomainRun
+                    cases domainValue with
+                    | false =>
+                        simp [
+                          psKernelDefEqLambdaSpineWithFuel,
+                          leftOpened,
+                          rightOpened,
+                          hDomainEq,
+                          hDomainRun
+                        ] at hSuccess
+                        rcases hSuccess with ⟨rfl, rfl⟩
+                        exact Or.inr hDomainSemantic.1
+                    | true =>
+                        exact
+                          Or.inl
+                            ⟨
+                              domainState,
+                              hDomainSemantic.1,
+                              by
+                                simpa [
+                                  psKernelDefEqLambdaSpineWithFuel,
+                                  leftOpened,
+                                  rightOpened,
+                                  continueAfterDomain,
+                                  hDomainEq,
+                                  hDomainRun
+                                ] using hSuccess
+                            ⟩
+          rcases hReady with
+            ⟨domainState, hDomainConfig, hContinue⟩ |
+            hDone
+          · cases hLeftLoose :
+                psKernelExprHasLooseBVar leftBody with
+            | true =>
+                let freshResult :=
+                  psKernelCheckerStateFreshName
+                    domainState
+                    rightName
+                let fresh :=
+                  Prod.fst freshResult
+                let freshState :=
+                  Prod.snd freshResult
+                let childLocal :=
+                  psKernelLocalContextAddLocal
+                    context.localContext
+                    fresh
+                    rightName
+                    rightOpened
+                    rightInfo
+                let child :=
+                  psKernelCheckerContextWithLocalContext
+                    context
+                    childLocal
+                let nextSubst :=
+                  psKernelExprListAppend
+                    subst
+                    (List.cons
+                      (PsKernelExpr.fvar fresh)
+                      List.nil)
+                have hParentFresh :
+                    PsKernelCheckerConfigurationSound
+                      context
+                      freshState := by
+                  simpa [
+                    freshResult,
+                    freshState
+                  ] using
+                    psKernelCheckerStateFreshName_preserves_configuration
+                      context
+                      domainState
+                      rightName
+                      hDomainConfig
+                have hChild :
+                    PsKernelCheckerConfigurationSound
+                      child
+                      freshState := by
+                  simpa [
+                    psKernelDefEqWithLocal,
+                    freshResult,
+                    fresh,
+                    freshState,
+                    childLocal,
+                    child
+                  ] using
+                    psKernelCheckerFreshLocal_preserves_configuration
+                      context
+                      domainState
+                      rightName
+                      rightOpened
+                      rightInfo
+                      hString
+                      hDomainConfig
+                cases hRest :
+                    psKernelDefEqLambdaSpineWithFuel
+                      remaining
+                      defeq
+                      child
+                      freshState
+                      leftBody
+                      rightBody
+                      nextSubst with
+                | error error =>
+                    simp [
+                      continueAfterDomain,
+                      hLeftLoose,
+                      psKernelDefEqWithLocal,
+                      freshResult,
+                      fresh,
+                      freshState,
+                      childLocal,
+                      child,
+                      nextSubst,
+                      hRest
+                    ] at hContinue
+                | ok restRun =>
+                    rcases restRun with
+                      ⟨restValue, childFinal⟩
+                    have _hChildFinal :=
+                      ih
+                        defeq
+                        hDefEq
+                        hString
+                        child
+                        freshState
+                        childFinal
+                        leftBody
+                        rightBody
+                        nextSubst
+                        restValue
+                        hChild
+                        hRest
+                    have hExit :
+                        PsKernelCheckerConfigurationSound
+                          context
+                          (psKernelCheckerStateExitLocalScope
+                            freshState
+                            childFinal) :=
+                      psKernelCheckerStateExitLocalScope_preserves_configuration
+                        context
+                        freshState
+                        childFinal
+                        hParentFresh
+                    simp [
+                      continueAfterDomain,
+                      hLeftLoose,
+                      psKernelDefEqWithLocal,
+                      freshResult,
+                      fresh,
+                      freshState,
+                      childLocal,
+                      child,
+                      nextSubst,
+                      hRest
+                    ] at hContinue
+                    rcases hContinue with ⟨rfl, rfl⟩
+                    exact hExit
+            | false =>
+                cases hRightLoose :
+                    psKernelExprHasLooseBVar rightBody with
+                | true =>
+                    let freshResult :=
+                      psKernelCheckerStateFreshName
+                        domainState
+                        rightName
+                    let fresh :=
+                      Prod.fst freshResult
+                    let freshState :=
+                      Prod.snd freshResult
+                    let childLocal :=
+                      psKernelLocalContextAddLocal
+                        context.localContext
+                        fresh
+                        rightName
+                        rightOpened
+                        rightInfo
+                    let child :=
+                      psKernelCheckerContextWithLocalContext
+                        context
+                        childLocal
+                    let nextSubst :=
+                      psKernelExprListAppend
+                        subst
+                        (List.cons
+                          (PsKernelExpr.fvar fresh)
+                          List.nil)
+                    have hParentFresh :
+                        PsKernelCheckerConfigurationSound
+                          context
+                          freshState := by
+                      simpa [
+                        freshResult,
+                        freshState
+                      ] using
+                        psKernelCheckerStateFreshName_preserves_configuration
+                          context
+                          domainState
+                          rightName
+                          hDomainConfig
+                    have hChild :
+                        PsKernelCheckerConfigurationSound
+                          child
+                          freshState := by
+                      simpa [
+                        psKernelDefEqWithLocal,
+                        freshResult,
+                        fresh,
+                        freshState,
+                        childLocal,
+                        child
+                      ] using
+                        psKernelCheckerFreshLocal_preserves_configuration
+                          context
+                          domainState
+                          rightName
+                          rightOpened
+                          rightInfo
+                          hString
+                          hDomainConfig
+                    cases hRest :
+                        psKernelDefEqLambdaSpineWithFuel
+                          remaining
+                          defeq
+                          child
+                          freshState
+                          leftBody
+                          rightBody
+                          nextSubst with
+                    | error error =>
+                        simp [
+                          continueAfterDomain,
+                          hLeftLoose,
+                          hRightLoose,
+                          psKernelDefEqWithLocal,
+                          freshResult,
+                          fresh,
+                          freshState,
+                          childLocal,
+                          child,
+                          nextSubst,
+                          hRest
+                        ] at hContinue
+                    | ok restRun =>
+                        rcases restRun with
+                          ⟨restValue, childFinal⟩
+                        have _hChildFinal :=
+                          ih
+                            defeq
+                            hDefEq
+                            hString
+                            child
+                            freshState
+                            childFinal
+                            leftBody
+                            rightBody
+                            nextSubst
+                            restValue
+                            hChild
+                            hRest
+                        have hExit :
+                            PsKernelCheckerConfigurationSound
+                              context
+                              (psKernelCheckerStateExitLocalScope
+                                freshState
+                                childFinal) :=
+                          psKernelCheckerStateExitLocalScope_preserves_configuration
+                            context
+                            freshState
+                            childFinal
+                            hParentFresh
+                        simp [
+                          continueAfterDomain,
+                          hLeftLoose,
+                          hRightLoose,
+                          psKernelDefEqWithLocal,
+                          freshResult,
+                          fresh,
+                          freshState,
+                          childLocal,
+                          child,
+                          nextSubst,
+                          hRest
+                        ] at hContinue
+                        rcases hContinue with ⟨rfl, rfl⟩
+                        exact hExit
+                | false =>
+                    let nextSubst :=
+                      psKernelExprListAppend
+                        subst
+                        (List.cons
+                          (PsKernelExpr.sort PsKernelLevel.zero)
+                          List.nil)
+                    cases hRest :
+                        psKernelDefEqLambdaSpineWithFuel
+                          remaining
+                          defeq
+                          context
+                          domainState
+                          leftBody
+                          rightBody
+                          nextSubst with
+                    | error error =>
+                        simp [
+                          continueAfterDomain,
+                          hLeftLoose,
+                          hRightLoose,
+                          nextSubst,
+                          hRest
+                        ] at hContinue
+                    | ok restRun =>
+                        rcases restRun with
+                          ⟨restValue, restState⟩
+                        have hRestConfig :=
+                          ih
+                            defeq
+                            hDefEq
+                            hString
+                            context
+                            domainState
+                            restState
+                            leftBody
+                            rightBody
+                            nextSubst
+                            restValue
+                            hDomainConfig
+                            hRest
+                        simp [
+                          continueAfterDomain,
+                          hLeftLoose,
+                          hRightLoose,
+                          nextSubst,
+                          hRest
+                        ] at hContinue
+                        rcases hContinue with ⟨rfl, rfl⟩
+                        exact hRestConfig
+          · exact hDone
+
 
 theorem psKernelDefEqFinish_false
     (state : PsKernelCheckerState)

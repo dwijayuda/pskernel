@@ -1,5 +1,23 @@
 # AI Work State
 
+## Arena operational continuation — canonical corpus result visibility
+
+- Latest green empirical checkpoint remains `108f376ac6d8034952354bdb7398bf9f0bf6019a`:
+  readiness green, Tutorial 141/141, historical bugs 17 correct + 1 conservative
+  decline (`rec-missing-ih`), zero incorrect/false accepts.
+- Full Init/Std run #36 (`37631303358`) is still inside the legacy PSC1
+  diagnostic replay after the canonical checker already returned. The automatic
+  workflow does not print `_results/*.json` until after that diagnostic pass.
+- Upstream Arena's `lka.py` stores exact canonical checker stderr, exit code,
+  wall time, CPU time, and max RSS in `_results/<checker>_<test>.json`.
+- Repository workflow `.github/workflows/pskernel-core-arena-corpus.yml`
+  is the preferred canonical-only large-corpus path: it supports `init`, `std`,
+  and `mathlib`, uploads `_results`/site artifacts, and does not run the legacy
+  oracle. The currently connected GitHub tool does not expose workflow_dispatch.
+- Do not infer a new production semantic bug from the still-hidden full Init/Std
+  result. Focused eta failures are fixed; the next full-corpus discrepancy remains
+  unclassified until exact stderr/declaration evidence is recovered.
+
 ## Arena continuation checkpoint — 2026-10-07 20:48 +07
 
 - Arena branch checkpoint before this state write: `108f376ac6d8034952354bdb7398bf9f0bf6019a`.

@@ -511,3 +511,11 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - Added an independent PSC1-portable JsIR structural validator and made all production Ps.BackendJs validated emission paths run it before printing. It rechecks target identifiers, global/local scope, parameter/binding/field/alternative uniqueness, runtime-op arity and canonical machine-integer literals. This creates a stable target-IR validation boundary but does not prove SpecializedIR -> JsIR preservation.
 - Added a focused JsIR corpus and cloud/PSC1 gates. Direct-JS promotion remains blocked on preservation/validator-soundness assurance even though the target-IR validation mechanism now exists.
 - Synchronized ArchitectureRegistry, PASS_EVIDENCE and EvidenceEnvelope with target-adapter evidence, certified behavioral semantic reuse, SAVEF validated proposal retrieval, DDC execution tooling and JsIR validation. These contracts are intended to make the later assurance phase prove existing subjects rather than redesign pipeline identities.
+
+
+## 2026-10-07 kernel workstream scope override
+
+- PSKernel implementation, defeq/cache internals, checker-soundness proof work, semantic-model/consistency proof work and other kernel-internal development are owned by a separate branch/chat. Do not modify kernel implementation or proof sources on pscv/v3-execution.
+- This compiler branch consumes only the frozen KernelContract/provider interfaces, provider/security identities and imported kernel evidence identities. Comparator calls through provider interfaces remain in scope; changing provider internals does not.
+- THE_PSCV_COMPILER_REFERENCE_VERSION_3.md section 49/50, V3_IMPLEMENTATION_STATUS and V3_ASSURANCE_HANDOFF now encode this ownership boundary. Final V3 acceptance may depend on imported kernel evidence, but producing it is not part of this branch's plan.
+- Current compiler-only priority remains: restore the JsIR integration gates, retain exact WasmIR, finish target-adapter/semantic-reuse/SAVEF/DDC connections, then solve direct-Wasm generation-2 performance without weakening exact fixed-point equality.

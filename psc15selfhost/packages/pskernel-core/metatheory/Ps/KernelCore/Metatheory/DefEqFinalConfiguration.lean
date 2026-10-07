@@ -524,6 +524,7 @@ theorem psKernelDefEqStringLitExpansionCoreWith_configuration_preserves
   | lit literal =>
       cases literal with
       | str value =>
+          simp only at hSuccess
           by_cases hString :
               psKernelExprIsStringOfListApp right = true
           · rw [if_pos hString] at hSuccess
@@ -982,6 +983,7 @@ theorem psKernelDefEqStringLitExpansionCoreWith_true_refines
   | lit literal =>
       cases literal with
       | str value =>
+          simp only at hSuccess
           by_cases hString :
               psKernelExprIsStringOfListApp right = true
           · rw [if_pos hString] at hSuccess

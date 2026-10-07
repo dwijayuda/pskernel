@@ -53,6 +53,7 @@
       "scripts/evidence-envelope.mjs",
       "scripts/ir-artifact.mjs",
       "scripts/ir-invariant-replay.mjs",
+      "scripts/ir-link-artifact.mjs",
       "scripts/js-abi-artifact.mjs",
       "scripts/kernel-checked-session.mjs",
       "scripts/kernel-contract.mjs",
@@ -82,7 +83,8 @@
     ],
     "executableValidation": [
       "psValidateErasedIrModule under psc-verified-ir/1",
-      "caller-pinned native closed-IR decoder/strict-validator replay under psc-closed-ir-invariant-replay/1 when explicitly requested"
+      "caller-pinned native closed-IR decoder/strict-validator replay under psc-closed-ir-invariant-replay/1 when explicitly requested",
+      "caller-pinned native linked-IR decoder/link-validator replay with consumer-pinned host contracts under psc-linked-ir-invariant-replay/1 when explicitly requested"
     ],
     "transformationTrustCurrent": [
       "erasure",

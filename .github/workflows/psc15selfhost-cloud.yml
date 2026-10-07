@@ -150,6 +150,7 @@ jobs:
           npm run test:ir-invariant-replay
           lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/Decode.lean
           lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean
+          lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/LinkArtifact.lean
 
       - name: Run WasmIR target validation corpus
         working-directory: psc15selfhost

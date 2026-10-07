@@ -70,6 +70,7 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.Model,
     `Ps.CompilerIr.Encode,
     `Ps.CompilerIr.Decode,
+    `Ps.CompilerIr.LinkArtifact,
     `Ps.CompilerIr.ValidateArtifact,
     `Ps.CompilerIr.InterfaceArtifact,
     `Ps.CompilerIr.Validate,

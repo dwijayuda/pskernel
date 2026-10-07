@@ -24,8 +24,8 @@ function intrinsic(value) {
 function literal(value) {
   arr(value);
   switch (value[0]) {
-    case 'natural': arr(value, 2); if (typeof value[1] !== 'string' || !/^(?:0|[1-9][0-9]*)$/u.test(value[1])) fail(); break;
-    case 'integer': arr(value, 2); if (typeof value[1] !== 'string' || !/^(?:0|-?[1-9][0-9]*)$/u.test(value[1])) fail(); break;
+    case 'natural': arr(value, 2); if (typeof value[1] !== 'string' || !/^(?:0|[1-9][0-9]*)(?![\s\S])/u.test(value[1])) fail(); break;
+    case 'integer': arr(value, 2); if (typeof value[1] !== 'string' || !/^(?:0|-?[1-9][0-9]*)(?![\s\S])/u.test(value[1])) fail(); break;
     case 'machineInteger': arr(value, 3); member(value[1], machines); literal(['integer', value[2]]); break;
     case 'bool': arr(value, 2); if (typeof value[1] !== 'boolean') fail(); break;
     case 'string': arr(value, 2); str(value[1]); if (!value[1].isWellFormed()) fail(); break;

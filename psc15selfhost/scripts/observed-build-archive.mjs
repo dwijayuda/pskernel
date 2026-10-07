@@ -3,7 +3,7 @@ import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
-import { replayClosedIrArtifact } from './ir-invariant-replay.mjs';
+import { replayClosedIrArtifact, replayIrLinkArtifact } from './ir-invariant-replay.mjs';
 import { decodeJsIrArtifact, decodeWasmIrArtifact } from './target-ir-artifact.mjs';
 
 const contract = 'psc-observed-build-archive/1';
@@ -96,7 +96,7 @@ export function packObservedBuildArchive(build, resourceLimits) {
  * replay runs only the validator explicitly selected and pinned by the caller.
  * Fresh pass integrity checking does not replay kernel checking or preservation.
  */
-export async function verifyObservedBuildArchive(input, { expectedGraphId, allowedAssumptions, resourceLimits, irValidation } = {}) {
+export async function verifyObservedBuildArchive(input, { expectedGraphId, allowedAssumptions, resourceLimits, irValidation, irLinkValidation } = {}) {
   try {
     const bound = limits(resourceLimits), expectedKey = identityKey(expectedGraphId);
     if (!Array.isArray(allowedAssumptions) || allowedAssumptions.some(id => typeof id !== 'string' || !id) ||
@@ -123,7 +123,37 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     const graph = graphValue(resolveArtifact(archive.graphId), bound);
     if (graph.entries.length + 1 !== blobs.size) fail('ARTIFACT_SET');
     for (const entry of graph.entries) resolveArtifact(entry.identity);
-    const irInvariantReplays = [];
+    const irInvariantReplays = [], irLinkInvariantReplays = [];
+    if (irValidation !== undefined && irLinkValidation !== undefined) fail('IR_VALIDATION_POLICY');
+    if (irLinkValidation !== undefined) {
+      if (!Array.isArray(irLinkValidation.artifacts) || !irLinkValidation.artifacts.length ||
+          irLinkValidation.artifacts.length > bound.maxArtifacts) fail('IR_LINK_POLICY');
+      const subjects = graph.entries.filter(entry =>
+        ['verified-ir', 'specialized-ir'].includes(entry.identity.domain));
+      if (!subjects.length) fail('IR_VALIDATION_SUBJECT_REQUIRED');
+      const covered = new Set();
+      let contextBytes = 0;
+      for (const artifact of irLinkValidation.artifacts) {
+        if (!(artifact?.bytes instanceof Uint8Array) ||
+            artifact.bytes.byteLength > bound.maxArtifactBytes) fail('IR_LINK_CONTEXT');
+        contextBytes += artifact.bytes.byteLength;
+        if (contextBytes > bound.maxTotalBytes) fail('RESOURCE_EXHAUSTED');
+        const replay = await replayIrLinkArtifact(artifact, irLinkValidation.validator);
+        if (replay.kind !== 'accepted') return { kind: replay.kind, reason: replay.reason ?? replay.resource,
+          irLinkInvariantReplays, authority: 'audit-record-only', releaseAccepted: false,
+          linkedIrInvariantsVerified: false, preservationVerified: false };
+        irLinkInvariantReplays.push(replay);
+        for (const { identity } of subjects) {
+          // The same canonical runtime representation serves distinct stage domains.
+          // Coverage binds exact bytes; it never promotes a stage or source authority.
+          if (replay.modules.some(({ irId }) =>
+              irId.algorithm === identity.algorithm && irId.schemaVersion === identity.schemaVersion &&
+              irId.contract === identity.contract && irId.byteLength === identity.byteLength &&
+              irId.digest === identity.digest)) covered.add(artifactKey(identity));
+        }
+      }
+      if (subjects.some(({ identity }) => !covered.has(artifactKey(identity)))) fail('IR_LINK_SUBJECT_UNCOVERED');
+    }
     if (irValidation !== undefined) {
       const subjects = graph.entries.filter(entry =>
         ['verified-ir', 'specialized-ir'].includes(entry.identity.domain));
@@ -186,7 +216,9 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
       }
     }
     return { kind: 'accepted', contract: 'psc-observed-build-verification/1', graphId: archive.graphId,
-      acceptanceScope: irValidation === undefined ? 'observed-artifact-integrity-only' : 'observed-artifact-integrity-and-closed-ir-invariants',
+      acceptanceScope: irLinkValidation !== undefined ? 'observed-artifact-integrity-and-linked-ir-invariants' :
+        irValidation === undefined ? 'observed-artifact-integrity-only' : 'observed-artifact-integrity-and-closed-ir-invariants',
+      linkedIrInvariantsVerified: irLinkValidation !== undefined, irLinkInvariantReplays,
       closedIrInvariantsVerified: irValidation !== undefined, irInvariantReplays, integrityVerified: true, artifactCount: blobs.size,
       artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts,
       fullInputClosureEstablished: false, semanticClaimsVerified: false,

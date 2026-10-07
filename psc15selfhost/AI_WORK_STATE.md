@@ -10,7 +10,7 @@ Mode: implementation first, as requested on 2026-10-07. All subsequent edits/com
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: portable Wasm target typing and source guard 0cc3b53 passed the complete main cloud workflow. Own-data-property emission and exact target numeric schema validation are implemented below and await their fresh cloud run. Earlier milestones remain recorded in this file and the implementation ledger.
+- Current checkpoint: 166c6a3 passed full main cloud CI and the 80-module direct-Wasm exact fixed point. Linked IR artifact/replay implementation is prepared below and awaits fresh cloud validation. Earlier milestones remain recorded in this file and the implementation ledger.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
@@ -620,3 +620,13 @@ Mode: implementation first, as requested on 2026-10-07. All subsequent edits/com
 - GitHub/cloud-only execution remains in force; no local files or commands were used. Kernel implementation, provider internals and kernel proofs remain untouched. Global preservation, linked replay, broader ABI adapters, production comparator isolation and final acceptance remain open.
 
 - 68c25e9 portable source/profile and workspace checks passed; cloud native compilation identified the missing Lake library root for the new property fixture. Registered it in the existing backend test-support library. Direct-Wasm shared erasure checks identified three old TS object-syntax expectations; updated them to the exact computed-key form while preserving cross-path equality and semantic assertions. Fresh cloud validation is required.
+
+
+## 2026-10-07 linked IR replay and direct-Wasm fixed point
+
+- 166c6a3 main cloud run 37644676918/job 112872238753 passed completely, including the new independent own-data-property runtime assertions through JS/stack-safe JS/TS, canonical numeric schema tests and portable whole-compiler checks.
+- The direct-Wasm job 112872237530 in run 37644676992 passed the actual whole-compiler fixed point: 80 modules; 756957 bytes; generation 1=2 and 2=3 by exact byte comparison; generation 2 instantiated and executed to compile generation 3. Source closure SHA-256 is 5a0f8ab44e94848834959628d120ed259a9449a4673a99eed918e7245b1ae9a1. Completion was 2026-10-07T15:42:07Z, elapsed 445284 ms. The existing limits and profile rules were unchanged. WASM_FIXED_POINT_V1.json retains the earlier failed observation and records this scoped success; global correctness, DDC and verified binaries are not established.
+- Added canonical portable link-context encoding/decoding and a native replay entry calling the existing strict interface/link validator. Contexts retain actual module bodies and export selections, derive provider signatures from declarations, and validate all bodies, layouts, capability propagation and dependency order.
+- The consumer selects exact target/capabilities and pins the complete bytes of every host interface contract. A matching assumption label cannot substitute different types or layouts. The host implementation remains an explicit assumption; replay creates no CheckedCore/CertifiedSource authority.
+- Closed and linked native replay share one bounded execution/identity/protocol mechanism. Optional archive linked replay accepts consumer-selected contexts only and requires every retained VerifiedIR/SpecializedIR byte identity to occur in a freshly accepted context. Missing dependencies, wrong bodies, duplicate modules, cycles, policy drift, unpinned host contracts and incomplete archive coverage fail closed.
+- Added focused native round-trip/link/archive regressions and a portable source check. Also closed the analogous trailing-line-terminator numeric spelling gap in the runtime IR host decoder. New link replay awaits cloud validation; preservation and validator soundness remain unproved.

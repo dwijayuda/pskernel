@@ -33,7 +33,7 @@
     {
       "id": "selfhost-fixed-points",
       "status": "partial",
-      "required": "Rust whole-compiler fixed point passed at 9c61a5e, 8d2c070 and 66ee434: 66 modules, generation 1=2=3 Rust source, 2810845 bytes. JavaScript passed at 8d2c070 for 63 modules, then the complete dedicated JS job passed at 66ee434 (run 37552329402/job 112570474936): 65 modules, generation 1=2=3, 2485478 bytes. The separate Wasm job timed out inside generation-2 compilation. See contracts/bootstrap/RUST_FIXED_POINT_V1.json and JS_FIXED_POINT_V1.json. Recheck changed closures and complete the still-failing Wasm fixed point. This does not establish native binary reproducibility, global compiler correctness, promotion or DDC."
+      "required": "Rust whole-compiler fixed point passed at 9c61a5e, 8d2c070 and 66ee434: 66 modules, generation 1=2=3 Rust source, 2810845 bytes. JavaScript passed at 8d2c070 for 63 modules, then the complete dedicated JS job passed at 66ee434 (run 37552329402/job 112570474936): 65 modules, generation 1=2=3, 2485478 bytes. The separate Wasm job at 66ee434 timed out inside generation-2 compilation. At 166c6a3, direct-Wasm job 112872237530/run 37644676992 passed all gates: 80 modules, generation 1=2=3 exact Wasm bytes, 756957 bytes, source closure 5a0f8ab44e94848834959628d120ed259a9449a4673a99eed918e7245b1ae9a1. See contracts/bootstrap/RUST_FIXED_POINT_V1.json and JS_FIXED_POINT_V1.json. Recheck changed closures and preserve the recorded fixed points. This does not establish native binary reproducibility, global compiler correctness, promotion or DDC."
     },
     {
       "id": "bootstrap-diversity",
@@ -48,7 +48,7 @@
     {
       "id": "savef-offline-replay",
       "status": "pending",
-      "required": "Replay actual compiler-preservation proof/validator certificates, trust closure and pinned release archives offline; metadata/hash closure is insufficient. A standalone pinned Lean Wasm profile checks a real closed implication-identity proof and rejects an invalid proof outside the checkout. A scoped SAVEF operation now replays actual Wasm literal certificates and records real artifact reuse only after fresh output validation, including actual PSC-emitted bytes. These focused fixtures do not discharge source preservation, broader theorem/interface reuse, diverse checking, runtime hardening, signed release or global assurance obligations."
+      "required": "Replay actual compiler-preservation proof/validator certificates, trust closure and pinned release archives offline; metadata/hash closure is insufficient. A standalone pinned Lean Wasm profile checks a real closed implication-identity proof and rejects an invalid proof outside the checkout. A scoped SAVEF operation now replays actual Wasm literal certificates and records real artifact reuse only after fresh output validation, including actual PSC-emitted bytes. These focused fixtures do not discharge source preservation, broader theorem/interface reuse, diverse checking, runtime hardening, signed release or global assurance obligations. Portable linked-IR replay now has an implementation with exact host-contract policy and per-subject archive coverage; independently exercise it and retain native validator/runtime assumptions. It does not discharge source preservation or host implementation behavior."
     },
     {
       "id": "factorybench-holdout",

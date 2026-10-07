@@ -337,9 +337,11 @@
         "packages/compiler-ir/src/Ps/CompilerIr/Decode.lean",
         "packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean",
         "host/src/Ps/Host/IrReplay.lean",
-        "scripts/ir-invariant-replay.mjs"
+        "scripts/ir-invariant-replay.mjs",
+        "packages/compiler-ir/src/Ps/CompilerIr/LinkArtifact.lean",
+        "scripts/ir-link-artifact.mjs"
       ],
-      "completion": "Standalone bounded verification replays supported evidence and validates archives, provenance and algorithm/domain/schema-qualified hashes offline. Optional caller-pinned closed-IR replay freshly invokes the strict validator; linked-module replay and global soundness remain pending.",
+      "completion": "Standalone bounded verification replays supported evidence and validates archives, provenance and qualified hashes offline. Optional caller-pinned closed or linked IR replay freshly invokes portable validators; linked contexts derive exports from actual bodies and require exact consumer-pinned host contracts and complete archived subject coverage. Soundness, complete release packaging and independent evidence remain pending.",
       "assurance": "pending"
     },
     {

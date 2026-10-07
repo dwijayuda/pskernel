@@ -331,9 +331,13 @@
         "scripts/offline-verifier-cli.mjs",
         "scripts/build-verifier-distribution.mjs",
         "contracts/archive/VERIFIER_DISTRIBUTION_V1.json",
-        "contracts/archive/OFFLINE_CAPSULE_V1.json"
+        "contracts/archive/OFFLINE_CAPSULE_V1.json",
+        "packages/compiler-ir/src/Ps/CompilerIr/Decode.lean",
+        "packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean",
+        "host/src/Ps/Host/IrReplay.lean",
+        "scripts/ir-invariant-replay.mjs"
       ],
-      "completion": "Standalone bounded verification replays supported evidence and validates archives, provenance and algorithm/domain/schema-qualified hashes offline.",
+      "completion": "Standalone bounded verification replays supported evidence and validates archives, provenance and algorithm/domain/schema-qualified hashes offline. Optional caller-pinned closed-IR replay freshly invokes the strict validator; linked-module replay and global soundness remain pending.",
       "assurance": "pending"
     },
     {

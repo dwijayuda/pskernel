@@ -69,6 +69,8 @@ lean_lib PsCompilerIr where
   roots := #[
     `Ps.CompilerIr.Model,
     `Ps.CompilerIr.Encode,
+    `Ps.CompilerIr.Decode,
+    `Ps.CompilerIr.ValidateArtifact,
     `Ps.CompilerIr.InterfaceArtifact,
     `Ps.CompilerIr.Validate,
     `Ps.CompilerIr.Interface,
@@ -558,3 +560,7 @@ lean_exe pscv_foreign_interface_tests where
 lean_exe pscv_theory_bridge_tests where
   srcDir := "packages/theory-bridge/test"
   root := `TheoryBridgeTests
+
+lean_exe pscv_ir_replay where
+  srcDir := "host/src"
+  root := `Ps.Host.IrReplay

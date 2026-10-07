@@ -3,6 +3,7 @@ import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
+import { replayClosedIrArtifact } from './ir-invariant-replay.mjs';
 import { decodeJsIrArtifact, decodeWasmIrArtifact } from './target-ir-artifact.mjs';
 
 const contract = 'psc-observed-build-archive/1';
@@ -91,10 +92,11 @@ export function packObservedBuildArchive(build, resourceLimits) {
 }
 
 /** Consumer supplies the expected graph identity and allowed assumptions.
- * No archived path is read/extracted, no tool is executed and no source is loaded.
+ * No archived path is read/extracted and no source is loaded. Optional closed-IR
+ * replay runs only the validator explicitly selected and pinned by the caller.
  * Fresh pass integrity checking does not replay kernel checking or preservation.
  */
-export async function verifyObservedBuildArchive(input, { expectedGraphId, allowedAssumptions, resourceLimits } = {}) {
+export async function verifyObservedBuildArchive(input, { expectedGraphId, allowedAssumptions, resourceLimits, irValidation } = {}) {
   try {
     const bound = limits(resourceLimits), expectedKey = identityKey(expectedGraphId);
     if (!Array.isArray(allowedAssumptions) || allowedAssumptions.some(id => typeof id !== 'string' || !id) ||
@@ -121,6 +123,19 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     const graph = graphValue(resolveArtifact(archive.graphId), bound);
     if (graph.entries.length + 1 !== blobs.size) fail('ARTIFACT_SET');
     for (const entry of graph.entries) resolveArtifact(entry.identity);
+    const irInvariantReplays = [];
+    if (irValidation !== undefined) {
+      const subjects = graph.entries.filter(entry =>
+        ['verified-ir', 'specialized-ir'].includes(entry.identity.domain));
+      if (!subjects.length) fail('IR_VALIDATION_SUBJECT_REQUIRED');
+      for (const { identity } of subjects) {
+        const replay = await replayClosedIrArtifact({ identity, bytes: resolveArtifact(identity) }, irValidation);
+        if (replay.kind !== 'accepted') return { kind: replay.kind, reason: replay.reason ?? replay.resource,
+          irInvariantReplays, authority: 'audit-record-only', releaseAccepted: false,
+          closedIrInvariantsVerified: false, preservationVerified: false };
+        irInvariantReplays.push(replay);
+      }
+    }
     const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [];
     for (const identity of graph.executions) {
       const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions });
@@ -171,7 +186,8 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
       }
     }
     return { kind: 'accepted', contract: 'psc-observed-build-verification/1', graphId: archive.graphId,
-      acceptanceScope: 'observed-artifact-integrity-only', integrityVerified: true, artifactCount: blobs.size,
+      acceptanceScope: irValidation === undefined ? 'observed-artifact-integrity-only' : 'observed-artifact-integrity-and-closed-ir-invariants',
+      closedIrInvariantsVerified: irValidation !== undefined, irInvariantReplays, integrityVerified: true, artifactCount: blobs.size,
       artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts,
       fullInputClosureEstablished: false, semanticClaimsVerified: false,
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };

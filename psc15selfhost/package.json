@@ -163,6 +163,7 @@
     "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs",
     "test:runtime-semantics": "node --test scripts/runtime-semantics-contract.test.mjs",
     "check:runtime-semantics": "npm run test:runtime-semantics",
+    "test:ir-invariant-replay": "lake build pscv_ir_replay pscv_ir_encoding_tests && node --test scripts/ir-invariant-replay.test.mjs",
     "test:wasm-runtime-strings": "lake build psc1_wasm_string_runtime_fixture && node scripts/backend-wasm-strings.test.mjs",
     "test:backend-js-unit": "lake exe psc1_backend_js_tests",
     "test:backend-js-differential": "node scripts/backend-js-differential.test.mjs",

@@ -147,6 +147,9 @@ jobs:
           lake exe psc1 check packages/driver-wasm/src/Ps/DriverWasm/Stages.lean
           lake exe psc1 check packages/driver-wasm/src/Ps/DriverWasm/SelfHostProgress.lean
           node --test scripts/ir-artifact.test.mjs
+          npm run test:ir-invariant-replay
+          lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/Decode.lean
+          lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean
 
       - name: Run WasmIR target validation corpus
         working-directory: psc15selfhost

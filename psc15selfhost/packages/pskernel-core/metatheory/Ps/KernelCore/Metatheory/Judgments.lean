@@ -652,6 +652,7 @@ inductive PsKernelReductionClosure
         (PsKernelExpr.proj typeName index right)
   | quotLift
       (expr : PsKernelExpr)
+      (fnName mkName : PsKernelName)
       (levels mkLevels : List PsKernelLevel)
       (args mkArgs : List PsKernelExpr)
       (major majorReduced representative fnValue : PsKernelExpr)
@@ -659,7 +660,9 @@ inductive PsKernelReductionClosure
         environment.quotInitialized = true)
       (hHead :
         psKernelExprGetAppFn expr =
-          PsKernelExpr.const psKernelQuotLiftName levels)
+          PsKernelExpr.const fnName levels)
+      (hLift :
+        psKernelNameEq fnName psKernelQuotLiftName = true)
       (hArgs :
         psKernelExprGetAppArgs expr = args)
       (hMajor :
@@ -670,7 +673,9 @@ inductive PsKernelReductionClosure
           environment localContext major majorReduced)
       (hMkHead :
         psKernelExprGetAppFn majorReduced =
-          PsKernelExpr.const psKernelQuotMkName mkLevels)
+          PsKernelExpr.const mkName mkLevels)
+      (hMk :
+        psKernelNameEq mkName psKernelQuotMkName = true)
       (hMkArity :
         Nat.beq
             (psKernelExprGetAppNumArgs majorReduced)
@@ -693,6 +698,7 @@ inductive PsKernelReductionClosure
           (psKernelExprListDrop 6 args))
   | quotInd
       (expr : PsKernelExpr)
+      (fnName mkName : PsKernelName)
       (levels mkLevels : List PsKernelLevel)
       (args mkArgs : List PsKernelExpr)
       (major majorReduced representative fnValue : PsKernelExpr)
@@ -700,7 +706,9 @@ inductive PsKernelReductionClosure
         environment.quotInitialized = true)
       (hHead :
         psKernelExprGetAppFn expr =
-          PsKernelExpr.const psKernelQuotIndName levels)
+          PsKernelExpr.const fnName levels)
+      (hInd :
+        psKernelNameEq fnName psKernelQuotIndName = true)
       (hArgs :
         psKernelExprGetAppArgs expr = args)
       (hMajor :
@@ -711,7 +719,9 @@ inductive PsKernelReductionClosure
           environment localContext major majorReduced)
       (hMkHead :
         psKernelExprGetAppFn majorReduced =
-          PsKernelExpr.const psKernelQuotMkName mkLevels)
+          PsKernelExpr.const mkName mkLevels)
+      (hMk :
+        psKernelNameEq mkName psKernelQuotMkName = true)
       (hMkArity :
         Nat.beq
             (psKernelExprGetAppNumArgs majorReduced)

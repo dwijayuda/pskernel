@@ -1319,19 +1319,25 @@ theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
             ⟨semanticReduced,
               hNormalizeReduction,
               hNormalize⟩
-          have hMajorReduction :
-              PsKernelReductionClosure
+          have hPreparedDefEq :
+              PsKernelDefEqJudgment
                 context.environment
                 context.localContext
                 major0
-                semanticReduced :=
-            psKernelReductionClosure_transitive
-              context.environment
-              context.localContext
+                prepared :=
+            PsKernelDefEqJudgment.reductionClosure
               major0
               prepared
-              semanticReduced
               hPreparedSemantic.1
+          have hNormalizeDefEq :
+              PsKernelDefEqJudgment
+                context.environment
+                context.localContext
+                prepared
+                semanticReduced :=
+            PsKernelDefEqJudgment.reductionClosure
+              prepared
+              semanticReduced
               hNormalizeReduction
           cases hCtorHead :
               Prod.fst
@@ -1417,6 +1423,7 @@ theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
                                 recursor
                                 rule
                                 major0
+                                prepared
                                 semanticReduced
                                 normalized
                                 hConfig.1
@@ -1424,7 +1431,8 @@ theorem psKernelReduceInductiveRecMajorTailWith_configuration_sound
                                 hArgs
                                 hFind
                                 hMajor
-                                hMajorReduction
+                                hPreparedDefEq
+                                hNormalizeDefEq
                                 hNormalize
                                 hCtorHead
                                 rfl

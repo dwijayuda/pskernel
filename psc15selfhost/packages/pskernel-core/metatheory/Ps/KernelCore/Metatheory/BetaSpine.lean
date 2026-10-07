@@ -2937,3 +2937,149 @@ theorem psKernelExprList_split_at
           · simpa [psKernelExprListDrop] using hDrop
           · simpa [psKernelExprListDrop] using hDropNext
           · simpa [psKernelExprListTake, hTake]
+
+
+theorem psKernelExprListReverseWorker_append_metatheory
+    (values acc : List PsKernelExpr) :
+    psKernelExprListReverseWorker values acc =
+      List.append (List.reverse values) acc := by
+  induction values generalizing acc with
+  | nil =>
+      rfl
+  | cons head tail ih =>
+      simp [
+        psKernelExprListReverseWorker,
+        ih,
+        List.append_assoc
+      ]
+
+
+theorem psKernelExprListReverse_eq_reverse_metatheory
+    (values : List PsKernelExpr) :
+    psKernelExprListReverse values =
+      List.reverse values := by
+  simp [
+    psKernelExprListReverse,
+    psKernelExprListReverseWorker_append_metatheory
+  ]
+
+
+theorem psKernelExprListReverse_append_singleton
+    (values : List PsKernelExpr)
+    (value : PsKernelExpr) :
+    psKernelExprListReverse
+        (List.append
+          values
+          (List.cons value List.nil)) =
+      List.cons
+        value
+        (psKernelExprListReverse values) := by
+  rw [
+    psKernelExprListReverse_eq_reverse_metatheory,
+    psKernelExprListReverse_eq_reverse_metatheory
+  ]
+  simp
+
+
+theorem psKernelExprInstantiateAt_lam
+    (name : PsKernelName)
+    (type body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAt
+        (PsKernelExpr.lam name type body binderInfo)
+        start subst offset =
+      PsKernelExpr.lam
+        name
+        (psKernelExprInstantiateAt
+          type start subst offset)
+        (psKernelExprInstantiateAt
+          body start subst (Nat.succ offset))
+        binderInfo := by
+  simp only [
+    psKernelExprInstantiateAt_refines_reference_core,
+    psKernelExprInstantiateAtReference_lam
+  ]
+
+
+theorem psKernelExprInstantiateRev_lam
+    (name : PsKernelName)
+    (type body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (prefix : List PsKernelExpr) :
+    psKernelExprInstantiateRev
+        (PsKernelExpr.lam name type body binderInfo)
+        prefix =
+      PsKernelExpr.lam
+        name
+        (psKernelExprInstantiateAt
+          type
+          0
+          (psKernelExprListReverse prefix)
+          0)
+        (psKernelExprInstantiateAt
+          body
+          0
+          (psKernelExprListReverse prefix)
+          1)
+        binderInfo := by
+  unfold psKernelExprInstantiateRev
+  unfold psKernelExprInstantiate
+  rw [psKernelExprInstantiateAt_lam]
+
+
+theorem psKernelExprInstantiate1_eq_instantiateAt_singleton
+    (expr replacement : PsKernelExpr) :
+    psKernelExprInstantiate1 expr replacement =
+      psKernelExprInstantiateAt
+        expr
+        0
+        (List.cons replacement List.nil)
+        0 := by
+  calc
+    psKernelExprInstantiate1 expr replacement =
+        psKernelExprInstantiateRev
+          expr
+          (List.cons replacement List.nil) := by
+      symm
+      exact
+        psKernelExprInstantiateRev_singleton
+          expr replacement
+    _ =
+        psKernelExprInstantiateAt
+          expr
+          0
+          (List.cons replacement List.nil)
+          0 := by
+      rfl
+
+
+theorem psKernelExprInstantiateRev_append_singleton_beta
+    (body arg : PsKernelExpr)
+    (prefix : List PsKernelExpr) :
+    psKernelExprInstantiate1
+        (psKernelExprInstantiateAt
+          body
+          0
+          (psKernelExprListReverse prefix)
+          1)
+        arg =
+      psKernelExprInstantiateRev
+        body
+        (List.append
+          prefix
+          (List.cons arg List.nil)) := by
+  rw [psKernelExprInstantiate1_eq_instantiateAt_singleton]
+  have hFuse :=
+    psKernelExprInstantiateAt_fuse_singleton
+      body
+      arg
+      (psKernelExprListReverse prefix)
+      0
+  simp only [Nat.succ_zero] at hFuse
+  rw [hFuse]
+  unfold psKernelExprInstantiateRev
+  unfold psKernelExprInstantiate
+  rw [psKernelExprListReverse_append_singleton]

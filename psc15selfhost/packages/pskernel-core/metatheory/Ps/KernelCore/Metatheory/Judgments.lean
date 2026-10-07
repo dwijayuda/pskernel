@@ -1235,6 +1235,61 @@ inductive PsKernelDefEqJudgment
         left
         right
 
+  /-
+  Algorithmic non-recursive structure-eta comparison used by DefEq.
+
+  Unlike the recursor structure-eta rule, this path compares an already
+  constructor-shaped value against projections from the other term.  It keeps
+  the field-by-field recursive DefEq evidence explicit, avoiding any appeal to
+  general DefEq transitivity.
+  -/
+  | structureEtaAlgorithmic
+      {localContext : PsKernelLocalContext}
+      (term structureValue termType structureType : PsKernelExpr)
+      (ctorName : PsKernelName)
+      (levels : List PsKernelLevel)
+      (ctorInfo : PsKernelConstructorInfo)
+      (hHead :
+        psKernelExprGetAppFn structureValue =
+          PsKernelExpr.const ctorName levels)
+      (hCtor :
+        psKernelFindConstantInList
+            ctorName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.ctorInfo ctorInfo))
+      (hArity :
+        Nat.beq
+            (psKernelExprListLength
+              (psKernelExprGetAppArgs structureValue))
+            (Nat.add ctorInfo.numParams ctorInfo.numFields) =
+          true)
+      (hNonRec :
+        psKernelEnvironmentIsNonRecStructure
+            environment
+            ctorInfo.induct =
+          true)
+      (hTypes :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          termType
+          structureType)
+      (hFields :
+        PsKernelStructureEtaCompareJudgment
+          environment
+          localContext
+          ctorInfo.induct
+          term
+          (psKernelExprGetAppArgs structureValue)
+          ctorInfo.numParams
+          0) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        term
+        structureValue
+
   | lambdaSpine
       {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
@@ -1512,6 +1567,79 @@ inductive PsKernelDefEqJudgment
         localContext
         left
         (PsKernelExpr.mdata metadata right)
+
+inductive PsKernelStructureEtaCompareJudgment
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext ->
+    PsKernelName ->
+    PsKernelExpr ->
+    List PsKernelExpr ->
+    Nat ->
+    Nat ->
+    Prop
+  | done
+      {localContext : PsKernelLocalContext}
+      (induct : PsKernelName)
+      (term : PsKernelExpr)
+      (args : List PsKernelExpr)
+      (numParams index : Nat)
+      (hDone :
+        psKernelNatLt
+            index
+            (Nat.sub
+              (psKernelExprListLength args)
+              numParams) =
+          false) :
+      PsKernelStructureEtaCompareJudgment
+        environment
+        localContext
+        induct
+        term
+        args
+        numParams
+        index
+  | step
+      {localContext : PsKernelLocalContext}
+      (induct : PsKernelName)
+      (term : PsKernelExpr)
+      (args : List PsKernelExpr)
+      (numParams index : Nat)
+      (arg : PsKernelExpr)
+      (hMore :
+        psKernelNatLt
+            index
+            (Nat.sub
+              (psKernelExprListLength args)
+              numParams) =
+          true)
+      (hArg :
+        psKernelExprListGet
+            args
+            (Nat.add numParams index) =
+          Option.some arg)
+      (hField :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          (PsKernelExpr.proj induct index term)
+          arg)
+      (hRest :
+        PsKernelStructureEtaCompareJudgment
+          environment
+          localContext
+          induct
+          term
+          args
+          numParams
+          (Nat.succ index)) :
+      PsKernelStructureEtaCompareJudgment
+        environment
+        localContext
+        induct
+        term
+        args
+        numParams
+        index
 
 inductive PsKernelBinderDomainJudgment
     (environment : PsKernelEnvironment) :

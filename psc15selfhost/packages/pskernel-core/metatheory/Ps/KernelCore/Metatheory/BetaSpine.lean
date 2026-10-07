@@ -1081,7 +1081,8 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
             | false => rfl
             | true =>
                 have hEqual := Nat.eq_of_beq_eq_true hEq
-                omega
+                subst offset
+                exact (Nat.lt_irrefl index hLt).elim
           have hBle :
               Nat.ble index offset = true :=
             Nat.ble_eq_true_of_le (Nat.le_of_lt hLt)
@@ -1188,140 +1189,33 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
         psKernelExprListIsEmpty
       ]
   | app fn arg ihFn ihArg =>
-      cases hLiftFn :
-          psKernelExprLiftLooseBVarsReferenceChanged fn offset 1 with
-      | mk liftedFn fnChanged =>
-          cases hLiftArg :
-              psKernelExprLiftLooseBVarsReferenceChanged arg offset 1 with
-          | mk liftedArg argChanged =>
-              have ihFnResult := ihFn offset
-              have ihArgResult := ihArg offset
-              simp [psKernelExprLiftLooseBVarsReference, hLiftFn] at ihFnResult
-              simp [psKernelExprLiftLooseBVarsReference, hLiftArg] at ihArgResult
-              cases fnChanged <;>
-                cases argChanged <;>
-                simp_all [
-                  psKernelExprLiftLooseBVarsReference,
-                  psKernelExprLiftLooseBVarsReferenceChanged,
-                  hLiftFn,
-                  hLiftArg,
-                  psKernelExprInstantiateAtReference,
-                  psKernelExprInstantiateAtReferenceChanged,
-                  psKernelExprListIsEmpty,
-                  psKernelExprLiftLooseBVarsReferenceChanged_false_fst
-                ]
+      rw [psKernelExprLiftLooseBVarsReference_app]
+      rw [psKernelExprInstantiateAtReference_app]
+      rw [ihFn offset, ihArg offset]
   | lam name type body binderInfo ihType ihBody =>
-      cases hLiftType :
-          psKernelExprLiftLooseBVarsReferenceChanged type offset 1 with
-      | mk liftedType typeChanged =>
-          cases hLiftBody :
-              psKernelExprLiftLooseBVarsReferenceChanged
-                body (Nat.succ offset) 1 with
-          | mk liftedBody bodyChanged =>
-              have ihTypeResult := ihType offset
-              have ihBodyResult := ihBody (Nat.succ offset)
-              simp [psKernelExprLiftLooseBVarsReference, hLiftType] at ihTypeResult
-              simp [psKernelExprLiftLooseBVarsReference, hLiftBody] at ihBodyResult
-              cases typeChanged <;>
-                cases bodyChanged <;>
-                simp_all [
-                  psKernelExprLiftLooseBVarsReference,
-                  psKernelExprLiftLooseBVarsReferenceChanged,
-                  hLiftType,
-                  hLiftBody,
-                  psKernelExprInstantiateAtReference,
-                  psKernelExprInstantiateAtReferenceChanged,
-                  psKernelExprListIsEmpty,
-                  psKernelExprLiftLooseBVarsReferenceChanged_false_fst
-                ]
+      rw [psKernelExprLiftLooseBVarsReference_lam]
+      rw [psKernelExprInstantiateAtReference_lam]
+      rw [ihType offset, ihBody (Nat.succ offset)]
   | forallE name type body binderInfo ihType ihBody =>
-      cases hLiftType :
-          psKernelExprLiftLooseBVarsReferenceChanged type offset 1 with
-      | mk liftedType typeChanged =>
-          cases hLiftBody :
-              psKernelExprLiftLooseBVarsReferenceChanged
-                body (Nat.succ offset) 1 with
-          | mk liftedBody bodyChanged =>
-              have ihTypeResult := ihType offset
-              have ihBodyResult := ihBody (Nat.succ offset)
-              simp [psKernelExprLiftLooseBVarsReference, hLiftType] at ihTypeResult
-              simp [psKernelExprLiftLooseBVarsReference, hLiftBody] at ihBodyResult
-              cases typeChanged <;>
-                cases bodyChanged <;>
-                simp_all [
-                  psKernelExprLiftLooseBVarsReference,
-                  psKernelExprLiftLooseBVarsReferenceChanged,
-                  hLiftType,
-                  hLiftBody,
-                  psKernelExprInstantiateAtReference,
-                  psKernelExprInstantiateAtReferenceChanged,
-                  psKernelExprListIsEmpty,
-                  psKernelExprLiftLooseBVarsReferenceChanged_false_fst
-                ]
+      rw [psKernelExprLiftLooseBVarsReference_forallE]
+      rw [psKernelExprInstantiateAtReference_forallE]
+      rw [ihType offset, ihBody (Nat.succ offset)]
   | letE name type value body nondep ihType ihValue ihBody =>
-      cases hLiftType :
-          psKernelExprLiftLooseBVarsReferenceChanged type offset 1 with
-      | mk liftedType typeChanged =>
-          cases hLiftValue :
-              psKernelExprLiftLooseBVarsReferenceChanged value offset 1 with
-          | mk liftedValue valueChanged =>
-              cases hLiftBody :
-                  psKernelExprLiftLooseBVarsReferenceChanged
-                    body (Nat.succ offset) 1 with
-              | mk liftedBody bodyChanged =>
-                  have ihTypeResult := ihType offset
-                  have ihValueResult := ihValue offset
-                  have ihBodyResult := ihBody (Nat.succ offset)
-                  simp [psKernelExprLiftLooseBVarsReference, hLiftType] at ihTypeResult
-                  simp [psKernelExprLiftLooseBVarsReference, hLiftValue] at ihValueResult
-                  simp [psKernelExprLiftLooseBVarsReference, hLiftBody] at ihBodyResult
-                  cases typeChanged <;>
-                    cases valueChanged <;>
-                    cases bodyChanged <;>
-                    simp_all [
-                      psKernelExprLiftLooseBVarsReference,
-                      psKernelExprLiftLooseBVarsReferenceChanged,
-                      hLiftType,
-                      hLiftValue,
-                      hLiftBody,
-                      psKernelExprInstantiateAtReference,
-                      psKernelExprInstantiateAtReferenceChanged,
-                      psKernelExprListIsEmpty,
-                      psKernelExprLiftLooseBVarsReferenceChanged_false_fst
-                    ]
+      rw [psKernelExprLiftLooseBVarsReference_letE]
+      rw [psKernelExprInstantiateAtReference_letE]
+      rw [
+        ihType offset,
+        ihValue offset,
+        ihBody (Nat.succ offset)
+      ]
   | mdata metadata body ihBody =>
-      cases hLiftBody :
-          psKernelExprLiftLooseBVarsReferenceChanged body offset 1 with
-      | mk liftedBody bodyChanged =>
-          have ihBodyResult := ihBody offset
-          simp [psKernelExprLiftLooseBVarsReference, hLiftBody] at ihBodyResult
-          cases bodyChanged <;>
-            simp_all [
-              psKernelExprLiftLooseBVarsReference,
-              psKernelExprLiftLooseBVarsReferenceChanged,
-              hLiftBody,
-              psKernelExprInstantiateAtReference,
-              psKernelExprInstantiateAtReferenceChanged,
-              psKernelExprListIsEmpty,
-              psKernelExprLiftLooseBVarsReferenceChanged_false_fst
-            ]
+      rw [psKernelExprLiftLooseBVarsReference_mdata]
+      rw [psKernelExprInstantiateAtReference_mdata]
+      rw [ihBody offset]
   | proj typeName index body ihBody =>
-      cases hLiftBody :
-          psKernelExprLiftLooseBVarsReferenceChanged body offset 1 with
-      | mk liftedBody bodyChanged =>
-          have ihBodyResult := ihBody offset
-          simp [psKernelExprLiftLooseBVarsReference, hLiftBody] at ihBodyResult
-          cases bodyChanged <;>
-            simp_all [
-              psKernelExprLiftLooseBVarsReference,
-              psKernelExprLiftLooseBVarsReferenceChanged,
-              hLiftBody,
-              psKernelExprInstantiateAtReference,
-              psKernelExprInstantiateAtReferenceChanged,
-              psKernelExprListIsEmpty,
-              psKernelExprLiftLooseBVarsReferenceChanged_false_fst
-            ]
-
+      rw [psKernelExprLiftLooseBVarsReference_proj]
+      rw [psKernelExprInstantiateAtReference_proj]
+      rw [ihBody offset]
 
 theorem psKernelExprLiftOne_then_instantiate_cancel
     (expr replacement : PsKernelExpr)

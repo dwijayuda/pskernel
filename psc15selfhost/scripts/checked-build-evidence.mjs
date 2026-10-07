@@ -44,6 +44,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   if (directWasm !== undefined && !(directWasm instanceof Uint8Array)) throw new Error('PSC_BUILD_GRAPH_WASM_BYTES');
   let toolInputs;
   let runtimeInterface;
+  let executableArtifact;
   function add(item, source, inline = false) {
     const key = artifactKey(item.identity);
     if (!artifacts.has(key)) {
@@ -195,6 +196,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         bytes(declarations, 'declarations-output', 'typescript-emitted-file/1', { kind: 'output-file', suffix: '.d.ts' }),
         bytes(sourceMap, 'source-map-output', 'typescript-emitted-file/1', { kind: 'output-file', suffix: '.js.map' }),
       ];
+      executableArtifact = outputs[0].identity;
       execute('typescript-to-es2022/1', ts, outputs, toolInputs ?? tool, 'typescript-erasure-to-es2022/1',
         { outputStem, inputClosureComplete: false,
           flags: ['--ignoreConfig', '--target', 'ES2022', '--module', 'ES2022', '--moduleResolution', 'bundler',
@@ -215,12 +217,14 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         'trusted-specialization-correspondence-checker'], correspondence);
     if (directBackend === 'javascript') {
       const js = bytes(directJavaScript, 'javascript-output', 'psc-direct-javascript/es2022', { kind: 'output-file', suffix: '.js' });
+      executableArtifact = js.identity;
       execute('psc-specialized-ir-to-javascript/1', specializedIr, [js], implementation, 'psc-ir-javascript-refinement/1',
         { target: 'javascript', wordSize: 64, observedStages: ['javascript-lower-and-stack-safe-print'],
           unobservedInteriorStages: ['javascript-target-ir'], productionPromotion: false },
         baseDependencies, ['trusted-javascript-lowering-and-printing']);
     } else {
       const wasm = bytes(directWasm, 'wasm-output', 'psc-direct-wasm/wasm32', { kind: 'output-file', suffix: '.wasm' });
+      executableArtifact = wasm.identity;
       execute('psc-specialized-ir-to-wasm/1', specializedIr, [wasm], implementation, 'psc-ir-wasm-refinement/1',
         { target: 'wasm', wordSize: 32, observedStages: ['wasm-lower-selfhost-abi-and-encode'],
           unobservedInteriorStages: ['wasm-target-ir'], globalPreservationProved: false },
@@ -236,6 +240,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
     ...(certification ? { certification } : {}),
+    ...(executableArtifact ? { executableArtifact } : {}),
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1'),
     ...(providerInputs.length ? { providerInputs: providerInputs.map(item => item.identity) } : {}),
     ...(toolInputs ? { typeScriptToolInputs: toolInputs.identity } : {}) };

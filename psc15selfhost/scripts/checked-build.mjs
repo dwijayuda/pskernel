@@ -7,6 +7,7 @@ import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
 import { createCheckedCompilerService } from './compiler-checked-service.mjs';
 import { createCheckedBuildGraph, readCheckedBuildHostSources } from './checked-build-evidence.mjs';
 import { packObservedBuildArchive } from './observed-build-archive.mjs';
+import { createEvidenceEnvelope } from './evidence-envelope.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkAdmissionsWithDual } from './checked-kernel-dual.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
@@ -191,12 +192,27 @@ export async function buildChecked({
     receipt.providerInputs = evidence.providerInputs;
     const archive = packObservedBuildArchive(evidence);
     receipt.buildArchive = archive.identity;
+    if (!evidence.executableArtifact) throw new Error('PSC2_CHECKED_EXECUTABLE_ARTIFACT_MISSING');
+    const envelope = createEvidenceEnvelope({
+      executableArtifact: evidence.executableArtifact,
+      pscvCert: pscvCertificate.identity,
+      certifiedSource: certifiedSourceArtifact.identity,
+      buildGraph: evidence.identity,
+      buildArchive: archive.identity,
+      runtimeInterface: evidence.runtimeInterface,
+      providerInputs: evidence.providerInputs ?? [],
+      typeScriptToolInputs: evidence.typeScriptToolInputs,
+      sourceResources: snapshot.resourceObservation,
+      seedResources,
+    });
+    receipt.evidenceEnvelope = envelope.identity;
+    await writeFile(path.join(staging, stem + '.evidence-envelope.json'), envelope.bytes);
     await writeFile(path.join(staging, stem + '.pscv-cert.json'), pscvCertificate.bytes);
     await writeFile(path.join(staging, stem + '.certified-source.json'), certifiedSourceArtifact.bytes);
     await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);
     await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
     await writeFile(path.join(staging, stem + '.admissions.json'), admissions);
-    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.pscv-cert.json', '.certified-source.json', '.build-graph.json', '.build-archive.json']) {
+    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.pscv-cert.json', '.certified-source.json', '.build-graph.json', '.build-archive.json', '.evidence-envelope.json']) {
       await rename(path.join(staging, stem + suffix), path.join(path.dirname(output), stem + suffix));
     }
     // This receipt is an audit record, not a transferable proof/capability.

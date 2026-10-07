@@ -171,8 +171,8 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
           simp [
             psKernelExprInstantiateAtReferenceChanged,
             hBefore
-          ] at hFst
-          exact hFst.symm
+          ] at hRun
+          exact hRun.symm
       | false =>
           cases hGet :
               psKernelExprListGet
@@ -183,7 +183,7 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
                 psKernelExprInstantiateAtReferenceChanged,
                 hBefore,
                 hGet
-              ] at hSnd
+              ] at hRun
           | none =>
               cases hEmpty :
                   psKernelExprListIsEmpty subst with
@@ -193,15 +193,15 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
                     hBefore,
                     hGet,
                     hEmpty
-                  ] at hFst
-                  exact hFst.symm
+                  ] at hRun
+                  exact hRun.symm
               | false =>
                   simp [
                     psKernelExprInstantiateAtReferenceChanged,
                     hBefore,
                     hGet,
                     hEmpty
-                  ] at hSnd
+                  ] at hRun
   | fvar name =>
       simp [psKernelExprInstantiateAtReferenceChanged] at hFst
       exact hFst.symm
@@ -1167,12 +1167,20 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
               hGe
             ]
           rw [hLift]
-          simp [
+          simp only [
             psKernelExprInstantiateAtReference,
-            psKernelExprInstantiateAtReferenceChanged,
             psKernelExprListIsEmpty,
+            Bool.false_eq_true,
+            if_false
+          ]
+          simp only [
+            psKernelExprInstantiateAtReferenceChanged,
             hNatLt,
-            hRelative,
+            Bool.false_eq_true,
+            if_false
+          ]
+          rw [hRelative]
+          simp [
             psKernelExprListGet,
             psKernelExprListLength
           ]

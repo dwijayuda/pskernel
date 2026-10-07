@@ -1353,6 +1353,53 @@ theorem psKernelDefEqFinish_preserves_configuration
                   ⟩)
 
 
+theorem psKernelDefEqFinish_result_sound
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (inputValue outputValue : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hDefEq :
+      inputValue = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right)
+    (hResult :
+      psKernelDefEqFinish
+          state
+          left
+          right
+          inputValue =
+        Prod.mk outputValue nextState) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (outputValue = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right) := by
+  have hFinishConfig :=
+    psKernelDefEqFinish_preserves_configuration
+      context
+      state
+      left
+      right
+      inputValue
+      hConfig
+      hDefEq
+  rw [hResult] at hFinishConfig
+  have hValueEq : inputValue = outputValue := by
+    have hFst := congrArg Prod.fst hResult
+    cases inputValue <;>
+      simpa [psKernelDefEqFinish] using hFst
+  refine ⟨hFinishConfig, ?_⟩
+  intro hOutput
+  apply hDefEq
+  exact hValueEq.trans hOutput
+
 theorem psKernelInferenceConfigurationSound_preserves
     (infer :
       PsKernelCheckerContext ->

@@ -255,3 +255,72 @@ theorem psKernelDeltaStepPostcondition_transport
             originalRight right nextRight
             hRight hResult.2
         ⟩
+
+
+/-
+A projection-headed application is only published as an optional reduction
+after the core WHNF callback has supplied an independently certified closure.
+Non-projection heads and unchanged projections return no reduction.
+-/
+theorem psKernelDefEqTryUnfoldProjApp_configuration_sound
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (answer : Option PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqTryUnfoldProjApp
+          coreWhnf context state expr =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelOptionalReductionPostcondition
+      context nextState expr answer := by
+  cases hHead : psKernelExprGetAppFn expr with
+  | proj typeName index body =>
+      cases hCoreRun :
+          coreWhnf context state expr false false with
+      | error error =>
+          simp [
+            psKernelDefEqTryUnfoldProjApp,
+            hHead,
+            hCoreRun
+          ] at hRun
+      | ok coreRun =>
+          rcases coreRun with ⟨reduced, coreState⟩
+          have hCoreSound :=
+            hCore
+              context state coreState expr reduced
+              false false hConfig hCoreRun
+          cases hEq : psKernelExprEq reduced expr with
+          | true =>
+              simp [
+                psKernelDefEqTryUnfoldProjApp,
+                hHead,
+                hCoreRun,
+                hEq
+              ] at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              exact ⟨hCoreSound.2, trivial⟩
+          | false =>
+              simp [
+                psKernelDefEqTryUnfoldProjApp,
+                hHead,
+                hCoreRun,
+                hEq
+              ] at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              exact ⟨hCoreSound.2, hCoreSound.1⟩
+  | _ =>
+      simp [
+        psKernelDefEqTryUnfoldProjApp,
+        hHead
+      ] at hRun
+      rcases hRun with ⟨rfl, rfl⟩
+      exact ⟨hConfig, trivial⟩

@@ -97,6 +97,18 @@ jobs:
           set -euo pipefail
           git clone --depth 1 https://github.com/leanprover/lean-kernel-arena.git arena
 
+      - name: Force Arena wall-clock measurement fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/no-perf"
+          cat > "$RUNNER_TEMP/no-perf/perf" <<'EOF'
+          #!/bin/sh
+          exit 1
+          EOF
+          chmod +x "$RUNNER_TEMP/no-perf/perf"
+          echo "$RUNNER_TEMP/no-perf" >> "$GITHUB_PATH"
+
       - name: Register PSKernel Core checker
         working-directory: arena
         shell: bash

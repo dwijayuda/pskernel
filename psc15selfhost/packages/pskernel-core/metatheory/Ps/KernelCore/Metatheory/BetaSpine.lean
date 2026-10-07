@@ -1943,126 +1943,237 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
 
 
 /-
-Fuel-free reference semantics for the lambda-prefix counter used by WHNF.
-The executable counter is fuel-bounded only for portability; semantically it
-walks a structurally decreasing chain of nested lambda bodies.
+Independent semantic relation for the lambda-prefix counter used by WHNF.
+
+The executable counter carries fuel only for portability.  The Assurance Plane
+records the observable counting decision as an inductive relation, so semantic
+proofs do not depend on a second executable recursive function.
 -/
-def psKernelWhnfCountLambdasReference
-    (current : PsKernelExpr)
-    (argCount count : Nat) :
-    Prod PsKernelExpr Nat :=
-  match current with
-  | PsKernelExpr.lam _ _ body _ =>
-      if psKernelNatLt count argCount then
-        let nextCount := Nat.succ count
-        if psKernelNatLt nextCount argCount then
-          match body with
-          | PsKernelExpr.lam _ _ _ _ =>
-              psKernelWhnfCountLambdasReference
-                body argCount nextCount
-          | _ =>
-              Prod.mk current nextCount
-        else
-          Prod.mk current nextCount
-      else
-        Prod.mk current count
-  | _ =>
-      Prod.mk current count
-termination_by psKernelExprNodeCount current
-decreasing_by
-  simp [psKernelExprNodeCount]
-  omega
+def psKernelExprIsLambda
+    (expr : PsKernelExpr) : Bool :=
+  match expr with
+  | PsKernelExpr.lam _ _ _ _ => true
+  | _ => false
 
 
-theorem psKernelWhnfCountLambdasWithFuel_refines_reference
+inductive PsKernelWhnfCountLambdasRelation :
+    PsKernelExpr ->
+    Nat ->
+    Nat ->
+    PsKernelExpr ->
+    Nat ->
+    Prop
+  | nonLambda
+      (current : PsKernelExpr)
+      (argCount count : Nat)
+      (hNotLam :
+        psKernelExprIsLambda current = false) :
+      PsKernelWhnfCountLambdasRelation
+        current argCount count current count
+  | lamNoArg
+      (name : PsKernelName)
+      (type body : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (argCount count : Nat)
+      (hCount :
+        psKernelNatLt count argCount = false) :
+      PsKernelWhnfCountLambdasRelation
+        (PsKernelExpr.lam name type body binderInfo)
+        argCount
+        count
+        (PsKernelExpr.lam name type body binderInfo)
+        count
+  | lamLast
+      (name : PsKernelName)
+      (type body : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (argCount count : Nat)
+      (hCount :
+        psKernelNatLt count argCount = true)
+      (hNext :
+        psKernelNatLt (Nat.succ count) argCount = false) :
+      PsKernelWhnfCountLambdasRelation
+        (PsKernelExpr.lam name type body binderInfo)
+        argCount
+        count
+        (PsKernelExpr.lam name type body binderInfo)
+        (Nat.succ count)
+  | lamBodyStop
+      (name : PsKernelName)
+      (type body : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (argCount count : Nat)
+      (hCount :
+        psKernelNatLt count argCount = true)
+      (hNext :
+        psKernelNatLt (Nat.succ count) argCount = true)
+      (hBodyNotLam :
+        psKernelExprIsLambda body = false) :
+      PsKernelWhnfCountLambdasRelation
+        (PsKernelExpr.lam name type body binderInfo)
+        argCount
+        count
+        (PsKernelExpr.lam name type body binderInfo)
+        (Nat.succ count)
+  | lamRecurse
+      (name : PsKernelName)
+      (type body : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (argCount count : Nat)
+      (lastLam : PsKernelExpr)
+      (consumed : Nat)
+      (hCount :
+        psKernelNatLt count argCount = true)
+      (hNext :
+        psKernelNatLt (Nat.succ count) argCount = true)
+      (hBodyLam :
+        psKernelExprIsLambda body = true)
+      (hRest :
+        PsKernelWhnfCountLambdasRelation
+          body
+          argCount
+          (Nat.succ count)
+          lastLam
+          consumed) :
+      PsKernelWhnfCountLambdasRelation
+        (PsKernelExpr.lam name type body binderInfo)
+        argCount
+        count
+        lastLam
+        consumed
+
+
+theorem psKernelWhnfCountLambdasWithFuel_refines_relation
+    (fuel : Nat)
     (current : PsKernelExpr)
-    (argCount count fuel : Nat)
+    (argCount count : Nat)
+    (lastLam : PsKernelExpr)
+    (consumed : Nat)
     (hFuel :
-      psKernelExprNodeCount current < fuel) :
-    psKernelWhnfCountLambdasWithFuel
-        fuel current argCount count =
-      psKernelWhnfCountLambdasReference
-        current argCount count := by
-  induction current generalizing fuel count with
-  | bvar index =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | fvar name =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | mvar name =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | sort level =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | const name levels =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | app fn arg ihFn ihArg =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | forallE name type body binderInfo ihType ihBody =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | letE name type value body nondep ihType ihValue ihBody =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | lit literal =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | mdata metadata body ihBody =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | proj typeName index body ihBody =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
-          rfl
-  | lam name type body binderInfo ihType ihBody =>
-      cases fuel with
-      | zero =>
-          simp [psKernelExprNodeCount] at hFuel
-      | succ remaining =>
+      psKernelExprNodeCount current < fuel)
+    (hRun :
+      psKernelWhnfCountLambdasWithFuel
+          fuel current argCount count =
+        Prod.mk lastLam consumed) :
+    PsKernelWhnfCountLambdasRelation
+      current argCount count lastLam consumed := by
+  induction fuel generalizing current count lastLam consumed with
+  | zero =>
+      exact (Nat.not_lt_zero _ hFuel).elim
+  | succ remaining ih =>
+      cases current with
+      | bvar index =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.bvar index)
+              argCount
+              count
+              rfl
+      | fvar name =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.fvar name)
+              argCount
+              count
+              rfl
+      | mvar name =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.mvar name)
+              argCount
+              count
+              rfl
+      | sort level =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.sort level)
+              argCount
+              count
+              rfl
+      | const name levels =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.const name levels)
+              argCount
+              count
+              rfl
+      | app fn arg =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.app fn arg)
+              argCount
+              count
+              rfl
+      | forallE name type body binderInfo =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.forallE name type body binderInfo)
+              argCount
+              count
+              rfl
+      | letE name type value body nondep =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.letE name type value body nondep)
+              argCount
+              count
+              rfl
+      | lit literal =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.lit literal)
+              argCount
+              count
+              rfl
+      | mdata metadata body =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.mdata metadata body)
+              argCount
+              count
+              rfl
+      | proj typeName index body =>
+          simp [psKernelWhnfCountLambdasWithFuel] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact
+            PsKernelWhnfCountLambdasRelation.nonLambda
+              (PsKernelExpr.proj typeName index body)
+              argCount
+              count
+              rfl
+      | lam name type body binderInfo =>
           cases hCount :
               psKernelNatLt count argCount with
           | false =>
               simp [
                 psKernelWhnfCountLambdasWithFuel,
-                psKernelWhnfCountLambdasReference,
                 hCount
-              ]
+              ] at hRun
+              rcases hRun with ⟨rfl, rfl⟩
+              exact
+                PsKernelWhnfCountLambdasRelation.lamNoArg
+                  name type body binderInfo
+                  argCount count hCount
           | true =>
               let nextCount := Nat.succ count
               cases hNext :
@@ -2070,14 +2181,52 @@ theorem psKernelWhnfCountLambdasWithFuel_refines_reference
               | false =>
                   simp [
                     psKernelWhnfCountLambdasWithFuel,
-                    psKernelWhnfCountLambdasReference,
                     hCount,
                     nextCount,
                     hNext
-                  ]
+                  ] at hRun
+                  rcases hRun with ⟨rfl, rfl⟩
+                  exact
+                    PsKernelWhnfCountLambdasRelation.lamLast
+                      name type body binderInfo
+                      argCount count
+                      hCount
+                      (by simpa [nextCount] using hNext)
               | true =>
                   cases body with
                   | lam bodyName bodyType bodyBody bodyInfo =>
+                      have hOuterLe :
+                          psKernelExprNodeCount
+                              (PsKernelExpr.lam
+                                name
+                                type
+                                (PsKernelExpr.lam
+                                  bodyName
+                                  bodyType
+                                  bodyBody
+                                  bodyInfo)
+                                binderInfo) ≤
+                            remaining :=
+                        Nat.le_of_lt_succ hFuel
+                      have hBodyLt :
+                          psKernelExprNodeCount
+                              (PsKernelExpr.lam
+                                bodyName
+                                bodyType
+                                bodyBody
+                                bodyInfo) <
+                            psKernelExprNodeCount
+                              (PsKernelExpr.lam
+                                name
+                                type
+                                (PsKernelExpr.lam
+                                  bodyName
+                                  bodyType
+                                  bodyBody
+                                  bodyInfo)
+                                binderInfo) := by
+                        simp [psKernelExprNodeCount]
+                        omega
                       have hBodyFuel :
                           psKernelExprNodeCount
                               (PsKernelExpr.lam
@@ -2085,126 +2234,246 @@ theorem psKernelWhnfCountLambdasWithFuel_refines_reference
                                 bodyType
                                 bodyBody
                                 bodyInfo) <
-                            remaining := by
-                        simp [psKernelExprNodeCount] at hFuel
-                        omega
-                      have ih :=
-                        ihBody
-                          remaining
+                            remaining :=
+                        Nat.lt_of_lt_of_le
+                          hBodyLt
+                          hOuterLe
+                      have hRecursive :
+                          psKernelWhnfCountLambdasWithFuel
+                              remaining
+                              (PsKernelExpr.lam
+                                bodyName
+                                bodyType
+                                bodyBody
+                                bodyInfo)
+                              argCount
+                              nextCount =
+                            Prod.mk lastLam consumed := by
+                        simpa [
+                          psKernelWhnfCountLambdasWithFuel,
+                          hCount,
+                          nextCount,
+                          hNext
+                        ] using hRun
+                      have hRest :=
+                        ih
+                          (PsKernelExpr.lam
+                            bodyName
+                            bodyType
+                            bodyBody
+                            bodyInfo)
                           nextCount
+                          lastLam
+                          consumed
                           hBodyFuel
-                      simpa [
-                        psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
-                        hCount,
-                        nextCount,
-                        hNext
-                      ] using ih
+                          hRecursive
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamRecurse
+                          name
+                          type
+                          (PsKernelExpr.lam
+                            bodyName
+                            bodyType
+                            bodyBody
+                            bodyInfo)
+                          binderInfo
+                          argCount
+                          count
+                          lastLam
+                          consumed
+                          hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
+                          hRest
                   | bvar index =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type (PsKernelExpr.bvar index) binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | fvar bodyName =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type (PsKernelExpr.fvar bodyName) binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | mvar bodyName =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type (PsKernelExpr.mvar bodyName) binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | sort bodyLevel =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type (PsKernelExpr.sort bodyLevel) binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | const bodyName bodyLevels =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type (PsKernelExpr.const bodyName bodyLevels) binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | app bodyFn bodyArg =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type (PsKernelExpr.app bodyFn bodyArg) binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | forallE bodyName bodyType bodyBody bodyInfo =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type
+                          (PsKernelExpr.forallE
+                            bodyName bodyType bodyBody bodyInfo)
+                          binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | letE bodyName bodyType bodyValue bodyBody bodyNondep =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type
+                          (PsKernelExpr.letE
+                            bodyName bodyType bodyValue bodyBody bodyNondep)
+                          binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | lit bodyLiteral =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type (PsKernelExpr.lit bodyLiteral) binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | mdata bodyMetadata bodyBody =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type
+                          (PsKernelExpr.mdata bodyMetadata bodyBody)
+                          binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
                   | proj bodyTypeName bodyIndex bodyBody =>
                       simp [
                         psKernelWhnfCountLambdasWithFuel,
-                        psKernelWhnfCountLambdasReference,
                         hCount,
                         nextCount,
                         hNext
-                      ]
+                      ] at hRun
+                      rcases hRun with ⟨rfl, rfl⟩
+                      exact
+                        PsKernelWhnfCountLambdasRelation.lamBodyStop
+                          name type
+                          (PsKernelExpr.proj
+                            bodyTypeName bodyIndex bodyBody)
+                          binderInfo
+                          argCount count hCount
+                          (by simpa [nextCount] using hNext)
+                          rfl
 
 
-theorem psKernelWhnfCountLambdas_refines_reference
+theorem psKernelWhnfCountLambdas_refines_relation
     (current : PsKernelExpr)
-    (argCount : Nat) :
-    psKernelWhnfCountLambdas current argCount =
-      psKernelWhnfCountLambdasReference
-        current argCount 0 := by
-  unfold psKernelWhnfCountLambdas
+    (argCount : Nat)
+    (lastLam : PsKernelExpr)
+    (consumed : Nat)
+    (hRun :
+      psKernelWhnfCountLambdas current argCount =
+        Prod.mk lastLam consumed) :
+    PsKernelWhnfCountLambdasRelation
+      current argCount 0 lastLam consumed := by
+  unfold psKernelWhnfCountLambdas at hRun
   exact
-    psKernelWhnfCountLambdasWithFuel_refines_reference
+    psKernelWhnfCountLambdasWithFuel_refines_relation
+      (Nat.succ (psKernelExprNodeCount current))
       current
       argCount
       0
-      (Nat.succ (psKernelExprNodeCount current))
+      lastLam
+      consumed
       (Nat.lt_succ_self
         (psKernelExprNodeCount current))
+      hRun
 
 
 theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton

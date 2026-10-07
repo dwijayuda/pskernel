@@ -554,7 +554,7 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
         have hOriginal :=
           liftSemantic (hEtaSound.2 hEtaTrue)
         exact
-          psKernelDefEqFinish_result_sound
+          psKernelDefEqFinish_result_sound_ok
             context
             etaState
             nextState
@@ -564,7 +564,7 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
             value
             hEtaSound.1
             (fun _ => hOriginal)
-            hSuccess
+            (by simpa only [Prod.fst_mk, Prod.snd_mk] using hSuccess)
       · rw [if_neg hEtaTrue] at hSuccess
         cases hString :
             psKernelDefEqStringLitExpansionWith
@@ -599,7 +599,7 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
                 cases stringValue with
                 | false =>
                     exact
-                      psKernelDefEqFinish_result_sound
+                      psKernelDefEqFinish_result_sound_ok
                         context
                         stringState
                         nextState
@@ -611,12 +611,12 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
                         (by
                           intro hFalse
                           simp at hFalse)
-                        hSuccess
+                        (by simpa only [Prod.fst_mk, Prod.snd_mk] using hSuccess)
                 | true =>
                     have hOriginal :=
                       liftSemantic hStringSound.2
                     exact
-                      psKernelDefEqFinish_result_sound
+                      psKernelDefEqFinish_result_sound_ok
                         context
                         stringState
                         nextState
@@ -626,7 +626,7 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
                         value
                         hStringSound.1
                         (fun _ => hOriginal)
-                        hSuccess
+                        (by simpa only [Prod.fst_mk, Prod.snd_mk] using hSuccess)
             | none =>
                 cases hUnit :
                     psKernelDefEqUnitLikeWith
@@ -660,7 +660,7 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
                         hStringSound.1
                         hUnit
                     exact
-                      psKernelDefEqFinish_result_sound
+                      psKernelDefEqFinish_result_sound_ok
                         context
                         unitState
                         nextState
@@ -671,5 +671,5 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
                         hUnitSound.1
                         (fun hValue =>
                           liftSemantic (hUnitSound.2 hValue))
-                        hSuccess
+                        (by simpa only [Prod.fst_mk, Prod.snd_mk] using hSuccess)
 

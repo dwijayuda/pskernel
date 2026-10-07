@@ -1212,7 +1212,8 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
           rw [hRelative0]
           simp [
             psKernelExprListGet,
-            psKernelExprListLength
+            psKernelExprListLength,
+            psKernelExprListIsEmpty
           ]
   | fvar name =>
       simp [

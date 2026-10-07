@@ -109,6 +109,7 @@ lean_lib PsBackendJs where
     `Ps.BackendJs.Model,
     `Ps.BackendJs.Lower,
     `Ps.BackendJs.Validate,
+    `Ps.BackendJs.Encode,
     `Ps.BackendJs.Print,
     `Ps.BackendJs.TailAlias
   ]

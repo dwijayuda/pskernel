@@ -36,20 +36,6 @@ def PsKernelEnvironmentIndexRefines
         name
         environment.constants
 
-theorem psKernelEnvironmentIndexRefines_lookup_sound
-    (environment : PsKernelEnvironment)
-    (hRefines : PsKernelEnvironmentIndexRefines environment) :
-    PsKernelEnvironmentLookupSound environment := by
-  intro name info hFind
-  unfold psKernelEnvironmentFind at hFind
-  calc
-    psKernelFindConstantInList name environment.constants =
-        psKernelFindConstantInList
-          name
-          (psKernelEnvironmentIndexFind environment.index name) :=
-      (hRefines name).symm
-    _ = Option.some info := hFind
-
 inductive PsKernelReductionStep
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext) :

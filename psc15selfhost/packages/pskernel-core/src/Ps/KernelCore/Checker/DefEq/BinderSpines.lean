@@ -168,17 +168,27 @@ def psKernelDefEqLambdaSpineWithFuel
                           Prod.fst (Prod.snd openedLocal);
                         let nextState :=
                           Prod.snd (Prod.snd openedLocal);
-                        smaller
-                          defeq
-                          child
-                          nextState
-                          leftBody
-                          rightBody
-                          (psKernelExprListAppend
-                            subst
-                            (List.cons
-                              (PsKernelExpr.fvar fresh)
-                              List.nil))
+                        match
+                            smaller
+                              defeq
+                              child
+                              nextState
+                              leftBody
+                              rightBody
+                              (psKernelExprListAppend
+                                subst
+                                (List.cons
+                                  (PsKernelExpr.fvar fresh)
+                                  List.nil)) with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok childResult =>
+                            Except.ok
+                              (Prod.mk
+                                (Prod.fst childResult)
+                                (psKernelCheckerStateExitLocalScope
+                                  nextState
+                                  (Prod.snd childResult)))
                       else
                         smaller
                           defeq
@@ -331,17 +341,27 @@ def psKernelDefEqForallSpineWithFuel
                           Prod.fst (Prod.snd openedLocal);
                         let nextState :=
                           Prod.snd (Prod.snd openedLocal);
-                        smaller
-                          defeq
-                          child
-                          nextState
-                          leftBody
-                          rightBody
-                          (psKernelExprListAppend
-                            subst
-                            (List.cons
-                              (PsKernelExpr.fvar fresh)
-                              List.nil))
+                        match
+                            smaller
+                              defeq
+                              child
+                              nextState
+                              leftBody
+                              rightBody
+                              (psKernelExprListAppend
+                                subst
+                                (List.cons
+                                  (PsKernelExpr.fvar fresh)
+                                  List.nil)) with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok childResult =>
+                            Except.ok
+                              (Prod.mk
+                                (Prod.fst childResult)
+                                (psKernelCheckerStateExitLocalScope
+                                  nextState
+                                  (Prod.snd childResult)))
                       else
                         smaller
                           defeq

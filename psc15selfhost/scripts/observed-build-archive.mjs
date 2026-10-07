@@ -1,6 +1,7 @@
 import { artifactId, artifactKey, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
+import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 
 const contract = 'psc-observed-build-archive/1';
 const defaults = Object.freeze({ maxArchiveBytes: 256 * 1024 * 1024, maxArtifactBytes: 128 * 1024 * 1024,
@@ -117,7 +118,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     const graph = graphValue(resolveArtifact(archive.graphId), bound);
     if (graph.entries.length + 1 !== blobs.size) fail('ARTIFACT_SET');
     for (const entry of graph.entries) resolveArtifact(entry.identity);
-    const executions = [], runtimeInterfaceProjections = [];
+    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [];
     for (const identity of graph.executions) {
       const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions });
       executions.push(result);
@@ -130,10 +131,18 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
           { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) },
           { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) }, { maxBytes: bound.maxArtifactBytes }));
       }
+      if (definition.passId === 'psc-pass-specialize/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            definition.semanticRelationId !== 'psc-specialization-runtime-refinement/1') fail('SPECIALIZATION_SUBJECT');
+        specializationCorrespondences.push(verifySpecializationCorrespondence(
+          { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) },
+          { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) }, { maxBytes: bound.maxArtifactBytes }));
+      }
     }
     return { kind: 'accepted', contract: 'psc-observed-build-verification/1', graphId: archive.graphId,
       acceptanceScope: 'observed-artifact-integrity-only', integrityVerified: true, artifactCount: blobs.size,
-      artifactBytes: total, executions, runtimeInterfaceProjections, fullInputClosureEstablished: false, semanticClaimsVerified: false,
+      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences,
+      fullInputClosureEstablished: false, semanticClaimsVerified: false,
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {
     return { kind: error.kind === 'resourceExhausted' || /EXHAUSTED/u.test(error.message) ? 'resourceExhausted' : 'rejectedInvalid',

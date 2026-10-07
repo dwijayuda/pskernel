@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
+import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 
 export async function readCheckedBuildHostSources() {
   const root = path.dirname(fileURLToPath(import.meta.url));
@@ -91,18 +92,20 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...providerInputs.map(item => item.identity)];
   const assumptions = ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
     'selected-kernel-invocation'];
-  function execute(id, input, outputs, impl, relation, parameters, dependencies, extraAssumptions = []) {
+  function execute(id, input, outputs, impl, relation, parameters, dependencies, extraAssumptions = [], validation) {
     const definition = add(passDefinition({ passId: id, version: 1, inputContract: input.identity.contract,
       outputContract: outputs[0].identity.contract, semanticRelationId: relation,
       resourceContractId: 'psc-compilation-resource/1', determinismClass: 'declared-inputs-with-trusted-host',
       totalityClass: 'partial-host-bounded', implementationId: impl.identity,
-      validatorId: null, theoremIds: [], assumptionIds: [...assumptions, ...extraAssumptions] }), { kind: 'inline' }, true);
+      validatorId: validation?.contract ?? null, theoremIds: [], assumptionIds: [...assumptions, ...extraAssumptions] }), { kind: 'inline' }, true);
     const record = recordPassExecution({ definition, inputs: [input], outputs, parameters,
       semanticIdentity, dependencies, resourcePolicy: { contract: 'psc-checked-host-resource/1',
         enforcement: 'existing-stage-specific-limits', completeBudgetCoverage: false,
+        ...(validation ? { correspondence: validation.resourcePolicy } : {}),
         ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.limits } : {}),
         ...(id !== 'typescript-to-es2022/1' && id !== 'psc-project-runtime-interface/1' && seedResources ? { nativeSession: seedResources.limits } : {}) },
       resourceObservation: { hostObserved: true, inputBytes: input.bytes.byteLength,
+        ...(validation ? { correspondence: validation.observed } : {}),
         outputBytes: outputs.reduce((sum, output) => sum + output.bytes.byteLength, 0),
         ...(id === 'psc-prepare-and-check/1' && sourceResources ? { sourceReading: sourceResources.observed } : {}),
         ...(id !== 'typescript-to-es2022/1' && id !== 'psc-project-runtime-interface/1' && seedResources ? { nativeSession: seedResources.observed,
@@ -168,9 +171,13 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   if (directJavaScript !== undefined) {
     if (!verifiedIr || !stages?.specializedIr) throw new Error('PSC_BUILD_GRAPH_JS_STAGES_REQUIRED');
     const specializedIr = add(stages.specializedIr, { kind: 'archive-required', role: 'actual-specialization-output' });
+    const correspondence = verifySpecializationCorrespondence(verifiedIr, specializedIr);
     execute('psc-pass-specialize/1', verifiedIr, [specializedIr], implementation, 'psc-specialization-runtime-refinement/1',
-      { observedStages: ['specialize', 'validate-specialized-ir'], postcondition: 'strict-runtime-ir-invariants' },
-      baseDependencies, ['trusted-specialization-implementation', 'trusted-strict-ir-validator']);
+      { observedStages: ['specialize', 'validate-specialized-ir', 'check-specialization-correspondence'],
+        postcondition: 'strict-runtime-ir-invariants', correspondenceRelation: correspondence.relation,
+        globalPreservationProved: false },
+      baseDependencies, ['trusted-specialization-implementation', 'trusted-strict-ir-validator',
+        'trusted-specialization-correspondence-checker'], correspondence);
     const js = bytes(directJavaScript, 'javascript-output', 'psc-direct-javascript/es2022', { kind: 'output-file', suffix: '.js' });
     execute('psc-specialized-ir-to-javascript/1', specializedIr, [js], implementation, 'psc-ir-javascript-refinement/1',
       { target: 'javascript', wordSize: 64, observedStages: ['javascript-lower-and-stack-safe-print'],

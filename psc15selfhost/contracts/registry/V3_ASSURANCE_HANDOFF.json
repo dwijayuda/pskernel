@@ -23,7 +23,7 @@
     {
       "id": "global-erasure-specialization",
       "status": "unproved",
-      "required": "Lean-check global erasure/specialization preservation, or independently validate every actual transformation under a precisely declared supported contract. Existing local slices do not discharge this obligation."
+      "required": "Lean-check global erasure/specialization preservation, or independently validate every actual transformation under a precisely declared supported contract. The host specialization correspondence checker now covers all encoded expression constructors and checks actual staged JS/archived instances independently of producer name mangling. Strict source/output validity and adequacy for runtime semantics remain preconditions; global validator soundness and erasure preservation are unproved. Run whole-compiler and adversarial campaigns; local slices do not discharge this obligation."
     },
     {
       "id": "backend-preservation",

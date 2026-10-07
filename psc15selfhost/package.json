@@ -207,7 +207,7 @@
     "test:factorybench": "node --test scripts/factory-bench.test.mjs",
     "check:foreign-interface": "lake exe pscv_foreign_interface_tests && lake exe psc1 check packages/interface-ir/src/Ps/InterfaceIr/Wit.lean",
     "test:js-scalar-abi": "lake build pscv_js_abi_tests && lake exe pscv_js_abi_tests && lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean && node --experimental-vm-modules --test scripts/js-scalar-abi.test.mjs",
-    "test:ir-artifacts": "lake build pscv_ir_encoding_tests && lake exe pscv_ir_encoding_tests && node --test scripts/ir-artifact.test.mjs"
+    "test:ir-artifacts": "lake build pscv_ir_encoding_tests psc1_ir_specialize_tests && lake exe pscv_ir_encoding_tests && node --test scripts/ir-artifact.test.mjs scripts/specialization-correspondence.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

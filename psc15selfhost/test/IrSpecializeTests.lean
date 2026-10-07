@@ -1,4 +1,6 @@
 import Ps.CompilerIr.Specialize
+import Ps.CompilerIr.Encode
+import Ps.CompilerIr.Validate
 
 def psIrSpecU32 : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
@@ -390,8 +392,18 @@ def psTestSpecializationPassEvidence : Bool :=
         && psIrSpecNoGenericDeclaration
           result.specialized.raw.declarations
 
-def main : IO Unit := do
-  if psTestGenericSpecialization
+def main (args : List String) : IO Unit := do
+  if args == ["--artifacts"] then
+    let .ok checked := psValidateErasedIrModule (PsErasedIrModule.mk psIrSpecModule)
+      | throw (IO.userError "SOURCE_INVALID")
+    let .ok specialized := psIrSpecializeValidatedModule checked
+      | throw (IO.userError "SPECIALIZE_FAILED")
+    let .ok _ := psValidateErasedIrModule (PsErasedIrModule.mk specialized.raw)
+      | throw (IO.userError "TARGET_INVALID")
+    let .ok input := psIrEncodeModule checked.raw | throw (IO.userError "SOURCE_ENCODING")
+    let .ok output := psIrEncodeModule specialized.raw | throw (IO.userError "TARGET_ENCODING")
+    IO.println (psJsonObject [("verifiedIr", psJsonQuote input), ("specializedIr", psJsonQuote output)])
+  else if psTestGenericSpecialization
       && psTestSpecializationWorklistDeduplicates
       && psTestSpecializationPassEvidence then
     IO.println "PSC1_IR_SPECIALIZE_TESTS: PASS"

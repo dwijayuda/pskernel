@@ -90,6 +90,10 @@ test('actual direct JavaScript specialization is revalidated, executed and archi
   assert.equal(replay.kind, 'accepted', replay.reason);
   assert.equal(replay.preservationVerified, false);
   assert.equal(replay.semanticClaimsVerified, false);
+  assert.equal(replay.specializationCorrespondences.length, 1);
+  assert.equal(replay.specializationCorrespondences[0].correspondenceChecked, true);
+  const specializationPass = definitions.find(item => item.passId === 'psc-pass-specialize/1');
+  assert.equal(specializationPass.validatorId, 'psc-specialization-correspondence/1');
   assert.throws(() => createCheckedBuildGraph({ ...inputs, irStages: { runtimeIr: staged.runtimeIr, verifiedIr: staged.verifiedIr } }),
     /JS_STAGES_REQUIRED/);
   assert.throws(() => createCheckedBuildGraph({ ...inputs, typeScript: 'competing backend' }), /MIXED_BACKEND_PATHS/);

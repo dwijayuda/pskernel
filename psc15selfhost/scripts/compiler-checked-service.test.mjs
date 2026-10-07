@@ -120,6 +120,7 @@ test('staged JavaScript output binds actual stage domains and rejects missing, c
   assert.equal(output.stageArtifacts.runtimeIr.domain, 'runtime-ir');
   assert.equal(output.stageArtifacts.verifiedIr.domain, 'verified-ir');
   assert.equal(output.stageArtifacts.specializedIr.domain, 'specialized-ir');
+  assert.equal(output.specializationCorrespondence.correspondenceChecked, true);
   assert.equal(emitted.length, 0);
   compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, specializedIr: undefined });
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /STAGES_SHAPE/);
@@ -130,6 +131,9 @@ test('staged JavaScript output binds actual stage domains and rejects missing, c
   compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good,
     verifiedIr: '["psc-runtime-ir-json/1",[],[],[],[["extra",[],[],["primitive","nat"],["literal",["natural","1"]]]]]' });
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /VALIDATION_CHANGED_IR/);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good,
+    specializedIr: '["psc-runtime-ir-json/1",[],[],[],[["extra",[],[],["primitive","nat"],["literal",["natural","1"]]]]]' });
+  assert.throws(() => service.emitArtifact(handle, 'javascript'), /UNJUSTIFIED_TARGET/);
   const small = fixture({ maxOutputBytes: 100 });
   small.compiler.psCompilerJavaScriptStagesFromPrepared = () => ok(good);
   assert.throws(() => small.service.emitArtifact(handle, 'javascript'), /UNCHECKED_MODULE/);

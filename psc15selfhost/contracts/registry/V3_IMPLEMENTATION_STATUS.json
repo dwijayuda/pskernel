@@ -186,7 +186,9 @@
       ],
       "status": "partial",
       "owners": [
-        "contracts/ir/ERASURE_PRESERVATION_V0.json"
+        "contracts/ir/ERASURE_PRESERVATION_V0.json",
+        "scripts/specialization-correspondence.mjs",
+        "contracts/ir/SPECIALIZATION_CORRESPONDENCE_V1.json"
       ],
       "completion": "Erasure, specialization and target passes expose complete relation/validator interfaces and coverage with explicit proof obligations.",
       "assurance": "pending"

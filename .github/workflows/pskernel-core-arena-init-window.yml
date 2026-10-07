@@ -110,10 +110,10 @@ jobs:
           import Init
           EOF
           cat > tests/init-hot.yaml <<'EOF'
-          description: Focused export for the Init Array.extract performance cliff.
+          description: Focused export for the first Init Array.extract performance cliff.
           leanfile: tests/init-hot.lean
           export-decls:
-            - _private.Init.Data.Array.Extract.0.Array.extract_append_extract._proof_1_3
+            - _private.Init.Data.Array.Extract.0.Array.extract_append_extract._proof_1_1
           outcome: accept
           EOF
           cat > checkers/pskernel-core.yaml <<EOF

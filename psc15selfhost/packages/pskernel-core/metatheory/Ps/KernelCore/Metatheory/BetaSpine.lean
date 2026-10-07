@@ -1362,3 +1362,201 @@ theorem psKernelExprListGet_none_length_le
           have hBound := ih remaining hTail
           simp [psKernelExprListLength]
           omega
+
+
+theorem psKernelExprLiftSucc_then_instantiateReference_lower
+    (expr replacement : PsKernelExpr)
+    (start amount : Nat) :
+    psKernelExprInstantiateAtReference
+        (psKernelExprLiftLooseBVarsReference
+          expr
+          start
+          (Nat.succ amount))
+        0
+        (List.cons replacement List.nil)
+        (Nat.add start amount) =
+      psKernelExprLiftLooseBVarsReference
+        expr
+        start
+        amount := by
+  cases amount with
+  | zero =>
+      simpa [
+        psKernelExprLiftLooseBVarsReference,
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
+      ] using
+        psKernelExprLiftOne_then_instantiateReference_cancel
+          expr replacement start
+  | succ remaining =>
+      induction expr generalizing start with
+      | bvar index =>
+          cases hGe : psKernelNatGe index start with
+          | false =>
+              have hBleFalse :
+                  Nat.ble start index = false := by
+                simpa [psKernelNatGe] using hGe
+              have hNotLe : ¬ start ≤ index := by
+                intro hLe
+                have hBleTrue :
+                    Nat.ble start index = true :=
+                  Nat.ble_eq_true_of_le hLe
+                rw [hBleTrue] at hBleFalse
+                contradiction
+              have hLt : index < start :=
+                Nat.lt_of_not_ge hNotLe
+              have hBefore :
+                  psKernelNatLt
+                      index
+                      (Nat.add start (Nat.succ remaining)) =
+                    true := by
+                simp [psKernelNatLt]
+                omega
+              simp [
+                psKernelExprLiftLooseBVarsReference,
+                psKernelExprLiftLooseBVarsReferenceChanged,
+                hGe,
+                psKernelExprInstantiateAtReference,
+                psKernelExprInstantiateAtReferenceChanged,
+                psKernelExprListIsEmpty,
+                Nat.zero_add,
+                hBefore
+              ]
+          | true =>
+              have hBleTrue :
+                  Nat.ble start index = true := by
+                simpa [psKernelNatGe] using hGe
+              have hLe : start ≤ index :=
+                Nat.le_of_ble_eq_true hBleTrue
+              have hBefore :
+                  psKernelNatLt
+                      (Nat.add index
+                        (Nat.succ (Nat.succ remaining)))
+                      (Nat.add start (Nat.succ remaining)) =
+                    false := by
+                simp [psKernelNatLt]
+                omega
+              have hRelative :
+                  Nat.sub
+                      (Nat.add index
+                        (Nat.succ (Nat.succ remaining)))
+                      (Nat.add start (Nat.succ remaining)) =
+                    Nat.succ (Nat.sub index start) := by
+                omega
+              have hMinusOne :
+                  Nat.sub
+                      (Nat.add index
+                        (Nat.succ (Nat.succ remaining)))
+                      1 =
+                    Nat.add index (Nat.succ remaining) := by
+                omega
+              simp [
+                psKernelExprLiftLooseBVarsReference,
+                psKernelExprLiftLooseBVarsReferenceChanged,
+                hGe,
+                psKernelExprInstantiateAtReference,
+                psKernelExprInstantiateAtReferenceChanged,
+                psKernelExprListIsEmpty,
+                Nat.zero_add,
+                hBefore,
+                hRelative,
+                hMinusOne,
+                psKernelExprListGet,
+                psKernelExprListLength
+              ]
+      | fvar name =>
+          simp [
+            psKernelExprLiftLooseBVarsReference,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | mvar name =>
+          simp [
+            psKernelExprLiftLooseBVarsReference,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | sort level =>
+          simp [
+            psKernelExprLiftLooseBVarsReference,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | const name levels =>
+          simp [
+            psKernelExprLiftLooseBVarsReference,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | lit literal =>
+          simp [
+            psKernelExprLiftLooseBVarsReference,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | app fn arg ihFn ihArg =>
+          rw [
+            psKernelExprLiftLooseBVarsReference_app,
+            psKernelExprInstantiateAtReference_app,
+            psKernelExprLiftLooseBVarsReference_app
+          ]
+          rw [
+            ihFn replacement start,
+            ihArg replacement start
+          ]
+      | lam name type body binderInfo ihType ihBody =>
+          rw [
+            psKernelExprLiftLooseBVarsReference_lam,
+            psKernelExprInstantiateAtReference_lam,
+            psKernelExprLiftLooseBVarsReference_lam
+          ]
+          rw [ihType replacement start]
+          have hBody :=
+            ihBody replacement (Nat.succ start)
+          simpa [Nat.succ_add] using hBody
+      | forallE name type body binderInfo ihType ihBody =>
+          rw [
+            psKernelExprLiftLooseBVarsReference_forallE,
+            psKernelExprInstantiateAtReference_forallE,
+            psKernelExprLiftLooseBVarsReference_forallE
+          ]
+          rw [ihType replacement start]
+          have hBody :=
+            ihBody replacement (Nat.succ start)
+          simpa [Nat.succ_add] using hBody
+      | letE name type value body nondep ihType ihValue ihBody =>
+          rw [
+            psKernelExprLiftLooseBVarsReference_letE,
+            psKernelExprInstantiateAtReference_letE,
+            psKernelExprLiftLooseBVarsReference_letE
+          ]
+          rw [
+            ihType replacement start,
+            ihValue replacement start
+          ]
+          have hBody :=
+            ihBody replacement (Nat.succ start)
+          simpa [Nat.succ_add] using hBody
+      | mdata metadata body ihBody =>
+          rw [
+            psKernelExprLiftLooseBVarsReference_mdata,
+            psKernelExprInstantiateAtReference_mdata,
+            psKernelExprLiftLooseBVarsReference_mdata
+          ]
+          exact ihBody replacement start
+      | proj typeName index body ihBody =>
+          rw [
+            psKernelExprLiftLooseBVarsReference_proj,
+            psKernelExprInstantiateAtReference_proj,
+            psKernelExprLiftLooseBVarsReference_proj
+          ]
+          exact ihBody replacement start

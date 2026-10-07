@@ -68,3 +68,4 @@ large-corpus replay. Contract-gate failures are reported by subfamily
 (diagnostics, admission, expression, resource policy, provider identity) so a
 failure is classified before any production semantic change is considered.
 - Foundation readiness now reports expression-contract result categories explicitly when that boundary fails.
+- KernelContract-v1 outcome adaptation recognizes stable diagnostic families with appended `;` details, preserving invalid-vs-internal classification for enriched checker diagnostics.

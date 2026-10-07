@@ -1376,6 +1376,53 @@ theorem psKernelExprListGet_none_length_le
           omega
 
 
+theorem psKernelExprInstantiateAtReference_singleton_above
+    (index offset : Nat)
+    (replacement : PsKernelExpr)
+    (hAbove : offset < index) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.bvar index)
+        0
+        (List.cons replacement List.nil)
+        offset =
+      PsKernelExpr.bvar (Nat.sub index 1) := by
+  have hBeq :
+      Nat.beq index (Nat.add 0 offset) = false := by
+    cases hEq : Nat.beq index (Nat.add 0 offset) with
+    | false => rfl
+    | true =>
+        have hEqual := Nat.eq_of_beq_eq_true hEq
+        omega
+  have hBle :
+      Nat.ble index (Nat.add 0 offset) = false := by
+    cases hEq : Nat.ble index (Nat.add 0 offset) with
+    | false => rfl
+    | true =>
+        have hWrong := Nat.le_of_ble_eq_true hEq
+        omega
+  have hNatLt :
+      psKernelNatLt index (Nat.add 0 offset) = false := by
+    simp [psKernelNatLt, hBeq, hBle]
+  have hPositive :
+      0 < Nat.sub index (Nat.add 0 offset) := by
+    apply Nat.sub_pos_of_lt
+    simpa using hAbove
+  cases hRelative :
+      Nat.sub index (Nat.add 0 offset) with
+  | zero =>
+      simp [hRelative] at hPositive
+  | succ relative =>
+      simp [
+        psKernelExprInstantiateAtReference,
+        psKernelExprInstantiateAtReferenceChanged,
+        psKernelExprListIsEmpty,
+        hNatLt,
+        hRelative,
+        psKernelExprListGet,
+        psKernelExprListLength
+      ]
+
+
 theorem psKernelExprLiftSucc_then_instantiateReference_lower
     (expr replacement : PsKernelExpr)
     (start amount : Nat) :
@@ -1416,24 +1463,11 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
                 contradiction
               have hLt : index < start :=
                 Nat.lt_of_not_ge hNotLe
-              have hBefore :
-                  psKernelNatLt
-                      index
-                      (start + (remaining + 1)) =
-                    true := by
-                simp [psKernelNatLt]
-                omega
-              have hBefore0 :
-                  psKernelNatLt
-                      index
-                      (Nat.add 0 (start + (remaining + 1))) =
-                    true := by
-                simpa using hBefore
               have hLiftBig :
                   psKernelExprLiftLooseBVarsReference
                       (PsKernelExpr.bvar index)
                       start
-                      (remaining + 1 + 1) =
+                      (Nat.succ (Nat.succ remaining)) =
                     PsKernelExpr.bvar index := by
                 simp [
                   psKernelExprLiftLooseBVarsReference,
@@ -1444,7 +1478,7 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
                   psKernelExprLiftLooseBVarsReference
                       (PsKernelExpr.bvar index)
                       start
-                      (remaining + 1) =
+                      (Nat.succ remaining) =
                     PsKernelExpr.bvar index := by
                 simp [
                   psKernelExprLiftLooseBVarsReference,
@@ -1452,107 +1486,56 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
                   hGe
                 ]
               rw [hLiftBig, hLiftSmall]
-              simp only [
-                psKernelExprInstantiateAtReference,
-                psKernelExprListIsEmpty,
-                Bool.false_eq_true,
-                ite_false
-              ]
-              simp only [
-                psKernelExprInstantiateAtReferenceChanged
-              ]
-              rw [hBefore0]
-              rfl
+              apply
+                psKernelExprInstantiateAtReference_closed_core
+              simp [psKernelExprHasLooseAt]
+              have hThreshold :
+                  Nat.ble
+                      (Nat.add start (Nat.succ remaining))
+                      index =
+                    false := by
+                cases hEq :
+                    Nat.ble
+                      (Nat.add start (Nat.succ remaining))
+                      index with
+                | false => rfl
+                | true =>
+                    have hWrong :=
+                      Nat.le_of_ble_eq_true hEq
+                    omega
+              exact hThreshold
           | true =>
               have hBleTrue :
                   Nat.ble start index = true := by
                 simpa [psKernelNatGe] using hGe
               have hLe : start ≤ index :=
                 Nat.le_of_ble_eq_true hBleTrue
-              have hStrict :
-                  start + (remaining + 1) <
-                    index + (remaining + 1 + 1) := by
+              let big :=
+                Nat.add index (Nat.succ (Nat.succ remaining))
+              let threshold :=
+                Nat.add start (Nat.succ remaining)
+              let small :=
+                Nat.add index (Nat.succ remaining)
+              have hAbove : threshold < big := by
+                dsimp [threshold, big]
                 omega
-              have hBeq :
-                  Nat.beq
-                      (index + (remaining + 1 + 1))
-                      (start + (remaining + 1)) =
-                    false := by
-                cases hEq :
-                    Nat.beq
-                      (index + (remaining + 1 + 1))
-                      (start + (remaining + 1)) with
-                | false => rfl
-                | true =>
-                    have hEqual :=
-                      Nat.eq_of_beq_eq_true hEq
-                    omega
-              have hBle :
-                  Nat.ble
-                      (index + (remaining + 1 + 1))
-                      (start + (remaining + 1)) =
-                    false := by
-                cases hEq :
-                    Nat.ble
-                      (index + (remaining + 1 + 1))
-                      (start + (remaining + 1)) with
-                | false => rfl
-                | true =>
-                    have hWrong :=
-                      Nat.le_of_ble_eq_true hEq
-                    omega
-              have hBefore :
-                  psKernelNatLt
-                      (index + (remaining + 1 + 1))
-                      (start + (remaining + 1)) =
-                    false := by
-                simp [psKernelNatLt, hBeq, hBle]
-              have hRelative :
-                  (index + (remaining + 1 + 1)) -
-                      (start + (remaining + 1)) =
-                    Nat.succ (index - start) := by
-                calc
-                  (index + (remaining + 1 + 1)) -
-                      (start + (remaining + 1)) =
-                      (Nat.succ index + (remaining + 1)) -
-                        (start + (remaining + 1)) := by
-                          congr 1
-                          omega
-                  _ = Nat.succ index - start := by
-                    simpa using
-                      (Nat.add_sub_add_right
-                        (Nat.succ index)
-                        (remaining + 1)
-                        start)
-                  _ = Nat.succ (index - start) :=
-                    Nat.succ_sub hLe
               have hMinusOne :
-                  (index + (remaining + 1 + 1)) - 1 =
-                    index + (remaining + 1) := by
+                  Nat.sub big 1 = small := by
+                dsimp [big, small]
                 have hShape :
-                    index + (remaining + 1 + 1) =
-                      Nat.succ (index + (remaining + 1)) := by
+                    Nat.add index (Nat.succ (Nat.succ remaining)) =
+                      Nat.succ
+                        (Nat.add index (Nat.succ remaining)) := by
                   omega
                 rw [hShape]
                 exact Nat.succ_sub_one _
-              have hBefore0 :
-                  psKernelNatLt
-                      (index + (remaining + 1 + 1))
-                      (Nat.add 0 (start + (remaining + 1))) =
-                    false := by
-                simpa using hBefore
-              have hRelative0 :
-                  (index + (remaining + 1 + 1)) -
-                      (Nat.add 0 (start + (remaining + 1))) =
-                    Nat.succ (index - start) := by
-                simpa using hRelative
               have hLiftBig :
                   psKernelExprLiftLooseBVarsReference
                       (PsKernelExpr.bvar index)
                       start
-                      (remaining + 1 + 1) =
-                    PsKernelExpr.bvar
-                      (index + (remaining + 1 + 1)) := by
+                      (Nat.succ (Nat.succ remaining)) =
+                    PsKernelExpr.bvar big := by
+                dsimp [big]
                 simp [
                   psKernelExprLiftLooseBVarsReference,
                   psKernelExprLiftLooseBVarsReferenceChanged,
@@ -1562,35 +1545,19 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
                   psKernelExprLiftLooseBVarsReference
                       (PsKernelExpr.bvar index)
                       start
-                      (remaining + 1) =
-                    PsKernelExpr.bvar
-                      (index + (remaining + 1)) := by
+                      (Nat.succ remaining) =
+                    PsKernelExpr.bvar small := by
+                dsimp [small]
                 simp [
                   psKernelExprLiftLooseBVarsReference,
                   psKernelExprLiftLooseBVarsReferenceChanged,
                   hGe
                 ]
               rw [hLiftBig, hLiftSmall]
-              simp only [
-                psKernelExprInstantiateAtReference,
-                psKernelExprListIsEmpty,
-                Bool.false_eq_true,
-                ite_false
-              ]
-              simp only [
-                psKernelExprInstantiateAtReferenceChanged
-              ]
-              rw [hBefore0]
-              simp only [
-                Bool.false_eq_true,
-                ite_false
-              ]
-              rw [hRelative0]
-              simp only [
-                psKernelExprListGet,
-                psKernelExprListLength
-              ]
-              rw [hMinusOne]
+              have hInst :=
+                psKernelExprInstantiateAtReference_singleton_above
+                  big threshold replacement hAbove
+              rw [hInst, hMinusOne]
       | fvar name =>
           simp [
             psKernelExprLiftLooseBVarsReference,
@@ -1641,17 +1608,6 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
                 0
                 (List.cons replacement List.nil)
                 (Nat.add start (Nat.succ remaining)) =
-              psKernelExprInstantiateAtReference
-                (PsKernelExpr.app
-                  (psKernelExprLiftLooseBVarsReference
-                    fn start (Nat.succ (Nat.succ remaining)))
-                  (psKernelExprLiftLooseBVarsReference
-                    arg start (Nat.succ (Nat.succ remaining))))
-                0
-                (List.cons replacement List.nil)
-                (Nat.add start (Nat.succ remaining)) := by
-                  rw [psKernelExprLiftLooseBVarsReference_app]
-            _ =
               PsKernelExpr.app
                 (psKernelExprInstantiateAtReference
                   (psKernelExprLiftLooseBVarsReference
@@ -1665,7 +1621,10 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
                   0
                   (List.cons replacement List.nil)
                   (Nat.add start (Nat.succ remaining))) := by
-                    rw [psKernelExprInstantiateAtReference_app]
+                    rw [
+                      psKernelExprLiftLooseBVarsReference_app,
+                      psKernelExprInstantiateAtReference_app
+                    ]
             _ =
               PsKernelExpr.app
                 (psKernelExprLiftLooseBVarsReference
@@ -1683,35 +1642,51 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
           rw [
             psKernelExprLiftLooseBVarsReference_lam,
             psKernelExprInstantiateAtReference_lam,
-            psKernelExprLiftLooseBVarsReference_lam
+            psKernelExprLiftLooseBVarsReference_lam,
+            ihType start
           ]
-          rw [ihType start]
-          have hBody :=
-            ihBody (Nat.succ start)
-          simpa [Nat.succ_add] using hBody
+          have hOffset :
+              Nat.succ
+                  (Nat.add start (Nat.succ remaining)) =
+                Nat.add
+                  (Nat.succ start)
+                  (Nat.succ remaining) := by
+            omega
+          rw [hOffset]
+          rw [ihBody (Nat.succ start)]
       | forallE name type body binderInfo ihType ihBody =>
           rw [
             psKernelExprLiftLooseBVarsReference_forallE,
             psKernelExprInstantiateAtReference_forallE,
-            psKernelExprLiftLooseBVarsReference_forallE
+            psKernelExprLiftLooseBVarsReference_forallE,
+            ihType start
           ]
-          rw [ihType start]
-          have hBody :=
-            ihBody (Nat.succ start)
-          simpa [Nat.succ_add] using hBody
+          have hOffset :
+              Nat.succ
+                  (Nat.add start (Nat.succ remaining)) =
+                Nat.add
+                  (Nat.succ start)
+                  (Nat.succ remaining) := by
+            omega
+          rw [hOffset]
+          rw [ihBody (Nat.succ start)]
       | letE name type value body nondep ihType ihValue ihBody =>
           rw [
             psKernelExprLiftLooseBVarsReference_letE,
             psKernelExprInstantiateAtReference_letE,
-            psKernelExprLiftLooseBVarsReference_letE
-          ]
-          rw [
+            psKernelExprLiftLooseBVarsReference_letE,
             ihType start,
             ihValue start
           ]
-          have hBody :=
-            ihBody (Nat.succ start)
-          simpa [Nat.succ_add] using hBody
+          have hOffset :
+              Nat.succ
+                  (Nat.add start (Nat.succ remaining)) =
+                Nat.add
+                  (Nat.succ start)
+                  (Nat.succ remaining) := by
+            omega
+          rw [hOffset]
+          rw [ihBody (Nat.succ start)]
       | mdata metadata body ihBody =>
           calc
             psKernelExprInstantiateAtReference

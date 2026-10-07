@@ -780,14 +780,18 @@ theorem psKernelDefEqLazyStepBoth_equal_hint_configuration_sound
                        (Prod.fst leftResult)
                        (Prod.fst rightResult)) =
         Except.ok (Prod.mk answer nextState) := by
-    convert hRun using 1 <;>
-      simp [
-        psKernelDefEqLazyStepBoth,
-        hNoLeft,
-        hNoRight,
-        sameShortcut,
-        argsResult
-      ]
+    calc
+      _ = psKernelDefEqLazyStepBoth
+            defeq coreWhnf context state
+            left right leftDef rightDef := by
+          simp [
+            psKernelDefEqLazyStepBoth,
+            hNoLeft,
+            hNoRight,
+            sameShortcut,
+            argsResult
+          ]
+      _ = Except.ok (Prod.mk answer nextState) := hRun
   cases hArgs :
       argsResult with
   | error error =>

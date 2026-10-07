@@ -4,6 +4,9 @@ import { spawnSync } from 'node:child_process';
 import vm from 'node:vm';
 import { artifactId, canonicalArtifact, canonicalBytes } from './artifact-evidence.mjs';
 import { bindJsScalarImports, jsScalarAbiContract } from './js-scalar-abi.mjs';
+import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
+import { artifactId as makeArtifactId } from './artifact-evidence.mjs';
+import { irEncodingContract } from './ir-artifact.mjs';
 
 const fixture = '.lake/build/bin/pscv_js_abi_tests' + (process.platform === 'win32' ? '.exe' : '');
 function emitted(flag) {
@@ -12,12 +15,33 @@ function emitted(flag) {
   return Buffer.from(result.stdout.trim());
 }
 const bytes = emitted('--plan'), value = JSON.parse(bytes);
+const irBytes = emitted('--ir');
+const verifiedIr = { bytes: irBytes, identity: makeArtifactId(irBytes, 'verified-ir', irEncodingContract) };
+
 const plan = { bytes, identity: artifactId(bytes, 'abi-plan', jsScalarAbiContract) };
 const providers = () => ({ host: Object.fromEntries(value.imports.map(entry => [entry.exportName, input => input])) });
 function bind(overrides = {}) {
   return bindJsScalarImports({ plan, expectedPlanId: plan.identity, providers: providers(),
     grantedCapabilities: ['host-call'], ...overrides });
 }
+
+
+test('host-derived ABI plan matches portable planner for exact VerifiedIR and capability policy', () => {
+  const derived = jsAbiArtifactsFromVerifiedIr(verifiedIr, {
+    schemaVersion: 1,
+    contract: 'psc-js-abi-host-policy/1',
+    target: 'javascript',
+    wordBits: 64,
+    modules: [{ moduleId: 'host', capabilities: ['host-call'] }],
+  });
+  assert.deepEqual(Buffer.from(derived.plan.bytes), Buffer.from(bytes));
+  assert.equal(derived.plan.identity.digest, plan.identity.digest);
+  assert.throws(() => jsAbiArtifactsFromVerifiedIr(verifiedIr), /POLICY_MODULE_REQUIRED/);
+  assert.throws(() => jsAbiArtifactsFromVerifiedIr(verifiedIr, {
+    schemaVersion: 1, contract: 'psc-js-abi-host-policy/1', target: 'javascript', wordBits: 64,
+    modules: [{ moduleId: 'host', capabilities: ['host-call'] }, { moduleId: 'unused', capabilities: [] }],
+  }), /UNUSED_POLICY_MODULE/);
+});
 
 test('portable plan is canonical and adapters preserve every supported scalar representation', () => {
   assert.deepEqual(canonicalBytes(value), bytes);

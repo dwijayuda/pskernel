@@ -120,10 +120,9 @@ theorem psKernelRecursorIota_refines
     (recursor : PsKernelRecursorInfo)
     (rule : PsKernelRecursorRule)
     (major0 majorReduced major : PsKernelExpr)
-    (hConfig :
-      PsKernelCheckerConfigurationSound
-        context
-        (psKernelCheckerStateEmpty))
+    (hIndex :
+      PsKernelEnvironmentIndexRefines
+        context.environment)
     (hHead :
       Prod.fst (psKernelExprGetAppFnArgs expr) =
         PsKernelExpr.const recName recLevels)
@@ -233,7 +232,7 @@ theorem psKernelRecursorIota_refines
         context.environment
         recName
         (PsKernelConstantInfo.recInfo recursor)
-        hConfig.1
+        hIndex
         hFind)
       hMajor
       hMajorReduction

@@ -966,8 +966,8 @@ def psKernelCoreRecursorTests : Bool :=
             psKernelExprMapGet
               (Prod.snd portableResult).inferOnly
               portableMajor with
-         | Option.some _ => true
-         | Option.none => false)
+         | Option.some _ => false
+         | Option.none => true)
   | _, _ =>
       false
 

@@ -1365,8 +1365,41 @@ def psTestWasmTailPositions : Bool :=
       nonTail == "nonTail" && direct == "direct" && indirect == "indirect"
   | _ => false
 
+def psTestWasmBulkEncoding : Bool :=
+  let instructions := (List.range 20000).flatMap fun _ =>
+    [PsWasmInstruction.i32Const 42, PsWasmInstruction.drop]
+  let expected := (List.range 20000).flatMap fun _ =>
+    [psWasmByte 65, psWasmByte 42, psWasmByte 26]
+  let encoded :=
+    match psWasmEncodeInstructions [] [] [] [] instructions with
+    | Except.ok bytes => bytes == expected
+    | Except.error _ => false
+  let firstError :=
+    match psWasmEncodeInstructions [] [] [] []
+        [PsWasmInstruction.call "first", PsWasmInstruction.call "last"] with
+    | Except.error (PsWasmEncodeError.unknownFunction name) => name == "first"
+    | _ => false
+  encoded && firstError
+
+def psTestWasmBulkListOperations : Bool :=
+  let values := List.range 65536
+  let mapped := psListMap Nat.succ values
+  let appendOk := psListAppend values [65536, 65537] == List.range 65538
+  let mapOk := mapped == values.map Nat.succ
+  let mapExceptOk :=
+    match psListMapExcept (fun (value : Nat) => (Except.ok (value + 1) : Except String Nat)) values with
+    | Except.ok result => result == mapped
+    | Except.error _ => false
+  let firstError :=
+    match psListMapExcept (fun (value : Nat) => (Except.error value : Except Nat Nat)) [3, 7] with
+    | Except.error value => value == 3
+    | Except.ok _ => false
+  appendOk && mapOk && mapExceptOk && firstError
+
 def main : IO Unit := do
-  if psTestWasmTailPositions
+  if psTestWasmBulkEncoding
+      && psTestWasmBulkListOperations
+      && psTestWasmTailPositions
       && psTestWasmScalarLowering
       && psTestWasmNatConstructorIdentityInvariant
       && psTestWasmWordProfiles

@@ -29,29 +29,57 @@ def psListReverseAcc {alpha : Type} (values : List alpha) : List alpha -> List a
 def psListReverse {alpha : Type} (values : List alpha) : List alpha :=
   psListReverseAcc values List.nil
 
-def psListAppend {alpha : Type} (left : List alpha) : List alpha -> List alpha :=
-  match left with
-  | List.nil => fun (right : List alpha) => right
+-- Build the left spine with tail calls, then share the original right suffix.
+def psListAppend {alpha : Type} (left : List alpha) (right : List alpha) : List alpha :=
+  psListReverseAcc (psListReverse left) right
+
+def psListMapWorker {alpha beta : Type}
+    (convert : alpha -> beta) (values : List alpha) : List beta -> List beta :=
+  match values with
+  | List.nil => fun (reversed : List beta) => psListReverse reversed
   | List.cons value rest =>
-      let smaller : List alpha -> List alpha := psListAppend rest;
-      fun (right : List alpha) => List.cons value (smaller right)
+      let smaller : List beta -> List beta := psListMapWorker convert rest;
+      fun (reversed : List beta) => smaller (List.cons (convert value) reversed)
 
 def psListMap {alpha beta : Type} (convert : alpha -> beta) (values : List alpha) : List beta :=
+  psListMapWorker convert values List.nil
+
+def psListMapExceptWorker {alpha beta error : Type}
+    (convert : alpha -> Except error beta) (values : List alpha) :
+    List beta -> Except error (List beta) :=
   match values with
-  | List.nil => List.nil
-  | List.cons value rest => List.cons (convert value) (psListMap convert rest)
+  | List.nil => fun (reversed : List beta) => Except.ok (psListReverse reversed)
+  | List.cons value rest =>
+      let smaller : List beta -> Except error (List beta) :=
+        psListMapExceptWorker convert rest;
+      fun (reversed : List beta) =>
+        match convert value with
+        | Except.error failure => Except.error failure
+        | Except.ok result => smaller (List.cons result reversed)
 
 def psListMapExcept {alpha beta error : Type}
     (convert : alpha -> Except error beta) (values : List alpha) : Except error (List beta) :=
+  psListMapExceptWorker convert values List.nil
+
+-- Flatten successful chunks as they arrive. Preserve first-error order and
+-- avoid one native continuation per element or per encoded byte.
+def psListFlatMapExceptWorker {alpha beta error : Type}
+    (convert : alpha -> Except error (List beta)) (values : List alpha) :
+    List beta -> Except error (List beta) :=
   match values with
-  | List.nil => Except.ok List.nil
+  | List.nil => fun (reversed : List beta) => Except.ok (psListReverse reversed)
   | List.cons value rest =>
-      match convert value with
-      | Except.error failure => Except.error failure
-      | Except.ok result =>
-          match psListMapExcept convert rest with
-          | Except.error failure => Except.error failure
-          | Except.ok results => Except.ok (List.cons result results)
+      let smaller : List beta -> Except error (List beta) :=
+        psListFlatMapExceptWorker convert rest;
+      fun (reversed : List beta) =>
+        match convert value with
+        | Except.error failure => Except.error failure
+        | Except.ok chunk => smaller (psListReverseAcc chunk reversed)
+
+def psListFlatMapExcept {alpha beta error : Type}
+    (convert : alpha -> Except error (List beta)) (values : List alpha) :
+    Except error (List beta) :=
+  psListFlatMapExceptWorker convert values List.nil
 
 def psListTake {alpha : Type} (count : Nat) : List alpha -> List alpha :=
   match count with

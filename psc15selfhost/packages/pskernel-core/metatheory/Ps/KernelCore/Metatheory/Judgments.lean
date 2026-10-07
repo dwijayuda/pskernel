@@ -1055,6 +1055,183 @@ inductive PsKernelDefEqJudgment
         localContext
         (PsKernelExpr.app leftFn leftArg)
         (PsKernelExpr.app rightFn rightArg)
+  | constLevels
+      {localContext : PsKernelLocalContext}
+      (name : PsKernelName)
+      (leftLevels rightLevels : List PsKernelLevel)
+      (hLevels :
+        List.map psKernelLevelNormalize leftLevels =
+          List.map psKernelLevelNormalize rightLevels) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        (PsKernelExpr.const name leftLevels)
+        (PsKernelExpr.const name rightLevels)
+  | projection
+      {localContext : PsKernelLocalContext}
+      (typeName : PsKernelName)
+      (index : Nat)
+      (left right : PsKernelExpr)
+      (hMajor :
+        PsKernelDefEqJudgment
+          environment localContext left right) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        (PsKernelExpr.proj typeName index left)
+        (PsKernelExpr.proj typeName index right)
+  /-
+  Algorithmic comparison after one or both sides have been reduced.
+
+  This is deliberately not a general transitivity constructor: both outer
+  links must be executable reduction closures, matching Lean's WHNF/lazy-delta
+  comparison phases.
+  -/
+  | reduceCompare
+      {localContext : PsKernelLocalContext}
+      (left right leftReduced rightReduced : PsKernelExpr)
+      (hLeft :
+        PsKernelReductionClosure
+          environment localContext left leftReduced)
+      (hRight :
+        PsKernelReductionClosure
+          environment localContext right rightReduced)
+      (hCore :
+        PsKernelDefEqJudgment
+          environment localContext leftReduced rightReduced) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+  | functionEtaLeft
+      {localContext : PsKernelLocalContext}
+      (lambdaValue other : PsKernelExpr)
+      (name : PsKernelName)
+      (domain body : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (hCompare :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          lambdaValue
+          (PsKernelExpr.lam
+            name
+            domain
+            (PsKernelExpr.app other (PsKernelExpr.bvar 0))
+            binderInfo)) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        lambdaValue
+        other
+  | functionEtaRight
+      {localContext : PsKernelLocalContext}
+      (other lambdaValue : PsKernelExpr)
+      (name : PsKernelName)
+      (domain body : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (hCompare :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          (PsKernelExpr.lam
+            name
+            domain
+            (PsKernelExpr.app other (PsKernelExpr.bvar 0))
+            binderInfo)
+          lambdaValue) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        other
+        lambdaValue
+  /-
+  Algorithmic proof-irrelevance view.
+
+  The concrete checker first obtains a type candidate for the left term,
+  reduces that type to Prop, obtains a type candidate for the right term, and
+  recursively compares the two types.  The stronger `proofIrrelevance` rule
+  below additionally carries full typing derivations and is the target of the
+  checked-input refinement layer.
+  -/
+  | proofIrrelevanceAlgorithmic
+      {localContext : PsKernelLocalContext}
+      (left right leftType rightType : PsKernelExpr)
+      (level : PsKernelLevel)
+      (hLeftTypeProp :
+        PsKernelReductionClosure
+          environment
+          localContext
+          leftType
+          (PsKernelExpr.sort level))
+      (hProp :
+        psKernelLevelNormalizesToZero level = true)
+      (hTypes :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          leftType
+          rightType) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+  /-
+  Unit-like non-recursive structures form an algorithmic singleton rule.
+  The checked-input refinement can later strengthen this to typed structure
+  eta/proof-irrelevance evidence.
+  -/
+  | unitLike
+      {localContext : PsKernelLocalContext}
+      (left right leftType rightType reducedType : PsKernelExpr)
+      (inductName ctorName : PsKernelName)
+      (inductInfo : PsKernelInductiveInfo)
+      (ctorInfo : PsKernelConstructorInfo)
+      (hTypeReduction :
+        PsKernelReductionClosure
+          environment
+          localContext
+          leftType
+          reducedType)
+      (hTypeHead :
+        psKernelExprGetAppFn reducedType =
+          PsKernelExpr.const inductName
+            (match psKernelExprGetAppFn reducedType with
+             | PsKernelExpr.const _ levels => levels
+             | _ => List.nil))
+      (hNonRec :
+        psKernelEnvironmentIsNonRecStructure
+            environment inductName =
+          true)
+      (hInduct :
+        psKernelFindConstantInList
+            inductName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.inductInfo inductInfo))
+      (hCtors :
+        inductInfo.ctors = List.cons ctorName List.nil)
+      (hCtor :
+        psKernelFindConstantInList
+            ctorName
+            environment.constants =
+          Option.some
+            (PsKernelConstantInfo.ctorInfo ctorInfo))
+      (hNoFields : ctorInfo.numFields = 0)
+      (hTypes :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          reducedType
+          rightType) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+
   /-
   Algorithmic K conversion used by recursor WHNF.
 

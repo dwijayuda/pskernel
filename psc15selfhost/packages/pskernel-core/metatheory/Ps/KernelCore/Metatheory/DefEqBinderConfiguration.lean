@@ -259,6 +259,18 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                  else
                    psKernelExprHasLooseBVar rightBody) with
             | false =>
+                simp only [
+                  psKernelDefEqLambdaSpineWithFuel,
+                  leftOpened,
+                  rightOpened,
+                  hDomainResult,
+                  if_pos True.intro
+                ] at hSuccess
+                rw [hDependent] at hSuccess
+                simp only [
+                  Bool.false_eq_true,
+                  if_false
+                ] at hSuccess
                 let nextSubst :=
                   psKernelExprListAppend
                     subst
@@ -276,11 +288,6 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       nextSubst with
                 | error error =>
                     simp [
-                      psKernelDefEqLambdaSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      hDependent,
                       nextSubst,
                       hRest
                     ] at hSuccess
@@ -298,11 +305,6 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                         hDomainConfig
                         hRest
                     simp [
-                      psKernelDefEqLambdaSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      hDependent,
                       nextSubst,
                       hRest
                     ] at hSuccess
@@ -335,6 +337,18 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                         hRightClosed
                         (hRestSemantic.2 hTrue)
             | true =>
+                simp only [
+                  psKernelDefEqLambdaSpineWithFuel,
+                  leftOpened,
+                  rightOpened,
+                  hDomainResult,
+                  if_pos True.intro
+                ] at hSuccess
+                rw [hDependent] at hSuccess
+                simp only [
+                  Bool.true_eq,
+                  if_pos True.intro
+                ] at hSuccess
                 let opened :=
                   psKernelDefEqWithLocal
                     context
@@ -409,11 +423,6 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       nextSubst with
                 | error error =>
                     simp [
-                      psKernelDefEqLambdaSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      hDependent,
                       opened,
                       fresh,
                       child,
@@ -446,11 +455,6 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                         childFinal
                         hParentFresh
                     simp [
-                      psKernelDefEqLambdaSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      hDependent,
                       opened,
                       fresh,
                       child,
@@ -684,6 +688,18 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                  else
                    psKernelExprHasLooseBVar rightBody) with
             | false =>
+                simp only [
+                  psKernelDefEqForallSpineWithFuel,
+                  leftOpened,
+                  rightOpened,
+                  hDomainResult,
+                  if_pos True.intro
+                ] at hSuccess
+                rw [hDependent] at hSuccess
+                simp only [
+                  Bool.false_eq_true,
+                  if_false
+                ] at hSuccess
                 let nextSubst :=
                   psKernelExprListAppend
                     subst
@@ -701,11 +717,6 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       nextSubst with
                 | error error =>
                     simp [
-                      psKernelDefEqForallSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      hDependent,
                       nextSubst,
                       hRest
                     ] at hSuccess
@@ -723,11 +734,6 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                         hDomainConfig
                         hRest
                     simp [
-                      psKernelDefEqForallSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      hDependent,
                       nextSubst,
                       hRest
                     ] at hSuccess
@@ -760,6 +766,18 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                         hRightClosed
                         (hRestSemantic.2 hTrue)
             | true =>
+                simp only [
+                  psKernelDefEqForallSpineWithFuel,
+                  leftOpened,
+                  rightOpened,
+                  hDomainResult,
+                  if_pos True.intro
+                ] at hSuccess
+                rw [hDependent] at hSuccess
+                simp only [
+                  Bool.true_eq,
+                  if_pos True.intro
+                ] at hSuccess
                 let opened :=
                   psKernelDefEqWithLocal
                     context
@@ -834,11 +852,6 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       nextSubst with
                 | error error =>
                     simp [
-                      psKernelDefEqForallSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      hDependent,
                       opened,
                       fresh,
                       child,
@@ -871,11 +884,6 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                         childFinal
                         hParentFresh
                     simp [
-                      psKernelDefEqForallSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainResult,
-                      hDependent,
                       opened,
                       fresh,
                       child,

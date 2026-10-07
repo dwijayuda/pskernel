@@ -212,63 +212,48 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                     (List.cons
                       (PsKernelExpr.sort PsKernelLevel.zero)
                       List.nil))
-          have hReady :
-              (∃ domainState : PsKernelCheckerState,
-                PsKernelCheckerConfigurationSound
-                    context
-                    domainState ∧
-                  continueAfterDomain domainState =
-                    Except.ok (Prod.mk value nextState)) ∨
-                PsKernelCheckerConfigurationSound
-                  context
-                  nextState := by
-            cases hDomainEq :
-                psKernelExprEq leftDomain rightDomain with
-            | true =>
-                exact
-                  Or.inl
-                    ⟨
-                      state,
-                      hConfig,
-                      by
-                        simpa only [
-                          psKernelDefEqLambdaSpineWithFuel,
-                          leftOpened,
-                          rightOpened,
-                          continueAfterDomain,
-                          hDomainEq
-                        ] using hSuccess
-                    ⟩
-            | false =>
-                cases hDomainRun :
-                    defeq
-                      context
-                      state
-                      leftOpened
-                      rightOpened with
-                | error error =>
-                    simp [
-                      psKernelDefEqLambdaSpineWithFuel,
-                      leftOpened,
-                      rightOpened,
-                      hDomainEq,
-                      hDomainRun
-                    ] at hSuccess
-                | ok domainRun =>
-                    rcases domainRun with
-                      ⟨domainValue, domainState⟩
-                    have hDomainSemantic :=
-                      hDefEq
+          cases hDependent :
+              (if psKernelExprHasLooseBVar leftBody then
+                 true
+               else
+                 psKernelExprHasLooseBVar rightBody) with
+          | true =>
+              have hReady :
+                  (∃ domainState : PsKernelCheckerState,
+                    PsKernelCheckerConfigurationSound
                         context
-                        state
-                        domainState
-                        leftOpened
-                        rightOpened
-                        domainValue
-                        hConfig
-                        hDomainRun
-                    cases domainValue with
-                    | false =>
+                        domainState ∧
+                      continueAfterDomain domainState =
+                        Except.ok (Prod.mk value nextState)) ∨
+                    PsKernelCheckerConfigurationSound
+                      context
+                      nextState := by
+                cases hDomainEq :
+                    psKernelExprEq leftDomain rightDomain with
+                | true =>
+                    exact
+                      Or.inl
+                        ⟨
+                          state,
+                          hConfig,
+                          by
+                            simpa [
+                              psKernelDefEqLambdaSpineWithFuel,
+                              leftOpened,
+                              rightOpened,
+                              continueAfterDomain,
+                              hDomainEq,
+                              hDependent
+                            ] using hSuccess
+                        ⟩
+                | false =>
+                    cases hDomainRun :
+                        defeq
+                          context
+                          state
+                          leftOpened
+                          rightOpened with
+                    | error error =>
                         simp [
                           psKernelDefEqLambdaSpineWithFuel,
                           leftOpened,
@@ -276,31 +261,51 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                           hDomainEq,
                           hDomainRun
                         ] at hSuccess
-                        rcases hSuccess with ⟨rfl, rfl⟩
-                        exact Or.inr hDomainSemantic.1
-                    | true =>
-                        exact
-                          Or.inl
-                            ⟨
-                              domainState,
-                              hDomainSemantic.1,
-                              by
-                                simpa only [
-                                  psKernelDefEqLambdaSpineWithFuel,
-                                  leftOpened,
-                                  rightOpened,
-                                  continueAfterDomain,
-                                  hDomainEq,
-                                  hDomainRun
-                                ] using hSuccess
-                            ⟩
-          rcases hReady with
-            ⟨domainState, hDomainConfig, hContinue⟩ |
-            hDone
-          · cases hLeftLoose :
-                psKernelExprHasLooseBVar leftBody with
-            | true =>
-                let freshResult :=
+                    | ok domainRun =>
+                        rcases domainRun with
+                          ⟨domainValue, domainState⟩
+                        have hDomainSemantic :=
+                          hDefEq
+                            context
+                            state
+                            domainState
+                            leftOpened
+                            rightOpened
+                            domainValue
+                            hConfig
+                            hDomainRun
+                        cases domainValue with
+                        | false =>
+                            simp [
+                              psKernelDefEqLambdaSpineWithFuel,
+                              leftOpened,
+                              rightOpened,
+                              hDomainEq,
+                              hDomainRun
+                            ] at hSuccess
+                            rcases hSuccess with ⟨rfl, rfl⟩
+                            exact Or.inr hDomainSemantic.1
+                        | true =>
+                            exact
+                              Or.inl
+                                ⟨
+                                  domainState,
+                                  hDomainSemantic.1,
+                                  by
+                                    simpa [
+                                      psKernelDefEqLambdaSpineWithFuel,
+                                      leftOpened,
+                                      rightOpened,
+                                      continueAfterDomain,
+                                      hDomainEq,
+                                      hDomainRun,
+                                      hDependent
+                                    ] using hSuccess
+                                ⟩
+              rcases hReady with
+                ⟨domainState, hDomainConfig, hContinue⟩ |
+                hDone
+              · let freshResult :=
                   psKernelCheckerStateFreshName
                     domainState
                     rightName
@@ -370,7 +375,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                 | error error =>
                     simp [
                       continueAfterDomain,
-                      hLeftLoose,
+                      hDependent,
                       psKernelDefEqWithLocal,
                       freshResult,
                       fresh,
@@ -407,7 +412,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                         hParentFresh
                     simp [
                       continueAfterDomain,
-                      hLeftLoose,
+                      hDependent,
                       psKernelDefEqWithLocal,
                       freshResult,
                       fresh,
@@ -419,179 +424,140 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                     ] at hContinue
                     rcases hContinue with ⟨rfl, rfl⟩
                     exact hExit
-            | false =>
-                cases hRightLoose :
-                    psKernelExprHasLooseBVar rightBody with
-                | true =>
-                    let freshResult :=
-                      psKernelCheckerStateFreshName
-                        domainState
-                        rightName
-                    let fresh :=
-                      Prod.fst freshResult
-                    let freshState :=
-                      Prod.snd freshResult
-                    let childLocal :=
-                      psKernelLocalContextAddLocal
-                        context.localContext
-                        fresh
-                        rightName
-                        rightOpened
-                        rightInfo
-                    let child :=
-                      psKernelCheckerContextWithLocalContext
+              · exact hDone
+          | false =>
+              have hReady :
+                  (∃ domainState : PsKernelCheckerState,
+                    PsKernelCheckerConfigurationSound
                         context
-                        childLocal
-                    let nextSubst :=
-                      psKernelExprListAppend
-                        subst
-                        (List.cons
-                          (PsKernelExpr.fvar fresh)
-                          List.nil)
-                    have hParentFresh :
-                        PsKernelCheckerConfigurationSound
-                          context
-                          freshState := by
-                      simpa [
-                        freshResult,
-                        freshState
-                      ] using
-                        psKernelCheckerStateFreshName_preserves_configuration
-                          context
-                          domainState
-                          rightName
-                          hDomainConfig
-                    have hChild :
-                        PsKernelCheckerConfigurationSound
-                          child
-                          freshState := by
-                      simpa [
-                        psKernelDefEqWithLocal,
-                        freshResult,
-                        fresh,
-                        freshState,
-                        childLocal,
-                        child
-                      ] using
-                        psKernelCheckerFreshLocal_preserves_configuration
-                          context
-                          domainState
-                          rightName
-                          rightOpened
-                          rightInfo
-                          hString
-                          hDomainConfig
-                    cases hRest :
-                        psKernelDefEqLambdaSpineWithFuel
-                          remaining
-                          defeq
-                          child
-                          freshState
-                          leftBody
-                          rightBody
-                          nextSubst with
-                    | error error =>
-                        simp [
-                          continueAfterDomain,
-                          hLeftLoose,
-                          hRightLoose,
-                          psKernelDefEqWithLocal,
-                          freshResult,
-                          fresh,
-                          freshState,
-                          childLocal,
-                          child,
-                          nextSubst,
-                          hRest
-                        ] at hContinue
-                    | ok restRun =>
-                        rcases restRun with
-                          ⟨restValue, childFinal⟩
-                        have _hChildFinal :=
-                          ih
-                            child
-                            freshState
-                            childFinal
-                            leftBody
-                            rightBody
-                            nextSubst
-                            restValue
-                            hChild
-                            hRest
-                        have hExit :
-                            PsKernelCheckerConfigurationSound
-                              context
-                              (psKernelCheckerStateExitLocalScope
-                                freshState
-                                childFinal) :=
-                          psKernelCheckerStateExitLocalScope_preserves_configuration
-                            context
-                            freshState
-                            childFinal
-                            hParentFresh
-                        simp [
-                          continueAfterDomain,
-                          hLeftLoose,
-                          hRightLoose,
-                          psKernelDefEqWithLocal,
-                          freshResult,
-                          fresh,
-                          freshState,
-                          childLocal,
-                          child,
-                          nextSubst,
-                          hRest
-                        ] at hContinue
-                        rcases hContinue with ⟨rfl, rfl⟩
-                        exact hExit
+                        domainState ∧
+                      continueAfterDomain domainState =
+                        Except.ok (Prod.mk value nextState)) ∨
+                    PsKernelCheckerConfigurationSound
+                      context
+                      nextState := by
+                cases hDomainEq :
+                    psKernelExprEq leftDomain rightDomain with
+                | true =>
+                    exact
+                      Or.inl
+                        ⟨
+                          state,
+                          hConfig,
+                          by
+                            simpa [
+                              psKernelDefEqLambdaSpineWithFuel,
+                              leftOpened,
+                              rightOpened,
+                              continueAfterDomain,
+                              hDomainEq,
+                              hDependent
+                            ] using hSuccess
+                        ⟩
                 | false =>
-                    let nextSubst :=
-                      psKernelExprListAppend
-                        subst
-                        (List.cons
-                          (PsKernelExpr.sort PsKernelLevel.zero)
-                          List.nil)
-                    cases hRest :
-                        psKernelDefEqLambdaSpineWithFuel
-                          remaining
-                          defeq
+                    cases hDomainRun :
+                        defeq
                           context
-                          domainState
-                          leftBody
-                          rightBody
-                          nextSubst with
+                          state
+                          leftOpened
+                          rightOpened with
                     | error error =>
                         simp [
-                          continueAfterDomain,
-                          hLeftLoose,
-                          hRightLoose,
-                          nextSubst,
-                          hRest
-                        ] at hContinue
-                    | ok restRun =>
-                        rcases restRun with
-                          ⟨restValue, restState⟩
-                        have hRestConfig :=
-                          ih
+                          psKernelDefEqLambdaSpineWithFuel,
+                          leftOpened,
+                          rightOpened,
+                          hDomainEq,
+                          hDomainRun
+                        ] at hSuccess
+                    | ok domainRun =>
+                        rcases domainRun with
+                          ⟨domainValue, domainState⟩
+                        have hDomainSemantic :=
+                          hDefEq
                             context
+                            state
                             domainState
-                            restState
-                            leftBody
-                            rightBody
-                            nextSubst
-                            restValue
-                            hDomainConfig
-                            hRest
-                        simp [
-                          continueAfterDomain,
-                          hLeftLoose,
-                          hRightLoose,
-                          nextSubst,
-                          hRest
-                        ] at hContinue
-                        rcases hContinue with ⟨rfl, rfl⟩
-                        exact hRestConfig
-          · exact hDone
+                            leftOpened
+                            rightOpened
+                            domainValue
+                            hConfig
+                            hDomainRun
+                        cases domainValue with
+                        | false =>
+                            simp [
+                              psKernelDefEqLambdaSpineWithFuel,
+                              leftOpened,
+                              rightOpened,
+                              hDomainEq,
+                              hDomainRun
+                            ] at hSuccess
+                            rcases hSuccess with ⟨rfl, rfl⟩
+                            exact Or.inr hDomainSemantic.1
+                        | true =>
+                            exact
+                              Or.inl
+                                ⟨
+                                  domainState,
+                                  hDomainSemantic.1,
+                                  by
+                                    simpa [
+                                      psKernelDefEqLambdaSpineWithFuel,
+                                      leftOpened,
+                                      rightOpened,
+                                      continueAfterDomain,
+                                      hDomainEq,
+                                      hDomainRun,
+                                      hDependent
+                                    ] using hSuccess
+                                ⟩
+              rcases hReady with
+                ⟨domainState, hDomainConfig, hContinue⟩ |
+                hDone
+              · let nextSubst :=
+                  psKernelExprListAppend
+                    subst
+                    (List.cons
+                      (PsKernelExpr.sort PsKernelLevel.zero)
+                      List.nil)
+                cases hRest :
+                    psKernelDefEqLambdaSpineWithFuel
+                      remaining
+                      defeq
+                      context
+                      domainState
+                      leftBody
+                      rightBody
+                      nextSubst with
+                | error error =>
+                    simp [
+                      continueAfterDomain,
+                      hDependent,
+                      nextSubst,
+                      hRest
+                    ] at hContinue
+                | ok restRun =>
+                    rcases restRun with
+                      ⟨restValue, restState⟩
+                    have hRestConfig :=
+                      ih
+                        context
+                        domainState
+                        restState
+                        leftBody
+                        rightBody
+                        nextSubst
+                        restValue
+                        hDomainConfig
+                        hRest
+                    simp [
+                      continueAfterDomain,
+                      hDependent,
+                      nextSubst,
+                      hRest
+                    ] at hContinue
+                    rcases hContinue with ⟨rfl, rfl⟩
+                    exact hRestConfig
+              · exact hDone
 
 
 theorem psKernelDefEqFinish_false

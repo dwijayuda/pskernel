@@ -4,8 +4,9 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation checkpoint before this state commit: `ca57738b7248b0cb4884fb2cc59745e0a8af21c1`.
-- Last green package proof checkpoint: `ca57738b7248b0cb4884fb2cc59745e0a8af21c1` (run #476).
+- Current proof implementation checkpoint before this state commit: `ce35d36214d7df4fd7d386cf9ce0f0514cf73a6a`.
+- Last green package proof checkpoint: `ce35d36214d7df4fd7d386cf9ce0f0514cf73a6a` (run #485).
+- Run #485 is green for the refactored Assurance Plane: reduction/DefEq/typing/projection judgments coexist in one uniform environment-indexed mutual block, recursor iota carries explicit major-conversion evidence, context weakening is an explicit admissible semantic rule, and projection consumers remain source-compatible.
 - Run #476 is green for the callback-driven ordinary/Quot recursor configuration/refinement composition. The ordinary reducer now has an explicit prefix dispatcher, independently proved iota tail semantics, and a named optional-reduction postcondition that prevents executable-success proof terms from leaking into semantic theorem types.
 - Run #456 remains the earlier green checkpoint for the independent ordinary recursor iota/rule-search metatheory, including executable recursor-rule search refinement.
 - Run #420 is green for the registered beta substitution/lowering algebra.
@@ -51,11 +52,11 @@ Empirical validation for the reconciled semantic source:
   among evaluated cases; current host-only replay/classification work is
   intentionally not merged into this proof branch.
 
-The full package proof gate is green at run #476. The ordinary recursor prefix
-transport/composition frontier is closed. The reconciled constructor/level/
-mutual-analysis source modules compile successfully and do not introduce a new
-proof blocker. The next semantic frontier is concrete K/structure conversion
-soundness plus bounded recursor/checker-knot fuel composition.
+The full package proof gate is green at run #485. The ordinary recursor prefix
+transport/composition frontier remains closed, and the stronger conversion-aware
+Assurance Plane compiles together with the reconciled constructor/level/
+mutual-analysis source modules. The next semantic frontier is concrete K/structure
+conversion soundness plus bounded recursor/checker-knot fuel composition.
 
 ## Acceptance criteria
 The work is complete only when all of the following hold:
@@ -117,6 +118,8 @@ The audit is conservative relative to newer cross-module checker-contract/contex
 - `WhnfCoreConfiguration.lean` is registered as a metatheory root and owns the composed fuel induction. It exposes the `false/false` core specialization consumed by public WHNF.
 - `PrimitiveNatReduction.lean` now proves the full Nat primitive table, Nat constructor/literal normalization, `psKernelReduceNatWith` state preservation, semantic success refinement, and the optional-reduction configuration contract.
 - `WhnfConfiguration.lean` is registered and green. It proves post-core composition and the full public WHNF fuel theorem under explicit recursor, beta-spine, and native-reduction contracts. Native reduction remains an intentional TCB law; beta-spine is now discharged by the green run #438 theorem, leaving concrete recursor soundness as the remaining WHNF knot dependency.
+- Run #485 validates the conversion-aware recursor foundation: `PsKernelReductionClosure.recursorIota` now consumes explicit major-conversion evidence rather than pretending all K/structure major changes are ordinary reduction; independent proof-irrelevance and structure-eta DefEq rules are represented in the Assurance Plane.
+- `Metatheory/Inductive.lean` now contains independent raw constructor-Π spine judgments. Outer parameters/fields are consumed only from syntactic `forallE` structure, while parameter domains use ordinary DefEq and field domains use ordinary typing/universe semantics. The non-Π case returns the exact raw residual expression; no WHNF-manufactured binders are admitted by the specification.
 - The semantic audit remains conservatively A=44/B=9/C=19/D=7 until a criteria-based refresh after concrete checker closure.
 
 ## Current blocker

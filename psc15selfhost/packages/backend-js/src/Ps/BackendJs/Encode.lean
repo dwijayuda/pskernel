@@ -33,6 +33,13 @@ def psJsIrEncodeText
     Except PsJsIrEncodeError String :=
   Except.ok (psJsonQuote value)
 
+def psJsIrEncodeBoolText
+    (value : Bool) : String :=
+  if value then
+    "true"
+  else
+    "false"
+
 def psJsIrEncodeMachineType
     (value : PsJsIrMachineIntegerType) : String :=
   match value with

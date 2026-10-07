@@ -190,3 +190,243 @@ theorem psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
                         hArg,
                         hRun
                       ] using hSuccess
+
+
+theorem psKernelDefEqEtaStructCoreWith_configuration_preserves
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (term structureValue : PsKernelExpr)
+    (value : Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqEtaStructCoreWith
+          defeq inferType context state term structureValue =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState := by
+  let fn := psKernelExprGetAppFn structureValue
+  let args := psKernelExprGetAppArgs structureValue
+  cases hFn : fn with
+  | const ctorName levels =>
+      cases hFind :
+          psKernelEnvironmentFind context.environment ctorName with
+      | none =>
+          simp [
+            psKernelDefEqEtaStructCoreWith,
+            fn,
+            args,
+            hFn,
+            hFind
+          ] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact hConfig
+      | some info =>
+          cases info with
+          | ctorInfo ctor =>
+              cases hArity :
+                  Nat.beq
+                    (psKernelExprListLength args)
+                    (Nat.add ctor.numParams ctor.numFields) with
+              | false =>
+                  simp [
+                    psKernelDefEqEtaStructCoreWith,
+                    fn,
+                    args,
+                    hFn,
+                    hFind,
+                    hArity
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact hConfig
+              | true =>
+                  cases hStructure :
+                      psKernelEnvironmentIsNonRecStructure
+                        context.environment
+                        ctor.induct with
+                  | false =>
+                      simp [
+                        psKernelDefEqEtaStructCoreWith,
+                        fn,
+                        args,
+                        hFn,
+                        hFind,
+                        hArity,
+                        hStructure
+                      ] at hSuccess
+                      rcases hSuccess with ⟨rfl, rfl⟩
+                      exact hConfig
+                  | true =>
+                      cases hTerm :
+                          inferType context state term with
+                      | error error =>
+                          simp [
+                            psKernelDefEqEtaStructCoreWith,
+                            fn,
+                            args,
+                            hFn,
+                            hFind,
+                            hArity,
+                            hStructure,
+                            hTerm
+                          ] at hSuccess
+                      | ok termRun =>
+                          rcases termRun with ⟨termType, termState⟩
+                          have hTermConfig :=
+                            hInfer
+                              context state termState
+                              term termType
+                              hConfig hTerm
+                          cases hStructType :
+                              inferType
+                                context
+                                termState
+                                structureValue with
+                          | error error =>
+                              simp [
+                                psKernelDefEqEtaStructCoreWith,
+                                fn,
+                                args,
+                                hFn,
+                                hFind,
+                                hArity,
+                                hStructure,
+                                hTerm,
+                                hStructType
+                              ] at hSuccess
+                          | ok structRun =>
+                              rcases structRun with
+                                ⟨structureType, structureState⟩
+                              have hStructureConfig :=
+                                hInfer
+                                  context
+                                  termState
+                                  structureState
+                                  structureValue
+                                  structureType
+                                  hTermConfig
+                                  hStructType
+                              cases hTypes :
+                                  defeq
+                                    context
+                                    structureState
+                                    termType
+                                    structureType with
+                              | error error =>
+                                  simp [
+                                    psKernelDefEqEtaStructCoreWith,
+                                    fn,
+                                    args,
+                                    hFn,
+                                    hFind,
+                                    hArity,
+                                    hStructure,
+                                    hTerm,
+                                    hStructType,
+                                    hTypes
+                                  ] at hSuccess
+                              | ok typeRun =>
+                                  rcases typeRun with
+                                    ⟨typesEqual, typeState⟩
+                                  have hTypeConfig :=
+                                    (hDefEq
+                                      context
+                                      structureState
+                                      typeState
+                                      termType
+                                      structureType
+                                      typesEqual
+                                      hStructureConfig
+                                      hTypes).1
+                                  cases typesEqual with
+                                  | false =>
+                                      simp [
+                                        psKernelDefEqEtaStructCoreWith,
+                                        fn,
+                                        args,
+                                        hFn,
+                                        hFind,
+                                        hArity,
+                                        hStructure,
+                                        hTerm,
+                                        hStructType,
+                                        hTypes
+                                      ] at hSuccess
+                                      rcases hSuccess with ⟨rfl, rfl⟩
+                                      exact hTypeConfig
+                                  | true =>
+                                      apply
+                                        psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
+                                          (Nat.succ ctor.numFields)
+                                          defeq
+                                          hDefEq
+                                          context
+                                          typeState
+                                          nextState
+                                          ctor.induct
+                                          term
+                                          args
+                                          ctor.numParams
+                                          0
+                                          value
+                                          hTypeConfig
+                                      simpa [
+                                        psKernelDefEqEtaStructCoreWith,
+                                        fn,
+                                        args,
+                                        hFn,
+                                        hFind,
+                                        hArity,
+                                        hStructure,
+                                        hTerm,
+                                        hStructType,
+                                        hTypes
+                                      ] using hSuccess
+          | axiomInfo infoValue =>
+              simp [psKernelDefEqEtaStructCoreWith, fn, args, hFn, hFind] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+          | defnInfo infoValue =>
+              simp [psKernelDefEqEtaStructCoreWith, fn, args, hFn, hFind] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+          | thmInfo infoValue =>
+              simp [psKernelDefEqEtaStructCoreWith, fn, args, hFn, hFind] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+          | opaqueInfo infoValue =>
+              simp [psKernelDefEqEtaStructCoreWith, fn, args, hFn, hFind] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+          | inductInfo infoValue =>
+              simp [psKernelDefEqEtaStructCoreWith, fn, args, hFn, hFind] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+          | recInfo infoValue =>
+              simp [psKernelDefEqEtaStructCoreWith, fn, args, hFn, hFind] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+          | quotInfo infoValue =>
+              simp [psKernelDefEqEtaStructCoreWith, fn, args, hFn, hFind] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hConfig
+  | _ =>
+      simp [
+        psKernelDefEqEtaStructCoreWith,
+        fn,
+        args,
+        hFn
+      ] at hSuccess
+      rcases hSuccess with ⟨rfl, rfl⟩
+      exact hConfig

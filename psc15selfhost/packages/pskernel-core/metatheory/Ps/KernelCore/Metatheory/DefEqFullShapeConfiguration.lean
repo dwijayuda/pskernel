@@ -1,6 +1,7 @@
 import Ps.KernelCore.Metatheory.DefEqBinderConfiguration
 import Ps.KernelCore.Metatheory.DefEqEtaConfiguration
 import Ps.KernelCore.Metatheory.DefEqApplicationConfiguration
+import Ps.KernelCore.Metatheory.DefEqFinalConfiguration
 
 /-
 Configuration-aware refinement for the full-shape DefEq phase.
@@ -446,3 +447,229 @@ theorem psKernelDefEqFullShapeWith_configuration_sound
           simp [psKernelDefEqFullShapeWith] at hSuccess
           rcases hSuccess with ⟨rfl, rfl⟩
           exact ⟨hConfig, trivial⟩
+
+/-
+Configuration-aware composition for the final phase after both sides have
+reached the full-shape comparison point.
+
+The explicit reduction closures from the original pair to the full-shape pair
+are essential: positive final-rule evidence is lifted with `reduceCompare`,
+not with general DefEq transitivity.  This is also the evidence required to
+soundly publish the original pair in the success cache.
+-/
+theorem psKernelIsDefEqAfterFullShape_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (originalLeft originalRight left right : PsKernelExpr)
+    (value : Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hLeft :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        originalLeft
+        left)
+    (hRight :
+      PsKernelReductionClosure
+        context.environment
+        context.localContext
+        originalRight
+        right)
+    (hSuccess :
+      psKernelIsDefEqAfterFullShape
+          defeq inferType whnf
+          context state
+          originalLeft originalRight
+          left right =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (value = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          originalLeft
+          originalRight) := by
+  have liftSemantic :
+      PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          originalLeft
+          originalRight := by
+    intro hCore
+    exact
+      PsKernelDefEqJudgment.reduceCompare
+        originalLeft
+        originalRight
+        left
+        right
+        hLeft
+        hRight
+        hCore
+  simp only [psKernelIsDefEqAfterFullShape] at hSuccess
+  cases hEta :
+      psKernelDefEqEtaStructWith
+        defeq inferType
+        context state left right with
+  | error error =>
+      simp only [hEta] at hSuccess
+      simp at hSuccess
+  | ok etaRun =>
+      simp only [hEta] at hSuccess
+      rcases etaRun with ⟨etaValue, etaState⟩
+      have hEtaSound :=
+        psKernelDefEqEtaStructWith_configuration_sound
+          defeq
+          inferType
+          hDefEq
+          hInfer
+          context
+          state
+          etaState
+          left
+          right
+          etaValue
+          hConfig
+          hEta
+      by_cases hEtaTrue : etaValue = true
+      · rw [if_pos hEtaTrue] at hSuccess
+        have hOriginal :=
+          liftSemantic (hEtaSound.2 hEtaTrue)
+        exact
+          psKernelDefEqFinish_result_sound
+            context
+            etaState
+            nextState
+            originalLeft
+            originalRight
+            true
+            value
+            hEtaSound.1
+            (fun _ => hOriginal)
+            hSuccess
+      · rw [if_neg hEtaTrue] at hSuccess
+        cases hString :
+            psKernelDefEqStringLitExpansionWith
+              defeq
+              whnf
+              context
+              etaState
+              left
+              right with
+        | error error =>
+            simp only [hString] at hSuccess
+            simp at hSuccess
+        | ok stringRun =>
+            simp only [hString] at hSuccess
+            rcases stringRun with ⟨stringAnswer, stringState⟩
+            have hStringSound :=
+              psKernelDefEqStringLitExpansionWith_optional_configuration_sound
+                defeq
+                whnf
+                hDefEq
+                hWhnf
+                context
+                etaState
+                stringState
+                left
+                right
+                stringAnswer
+                hEtaSound.1
+                hString
+            cases stringAnswer with
+            | some stringValue =>
+                cases stringValue with
+                | false =>
+                    exact
+                      psKernelDefEqFinish_result_sound
+                        context
+                        stringState
+                        nextState
+                        originalLeft
+                        originalRight
+                        false
+                        value
+                        hStringSound.1
+                        (by
+                          intro hFalse
+                          simp at hFalse)
+                        hSuccess
+                | true =>
+                    have hOriginal :=
+                      liftSemantic hStringSound.2
+                    exact
+                      psKernelDefEqFinish_result_sound
+                        context
+                        stringState
+                        nextState
+                        originalLeft
+                        originalRight
+                        true
+                        value
+                        hStringSound.1
+                        (fun _ => hOriginal)
+                        hSuccess
+            | none =>
+                cases hUnit :
+                    psKernelDefEqUnitLikeWith
+                      defeq
+                      inferType
+                      whnf
+                      context
+                      stringState
+                      left
+                      right with
+                | error error =>
+                    simp only [hUnit] at hSuccess
+                    simp at hSuccess
+                | ok unitRun =>
+                    simp only [hUnit] at hSuccess
+                    rcases unitRun with ⟨unitValue, unitState⟩
+                    have hUnitSound :=
+                      psKernelDefEqUnitLikeWith_configuration_sound
+                        defeq
+                        inferType
+                        whnf
+                        hDefEq
+                        hInfer
+                        hWhnf
+                        context
+                        stringState
+                        unitState
+                        left
+                        right
+                        unitValue
+                        hStringSound.1
+                        hUnit
+                    exact
+                      psKernelDefEqFinish_result_sound
+                        context
+                        unitState
+                        nextState
+                        originalLeft
+                        originalRight
+                        unitValue
+                        value
+                        hUnitSound.1
+                        (fun hValue =>
+                          liftSemantic (hUnitSound.2 hValue))
+                        hSuccess
+

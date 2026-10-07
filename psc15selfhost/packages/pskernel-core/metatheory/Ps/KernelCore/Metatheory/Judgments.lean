@@ -805,11 +805,10 @@ inductive PsKernelReductionClosure
       (hMajorArgs :
         Prod.snd (psKernelExprGetAppFnArgs major) =
           majorArgs)
-      (hRule :
-        psKernelFindRecursorRule
-            ctorName
-            recursor.rules =
-          Option.some rule)
+      (hRuleMem :
+        rule ∈ recursor.rules)
+      (hRuleCtor :
+        psKernelNameEq rule.ctor ctorName = true)
       (hFields :
         psKernelNatGt
             rule.nFields

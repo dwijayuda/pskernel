@@ -50,7 +50,14 @@
     "closedPart": "Declared interface, signature, nominal recursive layout, runtime-values profile, target and capability compatibility.",
     "remainingPart": "Aggregate/resource/async JavaScript adapters, Wasm Component canonical ABI and native Rust/C adapters, plus global adapter preservation/host-behavior assurance.",
     "moduleLinkProfile": "Complete acyclic graph with monomorphic exports derived from actual validated module bodies; unsupported generic exports and cycles reject.",
-    "scalarAdapter": "contracts/ir/JS_SCALAR_ABI_V1.json: synchronous primitive JavaScript adapter is production-bound to exact VerifiedIR, capability policy, build graph/archive and EvidenceEnvelope with independent offline plan replay."
+    "scalarAdapter": "contracts/ir/JS_SCALAR_ABI_V1.json: synchronous primitive JavaScript adapter is production-bound to exact VerifiedIR, capability policy, build graph/archive and EvidenceEnvelope with independent offline plan replay.",
+    "targetMatrix": {
+      "typescriptToJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
+      "directJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
+      "rust": "external imports fail closed with externalImportUnsupported; native adapter implementation remains pending",
+      "coreWasm": "external imports fail closed with unsupportedModuleFeature; Component Model adapter is separate and remains pending",
+      "componentModel": "portable InterfaceIR->WIT declarations exist; canonical ABI/component binary lowering and independent parser/runtime validation remain pending"
+    }
   },
   "policy": {
     "unknownMeaningMustNotBeAddedSilently": true,

@@ -167,3 +167,130 @@ theorem psKernelDefEqFullShape_literal_true_refines
       psKernelDefEqFullShape_lit_lit
         defeq inferType whnf context state left right
   · exact PsKernelDefEqJudgment.literal left right hLiteral
+
+
+/-
+Regression lock for Lean-compatible symmetric function eta.
+
+After the full-shape/WHNF stage, a lambda on either side must route to the
+corresponding eta helper whenever the other side is not itself a lambda.
+These equations directly cover the application/partial-application family that
+Arena exposed, plus the constant-function shape handled by the same rule.
+-/
+
+theorem psKernelDefEqFullShape_app_lambda_uses_eta_right
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (fn arg : PsKernelExpr)
+    (name : PsKernelName)
+    (domain body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo) :
+    psKernelDefEqFullShapeWith
+        defeq inferType whnf context state
+        (PsKernelExpr.app fn arg)
+        (PsKernelExpr.lam name domain body binderInfo) =
+      psKernelDefEqLambdaEtaRightWith
+        defeq inferType whnf context state
+        (PsKernelExpr.app fn arg)
+        (PsKernelExpr.lam name domain body binderInfo) := by
+  rfl
+
+
+theorem psKernelDefEqFullShape_lambda_app_uses_eta_left
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (fn arg : PsKernelExpr)
+    (name : PsKernelName)
+    (domain body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo) :
+    psKernelDefEqFullShapeWith
+        defeq inferType whnf context state
+        (PsKernelExpr.lam name domain body binderInfo)
+        (PsKernelExpr.app fn arg) =
+      psKernelDefEqLambdaEtaLeftWith
+        defeq inferType whnf context state
+        (PsKernelExpr.lam name domain body binderInfo)
+        (PsKernelExpr.app fn arg) := by
+  rfl
+
+
+theorem psKernelDefEqFullShape_const_lambda_uses_eta_right
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (constName : PsKernelName)
+    (levels : List PsKernelLevel)
+    (name : PsKernelName)
+    (domain body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo) :
+    psKernelDefEqFullShapeWith
+        defeq inferType whnf context state
+        (PsKernelExpr.const constName levels)
+        (PsKernelExpr.lam name domain body binderInfo) =
+      psKernelDefEqLambdaEtaRightWith
+        defeq inferType whnf context state
+        (PsKernelExpr.const constName levels)
+        (PsKernelExpr.lam name domain body binderInfo) := by
+  rfl
+
+
+theorem psKernelDefEqFullShape_lambda_const_uses_eta_left
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (constName : PsKernelName)
+    (levels : List PsKernelLevel)
+    (name : PsKernelName)
+    (domain body : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo) :
+    psKernelDefEqFullShapeWith
+        defeq inferType whnf context state
+        (PsKernelExpr.lam name domain body binderInfo)
+        (PsKernelExpr.const constName levels) =
+      psKernelDefEqLambdaEtaLeftWith
+        defeq inferType whnf context state
+        (PsKernelExpr.lam name domain body binderInfo)
+        (PsKernelExpr.const constName levels) := by
+  rfl

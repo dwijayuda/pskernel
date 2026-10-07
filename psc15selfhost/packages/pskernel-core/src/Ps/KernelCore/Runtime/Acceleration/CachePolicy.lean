@@ -26,54 +26,49 @@ across the whole expression tree, not independently per branch.
 def psKernelSemanticCacheNodeBudget : Nat :=
   256
 
-def psKernelSemanticCacheRemaining
-    (fuel : Nat) :
-    PsKernelExpr -> Option Nat :=
-  match fuel with
-  | Nat.zero =>
-      fun (_expr : PsKernelExpr) =>
-        Option.none
-  | Nat.succ remaining =>
-      let smaller : Nat -> PsKernelExpr -> Option Nat :=
-        psKernelSemanticCacheRemaining;
-      fun (expr : PsKernelExpr) =>
-        match expr with
-        | PsKernelExpr.fvar _ =>
-            Option.none
-        | PsKernelExpr.app fn arg =>
-            match smaller remaining fn with
-            | Option.none => Option.none
-            | Option.some next => smaller next arg
-        | PsKernelExpr.lam _ type body _ =>
-            match smaller remaining type with
-            | Option.none => Option.none
-            | Option.some next => smaller next body
-        | PsKernelExpr.forallE _ type body _ =>
-            match smaller remaining type with
-            | Option.none => Option.none
-            | Option.some next => smaller next body
-        | PsKernelExpr.letE _ type value body _ =>
-            match smaller remaining type with
-            | Option.none => Option.none
-            | Option.some afterType =>
-                match smaller afterType value with
-                | Option.none => Option.none
-                | Option.some afterValue =>
-                    smaller afterValue body
-        | PsKernelExpr.mdata _ body =>
-            smaller remaining body
-        | PsKernelExpr.proj _ _ body =>
-            smaller remaining body
-        | _ =>
-            Option.some remaining
+def psKernelSemanticCacheRemaining :
+    PsKernelExpr -> Nat -> Option Nat
+  | _expr, Nat.zero =>
+      Option.none
+  | PsKernelExpr.fvar _, Nat.succ _ =>
+      Option.none
+  | PsKernelExpr.app fn arg, Nat.succ remaining =>
+      match psKernelSemanticCacheRemaining fn remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelSemanticCacheRemaining arg next
+  | PsKernelExpr.lam _ type body _, Nat.succ remaining =>
+      match psKernelSemanticCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelSemanticCacheRemaining body next
+  | PsKernelExpr.forallE _ type body _, Nat.succ remaining =>
+      match psKernelSemanticCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelSemanticCacheRemaining body next
+  | PsKernelExpr.letE _ type value body _, Nat.succ remaining =>
+      match psKernelSemanticCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some afterType =>
+          match psKernelSemanticCacheRemaining value afterType with
+          | Option.none => Option.none
+          | Option.some afterValue =>
+              psKernelSemanticCacheRemaining body afterValue
+  | PsKernelExpr.mdata _ body, Nat.succ remaining =>
+      psKernelSemanticCacheRemaining body remaining
+  | PsKernelExpr.proj _ _ body, Nat.succ remaining =>
+      psKernelSemanticCacheRemaining body remaining
+  | _expr, Nat.succ remaining =>
+      Option.some remaining
 
 def psKernelSemanticCacheEligible
     (expr : PsKernelExpr) :
     Bool :=
   match
       psKernelSemanticCacheRemaining
-        psKernelSemanticCacheNodeBudget
-        expr with
+        expr
+        psKernelSemanticCacheNodeBudget with
   | Option.some _ => true
   | Option.none => false
 

@@ -6,7 +6,7 @@ const id = value => { artifactKey(value); return copy(value); };
 
 export function createEvidenceEnvelope({
   executableArtifact, pscvCert, certifiedSource, buildGraph, buildArchive,
-  runtimeInterface, providerInputs = [], typeScriptToolInputs, sourceResources, seedResources,
+  runtimeInterface, targetAdapters = [], providerInputs = [], typeScriptToolInputs, sourceResources, seedResources,
   transformationAssurance = 'trusted-implementation-global-preservation-unproved',
 }) {
   if (!executableArtifact || !pscvCert || !certifiedSource || !buildGraph || !buildArchive) fail('REQUIRED');
@@ -19,6 +19,7 @@ export function createEvidenceEnvelope({
     buildGraph: id(buildGraph),
     buildArchive: id(buildArchive),
     ...(runtimeInterface ? { runtimeInterface: id(runtimeInterface) } : {}),
+    targetAdapters: targetAdapters.map(id),
     providerInputs: providerInputs.map(id),
     ...(typeScriptToolInputs ? { typeScriptToolInputs: id(typeScriptToolInputs) } : {}),
     resources: {
@@ -44,7 +45,7 @@ export async function verifyEvidenceEnvelope(record, { resolveArtifact, requireR
       value.releaseAccepted !== false || value.executablePreservation !== 'not-established') fail('SCHEMA');
   if (typeof resolveArtifact !== 'function') fail('RESOLVER');
   const required = [value.executableArtifact, value.pscvCert, value.certifiedSource, value.buildGraph, value.buildArchive,
-    ...(value.runtimeInterface ? [value.runtimeInterface] : []), ...(value.providerInputs ?? []),
+    ...(value.runtimeInterface ? [value.runtimeInterface] : []), ...(value.targetAdapters ?? []), ...(value.providerInputs ?? []),
     ...(value.typeScriptToolInputs ? [value.typeScriptToolInputs] : [])];
   if (requireRuntimeInterface && !value.runtimeInterface) fail('RUNTIME_INTERFACE_REQUIRED');
   for (const identity of required) {

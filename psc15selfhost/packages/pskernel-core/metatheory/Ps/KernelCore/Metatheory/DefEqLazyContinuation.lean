@@ -1,5 +1,6 @@
 import Ps.KernelCore.Metatheory.DefEqLazyConfiguration
 import Ps.KernelCore.Metatheory.NativeReduction
+import Ps.KernelCore.Metatheory.DefEqApplicationConfiguration
 
 /-
 Callback contracts for the fuel-driven lazy-delta continuation.
@@ -248,6 +249,90 @@ def PsKernelDeltaStepBothConfigurationSound
       Except.ok (Prod.mk answer nextState) ->
     PsKernelDeltaStepPostcondition
       context nextState left right answer
+
+
+
+/-
+The equal-hint argument shortcut has two separate obligations:
+* configuration soundness, even if the negative-result cache is consulted;
+* whole-application DefEq evidence only after an independently justified
+  equality of constant heads has been supplied.
+
+The shortcut flag itself is not an equality certificate. The caller must
+supply a proof of the head relation, grounded in authoritative lookups.
+-/
+theorem psKernelLazyDelta_same_hint_args_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (shortcut value : Bool)
+    (hHead :
+      shortcut = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext
+          (psKernelExprGetAppFn left)
+          (psKernelExprGetAppFn right))
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      (if shortcut then
+         if psKernelSemanticPairCacheEligible left right then
+           if psKernelExprPairSetContains state.failure left right then
+             Except.ok (Prod.mk false state)
+           else
+             psKernelDefEqArgs defeq context state left right
+         else
+           psKernelDefEqArgs defeq context state left right
+       else
+         Except.ok (Prod.mk false state)) =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      ((if shortcut then value else false) = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext left right) := by
+  by_cases hShortcut : shortcut = true
+  · by_cases hEligible :
+        psKernelSemanticPairCacheEligible left right = true
+    · by_cases hFailed :
+          psKernelExprPairSetContains state.failure left right = true
+      · simp [hShortcut, hEligible, hFailed] at hRun
+        rcases hRun with ⟨rfl, rfl⟩
+        refine ⟨hConfig, ?_⟩
+        simp [hShortcut]
+      · have hArgs :
+            psKernelDefEqArgs defeq context state left right =
+              Except.ok (Prod.mk value nextState) := by
+          simpa [hShortcut, hEligible, hFailed] using hRun
+        have hSound :=
+          psKernelDefEqArgs_configuration_sound
+            defeq hDefEq
+            context state nextState left right value
+            (hHead hShortcut) hConfig hArgs
+        refine ⟨hSound.1, ?_⟩
+        intro hValue
+        exact hSound.2 (by simpa [hShortcut] using hValue)
+    · have hArgs :
+          psKernelDefEqArgs defeq context state left right =
+            Except.ok (Prod.mk value nextState) := by
+        simpa [hShortcut, hEligible] using hRun
+      have hSound :=
+        psKernelDefEqArgs_configuration_sound
+          defeq hDefEq
+          context state nextState left right value
+          (hHead hShortcut) hConfig hArgs
+      refine ⟨hSound.1, ?_⟩
+      intro hValue
+      exact hSound.2 (by simpa [hShortcut] using hValue)
+  · simp [hShortcut] at hRun
+    rcases hRun with ⟨rfl, rfl⟩
+    refine ⟨hConfig, ?_⟩
+    simp [hShortcut]
 
 
 theorem psKernelDefEqLazyStep_configuration_sound_of_branches

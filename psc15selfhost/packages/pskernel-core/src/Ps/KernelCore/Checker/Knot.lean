@@ -349,10 +349,16 @@ def psKernelIsDefEqWithFuel
                   right
                   true)
             else if
-                psKernelExprPairSetContains
-                  state.success
-                  left
-                  right then
+                if
+                    psKernelSemanticPairCacheEligible
+                      left
+                      right then
+                  psKernelExprPairSetContains
+                    state.success
+                    left
+                    right
+                else
+                  false then
               Except.ok
                 (Prod.mk true state)
             else

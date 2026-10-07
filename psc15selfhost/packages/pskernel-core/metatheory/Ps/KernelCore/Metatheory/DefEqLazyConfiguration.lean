@@ -324,3 +324,45 @@ theorem psKernelDefEqTryUnfoldProjApp_configuration_sound
       ] at hRun
       rcases hRun with ⟨rfl, rfl⟩
       exact ⟨hConfig, trivial⟩
+
+
+/-
+DefEq unfolding changes only the semantic unfold cache; it leaves the
+authoritative environment index and fresh-local bound untouched.
+The semantic-cache refinement is single-owned by Metatheory.Delta.
+-/
+theorem psKernelDefEqUnfold_configuration_preserves
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state) :
+    PsKernelCheckerConfigurationSound
+      context
+      (Prod.snd
+        (psKernelDefEqUnfold context state expr)) := by
+  rcases hConfig with ⟨hIndex, hFresh, hSemantic⟩
+  have hFreshEq :
+      (Prod.snd
+        (psKernelDefEqUnfold
+          context state expr)).nextFresh =
+        state.nextFresh := by
+    cases hEligible : psKernelSemanticCacheEligible expr <;>
+      cases hCache :
+          psKernelExprMapGet state.unfold expr <;>
+        cases hDirect :
+            psKernelUnfoldDefinition context expr <;>
+          simp [
+            psKernelDefEqUnfold,
+            hEligible,
+            hCache,
+            hDirect,
+            psKernelCheckerStateWithUnfold
+          ]
+  refine ⟨hIndex, ?_, ?_⟩
+  · simpa only [hFreshEq] using hFresh
+  · exact
+      psKernelDefEqUnfold_preserves_semantic_sound
+        context state expr
+        hIndex
+        psKernelReductionCacheInsertLaw_all
+        hSemantic

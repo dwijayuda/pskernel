@@ -856,3 +856,58 @@ theorem psKernelSameDeltaDefinition_name_sound
     psKernelNameEq_sound_of_string_law
       hString left.base.name right.base.name
       (by simpa [psKernelSameDeltaDefinition] using hSame)
+
+
+/-
+The only sound way for lazy-delta to omit the head comparison is to connect
+both supplied definition descriptors to the actual queried constant heads.
+The name and normalized universe comparisons then justify a particular
+algorithmic constant-head DefEq judgment.
+-/
+theorem psKernelLazyDelta_same_definition_head_sound
+    (hString : PsKernelStringEqSoundLaw)
+    (context : PsKernelCheckerContext)
+    (left right : PsKernelExpr)
+    (leftDef rightDef : PsKernelDefinitionInfo)
+    (hLeftDef :
+      psKernelDeltaDefinition context left = Option.some leftDef)
+    (hRightDef :
+      psKernelDeltaDefinition context right = Option.some rightDef)
+    (hSame :
+      psKernelSameDeltaDefinition leftDef rightDef = true)
+    (hLevels :
+      psKernelAppHeadLevelsEquivalent left right = true) :
+    PsKernelDefEqJudgment
+      context.environment context.localContext
+      (psKernelExprGetAppFn left)
+      (psKernelExprGetAppFn right) := by
+  obtain ⟨leftName, leftLevels, hLeftHead, _, hLeftName⟩ :=
+    psKernelDeltaDefinition_some_head_matches
+      context left leftDef hLeftDef
+  obtain ⟨rightName, rightLevels, hRightHead, _, hRightName⟩ :=
+    psKernelDeltaDefinition_some_head_matches
+      context right rightDef hRightDef
+  have hLeftNameEq :=
+    psKernelNameEq_sound_of_string_law
+      hString leftDef.base.name leftName hLeftName
+  have hRightNameEq :=
+    psKernelNameEq_sound_of_string_law
+      hString rightDef.base.name rightName hRightName
+  have hDefinitionNameEq :=
+    psKernelSameDeltaDefinition_name_sound
+      hString leftDef rightDef hSame
+  have hHeadNameEq : leftName = rightName := by
+    calc
+      leftName = leftDef.base.name := hLeftNameEq.symm
+      _ = rightDef.base.name := hDefinitionNameEq
+      _ = rightName := hRightNameEq
+  have hNormalized :=
+    psKernelAppHeadLevelsEquivalent_normalized_sound
+      hString left right
+      leftName rightName leftLevels rightLevels
+      hLeftHead hRightHead hLevels
+  rw [hLeftHead, hRightHead]
+  subst rightName
+  exact
+    PsKernelDefEqJudgment.constLevels
+      leftName leftLevels rightLevels hNormalized

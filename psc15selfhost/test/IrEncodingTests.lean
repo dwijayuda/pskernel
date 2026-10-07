@@ -83,7 +83,7 @@ def psTsDeclarationFixture
 def psTsDeclarationFailureFixture : IO Unit := do
   let nat := PsExpr.constE (PsName.str .anonymous "Nat") []
   let binder := PsName.str .anonymous "A"
-  let simple := PsPublicApiDeclaration.constant .definition binder [] nat
+  let simple := PsPublicApiDeclaration.constant .definitionValue binder [] nat
   let api := PsPublicApiModule.mk [simple, simple]
   let selected := [PsTsDeclarationRequest.mk 1 "Array"]
   let .ok sparse := psTsEmitDeclarations .closedJavaScript64 api selected
@@ -117,18 +117,18 @@ def psTsDeclarationFailureFixture : IO Unit := do
   if exact != sparse then throw (IO.userError "DECLARATION_EXACT_OUTPUT")
   let type := PsExpr.sortE (.succ .zero)
   let generic := PsExpr.forallE binder type (.forallE binder (.bvar 0) (.bvar 1) .explicit) .explicit
-  let genericApi := PsPublicApiModule.mk [PsPublicApiDeclaration.constant .definition binder [] generic]
+  let genericApi := PsPublicApiModule.mk [PsPublicApiDeclaration.constant .definitionValue binder [] generic]
   let request := [PsTsDeclarationRequest.mk 0 "identity"]
   match psTsEmitDeclarations .closedJavaScript64 genericApi request with
   | .error .genericExportUnavailable => pure ()
   | _ => throw (IO.userError "DECLARATION_CLOSED_GENERIC")
   let genericValue := PsPublicApiModule.mk [
-    PsPublicApiDeclaration.constant .definition binder [] (.forallE binder type nat .explicit)]
+    PsPublicApiDeclaration.constant .definitionValue binder [] (.forallE binder type nat .explicit)]
   match psTsEmitDeclarations .uniformJavaScript64 genericValue request with
   | .error .genericValueUnsupported => pure ()
   | _ => throw (IO.userError "DECLARATION_GENERIC_VALUE")
   let unsupported := PsPublicApiModule.mk [
-    PsPublicApiDeclaration.constant .definition binder [] (.fvar 0)]
+    PsPublicApiDeclaration.constant .definitionValue binder [] (.fvar 0)]
   match psTsEmitDeclarations .uniformJavaScript64 unsupported request with
   | .error (.sourceSignature .typeFormUnsupported) => pure ()
   | _ => throw (IO.userError "DECLARATION_SOURCE_FAILURE")

@@ -6,6 +6,10 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
+- **2026-10-08 writer fixture correction:** `f011fea` passed source/profile/ownership checks and compiled `Ps.InterfaceTs.Declarations`. Main run 37701335594/job 113065221045 then rejected four native fixture constructors: the source API enum is `definitionValue`, while the JSON tag is `definition`. Corrected only those fixture constructors. Writer behavior and acceptance rules are unchanged; downstream validation is pending.
+
+- **2026-10-08 confirmed source projector checkpoint:** `087d820` completed full main run 37700738960/job 113063310562 and provider-parity run 37700738923/job 113063310124 successfully. This confirms the executed native/portable checks only, with no global theorem or promotion implication.
+
 - **2026-10-08 portable declaration writer:** added the separate portable `interface-ts` owner with a bounded task-based declaration writer over PublicApiIR source signatures and explicit ordered export requests. It preserves closed/uniform generic policy, exact alias spelling, scalar/Array/function types and empty-module behavior; no target inference or generic fallback. Native fixtures compare exact bytes with the independent host factory and consume the results through the pinned TypeScript checker; focused request/name/resource/generic failures are added. Cloud validation is pending. Live checked-service routing and uniform origin composition remain next; kernel implementation and global proof status are unchanged.
 
 - **2026-10-08 source projector rebuild progress:** `087d820` main run 37700738960/job 113063310562 has passed native semantic builds, actual native source-signature comparisons and portable implementation self-checks through step 32. Later checks were still running when this checkpoint was prepared, so it is not recorded as a full green run.

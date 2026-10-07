@@ -120,73 +120,64 @@ theorem psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
   | zero =>
       simp [psKernelDefEqEtaStructFieldsWithFuel] at hSuccess
   | succ remaining ih =>
-      let fieldCount :=
-        Nat.sub (psKernelExprListLength args) numParams
+      simp only [psKernelDefEqEtaStructFieldsWithFuel] at hSuccess
       by_cases hMore :
-          psKernelNatLt index fieldCount = true
-      · cases hArg :
-            psKernelExprListGet args (Nat.add numParams index) with
+          psKernelNatLt
+              index
+              (Nat.sub
+                (psKernelExprListLength args)
+                numParams) =
+            true
+      · rw [if_pos hMore] at hSuccess
+        cases hArg :
+            psKernelExprListGet
+              args
+              (Nat.add numParams index) with
         | none =>
-            simp [
-              psKernelDefEqEtaStructFieldsWithFuel,
-              fieldCount,
-              hMore,
-              hArg
-            ] at hSuccess
+            rw [hArg] at hSuccess
+            simp at hSuccess
             rcases hSuccess with ⟨rfl, rfl⟩
             exact hConfig
         | some arg =>
+            rw [hArg] at hSuccess
             cases hRun :
-                defeq context state
+                defeq
+                  context
+                  state
                   (PsKernelExpr.proj induct index term)
                   arg with
             | error error =>
-                simp [
-                  psKernelDefEqEtaStructFieldsWithFuel,
-                  fieldCount,
-                  hMore,
-                  hArg,
-                  hRun
-                ] at hSuccess
+                rw [hRun] at hSuccess
+                simp at hSuccess
             | ok run =>
                 rcases run with ⟨eqValue, eqState⟩
+                rw [hRun] at hSuccess
                 have hEq :=
                   hDefEq
-                    context state eqState
+                    context
+                    state
+                    eqState
                     (PsKernelExpr.proj induct index term)
-                    arg eqValue
-                    hConfig hRun
-                cases eqValue with
-                | false =>
-                    simp [
-                      psKernelDefEqEtaStructFieldsWithFuel,
-                      fieldCount,
-                      hMore,
-                      hArg,
-                      hRun
-                    ] at hSuccess
-                    rcases hSuccess with ⟨rfl, rfl⟩
-                    exact hEq.1
-                | true =>
-                    apply
-                      ih
-                        eqState
-                        nextState
-                        (Nat.succ index)
-                        value
-                        hEq.1
-                    simpa [
-                      psKernelDefEqEtaStructFieldsWithFuel,
-                      fieldCount,
-                      hMore,
-                      hArg,
-                      hRun
-                    ] using hSuccess
-      · simp [
-          psKernelDefEqEtaStructFieldsWithFuel,
-          fieldCount,
-          hMore
-        ] at hSuccess
+                    arg
+                    eqValue
+                    hConfig
+                    hRun
+                by_cases hEqValue : eqValue = true
+                · rw [if_pos hEqValue] at hSuccess
+                  exact
+                    ih
+                      eqState
+                      nextState
+                      (Nat.succ index)
+                      value
+                      hEq.1
+                      (by simpa [Nat.succ_eq_add_one] using hSuccess)
+                · rw [if_neg hEqValue] at hSuccess
+                  simp at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact hEq.1
+      · rw [if_neg hMore] at hSuccess
+        simp at hSuccess
         rcases hSuccess with ⟨rfl, rfl⟩
         exact hConfig
 

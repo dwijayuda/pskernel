@@ -649,3 +649,193 @@ theorem psKernelLazyDelta_two_sided_fallback_configuration_sound
               context nextState
               left right leftValue rightValue answer
               hLeftSound.1 hRightSound.1 hFinishSound
+
+
+/-
+For equal reducibility hints, the optimized argument comparison can decide
+positive equality only with proof of the actual constant-head equivalence.
+Otherwise the executable continues by unfolding both sides, preserving the
+failure-cache state and transporting the terminal result along each reduction.
+-/
+theorem psKernelDefEqLazyStepBoth_equal_hint_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (hString : PsKernelStringEqSoundLaw)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (leftDef rightDef : PsKernelDefinitionInfo)
+    (answer : PsKernelDeltaStepResult)
+    (hNoLeft :
+      psKernelReducibilityHintsLt leftDef.hints rightDef.hints = false)
+    (hNoRight :
+      psKernelReducibilityHintsLt rightDef.hints leftDef.hints = false)
+    (hLeftDef :
+      psKernelDeltaDefinition context left = Option.some leftDef)
+    (hRightDef :
+      psKernelDeltaDefinition context right = Option.some rightDef)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqLazyStepBoth
+          defeq coreWhnf context state
+          left right leftDef rightDef =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelDeltaStepPostcondition
+      context nextState left right answer := by
+  let sameShortcut : Bool :=
+    if
+        (if psKernelNatGt (psKernelExprGetAppNumArgs left) 0 then
+           psKernelNatGt (psKernelExprGetAppNumArgs right) 0
+         else
+           false) then
+      if psKernelSameDeltaDefinition leftDef rightDef then
+        if psKernelReducibilityHintsIsRegular leftDef.hints then
+          psKernelAppHeadLevelsEquivalent left right
+        else
+          false
+      else
+        false
+    else
+      false
+  let argsResult :
+      Except String (Prod Bool PsKernelCheckerState) :=
+    if sameShortcut then
+      if psKernelSemanticPairCacheEligible left right then
+        if psKernelExprPairSetContains state.failure left right then
+          Except.ok (Prod.mk false state)
+        else
+          psKernelDefEqArgs defeq context state left right
+      else
+        psKernelDefEqArgs defeq context state left right
+    else
+      Except.ok (Prod.mk false state)
+  have hHead :
+      sameShortcut = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext
+          (psKernelExprGetAppFn left)
+          (psKernelExprGetAppFn right) := by
+    intro hShortcut
+    exact
+      psKernelLazyDelta_same_shortcut_head_sound
+        hString context left right leftDef rightDef
+        hLeftDef hRightDef
+        (by simpa [sameShortcut] using hShortcut)
+  have hMain :
+      (match argsResult with
+       | Except.error error =>
+           Except.error error
+       | Except.ok compared =>
+           if (if sameShortcut then Prod.fst compared else false) then
+             Except.ok
+               (Prod.mk
+                 PsKernelDeltaStepResult.equal
+                 (Prod.snd compared))
+           else
+             let comparedState := Prod.snd compared
+             let afterFailure :=
+               if sameShortcut then
+                 if psKernelSemanticPairCacheEligible left right then
+                   psKernelCheckerStateWithFailure
+                     comparedState
+                     (psKernelExprPairSetInsert
+                       comparedState.failure left right)
+                 else
+                   comparedState
+               else
+                 comparedState
+             match
+                 psKernelDefEqDeltaOnce
+                   coreWhnf context afterFailure left with
+             | Except.error error =>
+                 Except.error error
+             | Except.ok leftResult =>
+                 match
+                     psKernelDefEqDeltaOnce
+                       coreWhnf context
+                       (Prod.snd leftResult)
+                       right with
+                 | Except.error error =>
+                     Except.error error
+                 | Except.ok rightResult =>
+                     psKernelDefEqFinishLazyStep
+                       defeq context
+                       (Prod.snd rightResult)
+                       (Prod.fst leftResult)
+                       (Prod.fst rightResult)) =
+        Except.ok (Prod.mk answer nextState) := by
+    simpa [
+      psKernelDefEqLazyStepBoth,
+      hNoLeft,
+      hNoRight,
+      sameShortcut,
+      argsResult
+    ] using hRun
+  cases hArgs :
+      argsResult with
+  | error error =>
+      simp only [hArgs] at hMain
+      simp at hMain
+  | ok compared =>
+      simp only [hArgs] at hMain
+      rcases compared with ⟨argValue, argState⟩
+      have hArgsSound :=
+        psKernelLazyDelta_same_hint_args_configuration_sound
+          defeq hDefEq context state argState
+          left right sameShortcut argValue hHead hConfig
+          (by simpa [argsResult] using hArgs)
+      by_cases hDecided :
+          (if sameShortcut then argValue else false) = true
+      · rw [if_pos hDecided] at hMain
+        simp at hMain
+        rcases hMain with ⟨rfl, rfl⟩
+        exact ⟨hArgsSound.1, hArgsSound.2 hDecided⟩
+      · rw [if_neg hDecided] at hMain
+        let afterFailure : PsKernelCheckerState :=
+          if sameShortcut then
+            if psKernelSemanticPairCacheEligible left right then
+              psKernelCheckerStateWithFailure
+                argState
+                (psKernelExprPairSetInsert
+                  argState.failure left right)
+            else
+              argState
+          else
+            argState
+        have hAfterConfig :
+            PsKernelCheckerConfigurationSound
+              context afterFailure := by
+          by_cases hShortcut : sameShortcut = true
+          · by_cases hEligible :
+                psKernelSemanticPairCacheEligible left right = true
+            · simpa [afterFailure, hShortcut, hEligible] using
+                (psKernelCheckerStateWithFailure_preserves_configuration
+                  context argState
+                  (psKernelExprPairSetInsert
+                    argState.failure left right)
+                  hArgsSound.1)
+            · simpa [afterFailure, hShortcut, hEligible] using
+                hArgsSound.1
+          · simpa [afterFailure, hShortcut] using hArgsSound.1
+        exact
+          psKernelLazyDelta_two_sided_fallback_configuration_sound
+            defeq coreWhnf hQuick hCore
+            context afterFailure nextState
+            left right answer hAfterConfig
+            (by simpa [afterFailure] using hMain)

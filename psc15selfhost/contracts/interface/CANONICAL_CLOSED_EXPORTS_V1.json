@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-canonical-closed-exports-sync-utf8/1",
+  "owner": "scripts/canonical-exports.mjs",
+  "reference": "https://github.com/WebAssembly/component-model/blob/a25fc0b372dd21f07f0242c46e98bd0f1ea0c0e1/design/mvp/CanonicalABI.md",
+  "scope": "Caller-pinned closed core-module exports bound to an explicitly selected synchronous exported InterfaceIR surface.",
+  "dependencies": [
+    "psc-interface-ir-json/1",
+    "psc-wasm-core-signatures/1",
+    "psc-canonical-core-values-sync-utf8/1"
+  ],
+  "preInstantiation": [
+    "pin/copy exact InterfaceIR and core binary bytes",
+    "pure type/function planning precedes memory attachment",
+    "require selected world export, no world imports and explicit grants covering required/provided capabilities",
+    "reject core imports and start functions",
+    "check every selected core function, optional realloc and optional post-return signature against the actual validated binary",
+    "check exported memory address width and required memory/realloc options",
+    "reject resource/borrow/async value lifetimes and duplicate bindings"
+  ],
+  "execution": [
+    "lower all arguments using the shared 16-flat-parameter path",
+    "call the exact inspected module instance's export",
+    "lift/copy results using the shared one-flat-result path",
+    "invoke explicitly selected post-return with unchanged core results after successful lifting",
+    "trap the adapter after any failure following entry into lowering; subsequent calls reject",
+    "arity failures before lowering leave the adapter ready"
+  ],
+  "hostAssumptions": [
+    "selected WebAssembly engine's validation, execution and platform memory safety",
+    "pinned module implements its declared behavior and allocator ownership/disjointness contract",
+    "engine compilation, instantiation and guest execution costs remain caller execution-policy obligations",
+    "Proxy/configuration effects are not sandboxed; this is not a hostile-code isolation boundary"
+  ],
+  "notEstablished": [
+    "source-to-binary preservation",
+    "component binary format conformance",
+    "import/callback/reentrant component lifecycle",
+    "resource ownership and async/cancellation",
+    "production compiler EvidenceEnvelope binding or target promotion",
+    "global formal assurance"
+  ],
+  "validation": "focused real-Wasm and independent portable function-plan cloud validation pending"
+}

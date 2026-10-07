@@ -3,10 +3,10 @@ import test from 'node:test';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { artifactId } from './artifact-evidence.mjs';
-import { createCanonicalMemoryCodec } from './canonical-memory.mjs';
+import { createCanonicalMemoryCodec, prepareCanonicalValueTypes, bindCanonicalValueMemory } from './canonical-memory.mjs';
 
 const executable=resolve('.lake/build/bin/pscv_canonical_abi_tests'+(process.platform==='win32'?'.exe':''));
-const [world,layouts32,layouts64]=JSON.parse(execFileSync(executable,['--memory-fixture'],{encoding:'utf8',timeout:30000}));
+const [world,layouts32,layouts64,plans32,plans64]=JSON.parse(execFileSync(executable,['--memory-fixture'],{encoding:'utf8',timeout:30000}));
 const artifact=value=>{const bytes=Buffer.from(JSON.stringify(value));return {bytes,identity:artifactId(bytes,'interface-ir','psc-interface-ir-json/1')};};
 const source=artifact(world);
 function setup({pointerBits=32,limits={},grow=false,realloc:override,sourceArtifact=source}={}){
@@ -186,5 +186,22 @@ test('flat and indirect aggregate paths share memory/value semantics',()=>{
     assert.deepEqual(codec.liftValue('bytes',list),[0,127,255]);
     assert.throws(()=>codec.lowerValue('pair',pair,{outPointer:256}),/UNEXPECTED_OUT_POINTER/);
     assert.throws(()=>codec.liftValue('pair',direct,{maxFlat:2}),/FLAT_LIMIT/);
+  }
+});
+
+test('pure function plans agree with portable lift/lower signatures before memory attachment',()=>{
+  for(const [pointerBits,plans] of [[32,plans32],[64,plans64]]){
+    const prepared=prepareCanonicalValueTypes({interfaceArtifact:source,expectedInterfaceId:source.identity,
+      interfaceName:'values',pointerBits});
+    for(const [name,direction,parameters,results] of plans){
+      const plan=prepared.describeFunction(name);
+      assert.deepEqual(plan[direction].parameters,parameters);
+      assert.deepEqual(plan[direction].results,results);
+    }
+    assert.throws(()=>bindCanonicalValueMemory({...prepared}),/PREPARED_INTERFACE/);
+    const codec=bindCanonicalValueMemory(prepared);
+    assert.deepEqual(codec.lowerArguments('count',[]),[]);
+    assert.equal(codec.liftResult('count',[42]),42);
+    assert.throws(()=>codec.lowerArguments('echo-text',['x']),/REALLOC_REQUIRED/);
   }
 });

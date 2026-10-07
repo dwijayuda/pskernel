@@ -98,3 +98,14 @@ A Canonical ABI wrapper must check the callee's actual signature before calling 
 The engine supplies full binary/instruction validation; the metadata reader is not an independent instruction validator or behavioral proof. Compilation does not run a start function, imports or guest code. Callers must still bind the inspected module instance and manage Canonical call/resource lifecycle. Byte and metadata limits do not prove a global engine compilation cost bound.
 
 Wasm names are length-delimited UTF-8, not text documents with an optional byte-order mark. Reviewing this boundary found that the older literal validator and failure diagnostics stripped an initial BOM through TextDecoder's default. Both now preserve it. A literal module exporting U+FEFF followed by `answer` must never validate against an expectation for plain `answer`. The literal expectation decoder also rejects trailing line terminators in numeric text, matching the exact canonical-number rule used elsewhere.
+
+
+## Pure planning before closed-core export binding
+
+Canonical value/type planning is now separate from attaching memory and realloc. Pure plans expose immutable lift/lower numeric signatures for selected functions; the runtime holds the underlying type layouts privately. The portable planner independently emits signatures for the same fixture functions and both pointer widths. This avoids instantiating a module merely to discover whether a function is compatible.
+
+`psc-canonical-closed-exports-sync-utf8/1` binds an explicitly selected exported InterfaceIR surface to a pinned core module with no imports or start function. It checks capabilities and every selected export/memory/realloc/post-return signature before instantiating that exact compiled module. Numeric-only bindings need no unused memory or allocator. Calls share the existing argument/result conversion, including indirect 17-argument and one-result thresholds.
+
+Results are lifted and copied before selected post-return code can overwrite/free their memory. A trap during lowering, the callee, lifting or post-return poisons the adapter, so later calls reject. Arity errors before lowering do not enter the lifecycle. This is an explicit closed synchronous profile: it does not implement general component imports, callbacks/reentry, resource ownership, asynchronous tasks or cancellation. Caller execution policy still owns compilation, instantiation and guest cost containment, and the module's behavioral/allocator contract remains an assumption.
+
+The profile is a runtime adapter boundary, not a claim that PSC's current private GC exports are Canonical ABI exports. Compiler lowering, component binary generation and production artifact/EvidenceEnvelope integration must explicitly select and bind this contract before those targets can be promoted.

@@ -112,7 +112,7 @@
       "shared memory",
       "resource ownership and borrowing tables",
       "async/future/stream values",
-      "canonical call lifecycle and post-return",
+      "general component call lifecycle; the separate closed-export profile implements synchronous calls and selected post-return",
       "component binaries and production import binding"
     ],
     "hostAssumptions": [
@@ -133,8 +133,9 @@
         "large values use aligned memory allocation or an explicit outPointer; unused outPointer rejects",
         "memory64 realloc receives four i64 parameters, including alignment"
       ],
-      "authority": "value conversion only; no function binding, source checking, post-return or component instance lifecycle"
+      "authority": "Value/type planning and conversion data; the separate closed-export binding profile uses it. No source checking or general component/resource lifetime authority."
     }
   },
-  "coreSignatureBoundary": "contracts/interface/WASM_CORE_SIGNATURES_V1.json"
+  "coreSignatureBoundary": "contracts/interface/WASM_CORE_SIGNATURES_V1.json",
+  "closedCoreExports": "contracts/interface/CANONICAL_CLOSED_EXPORTS_V1.json"
 }

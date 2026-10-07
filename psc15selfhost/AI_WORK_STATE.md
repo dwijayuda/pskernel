@@ -680,3 +680,12 @@ Mode: implementation first, as requested on 2026-10-07. All subsequent edits/com
 - Focused cloud checks cover actual signature/call agreement, GC index groups, import offsets, nonexecuted start functions, memory width mismatch, reference/numeric separation, exact names, identity and metadata budgets. Fresh cloud validation is pending. Next connect validated signatures to synchronous call binding and post-return, with ownership/async/component binaries still explicit open obligations.
 
 - Preserved concurrent 1b2b443/a59700b V4.1 proposal/audit documentation when advancing this checkpoint. The proposal explicitly leaves V3 active until a separate staged migration. Direct Git ref reads now supplement lagging PR metadata before branch updates.
+
+
+## 2026-10-07 closed synchronous Canonical exports
+
+- 79a90af passed full main cloud CI (37656246970/job 112912009591). Exact Wasm BOM-name/numeric regressions and the five actual-engine signature/index tests pass alongside all compiler/profile checks. The automatic direct-Wasm fixed point also passed at e78ee2b (37655133040/job 112908667092), again producing 756957-byte generation 1=2=3 output; no global correctness/DDC/promotion claim follows.
+- Split pure caller-pinned InterfaceIR type/function planning from memory/realloc attachment. Function lift/lower signatures now precede instantiation and are independently compared with the portable planner for both pointer widths.
+- Added psc-canonical-closed-exports-sync-utf8/1. It checks capabilities, actual core signatures, address width, allocator and selected post-return before instantiating the exact pinned closed module. Runtime calls lower arguments, invoke the selected export, lift/copy results and then run post-return. Failed entered calls trap the adapter against reuse; pre-entry arity errors leave it ready.
+- Focused real-Wasm cases cover unsigned i64, UTF-8 results preserved across post-return overwrite, 17-argument indirect transport, numeric-only bindings, signature/capability/options mismatch, callee/result/post-return traps, imports/start rejection and unsupported resource/async profiles. Fresh cloud validation pending.
+- Closed export binding is not production PSC GC ABI promotion or a complete component runtime. Compiler-side adapter selection, imported callbacks, ownership/async lifetimes, component binaries, production evidence binding and global assurance remain open. All work remains GitHub/cloud only; kernel code is untouched.

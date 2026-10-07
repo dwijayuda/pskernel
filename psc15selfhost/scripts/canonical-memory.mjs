@@ -5,6 +5,7 @@ export const canonicalMemoryContract = 'psc-canonical-memory-sync-utf8/1';
 export const canonicalCoreValuesContract = 'psc-canonical-core-values-sync-utf8/1';
 const fail = code => { throw new TypeError('PSC_CANONICAL_MEMORY_' + code); };
 const maximumValueBytes = 268435455;
+const preparedInterfaces=new WeakMap();
 const align = (size, alignment) => Math.ceil(size / alignment) * alignment;
 const unique = values => new Set(values).size === values.length;
 const own = (value, key) => {
@@ -126,15 +127,15 @@ function compileDefinitions(iface, pointerBits, typeDepth) {
     return result;
   }
   for(const name of definitions.keys())named(name,0);
-  return cache;
+  return {layouts:cache,type:value=>type(value,0)};
 }
 
-/** Host-side value codec, not canon-lift/canon-lower or production import binding.
- * Callers pin exact InterfaceIR bytes and supply trusted memory/realloc. Resource
- * ownership, asynchronous values and shared memories require separate profiles.
+/** Pure caller-pinned value/type planning. Memory and realloc are attached
+ * separately after consumers check binary signatures and execution policy.
+ * This is adapter data, not compiler source authority or a lifetime proof.
  */
-export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceId,interfaceName,
-  pointerBits=32,memory,realloc,limits={}}) {
+export function prepareCanonicalValueTypes({interfaceArtifact,expectedInterfaceId,interfaceName,
+  pointerBits=32,limits={}}) {
   const typeDepth=limits.typeDepth??64, maxNodes=limits.maxNodes??250000;
   const maxBytes=limits.maxBytes??16*1024*1024, maxStringCodeUnits=limits.maxStringCodeUnits??8*1024*1024;
   if(!integer(typeDepth,1,128) || !integer(maxNodes,1,1000000) ||
@@ -149,16 +150,57 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
   if(!iface)fail('INTERFACE');
   // The component validation bound always uses memory64 element sizes.
   const maximum=compileDefinitions(iface,64,typeDepth);
-  const layouts=pointerBits===64?maximum:compileDefinitions(iface,32,typeDepth);
-  if(!(memory instanceof WebAssembly.Memory) || (realloc!==undefined && typeof realloc!=='function'))fail('HOST');
+  const selected=pointerBits===64?maximum:compileDefinitions(iface,32,typeDepth);
+  const layouts=selected.layouts,functionPlans=new Map();
+  function functionPlan(name){
+    if(functionPlans.has(name))return functionPlans.get(name);
+    const fn=iface.functions.find(value=>value.name===name);
+    if(!fn||fn.asynchronous||!fn.targets.includes('component-model')||
+        !unique(fn.targets)||!unique(fn.parameters.map(field=>field.name)))fail('FUNCTION_PROFILE');
+    const types=fn.parameters.map(field=>field.type);
+    sequence('tuple',types.map(maximum.type));
+    if(fn.result!==null)maximum.type(fn.result);
+    const parameters=sequence('tuple',types.map(selected.type));
+    const result=fn.result===null?null:selected.type(fn.result);
+    if(parameters.handles||result?.handles)fail('HANDLE_TABLE_REQUIRED');
+    const value={parameters,result,arity:types.length};functionPlans.set(name,value);return value;
+  }
+  function describeFunction(name){
+    const fn=functionPlan(name),pointer=pointerBits===32?'i32':'i64';
+    const indirectParameters=fn.parameters.flatCount>16,indirectResult=fn.result!==null&&fn.result.flatCount>1;
+    const parameters=indirectParameters?[pointer]:[...fn.parameters.flat];
+    const directResults=fn.result===null?[]:[...fn.result.flat];
+    const liftResults=indirectResult?[pointer]:directResults;
+    const lowerParameters=indirectResult?[...parameters,pointer]:parameters;
+    return Object.freeze({name,arity:fn.arity,hasResult:fn.result!==null,indirectParameters,indirectResult,
+      needsMemory:fn.parameters.memory||Boolean(fn.result?.memory)||indirectParameters||indirectResult,
+      needsRealloc:fn.parameters.memory||indirectParameters,
+      lift:Object.freeze({parameters:Object.freeze(parameters),results:Object.freeze(liftResults)}),
+      lower:Object.freeze({parameters:Object.freeze(lowerParameters),results:Object.freeze(indirectResult?[]:directResults)})});
+  }
+  const prepared=Object.freeze({contract:canonicalCoreValuesContract,interfaceName,pointerBits,
+    interfaceId:Object.freeze({...expectedInterfaceId}),exported:world.exports.includes(interfaceName),
+    hasWorldImports:world.imports.length!==0,
+    requiredCapabilities:Object.freeze([...iface.requiredCapabilities]),
+    providedCapabilities:Object.freeze([...iface.providedCapabilities]),describeFunction});
+  preparedInterfaces.set(prepared,{layouts,functionPlan,pointerBits,maxNodes,maxBytes,maxStringCodeUnits});
+  return prepared;
+}
+
+export function bindCanonicalValueMemory(prepared,{memory,realloc}={}){
+  const state=preparedInterfaces.get(prepared);if(!state)fail('PREPARED_INTERFACE');
+  const {layouts,functionPlan,pointerBits,maxNodes,maxBytes,maxStringCodeUnits}=state;
+  if((memory!==undefined&&!(memory instanceof WebAssembly.Memory)) ||
+      (realloc!==undefined&&typeof realloc!=='function'))fail('HOST');
   const pointerSize=pointerBits/8, pointerMaximum=pointerBits===32?4294967295:Number.MAX_SAFE_INTEGER;
   let busy=false;
   const buffer=()=>{
+    if(memory===undefined)fail('MEMORY_REQUIRED');
     const value=memory.buffer;
     if(!(value instanceof ArrayBuffer))fail('SHARED_MEMORY');
     return value;
   };
-  buffer();
+  if(memory!==undefined)buffer();
   function range(pointer,size,alignment=1){
     const value=buffer();
     if(!integer(pointer,0,pointerMaximum) || !integer(size,0,maximumValueBytes) ||
@@ -450,6 +492,33 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
     }
   }
   function flatLimit(value){if(value!==1 && value!==16)fail('FLAT_LIMIT');return value;}
+  function lowerNode(node,value,maxFlat,outPointer){
+    const indirect=node.flatCount>flatLimit(maxFlat),state={nodes:0,bytes:0};
+    if(outPointer!==undefined){
+      if(!indirect)fail('UNEXPECTED_OUT_POINTER');
+      range(outPointer,node.size,node.alignment);
+    }
+    if(indirect)byteBudget(state,node.size);
+    const preparedValue=prepare(node,value,state);
+    if(indirect){
+      const at=outPointer===undefined?allocation(node.size,node.alignment):outPointer;
+      store(node,preparedValue,at);return outPointer===undefined?[pointerCore(at)]:[];
+    }
+    return lowerFlat(node,preparedValue).map((item,i)=>coreValue(node.flat[i],item));
+  }
+  function liftNode(node,values,maxFlat){
+    const indirect=node.flatCount>flatLimit(maxFlat),state={nodes:0,bytes:0};
+    const types=indirect?[pointerType]:node.flat;
+    const input=arrayValues(values,types.length,16).map((item,i)=>coreBits(types[i],item));
+    if(indirect){byteBudget(state,node.size);return load(node,address(input[0]),state);}
+    let index=0;
+    const result=liftFlat(node,kind=>{
+      if(kind!==types[index])fail('FLAT_TYPE');
+      return input[index++];
+    },state);
+    if(index!==input.length)fail('FLAT_ARITY');
+    return result;
+  }
   function selected(name){
     const result=layouts.get(name);
     if(!result)fail('TYPE_NAME');
@@ -466,32 +535,13 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
     layout(name){const node=selected(name);return Object.freeze({alignment:node.alignment,byteSize:node.size,
       flatCount:node.flatCount,flatPrefix:Object.freeze([...node.flat]),fieldOffsets:Object.freeze([...node.offsets]),
       payloadOffset:node.payloadOffset,needsMemory:node.memory,needsHandleTable:node.handles});},
-    lowerValue(name,value,{maxFlat=16,outPointer}={}){return transaction(()=>{
-      const node=selected(name),indirect=node.flatCount>flatLimit(maxFlat),state={nodes:0,bytes:0};
-      if(outPointer!==undefined){
-        if(!indirect)fail('UNEXPECTED_OUT_POINTER');
-        range(outPointer,node.size,node.alignment);
-      }
-      if(indirect)byteBudget(state,node.size);
-      const prepared=prepare(node,value,state);
-      if(indirect){
-        const at=outPointer===undefined?allocation(node.size,node.alignment):outPointer;
-        store(node,prepared,at);return outPointer===undefined?[pointerCore(at)]:[];
-      }
-      return lowerFlat(node,prepared).map((item,i)=>coreValue(node.flat[i],item));
-    });},
-    liftValue(name,values,{maxFlat=16}={}){return transaction(()=>{
-      const node=selected(name),indirect=node.flatCount>flatLimit(maxFlat),state={nodes:0,bytes:0};
-      const types=indirect?[pointerType]:node.flat;
-      const input=arrayValues(values,types.length,16).map((item,i)=>coreBits(types[i],item));
-      if(indirect){byteBudget(state,node.size);return load(node,address(input[0]),state);}
-      let index=0;
-      const result=liftFlat(node,kind=>{
-        if(kind!==types[index])fail('FLAT_TYPE');
-        return input[index++];
-      },state);
-      if(index!==input.length)fail('FLAT_ARITY');
-      return result;
+    lowerValue(name,value,{maxFlat=16,outPointer}={}){return transaction(()=>lowerNode(selected(name),value,maxFlat,outPointer));},
+    liftValue(name,values,{maxFlat=16}={}){return transaction(()=>liftNode(selected(name),values,maxFlat));},
+    lowerArguments(name,values){return transaction(()=>lowerNode(functionPlan(name).parameters,values,16));},
+    liftResult(name,values){return transaction(()=>{
+      const fn=functionPlan(name);
+      if(fn.result===null){arrayValues(values,0,0);return undefined;}
+      return liftNode(fn.result,values,1);
     });},
     load(name,at){return transaction(()=>{const node=selected(name),state={nodes:0,bytes:0};byteBudget(state,node.size);return load(node,at,state);});},
     store(name,value,at){return transaction(()=>{
@@ -499,4 +549,8 @@ export function createCanonicalMemoryCodec({interfaceArtifact,expectedInterfaceI
       const prepared=prepare(node,value,state);store(node,prepared,at);
     });},
   });
+}
+
+export function createCanonicalMemoryCodec(options){
+  return bindCanonicalValueMemory(prepareCanonicalValueTypes(options),options);
 }

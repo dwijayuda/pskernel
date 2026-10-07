@@ -174,9 +174,16 @@ def memoryDefinitions : List PsForeignDefinition := [
     PsForeignField.mk "constructor" (.named "wide"), PsForeignField.mk "status" (.named "maybe")])
 ]
 
+def memoryFunctions : List PsForeignFunction := [
+  PsForeignFunction.mk "echo-text" [PsForeignField.mk "x" (scalar .string)] (some (scalar .string)) false ["component-model"],
+  PsForeignFunction.mk "count" [] (some (scalar .u32)) false ["component-model"],
+  PsForeignFunction.mk "last" ((List.range 17).map fun index =>
+    PsForeignField.mk ("x" ++ toString index) (scalar .u8)) (some (scalar .u8)) false ["component-model"]
+]
+
 def memoryWorld : PsForeignWorld :=
   PsForeignWorld.mk "psc-foreign-interface/1" "psc" "codec" "world"
-    [PsForeignInterface.mk "values" memoryDefinitions [] [] []] [] []
+    [PsForeignInterface.mk "values" memoryDefinitions memoryFunctions [] []] ["values"] ["values"]
 
 def memoryFlatJson (value : PsCanonicalFlatType) : String :=
   psJsonQuote (match value with | .i32 => "i32" | .i64 => "i64" | .f32 => "f32" | .f64 => "f64")
@@ -194,10 +201,21 @@ def memoryFixtureLayouts (width : PsCanonicalPointerWidth) : String :=
   | .ok layouts => psJsonArray (layouts.map fun entry =>
       psJsonArray [psJsonQuote entry.1, memoryLayoutJson entry.2])
 
+def memoryFunctionJson (value : PsCanonicalFunctionPlan) : String :=
+  let direction := match value.direction with | .lift => "lift" | .lower => "lower"
+  psJsonArray [psJsonQuote value.functionName, psJsonQuote direction,
+    psJsonArray (value.coreParameters.map memoryFlatJson), psJsonArray (value.coreResults.map memoryFlatJson)]
+
+def memoryFunctionPlans (width : PsCanonicalPointerWidth) : String :=
+  match psCanonicalPlanWorld policy width memoryWorld with
+  | .error _ => "null"
+  | .ok plans => psJsonArray (plans.map memoryFunctionJson)
+
 def memoryFixture : String :=
   match psForeignEncodeWorld 64 memoryWorld with
   | .error _ => "null"
-  | .ok world => psJsonArray [world, memoryFixtureLayouts .memory32, memoryFixtureLayouts .memory64]
+  | .ok world => psJsonArray [world, memoryFixtureLayouts .memory32, memoryFixtureLayouts .memory64,
+      memoryFunctionPlans .memory32, memoryFunctionPlans .memory64]
 
 def runTests : IO Unit := do
   let tests := [("record alignment/offsets", scalarAndRecord), ("pointer widths", memoryWidths),

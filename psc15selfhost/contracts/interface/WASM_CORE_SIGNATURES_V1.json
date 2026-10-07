@@ -21,10 +21,10 @@
   "resources": "Input bytes, names and decoded metadata entries are bounded. Engine compilation and platform allocation remain host runtime assumptions, not a global resource proof.",
   "authority": "Binary/interface inspection data only. It does not independently validate instructions, prove behavior or source preservation, execute imports/start functions, or create compiler/kernel authority.",
   "remaining": [
-    "actual Canonical call binding and lifecycle integration",
+    "general Canonical call/import lifecycle; closed synchronous export binding is implemented separately",
     "post-return and resource ownership",
     "component binary emission/validation",
     "global preservation"
   ],
-  "validation": "focused cloud engine/metadata tests pending"
+  "validation": "79a90af passed full main cloud CI (37656246970/job 112912009591), including real-engine signature/index/start/name cases and literal exact-name/numeric regressions."
 }

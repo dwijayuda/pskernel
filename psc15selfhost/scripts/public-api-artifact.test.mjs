@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { decodePublicApi, publicApiArtifact } from './public-api-artifact.mjs';
-import { verifyArtifact } from './artifact-evidence.mjs';
+import { canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 
 const name = v => ({ k: 's', p: { k: 'a' }, v });
 const variable = i => ({ k: 'b', i });
@@ -10,7 +10,7 @@ const sort = { k: 'sort', l: { k: 's', o: { k: 'z' } } };
 const generic = forall('A', sort, forall('value', variable(0), variable(1)));
 const declaration = ['constant', 'definition', name('forward'), [], generic];
 const root = entries => ['psc-public-api-ir/1', 'all-prepared-declarations', entries];
-const bytes = entries => Buffer.from(JSON.stringify(root(entries)));
+const bytes = entries => canonicalBytes(root(entries));
 
 test('source generics and binder visibility survive exact body-free encoding', () => {
   const item = publicApiArtifact(bytes([declaration]));
@@ -40,7 +40,7 @@ test('universe binders and inductive metadata are retained without target layout
   assert.deepEqual(decodePublicApi(bytes([inductive]))[2][0], inductive);
   assert.throws(() => decodePublicApi(bytes([[...inductive.slice(0, 2), [], ...inductive.slice(3)]])), /UNBOUND_LEVEL/);
   assert.throws(() => decodePublicApi(bytes([[...inductive.slice(0, 2), [u, u], ...inductive.slice(3)]])), /DUPLICATE_NAME/);
-  const invalid = structuredClone(inductive); invalid[4] = 0.5;
+  const invalid = structuredClone(inductive); invalid[4] = -1;
   assert.throws(() => decodePublicApi(bytes([invalid])), /NATURAL/);
 });
 

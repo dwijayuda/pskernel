@@ -1,5 +1,6 @@
 import Ps.Foundation.Name
 import Ps.Foundation.List
+import Ps.Project.ModuleInterface
 
 inductive PsQueryStage where
   | source | parsed | elaboratedPublic | checkedStructural | certifiedBehavioral
@@ -225,3 +226,21 @@ def psQueryPlanStage (rules : List PsQueryReuseRule) (previous : List PsQuerySta
         | Option.none => PsQueryStageDecision.rebuild PsQueryStageReason.missingPrevious
         | Option.some record => psQueryStageCompare rules record current
   else PsQueryStageDecision.rebuild PsQueryStageReason.malformedInput
+
+
+def psCertifiedModuleInterfaceFingerprintContract : String :=
+  "psc-certified-module-interface/1"
+
+def psExactBehavioralInterfaceReuseChecker : String :=
+  "psc-exact-behavioral-interface-reuse/1"
+
+def psCertifiedModuleInterfaceReuseRule
+    (consumerStage : PsQueryStage)
+    (ruleArtifactKey : String) :
+    PsQueryReuseRule :=
+  PsQueryReuseRule.mk
+    consumerStage
+    PsQueryStage.certifiedBehavioral
+    psCertifiedModuleInterfaceFingerprintContract
+    ruleArtifactKey
+    psExactBehavioralInterfaceReuseChecker

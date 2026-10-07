@@ -85,6 +85,7 @@
       "scripts/target-ir-artifact.mjs",
       "scripts/typescript-cli.mjs",
       "scripts/typescript-tool-inputs.mjs",
+      "scripts/uniform-specialization.mjs",
       "scripts/wasm-canonical-artifact.mjs",
       "scripts/wasm-core-signatures.mjs",
       "scripts/workspace-layout.mjs"

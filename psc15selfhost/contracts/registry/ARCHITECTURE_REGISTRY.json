@@ -501,6 +501,18 @@
       "kind": "compiler-pass",
       "status": "experimental",
       "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-js-closed-instances/1",
+      "kind": "representation-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-direct-js-declarations-uniform-structural/1",
+      "kind": "declaration-profile",
+      "status": "experimental",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 
+import { closedJsRepresentationProfile, uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 import {
   assertCanonicalAdmissionsEnvelope,
@@ -70,6 +71,10 @@ export function createKernelCheckedSession(
   policy = {},
 ) {
   const sessionIdentity = randomUUID();
+  const javaScriptRepresentation = policy.javaScriptRepresentation ?? closedJsRepresentationProfile;
+  if (![closedJsRepresentationProfile, uniformJsRepresentationProfile].includes(javaScriptRepresentation))
+    throw new Error('PSC2_CHECKED_JAVASCRIPT_REPRESENTATION');
+  const uniformJavaScript = javaScriptRepresentation === uniformJsRepresentationProfile;
   const targets = Object.freeze([...(policy.targets ?? ['typescript'])]);
   const permittedTargets = new Set(['typescript', 'javascript', 'wasm', 'rust']);
   if (targets.length === 0 || targets.some(target => !permittedTargets.has(target))) throw new Error('PSC2_CHECKED_TARGET_POLICY');
@@ -134,6 +139,7 @@ export function createKernelCheckedSession(
         assumptionPolicy,
         resourcePolicy,
         targets,
+        ...(targets.includes('javascript') ? { javaScriptRepresentation } : {}),
         sourceSha256: hash(source),
         canonicalAdmissionsSha256: hash(admissions),
         kernelContract: kernelContractV1,
@@ -151,7 +157,7 @@ export function createKernelCheckedSession(
         throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
       }
       const stageApi = target === 'typescript' ? 'psCompilerTypeScriptStagesFromPrepared' :
-        target === 'javascript' ? 'psCompilerJavaScriptStagesFromPrepared' :
+        target === 'javascript' ? (uniformJavaScript ? 'psCompilerUniformJavaScriptStagesFromPrepared' : 'psCompilerJavaScriptStagesFromPrepared') :
         target === 'wasm' ? 'psCompilerWasmStagesFromPrepared' : undefined;
       if (stageApi && stageApi in compiler) {
         if (typeof compiler[stageApi] !== 'function') throw new Error('PSC2_CHECKED_EMIT_STAGES_API_SHAPE');
@@ -160,8 +166,9 @@ export function createKernelCheckedSession(
           compiler[stageApi](compiler.psCompilerWasm32Target, item.prepared) : compiler[stageApi](item.prepared), 'EMIT_STAGES');
         const outputKey = target === 'typescript' ? 'typeScript' : target === 'wasm' ? 'wasm' : 'javaScript';
         if (!product || typeof product !== 'object') throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
+        const specializationField = target === 'javascript' && uniformJavaScript ? 'uniformSpecializedIr' : 'specializedIr';
         const fields = [outputKey, 'runtimeIr', 'verifiedIr',
-          ...(target !== 'typescript' ? ['specializedIr'] : []),
+          ...(target !== 'typescript' ? [specializationField] : []),
           ...(target === 'javascript' ? ['jsIr'] : []), ...(target === 'wasm' ? ['wasmIr'] : []),
           ...(includeErasureCorrespondence ? ['erasureCorrespondence'] : []),
           ...(includeMetadata ? ['generatedPositions'] : [])];
@@ -177,7 +184,7 @@ export function createKernelCheckedSession(
         if (target !== 'wasm') freezeGraph(staged);
         if ((target === 'wasm' ? !staged?.[outputKey] || typeof staged[outputKey] !== 'object' : typeof staged?.[outputKey] !== 'string') ||
             typeof staged.runtimeIr !== 'string' || typeof staged.verifiedIr !== 'string' ||
-            (target !== 'typescript' && typeof staged.specializedIr !== 'string') ||
+            (target !== 'typescript' && typeof staged[specializationField] !== 'string') ||
             (target === 'javascript' && typeof staged.jsIr !== 'string') ||
             (target === 'wasm' && typeof staged.wasmIr !== 'string')) {
           throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
@@ -193,11 +200,12 @@ export function createKernelCheckedSession(
           stages: Object.freeze({
             runtimeIr: staged.runtimeIr,
             verifiedIr: staged.verifiedIr,
-            ...(target !== 'typescript' ? { specializedIr: staged.specializedIr } : {}),
+            ...(target !== 'typescript' ? { [specializationField]: staged[specializationField] } : {}),
             ...(target === 'javascript' ? { jsIr: staged.jsIr } : {}),
             ...(target === 'wasm' ? { wasmIr: staged.wasmIr } : {}),
           }) });
       }
+      if (target === 'javascript' && uniformJavaScript) throw new Error('PSC2_CHECKED_UNIFORM_STAGES_API_REQUIRED');
       const names = { typescript: 'psCompilerTypeScriptFromPrepared', javascript: 'psCompilerJavaScriptFromPrepared',
         rust: 'psCompilerRustFromPrepared', wasm: 'psCompilerWasmFromPrepared' };
       const name = names[target];

@@ -5,9 +5,10 @@ import { test } from 'node:test';
 import { artifactId, artifactKey, canonicalBytes, canonicalArtifact } from './artifact-evidence.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { projectSourceSignature, printSourceSignatureType } from './public-api-signature.mjs';
-import { createDirectJsDeclarations, verifyDirectJsDeclarations, directJsDeclarationProfile } from './js-declarations.mjs';
+import { createDirectJsDeclarations, verifyDirectJsDeclarations, directJsDeclarationProfile, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
 import { packObservedBuildArchive, verifyObservedBuildArchive } from './observed-build-archive.mjs';
+import { uniformSpecializationArtifact } from './uniform-specialization.mjs';
 import { fixture as genericFixture } from './js-origin-test-fixture.mjs';
 
 const name = v => ({ k: 's', p: { k: 'a' }, v });
@@ -138,4 +139,46 @@ test('requested direct declaration products publish through the shared graph and
   assert.equal(replay.kind, 'accepted', replay.reason);
   assert.equal(replay.preservationVerified, false);
   assert.throws(() => createCheckedBuildGraph({ ...inputs, declarationProfile: 'unknown' }), /DECLARATION_PROFILE/);
+});
+
+test('explicit uniform subjects retain source generics and replay without inferring them from instances', async () => {
+  const generic = genericFixture(), raw = JSON.parse(generic.runtimeIr.bytes);
+  const uniform = uniformSpecializationArtifact(canonicalBytes(['psc-uniform-specialized-ir/1', 'psc-js-uniform-values/1', raw]));
+  const subjects = {
+    publicApi: generic.publicApi,
+    erasureTable: textRecord(generic.erasureTable, 'erasure-table', 'psc-erasure-declarations/1'),
+    runtimeIr: generic.runtimeIr, verifiedIr: generic.verifiedIr, uniformSpecializedIr: uniform,
+    jsIr: record(['psc-js-ir-json/1', [], [
+      ['g', ['x'], ['var', 'x']], ['answer', [], ['call', ['var', 'g'], [['literal', ['natural', '7']]]]],
+    ], 'js-ir', 'psc-js-ir-json/1'),
+    javaScript: textRecord('export function g(x) { return x; }\nexport const answer = g(7n);\n',
+      'javascript-output', 'psc-direct-javascript/es2022'),
+  };
+  const product = createDirectJsDeclarations({ subjects, profile: directJsUniformDeclarationProfile });
+  assert.match(product.declarations.bytes.toString(), /<T0>\(_arg0: T0\) => T0/);
+  assert.match(product.declarations.bytes.toString(), / as g }/);
+  const byId = new Map(Object.values(subjects).map(record => [artifactKey(record.identity), record.bytes]));
+  await verifyDirectJsDeclarations(product, { expectedSubjects: ids(subjects),
+    expectedProfile: directJsUniformDeclarationProfile, resolveArtifact: id => byId.get(artifactKey(id)) });
+  assert.throws(() => createDirectJsDeclarations({ subjects }), /SUBJECTS/);
+  await assert.rejects(verifyDirectJsDeclarations(product, { expectedSubjects: ids(subjects),
+    resolveArtifact: id => byId.get(artifactKey(id)) }), /SUBJECTS/);
+  const genericConstant = ['psc-runtime-ir-json/1', [], [], [], [
+    ['value', ['A'], [], ['primitive', 'nat'], ['literal', ['natural', '7']]],
+  ]];
+  const valueSubjects = {
+    publicApi: publicApiArtifact(canonicalBytes(['psc-public-api-ir/1', 'all-prepared-declarations', [
+      ['constant', 'definition', name('value'), [],
+        forall('A', { k: 'sort', l: { k: 's', o: { k: 'z' } } }, constant('Nat'))],
+    ]])),
+    erasureTable: record(['psc-erasure-declarations/1', 'declaration-inventory', [[name('value'), ['runtime', 'value']]]],
+      'erasure-table', 'psc-erasure-declarations/1'),
+    runtimeIr: record(genericConstant, 'runtime-ir'), verifiedIr: record(genericConstant, 'verified-ir'),
+    uniformSpecializedIr: uniformSpecializationArtifact(canonicalBytes(
+      ['psc-uniform-specialized-ir/1', 'psc-js-uniform-values/1', genericConstant])),
+    jsIr: record(['psc-js-ir-json/1', [], [['value', [], ['literal', ['natural', '7']]]]], 'js-ir', 'psc-js-ir-json/1'),
+    javaScript: textRecord('export const value = 7n;\n', 'javascript-output', 'psc-direct-javascript/es2022'),
+  };
+  assert.throws(() => createDirectJsDeclarations({ subjects: valueSubjects, profile: directJsUniformDeclarationProfile }),
+    /GENERIC_VALUE_EXPORT_UNSUPPORTED/);
 });

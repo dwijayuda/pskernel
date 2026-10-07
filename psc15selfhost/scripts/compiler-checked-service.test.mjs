@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
 import { createCheckedCompilerService } from './compiler-checked-service.mjs';
+import { uniformJsRepresentationProfile } from './uniform-specialization.mjs';
+import { canonicalBytes } from './artifact-evidence.mjs';
 import { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 
 const ok = value => ({ $ps$tag: 'ok', $ps$fields: { value } });
@@ -430,4 +432,49 @@ test('requested declarations share the checked emission and do not require optio
   assert.equal(emissions, 1);
   service.revoke(handle);
   assert.throws(() => service.emitDeclarationsArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
+});
+
+test('uniform representation is fixed by host policy, cannot fall back, and retains checked generic declarations', async () => {
+  const { service, compiler, emitted } = fixture({ javaScriptRepresentation: uniformJsRepresentationProfile });
+  let calls = 0;
+  const name = v => ({ k: 's', p: { k: 'a' }, v });
+  const type = { k: 'forall', n: name('A'), bi: 'default', t: { k: 'sort', l: { k: 's', o: { k: 'z' } } },
+    b: { k: 'forall', n: name('x'), bi: 'default', t: { k: 'b', i: 0 }, b: { k: 'b', i: 1 } } };
+  const raw = ['psc-runtime-ir-json/1', [], [], [], [
+    ['forward', ['RuntimeA'], [['x', ['typeParameter', 'RuntimeA']]], ['typeParameter', 'RuntimeA'], ['var', 'x']],
+  ]];
+  const api = ['psc-public-api-ir/1', 'all-prepared-declarations', [
+    ['constant', 'definition', name('forward'), [], type],
+  ]];
+  compiler.psCompilerPublicApiFromPrepared = () => ok(canonicalBytes(api).toString());
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => { throw new Error('CLOSED_FALLBACK_FORBIDDEN'); };
+  const handle = await service.check('lean', 'generic fixture');
+  assert.throws(() => service.emitExecutableArtifact(handle, 'javascript'), /UNIFORM_STAGES_API_REQUIRED/);
+  const good = { javaScript: 'export function forward(x) { return x; }\n',
+    runtimeIr: JSON.stringify(raw), verifiedIr: JSON.stringify(raw),
+    uniformSpecializedIr: JSON.stringify(['psc-uniform-specialized-ir/1', uniformJsRepresentationProfile, raw]),
+    jsIr: '["psc-js-ir-json/1",[],[["forward",["x"],["var","x"]]]]',
+    erasureCorrespondence: canonicalBytes(['psc-erasure-declarations/1', 'declaration-inventory',
+      [[name('forward'), ['runtime', 'forward']]]]).toString(),
+  };
+  compiler.psCompilerUniformJavaScriptStagesFromPrepared = prepared => {
+    assert.equal(Object.isFrozen(prepared), true); calls++; return ok(good);
+  };
+  const product = service.emitDeclarationsArtifact(handle);
+  assert.equal(calls, 1);
+  assert.equal(product.checkedCore.javaScriptRepresentation, uniformJsRepresentationProfile);
+  assert.equal(product.javaScriptRepresentation, uniformJsRepresentationProfile);
+  assert.equal(product.uniformSpecializationCorrespondence.bytesPreserved, true);
+  assert.equal(product.specializationCorrespondence, undefined);
+  assert.equal(product.stageArtifacts.uniformSpecializedIr.domain, 'uniform-specialized-ir');
+  assert.match(product.directDeclarations.declarations.bytes.toString(), /<T0>\(_arg0: T0\) => T0/);
+  assert.throws(() => service.emitDeclarationsArtifact(handle, { profile: 'psc-direct-js-declarations-closed-structural/1' }), /PROFILE/);
+  compiler.psCompilerUniformJavaScriptStagesFromPrepared = () => ({ $ps$tag: 'error' });
+  assert.throws(() => service.emitExecutableArtifact(handle, 'javascript'), /EMIT_STAGES_FAILED/);
+  compiler.psCompilerUniformJavaScriptStagesFromPrepared = () => ok({ ...good, uniformSpecializedIr: undefined });
+  assert.throws(() => service.emitExecutableArtifact(handle, 'javascript'), /STAGES_SHAPE/);
+  assert.equal(emitted.length, 0);
+  service.revoke(handle);
+  assert.throws(() => service.emitDeclarationsArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
+  assert.throws(() => fixture({ javaScriptRepresentation: 'invented' }), /JAVASCRIPT_REPRESENTATION/);
 });

@@ -5,9 +5,11 @@ import { projectSourceSignature, sourceSignatureRuntimeType, printSourceSignatur
 import { decodeErasureDeclarations } from './erasure-declarations.mjs';
 import { decodeIrArtifact } from './ir-artifact.mjs';
 import { decodeJsIrArtifact, assertJsDeclarationInventory } from './target-ir-artifact.mjs';
+import { verifyUniformSpecialization, uniformSpecializationContract } from './uniform-specialization.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 
 export const directJsDeclarationProfile = 'psc-direct-js-declarations-closed-structural/1';
+export const directJsUniformDeclarationProfile = 'psc-direct-js-declarations-uniform-structural/1';
 export const directJsDeclarationsContract = 'psc-direct-javascript-declarations/1';
 export const directJsDeclarationBindingContract = 'psc-direct-javascript-declaration-binding/1';
 const fail = code => { throw new Error('PSC_JS_DECLARATIONS_' + code); };
@@ -16,16 +18,19 @@ const subjectKinds = Object.freeze({
   erasureTable: ['erasure-table', 'psc-erasure-declarations/1'],
   runtimeIr: ['runtime-ir', 'psc-runtime-ir-json/1'],
   verifiedIr: ['verified-ir', 'psc-runtime-ir-json/1'],
-  specializedIr: ['specialized-ir', 'psc-runtime-ir-json/1'],
   jsIr: ['js-ir', 'psc-js-ir-json/1'],
   javaScript: ['javascript-output', 'psc-direct-javascript/es2022'],
 });
 function limits(maxBytes, maxTotalBytes) {
   if (![maxBytes, maxTotalBytes].every(n => Number.isSafeInteger(n) && n > 0)) fail('RESOURCE_POLICY');
 }
-function subjectIds(subjects) {
-  if (!subjects || Object.keys(subjects).sort().join(',') !== Object.keys(subjectKinds).sort().join(',')) fail('SUBJECTS');
-  for (const [key, [domain, contract]] of Object.entries(subjectKinds)) {
+function subjectIds(subjects, profile) {
+  if (![directJsDeclarationProfile, directJsUniformDeclarationProfile].includes(profile)) fail('PROFILE');
+  const kinds = { ...subjectKinds, ...(profile === directJsUniformDeclarationProfile ?
+    { uniformSpecializedIr: ['uniform-specialized-ir', uniformSpecializationContract] } :
+    { specializedIr: ['specialized-ir', 'psc-runtime-ir-json/1'] }) };
+  if (!subjects || Object.keys(subjects).sort().join(',') !== Object.keys(kinds).sort().join(',')) fail('SUBJECTS');
+  for (const [key, [domain, contract]] of Object.entries(kinds)) {
     const id = subjects[key];
     if (id?.domain !== domain || id?.contract !== contract) fail('SUBJECT_KIND');
     artifactKey(id);
@@ -40,9 +45,9 @@ const same = (a, b) => artifactKey(a) === artifactKey(b);
 export function createDirectJsDeclarations({ subjects, profile = directJsDeclarationProfile,
   maxBytes = 128 * 1024 * 1024, maxTotalBytes = 512 * 1024 * 1024 }) {
   limits(maxBytes, maxTotalBytes);
-  if (profile !== directJsDeclarationProfile) fail('PROFILE');
+  const uniform = profile === directJsUniformDeclarationProfile;
   const ids = Object.fromEntries(Object.entries(subjects ?? {}).map(([key, value]) => [key, value?.identity]));
-  subjectIds(ids);
+  subjectIds(ids, profile);
   let total = 0;
   for (const item of Object.values(subjects)) {
     if (item.identity.byteLength > maxBytes || (total += item.identity.byteLength) > maxTotalBytes) fail('RESOURCE');
@@ -50,12 +55,13 @@ export function createDirectJsDeclarations({ subjects, profile = directJsDeclara
   }
   const api = decodePublicApi(subjects.publicApi.bytes, { maxBytes });
   const runtime = decodeIrArtifact(subjects.runtimeIr.bytes, { maxBytes });
-  const specialized = decodeIrArtifact(subjects.specializedIr.bytes, { maxBytes });
+  const specialized = uniform ? runtime : decodeIrArtifact(subjects.specializedIr.bytes, { maxBytes });
   const target = decodeJsIrArtifact(subjects.jsIr.bytes, { maxBytes });
   const table = decodeErasureDeclarations(subjects.erasureTable.bytes,
     { publicApi: subjects.publicApi.bytes, runtimeIr: subjects.runtimeIr.bytes, maxBytes });
   if (!Buffer.from(subjects.runtimeIr.bytes).equals(Buffer.from(subjects.verifiedIr.bytes))) fail('VALIDATION_CHANGED_IR');
-  verifySpecializationCorrespondence(subjects.verifiedIr, subjects.specializedIr, { maxBytes });
+  if (uniform) verifyUniformSpecialization(subjects.verifiedIr, subjects.uniformSpecializedIr, { maxBytes });
+  else verifySpecializationCorrespondence(subjects.verifiedIr, subjects.specializedIr, { maxBytes });
   assertJsDeclarationInventory(specialized, target);
   if (runtime[1].length || target[1].length) fail('IMPORTS_UNSUPPORTED');
   const targetIndices = new Map(target[2].map((value, index) => [value[0], index]));
@@ -71,8 +77,11 @@ export function createDirectJsDeclarations({ subjects, profile = directJsDeclara
     if (entry[1][0] !== 'runtime') continue;
     const declaration = api[2][sourceIndex], lowered = runtime[4][cursor++];
     const signature = projectSourceSignature(declaration[4]);
-    if (signature.typeParameters.length || lowered[1].length) fail('GENERIC_EXPORT_UNAVAILABLE');
-    const projected = sourceSignatureRuntimeType(signature.type);
+    if (!uniform && (signature.typeParameters.length || lowered[1].length)) fail('GENERIC_EXPORT_UNAVAILABLE');
+    if (signature.typeParameters.length !== lowered[1].length) fail('GENERIC_ARITY');
+    if (signature.typeParameters.length && (signature.type[0] !== 'function' || !lowered[2].length))
+      fail('GENERIC_VALUE_EXPORT_UNSUPPORTED');
+    const projected = sourceSignatureRuntimeType(signature.type, lowered[1]);
     const actual = lowered[2].length ? ['function', lowered[2].map(parameter => parameter[1]), lowered[3]] : lowered[3];
     if (JSON.stringify(projected) !== JSON.stringify(actual)) fail('SOURCE_RUNTIME_SIGNATURE');
     const targetIndex = targetIndices.get(lowered[0]);
@@ -81,7 +90,9 @@ export function createDirectJsDeclarations({ subjects, profile = directJsDeclara
     // A local alias avoids TypeScript binding-name collisions with Array, etc.
     const exportName = lowered[0], localName = '$pscDeclaration' + sourceIndex;
     if (!/^[A-Za-z_$][A-Za-z0-9_$]*(?![\s\S])/u.test(exportName)) fail('EXPORT_NAME');
-    const printed = printSourceSignatureType(signature.type);
+    const parameters = signature.typeParameters.length ?
+      '<' + signature.typeParameters.map(parameter => parameter.name).join(', ') + '>' : '';
+    const printed = parameters + printSourceSignatureType(signature.type);
     write('declare const ' + localName + ': ' + printed + ';\n');
     write('export { ' + localName + ' as ' + exportName + ' };\n');
     signatures.push({ sourceIndex, sourceName: entry[0], signature });
@@ -114,7 +125,7 @@ export async function verifyDirectJsDeclarations(product, {
   resolveArtifact, expectedSubjects, expectedProfile = directJsDeclarationProfile,
   maxBytes = 128 * 1024 * 1024, maxTotalBytes = 512 * 1024 * 1024,
 } = {}) {
-  limits(maxBytes, maxTotalBytes); subjectIds(expectedSubjects);
+  limits(maxBytes, maxTotalBytes); subjectIds(expectedSubjects, expectedProfile);
   let total = 0;
   for (const key of ['declarations', 'sourceSignatures', 'binding']) {
     const record = product[key];
@@ -122,9 +133,9 @@ export async function verifyDirectJsDeclarations(product, {
     verifyArtifact(record.bytes, record.identity);
   }
   const value = decodeComparatorJson(product.binding.bytes, { maxBytes, maxDepth: 512, maxNodes: 2000000 });
-  subjectIds(value.subjects);
+  subjectIds(value.subjects, value.profile);
   if (value.profile !== expectedProfile) fail('PROFILE');
-  for (const key of Object.keys(subjectKinds)) if (!same(value.subjects[key], expectedSubjects[key])) fail('SUBJECT_BINDING');
+  for (const key of Object.keys(expectedSubjects)) if (!same(value.subjects[key], expectedSubjects[key])) fail('SUBJECT_BINDING');
   const subjects = {};
   for (const [key, identity] of Object.entries(expectedSubjects)) {
     if (identity.byteLength > maxBytes || (total += identity.byteLength) > maxTotalBytes) fail('RESOURCE');

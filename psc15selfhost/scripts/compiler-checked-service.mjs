@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
-import { checkedIrStageArtifacts } from './ir-artifact.mjs';
-import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { checkedIrStageArtifacts, decodeIrArtifact } from './ir-artifact.mjs';
+import { checkedTargetIrStageArtifacts, decodeJsIrArtifact, assertJsDeclarationInventory } from './target-ir-artifact.mjs';
 import { artifactId, artifactKey } from './artifact-evidence.mjs';
-import { createDirectJsDeclarations, directJsDeclarationProfile } from './js-declarations.mjs';
+import { createDirectJsDeclarations, directJsDeclarationProfile, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 import { createDirectJsSourceMap } from './js-source-map.mjs';
 import { createJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
@@ -12,6 +12,7 @@ import { createErasureDeclarationMap } from './erasure-declarations.mjs';
 import { createDeclarationOriginGraph } from './declaration-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { createSpecializationInstanceMap, verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { createCertifiedSourceSession } from './certified-source.mjs';
 
 function byteList(value, limit) {
@@ -34,13 +35,16 @@ function byteList(value, limit) {
 /** Host composition root. A receipt can describe a capability but cannot mint one. */
 export function createCheckedCompilerService({
   compiler, checkAdmissions, identity, providerSecurity, kernelContract = kernelContractV1,
+  javaScriptRepresentation = closedJsRepresentationProfile,
   targets = ['typescript'], assumptionPolicy = 'kernel-contract-default',
   resourcePolicy = 'checked-host-output/1', maxOutputBytes = 256 * 1024 * 1024,
 }) {
   if (!Number.isSafeInteger(maxOutputBytes) || maxOutputBytes < 0) throw new Error('PSC_CHECKED_OUTPUT_BUDGET');
   const session = createKernelCheckedSession(compiler, checkAdmissions, identity, kernelContract, providerSecurity,
-    { targets, assumptionPolicy, resourcePolicy });
+    { targets, assumptionPolicy, resourcePolicy, javaScriptRepresentation });
   const certified = createCertifiedSourceSession(session);
+  const declarationProfile = javaScriptRepresentation === uniformJsRepresentationProfile ?
+    directJsUniformDeclarationProfile : directJsDeclarationProfile;
   async function check(sourceKind, source) {
     return certified.certify(await session.check(sourceKind, source));
   }
@@ -98,6 +102,14 @@ export function createCheckedCompilerService({
     if (productByteLength > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     const stages = checkedIrStageArtifacts(emission.stages, { maxBytes: maxOutputBytes });
     const targetStages = checkedTargetIrStageArtifacts(emission.stages, { maxBytes: maxOutputBytes });
+    const uniform = emission.stages?.uniformSpecializedIr === undefined ? undefined :
+      uniformSpecializationArtifact(emission.stages.uniformSpecializedIr, { maxBytes: maxOutputBytes });
+    let uniformCorrespondence;
+    if (uniform) {
+      uniformCorrespondence = verifyUniformSpecialization(stages.verifiedIr, uniform, { maxBytes: maxOutputBytes });
+      assertJsDeclarationInventory(decodeIrArtifact(stages.verifiedIr.bytes, { maxBytes: maxOutputBytes }),
+        decodeJsIrArtifact(targetStages.jsIr.bytes, { maxBytes: maxOutputBytes }));
+    }
     let erasureMap, erasureProduct;
     if (emission.erasureCorrespondence !== undefined) {
       if (!api || !stages) throw new Error('PSC_CHECKED_ERASURE_SUBJECT_REQUIRED');
@@ -135,11 +147,12 @@ export function createCheckedCompilerService({
     }
     let directDeclarations;
     if (declarationsRequested) {
-      if (target !== 'javascript' || !api || !erasureProduct || !stages?.specializedIr || !targetStages.jsIr)
+      if (target !== 'javascript' || !api || !erasureProduct || (!stages?.specializedIr && !uniform) || !targetStages.jsIr)
         throw new Error('PSC_CHECKED_DECLARATION_SUBJECTS_REQUIRED');
-      directDeclarations = createDirectJsDeclarations({ subjects: {
+      directDeclarations = createDirectJsDeclarations({ profile: declarationProfile, subjects: {
         publicApi: api.record, erasureTable: erasureProduct.artifacts.find(item => item.identity.domain === 'erasure-table'),
-        runtimeIr: stages.runtimeIr, verifiedIr: stages.verifiedIr, specializedIr: stages.specializedIr,
+        runtimeIr: stages.runtimeIr, verifiedIr: stages.verifiedIr,
+        ...(uniform ? { uniformSpecializedIr: uniform } : { specializedIr: stages.specializedIr }),
         jsIr: targetStages.jsIr, javaScript: { bytes, identity: artifactId(bytes, 'javascript-output', 'psc-direct-javascript/es2022') },
       }, maxBytes: maxOutputBytes, maxTotalBytes: maxOutputBytes });
     }
@@ -156,11 +169,13 @@ export function createCheckedCompilerService({
       checkedCore: capability,
       pscvCert: certificate.identity,
       certifiedSource,
+      ...(target === 'javascript' ? { javaScriptRepresentation } : {}),
+      ...(uniformCorrespondence ? { uniformSpecializationCorrespondence: uniformCorrespondence } : {}),
       ...(specialization ? { specializationCorrespondence: specialization } : {}),
       ...(specializationProduct ? { specializationInstances: specializationProduct.map.identity } : {}),
       ...(emission.stages ? { stages: emission.stages,
         stageArtifacts: Object.freeze(Object.fromEntries(
-          [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {})]
+          [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {}), ...(uniform ? [['uniformSpecializedIr', uniform]] : [])]
             .map(([key, value]) => [key, value.identity]))) } : {}),
       ...(directDeclarations ? { directDeclarations } : {}),
       ...(directSourceMap ? { sourceMap: directSourceMap.sourceMap.bytes.toString('utf8'),
@@ -175,8 +190,8 @@ export function createCheckedCompilerService({
   }
   function emitArtifact(handle, target = 'typescript') { return emitProduct(handle, target, true); }
   function emitExecutableArtifact(handle, target = 'typescript') { return emitProduct(handle, target, false); }
-  function emitDeclarationsArtifact(handle, { profile = directJsDeclarationProfile } = {}) {
-    if (profile !== directJsDeclarationProfile) throw new Error('PSC_JS_DECLARATIONS_PROFILE');
+  function emitDeclarationsArtifact(handle, { profile = declarationProfile } = {}) {
+    if (profile !== declarationProfile) throw new Error('PSC_JS_DECLARATIONS_PROFILE');
     return emitProduct(handle, 'javascript', false, true);
   }
   return Object.freeze({

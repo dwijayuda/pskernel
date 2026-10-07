@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { resolveTypeScriptCli, pinnedTypeScriptVersionText } from './typescript-cli.mjs';
 import { uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
-import { createDirectJsDeclarations } from './js-declarations.mjs';
+import { createDirectJsDeclarations, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { spawnSync } from 'node:child_process';
 import { canonicalBytes, canonicalArtifact, artifactKey, artifactId, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
@@ -17,6 +17,25 @@ import { decodeIrArtifact, checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
 import { packObservedBuildArchive, verifyObservedBuildArchive } from './observed-build-archive.mjs';
+
+async function checkDeclarationConsumer(product, consumer) {
+  const directory = await mkdtemp(path.join(tmpdir(), 'psc-direct-declarations-'));
+  try {
+    const cli = resolveTypeScriptCli();
+    const version = spawnSync(process.execPath, [cli, '--version'], { encoding: 'utf8', timeout: 30000 });
+    assert.equal(version.status, 0, version.stderr);
+    assert.equal(version.stdout.trim(), pinnedTypeScriptVersionText);
+    await writeFile(path.join(directory, 'module.d.ts'), product.declarations.bytes);
+    await writeFile(path.join(directory, 'consumer.ts'), consumer);
+    const result = spawnSync(process.execPath, [cli, '--target', 'ES2022', '--module', 'NodeNext',
+      '--moduleResolution', 'NodeNext', '--strict', '--noEmit', '--pretty', 'false', 'consumer.ts'],
+    { cwd: directory, encoding: 'utf8', timeout: 30000, maxBuffer: 4 * 1024 * 1024 });
+    assert.equal(result.status, 0, result.error?.message ?? result.stdout + result.stderr);
+    // This consumer check is separate evidence; generation itself never called tsc.
+    assert.equal(JSON.parse(product.binding.bytes).declarationTargetAccepted, false);
+    assert.equal(JSON.parse(product.binding.bytes).globalPreservationProved, false);
+  } finally { await rm(directory, { recursive: true, force: true }); }
+}
 
 function emitted(flag) {
   const file = '.lake/build/bin/pscv_ir_encoding_tests' + (process.platform === 'win32' ? '.exe' : '');
@@ -255,14 +274,7 @@ test('actual source signatures produce direct declarations accepted by the pinne
   assert.equal(executable.answer, 42n);
   assert.equal(executable.applyNat(executable.echoNat, 17n), 17n);
   assert.deepEqual(executable.echoArray([3n]), [3n]);
-  const directory = await mkdtemp(path.join(tmpdir(), 'psc-direct-declarations-'));
-  try {
-    const cli = resolveTypeScriptCli();
-    const version = spawnSync(process.execPath, [cli, '--version'], { encoding: 'utf8', timeout: 30000 });
-    assert.equal(version.status, 0, version.stderr);
-    assert.equal(version.stdout.trim(), pinnedTypeScriptVersionText);
-    await writeFile(path.join(directory, 'module.d.ts'), product.declarations.bytes);
-    await writeFile(path.join(directory, 'consumer.ts'), [
+  await checkDeclarationConsumer(product, [
       'import { answer, echoNat, applyNat, echoArray, greeting } from "./module.js";',
       'const a: bigint = echoNat(answer);',
       'const b: bigint = applyNat(echoNat, 7n);',
@@ -275,14 +287,6 @@ test('actual source signatures produce direct declarations accepted by the pinne
       '// @ts-expect-error function parameter retains its result type',
       'applyNat((value: bigint): string => "bad", 3n);',
     ].join('\n'));
-    const result = spawnSync(process.execPath, [cli, '--target', 'ES2022', '--module', 'NodeNext',
-      '--moduleResolution', 'NodeNext', '--strict', '--noEmit', '--pretty', 'false', 'consumer.ts'],
-    { cwd: directory, encoding: 'utf8', timeout: 30000, maxBuffer: 4 * 1024 * 1024 });
-    assert.equal(result.status, 0, result.error?.message ?? result.stdout + result.stderr);
-    // This consumer check is separate evidence; generation itself never called tsc.
-    assert.equal(JSON.parse(product.binding.bytes).declarationTargetAccepted, false);
-    assert.equal(JSON.parse(product.binding.bytes).globalPreservationProved, false);
-  } finally { await rm(directory, { recursive: true, force: true }); }
 });
 
 test('uniform JS representation retains generic exports and strips only checked static type arguments', async () => {
@@ -290,6 +294,28 @@ test('uniform JS representation retains generic exports and strips only checked 
   const snapshots = checkedIrStageArtifacts(staged), targets = checkedTargetIrStageArtifacts(staged);
   const selected = uniformSpecializationArtifact(staged.uniformSpecializedIr);
   const relation = verifyUniformSpecialization(snapshots.verifiedIr, selected);
+  const record = (text, domain, contract) => {
+    const bytes = Buffer.from(text); return { bytes, identity: artifactId(bytes, domain, contract) };
+  };
+  const product = createDirectJsDeclarations({ profile: directJsUniformDeclarationProfile, subjects: {
+    publicApi: publicApiArtifact(staged.publicApi),
+    erasureTable: record(staged.erasureCorrespondence, 'erasure-table', 'psc-erasure-declarations/1'),
+    runtimeIr: snapshots.runtimeIr, verifiedIr: snapshots.verifiedIr, uniformSpecializedIr: selected,
+    jsIr: targets.jsIr, javaScript: record(staged.javaScript, 'javascript-output', 'psc-direct-javascript/es2022'),
+  } });
+  await checkDeclarationConsumer(product, [
+    'import { forward, unused, applyValue, echoArray, mapValues, answer, choice } from "./module.js";',
+    'const a: bigint = forward(answer);',
+    'const b: string = unused("retained");',
+    'const c: boolean = applyValue((value: bigint): boolean => value === 7n, 7n);',
+    'const d: Array<string> = mapValues((value: bigint): string => value.toString(), [1n, 2n]);',
+    'const e: Array<boolean> = echoArray([choice]);',
+    '// @ts-expect-error generic identity retains the actual argument type',
+    'const bad: number = forward("text");',
+    '// @ts-expect-error generic array mapping checks callback element type',
+    'mapValues((value: string): string => value, [1n]);',
+  ].join('\n'));
+
   assert.equal(relation.bytesPreserved, true);
   assert.equal(relation.targetRepresentationAdequacyProved, false);
   const runtime = JSON.parse(staged.runtimeIr), uniform = JSON.parse(staged.uniformSpecializedIr);

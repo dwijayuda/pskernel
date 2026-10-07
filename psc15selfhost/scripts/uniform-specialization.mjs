@@ -3,6 +3,7 @@ import { decodeComparatorJson } from './comparator-export.mjs';
 import { decodeIrArtifact } from './ir-artifact.mjs';
 
 export const uniformSpecializationContract = 'psc-uniform-specialized-ir/1';
+export const closedJsRepresentationProfile = 'psc-js-closed-instances/1';
 export const uniformJsRepresentationProfile = 'psc-js-uniform-values/1';
 const fail = code => { throw new Error('PSC_UNIFORM_SPECIALIZATION_' + code); };
 

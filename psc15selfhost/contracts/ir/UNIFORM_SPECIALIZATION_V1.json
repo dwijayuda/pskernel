@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "contract": "psc-uniform-specialized-ir/1",
   "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
-  "status": "portable-producer-and-native-consumer-implemented-production-host-routing-pending",
+  "status": "portable-producer-checked-service-and-generic-declarations-implemented-descriptor-archive-routing-pending",
   "problem": "Closed monomorphization does not preserve an arbitrary generic public export. Direct declarations require a source generic API to have an actual callable export.",
   "representationProfile": "psc-js-uniform-values/1",
   "input": "The same PsValidatedIrModule obtained by strict RuntimeIR validation; no weakening of generic scope, type or invariant checks.",
@@ -19,8 +19,9 @@
   "unsupported": [
     "Foreign/imported functions in this initial uniform profile",
     "Dependent runtime values or new runtime representation primitives",
-    "Automatic selection, production checked-host routing and backend descriptor/archive routing",
-    "Generic declaration publication and public named-type declarations until their source/export binding consumes this exact profile"
+    "Automatic selection and backend descriptor/graph/archive routing",
+    "Uniform source-origin composition and source maps until an exact uniform correspondence parent is supported",
+    "Higher-rank/named public types and generic constant declarations without a runtime function"
   ],
   "portableProfiles": [
     "PSC1-selfhost-stable/1",
@@ -34,8 +35,11 @@
     "serializedAuthority": false
   },
   "remaining": [
-    "Explicit host target/profile authorization, typed descriptor/graph/archive integration",
-    "Source generic declaration binding and higher-rank/named public type policies",
+    "Typed descriptor/graph/archive integration and production checked CLI selection",
+    "Uniform source-origin composition, portable declaration serialization and higher-rank/named public type policies",
     "Uniform source/target preservation argument and later independent assurance"
-  ]
+  ],
+  "closedRepresentationProfile": "psc-js-closed-instances/1",
+  "hostSelection": "createCheckedCompilerService selects javaScriptRepresentation once at construction; default is closed. A uniform session requires its exact selected staged API, checks every required stage and exact VerifiedIR/envelope identity, and cannot fall back to closed or legacy APIs. Logical source certificates remain separate from representation selection.",
+  "declarations": "The explicitly paired psc-direct-js-declarations-uniform-structural/1 profile consumes exact source PublicApiIR and uniform selection subjects. It retains prefix source generics, checks alpha-correspondence with RuntimeIR, and binds complete JsIR export inventory without inferring signatures from instances."
 }

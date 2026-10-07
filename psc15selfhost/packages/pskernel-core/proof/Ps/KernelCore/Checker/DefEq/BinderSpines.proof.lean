@@ -385,9 +385,6 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                       ⟨restValue, childFinal⟩
                     have _hChildFinal :=
                       ih
-                        defeq
-                        hDefEq
-                        hString
                         child
                         freshState
                         childFinal
@@ -512,9 +509,6 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                           ⟨restValue, childFinal⟩
                         have _hChildFinal :=
                           ih
-                            defeq
-                            hDefEq
-                            hString
                             child
                             freshState
                             childFinal
@@ -579,9 +573,6 @@ theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
                           ⟨restValue, restState⟩
                         have hRestConfig :=
                           ih
-                            defeq
-                            hDefEq
-                            hString
                             context
                             domainState
                             restState

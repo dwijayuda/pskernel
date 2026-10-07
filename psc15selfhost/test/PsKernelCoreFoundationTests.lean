@@ -2,13 +2,42 @@ import KernelCore.Foundation.KernelContract
 import KernelCore.Foundation.AdmissionRuntime
 import KernelCore.Foundation.CheckerOps
 
+def psKernelContractExpressionDiagnostic : String :=
+  match psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault with
+  | Except.error error =>
+      "session=" ++ toString (psKernelContractOutcomeTag (psKernelErrorOutcome error))
+  | Except.ok session =>
+      let invalidApp := PsKernelExpr.app
+        (PsKernelExpr.lam PsKernelName.anonymous psKernelContractSort
+          (PsKernelExpr.bvar 0) PsKernelBinderInfo.default)
+        psKernelContractSort
+      "sort=" ++
+        toString (psKernelContractResultTag (psKernelV1CheckExpression session List.nil
+          PsKernelDefinitionSafety.safe psKernelContractSort)) ++
+      ";check-invalid=" ++
+        toString (psKernelContractResultTag (psKernelV1CheckExpression session List.nil
+          PsKernelDefinitionSafety.safe invalidApp)) ++
+      ";whnf-invalid=" ++
+        toString (psKernelContractResultTag (psKernelV1Whnf session List.nil
+          PsKernelDefinitionSafety.safe invalidApp)) ++
+      ";defeq-invalid=" ++
+        toString (psKernelContractResultTag (psKernelV1IsDefEq session List.nil
+          PsKernelDefinitionSafety.safe invalidApp invalidApp)) ++
+      ";defeq-sort=" ++
+        (match psKernelV1IsDefEq session List.nil PsKernelDefinitionSafety.safe
+            psKernelContractSort psKernelContractSort with
+         | Except.ok equal => toString equal
+         | Except.error error =>
+             "error:" ++ toString (psKernelContractOutcomeTag (psKernelErrorOutcome error)))
+
 def main : IO Unit :=
   if !psKernelContractDiagnosticTests then
     throw (IO.userError "PSC1_KERNEL_CONTRACT_DIAGNOSTICS: FAIL")
   else if !psKernelContractAdmissionTests then
     throw (IO.userError "PSC1_KERNEL_CONTRACT_ADMISSION: FAIL")
   else if !psKernelContractExpressionTests then
-    throw (IO.userError "PSC1_KERNEL_CONTRACT_EXPRESSION: FAIL")
+    throw (IO.userError
+      ("PSC1_KERNEL_CONTRACT_EXPRESSION: FAIL; " ++ psKernelContractExpressionDiagnostic))
   else if !psKernelContractResourceTests then
     throw (IO.userError "PSC1_KERNEL_CONTRACT_RESOURCE: FAIL")
   else if !psKernelContractProviderTests then

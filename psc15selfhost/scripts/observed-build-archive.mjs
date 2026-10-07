@@ -2,6 +2,7 @@ import { artifactId, artifactKey, canonicalBytes, verifyArtifact, verifyPassExec
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
 
 const contract = 'psc-observed-build-archive/1';
 const defaults = Object.freeze({ maxArchiveBytes: 256 * 1024 * 1024, maxArtifactBytes: 128 * 1024 * 1024,
@@ -118,7 +119,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     const graph = graphValue(resolveArtifact(archive.graphId), bound);
     if (graph.entries.length + 1 !== blobs.size) fail('ARTIFACT_SET');
     for (const entry of graph.entries) resolveArtifact(entry.identity);
-    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [];
+    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [];
     for (const identity of graph.executions) {
       const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions });
       executions.push(result);
@@ -138,10 +139,26 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
           { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) },
           { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) }, { maxBytes: bound.maxArtifactBytes }));
       }
+      if (definition.passId === 'psc-verified-ir-to-js-abi-plan/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            definition.semanticRelationId !== 'psc-verified-ir-js-scalar-abi-plan/1' ||
+            !execution.action?.parameters?.policyId) fail('JS_ABI_SUBJECT');
+        const policyId = execution.action.parameters.policyId;
+        const policyBytes = resolveArtifact(policyId);
+        verifyArtifact(policyBytes, policyId);
+        const policy = JSON.parse(policyBytes);
+        const derived = jsAbiArtifactsFromVerifiedIr(
+          { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) },
+          policy, { maxBytes: bound.maxArtifactBytes });
+        if (artifactKey(derived.policy.identity) !== artifactKey(policyId) ||
+            artifactKey(derived.plan.identity) !== artifactKey(execution.outputs[0])) fail('JS_ABI_RELATION');
+        jsAbiPlans.push(Object.freeze({ inputId: execution.inputs[0], policyId,
+          planId: execution.outputs[0], relation: derived.relation, authority: derived.authority }));
+      }
     }
     return { kind: 'accepted', contract: 'psc-observed-build-verification/1', graphId: archive.graphId,
       acceptanceScope: 'observed-artifact-integrity-only', integrityVerified: true, artifactCount: blobs.size,
-      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences,
+      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans,
       fullInputClosureEstablished: false, semanticClaimsVerified: false,
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {

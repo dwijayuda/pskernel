@@ -1,6 +1,7 @@
 # AI Work State
 
 ## Arena operational continuation — canonical corpus result visibility
+- **External execution blocker:** the available GitHub connector can read/write repository contents and inspect/rerun existing Actions jobs, but exposes no workflow-dispatch operation. The canonical-only workflow has no historical runs to rerun. A user must start `PSKernel Core Arena corpus` once with branch `pscv/pskernel-core-arena-v1`, `test=init`, `timeout_minutes=180`. That workflow uploads `arena/_results`, including exact stderr. After Init is classified/fixed/green, repeat with `test=std`; only after both are green run `test=mathlib` (use at least 180 minutes). This is an execution-control blocker, not a semantic blocker and not evidence of a new PSKernel bug.
 - Full Init/Std run #36 completed by timeout/cancellation. Canonical PSKernel returned before the timeout but Arena classified both results as `error` (not `rejected` or `declined`): Init ~8.3 min, Std ~9.8 min. The subsequent legacy replay consumed the remainder of the 90-minute jobs and was cancelled. No workflow artifacts were uploaded, so exact canonical stderr from `_results` is not recoverable from run #36.
 
 - Latest green empirical checkpoint remains `108f376ac6d8034952354bdb7398bf9f0bf6019a`:

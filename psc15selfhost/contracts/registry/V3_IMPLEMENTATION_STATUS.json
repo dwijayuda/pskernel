@@ -13,7 +13,9 @@
       "PSC1-portable-selfhost/1"
     ],
     "scaffoldIsImplementationComplete": false,
-    "implementationCompleteIsAcceptedRelease": false
+    "implementationCompleteIsAcceptedRelease": false,
+    "kernelWorkstream": "external-separate-branch-do-not-modify",
+    "kernelConsumption": "frozen KernelContract/provider interfaces and imported evidence identities only"
   },
   "workstreams": [
     {
@@ -63,12 +65,12 @@
         3,
         4
       ],
-      "status": "partial",
+      "status": "external-kernel-workstream-not-owned-by-psc-v3-execution",
       "owners": [
         "contracts/semantic/ALGORITHMIC_DEFEQ_CACHE_V1.json"
       ],
-      "completion": "Executable cache validity follows exact query/context identities; no unsupported equivalence closure.",
-      "assurance": "pending"
+      "completion": "Provided by the separate kernel branch/workstream and imported by exact contract/evidence identity. This compiler branch must not modify kernel implementation or proof sources.",
+      "assurance": "external"
     },
     {
       "id": "verified-ir",
@@ -185,12 +187,12 @@
         8,
         9
       ],
-      "status": "seed",
+      "status": "external-kernel-workstream-not-owned-by-psc-v3-execution",
       "owners": [
         "theory/core/DECLARATIVE_CORE_SEED_V1.json"
       ],
-      "completion": "Implement complete theory definitions and explicit checker/model refinement obligations without creating unproved authority.",
-      "assurance": "pending"
+      "completion": "Provided by the separate kernel branch/workstream and imported by exact contract/evidence identity. This compiler branch must not modify kernel implementation or proof sources.",
+      "assurance": "external"
     },
     {
       "id": "preservation",

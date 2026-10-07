@@ -49,12 +49,12 @@ jobs:
           lake build psc_kernel_core_arena
           .lake/build/bin/psc_kernel_core_arena --version
 
-      - name: Run kernel foundation regressions
+      - name: Run Arena level regression
         working-directory: psc15selfhost
         shell: bash
         run: |
           set -euo pipefail
-          lake exe psc1_kernel_core_foundation_tests
+          lake exe psc_kernel_core_arena_level_tests
 
       - name: Smoke Arena metadata stream
         working-directory: psc15selfhost

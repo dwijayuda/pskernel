@@ -210,3 +210,22 @@ after code generation cannot recover those relations reliably.
 All new products remain descriptive artifacts. Checked-session association,
 source-to-admissions normalization, public projection fidelity, runtime export
 correspondence and global preservation are distinct obligations.
+
+## Origin preparation boundary
+
+The existing bounded reader preserves BOM and rejects malformed UTF-8. Preparation
+now retains exact byte intervals for the text it already produced, including
+import removal, newline normalization and trimming. Separate intervals preserve
+gaps rather than claiming that a declaration crossing removed text came from one
+contiguous source range. Empty/import-only files remain in the provenance inventory
+without consuming a prepared-source index.
+
+This edge is host metadata and does not alter source admissions or kernel logic.
+The full next edge should observe each actual `psElabDeclarationBatch` event,
+associate resulting declarations with the parsed declaration span, and thread a
+separate origin side table through preparation. A shared elaboration fold should
+serve ordinary and origin-aware preparation so event capture cannot drift into a
+second frontend. Declaration-level origins must be labeled as such until finer
+expression mappings are emitted. Core and target transformations must explicitly
+record preservation, merging, synthesis or loss; the preparation map alone cannot
+supply generated-code positions.

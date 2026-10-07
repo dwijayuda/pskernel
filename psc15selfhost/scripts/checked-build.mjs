@@ -202,7 +202,7 @@ export async function buildChecked({
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes, sourceResources: snapshot.resourceObservation, seedResources,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
-      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi,
+      hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi, sourceOrigins: snapshot.sourceOrigins,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     const evidence = bindObservedBuildContext(observed, { languageAuthority, backendRegistry, backendId: 'typescript' });
     receipt.profileEnvironment = evidence.profileEnvironment.identity;
@@ -214,6 +214,7 @@ export async function buildChecked({
     receipt.buildGraph = evidence.identity;
     if (evidence.runtimeInterface) receipt.runtimeInterface = evidence.runtimeInterface;
     if (evidence.publicApi) receipt.publicApi = evidence.publicApi.identity;
+    if (evidence.sourceOrigins) receipt.sourceOrigins = evidence.sourceOrigins.identity;
     if (evidence.jsAbi) {
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
       receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;
@@ -246,6 +247,7 @@ export async function buildChecked({
     await writeFile(path.join(staging, stem + '.certified-source.json'), certifiedSourceArtifact.bytes);
     await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);
     await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
+    if (evidence.sourceOrigins) await writeFile(path.join(staging, stem + '.source-origins.json'), evidence.sourceOrigins.bytes);
     if (evidence.publicApi) await writeFile(path.join(staging, stem + '.public-api.json'), evidence.publicApi.bytes);
     await writeFile(path.join(staging, stem + '.profile-environment.json'), evidence.profileEnvironment.bytes);
     await writeFile(path.join(staging, stem + '.backend-descriptor.json'), evidence.backendDescriptor.bytes);

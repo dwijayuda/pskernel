@@ -3,10 +3,9 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { packageBySection, parseImports } from './workspace-layout.mjs';
 import { findSourceWorkspaceRoot, readGeneratedSourceClosure } from './selfhost-source-workspace.mjs';
+import { sourcePreparationRecord } from './source-preparation-origins.mjs';
 import { createSourceReadBudget } from './source-read-budget.mjs';
 
-const stripImports = source => source.split(/\r?\n/u)
-  .filter(line => !/^\s*import\s+[A-Za-z0-9_.]+\s*;?\s*$/u.test(line)).join('\n').trim();
 function inside(root, file) {
   const relative = path.relative(root, file);
   if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
@@ -64,8 +63,14 @@ export async function readCheckedSourceSnapshot(entryPath, resourceLimits) {
   const closureSha256 = generated?.closureSha256 ?? createHash('sha256')
     .update(JSON.stringify({ entry: path.relative(root, entry).split(path.sep).join('/'), files }))
     .digest('hex');
-  const sources = Object.freeze(ordered.map(item => stripImports(item.source)).filter(Boolean));
+  const sources = [], sourceOrigins = [];
+  for (const item of ordered) {
+    const record = sourcePreparationRecord(path.relative(root, item.path).split(path.sep).join('/'), item.source, sources.length);
+    sourceOrigins.push(record);
+    if (record.prepared) sources.push(record.prepared);
+  }
+  Object.freeze(sources); Object.freeze(sourceOrigins);
   return Object.freeze({ root, entry, kind: extension === '.ps' ? 'ps' : 'lean',
-    ordered, closureSha256, sources, source: sources.join('\n\n') + '\n',
+    ordered, closureSha256, sources, sourceOrigins, source: sources.join('\n\n') + '\n',
     resourceObservation: generated?.resourceObservation ?? budget.snapshot() });
 }

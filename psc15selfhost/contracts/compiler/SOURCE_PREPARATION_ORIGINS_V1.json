@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-source-preparation-origins/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "domain": "source-origins",
+  "coordinateUnit": "utf8-byte",
+  "authority": "debug-metadata-only",
+  "input": "Exact source text captured once by the bounded source reader, including BOM and original CRLF bytes; ordered prepared source snapshot is the existing semantic input.",
+  "transformation": "Existing import-line removal, CRLF-to-LF joining and JavaScript trim semantics are unchanged.",
+  "fileFields": [
+    "path",
+    "preparedIndex|null",
+    "originalId",
+    "preparedId",
+    "segments"
+  ],
+  "segmentFields": [
+    "preparedStartInclusive",
+    "preparedStopExclusive",
+    "originalStartInclusive",
+    "originalStopExclusive"
+  ],
+  "invariants": [
+    "Segments completely cover nonempty prepared bytes in order without overlaps or gaps.",
+    "Each interval copies the same byte sequence; removed imports, CR and trimmed whitespace remain gaps in original-source coordinates.",
+    "Empty/import-only files have null preparedIndex and no segments.",
+    "Nonempty preparedIndex values exactly enumerate the observed source snapshot; empty files do not renumber later modules incorrectly.",
+    "Source text, prepared text, map, pass execution and source subject have distinct exact artifact identities."
+  ],
+  "producer": "readCheckedSourceSnapshot records provenance in the same pass that prepares actual compiler inputs; no source file rereads.",
+  "consumers": [
+    "checked build .source-origins.json output",
+    "typed ArtifactBundle debugArtifacts",
+    "observed build archive replay",
+    "future portable declaration/node origins and map composition"
+  ],
+  "replay": "Recompute preparation and segments from archived UTF-8 source bytes, compare every prepared source in order, require exact source-subject identity and bounded resolution. The selected build archive/graph must authenticate the observed provenance; successful projection alone cannot authenticate a file path.",
+  "compatibility": "Historical graphs lacking this debug product remain readable. This is the preparation edge only, not a complete OriginGraph or an emitted JS/declaration map.",
+  "remaining": [
+    "Parser/elaborator event side table bound to prepared source indices and exact byte spans",
+    "Core-to-runtime/specialization/target origin policies and stable node relations",
+    "Generated JS and declaration UTF-16 positions plus ECMA-426 emission"
+  ],
+  "semanticPreservationProved": false,
+  "debugProductEstablishesSemanticAuthority": false
+}

@@ -55,6 +55,7 @@ test('explicit owned kernel checks dependent source before emission and executio
     assert.equal(archived.kind, 'accepted', archived.reason);
     assert.equal(archived.executions.length, graph.executions.length);
     assertPasses(graph, [
+      'psc-source-preparation-origins/1',
       'psc-prepare-and-check/1',
       'psc-certify-checked-core/1',
       'psc-project-public-api/1',
@@ -181,7 +182,10 @@ for (const [kind, source] of [
       const apiBytes = await readFile(path.join(dir, 'out.public-api.json'));
       verifyArtifact(apiBytes, receipt.publicApi);
       assert.equal(decodePublicApi(apiBytes)[0], 'psc-public-api-ir/1');
-      assert.equal(bundle.debugArtifacts.length, 1);
+      assert.deepEqual(bundle.debugArtifacts.map(item => item.role), ['source-origins', 'source-map']);
+      const origins = await readFile(path.join(dir, 'out.source-origins.json'));
+      verifyArtifact(origins, receipt.sourceOrigins);
+      assert.equal(JSON.parse(origins).coordinateUnit, 'utf8-byte');
       assert.ok(existsSync(path.join(dir, 'out.admissions.json')));
       assert.ok(existsSync(path.join(dir, 'out.pscv-cert.json')));
       assert.ok(existsSync(path.join(dir, 'out.certified-source.json')));
@@ -189,7 +193,8 @@ for (const [kind, source] of [
       const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json'), 'utf8'));
       assert.equal(graph.coverage, 'observed-erasure-validation-and-composite-backend-edges');
       assertPasses(graph, [
-        'psc-prepare-and-check/1',
+        'psc-source-preparation-origins/1',
+      'psc-prepare-and-check/1',
         'psc-certify-checked-core/1',
       'psc-project-public-api/1',
         'psc-erase-checked-core/1',

@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
+import { createSourcePreparationArtifacts } from './source-preparation-origins.mjs';
 import { publicApiArtifact } from './public-api-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
@@ -39,7 +40,7 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
@@ -105,15 +106,15 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...providerInputs.map(item => item.identity)];
   const assumptions = ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
     'selected-kernel-invocation'];
-  function execute(id, input, outputs, impl, relation, parameters, dependencies, extraAssumptions = [], validation) {
+  function execute(id, input, outputs, impl, relation, parameters, dependencies, extraAssumptions = [], validation, effectPolicy = {}) {
     const product = (item, index) => ({ role: 'artifact-' + index, domain: item.identity.domain, contract: item.identity.contract });
     const signature = {
       schemaVersion: 2, contract: 'psc-pass-definition/2',
       inputArtifacts: [product(input, 0)], outputArtifacts: outputs.map(product),
       effects: { supportedProfiles: [provider.profile], requiresAnalyses: [], preservesAnalyses: [], invalidatesAnalyses: ['*'],
         preservesInterfaces: [], invalidatesInterfaces: ['*'], preservesFingerprints: [], invalidatesFingerprints: ['*'],
-        originPolicy: 'drop-with-reason', originReason: 'OriginGraph is not yet produced for this projection.',
-        authorityEffect: 'requiresRevalidation', assuranceClass: 'trustedImplementation' },
+        originPolicy: 'drop-with-reason', originReason: 'OriginGraph is not yet propagated through this projection.',
+        authorityEffect: 'requiresRevalidation', assuranceClass: 'trustedImplementation', ...effectPolicy },
     };
     const definition = add(passDefinition({ passId: id, version: 1, ...signature, semanticRelationId: relation,
       resourceContractId: 'psc-compilation-resource/1', determinismClass: 'declared-inputs-with-trusted-host',
@@ -135,6 +136,19 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
       diagnostics: ['Global preservation is unproved; these records describe the executed composite edges.'], evidence: [] });
     add(record.action, { kind: 'inline' }, true); add(record, { kind: 'inline' }, true);
     executions.push(record.identity);
+  }
+  let preparationOrigins;
+  if (sourceOrigins !== undefined) {
+    const projection = createSourcePreparationArtifacts(sourceOrigins, source);
+    for (const item of projection.artifacts) add(item, { kind: 'archive-required', role: 'source-preparation-text' });
+    preparationOrigins = add(projection.map, { kind: 'output-file', suffix: '.source-origins.json' });
+    execute('psc-source-preparation-origins/1', source, [preparationOrigins], implementation,
+      'psc-source-preparation-origin-projection/1',
+      { coordinateUnit: 'utf8-byte', observedStages: ['exact-source-preparation-origin-capture'],
+        debugOnly: true, semanticPreservationProved: false },
+      [...baseDependencies, ...projection.artifacts.map(item => item.identity)], [], undefined,
+      { originPolicy: 'synthesize', authorityEffect: 'none',
+        originReason: 'Record exact copied UTF-8 ranges across import removal, newline normalization and trimming; Core/IR origins remain absent.' });
   }
   execute('psc-prepare-and-check/1', source, [core], implementation, 'psc-source-checked-admissions/1',
     { sourceKind, sourceCount: sources.length, observedStages: ['prepare', 'kernel-check'] }, baseDependencies,
@@ -318,6 +332,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
     ...(certification ? { certification } : {}),
     ...(sourceApi ? { publicApi: sourceApi } : {}),
+    ...(preparationOrigins ? { sourceOrigins: preparationOrigins } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

@@ -1,6 +1,7 @@
 import { verifyObservedContextProducts } from './observed-build-context.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
+import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
@@ -178,6 +179,12 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
       executions.push(result);
       const execution = JSON.parse(resolveArtifact(identity));
       const definition = JSON.parse(resolveArtifact(execution.passDefinitionId));
+      if (definition.passId === 'psc-source-preparation-origins/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            definition.semanticRelationId !== 'psc-source-preparation-origin-projection/1') fail('SOURCE_ORIGIN_SUBJECT');
+        await verifySourcePreparationOrigins({ identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) },
+          { expectedSourceId: execution.inputs[0], resolveArtifact, maxBytes: bound.maxArtifactBytes });
+      }
       if (definition.passId === 'psc-project-public-api/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
             execution.inputs[0].domain !== 'certified-source' || execution.inputs[0].contract !== 'psc-certified-source/1' ||

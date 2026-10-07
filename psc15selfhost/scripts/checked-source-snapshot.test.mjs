@@ -16,6 +16,10 @@ test('standalone source snapshot does not reread changed files', () => fixture(a
   assert.match(snapshot.source, /42/); assert.ok(Object.isFrozen(snapshot));
   assert.deepEqual(snapshot.sources, ['def answer : Nat := 42']);
   assert.ok(Object.isFrozen(snapshot.sources));
+  assert.ok(Object.isFrozen(snapshot.sourceOrigins));
+  assert.equal(snapshot.sourceOrigins[0].source, 'def answer : Nat := 42');
+  assert.equal(snapshot.sourceOrigins[0].preparedIndex, 0);
+  assert.deepEqual(snapshot.sourceOrigins[0].segments, [[0, 22, 0, 22]]);
   assert.notEqual(snapshot.closureSha256, (await readCheckedSourceSnapshot(entry)).closureSha256);
 }));
 test('PS dependency cannot be shadowed by Lean sibling', () => fixture(async dir => {

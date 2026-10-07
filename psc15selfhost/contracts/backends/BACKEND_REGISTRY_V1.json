@@ -59,6 +59,12 @@
         ],
         "debugArtifacts": [
           {
+            "role": "source-origins",
+            "domain": "source-origins",
+            "contract": "psc-source-preparation-origins/1",
+            "requiresToolchain": false
+          },
+          {
             "role": "source-map",
             "domain": "source-map-output",
             "contract": "typescript-emitted-file/1",
@@ -116,7 +122,14 @@
             "requiresToolchain": false
           }
         ],
-        "debugArtifacts": [],
+        "debugArtifacts": [
+          {
+            "role": "source-origins",
+            "domain": "source-origins",
+            "contract": "psc-source-preparation-origins/1",
+            "requiresToolchain": false
+          }
+        ],
         "interfaceArtifacts": [
           {
             "role": "javascript-scalar-binding",
@@ -177,7 +190,14 @@
             "requiresToolchain": false
           }
         ],
-        "debugArtifacts": [],
+        "debugArtifacts": [
+          {
+            "role": "source-origins",
+            "domain": "source-origins",
+            "contract": "psc-source-preparation-origins/1",
+            "requiresToolchain": false
+          }
+        ],
         "interfaceArtifacts": [
           {
             "role": "foreign-interface",
@@ -240,7 +260,14 @@
             "requiresToolchain": false
           }
         ],
-        "debugArtifacts": [],
+        "debugArtifacts": [
+          {
+            "role": "source-origins",
+            "domain": "source-origins",
+            "contract": "psc-source-preparation-origins/1",
+            "requiresToolchain": false
+          }
+        ],
         "interfaceArtifacts": []
       },
       "ownershipDebt": "Generic validated RuntimeIR input remains current. Rust source emission has no persistent RustIR; observed production graph and exact native toolchain closure remain pending."

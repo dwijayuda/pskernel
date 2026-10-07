@@ -70,6 +70,7 @@
       "scripts/query-context.mjs",
       "scripts/runtime-interface-artifact.mjs",
       "scripts/selfhost-source-workspace.mjs",
+      "scripts/source-preparation-origins.mjs",
       "scripts/source-read-budget.mjs",
       "scripts/specialization-correspondence.mjs",
       "scripts/target-ir-artifact.mjs",

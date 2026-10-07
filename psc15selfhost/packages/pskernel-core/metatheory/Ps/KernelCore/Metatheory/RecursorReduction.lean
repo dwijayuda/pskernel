@@ -1,3 +1,4 @@
+import Lean.Elab.Tactic.Omega
 import Ps.KernelCore.Checker.Recursor.Reduction
 import Ps.KernelCore.Metatheory.CheckerContracts
 import Ps.KernelCore.Metatheory.QuotReduction
@@ -83,6 +84,81 @@ def PsKernelRecursorStructureConversionConfigurationSound
         context.localContext
         major
         result
+
+
+theorem psKernelStructureFieldsWithFuel_refines_eta_fields
+    (fuel : Nat)
+    (inductName : PsKernelName)
+    (major : PsKernelExpr)
+    (fieldCount index : Nat)
+    (hEnough :
+      Nat.sub fieldCount index < fuel) :
+    PsKernelStructureEtaFields
+      inductName
+      major
+      index
+      fieldCount
+      (psKernelStructureFieldsWithFuel
+        fuel
+        inductName
+        major
+        fieldCount
+        index) := by
+  induction fuel generalizing index with
+  | zero =>
+      omega
+  | succ remaining ih =>
+      cases hMore :
+          psKernelNatLt index fieldCount with
+      | false =>
+          simpa [
+            psKernelStructureFieldsWithFuel,
+            hMore
+          ] using
+            (PsKernelStructureEtaFields.done
+              index
+              fieldCount
+              hMore)
+      | true =>
+          have hLt : index < fieldCount := by
+            cases hEq : Nat.beq index fieldCount with
+            | true =>
+                simp [psKernelNatLt, hEq] at hMore
+            | false =>
+                have hBle :
+                    Nat.ble index fieldCount = true := by
+                  simpa [psKernelNatLt, hEq] using hMore
+                have hLe :
+                    index ≤ fieldCount :=
+                  Nat.le_of_ble_eq_true hBle
+                have hNe : index ≠ fieldCount := by
+                  intro hEqual
+                  subst fieldCount
+                  simp at hEq
+                exact Nat.lt_of_le_of_ne hLe hNe
+          have hEnoughRest :
+              Nat.sub fieldCount (Nat.succ index) <
+                remaining := by
+            omega
+          have hRest :=
+            ih
+              (Nat.succ index)
+              hEnoughRest
+          simpa [
+            psKernelStructureFieldsWithFuel,
+            hMore
+          ] using
+            (PsKernelStructureEtaFields.step
+              index
+              fieldCount
+              (psKernelStructureFieldsWithFuel
+                remaining
+                inductName
+                major
+                fieldCount
+                (Nat.succ index))
+              hMore
+              hRest)
 
 
 def PsKernelRecursorPreparedMajor

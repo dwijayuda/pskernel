@@ -243,6 +243,48 @@
       "kind": "evidence-envelope",
       "status": "current-host",
       "canonicalPath": "contracts/archive/EVIDENCE_ENVELOPE_V1.json"
+    },
+    {
+      "id": "psc-js-scalar-abi-plan/1",
+      "kind": "target-adapter",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/JS_SCALAR_ABI_V1.json"
+    },
+    {
+      "id": "psc-certified-module-interface/1",
+      "kind": "module-interface-evidence",
+      "status": "current-host",
+      "canonicalPath": "scripts/module-interface-evidence.mjs"
+    },
+    {
+      "id": "psc-exact-behavioral-interface-reuse/1",
+      "kind": "semantic-reuse-validator",
+      "status": "current-host",
+      "canonicalPath": "scripts/module-interface-evidence.mjs"
+    },
+    {
+      "id": "psc-semantic-reuse-candidate/1",
+      "kind": "semantic-cache-boundary",
+      "status": "current-host",
+      "canonicalPath": "scripts/semantic-query-cache.mjs"
+    },
+    {
+      "id": "psc-savef-retrieval-session/1",
+      "kind": "knowledge-retrieval-boundary",
+      "status": "current-host",
+      "canonicalPath": "scripts/savef-retrieval-session.mjs"
+    },
+    {
+      "id": "psc-diverse-bootstrap-campaign/1",
+      "kind": "bootstrap-campaign",
+      "status": "current-host",
+      "canonicalPath": "scripts/diverse-bootstrap.mjs"
+    },
+    {
+      "id": "psc-js-ir-validator/1",
+      "kind": "target-ir-validator",
+      "status": "current",
+      "canonicalPath": "packages/backend-js/src/Ps/BackendJs/Validate.lean"
     }
   ]
 }

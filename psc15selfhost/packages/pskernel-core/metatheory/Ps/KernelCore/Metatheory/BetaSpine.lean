@@ -1965,7 +1965,7 @@ theorem psKernelExprLiftSucc_then_instantiateReference_lower
 
 
 /-
-Independent semantic relation for the lambda-prefix counter used by WHNF.
+Independent semantic relation for the lambda-priorArgs counter used by WHNF.
 
 The executable counter carries fuel only for portability.  The Assurance Plane
 records the observable counting decision as an inductive relation, so semantic
@@ -3027,21 +3027,21 @@ theorem psKernelExprInstantiateRev_lam
     (name : PsKernelName)
     (type body : PsKernelExpr)
     (binderInfo : PsKernelBinderInfo)
-    (prefix : List PsKernelExpr) :
+    (priorArgs : List PsKernelExpr) :
     psKernelExprInstantiateRev
         (PsKernelExpr.lam name type body binderInfo)
-        prefix =
+        priorArgs =
       PsKernelExpr.lam
         name
         (psKernelExprInstantiateAt
           type
           0
-          (psKernelExprListReverse prefix)
+          (psKernelExprListReverse priorArgs)
           0)
         (psKernelExprInstantiateAt
           body
           0
-          (psKernelExprListReverse prefix)
+          (psKernelExprListReverse priorArgs)
           1)
         binderInfo := by
   unfold psKernelExprInstantiateRev
@@ -3077,25 +3077,25 @@ theorem psKernelExprInstantiate1_eq_instantiateAt_singleton
 
 theorem psKernelExprInstantiateRev_append_singleton_beta
     (body arg : PsKernelExpr)
-    (prefix : List PsKernelExpr) :
+    (priorArgs : List PsKernelExpr) :
     psKernelExprInstantiate1
         (psKernelExprInstantiateAt
           body
           0
-          (psKernelExprListReverse prefix)
+          (psKernelExprListReverse priorArgs)
           1)
         arg =
       psKernelExprInstantiateRev
         body
         (List.append
-          prefix
+          priorArgs
           (List.cons arg List.nil)) := by
   rw [psKernelExprInstantiate1_eq_instantiateAt_singleton]
   have hFuse :=
     psKernelExprInstantiateAt_fuse_singleton
       body
       arg
-      (psKernelExprListReverse prefix)
+      (psKernelExprListReverse priorArgs)
       0
   simp only [Nat.succ_zero] at hFuse
   rw [hFuse]
@@ -3109,7 +3109,7 @@ theorem psKernelBetaPrefixStep
     (name : PsKernelName)
     (type body : PsKernelExpr)
     (binderInfo : PsKernelBinderInfo)
-    (prefix : List PsKernelExpr)
+    (priorArgs : List PsKernelExpr)
     (arg : PsKernelExpr)
     (rest : List PsKernelExpr) :
     PsKernelReductionClosure
@@ -3119,32 +3119,32 @@ theorem psKernelBetaPrefixStep
         (psKernelExprInstantiateRev
           (PsKernelExpr.lam
             name type body binderInfo)
-          prefix)
+          priorArgs)
         (List.cons arg rest))
       (psKernelExprApplyArgsCheap
         (psKernelExprInstantiateRev
           body
           (List.append
-            prefix
+            priorArgs
             (List.cons arg List.nil)))
         rest) := by
   let instantiatedType :=
     psKernelExprInstantiateAt
       type
       0
-      (psKernelExprListReverse prefix)
+      (psKernelExprListReverse priorArgs)
       0
   let instantiatedBody :=
     psKernelExprInstantiateAt
       body
       0
-      (psKernelExprListReverse prefix)
+      (psKernelExprListReverse priorArgs)
       1
   have hLam :
       psKernelExprInstantiateRev
           (PsKernelExpr.lam
             name type body binderInfo)
-          prefix =
+          priorArgs =
         PsKernelExpr.lam
           name
           instantiatedType
@@ -3155,7 +3155,7 @@ theorem psKernelBetaPrefixStep
       instantiatedBody
     ] using
       psKernelExprInstantiateRev_lam
-        name type body binderInfo prefix
+        name type body binderInfo priorArgs
   have hResult :
       psKernelExprInstantiate1
           instantiatedBody
@@ -3163,11 +3163,11 @@ theorem psKernelBetaPrefixStep
         psKernelExprInstantiateRev
           body
           (List.append
-            prefix
+            priorArgs
             (List.cons arg List.nil)) := by
     simpa [instantiatedBody] using
       psKernelExprInstantiateRev_append_singleton_beta
-        body arg prefix
+        body arg priorArgs
   have hStep :
       PsKernelReductionStep
         context.environment

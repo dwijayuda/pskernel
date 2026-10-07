@@ -43,6 +43,28 @@ theorem psKernelNatLt_false_of_le
       simp [psKernelNatLt, hEq, hBle]
 
 
+theorem psKernelNatLt_lt_of_true
+    (left right : Nat)
+    (hTrue :
+      psKernelNatLt left right = true) :
+    left < right := by
+  cases hEq : Nat.beq left right with
+  | true =>
+      simp [psKernelNatLt, hEq] at hTrue
+  | false =>
+      have hBle :
+          Nat.ble left right = true := by
+        simpa [psKernelNatLt, hEq] using hTrue
+      have hLe :
+          left ≤ right :=
+        Nat.le_of_ble_eq_true hBle
+      have hNe : left ≠ right := by
+        intro hEqual
+        subst right
+        simp at hEq
+      exact Nat.lt_of_le_of_ne hLe hNe
+
+
 /-
 Metatheory for WHNF's optimized multi-lambda beta spine.
 

@@ -4,9 +4,9 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `60138932a8b7671c6db9c0c0e1f689a05445f938`
-- Last green package proof checkpoint: `5433913920539cb4e1a6f651bf756aedfcceb151` (run #380).
-- `WhnfCoreConfiguration.lean` is newly registered at `8fb37a95...`; run #381 on `60138932...` is the first gate that compiles the composed WHNF-core fuel induction.
+- Current proof implementation HEAD reconciled in this state: `786f99bf5a4bbd5496d4de4c35bd0d06c0ea9e21`
+- Last green package proof checkpoint: `60138932a8b7671c6db9c0c0e1f689a05445f938` (run #381).
+- Run #381 is green: the registered `WhnfCoreConfiguration.lean` fuel induction and its public `false/false` specialization compile on the full package proof gate.
 - Run #328 validated the eager-reduce context transport fix.
 - The checked-inference fuel proof now closes projection recursion through the smaller-fuel induction hypothesis and configuration-aware projection semantics.
 - Checked projection is fully registered and green as of run #346.
@@ -81,9 +81,9 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- validate run #381 for the newly registered `WhnfCoreConfiguration.lean` fuel-induction root;
-- if #381 is green, proceed directly to public WHNF composition: post-core native/Nat/delta semantics, cache publication, and the public fuel theorem;
-- native reduction must remain an explicit `PsKernelNativeReductionSoundLaw` TCB assumption; primitive Nat reduction must be discharged through the ordinary optional-reduction configuration contract;
+- close the public WHNF post-core composition now that WHNF-core is green;
+- first complete a reusable `psKernelReduceNatWith` optional-reduction configuration theorem, including the currently unmodeled Pow/GCD/bitwise/shift result forms, so public WHNF does not hide primitive Nat behavior behind an assumption;
+- compose core reduction + explicit `PsKernelNativeReductionSoundLaw` TCB + Nat optional reduction + delta unfolding + `psKernelWhnfFinish` cache publication into the public WHNF fuel theorem;
 - after public WHNF, continue to concrete DefEq, checker-knot composition, admission refinement, final implementation refinement, and integration reconciliation.
 
 Architectural blockers still remaining:
@@ -95,8 +95,8 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Validate the registered `WhnfCoreConfiguration` composition root (run #381) and fix only exact fuel-induction obligations if any.
-2. Lift to public WHNF including native/Nat/delta post-core semantics and cache publication.
+1. Prove complete `psKernelReduceNatWith` optional-reduction configuration soundness, adding independent reduction constructors/lemmas for the remaining primitive Nat operations as needed.
+2. Lift the green WHNF-core theorem to public WHNF including native/Nat/delta post-core semantics and cache publication.
 3. Prove concrete DefEq configuration/stateful soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
 4. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
 5. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.

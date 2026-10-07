@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-wasm-canonical-scalar-exports/1",
+  "status": "implemented-focused-cloud-validation-pending",
+  "source": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
+  "input": "PsSpecializedIrModule, freshly strictly revalidated; no external imports",
+  "selection": "Explicit source declaration / foreign function names, 1..1024 exports; foreign names and uniqueness validated by InterfaceIR; parameter labels are positional arg0..arg15.",
+  "supported": "Synchronous bool/char, fixed-width signed/unsigned integers, f32/f64, usize/isize resolved from the actual target word profile; zero-result Unit returns.",
+  "rejected": "Unit parameters; Nat/Int/String/aggregate/function/unknown/generic values at the export boundary; polymorphic selected declarations; more than 16 arguments; imports, resources, async.",
+  "output": {
+    "binary": "Actual lowered Wasm with only selected foreign export names",
+    "interfaceJson": "psc-interface-ir-json/1 derived from actual source declarations",
+    "bindingJson": "Contract, runtime semantics, wordBits, interfaceName, and functionName/coreExport/sourceName bindings"
+  },
+  "invariants": [
+    "No source signature supplied by the host substitutes for actual revalidated IR declarations.",
+    "Source parameter order and primitive semantics are retained; source parameter spelling is not assumed to be a legal WIT name.",
+    "The independent Canonical ABI planner determines expected core signatures; the actual target functions reached by exports are checked against those signatures.",
+    "Structural and operand/control WasmIR validation runs on the exact module subsequently encoded.",
+    "Only explicitly selected exports are externally visible; internal GC/runtime helpers retain their private representation.",
+    "The scalar profile uses no linear memory; wordBits describes source machine words and does not imply memory64.",
+    "Unit results already lower to zero core results. Unsupported representations require future conversion wrappers, never silent reinterpretation.",
+    "Artifacts are data, not CheckedCore/CertifiedSource authority or a preservation theorem."
+  ],
+  "hostConsumer": "scripts/canonical-exports.mjs with consumer-pinned exact interface/binary identities and bindings projected to functionName/coreExport.",
+  "validation": {
+    "native": "test/WasmCanonicalExportsTests.lean",
+    "actualBinary": "scripts/wasm-canonical-exports.test.mjs",
+    "portable": "PSC1-portable-selfhost/1 structural audit and explicit PSC1 source check in check:foreign-interface"
+  },
+  "remaining": [
+    "Production checked-driver, PassExecution/EvidenceEnvelope and archive/offline binding of source/interface/selection/binary identities",
+    "Aggregate/string/large-argument conversion wrappers",
+    "Core/Component imports and resource/async lifetimes",
+    "Global source/backend/adapter preservation proof or independently validated relation"
+  ]
+}

@@ -173,6 +173,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.ValidateTyping,
     `Ps.BackendWasm.ValidateIr,
     `Ps.BackendWasm.LiteralEvidence,
+    `Ps.BackendWasm.CanonicalExports,
     `Ps.BackendWasm.SelfHostAbi
   ]
 
@@ -571,3 +572,7 @@ lean_exe pscv_ir_replay where
 lean_exe pscv_canonical_abi_tests where
   srcDir := "test"
   root := `CanonicalAbiTests
+
+lean_exe pscv_wasm_canonical_exports_tests where
+  srcDir := "test"
+  root := `WasmCanonicalExportsTests

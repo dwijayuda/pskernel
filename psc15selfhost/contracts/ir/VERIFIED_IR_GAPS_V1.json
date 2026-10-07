@@ -55,8 +55,8 @@
       "typescriptToJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
       "directJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
       "rust": "external imports fail closed with externalImportUnsupported; native adapter implementation remains pending",
-      "coreWasm": "external imports fail closed with unsupportedModuleFeature; Component Model adapter is separate and remains pending",
-      "componentModel": "Portable InterfaceIR/WIT, synchronous layout/signature planning, memory/core-value codecs and signature-checked closed-core export binding with selected post-return exist. Imports/callbacks, resource/async lifetimes, component binaries, production EvidenceEnvelope integration and global preservation remain pending."
+      "coreWasm": "External imports fail closed with unsupportedModuleFeature. An explicit scalar export path derives InterfaceIR from revalidated SpecializedIR, checks actual target signatures, validates WasmIR and emits selected closed exports; production evidence integration and aggregate conversion remain pending.",
+      "componentModel": "Portable InterfaceIR/WIT, synchronous layout/signature planning, memory/core-value codecs, signature-checked closed-core export binding, and compiler-selected scalar exports exist. Imports/callbacks, resource/async lifetimes, component binaries, production EvidenceEnvelope integration and global preservation remain pending."
     }
   },
   "policy": {

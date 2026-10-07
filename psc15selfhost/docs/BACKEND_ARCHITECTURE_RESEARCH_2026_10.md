@@ -109,3 +109,29 @@ Canonical value/type planning is now separate from attaching memory and realloc.
 Results are lifted and copied before selected post-return code can overwrite/free their memory. A trap during lowering, the callee, lifting or post-return poisons the adapter, so later calls reject. Arity errors before lowering do not enter the lifecycle. This is an explicit closed synchronous profile: it does not implement general component imports, callbacks/reentry, resource ownership, asynchronous tasks or cancellation. Caller execution policy still owns compilation, instantiation and guest cost containment, and the module's behavioral/allocator contract remains an assumption.
 
 The profile is a runtime adapter boundary, not a claim that PSC's current private GC exports are Canonical ABI exports. Compiler lowering, component binary generation and production artifact/EvidenceEnvelope integration must explicitly select and bind this contract before those targets can be promoted.
+
+### Compiler-selected scalar Wasm exports (2026-10-08)
+
+The closed Canonical ABI host binder now has a portable compiler producer.
+`Ps.BackendWasm.CanonicalExports` derives InterfaceIR from actual freshly
+validated post-specialization declarations, checks the lowered functions
+against the independent Canonical ABI planner, validates the resulting
+WasmIR, and encodes that same module. An explicit source/foreign-name
+selection controls the entire visible export surface. Internal string/GC
+helpers remain private and can still serve the selected functions.
+
+The source machine-word profile determines `usize/isize` as u32/s32 or
+u64/s64. This scalar-only interface needs no memory; it does not couple source
+word size to Canonical ABI address width. Fixed-width integers and floats,
+Bool and Char retain their declared scalar semantics. Unit results already
+lower to zero core results. Unit parameters, generic or GC boundary values,
+and more than sixteen parameters reject until actual conversion wrappers
+exist. Parameter names become deterministic positional labels, since source
+identifier syntax is not the WIT naming grammar.
+
+The binding artifact records source names and exported aliases. It does not
+mint source authority or prove preservation. Production checked-driver,
+PassExecution/EvidenceEnvelope, archive and independent replay integration
+must bind the selection, actual IR, interface and exact binary before this
+profile can be promoted. See
+`contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json`.

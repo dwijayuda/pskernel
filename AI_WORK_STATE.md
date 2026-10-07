@@ -4,8 +4,9 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `dc6ab92367b6b2aaabddad6b76a54f83020647dd`
+- Current proof implementation HEAD reconciled in this state: `ac0566b5837cc6f60d7bf074f527a618b90d1ea3`
 - Last green package proof checkpoint: `dc6ab92367b6b2aaabddad6b76a54f83020647dd` (run #396).
+- Current beta-spine proof HEAD: `ac0566b5...`; run #406 is validating a structural reduction of the capture-cancellation proof after runs #401-#405 exposed proof-algebra/normalization issues only.
 - Run #381 is green: the registered `WhnfCoreConfiguration.lean` fuel induction and its public `false/false` specialization compile on the full package proof gate.
 - Run #396 is green: complete primitive-Nat refinement, `psKernelReduceNatWith` optional-reduction soundness, post-core native/Nat/delta/cache composition, and `psKernelWhnfWithFuel_configuration_sound_contract` all compile as registered metatheory.
 - Run #328 validated the eager-reduce context transport fix.
@@ -84,8 +85,9 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- instantiate the green public-WHNF theorem in the concrete mutually recursive checker knot;
-- discharge `PsKernelBetaSpineSoundLaw` as a real proof obligation (not a TCB assumption);
+- discharge `PsKernelBetaSpineSoundLaw` as a real proof obligation (not a TCB assumption); the current work is isolating substitution/capture-cancellation algebra in `Metatheory/BetaSpine.lean`;
+- run #397 proved the initial reference substitution algebra base green; runs #398-#405 exposed only proof-normalization/invariant gaps, not a production semantic defect; run #406 validates the latest structural cancellation reduction;
+- once beta-spine is green, instantiate the green public-WHNF theorem in the concrete mutually recursive checker knot;
 - prove `PsKernelRecursorReductionConfigurationSound` for the bounded concrete recursor together with concrete DefEq/inference dependencies by a shared fuel/configuration argument;
 - then close concrete DefEq stateful soundness and compose public checked/infer-only/WHNF/DefEq contracts through `Checker/Knot`.
 

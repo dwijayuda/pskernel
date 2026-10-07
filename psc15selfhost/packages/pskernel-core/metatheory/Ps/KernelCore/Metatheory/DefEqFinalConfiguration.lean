@@ -615,6 +615,232 @@ theorem psKernelDefEqEtaStructCoreWith_configuration_preserves
       rcases hSuccess with ⟨rfl, rfl⟩
       exact hConfig
 
+
+theorem psKernelDefEqEtaStructCoreWith_true_refines
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (term structureValue : PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqEtaStructCoreWith
+          defeq inferType context state term structureValue =
+        Except.ok (Prod.mk true nextState)) :
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      term
+      structureValue := by
+  simp only [psKernelDefEqEtaStructCoreWith] at hSuccess
+  cases hFn : psKernelExprGetAppFn structureValue with
+  | const ctorName levels =>
+      simp only [hFn] at hSuccess
+      cases hFind :
+          psKernelEnvironmentFind
+            context.environment
+            ctorName with
+      | none =>
+          simp only [hFind] at hSuccess
+          simp at hSuccess
+      | some info =>
+          simp only [hFind] at hSuccess
+          cases info with
+          | ctorInfo ctor =>
+              simp only at hSuccess
+              by_cases hArity :
+                  Nat.beq
+                      (psKernelExprListLength
+                        (psKernelExprGetAppArgs structureValue))
+                      (Nat.add ctor.numParams ctor.numFields) =
+                    true
+              · rw [if_pos hArity] at hSuccess
+                by_cases hStructure :
+                    psKernelEnvironmentIsNonRecStructure
+                        context.environment
+                        ctor.induct =
+                      true
+                · rw [if_pos hStructure] at hSuccess
+                  cases hTerm :
+                      inferType context state term with
+                  | error error =>
+                      simp only [hTerm] at hSuccess
+                      simp at hSuccess
+                  | ok termRun =>
+                      simp only [hTerm] at hSuccess
+                      rcases termRun with ⟨termType, termState⟩
+                      have hTermConfig :=
+                        hInfer
+                          context
+                          state
+                          termState
+                          term
+                          termType
+                          hConfig
+                          hTerm
+                      cases hStructType :
+                          inferType
+                            context
+                            termState
+                            structureValue with
+                      | error error =>
+                          simp only [hStructType] at hSuccess
+                          simp at hSuccess
+                      | ok structRun =>
+                          simp only [hStructType] at hSuccess
+                          rcases structRun with
+                            ⟨structureType, structureState⟩
+                          have hStructureConfig :=
+                            hInfer
+                              context
+                              termState
+                              structureState
+                              structureValue
+                              structureType
+                              hTermConfig
+                              hStructType
+                          cases hTypes :
+                              defeq
+                                context
+                                structureState
+                                termType
+                                structureType with
+                          | error error =>
+                              simp only [hTypes] at hSuccess
+                              simp at hSuccess
+                          | ok typeRun =>
+                              simp only [hTypes] at hSuccess
+                              rcases typeRun with
+                                ⟨typesEqual, typeState⟩
+                              have hTypeSemantic :=
+                                hDefEq
+                                  context
+                                  structureState
+                                  typeState
+                                  termType
+                                  structureType
+                                  typesEqual
+                                  hStructureConfig
+                                  hTypes
+                              by_cases hTypesEqual :
+                                  typesEqual = true
+                              · rw [if_pos hTypesEqual] at hSuccess
+                                have hFields :=
+                                  psKernelDefEqEtaStructFieldsWithFuel_true_refines
+                                    (Nat.succ ctor.numFields)
+                                    defeq
+                                    hDefEq
+                                    context
+                                    typeState
+                                    nextState
+                                    ctor.induct
+                                    term
+                                    (psKernelExprGetAppArgs structureValue)
+                                    ctor.numParams
+                                    0
+                                    hTypeSemantic.1
+                                    hSuccess
+                                have hCtor :
+                                    psKernelFindConstantInList
+                                        ctorName
+                                        context.environment.constants =
+                                      Option.some
+                                        (PsKernelConstantInfo.ctorInfo ctor) := by
+                                  unfold psKernelEnvironmentFind at hFind
+                                  calc
+                                    psKernelFindConstantInList
+                                        ctorName
+                                        context.environment.constants =
+                                      psKernelFindConstantInList
+                                        ctorName
+                                        (psKernelEnvironmentIndexFind
+                                          context.environment.index
+                                          ctorName) :=
+                                      (hConfig.1 ctorName).symm
+                                    _ =
+                                        Option.some
+                                          (PsKernelConstantInfo.ctorInfo ctor) :=
+                                      hFind
+                                exact
+                                  PsKernelDefEqJudgment.structureEtaAlgorithmic
+                                    term
+                                    structureValue
+                                    termType
+                                    structureType
+                                    ctorName
+                                    levels
+                                    ctor
+                                    hFn
+                                    hCtor
+                                    hArity
+                                    hStructure
+                                    (hTypeSemantic.2 hTypesEqual)
+                                    hFields
+                              · rw [if_neg hTypesEqual] at hSuccess
+                                simp at hSuccess
+                · rw [if_neg hStructure] at hSuccess
+                  simp at hSuccess
+              · rw [if_neg hArity] at hSuccess
+                simp at hSuccess
+          | axiomInfo infoValue =>
+              simp at hSuccess
+          | defnInfo infoValue =>
+              simp at hSuccess
+          | thmInfo infoValue =>
+              simp at hSuccess
+          | opaqueInfo infoValue =>
+              simp at hSuccess
+          | inductInfo infoValue =>
+              simp at hSuccess
+          | recInfo infoValue =>
+              simp at hSuccess
+          | quotInfo infoValue =>
+              simp at hSuccess
+  | bvar index =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | fvar name =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | mvar name =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | sort level =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | app fn arg =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | lam name type body binderInfo =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | forallE name type body binderInfo =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | letE name type value body nondep =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | lit literal =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | mdata metadata body =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+  | proj typeName index body =>
+      simp only [hFn] at hSuccess
+      simp at hSuccess
+
 theorem psKernelDefEqEtaStructWith_configuration_preserves
     (defeq :
       PsKernelCheckerContext ->

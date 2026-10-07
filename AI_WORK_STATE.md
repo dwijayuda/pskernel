@@ -1,5 +1,51 @@
 # AI Work State
 
+## Arena large-corpus performance checkpoint — 2026-10-08
+
+- Current Arena implementation checkpoint before this state write: `8286d80fc010c90e556bc39a7920b8b0ee2a96f5`.
+- The previously reported full Init/Std `error` results are now classified:
+  they are **upstream Arena wall-clock timeouts**, not checker semantic rejection.
+  Init is killed at 500s; Std is killed at 590s, both with exit -9.
+- Bounded legacy PSC1 diagnostic replay (`1c534de...`) now allows canonical
+  `_results` JSON to surface promptly after the checker returns/times out.
+- Arena unlimited-declaration admission bypasses only public receipt/environment-size
+  scans while retaining KernelContract preflight and canonical declaration dispatch
+  (`2f8f9dff...`); focused differential coverage is green.
+- Direct PSKernel-native lean4export interning was added in
+  `Ps.Host.KernelCoreArena.CoreIntern` and wired into Arena replay
+  (`bbde63ed...`, `fbc2d2d5...`, `8286d80f...`). This preserves the export
+  DAG instead of recursively rebuilding PSC1 expressions at declaration lookup.
+- Correctness after direct interning:
+  - Tutorial: **141/141 correct**.
+  - Historical corpus: **17 correct + 1 conservative decline** (`rec-missing-ih`).
+  - Readiness/foundation and pinned Init.Prelude replay: green.
+  - Init.Prelude: 70,484 records / 2,038 declarations / 2,324 constants,
+    ~0.65s wall, ~79.7 MB peak RSS in the direct-intern readiness run.
+- Direct interning did **not** remove the full-corpus bottleneck:
+  - Init at 500s reached progress markers through 399,999 records / 4,176 declarations.
+  - Std at 590s reached exactly 999,999 records / 6,997 declarations, the same
+    million-record frontier observed before direct interning.
+  - All reported name/level/expr intern tables are fully dense
+    (`count == dense.size`), ruling out sparse IndexTable lookup as the cause.
+- Therefore the dominant remaining bottleneck is inside canonical checker work,
+  not lean4export index transport or a hidden semantic reject. Current leading
+  candidate is repeated whole-expression cache eligibility + structural hashing:
+  cache lookup and publication can each rescan fvar eligibility and then hash the
+  same expression. This must be optimized without weakening the fvar-scope cache
+  invariant.
+- No new confirmed production semantic defect has been found. Do **not** notify
+  the metatheory lane of a new semantic rule at this checkpoint.
+
+Immediate Arena plan:
+1. Establish short native/cache and corpus-prefix performance baselines.
+2. Remove redundant archived PSC1 transport state from the canonical Arena adapter
+   after direct-core interning (legacy checker remains a separate diagnostic executable).
+3. Optimize repeated cache eligibility/hash computation in the canonical checker
+   using reusable/prehashed metadata while preserving identical cache eligibility.
+4. Rerun foundation/readiness/Tutorial/soundness after every core acceleration change.
+5. Re-run full Init and Std until both accept within upstream Arena time limits.
+6. Only then start full streamed Mathlib and classify any Mathlib discrepancies.
+
 ## Arena operational continuation — canonical corpus result visibility
 - **External execution blocker:** the available GitHub connector can read/write repository contents and inspect/rerun existing Actions jobs, but exposes no workflow-dispatch operation. The canonical-only workflow has no historical runs to rerun. A user must start `PSKernel Core Arena corpus` once with branch `pscv/pskernel-core-arena-v1`, `test=init`, `timeout_minutes=180`. That workflow uploads `arena/_results`, including exact stderr. After Init is classified/fixed/green, repeat with `test=std`; only after both are green run `test=mathlib` (use at least 180 minutes). This is an execution-control blocker, not a semantic blocker and not evidence of a new PSKernel bug.
 - Full Init/Std run #36 completed by timeout/cancellation. Canonical PSKernel returned before the timeout but Arena classified both results as `error` (not `rejected` or `declined`): Init ~8.3 min, Std ~9.8 min. The subsequent legacy replay consumed the remainder of the 90-minute jobs and was cancelled. No workflow artifacts were uploaded, so exact canonical stderr from `_results` is not recoverable from run #36.

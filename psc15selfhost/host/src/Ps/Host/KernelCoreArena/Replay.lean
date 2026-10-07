@@ -145,7 +145,7 @@ def orderDefinitions
     | name :: rest => do
         let some value := definitionMember? name defs
           | throw (.rejected "incomplete exported mutual definition group")
-        let tail <- go rest
+        let tail ← go rest
         pure (value :: tail)
   go all
 
@@ -164,7 +164,7 @@ structure State where
   pendingMutual : List PendingMutual
 
 def State.empty : Except Failure State := do
-  let session <- liftKernel (psKernelKernelSessionEmpty arenaResources psKernelProviderDefault)
+  let session ← liftKernel (psKernelKernelSessionEmpty arenaResources psKernelProviderDefault)
   pure {
     transport := PSC1Kernel.Replay.State.empty
     session := session
@@ -184,30 +184,30 @@ def State.exprAt (state : State) (index : Nat) : Except Failure PsKernelExpr := 
 def State.resolveNames (state : State) : List Nat -> Except Failure (List PsKernelName)
   | [] => pure []
   | index :: rest => do
-      let name <- state.nameAt index
-      let tail <- state.resolveNames rest
+      let name ← state.nameAt index
+      let tail ← state.resolveNames rest
       pure (name :: tail)
 
 def State.admitRequest
     (state : State)
     (request : PsKernelDeclarationRequest) : Except Failure State := do
-  let result <- liftKernel (psKernelV1AdmitDeclaration state.session request)
+  let result ← liftKernel (psKernelV1AdmitDeclaration state.session request)
   pure { state with session := result.session }
 
 def State.addDefinitionRecord
     (state : State)
     (record : PSC1Kernel.Replay.DefinitionRecord) : Except Failure State := do
-  let name <- state.nameAt record.name
-  let levelParams <- state.resolveNames record.levelParams
-  let type <- state.exprAt record.type
-  let value <- state.exprAt record.value
+  let name ← state.nameAt record.name
+  let levelParams ← state.resolveNames record.levelParams
+  let type ← state.exprAt record.type
+  let value ← state.exprAt record.value
   let info : PsKernelDefinitionInfo := {
     base := { name := name, levelParams := levelParams, type := type }
     value := value
     hints := coreHints record.hints
     safety := coreSafety record.safety
   }
-  let all <-
+  let all ←
     if record.all.isEmpty then pure [name]
     else state.resolveNames record.all
   let selfRef :=
@@ -226,8 +226,8 @@ def State.addDefinitionRecord
     let group := { previous with defs := previous.defs ++ [info] }
     let pending := removePending all state.pendingMutual ++ [group]
     if group.defs.length == all.length then
-      let ordered <- orderDefinitions all group.defs
-      let next <- { state with pendingMutual := removePending all pending }.admitRequest
+      let ordered ← orderDefinitions all group.defs
+      let next ← { state with pendingMutual := removePending all pending }.admitRequest
         (.mutualDefinitions ordered)
       pure next
     else
@@ -239,9 +239,9 @@ def State.resolveConstructors
       Except Failure (List PsKernelSimpleConstructorDecl)
   | [] => pure []
   | ctor :: rest => do
-      let name <- state.nameAt ctor.name
-      let type <- state.exprAt ctor.type
-      let tail <- state.resolveConstructors rest
+      let name ← state.nameAt ctor.name
+      let type ← state.exprAt ctor.type
+      let tail ← state.resolveConstructors rest
       pure ({ name := name, type := type } :: tail)
 
 def State.resolveMutualTypes
@@ -250,10 +250,10 @@ def State.resolveMutualTypes
       Except Failure (List PsKernelSimpleMutualTypeDecl)
   | [] => pure []
   | typeRecord :: rest => do
-      let name <- state.nameAt typeRecord.name
-      let type <- state.exprAt typeRecord.type
-      let ctors <- state.resolveConstructors typeRecord.ctors
-      let tail <- state.resolveMutualTypes rest
+      let name ← state.nameAt typeRecord.name
+      let type ← state.exprAt typeRecord.type
+      let ctors ← state.resolveConstructors typeRecord.ctors
+      let tail ← state.resolveMutualTypes rest
       pure ({ name := name, type := type, ctors := ctors } :: tail)
 
 def State.addInductiveRecord
@@ -261,8 +261,8 @@ def State.addInductiveRecord
     (record : PSC1Kernel.Replay.InductiveRecord) : Except Failure State := do
   if record.types.isEmpty then
     throw (.rejected "empty exported inductive group")
-  let levelParams <- state.resolveNames record.levelParams
-  let types <- state.resolveMutualTypes record.types
+  let levelParams ← state.resolveNames record.levelParams
+  let types ← state.resolveMutualTypes record.types
   if record.numNested > 0 then
     state.admitRequest (.nestedInductive {
       levelParams := levelParams
@@ -292,12 +292,12 @@ def State.addInductiveRecord
 def State.validateQuotRecord
     (state : State)
     (record : PSC1Kernel.Replay.QuotRecord) : Except Failure State := do
-  let prepared <-
+  let prepared ←
     if state.session.environment.quotInitialized then pure state
     else state.admitRequest .quot
-  let name <- prepared.nameAt record.name
-  let expectedLevels <- prepared.resolveNames record.levelParams
-  let expectedType <- prepared.exprAt record.type
+  let name ← prepared.nameAt record.name
+  let expectedLevels ← prepared.resolveNames record.levelParams
+  let expectedType ← prepared.exprAt record.type
   let some (.quotInfo got) := psKernelEnvironmentFind prepared.session.environment name
     | throw (.rejected "exported Quot primitive is missing")
   unless nameListEq got.base.levelParams expectedLevels do
@@ -383,23 +383,23 @@ def State.replayRecord
   | .nameR value => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
-      let transport <- liftTransport (state.transport.addNameRecord value)
+      let transport ← liftTransport (state.transport.addNameRecord value)
       pure { state with transport := transport, records := state.records + 1 }
   | .levelR value => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
-      let transport <- liftTransport (state.transport.addLevelRecord value)
+      let transport ← liftTransport (state.transport.addLevelRecord value)
       pure { state with transport := transport, records := state.records + 1 }
   | .exprR value => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
-      let transport <- liftTransport (state.transport.addExprRecord value)
+      let transport ← liftTransport (state.transport.addExprRecord value)
       pure { state with transport := transport, records := state.records + 1 }
   | .axiomR _ | .definitionR _ | .theoremR _ | .opaqueR _ |
       .quotR _ | .inductiveR _ => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
-      let next <- state.addDeclaration record
+      let next ← state.addDeclaration record
       pure {
         next with
         records := state.records + 1
@@ -412,7 +412,7 @@ def State.replayLine
   if raw.trim.isEmpty then
     pure state
   else
-    let record <- liftTransport (PSC1Kernel.ReplayJson.decodeLine raw)
+    let record ← liftTransport (PSC1Kernel.ReplayJson.decodeLine raw)
     state.replayRecord record
 
 structure Stats where

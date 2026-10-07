@@ -70,8 +70,9 @@ theorem psKernelReductionClosure_contextWeaken
       expr fnName mkName levels mkLevels args mkArgs
       major majorReduced representative fnValue
       hInitialized hHead hLift hArgs hMajor
-      hMajorReduction ihMajor
-      hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue =>
+      hMajorReduction
+      hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue
+      ihMajor =>
       exact
         PsKernelReductionClosure.quotLift
           expr fnName mkName levels mkLevels args mkArgs
@@ -83,8 +84,9 @@ theorem psKernelReductionClosure_contextWeaken
       expr fnName mkName levels mkLevels args mkArgs
       major majorReduced representative fnValue
       hInitialized hHead hInd hArgs hMajor
-      hMajorReduction ihMajor
-      hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue =>
+      hMajorReduction
+      hMkHead hMk hMkArity hMkArgs hRepresentative hFnValue
+      ihMajor =>
       exact
         PsKernelReductionClosure.quotInd
           expr fnName mkName levels mkLevels args mkArgs
@@ -96,8 +98,9 @@ theorem psKernelReductionClosure_contextWeaken
       expr recName ctorName recLevels ctorLevels recArgs majorArgs
       recursor rule major0 majorReduced major
       hHead hArgs hFind hMajor
-      hMajorReduction ihMajor
-      hNormalize hCtorHead hMajorArgs hRule hFields hLevels =>
+      hMajorReduction
+      hNormalize hCtorHead hMajorArgs hRule hFields hLevels
+      ihMajor =>
       exact
         PsKernelReductionClosure.recursorIota
           expr recName ctorName recLevels ctorLevels recArgs majorArgs

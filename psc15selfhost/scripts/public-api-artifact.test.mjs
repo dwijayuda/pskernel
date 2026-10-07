@@ -10,7 +10,7 @@ const sort = { k: 'sort', l: { k: 's', o: { k: 'z' } } };
 const generic = forall('A', sort, forall('value', variable(0), variable(1)));
 const declaration = ['constant', 'definition', name('forward'), [], generic];
 const root = entries => ['psc-public-api-ir/1', 'all-prepared-declarations', entries];
-const bytes = entries => JSON.stringify(root(entries));
+const bytes = entries => Buffer.from(JSON.stringify(root(entries)));
 
 test('source generics and binder visibility survive exact body-free encoding', () => {
   const item = publicApiArtifact(bytes([declaration]));

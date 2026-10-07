@@ -1383,7 +1383,7 @@
     {
       "id": "psc-public-api-ir/1",
       "kind": "public-api",
-      "status": "current-producer",
+      "status": "current-hosted-semantic",
       "canonicalPath": "contracts/compiler/PUBLIC_API_IR_V1.json",
       "classification": "public-api-ir"
     }

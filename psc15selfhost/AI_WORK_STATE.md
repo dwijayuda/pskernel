@@ -6,6 +6,8 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
+- **2026-10-08 PublicApiIR cloud integration follow-up:** `fcb7b7b` passed both source-profile audits and built the new native compiler modules in provider parity. Main CI stopped on an unsupported registry status spelling; parity then exposed a text-to-byte mismatch at the new seed decoding call. Reused the existing `current-hosted-semantic` status and corrected every new string caller of the byte-only decoders, including the native fixture. The strict decoder and registry vocabulary remain unchanged; cloud revalidation is pending.
+
 - **2026-10-08 PublicApiIR implementation:** added portable body-free source-Core signature IR and codec, retaining generic/universe/dependent binders and inductive/constructor/recursor shapes before erasure. The live checked service and two-phase native compiler host project from their retained prepared value. Actual checked builds publish `.public-api.json`, record a CertifiedSource-bound pass and include the product in their typed bundles; archives enforce its bounded schema/scope. Historical modules may omit the capability; a malformed present capability rejects. Direct-JS generic export correspondence, declaration/maps, origins and independent projection preservation remain open. Added focused native/host regressions; cloud validation is pending. No kernel implementation was changed.
 - **2026-10-08 full query checkpoint validation:** `331ab54` main run 37676809517/job 112982326699 passed in full, including actual IR/archive fixtures, portable QueryGraph cases, checked host integration and final self-checks. No global assurance or release promotion is inferred.
 

@@ -131,7 +131,7 @@ export async function runCheckedSeedSession({
         Buffer.byteLength(completed.runtimeIr ?? '') + Buffer.byteLength(completed.verifiedIr ?? '');
       if (observation.generatedBytes > limits.generatedBytes)
         throw checkedSeedExhausted('generatedBytes', limits.generatedBytes, observation.generatedBytes);
-      if (completed.publicApi !== undefined) decodePublicApi(completed.publicApi, { maxBytes: limits.generatedBytes });
+      if (completed.publicApi !== undefined) decodePublicApi(Buffer.from(completed.publicApi), { maxBytes: limits.generatedBytes });
     } else if (completed?.phase !== 'checked') {
       throw new Error('PSC2_CHECKED_SEED_SESSION_CHECK_RESULT');
     }

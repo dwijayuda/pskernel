@@ -564,7 +564,7 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
             value
             hEtaSound.1
             (fun _ => hOriginal)
-            (by simpa only [Prod.fst_mk, Prod.snd_mk] using hSuccess)
+            (by simpa using hSuccess)
       · rw [if_neg hEtaTrue] at hSuccess
         cases hString :
             psKernelDefEqStringLitExpansionWith
@@ -611,7 +611,7 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
                         (by
                           intro hFalse
                           simp at hFalse)
-                        (by simpa only [Prod.fst_mk, Prod.snd_mk] using hSuccess)
+                        (by simpa using hSuccess)
                 | true =>
                     have hOriginal :=
                       liftSemantic hStringSound.2
@@ -626,7 +626,7 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
                         value
                         hStringSound.1
                         (fun _ => hOriginal)
-                        (by simpa only [Prod.fst_mk, Prod.snd_mk] using hSuccess)
+                        (by simpa using hSuccess)
             | none =>
                 cases hUnit :
                     psKernelDefEqUnitLikeWith
@@ -671,5 +671,5 @@ theorem psKernelIsDefEqAfterFullShape_configuration_sound
                         hUnitSound.1
                         (fun hValue =>
                           liftSemantic (hUnitSound.2 hValue))
-                        (by simpa only [Prod.fst_mk, Prod.snd_mk] using hSuccess)
+                        (by simpa using hSuccess)
 

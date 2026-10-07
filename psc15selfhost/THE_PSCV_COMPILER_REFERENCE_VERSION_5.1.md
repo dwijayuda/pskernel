@@ -1,0 +1,776 @@
+# THE PSCV Compiler Reference — Version 5.1
+
+**Status:** proposed standalone target architecture; quantitative architecture score **99.15 / 100**  
+**Repository:** `dwijayuda/pskernel`  
+**Branch audited:** `pscv/v3-execution`  
+**Audit snapshot HEAD:** `ee7febce6e7744fbb66b1e25e625f4855dd33096`  
+**Primary implementation subtree:** `psc15selfhost/`  
+**Normative language authority:** `PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md`  
+**Base edition:** `ps-0.9-r3`  
+**Verified profile:** `pscv-v1`  
+**Closed-assurance policy:** `pscv-closed-v1`  
+**Boundary-assurance policy:** `pscv-boundary-v1`  
+**Verification semantics:** `PSCV-VERIFY-v1`  
+**Certificate policy:** `PSCV-CERT-v1`  
+**Normative Lean semantic pin:** Lean 4.35.0-rc3, commit `470d5ce1400764999581fd26d5d72b00d990b0f4`  
+**Bootstrap Lean implementation pin:** Lean 4.34.0, commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`  
+**Current implementation milestone:** `psc2-compiler-v1`  
+**Research/evaluation date:** 2026-10-08
+
+> **Standalone rule.** This document is complete as a target-architecture reference. A reader does not need Version 3, Version 4, Version 4.1, or Version 4.2 to understand the intended PSCV compiler architecture. Earlier documents remain design history and implementation evidence only.
+
+> **Score rule.** 99.15/100 is a quantitative **target-architecture quality** score under the rubric defined here. It is not a claim that 99.15% of implementation, proofs, security hardening, or release evidence is complete.
+
+---
+
+# 1. Executive decision
+
+PSCV V5.1 is organized around five stable contracts:
+
+1. **Semantic Spine** — the smallest path required to turn ProofScript source into target artifacts.
+2. **Claim Lattice** — every success claim is explicit; parsing, kernel acceptance, target validation, preservation, fixed point, reproducibility, provenance, and DDC cannot be silently conflated.
+3. **Authority Firewall** — untrusted extensions, AI, tactics, optimizers, backends, target compilers, caches, and SAVEF may propose artifacts but cannot mint semantic authority.
+4. **Build/Query Identity** — compiler actions are hermetic-by-contract, incrementally reusable only under declared dependencies/fingerprints, and pinned to exact semantic/toolchain identities.
+5. **Artifact Bundles** — every backend returns a typed bundle of executable, declaration/interface, debug/source-map, and evidence artifacts.
+
+Canonical semantic spine:
+
+~~~text
+ProofScript SourceArtifact
+        |
+        v
+ProfileEnvironment
+        |
+        v
+parse / resolve / elaborate
+        |
+        v
+CoreArtifact
+        |
+        | KernelContract
+        v
+Checked<Core>
+        |
+        | PSCV policy / specification closure
+        v
+Certified<Checked<Core>>
+        |
+        | erasure
+        v
+RuntimeIR
+        |
+        | strict runtime validation
+        v
+Validated<RuntimeIR>
+        |
+        | specialization
+        v
+SpecializedIR
+        |
+        +----------------+----------------+----------------+
+        |                |                |                |
+        v                v                v                v
+ TypeScript          Direct JS         WasmIR          Rust source
+ source backend      backend           backend          backend
+        |                |                |                |
+    pinned tsc       ValidateJsIR     ValidateWasmIR    pinned rustc
+        |                |                |                |
+        v                v                v                v
+ ArtifactBundle     ArtifactBundle     ArtifactBundle   ArtifactBundle
+~~~
+
+The compiler has four optional neighboring systems:
+
+~~~text
+ASSURANCE       proofs / validators / comparator / diverse checkers
+DEVELOPMENT     CompilerService / QueryGraph / SAVEF / AI
+INTEROP         InterfaceIR / WIT / target bindings / Canonical ABI
+RELEASE         provenance / archive / reproducibility / DDC
+~~~
+
+The semantic compiler remains usable when all four are absent.
+
+---
+
+# 2. Design laws
+
+V5.1 has twenty architecture laws.
+
+1. **Small semantic spine.** Compiler semantics do not absorb SAVEF, release, benchmarking, archive, package-registry, or AI policy.
+2. **Closed semantics, open extensions.** Extensibility never means ambient mutation of a closed profile.
+3. **Evidence is not an IR.** Stronger evidence wraps a representation unless the representation itself changed.
+4. **IRs require real representation gaps.**
+5. **Every transformation has one pass contract.**
+6. **Every pass declares preserved/invalidated analyses, interfaces, and fingerprints.**
+7. **Every backend has one backend descriptor.**
+8. **Target-specific representation stays below the target-neutral boundary.**
+9. **Only a SemanticProfile revision may change foundational Core meaning.**
+10. **Untrusted producers never mint authority.**
+11. **Source fidelity, logical soundness, and executable fidelity are separate claims.**
+12. **Successful target compilation is not semantic-preservation evidence.**
+13. **A fixed point is not compiler correctness.**
+14. **Reproducibility is not source-binary correspondence.**
+15. **Provenance is not proof.**
+16. **Incremental cache reuse is optimization, not semantic authority.**
+17. **Public declarations and debug mappings are derived from checked semantic products, not reverse-engineered from emitted target code.**
+18. **Direct JavaScript does not require TypeScript to produce declarations or source maps.**
+19. **Third-party extension execution is least-authority and isolated in assured profiles.**
+20. **Every release claim is machine-explainable by a ClaimSet and evidence graph.**
+
+---
+
+# 3. Quantitative evaluation
+
+## 3.1 Criteria and weights
+
+| Criterion | Weight |
+|---|---:|
+| Soundness / fidelity | 10 |
+| TCB transparency | 8 |
+| Adversarial robustness | 7 |
+| Small compiler and extensibility | 8 |
+| Architecture | 9 |
+| Independent evidence | 6 |
+| Performance | 6 |
+| Resource behavior | 5 |
+| Portability | 5 |
+| Longevity | 5 |
+| Interoperability | 5 |
+| Self-host / bootstrap | 7 |
+| Auditability | 6 |
+| Security | 6 |
+| Soundness security | 7 |
+| **Total** | **100** |
+
+## 3.2 Meaning of 99%
+
+A score above 99 means the architecture specifies semantic ownership, trust/authority ownership, extension containment, backend contracts, query/pass invalidation, resource/failure semantics, reproducibility/build identity, migration from the real codebase, and evidence meanings with remaining uncertainty primarily in implementation and assurance evidence rather than missing architecture.
+
+## 3.3 Iteration loop
+
+Using this rubric:
+
+~~~text
+V4.2 rescored      97.01 / 100
+V5.0 draft         98.39 / 100
+V5.1               99.15 / 100
+~~~
+
+V5.0 still lost points because backend output products, source/API origin metadata, hermetic build identity, and claim semantics were insufficiently unified.
+
+V5.1 closes those architecture gaps.
+
+The loop stops at V5.1.
+
+---
+
+# 4. Research basis
+
+## 4.1 Lean 4
+
+Lean elaborates rich source syntax into a much smaller Core theory; the trusted kernel checks elaborator output. Macro expansion and elaboration are extensible, while interactive metadata is side information rather than logical authority.
+
+Sources:
+
+- https://lean-lang.org/doc/reference/latest/Elaboration-and-Compilation/
+- https://lean-lang.org/doc/reference/latest/Notations-and-Macros/
+- https://lean-lang.org/doc/reference/latest/Notations-and-Macros/Elaborators/
+- https://github.com/leanprover/lean4/blob/master/src/Lean/Compiler/LCNF.lean
+
+Adopted:
+
+- extensible surface over small Core;
+- kernel rechecking of proof/declaration terms;
+- interactive/compiler-service metadata separate from proof authority.
+
+Stronger PSCV requirement:
+
+- source-fidelity risk from semantic elaborators is explicitly tracked instead of being treated as solved by kernel checking.
+
+## 4.2 CompCert
+
+CompCert uses multiple real intermediate languages and pass-specific semantic-preservation theorems.
+
+Sources:
+
+- https://compcert.org/doc/
+- https://compcert.org/man/manual001.html
+
+Adopted:
+
+- real IRs correspond to real semantic/representation gaps;
+- transformations own explicit semantic relations;
+- external unverified stages do not inherit verified claims.
+
+## 4.3 CakeML
+
+CakeML combines formal semantics, verified compilation, bootstrapping, and high-assurance checker applications while keeping these claims distinct.
+
+Sources:
+
+- https://cakeml.org/
+- https://cakeml.org/checkers.html
+
+Adopted:
+
+- self-host/bootstrap evidence does not replace compiler preservation;
+- high-assurance paths can progressively reduce their trusted base.
+
+## 4.4 rustc
+
+rustc uses purpose-specific HIR/THIR/MIR representations, demand-driven queries, red/green incremental dependency tracking, and backend abstraction.
+
+Sources:
+
+- https://rustc-dev-guide.rust-lang.org/overview.html
+- https://rustc-dev-guide.rust-lang.org/thir.html
+- https://rustc-dev-guide.rust-lang.org/queries/incremental-compilation.html
+- https://rustc-dev-guide.rust-lang.org/backend/backend-agnostic.html
+
+Adopted:
+
+- purpose-specific transient/persistent IRs;
+- explicit query dependencies;
+- semantic invalidation rather than timestamp invalidation;
+- backend independence.
+
+## 4.5 LLVM and MLIR
+
+LLVM's pass manager explicitly caches analyses and requires passes to report what remains preserved. MLIR provides conversion targets, pass/dialect extension infrastructure, and explicit legality.
+
+Sources:
+
+- https://llvm.org/docs/NewPassManager.html
+- https://mlir.llvm.org/docs/PassManagement/
+- https://mlir.llvm.org/docs/DialectConversion/
+
+Adopted:
+
+- preserved/invalidated analyses;
+- explicit pass registration;
+- legal target contracts.
+
+Rejected for untrusted PSCV extensions:
+
+- native in-process plugin loading is not considered a security boundary.
+
+## 4.6 Swift SIL
+
+Swift distinguishes raw SIL from canonical SIL because mandatory passes establish actual invariants required before optimization/codegen.
+
+Source:
+
+- https://github.com/swiftlang/swift/blob/main/docs/SIL/SIL.md
+
+Adopted:
+
+- construction/canonical states are justified when they have genuinely different invariants.
+
+## 4.7 TypeScript
+
+TypeScript supports declaration output and source/declaration maps, and its compiler/language-service architecture separates parsing/checking/emission/tooling.
+
+Sources:
+
+- https://github.com/microsoft/TypeScript/wiki/Architectural-Overview
+- https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options
+- https://www.typescriptlang.org/tsconfig/sourceMap.html
+- https://www.typescriptlang.org/tsconfig/declarationMap.html
+
+Adopted:
+
+- long-lived service architecture;
+- `.d.ts` as a public API artifact;
+- source maps as first-class developer-tool artifacts.
+
+Stronger PSCV requirement:
+
+- direct JS generates `.d.ts` and maps from ProofScript semantic products, not by depending on `tsc`.
+
+## 4.8 ECMA-426 source maps
+
+ECMA-426 standardizes source maps for JavaScript, WebAssembly, CSS, and other generated formats.
+
+Source:
+
+- https://ecma-international.org/publications-and-standards/standards/ecma-426/
+
+Adopted:
+
+- backend-neutral origin tracking;
+- standard source-map output from target-position/origin information.
+
+## 4.9 Dafny
+
+Dafny supports modular verification through specifications and multiple target backends.
+
+Source:
+
+- https://dafny.org/dafny/DafnyRef/DafnyRef
+
+Adopted:
+
+- behavioral module interfaces as composition boundaries;
+- verification semantics remain target-independent.
+
+## 4.10 WebAssembly Component Model and WASI
+
+WIT provides versioned language-neutral interfaces. WASI is capability-oriented and explicitly avoids ambient authority.
+
+Sources:
+
+- https://component-model.bytecodealliance.org/design/wit.html
+- https://github.com/WebAssembly/WASI/blob/main/docs/DesignPrinciples.md
+- https://github.com/WebAssembly/WASI/blob/main/docs/Capabilities.md
+
+Adopted:
+
+- InterfaceIR/WIT boundary;
+- preferred sandbox form for portable third-party extensions;
+- explicit capability grants.
+
+## 4.11 Rust procedural macros as a negative security reference
+
+Rust procedural macros execute at compile time with compiler-like filesystem/stdin/stdout access.
+
+Source:
+
+- https://doc.rust-lang.org/stable/reference/procedural-macros.html
+
+V5.1 conclusion:
+
+> PSCV assured profiles must not adopt ambient in-process third-party extension authority.
+
+## 4.12 Alive2 / translation validation
+
+Alive2 validates LLVM transformations using refinement checking.
+
+Source:
+
+- https://github.com/AliveToolkit/alive2
+
+Adopted:
+
+- complex optimizers/backends can remain replaceable when a smaller trusted validator establishes the claimed relation.
+
+## 4.13 Foundational Proof-Carrying Code
+
+FPCC research demonstrates the value of untrusted producers paired with very small proof-checking TCBs.
+
+Sources:
+
+- https://www.cs.princeton.edu/~appel/fpcc.html
+- https://www.cs.princeton.edu/research/techreps/428
+
+Adopted:
+
+- authority belongs to small checkers, not proof producers;
+- proof artifacts should be separately checkable.
+
+## 4.14 Hermetic and reproducible builds
+
+Bazel/Nix/reproducible-builds research emphasizes declared inputs, isolated actions, pinned tools and bit-identical reproduction.
+
+Sources:
+
+- https://bazel.build/remote/rbe
+- https://wiki.nixos.org/wiki/Derivations
+- https://reproducible-builds.org/docs/definition/
+
+Adopted:
+
+- explicit BuildAction identity;
+- undeclared host inputs are not semantic inputs.
+
+## 4.15 SLSA and DDC
+
+SLSA provenance records how/where artifacts were built. DDC addresses source-binary correspondence under explicit assumptions.
+
+Sources:
+
+- https://slsa.dev/spec/v1.2/provenance
+- https://dwheeler.com/trusting-trust/dissertation/html/wheeler-trusting-trust-ddc.html
+
+Adopted:
+
+- provenance, reproducibility, fixed point, preservation, and DDC remain distinct claims.
+
+---
+
+# 5. Scope and non-goals
+
+## Compiler core owns
+
+- profile/environment resolution;
+- parsing and elaboration;
+- canonical Core artifact creation;
+- KernelContract client;
+- PSCV certification client;
+- erasure;
+- RuntimeIR;
+- runtime validation;
+- specialization;
+- generic pass contracts;
+- backend contracts;
+- module/public API extraction;
+- origin metadata;
+- artifact-bundle assembly;
+- compiler-service query hooks.
+
+## Companion systems own
+
+### Assurance
+Kernel metatheory, preservation theorems, validators, comparator, independent checkers, provider hardening.
+
+### Development
+QueryGraph persistence, SAVEF, AI orchestration, FactoryBench.
+
+### Interoperability
+InterfaceIR, WIT, Component Model/Canonical ABI, target-language foreign bindings.
+
+### Release
+Provenance, archive, signing, reproducibility campaigns, DDC.
+
+The core compiler does not depend on SAVEF, FactoryBench, archive, DDC, or AI.
+
+---
+
+# 6. Claim lattice
+
+Compiler success is not represented by one Boolean.
+
+Every artifact has an explicit `ClaimSet`.
+
+Representative independent claims:
+
+~~~text
+Parsed
+Resolved
+Elaborated
+ProfileConformant
+
+KernelAccepted
+SpecificationCovered
+PSCVCertified
+
+RuntimeIRValidated
+SpecializationValidated
+TargetIRValidated
+TargetToolAccepted
+
+SemanticPreservationChecked
+IndependentCheckerAccepted
+
+SelfHostFixedPoint
+Reproducible
+ProvenanceBound
+SourceBinaryCorrespondenceDDC
+
+AssuredRelease
+~~~
+
+These claims are not all linearly ordered.
+
+Examples:
+
+~~~text
+TargetToolAccepted
+    does not imply
+SemanticPreservationChecked
+
+SelfHostFixedPoint
+    does not imply
+KernelAccepted
+
+Reproducible
+    does not imply
+SourceBinaryCorrespondenceDDC
+
+ProvenanceBound
+    does not imply
+SemanticPreservationChecked
+~~~
+
+`AssuredRelease` is a policy-defined conjunction of exact required claims.
+
+No tool may silently upgrade one claim into another.
+
+---
+
+# 7. Capability model
+
+Representations carry authority only through capabilities:
+
+~~~text
+Checked<T>
+Validated<T, Contract>
+Certified<T, Policy>
+~~~
+
+Each capability binds:
+
+- exact subject ArtifactId;
+- semantic/profile identity;
+- checker/validator identity;
+- implementation/security identity where relevant;
+- assumptions;
+- resource policy;
+- evidence reference;
+- session/live-authority identity when required.
+
+Serialized receipts cannot recreate live authority.
+
+Authority-bearing values are never accepted from ordinary plugin/cache/SAVEF serialization.
+
+---
+
+# 8. Three soundness dimensions
+
+## Logical soundness
+
+Can an invalid Core theorem/declaration be accepted?
+
+Primary boundary:
+
+~~~text
+CoreArtifact -> KernelContract -> Checked<Core>
+~~~
+
+## Source fidelity
+
+Does the exact source/profile/extensions/import environment elaborate to the intended Core?
+
+Relevant components:
+
+- parser;
+- macro/syntax expansion;
+- elaborator;
+- coercion/instance environment;
+- semantic elaborator extensions;
+- contract/VC interpretation.
+
+A kernel-valid term can still be an incorrect elaboration of source.
+
+## Executable fidelity
+
+Does generated executable behavior preserve certified runtime semantics?
+
+Relevant transformations:
+
+- erasure;
+- specialization;
+- optimizations;
+- backend lowering;
+- target printers/encoders;
+- target compilers;
+- ABI/runtime adapters.
+
+Claims and TCBs state which dimensions they cover.
+
+---
+
+# 9. TCB partition
+
+V5.1 records separate trust manifests.
+
+## LogicalTCB
+
+Potentially:
+
+- foundational profile/axioms;
+- KernelContract semantics;
+- selected kernel;
+- canonical kernel decoder;
+- AuthorityBroker subject/result binding.
+
+## SourceFidelityTCB
+
+Any source-to-Core component not independently validated:
+
+- parser;
+- elaborator;
+- semantic extensions;
+- profile resolver.
+
+## ExecutableFidelityTCB
+
+Any runtime/target transformation not independently proved/validated.
+
+## SecurityTCB
+
+Runtime mechanisms whose compromise could forge authority decisions:
+
+- AuthorityBroker runtime;
+- sandbox runtime;
+- OS isolation;
+- cryptographic identity implementation.
+
+A component may move out of an effective TCB only to the extent that independent evidence covers its role.
+
+---
+
+# 10. Authority Firewall
+
+All replaceable/untrusted producers sit outside authority.
+
+~~~text
+syntax extensions
+AI / tactics / solvers
+optimizers
+compiler passes
+backends
+target compilers
+interface adapters
+caches / SAVEF
+
+       |
+       | bounded canonical data
+       v
+
+Authority Firewall
+
+       |
+       +--> profile identity
+       +--> canonical decode/hash
+       +--> KernelContract
+       +--> certificate checkers
+       +--> IR/target validators
+       +--> assumption/resource policy
+       +--> subject identity match
+       +--> fail-closed classification
+
+       |
+       v
+
+live Checked / Certified / Validated capabilities
+~~~
+
+High-assurance target architecture places authority minting behind a minimal AuthorityBroker process/component.
+
+The current WeakMap/session host capability mechanism is a valid development transition, not the final hostile-extension isolation boundary.
+
+---
+
+# 11. Authority influence closure
+
+Every checked/release build can compute:
+
+~~~text
+AuthorityInfluenceClosure
+~~~
+
+containing all code/configuration capable of:
+
+- selecting/replacing a checker;
+- changing active semantic profile;
+- minting authority capability;
+- mutating checked subject bytes;
+- bypassing mandatory validation;
+- changing evidence policy.
+
+Undeclared authority influence causes assured-profile failure.
+
+This closure is distinct from ordinary dependency closure.
+
+---
+
+# 12. Extension model
+
+Extension semantic classes:
+
+~~~text
+E0 Library
+E1 SurfaceSyntax / canonical rewrite
+E2 ProofProducer
+E3 CompilerPass / optimizer
+E4 Backend / emitter / InterfaceAdapter
+E5 SemanticElaborator
+E6 FoundationRevision
+~~~
+
+Rules:
+
+- E0 has no compiler execution authority.
+- E1 output is reprocessed by normal frontend rules and participates in profile identity.
+- E2 output is untrusted proof/certificate candidate.
+- E3/E4 must be proved, certificate-checked, translation-validated, or explicitly added to executable-fidelity TCB.
+- E5 changes source-to-Core fidelity and is forbidden in closed profiles unless explicitly pinned/approved and either trusted or independently validated.
+- E6 is not a plugin; it requires a new SemanticProfile/Core/kernel revision.
+
+Execution classes:
+
+~~~text
+U0 no executable plugin code
+U1 Wasm Component + explicit WIT capabilities
+U2 isolated bounded process/container
+U3 in-process explicitly trusted component
+~~~
+
+Assured third-party extensions prefer U1, then U2. U3 expands the relevant TCB.
+
+A manifest is not a sandbox.
+
+---
+
+# 13. ProfileEnvironment
+
+Every source semantic interpretation is bound to:
+
+~~~text
+ProfileEnvironment {
+  languageEdition
+  semanticProfile
+  standardEnvironmentId
+  extensionSetId
+  importedStructuralInterfaceIds[]
+  importedBehavioralInterfaceIds[]
+  semanticOptions
+}
+~~~
+
+Ordinary dependencies cannot mutate a closed profile implicitly.
+
+The ordered/canonical extension set is part of source meaning.
+
+---
+
+# 14. Representations and capabilities
+
+Real representation families:
+
+~~~text
+SourceArtifact
+Syntax
+Core
+RuntimeIR
+SpecializedIR
+TargetIR*
+ExecutableArtifact
+~~~
+
+Evidence-only states are capabilities.
+
+## RuntimeIR and current PsVerifiedIr
+
+The current `PsVerifiedIr*` model is architecturally:
+
+~~~text
+RuntimeIR
++
+Validated<RuntimeIR, RuntimeIRContract>
+~~~
+
+No immediate mass rename is required.
+
+## SpecializedIR
+
+Specialization materially changes executable declarations/instances and remains a real representation.
+
+## TargetIR
+
+Current explicit target IRs:
+
+- JsIR;
+- WasmIR.
+
+Rust and TypeScript remain source backends unless independent validation/proof needs justify persistent target IRs.

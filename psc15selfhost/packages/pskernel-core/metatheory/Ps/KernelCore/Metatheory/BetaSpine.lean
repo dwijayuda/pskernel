@@ -24,7 +24,9 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
   have hSnd := congrArg Prod.snd hRun
   cases amount with
   | zero =>
-      simp [psKernelExprLiftLooseBVarsReferenceChanged] at hFst
+      rw [
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
+      ] at hFst
       exact hFst.symm
   | succ remaining =>
       cases expr with
@@ -325,7 +327,7 @@ theorem psKernelExprLiftLooseBVarsReference_app
   | zero =>
       simp [
         psKernelExprLiftLooseBVarsReference,
-        psKernelExprLiftLooseBVarsReferenceChanged
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
       ]
   | succ remaining =>
       cases hFn :
@@ -391,7 +393,7 @@ theorem psKernelExprLiftLooseBVarsReference_lam
   | zero =>
       simp [
         psKernelExprLiftLooseBVarsReference,
-        psKernelExprLiftLooseBVarsReferenceChanged
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
       ]
   | succ remaining =>
       cases hType :
@@ -457,7 +459,7 @@ theorem psKernelExprLiftLooseBVarsReference_forallE
   | zero =>
       simp [
         psKernelExprLiftLooseBVarsReference,
-        psKernelExprLiftLooseBVarsReferenceChanged
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
       ]
   | succ remaining =>
       cases hType :
@@ -524,7 +526,7 @@ theorem psKernelExprLiftLooseBVarsReference_letE
   | zero =>
       simp [
         psKernelExprLiftLooseBVarsReference,
-        psKernelExprLiftLooseBVarsReferenceChanged
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
       ]
   | succ remaining =>
       cases hType :
@@ -610,7 +612,7 @@ theorem psKernelExprLiftLooseBVarsReference_mdata
   | zero =>
       simp [
         psKernelExprLiftLooseBVarsReference,
-        psKernelExprLiftLooseBVarsReferenceChanged
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
       ]
   | succ remaining =>
       cases hBody :
@@ -653,7 +655,7 @@ theorem psKernelExprLiftLooseBVarsReference_proj
   | zero =>
       simp [
         psKernelExprLiftLooseBVarsReference,
-        psKernelExprLiftLooseBVarsReferenceChanged
+        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
       ]
   | succ remaining =>
       cases hBody :

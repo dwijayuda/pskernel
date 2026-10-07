@@ -1017,6 +1017,666 @@ theorem psKernelEnvironmentFind_some_authoritative
     _ = Option.some info := hFind
 
 
+theorem psKernelToConstructorWhenK_configuration_sound_of_components
+    (publicWhnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (hInfer :
+      PsKernelInferOnlyConfigurationPreserves inferType)
+    (hDefEq :
+      PsKernelDefEqConfigurationSound defeq) :
+    PsKernelRecursorKConversionConfigurationSound
+      publicWhnf inferType defeq := by
+  intro
+    context state nextState recursor major result
+    hKFlag hConfig hSuccess
+  cases hMajorInduct :
+      psKernelRecursorMajorInduct recursor with
+  | none =>
+      simp [
+        psKernelToConstructorWhenK,
+        hMajorInduct
+      ] at hSuccess
+      rcases hSuccess with ⟨rfl, rfl⟩
+      exact
+        ⟨
+          hConfig,
+          PsKernelDefEqJudgment.refl major
+        ⟩
+  | some majorInduct =>
+      cases hInferMajor :
+          inferType context state major with
+      | error error =>
+          simp [
+            psKernelToConstructorWhenK,
+            hMajorInduct,
+            hInferMajor
+          ] at hSuccess
+      | ok majorRun =>
+          rcases majorRun with
+            ⟨majorType, majorState⟩
+          have hMajorConfig :=
+            hInfer
+              context
+              state
+              majorState
+              major
+              majorType
+              hConfig
+              hInferMajor
+          cases hWhnfType :
+              publicWhnf
+                context
+                majorState
+                majorType with
+          | error error =>
+              simp [
+                psKernelToConstructorWhenK,
+                hMajorInduct,
+                hInferMajor,
+                hWhnfType
+              ] at hSuccess
+          | ok typeRun =>
+              rcases typeRun with
+                ⟨appType, appTypeState⟩
+              have hTypeSemantic :=
+                hWhnf
+                  context
+                  majorState
+                  appTypeState
+                  majorType
+                  appType
+                  hMajorConfig
+                  hWhnfType
+              cases hTypeHead :
+                  psKernelExprGetAppFn appType with
+              | const typeInduct typeLevels =>
+                  cases hTypeInduct :
+                      psKernelNameEq
+                        typeInduct
+                        majorInduct with
+                  | false =>
+                      simp [
+                        psKernelToConstructorWhenK,
+                        hMajorInduct,
+                        hInferMajor,
+                        hWhnfType,
+                        hTypeHead,
+                        hTypeInduct
+                      ] at hSuccess
+                      rcases hSuccess with ⟨rfl, rfl⟩
+                      exact
+                        ⟨
+                          hTypeSemantic.2,
+                          PsKernelDefEqJudgment.refl major
+                        ⟩
+                  | true =>
+                      let indices :=
+                        psKernelExprListDrop
+                          recursor.numParams
+                          (psKernelExprGetAppArgs appType)
+                      cases hIndexGuard :
+                          (if psKernelExprHasMVarForK appType then
+                             psKernelExprListAnyMVar indices
+                           else
+                             false) with
+                      | true =>
+                          simp [
+                            psKernelToConstructorWhenK,
+                            hMajorInduct,
+                            hInferMajor,
+                            hWhnfType,
+                            hTypeHead,
+                            hTypeInduct,
+                            indices,
+                            hIndexGuard
+                          ] at hSuccess
+                          rcases hSuccess with ⟨rfl, rfl⟩
+                          exact
+                            ⟨
+                              hTypeSemantic.2,
+                              PsKernelDefEqJudgment.refl major
+                            ⟩
+                      | false =>
+                          cases hFind :
+                              psKernelEnvironmentFind
+                                context.environment
+                                typeInduct with
+                          | none =>
+                              simp [
+                                psKernelToConstructorWhenK,
+                                hMajorInduct,
+                                hInferMajor,
+                                hWhnfType,
+                                hTypeHead,
+                                hTypeInduct,
+                                indices,
+                                hIndexGuard,
+                                hFind
+                              ] at hSuccess
+                              rcases hSuccess with ⟨rfl, rfl⟩
+                              exact
+                                ⟨
+                                  hTypeSemantic.2,
+                                  PsKernelDefEqJudgment.refl major
+                                ⟩
+                          | some info =>
+                              cases info with
+                              | inductInfo inductInfo =>
+                                  cases hCtors :
+                                      inductInfo.ctors with
+                                  | nil =>
+                                      simp [
+                                        psKernelToConstructorWhenK,
+                                        hMajorInduct,
+                                        hInferMajor,
+                                        hWhnfType,
+                                        hTypeHead,
+                                        hTypeInduct,
+                                        indices,
+                                        hIndexGuard,
+                                        hFind,
+                                        hCtors
+                                      ] at hSuccess
+                                      rcases hSuccess with ⟨rfl, rfl⟩
+                                      exact
+                                        ⟨
+                                          hTypeSemantic.2,
+                                          PsKernelDefEqJudgment.refl major
+                                        ⟩
+                                  | cons ctorName ctorRest =>
+                                      let params :=
+                                        psKernelExprListTake
+                                          recursor.numParams
+                                          (psKernelExprGetAppArgs appType)
+                                      cases hParamCount :
+                                          Nat.beq
+                                            (psKernelExprListLength params)
+                                            recursor.numParams with
+                                      | false =>
+                                          simp [
+                                            psKernelToConstructorWhenK,
+                                            hMajorInduct,
+                                            hInferMajor,
+                                            hWhnfType,
+                                            hTypeHead,
+                                            hTypeInduct,
+                                            indices,
+                                            hIndexGuard,
+                                            hFind,
+                                            hCtors,
+                                            params,
+                                            hParamCount
+                                          ] at hSuccess
+                                          rcases hSuccess with ⟨rfl, rfl⟩
+                                          exact
+                                            ⟨
+                                              hTypeSemantic.2,
+                                              PsKernelDefEqJudgment.refl major
+                                            ⟩
+                                      | true =>
+                                          let candidate :=
+                                            psKernelApplyArgs
+                                              (PsKernelExpr.const
+                                                ctorName
+                                                typeLevels)
+                                              params
+                                          cases hInferCandidate :
+                                              inferType
+                                                context
+                                                appTypeState
+                                                candidate with
+                                          | error error =>
+                                              simp [
+                                                psKernelToConstructorWhenK,
+                                                hMajorInduct,
+                                                hInferMajor,
+                                                hWhnfType,
+                                                hTypeHead,
+                                                hTypeInduct,
+                                                indices,
+                                                hIndexGuard,
+                                                hFind,
+                                                hCtors,
+                                                params,
+                                                hParamCount,
+                                                candidate,
+                                                hInferCandidate
+                                              ] at hSuccess
+                                          | ok candidateRun =>
+                                              rcases candidateRun with
+                                                ⟨candidateType,
+                                                  candidateState⟩
+                                              have hCandidateConfig :=
+                                                hInfer
+                                                  context
+                                                  appTypeState
+                                                  candidateState
+                                                  candidate
+                                                  candidateType
+                                                  hTypeSemantic.2
+                                                  hInferCandidate
+                                              cases hDefEqRun :
+                                                  defeq
+                                                    context
+                                                    candidateState
+                                                    appType
+                                                    candidateType with
+                                              | error error =>
+                                                  simp [
+                                                    psKernelToConstructorWhenK,
+                                                    hMajorInduct,
+                                                    hInferMajor,
+                                                    hWhnfType,
+                                                    hTypeHead,
+                                                    hTypeInduct,
+                                                    indices,
+                                                    hIndexGuard,
+                                                    hFind,
+                                                    hCtors,
+                                                    params,
+                                                    hParamCount,
+                                                    candidate,
+                                                    hInferCandidate,
+                                                    hDefEqRun
+                                                  ] at hSuccess
+                                              | ok equalRun =>
+                                                  rcases equalRun with
+                                                    ⟨equalValue,
+                                                      equalState⟩
+                                                  have hEqualSemantic :=
+                                                    hDefEq
+                                                      context
+                                                      candidateState
+                                                      equalState
+                                                      appType
+                                                      candidateType
+                                                      equalValue
+                                                      hCandidateConfig
+                                                      hDefEqRun
+                                                  cases equalValue with
+                                                  | false =>
+                                                      simp [
+                                                        psKernelToConstructorWhenK,
+                                                        hMajorInduct,
+                                                        hInferMajor,
+                                                        hWhnfType,
+                                                        hTypeHead,
+                                                        hTypeInduct,
+                                                        indices,
+                                                        hIndexGuard,
+                                                        hFind,
+                                                        hCtors,
+                                                        params,
+                                                        hParamCount,
+                                                        candidate,
+                                                        hInferCandidate,
+                                                        hDefEqRun
+                                                      ] at hSuccess
+                                                      rcases hSuccess with
+                                                        ⟨rfl, rfl⟩
+                                                      exact
+                                                        ⟨
+                                                          hEqualSemantic.1,
+                                                          PsKernelDefEqJudgment.refl
+                                                            major
+                                                        ⟩
+                                                  | true =>
+                                                      simp [
+                                                        psKernelToConstructorWhenK,
+                                                        hMajorInduct,
+                                                        hInferMajor,
+                                                        hWhnfType,
+                                                        hTypeHead,
+                                                        hTypeInduct,
+                                                        indices,
+                                                        hIndexGuard,
+                                                        hFind,
+                                                        hCtors,
+                                                        params,
+                                                        hParamCount,
+                                                        candidate,
+                                                        hInferCandidate,
+                                                        hDefEqRun
+                                                      ] at hSuccess
+                                                      rcases hSuccess with
+                                                        ⟨rfl, rfl⟩
+                                                      have hAuthoritative :
+                                                          psKernelFindConstantInList
+                                                              typeInduct
+                                                              context.environment.constants =
+                                                            Option.some
+                                                              (PsKernelConstantInfo.inductInfo
+                                                                inductInfo) :=
+                                                        psKernelEnvironmentFind_some_authoritative
+                                                          context.environment
+                                                          typeInduct
+                                                          (PsKernelConstantInfo.inductInfo
+                                                            inductInfo)
+                                                          hConfig.1
+                                                          hFind
+                                                      exact
+                                                        ⟨
+                                                          hEqualSemantic.1,
+                                                          PsKernelDefEqJudgment.recursorKConversion
+                                                            recursor
+                                                            major
+                                                            appType
+                                                            candidate
+                                                            candidateType
+                                                            majorInduct
+                                                            typeInduct
+                                                            ctorName
+                                                            typeLevels
+                                                            indices
+                                                            params
+                                                            inductInfo
+                                                            ctorRest
+                                                            hKFlag
+                                                            hMajorInduct
+                                                            hTypeHead
+                                                            hTypeInduct
+                                                            rfl
+                                                            hIndexGuard
+                                                            hAuthoritative
+                                                            hCtors
+                                                            rfl
+                                                            hParamCount
+                                                            rfl
+                                                            (hEqualSemantic.2 rfl)
+                                                        ⟩
+                              | axiomInfo value =>
+                                  simp [
+                                    psKernelToConstructorWhenK,
+                                    hMajorInduct,
+                                    hInferMajor,
+                                    hWhnfType,
+                                    hTypeHead,
+                                    hTypeInduct,
+                                    indices,
+                                    hIndexGuard,
+                                    hFind
+                                  ] at hSuccess
+                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                  exact
+                                    ⟨
+                                      hTypeSemantic.2,
+                                      PsKernelDefEqJudgment.refl major
+                                    ⟩
+                              | defnInfo value =>
+                                  simp [
+                                    psKernelToConstructorWhenK,
+                                    hMajorInduct,
+                                    hInferMajor,
+                                    hWhnfType,
+                                    hTypeHead,
+                                    hTypeInduct,
+                                    indices,
+                                    hIndexGuard,
+                                    hFind
+                                  ] at hSuccess
+                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                  exact
+                                    ⟨
+                                      hTypeSemantic.2,
+                                      PsKernelDefEqJudgment.refl major
+                                    ⟩
+                              | thmInfo value =>
+                                  simp [
+                                    psKernelToConstructorWhenK,
+                                    hMajorInduct,
+                                    hInferMajor,
+                                    hWhnfType,
+                                    hTypeHead,
+                                    hTypeInduct,
+                                    indices,
+                                    hIndexGuard,
+                                    hFind
+                                  ] at hSuccess
+                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                  exact
+                                    ⟨
+                                      hTypeSemantic.2,
+                                      PsKernelDefEqJudgment.refl major
+                                    ⟩
+                              | opaqueInfo value =>
+                                  simp [
+                                    psKernelToConstructorWhenK,
+                                    hMajorInduct,
+                                    hInferMajor,
+                                    hWhnfType,
+                                    hTypeHead,
+                                    hTypeInduct,
+                                    indices,
+                                    hIndexGuard,
+                                    hFind
+                                  ] at hSuccess
+                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                  exact
+                                    ⟨
+                                      hTypeSemantic.2,
+                                      PsKernelDefEqJudgment.refl major
+                                    ⟩
+                              | ctorInfo value =>
+                                  simp [
+                                    psKernelToConstructorWhenK,
+                                    hMajorInduct,
+                                    hInferMajor,
+                                    hWhnfType,
+                                    hTypeHead,
+                                    hTypeInduct,
+                                    indices,
+                                    hIndexGuard,
+                                    hFind
+                                  ] at hSuccess
+                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                  exact
+                                    ⟨
+                                      hTypeSemantic.2,
+                                      PsKernelDefEqJudgment.refl major
+                                    ⟩
+                              | recInfo value =>
+                                  simp [
+                                    psKernelToConstructorWhenK,
+                                    hMajorInduct,
+                                    hInferMajor,
+                                    hWhnfType,
+                                    hTypeHead,
+                                    hTypeInduct,
+                                    indices,
+                                    hIndexGuard,
+                                    hFind
+                                  ] at hSuccess
+                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                  exact
+                                    ⟨
+                                      hTypeSemantic.2,
+                                      PsKernelDefEqJudgment.refl major
+                                    ⟩
+                              | quotInfo value =>
+                                  simp [
+                                    psKernelToConstructorWhenK,
+                                    hMajorInduct,
+                                    hInferMajor,
+                                    hWhnfType,
+                                    hTypeHead,
+                                    hTypeInduct,
+                                    indices,
+                                    hIndexGuard,
+                                    hFind
+                                  ] at hSuccess
+                                  rcases hSuccess with ⟨rfl, rfl⟩
+                                  exact
+                                    ⟨
+                                      hTypeSemantic.2,
+                                      PsKernelDefEqJudgment.refl major
+                                    ⟩
+              | bvar index =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | fvar name =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | mvar name =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | sort level =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | app fn arg =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | lam name type body binderInfo =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | forallE name type body binderInfo =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | letE name type value body nondep =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | lit literal =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | mdata metadata body =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+              | proj typeName index body =>
+                  simp [
+                    psKernelToConstructorWhenK,
+                    hMajorInduct,
+                    hInferMajor,
+                    hWhnfType,
+                    hTypeHead
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      hTypeSemantic.2,
+                      PsKernelDefEqJudgment.refl major
+                    ⟩
+
+
 theorem psKernelFindRecursorRule_some_matches_metatheory
     (ctorName : PsKernelName)
     (rules : List PsKernelRecursorRule)

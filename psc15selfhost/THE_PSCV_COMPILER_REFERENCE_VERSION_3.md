@@ -5,6 +5,8 @@
 **Branch audited:** psc2/selfhost-lean-kernel
 **Baseline:** 1df9e01ba1c4d73382c0e30c69de06022ba0cedd
 **Primary implementation subtree:** psc15selfhost/
+**Normative language authority:** psc15selfhost/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md (`pscv-v1`, `PSCV-VERIFY-v1`, `PSCV-CERT-v1`; Lean 4.35.0-rc3 semantic pin)
+**Current compiler milestone:** `psc2-compiler-v1`; PSCV conformance remains a target until all PSCV gates close
 **Predecessors:** psc15selfhost/THE_PSCV_COMPILER_REFERENCE.md and psc15selfhost/THE_PSCV_COMPILER_REFERENCE_VERSION_2.md
 **Research date:** 2026-10-06
 **Acceptance rule:** equal-weight average at least 9.90 and no requested criterion below 9.90

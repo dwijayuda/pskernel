@@ -1138,7 +1138,7 @@ inductive PsKernelDefEqJudgment
   | recursorStructureEta
       {localContext : PsKernelLocalContext}
       (major majorType etaValue : PsKernelExpr)
-      (inductName ctorName : PsKernelName)
+      (inductName typeName ctorName : PsKernelName)
       (levels : List PsKernelLevel)
       (typeArgs params fields : List PsKernelExpr)
       (inductInfo : PsKernelInductiveInfo)
@@ -1150,7 +1150,9 @@ inductive PsKernelDefEqJudgment
           true)
       (hTypeHead :
         psKernelExprGetAppFn majorType =
-          PsKernelExpr.const inductName levels)
+          PsKernelExpr.const typeName levels)
+      (hTypeName :
+        psKernelNameEq typeName inductName = true)
       (hTypeArgs :
         psKernelExprGetAppArgs majorType = typeArgs)
       (hInduct :

@@ -313,6 +313,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.EnvironmentIndexRefinement,
     `Ps.KernelCore.Metatheory.NativeReduction,
     `Ps.KernelCore.Metatheory.PrimitiveNatReduction,
+    `Ps.KernelCore.Metatheory.QuotReduction,
     `Ps.KernelCore.Metatheory.Substitution,
     `Ps.KernelCore.Metatheory.SubstitutionRefinement,
     `Ps.KernelCore.Metatheory.Admission,

@@ -465,3 +465,187 @@ theorem psKernelDefEqDeltaOnce_configuration_sound
             hCoreSound.1,
           hCoreSound.2
         ⟩
+
+
+/-
+The one-sided lazy-delta steps are the first consumers of the independent
+step-result transport law. A successful projection-unfold or delta-once
+operation preserves state soundness and supplies a reduction closure. The
+terminal quick comparison is then transported back across that closure.
+-/
+theorem psKernelDefEqLazyStepRightOnly_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : PsKernelDeltaStepResult)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqLazyStepRightOnly
+          defeq coreWhnf context state left right =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelDeltaStepPostcondition
+      context nextState left right answer := by
+  unfold psKernelDefEqLazyStepRightOnly at hRun
+  cases hProj :
+      psKernelDefEqTryUnfoldProjApp
+        coreWhnf context state left with
+  | error error =>
+      simp only [hProj] at hRun
+      simp at hRun
+  | ok projRun =>
+      simp only [hProj] at hRun
+      rcases projRun with ⟨projAnswer, projState⟩
+      have hProjSound :=
+        psKernelDefEqTryUnfoldProjApp_configuration_sound
+          coreWhnf hCore
+          context state projState left projAnswer
+          hConfig hProj
+      cases projAnswer with
+      | some leftValue =>
+          have hFinish :=
+            psKernelDefEqFinishLazyStep_configuration_sound
+              defeq hQuick
+              context projState nextState
+              leftValue right answer
+              hProjSound.1 hRun
+          exact
+            psKernelDeltaStepPostcondition_transport
+              context nextState
+              left right leftValue right answer
+              hProjSound.2
+              (PsKernelReductionClosure.refl right)
+              hFinish
+      | none =>
+          cases hDelta :
+              psKernelDefEqDeltaOnce
+                coreWhnf context projState right with
+          | error error =>
+              simp only [hDelta] at hRun
+              simp at hRun
+          | ok deltaRun =>
+              simp only [hDelta] at hRun
+              rcases deltaRun with ⟨rightValue, deltaState⟩
+              have hDeltaSound :=
+                psKernelDefEqDeltaOnce_configuration_sound
+                  coreWhnf hCore
+                  context projState deltaState
+                  right rightValue hProjSound.1 hDelta
+              have hFinish :=
+                psKernelDefEqFinishLazyStep_configuration_sound
+                  defeq hQuick
+                  context deltaState nextState
+                  left rightValue answer
+                  hDeltaSound.2 hRun
+              exact
+                psKernelDeltaStepPostcondition_transport
+                  context nextState
+                  left right left rightValue answer
+                  (PsKernelReductionClosure.refl left)
+                  hDeltaSound.1
+                  hFinish
+
+
+theorem psKernelDefEqLazyStepLeftOnly_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (answer : PsKernelDeltaStepResult)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqLazyStepLeftOnly
+          defeq coreWhnf context state left right =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelDeltaStepPostcondition
+      context nextState left right answer := by
+  unfold psKernelDefEqLazyStepLeftOnly at hRun
+  cases hProj :
+      psKernelDefEqTryUnfoldProjApp
+        coreWhnf context state right with
+  | error error =>
+      simp only [hProj] at hRun
+      simp at hRun
+  | ok projRun =>
+      simp only [hProj] at hRun
+      rcases projRun with ⟨projAnswer, projState⟩
+      have hProjSound :=
+        psKernelDefEqTryUnfoldProjApp_configuration_sound
+          coreWhnf hCore
+          context state projState right projAnswer
+          hConfig hProj
+      cases projAnswer with
+      | some rightValue =>
+          have hFinish :=
+            psKernelDefEqFinishLazyStep_configuration_sound
+              defeq hQuick
+              context projState nextState
+              left rightValue answer
+              hProjSound.1 hRun
+          exact
+            psKernelDeltaStepPostcondition_transport
+              context nextState
+              left right left rightValue answer
+              (PsKernelReductionClosure.refl left)
+              hProjSound.2
+              hFinish
+      | none =>
+          cases hDelta :
+              psKernelDefEqDeltaOnce
+                coreWhnf context projState left with
+          | error error =>
+              simp only [hDelta] at hRun
+              simp at hRun
+          | ok deltaRun =>
+              simp only [hDelta] at hRun
+              rcases deltaRun with ⟨leftValue, deltaState⟩
+              have hDeltaSound :=
+                psKernelDefEqDeltaOnce_configuration_sound
+                  coreWhnf hCore
+                  context projState deltaState
+                  left leftValue hProjSound.1 hDelta
+              have hFinish :=
+                psKernelDefEqFinishLazyStep_configuration_sound
+                  defeq hQuick
+                  context deltaState nextState
+                  leftValue right answer
+                  hDeltaSound.2 hRun
+              exact
+                psKernelDeltaStepPostcondition_transport
+                  context nextState
+                  left right leftValue right answer
+                  hDeltaSound.1
+                  (PsKernelReductionClosure.refl right)
+                  hFinish

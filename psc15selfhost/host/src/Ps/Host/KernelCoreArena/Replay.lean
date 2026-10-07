@@ -209,7 +209,6 @@ def arenaResources : PsKernelResourcePolicy :=
     maxDeclarations := 0 }
 
 structure State where
-  transport : PSC1Kernel.Replay.State
   coreTransport : PsKernelCoreArena.CoreIntern.State
   session : PsKernelKernelSession
   allowHistoricalMetadata : Bool
@@ -223,7 +222,6 @@ def State.empty
     (allowHistoricalMetadata : Bool := false) : Except Failure State := do
   let session ← liftKernel (psKernelKernelSessionEmpty arenaResources psKernelProviderDefault)
   pure {
-    transport := PSC1Kernel.Replay.State.empty
     coreTransport := PsKernelCoreArena.CoreIntern.State.empty
     session := session
     allowHistoricalMetadata := allowHistoricalMetadata
@@ -484,33 +482,27 @@ def State.replayRecord
   | .nameR value => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
-      let transport ← liftTransport (state.transport.addNameRecord value)
       let coreTransport ← liftTransport (state.coreTransport.addNameRecord value)
       pure {
         state with
-          transport := transport
           coreTransport := coreTransport
           records := state.records + 1
       }
   | .levelR value => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
-      let transport ← liftTransport (state.transport.addLevelRecord value)
       let coreTransport ← liftTransport (state.coreTransport.addLevelRecord value)
       pure {
         state with
-          transport := transport
           coreTransport := coreTransport
           records := state.records + 1
       }
   | .exprR value => do
       unless state.sawMeta do
         throw (.rejected "lean4export metadata must be the first record")
-      let transport ← liftTransport (state.transport.addExprRecord value)
       let coreTransport ← liftTransport (state.coreTransport.addExprRecord value)
       pure {
         state with
-          transport := transport
           coreTransport := coreTransport
           records := state.records + 1
       }

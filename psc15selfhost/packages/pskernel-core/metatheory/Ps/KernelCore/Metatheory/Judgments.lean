@@ -1583,8 +1583,11 @@ inductive PsKernelLambdaSpineJudgment
           rightDomain
           subst)
       (hDependent :
-        psKernelExprHasLooseBVar leftBody = true ∨
-          psKernelExprHasLooseBVar rightBody = true)
+        (if psKernelExprHasLooseBVar leftBody then
+           true
+         else
+           psKernelExprHasLooseBVar rightBody) =
+          true)
       (hFresh :
         psKernelLocalContextFind localContext fresh =
           Option.none)
@@ -1686,8 +1689,11 @@ inductive PsKernelForallSpineJudgment
           rightDomain
           subst)
       (hDependent :
-        psKernelExprHasLooseBVar leftBody = true ∨
-          psKernelExprHasLooseBVar rightBody = true)
+        (if psKernelExprHasLooseBVar leftBody then
+           true
+         else
+           psKernelExprHasLooseBVar rightBody) =
+          true)
       (hFresh :
         psKernelLocalContextFind localContext fresh =
           Option.none)

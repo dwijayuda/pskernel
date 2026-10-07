@@ -636,8 +636,12 @@ def psKernelInferCoreWithFuel
                             Except.error error
                         | Except.ok bodyResult =>
                             let bodyType :=
-                              psKernelExprCheapBetaReduce
-                                (Prod.fst bodyResult);
+                              match openedBody with
+                              | PsKernelExpr.lam _ _ _ _ =>
+                                  Prod.fst bodyResult
+                              | _ =>
+                                  psKernelExprCheapBetaReduce
+                                    (Prod.fst bodyResult);
                             let closedBody :=
                               psKernelExprAbstractFVars
                                 bodyType

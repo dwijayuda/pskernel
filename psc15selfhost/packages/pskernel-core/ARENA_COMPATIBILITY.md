@@ -70,3 +70,4 @@ failure is classified before any production semantic change is considered.
 - Foundation readiness now reports expression-contract result categories explicitly when that boundary fails.
 - KernelContract-v1 outcome adaptation recognizes stable diagnostic families with appended `;` details, preserving invalid-vs-internal classification for enriched checker diagnostics.
 - Foundation recursor differential now enforces the production cache invariant: local-fvar expressions must not be published in semantic inference caches.
+- Foundation DefEq differentials now require success-cache publication only for cache-eligible expression pairs; fvar-containing successful comparisons are validated semantically without contradicting the scoped-cache policy.

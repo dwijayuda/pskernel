@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.DefEq.BinderSpines
-import Ps.KernelCore.Metatheory.Judgments
+import Ps.KernelCore.Metatheory.ContextState
+import Ps.KernelCore.Metatheory.CacheSemantic
 
 theorem psKernelDefEqFinish_false
     (state : PsKernelCheckerState)
@@ -158,6 +159,124 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
                     hDefEq
                 ⟩)
 
+
+
+theorem psKernelDefEqFinish_value
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool) :
+    Prod.fst
+        (psKernelDefEqFinish
+          state left right value) =
+      value := by
+  cases value with
+  | false =>
+      rfl
+  | true =>
+      exact psKernelDefEqFinish_true_value state left right
+
+
+theorem psKernelDefEqFinish_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        state)
+    (hDefEq :
+      PsKernelDefEqJudgment
+        context.environment
+        context.localContext
+        left
+        right) :
+    PsKernelCheckerConfigurationSound
+      context
+      (Prod.snd
+        (psKernelDefEqFinish
+          state
+          left
+          right
+          value)) := by
+  rcases hConfig with
+    ⟨hIndex, hFresh, hState⟩
+  refine ⟨hIndex, ?_, ?_⟩
+  · have hNext :
+        (Prod.snd
+          (psKernelDefEqFinish
+            state left right value)).nextFresh =
+          state.nextFresh := by
+      cases value with
+      | false =>
+          rfl
+      | true =>
+          cases hEligible :
+              psKernelSemanticPairCacheEligible
+                left
+                right <;>
+            simp [
+              psKernelDefEqFinish,
+              hEligible,
+              psKernelCheckerStateWithSuccess
+            ]
+    simpa [hNext] using hFresh
+  · exact
+      psKernelDefEqFinish_preserves_semantic_sound
+        context.environment
+        context.localContext
+        state
+        left
+        right
+        value
+        psKernelDefEqCacheInsertLaw_all
+        hState
+        hDefEq
+
+
+theorem psKernelDefEqFinish_configuration_refines
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        state)
+    (hDefEq :
+      value = true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right) :
+    PsKernelCheckerConfigurationSound
+        context
+        (Prod.snd
+          (psKernelDefEqFinish
+            state left right value)) ∧
+      (Prod.fst
+          (psKernelDefEqFinish
+            state left right value) =
+        true ->
+        PsKernelDefEqJudgment
+          context.environment
+          context.localContext
+          left
+          right) := by
+  cases value with
+  | false =>
+      constructor
+      · simpa [psKernelDefEqFinish] using hConfig
+      · simp [psKernelDefEqFinish]
+  | true =>
+      have hSemantic := hDefEq rfl
+      constructor
+      · exact
+          psKernelDefEqFinish_preserves_configuration
+            context state left right true hConfig hSemantic
+      · intro _
+        exact hSemantic
 
 
 theorem psKernelDefEqFinish_fvar_pair_not_cached

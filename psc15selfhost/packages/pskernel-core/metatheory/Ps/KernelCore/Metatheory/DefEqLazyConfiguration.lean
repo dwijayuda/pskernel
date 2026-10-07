@@ -366,3 +366,102 @@ theorem psKernelDefEqUnfold_configuration_preserves
         hIndex
         psKernelReductionCacheInsertLaw_all
         hSemantic
+
+
+/-
+One delta unfolding followed by core WHNF is a genuine reduction closure.
+Unfold-cache soundness and the full checker configuration are preserved
+through both stages; the delta step never manufactures definitional equality.
+-/
+theorem psKernelDefEqDeltaOnce_configuration_sound
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hRun :
+      psKernelDefEqDeltaOnce
+          coreWhnf context state expr =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelReductionClosure
+        context.environment context.localContext expr result ∧
+      PsKernelCheckerConfigurationSound context nextState := by
+  let unfolded :=
+    psKernelDefEqUnfold context state expr
+  have hUnfoldConfig :
+      PsKernelCheckerConfigurationSound
+        context (Prod.snd unfolded) := by
+    simpa [unfolded] using
+      (psKernelDefEqUnfold_configuration_preserves
+        context state expr hConfig)
+  have hUnfoldCache :
+      PsKernelReductionCacheSound
+        context.environment
+        context.localContext
+        state.unfold := by
+    rcases hConfig.2.2 with
+      ⟨_, _, _, _, hCache, _⟩
+    exact hCache
+  cases hValue : Prod.fst unfolded with
+  | none =>
+      simp [
+        psKernelDefEqDeltaOnce,
+        unfolded,
+        hValue
+      ] at hRun
+  | some unfoldedExpr =>
+      have hCoreRun :
+          coreWhnf
+              context
+              (Prod.snd unfolded)
+              unfoldedExpr
+              false
+              true =
+            Except.ok (Prod.mk result nextState) := by
+        simpa [
+          psKernelDefEqDeltaOnce,
+          unfolded,
+          hValue
+        ] using hRun
+      have hCoreSound :=
+        hCore
+          context
+          (Prod.snd unfolded)
+          nextState
+          unfoldedExpr
+          result
+          false
+          true
+          hUnfoldConfig
+          hCoreRun
+      have hUnfoldSome :
+          Prod.fst
+              (psKernelDefEqUnfold
+                context state expr) =
+            Option.some unfoldedExpr := by
+        simpa [unfolded] using hValue
+      have hUnfoldReduction :=
+        psKernelDefEqUnfold_some_refines_reduction
+          context state expr unfoldedExpr
+          hConfig.1
+          hUnfoldCache
+          hUnfoldSome
+      exact
+        ⟨
+          psKernelReductionClosure_trans
+            context.environment
+            context.localContext
+            expr
+            unfoldedExpr
+            result
+            hUnfoldReduction
+            hCoreSound.1,
+          hCoreSound.2
+        ⟩

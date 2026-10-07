@@ -2723,9 +2723,26 @@ theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
                   (psKernelExprListLength (List.cons head tail))
                   offset <
                 index := by
-            have hThreshold := hLengthPlusThreshold
-            rw [Nat.add_succ] at hThreshold
-            exact Nat.lt_of_succ_le hThreshold
+            let listLength :=
+              psKernelExprListLength (List.cons head tail)
+            have hAddSucc :
+                Nat.add listLength (Nat.succ offset) =
+                  Nat.succ (Nat.add listLength offset) :=
+              Nat.add_succ listLength offset
+            have hThreshold :
+                Nat.add listLength (Nat.succ offset) ≤
+                  index := by
+              simpa [listLength] using hLengthPlusThreshold
+            have hSuccLe :
+                Nat.succ (Nat.add listLength offset) ≤
+                  index :=
+              Eq.mp
+                (congrArg
+                  (fun value => value ≤ index)
+                  hAddSucc)
+                hThreshold
+            simpa [listLength] using
+              (Nat.lt_of_succ_le hSuccLe)
           have hOffsetPlusLengthLt :
               Nat.add
                   offset

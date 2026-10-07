@@ -51,6 +51,7 @@
       "scripts/compiler-checked-service.mjs",
       "scripts/evidence-envelope.mjs",
       "scripts/ir-artifact.mjs",
+      "scripts/js-abi-artifact.mjs",
       "scripts/kernel-checked-session.mjs",
       "scripts/kernel-contract.mjs",
       "scripts/observed-build-archive.mjs",

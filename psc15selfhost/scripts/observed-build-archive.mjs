@@ -3,6 +3,7 @@ import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
+import { decodeJsIrArtifact, decodeWasmIrArtifact } from './target-ir-artifact.mjs';
 
 const contract = 'psc-observed-build-archive/1';
 const defaults = Object.freeze({ maxArchiveBytes: 256 * 1024 * 1024, maxArtifactBytes: 128 * 1024 * 1024,
@@ -28,7 +29,8 @@ function graphValue(bytes, bound) {
   if (graph.schemaVersion !== 1 || graph.contract !== 'psc-observed-build-graph/1' ||
       graph.authority !== 'audit-record-only' ||
       !['observed-composite-edges', 'observed-erasure-validation-and-composite-backend-edges',
-        'observed-erasure-validation-specialization-and-composite-backend-edges'].includes(graph.coverage) ||
+        'observed-erasure-validation-specialization-and-composite-backend-edges',
+        'observed-erasure-validation-specialization-target-ir-and-executable-edges'].includes(graph.coverage) ||
       !Array.isArray(graph.entries) ||
       !Array.isArray(graph.executions) || !graph.executions.length || graph.executions.length > graph.entries.length ||
       !Array.isArray(graph.remaining) || !graph.remaining.every(value => typeof value === 'string')) fail('GRAPH_SCHEMA');
@@ -119,7 +121,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     const graph = graphValue(resolveArtifact(archive.graphId), bound);
     if (graph.entries.length + 1 !== blobs.size) fail('ARTIFACT_SET');
     for (const entry of graph.entries) resolveArtifact(entry.identity);
-    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [];
+    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [];
     for (const identity of graph.executions) {
       const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions });
       executions.push(result);
@@ -138,6 +140,18 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
         specializationCorrespondences.push(verifySpecializationCorrespondence(
           { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) },
           { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) }, { maxBytes: bound.maxArtifactBytes }));
+      }
+      if (definition.passId === 'psc-specialized-ir-to-js-ir/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            definition.semanticRelationId !== 'psc-specialized-ir-js-ir/1') fail('JS_IR_SUBJECT');
+        decodeJsIrArtifact(resolveArtifact(execution.outputs[0]), { maxBytes: bound.maxArtifactBytes });
+        targetIrArtifacts.push(Object.freeze({ kind: 'js-ir', inputId: execution.inputs[0], outputId: execution.outputs[0] }));
+      }
+      if (definition.passId === 'psc-specialized-ir-to-wasm-ir/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            definition.semanticRelationId !== 'psc-specialized-ir-wasm-ir/1') fail('WASM_IR_SUBJECT');
+        decodeWasmIrArtifact(resolveArtifact(execution.outputs[0]), { maxBytes: bound.maxArtifactBytes });
+        targetIrArtifacts.push(Object.freeze({ kind: 'wasm-ir', inputId: execution.inputs[0], outputId: execution.outputs[0] }));
       }
       if (definition.passId === 'psc-verified-ir-to-js-abi-plan/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
@@ -158,7 +172,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     }
     return { kind: 'accepted', contract: 'psc-observed-build-verification/1', graphId: archive.graphId,
       acceptanceScope: 'observed-artifact-integrity-only', integrityVerified: true, artifactCount: blobs.size,
-      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans,
+      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts,
       fullInputClosureEstablished: false, semanticClaimsVerified: false,
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {

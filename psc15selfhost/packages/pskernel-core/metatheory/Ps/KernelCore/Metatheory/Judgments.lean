@@ -313,6 +313,23 @@ inductive PsKernelReductionStep
         (PsKernelExpr.lit
           (PsKernelLiteral.nat
             (psKernelNatPow left right)))
+  | natPowZero
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatPowName = true)
+      (hZero :
+        Nat.beq right 0 = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat 1))
   | natGcd
       (op : PsKernelName)
       (left right : Nat)
@@ -402,6 +419,23 @@ inductive PsKernelReductionStep
         (PsKernelExpr.lit
           (PsKernelLiteral.nat
             (psKernelNatShiftLeft left right)))
+  | natShiftLeftZero
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatShiftLeftName = true)
+      (hZero :
+        Nat.beq left 0 = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat 0))
   | natShiftRight
       (op : PsKernelName)
       (left right : Nat)

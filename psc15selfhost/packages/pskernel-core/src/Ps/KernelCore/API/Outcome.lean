@@ -23,13 +23,22 @@ def psKernelErrorOutcome (error : PsKernelError) : PsKernelOutcome :=
   | PsKernelError.resourceExhausted _ _ => PsKernelOutcome.resourceExhausted
   | PsKernelError.internalError _ => PsKernelOutcome.internalError
 
+def psKernelDiagnosticMatches
+    (message : String)
+    (diagnostic : String) : Bool :=
+  if psKernelStringEq message diagnostic then
+    true
+  else
+    message.startsWith
+      (String.Internal.append diagnostic ";")
+
 def psKernelDiagnosticMember
     (message : String)
     (messages : List String) : Bool :=
   match messages with
   | List.nil => false
   | List.cons head rest =>
-      if psKernelStringEq message head then true
+      if psKernelDiagnosticMatches message head then true
       else psKernelDiagnosticMember message rest
 
 def psKernelKnownInvalidDiagnostic (message : String) : Bool :=

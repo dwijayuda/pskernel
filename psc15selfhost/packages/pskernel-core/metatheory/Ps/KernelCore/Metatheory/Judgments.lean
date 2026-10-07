@@ -297,6 +297,127 @@ inductive PsKernelReductionStep
             (PsKernelExpr.lit (PsKernelLiteral.nat left)))
           (PsKernelExpr.lit (PsKernelLiteral.nat right)))
         (psKernelBoolExpr (Nat.ble left right))
+  | natPow
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatPowName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (psKernelNatPow left right)))
+  | natGcd
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatGcdName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (psKernelNatGcd left right)))
+  | natLand
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatLandName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (psKernelNatBitwise
+              PsKernelNatBitwiseOp.land
+              left
+              right)))
+  | natLor
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatLorName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (psKernelNatBitwise
+              PsKernelNatBitwiseOp.lor
+              left
+              right)))
+  | natXor
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatXorName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (psKernelNatBitwise
+              PsKernelNatBitwiseOp.xor
+              left
+              right)))
+  | natShiftLeft
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatShiftLeftName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (psKernelNatShiftLeft left right)))
+  | natShiftRight
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatShiftRightName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (psKernelNatShiftRight left right)))
 
 inductive PsKernelStructuralExprEq :
     PsKernelExpr -> PsKernelExpr -> Prop

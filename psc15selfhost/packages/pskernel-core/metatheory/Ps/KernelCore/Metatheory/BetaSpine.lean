@@ -1376,6 +1376,101 @@ theorem psKernelExprListGet_none_length_le
           omega
 
 
+theorem psKernelExprInstantiateAtReference_bvar_before_cons
+    (index start offset : Nat)
+    (head : PsKernelExpr)
+    (tail : List PsKernelExpr)
+    (hBefore :
+      psKernelNatLt
+          index
+          (Nat.add start offset) =
+        true) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.bvar index)
+        start
+        (List.cons head tail)
+        offset =
+      PsKernelExpr.bvar index := by
+  simp only [
+    psKernelExprInstantiateAtReference,
+    psKernelExprListIsEmpty,
+    Bool.false_eq_true,
+    ite_false,
+    psKernelExprInstantiateAtReferenceChanged
+  ]
+  rw [hBefore]
+  rfl
+
+
+theorem psKernelExprInstantiateAtReference_bvar_hit_cons
+    (index start offset : Nat)
+    (head replacement : PsKernelExpr)
+    (tail : List PsKernelExpr)
+    (hBefore :
+      psKernelNatLt
+          index
+          (Nat.add start offset) =
+        false)
+    (hGet :
+      psKernelExprListGet
+          (List.cons head tail)
+          (Nat.sub index (Nat.add start offset)) =
+        Option.some replacement) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.bvar index)
+        start
+        (List.cons head tail)
+        offset =
+      psKernelExprLiftLooseBVarsReference
+        replacement
+        0
+        offset := by
+  simp only [
+    psKernelExprInstantiateAtReference,
+    psKernelExprListIsEmpty,
+    Bool.false_eq_true,
+    ite_false,
+    psKernelExprInstantiateAtReferenceChanged
+  ]
+  rw [hBefore, hGet]
+  rfl
+
+
+theorem psKernelExprInstantiateAtReference_bvar_miss_cons
+    (index start offset : Nat)
+    (head : PsKernelExpr)
+    (tail : List PsKernelExpr)
+    (hBefore :
+      psKernelNatLt
+          index
+          (Nat.add start offset) =
+        false)
+    (hGet :
+      psKernelExprListGet
+          (List.cons head tail)
+          (Nat.sub index (Nat.add start offset)) =
+        Option.none) :
+    psKernelExprInstantiateAtReference
+        (PsKernelExpr.bvar index)
+        start
+        (List.cons head tail)
+        offset =
+      PsKernelExpr.bvar
+        (Nat.sub
+          index
+          (psKernelExprListLength
+            (List.cons head tail))) := by
+  simp only [
+    psKernelExprInstantiateAtReference,
+    psKernelExprListIsEmpty,
+    Bool.false_eq_true,
+    ite_false,
+    psKernelExprInstantiateAtReferenceChanged
+  ]
+  rw [hBefore, hGet]
+  rfl
+
+
 theorem psKernelExprInstantiateAtReference_singleton_above
     (index offset : Nat)
     (replacement : PsKernelExpr)

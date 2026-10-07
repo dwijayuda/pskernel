@@ -14,7 +14,7 @@ for (const entry of registry.entries ?? []) {
   if (!allowed.has(entry.status)) throw new Error("PSC_ARCH_REGISTRY_STATUS: " + entry.id);
   if (entry.canonicalPath) await access(path.join(root, entry.canonicalPath));
 }
-for (const required of ["pscv-architecture/v3","proofscript-kernel-contract/1","psc-verified-ir/1","psc-runtime-semantics/1","psc-provider-security/1","psc-trust-manifest/1","psc-checked-core-capability/1"]) {
+for (const required of ["pscv-architecture/v3","pscv-v1","proofscript-kernel-contract/1","psc-verified-ir/1","psc-runtime-semantics/1","psc-provider-security/1","psc-trust-manifest/1","psc-checked-core-capability/1"]) {
   if (!ids.has(required)) throw new Error("PSC_ARCH_REGISTRY_REQUIRED: " + required);
 }
 process.stdout.write("PSCV_ARCHITECTURE_REGISTRY: PASS (" + ids.size + " identities)\n");

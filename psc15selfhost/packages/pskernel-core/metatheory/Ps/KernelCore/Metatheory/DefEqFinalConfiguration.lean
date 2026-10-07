@@ -222,6 +222,7 @@ theorem psKernelDefEqEtaStructCoreWith_configuration_preserves
           simp only [hFind] at hSuccess
           cases info with
           | ctorInfo ctor =>
+              simp only at hSuccess
               by_cases hArity :
                   Nat.beq
                       (psKernelExprListLength

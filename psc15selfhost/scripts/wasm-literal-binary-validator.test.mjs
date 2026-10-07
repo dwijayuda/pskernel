@@ -96,3 +96,15 @@ test('offline certificate boundary replays the binary relation with exact pinned
   assert.equal((await badBoundary.check({ certificate: badCert, subject: bad.subject })).kind, 'rejectedInvalid');
   boundary.close(); badBoundary.close();
 });
+
+test('export names retain a leading BOM and numeric expectations reject trailing line terminators',async()=>{
+  const named=Buffer.concat([bytes.subarray(0,19),
+    Buffer.from([7,13,1,9,239,187,191,...Buffer.from('answer'),0,0]),bytes.subarray(31)]);
+  const instance=new WebAssembly.Instance(new WebAssembly.Module(named));
+  assert.equal(instance.exports['\uFEFFanswer'](),42);
+  assert.equal(instance.exports.answer,undefined);
+  assert.match(validateWasmLiteralBinary(named,answer).code,/LITERAL_MISMATCH/);
+  assert.equal(validateWasmLiteralBinary(named,expected([{name:'\uFEFFanswer',type:'uint32',value:'42'}])).kind,'accepted');
+  for(const suffix of ['\n','\r','\u2028','\u2029'])
+    assert.match(validateWasmLiteralBinary(bytes,expected([{name:'answer',type:'uint32',value:'42'+suffix}])).code,/EXPECTATION_ENTRY/);
+});

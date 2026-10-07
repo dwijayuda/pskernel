@@ -45,7 +45,7 @@ class Reader {
   count() { const count = this.u32(); if (count > this.limits.maxFunctions) exhausted('VECTOR_COUNT'); return count; }
   name() {
     const length = this.u32(); if (length > this.limits.maxNameBytes) exhausted('NAME_BYTES');
-    try { return new TextDecoder('utf-8', { fatal: true }).decode(this.take(length)); }
+    try { return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(this.take(length)); }
     catch (error) { if (error instanceof ValidationError) throw error; invalid('UTF8'); }
   }
   done() { if (this.at !== this.bytes.length) invalid('TRAILING_BYTES'); }
@@ -123,7 +123,7 @@ export function validateWasmLiteralBinary(input, expectation, resourceLimits = {
       if (!entry || Object.keys(entry).sort().join(',') !== 'name,type,value' || typeof entry.name !== 'string' ||
           Buffer.byteLength(entry.name) > bound.maxNameBytes || expectations.has(entry.name) ||
           !['uint32', 'int32', 'bool'].includes(entry.type) || typeof entry.value !== 'string' ||
-          entry.value.length > 11 || !/^(0|-?[1-9][0-9]*)$/u.test(entry.value)) invalid('EXPECTATION_ENTRY');
+          entry.value.length > 11 || !/^(0|-?[1-9][0-9]*)(?![\s\S])/u.test(entry.value)) invalid('EXPECTATION_ENTRY');
       const integer = BigInt(entry.value);
       const minimum = entry.type === 'int32' ? -2147483648n : 0n;
       const maximum = entry.type === 'uint32' ? 4294967295n : entry.type === 'bool' ? 1n : 2147483647n;

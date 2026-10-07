@@ -30,7 +30,7 @@ export function wasmFunctionExports(bytes) {
       for (let item = 0; item < count; item++) {
         const length = u32(), nameEnd = position + length;
         if (nameEnd > limit) throw new Error('PSC_WASM_DIAGNOSTIC_NAME');
-        const name = new TextDecoder('utf-8', { fatal: true }).decode(bytes.subarray(position, nameEnd));
+        const name = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes.subarray(position, nameEnd));
         position = nameEnd;
         const kind = byte(), index = u32();
         if (kind === 0) names.set(index, [...(names.get(index) ?? []), name]);

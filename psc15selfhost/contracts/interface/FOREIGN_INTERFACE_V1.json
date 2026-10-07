@@ -121,7 +121,7 @@
       "allocation or memory failures may leave prior writes/allocations; no rollback or automatic deallocation is promised",
       "the JavaScript codec is host runtime support; the portable compiler remains PSC1"
     ],
-    "validation": "1ca7268 passed full main cloud CI (37653684228/job 112903260891), including eight actual-memory/layout comparison test groups; new core-value additions await cloud validation.",
+    "validation": "e78ee2b passed full main cloud CI (37655133216/job 112908206215), including twelve memory/core-value groups, actual Wasm i64 allocator/identity calls, independent portable layout comparison and inherited compiler/profile gates.",
     "assurance": "No global adapter preservation, resource ownership, conformance or release claim.",
     "coreValues": {
       "contract": "psc-canonical-core-values-sync-utf8/1",
@@ -135,5 +135,6 @@
       ],
       "authority": "value conversion only; no function binding, source checking, post-return or component instance lifecycle"
     }
-  }
+  },
+  "coreSignatureBoundary": "contracts/interface/WASM_CORE_SIGNATURES_V1.json"
 }

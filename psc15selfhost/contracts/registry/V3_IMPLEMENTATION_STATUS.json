@@ -280,7 +280,8 @@
         "packages/interface-ir/src/Ps/InterfaceIr/Wit.lean",
         "contracts/interface/FOREIGN_INTERFACE_V1.json",
         "packages/interface-ir/src/Ps/InterfaceIr/CanonicalAbi.lean",
-        "scripts/canonical-memory.mjs"
+        "scripts/canonical-memory.mjs",
+        "scripts/wasm-core-signatures.mjs"
       ],
       "completion": "Typed functions, aggregates, handles, ownership, errors, streams/futures, targets and capability imports/exports drive adapters.",
       "assurance": "pending"

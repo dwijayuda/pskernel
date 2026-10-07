@@ -1,5 +1,28 @@
 # AI Work State
 
+## Arena / Mathlib parallel lane — 2026-10-07
+
+- Branch: `pscv/pskernel-core-arena-v1`, intentionally separate from `pscv/prove-pskernel-core-v1`.
+- Base proof checkpoint: `f470e89395a58b34ba1a76219d484b8612abca38` (proof run #397 green).
+- Added host-only `lean4export 3.1.0 -> KernelContract-v1` streaming adapter and native `psc_kernel_core_arena` executable.
+- The adapter reuses the archived PSC1Kernel replay modules only for NDJSON grammar/intern-table transport; acceptance decisions are made only by current `packages/pskernel-core` through `psKernelV1AdmitDeclaration`.
+- Lean 4.34.0 -> 4.34.1 audit: six upstream commits, no `src/kernel/**` changes. Arena adapter accepts exact 4.34.1 export identity as an audited compatibility bridge while the semantic contract remains pinned to 4.34.0.
+- First full `Init.Prelude` replay built the checker successfully and exposed the first semantic mismatch at export line 103, `Functor/Functor.mk`: `simple inductive constructor field universe is too large`.
+- Root cause: `psKernelLevelNormalizeWithFuel` rebuilt a normalized max and then applied the common successor offset outside the max. Lean 4.34 and the older PSC1Kernel reference distribute the offset across normalized max branches. These forms are semantically equal, but Lean's algorithmic universe-ordering procedure is shape-sensitive/incomplete, so the noncanonical form can cause a false rejection.
+- Fix on the Arena branch: distribute common offsets across normalized max branches before `psKernelLevelMkMaxList`; added an exact Functor-shape differential regression in `test/KernelCore/Foundation/Core.lean`.
+- This is a confirmed PSKernel compatibility bug, not a Lean soundness bug.
+- Arena readiness CI now gates: exact Lean identity -> build adapter -> kernel foundation regressions -> metadata smoke -> full pinned `Init.Prelude` replay.
+- Do not copy the production-level fix into the proof/integration branches until the corrected Arena replay is green; once validated, reconcile the minimal semantic fix and regression into both lanes.
+
+Next Arena sequence after `Init.Prelude` is green:
+1. Arena tutorial corpus.
+2. Arena invalid/adversarial corpus with zero false accepts as the first priority.
+3. Remaining small accepted corpus.
+4. Full `Init`.
+5. Full `Std`.
+6. Full Mathlib streamed NDJSON.
+7. Prepare `checkers/pskernel-core.yaml` for upstream Lean Kernel Arena.
+
 ## Repository
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`

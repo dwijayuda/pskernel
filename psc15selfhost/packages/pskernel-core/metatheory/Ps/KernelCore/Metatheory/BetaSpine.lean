@@ -168,40 +168,56 @@ theorem psKernelExprInstantiateAtReferenceChanged_false_fst
       cases hBefore :
           psKernelNatLt index (Nat.add start offset) with
       | true =>
-          simp [
-            psKernelExprInstantiateAtReferenceChanged,
-            hBefore
-          ] at hRun
-          exact hRun.symm
+          simp only [
+            psKernelExprInstantiateAtReferenceChanged
+          ] at hFst
+          rw [hBefore] at hFst
+          simp at hFst
+          exact hFst.symm
       | false =>
           cases hGet :
               psKernelExprListGet
                 subst
                 (Nat.sub index (Nat.add start offset)) with
           | some replacement =>
-              simp [
-                psKernelExprInstantiateAtReferenceChanged,
-                hBefore,
-                hGet
-              ] at hRun
+              simp only [
+                psKernelExprInstantiateAtReferenceChanged
+              ] at hSnd
+              rw [hBefore] at hSnd
+              simp only [
+                Bool.false_eq_true,
+                ite_false
+              ] at hSnd
+              rw [hGet] at hSnd
+              simp at hSnd
           | none =>
               cases hEmpty :
                   psKernelExprListIsEmpty subst with
               | true =>
-                  simp [
-                    psKernelExprInstantiateAtReferenceChanged,
-                    hBefore,
-                    hGet,
-                    hEmpty
-                  ] at hRun
-                  exact hRun.symm
+                  simp only [
+                    psKernelExprInstantiateAtReferenceChanged
+                  ] at hFst
+                  rw [hBefore] at hFst
+                  simp only [
+                    Bool.false_eq_true,
+                    ite_false
+                  ] at hFst
+                  rw [hGet] at hFst
+                  rw [hEmpty] at hFst
+                  simp at hFst
+                  exact hFst.symm
               | false =>
-                  simp [
-                    psKernelExprInstantiateAtReferenceChanged,
-                    hBefore,
-                    hGet,
-                    hEmpty
-                  ] at hRun
+                  simp only [
+                    psKernelExprInstantiateAtReferenceChanged
+                  ] at hSnd
+                  rw [hBefore] at hSnd
+                  simp only [
+                    Bool.false_eq_true,
+                    ite_false
+                  ] at hSnd
+                  rw [hGet] at hSnd
+                  rw [hEmpty] at hSnd
+                  simp at hSnd
   | fvar name =>
       simp [psKernelExprInstantiateAtReferenceChanged] at hFst
       exact hFst.symm
@@ -1174,10 +1190,13 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
             if_false
           ]
           simp only [
-            psKernelExprInstantiateAtReferenceChanged,
-            hNatLt,
+            psKernelExprInstantiateAtReferenceChanged
+          ]
+          simp only [Nat.zero_add]
+          rw [hNatLt]
+          simp only [
             Bool.false_eq_true,
-            if_false
+            ite_false
           ]
           rw [hRelative]
           simp [

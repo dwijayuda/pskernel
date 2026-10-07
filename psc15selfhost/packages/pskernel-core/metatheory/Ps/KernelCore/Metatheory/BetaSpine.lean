@@ -2205,3 +2205,245 @@ theorem psKernelWhnfCountLambdas_refines_reference
       (Nat.succ (psKernelExprNodeCount current))
       (Nat.lt_succ_self
         (psKernelExprNodeCount current))
+
+
+theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
+    (index offset : Nat)
+    (replacement head : PsKernelExpr)
+    (tail : List PsKernelExpr) :
+    psKernelExprInstantiateAtReference
+        (psKernelExprInstantiateAtReference
+          (PsKernelExpr.bvar index)
+          0
+          (List.cons head tail)
+          (Nat.succ offset))
+        0
+        (List.cons replacement List.nil)
+        offset =
+      psKernelExprInstantiateAtReference
+        (PsKernelExpr.bvar index)
+        0
+        (List.cons replacement (List.cons head tail))
+        offset := by
+  by_cases hLt : index < offset
+  · have hInnerBefore :
+        psKernelNatLt
+            index
+            (Nat.add 0 (Nat.succ offset)) =
+          true := by
+      simpa using
+        psKernelNatLt_true_of_lt
+          index
+          (Nat.succ offset)
+          (Nat.lt_trans hLt (Nat.lt_succ_self offset))
+    have hOuterBefore :
+        psKernelNatLt
+            index
+            (Nat.add 0 offset) =
+          true := by
+      simpa using
+        psKernelNatLt_true_of_lt
+          index
+          offset
+          hLt
+    rw [
+      psKernelExprInstantiateAtReference_bvar_before_cons
+        index 0 (Nat.succ offset) head tail hInnerBefore,
+      psKernelExprInstantiateAtReference_bvar_before_cons
+        index 0 offset replacement List.nil hOuterBefore,
+      psKernelExprInstantiateAtReference_bvar_before_cons
+        index 0 offset replacement (List.cons head tail) hOuterBefore
+    ]
+  · by_cases hEq : index = offset
+    · subst index
+      have hInnerBefore :
+          psKernelNatLt
+              offset
+              (Nat.add 0 (Nat.succ offset)) =
+            true := by
+        simpa using
+          psKernelNatLt_true_of_lt
+            offset
+            (Nat.succ offset)
+            (Nat.lt_succ_self offset)
+      have hOuterBefore :
+          psKernelNatLt
+              offset
+              (Nat.add 0 offset) =
+            false := by
+        simpa using
+          psKernelNatLt_false_of_le
+            offset
+            offset
+            (Nat.le_refl offset)
+      have hSingletonGet :
+          psKernelExprListGet
+              (List.cons replacement List.nil)
+              (Nat.sub offset (Nat.add 0 offset)) =
+            Option.some replacement := by
+        simp [psKernelExprListGet]
+      have hCombinedGet :
+          psKernelExprListGet
+              (List.cons replacement (List.cons head tail))
+              (Nat.sub offset (Nat.add 0 offset)) =
+            Option.some replacement := by
+        simp [psKernelExprListGet]
+      rw [
+        psKernelExprInstantiateAtReference_bvar_before_cons
+          offset 0 (Nat.succ offset) head tail hInnerBefore,
+        psKernelExprInstantiateAtReference_bvar_hit_cons
+          offset 0 offset replacement replacement List.nil
+          hOuterBefore hSingletonGet,
+        psKernelExprInstantiateAtReference_bvar_hit_cons
+          offset 0 offset replacement replacement (List.cons head tail)
+          hOuterBefore hCombinedGet
+      ]
+    · have hGt : offset < index := by
+        omega
+      have hInnerLe :
+          Nat.succ offset ≤ index :=
+        Nat.succ_le_of_lt hGt
+      have hInnerBefore :
+          psKernelNatLt
+              index
+              (Nat.add 0 (Nat.succ offset)) =
+            false := by
+        simpa using
+          psKernelNatLt_false_of_le
+            index
+            (Nat.succ offset)
+            hInnerLe
+      have hOuterBefore :
+          psKernelNatLt
+              index
+              (Nat.add 0 offset) =
+            false := by
+        simpa using
+          psKernelNatLt_false_of_le
+            index
+            offset
+            (Nat.le_of_lt hGt)
+      let relative :=
+        Nat.sub index (Nat.succ offset)
+      have hRelativeSucc :
+          Nat.sub index offset =
+            Nat.succ relative := by
+        dsimp [relative]
+        omega
+      cases hGet :
+          psKernelExprListGet
+            (List.cons head tail)
+            relative with
+      | some found =>
+          have hInnerGet :
+              psKernelExprListGet
+                  (List.cons head tail)
+                  (Nat.sub index (Nat.add 0 (Nat.succ offset))) =
+                Option.some found := by
+            simpa [relative] using hGet
+          have hInner :=
+            psKernelExprInstantiateAtReference_bvar_hit_cons
+              index
+              0
+              (Nat.succ offset)
+              head
+              found
+              tail
+              hInnerBefore
+              hInnerGet
+          rw [hInner]
+          have hLower :
+              psKernelExprInstantiateAtReference
+                  (psKernelExprLiftLooseBVarsReference
+                    found 0 (Nat.succ offset))
+                  0
+                  (List.cons replacement List.nil)
+                  offset =
+                psKernelExprLiftLooseBVarsReference
+                  found 0 offset := by
+            simpa using
+              psKernelExprLiftSucc_then_instantiateReference_lower
+                found
+                replacement
+                0
+                offset
+          rw [hLower]
+          have hCombinedGet :
+              psKernelExprListGet
+                  (List.cons replacement (List.cons head tail))
+                  (Nat.sub index (Nat.add 0 offset)) =
+                Option.some found := by
+            rw [Nat.zero_add, hRelativeSucc]
+            simpa [psKernelExprListGet] using hGet
+          rw [
+            psKernelExprInstantiateAtReference_bvar_hit_cons
+              index
+              0
+              offset
+              replacement
+              found
+              (List.cons head tail)
+              hOuterBefore
+              hCombinedGet
+          ]
+      | none =>
+          have hInnerGet :
+              psKernelExprListGet
+                  (List.cons head tail)
+                  (Nat.sub index (Nat.add 0 (Nat.succ offset))) =
+                Option.none := by
+            simpa [relative] using hGet
+          have hInner :=
+            psKernelExprInstantiateAtReference_bvar_miss_cons
+              index
+              0
+              (Nat.succ offset)
+              head
+              tail
+              hInnerBefore
+              hInnerGet
+          rw [hInner]
+          have hLengthBound :
+              psKernelExprListLength (List.cons head tail) ≤
+                relative :=
+            psKernelExprListGet_none_length_le
+              (List.cons head tail)
+              relative
+              hGet
+          have hReducedAbove :
+              offset <
+                Nat.sub
+                  index
+                  (psKernelExprListLength
+                    (List.cons head tail)) := by
+            dsimp [relative] at hLengthBound
+            omega
+          rw [
+            psKernelExprInstantiateAtReference_singleton_above
+              (Nat.sub
+                index
+                (psKernelExprListLength
+                  (List.cons head tail)))
+              offset
+              replacement
+              hReducedAbove
+          ]
+          have hCombinedGet :
+              psKernelExprListGet
+                  (List.cons replacement (List.cons head tail))
+                  (Nat.sub index (Nat.add 0 offset)) =
+                Option.none := by
+            rw [Nat.zero_add, hRelativeSucc]
+            simpa [psKernelExprListGet] using hGet
+          rw [
+            psKernelExprInstantiateAtReference_bvar_miss_cons
+              index
+              0
+              offset
+              replacement
+              (List.cons head tail)
+              hOuterBefore
+              hCombinedGet
+          ]
+          simp [psKernelExprListLength]
+          omega

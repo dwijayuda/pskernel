@@ -2447,3 +2447,146 @@ theorem psKernelExprInstantiateAtReference_bvar_fuse_singleton
           ]
           simp [psKernelExprListLength]
           omega
+
+
+theorem psKernelExprInstantiateAtReference_fuse_singleton
+    (expr replacement : PsKernelExpr)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAtReference
+        (psKernelExprInstantiateAtReference
+          expr
+          0
+          subst
+          (Nat.succ offset))
+        0
+        (List.cons replacement List.nil)
+        offset =
+      psKernelExprInstantiateAtReference
+        expr
+        0
+        (List.cons replacement subst)
+        offset := by
+  cases subst with
+  | nil =>
+      have hEmpty :
+          psKernelExprInstantiateAtReference
+              expr
+              0
+              List.nil
+              (Nat.succ offset) =
+            expr := by
+        simp [
+          psKernelExprInstantiateAtReference,
+          psKernelExprListIsEmpty
+        ]
+      rw [hEmpty]
+  | cons head tail =>
+      induction expr generalizing offset replacement head tail with
+      | bvar index =>
+          exact
+            psKernelExprInstantiateAtReference_bvar_fuse_singleton
+              index offset replacement head tail
+      | fvar name =>
+          simp [
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | mvar name =>
+          simp [
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | sort level =>
+          simp [
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | const name levels =>
+          simp [
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | lit literal =>
+          simp [
+            psKernelExprInstantiateAtReference,
+            psKernelExprInstantiateAtReferenceChanged,
+            psKernelExprListIsEmpty
+          ]
+      | app fn arg ihFn ihArg =>
+          rw [
+            psKernelExprInstantiateAtReference_app,
+            psKernelExprInstantiateAtReference_app,
+            psKernelExprInstantiateAtReference_app,
+            ihFn,
+            ihArg
+          ]
+      | lam name type body binderInfo ihType ihBody =>
+          rw [
+            psKernelExprInstantiateAtReference_lam,
+            psKernelExprInstantiateAtReference_lam,
+            psKernelExprInstantiateAtReference_lam,
+            ihType,
+            ihBody
+          ]
+      | forallE name type body binderInfo ihType ihBody =>
+          rw [
+            psKernelExprInstantiateAtReference_forallE,
+            psKernelExprInstantiateAtReference_forallE,
+            psKernelExprInstantiateAtReference_forallE,
+            ihType,
+            ihBody
+          ]
+      | letE name type value body nondep ihType ihValue ihBody =>
+          rw [
+            psKernelExprInstantiateAtReference_letE,
+            psKernelExprInstantiateAtReference_letE,
+            psKernelExprInstantiateAtReference_letE,
+            ihType,
+            ihValue,
+            ihBody
+          ]
+      | mdata metadata body ihBody =>
+          rw [
+            psKernelExprInstantiateAtReference_mdata,
+            psKernelExprInstantiateAtReference_mdata,
+            psKernelExprInstantiateAtReference_mdata,
+            ihBody
+          ]
+      | proj typeName index body ihBody =>
+          rw [
+            psKernelExprInstantiateAtReference_proj,
+            psKernelExprInstantiateAtReference_proj,
+            psKernelExprInstantiateAtReference_proj,
+            ihBody
+          ]
+
+
+theorem psKernelExprInstantiateAt_fuse_singleton
+    (expr replacement : PsKernelExpr)
+    (subst : List PsKernelExpr)
+    (offset : Nat) :
+    psKernelExprInstantiateAt
+        (psKernelExprInstantiateAt
+          expr
+          0
+          subst
+          (Nat.succ offset))
+        0
+        (List.cons replacement List.nil)
+        offset =
+      psKernelExprInstantiateAt
+        expr
+        0
+        (List.cons replacement subst)
+        offset := by
+  simp only [
+    psKernelExprInstantiateAt_refines_reference_core
+  ]
+  exact
+    psKernelExprInstantiateAtReference_fuse_singleton
+      expr replacement subst offset

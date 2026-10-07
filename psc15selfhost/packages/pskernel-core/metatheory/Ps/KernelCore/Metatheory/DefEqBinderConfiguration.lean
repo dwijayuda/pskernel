@@ -551,7 +551,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       leftOpened,
                       rightOpened,
                       hDomainResult,
-                      ite_true
+                      if_pos True.intro
                     ] using hSuccess)
           | false =>
               cases hDomainRun :
@@ -625,7 +625,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                               leftOpened,
                               rightOpened,
                               hDomainResult,
-                              ite_true
+                              if_pos True.intro
                             ] using hSuccess)
 
 
@@ -1020,7 +1020,7 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       leftOpened,
                       rightOpened,
                       hDomainResult,
-                      ite_true
+                      if_pos True.intro
                     ] using hSuccess)
           | false =>
               cases hDomainRun :
@@ -1094,7 +1094,7 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                               leftOpened,
                               rightOpened,
                               hDomainResult,
-                              ite_true
+                              if_pos True.intro
                             ] using hSuccess)
 
 

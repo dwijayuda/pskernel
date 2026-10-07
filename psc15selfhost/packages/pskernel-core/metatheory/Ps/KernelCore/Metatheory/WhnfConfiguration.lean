@@ -324,3 +324,521 @@ theorem psKernelWhnfAfterCore_configuration_refines
                           subst result
                           exact
                             ⟨hCombined, hFinishSemantic.2⟩
+
+
+theorem psKernelWhnfCoreMiss_configuration_refines
+    (remaining : Nat)
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (hPublic :
+      PsKernelWhnfConfigurationSound
+        (psKernelWhnfWithFuel remaining reduceRecursor))
+    (hRecursor :
+      PsKernelRecursorReductionConfigurationSound
+        reduceRecursor)
+    (hBeta :
+      PsKernelBetaSpineSoundLaw)
+    (hNative :
+      PsKernelNativeReductionSoundLaw)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      (match
+          psKernelWhnfCoreWithFuel
+            remaining
+            (psKernelWhnfWithFuel remaining reduceRecursor)
+            reduceRecursor
+            context
+            state
+            expr
+            false
+            false with
+       | Except.error error =>
+           Except.error error
+       | Except.ok coreResult =>
+           psKernelWhnfAfterCore
+             (psKernelWhnfWithFuel remaining reduceRecursor)
+             context
+             (Prod.snd coreResult)
+             expr
+             (Prod.fst coreResult)) =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelReductionClosure
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerConfigurationSound context nextState := by
+  cases hCore :
+      psKernelWhnfCoreWithFuel
+        remaining
+        (psKernelWhnfWithFuel remaining reduceRecursor)
+        reduceRecursor
+        context
+        state
+        expr
+        false
+        false with
+  | error error =>
+      simp [hCore] at hSuccess
+  | ok coreRun =>
+      rcases coreRun with ⟨core, coreState⟩
+      have hCoreSemantic :=
+        psKernelWhnfCoreWithFuel_public_configuration_refines
+          remaining
+          (psKernelWhnfWithFuel remaining reduceRecursor)
+          reduceRecursor
+          hPublic
+          hRecursor
+          hBeta
+          context
+          state
+          coreState
+          expr
+          core
+          hConfig
+          hCore
+      have hAfter :
+          psKernelWhnfAfterCore
+              (psKernelWhnfWithFuel remaining reduceRecursor)
+              context
+              coreState
+              expr
+              core =
+            Except.ok (Prod.mk result nextState) := by
+        simpa [hCore] using hSuccess
+      exact
+        psKernelWhnfAfterCore_configuration_refines
+          (psKernelWhnfWithFuel remaining reduceRecursor)
+          hPublic
+          hNative
+          context
+          coreState
+          nextState
+          expr
+          core
+          result
+          hCoreSemantic.2
+          hCoreSemantic.1
+          hAfter
+
+
+theorem psKernelWhnfCachedCore_configuration_refines
+    (remaining : Nat)
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (hPublic :
+      PsKernelWhnfConfigurationSound
+        (psKernelWhnfWithFuel remaining reduceRecursor))
+    (hRecursor :
+      PsKernelRecursorReductionConfigurationSound
+        reduceRecursor)
+    (hBeta :
+      PsKernelBetaSpineSoundLaw)
+    (hNative :
+      PsKernelNativeReductionSoundLaw)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      (match
+          if psKernelSemanticCacheEligible expr then
+            psKernelExprMapGet state.whnf expr
+          else
+            Option.none with
+       | Option.some cached =>
+           Except.ok (Prod.mk cached state)
+       | Option.none =>
+           match
+               psKernelWhnfCoreWithFuel
+                 remaining
+                 (psKernelWhnfWithFuel remaining reduceRecursor)
+                 reduceRecursor
+                 context
+                 state
+                 expr
+                 false
+                 false with
+           | Except.error error =>
+               Except.error error
+           | Except.ok coreResult =>
+               psKernelWhnfAfterCore
+                 (psKernelWhnfWithFuel remaining reduceRecursor)
+                 context
+                 (Prod.snd coreResult)
+                 expr
+                 (Prod.fst coreResult)) =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelReductionClosure
+        context.environment
+        context.localContext
+        expr
+        result ∧
+      PsKernelCheckerConfigurationSound context nextState := by
+  have hCacheSound :
+      PsKernelReductionCacheSound
+        context.environment
+        context.localContext
+        state.whnf := by
+    rcases hConfig.2.2 with
+      ⟨_hInferOnly, _hChecked, _hWhnfCore,
+        hWhnf, _hUnfold, _hDefEq⟩
+    exact hWhnf
+  cases hEligible :
+      psKernelSemanticCacheEligible expr with
+  | true =>
+      cases hGet :
+          psKernelExprMapGet state.whnf expr with
+      | some cached =>
+          simp [hEligible, hGet] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact
+            ⟨hCacheSound expr cached hGet, hConfig⟩
+      | none =>
+          have hTail :
+              (match
+                  psKernelWhnfCoreWithFuel
+                    remaining
+                    (psKernelWhnfWithFuel remaining reduceRecursor)
+                    reduceRecursor
+                    context
+                    state
+                    expr
+                    false
+                    false with
+               | Except.error error =>
+                   Except.error error
+               | Except.ok coreResult =>
+                   psKernelWhnfAfterCore
+                     (psKernelWhnfWithFuel remaining reduceRecursor)
+                     context
+                     (Prod.snd coreResult)
+                     expr
+                     (Prod.fst coreResult)) =
+                Except.ok (Prod.mk result nextState) := by
+            simpa [hEligible, hGet] using hSuccess
+          exact
+            psKernelWhnfCoreMiss_configuration_refines
+              remaining
+              reduceRecursor
+              hPublic
+              hRecursor
+              hBeta
+              hNative
+              context
+              state
+              nextState
+              expr
+              result
+              hConfig
+              hTail
+  | false =>
+      have hTail :
+          (match
+              psKernelWhnfCoreWithFuel
+                remaining
+                (psKernelWhnfWithFuel remaining reduceRecursor)
+                reduceRecursor
+                context
+                state
+                expr
+                false
+                false with
+           | Except.error error =>
+               Except.error error
+           | Except.ok coreResult =>
+               psKernelWhnfAfterCore
+                 (psKernelWhnfWithFuel remaining reduceRecursor)
+                 context
+                 (Prod.snd coreResult)
+                 expr
+                 (Prod.fst coreResult)) =
+            Except.ok (Prod.mk result nextState) := by
+        simpa [hEligible] using hSuccess
+      exact
+        psKernelWhnfCoreMiss_configuration_refines
+          remaining
+          reduceRecursor
+          hPublic
+          hRecursor
+          hBeta
+          hNative
+          context
+          state
+          nextState
+          expr
+          result
+          hConfig
+          hTail
+
+
+theorem psKernelWhnfWithFuel_configuration_sound_contract
+    (fuel : Nat)
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (hRecursor :
+      PsKernelRecursorReductionConfigurationSound
+        reduceRecursor)
+    (hBeta :
+      PsKernelBetaSpineSoundLaw)
+    (hNative :
+      PsKernelNativeReductionSoundLaw) :
+    PsKernelWhnfConfigurationSound
+      (psKernelWhnfWithFuel fuel reduceRecursor) := by
+  induction fuel with
+  | zero =>
+      intro context state nextState expr result hConfig hSuccess
+      simp [psKernelWhnfWithFuel] at hSuccess
+  | succ remaining ih =>
+      intro context state nextState expr result hConfig hSuccess
+      cases expr with
+      | bvar index =>
+          simp [psKernelWhnfWithFuel] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact
+            ⟨
+              PsKernelReductionClosure.refl
+                (PsKernelExpr.bvar index),
+              hConfig
+            ⟩
+      | sort level =>
+          simp [psKernelWhnfWithFuel] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact
+            ⟨
+              PsKernelReductionClosure.refl
+                (PsKernelExpr.sort level),
+              hConfig
+            ⟩
+      | mvar name =>
+          simp [psKernelWhnfWithFuel] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact
+            ⟨
+              PsKernelReductionClosure.refl
+                (PsKernelExpr.mvar name),
+              hConfig
+            ⟩
+      | forallE name domain codomain binderInfo =>
+          simp [psKernelWhnfWithFuel] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact
+            ⟨
+              PsKernelReductionClosure.refl
+                (PsKernelExpr.forallE
+                  name domain codomain binderInfo),
+              hConfig
+            ⟩
+      | lit literal =>
+          simp [psKernelWhnfWithFuel] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact
+            ⟨
+              PsKernelReductionClosure.refl
+                (PsKernelExpr.lit literal),
+              hConfig
+            ⟩
+      | mdata metadata body =>
+          cases hRun :
+              psKernelWhnfWithFuel
+                remaining
+                reduceRecursor
+                context
+                state
+                body with
+          | error error =>
+              simp [
+                psKernelWhnfWithFuel,
+                hRun
+              ] at hSuccess
+          | ok run =>
+              rcases run with ⟨reduced, reducedState⟩
+              have hRest :=
+                ih
+                  context
+                  state
+                  reducedState
+                  body
+                  reduced
+                  hConfig
+                  hRun
+              have hReduction :
+                  PsKernelReductionClosure
+                    context.environment
+                    context.localContext
+                    (PsKernelExpr.mdata metadata body)
+                    reduced :=
+                PsKernelReductionClosure.cons
+                  (PsKernelExpr.mdata metadata body)
+                  body
+                  reduced
+                  (PsKernelReductionStep.metadata
+                    metadata body)
+                  hRest.1
+              simp [
+                psKernelWhnfWithFuel,
+                hRun
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact
+                ⟨hReduction, hRest.2⟩
+      | fvar name =>
+          cases hFind :
+              psKernelLocalContextFind
+                context.localContext
+                name with
+          | none =>
+              simp [
+                psKernelWhnfWithFuel,
+                hFind
+              ] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact
+                ⟨
+                  PsKernelReductionClosure.refl
+                    (PsKernelExpr.fvar name),
+                  hConfig
+                ⟩
+          | some declaration =>
+              cases hValue :
+                  psKernelLocalDeclValue declaration with
+              | none =>
+                  simp [
+                    psKernelWhnfWithFuel,
+                    hFind,
+                    hValue
+                  ] at hSuccess
+                  rcases hSuccess with ⟨rfl, rfl⟩
+                  exact
+                    ⟨
+                      PsKernelReductionClosure.refl
+                        (PsKernelExpr.fvar name),
+                      hConfig
+                    ⟩
+              | some value =>
+                  have hTail :
+                      (match
+                          if
+                              psKernelSemanticCacheEligible
+                                (PsKernelExpr.fvar name) then
+                            psKernelExprMapGet
+                              state.whnf
+                              (PsKernelExpr.fvar name)
+                          else
+                            Option.none with
+                       | Option.some cached =>
+                           Except.ok (Prod.mk cached state)
+                       | Option.none =>
+                           match
+                               psKernelWhnfCoreWithFuel
+                                 remaining
+                                 (psKernelWhnfWithFuel
+                                   remaining
+                                   reduceRecursor)
+                                 reduceRecursor
+                                 context
+                                 state
+                                 (PsKernelExpr.fvar name)
+                                 false
+                                 false with
+                           | Except.error error =>
+                               Except.error error
+                           | Except.ok coreResult =>
+                               psKernelWhnfAfterCore
+                                 (psKernelWhnfWithFuel
+                                   remaining
+                                   reduceRecursor)
+                                 context
+                                 (Prod.snd coreResult)
+                                 (PsKernelExpr.fvar name)
+                                 (Prod.fst coreResult)) =
+                        Except.ok
+                          (Prod.mk result nextState) := by
+                    simpa [
+                      psKernelWhnfWithFuel,
+                      hFind,
+                      hValue
+                    ] using hSuccess
+                  exact
+                    psKernelWhnfCachedCore_configuration_refines
+                      remaining
+                      reduceRecursor
+                      ih
+                      hRecursor
+                      hBeta
+                      hNative
+                      context
+                      state
+                      nextState
+                      (PsKernelExpr.fvar name)
+                      result
+                      hConfig
+                      hTail
+      | const name levels =>
+          exact
+            psKernelWhnfCachedCore_configuration_refines
+              remaining reduceRecursor ih hRecursor hBeta hNative
+              context state nextState
+              (PsKernelExpr.const name levels)
+              result hConfig
+              (by
+                simpa [psKernelWhnfWithFuel] using hSuccess)
+      | lam name type body binderInfo =>
+          exact
+            psKernelWhnfCachedCore_configuration_refines
+              remaining reduceRecursor ih hRecursor hBeta hNative
+              context state nextState
+              (PsKernelExpr.lam name type body binderInfo)
+              result hConfig
+              (by
+                simpa [psKernelWhnfWithFuel] using hSuccess)
+      | letE name type value body nondep =>
+          exact
+            psKernelWhnfCachedCore_configuration_refines
+              remaining reduceRecursor ih hRecursor hBeta hNative
+              context state nextState
+              (PsKernelExpr.letE name type value body nondep)
+              result hConfig
+              (by
+                simpa [psKernelWhnfWithFuel] using hSuccess)
+      | app fn arg =>
+          exact
+            psKernelWhnfCachedCore_configuration_refines
+              remaining reduceRecursor ih hRecursor hBeta hNative
+              context state nextState
+              (PsKernelExpr.app fn arg)
+              result hConfig
+              (by
+                simpa [psKernelWhnfWithFuel] using hSuccess)
+      | proj typeName index body =>
+          exact
+            psKernelWhnfCachedCore_configuration_refines
+              remaining reduceRecursor ih hRecursor hBeta hNative
+              context state nextState
+              (PsKernelExpr.proj typeName index body)
+              result hConfig
+              (by
+                simpa [psKernelWhnfWithFuel] using hSuccess)

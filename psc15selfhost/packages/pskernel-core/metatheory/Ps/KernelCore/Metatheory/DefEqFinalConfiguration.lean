@@ -134,12 +134,12 @@ theorem psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
               args
               (Nat.add numParams index) with
         | none =>
-            rw [hArg] at hSuccess
+            simp only [hArg] at hSuccess
             simp at hSuccess
             rcases hSuccess with ⟨rfl, rfl⟩
             exact hConfig
         | some arg =>
-            rw [hArg] at hSuccess
+            simp only [hArg] at hSuccess
             cases hRun :
                 defeq
                   context
@@ -147,11 +147,11 @@ theorem psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
                   (PsKernelExpr.proj induct index term)
                   arg with
             | error error =>
-                rw [hRun] at hSuccess
+                simp only [hRun] at hSuccess
                 simp at hSuccess
             | ok run =>
                 rcases run with ⟨eqValue, eqState⟩
-                rw [hRun] at hSuccess
+                simp only [hRun] at hSuccess
                 have hEq :=
                   hDefEq
                     context

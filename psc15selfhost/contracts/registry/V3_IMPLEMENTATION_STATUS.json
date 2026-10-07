@@ -215,7 +215,7 @@
         29,
         32
       ],
-      "status": "partial",
+      "status": "implementation-available-js-validated-wasm-validation-partial",
       "owners": [
         "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean",
         "scripts/wasm-literal-binary-validator.mjs",
@@ -223,7 +223,8 @@
         "packages/backend-rust/src/Ps/BackendRust/Tail.lean",
         "packages/backend-rust/src/Ps/BackendRust/TailAlias.lean",
         "packages/backend-js/src/Ps/BackendJs/TailAlias.lean",
-        "packages/backend-js/src/Ps/BackendJs/Print.lean"
+        "packages/backend-js/src/Ps/BackendJs/Print.lean",
+        "packages/backend-js/src/Ps/BackendJs/Validate.lean"
       ],
       "completion": "Supported JS/Wasm/TS/Rust paths compile, validate and report unsupported cases deterministically.",
       "assurance": "pending"
@@ -845,7 +846,7 @@
       },
       {
         "id": "specialized-ir-to-target-ir",
-        "status": "partial"
+        "status": "implementation-available-js-wasm-assurance-pending"
       },
       {
         "id": "target-ir-to-executable-artifact",

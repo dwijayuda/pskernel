@@ -1192,7 +1192,6 @@ theorem psKernelExprLiftOne_then_instantiateReference_cancel
           simp only [
             psKernelExprInstantiateAtReferenceChanged
           ]
-          simp only [Nat.zero_add]
           rw [hNatLt]
           simp only [
             Bool.false_eq_true,

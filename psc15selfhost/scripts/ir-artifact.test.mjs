@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { SourceMap } from 'node:module';
+import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { resolveTypeScriptCli, pinnedTypeScriptVersionText } from './typescript-cli.mjs';
+import { createDirectJsDeclarations } from './js-declarations.mjs';
+import { publicApiArtifact } from './public-api-artifact.mjs';
 import { spawnSync } from 'node:child_process';
 import { canonicalBytes, canonicalArtifact, artifactKey, artifactId, passDefinition, recordPassExecution } from './artifact-evidence.mjs';
 import { runtimeInterfaceArtifact, verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
@@ -230,4 +236,50 @@ test('portable and independent runtime-interface projections agree and distingui
 
 test('native generated coordinates count UTF-16, all ECMAScript line terminators and CRLF across chunks', () => {
   assert.deepEqual(JSON.parse(emitted('--generated-position-cursor')), [[5, 0, 3], [16, 3, 1]]);
+});
+
+test('actual source signatures produce direct declarations accepted by the pinned TypeScript consumer', async () => {
+  const staged = JSON.parse(emitted('--js-declaration-stages'));
+  const snapshots = checkedIrStageArtifacts(staged), targets = checkedTargetIrStageArtifacts(staged);
+  const textRecord = (text, domain, contract) => {
+    const bytes = Buffer.from(text); return { bytes, identity: artifactId(bytes, domain, contract) };
+  };
+  const product = createDirectJsDeclarations({ subjects: {
+    publicApi: publicApiArtifact(staged.publicApi),
+    erasureTable: textRecord(staged.erasureCorrespondence, 'erasure-table', 'psc-erasure-declarations/1'),
+    runtimeIr: snapshots.runtimeIr, verifiedIr: snapshots.verifiedIr, specializedIr: snapshots.specializedIr,
+    jsIr: targets.jsIr, javaScript: textRecord(staged.javaScript, 'javascript-output', 'psc-direct-javascript/es2022'),
+  } });
+  const executable = await import('data:text/javascript;base64,' + Buffer.from(staged.javaScript).toString('base64'));
+  assert.equal(executable.answer, 42n);
+  assert.equal(executable.applyNat(executable.echoNat, 17n), 17n);
+  assert.deepEqual(executable.echoArray([3n]), [3n]);
+  const directory = await mkdtemp(path.join(tmpdir(), 'psc-direct-declarations-'));
+  try {
+    const cli = resolveTypeScriptCli();
+    const version = spawnSync(process.execPath, [cli, '--version'], { encoding: 'utf8', timeout: 30000 });
+    assert.equal(version.status, 0, version.stderr);
+    assert.equal(version.stdout.trim(), pinnedTypeScriptVersionText);
+    await writeFile(path.join(directory, 'module.d.ts'), product.declarations.bytes);
+    await writeFile(path.join(directory, 'consumer.ts'), [
+      'import { answer, echoNat, applyNat, echoArray, greeting } from "./module.js";',
+      'const a: bigint = echoNat(answer);',
+      'const b: bigint = applyNat(echoNat, 7n);',
+      'const c: Array<bigint> = echoArray([1n, 2n]);',
+      'const s: string = greeting;',
+      '// @ts-expect-error source Nat uses bigint, not number',
+      'echoNat(3);',
+      '// @ts-expect-error source array element type remains Nat',
+      'echoArray(["bad"]);',
+      '// @ts-expect-error function parameter retains its result type',
+      'applyNat((value: bigint): string => "bad", 3n);',
+    ].join('\n'));
+    const result = spawnSync(process.execPath, [cli, '--target', 'ES2022', '--module', 'NodeNext',
+      '--moduleResolution', 'NodeNext', '--strict', '--noEmit', '--pretty', 'false', 'consumer.ts'],
+    { cwd: directory, encoding: 'utf8', timeout: 30000, maxBuffer: 4 * 1024 * 1024 });
+    assert.equal(result.status, 0, result.error?.message ?? result.stdout + result.stderr);
+    // This consumer check is separate evidence; generation itself never called tsc.
+    assert.equal(JSON.parse(product.binding.bytes).declarationTargetAccepted, false);
+    assert.equal(JSON.parse(product.binding.bytes).globalPreservationProved, false);
+  } finally { await rm(directory, { recursive: true, force: true }); }
 });

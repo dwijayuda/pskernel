@@ -447,6 +447,36 @@
       "kind": "product-selection",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/PRODUCT_SELECTION_V1.json"
+    },
+    {
+      "id": "psc-source-signature-structural/1",
+      "kind": "source-signature-projection",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-direct-js-declarations-closed-structural/1",
+      "kind": "declaration-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-declarations/1",
+      "kind": "declaration-output",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-source-declaration-signatures/1",
+      "kind": "source-signatures",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-declaration-binding/1",
+      "kind": "declaration-binding",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

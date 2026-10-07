@@ -3,7 +3,8 @@ import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
-import { artifactKey } from './artifact-evidence.mjs';
+import { artifactId, artifactKey } from './artifact-evidence.mjs';
+import { createDirectJsDeclarations, directJsDeclarationProfile } from './js-declarations.mjs';
 import { createDirectJsSourceMap } from './js-source-map.mjs';
 import { createJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { createJsGeneratedPositionMap } from './js-generated-positions.mjs';
@@ -78,13 +79,14 @@ export function createCheckedCompilerService({
       transformationAssurance: 'trusted-source-projection-target-correspondence-unproved',
     });
   }
-  function emitProduct(handle, target, includeMetadata) {
+  function emitProduct(handle, target, includeMetadata, declarationsRequested = false) {
     const certifiedSource = certified.describe(handle);
     const certificate = certified.certificate(handle);
     const checkedCoreHandle = certified.checkedCore(handle);
     const capability = session.describe(checkedCoreHandle);
-    const emission = session.emitTargetWithStages(checkedCoreHandle, target, { includeMetadata });
-    const api = includeMetadata ? apiProduct(handle) : undefined;
+    const emission = session.emitTargetWithStages(checkedCoreHandle, target, {
+      includeMetadata, includeErasureCorrespondence: includeMetadata || declarationsRequested });
+    const api = includeMetadata || declarationsRequested ? apiProduct(handle) : undefined;
     const origins = includeMetadata ? originProduct(handle, api) : undefined;
     const raw = emission.output;
     const payload = target === 'wasm' ? byteList(raw, maxOutputBytes) : raw;
@@ -131,13 +133,24 @@ export function createCheckedCompilerService({
       directSourceMap = createDirectJsSourceMap({ lineage: declarationLineage,
         resolveArtifact: id => artifacts.get(artifactKey(id)), maxBytes: maxOutputBytes, maxTotalBytes: maxOutputBytes });
     }
-    if (productByteLength + (erasureMap?.bytes.byteLength ?? 0) + (specializationProduct?.map.bytes.byteLength ?? 0) +
+    let directDeclarations;
+    if (declarationsRequested) {
+      if (target !== 'javascript' || !api || !erasureProduct || !stages?.specializedIr || !targetStages.jsIr)
+        throw new Error('PSC_CHECKED_DECLARATION_SUBJECTS_REQUIRED');
+      directDeclarations = createDirectJsDeclarations({ subjects: {
+        publicApi: api.record, erasureTable: erasureProduct.artifacts.find(item => item.identity.domain === 'erasure-table'),
+        runtimeIr: stages.runtimeIr, verifiedIr: stages.verifiedIr, specializedIr: stages.specializedIr,
+        jsIr: targetStages.jsIr, javaScript: { bytes, identity: artifactId(bytes, 'javascript-output', 'psc-direct-javascript/es2022') },
+      }, maxBytes: maxOutputBytes, maxTotalBytes: maxOutputBytes });
+    }
+    if (productByteLength + (directDeclarations ? Object.values(directDeclarations).reduce((sum, item) => sum + item.bytes.byteLength, 0) : 0) +
+        (erasureMap?.bytes.byteLength ?? 0) + (specializationProduct?.map.bytes.byteLength ?? 0) +
         (generatedPositionMap?.bytes.byteLength ?? 0) + (declarationLineage?.bytes.byteLength ?? 0) + (directSourceMap?.sourceMap.bytes.byteLength ?? 0) +
         (directSourceMap?.recipe.bytes.byteLength ?? 0) > maxOutputBytes)
       throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
-      requestedProducts: includeMetadata ? 'executable-and-available-metadata' : 'executable-only',
+      requestedProducts: declarationsRequested ? 'executable-and-source-declarations' : includeMetadata ? 'executable-and-available-metadata' : 'executable-only',
       artifact: Object.freeze({ algorithm: 'sha256', domain: 'target-bytes', schemaVersion: 1,
         digest: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength }),
       checkedCore: capability,
@@ -149,6 +162,7 @@ export function createCheckedCompilerService({
         stageArtifacts: Object.freeze(Object.fromEntries(
           [...Object.entries(stages ?? {}), ...Object.entries(targetStages ?? {})]
             .map(([key, value]) => [key, value.identity]))) } : {}),
+      ...(directDeclarations ? { directDeclarations } : {}),
       ...(directSourceMap ? { sourceMap: directSourceMap.sourceMap.bytes.toString('utf8'),
         sourceMapArtifact: directSourceMap.sourceMap.identity, sourceMapRecipe: directSourceMap.recipe.identity } : {}),
       ...(declarationLineage ? { declarationLineage: declarationLineage.identity } : {}),
@@ -161,8 +175,12 @@ export function createCheckedCompilerService({
   }
   function emitArtifact(handle, target = 'typescript') { return emitProduct(handle, target, true); }
   function emitExecutableArtifact(handle, target = 'typescript') { return emitProduct(handle, target, false); }
+  function emitDeclarationsArtifact(handle, { profile = directJsDeclarationProfile } = {}) {
+    if (profile !== directJsDeclarationProfile) throw new Error('PSC_JS_DECLARATIONS_PROFILE');
+    return emitProduct(handle, 'javascript', false, true);
+  }
   return Object.freeze({
-    check, checkSources,
+    check, checkSources, emitDeclarationsArtifact,
     emit: handle => emitExecutableArtifact(handle, 'typescript').payload,
     emitExecutableArtifact,
     emitArtifact,

@@ -5,7 +5,7 @@ import { createErasureDeclarationMap, erasureDeclarationMapContract } from './er
 import { createSpecializationInstanceMap, specializationInstanceMapContract } from './specialization-correspondence.mjs';
 import { createJsGeneratedPositionMap, jsGeneratedPositionMapContract } from './js-generated-positions.mjs';
 import { decodeIrArtifact } from './ir-artifact.mjs';
-import { decodeJsIrArtifact } from './target-ir-artifact.mjs';
+import { decodeJsIrArtifact, assertJsDeclarationInventory } from './target-ir-artifact.mjs';
 
 export const jsDeclarationLineageContract = 'psc-js-declaration-lineage/1';
 const fail = code => { throw new Error('PSC_JS_LINEAGE_' + code); };
@@ -81,14 +81,7 @@ export function createJsDeclarationLineage({ parents, resolveArtifact,
     if (!same(rebuilt.identity, supplied.identity)) fail('PARENT_BINDING');
   }
   const specialized = decodeIrArtifact(specializedIr.bytes, { maxBytes }), target = decodeJsIrArtifact(jsIr.bytes, { maxBytes });
-  if (specialized[4].length !== target[2].length) fail('TARGET_DECLARATION_COVERAGE');
-  // The current JS lowerer preserves declaration/parameter names and order.
-  // This deliberately checks only that boundary's inventory, not its bodies.
-  for (let index = 0; index < target[2].length; index++) {
-    const a = specialized[4][index], b = target[2][index];
-    if (a[0] !== b[0] || a[2].length !== b[1].length ||
-        a[2].some((parameter, i) => parameter[0] !== b[1][i])) fail('TARGET_DECLARATION_INVENTORY');
-  }
+  assertJsDeclarationInventory(specialized, target);
   const erasureEntries = decode(resolve(erasure.tableId), maxBytes)[2];
   const sourceEntries = decode(resolve(origin.tableId), maxBytes)[3];
   const instanceEntries = decode(rebuiltSpecialization, maxBytes).instances;

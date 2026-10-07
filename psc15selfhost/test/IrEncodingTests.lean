@@ -94,8 +94,10 @@ def main (args : List String) : IO Unit := do
     let .ok interface := psIrEncodeRuntimeInterface validated
       | throw (IO.userError "INTERFACE_FAILED")
     IO.println interface
-  else if args == ["--js-stages"] then
-    let source := "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := forward Nat 42\n"
+  else if args == ["--js-stages"] || args == ["--js-declaration-stages"] then
+    let source := if args == ["--js-declaration-stages"] then
+      "def echoNat (value : Nat) : Nat := value\ndef applyNat (fn : Nat -> Nat) (value : Nat) : Nat := fn value\ndef echoArray (values : Array Nat) : Array Nat := values\ndef answer : Nat := applyNat echoNat 42\ndef greeting : String := \"hello\"\n"
+      else "def forward (A : Type) (value : A) : A := value\ndef answer : Nat := forward Nat 42\n"
     let .ok observed := psCompilerPrepareSourceWithOrigins .lean source
       | throw (IO.userError "PREPARE_FAILED")
     let prepared := observed.prepared

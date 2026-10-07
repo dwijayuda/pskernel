@@ -1182,7 +1182,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "standalone-declaration-map-host-adapter-implemented-declarations-fine-origins-portable-serializer-and-linking-pending",
+      "status": "host-source-maps-and-selected-closed-structural-declarations-implemented-generic-exports-declaration-maps-portable-serializers-and-cli-routing-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1470,6 +1470,41 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/PRODUCT_SELECTION_V1.json",
       "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-source-signature-structural/1",
+      "kind": "source-signature-projection",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-direct-js-declarations-closed-structural/1",
+      "kind": "declaration-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-direct-javascript-declarations/1",
+      "kind": "declaration-output",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-source-declaration-signatures/1",
+      "kind": "source-signatures",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-direct-javascript-declaration-binding/1",
+      "kind": "declaration-binding",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
     }
   ]
 }

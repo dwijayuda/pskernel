@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-direct-javascript-declarations/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "selectedProfile": "psc-direct-js-declarations-closed-structural/1",
+  "implementation": "host-adapter-with-portable-source-producer",
+  "source": "Exact pre-erasure PublicApiIR types. Runtime/Specialized/JsIR are used only to validate correspondence and bind actual exports, never to infer the source API.",
+  "products": [
+    {
+      "domain": "declarations-output",
+      "contract": "psc-direct-javascript-declarations/1",
+      "suffix": ".d.ts"
+    },
+    {
+      "domain": "declaration-signatures",
+      "contract": "psc-source-declaration-signatures/1",
+      "suffix": ".declaration-signatures.json"
+    },
+    {
+      "domain": "declaration-binding",
+      "contract": "psc-direct-javascript-declaration-binding/1",
+      "suffix": ".declaration-binding.json"
+    }
+  ],
+  "supportedSourceTypes": [
+    "Exact built-in scalar constants with no universe arguments",
+    "Nondependent runtime function binders, including higher-order function parameters",
+    "Array with its explicit universe argument and a supported element type"
+  ],
+  "genericProjection": "The separate structural source-signature projection retains a prefix of syntactically non-Prop type binders, structured source names and de Bruijn references. Declaration publication rejects generics until an actual generic export strategy is selected.",
+  "validation": [
+    "Bounded canonical source/IR/table decoding and exact artifact kinds/bytes.",
+    "Complete observed erasure inventory and source-name/order correspondence.",
+    "RuntimeIR and VerifiedIR bytes identical; existing independent closed specialization relation rerun.",
+    "Complete SpecializedIR/JsIR declaration and parameter inventories agree.",
+    "Each source-derived closed signature equals its observed RuntimeIR signature, including flattened runtime calling convention.",
+    "Every JsIR declaration has exactly one source-owned export; actual names come from observation, not name-mangling guesses.",
+    "Fresh archive replay pins all seven subjects plus selected profile and reconstructs all three products."
+  ],
+  "representation": {
+    "wordSize": 64,
+    "precision": "JavaScript runtime representation, without refinement types for Nat bounds, integer ranges, Unicode scalar constraints or float precision.",
+    "valueDeclarations": "Private collision-free declaration aliases with explicit ES export aliases retain exact emitted names.",
+    "emptyModule": "Explicit export {} preserves module status."
+  },
+  "independence": "Requested declaration failure does not decide kernel acceptance or executable-only output. Origin and generated-position maps are not dependencies of declarations.",
+  "toolchain": "Generation never calls tsc. The pinned repository TypeScript compiler is a focused independent consumer check only.",
+  "unsupported": [
+    "Generic runtime exports under the current closed specializer",
+    "Dependent value types, proposition erasure inference, higher-rank generics",
+    "Named type aliases, structures/inductives and type-level computation",
+    "Declaration position maps and portable declaration serializer",
+    "Runtime refinements, independently proved source projection or executable preservation"
+  ],
+  "assumptions": [
+    "Exact checked PublicApiIR projection",
+    "Observed erasure dispositions",
+    "Strict source/target IR validity",
+    "Selected JS printer exports the JsIR declaration inventory"
+  ],
+  "authority": "descriptive-product-only",
+  "globalPreservationProved": false,
+  "releasePromotion": false
+}

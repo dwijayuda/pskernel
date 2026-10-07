@@ -406,3 +406,28 @@ test('the convenience executable emitter does not request source API projection'
   assert.match(service.emit(handle), /export const value/);
   assert.throws(() => service.emitArtifact(handle), /API_PRODUCT_FAILED/);
 });
+
+test('requested declarations share the checked emission and do not require optional debug products', async () => {
+  const { service, compiler } = fixture();
+  let emissions = 0, debugReads = 0;
+  compiler.psCompilerPrepareSourceWithOrigins = (kind, source) => ok({ prepared: { kind, source }, origins: null });
+  compiler.psCompilerPublicApiFromPrepared = () => ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => {
+    emissions++;
+    return ok(Object.defineProperty({ javaScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr,
+      specializedIr: emptyIr, jsIr: emptyJsIr,
+      erasureCorrespondence: '["psc-erasure-declarations/1","declaration-inventory",[]]' }, 'generatedPositions', {
+      get() { debugReads++; throw new Error('UNREQUESTED_DEBUG'); },
+    }));
+  };
+  const handle = await service.check('lean', '');
+  const product = service.emitDeclarationsArtifact(handle);
+  assert.equal(product.requestedProducts, 'executable-and-source-declarations');
+  assert.equal(product.directDeclarations.declarations.bytes.toString(), 'export {};\n');
+  assert.equal(product.originGraph, undefined); assert.equal(product.generatedPositions, undefined);
+  assert.equal(emissions, 1); assert.equal(debugReads, 0);
+  assert.throws(() => service.emitDeclarationsArtifact(handle, { profile: 'invented' }), /PROFILE/);
+  assert.equal(emissions, 1);
+  service.revoke(handle);
+  assert.throws(() => service.emitDeclarationsArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
+});

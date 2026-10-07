@@ -143,8 +143,8 @@ export function createKernelCheckedSession(
       modules.set(handle, { prepared, admissions, source, origins, originMalformed, inputs: sourceInputs });
       return handle;
   }
-  function emitTargetWithStages(handle, target, { includeMetadata = true } = {}) {
-      if (typeof includeMetadata !== 'boolean') throw new Error('PSC2_CHECKED_PRODUCT_SELECTION');
+  function emitTargetWithStages(handle, target, { includeMetadata = true, includeErasureCorrespondence = includeMetadata } = {}) {
+      if (typeof includeMetadata !== 'boolean' || typeof includeErasureCorrespondence !== 'boolean') throw new Error('PSC2_CHECKED_PRODUCT_SELECTION');
       const item = checkedItem(handle);
       if (!targets.includes(target)) throw new Error('PSC2_CHECKED_TARGET_FORBIDDEN');
       if (admissionsFrom(compiler, item.prepared) !== item.admissions) {
@@ -163,7 +163,8 @@ export function createKernelCheckedSession(
         const fields = [outputKey, 'runtimeIr', 'verifiedIr',
           ...(target !== 'typescript' ? ['specializedIr'] : []),
           ...(target === 'javascript' ? ['jsIr'] : []), ...(target === 'wasm' ? ['wasmIr'] : []),
-          ...(includeMetadata ? ['erasureCorrespondence', 'generatedPositions'] : [])];
+          ...(includeErasureCorrespondence ? ['erasureCorrespondence'] : []),
+          ...(includeMetadata ? ['generatedPositions'] : [])];
         const staged = {};
         for (const field of fields) {
           const descriptor = Object.getOwnPropertyDescriptor(product, field);

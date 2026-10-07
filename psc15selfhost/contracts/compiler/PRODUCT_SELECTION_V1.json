@@ -8,7 +8,8 @@
     "emitExecutableArtifact": "Executable and required IR evidence only; optional PublicApiIR/origin/erasure/generated-position products are not read or decoded.",
     "emit": "TypeScript executable-only convenience operation.",
     "emitPublicApiArtifact": "Independent requested source API product.",
-    "emitOriginGraph": "Independent requested declaration origin product, with required PublicApiIR dependency."
+    "emitOriginGraph": "Independent requested declaration origin product, with required PublicApiIR dependency.",
+    "emitDeclarationsArtifact": "Explicit direct-JS closed structural source declaration request; returns executable and source declaration products from one staged emission, without requesting origin/generated-position products."
   },
   "acceptance": [
     "Kernel acceptance uses the same frozen prepared Core and exact admissions, independently of optional origin-table shape.",

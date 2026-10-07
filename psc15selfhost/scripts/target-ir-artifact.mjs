@@ -163,3 +163,16 @@ export function checkedTargetIrStageArtifacts(stages,{maxBytes=128*1024*1024}={}
   }
   return Object.freeze(result);
 }
+
+/** Exact inventory boundary after decoding both modules. This checks names,
+ * order and arity only, not lowering semantics or target instruction validity.
+ */
+export function assertJsDeclarationInventory(specialized, target) {
+  if (specialized[4].length !== target[2].length) throw new Error('PSC_JS_LINEAGE_TARGET_DECLARATION_COVERAGE');
+  for (let index = 0; index < target[2].length; index++) {
+    const a = specialized[4][index], b = target[2][index];
+    if (a[0] !== b[0] || a[2].length !== b[1].length ||
+        a[2].some((parameter, i) => parameter[0] !== b[1][i]))
+      throw new Error('PSC_JS_LINEAGE_TARGET_DECLARATION_INVENTORY');
+  }
+}

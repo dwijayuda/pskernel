@@ -3,6 +3,7 @@ import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtif
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyDeclarationOriginGraph } from './declaration-origins.mjs';
 import { verifySourcePreparationOrigins } from './source-preparation-origins.mjs';
+import { verifyDirectJsDeclarations } from './js-declarations.mjs';
 import { verifyDirectJsSourceMap } from './js-source-map.mjs';
 import { verifyJsDeclarationLineage } from './js-declaration-lineage.mjs';
 import { verifyJsGeneratedPositionMap } from './js-generated-positions.mjs';
@@ -241,6 +242,22 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
               { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
               { resolveArtifact, expectedInputId: input.identity, expectedOutputId: output.identity,
                 resourceLimits: { maxBytes: bound.maxArtifactBytes } }));
+      }
+      if (definition.passId === 'psc-emit-direct-js-declarations/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 3 || typeof execution.action.parameters.profile !== 'string' ||
+            definition.semanticRelationId !== 'psc-source-api-to-bound-js-declarations/1') fail('JS_DECLARATIONS_SUBJECT');
+        const expectedSubjects = { publicApi: execution.inputs[0] };
+        for (const [key, domain] of [['erasureTable', 'erasure-table'], ['runtimeIr', 'runtime-ir'],
+            ['verifiedIr', 'verified-ir'], ['specializedIr', 'specialized-ir'],
+            ['jsIr', 'js-ir'], ['javaScript', 'javascript-output']]) {
+          const ids = execution.action.dependencies.filter(id => id.domain === domain);
+          if (ids.length !== 1) fail('JS_DECLARATIONS_SUBJECT');
+          expectedSubjects[key] = ids[0];
+        }
+        const product = Object.fromEntries(['declarations', 'sourceSignatures', 'binding'].map((key, index) =>
+          [key, { identity: execution.outputs[index], bytes: resolveArtifact(execution.outputs[index]) }]));
+        await verifyDirectJsDeclarations(product, { resolveArtifact, expectedSubjects,
+          expectedProfile: execution.action.parameters.profile, maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes });
       }
       if (definition.passId === 'psc-emit-direct-js-source-map/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 2 ||

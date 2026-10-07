@@ -110,10 +110,11 @@
       "supportedCapabilities": [
         "direct-esm",
         "target-ir-validation",
-        "standalone-declaration-source-maps"
+        "standalone-declaration-source-maps",
+        "closed-structural-source-declarations"
       ],
       "unsupportedCapabilities": [
-        "direct-declarations",
+        "generic-and-dependent-source-declarations",
         "expression-source-maps",
         "automatic-source-map-linking",
         "direct-declaration-maps",
@@ -133,6 +134,24 @@
             "role": "source-api",
             "domain": "public-api",
             "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declarations",
+            "domain": "declarations-output",
+            "contract": "psc-direct-javascript-declarations/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration-signatures",
+            "domain": "declaration-signatures",
+            "contract": "psc-source-declaration-signatures/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration-binding",
+            "domain": "declaration-binding",
+            "contract": "psc-direct-javascript-declaration-binding/1",
             "requiresToolchain": false
           }
         ],
@@ -195,7 +214,7 @@
           }
         ]
       },
-      "ownershipDebt": "Source PublicApiIR and exact declaration-to-emission lineage feed standalone declaration-level ECMA-426 maps. Expression origins, automatic source-map linking, direct declarations, generic export correspondence, production checked CLI direct-backend selection and promotion remain pending."
+      "ownershipDebt": "Source PublicApiIR feeds explicitly selected closed structural declarations and exact declaration-to-emission lineage feeds standalone ECMA-426 maps. Generic export strategy, dependent/named source types, declaration maps, portable serializers, expression origins, automatic linking, production checked CLI direct-backend selection and promotion remain pending."
     },
     {
       "backendId": "wasm",

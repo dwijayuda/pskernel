@@ -313,7 +313,7 @@ test('portable entry roots minimally cover the backend-js package graph', async 
   );
   assert.deepEqual(
     entries.map(sourcePath => path.basename(sourcePath)).sort(),
-    ['Print.lean'],
+    ['Encode.lean', 'Print.lean'],
   );
 });
 

@@ -633,6 +633,16 @@ inductive PsKernelReductionClosure
         localContext
         expr
         expr
+  | contextWeaken
+      {older newer : PsKernelLocalContext}
+      (left right : PsKernelExpr)
+      (hExt :
+        PsKernelLocalContextExtends older newer)
+      (hReduction :
+        PsKernelReductionClosure
+          environment older left right) :
+      PsKernelReductionClosure
+        environment newer left right
   | presentationSource
       {localContext : PsKernelLocalContext}
       (source query result : PsKernelExpr)
@@ -918,6 +928,16 @@ inductive PsKernelDefEqJudgment
         localContext
         expr
         expr
+  | contextWeaken
+      {older newer : PsKernelLocalContext}
+      (left right : PsKernelExpr)
+      (hExt :
+        PsKernelLocalContextExtends older newer)
+      (hDefEq :
+        PsKernelDefEqJudgment
+          environment older left right) :
+      PsKernelDefEqJudgment
+        environment newer left right
   | symm
       {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
@@ -1307,7 +1327,7 @@ inductive PsKernelProjectionResultJudgment
       (index : Nat)
       (structValue structType typeWhnf : PsKernelExpr)
       (inductLevels : List PsKernelLevel)
-      {args : List PsKernelExpr}
+      (args : List PsKernelExpr)
       (inductInfo : PsKernelInductiveInfo)
       (ctorInfo : PsKernelConstructorInfo)
       (initial afterParams afterFields fieldBody result : PsKernelExpr)

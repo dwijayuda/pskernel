@@ -9,6 +9,55 @@ threads checker state through recursive calls. The public distinction between
 is cached separately.
 -/
 
+def psKernelInferenceDebugDefEqValue
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) : String :=
+  match defeq context state left right with
+  | Except.ok result => toString (Prod.fst result)
+  | Except.error error => "error(" ++ error ++ ")"
+
+def psKernelInferenceDebugAppArgsWithFuel
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : List PsKernelExpr)
+    (index : Nat) : String :=
+  match fuel with
+  | Nat.zero => "arg-debug-budget"
+  | Nat.succ remaining =>
+      match left, right with
+      | List.nil, List.nil => "arg-debug-end"
+      | List.cons leftHead leftTail, List.cons rightHead rightTail =>
+          "arg" ++ toString index ++
+            "[left=" ++ psKernelInferenceDebugExprHead leftHead ++
+            ";right=" ++ psKernelInferenceDebugExprHead rightHead ++
+            ";left-right=" ++
+              psKernelInferenceDebugDefEqValue
+                defeq context state leftHead rightHead ++
+            ";right-left=" ++
+              psKernelInferenceDebugDefEqValue
+                defeq context state rightHead leftHead ++
+            "];" ++
+            psKernelInferenceDebugAppArgsWithFuel
+              remaining defeq context state
+              leftTail rightTail (Nat.succ index)
+      | _, _ => "arg-debug-length-mismatch"
+
 def psKernelInferenceDebugForallTerminalWithFuel
     (fuel : Nat)
     (whnf :
@@ -17,6 +66,13 @@ def psKernelInferenceDebugForallTerminalWithFuel
       PsKernelExpr ->
       Except String
         (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (left right : PsKernelExpr) :
@@ -46,6 +102,7 @@ def psKernelInferenceDebugForallTerminalWithFuel
           psKernelInferenceDebugForallTerminalWithFuel
             remaining
             whnf
+            defeq
             child
             nextState
             (psKernelExprInstantiate1
@@ -69,21 +126,35 @@ def psKernelInferenceDebugForallTerminalWithFuel
                   Except.ok
                     ("terminal-right-whnf-error=" ++ error)
               | Except.ok rightResult =>
+                  let leftWhnf := Prod.fst leftResult;
+                  let rightWhnf := Prod.fst rightResult;
+                  let argDebug :=
+                    match leftWhnf, rightWhnf with
+                    | PsKernelExpr.app _ _, PsKernelExpr.app _ _ =>
+                        psKernelInferenceDebugAppArgsWithFuel
+                          (Nat.succ
+                            (Nat.add
+                              (psKernelExprGetAppNumArgs leftWhnf)
+                              (psKernelExprGetAppNumArgs rightWhnf)))
+                          defeq
+                          context
+                          state
+                          (psKernelExprGetAppArgs leftWhnf)
+                          (psKernelExprGetAppArgs rightWhnf)
+                          0
+                    | _, _ => "arg-debug-not-app-pair";
                   Except.ok
                     ("terminal-before=" ++
                       psKernelInferenceDebugExprHead left ++
                       " vs " ++
                       psKernelInferenceDebugExprHead right ++
                       "; terminal-after=" ++
-                      psKernelInferenceDebugExprHead
-                        (Prod.fst leftResult) ++
+                      psKernelInferenceDebugExprHead leftWhnf ++
                       " vs " ++
-                      psKernelInferenceDebugExprHead
-                        (Prod.fst rightResult) ++
+                      psKernelInferenceDebugExprHead rightWhnf ++
                       "; terminal-diff=" ++
-                      psKernelInferenceDebugExprDiff
-                        (Prod.fst leftResult)
-                        (Prod.fst rightResult))
+                      psKernelInferenceDebugExprDiff leftWhnf rightWhnf ++
+                      "; " ++ argDebug)
 
 def psKernelInferCoreWithFuel
     (fuel : Nat) :
@@ -541,8 +612,9 @@ def psKernelInferCoreWithFuel
                                                   (psKernelExprNodeCount view.domain)
                                                   (psKernelExprNodeCount argType)))
                                               whnf
+                                              defeq
                                               eqContext
-                                              (Prod.snd eqResult)
+                                              (Prod.snd argResult)
                                               view.domain
                                               argType
                                           match

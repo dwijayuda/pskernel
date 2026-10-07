@@ -147,12 +147,19 @@ export function createKernelCheckedSession(
         if (target !== 'wasm') freezeGraph(staged);
         if ((target === 'wasm' ? !staged?.[outputKey] || typeof staged[outputKey] !== 'object' : typeof staged?.[outputKey] !== 'string') ||
             typeof staged.runtimeIr !== 'string' || typeof staged.verifiedIr !== 'string' ||
-            (target !== 'typescript' && typeof staged.specializedIr !== 'string')) {
+            (target !== 'typescript' && typeof staged.specializedIr !== 'string') ||
+            (target === 'javascript' && typeof staged.jsIr !== 'string') ||
+            (target === 'wasm' && typeof staged.wasmIr !== 'string')) {
           throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
         }
         return Object.freeze({ output: staged[outputKey],
-          stages: Object.freeze({ runtimeIr: staged.runtimeIr, verifiedIr: staged.verifiedIr,
-            ...(target !== 'typescript' ? { specializedIr: staged.specializedIr } : {}) }) });
+          stages: Object.freeze({
+            runtimeIr: staged.runtimeIr,
+            verifiedIr: staged.verifiedIr,
+            ...(target !== 'typescript' ? { specializedIr: staged.specializedIr } : {}),
+            ...(target === 'javascript' ? { jsIr: staged.jsIr } : {}),
+            ...(target === 'wasm' ? { wasmIr: staged.wasmIr } : {}),
+          }) });
       }
       const names = { typescript: 'psCompilerTypeScriptFromPrepared', javascript: 'psCompilerJavaScriptFromPrepared',
         rust: 'psCompilerRustFromPrepared', wasm: 'psCompilerWasmFromPrepared' };

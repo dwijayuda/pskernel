@@ -338,7 +338,13 @@ theorem psKernelWhnfCoreMiss_configuration_refines
         (Prod (Option PsKernelExpr) PsKernelCheckerState))
     (hPublic :
       PsKernelWhnfConfigurationSound
-        (psKernelWhnfWithFuel remaining reduceRecursor))
+        (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr))
     (hRecursor :
       PsKernelRecursorReductionConfigurationSound
         reduceRecursor)
@@ -355,7 +361,13 @@ theorem psKernelWhnfCoreMiss_configuration_refines
       (match
           psKernelWhnfCoreWithFuel
             remaining
-            (psKernelWhnfWithFuel remaining reduceRecursor)
+            (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
             reduceRecursor
             context
             state
@@ -366,7 +378,13 @@ theorem psKernelWhnfCoreMiss_configuration_refines
            Except.error error
        | Except.ok coreResult =>
            psKernelWhnfAfterCore
-             (psKernelWhnfWithFuel remaining reduceRecursor)
+             (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
              context
              (Prod.snd coreResult)
              expr
@@ -381,7 +399,13 @@ theorem psKernelWhnfCoreMiss_configuration_refines
   cases hCore :
       psKernelWhnfCoreWithFuel
         remaining
-        (psKernelWhnfWithFuel remaining reduceRecursor)
+        (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
         reduceRecursor
         context
         state
@@ -395,7 +419,13 @@ theorem psKernelWhnfCoreMiss_configuration_refines
       have hCoreSemantic :=
         psKernelWhnfCoreWithFuel_public_configuration_refines
           remaining
-          (psKernelWhnfWithFuel remaining reduceRecursor)
+          (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
           reduceRecursor
           hPublic
           hRecursor
@@ -409,7 +439,13 @@ theorem psKernelWhnfCoreMiss_configuration_refines
           hCore
       have hAfter :
           psKernelWhnfAfterCore
-              (psKernelWhnfWithFuel remaining reduceRecursor)
+              (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
               context
               coreState
               expr
@@ -418,7 +454,13 @@ theorem psKernelWhnfCoreMiss_configuration_refines
         simpa [hCore] using hSuccess
       exact
         psKernelWhnfAfterCore_configuration_refines
-          (psKernelWhnfWithFuel remaining reduceRecursor)
+          (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
           hPublic
           hNative
           context
@@ -444,7 +486,13 @@ theorem psKernelWhnfCachedCore_configuration_refines
         (Prod (Option PsKernelExpr) PsKernelCheckerState))
     (hPublic :
       PsKernelWhnfConfigurationSound
-        (psKernelWhnfWithFuel remaining reduceRecursor))
+        (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr))
     (hRecursor :
       PsKernelRecursorReductionConfigurationSound
         reduceRecursor)
@@ -469,7 +517,13 @@ theorem psKernelWhnfCachedCore_configuration_refines
            match
                psKernelWhnfCoreWithFuel
                  remaining
-                 (psKernelWhnfWithFuel remaining reduceRecursor)
+                 (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
                  reduceRecursor
                  context
                  state
@@ -480,7 +534,13 @@ theorem psKernelWhnfCachedCore_configuration_refines
                Except.error error
            | Except.ok coreResult =>
                psKernelWhnfAfterCore
-                 (psKernelWhnfWithFuel remaining reduceRecursor)
+                 (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
                  context
                  (Prod.snd coreResult)
                  expr
@@ -516,7 +576,13 @@ theorem psKernelWhnfCachedCore_configuration_refines
               (match
                   psKernelWhnfCoreWithFuel
                     remaining
-                    (psKernelWhnfWithFuel remaining reduceRecursor)
+                    (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
                     reduceRecursor
                     context
                     state
@@ -527,7 +593,13 @@ theorem psKernelWhnfCachedCore_configuration_refines
                    Except.error error
                | Except.ok coreResult =>
                    psKernelWhnfAfterCore
-                     (psKernelWhnfWithFuel remaining reduceRecursor)
+                     (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
                      context
                      (Prod.snd coreResult)
                      expr
@@ -554,7 +626,13 @@ theorem psKernelWhnfCachedCore_configuration_refines
           (match
               psKernelWhnfCoreWithFuel
                 remaining
-                (psKernelWhnfWithFuel remaining reduceRecursor)
+                (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
                 reduceRecursor
                 context
                 state
@@ -565,7 +643,13 @@ theorem psKernelWhnfCachedCore_configuration_refines
                Except.error error
            | Except.ok coreResult =>
                psKernelWhnfAfterCore
-                 (psKernelWhnfWithFuel remaining reduceRecursor)
+                 (fun nextContext nextState nextExpr =>
+          psKernelWhnfWithFuel
+            remaining
+            reduceRecursor
+            nextContext
+            nextState
+            nextExpr)
                  context
                  (Prod.snd coreResult)
                  expr
@@ -614,6 +698,28 @@ theorem psKernelWhnfWithFuel_configuration_sound_contract
       simp [psKernelWhnfWithFuel] at hSuccess
   | succ remaining ih =>
       intro context state nextState expr result hConfig hSuccess
+      have ihEta :
+          PsKernelWhnfConfigurationSound
+            (fun nextContext nextState nextExpr =>
+              psKernelWhnfWithFuel
+                remaining
+                reduceRecursor
+                nextContext
+                nextState
+                nextExpr) := by
+        intro
+          nextContext nextState finalState
+          nextExpr nextResult
+          hNextConfig hNextSuccess
+        exact
+          ih
+            nextContext
+            nextState
+            finalState
+            nextExpr
+            nextResult
+            hNextConfig
+            hNextSuccess
       cases expr with
       | bvar index =>
           simp [psKernelWhnfWithFuel] at hSuccess
@@ -786,7 +892,7 @@ theorem psKernelWhnfWithFuel_configuration_sound_contract
                     psKernelWhnfCachedCore_configuration_refines
                       remaining
                       reduceRecursor
-                      ih
+                      ihEta
                       hRecursor
                       hBeta
                       hNative
@@ -800,7 +906,7 @@ theorem psKernelWhnfWithFuel_configuration_sound_contract
       | const name levels =>
           exact
             psKernelWhnfCachedCore_configuration_refines
-              remaining reduceRecursor ih hRecursor hBeta hNative
+              remaining reduceRecursor ihEta hRecursor hBeta hNative
               context state nextState
               (PsKernelExpr.const name levels)
               result hConfig
@@ -809,7 +915,7 @@ theorem psKernelWhnfWithFuel_configuration_sound_contract
       | lam name type body binderInfo =>
           exact
             psKernelWhnfCachedCore_configuration_refines
-              remaining reduceRecursor ih hRecursor hBeta hNative
+              remaining reduceRecursor ihEta hRecursor hBeta hNative
               context state nextState
               (PsKernelExpr.lam name type body binderInfo)
               result hConfig
@@ -818,7 +924,7 @@ theorem psKernelWhnfWithFuel_configuration_sound_contract
       | letE name type value body nondep =>
           exact
             psKernelWhnfCachedCore_configuration_refines
-              remaining reduceRecursor ih hRecursor hBeta hNative
+              remaining reduceRecursor ihEta hRecursor hBeta hNative
               context state nextState
               (PsKernelExpr.letE name type value body nondep)
               result hConfig
@@ -827,7 +933,7 @@ theorem psKernelWhnfWithFuel_configuration_sound_contract
       | app fn arg =>
           exact
             psKernelWhnfCachedCore_configuration_refines
-              remaining reduceRecursor ih hRecursor hBeta hNative
+              remaining reduceRecursor ihEta hRecursor hBeta hNative
               context state nextState
               (PsKernelExpr.app fn arg)
               result hConfig
@@ -836,7 +942,7 @@ theorem psKernelWhnfWithFuel_configuration_sound_contract
       | proj typeName index body =>
           exact
             psKernelWhnfCachedCore_configuration_refines
-              remaining reduceRecursor ih hRecursor hBeta hNative
+              remaining reduceRecursor ihEta hRecursor hBeta hNative
               context state nextState
               (PsKernelExpr.proj typeName index body)
               result hConfig

@@ -143,6 +143,162 @@ theorem psKernelExprLiftLooseBVarsReferenceChanged_false_fst
               exact hRun.1
 
 
+theorem psKernelExprInstantiateAtReferenceChanged_false_fst
+    (expr : PsKernelExpr)
+    (start : Nat)
+    (subst : List PsKernelExpr)
+    (offset : Nat)
+    (result : PsKernelExpr)
+    (hRun :
+      psKernelExprInstantiateAtReferenceChanged
+          expr start subst offset =
+        Prod.mk result false) :
+    result = expr := by
+  cases expr with
+  | bvar index =>
+      cases hBefore :
+          psKernelNatLt index (Nat.add start offset) with
+      | true =>
+          simpa [
+            psKernelExprInstantiateAtReferenceChanged,
+            hBefore
+          ] using hRun
+      | false =>
+          cases hGet :
+              psKernelExprListGet
+                subst
+                (Nat.sub index (Nat.add start offset)) with
+          | some replacement =>
+              simp [
+                psKernelExprInstantiateAtReferenceChanged,
+                hBefore,
+                hGet
+              ] at hRun
+          | none =>
+              cases hEmpty :
+                  psKernelExprListIsEmpty subst with
+              | true =>
+                  simpa [
+                    psKernelExprInstantiateAtReferenceChanged,
+                    hBefore,
+                    hGet,
+                    hEmpty
+                  ] using hRun
+              | false =>
+                  simp [
+                    psKernelExprInstantiateAtReferenceChanged,
+                    hBefore,
+                    hGet,
+                    hEmpty
+                  ] at hRun
+  | fvar name =>
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+  | mvar name =>
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+  | sort level =>
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+  | const name levels =>
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+  | lit literal =>
+      simpa [psKernelExprInstantiateAtReferenceChanged] using hRun
+  | app fn arg =>
+      cases hFn :
+          psKernelExprInstantiateAtReferenceChanged
+            fn start subst offset with
+      | mk fnResult fnChanged =>
+          cases hArg :
+              psKernelExprInstantiateAtReferenceChanged
+                arg start subst offset with
+          | mk argResult argChanged =>
+              cases fnChanged <;>
+                cases argChanged <;>
+                simp [
+                  psKernelExprInstantiateAtReferenceChanged,
+                  hFn,
+                  hArg
+                ] at hRun
+              exact hRun.1
+  | lam name type body binderInfo =>
+      cases hType :
+          psKernelExprInstantiateAtReferenceChanged
+            type start subst offset with
+      | mk typeResult typeChanged =>
+          cases hBody :
+              psKernelExprInstantiateAtReferenceChanged
+                body start subst (Nat.succ offset) with
+          | mk bodyResult bodyChanged =>
+              cases typeChanged <;>
+                cases bodyChanged <;>
+                simp [
+                  psKernelExprInstantiateAtReferenceChanged,
+                  hType,
+                  hBody
+                ] at hRun
+              exact hRun.1
+  | forallE name type body binderInfo =>
+      cases hType :
+          psKernelExprInstantiateAtReferenceChanged
+            type start subst offset with
+      | mk typeResult typeChanged =>
+          cases hBody :
+              psKernelExprInstantiateAtReferenceChanged
+                body start subst (Nat.succ offset) with
+          | mk bodyResult bodyChanged =>
+              cases typeChanged <;>
+                cases bodyChanged <;>
+                simp [
+                  psKernelExprInstantiateAtReferenceChanged,
+                  hType,
+                  hBody
+                ] at hRun
+              exact hRun.1
+  | letE name type value body nondep =>
+      cases hType :
+          psKernelExprInstantiateAtReferenceChanged
+            type start subst offset with
+      | mk typeResult typeChanged =>
+          cases hValue :
+              psKernelExprInstantiateAtReferenceChanged
+                value start subst offset with
+          | mk valueResult valueChanged =>
+              cases hBody :
+                  psKernelExprInstantiateAtReferenceChanged
+                    body start subst (Nat.succ offset) with
+              | mk bodyResult bodyChanged =>
+                  cases typeChanged <;>
+                    cases valueChanged <;>
+                    cases bodyChanged <;>
+                    simp [
+                      psKernelExprInstantiateAtReferenceChanged,
+                      hType,
+                      hValue,
+                      hBody
+                    ] at hRun
+                  exact hRun.1
+  | mdata metadata body =>
+      cases hBody :
+          psKernelExprInstantiateAtReferenceChanged
+            body start subst offset with
+      | mk bodyResult bodyChanged =>
+          cases bodyChanged <;>
+            simp [
+              psKernelExprInstantiateAtReferenceChanged,
+              hBody
+            ] at hRun
+          exact hRun.1
+  | proj typeName index body =>
+      cases hBody :
+          psKernelExprInstantiateAtReferenceChanged
+            body start subst offset with
+      | mk bodyResult bodyChanged =>
+          cases bodyChanged <;>
+            simp [
+              psKernelExprInstantiateAtReferenceChanged,
+              hBody
+            ] at hRun
+          exact hRun.1
+
+
 theorem psKernelExprLiftOne_then_instantiateReference_cancel
     (expr replacement : PsKernelExpr)
     (offset : Nat) :

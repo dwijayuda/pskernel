@@ -230,9 +230,11 @@
         "packages/backend-js/src/Ps/BackendJs/Encode.lean",
         "packages/backend-wasm/src/Ps/BackendWasm/Encode.lean",
         "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean",
-        "scripts/target-ir-artifact.mjs"
+        "scripts/target-ir-artifact.mjs",
+        "packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.lean",
+        "contracts/target/WASM_IR_VALIDATION_V1.json"
       ],
-      "completion": "Direct JS and direct Wasm lower once, validate the exact target IR consumed by printing/encoding, retain canonical target snapshots, and expose them through checked emission/build evidence. Global target preservation remains deferred.",
+      "completion": "Direct JS and direct Wasm lower once, validate the exact target IR consumed by printing/encoding, retain canonical target snapshots, and expose them through checked emission/build evidence. Global target preservation remains deferred. The represented Wasm profile has operand/control/local/GC typing checks; validator soundness and broader recursive-type equivalence remain explicit obligations.",
       "assurance": "pending"
     },
     {

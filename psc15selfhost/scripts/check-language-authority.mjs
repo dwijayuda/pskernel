@@ -14,6 +14,13 @@ if (authority.schemaVersion !== 2) {
   );
 }
 
+const bootstrapToolchain = (await readFile(path.join(root, "lean-toolchain"), "utf8")).trim();
+if (!authority.bootstrapLean ||
+    bootstrapToolchain !== "leanprover/lean4:v" + authority.bootstrapLean.version ||
+    !/^[a-f0-9]{40}$/.test(authority.bootstrapLean.commit)) {
+  throw new Error("PSCV_LANGUAGE_AUTHORITY_BOOTSTRAP_PIN");
+}
+
 const document = await readFile(path.join(root, authority.document));
 const actualSha = createHash("sha256").update(document).digest("hex");
 if (actualSha !== authority.sha256) {

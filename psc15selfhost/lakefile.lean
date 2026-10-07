@@ -168,6 +168,8 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Encode,
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Validate,
+    `Ps.BackendWasm.ValidateStructure,
+    `Ps.BackendWasm.ValidateTyping,
     `Ps.BackendWasm.ValidateIr,
     `Ps.BackendWasm.LiteralEvidence,
     `Ps.BackendWasm.SelfHostAbi

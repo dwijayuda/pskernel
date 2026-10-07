@@ -9,7 +9,8 @@
     "emit": "TypeScript executable-only convenience operation.",
     "emitPublicApiArtifact": "Independent requested source API product.",
     "emitOriginGraph": "Independent requested declaration origin product, with required PublicApiIR dependency.",
-    "emitDeclarationsArtifact": "Explicit direct-JS closed structural source declaration request; returns executable and source declaration products from one staged emission, without requesting origin/generated-position products."
+    "emitDeclarationsArtifact": "Explicit direct-JS source declaration request under the session's fixed closed or uniform structural profile; returns executable and source declaration products from one staged emission, without requesting origin/generated-position products.",
+    "emitSelectedArtifact": "Explicit own boolean metadata/declarations/sourceMap flags; one staged emission serves their dependency closure. Declarations and required source maps are JavaScript products. sourceMap requires a complete available origin closure and fails if absent; metadata alone retains all-available semantics."
   },
   "acceptance": [
     "Kernel acceptance uses the same frozen prepared Core and exact admissions, independently of optional origin-table shape.",
@@ -18,7 +19,8 @@
     "Selected target-stage APIs execute once per emission. Failure, malformed required stage data, changed RuntimeIR/VerifiedIR bytes and failed specialization correspondence still reject executable-only output.",
     "Selected stage fields must be own data properties. Unrequested metadata fields are neither read nor recursively frozen.",
     "Source API projection and debug reconstruction are not invoked for executable-only output. Only selected returned products count against the output byte budget.",
-    "Revocation, session identity, CertifiedSource binding and target authorization apply to every selection."
+    "Revocation, session identity, CertifiedSource binding and target authorization apply to every selection.",
+    "Executable emission and source API projection recheck live session membership and exact admissions after invoking the selected producer and before returning its product."
   ],
   "specialization": "Executable-only emission runs the existing independent exact-instantiation relation without allocating a debug witness map. Full metadata emission retains witnesses from the same relation.",
   "compatibility": "emitArtifact keeps its strict all-available-metadata behavior. No automatic fallback follows a requested-product failure. A caller explicitly requests executable-only output on its existing live handle.",

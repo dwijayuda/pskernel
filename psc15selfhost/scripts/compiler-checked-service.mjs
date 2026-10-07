@@ -169,7 +169,7 @@ export function createCheckedCompilerService({
       throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
-      requestedProducts: declarationsRequested ? 'executable-and-source-declarations' : includeMetadata ? 'executable-and-available-metadata' : 'executable-only',
+      requestedProducts: declarationsRequested ? (includeMetadata ? 'executable-source-declarations-and-metadata' : 'executable-and-source-declarations') : includeMetadata ? 'executable-and-available-metadata' : 'executable-only',
       artifact: Object.freeze({ algorithm: 'sha256', domain: 'target-bytes', schemaVersion: 1,
         digest: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength }),
       checkedCore: capability,
@@ -196,6 +196,26 @@ export function createCheckedCompilerService({
       transformationAssurance: 'trusted-implementation-global-preservation-unproved',
     });
   }
+  // One staged emission serves every selected product. Required maps fail
+  // explicitly when their producer/origin closure is unavailable.
+  function emitSelectedArtifact(handle, target = 'typescript', selection = {}) {
+    if (!selection || typeof selection !== 'object' || Array.isArray(selection))
+      throw new Error('PSC_CHECKED_PRODUCT_SELECTION');
+    const flags = { metadata: false, declarations: false, sourceMap: false };
+    for (const key of Reflect.ownKeys(selection)) {
+      const field = Object.getOwnPropertyDescriptor(selection, key);
+      if (!Object.hasOwn(flags, key) || !field || !Object.hasOwn(field, 'value') || typeof field.value !== 'boolean')
+        throw new Error('PSC_CHECKED_PRODUCT_SELECTION');
+      flags[key] = field.value;
+    }
+    if ((flags.declarations || flags.sourceMap) && target !== 'javascript')
+      throw new Error('PSC_CHECKED_PRODUCT_TARGET');
+    const product = emitProduct(handle, target, flags.metadata || flags.sourceMap, flags.declarations);
+    if (flags.sourceMap && product.sourceMap === undefined) throw new Error('PSC_CHECKED_SOURCE_MAP_REQUIRED');
+    return Object.freeze({ ...product, productSelection: Object.freeze({
+      contract: 'psc-compiler-product-selection/1', executable: true, ...flags,
+    }) });
+  }
   function emitArtifact(handle, target = 'typescript') { return emitProduct(handle, target, true); }
   function emitExecutableArtifact(handle, target = 'typescript') { return emitProduct(handle, target, false); }
   function emitDeclarationsArtifact(handle, { profile = declarationProfile } = {}) {
@@ -203,7 +223,7 @@ export function createCheckedCompilerService({
     return emitProduct(handle, 'javascript', false, true);
   }
   return Object.freeze({
-    check, checkSources, emitDeclarationsArtifact,
+    check, checkSources, emitDeclarationsArtifact, emitSelectedArtifact,
     emit: handle => emitExecutableArtifact(handle, 'typescript').payload,
     emitExecutableArtifact,
     emitArtifact,

@@ -528,3 +528,60 @@ test('uniform live metadata composes real retained declarations without closed i
   service.revoke(handle);
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /CERTIFIED_SOURCE_NOT_LIVE/);
 });
+
+test('selected declaration and required-map products share one accepted preparation and emission', async () => {
+  const { service, compiler, emitted } = fixture();
+  let preparations = 0, stages = 0, writers = 0;
+  compiler.psCompilerPrepareSourceWithOrigins = (kind, source) => {
+    preparations++;
+    return ok({ prepared: { kind, source }, origins: '["psc-declaration-origins/1","declaration-batch",1,[]]' });
+  };
+  compiler.psCompilerPublicApiFromPrepared = () => ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
+  const good = { javaScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr, specializedIr: emptyIr, jsIr: emptyJsIr,
+    generatedPositions: '["psc-js-generated-positions/1","declaration-emission-chunk",[]]',
+    erasureCorrespondence: '["psc-erasure-declarations/1","declaration-inventory",[]]' };
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => { stages++; return ok(good); };
+  compiler.psCompilerJavaScriptDeclarationsFromPrepared = () => { writers++; return ok('export {};\n'); };
+  const handle = await service.check('lean', '');
+  const selection = { declarations: true, sourceMap: true };
+  const product = service.emitSelectedArtifact(handle, 'javascript', selection);
+  selection.declarations = false;
+  assert.deepEqual(product.productSelection, { contract: 'psc-compiler-product-selection/1',
+    executable: true, metadata: false, declarations: true, sourceMap: true });
+  assert.equal(product.directDeclarations.declarations.bytes.toString(), 'export {};\n');
+  assert.equal(JSON.parse(product.sourceMap).version, 3);
+  assert.equal(preparations, 1); assert.equal(stages, 1); assert.equal(writers, 1); assert.equal(emitted.length, 0);
+  for (const invalid of [null, [], { metadata: 'yes' }, { unknown: true },
+    Object.defineProperty({}, 'metadata', { get() { throw new Error('GETTER_MUST_NOT_RUN'); } })])
+    assert.throws(() => service.emitSelectedArtifact(handle, 'javascript', invalid), /PRODUCT_SELECTION/);
+  assert.throws(() => service.emitSelectedArtifact(handle, 'wasm', { sourceMap: true }), /PRODUCT_TARGET/);
+  assert.equal(stages, 1);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ ...good, generatedPositions: undefined });
+  assert.throws(() => service.emitSelectedArtifact(handle, 'javascript', { sourceMap: true }), /GENERATED_POSITIONS_SHAPE/);
+  compiler.psCompilerJavaScriptStagesFromPrepared = () => ok({ javaScript: '', runtimeIr: emptyIr,
+    verifiedIr: emptyIr, specializedIr: emptyIr, jsIr: emptyJsIr });
+  assert.throws(() => service.emitSelectedArtifact(handle, 'javascript', { sourceMap: true }), /SOURCE_MAP_REQUIRED/);
+  assert.equal(service.emitSelectedArtifact(handle, 'javascript').payload, '');
+});
+
+for (const staged of [false, true]) for (const close of [false, true])
+  test(`emission rechecks liveness after a ${staged ? 'staged' : 'legacy'} producer ${close ? 'closes' : 'revokes'} its session`, async () => {
+    const { service, compiler } = fixture();
+    const handle = await service.check('lean', '');
+    const interrupt = () => close ? service.close() : service.revoke(handle);
+    if (staged) compiler.psCompilerJavaScriptStagesFromPrepared = () => {
+      interrupt(); return ok({ javaScript: '', runtimeIr: emptyIr, verifiedIr: emptyIr,
+        specializedIr: emptyIr, jsIr: emptyJsIr });
+    };
+    else compiler.psCompilerJavaScriptFromPrepared = () => { interrupt(); return ok(''); };
+    assert.throws(() => service.emitSelectedArtifact(handle, 'javascript'), /UNCHECKED_MODULE|SESSION_CLOSED/);
+  });
+
+test('source API projection rechecks liveness before returning a product', async () => {
+  const { service, compiler } = fixture();
+  const handle = await service.check('lean', '');
+  compiler.psCompilerPublicApiFromPrepared = () => {
+    service.revoke(handle); return ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
+  };
+  assert.throws(() => service.emitPublicApiArtifact(handle), /UNCHECKED_MODULE/);
+});

@@ -103,6 +103,12 @@ export function createKernelCheckedSession(
     if (!item) throw new Error('PSC2_CHECKED_UNCHECKED_MODULE');
     return item;
   }
+  function requireStableItem(handle, item) {
+    if (checkedItem(handle) !== item) throw new Error('PSC2_CHECKED_UNCHECKED_MODULE');
+    if (admissionsFrom(compiler, item.prepared) !== item.admissions)
+      throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
+    checkedItem(handle);
+  }
   function prepare(name, ...args) {
     const observed = name + 'WithOrigins';
     if (!(observed in compiler)) return { prepared: unwrapCompilerResult(compiler[name](...args), 'PREPARE') };
@@ -194,6 +200,7 @@ export function createKernelCheckedSession(
         if (Object.hasOwn(staged, 'generatedPositions') &&
             (target !== 'javascript' || typeof staged.generatedPositions !== 'string'))
           throw new Error('PSC2_CHECKED_GENERATED_POSITIONS_SHAPE');
+        requireStableItem(handle, item);
         return Object.freeze({ output: staged[outputKey],
           ...(Object.hasOwn(staged, 'generatedPositions') ? { generatedPositions: staged.generatedPositions } : {}),
           ...(Object.hasOwn(staged, 'erasureCorrespondence') ? { erasureCorrespondence: staged.erasureCorrespondence } : {}),
@@ -218,6 +225,7 @@ export function createKernelCheckedSession(
       } else result = compiler[name](item.prepared);
       const output = unwrapCompilerResult(result, 'EMIT');
       if (target !== 'wasm' && typeof output !== 'string') throw new Error('PSC2_CHECKED_EMIT_RESULT_SHAPE');
+      requireStableItem(handle, item);
       return Object.freeze({ output });
   }
   // Legacy selected compiler modules can lack this product. Presence with a
@@ -225,10 +233,14 @@ export function createKernelCheckedSession(
   function publicApi(handle) {
     const item = checkedItem(handle);
     if (admissionsFrom(compiler, item.prepared) !== item.admissions) throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
-    if (!('psCompilerPublicApiFromPrepared' in compiler)) return undefined;
+    if (!('psCompilerPublicApiFromPrepared' in compiler)) {
+      requireStableItem(handle, item);
+      return undefined;
+    }
     if (typeof compiler.psCompilerPublicApiFromPrepared !== 'function') throw new Error('PSC2_CHECKED_PUBLIC_API_API_SHAPE');
     const output = unwrapCompilerResult(compiler.psCompilerPublicApiFromPrepared(item.prepared), 'PUBLIC_API');
     if (typeof output !== 'string') throw new Error('PSC2_CHECKED_PUBLIC_API_RESULT_SHAPE');
+    requireStableItem(handle, item);
     return output;
   }
   function javaScriptDeclarations(handle, bindings, maxBytes) {
@@ -254,8 +266,7 @@ export function createKernelCheckedSession(
       compiler.psCompilerJavaScriptDeclarationsFromPrepared(request, item.prepared), 'DECLARATIONS');
     if (typeof output !== 'string') throw new Error('PSC2_CHECKED_DECLARATIONS_RESULT_SHAPE');
     if (Buffer.byteLength(output) > Math.min(maxBytes, 67108864)) throw new Error('PSC2_CHECKED_DECLARATIONS_OUTPUT_RESOURCE');
-    checkedItem(handle);
-    if (admissionsFrom(compiler, item.prepared) !== item.admissions) throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
+    requireStableItem(handle, item);
     return output;
   }
   function emitTarget(handle, target) { return emitTargetWithStages(handle, target, { includeMetadata: false }).output; }

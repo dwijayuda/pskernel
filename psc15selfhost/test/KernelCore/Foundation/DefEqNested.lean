@@ -293,6 +293,98 @@ def psKernelCoreDefEqTests : Bool :=
         (Prod.fst portableResult) == referenceResult
     | _, _ =>
         false;
+  let binaryName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "binaryFunction";
+  let binaryType :=
+    PsKernelExpr.forallE
+      PsKernelName.anonymous
+      natType
+      (PsKernelExpr.forallE
+        PsKernelName.anonymous
+        natType
+        natType
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default;
+  let portableBinaryAdded :=
+    psKernelCheckerContextWithLocal
+      portableEtaContext
+      binaryName
+      binaryType
+      PsKernelBinderInfo.default;
+  let portableBinaryName :=
+    Prod.fst portableBinaryAdded;
+  let portableBinaryContext :=
+    Prod.snd portableBinaryAdded;
+  let referenceBinaryAdded :=
+    referenceEtaContext.withLocal
+      (psKernelNameToReference binaryName)
+      (psKernelExprToReference binaryType)
+      PSC1Kernel.BinderInfo.default;
+  let referenceBinaryName :=
+    Prod.fst referenceBinaryAdded;
+  let referenceBinaryContext :=
+    Prod.snd referenceBinaryAdded;
+  let partialApplication :=
+    PsKernelExpr.app
+      (PsKernelExpr.fvar portableBinaryName)
+      (PsKernelExpr.lit (PsKernelLiteral.nat 0));
+  let etaExpandedApplication :=
+    PsKernelExpr.lam
+      PsKernelName.anonymous
+      natType
+      (PsKernelExpr.app
+        partialApplication
+        (PsKernelExpr.bvar 0))
+      PsKernelBinderInfo.default;
+  let referencePartialApplication :=
+    PSC1Kernel.Expr.app
+      (PSC1Kernel.Expr.fvar referenceBinaryName)
+      (PSC1Kernel.Expr.lit (PSC1Kernel.Literal.nat 0));
+  let referenceEtaExpandedApplication :=
+    PSC1Kernel.Expr.lam
+      PSC1Kernel.Name.anonymous
+      (psKernelExprToReference natType)
+      (PSC1Kernel.Expr.app
+        referencePartialApplication
+        (PSC1Kernel.Expr.bvar 0))
+      PSC1Kernel.BinderInfo.default;
+  let etaApplicationDifferential :=
+    match
+        psKernelIsDefEq
+          2048
+          portableBinaryContext
+          psKernelCheckerStateEmpty
+          partialApplication
+          etaExpandedApplication,
+        psKernelIsDefEq
+          2048
+          portableBinaryContext
+          psKernelCheckerStateEmpty
+          etaExpandedApplication
+          partialApplication,
+        PSC1Kernel.isDefEq
+          referenceBinaryContext
+          referencePartialApplication
+          referenceEtaExpandedApplication,
+        PSC1Kernel.isDefEq
+          referenceBinaryContext
+          referenceEtaExpandedApplication
+          referencePartialApplication with
+    | Except.ok portableForward,
+        Except.ok portableReverse,
+        Except.ok referenceForward,
+        Except.ok referenceReverse =>
+        Bool.and
+          (Prod.fst portableForward)
+          (Bool.and
+            (Prod.fst portableReverse)
+            (Bool.and
+              ((Prod.fst portableForward) == referenceForward)
+              ((Prod.fst portableReverse) == referenceReverse)))
+    | _, _, _, _ =>
+        false;
   Bool.and
     (psKernelDefEqDifferential
       portableBase
@@ -311,7 +403,9 @@ def psKernelCoreDefEqTests : Bool :=
           referenceProofContext
           (PsKernelExpr.fvar proofLeftName)
           (PsKernelExpr.fvar proofRightName))
-        etaDifferential))
+        (Bool.and
+          etaDifferential
+          etaApplicationDifferential)))
 
 
 def psKernelConstantListUsesNestedPrefix

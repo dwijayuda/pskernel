@@ -1,0 +1,85 @@
+name: PSKernel Core Arena prefix performance
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-v1
+    paths:
+      - ".github/workflows/pskernel-core-arena-perf.yml"
+      - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
+      - "psc15selfhost/packages/pskernel-core/**"
+      - "psc15selfhost/lakefile.lean"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pskernel-core-arena-perf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  init-prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PSKERNEL_SHA: ${{ github.sha }}
+    steps:
+      - name: Install toolchains
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Clone upstream Arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/leanprover/lean-kernel-arena.git arena
+
+      - name: Register PSKernel
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > checkers/pskernel-core.yaml <<EOF
+          description: PSKernel Core Arena prefix performance lane.
+          url: https://github.com/dwijayuda/pskernel
+          ref: pscv/pskernel-core-arena-v1
+          rev: $PSKERNEL_SHA
+          build: |
+            cd psc15selfhost
+            lake build psc_kernel_core_arena psc_kernel_legacy_arena
+          run: psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "\$IN"
+          EOF
+
+      - name: Build Init export and checker
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test init --cache
+          uv run lka.py build-checker pskernel-core
+          head -n 100000 _build/tests/init.ndjson > /tmp/init-prefix-100k.ndjson
+          wc -l -c /tmp/init-prefix-100k.ndjson
+
+      - name: Measure canonical and legacy prefix
+        working-directory: arena
+        shell: bash
+        run: |
+          set -u
+          CURRENT=_build/checkers/pskernel-core/src/psc15selfhost/.lake/build/bin/psc_kernel_core_arena
+          LEGACY=_build/checkers/pskernel-core/src/psc15selfhost/.lake/build/bin/psc_kernel_legacy_arena
+          echo "=== canonical 100k ==="
+          /usr/bin/time -f 'canonical_wall=%e canonical_rss_kb=%M canonical_exit=%x' \
+            timeout 300 "$CURRENT" < /tmp/init-prefix-100k.ndjson
+          echo "canonical_shell_exit=$?"
+          echo "=== legacy 100k ==="
+          /usr/bin/time -f 'legacy_wall=%e legacy_rss_kb=%M legacy_exit=%x' \
+            timeout 300 "$LEGACY" < /tmp/init-prefix-100k.ndjson
+          echo "legacy_shell_exit=$?"
+          exit 0

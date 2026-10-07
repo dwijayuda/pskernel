@@ -481,13 +481,13 @@
     {
       "id": "psc-uniform-specialized-ir/1",
       "kind": "specialized-ir",
-      "status": "current-portable-selected-profile",
+      "status": "experimental",
       "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
     },
     {
       "id": "psc-js-uniform-values/1",
       "kind": "representation-profile",
-      "status": "current-portable-selected-profile",
+      "status": "experimental",
       "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
     },
     {
@@ -499,7 +499,7 @@
     {
       "id": "psc-pass-uniform-specialize/1",
       "kind": "compiler-pass",
-      "status": "current-portable-selected-profile",
+      "status": "experimental",
       "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
     }
   ],

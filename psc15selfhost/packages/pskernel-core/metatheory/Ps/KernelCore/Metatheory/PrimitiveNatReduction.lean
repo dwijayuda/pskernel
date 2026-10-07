@@ -913,3 +913,45 @@ theorem psKernelReduceNatWith_some_refines
           simp [psKernelReduceNatWith] at hSuccess
   | _ =>
       simp [psKernelReduceNatWith] at hSuccess
+
+
+theorem psKernelReduceNatWith_configuration_sound
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound publicWhnf) :
+    PsKernelOptionalReductionConfigurationSound
+      (psKernelReduceNatWith publicWhnf) := by
+  intro
+    context state nextState expr answer
+    hConfig hSuccess
+  constructor
+  · exact
+      psKernelReduceNatWith_preserves_configuration
+        publicWhnf
+        hWhnf
+        context
+        state
+        nextState
+        expr
+        answer
+        hConfig
+        hSuccess
+  · cases answer with
+    | none =>
+        trivial
+    | some result =>
+        exact
+          psKernelReduceNatWith_some_refines
+            publicWhnf
+            hWhnf
+            context
+            state
+            nextState
+            expr
+            result
+            hConfig
+            hSuccess

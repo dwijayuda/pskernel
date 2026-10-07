@@ -1,11 +1,13 @@
 import Ps.Compiler.Internal
 import Ps.BackendWasm.Lower
 import Ps.BackendWasm.Binary
+import Ps.BackendWasm.ValidateIr
 import Ps.BackendWasm.SelfHostAbi
 
 inductive PsCompilerWasmError where
   | compiler (error : PsCompilerError)
   | lower (error : PsWasmLowerError)
+  | targetValidation (error : PsWasmIrValidationError)
   | encode (error : PsWasmEncodeError)
 
 def psCompilerWasm32Target : PsWasmTargetProfile :=
@@ -104,6 +106,8 @@ def psCompilerWasmErrorCode
   | PsCompilerWasmError.compiler _ => "compiler"
   | PsCompilerWasmError.lower lowerError =>
       psCompilerWasmLowerErrorCode lowerError
+  | PsCompilerWasmError.targetValidation _ =>
+      "target-validation"
   | PsCompilerWasmError.encode _ => "encode"
 
 def psCompilerWasmFromPrepared
@@ -117,12 +121,19 @@ def psCompilerWasmFromPrepared
       match psWasmLowerValidatedModule profile ir with
       | Except.error error =>
           Except.error (PsCompilerWasmError.lower error)
-      | Except.ok module =>
-          match psWasmEncodeModule (psWasmAddSelfHostGcAbi module) with
+      | Except.ok lowered =>
+          let module : PsWasmModule :=
+            psWasmAddSelfHostGcAbi lowered;
+          match psWasmIrValidateModule module with
           | Except.error error =>
-              Except.error (PsCompilerWasmError.encode error)
-          | Except.ok bytes =>
-              Except.ok bytes
+              Except.error
+                (PsCompilerWasmError.targetValidation error)
+          | Except.ok _ =>
+              match psWasmEncodeModule module with
+              | Except.error error =>
+                  Except.error (PsCompilerWasmError.encode error)
+              | Except.ok bytes =>
+                  Except.ok bytes
 
 def psCompilerWasmFromElaborated
     (profile : PsWasmTargetProfile)

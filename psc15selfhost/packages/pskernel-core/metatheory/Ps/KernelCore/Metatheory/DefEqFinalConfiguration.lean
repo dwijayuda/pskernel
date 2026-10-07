@@ -93,6 +93,89 @@ theorem psKernelDefEqIsPropWith_configuration_preserves
               ] at hSuccess
 
 
+theorem psKernelDefEqIsPropWith_true_refines
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hInfer :
+      PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqIsPropWith
+          inferType
+          whnf
+          context
+          state
+          expr =
+        Except.ok (Prod.mk true nextState)) :
+    ∃ (inferredType : PsKernelExpr) (level : PsKernelLevel),
+      PsKernelReductionClosure
+          context.environment
+          context.localContext
+          inferredType
+          (PsKernelExpr.sort level) ∧
+        psKernelLevelNormalizesToZero level = true := by
+  cases hInferRun :
+      inferType context state expr with
+  | error error =>
+      simp [
+        psKernelDefEqIsPropWith,
+        hInferRun
+      ] at hSuccess
+  | ok inferRun =>
+      rcases inferRun with ⟨inferredType, inferredState⟩
+      have hInferredConfig :=
+        hInfer
+          context
+          state
+          inferredState
+          expr
+          inferredType
+          hConfig
+          hInferRun
+      cases hWhnfRun :
+          whnf context inferredState inferredType with
+      | error error =>
+          simp [
+            psKernelDefEqIsPropWith,
+            hInferRun,
+            hWhnfRun
+          ] at hSuccess
+      | ok whnfRun =>
+          rcases whnfRun with ⟨reducedType, reducedState⟩
+          have hReduced :=
+            hWhnf
+              context
+              inferredState
+              reducedState
+              inferredType
+              reducedType
+              hInferredConfig
+              hWhnfRun
+          cases reducedType with
+          | sort level =>
+              simp [
+                psKernelDefEqIsPropWith,
+                hInferRun,
+                hWhnfRun
+              ] at hSuccess
+              rcases hSuccess with ⟨hProp, rfl⟩
+              exact ⟨inferredType, level, hReduced.1, hProp⟩
+          | _ =>
+              simp [
+                psKernelDefEqIsPropWith,
+                hInferRun,
+                hWhnfRun
+              ] at hSuccess
+
 theorem psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
     (fuel : Nat)
     (defeq :

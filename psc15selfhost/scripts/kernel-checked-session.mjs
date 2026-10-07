@@ -124,7 +124,7 @@ export function createKernelCheckedSession(
         provider: identity,
         providerSecurity: security,
       });
-      modules.set(handle, { prepared, admissions });
+      modules.set(handle, { prepared, admissions, source });
       return handle;
   }
   function emitTargetWithStages(handle, target) {
@@ -197,6 +197,10 @@ export function createKernelCheckedSession(
     emitTarget,
     emitTargetWithStages,
     describe(handle) { checkedItem(handle); return handle; },
+    certificationSubject(handle) {
+      const item = checkedItem(handle);
+      return Object.freeze({ source: item.source, admissions: item.admissions });
+    },
     revoke(handle) { checkedItem(handle); modules.delete(handle); },
     close() { closed = true; },
   });

@@ -33,9 +33,16 @@ function fixture(options = {}) {
 test('all permitted backends emit from the same accepted object and bind byte digests', async () => {
   const { service, emitted } = fixture();
   const handle = await service.check('lean', 'def value : Nat := 7');
+  const certificate = service.certificate(handle);
+  const certified = service.describe(handle);
+  assert.equal(handle.capability, 'psc-certified-source-capability/1');
+  assert.equal(certificate.identity.contract, 'pscv-cert/1');
+  assert.equal(certified.contract, 'psc-certified-source/1');
   for (const target of handle.targets) {
     const artifact = service.emitArtifact(handle, target);
-    assert.equal(artifact.checkedCore, handle);
+    assert.equal(artifact.checkedCore.capability, 'psc-checked-core-capability/1');
+    assert.deepEqual(artifact.pscvCert, certificate.identity);
+    assert.deepEqual(artifact.certifiedSource.identity, certified.identity);
     assert.equal(artifact.transformationAssurance, 'trusted-implementation-global-preservation-unproved');
     const bytes = typeof artifact.payload === 'string' ? Buffer.from(artifact.payload) : artifact.payload;
     assert.equal(artifact.artifact.digest, createHash('sha256').update(bytes).digest('hex'));
@@ -48,10 +55,13 @@ test('all permitted backends emit from the same accepted object and bind byte di
 test('serialized, foreign, revoked and closed capabilities cannot emit', async () => {
   const { service } = fixture();
   const handle = await service.check('lean', 'accepted');
-  assert.throws(() => service.emitArtifact(JSON.parse(JSON.stringify(handle))), /UNCHECKED_MODULE/);
-  assert.throws(() => fixture().service.emitArtifact(handle), /UNCHECKED_MODULE/);
+  assert.throws(() => service.emitArtifact(JSON.parse(JSON.stringify(handle))), /CERTIFIED_SOURCE_NOT_LIVE/);
+  assert.throws(() => fixture().service.emitArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
+  const serializedCertificate = JSON.parse(service.certificate(handle).bytes);
   service.revoke(handle);
-  assert.throws(() => service.emitArtifact(handle), /UNCHECKED_MODULE/);
+  assert.equal(serializedCertificate.contract, 'pscv-cert/1');
+  assert.throws(() => service.emitArtifact(handle), /CERTIFIED_SOURCE_NOT_LIVE/);
+  assert.throws(() => service.emitArtifact(serializedCertificate), /CERTIFIED_SOURCE_NOT_LIVE/);
   const second = await service.check('lean', 'accepted again');
   service.close();
   assert.throws(() => service.emitArtifact(second), /SESSION_CLOSED/);
@@ -136,7 +146,7 @@ test('staged JavaScript output binds actual stage domains and rejects missing, c
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /UNJUSTIFIED_TARGET/);
   const small = fixture({ maxOutputBytes: 100 });
   small.compiler.psCompilerJavaScriptStagesFromPrepared = () => ok(good);
-  assert.throws(() => small.service.emitArtifact(handle, 'javascript'), /UNCHECKED_MODULE/);
+  assert.throws(() => small.service.emitArtifact(handle, 'javascript'), /CERTIFIED_SOURCE_NOT_LIVE/);
   const smallHandle = await small.service.check('lean', 'same');
   assert.throws(() => small.service.emitArtifact(smallHandle, 'javascript'), /OUTPUT_RESOURCE_EXHAUSTED/);
   assert.equal(emitted.length, 0);

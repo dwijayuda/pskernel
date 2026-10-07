@@ -3,6 +3,7 @@ import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
 import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { createCertifiedSourceSession } from './certified-source.mjs';
 
 function byteList(value, limit) {
   const bytes = [], seen = new WeakSet();
@@ -30,9 +31,19 @@ export function createCheckedCompilerService({
   if (!Number.isSafeInteger(maxOutputBytes) || maxOutputBytes < 0) throw new Error('PSC_CHECKED_OUTPUT_BUDGET');
   const session = createKernelCheckedSession(compiler, checkAdmissions, identity, kernelContract, providerSecurity,
     { targets, assumptionPolicy, resourcePolicy });
+  const certified = createCertifiedSourceSession(session);
+  async function check(sourceKind, source) {
+    return certified.certify(await session.check(sourceKind, source));
+  }
+  async function checkSources(sourceKind, sources) {
+    return certified.certify(await session.checkSources(sourceKind, sources));
+  }
   function emitArtifact(handle, target = 'typescript') {
-    const capability = session.describe(handle);
-    const emission = session.emitTargetWithStages(handle, target);
+    const certifiedSource = certified.describe(handle);
+    const certificate = certified.certificate(handle);
+    const checkedCoreHandle = certified.checkedCore(handle);
+    const capability = session.describe(checkedCoreHandle);
+    const emission = session.emitTargetWithStages(checkedCoreHandle, target);
     const raw = emission.output;
     const payload = target === 'wasm' ? byteList(raw, maxOutputBytes) : raw;
     const bytes = typeof payload === 'string' ? Buffer.from(payload, 'utf8') : payload;
@@ -48,6 +59,8 @@ export function createCheckedCompilerService({
       artifact: Object.freeze({ algorithm: 'sha256', domain: 'target-bytes', schemaVersion: 1,
         digest: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength }),
       checkedCore: capability,
+      pscvCert: certificate.identity,
+      certifiedSource,
       ...(specialization ? { specializationCorrespondence: specialization } : {}),
       ...(emission.stages ? { stages: emission.stages,
         stageArtifacts: Object.freeze(Object.fromEntries(Object.entries(stages).map(([key, value]) => [key, value.identity]))) } : {}),
@@ -55,8 +68,13 @@ export function createCheckedCompilerService({
     });
   }
   return Object.freeze({
-    check: session.check, checkSources: session.checkSources,
+    check, checkSources,
     emit: handle => emitArtifact(handle, 'typescript').payload,
-    emitArtifact, describe: session.describe, revoke: session.revoke, close: session.close,
+    emitArtifact,
+    describe: certified.describe,
+    certificate: certified.certificate,
+    certifiedSourceArtifact: certified.certifiedSourceArtifact,
+    revoke: certified.revoke,
+    close: certified.close,
   });
 }

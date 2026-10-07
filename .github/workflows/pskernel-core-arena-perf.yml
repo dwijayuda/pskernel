@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        prefix: [350000, 355000, 360000, 365000, 370000, 375000]
+        prefix: [360000, 361500, 361900, 362000, 362100, 362400]
     env:
       PSKERNEL_SHA: ${{ github.sha }}
       PREFIX: ${{ matrix.prefix }}

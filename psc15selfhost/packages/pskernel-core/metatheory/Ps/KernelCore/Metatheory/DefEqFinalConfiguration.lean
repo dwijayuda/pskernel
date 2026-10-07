@@ -1167,10 +1167,23 @@ theorem psKernelDefEqUnitLikeWith_true_refines
                                                   true
                                                   hRightConfig
                                                   hSuccess).2 rfl
-                                              have hLookup :=
-                                                psKernelEnvironmentIndexRefines_lookup_sound
-                                                  context.environment
-                                                  hConfig.1
+                                              have hLookup :
+                                                  PsKernelEnvironmentLookupSound
+                                                    context.environment := by
+                                                intro name info hEnvironmentFind
+                                                unfold psKernelEnvironmentFind at hEnvironmentFind
+                                                calc
+                                                  psKernelFindConstantInList
+                                                      name
+                                                      context.environment.constants =
+                                                    psKernelFindConstantInList
+                                                      name
+                                                      (psKernelEnvironmentIndexFind
+                                                        context.environment.index
+                                                        name) :=
+                                                    (hConfig.1 name).symm
+                                                  _ = Option.some info :=
+                                                    hEnvironmentFind
                                               have hInduct :=
                                                 hLookup
                                                   inductName

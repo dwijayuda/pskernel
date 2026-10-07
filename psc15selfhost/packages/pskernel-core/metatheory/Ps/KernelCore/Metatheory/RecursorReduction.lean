@@ -1731,11 +1731,13 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                     (Nat.add
                       recursor.numMinors
                       recursor.numIndices))
+              revert hSuccess
               cases hShort :
                   psKernelNatGe
                     majorIndex
                     (psKernelExprListLength recArgs) with
               | true =>
+                  intro hSuccess
                   simp [
                     psKernelReduceInductiveRecFactoredWith,
                     recSpine,
@@ -1748,11 +1750,14 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | false =>
+                  intro hSuccess
+                  revert hSuccess
                   cases hMajor :
                       psKernelExprListGet
                         recArgs
                         majorIndex with
                   | none =>
+                      intro hSuccess
                       simp [
                         psKernelReduceInductiveRecFactoredWith,
                         recSpine,
@@ -1766,6 +1771,7 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                       rcases hSuccess with ⟨rfl, rfl⟩
                       exact ⟨hConfig, trivial⟩
                   | some major0 =>
+                      intro hSuccess
                       have hTail :
                           psKernelReduceInductiveRecMajorTailWith
                               publicWhnf
@@ -1792,7 +1798,7 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                           hShort,
                           hMajor
                         ] using hSuccess
-                      exact
+                      have hTailSemantic :=
                         psKernelReduceInductiveRecMajorTailWith_configuration_sound
                           publicWhnf
                           coreWhnf
@@ -1823,6 +1829,11 @@ theorem psKernelReduceInductiveRecFactoredWith_configuration_sound
                           (by
                             simpa [majorIndex] using hMajor)
                           hTail
+                      cases answer with
+                      | none =>
+                          exact ⟨hTailSemantic.1, trivial⟩
+                      | some result =>
+                          exact ⟨hTailSemantic.1, hTailSemantic.2⟩
           | axiomInfo value =>
               simp [
                 psKernelReduceInductiveRecFactoredWith,

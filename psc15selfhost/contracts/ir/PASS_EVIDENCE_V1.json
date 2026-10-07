@@ -35,7 +35,10 @@
     "checked-service direct JavaScript staged emission and graph/archive support for actual erasure, validation, specialization and final output; default production build remains TypeScript",
     "actual runtime structural-interface projection from archived VerifiedIR, with independent projection replay and a receipt-bound interface fingerprint",
     "checked-service direct Wasm staged emission and six-edge graph with actual erasure/validation/specialization/binary snapshots",
-    "independent bounded specialization correspondence replay in checked service, build graph and offline archive; validator global soundness remains unproved"
+    "independent bounded specialization correspondence replay in checked service, build graph and offline archive; validator global soundness remains unproved",
+    "actual VerifiedIR to canonical JavaScript scalar ABI policy/plan artifact, with policy identity bound to the pass and offline relation replay",
+    "certified behavioral-interface reuse obligations validated before untrusted evidence-cache hits",
+    "production executable EvidenceEnvelope target-adapter identities preserved for downstream audit"
   ],
   "remaining": [
     "backend-interior stage artifacts, other-target specialization snapshots and default-build direct-JS integration after promotion gates",
@@ -48,5 +51,7 @@
   "stageEncoding": "contracts/ir/IR_ARTIFACT_ENCODING_V1.json",
   "typeScriptToolInputs": "contracts/ir/TYPESCRIPT_TOOL_INPUTS_V1.json",
   "providerInputs": "contracts/ir/CHECKED_PROVIDER_INPUTS_V1.json",
-  "sourceResources": "contracts/resource/SOURCE_READ_BUDGET_V1.json"
+  "sourceResources": "contracts/resource/SOURCE_READ_BUDGET_V1.json",
+  "semanticReuse": "QueryGraphV2 candidates require exact certified-interface reuse-rule replay before the ordinary ActionId/pass-evidence cache validator can return cached outputs.",
+  "targetAdapterEvidence": "psc-verified-ir-to-js-abi-plan/1 is the first production target-adapter evidence edge; broader target profiles reuse the same PassExecution/Envelope model."
 }

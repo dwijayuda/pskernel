@@ -487,3 +487,377 @@ theorem psKernelDefEqFullShape_nonlambda_lambda_eta_configuration_sound
       (PsKernelExpr.lam name domain body binderInfo)
       hConfig
       hSuccess
+
+
+theorem psKernelDefEqLambdaEtaLeftWith_configuration_preserves
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (lambdaValue other : PsKernelExpr)
+    (answer : Option Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqLambdaEtaLeftWith
+          defeq inferType whnf
+          context state lambdaValue other =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelCheckerConfigurationSound context nextState := by
+  cases hInferRun :
+      inferType context state other with
+  | error error =>
+      simp [psKernelDefEqLambdaEtaLeftWith, hInferRun] at hSuccess
+  | ok typeRun =>
+      rcases typeRun with ⟨otherType, typeState⟩
+      have hTypeConfig :=
+        hInfer
+          context state typeState
+          other otherType
+          hConfig hInferRun
+      cases hWhnfRun :
+          whnf context typeState otherType with
+      | error error =>
+          simp [
+            psKernelDefEqLambdaEtaLeftWith,
+            hInferRun,
+            hWhnfRun
+          ] at hSuccess
+      | ok reducedRun =>
+          rcases reducedRun with ⟨reducedType, reducedState⟩
+          have hReduced :=
+            hWhnf
+              context typeState reducedState
+              otherType reducedType
+              hTypeConfig hWhnfRun
+          cases reducedType with
+          | forallE name domain body binderInfo =>
+              let eta :=
+                PsKernelExpr.lam
+                  name
+                  domain
+                  (PsKernelExpr.app
+                    other
+                    (PsKernelExpr.bvar 0))
+                  binderInfo
+              cases hEqRun :
+                  defeq context reducedState lambdaValue eta with
+              | error error =>
+                  simp [
+                    psKernelDefEqLambdaEtaLeftWith,
+                    hInferRun,
+                    hWhnfRun,
+                    eta,
+                    hEqRun
+                  ] at hSuccess
+              | ok eqRun =>
+                  rcases eqRun with ⟨eqValue, eqState⟩
+                  have hEqSemantic :=
+                    hDefEq
+                      context reducedState eqState
+                      lambdaValue eta eqValue
+                      hReduced.2 hEqRun
+                  cases eqValue <;>
+                    simp [
+                      psKernelDefEqLambdaEtaLeftWith,
+                      hInferRun,
+                      hWhnfRun,
+                      eta,
+                      hEqRun
+                    ] at hSuccess <;>
+                    rcases hSuccess with ⟨rfl, rfl⟩ <;>
+                    exact hEqSemantic.1
+          | bvar index =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | fvar name =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | mvar name =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | sort level =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | const name levels =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | app fn arg =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | lam name type body binderInfo =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | letE name type value body nondep =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | lit literal =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | mdata metadata body =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | proj typeName index body =>
+              simp [psKernelDefEqLambdaEtaLeftWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+
+
+theorem psKernelDefEqLambdaEtaRightWith_configuration_preserves
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (other lambdaValue : PsKernelExpr)
+    (answer : Option Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqLambdaEtaRightWith
+          defeq inferType whnf
+          context state other lambdaValue =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelCheckerConfigurationSound context nextState := by
+  cases hInferRun :
+      inferType context state other with
+  | error error =>
+      simp [psKernelDefEqLambdaEtaRightWith, hInferRun] at hSuccess
+  | ok typeRun =>
+      rcases typeRun with ⟨otherType, typeState⟩
+      have hTypeConfig :=
+        hInfer
+          context state typeState
+          other otherType
+          hConfig hInferRun
+      cases hWhnfRun :
+          whnf context typeState otherType with
+      | error error =>
+          simp [
+            psKernelDefEqLambdaEtaRightWith,
+            hInferRun,
+            hWhnfRun
+          ] at hSuccess
+      | ok reducedRun =>
+          rcases reducedRun with ⟨reducedType, reducedState⟩
+          have hReduced :=
+            hWhnf
+              context typeState reducedState
+              otherType reducedType
+              hTypeConfig hWhnfRun
+          cases reducedType with
+          | forallE name domain body binderInfo =>
+              let eta :=
+                PsKernelExpr.lam
+                  name
+                  domain
+                  (PsKernelExpr.app
+                    other
+                    (PsKernelExpr.bvar 0))
+                  binderInfo
+              cases hEqRun :
+                  defeq context reducedState eta lambdaValue with
+              | error error =>
+                  simp [
+                    psKernelDefEqLambdaEtaRightWith,
+                    hInferRun,
+                    hWhnfRun,
+                    eta,
+                    hEqRun
+                  ] at hSuccess
+              | ok eqRun =>
+                  rcases eqRun with ⟨eqValue, eqState⟩
+                  have hEqSemantic :=
+                    hDefEq
+                      context reducedState eqState
+                      eta lambdaValue eqValue
+                      hReduced.2 hEqRun
+                  cases eqValue <;>
+                    simp [
+                      psKernelDefEqLambdaEtaRightWith,
+                      hInferRun,
+                      hWhnfRun,
+                      eta,
+                      hEqRun
+                    ] at hSuccess <;>
+                    rcases hSuccess with ⟨rfl, rfl⟩ <;>
+                    exact hEqSemantic.1
+          | bvar index =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | fvar name =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | mvar name =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | sort level =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | const name levels =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | app fn arg =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | lam name type body binderInfo =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | letE name type value body nondep =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | lit literal =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | mdata metadata body =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+          | proj typeName index body =>
+              simp [psKernelDefEqLambdaEtaRightWith, hInferRun, hWhnfRun] at hSuccess
+              rcases hSuccess with ⟨rfl, rfl⟩
+              exact hReduced.2
+
+
+theorem psKernelDefEqLambdaEtaLeftWith_optional_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (lambdaValue other : PsKernelExpr)
+    (answer : Option Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqLambdaEtaLeftWith
+          defeq inferType whnf
+          context state lambdaValue other =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelOptionalDefEqPostcondition
+      context nextState lambdaValue other answer := by
+  have hPreserve :=
+    psKernelDefEqLambdaEtaLeftWith_configuration_preserves
+      defeq inferType whnf
+      hDefEq hInfer hWhnf
+      context state nextState
+      lambdaValue other answer
+      hConfig hSuccess
+  refine ⟨hPreserve, ?_⟩
+  cases answer with
+  | none =>
+      trivial
+  | some value =>
+      cases value with
+      | false =>
+          trivial
+      | true =>
+          exact
+            (psKernelDefEqLambdaEtaLeftWith_configuration_sound
+              defeq inferType whnf
+              hDefEq hInfer hWhnf
+              context state nextState
+              lambdaValue other
+              hConfig hSuccess).2
+
+
+theorem psKernelDefEqLambdaEtaRightWith_optional_configuration_sound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (other lambdaValue : PsKernelExpr)
+    (answer : Option Bool)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelDefEqLambdaEtaRightWith
+          defeq inferType whnf
+          context state other lambdaValue =
+        Except.ok (Prod.mk answer nextState)) :
+    PsKernelOptionalDefEqPostcondition
+      context nextState other lambdaValue answer := by
+  have hPreserve :=
+    psKernelDefEqLambdaEtaRightWith_configuration_preserves
+      defeq inferType whnf
+      hDefEq hInfer hWhnf
+      context state nextState
+      other lambdaValue answer
+      hConfig hSuccess
+  refine ⟨hPreserve, ?_⟩
+  cases answer with
+  | none =>
+      trivial
+  | some value =>
+      cases value with
+      | false =>
+          trivial
+      | true =>
+          exact
+            (psKernelDefEqLambdaEtaRightWith_configuration_sound
+              defeq inferType whnf
+              hDefEq hInfer hWhnf
+              context state nextState
+              other lambdaValue
+              hConfig hSuccess).2

@@ -58,12 +58,18 @@ def psKernelWhnfCountLambdasWithFuel
         | _ =>
             Prod.mk current count
 
+/-
+The worker descends only when count < argCount, incrementing count at every
+descent. Its recursion depth is bounded by argCount independently of the size
+of the lambda body. Avoid traversing a potentially huge proof expression merely
+to compute structural fuel for this short spine walk.
+-/
 def psKernelWhnfCountLambdas
     (current : PsKernelExpr)
     (argCount : Nat) :
     Prod PsKernelExpr Nat :=
   psKernelWhnfCountLambdasWithFuel
-    (Nat.succ (psKernelExprNodeCount current))
+    (Nat.succ argCount)
     current
     argCount
     0

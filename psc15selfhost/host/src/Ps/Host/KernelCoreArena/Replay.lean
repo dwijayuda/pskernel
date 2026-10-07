@@ -36,9 +36,9 @@ def stripNestedStagePrefix? (message : String) : Option String :=
   ]
   let rec go : List String -> Option String
     | [] => none
-    | prefix :: rest =>
-        if message.startsWith prefix then
-          some (message.drop prefix.length)
+    | stagePrefix :: rest =>
+        if message.startsWith stagePrefix then
+          some (message.drop stagePrefix.length)
         else
           go rest
   go prefixes

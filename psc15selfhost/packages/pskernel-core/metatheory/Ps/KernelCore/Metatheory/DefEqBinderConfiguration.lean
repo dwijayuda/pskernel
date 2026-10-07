@@ -533,6 +533,13 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                     subst :=
                 PsKernelBinderDomainJudgment.structural
                   leftDomain rightDomain subst hDomainEq
+              have hDomainResult :
+                  (if psKernelExprEq leftDomain rightDomain then
+                    Except.ok (Prod.mk true state)
+                   else
+                    defeq context state leftOpened rightOpened) =
+                    Except.ok (Prod.mk true state) := by
+                simp [hDomainEq]
               exact
                 finishAfterDomain
                   state
@@ -543,9 +550,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                       psKernelDefEqLambdaSpineWithFuel,
                       leftOpened,
                       rightOpened,
-                      hDomainEq,
-                      Bool.true_eq,
-                      ite_true
+                      hDomainResult
                     ] using hSuccess)
           | false =>
               cases hDomainRun :
@@ -601,6 +606,13 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                           rightDomain
                           subst
                           (hDomainSemantic.2 rfl)
+                      have hDomainResult :
+                          (if psKernelExprEq leftDomain rightDomain then
+                            Except.ok (Prod.mk true state)
+                           else
+                            defeq context state leftOpened rightOpened) =
+                            Except.ok (Prod.mk true domainState) := by
+                        simp [hDomainEq, hDomainRun]
                       exact
                         finishAfterDomain
                           domainState
@@ -611,11 +623,7 @@ theorem psKernelDefEqLambdaSpineWithFuel_configuration_sound
                               psKernelDefEqLambdaSpineWithFuel,
                               leftOpened,
                               rightOpened,
-                              hDomainEq,
-                              hDomainRun,
-                              Bool.false_eq_true,
-                              ite_false,
-                              ite_true
+                              hDomainResult
                             ] using hSuccess)
 
 
@@ -992,6 +1000,13 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                     subst :=
                 PsKernelBinderDomainJudgment.structural
                   leftDomain rightDomain subst hDomainEq
+              have hDomainResult :
+                  (if psKernelExprEq leftDomain rightDomain then
+                    Except.ok (Prod.mk true state)
+                   else
+                    defeq context state leftOpened rightOpened) =
+                    Except.ok (Prod.mk true state) := by
+                simp [hDomainEq]
               exact
                 finishAfterDomain
                   state
@@ -1002,9 +1017,7 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                       psKernelDefEqForallSpineWithFuel,
                       leftOpened,
                       rightOpened,
-                      hDomainEq,
-                      Bool.true_eq,
-                      ite_true
+                      hDomainResult
                     ] using hSuccess)
           | false =>
               cases hDomainRun :
@@ -1060,6 +1073,13 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                           rightDomain
                           subst
                           (hDomainSemantic.2 rfl)
+                      have hDomainResult :
+                          (if psKernelExprEq leftDomain rightDomain then
+                            Except.ok (Prod.mk true state)
+                           else
+                            defeq context state leftOpened rightOpened) =
+                            Except.ok (Prod.mk true domainState) := by
+                        simp [hDomainEq, hDomainRun]
                       exact
                         finishAfterDomain
                           domainState
@@ -1070,9 +1090,5 @@ theorem psKernelDefEqForallSpineWithFuel_configuration_sound
                               psKernelDefEqForallSpineWithFuel,
                               leftOpened,
                               rightOpened,
-                              hDomainEq,
-                              hDomainRun,
-                              Bool.false_eq_true,
-                              ite_false,
-                              ite_true
+                              hDomainResult
                             ] using hSuccess)

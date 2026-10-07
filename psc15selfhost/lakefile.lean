@@ -447,6 +447,10 @@ lean_exe psc1_backend_diff_fixture where
   srcDir := "test"
   root := `BackendDifferentialFixture
 
+lean_exe psc1_wasm_string_runtime_fixture where
+  srcDir := "test"
+  root := `WasmStringRuntimeFixture
+
 lean_exe psc1_backend_wasm_binary_smoke where
   srcDir := "test"
   root := `WasmBinarySmoke

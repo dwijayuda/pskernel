@@ -238,7 +238,12 @@ export async function checkPortableSelfhostContract(packageFilter) {
       );
       if (psTypeScript.error || psTypeScript.status !== 0) {
         throw new Error(
-          'PSC1_PORTABLE_SELFHOST_PS_TYPESCRIPT_FAILED: ' + displayPath,
+          'PSC1_PORTABLE_SELFHOST_PS_TYPESCRIPT_FAILED: ' + displayPath +
+          ': exit=' + String(psTypeScript.status) +
+          '; signal=' + String(psTypeScript.signal) +
+          '; ' + (psTypeScript.error?.message ?? '') + '\n' +
+          (psTypeScript.stderr ?? '').slice(-5000) + '\n' +
+          (psTypeScript.stdout ?? '').slice(-2000),
         );
       }
       if (psTypeScript.stdout !== result.stdout) {

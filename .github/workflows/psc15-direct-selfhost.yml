@@ -115,6 +115,7 @@ jobs:
           lake exe psc1_backend_wasm_tests
           lake exe psc1_backend_wasm_binary_smoke > /tmp/psc15-wasm-bytes.txt
           node scripts/backend-wasm-runtime.test.mjs /tmp/psc15-wasm-bytes.txt
+          npm run test:wasm-runtime-strings
 
       - name: Build and instantiate direct Wasm whole compiler
         working-directory: psc15selfhost

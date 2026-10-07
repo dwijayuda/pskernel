@@ -9,6 +9,7 @@ export async function loadWasmSelfhostCompiler(bytes) {
   for (const name of ['Initial', 'Failed', 'Parse', 'Elaborate', 'Prepare', 'Finish', 'Validate', 'Specialize', 'Lower', 'Encode', 'Output'])
     api[name] = required(instance.exports, 'psCompilerWasmProgress' + name);
   for (const [key, name] of Object.entries({ stringNew: '__ps_selfhost_string_new', stringSet: '__ps_selfhost_string_set',
+    stringFinish: '__ps_selfhost_string_finish',
     bytesIsNil: '__ps_selfhost_bytes_is_nil', bytesHead: '__ps_selfhost_bytes_head', bytesTail: '__ps_selfhost_bytes_tail',
     sourceListEmpty: 'psCompilerSelfHostSourceListEmpty', sourceListCons: 'psCompilerSelfHostSourceListCons',
     compileWhole: 'psCompilerWasm32ProofScriptSourcesBytesOrEmpty' })) api[key] = required(instance.exports, name);
@@ -18,7 +19,7 @@ export async function loadWasmSelfhostCompiler(bytes) {
 function wasmString(api, text) {
   const chars = Array.from(text), value = api.stringNew(chars.length);
   for (let index = 0; index < chars.length; index++) api.stringSet(value, index, chars[index].codePointAt(0));
-  return value;
+  return api.stringFinish(value);
 }
 
 function byteList(api, value) {

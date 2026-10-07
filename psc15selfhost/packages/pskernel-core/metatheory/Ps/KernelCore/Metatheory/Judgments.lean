@@ -1143,7 +1143,7 @@ inductive PsKernelProjectionApplyParamsJudgment
     Nat -> Nat -> PsKernelExpr -> PsKernelExpr -> Prop
   | done
       {localContext : PsKernelLocalContext}
-      (args : List PsKernelExpr)
+      {args : List PsKernelExpr}
       (index numParams : Nat)
       (current : PsKernelExpr)
       (hDone : psKernelNatLt index numParams = false) :
@@ -1157,7 +1157,7 @@ inductive PsKernelProjectionApplyParamsJudgment
         current
   | step
       {localContext : PsKernelLocalContext}
-      (args : List PsKernelExpr)
+      {args : List PsKernelExpr}
       (index numParams : Nat)
       (current domain body result argument : PsKernelExpr)
       (name : PsKernelName)
@@ -1199,9 +1199,9 @@ inductive PsKernelProjectionSkipFieldsJudgment
     Nat -> PsKernelExpr -> PsKernelExpr -> Prop
   | done
       {localContext : PsKernelLocalContext}
-      (inductName : PsKernelName)
-      (structValue : PsKernelExpr)
-      (targetIndex : Nat)
+      {inductName : PsKernelName}
+      {structValue : PsKernelExpr}
+      {targetIndex : Nat}
       (index : Nat)
       (current : PsKernelExpr)
       (hDone : psKernelNatLt index targetIndex = false) :
@@ -1216,9 +1216,9 @@ inductive PsKernelProjectionSkipFieldsJudgment
         current
   | stepClosed
       {localContext : PsKernelLocalContext}
-      (inductName : PsKernelName)
-      (structValue : PsKernelExpr)
-      (targetIndex : Nat)
+      {inductName : PsKernelName}
+      {structValue : PsKernelExpr}
+      {targetIndex : Nat}
       (index : Nat)
       (current domain body result : PsKernelExpr)
       (name : PsKernelName)
@@ -1252,9 +1252,9 @@ inductive PsKernelProjectionSkipFieldsJudgment
         result
   | stepDependent
       {localContext : PsKernelLocalContext}
-      (inductName : PsKernelName)
-      (structValue : PsKernelExpr)
-      (targetIndex : Nat)
+      {inductName : PsKernelName}
+      {structValue : PsKernelExpr}
+      {targetIndex : Nat}
       (index : Nat)
       (current domain body result : PsKernelExpr)
       (name : PsKernelName)
@@ -1307,7 +1307,7 @@ inductive PsKernelProjectionResultJudgment
       (index : Nat)
       (structValue structType typeWhnf : PsKernelExpr)
       (inductLevels : List PsKernelLevel)
-      (args : List PsKernelExpr)
+      {args : List PsKernelExpr}
       (inductInfo : PsKernelInductiveInfo)
       (ctorInfo : PsKernelConstructorInfo)
       (initial afterParams afterFields fieldBody result : PsKernelExpr)

@@ -141,6 +141,7 @@ jobs:
           lake exe pscv_ir_encoding_tests
           lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/Encode.lean
           lake exe psc1 check packages/driver-ts/src/Ps/DriverTs/Stages.lean
+          lake exe psc1 check packages/driver-js/src/Ps/DriverJs/Stages.lean
           node --test scripts/ir-artifact.test.mjs
 
       - name: Check generalized erasure source equality guard
@@ -243,10 +244,6 @@ jobs:
         working-directory: psc15selfhost
         run: lake exe psc1 check packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean
 
-      - name: Prove direct JavaScript whole-compiler self-host fixed point
-        working-directory: psc15selfhost
-        run: npm run test:direct-js-selfhost
-
-      - name: Prove direct Wasm whole-compiler self-host fixed point
-        working-directory: psc15selfhost
-        run: npm run test:direct-wasm-selfhost
+      # Whole-compiler JS/Wasm fixed points remain mandatory separate jobs in
+      # psc15-direct-selfhost.yml. Serial duplicates here exhausted this job's
+      # 45-minute allocation after JS passed, cancelling the Wasm comparison.

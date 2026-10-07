@@ -33,7 +33,7 @@
     {
       "id": "selfhost-fixed-points",
       "status": "partial",
-      "required": "Rust whole-compiler fixed point passed at 9c61a5e in cloud run 37543432920/job 112541632056: 66 modules, generation 1=2=3 generated Rust source, 2810845 bytes. See contracts/bootstrap/RUST_FIXED_POINT_V1.json. Recheck changed Rust closures, complete JS/Wasm fixed points and diagnose their failures. This does not establish native binary reproducibility, global compiler correctness or DDC."
+      "required": "Rust whole-compiler fixed point passed at 9c61a5e and 8d2c070: 66 modules, generation 1=2=3 Rust source, 2810845 bytes. JavaScript passed at 8d2c070 in run 37547807880/job 112556123955 step 38: 63 modules, generation 1=2=3 JavaScript source, 2429673 bytes; the job later timed out during Wasm. See contracts/bootstrap/RUST_FIXED_POINT_V1.json and JS_FIXED_POINT_V1.json. Recheck changed closures and complete the still-failing Wasm fixed point. This does not establish native binary reproducibility, global compiler correctness, promotion or DDC."
     },
     {
       "id": "bootstrap-diversity",

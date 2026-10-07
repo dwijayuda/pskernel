@@ -19,7 +19,7 @@ concurrency:
 jobs:
   direct-js:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +64,9 @@ jobs:
           npm run test:erasure-eta
 
       - name: Prove direct JavaScript whole-compiler fixed point
-        timeout-minutes: 20
+        # Observed full generation 1=2=3 replay at 8d2c070 took 31 minutes.
+        # This allocates runner time; compiler/profile/equality gates are unchanged.
+        timeout-minutes: 40
         working-directory: psc15selfhost
         run: npm run test:direct-js-selfhost
 

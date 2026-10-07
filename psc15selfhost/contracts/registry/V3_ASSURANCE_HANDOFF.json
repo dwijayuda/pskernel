@@ -17,8 +17,8 @@
     },
     {
       "id": "global-core-soundness",
-      "status": "unproved",
-      "required": "Lean-check the semantic environment model, full algorithmic-defeq soundness, cache refinement and checker soundness, with explicit theory and assumption closure."
+      "status": "external-kernel-workstream",
+      "required": "Import exact, independently reviewable kernel soundness/model/cache-refinement evidence from the separate kernel branch. The PSCV compiler branch must not implement or modify kernel theory/checker internals; it only binds the resulting evidence and provider identities into TrustManifest/AssuranceVector/release evidence."
     },
     {
       "id": "global-erasure-specialization",
@@ -70,5 +70,21 @@
       "status": "pending",
       "required": "Check emitted WIT with an independent pinned Component Model parser, implement actual target runtime adapters and bind them to validated modules/artifacts, then exercise canonical ABI behavior, ownership/lifetimes, capability confinement and async cancellation. Portable structural checks and the 17-case WIT fixture do not establish runtime ABI behavior or global adapter soundness."
     }
-  ]
+  ],
+  "kernelWorkstreamPolicy": {
+    "ownership": "external-separate-branch",
+    "forbiddenOnThisBranch": [
+      "kernel implementation changes",
+      "kernel defeq/cache changes",
+      "kernel checker-soundness proofs",
+      "kernel semantic-model/consistency proofs"
+    ],
+    "allowedIntegration": [
+      "KernelContract identity",
+      "provider identity/security metadata",
+      "imported kernel evidence identity",
+      "comparator calls through provider interfaces"
+    ],
+    "releaseDependency": "Final V3 release may depend on imported kernel assurance evidence, but producing that evidence is out of scope for pscv/v3-execution."
+  }
 }

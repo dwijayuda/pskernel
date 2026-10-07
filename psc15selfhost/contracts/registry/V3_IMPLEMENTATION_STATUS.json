@@ -290,9 +290,11 @@
         "scripts/savef-lifecycle.mjs",
         "scripts/savef-wasm-literal.mjs",
         "contracts/archive/SAVEF_WASM_LITERAL_REUSE_V1.json",
-        "contracts/archive/SAVEF_LIFECYCLE_V1.json"
+        "contracts/archive/SAVEF_LIFECYCLE_V1.json",
+        "scripts/savef-index.mjs",
+        "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json"
       ],
-      "completion": "Typed graphs, ValidUnder checks, migrations, supersession, failure knowledge and accepted reuse events operate end to end.",
+      "completion": "Typed graphs, ValidUnder checks, migrations, supersession, failure knowledge, accepted reuse events and a persistent rebuildable non-authoritative semantic index operate end to end.",
       "assurance": "pending"
     },
     {
@@ -352,7 +354,9 @@
       ],
       "status": "partial",
       "owners": [
-        "contracts/registry/ARCHITECTURE_REGISTRY.json"
+        "contracts/registry/ARCHITECTURE_REGISTRY.json",
+        "scripts/savef-index.mjs",
+        "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json"
       ],
       "completion": "Canonical semantic ownership, sidecars, historical indexing and semantic deltas guide incremental organization.",
       "assurance": "pending"
@@ -844,7 +848,7 @@
       },
       {
         "id": "evidence-to-savef-index",
-        "status": "partial"
+        "status": "implementation-available"
       },
       {
         "id": "savef-index-to-next-untrusted-proposal",

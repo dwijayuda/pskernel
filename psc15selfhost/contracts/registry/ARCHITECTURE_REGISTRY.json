@@ -231,6 +231,12 @@
       "kind": "certified-source",
       "status": "current-host",
       "canonicalPath": "contracts/ir/PSCV_CERT_V1.json"
+    },
+    {
+      "id": "psc-savef-semantic-index/1",
+      "kind": "derived-semantic-index",
+      "status": "current-host",
+      "canonicalPath": "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json"
     }
   ]
 }

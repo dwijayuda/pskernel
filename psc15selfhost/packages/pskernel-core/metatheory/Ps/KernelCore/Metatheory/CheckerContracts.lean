@@ -157,6 +157,30 @@ def PsKernelWhnfConfigurationSound
 
 
 /-
+Named postcondition for optional reduction results.
+
+Keeping this result proposition independent of the executable-success proof
+prevents equality-transport details from leaking into higher semantic
+composition while preserving exactly the same configuration and reduction
+claims.
+-/
+def PsKernelOptionalReductionPostcondition
+    (context : PsKernelCheckerContext)
+    (nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (answer : Option PsKernelExpr) : Prop :=
+  PsKernelCheckerConfigurationSound context nextState ∧
+    match answer with
+    | Option.none => True
+    | Option.some result =>
+        PsKernelReductionClosure
+          context.environment
+          context.localContext
+          expr
+          result
+
+
+/-
 Reusable contract for reduction helpers that may decline to reduce.  A
 successful call must preserve checker configuration; when it publishes a
 replacement expression, that replacement must be connected to the input by
@@ -178,15 +202,11 @@ def PsKernelOptionalReductionConfigurationSound
     PsKernelCheckerConfigurationSound context state ->
     reduce context state expr =
       Except.ok (Prod.mk answer nextState) ->
-    PsKernelCheckerConfigurationSound context nextState ∧
-      match answer with
-      | Option.none => True
-      | Option.some result =>
-          PsKernelReductionClosure
-            context.environment
-            context.localContext
-            expr
-            result
+    PsKernelOptionalReductionPostcondition
+      context
+      nextState
+      expr
+      answer
 
 /-
 Recursor reduction has the same semantic shape but carries the two observable
@@ -215,15 +235,11 @@ def PsKernelRecursorReductionConfigurationSound
         cheapRec
         cheapProj =
       Except.ok (Prod.mk answer nextState) ->
-    PsKernelCheckerConfigurationSound context nextState ∧
-      match answer with
-      | Option.none => True
-      | Option.some result =>
-          PsKernelReductionClosure
-            context.environment
-            context.localContext
-            expr
-            result
+    PsKernelOptionalReductionPostcondition
+      context
+      nextState
+      expr
+      answer
 
 
 def PsKernelDefEqConfigurationSound

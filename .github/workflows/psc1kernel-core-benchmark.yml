@@ -5,6 +5,7 @@ on:
     branches:
       - psc2/psc1kernel-selfhost-portable
       - psc2/selfhost-lean-kernel
+      - pscv/pskernel-core-arena-v1
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/PsKernelCoreBench.lean

@@ -231,20 +231,6 @@ theorem psKernelWhnfCoreWithRecursorFuel_configuration_sound_of_defeq
       (psKernelWhnfCoreWithRecursorFuel
         fuel
         defeq) := by
-  let reducer :=
-    psKernelReduceRecursorBoundedWithFuel
-      fuel
-      defeq
-  have hReducer :
-      PsKernelRecursorReductionConfigurationSound
-        reducer := by
-    simpa [reducer] using
-      (psKernelReduceRecursorBoundedWithFuel_configuration_sound
-        fuel
-        defeq
-        hDefEq
-        hBeta
-        hNative)
   have hWhnf :
       PsKernelWhnfConfigurationSound
         (psKernelWhnfWithRecursorFuel
@@ -256,19 +242,33 @@ theorem psKernelWhnfCoreWithRecursorFuel_configuration_sound_of_defeq
       hDefEq
       hBeta
       hNative
-  simpa [
-    psKernelWhnfCoreWithRecursorFuel,
-    reducer
-  ] using
-    (psKernelWhnfCoreWithFuel_configuration_sound_contract
+  change
+    PsKernelWhnfCoreConfigurationSound
+      (psKernelWhnfCoreWithFuel
+        fuel
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          defeq)
+        (psKernelReduceRecursorBoundedWithFuel
+          fuel
+          defeq))
+  exact
+    psKernelWhnfCoreWithFuel_configuration_sound_contract
       fuel
       (psKernelWhnfWithRecursorFuel
         fuel
         defeq)
-      reducer
+      (psKernelReduceRecursorBoundedWithFuel
+        fuel
+        defeq)
       hWhnf
-      hReducer
-      hBeta)
+      (psKernelReduceRecursorBoundedWithFuel_configuration_sound
+        fuel
+        defeq
+        hDefEq
+        hBeta
+        hNative)
+      hBeta
 
 
 theorem psKernelInferWithRecursorFuel_configuration_preserves_of_defeq

@@ -487,6 +487,16 @@ lean_exe psc_kernel_core_provider where
   srcDir := "host/src"
   root := `Ps.Host.KernelCoreProvider.Main
 
+lean_lib PsKernelCoreArenaHost where
+  srcDir := "host/src"
+  roots := #[
+    `Ps.Host.KernelCoreArena.Replay
+  ]
+
+lean_exe psc_kernel_core_arena where
+  srcDir := "host/src"
+  root := `Ps.Host.KernelCoreArena.Main
+
 lean_exe psc_kernel_core_provider_tests where
   srcDir := "test"
   root := `KernelCoreProviderTests

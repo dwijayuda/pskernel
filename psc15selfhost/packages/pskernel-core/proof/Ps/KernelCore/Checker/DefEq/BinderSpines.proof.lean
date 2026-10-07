@@ -3,6 +3,100 @@ import Ps.KernelCore.Metatheory.ContextState
 import Ps.KernelCore.Metatheory.CacheSemantic
 import Ps.KernelCore.Metatheory.CheckerContracts
 
+theorem psKernelDefEqWithLocal_parent_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state) :
+    let opened :=
+      psKernelDefEqWithLocal
+        context state userName type binderInfo
+    PsKernelCheckerConfigurationSound
+      context
+      (Prod.snd (Prod.snd opened)) := by
+  intro opened
+  simpa [
+    opened,
+    psKernelDefEqWithLocal
+  ] using
+    psKernelCheckerStateFreshName_preserves_configuration
+      context
+      state
+      userName
+      hConfig
+
+
+theorem psKernelDefEqWithLocal_child_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state) :
+    let opened :=
+      psKernelDefEqWithLocal
+        context state userName type binderInfo
+    PsKernelCheckerConfigurationSound
+      (Prod.fst (Prod.snd opened))
+      (Prod.snd (Prod.snd opened)) := by
+  intro opened
+  simpa [
+    opened,
+    psKernelDefEqWithLocal
+  ] using
+    psKernelCheckerFreshLocal_preserves_configuration
+      context
+      state
+      userName
+      type
+      binderInfo
+      hString
+      hConfig
+
+
+theorem psKernelDefEqWithLocal_fresh_absent
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state) :
+    let opened :=
+      psKernelDefEqWithLocal
+        context state userName type binderInfo
+    psKernelLocalContextFind
+        context.localContext
+        (Prod.fst opened) =
+      Option.none := by
+  intro opened
+  have hFresh :
+      psKernelCheckerStateFreshName state userName =
+        Prod.mk
+          (Prod.fst opened)
+          (Prod.snd (Prod.snd opened)) := by
+    simpa [
+      opened,
+      psKernelDefEqWithLocal
+    ]
+  exact
+    psKernelCheckerStateFreshName_absent_of_configuration
+      context
+      state
+      (Prod.snd (Prod.snd opened))
+      userName
+      (Prod.fst opened)
+      hString
+      hConfig
+      hFresh
+
+
 theorem psKernelDefEqLambdaSpineWithFuel_preserves_configuration
     (fuel : Nat)
     (defeq :

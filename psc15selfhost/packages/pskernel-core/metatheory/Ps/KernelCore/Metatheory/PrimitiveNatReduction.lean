@@ -8,22 +8,59 @@ than postulating it as a soundness assumption.
 -/
 
 
-theorem psKernelExprNatLiteralValue_some_shape
+theorem psKernelExprNatLiteralValue_some_refines_literal
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
     (expr : PsKernelExpr)
     (value : Nat)
     (hValue :
       psKernelExprNatLiteralValue expr =
         Option.some value) :
-    expr =
-      PsKernelExpr.lit (PsKernelLiteral.nat value) := by
+    PsKernelReductionClosure
+      environment
+      localContext
+      expr
+      (PsKernelExpr.lit (PsKernelLiteral.nat value)) := by
   cases expr with
   | lit literal =>
       cases literal with
       | nat candidate =>
           simp [psKernelExprNatLiteralValue] at hValue
-          subst candidate
-          rfl
+          subst value
+          exact
+            PsKernelReductionClosure.refl
+              (PsKernelExpr.lit
+                (PsKernelLiteral.nat candidate))
       | str text =>
+          simp [psKernelExprNatLiteralValue] at hValue
+  | const name levels =>
+      cases levels with
+      | nil =>
+          cases hName :
+              psKernelNameEq name psKernelNatZeroName with
+          | false =>
+              simp [
+                psKernelExprNatLiteralValue,
+                hName
+              ] at hValue
+          | true =>
+              simp [
+                psKernelExprNatLiteralValue,
+                hName
+              ] at hValue
+              subst value
+              exact
+                PsKernelReductionClosure.cons
+                  (PsKernelExpr.const name List.nil)
+                  (PsKernelExpr.lit (PsKernelLiteral.nat 0))
+                  (PsKernelExpr.lit (PsKernelLiteral.nat 0))
+                  (PsKernelReductionStep.natZeroLiteral
+                    name
+                    hName)
+                  (PsKernelReductionClosure.refl
+                    (PsKernelExpr.lit
+                      (PsKernelLiteral.nat 0)))
+      | cons level rest =>
           simp [psKernelExprNatLiteralValue] at hValue
   | bvar index =>
       simp [psKernelExprNatLiteralValue] at hValue
@@ -32,8 +69,6 @@ theorem psKernelExprNatLiteralValue_some_shape
   | mvar name =>
       simp [psKernelExprNatLiteralValue] at hValue
   | sort level =>
-      simp [psKernelExprNatLiteralValue] at hValue
-  | const name levels =>
       simp [psKernelExprNatLiteralValue] at hValue
   | app fn arg =>
       simp [psKernelExprNatLiteralValue] at hValue
@@ -47,7 +82,6 @@ theorem psKernelExprNatLiteralValue_some_shape
       simp [psKernelExprNatLiteralValue] at hValue
   | proj typeName index body =>
       simp [psKernelExprNatLiteralValue] at hValue
-
 theorem psKernelReduceNatBinary_some_refines_step
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)
@@ -82,6 +116,7 @@ theorem psKernelReduceNatBinary_some_refines_step
           simp_all [psKernelReduceNatBinary]
       | ok checked =>
           simp_all [psKernelReduceNatBinary]
+          subst result
           exact
             PsKernelReductionStep.natAdd
               op left right hAdd
@@ -97,6 +132,7 @@ theorem psKernelReduceNatBinary_some_refines_step
               simp_all [psKernelReduceNatBinary]
           | ok checked =>
               simp_all [psKernelReduceNatBinary]
+              subst result
               exact
                 PsKernelReductionStep.natSub
                   op left right hSub
@@ -112,6 +148,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                   simp_all [psKernelReduceNatBinary]
               | ok checked =>
                   simp_all [psKernelReduceNatBinary]
+                  subst result
                   exact
                     PsKernelReductionStep.natMul
                       op left right hMul
@@ -130,6 +167,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                           psKernelNatGt left 1 with
                       | false =>
                           simp_all [psKernelReduceNatBinary]
+                          subst result
                           exact
                             PsKernelReductionStep.natPow
                               op left right hPow
@@ -138,6 +176,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                               Nat.beq right 0 with
                           | true =>
                               simp_all [psKernelReduceNatBinary]
+                              subst result
                               exact
                                 PsKernelReductionStep.natPowZero
                                   op left right hPow hZero
@@ -150,6 +189,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                   simp_all [psKernelReduceNatBinary]
                               | false =>
                                   simp_all [psKernelReduceNatBinary]
+                                  subst result
                                   exact
                                     PsKernelReductionStep.natPow
                                       op left right hPow
@@ -158,6 +198,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                       psKernelNameEq op psKernelNatGcdName with
                   | true =>
                       simp_all [psKernelReduceNatBinary]
+                      subst result
                       exact
                         PsKernelReductionStep.natGcd
                           op left right hGcd
@@ -166,6 +207,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                           psKernelNameEq op psKernelNatModName with
                       | true =>
                           simp_all [psKernelReduceNatBinary]
+                          subst result
                           exact
                             PsKernelReductionStep.natMod
                               op left right hMod
@@ -174,6 +216,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                               psKernelNameEq op psKernelNatDivName with
                           | true =>
                               simp_all [psKernelReduceNatBinary]
+                              subst result
                               exact
                                 PsKernelReductionStep.natDiv
                                   op left right hDiv
@@ -182,6 +225,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                   psKernelNameEq op psKernelNatBeqName with
                               | true =>
                                   simp_all [psKernelReduceNatBinary]
+                                  subst result
                                   exact
                                     PsKernelReductionStep.natBeq
                                       op left right hBeq
@@ -190,6 +234,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                       psKernelNameEq op psKernelNatBleName with
                                   | true =>
                                       simp_all [psKernelReduceNatBinary]
+                                      subst result
                                       exact
                                         PsKernelReductionStep.natBle
                                           op left right hBle
@@ -198,6 +243,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                           psKernelNameEq op psKernelNatLandName with
                                       | true =>
                                           simp_all [psKernelReduceNatBinary]
+                                          subst result
                                           exact
                                             PsKernelReductionStep.natLand
                                               op left right hLand
@@ -206,6 +252,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                               psKernelNameEq op psKernelNatLorName with
                                           | true =>
                                               simp_all [psKernelReduceNatBinary]
+                                              subst result
                                               exact
                                                 PsKernelReductionStep.natLor
                                                   op left right hLor
@@ -214,6 +261,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                                   psKernelNameEq op psKernelNatXorName with
                                               | true =>
                                                   simp_all [psKernelReduceNatBinary]
+                                                  subst result
                                                   exact
                                                     PsKernelReductionStep.natXor
                                                       op left right hXor
@@ -225,6 +273,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                                           Nat.beq left 0 with
                                                       | true =>
                                                           simp_all [psKernelReduceNatBinary]
+                                                          subst result
                                                           exact
                                                             PsKernelReductionStep.natShiftLeftZero
                                                               op left right hShiftLeft hLeftZero
@@ -248,6 +297,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                                                   simp_all [psKernelReduceNatBinary]
                                                               | false =>
                                                                   simp_all [psKernelReduceNatBinary]
+                                                                  subst result
                                                                   exact
                                                                     PsKernelReductionStep.natShiftLeft
                                                                       op left right hShiftLeft
@@ -256,6 +306,7 @@ theorem psKernelReduceNatBinary_some_refines_step
                                                           psKernelNameEq op psKernelNatShiftRightName with
                                                       | true =>
                                                           simp_all [psKernelReduceNatBinary]
+                                                          subst result
                                                           exact
                                                             PsKernelReductionStep.natShiftRight
                                                               op left right hShiftRight

@@ -285,6 +285,12 @@
       "kind": "target-ir-validator",
       "status": "current",
       "canonicalPath": "packages/backend-js/src/Ps/BackendJs/Validate.lean"
+    },
+    {
+      "id": "psc-source-closure/1",
+      "kind": "source-closure",
+      "status": "current-host",
+      "canonicalPath": "scripts/source-closure-artifact.mjs"
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contract": "psc-wasm-canonical-scalar-exports/1",
-  "status": "implemented-focused-cloud-validation-pending",
+  "status": "implemented-native-and-host-scalar-checks-passed-evidence-integration-cloud-pending",
   "source": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
   "input": "PsSpecializedIrModule, freshly strictly revalidated; no external imports",
   "selection": "Explicit source declaration / foreign function names, 1..1024 exports; foreign names and uniqueness validated by InterfaceIR; parameter labels are positional arg0..arg15.",
@@ -10,7 +10,8 @@
   "output": {
     "binary": "Actual lowered Wasm with only selected foreign export names",
     "interfaceJson": "psc-interface-ir-json/1 derived from actual source declarations",
-    "bindingJson": "Contract, runtime semantics, wordBits, interfaceName, and functionName/coreExport/sourceName bindings"
+    "bindingJson": "Contract, runtime semantics, wordBits, interfaceName, and functionName/coreExport/sourceName bindings",
+    "target": "Exact validated PsWasmModule used for binary encoding, retained for the driver's canonical WasmIR snapshot"
   },
   "invariants": [
     "No source signature supplied by the host substitutes for actual revalidated IR declarations.",
@@ -26,12 +27,28 @@
   "validation": {
     "native": "test/WasmCanonicalExportsTests.lean",
     "actualBinary": "scripts/wasm-canonical-exports.test.mjs",
-    "portable": "PSC1-portable-selfhost/1 structural audit and explicit PSC1 source check in check:foreign-interface"
+    "portable": "PSC1-portable-selfhost/1 structural audit and explicit PSC1 source check in check:foreign-interface",
+    "precedingCloud": {
+      "commit": "3090317d925cc3934c34034d603c28d73fb87aec",
+      "runId": 37661580595,
+      "jobId": 112930171287,
+      "focusedStep": "Check portable foreign interfaces and WIT boundary",
+      "conclusion": "success; full run tail cancelled by concurrent docs update"
+    }
   },
   "remaining": [
-    "Production checked-driver, PassExecution/EvidenceEnvelope and archive/offline binding of source/interface/selection/binary identities",
+    "Production checked-driver/API/CLI selection routing and EvidenceEnvelope/output publication; build graph and offline relations are implemented",
     "Aggregate/string/large-argument conversion wrappers",
     "Core/Component imports and resource/async lifetimes",
     "Global source/backend/adapter preservation proof or independently validated relation"
-  ]
+  ],
+  "hostEvidence": {
+    "implementation": "scripts/wasm-canonical-artifact.mjs",
+    "selectionContract": "psc-wasm-canonical-selection/1",
+    "projection": "Independent bounded reconstruction of InterfaceIR and binding JSON from exact SpecializedIR and export-selection bytes",
+    "binary": "Closed exact export surface, numeric core signatures, and optional WasmIR source-name/function-index routing; engine validation without instantiation",
+    "graph": "checked-build-evidence.mjs records selection, interface, binding, target IR, binary and signature-validation artifacts",
+    "offline": "observed-build-archive.mjs repeats projection and signature checks from consumer-pinned archived graph bytes",
+    "scope": "Signature projection and target acceptance only; strict body invariants, source authority and behavioral preservation remain separate."
+  }
 }

@@ -55,7 +55,7 @@
       "typescriptToJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
       "directJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
       "rust": "external imports fail closed with externalImportUnsupported; native adapter implementation remains pending",
-      "coreWasm": "External imports fail closed with unsupportedModuleFeature. An explicit scalar export path derives InterfaceIR from revalidated SpecializedIR, checks actual target signatures, validates WasmIR and emits selected closed exports; production evidence integration and aggregate conversion remain pending.",
+      "coreWasm": "External imports fail closed with unsupportedModuleFeature. An explicit scalar export path derives InterfaceIR from revalidated SpecializedIR, checks actual target signatures, validates WasmIR and emits selected closed exports; production evidence integration and aggregate conversion remain pending. Independent scalar-interface projection and exact target/binary signature relations are recorded in build graphs and replayed offline; checked driver/CLI selection routing remains pending.",
       "componentModel": "Portable InterfaceIR/WIT, synchronous layout/signature planning, memory/core-value codecs, signature-checked closed-core export binding, and compiler-selected scalar exports exist. Imports/callbacks, resource/async lifetimes, component binaries, production EvidenceEnvelope integration and global preservation remain pending."
     }
   },
@@ -79,6 +79,7 @@
       "conclusion": "success"
     },
     "scope": "Implemented executable checks, not a proof of validator soundness or completed global preservation. Full self-host fixed points remain pending.",
-    "jsScalarProductionBinding": "scripts/js-abi-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs + EvidenceEnvelope targetAdapters"
+    "jsScalarProductionBinding": "scripts/js-abi-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs + EvidenceEnvelope targetAdapters",
+    "wasmCanonicalScalarProjection": "scripts/wasm-canonical-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs; source/target/binary signatures only, no body-preservation claim"
   }
 }

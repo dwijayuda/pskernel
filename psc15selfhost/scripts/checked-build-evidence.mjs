@@ -8,6 +8,7 @@ import { checkedTargetIrStageArtifacts } from './target-ir-artifact.mjs';
 import { runtimeInterfaceArtifact } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
+import { verifyWasmCanonicalProjection, verifyWasmCanonicalBinary } from './wasm-canonical-artifact.mjs';
 
 export async function readCheckedBuildHostSources() {
   const root = path.dirname(fileURLToPath(import.meta.url));
@@ -37,13 +38,15 @@ export async function readCheckedBuildHostSources() {
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
-  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy }) {
+  pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical }) {
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
       (directBackend && [typeScript, javaScript, declarations, sourceMap].some(value => value !== undefined)))
     throw new Error('PSC_BUILD_GRAPH_MIXED_BACKEND_PATHS');
   if (directWasm !== undefined && !(directWasm instanceof Uint8Array)) throw new Error('PSC_BUILD_GRAPH_WASM_BYTES');
+  if (wasmCanonical !== undefined && directBackend !== 'wasm') throw new Error('PSC_BUILD_GRAPH_CANONICAL_TARGET');
+  let canonicalAdapter;
   let toolInputs;
   let runtimeInterface;
   let executableArtifact;
@@ -246,16 +249,45 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     } else {
       if (!targetStages.wasmIr) throw new Error('PSC_BUILD_GRAPH_WASM_TARGET_IR_REQUIRED');
       const wasmIr = add(targetStages.wasmIr, { kind: 'archive-required', role: 'actual-validated-wasm-ir' });
+      let adapterDependencies = baseDependencies;
+      let selection, foreignInterface, binding;
+      if (wasmCanonical !== undefined) {
+        const projection = verifyWasmCanonicalProjection({ specializedIr, selection: wasmCanonical.selection,
+          interfaceArtifact: wasmCanonical.interface, binding: wasmCanonical.binding });
+        selection = add(wasmCanonical.selection, { kind: 'archive-required', role: 'wasm-canonical-export-selection' });
+        foreignInterface = add(wasmCanonical.interface, { kind: 'output-file', suffix: '.interface-ir.json' });
+        binding = add(wasmCanonical.binding, { kind: 'output-file', suffix: '.wasm-abi-plan.json' });
+        adapterDependencies = [...baseDependencies, selection.identity, foreignInterface.identity, binding.identity];
+        execute('psc-specialized-ir-to-canonical-interface/1', specializedIr, [foreignInterface, binding],
+          implementation, projection.relation,
+          { selectionId: selection.identity, observedStages: ['independent-scalar-interface-projection'],
+            sourceInvariantsVerified: false, globalPreservationProved: false },
+          [...baseDependencies, selection.identity], ['selected-wasm-export-policy', 'trusted-wasm-interface-projection']);
+      }
       execute('psc-specialized-ir-to-wasm-ir/1', specializedIr, [wasmIr], implementation, 'psc-specialized-ir-wasm-ir/1',
-        { target: 'wasm', wordSize: 32,
-          observedStages: ['wasm-lower', 'selfhost-abi', 'validate-wasm-ir', 'snapshot-wasm-ir'],
+        { target: 'wasm', wordSize: binding ? JSON.parse(binding.bytes).wordBits : 32,
+          observedStages: binding
+            ? ['wasm-lower', 'canonical-scalar-export-selection', 'validate-canonical-core-signatures', 'validate-wasm-ir', 'snapshot-wasm-ir']
+            : ['wasm-lower', 'selfhost-abi', 'validate-wasm-ir', 'snapshot-wasm-ir'],
+          ...(selection ? { selectionId: selection.identity } : {}),
           validator: 'psc-wasm-ir-validator/1', globalPreservationProved: false },
-        baseDependencies, ['trusted-wasm-lowering-and-abi', 'trusted-wasm-ir-validator']);
-      const wasm = bytes(directWasm, 'wasm-output', 'psc-direct-wasm/wasm32', { kind: 'output-file', suffix: '.wasm' });
+        adapterDependencies, ['trusted-wasm-lowering-and-abi', 'trusted-wasm-ir-validator']);
+      const wasm = bytes(directWasm, binding ? 'wasm-binary' : 'wasm-output',
+        binding ? 'webassembly-core/1' : 'psc-direct-wasm/wasm32', { kind: 'output-file', suffix: '.wasm' });
       executableArtifact = wasm.identity;
       execute('psc-wasm-ir-to-wasm/1', wasmIr, [wasm], implementation, 'psc-wasm-ir-encoding/1',
         { target: 'wasm', observedStages: ['wasm-binary-encode'], globalPreservationProved: false },
-        baseDependencies, ['trusted-wasm-binary-encoder']);
+        adapterDependencies, ['trusted-wasm-binary-encoder']);
+      if (binding) {
+        const checked = verifyWasmCanonicalBinary({ interfaceArtifact: foreignInterface, binding, binary: wasm, targetIr: wasmIr });
+        const validation = json(checked, 'adapter-validation', 'psc-wasm-canonical-signatures-validation/1', { kind: 'inline' });
+        execute('psc-check-canonical-wasm-exports/1', wasm, [validation], implementation, checked.relation,
+          { interfaceId: foreignInterface.identity, bindingId: binding.identity, targetIrId: wasmIr.identity,
+            observedStages: ['engine-binary-validation', 'exact-closed-export-signature-check'],
+            guestExecuted: false, globalPreservationProved: false },
+          [...adapterDependencies, wasmIr.identity], ['selected-wasm-engine-validation', 'trusted-wasm-signature-inspection']);
+        canonicalAdapter = Object.freeze({ selection, interface: foreignInterface, binding, validation });
+      }
     }
   }
   const graph = { schemaVersion: 1, contract: 'psc-observed-build-graph/1', authority: 'audit-record-only',
@@ -268,6 +300,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   return { graph, artifacts, bytes: encoded, ...(runtimeInterface ? { runtimeInterface: runtimeInterface.identity } : {}),
     ...(certification ? { certification } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
+    ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1'),
     ...(providerInputs.length ? { providerInputs: providerInputs.map(item => item.identity) } : {}),

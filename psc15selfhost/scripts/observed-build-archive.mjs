@@ -1,8 +1,9 @@
-import { artifactId, artifactKey, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
+import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { verifyRuntimeInterfaceProjection } from './runtime-interface-artifact.mjs';
 import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
 import { jsAbiArtifactsFromVerifiedIr } from './js-abi-artifact.mjs';
+import { verifyWasmCanonicalProjection, verifyWasmCanonicalBinary } from './wasm-canonical-artifact.mjs';
 import { replayClosedIrArtifact, replayIrLinkArtifact } from './ir-invariant-replay.mjs';
 import { decodeJsIrArtifact, decodeWasmIrArtifact } from './target-ir-artifact.mjs';
 
@@ -166,7 +167,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
         irInvariantReplays.push(replay);
       }
     }
-    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [];
+    const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [], wasmCanonicalProjections = [], wasmCanonicalSignatures = [];
     for (const identity of graph.executions) {
       const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions });
       executions.push(result);
@@ -198,6 +199,31 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
         decodeWasmIrArtifact(resolveArtifact(execution.outputs[0]), { maxBytes: bound.maxArtifactBytes });
         targetIrArtifacts.push(Object.freeze({ kind: 'wasm-ir', inputId: execution.inputs[0], outputId: execution.outputs[0] }));
       }
+      if (definition.passId === 'psc-specialized-ir-to-canonical-interface/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 2 ||
+            definition.semanticRelationId !== 'psc-specialized-ir-canonical-scalar-interface/1' ||
+            !execution.action?.parameters?.selectionId) fail('WASM_CANONICAL_PROJECTION_SUBJECT');
+        const subject = id => ({ identity: id, bytes: resolveArtifact(id) });
+        wasmCanonicalProjections.push(verifyWasmCanonicalProjection({
+          specializedIr: subject(execution.inputs[0]), selection: subject(execution.action.parameters.selectionId),
+          interfaceArtifact: subject(execution.outputs[0]), binding: subject(execution.outputs[1]),
+        }, { maxBytes: bound.maxArtifactBytes }));
+      }
+      if (definition.passId === 'psc-check-canonical-wasm-exports/1') {
+        const parameters = execution.action?.parameters;
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
+            definition.semanticRelationId !== 'psc-wasm-canonical-scalar-export-signatures/1' ||
+            !parameters?.interfaceId || !parameters?.bindingId || !parameters?.targetIrId)
+          fail('WASM_CANONICAL_BINARY_SUBJECT');
+        const subject = id => ({ identity: id, bytes: resolveArtifact(id) });
+        const result = verifyWasmCanonicalBinary({ binary: subject(execution.inputs[0]),
+          interfaceArtifact: subject(parameters.interfaceId), binding: subject(parameters.bindingId),
+          targetIr: subject(parameters.targetIrId),
+        }, { ir: { maxBytes: bound.maxArtifactBytes } });
+        const expected = canonicalArtifact(result, 'adapter-validation', 'psc-wasm-canonical-signatures-validation/1');
+        if (artifactKey(expected.identity) !== artifactKey(execution.outputs[0])) fail('WASM_CANONICAL_BINARY_RELATION');
+        wasmCanonicalSignatures.push(result);
+      }
       if (definition.passId === 'psc-verified-ir-to-js-abi-plan/1') {
         if (execution.inputs.length !== 1 || execution.outputs.length !== 1 ||
             definition.semanticRelationId !== 'psc-verified-ir-js-scalar-abi-plan/1' ||
@@ -220,7 +246,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
         irValidation === undefined ? 'observed-artifact-integrity-only' : 'observed-artifact-integrity-and-closed-ir-invariants',
       linkedIrInvariantsVerified: irLinkValidation !== undefined, irLinkInvariantReplays,
       closedIrInvariantsVerified: irValidation !== undefined, irInvariantReplays, integrityVerified: true, artifactCount: blobs.size,
-      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts,
+      artifactBytes: total, executions, runtimeInterfaceProjections, specializationCorrespondences, jsAbiPlans, targetIrArtifacts, wasmCanonicalProjections, wasmCanonicalSignatures,
       fullInputClosureEstablished: false, semanticClaimsVerified: false,
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {

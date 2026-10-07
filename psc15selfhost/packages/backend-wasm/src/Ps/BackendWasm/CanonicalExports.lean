@@ -20,6 +20,7 @@ structure PsWasmCanonicalArtifacts where
   binary : List UInt8
   interfaceJson : String
   bindingJson : String
+  target : PsWasmModule
 
 inductive PsWasmCanonicalError where
   | source (error : PsVerifiedIrValidationError)
@@ -214,7 +215,7 @@ def psWasmCanonicalEncode (profile : PsWasmTargetProfile)
       match psForeignEncodeWorld 8 world with
       | Except.error error => Except.error (PsWasmCanonicalError.interfaceEncoding error)
       | Except.ok interfaceJson =>
-          Except.ok (PsWasmCanonicalArtifacts.mk binary interfaceJson (psWasmCanonicalBindingJson profile selection))
+          Except.ok (PsWasmCanonicalArtifacts.mk binary interfaceJson (psWasmCanonicalBindingJson profile selection) module)
 
 -- This path consumes and revalidates post-specialization IR. It exports only
 -- the selected scalar surface, retaining internal GC/runtime helpers privately.

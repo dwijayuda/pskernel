@@ -135,3 +135,26 @@ PassExecution/EvidenceEnvelope, archive and independent replay integration
 must bind the selection, actual IR, interface and exact binary before this
 profile can be promoted. See
 `contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json`.
+
+### Canonical scalar evidence boundaries (2026-10-08)
+
+The independent host projection consumes exact SpecializedIR and explicit
+selection artifacts. It reconstructs the portable producer's InterfaceIR and
+binding bytes, rejecting mismatched aliases, primitive signatures, word
+profiles, generic boundaries and duplicate source names. This projection
+checks the full IR encoding schema but deliberately does not claim strict
+body/type/scope validation; optional existing IR replay owns that relation.
+
+A separate relation checks engine-valid closed binaries without instantiating
+them. It requires the entire selected export surface, Canonical numeric
+signatures, and, when the actual WasmIR snapshot is supplied, exact export
+routing through source function names and encoded function indices. It does
+not inspect function behavior. The portable producer retains its actual
+validated target module so a driver can snapshot the same value it encoded.
+
+Observed build graphs bind selection, interface, binding, target IR, binary
+and validation artifacts; offline archive verification recomputes both
+relations. The static host TrustManifest explicitly includes the added
+projection/codec/signature-inspection dependencies. Production checked-driver
+selection routing and output/EvidenceEnvelope publication remain separate
+implementation work. No serialized adapter data creates source authority.

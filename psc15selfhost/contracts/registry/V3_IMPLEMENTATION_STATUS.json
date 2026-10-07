@@ -284,7 +284,8 @@
         "scripts/wasm-core-signatures.mjs",
         "scripts/canonical-exports.mjs",
         "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
-        "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json"
+        "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json",
+        "scripts/wasm-canonical-artifact.mjs"
       ],
       "completion": "Typed functions, aggregates, handles, ownership, errors, streams/futures, targets and capability imports/exports drive adapters.",
       "assurance": "pending"

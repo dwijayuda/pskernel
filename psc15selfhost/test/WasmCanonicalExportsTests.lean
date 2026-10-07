@@ -1,4 +1,6 @@
 import Ps.BackendWasm.CanonicalExports
+import Ps.CompilerIr.Encode
+import Ps.BackendWasm.Encode
 
 def canonicalEcho (name : String) (type : PsVerifiedIrPrimitiveType) : PsVerifiedIrDeclaration :=
   PsVerifiedIrDeclaration.mk name [] [PsVerifiedIrParameter.mk "internal_parameter" (.primitive type)]
@@ -60,10 +62,18 @@ def main (args : List String) : IO Unit := do
     match psWasmCompileCanonicalExports (PsWasmTargetProfile.mk width) canonicalSelection canonicalSource with
     | Except.error _ => throw (IO.userError "PSC_WASM_CANONICAL_FIXTURE_FAILED")
     | Except.ok artifacts =>
+        let sourceJson ← match psIrEncodeModule canonicalSource.raw with
+          | Except.ok value => pure value
+          | Except.error _ => throw (IO.userError "PSC_WASM_CANONICAL_SOURCE_ENCODING");
+        let targetJson ← match psWasmIrEncodeModule artifacts.target with
+          | Except.ok value => pure value
+          | Except.error _ => throw (IO.userError "PSC_WASM_CANONICAL_TARGET_ENCODING");
         IO.println (psJsonObject [
           Prod.mk "binary" (psJsonArray (artifacts.binary.map fun byte => toString byte.toNat)),
           Prod.mk "bindingJson" (psJsonQuote artifacts.bindingJson),
-          Prod.mk "interfaceJson" (psJsonQuote artifacts.interfaceJson)]);
+          Prod.mk "interfaceJson" (psJsonQuote artifacts.interfaceJson),
+          Prod.mk "sourceJson" (psJsonQuote sourceJson),
+          Prod.mk "targetJson" (psJsonQuote targetJson)]);
     return;
   let forged := canonicalSingle (PsVerifiedIrDeclaration.mk "forged" [] [] (.primitive .uint32) (.literal (.bool true)));
   let imported := PsSpecializedIrModule.mk { canonicalSource.raw with

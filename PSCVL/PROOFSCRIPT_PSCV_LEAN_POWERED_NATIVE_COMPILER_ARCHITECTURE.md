@@ -117,3 +117,193 @@ PSC V1 LANGUAGE / STANDARD MANIFEST / APPROVED FORMAL SPEC
 **Trust distinction:** The **compiler host** may import broad Lean APIs. **Standard PSCV user source** may use only the frozen manifest and explicitly mapped source grammar. `import Lean` inside the implementation is **not** permission for a user's `.ps` module to extend ProofScript grammar by importing Lean's metaprogramming registries. Treat imported native Lean or world-effect components as explicitly modeled boundaries when permitted.
 
 **One-logic invariant:** The PSCV frontend produces ordinary Lean propositions/checked terms; Lean's pinned kernel is the logical authority. Do not introduce PSCV-native axioms or a shadow typechecker. However, Lean kernel acceptance is not proof of application-spec completeness or native backend correctness.
+
+
+## 5. Proposed small PSCVL codebase (do not manufacture empty modules)
+
+~~~text
+pskernel/
+  PSCVL/
+    Main.lean                             # psc CLI; strict check/verify/build
+    PSCVL.lean                            # trusted compiler library entry
+    lakefile.lean
+    lean-toolchain                        # leanprover/lean4:v4.35.0-rc3
+    PSCVL/
+      Source/
+        Lexical.lean                      # strict UTF-8, CRLF, tab, spans
+        Grammar.lean                      # owned Appendix A AST validation
+        ProofGrammar.lean                 # Chapter 20 tactic whitelist
+        Modules.lean                      # module identities/import graph
+      Syntax/
+        Decl.lean                         # const/function/inductive/structure
+        Term.lean                         # call/tuple/record/if/match
+        VerifiedDo.lean                   # local mut, loops, ghost
+        Contract.lean                     # given/requires/ensures/errors/frames
+      Elab/
+        Lower.lean                        # owned Syntax -> Lean Syntax
+        StandardEnv.lean                  # frozen registry/option identity
+        Deterministic.lean                # name/unification/instances/coercions
+      Verify/
+        VC.lean                           # pinned vcgen adapter, call obligations
+        Effects.lean                      # frozen Id/State/Reader/Except WP laws
+        Frame.lean                        # old/reads/modifies logical model
+        Erasure.lean                      # proof/ghost noninterference
+      Assurance/
+        SpecIdentity.lean                 # approved formal claims/digest
+        Closure.lean                      # imports, axioms, runtime, effects
+        Certificate.lean                  # accepted PSCV-CERT-v1
+        Gate.lean                         # the ONLY verified emission authority
+      Native/
+        BuildPlan.lean                    # content-addressed generated Lean
+        LeanDriver.lean                   # existing Lean/Lake build pipeline
+        Publish.lean                      # check/publish atomically
+      Distribution/
+        Toolchain.lean                    # bundled pinned Lean SDK paths
+    tests/
+      grammar/
+      elaboration/
+      verification/
+      assurance/
+      native/
+      release/
+    manifests/
+      STD-ENV-PSCV-V1-L435RC3-RC1.json   # PENDING normative freeze
+      verification-registry.json          # PENDING normative freeze
+    README.md
+    CONFORMANCE.md
+    NORMATIVE_ALIGNMENT.md
+    PROOFSCRIPT_PSCV_LEAN_POWERED_NATIVE_COMPILER_ARCHITECTURE.md
+~~~
+
+These are **logical ownership boundaries**, not a command to create two dozen files now. Prefer a small set of cohesive `.lean` modules until feature families grow. Refactor the existing `Syntax.lean`, `Grammar.lean`, `Effect.lean` and `Policy.lean` incrementally rather than replacing proven working code unnecessarily.
+
+**Minimal-core responsibility division:**
+
+- `Source/Syntax` owns only source acceptance and canonical syntax lowering; does **not** contain native linker calls or certificate shortcuts.
+- `Elab` delegates typechecking to Lean but owns the *observable* PSCV choices that Lean's default elaborator does not reproduce.
+- `Verify` reuses checked Lean/`Std.WP` lemmas and pinned proof-producing algorithms; does not introduce a second type theory or unchecked solver oracle.
+- `Assurance` owns immutable approval, specification coverage and closure; the verified token cannot be synthesized from a Boolean annotation.
+- `Native` wraps the existing Lean/Lake backend and **cannot accept** raw source or uncertified Lean declarations as an alternative entry.
+- `Distribution` bundles official binary/toolchain assets, rather than reimplementing their C/runtime/compiler features.
+
+## 6. End-to-end data flow — exact stages and stop points
+
+| Stage | Implementation owner | Input → output | Mandatory rejection/claim |
+|---|---|---|---|
+| P0 | PSCVL lexical gate | original UTF-8 bytes → normalized tokens/spans | Reject invalid UTF-8, nonpermitted BOM/CR/tabs, unclosed tokens. Do not accept a *lossy*-decoded source. |
+| P1 | PSCVL module layer + Lean import infrastructure | `.ps` paths/import headers → deterministic logical module DAG | Reject ambiguous `Foo.ps`/`Foo.lean`, cycles, invalid `public import`, unapproved imported environments. |
+| P2 | PSCVL Standard environment | exact pin/manifest/assurance policy → frozen context identity | Reject absent/mismatched registries. No ambient notation/simp/ext/grind/parser registration. |
+| P3 | Lean parser + PSCVL recursive gate | tokens → **accepted owned PSCV AST** | Require complete `SourceFile → EOF`. Reject all unlisted nested term/tactic/do nodes **before elaboration**. |
+| P4 | PSCVL owned lowering + Lean quotations | approved PSCV AST → generated Lean Syntax + source map | Only finite, versioned expansion rules. Audit output AST and declaration identity. |
+| P5 | Lean elaborator/kernel + PSCV deterministic layer | Lean Syntax → checked core declarations | Enforce `PS-UNIFY-v1`, lookup/instance/default/coercion behavior, totality, options and visibility. |
+| P6 | Lean `Std.WP`/VCGen + PSCV Verify | checked code and approved claims → exact obligations and checked proof evidence | Reject unresolved goals, hidden axiom/proof holes, unverified callees or incorrect effect models. |
+| P7 | Lean module machinery (non-executable only) | checked declarations → optional `.olean`/index files | These are **not** `PSCV-CERT-v1` and must not be interpreted as executable emission. |
+| P8 | PSCVL assurance + optional `leanchecker` | approved spec + local/imported checked proof + exec closure → accepted certificate | Reject missing approval, stale evidence, unsafe/partial/noncomputable/IO/FFI closure, ghost leak, bad import. |
+| P9 | PSCVL Gate | accepted `PSCV-CERT-v1` → internal `VerifiedExecutableModule` | **Only** constructor of certified native-emission authority. No unchecked source/`Environment` bypass. |
+| P10 | Lean/Lake native compiler | certified generated module → LCNF → C → objects → native binary | Pin executable toolchain; capture compiler assurance and provenance; reject failures. |
+| P11 | PSCVL release adapter | validated binary + assurance report → published artifact | Atomic publish; never release partial/failed verified output. |
+
+### 6.1 Resolve the alleged certification “chicken-and-egg” correctly
+
+Elaborating checked Lean **proof/module artifacts** may happen before the full PSCV certificate. The language reference allows parsing, elaboration, proof-obligation generation, checking, and non-executable metadata while obligations remain open. **Native C/object/executable generation must not start before the mandatory certified handoff**.
+
+Therefore:
+1. Parse/normalize `.ps` and lower deterministically in-memory.
+2. Construct checking-only Lean modules and any `.olean` needed for trusted replay/import composition; verify their identity before use.
+3. Produce `PSCV-CERT-v1` only after all gates pass.
+4. Then invoke Lean's native code emitter on the **same identity-bound generated code**.
+5. Keep outputs staged; publish only when compiler and provenance checks finish successfully.
+
+Generated `.lean` is a reproducible build intermediate; **ProofScript `.ps` plus approved specification remains authoritative**.
+
+### 6.2 Pseudocode for a non-bypassable API (design, NOT existing Lean definitions)
+
+~~~lean
+-- Conceptual; replace placeholders with concrete, kernel-backed types.
+structure ParsedPSCV where
+  ownedSyntax : OwnedPSCVSyntax
+  sourceIdentity : SourceIdentity
+
+structure ElaboratedPSCV where
+  declarations : CheckedLeanDeclarations
+  obligations : Array CanonicalObligation
+  environmentIdentity : EnvironmentIdentity
+
+-- Constructor should be inaccessible to arbitrary callers.
+structure VerifiedExecutableModule where
+  certificate : AcceptedPSCVv1Certificate
+  validatedCodegenInput : CanonicalLeanLoweringIdentity
+
+def certify :
+  ElaboratedPSCV →
+  ApprovedSpecification →
+  CheckedEvidence →
+  AssurancePolicy →
+  Except VerificationFailure VerifiedExecutableModule
+
+-- Only this typed state enters code generation:
+def compileNative :
+  VerifiedExecutableModule →
+  BundledLeanToolchain →
+  TargetPlatform →
+  IO (Except NativeBuildFailure NativeArtifact)
+~~~
+
+A client must **not** be able to construct `VerifiedExecutableModule` from a self-asserted `verified=true`, from a successful `check`, or from an arbitrary Lean `Environment`. Use private constructors and a checked composition root; serialization cannot bypass replay.
+
+## 7. Source-language design — maximum parsing reuse, exact PSCV acceptance
+
+### 7.1 Use existing Lean parser infrastructure, not unrestricted Lean language
+
+Reuse `Lean.Parser.Module.parseCommand`, the mapped `Lean.Parser.Term` token/category families, syntax-tree source spans, `TSyntax` quotations and Lean's existing term parser primitives. The PSCV parser accepts *only* the union of:
+
+1. **Appendix A** owned productions for the Standard/PSCV profile;
+2. exact source-compatible **Appendix I** Lean families **with their narrower PSCV restrictions**;
+3. finite **Chapter 20.2 StandardTactic** grammar.
+
+Arbitrary Lean source syntax/macros/attributes/notational extensions are **not** automatically permitted because their code exists or because `import Lean` succeeded in the trusted compiler.
+
+### 7.2 Exact difficult cases; these require explicit tests
+
+| Family | Normative behavior | Why a Lean-only frontend is insufficient |
+|---|---|---|
+| Lexer | UTF-8, one optional BOM, CRLF/LF, reject forbidden lone CR or TAB, byte-accurate source positions | Lean's shell intentionally exposes a lossy UTF-8 decoder; PSCV must reject malformed source instead. |
+| Calls | `f(x,y)` is two arguments; `f (x,y)` is one tuple; `f((x,y))` one grouped tuple; adjacency is token/source-position based | Native Lean whitespace application has different ownership than PSCV's postfix multi-argument form. |
+| Empty call/parameters | `f()` invokes omitted default/automatic binders; `f(())` supplies explicit Unit; `function f()` uses specified optional Unit sugar | Not JavaScript zero-arity, not a universal unit parameter for all calls. |
+| Binders | comma-oriented explicit `(x:A, y:B,)`; `{x:A}`, strict `{{x:A}}`, instance `[C α]`; defaults elaborated in definition's scope | Lean's broad binder language and default elaboration must not silently add spellings or different scoping. |
+| Named calls | positional prefix followed by named suffix, no duplicate/unknown names, exact telescope binding | Some Lean application choices or implicit insertion paths may not match Chapter 22. |
+| Braced body/if | `:= { PSTerm }` is exactly **one term**, not sequencing; `if (c) {a} else {b}` has no truthiness | Lean has other conditionals/layouts; PSCV must own the source shape. |
+| Struct/class vs records | Structure/class declaration fields are newline/layout, records/updates are comma-oriented | A universal comma/semicolon replacement is incorrect. |
+| Instance/where/do/proofs | Internal sequences are newline-only in Standard; no general semicolon | Native Lean supports extra separator syntax and tactic semicolon composition. |
+| Pattern/match | Single-scrutinee bounded braced `match` with specified patterns and exhaustiveness | Lean's full equation/motive/pattern compiler is larger than the admitted PSCV source subset. |
+| Verified `do` | Braced `do { ... }`, mutable locals, `ghost`, `assert`, `for` and `while` with specified VCs | Lean has more control-flow syntax, including `repeat` and multiple-stream `for` syntax. |
+| Tactics | Exactly Chapter 20.2 heads/argument shapes; no bullets/`case`/tactic configs/`at`/unlisted macros | Lean's tactic registry is extensible and many syntax variants share the same broad node family. |
+| `import`/`public import` | Header only, no cycles, deterministic registry propagation, certified dependencies | Arbitrary imports can mutate Lean parser/tactic/attribute registries and break closed Standard semantics. |
+
+**Implementation pattern:** source bytes → controlled parse → **recursive positive typed AST validation**, not just keyword bans → typed owned lowering → expanded/lowered tree validation → Lean elaboration. An AST kind that is not on the finite allowed list must reject even inside an otherwise admitted `def`/`theorem`. A scanner must retain token adjacency/indentation; plain text regex alone is not enough.
+
+**Current gap:** `PSCVL/PSCVL/Grammar.lean` has a bounded command whitelist and partial recursive denylists; this is not yet Appendix-A complete. Current native Lean syntax quirks that only pass `check-preview` are **never** conformance evidence.
+
+## 8. Deterministic elaboration — the large unavoidable PSCV-owned responsibility
+
+The reference specifies **`PS-UNIFY-v1`** and precise observable source meaning (Chapter 22); Lean's default elaborator is much broader. Kernel acceptance guarantees core typing, **not** that the elaborator selected the intended source-level instance, default, coercion chain or identifier.
+
+**Maximal reuse strategy:**
+
+- Use Lean's native `Expr`, `Level`, `MetaM`, `MVarId`, local contexts, WHNF/defeq, checked kernel terms, and ordinary declaration/inductive compilation; do not implement dependent type theory.
+- For family **A**, if native Lean is shown to produce exactly the PSCV outcome/meaning under the frozen environment, invoke it directly.
+- For family **B**, use Lean lower-level metavariable/defeq primitives with a *small deterministic PSCV wrapper*: FIFO constraints, occurs/local-context checks, pattern-only metavariable assignment, no uncontrolled higher-order imitation; first eligible ordered instance; one-hop coercion; explicit final default-instance phase.
+- For family **C**, lower PSCV-owned syntax to already understood Lean terms after the proper PSCV source-specific rule checks.
+
+Important normative details to enforce:
+1. Local instance candidates are lexically prioritized; later same-scope candidates precede earlier ones.
+2. Global/imported instances use priority, module order, and the specified depth-first `ImportLinearization`, not hash iteration or installation order.
+3. Source default values are elaborated in the **declaration's preceding-parameter scope** and instantiated at calls, never parsed again in caller scope.
+4. `PS-UNIFY-v1` is a FIFO constraint algorithm with narrowly admitted pattern assignments and fixed postponement behavior, not full Lean higher-order search.
+5. `CoeT`, `CoeFun`, and `CoeSort` are bounded; Standard `autoLift=false` and no uncontrolled chains.
+6. Fixed Standard options, initial notation, simp/default/instance/coercion/grind/ext registries must come from the **generated and frozen manifest**.
+7. Resource exhaustion/ambiguous resolution fails explicitly, not semantic success or fallback to raw Lean.
+
+**Implementation-cost conclusion:** First prove/test how much native Lean behavior already matches a closed PSCV environment; write custom logic only for observed normative divergences. But a wrapper that merely rechecks final Lean type correctness is **not** enough for differences in source-observable elaboration choices.
+
+**Release blocker:** `STD-ENV-PSCV-V1-L435RC3-RC1.json` and the PSCV verification-registry snapshot/digests are marked **PENDING** in Normative RC-v2. They must be generated, provenance-validated, hashed and frozen. Do not invent those hashes or claim final Standard conformance before that work.

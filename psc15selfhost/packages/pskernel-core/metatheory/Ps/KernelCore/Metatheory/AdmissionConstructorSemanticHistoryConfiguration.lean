@@ -354,3 +354,67 @@ theorem psKernelOrdinaryHeaderConstructorPipeline_configuration_refines
   · simpa [hParamSound.2.1, hResult] using hIndexSound.2.2
   · exact PsKernelEnvironmentSemanticExtends.trans
       sortedHeader.context.environment work ctorResult.environment hWorkExt hCtorExt
+
+/--
+Constructor publication cannot consume a reserved disjoint name. The proof
+uses the independent publication history, not an empirical environment check.
+Comparator reflexivity remains an explicit premise for negative membership.
+-/
+theorem PsKernelCheckedOrdinaryConstructorHistory.preserves_reserved_name
+    (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    {decl : PsKernelSimpleInductiveDecl} {levels : List PsKernelLevel}
+    {params : List PsKernelOpenBinder} {numIndices : Nat}
+    {resultLevel : PsKernelLevel} {headerLocal : PsKernelLocalContext}
+    {work finalEnvironment : PsKernelEnvironment} {index : Nat}
+    {ctors : List PsKernelSimpleConstructorDecl}
+    {shapes : List PsKernelSimpleConstructorShape}
+    (hHistory : PsKernelCheckedOrdinaryConstructorHistory decl levels params
+      numIndices resultLevel headerLocal work index ctors shapes finalEnvironment) :
+    ∀ reserved : PsKernelName,
+      psKernelFindConstantInList reserved work.constants = none ->
+      psKernelNameListContains reserved (psKernelSimpleCtorNames ctors) = false ->
+      psKernelFindConstantInList reserved finalEnvironment.constants = none := by
+  induction hHistory with
+  | done work index =>
+      intro reserved hAbsent hGuard
+      exact hAbsent
+  | step work index ctor rest tailShapes finalEnvironment inferredType level
+      fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
+      intro reserved hAbsent hGuard
+      have hNamesGuard : psKernelNameListContains reserved
+          (ctor.name :: psKernelSimpleCtorNames rest) = false := by
+        simpa [psKernelSimpleCtorNames] using hGuard
+      have hDifferent := psKernelNameListContains_false_excludes_equal
+        hReflexive reserved (ctor.name :: psKernelSimpleCtorNames rest)
+        hNamesGuard ctor.name (List.Mem.head _)
+      have hInsertEqual : psKernelNameEq ctor.name reserved = false := by
+        cases hEq : psKernelNameEq ctor.name reserved with
+        | false => rfl
+        | true =>
+            exact False.elim (hDifferent
+              (psKernelNameEq_sound_of_string_law hString ctor.name reserved hEq))
+      have hTailGuard : psKernelNameListContains reserved
+          (psKernelSimpleCtorNames rest) = false := by
+        cases hEq : psKernelNameEq reserved ctor.name with
+        | true => simp [psKernelNameListContains, hEq] at hNamesGuard
+        | false => simpa [psKernelNameListContains, hEq] using hNamesGuard
+      apply ih reserved _ hTailGuard
+      simpa [psKernelEnvironmentAddUnchecked, psKernelFindConstantInList,
+        psKernelConstantInfoName, psKernelConstantInfoBase, hInsertEqual] using hAbsent
+
+theorem PsKernelCheckedOrdinaryConstructorHistory.shape_provenance
+    {decl : PsKernelSimpleInductiveDecl} {levels : List PsKernelLevel}
+    {params : List PsKernelOpenBinder} {numIndices : Nat}
+    {resultLevel : PsKernelLevel} {headerLocal : PsKernelLocalContext}
+    {work finalEnvironment : PsKernelEnvironment} {index : Nat}
+    {ctors : List PsKernelSimpleConstructorDecl}
+    {shapes : List PsKernelSimpleConstructorShape}
+    (hHistory : PsKernelCheckedOrdinaryConstructorHistory decl levels params
+      numIndices resultLevel headerLocal work index ctors shapes finalEnvironment) :
+    shapes.map PsKernelSimpleConstructorShape.ctor = ctors := by
+  induction hHistory with
+  | done => rfl
+  | step work index ctor rest tailShapes finalEnvironment inferredType level
+      fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
+      simpa using congrArg (List.cons _) ih

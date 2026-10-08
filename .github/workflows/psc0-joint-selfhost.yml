@@ -2,6 +2,7 @@ name: PSC0 joint compiler and kernel self-host
 
 on:
   pull_request:
+    types: [opened, reopened, synchronize, labeled]
     paths:
       - 'psc0/packages/pskernel-core/src/**'
       - 'psc0/scripts/joint-*.mjs'
@@ -44,6 +45,8 @@ jobs:
           restore-keys: |
             psc0-joint-lean-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
             psc0-core-${{ runner.os }}-
+      - name: Validate generated kernel canonical-admission decoder
+        run: node --test scripts/generated-core-provider.test.mjs
       - name: Check complete kernel implementation closure
         run: |
           node scripts/joint-kernel-closure.mjs --assert-full
@@ -57,6 +60,10 @@ jobs:
 
   kernel-generated-fixed-point:
     needs: source-contract
+    # Ordinary PR edits use cheap source/adapter checks only. Run the full
+    # expensive generation on an explicit 'enhancement' labeling event or
+    # manual dispatch, never on every synchronize/update.
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.action == 'labeled' && github.event.label.name == 'enhancement') }}
     runs-on: ubuntu-latest
     timeout-minutes: 110
     defaults:
@@ -97,6 +104,11 @@ jobs:
         run: node scripts/joint-selfhost.mjs generate
         env:
           NODE_OPTIONS: --max-old-space-size=12288
+      - name: Check the generated kernel as a real checker of compiler admissions
+        timeout-minutes: 40
+        run: node scripts/joint-selfhost.mjs verify-generated
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
       - name: Upload independent kernel-generation evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -104,6 +116,7 @@ jobs:
           name: psc0-joint-kernel-generation
           path: |
             psc0/dist/joint-kernel/kernel-fixed-point.json
+            psc0/dist/joint-kernel/checked-prelude.json
             psc0/dist/joint-kernel/bootstrap/kernel/index.checked.json
             psc0/dist/joint-kernel/selfhost/kernel/index.checked.json
             psc0/dist/joint-kernel/bootstrap/workspace/.proofscript-bootstrap.json

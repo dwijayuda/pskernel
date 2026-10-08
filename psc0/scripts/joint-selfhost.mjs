@@ -199,6 +199,89 @@ async function generate() {
   console.log('PSC0_JOINT_FULL_CHECKER_PROMOTION: NOT_YET (generated JS checker must replay compiler admissions)');
 }
 
+async function exportGeneratedPrelude() {
+  const preludePath = path.join(out, 'checked-prelude.json');
+  await mkdir(path.dirname(preludePath), { recursive: true });
+  run('lake', ['build', 'psc2_joint_closure_inventory'], 300000);
+  run('lake', ['exe', 'psc2_joint_closure_inventory', '--prelude', relative(preludePath)], 300000);
+  const prelude = await readJson(preludePath);
+  if (!Array.isArray(prelude) || prelude.length < 1 ||
+      prelude.some(d => typeof d.name !== 'string' ||
+        !d.nameWire || !Array.isArray(d.levelParameterWires))) {
+    throw new Error('PSC0_JOINT_STRUCTURED_PRELUDE_INVALID');
+  }
+  return preludePath;
+}
+
+async function runGeneratedChecker(kernelJs, preludePath, admissionsText, maxMillis) {
+  const result = spawnSync(process.execPath,
+    ['scripts/generated-core-provider-cli.mjs', relative(kernelJs), relative(preludePath),
+      admissionsText === null ? '--selftest' : '--check'], {
+      cwd: root,
+      input: admissionsText ?? undefined,
+      encoding: 'utf8',
+      maxBuffer: 4 * 1024 * 1024,
+      timeout: maxMillis,
+      windowsHide: true,
+      env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=6144' },
+    });
+  if (result.error || result.status !== 0) {
+    throw new Error('PSC0_JOINT_GENERATED_CHECKER_PROCESS_FAILED: ' +
+      String(result.error?.code ?? result.signal ?? result.status));
+  }
+  let response;
+  try { response = JSON.parse(result.stdout); }
+  catch { throw new Error('PSC0_JOINT_GENERATED_CHECKER_RESPONSE_JSON'); }
+  if (response.protocol !== 'pskernel-core-generated/1' ||
+      response.provider !== 'pskernel-core-js-candidate' ||
+      typeof response.accepted !== 'boolean') {
+    throw new Error('PSC0_JOINT_GENERATED_CHECKER_RESPONSE_INVALID');
+  }
+  return response;
+}
+
+async function verifyGeneratedChecker() {
+  const kernelJs = path.join(out, 'selfhost/kernel/index.js');
+  const checkedCompiler = await assertCompilerReceipt();
+  if (!existsSync(kernelJs) || !existsSync(out + '/kernel-fixed-point.json')) {
+    throw new Error('PSC0_JOINT_GENERATED_KERNEL_NOT_READY');
+  }
+  const previous = await readJson(path.join(out, 'kernel-fixed-point.json'));
+  if (previous.status !== 'kernel-generated-fixed-point' ||
+      !(await digestFile(kernelJs) === previous.selfhostJavaScriptSha256)) {
+    throw new Error('PSC0_JOINT_GENERATED_KERNEL_RECEIPT_MISMATCH');
+  }
+  const preludePath = await exportGeneratedPrelude();
+  const empty = await runGeneratedChecker(kernelJs, preludePath, null, 900000);
+  if (!empty.accepted) {
+    throw new Error('PSC0_JOINT_GENERATED_CHECKER_EMPTY_PRELUDE_FAILED: ' +
+      String(empty.message ?? empty.errorKind));
+  }
+  console.log('PSC0_JOINT_GENERATED_CHECKER_EMPTY_PRELUDE: PASS');
+  const compilerAdmissionsPath = path.join(root,
+    'dist/checked/pskernel-core/bootstrap/packages/compiler/index.admissions.json');
+  const admissions = await readFile(compilerAdmissionsPath, 'utf8');
+  if (hash(admissions) !== checkedCompiler.canonicalAdmissionsSha256) {
+    throw new Error('PSC0_JOINT_COMPILER_ADMISSIONS_CHANGED');
+  }
+  const result = await runGeneratedChecker(kernelJs, preludePath, admissions, 2400000);
+  if (!result.accepted) {
+    throw new Error('PSC0_JOINT_GENERATED_CHECKER_COMPILER_REJECTED: ' +
+      String(result.declarationIndex ?? '-') + ' ' +
+      String(result.message ?? result.errorKind));
+  }
+  console.log('PSC0_JOINT_GENERATED_CHECKER_ADMITS_COMPILER: PASS');
+  const receipt = { ...previous, generatedKernelAdmitsCompiler: true,
+    // A generated checker admitting the compiler is necessary but does not
+    // prove the *repeated joint compiler+kernel checker* fixed point.
+    jointCheckerFixedPoint: false,
+    generatedCheckerProvider: 'pskernel-core-js-candidate',
+    checkedCompilerAdmissionsSha256: hash(admissions),
+    checkedPreludeSha256: await digestFile(preludePath) };
+  await writeFile(path.join(out, 'kernel-fixed-point.json'),
+    JSON.stringify(receipt, null, 2) + '\n');
+}
+
 const mode = process.argv[2] ?? 'generate';
 if (mode === 'preflight') {
   const report = await analyzeKernelClosure();
@@ -206,6 +289,8 @@ if (mode === 'preflight') {
     ' sourceSha256=' + report.sourceSha256);
 } else if (mode === 'generate') {
   await generate();
+} else if (mode === 'verify-generated') {
+  await verifyGeneratedChecker();
 } else {
-  throw new Error('usage: joint-selfhost.mjs preflight|generate');
+  throw new Error('usage: joint-selfhost.mjs preflight|generate|verify-generated');
 }

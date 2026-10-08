@@ -80,3 +80,33 @@ JS kernel is a separate execution/compatibility workstream.
 Full assurance still requires an independent kernel soundness argument and
 the compiler's semantic preservation evidence; fixed-point equality is
 neither one on its own.
+
+## Generated-JS kernel provider candidate
+
+The `scripts/generated-core-provider.mjs` adapter independently decodes the
+canonical proofscript-checked-admissions version-2 wire into the generated
+PSKernel Core JS ADTs. It checks BigInt literals, exact structured names,
+universe levels, binders and inductive declaration structure and rejects
+unsupported forms rather than admitting them. A host-side Lean inventory
+preserves the exact prelude structured names, and the generated checker replays
+the prelude from an empty PSKernel session with no fallback.
+
+The candidate is **non-authoritative** until its actual execution passes
+differential evidence and the full compiler admissions replay. A small unit
+suite runs independently of the expensive bootstrap; it does not itself show
+kernel semantic parity.
+
+After a successful `npm run joint:kernel`, execute
+`npm run joint:verify-generated` to check that the generated JS kernel
+replays the actual 55-module compiler canonical admissions under a bounded
+subprocess and memory policy. That gate records
+`generatedKernelAdmitsCompiler=true` only on genuine acceptance; it retains
+`jointCheckerFixedPoint=false` until the final compiler+kernel repeat cycle.
+
+### Triggering expensive GitHub CI only when requested
+
+The PR runs the source-contract checks on ordinary edits and preserves the
+baseline. Its time-intensive generation and generated-checker replay run only
+on `workflow_dispatch` or the explicit `enhancement` PR-label event. This
+prevents a 26-minute compiler bootstrap plus kernel generation being repeated
+just because unrelated files are edited.

@@ -147,7 +147,8 @@
     "joint:preflight": "node scripts/joint-selfhost.mjs preflight && node --test scripts/joint-kernel-closure.test.mjs",
     "joint:kernel": "node scripts/joint-selfhost.mjs generate",
     "joint:smoke": "node scripts/psc1kernel-generated-smoke.mjs dist/joint-kernel/bootstrap/kernel/index.js",
-    "joint:verify-generated": "node scripts/joint-selfhost.mjs verify-generated"
+    "joint:verify-generated": "node scripts/joint-selfhost.mjs verify-generated",
+    "joint:native": "node scripts/joint-selfhost.mjs generate-native"
   },
   "devDependencies": {
     "typescript": "5.8.3"

@@ -58,6 +58,54 @@ jobs:
       - name: Check KernelCore root with actual PSC1 frontend
         run: lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
 
+  native-kernel-artifact:
+    needs: source-contract
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.action == 'labeled' && github.event.label.name == 'enhancement') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            psc0/.lake/build
+            psc0/lean-checked/.lake/build
+          key: psc0-joint-native-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean', 'psc0/packages/pskernel-core/src/**/*.lean') }}
+          restore-keys: |
+            psc0-joint-native-${{ runner.os }}-
+            psc0-core-${{ runner.os }}-
+      - name: Install pinned compiler TypeScript
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Emit kernel JS through Lean-native PSC0 compiler and native PSKernel Core
+        run: node scripts/joint-selfhost.mjs generate-native
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Upload native-compiler kernel generation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-native-kernel-generation
+          path: |
+            psc0/dist/joint-kernel/kernel-native-generation.json
+            psc0/dist/joint-kernel/native/kernel/index.checked.json
+            psc0/dist/joint-kernel/native/kernel/index.js
+          if-no-files-found: ignore
+          retention-days: 14
+
   kernel-generated-fixed-point:
     needs: source-contract
     # Ordinary PR edits use cheap source/adapter checks only. Run the full
@@ -100,6 +148,15 @@ jobs:
         run: |
           lake exe psc_kernel_core_provider_tests
           node --test scripts/checked-kernel-core.test.mjs
+      - name: Restore content-bound checked compiler and kernel artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            psc0/dist/checked/pskernel-core/bootstrap
+            psc0/dist/joint-kernel
+          key: psc0-joint-artifacts-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/package.json', 'psc0/packages/pskernel-core/src/**/*.lean', 'psc0/packages/bootstrap/src/**/*.lean', 'psc0/scripts/joint-selfhost.mjs', 'psc0/scripts/checked-build.mjs') }}
+          restore-keys: |
+            psc0-joint-artifacts-${{ runner.os }}-
       - name: Generate and check kernel with PSC0-generated compiler
         run: node scripts/joint-selfhost.mjs generate
         env:
@@ -117,6 +174,9 @@ jobs:
           path: |
             psc0/dist/joint-kernel/kernel-fixed-point.json
             psc0/dist/joint-kernel/checked-prelude.json
+            psc0/dist/checked/pskernel-core/bootstrap/packages/compiler/index.checked.json
+            psc0/dist/joint-kernel/bootstrap/kernel/index.js
+            psc0/dist/joint-kernel/selfhost/kernel/index.js
             psc0/dist/joint-kernel/bootstrap/kernel/index.checked.json
             psc0/dist/joint-kernel/selfhost/kernel/index.checked.json
             psc0/dist/joint-kernel/bootstrap/workspace/.proofscript-bootstrap.json

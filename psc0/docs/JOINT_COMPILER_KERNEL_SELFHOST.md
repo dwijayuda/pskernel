@@ -110,3 +110,33 @@ baseline. Its time-intensive generation and generated-checker replay run only
 on `workflow_dispatch` or the explicit `enhancement` PR-label event. This
 prevents a 26-minute compiler bootstrap plus kernel generation being repeated
 just because unrelated files are edited.
+
+## Fast native kernel generation
+
+`npm run joint:native` builds the 79-module KernelCore implementation using
+the **Lean-native execution of PSC0's compiler source**, with canonical
+admissions checked by native PSKernel Core, then generates TypeScript and
+JavaScript and runs the independent generated-kernel runtime smoke tests.
+
+This isolates two different costs and guarantees:
+
+- **Native PSC0 compiler → checked JavaScript kernel** proves that the
+  compiled PSC0 frontend can handle its kernel implementation; it is the
+  efficient build/development path.
+- **PSC0-generated JavaScript compiler → checked JavaScript kernel** is the
+  stronger self-host source-emission test, which remains separate and may be
+  much slower.
+
+The native path records `generatedCompilerSelfhost=false` and
+`jointCheckerFixedPoint=false`; do not misreport the native compiler as
+having been compiled by PSC0 itself. The stronger generated-JS checker must
+still accept the compiler and pass the repeated-generation contract.
+
+Cached source and output receipts are never accepted as kernel-check
+authorization merely because their SHA values match. The current selected
+native PSKernel Core rechecks cached compiler canonical admissions before
+they can be used for new checked artifact production.
+
+The deliberate GitHub full-certification event runs both the fast native
+kernel-generation lane and the slower generated-compiler/kernel lane, while
+routine PR edits run lightweight profile and wire checks only.

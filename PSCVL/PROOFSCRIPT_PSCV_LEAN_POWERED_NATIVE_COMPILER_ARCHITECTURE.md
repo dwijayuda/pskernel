@@ -307,3 +307,170 @@ Important normative details to enforce:
 **Implementation-cost conclusion:** First prove/test how much native Lean behavior already matches a closed PSCV environment; write custom logic only for observed normative divergences. But a wrapper that merely rechecks final Lean type correctness is **not** enough for differences in source-observable elaboration choices.
 
 **Release blocker:** `STD-ENV-PSCV-V1-L435RC3-RC1.json` and the PSCV verification-registry snapshot/digests are marked **PENDING** in Normative RC-v2. They must be generated, provenance-validated, hashed and frozen. Do not invent those hashes or claim final Standard conformance before that work.
+
+
+## 9. Verification policy — reuse Lean's proof engine, not its unrestricted authority
+
+### 9.1 Function contracts are real checked propositions
+
+The pinned [`expandDefContract`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Tactic/Do/Contract.lean#L86-L154) expands a `def` with `given`/`requires`/`ensures` into a regular definition and `@[spec] theorem f.spec` proved with `vcgen`. Reuse this machinery as the default proof producer, but freeze the PSCV-owned `given` binder scope, contract order and exact aggregate obligation identity.
+
+**Do not confuse:**
+- a syntactically specified contract;
+- an open/unproved condition;
+- a checked Lean theorem about that contract;
+- an externally **approved** formal specification with a bound immutable digest;
+- verified executable status of the function's entire dependency closure.
+
+Only the fourth plus all required proof/closure evidence can contribute to the fifth. Lean's intrinsic `@[spec]` is not an approval authority.
+
+**Missing PSCV work, not automatically inherited:** versioned `given` logical variables, exact `requires`/`ensures` clause ordering, call-site precondition VCs, modular use of checked callee postconditions, `errors` for distinct typed paths, `old`/`reads`/`modifies`, `verify target := proofTerm`, return-path coverage and approved external SpecCapsule associations. Prefer one general aggregate obligation generator, **not** per-test theorem patches.
+
+### 9.2 Effect-specific WP reuse, with mandatory laws
+
+For PSCV initial v1 effect families, use pinned `Std.WP`:
+
+| Initial effect | Reused implementation basis | Additional PSCV acceptance |
+|---|---|---|
+| Pure / `Id` | `Std.WP.Monad.Instances`, `Std.WP.Monad.Sound` | Exact success result, totality, pure postcondition |
+| State / `StateM` | State/StateT WP and soundness proofs | Logical pre-state/post-state/result, abstract frame components |
+| Reader / `ReaderM` | Reader/ReaderT WP and soundness | Environment read-only and explicitly fixed to logical model |
+| Typed error / `Except ε α` | Except/ExceptT WP and soundness, `Std.WP.EStack` | Independent successful result/error postconditions; no silent success on error |
+
+A mere Lean `Monad` instance must **not** authorize PSCV verified effects. An admitted effect registration needs checked laws for monotonicity, pure, bind, primitive operations and representation independence as appropriate to its declared post-shape. Keep the verification registry versioned and deterministic.
+
+The existing [`PSCVL/PSCVL/Effect.lean`](PSCVL/Effect.lean) contains useful kernel propositions and correspondence lemmas to the pinned WP interpretations; retain those only as audited explanatory/adaptor lemmas, **never** as a competing verification logic.
+
+### 9.3 Proof-only `assert`, ghost, loops, termination
+
+Reuse pinned `Lean.Elab.Do.Basic`, `BuiltinDo.Let`, `Std.WP` assertion gadgets and `vcgen` where they produce equivalent proof obligations; adapt **only the PSCV-owned grammar**:
+
+- `assert P`: `P : Prop`, generate a proof obligation, assume `P` in following verification **only when proved**, erase from execution.
+- `ghost` / `ghost mut`: verification-only state; lower to the pinned erased-state mechanism, then establish **noninterference** of results, branches, error paths, foreign calls and externally visible effect traces. Merely parsing `erased` is insufficient.
+- `for`: certified finite iterator semantics; explicit invariant when necessary or checked iterator theorem equivalent; `break` and `continue` remain in the VC model.
+- `while`: at least one invariant and exactly one decreasing measure in Appendix A.18. Generate initialization, ordinary/continue preservation, normal/break exits and well-founded descent obligations.
+- `termination_by` / `decreasing_by`: admitted total Lean-style well-founded recursion, checked measure/decrease evidence; do not allow unconstrained Lean `partial_fixpoint`.
+- Every early `return` must satisfy the same applicable postcondition; runtime errors must satisfy the typed error postcondition instead.
+
+The pinned [`Lean/Parser/Do.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Parser/Do.lean#L209-L217) admits native forms beyond PSCV, such as multiple-collection `for`. **The frontend grammar must exclude them before invoking Lean.**
+
+### 9.4 Frames, pre-state and world effects
+
+`old(expr)` evaluates an admitted pure/model expression in the **logical pre-state**. `reads [..]`/`modifies [..]` constrain **abstract state components/capabilities**, not arbitrary physical pointers. Verify unchanged components outside the frame and caller/callee frame composition through the selected effect's checked laws.
+
+**Never promote raw IO, FFI, network, filesystem, database, clock, randomness, concurrency or unknown native effects into closed mathematical proof status.** They require a separately verified abstract capability or explicitly identified `pscv-boundary-v1` assumption, with source-to-real-world evidence stated as proved/validated/tested/assumed. A native program entry point with `IO` needs a compatible explicit boundary policy; raw `IO` remains forbidden in closed verified executable closure.
+
+## 10. Approved specification identity and `PSCV-CERT-v1`
+
+A production PSCV compiler must bind proof evidence to the **approved formal claim**, not to an AI-generated description or a mutable `pscv_type_spec` marker.
+
+### 10.1 Required certificate content
+
+- PSCV edition/grammar/verification/certificate policy IDs, Lean pin, frozen environment/registry digests and compiler version;
+- logical module/source/fully qualified declaration identity, generated Lean lowering identity and approved specification digest;
+- exported executable roots and complete runtime, module and imported-certification dependency closure;
+- exact canonical obligation identities, kernel-accepted proof IDs and clean replay status;
+- every caller precondition, return/postcondition, loop/recursion/typed error/frame assertion and ghost-erasure judgment required by source semantics;
+- trust/axiom/unsafe/partial/noncomputable/foreign dependency closure and active `pscv-closed-v1` or `pscv-boundary-v1` policy;
+- admitted effect law identities and imported verified effect/spec registrations;
+- compiler target/runtime/toolchain provenance and **separately stated** native backend assurance level.
+
+A serialized certificate is *data*, not proof authority. A consumer revalidates identities and replays required evidence under its selected assurance policy. Changing formal claims, code, environment, version, imported module or effect model makes old cached evidence stale.
+
+### 10.2 One certified handoff, no fallback
+
+Only the internal assurance/gate code should construct the certified module. The native compiler adapter accepts **only** that certified value. Reject alternate entry points that take:
+- arbitrary parser trees;
+- a raw Lean `Environment`;
+- a merely elaborated `.lean` module;
+- an unvalidated `.olean`;
+- `@[pscv_export, pscv_type_spec]` source annotations;
+- a JSON `verified: true` field.
+
+Current [`PSCVL/PSCVL/Policy.lean`](PSCVL/Policy.lean) checks local declarations using `collectAxioms` and filters source flags, but cannot yet validate the **full imported executable closure**, formal approval, effect and ghost erasure, or backend preservation. Keep the preflight **UNCERTIFIED** until all gates exist.
+
+### 10.3 Kernel assurance versus native compiler assurance
+
+Lean's kernel proves the elaborated propositions in its accepted environment. That is **not** a machine-code correctness proof. Maintain at least these independent fields in assurance reports:
+
+~~~text
+approved specification coverage: covered / incomplete
+source logic/proof closure: checked / open / rejected
+independent proof replay: passed / not performed / failed
+compiler/native preservation: unvalidated / tested / translation-validated / proved
+world/foreign boundary: proved / validated / tested / assumed / unknown
+build provenance: recorded / reproducible / independently replayed
+~~~
+
+Native source-level verification remains useful before full compiler verification, but **never label backend tests as a formal proof of C/machine semantics**. Follow the active normative compile gate for whichever assurance claims are published.
+
+## 11. Native Lean compilation — fastest reliable implementation path
+
+### 11.1 Option comparison
+
+| Route | Reuse | Complexity/maintenance | Recommendation |
+|---|---|---|---|
+| **A. Generated controlled `.lean` modules + pinned Lean/Lake** | Reuses Lean parser/elaboration/module tooling, LCNF, `EmitC`, build actions, compiler/runtime | Low additional backend code; generated-source identity and hermetic sandbox required | **Start here** |
+| B. Fully in-process calls via `runFrontend`, `Lean.Compiler.compile`, `Lean.Compiler.LCNF.emitC`, native linker | Highest direct Lean API reuse, may avoid process/temporary I/O | More coupling to upstream internal state, import artifacts and compiler API changes | Optimize **after** A works and is measured |
+| C. New PSCV native IR + independent emitter | Little backend reuse | Large, duplicate semantic/TCB burden | **Reject for initial project** |
+
+**Important:** Option A does not mean "translate `.ps` arbitrarily to an unverified text file and run `lake`." A generated Lean module must be **deterministically lowered from a previously accepted PSCV AST**, identity-bound to the original source/formal claim, checked/replayed, and permitted to emit native code **only after certification**.
+
+### 11.2 Concrete reuse of native pipeline
+
+The pinned Lean native compiler already provides:
+1. `Lean.Compiler.compile` in [`Lean/Compiler/Main.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/Main.lean#L15-L23).
+2. LCNF conversion/passes in [`Lean/Compiler/LCNF/Main.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Main.lean).
+3. `emitC`/`emitCForDecls` in [`Lean/Compiler/LCNF/EmitC.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L1174-L1187).
+4. `lean`, `leanir` where configured, `leanc`, linker/runtime and Lake's module build actions. [`Lake.compileLeanModule`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/Lake/Build/Actions.lean#L29-L65) configures `lean -o` module output and `-c` C output (or separate compilation mode).
+5. Native binaries via [Lake executable targets](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/README.md). For proof replay, [`LeanChecker.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/LeanChecker.lean) supplies `leanchecker`.
+
+**No PSCV-specific implementations** of Lean kernel reduction, native IR, closure conversion, C emitter, Lean runtime memory management, C linker, or native optimizer should exist in the initial codebase.
+
+### 11.3 Safe, reproducible native driver
+
+- Accept a certified `VerifiedExecutableModule` only.
+- Materialize generated Lean modules in **private content-addressed staging**, with exact source/generated declaration/digest linkage.
+- Use a pinned toolchain; do not resolve an arbitrary system `lean`/`lake` executable from ambient PATH without identity verification. Control `LEAN_PATH`, import search paths and build options.
+- Validate staged generated Lean identity and imported `olean` dependencies before invoking any code emission. If a generated artifact changes, **invalidate its dependent certificate/replay**.
+- Invoke the stock Lean/Lake build machinery, capture all compiler diagnostics and status. Record target platform/ABI, Lean commit/build, runtime libraries and linker identity.
+- Keep native C/object/binaries private until compilation, provenance and selected assurance checks succeed; atomically publish only the approved final artifact.
+- A failed certificate, backend, missing tool, stale cache or incomplete effect model yields **no PSCV verified executable**.
+
+### 11.4 Standalone `psc` is not automatically a standalone SDK
+
+The frontend `psc` itself can be compiled with Lean into a native executable, **but compiling new user `.ps` modules** still needs the appropriate Lean frontend/compiler libraries, module `.olean` files, Lean runtime/headers and C tooling. A single executable file and an independently installable *SDK* are different products. Package the toolchain rather than asking users to install Lean.
+
+## 12. Distribution plan: users run `psc`, not `lean`
+
+~~~text
+npm install -g @proofscript/psc
+psc check Main.ps
+psc verify Main.ps --spec spec.lock
+psc build Main.ps --verified --target native
+psc run Main.ps --verified
+~~~
+
+**Proposed interfaces**, not available PSCVL CLI commands today.
+
+~~~text
+@proofscript/psc                 # npm launcher/platform selection
+  |
+  +-- psc executable            # compiled from .lean
+  +-- bundled/pinned Lean SDK   # not user-installed as an external prerequisite
+  |    +-- lean / optional leanir, leanc, leanchecker, Lake as used
+  |    +-- required .olean/precompiled compiler+Std libs
+  |    +-- runtime libraries, headers and C linker/toolchain
+  +-- PSCV frozen Standard/effect registry manifests
+  +-- hashes / provenance / licenses / SBOM
+~~~
+
+Two release flavors may improve size:
+- **`psc-check`**: parse/elaborate/proof-check with bundled necessary Lean modules; no native C compiler needed.
+- **`psc-native`**: includes the full pinned native compilation toolchain; provides `psc build --target native` without separately installing Lean/Elan.
+
+**Platform policy:** Package per supported OS/CPU ABI (e.g., Linux x86_64, macOS arm64, Windows x86_64) after checking genuine upstream binary/runtime dependencies. Clean-machine CI must start with **no preinstalled Lean/Elan/Lake**. Do not claim a platform supported based only on a cross-compiled binary. Validate module search paths and shared-library loading; do not invent fixed bundle layout from one host.
+
+**Supply-chain policy:** Pin exact Lean commit and packaged binary hashes; include source/module/runtime manifest identities, third-party licenses/notices, checksum/SBOM, and signatures where distributed. Lean's own [LICENSE](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/LICENSE) is Apache-2.0; check other bundled tools independently. Avoid silent download of a newer Lean version or changed Standard registry.
+
+**Cost decision:** PSCV does not need to self-host to provide a standalone `psc`. PSCV's compiler remains written in Lean even after users never see or install Lean themselves.

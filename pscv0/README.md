@@ -1,19 +1,26 @@
-# PSCV0 — Version 6 compiler workspace
+# PSCV0 — V6 Lean-native compiler workspace
 
-**Current direction:** a new, minimal kernel-first compiler core with npm-first distribution, rather than preserving the prior PSC2/self-host implementation architecture.
+**Current implementation direction:** All compiler and extension implementation code is written in Lean 4, with npm as a distribution system and Lean 4 native compilation as the initial executable backend.
 
 ## Start here
 
-- **[New clean V6 core workspace](v6/)** — authority-conscious, npm-shaped packages implemented from scratch; currently P0, not yet a full PSCV compiler.
-- **[Core npm design and soundness/security evaluation](v6/CORE_NPM_ARCHITECTURE.md)** — package boundaries, extension classes, source fidelity, kernel identities, optional Lean proofs, threat model and milestone gates.
-- [V6 compiler reference](THE_PSCV_COMPILER_REFERENCE_VERSION_6.md) — standalone Lean-built compiler target and four backends.
-- [Normative language reference](PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md) — closed PSCV semantics, verification and certification requirements.
-- [V6 work state](AI_WORK_STATE.md) — check current branch/CI results before making readiness claims.
+- [V6 Lean-native implementation](v6/) — new Lake build and npm source packages, compiled with pinned Lean 4.35.0-rc3.
+- [Source-reuse research](v6/LEAN_NATIVE_REUSE_RESEARCH.md) — detailed audit of old Lean packages and precise reuse/rewrite decisions.
+- [Core npm architecture and security policy](v6/CORE_NPM_ARCHITECTURE.md) — source authority, plugin constraints, native toolchain and evidence boundaries.
+- [V6 architecture reference](THE_PSCV_COMPILER_REFERENCE_VERSION_6.md).
+- [Normative PSCV language reference](PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md) — language edition ps-0.9-r3 and verified pscv-v1 requirements.
+- [Work state](AI_WORK_STATE.md) — latest implementation checkpoint, CI and open gates.
 
-## Existing prior-implementation material
+## Active V6 package implementation
 
-Previous packages/, host/, scripts/, contracts/, test/ and related files remain physically present for the existing compiler and provider rebuild paths. They are **not dependencies of the new v6/ core**, not compatibility obligations and not reasons to retain old architecture. Once the new core has replacement capabilities and regression evidence, obsolete implementation files can be deleted in separately reviewed commits; ordinary Git history remains available.
+The core, extension manifest policy and kernel candidate checker are Lean source files in v6/packages/{core,extensions,kernel}/src. The development CLI is v6/packages/cli/src/PscvDevMain.lean. Build the Lean-native development executable using the v6/lakefile.lean and version-pinned v6/lean-toolchain. The existing native/Wasm pskernel-lean@4.34 npm packages remain **separately pinned differential oracles**; the V6 semantic/build host uses Lean 4.35.0-rc3 and cannot silently claim compatibility with a 4.34 checker.
 
-Historical research and V5.1 design are in [legacy/](legacy/). Existing official Lean kernel npm provider facades remain independent dependencies for P0 admission checking. Kernel correctness/metatheory is a separate workstream.
+## Previous implementation
 
-**No automatic certification:** current v6/ code can inspect source bytes, validate extension manifests and ask the pinned native/Wasm Lean 4.34 kernel to check a canonical admission stream. It does not parse or compile arbitrary .ps, produce PSCV certificates, compile four backends or support .proof.lean yet.
+The original packages/, host/, scripts/ and associated tests remain physically in this source snapshot as reference/extraction material for syntax, erasure, RuntimeIR, target backends, WIT and diagnostics. **None is imported into the new trusted V6 core or CLI**, and none is a compatibility preservation requirement. Separate Lake targets may compile selected old Lean files as research-only reuse probes; those modules do not enter the production V6 executable. Delete replaced code later if desired, without weakening acceptance or rewriting history.
+
+Legacy V1–V5.1 architecture and status documents are in [legacy/](legacy/).
+
+## Current maturity
+
+The native Lean build and small source-level proof/kernel tests work. No arbitrary .ps source compilation, PSCV-CERT, four target backends, verified .proof.lean bridge, isolated feature host or public native npm release is implemented by this P0.

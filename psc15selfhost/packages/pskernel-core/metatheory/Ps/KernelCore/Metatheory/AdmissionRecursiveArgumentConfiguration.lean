@@ -576,6 +576,72 @@ theorem psKernelReverseOpenBinders_cons_append
     psKernelReverseOpenBindersWorker_eq_reverse_append,
     List.reverse_cons, List.append_assoc]
 
+
+/--
+Independent typed and positive ordinary field history. The accumulated
+recursive-field records are derived from the independently justified
+recursive-argument classification, in the same order as their field binders.
+-/
+inductive PsKernelOrdinaryConstructorFieldsValid
+    (environment : PsKernelEnvironment)
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (resultLevel : PsKernelLevel) :
+    PsKernelLocalContext -> PsKernelExpr ->
+    List PsKernelOpenBinder -> List PsKernelSimpleRecursiveField ->
+    PsKernelLocalContext -> List PsKernelOpenBinder ->
+    List PsKernelSimpleRecursiveField -> PsKernelExpr -> Prop
+  | done
+      (localContext : PsKernelLocalContext) (type : PsKernelExpr)
+      (revFields : List PsKernelOpenBinder)
+      (revRecursive : List PsKernelSimpleRecursiveField)
+      (hTerminal : PsKernelRawConstructorPiHead type = false) :
+      PsKernelOrdinaryConstructorFieldsValid environment target levels params
+        numIndices resultLevel localContext type revFields revRecursive
+        localContext (psKernelReverseOpenBinders revFields)
+        (psKernelReverseRecursiveFields revRecursive) type
+  | cons
+      (localContext continuation finalContext : PsKernelLocalContext)
+      (fresh userName : PsKernelName)
+      (domain body residual : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (fieldLevel : PsKernelLevel)
+      (revFields fields : List PsKernelOpenBinder)
+      (revRecursive recursiveFields : List PsKernelSimpleRecursiveField)
+      (info : Option (List PsKernelOpenBinder × List PsKernelExpr))
+      (hFresh : psKernelLocalContextFind localContext fresh = none)
+      (hDomain : PsKernelTypingJudgment environment localContext domain
+        (PsKernelExpr.sort fieldLevel))
+      (hUniverse : psKernelLevelLe fieldLevel resultLevel = true ∨
+        psKernelLevelNormalizesToZero resultLevel = true)
+      (hPositive : PsKernelOrdinaryRecursiveArgumentSafe
+        environment target levels params numIndices
+        (psKernelLocalContextAddLocal localContext fresh userName
+          (psKernelExprConsumeTypeAnnotations domain) binderInfo)
+        domain [] info)
+      (hHistory : PsKernelLocalContextOrdinalHistoryExtends
+        (psKernelLocalContextAddLocal localContext fresh userName
+          (psKernelExprConsumeTypeAnnotations domain) binderInfo) continuation)
+      (hTail : PsKernelOrdinaryConstructorFieldsValid
+        environment target levels params numIndices resultLevel continuation
+        (psKernelExprInstantiate1 body (PsKernelExpr.fvar fresh))
+        (PsKernelOpenBinder.mk fresh userName
+          (psKernelExprConsumeTypeAnnotations domain) binderInfo :: revFields)
+        (match info with
+         | none => revRecursive
+         | some recursive =>
+             PsKernelSimpleRecursiveField.mk
+               (PsKernelOpenBinder.mk fresh userName
+                 (psKernelExprConsumeTypeAnnotations domain) binderInfo)
+               recursive.1 recursive.2 :: revRecursive)
+        finalContext fields recursiveFields residual) :
+      PsKernelOrdinaryConstructorFieldsValid environment target levels params
+        numIndices resultLevel localContext
+        (PsKernelExpr.forallE userName domain body binderInfo)
+        revFields revRecursive finalContext fields recursiveFields residual
+
 /--
 Raw field-spine typing and exact residual refinement. Recursive analysis may
 allocate temporary function arguments; its monotone ordinal history is kept,
@@ -606,7 +672,13 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
           result.session.context.localContext fields result.result ∧
         PsKernelCheckerConfigurationSound
           result.session.context result.session.state ∧
-        result.session.context.environment = session.context.environment := by
+        result.session.context.environment = session.context.environment ∧
+        (PsKernelStringEqReflexiveLaw ->
+          PsKernelOrdinaryConstructorFieldsValid session.context.environment
+            target levels params numIndices resultLevel
+            session.context.localContext type revFields revRecursive
+            result.session.context.localContext result.fields
+            result.recursiveFields result.result) := by
   induction fuel with
   | zero =>
       intro session target levels params numIndices resultLevel type revFields
@@ -705,7 +777,7 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                           rcases ih child target levels params numIndices resultLevel
                             (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
                             (field :: revFields) nextRecursive result hChildConfig hTailRun
-                            with ⟨fields, hFields, hSpine, hFinalConfig, hFinalEnv⟩
+                            with ⟨fields, hFields, hSpine, hFinalConfig, hFinalEnv, hFinalHistory⟩
                           have hChildEnv :
                               child.context.environment = session.context.environment := by
                             simp [child, psKernelSessionRestoreLocalScope,
@@ -750,7 +822,7 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                             | true => exact Or.inl hLe
                             | false => exact Or.inr (by simpa [hLe] using hUniverse)
                           refine ⟨field :: fields, ?_, ?_, hFinalConfig,
-                            Eq.trans hFinalEnv hChildEnv⟩
+                            Eq.trans hFinalEnv hChildEnv, ?_⟩
                           · exact Eq.trans hFields
                               (psKernelReverseOpenBinders_cons_append field revFields fields)
                           · apply PsKernelRawConstructorFieldSpineValid.cons
@@ -760,9 +832,31 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                             simpa [opened, psKernelSessionWithLocal,
                               psKernelCheckerContextWithLocalContext,
                               hSortContext, hCheckContext] using hRest
+
+                          · intro hReflexive
+                            have hPositive :=
+                              psKernelAnalyzeSimpleRecursiveArgumentWithFuel_semantic_refines
+                                (Nat.succ remaining) hNative hString hReflexive
+                                opened.2 target levels params numIndices domain []
+                                analysis hOpenedConfig hAnalysisRun
+                            apply PsKernelOrdinaryConstructorFieldsValid.cons
+                              session.context.localContext child.context.localContext
+                              result.session.context.localContext opened.1 userName
+                              domain body result.result binderInfo fieldSort.1
+                              revFields result.fields revRecursive result.recursiveFields
+                              analysis.recursiveInfo hFreshOriginal hDomain hAllowed
+                            · simpa [opened, psKernelSessionWithLocal,
+                                psKernelCheckerContextWithLocalContext,
+                                hSortContext, hCheckContext] using hPositive
+                            · simpa [opened, psKernelSessionWithLocal,
+                                psKernelCheckerContextWithLocalContext,
+                                hSortContext, hCheckContext] using hScopeHistory
+                            · simpa [hChildEnv, field, nextRecursive]
+                                using hFinalHistory hReflexive
       | _ =>
           simp only [psKernelOpenSimpleConstructorFieldsWithFuel] at hRun
           cases hRun
           exact ⟨[], by simp,
             PsKernelRawConstructorFieldSpineValid.done _ _ (by rfl),
-            hConfig, rfl⟩
+            hConfig, rfl, fun _ =>
+              PsKernelOrdinaryConstructorFieldsValid.done _ _ _ _ (by rfl)⟩

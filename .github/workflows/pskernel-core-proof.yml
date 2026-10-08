@@ -52,3 +52,10 @@ jobs:
           npm run test:pskernel-core-proofs
           finished=$(date +%s)
           echo "PSKERNEL_CORE_PROOF_CHECK_SECONDS=$((finished-started))"
+
+      - name: Check native kernel foundation conformance
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe psc1_kernel_core_foundation_tests

@@ -733,3 +733,184 @@ Use module-local theorem/property IDs to prevent AI-generated speculative proof 
 
 A stage1 compiler compiling itself into stage2, then stage2 into stage3, with canonical identity stability shows bootstrap reproducibility under fixed inputs; it **does not by itself imply source-to-target semantics preservation or program correctness**. Preserve the Claim Lattice from [PSC-V51].
 
+
+## 16. AI-assisted proof ergonomics: executable evaluation protocol
+
+The language is intentionally designed for AI proof engineering, but a source language is not made easier to prove merely by adding syntax or removing code lines. Verification effort includes the elaborated Core theorem, effect VCs, induction/termination obligations, library lemmas, imported axioms, and post-edit proof maintenance.
+
+### 16.1 Profile-level proof simplifications
+
+**SHP2-AI-1:** mutable local variables and finite iteration must desugar into small typed state/SSA obligations; aliasable heap effects are excluded. This follows the design principles of Lean `do` [R-LEAN-DO], plus contracts and invariant reasoning studied in [R-DAFNY] and [R-VERUS]. It is not a proof of SHP2's current implementation.
+
+**SHP2-AI-2:** every compiler library operation used by multiple passes SHOULD expose a stable theorem API: bounds, construction, lookup/update, monotonicity, serialization, source-span preservation, input/output typing and failure behavior. AI proof attempts SHOULD depend on these lemmas rather than unfold the whole library implementation.
+
+**SHP2-AI-3:** successful proof search MUST end in an accepted proof term under the pinned kernel and approved axiom closure; tactic success, SMT output, runtime tests, model agreement and AI confidence do not count.
+
+**SHP2-AI-4:** approved specifications must have a separately reviewed stable identity. Proof-producing agents MAY refactor code or introduce lemmas; they MUST NOT weaken required postconditions, mark a helper as out-of-scope, introduce unchecked assumptions or change the acceptance policy merely to obtain green tests.
+
+### 16.2 Controlled benchmark (not performed here)
+
+Select a **24-task frozen corpus** covering: UTF-8 cursor bounds, parser progress/recovery, AST substitution, well-scopedness, instance resolution, unification occurs-check, reduction, total worklists, State+Except rollback, typed IR validation, specialization correspondence, JS/TS declaration identities, Wasm stack/ABI and deterministic Rust code generation.
+
+Compare for the same approved property and same underlying algorithm where possible:
+
+- **A:** current PSC1 explicit workers and boilerplate.
+- **B:** SHP2 local `do`/mutation/finite iteration.
+- **C:** SHP2 pure fold/structural-recursion implementation.
+
+Use pinned Lean/PSKernel and library versions, equal tools/agent model/token/time budgets, multiple independent proof attempts for each task (five as a starting measurement design, not a requirement on the language's semantics). Hold the formal theorem statement and host runtime semantics constant; do not alter the requirement to favor a style.
+
+Measure:
+1. independently replayed proof completion and exact proved obligation count;
+2. admitted axioms/spec-coverage and unsound/vacuous proposals rejected;
+3. median and tail wall-clock and token/tool-call cost;
+4. normalized VC size, number of state variables, imports and proof dependency depth;
+5. repair effort when source is behavior-preservingly refactored;
+6. compilation/runtime CPU, memory, generated size and deep-stack behavior;
+7. number of manual supporting lemmas and timeouts.
+
+**SHP2-AI-5:** if the measured pure style proves faster for a subsystem, use that style; SHP2 is a **capability subset**, not a demand that every compiler function be imperative. Honest proof-efficiency recommendations are conditional on controlled results and independent theorem replay.
+
+## 17. Evaluation of the proposed language reference
+
+### 17.1 Scope of the score
+
+The numerical score below is an **expert engineering judgment about the projected design**, supported by primary-language rules and traceable source constraints—not a measured empirical result or a formal kernel theorem. It compares alternative source-language approaches using the *same weights* across all eleven user-requested criteria. Individual candidate values range from 0 (poor fit) to 5 (excellent fit); `Score = Σ weight × rating / 5` with max 100.
+
+**Do not combine or directly compare this score** with the companion V3 research document's self-audited 97/100 **documentation-coverage** checklist. They answer different questions. A high design-preference rating does not mean implemented self-host/target proof closure.
+
+### 17.2 Weighted eleven-criterion comparison
+
+| Criterion | Weight | PSC1 | Lean full | Rust-style | Go-style | Proposed SHP2 |
+|---|---:|---:|---:|---:|---:|---:|
+| Soundness and source fidelity | 13 | 3.4 | 3.9 | 3.7 | 2.9 | 4.6 |
+| Formal verification and AI proof efficiency | 18 | 3.0 | 3.4 | 3.3 | 2.3 | 4.3 |
+| Malformed/adversarial-input robustness | 8 | 3.7 | 3.6 | 3.8 | 3.1 | 4.5 |
+| Compatibility completeness | 8 | 1.8 | 4.9 | 4.2 | 3.8 | 4.7 |
+| Architecture and semantic boundaries | 9 | 3.0 | 4.2 | 4.1 | 3.5 | 4.7 |
+| Runtime/compiler performance | 8 | 2.0 | 4.2 | 4.5 | 4.4 | 4.2 |
+| Four-backend portability | 10 | 4.0 | 1.6 | 2.4 | 3.4 | 4.5 |
+| Longevity/versioning | 6 | 2.8 | 4.5 | 4.4 | 4.5 | 4.6 |
+| Interoperability | 5 | 2.6 | 3.5 | 4.2 | 4.0 | 4.4 |
+| Full self-host/bootstrap | 10 | 3.9 | 2.5 | 3.0 | 3.1 | 4.5 |
+| Auditability and conformance evidence | 5 | 3.4 | 3.4 | 3.8 | 3.2 | 4.6 |
+| **Weighted conditional design preference /100** | **100** | **62.2** | **70.8** | **73.0** | **65.8** | **89.9** |
+
+### 17.3 Why SHP2 scores as it does
+
+| Criterion | Source-backed design choice | Missing evidence / limitation |
+|---|---|---|
+| Soundness/fidelity | restrictive parent grammar and Core, source-to-Lean and Core-to-target proof relations | approved standard environment still lacks final digest; no completed lowering proofs |
+| Formal/metatheoretic verification performance | total P0, typed local state, finite loops, explicit error/ghost frames, proof-local abstractions | AI proof-completion comparison and theorem libraries not measured |
+| Robustness | typed rejection/exhaustion, transitive imported trust, negative source/IR/runtime corpus | malicious/malformed input campaigns not executed |
+| Compatibility | entire reference based on `pscv-v1` syntax/theory; full language remains larger | some F1 library/WP identities and elaborator parity unfinished |
+| Architecture | V5.1 semantic spine, separation of compiler and kernel provider, backend-neutral RuntimeIR | actual Lean-Core RuntimeIR adapter not implemented |
+| Performance | byte builders, finite loops, deterministic maps, worklists | JS/Wasm/Rust/TS runtime benchmarks not run |
+| Portability | target-neutral numeric/string/error/ADT semantics and 4-target mapping | big integers, Wasm ABI and runtime libraries not established everywhere |
+| Longevity | one `.ps` source and pinned versioned source semantics | future PSCV/Lean versions require explicit compatibility work |
+| Interoperability | declared host adapters, TS declarations and runtime interfaces | foreign toolchains, WIT/Component ABI evidence not closed |
+| Self-host/bootstrap | 16-cell matrix, stage dimensions, frozen seed, independent checker ownership | 4 whole compiler re-entry executions not demonstrated |
+| Auditability | rule IDs, complete acceptance/negative matrix, primary-source trace and unmixed assurance claims | implementation conformance and independent review pending |
+
+The recommendation is to choose SHP2 as the **prospective long-term source language**, while keeping the **current PSC1 seed** intact. Do not declare the candidate feature profile operationally available until actual compiler and backend implementations meet the stated acceptance tests.
+
+### 17.4 Independent evaluation distinctions
+
+An independent reviewer should separately assess:
+
+- **Reference clarity/completeness:** are grammar ownership, selection restrictions, static/operational rules, effects, runtime semantics, target mapping and examples internally consistent?
+- **Language suitability:** are the chosen features practical without making VCs/alias reasoning disproportionately harder?
+- **Actual proof efficiency:** controlled same-theorem AI-proof comparison, independent kernel replay, axiom/spec integrity.
+- **Operational portability:** actual full-closure compiler tests under four distinct runtimes.
+- **Assurance strength:** source meaning, PSKernel soundness, kernel provider identity, erasure and backend preservation.
+
+These outcomes may differ. A clear reference can earn a high documentation score while the language implementation remains unproved or unavailable.
+
+### 17.5 Known unresolved issues (do not silently assume)
+
+- The parent `STD-ENV-PSCV-V1-L435RC3-RC1.json` SHA-256 is **PENDING/release-blocking**; no frozen final manifest has been verified in this research.
+- There is no currently demonstrated complete SHP2 grammar/elaborator/code generator in PR #81 or in the existing PSC1 source compiler.
+- The exact composition of verified State+Except effects and their registered WP must be resolved under `PSCV-VERIFY-v1` before admitting the combined effect.
+- The full self-host compiler's runtime Nat/Int, UTF-8, deterministic map and finite iterator conformance need four-target independent execution.
+- The semantics of all target host ABI, Wasm memory/GC and provider sessions need approved exact manifests and separate evidence.
+- The full 16 producer-target re-entry matrix has not been observed.
+- Target compiler semantic preservation and kernel metatheoretic assurance are separate unresolved efforts.
+- AI formal proof performance and proof-maintenance benefit of SHP2 versus pure/PSC1 source are **not measured**.
+- Illustrative source and target snippets are not machine-validated artifacts.
+- Future Python/PHP/Java/Go backend feasibility is architectural design intent, not an implemented feature claim.
+
+## 18. Recommendation, staged adoption, and end-state
+
+**Recommendation:** **conditionally adopt the design** of `PSCV-selfhost-portable/2` as the desired compiler implementation-language profile, subject to feature conformance and benchmark results; retain `PSC1-selfhost-stable/1` as a preserved seed.
+
+The most valuable implementation family is `do + locally scoped let mut + typed Except + finite for` **on top of a small total Core**. It provides the language features actual Lean/Rust/Go compiler developers use while leaving a more constrained semantic/proof boundary than unrestricted host language features.
+
+The eventual *one-source, two-frontends* architecture is:
+
+~~~text
+                           SHP2 ProofScript (.ps) compiler source
+                                         |
+                       +-----------------+------------------+
+                       |                                    |
+                 Lean-hosted path                    Native PSCV path
+                       |                                    |
+             Lean source/Core checked            PSCV Core + PSKernel checked
+                       |                                    |
+             correspondence + evidence        correspondence + evidence
+                       +-----------------+------------------+
+                                         |
+                            certified or explicit
+                           DEVELOPMENT-UNVERIFIED
+                                         |
+                   target-neutral erasure / validated RuntimeIR
+                                         |
+                           specialization / target IR
+                                         |
+                      +---------+---------+---------+
+                      |         |         |         |
+                     TS      direct JS   Wasm      Rust
+                                         |
+                        full-closure compiler re-entry
+                         (16 producer/target paths)
+~~~
+
+Development compiler pipelines may generate unverified artifacts before proofs are complete, but MUST NOT imply certification. Source, instance/environment, proof, RuntimeIR and target semantics are separate claims whose evidence cannot be substituted.
+
+**Adoption order:** (1) freeze profile and Standard manifest, (2) implement exact ByteArray/Nat/Int/Array/Except/State libraries and semantics, (3) add F0 `do`/local mutation/finite loop lowering, (4) compare Lean-hosted and own PSCV elaboration, (5) integrate checked RuntimeIR and all four emitters, (6) port whole compiler source package-by-package, (7) run complete 16-cell self-host and host-provider closure tests, (8) measure AI proof performance, (9) finish certification and backend-preservation proof/evidence.
+
+## 19. Primary sources and repository evidence
+
+These are live public language-reference URLs or commit-pinned repository sources. A newer reference version does not silently change the normative 4.35.0-rc3 PSCV pin.
+
+[PSC-LANG]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md
+[PSC-V51]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md
+[PSC-RESEARCH]: https://github.com/dwijayuda/pskernel/blob/47a0f60d6cc8d255d7eb3a24e01bbc4f427a2c9b/PSCV_SELFHOST_PORTABLE.md
+[PSC-STATUS]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/STATUS.md
+[PSC-HOST]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/scripts/compiler-checked-service.mjs
+[PSC-IR]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/packages/compiler-ir/src/Ps/CompilerIr/Model.lean
+
+[R-LEAN-PIPE]: https://lean-lang.org/doc/reference/latest/Elaboration-and-Compilation/
+[R-LEAN-IND]: https://lean-lang.org/doc/reference/latest/The-Type-System/Inductive-Types/
+[R-LEAN-DO]: https://lean-lang.org/doc/reference/latest/Functors___-Monads-and--do--Notation/Syntax/
+[R-LEAN-REC]: https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/
+[R-LEAN-STRING]: https://lean-lang.org/doc/reference/latest/Basic-Types/Strings/
+[R-LEAN-INST]: https://lean-lang.org/doc/reference/latest/Type-Classes/Instance-Synthesis/
+[R-TS-GEN]: https://www.typescriptlang.org/docs/handbook/2/generics.html
+[R-TS-NARROW]: https://www.typescriptlang.org/docs/handbook/2/narrowing
+[R-TS-ERASE]: https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html
+[R-TS-OBJ]: https://www.typescriptlang.org/docs/handbook/2/objects
+[R-TS-MODULE]: https://www.typescriptlang.org/docs/handbook/modules/reference
+[R-ECMA]: https://tc39.es/ecma262/2026/
+[R-RUST-EXPR]: https://doc.rust-lang.org/reference/expressions.html
+[R-RUST-TYPES]: https://doc.rust-lang.org/reference/types.html
+[R-RUST-BORROW]: https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html
+[R-RUST-OVERFLOW]: https://doc.rust-lang.org/reference/expressions/operator-expr.html
+[R-GO-SPEC]: https://go.dev/ref/spec
+[R-COMPCERT]: https://compcert.org/doc/
+[R-CAKEML]: https://cakeml.org/index.html
+[R-DAFNY]: https://dafny.org/latest/DafnyRef/DafnyRef.html
+[R-VERUS]: https://verus-lang.github.io/verus/guide/
+
+---
+
+**End of PSCV Self-Host Portable Language Reference v1.0 candidate. Its acceptance requirements are proposals until explicitly adopted and implemented; no normative PSCV source rule or verification certificate is overridden.**

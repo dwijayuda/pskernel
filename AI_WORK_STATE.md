@@ -459,3 +459,34 @@ Architectural blockers still remaining:
   runtime boundary. Native-reduction and StringEq soundness remain named TCB
   laws. Full positivity, ordinary/mutual/nested transaction refinement,
   final public composition, final audit, and integration remain incomplete.
+
+
+## Recursive-argument configuration and positivity frontier — 2026-10-09
+- **#710 fully GREEN** at `de697002ec902baf389fa66974223d4bc9b20e00`:
+  full proof tree and native foundation differential/conformance suite.
+  Recursive-argument index exclusion is validated, explicitly conditional
+  on comparator reflexivity.
+- **#711 fully GREEN** at `816a728731e8e02d29bfcee1706860054cf4e58f`:
+  recursive-argument analysis preserves configuration in the actual returned
+  local context and keeps the authoritative environment unchanged. Full native
+  foundation conformance also passes.
+- Candidate `873de1dac57b84a4b39bc2bb9d88f216fea479bc`, run #712:
+  independent `PsKernelOrdinaryRecursiveArgumentSafe` grammar and executable
+  fuel refinement for nonrecursive, canonical recursive-application, and
+  function-domain cases. It records reductions, typed Sort-valued domains,
+  structural domain/index exclusion, canonical parameters/universes/arity,
+  and fresh opened names. Check CI before claiming green.
+- Positivity/index exclusion still separately require the explicit
+  `PsKernelStringEqReflexiveLaw`; no new axiom, runtime bridge assumption,
+  or unconditional comparator claim has been introduced.
+- Next field-spine boundary: after function-argument analysis,
+  `psKernelOpenSimpleConstructorFieldsWithFuel` restores child0's local
+  declarations (retaining analysis nextIndex) but retains analysis checker
+  state. Configuration in the larger analysis scope does not automatically
+  imply configuration in this restored scope. Prove the required scope/cache
+  contraction under justified environment invariants or diagnose a concrete
+  source defect; do NOT silently reuse the larger-scope configuration.
+- Full ordinary/mutual/nested inductive admission, well-formed environment
+  extension and transaction publication, final public theorem family, audit
+  refresh, integration reconciliation, and final gates remain incomplete.
+  Audit remains 44/9/19/7.

@@ -1056,7 +1056,7 @@ def psOpenMatchMinorHypotheses
                       | Option.none => Except.ok Option.none
                       | Option.some parameterIndex =>
                           match psEraseFinishApplication environment baseScope
-                              (PsVerifiedIrExpr.var current.name) List.nil
+                              (PsVerifiedIrExpr.var current.name) (psListReverse current.typeArgumentsRev)
                               (psErasureRecursiveCallArguments current.runtimeParameters parameterIndex binding.name)
                               domain with
                           | Except.error error => Except.error error

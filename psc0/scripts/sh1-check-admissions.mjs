@@ -61,6 +61,18 @@ for (const generation of ['C2', 'C3']) {
     await addStream(generation + '/capabilities/' + capability.sourceKind + '/admissions.json',
       capability.admissionsSha256, generation + ' raw ' + capability.sourceKind + ' capability source');
   }
+  if (qualification.recursiveGenericErasureGenerations) {
+    assert.deepEqual(qualification.recursiveGenericErasureGenerations, ['C1', 'C2', 'C3']);
+    const generic = JSON.parse(await readFile(
+      path.join(artifactsRoot, generation, 'generic-erasure/receipt.json')));
+    assert.equal(generic.evidence, 'scoped-recursive-generic-erasure');
+    assert.equal(generic.compilerSha256, receipt.artifacts.javascriptSha256);
+    assert.equal(generic.sourceSha256, sha256(await readFile(
+      path.join(root, 'test/fixtures/selfhost-sh1-generic-erasure.lean'))));
+    assert.equal(generic.behavior.status, 'pass');
+    await addStream(generation + '/generic-erasure/admissions.json',
+      generic.artifacts.admissionsSha256, generation + ' raw recursive-generic fixture source');
+  }
 }
 const receipt = {
   schemaVersion: 1,

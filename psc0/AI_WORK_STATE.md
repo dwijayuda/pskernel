@@ -2,7 +2,33 @@
 
 Updated: 2026-10-08 UTC.
 
-## Active checkpoint: next three-helper source migration
+## Active checkpoint: isolated recursive generic-argument repair
+
+Execution branch for this checkpoint: psc0/sh1-generic-erasure-v1.
+Parent helper migration: 671685c3f0059574405a1e630dd965d421a26f05.
+That migration passed its first bounded native development gate in run
+37851669475; its full selected-seed qualification is running independently.
+
+The current-definition erasure context now retains ordered declaration generic
+arguments using a reversed accumulator. Type binders add their assigned Tn;
+runtime and erased proof binders preserve the context. Recursive-IH calls use
+those ordered arguments. This repairs the shared empty-type-argument omission
+without collecting unrelated local types or changing kernel/provider internals.
+
+The focused raw fixture covers one/two/three generics, interleaved type,
+proposition/proof and runtime binders, and a monomorphic control. The harness
+checks actual original-IR call paths and argument order, emits that same IR,
+and compares bounded runtime behavior. It runs on N1 and C1/C2/C3, not the old Q.
+The separate provider job also checks its exact C2/C3 admission streams.
+
+Cloud outcomes for this repair are pending. Preserve C2-versus-C3 product
+equality; Q may produce a different C1 TypeScript product while its C1 executable
+already contains the new erasure implementation. A remains the selected seed.
+The diagnostic IR inventory must determine the new finding counts. This
+checkpoint does not implement the separate call-expression typing obligations
+or activate strict SH/1 runtime enforcement.
+
+## Previous checkpoint: next three-helper source migration
 
 The qualified Foundation checkpoint below remains the previous completed milestone.
 This continuation migrates psExprApplyManyWorker, psExprAppViewAccWorker and

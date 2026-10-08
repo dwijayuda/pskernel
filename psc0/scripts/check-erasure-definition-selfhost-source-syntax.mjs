@@ -15,7 +15,7 @@ for (const pattern of [
   /let outputName : String :=\s*match psErasureLookupName/,
   /\| Option\.some known => known/,
   /\| Option\.none =>[\s\S]*?"decl";/,
-  /let definitionScope : PsErasureScope :=\s*PsErasureScope\.mk\s+scope\.localContext\s+scope\.runtimeLocals\s+scope\.typeLocals\s+scope\.erasedLocals\s+scope\.declarationNames\s+scope\.runtimeConstructors\s+scope\.runtimeRecursors\s+scope\.runtimeStructures\s+scope\.runtimeStructureConstructors\s+scope\.runtimeExpressions\s*\(Option\.some\s*\(PsErasureCurrentDefinition\.mk outputName List\.nil\)\);/,
+  /let definitionScope : PsErasureScope :=\s*PsErasureScope\.mk\s+scope\.localContext\s+scope\.runtimeLocals\s+scope\.typeLocals\s+scope\.erasedLocals\s+scope\.declarationNames\s+scope\.runtimeConstructors\s+scope\.runtimeRecursors\s+scope\.runtimeStructures\s+scope\.runtimeStructureConstructors\s+scope\.runtimeExpressions\s*\(Option\.some\s*\(PsErasureCurrentDefinition\.mk outputName List\.nil List\.nil\)\);/,
   /match psLowerStructureRecursors environment value with\s*\| Except\.error error => Except\.error error/,
   /psEraseOpenDefinition\s+environment\s+definitionScope\s+type\s+normalizedValue with/,
   /match psErasureEtaFunction opened\.parameters opened\.resultType opened\.body with/,

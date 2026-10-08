@@ -181,6 +181,15 @@ def psEraseOpenDefinitionWithFuel
                 | PsErasedBinderKind.type =>
                     let parameterName :=
                       String.Internal.append "T" (psNatToString typeIndex);
+                    let nextCurrentDefinition : Option PsErasureCurrentDefinition :=
+                      match scope.currentDefinition with
+                      | Option.none => Option.none
+                      | Option.some current =>
+                          Option.some
+                            (PsErasureCurrentDefinition.mk
+                              current.name
+                              (List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev)
+                              current.runtimeParameters);
                     let nextScope : PsErasureScope :=
                       PsErasureScope.mk
                         pushed.context
@@ -193,7 +202,7 @@ def psEraseOpenDefinitionWithFuel
                         scope.runtimeStructures
                         scope.runtimeStructureConstructors
                         scope.runtimeExpressions
-                        scope.currentDefinition;
+                        nextCurrentDefinition;
                     smaller
                       nextScope
                       nextType
@@ -243,6 +252,7 @@ def psEraseOpenDefinitionWithFuel
                               Option.some
                                 (PsErasureCurrentDefinition.mk
                                   current.name
+                                  current.typeArgumentsRev
                                   (psErasureAppendRuntimeParameter current.runtimeParameters parameterName));
                         let nextScope : PsErasureScope :=
                           PsErasureScope.mk
@@ -355,7 +365,7 @@ def psEraseDefinition
         scope.runtimeStructureConstructors
         scope.runtimeExpressions
         (Option.some
-          (PsErasureCurrentDefinition.mk outputName List.nil));
+          (PsErasureCurrentDefinition.mk outputName List.nil List.nil));
     match psLowerStructureRecursors environment value with
     | Except.error error => Except.error error
     | Except.ok normalizedValue =>

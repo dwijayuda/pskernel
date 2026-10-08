@@ -143,6 +143,8 @@ structure PsRuntimeInductiveInfo where
 
 structure PsErasureCurrentDefinition where
   name : String
+  -- Only declaration binders contribute; restore their order at recursive calls.
+  typeArgumentsRev : List PsVerifiedIrType
   runtimeParameters : List String
 
 structure PsErasureScope where

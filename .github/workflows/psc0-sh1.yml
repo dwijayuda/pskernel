@@ -105,6 +105,7 @@ jobs:
           node --check scripts/sh1-iteration-conformance.mjs
           node --check scripts/sh1-foundation-conformance.mjs
           node --check scripts/sh1-helper-conformance.mjs
+          node --check scripts/sh1-generic-erasure-conformance.mjs
           node check-psc1-source.mjs
           node scripts/bootstrap-root-minimality-tests.mjs
           node scripts/check-modular-preparation-source.mjs

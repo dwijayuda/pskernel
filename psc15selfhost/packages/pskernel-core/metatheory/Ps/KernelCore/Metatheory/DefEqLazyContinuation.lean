@@ -795,8 +795,7 @@ theorem psKernelDefEqLazyStepBoth_equal_hint_configuration_sound
         hNoLeft, hNoRight,
         sameShortcut, argsResult,
         hLeftArgs, hRightArgs, hSame, hRegular, hLevels
-      ] at hRun ⊢
-      exact hRun
+      ] at hRun ⊢ <;> assumption
   cases hArgs :
       argsResult with
   | error error =>

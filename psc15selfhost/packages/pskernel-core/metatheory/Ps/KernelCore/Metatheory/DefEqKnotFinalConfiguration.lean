@@ -47,11 +47,10 @@ theorem psKernelDefEqKnot_after_full_whnf_configuration_sound
     psKernelInferWithRecursorFuel_configuration_preserves_of_defeq
       fuel (psKernelIsDefEqWithFuel fuel)
       hDefEq hBeta hNative
-  cases hChanged :
-      (if psKernelExprEq leftFull leftDelta then
-         if psKernelExprEq rightFull rightDelta then false else true
-       else true) with
-  | true =>
+  by_cases hChanged :
+      psKernelExprEq leftFull leftDelta = false ∨
+        psKernelExprEq rightFull rightDelta = false
+  ·
       cases hCompare :
           psKernelIsDefEqWithFuel fuel
             nextContext rightFullState leftFull rightFull with
@@ -86,7 +85,7 @@ theorem psKernelDefEqKnot_after_full_whnf_configuration_sound
               left right leftFull rightFull compareValue value
               hConfig hLeftReduction hRightReduction
               hCompare hFinish
-  | false =>
+  ·
       have hFullShape :
           PsKernelOptionalDefEqConfigurationSound
             (psKernelDefEqFullShapeWith

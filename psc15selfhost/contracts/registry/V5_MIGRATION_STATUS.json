@@ -1067,7 +1067,7 @@
       "backendKind": "directTargetIR",
       "role": "long-term JS/npm lane; selected closed/uniform declarations and declaration-granularity maps",
       "descriptorStatus": "implemented",
-      "bundleStatus": "generated-and-native-checked-build-routing-implemented-cloud-validation-pending",
+      "bundleStatus": "generated-native-closed-uniform-build-routing-cloud-validated-at-a47b047e",
       "preservation": "not-established-globally"
     },
     {
@@ -1075,7 +1075,7 @@
       "backendKind": "directTargetIR",
       "role": "Core Wasm; private self-host ABI and Canonical ABI remain distinct",
       "descriptorStatus": "implemented",
-      "bundleStatus": "generated-native-private-and-selected-canonical-build-routing-implemented-cloud-validation-pending",
+      "bundleStatus": "generated-native-private-and-selected-canonical-build-routing-cloud-validated-at-a47b047e",
       "preservation": "not-established-globally"
     },
     {
@@ -1083,7 +1083,7 @@
       "backendKind": "sourceTarget",
       "role": "first-class native and diverse bootstrap lane; no persistent RustIR required",
       "descriptorStatus": "implemented",
-      "bundleStatus": "generated-native-source-metadata-routing-implemented-cloud-build-validation-and-native-toolchain-capture-pending",
+      "bundleStatus": "generated-native-source-metadata-routing-cloud-validated-at-a47b047e-native-toolchain-capture-pending",
       "preservation": "not-established-globally"
     }
   ],
@@ -1130,7 +1130,7 @@
       "classifications": [
         "artifact-bundle"
       ],
-      "status": "four-lane-generated-native-source-routing-implemented-cloud-integration-validation-and-rust-native-toolchain-pending",
+      "status": "four-lane-generated-native-source-routing-cloud-validated-at-a47b047e-rust-native-toolchain-pending",
       "requirement": "Common typed independently identified executable/public/debug/interface/toolchain/evidence products."
     },
     {
@@ -1201,7 +1201,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "closed-uniform-declarations-maps-generated-native-build-routing-and-portable-emission-implemented-cloud-build-route-validation-pending",
+      "status": "closed-uniform-declarations-maps-generated-native-build-routing-and-portable-emission-cloud-validated-at-a47b047e-declaration-maps-and-broader-public-types-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1658,5 +1658,23 @@
       "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V3.json",
       "classification": "artifact-bundle"
     }
-  ]
+  ],
+  "implementationCloud": {
+    "headCommit": "a47b047eb324db0df711b73d47b1f6211c126418",
+    "mainRun": 37711862947,
+    "mainJob": 113099636619,
+    "conclusion": "success",
+    "parityRun": 37711862916,
+    "parityJob": 113099360369,
+    "parityConclusion": "success",
+    "scope": [
+      "four-lane-generated-and-native-source-products",
+      "canonical-wasm-32-and-64-build-archive-replay",
+      "explicit-native-archive-budgets",
+      "wasm-unit-runtime-and-whole-compiler",
+      "portable-selfhost"
+    ],
+    "proofImplication": "none",
+    "subsequentClaimConsumerChanges": "fresh-cloud-validation-pending"
+  }
 }

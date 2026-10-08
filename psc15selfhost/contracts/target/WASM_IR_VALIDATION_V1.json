@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-wasm-ir-validation/1",
+  "status": "implemented-focused-cloud-validated",
+  "scope": "The closed GC/tail-call instruction and value-type vocabulary represented by PsWasmModule, before Binary.lean encoding.",
+  "owners": [
+    "packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.lean",
+    "packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.lean",
+    "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean"
+  ],
+  "reference": {
+    "specification": "WebAssembly Core 3.0",
+    "date": "2026-10-03",
+    "validation": "https://webassembly.github.io/spec/core/appendix/algorithm.html",
+    "types": "https://webassembly.github.io/spec/core/valid/types.html",
+    "instructions": "https://webassembly.github.io/spec/core/valid/instructions.html"
+  },
+  "invariants": [
+    "unique declared names and resolvable references",
+    "no noValue sentinel in value positions",
+    "structure parents precede children, are non-final, and admit immutable field-prefix covariance",
+    "operand type and arity for every represented instruction",
+    "balanced if/else frames with exact block results and no cross-frame stack underflow",
+    "unreachable code retains concrete operand checks and only empty-frame pops are polymorphic",
+    "non-null GC locals require definite initialization; branch-local initialization is reset at control boundaries",
+    "direct and indirect call signatures, tail results, and final function results",
+    "declared ref.func targets and GC/function reference hierarchy separation",
+    "packed field/array access mode and mutable array destinations",
+    "array copy storage compatibility and non-defaultable array element rejection"
+  ],
+  "matchingPolicy": {
+    "heapReferences": "exact nominal identity or declared structure-supertype chain",
+    "functionReferences": "exact named function-type identity after ref.func with explicit typeName or ref.cast; anonymous references remain abstract funcref until cast",
+    "tailResults": "exact result sequence; broader subtype-equivalent sequences are conservatively declined",
+    "recursiveTypeEquivalence": "arbitrary isorecursive equivalence across distinct type identities is not inferred"
+  },
+  "resources": {
+    "instructionTraversal": "structural tail traversal",
+    "controlState": "explicit persistent frames",
+    "hierarchyTraversal": "bounded by module structure count",
+    "arrayNewFixed": "u32 immediate; known operand stack or unreachable shortcut bounds pops",
+    "limitations": [
+      "list-based context lookups and subtype checks are not constant time",
+      "host time/memory limits remain caller/runner obligations"
+    ]
+  },
+  "authority": {
+    "checksTargetTyping": true,
+    "createsSourceAuthority": false,
+    "provesSourcePreservation": false,
+    "validatorSoundness": "unproved",
+    "encoderPreservation": "unproved",
+    "completeWasmSpecValidator": false
+  },
+  "validation": {
+    "focusedCorpus": "test/BackendWasmIrTests.lean",
+    "externalOracle": "existing emitted-byte engine validation and whole-compiler instantiation",
+    "selfHostProfile": "PSC1-portable-selfhost/1",
+    "acceptanceLimits": "unchanged",
+    "evidence": {
+      "commit": "0cc3b538233c48dcaac742834fc4716b1e9d3871",
+      "workflowRun": 37642313758,
+      "job": 112864213822,
+      "conclusion": "success",
+      "scope": "native target-IR corpus, portable source/profile checks, backend engine validation, whole-Wasm generation and instantiation",
+      "fixedPoint": "not-established"
+    }
+  }
+}

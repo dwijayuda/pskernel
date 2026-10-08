@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-archive-profile/0",
+  "status": "prototype",
+  "offlineVerificationRequired": true,
+  "requiredRepositoryObjects": [
+    "psc.semantic-lock.json",
+    "contracts/registry/ARCHITECTURE_REGISTRY.json",
+    "TRUST_MANIFEST.json",
+    "profiles/provider-security/PROVIDER_SECURITY_PROFILES.json",
+    "profiles/assurance/INDEPENDENCE_VECTORS.json",
+    "savef/schemas/KNOWLEDGE_OBJECT_V1.json",
+    "scripts/pscv-verify.mjs"
+  ],
+  "knowledgeObjects": [
+    "savef/objects/psc-specialization-pass.json",
+    "savef/objects/psc-theory-exact-defeq-reflexive.json",
+    "savef/objects/psc-module-interface-validation.json",
+    "savef/objects/psc-erasure-proof-omission.json",
+    "savef/objects/psc-specialization-literal-proof.json"
+  ],
+  "futureReleaseRequirements": [
+    "canonical source closure",
+    "toolchain manifest",
+    "target artifacts",
+    "provenance envelope",
+    "licenses",
+    "semantic migration history"
+  ],
+  "hashAgility": {
+    "required": true,
+    "identityShape": [
+      "algorithm",
+      "domain",
+      "schemaVersion",
+      "digest"
+    ]
+  }
+}

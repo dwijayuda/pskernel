@@ -53,7 +53,17 @@ export function semanticBoundaryViolations(relativePath, source) {
   }
 
   if ((isBackend || isDriver) && /\bpsCompilerVerifiedIrFromPrepared\b/u.test(source)) {
-    if (!/\bps(?:Ts|Rust|Wasm|Js)EmitValidatedModule\b/u.test(source)) {
+    // A driver may consume VerifiedIR directly through one of the typed
+    // validated target APIs, or advance it through the typed specialization
+    // capability before a specialized target API. Merely mentioning a
+    // specialized lowerer is insufficient: the same owner must perform the
+    // VerifiedIR -> SpecializedIR transition explicitly.
+    const consumesValidatedIr =
+      /\b(?:psTsEmitValidatedModule|psRustEmitValidatedModule|psJsEmitValidatedModule|psJsEmitValidatedModuleWithTargetProfile|psJsEmitValidatedModuleStackSafeWithTargetProfile|psWasmLowerValidatedModule)\b/u.test(source);
+    const consumesSpecializedIr =
+      /\bpsIrSpecializeValidatedModule\b/u.test(source) &&
+      /\b(?:psWasmLowerSpecializedValidatedModule)\b/u.test(source);
+    if (!consumesValidatedIr && !consumesSpecializedIr) {
       violations.push("PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR");
     }
   }

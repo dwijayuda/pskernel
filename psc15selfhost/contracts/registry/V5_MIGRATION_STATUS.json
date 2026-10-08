@@ -1,0 +1,1846 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-v5-migration-status/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "decision": {
+    "date": "2026-10-08",
+    "status": "adopted-target-implementation-in-progress",
+    "basis": "Explicit user instruction adopting V5.1 after the proposal; not an implementation, conformance, promotion or proof claim.",
+    "baselineCommit": "64b1889dd45e9af42b758342e6e116b3b2db5ab4",
+    "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+    "languageAuthority": "PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md",
+    "kernelScope": "consume-contracts-and-evidence-only",
+    "execution": "github-cloud-only",
+    "compilerExecutionPolicy": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json",
+    "implementationScopeRevision": {
+      "date": "2026-10-08",
+      "basis": "Explicit user instruction: self-hosting is no longer a goal and PSC1 self-host implementation patterns are no longer constraints.",
+      "implementationProfile": "pscv-hosted-lean/1",
+      "selfHostingRequired": false,
+      "pscvLanguageSemantics": "unchanged-normative-target",
+      "assurance": "no-automatic-conformance-or-proof-upgrade"
+    }
+  },
+  "classificationVocabulary": [
+    "semantic-compiler-spine",
+    "representation",
+    "capability-authority",
+    "claimset-evidence",
+    "compiler-pass",
+    "querygraph-incremental",
+    "public-api-ir",
+    "origin-source-maps",
+    "interface-ir-interop",
+    "backend",
+    "artifact-bundle",
+    "extension-system",
+    "authority-firewall-broker",
+    "assurance-companion",
+    "savef-development-companion",
+    "release-archive-companion",
+    "research-outside-compiler-core"
+  ],
+  "semanticSpine": [
+    "Source",
+    "Core",
+    "Checked<Core>",
+    "Certified<Checked<Core>>",
+    "RuntimeIR",
+    "Validated<RuntimeIR>",
+    "SpecializedIR",
+    "backend"
+  ],
+  "invariants": [
+    "Evidence states are capabilities, not extra IRs.",
+    "Serialized claims, cache reuse, manifests and receipts do not mint live authority.",
+    "No automatic implication from kernel acceptance, target acceptance, fixed point, provenance or hash integrity to executable preservation.",
+    "Existing contract identities and exact evidence remain unchanged; target ownership is not physical relocation.",
+    "No semantic package dependency on SAVEF, FactoryBench, archive policy or AI orchestration.",
+    "Compiler implementation uses the pinned hosted Lean profile. PSC1 self-host patterns are historical optional checks; PSCV language semantics, exact evidence and authority boundaries remain mandatory."
+  ],
+  "statusDimensions": {
+    "implementation": "Inherited workstream status and explicit next capability.",
+    "validation": "Exact run/checker/subject evidence only; not inferred from file presence.",
+    "proof": "No new theorem claim; inherited proved slices remain scoped, global obligations remain open.",
+    "planning": "Ordered target capabilities do not claim implemented behavior."
+  },
+  "legacyLedger": {
+    "path": "contracts/registry/V3_IMPLEMENTATION_STATUS.json",
+    "sectionCount": 57,
+    "workstreamCount": 22,
+    "assurancePath": "contracts/registry/V3_ASSURANCE_HANDOFF.json",
+    "policy": "Preserve every workstream, owner, acceptance criterion and unresolved obligation."
+  },
+  "workstreams": [
+    {
+      "id": "authority",
+      "v3Sections": [
+        10,
+        11,
+        12,
+        13,
+        43
+      ],
+      "classifications": [
+        "semantic-compiler-spine",
+        "capability-authority",
+        "authority-firewall-broker"
+      ],
+      "existingOwners": [
+        "scripts/kernel-checked-session.mjs",
+        "scripts/compiler-checked-service.mjs",
+        "scripts/production-authority-audit.mjs",
+        "packages/compiler/src/Ps/Compiler/Candidate.lean",
+        "packages/compiler/src/Ps/Compiler/Internal.lean",
+        "scripts/certified-source.mjs",
+        "contracts/ir/PSCV_CERT_V1.json"
+      ],
+      "inheritedImplementationStatus": "implementation-available-assurance-pending",
+      "assurance": "pending",
+      "disposition": "Keep live checked/certified sessions and production topology; isolated AuthorityBroker and complete authority-influence closure remain missing."
+    },
+    {
+      "id": "identity-trust",
+      "v3Sections": [
+        5,
+        7,
+        9,
+        17,
+        39,
+        40
+      ],
+      "classifications": [
+        "claimset-evidence",
+        "authority-firewall-broker",
+        "release-archive-companion"
+      ],
+      "existingOwners": [
+        "TRUST_MANIFEST.json",
+        "scripts/semantic-lock.mjs",
+        "contracts/semantic/SEMANTIC_LOCK_V1.json"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Keep exact artifact, provider-security, semantic-lock and TrustManifest identities. Add ProfileEnvironment/ActionId/ClaimSet identities without changing archived records."
+    },
+    {
+      "id": "defeq-cache",
+      "v3Sections": [
+        3,
+        4
+      ],
+      "classifications": [
+        "assurance-companion"
+      ],
+      "existingOwners": [
+        "contracts/semantic/ALGORITHMIC_DEFEQ_CACHE_V1.json"
+      ],
+      "inheritedImplementationStatus": "external-kernel-workstream-not-owned-by-psc-v3-execution",
+      "assurance": "external",
+      "disposition": "External kernel workstream: consume pair-local cache contract and exact evidence; do not edit checker, cache or theory internals."
+    },
+    {
+      "id": "verified-ir",
+      "v3Sections": [
+        14
+      ],
+      "classifications": [
+        "representation",
+        "capability-authority",
+        "interface-ir-interop"
+      ],
+      "existingOwners": [
+        "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+        "packages/compiler-ir/src/Ps/CompilerIr/Interface.lean",
+        "packages/compiler-ir/src/Ps/CompilerIr/Link.lean",
+        "contracts/ir/INTERFACE_LINK_V1.json",
+        "packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean",
+        "scripts/js-scalar-abi.mjs",
+        "scripts/js-abi-artifact.mjs",
+        "scripts/checked-build-evidence.mjs",
+        "scripts/observed-build-archive.mjs",
+        "scripts/evidence-envelope.mjs"
+      ],
+      "inheritedImplementationStatus": "implementation-available-scalar-js-abi-broader-adapters-pending",
+      "assurance": "pending",
+      "disposition": "PsVerifiedIr is RuntimeIR plus a validation capability, not another evidence-only representation. Retain strict validation/linking; move JS ABI ownership logically to interface-ts only."
+    },
+    {
+      "id": "pass-evidence",
+      "v3Sections": [
+        15,
+        16
+      ],
+      "classifications": [
+        "compiler-pass",
+        "claimset-evidence"
+      ],
+      "existingOwners": [
+        "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean",
+        "scripts/artifact-evidence.mjs",
+        "scripts/checked-build-evidence.mjs",
+        "scripts/typescript-tool-inputs.mjs",
+        "scripts/checked-provider-inputs.mjs",
+        "scripts/observed-build-archive.mjs",
+        "contracts/ir/PASS_EVIDENCE_V1.json",
+        "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+        "packages/driver-ts/src/Ps/DriverTs/Stages.lean",
+        "packages/driver-js/src/Ps/DriverJs/Stages.lean",
+        "packages/driver-wasm/src/Ps/DriverWasm/Stages.lean",
+        "scripts/ir-artifact.mjs",
+        "scripts/evidence-envelope.mjs",
+        "contracts/archive/EVIDENCE_ENVELOPE_V1.json",
+        "scripts/js-abi-artifact.mjs"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Retain exact observed stages and replay, heterogeneous typed products, preservation/invalidation metadata, origin and authority effects. Current source and target products use common pass/bundle/archive consumers; global transformation preservation remains unproved."
+    },
+    {
+      "id": "query-interfaces",
+      "v3Sections": [
+        18,
+        24
+      ],
+      "classifications": [
+        "querygraph-incremental",
+        "claimset-evidence"
+      ],
+      "existingOwners": [
+        "packages/project/src/Ps/Project/QueryGraph.lean",
+        "packages/project/src/Ps/Project/QueryGraphV2.lean",
+        "packages/compiler-ir/src/Ps/CompilerIr/InterfaceArtifact.lean",
+        "scripts/runtime-interface-artifact.mjs",
+        "contracts/module-interface/RUNTIME_INTERFACE_ARTIFACT_V1.json",
+        "contracts/module-interface/QUERY_GRAPH_V2.json",
+        "scripts/module-interface-evidence.mjs",
+        "scripts/semantic-query-cache.mjs",
+        "scripts/evidence-cache.mjs"
+      ],
+      "inheritedImplementationStatus": "implementation-available-exact-behavioral-reuse-assurance-pending",
+      "assurance": "pending",
+      "disposition": "Keep structural/behavioral interfaces and exact reuse checks; add ProfileEnvironment, hermetic ActionId and declared fingerprint classes. Green cache state never grants authority."
+    },
+    {
+      "id": "cache-store",
+      "v3Sections": [
+        19,
+        30
+      ],
+      "classifications": [
+        "querygraph-incremental"
+      ],
+      "existingOwners": [
+        "scripts/cache-utils.mjs",
+        "scripts/evidence-cache.mjs",
+        "contracts/ir/EVIDENCE_CACHE_V1.json",
+        "scripts/semantic-query-cache.mjs",
+        "scripts/module-interface-evidence.mjs"
+      ],
+      "inheritedImplementationStatus": "implementation-available-semantic-reuse-validation-assurance-pending",
+      "assurance": "pending",
+      "disposition": "Keep cache corruption fail-closed and fresh capability validation; do not treat bytes or serialized receipts as live authority."
+    },
+    {
+      "id": "resources",
+      "v3Sections": [
+        20,
+        21,
+        22,
+        23,
+        31
+      ],
+      "classifications": [
+        "semantic-compiler-spine",
+        "extension-system",
+        "authority-firewall-broker"
+      ],
+      "existingOwners": [
+        "contracts/resource/COMPILATION_RESOURCE_V1.json",
+        "scripts/bounded-process.mjs",
+        "scripts/source-read-budget.mjs",
+        "contracts/resource/SOURCE_READ_BUDGET_V1.json",
+        "scripts/checked-seed-protocol.mjs",
+        "contracts/resource/CHECKED_SEED_RESOURCES_V1.json",
+        "scripts/isolated-producer.mjs",
+        "contracts/resource/BOUNDED_HOST_EXECUTION_V1.json"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Keep observed portable work budgets and bounded host execution; complete typed failure algebra and extension enforcement without unchecked fallback."
+    },
+    {
+      "id": "core-theory",
+      "v3Sections": [
+        8,
+        9
+      ],
+      "classifications": [
+        "assurance-companion"
+      ],
+      "existingOwners": [
+        "theory/core/DECLARATIVE_CORE_SEED_V1.json"
+      ],
+      "inheritedImplementationStatus": "external-kernel-workstream-not-owned-by-psc-v3-execution",
+      "assurance": "external",
+      "disposition": "External kernel workstream. Preserve historical proof slices; consume checked external claims. Global kernel soundness is not a compiler implementation task."
+    },
+    {
+      "id": "preservation",
+      "v3Sections": [
+        14,
+        15,
+        29
+      ],
+      "classifications": [
+        "compiler-pass",
+        "assurance-companion"
+      ],
+      "existingOwners": [
+        "contracts/ir/ERASURE_PRESERVATION_V0.json",
+        "scripts/specialization-correspondence.mjs",
+        "contracts/ir/SPECIALIZATION_CORRESPONDENCE_V1.json"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Preserve proved local slices and correspondence validators. Global erasure/specialization preservation stays unproved until checked evidence discharges its exact relation."
+    },
+    {
+      "id": "backends",
+      "v3Sections": [
+        28,
+        29,
+        32
+      ],
+      "classifications": [
+        "backend",
+        "representation"
+      ],
+      "existingOwners": [
+        "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean",
+        "scripts/wasm-literal-binary-validator.mjs",
+        "scripts/wasm-literal-certificate.mjs",
+        "packages/backend-rust/src/Ps/BackendRust/Tail.lean",
+        "packages/backend-rust/src/Ps/BackendRust/TailAlias.lean",
+        "packages/backend-js/src/Ps/BackendJs/TailAlias.lean",
+        "packages/backend-js/src/Ps/BackendJs/Print.lean",
+        "packages/backend-js/src/Ps/BackendJs/Validate.lean",
+        "packages/backend-js/src/Ps/BackendJs/Encode.lean",
+        "packages/backend-wasm/src/Ps/BackendWasm/Encode.lean",
+        "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean",
+        "scripts/target-ir-artifact.mjs",
+        "packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.lean",
+        "contracts/target/WASM_IR_VALIDATION_V1.json"
+      ],
+      "inheritedImplementationStatus": "implementation-available-exact-js-wasm-target-ir-assurance-pending",
+      "assurance": "pending",
+      "disposition": "Keep four first-class lanes, JsIR/WasmIR validation, emitters and runtime fixes. TS/Rust remain source backends. Register explicit descriptors and bundles; target acceptance is not preservation. Rust generated checked source products now retain actual generic RuntimeIR validation/emission edges and use common artifact publication. Explicit products/3 native Rust source routing is connected. Cargo toolchain capture and specialized-input migration remain pending. Direct-JS declaration maps now reuse source-signature writer coordinates and source-origin composition through common graph/descriptor/bundle/archive routing; selected link packaging pending cloud validation; expression/type-token origins remain open.",
+      "addedOwners": [
+        "packages/driver-rust/src/Ps/DriverRust/Stages.lean",
+        "scripts/js-source-map-link.mjs",
+        "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+        "contracts/backends/BACKEND_REGISTRY_V3.json"
+      ]
+    },
+    {
+      "id": "comparator",
+      "v3Sections": [
+        6,
+        7,
+        41
+      ],
+      "classifications": [
+        "assurance-companion"
+      ],
+      "existingOwners": [
+        "scripts/comparator-v1.mjs",
+        "scripts/comparator-session.mjs",
+        "scripts/comparator-export.mjs",
+        "scripts/isolated-producer.mjs",
+        "contracts/resource/COMPARATOR_PROTOCOL_V1.json"
+      ],
+      "inheritedImplementationStatus": "implementation-available-assurance-pending",
+      "assurance": "pending",
+      "disposition": "Keep challenge/session/export mechanisms as assurance companion. Production sandbox/checker independence remains pending."
+    },
+    {
+      "id": "solver-certificates",
+      "v3Sections": [
+        27
+      ],
+      "classifications": [
+        "extension-system",
+        "assurance-companion"
+      ],
+      "existingOwners": [
+        "scripts/certificate-boundary.mjs",
+        "contracts/ir/CERTIFICATE_BOUNDARY_V1.json"
+      ],
+      "inheritedImplementationStatus": "implementation-available-assurance-pending",
+      "assurance": "pending",
+      "disposition": "Proof producers propose bounded candidates; selected checkers validate exact certificates. Producers cannot install axioms or mint authority."
+    },
+    {
+      "id": "executable-interop",
+      "v3Sections": [
+        26
+      ],
+      "classifications": [
+        "interface-ir-interop",
+        "backend"
+      ],
+      "existingOwners": [
+        "packages/interface-ir/src/Ps/InterfaceIr/Model.lean",
+        "packages/interface-ir/src/Ps/InterfaceIr/Validate.lean",
+        "packages/interface-ir/src/Ps/InterfaceIr/Wit.lean",
+        "contracts/interface/FOREIGN_INTERFACE_V1.json",
+        "packages/interface-ir/src/Ps/InterfaceIr/CanonicalAbi.lean",
+        "scripts/canonical-memory.mjs",
+        "scripts/wasm-core-signatures.mjs",
+        "scripts/canonical-exports.mjs",
+        "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
+        "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json",
+        "scripts/wasm-canonical-artifact.mjs"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Keep InterfaceIR/WIT/Canonical ABI separate from PublicApiIR. Scalar producer, bounded portable request, actual prepared-source driver and closed host adapter are connected through live generated/native checked selection and graph/descriptor/bundle/envelope publication. Actual 32/64-bit native build/archive routing passed at a47b047e (main run 37711862947) and remains covered by subsequent main CI; broad adapters and independent WIT evidence remain pending.",
+      "addedOwners": [
+        "packages/backend-wasm/src/Ps/BackendWasm/CanonicalRequest.lean",
+        "packages/driver-wasm/src/Ps/DriverWasm/Canonical.lean"
+      ]
+    },
+    {
+      "id": "logical-interop",
+      "v3Sections": [
+        25
+      ],
+      "classifications": [
+        "assurance-companion"
+      ],
+      "existingOwners": [
+        "packages/theory-bridge/src/Ps/TheoryBridge/Model.lean",
+        "packages/theory-bridge/src/Ps/TheoryBridge/Translate.lean",
+        "contracts/ir/THEORY_TRANSLATION_V1.json"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Keep TheoryBridge as logical interoperability companion. Closed renaming validation is not a global cross-foundation preservation theorem."
+    },
+    {
+      "id": "savef",
+      "v3Sections": [
+        35,
+        36,
+        37
+      ],
+      "classifications": [
+        "savef-development-companion"
+      ],
+      "existingOwners": [
+        "scripts/savef-object.mjs",
+        "scripts/savef-graph.mjs",
+        "scripts/savef-lifecycle.mjs",
+        "scripts/savef-wasm-literal.mjs",
+        "contracts/archive/SAVEF_WASM_LITERAL_REUSE_V1.json",
+        "contracts/archive/SAVEF_LIFECYCLE_V1.json",
+        "scripts/savef-index.mjs",
+        "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json",
+        "scripts/savef-retrieval-session.mjs"
+      ],
+      "inheritedImplementationStatus": "implementation-available-index-retrieval-reuse-acceptance",
+      "assurance": "pending",
+      "disposition": "Keep lifecycle, retrieval, indexing and reuse. Semantic compiler packages must not depend on SAVEF; retrieved objects remain candidates until fresh checking."
+    },
+    {
+      "id": "verifier-archive",
+      "v3Sections": [
+        33,
+        34,
+        40
+      ],
+      "classifications": [
+        "release-archive-companion",
+        "assurance-companion"
+      ],
+      "existingOwners": [
+        "scripts/pscv-verify.mjs",
+        "scripts/offline-capsule.mjs",
+        "scripts/offline-verifier-cli.mjs",
+        "scripts/build-verifier-distribution.mjs",
+        "contracts/archive/VERIFIER_DISTRIBUTION_V1.json",
+        "contracts/archive/OFFLINE_CAPSULE_V1.json",
+        "packages/compiler-ir/src/Ps/CompilerIr/Decode.lean",
+        "packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean",
+        "host/src/Ps/Host/IrReplay.lean",
+        "scripts/ir-invariant-replay.mjs",
+        "packages/compiler-ir/src/Ps/CompilerIr/LinkArtifact.lean",
+        "scripts/ir-link-artifact.mjs"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Keep standalone/offline replay and exact archived subjects. Bundle, observed context and archive readers now enforce optional independently selected ClaimSet checker and exact policy requirements with entry-time snapshots. Integrity, exact selected claim decisions and global preservation remain separate; real evidence adapters and release policies are pending."
+    },
+    {
+      "id": "factorybench",
+      "v3Sections": [
+        38
+      ],
+      "classifications": [
+        "savef-development-companion"
+      ],
+      "existingOwners": [
+        "factory/bench/FACTORYBENCH_V4_HOLDOUT.json",
+        "scripts/factory-bench.mjs",
+        "factory/bench/FACTORYBENCH_V4_EXECUTION.json"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Keep sealed holdout policy and B0-B4 harness outside semantic compiler. Actual independently selected holdout campaign remains pending."
+    },
+    {
+      "id": "bootstrap-promotion",
+      "v3Sections": [
+        32,
+        28
+      ],
+      "classifications": [
+        "assurance-companion",
+        "release-archive-companion"
+      ],
+      "existingOwners": [
+        "contracts/bootstrap/BOOTSTRAP_ASSURANCE_V1.json"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Preserve exact historical TS/JS/Wasm/Rust closure checkpoints and anti-conflation rules. Per the explicit 2026-10-08 user scope revision, self-hosting and fixed points are optional historical evidence, not compiler implementation goals or coding constraints. Any future selected fixed-point, reproducibility or DDC claim still requires its own fresh exact evidence; none is inferred from hosted compilation."
+    },
+    {
+      "id": "indexing-layout",
+      "v3Sections": [
+        42,
+        43,
+        44,
+        45,
+        57
+      ],
+      "classifications": [
+        "savef-development-companion",
+        "release-archive-companion"
+      ],
+      "existingOwners": [
+        "contracts/registry/ARCHITECTURE_REGISTRY.json",
+        "scripts/savef-index.mjs",
+        "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Keep semantic indexing and architecture registry; introduce logical ownership before physical package moves."
+    },
+    {
+      "id": "adversarial",
+      "v3Sections": [
+        41
+      ],
+      "classifications": [
+        "assurance-companion",
+        "authority-firewall-broker"
+      ],
+      "existingOwners": [
+        "scripts/kernel-checked-session.test.mjs"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Retain boundary fixtures and no-fallback checks; extensive real-provider/runtime assurance remains deferred."
+    },
+    {
+      "id": "acceptance",
+      "v3Sections": [
+        1,
+        46,
+        48,
+        49,
+        50,
+        52,
+        53,
+        56
+      ],
+      "classifications": [
+        "claimset-evidence",
+        "assurance-companion"
+      ],
+      "existingOwners": [
+        "scripts/v3-acceptance-audit.mjs"
+      ],
+      "inheritedImplementationStatus": "partial",
+      "assurance": "pending",
+      "disposition": "Keep V3 acceptance inventory and every unresolved obligation; map to V5.1 claims without upgrading milestone scans or design scores."
+    }
+  ],
+  "registeredSubsystems": [
+    {
+      "id": "pscv-architecture/v3",
+      "kind": "architecture",
+      "classification": "research-outside-compiler-core",
+      "inheritedStatus": "accepted-target",
+      "existingPath": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "ps-source/0.9-r3",
+      "kind": "source-language",
+      "classification": "semantic-compiler-spine",
+      "inheritedStatus": "current",
+      "existingPath": "language-authority.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "pscv-v1",
+      "kind": "verified-language-profile",
+      "classification": "semantic-compiler-spine",
+      "inheritedStatus": "target",
+      "existingPath": "PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "proofscript-kernel-contract/1",
+      "kind": "kernel-contract",
+      "classification": "authority-firewall-broker",
+      "inheritedStatus": "frozen",
+      "existingPath": "docs/architecture/contracts/KERNEL_CONTRACT_V1.md",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-verified-ir/1",
+      "kind": "verified-ir",
+      "classification": "representation",
+      "inheritedStatus": "current",
+      "existingPath": "docs/architecture/contracts/VERIFIED_IR_V1.md",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-runtime-semantics/1",
+      "kind": "runtime-semantics",
+      "classification": "semantic-compiler-spine",
+      "inheritedStatus": "frozen",
+      "existingPath": "docs/architecture/contracts/RUNTIME_SEMANTICS_V1.md",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "PSC1-selfhost-stable/1",
+      "kind": "implementation-profile",
+      "classification": "semantic-compiler-spine",
+      "inheritedStatus": "current",
+      "existingPath": "selfhost-profile.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "PSC1-portable-selfhost/1",
+      "kind": "implementation-profile",
+      "classification": "semantic-compiler-spine",
+      "inheritedStatus": "current",
+      "existingPath": "portable-selfhost-profile.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-provider-security/1",
+      "kind": "provider-security",
+      "classification": "authority-firewall-broker",
+      "inheritedStatus": "current",
+      "existingPath": "profiles/provider-security/PROVIDER_SECURITY_PROFILES.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-trust-manifest/1",
+      "kind": "trust-manifest",
+      "classification": "authority-firewall-broker",
+      "inheritedStatus": "current",
+      "existingPath": "TRUST_MANIFEST.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-checked-core-capability/1",
+      "kind": "checked-capability",
+      "classification": "capability-authority",
+      "inheritedStatus": "current-host",
+      "existingPath": "scripts/kernel-checked-session.mjs",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-specialized-ir/1",
+      "kind": "specialized-ir",
+      "classification": "representation",
+      "inheritedStatus": "target",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-module-interface/2",
+      "kind": "module-interface",
+      "classification": "querygraph-incremental",
+      "inheritedStatus": "target",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-comparator/1",
+      "kind": "comparator",
+      "classification": "assurance-companion",
+      "inheritedStatus": "target",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "spkf/1",
+      "kind": "savef-format",
+      "classification": "savef-development-companion",
+      "inheritedStatus": "target",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-algorithmic-defeq-cache/1",
+      "kind": "semantic-cache-contract",
+      "classification": "assurance-companion",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/semantic/ALGORITHMIC_DEFEQ_CACHE_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-verified-ir-gap-registry/1",
+      "kind": "verified-ir-gap-registry",
+      "classification": "capability-authority",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/ir/VERIFIED_IR_GAPS_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-pass-specialize/1",
+      "kind": "compiler-pass",
+      "classification": "compiler-pass",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/ir/SPECIALIZATION_PASS_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-structural-module-interface/1",
+      "kind": "module-interface",
+      "classification": "querygraph-incremental",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/module-interface/STRUCTURAL_MODULE_INTERFACE_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-declarative-core-seed/1",
+      "kind": "theory-seed",
+      "classification": "assurance-companion",
+      "inheritedStatus": "experimental",
+      "existingPath": "theory/core/DECLARATIVE_CORE_SEED_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "spkf-local-prototype/1",
+      "kind": "savef-format",
+      "classification": "savef-development-companion",
+      "inheritedStatus": "experimental",
+      "existingPath": "savef/schemas/KNOWLEDGE_OBJECT_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "pscv-verify/0-prototype",
+      "kind": "offline-verifier",
+      "classification": "release-archive-companion",
+      "inheritedStatus": "experimental",
+      "existingPath": "scripts/pscv-verify.mjs",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "factorybench-v4-holdout/0",
+      "kind": "factory-bench",
+      "classification": "savef-development-companion",
+      "inheritedStatus": "experimental",
+      "existingPath": "factory/bench/FACTORYBENCH_V4_HOLDOUT.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-wasm-translation-validator/0",
+      "kind": "translation-validator",
+      "classification": "assurance-companion",
+      "inheritedStatus": "experimental",
+      "existingPath": "contracts/target/WASM_TRANSLATION_VALIDATOR_V0.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-behavioral-module-interface/1",
+      "kind": "module-interface",
+      "classification": "querygraph-incremental",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/module-interface/BEHAVIORAL_MODULE_INTERFACE_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-compilation-resource/1",
+      "kind": "resource-contract",
+      "classification": "semantic-compiler-spine",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/resource/COMPILATION_RESOURCE_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-kernel-exact-defeq-sound/1",
+      "kind": "formal-proof-slice",
+      "classification": "assurance-companion",
+      "inheritedStatus": "current",
+      "existingPath": "packages/pscv-theory/src/Ps/Theory/Core.lean",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-erasure-preservation/0",
+      "kind": "formal-preservation-contract",
+      "classification": "assurance-companion",
+      "inheritedStatus": "experimental",
+      "existingPath": "contracts/ir/ERASURE_PRESERVATION_V0.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-erasure-proof-declaration-omission/1",
+      "kind": "formal-proof-slice",
+      "classification": "assurance-companion",
+      "inheritedStatus": "current",
+      "existingPath": "packages/pscv-theory/src/Ps/Theory/Core.lean",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-specialization-literal-preservation/1",
+      "kind": "formal-proof-slice",
+      "classification": "assurance-companion",
+      "inheritedStatus": "current",
+      "existingPath": "packages/pscv-theory/src/Ps/Theory/Core.lean",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-independence-vector/1",
+      "kind": "assurance-lineage",
+      "classification": "assurance-companion",
+      "inheritedStatus": "current",
+      "existingPath": "profiles/assurance/INDEPENDENCE_VECTORS.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-trust-delta/1",
+      "kind": "audit-contract",
+      "classification": "claimset-evidence",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/audit/TRUST_DELTA_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-semantic-delta/1",
+      "kind": "audit-contract",
+      "classification": "claimset-evidence",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/audit/SEMANTIC_DELTA_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-theory-bridge/1",
+      "kind": "logical-interoperability",
+      "classification": "assurance-companion",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/interface/THEORY_BRIDGE_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-semantic-lock/0",
+      "kind": "semantic-lock",
+      "classification": "release-archive-companion",
+      "inheritedStatus": "experimental",
+      "existingPath": "psc.semantic-lock.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-archive-profile/0",
+      "kind": "archive-profile",
+      "classification": "release-archive-companion",
+      "inheritedStatus": "experimental",
+      "existingPath": "contracts/archive/ARCHIVE_PROFILE_V0.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-direct-js-promotion/1",
+      "kind": "promotion-policy",
+      "classification": "release-archive-companion",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/promotion/DIRECT_JS_PROMOTION_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-bootstrap-assurance/1",
+      "kind": "bootstrap-assurance",
+      "classification": "assurance-companion",
+      "inheritedStatus": "current",
+      "existingPath": "contracts/bootstrap/BOOTSTRAP_ASSURANCE_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "pscv-cert/1",
+      "kind": "source-certificate",
+      "classification": "capability-authority",
+      "inheritedStatus": "current-host",
+      "existingPath": "contracts/ir/PSCV_CERT_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-certified-source/1",
+      "kind": "certified-source",
+      "classification": "capability-authority",
+      "inheritedStatus": "current-host",
+      "existingPath": "contracts/ir/PSCV_CERT_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-savef-semantic-index/1",
+      "kind": "derived-semantic-index",
+      "classification": "savef-development-companion",
+      "inheritedStatus": "current-host",
+      "existingPath": "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-evidence-envelope/1",
+      "kind": "evidence-envelope",
+      "classification": "claimset-evidence",
+      "inheritedStatus": "current-host",
+      "existingPath": "contracts/archive/EVIDENCE_ENVELOPE_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-js-scalar-abi-plan/1",
+      "kind": "target-adapter",
+      "classification": "interface-ir-interop",
+      "inheritedStatus": "current-host",
+      "existingPath": "contracts/ir/JS_SCALAR_ABI_V1.json",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-certified-module-interface/1",
+      "kind": "module-interface-evidence",
+      "classification": "querygraph-incremental",
+      "inheritedStatus": "current-host",
+      "existingPath": "scripts/module-interface-evidence.mjs",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-exact-behavioral-interface-reuse/1",
+      "kind": "semantic-reuse-validator",
+      "classification": "querygraph-incremental",
+      "inheritedStatus": "current-host",
+      "existingPath": "scripts/module-interface-evidence.mjs",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-semantic-reuse-candidate/1",
+      "kind": "semantic-cache-boundary",
+      "classification": "querygraph-incremental",
+      "inheritedStatus": "current-host",
+      "existingPath": "scripts/semantic-query-cache.mjs",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-savef-retrieval-session/1",
+      "kind": "knowledge-retrieval-boundary",
+      "classification": "savef-development-companion",
+      "inheritedStatus": "current-host",
+      "existingPath": "scripts/savef-retrieval-session.mjs",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-diverse-bootstrap-campaign/1",
+      "kind": "bootstrap-campaign",
+      "classification": "assurance-companion",
+      "inheritedStatus": "current-host",
+      "existingPath": "scripts/diverse-bootstrap.mjs",
+      "disposition": "retain-existing-identity-and-evidence"
+    },
+    {
+      "id": "psc-js-ir-validator/1",
+      "kind": "target-ir-validator",
+      "classification": "backend",
+      "inheritedStatus": "current",
+      "existingPath": "packages/backend-js/src/Ps/BackendJs/Validate.lean",
+      "disposition": "retain-existing-identity-and-evidence"
+    }
+  ],
+  "compilerIrOwnership": [
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "logicalOwner": "runtime-ir",
+      "rationale": "Runtime representation plus legacy reference checks and validated wrapper; separate APIs later without weakening strict validation.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+      "logicalOwner": "runtime-ir",
+      "rationale": "Canonical RuntimeIR serialization; shared JSON helpers remain transitional dependencies.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Decode.lean",
+      "logicalOwner": "runtime-ir",
+      "rationale": "Bounded untrusted RuntimeIR decoding; decoding alone is not validation.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+      "logicalOwner": "runtime-validation",
+      "rationale": "Strict RuntimeIR invariant validator and capability construction.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean",
+      "logicalOwner": "runtime-validation",
+      "rationale": "Decode plus fresh strict validation; external artifact replay entry.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+      "logicalOwner": "specialization",
+      "rationale": "Real runtime specialization representation/transform plus existing pass metadata.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean",
+      "logicalOwner": "pass-contract",
+      "rationale": "Portable definitions/executions; serialized bindings require independent byte verification.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Interface.lean",
+      "logicalOwner": "module-interface",
+      "rationale": "Runtime linking interfaces and consumer policy; distinct from source PublicApiIR and foreign InterfaceIR.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/InterfaceArtifact.lean",
+      "logicalOwner": "module-interface",
+      "rationale": "Actual validated runtime interface projection; cannot recover erased public generics.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Link.lean",
+      "logicalOwner": "module-interface",
+      "rationale": "Provider/consumer layout, exports, capabilities and dependency validation.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/LinkArtifact.lean",
+      "logicalOwner": "module-interface",
+      "rationale": "Portable serialization and validation of linked module subjects.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean",
+      "logicalOwner": "interface-ts",
+      "rationale": "JS-specific scalar adapter planning; logical ownership exception, no move in this checkpoint.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/PublicApi.lean",
+      "logicalOwner": "public-api",
+      "rationale": "Exact source-semantic body-free projection before erasure and its codec; no target export or preservation authority.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/PublicApiEncode.lean",
+      "logicalOwner": "public-api",
+      "rationale": "Exact source-semantic body-free projection before erasure and its codec; no target export or preservation authority.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/SourceSignature.lean",
+      "logicalOwner": "public-api",
+      "rationale": "Portable bounded structural source signature projection and codec; target-neutral and separate from executable/export binding.",
+      "physicalMove": "deferred"
+    },
+    {
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/SourceSignatureEncode.lean",
+      "logicalOwner": "public-api",
+      "rationale": "Portable bounded structural source signature projection and codec; target-neutral and separate from executable/export binding.",
+      "physicalMove": "deferred"
+    }
+  ],
+  "backendLanes": [
+    {
+      "backendId": "typescript",
+      "backendKind": "sourceTarget",
+      "role": "minimal bootstrap; ecosystem and differential oracle",
+      "descriptorStatus": "implemented",
+      "bundleStatus": "production-checked-build-routing-implemented",
+      "preservation": "not-established-globally"
+    },
+    {
+      "backendId": "javascript",
+      "backendKind": "directTargetIR",
+      "role": "long-term JS/npm lane; selected closed/uniform declarations and declaration-granularity maps",
+      "descriptorStatus": "implemented",
+      "bundleStatus": "standalone-maps-cloud-validated-at-885988b2-opt-in-linked-output-implementation-pending-cloud-validation",
+      "preservation": "not-established-globally"
+    },
+    {
+      "backendId": "wasm",
+      "backendKind": "directTargetIR",
+      "role": "Core Wasm; private self-host ABI and Canonical ABI remain distinct",
+      "descriptorStatus": "implemented",
+      "bundleStatus": "generated-native-private-and-selected-canonical-build-routing-cloud-validated-at-a47b047e",
+      "preservation": "not-established-globally"
+    },
+    {
+      "backendId": "rust",
+      "backendKind": "sourceTarget",
+      "role": "first-class native and diverse bootstrap lane; no persistent RustIR required",
+      "descriptorStatus": "implemented",
+      "bundleStatus": "generated-native-source-metadata-routing-cloud-validated-at-a47b047e-native-toolchain-capture-pending",
+      "preservation": "not-established-globally"
+    }
+  ],
+  "historicalEvidence": [
+    "contracts/bootstrap/JS_FIXED_POINT_V1.json",
+    "contracts/bootstrap/RUST_FIXED_POINT_V1.json",
+    "contracts/bootstrap/WASM_FIXED_POINT_V1.json",
+    "contracts/bootstrap/BOOTSTRAP_ASSURANCE_V1.json",
+    "contracts/promotion/DIRECT_JS_PROMOTION_V1.json"
+  ],
+  "baselineCloud": {
+    "headCommit": "64b1889dd45e9af42b758342e6e116b3b2db5ab4",
+    "mainRun": 37663136253,
+    "mainJob": 112936034457,
+    "conclusion": "failure",
+    "failedCheck": "observed build archive scalar Canonical projection",
+    "rootCause": "psc-pass-definition/1 accepts homogeneous output contracts but interface and binding outputs have distinct contracts; recorder rejects correctly.",
+    "repair": "Introduce strict positional output contracts without relaxing legacy homogeneous checks.",
+    "proofImplication": "none",
+    "repairStatus": "strict-v2-typed-product-implementation-awaiting-cloud-validation"
+  },
+  "orderedImplementation": [
+    {
+      "order": 0,
+      "id": "pscv-language-conformance",
+      "classifications": [
+        "semantic-compiler-spine",
+        "claimset-evidence"
+      ],
+      "status": "normative-authority-pinned-inherited-frontend-only-complete-rule-inventory-and-verified-executable-gate-pending",
+      "requirement": "Bind language reference Sections 2, 30–32 and Appendix J to real implementations. Complete source/elaboration capabilities and approved specification, coverage, obligation/proof, trust/effect/dependency and erasure closure before normative PSCV verified-executable emission. Existing lower-case pscv-cert/1 does not establish PSCV-CERT-v1 conformance."
+    },
+    {
+      "order": 1,
+      "id": "claimset",
+      "classifications": [
+        "claimset-evidence"
+      ],
+      "status": "contract-policy-verifier-and-bundle-context-archive-routing-cloud-validated-at-09ae1662-real-evidence-adapters-pending",
+      "requirement": "Machine-readable exact-subject claims, explicit selected-checker evidence policies, no automatic cross-claim promotion."
+    },
+    {
+      "order": 2,
+      "id": "backend-descriptors",
+      "classifications": [
+        "backend"
+      ],
+      "status": "four-lane-registry-exact-descriptor-binding-and-versioned-profile-derivations-implemented",
+      "requirement": "TS/direct JS/Wasm/Rust descriptors identify contracts, implementation, toolchains, capabilities and assurance."
+    },
+    {
+      "order": 3,
+      "id": "artifact-bundles",
+      "classifications": [
+        "artifact-bundle"
+      ],
+      "status": "four-lane-generated-native-source-routing-cloud-validated-at-a47b047e-rust-native-toolchain-pending",
+      "requirement": "Common typed independently identified executable/public/debug/interface/toolchain/evidence products."
+    },
+    {
+      "order": 4,
+      "id": "anti-drift",
+      "classifications": [
+        "semantic-compiler-spine",
+        "backend",
+        "authority-firewall-broker"
+      ],
+      "status": "static-guards-cloud-validated-at-331ab54",
+      "requirement": "Package identity/dependency/backend isolation/authority checks; enumerate current debt and reject new drift."
+    },
+    {
+      "order": 5,
+      "id": "compiler-ir-ownership",
+      "classifications": [
+        "representation",
+        "compiler-pass",
+        "querygraph-incremental",
+        "interface-ir-interop"
+      ],
+      "status": "classified-physical-move-deferred",
+      "requirement": "Classify every existing file now; expose logical APIs before any physical move."
+    },
+    {
+      "order": 6,
+      "id": "pass-invalidation",
+      "classifications": [
+        "compiler-pass"
+      ],
+      "status": "all-observed-passes-declare-effects-consumed-by-query-invalidation",
+      "requirement": "Explicit analyses/interfaces/fingerprint preservation and invalidation, origin policy and authority effects."
+    },
+    {
+      "order": 7,
+      "id": "profile-actions-query",
+      "classifications": [
+        "querygraph-incremental"
+      ],
+      "status": "observed-producers-portable-identity-gate-and-host-query-cache-bindings-implemented-persistent-service-and-hermetic-executor-pending",
+      "requirement": "ProfileEnvironment/extension set, hermetic BuildAction/ActionId and consumed semantic fingerprint classes govern reuse."
+    },
+    {
+      "order": 8,
+      "id": "public-api",
+      "classifications": [
+        "public-api-ir"
+      ],
+      "status": "portable-source-producer-and-observed-runtime-name-inventory-implemented-semantic-correspondence-and-export-policy-pending",
+      "requirement": "Portable checked-Core/module-interface projection preserves public source generics and contracts; never infer from SpecializedIR."
+    },
+    {
+      "order": 9,
+      "id": "origin-graph",
+      "classifications": [
+        "origin-source-maps"
+      ],
+      "status": "closed-uniform-javascript-and-declaration-chunk-maps-cloud-validated-at-885988b2-expression-origins-open",
+      "requirement": "Exact source-to-target origins and per-pass preserve/merge/synthesize/drop reasons; separate non-authoritative metadata."
+    },
+    {
+      "order": 10,
+      "id": "direct-js-products",
+      "classifications": [
+        "backend",
+        "public-api-ir",
+        "origin-source-maps",
+        "artifact-bundle"
+      ],
+      "status": "closed-uniform-declarations-standalone-and-explicit-linked-maps-generated-native-routing-cloud-validated-at-93add6da-broader-signatures-pending",
+      "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
+    },
+    {
+      "order": 11,
+      "id": "logical-api-refactor",
+      "classifications": [
+        "semantic-compiler-spine"
+      ],
+      "status": "planned",
+      "requirement": "Expose logical ownership APIs before low-risk physical refactoring; native compilation, semantic boundaries and affected compiler consumers remain required."
+    },
+    {
+      "order": 12,
+      "id": "extensions-broker",
+      "classifications": [
+        "extension-system",
+        "authority-firewall-broker"
+      ],
+      "status": "planned",
+      "requirement": "E0-E6/U0-U3 contracts, bounded sandbox host and isolated AuthorityBroker with declared influence closure."
+    },
+    {
+      "order": 13,
+      "id": "assurance-convergence",
+      "classifications": [
+        "assurance-companion",
+        "release-archive-companion"
+      ],
+      "status": "planned",
+      "requirement": "Map every inherited obligation into exact ClaimSet policies; perform extensive campaigns in later assurance phase."
+    }
+  ],
+  "assuranceObligations": [
+    {
+      "id": "comparator-isolation-and-checkers",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "authority-adversarial",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "global-core-soundness",
+      "inheritedStatus": "external-kernel-workstream",
+      "disposition": "consume-external-evidence-only",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "global-erasure-specialization",
+      "inheritedStatus": "unproved",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "backend-preservation",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "selfhost-fixed-points",
+      "inheritedStatus": "partial",
+      "disposition": "historical-evidence-preserved-new-campaigns-optional-by-explicit-user-scope-revision",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "bootstrap-diversity",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "resource-adversarial",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "savef-offline-replay",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "factorybench-holdout",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "final-v3-acceptance",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "logical-translation-preservation",
+      "inheritedStatus": "unproved",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    },
+    {
+      "id": "foreign-interface-adapters",
+      "inheritedStatus": "pending",
+      "disposition": "retain-until-exact-evidence-discharges",
+      "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
+    }
+  ],
+  "acceptance": {
+    "implementationComplete": false,
+    "v5Conformance": false,
+    "assuredRelease": false,
+    "globalPreservationProved": false,
+    "requires": "Real producers, exact typed handoffs and real consumers for target capabilities; focused cloud checks and explicit remaining assumptions. Extensive formal/independent assurance is tracked separately and cannot be asserted from implementation."
+  },
+  "targetSubsystems": [
+    {
+      "id": "psc-claim-set/1",
+      "kind": "claim-set",
+      "status": "current-host",
+      "canonicalPath": "contracts/claims/CLAIM_SET_V1.json",
+      "classification": "claimset-evidence"
+    },
+    {
+      "id": "psc-pass-definition/2",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/passes/PASS_DEFINITION_V2.json",
+      "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-backend-registry/1",
+      "kind": "backend-registry",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_REGISTRY_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-backend-descriptor/1",
+      "kind": "backend-descriptor",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_DESCRIPTOR_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-artifact-bundle/1",
+      "kind": "artifact-bundle",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/ARTIFACT_BUNDLE_V1.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-compiler-ownership/1",
+      "kind": "compiler-ownership",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_OWNERSHIP_V1.json",
+      "classification": "semantic-compiler-spine"
+    },
+    {
+      "id": "psc-profile-environment/1",
+      "kind": "profile-environment",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PROFILE_ENVIRONMENT_V1.json",
+      "classification": "querygraph-incremental"
+    },
+    {
+      "id": "psc-extension-set/1",
+      "kind": "extension-set",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PROFILE_ENVIRONMENT_V1.json",
+      "classification": "extension-system"
+    },
+    {
+      "id": "psc-build-action/1",
+      "kind": "build-action",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json",
+      "classification": "querygraph-incremental"
+    },
+    {
+      "id": "psc-observed-action-binding/1",
+      "kind": "action-binding",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json",
+      "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-query-key/1",
+      "kind": "query-context",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/QUERY_CONTEXT_V1.json",
+      "classification": "querygraph-incremental"
+    },
+    {
+      "id": "psc-public-api-ir/1",
+      "kind": "public-api",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/PUBLIC_API_IR_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-source-preparation-origins/1",
+      "kind": "source-origins",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/SOURCE_PREPARATION_ORIGINS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-declaration-origins/1",
+      "kind": "source-origins",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/DECLARATION_ORIGINS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-origin-graph/1",
+      "kind": "origin-graph",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DECLARATION_ORIGINS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-erasure-declarations/1",
+      "kind": "declaration-correspondence",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-erasure-declaration-map/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-specialization-instance-map/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/SPECIALIZATION_INSTANCE_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-js-generated-positions/1",
+      "kind": "generated-positions",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/JS_GENERATED_POSITIONS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-js-generated-position-map/1",
+      "kind": "generated-positions",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_GENERATED_POSITIONS_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-js-declaration-lineage/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_DECLARATION_LINEAGE_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-javascript-source-map/1",
+      "kind": "source-map",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-javascript-source-map-recipe/1",
+      "kind": "source-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-compiler-product-selection/1",
+      "kind": "product-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PRODUCT_SELECTION_V1.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-source-signature-structural/1",
+      "kind": "source-signature-projection",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-direct-js-declarations-closed-structural/1",
+      "kind": "declaration-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-direct-javascript-declarations/1",
+      "kind": "declaration-output",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-source-declaration-signatures/1",
+      "kind": "source-signatures",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-direct-javascript-declaration-binding/1",
+      "kind": "declaration-binding",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-uniform-specialized-ir/1",
+      "kind": "specialized-ir",
+      "status": "experimental",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-js-uniform-values/1",
+      "kind": "representation-profile",
+      "status": "experimental",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-uniform-specialization-correspondence/1",
+      "kind": "representation-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-pass-uniform-specialize/1",
+      "kind": "compiler-pass",
+      "status": "experimental",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-js-closed-instances/1",
+      "kind": "representation-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-direct-js-declarations-uniform-structural/1",
+      "kind": "declaration-profile",
+      "status": "experimental",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-backend-profile-selection/1",
+      "kind": "backend-profile-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V1.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-ts-declaration-request/1",
+      "kind": "declaration-request",
+      "status": "experimental",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json",
+      "classification": "public-api-ir"
+    },
+    {
+      "id": "psc-backend-profile-selection/2",
+      "kind": "backend-profile-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/2",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-js-uniform-declaration-lineage/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-javascript-source-map-recipe/2",
+      "kind": "source-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/3",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-compose-uniform-js-declaration-lineage/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json",
+      "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-emit-uniform-js-source-map/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json",
+      "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-checked-seed-products/1",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V1.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-wasm-canonical-request/1",
+      "kind": "wasm-export-request",
+      "status": "experimental",
+      "canonicalPath": "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json",
+      "classification": "interface-ir-interop"
+    },
+    {
+      "id": "psc-checked-seed-products/2",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V2.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-checked-seed-products/3",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V3.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-js-declaration-positions/1",
+      "kind": "declaration-positions",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-js-declaration-map/1",
+      "kind": "declaration-map",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-js-declaration-map-recipe/1",
+      "kind": "declaration-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-emit-direct-js-declaration-map/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json",
+      "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/4",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-direct-js-source-map-link/1",
+      "kind": "source-map-link-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-js-linked-javascript/1",
+      "kind": "linked-javascript-product",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-direct-js-linked-declarations/1",
+      "kind": "linked-declarations-product",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-link-direct-js-source-maps/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+      "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/5",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-compiler-execution-policy/1",
+      "kind": "compiler-execution-policy",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json",
+      "classification": "semantic-compiler-spine"
+    },
+    {
+      "id": "pscv-hosted-lean/1",
+      "kind": "compiler-implementation-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json",
+      "classification": "semantic-compiler-spine"
+    }
+  ],
+  "implementationCloud": {
+    "headCommit": "a47b047eb324db0df711b73d47b1f6211c126418",
+    "mainRun": 37711862947,
+    "mainJob": 113099636619,
+    "conclusion": "success",
+    "parityRun": 37711862916,
+    "parityJob": 113099360369,
+    "parityConclusion": "success",
+    "scope": [
+      "four-lane-generated-and-native-source-products",
+      "canonical-wasm-32-and-64-build-archive-replay",
+      "explicit-native-archive-budgets",
+      "wasm-unit-runtime-and-whole-compiler",
+      "portable-selfhost"
+    ],
+    "proofImplication": "none",
+    "subsequentClaimConsumerChanges": "full-main-cloud-pass-at-09ae1662-run-37712984304-job-113102943084",
+    "declarationMapCheckpoint": {
+      "commit": "885988b2e82fe7bad45e115ddec5c35f04c81cf0",
+      "mainRun": 37714593700,
+      "mainJob": 113108071900,
+      "conclusion": "success",
+      "parityRun": 37714593365,
+      "parityJob": 113108069909,
+      "parityConclusion": "success",
+      "scope": [
+        "closed-and-uniform-prepared-and-original-source-map-reconstruction",
+        "utf16-bom-crlf-import-gap-and-mutation-boundaries",
+        "generated-selection-and-actual-native-closed-uniform-publication",
+        "portable-declaration-byte-comparison-and-offline-archive-replay",
+        "full-existing-main-compiler-selfhost-isolation-gates"
+      ],
+      "proofImplication": "none"
+    },
+    "linkedSourceMapCheckpoint": {
+      "commit": "93add6da4e501c57f9016c7c3666ea52c87a66e7",
+      "mainRun": 37718501374,
+      "conclusion": "success",
+      "scope": "Closed/uniform explicit linked output selection and exact receipt/bundle/archive behavior; no preservation theorem.",
+      "historicalOptionalFixedPointRuns": [
+        37718501397,
+        37718501361
+      ]
+    },
+    "hostedPolicyCheckpoint": {
+      "commit": "4c965eee7843163f24cb51b52651f7e4a64e8009",
+      "mainRun": 37763975497,
+      "mainJob": 113266957441,
+      "conclusion": "success",
+      "rustRun": 37763975306,
+      "rustJob": 113266956747,
+      "rustConclusion": "success",
+      "scope": "Hosted execution policy and unchanged mandatory compiler semantic, backend, production, archive and isolation gates. Historical PSC1/self-application checks were explicitly skipped.",
+      "proofImplication": "none",
+      "subsequentDefaultBuildRouting": "cloud-validated-at-d43ae7ed"
+    },
+    "hostedDefaultBuildCheckpoint": {
+      "commit": "d43ae7edd916d7639939e2070eb9d18b57212f4c",
+      "mainRun": 37764795277,
+      "mainJob": 113269682175,
+      "conclusion": "success",
+      "rustRun": 37764795361,
+      "rustJob": 113269682902,
+      "rustConclusion": "success",
+      "parityRun": 37764795224,
+      "parityJob": 113269682094,
+      "parityConclusion": "success",
+      "scope": [
+        "normal-native-compiler-build-without-self-application",
+        "default-native-and-explicit-generated-compiler-selection",
+        "default-ts-closed-js-uniform-js-wasm-publication-and-archive-replay",
+        "74-checked-host-regressions",
+        "existing-mandatory-semantic-backend-resource-isolation-gates"
+      ],
+      "selfHostClaim": false,
+      "proofImplication": "none"
+    }
+  }
+}

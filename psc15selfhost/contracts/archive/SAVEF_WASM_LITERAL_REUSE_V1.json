@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-wasm-literal-reuse/1",
+  "owner": "scripts/savef-wasm-literal.mjs",
+  "operationId": "psc-reuse-wasm-literal-artifact/1",
+  "claimClass": "wasm-closed-i32-literal-export-behavior",
+  "status": "implemented-scoped-validated-artifact-reuse",
+  "producer": "Check actual binary bytes against an exact literal expectation. Package separate specification/artifact knowledge objects, replay certificate, observed validation, supplied license/provenance and exact operation/validator source-byte witnesses. No search index is updated.",
+  "consumer": "The caller independently pins the knowledge root, binary, expectation and semantic context. Fresh graph validity replays the built-in bounded independent binary decoder through the certificate boundary. The registered operation accepts only the exact task/input and a matching validated claim on that root, then resolves its actual binary payload from the checked closure.",
+  "acceptance": "Freshly validate the exact output against the expected exports. Only an actual live operation plus output acceptance creates a reuse event; revoked, consumed, serialized or cross-task uses cannot do so.",
+  "scope": "Closed i32 literal exports representing UInt32, Int32 or Bool. Existing validator restrictions and resource limits apply. Source-to-expectation binding and compiler preservation are not inferred.",
+  "implementationIdentity": "Exact observed source bytes for the operation, binary decoder and certificate adapter. Shared boundaries and host runtime remain explicit assumptions; complete execution/input closure is false.",
+  "evidence": "Three focused groups include real PSC-emitted unsigned/signed boundary and boolean functions, their actual derived expectation, certificate replay, accepted reuse and WebAssembly engine execution. Wrong tasks, modified certificates, stale context and substituted output reject.",
+  "notEstablished": ["global compiler preservation", "formal theorem", "causal productivity improvement", "independent FactoryBench holdout", "release licensing from metadata", "final V3 acceptance"]
+}

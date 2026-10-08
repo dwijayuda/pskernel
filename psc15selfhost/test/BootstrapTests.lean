@@ -486,6 +486,33 @@ def psTestLocalInstanceSynthesis : Bool :=
   | none => false
 
 
+def psTestParserCursorCounts : Bool :=
+  match psLex "A.B tail" with
+  | .error _ => false
+  | .ok tokens =>
+      let initial := psTokenCursorFromTokens tokens;
+      initial.remainingCount == 5 &&
+        (match psTokenCursorAdvance initial with
+         | .none => false
+         | .some read => read.cursor.remainingCount == 4 && read.cursor.remaining.length == 4) &&
+        (match psParseSyntaxName initial with
+         | .error _ => false
+         | .ok parsed => parsed.cursor.remainingCount == 2 &&
+             parsed.cursor.remaining.length == 2 && psTokenCursorAtText parsed.cursor "tail")
+
+def psTestLexerAccumulatorBoundaries : Bool :=
+  psLexStringToListFromWithFuel 0 "Aé😀" 0 == []
+    && psLexStringToListFromWithFuel 1 "Aé😀" 0 == ['A']
+    && psLexStringToListFromWithFuel 2 "Aé😀" 1 == ['é', '😀']
+    && psLexStringToListFromWithFuel 10 "Aé😀" 7 == []
+    && psListLength (psLexStringToList (String.ofList (List.replicate 20000 'a'))) == 20000
+    && (match psLexAllWithFuel 0 (psLexCursorFromString "x") with
+        | .error .fuelExhausted => true
+        | _ => false)
+    && (match psLexAllWithFuel 1 (psLexCursorFromString "x") with
+        | .ok [token, eofToken] => token.text == "x" && psTokenKindEq eofToken.kind .endOfInput
+        | _ => false)
+
 def psTestLexerUtf8Offset : Bool :=
   match psLex "𝒫x" with
   | Except.error _ => false
@@ -530,7 +557,7 @@ def psTestParsedModuleShape (module : PsSyntaxModule) : Bool :=
 def psTestDualSourceSimpleParse : Bool :=
   match
       psParseLeanSource "import A\ndef x : Nat := 1",
-      psParseProofScriptSource "import A; def x : Nat := 1;" with
+      psParseProofScriptSource "import A\nconst x : Nat := { 1 }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       psTestParsedModuleShape leanModule
         && psTestParsedModuleShape proofScriptModule
@@ -1069,7 +1096,7 @@ def psTestDualSourceAnnotatedLet : Bool :=
       psParseLeanSource
         "def one : Nat := let x : Nat := 1; x",
       psParseProofScriptSource
-        "const one: Nat := { let x : Nat := 1; x }" with
+        "const one: Nat := { let x : Nat := 1\nx }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -1088,7 +1115,7 @@ def psTestDualSourceInferredLet : Bool :=
       psParseLeanSource
         "def one : Nat := let x := 1; x",
       psParseProofScriptSource
-        "const one: Nat := { let x := 1; x }" with
+        "const one: Nat := { let x := 1\nx }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -2586,6 +2613,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "reject invalid Char escapes", passed := psTestRejectInvalidCharacterEscapes },
   { name := "ProofScript empty call stays empty", passed := psTestProofScriptEmptyCallStaysEmpty },
   { name := "ProofScript CallGap", passed := psTestProofScriptCallGap },
+  { name := "parser cursor cached counts", passed := psTestParserCursorCounts },
+  { name := "lexer accumulator boundaries", passed := psTestLexerAccumulatorBoundaries },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },
   { name := "lexer nested trivia", passed := psTestLexerNestedTrivia },
   { name := "module graph", passed := psTestModuleGraph },

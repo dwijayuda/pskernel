@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contract": "psc-trust-manifest/1",
-  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
   "semanticBootstrapRoot": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
   "selfHostProfile": "PSC1-selfhost-stable/1",
   "portableSelfHostProfile": "PSC1-portable-selfhost/1",
@@ -27,7 +27,77 @@
     "hostBoundary": "scripts/kernel-checked-session.mjs",
     "checkedBuildBoundary": "scripts/checked-build.mjs",
     "failClosed": true,
-    "semanticFallbackForbidden": true
+    "semanticFallbackForbidden": true,
+    "certificationContract": "pscv-cert/1",
+    "certifiedSourceCapability": "psc-certified-source-capability/1"
+  },
+  "hostSourceClosure": {
+    "coverage": "static-relative-esm-imports/1",
+    "entry": "scripts/checked-build.mjs",
+    "declared": [
+      "scripts/artifact-evidence.mjs",
+      "scripts/backend-contract.mjs",
+      "scripts/bootstrap-manifest.mjs",
+      "scripts/bounded-process.mjs",
+      "scripts/build-context.mjs",
+      "scripts/build-output-files.mjs",
+      "scripts/canonical-memory.mjs",
+      "scripts/certified-source.mjs",
+      "scripts/checked-build-evidence.mjs",
+      "scripts/checked-build.mjs",
+      "scripts/checked-kernel-dual.mjs",
+      "scripts/checked-kernel-identity.mjs",
+      "scripts/checked-kernel-provider.mjs",
+      "scripts/checked-provider-inputs.mjs",
+      "scripts/checked-seed-protocol.mjs",
+      "scripts/checked-seed-session.mjs",
+      "scripts/checked-source-snapshot.mjs",
+      "scripts/claim-set.mjs",
+      "scripts/comparator-export.mjs",
+      "scripts/compiler-checked-service.mjs",
+      "scripts/declaration-origins.mjs",
+      "scripts/erasure-declarations.mjs",
+      "scripts/evidence-envelope.mjs",
+      "scripts/interface-ir-artifact.mjs",
+      "scripts/ir-artifact.mjs",
+      "scripts/ir-invariant-replay.mjs",
+      "scripts/ir-link-artifact.mjs",
+      "scripts/js-abi-artifact.mjs",
+      "scripts/js-declaration-lineage.mjs",
+      "scripts/js-declaration-map.mjs",
+      "scripts/js-declarations.mjs",
+      "scripts/js-generated-positions.mjs",
+      "scripts/js-source-map-link.mjs",
+      "scripts/js-source-map.mjs",
+      "scripts/kernel-checked-session.mjs",
+      "scripts/kernel-contract.mjs",
+      "scripts/observed-build-archive.mjs",
+      "scripts/observed-build-context.mjs",
+      "scripts/observed-file-bytes.mjs",
+      "scripts/provider-security.mjs",
+      "scripts/public-api-artifact.mjs",
+      "scripts/public-api-signature.mjs",
+      "scripts/query-context.mjs",
+      "scripts/runtime-interface-artifact.mjs",
+      "scripts/selfhost-source-workspace.mjs",
+      "scripts/source-map-encoding.mjs",
+      "scripts/source-map-origins.mjs",
+      "scripts/source-preparation-origins.mjs",
+      "scripts/source-read-budget.mjs",
+      "scripts/specialization-correspondence.mjs",
+      "scripts/target-ir-artifact.mjs",
+      "scripts/typescript-cli.mjs",
+      "scripts/typescript-tool-inputs.mjs",
+      "scripts/uniform-specialization.mjs",
+      "scripts/wasm-canonical-artifact.mjs",
+      "scripts/wasm-core-signatures.mjs",
+      "scripts/workspace-layout.mjs"
+    ],
+    "dynamicImportOwners": [
+      "scripts/checked-build.mjs",
+      "scripts/checked-kernel-provider.mjs"
+    ],
+    "remaining": "Installed TypeScript/native platform trees and selected provider runtime-file profiles are captured separately by checked builds. Complete generated compiler/runtime execution closure, unlisted dynamic/ambient inputs and authenticated supply-chain evidence remain incomplete; static closure is not the entire TCB."
   },
   "trustClasses": {
     "logicalAcceptance": [
@@ -36,7 +106,9 @@
       "provider identity validation"
     ],
     "executableValidation": [
-      "psValidateErasedIrModule under psc-verified-ir/1"
+      "psValidateErasedIrModule under psc-verified-ir/1",
+      "caller-pinned native closed-IR decoder/strict-validator replay under psc-closed-ir-invariant-replay/1 when explicitly requested",
+      "caller-pinned native linked-IR decoder/link-validator replay with consumer-pinned host contracts under psc-linked-ir-invariant-replay/1 when explicitly requested"
     ],
     "transformationTrustCurrent": [
       "erasure",
@@ -48,5 +120,9 @@
       "host OS and memory safety",
       "declared FFI implementations"
     ]
-  }
+  },
+  "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+  "implementationProfile": "pscv-hosted-lean/1",
+  "executionPolicy": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json",
+  "selfHostProfilesRole": "historical-optional-checks-not-active-implementation-constraints"
 }

@@ -8,6 +8,7 @@ lean_lib PsFoundation where
   roots := #[
     `Ps.Foundation.List,
     `Ps.Foundation.Name,
+    `Ps.Foundation.Text,
     `Ps.Foundation.Source,
     `Ps.Foundation.Diagnostic
   ]
@@ -66,9 +67,27 @@ lean_lib PsBridge where
 lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
+    `Ps.CompilerIr.PublicApi,
+    `Ps.CompilerIr.PublicApiEncode,
+    `Ps.CompilerIr.SourceSignature,
+    `Ps.CompilerIr.SourceSignatureEncode,
     `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Encode,
+    `Ps.CompilerIr.Decode,
+    `Ps.CompilerIr.LinkArtifact,
+    `Ps.CompilerIr.ValidateArtifact,
+    `Ps.CompilerIr.InterfaceArtifact,
+    `Ps.CompilerIr.Validate,
+    `Ps.CompilerIr.Interface,
+    `Ps.CompilerIr.JsAbi,
+    `Ps.CompilerIr.Link,
+    `Ps.CompilerIr.Pass,
     `Ps.CompilerIr.Specialize
   ]
+
+lean_lib PsInterfaceTs where
+  srcDir := "packages/interface-ts/src"
+  roots := #[`Ps.InterfaceTs.Declarations, `Ps.InterfaceTs.Request]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -101,20 +120,23 @@ lean_lib PsBackendJs where
   roots := #[
     `Ps.BackendJs.Model,
     `Ps.BackendJs.Lower,
-    `Ps.BackendJs.Print
+    `Ps.BackendJs.Validate,
+    `Ps.BackendJs.Encode,
+    `Ps.BackendJs.Print,
+    `Ps.BackendJs.TailAlias
   ]
 
 lean_lib PsDriverTs where
   srcDir := "packages/driver-ts/src"
-  roots := #[`Ps.DriverTs.Compiler]
+  roots := #[`Ps.DriverTs.Compiler, `Ps.DriverTs.Bootstrap, `Ps.DriverTs.Stages]
 
 lean_lib PsDriverJs where
   srcDir := "packages/driver-js/src"
-  roots := #[`Ps.DriverJs.Compiler]
+  roots := #[`Ps.DriverJs.Compiler, `Ps.DriverJs.Bootstrap, `Ps.DriverJs.Stages, `Ps.DriverJs.Declarations]
 
 lean_lib PsDriverWasm where
   srcDir := "packages/driver-wasm/src"
-  roots := #[`Ps.DriverWasm.Compiler]
+  roots := #[`Ps.DriverWasm.Compiler, `Ps.DriverWasm.Bootstrap, `Ps.DriverWasm.Stages, `Ps.DriverWasm.Canonical, `Ps.DriverWasm.SelfHostProgress]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
@@ -126,19 +148,23 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Identifier,
     `Ps.BackendRust.Type,
     `Ps.BackendRust.Expr,
+    `Ps.BackendRust.Tail,
+    `Ps.BackendRust.TailAlias,
     `Ps.BackendRust.ValueRefs,
+    `Ps.BackendRust.Captures,
     `Ps.BackendRust.Runtime,
     `Ps.BackendRust.Module
   ]
 
 lean_lib PsDriverRust where
   srcDir := "packages/driver-rust/src"
-  roots := #[`Ps.DriverRust.Compiler]
+  roots := #[`Ps.DriverRust.Compiler, `Ps.DriverRust.Bootstrap, `Ps.DriverRust.Stages]
 
 lean_lib PsBackendWasm where
   srcDir := "packages/backend-wasm/src"
   roots := #[
     `Ps.BackendWasm.Model,
+    `Ps.BackendWasm.TailCalls,
     `Ps.BackendWasm.Type,
     `Ps.BackendWasm.LowerInt,
     `Ps.BackendWasm.LowerFloat,
@@ -148,7 +174,15 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.RuntimeString,
     `Ps.BackendWasm.RuntimeIntRepr,
     `Ps.BackendWasm.Binary,
+    `Ps.BackendWasm.Encode,
     `Ps.BackendWasm.Lower,
+    `Ps.BackendWasm.Validate,
+    `Ps.BackendWasm.ValidateStructure,
+    `Ps.BackendWasm.ValidateTyping,
+    `Ps.BackendWasm.ValidateIr,
+    `Ps.BackendWasm.LiteralEvidence,
+    `Ps.BackendWasm.CanonicalExports,
+    `Ps.BackendWasm.CanonicalRequest,
     `Ps.BackendWasm.SelfHostAbi
   ]
 
@@ -166,7 +200,9 @@ lean_lib PsProject where
   srcDir := "packages/project/src"
   roots := #[
     `Ps.Project.ModuleGraph,
-    `Ps.Project.QueryGraph
+    `Ps.Project.ModuleInterface,
+    `Ps.Project.QueryGraph,
+    `Ps.Project.QueryGraphV2
   ]
 
 lean_lib PsMeta where
@@ -354,6 +390,14 @@ lean_exe psc1_project_query_graph_tests where
   srcDir := "test"
   root := `ProjectQueryGraphTests
 
+lean_exe pscv_query_graph_v2_tests where
+  srcDir := "test"
+  root := `QueryGraphV2Tests
+
+lean_exe pscv_wasm_literal_validation_tests where
+  srcDir := "test"
+  root := `WasmLiteralValidationTests
+
 lean_exe psc1_host_project_query_tests where
   srcDir := "test"
   root := `HostProjectQueryTests
@@ -368,11 +412,15 @@ lean_exe psc1_backend_ts_tests where
 
 lean_lib PsBackendJsTestSupport where
   srcDir := "test"
-  roots := #[`BackendJsFixture]
+  roots := #[`BackendJsFixture, `BackendJsTailFixture, `BackendJsPropertyFixture]
 
 lean_exe psc1_backend_js_tests where
   srcDir := "test"
   root := `BackendJsTests
+
+lean_exe psc1_backend_js_validate_tests where
+  srcDir := "test"
+  root := `BackendJsValidateTests
 
 lean_exe psc1_backend_js_diff_fixture where
   srcDir := "test"
@@ -381,6 +429,10 @@ lean_exe psc1_backend_js_diff_fixture where
 lean_exe psc1_backend_wasm_tests where
   srcDir := "test"
   root := `BackendWasmTests
+
+lean_exe psc1_backend_wasm_ir_tests where
+  srcDir := "test"
+  root := `BackendWasmIrTests
 
 lean_exe psc1_ir_specialize_tests where
   srcDir := "test"
@@ -410,6 +462,10 @@ lean_exe psc1_backend_diff_fixture where
   srcDir := "test"
   root := `BackendDifferentialFixture
 
+lean_exe psc1_wasm_string_runtime_fixture where
+  srcDir := "test"
+  root := `WasmStringRuntimeFixture
+
 lean_exe psc1_backend_wasm_binary_smoke where
   srcDir := "test"
   root := `WasmBinarySmoke
@@ -417,6 +473,22 @@ lean_exe psc1_backend_wasm_binary_smoke where
 lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests
+
+lean_exe psc1_verified_ir_strict_tests where
+  srcDir := "test"
+  root := `VerifiedIrStrictTests
+
+lean_exe pscv_interface_ir_tests where
+  srcDir := "test"
+  root := `InterfaceIrTests
+
+lean_exe pscv_js_abi_tests where
+  srcDir := "test"
+  root := `JsAbiTests
+
+lean_exe pscv_ir_encoding_tests where
+  srcDir := "test"
+  root := `IrEncodingTests
 
 lean_exe psc2_minimal_selfhost_tests where
   srcDir := "test"
@@ -463,3 +535,53 @@ lean_exe psc_kernel_core_provider where
 lean_exe psc_kernel_core_provider_tests where
   srcDir := "test"
   root := `KernelCoreProviderTests
+
+
+lean_lib PsPscvTheory where
+  srcDir := "packages/pscv-theory/src"
+  roots := #[
+    `Ps.Theory.Core
+  ]
+
+lean_lib PsPscvTheoryProof where
+  srcDir := "packages/pscv-theory/proof"
+  roots := #[
+    `Ps.Theory.Refinement,
+    `Ps.Theory.ParserCursor
+  ]
+
+lean_exe pscv_theory_seed_tests where
+  srcDir := "packages/pscv-theory/test"
+  root := `TheorySeedTests
+
+
+lean_lib PsTheoryBridge where
+  srcDir := "packages/theory-bridge/src"
+  roots := #[
+    `Ps.TheoryBridge.Model,
+    `Ps.TheoryBridge.Translate
+  ]
+
+lean_lib PsInterfaceIr where
+  srcDir := "packages/interface-ir/src"
+  roots := #[`Ps.InterfaceIr.Model, `Ps.InterfaceIr.Validate, `Ps.InterfaceIr.Encode, `Ps.InterfaceIr.Wit, `Ps.InterfaceIr.CanonicalAbi]
+
+lean_exe pscv_foreign_interface_tests where
+  srcDir := "packages/interface-ir/test"
+  root := `ForeignInterfaceTests
+
+lean_exe pscv_theory_bridge_tests where
+  srcDir := "packages/theory-bridge/test"
+  root := `TheoryBridgeTests
+
+lean_exe pscv_ir_replay where
+  srcDir := "host/src"
+  root := `Ps.Host.IrReplay
+
+lean_exe pscv_canonical_abi_tests where
+  srcDir := "test"
+  root := `CanonicalAbiTests
+
+lean_exe pscv_wasm_canonical_exports_tests where
+  srcDir := "test"
+  root := `WasmCanonicalExportsTests

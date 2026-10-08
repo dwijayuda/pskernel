@@ -411,40 +411,112 @@ def psErasureReverseIrDeclarationsAcc
       fun (acc : List PsVerifiedIrDeclaration) =>
         smaller (List.cons declaration acc)
 
+-- This side table records the actual declaration fold. It is not a semantic
+-- erasure certificate and does not describe runtime layout/constructor exports.
+inductive PsErasureDeclarationDisposition where
+  | runtime (name : String)
+  | proofErased
+  | noRuntimeDeclaration
+
+structure PsErasureDeclarationCorrespondence where
+  sourceName : PsName
+  disposition : PsErasureDeclarationDisposition
+
+structure PsErasureDeclarationsProduct where
+  declarations : List PsVerifiedIrDeclaration
+  correspondence : List PsErasureDeclarationCorrespondence
+
+def psErasureReverseCorrespondenceAcc
+    (entries : List PsErasureDeclarationCorrespondence) :
+    List PsErasureDeclarationCorrespondence -> List PsErasureDeclarationCorrespondence :=
+  match entries with
+  | List.nil => fun (acc : List PsErasureDeclarationCorrespondence) => acc
+  | List.cons entry rest =>
+      let smaller :
+          List PsErasureDeclarationCorrespondence -> List PsErasureDeclarationCorrespondence :=
+        psErasureReverseCorrespondenceAcc rest;
+      fun (acc : List PsErasureDeclarationCorrespondence) =>
+        smaller (List.cons entry acc)
+
+def psEraseRuntimeDeclaration
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (declaration : PsDeclaration) :
+    Except PsErasureError (Option PsVerifiedIrDeclaration) :=
+  match declaration with
+  | PsDeclaration.definitionDecl name _ type value =>
+      psEraseDefinition environment scope name type value
+  | PsDeclaration.partialDecl name _ type value =>
+      psEraseDefinition environment scope name type value
+  | _ => Except.ok Option.none
+
+def psErasureDeclarationDisposition
+    (declaration : PsDeclaration)
+    (result : Option PsVerifiedIrDeclaration) : PsErasureDeclarationDisposition :=
+  match result with
+  | Option.some lowered => PsErasureDeclarationDisposition.runtime lowered.name
+  | Option.none =>
+      match declaration with
+      | PsDeclaration.definitionDecl _ _ _ _ => PsErasureDeclarationDisposition.proofErased
+      | PsDeclaration.partialDecl _ _ _ _ => PsErasureDeclarationDisposition.proofErased
+      | _ => PsErasureDeclarationDisposition.noRuntimeDeclaration
+
+def psEraseDefinitionsObservedWorker
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (declarations : List PsDeclaration) :
+    Bool ->
+    List PsVerifiedIrDeclaration ->
+    List PsErasureDeclarationCorrespondence ->
+    Except PsErasureError PsErasureDeclarationsProduct :=
+  match declarations with
+  | List.nil =>
+      fun (_observe : Bool)
+          (declarationsRev : List PsVerifiedIrDeclaration)
+          (correspondenceRev : List PsErasureDeclarationCorrespondence) =>
+        Except.ok
+          (PsErasureDeclarationsProduct.mk
+            (psErasureReverseIrDeclarationsAcc declarationsRev List.nil)
+            (psErasureReverseCorrespondenceAcc correspondenceRev List.nil))
+  | List.cons declaration rest =>
+      let smaller :
+          Bool ->
+          List PsVerifiedIrDeclaration ->
+          List PsErasureDeclarationCorrespondence ->
+          Except PsErasureError PsErasureDeclarationsProduct :=
+        psEraseDefinitionsObservedWorker environment scope rest;
+      fun (observe : Bool)
+          (declarationsRev : List PsVerifiedIrDeclaration)
+          (correspondenceRev : List PsErasureDeclarationCorrespondence) =>
+        match psEraseRuntimeDeclaration environment scope declaration with
+        | Except.error error => Except.error error
+        | Except.ok result =>
+            let nextCorrespondence : List PsErasureDeclarationCorrespondence :=
+              if observe then
+                List.cons
+                  (PsErasureDeclarationCorrespondence.mk
+                    (psDeclarationName declaration)
+                    (psErasureDeclarationDisposition declaration result))
+                  correspondenceRev
+              else correspondenceRev;
+            let nextDeclarations : List PsVerifiedIrDeclaration :=
+              match result with
+              | Option.none => declarationsRev
+              | Option.some lowered => List.cons lowered declarationsRev;
+            smaller observe nextDeclarations nextCorrespondence
+
 def psEraseDefinitionsLoopWorker
     (environment : PsEnvironment)
     (scope : PsErasureScope)
     (declarations : List PsDeclaration) :
     List PsVerifiedIrDeclaration ->
     Except PsErasureError (List PsVerifiedIrDeclaration) :=
-  match declarations with
-  | List.nil =>
-      fun (declarationsRev : List PsVerifiedIrDeclaration) =>
-        Except.ok (psErasureReverseIrDeclarationsAcc declarationsRev List.nil)
-  | List.cons declaration rest =>
-      let smaller :
-          List PsVerifiedIrDeclaration ->
-          Except PsErasureError (List PsVerifiedIrDeclaration) :=
-        psEraseDefinitionsLoopWorker environment scope rest;
-      fun (declarationsRev : List PsVerifiedIrDeclaration) =>
-        match declaration with
-        | PsDeclaration.definitionDecl name _ type value =>
-            match psEraseDefinition environment scope name type value with
-            | Except.error error => Except.error error
-            | Except.ok result =>
-                match result with
-                | Option.none => smaller declarationsRev
-                | Option.some lowered =>
-                    smaller (List.cons lowered declarationsRev)
-        | PsDeclaration.partialDecl name _ type value =>
-            match psEraseDefinition environment scope name type value with
-            | Except.error error => Except.error error
-            | Except.ok result =>
-                match result with
-                | Option.none => smaller declarationsRev
-                | Option.some lowered =>
-                    smaller (List.cons lowered declarationsRev)
-        | _ => smaller declarationsRev
+  fun (declarationsRev : List PsVerifiedIrDeclaration) =>
+    match
+        psEraseDefinitionsObservedWorker
+          environment scope declarations false declarationsRev List.nil with
+    | Except.error error => Except.error error
+    | Except.ok product => Except.ok product.declarations
 
 def psEraseDefinitionsLoop
     (environment : PsEnvironment)
@@ -461,11 +533,16 @@ def psErasureAppendDeclarations (declarations : List PsDeclaration) : List PsDec
       let smaller : List PsDeclaration -> List PsDeclaration := psErasureAppendDeclarations rest;
       fun (tail : List PsDeclaration) => List.cons declaration (smaller tail)
 
-def psEraseCoreModuleWithRuntimePrelude
+structure PsErasureModuleProduct where
+  raw : PsVerifiedIrModule
+  correspondence : List PsErasureDeclarationCorrespondence
+
+def psEraseCoreModuleObserved
+    (observe : Bool)
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
-    Except PsErasureError PsVerifiedIrModule :=
+    Except PsErasureError PsErasureModuleProduct :=
   let runtimeDeclarations :=
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
   let names := psErasureDeclarationNames runtimeDeclarations;
@@ -489,19 +566,34 @@ def psEraseCoreModuleWithRuntimePrelude
       | Except.error error => Except.error error
       | Except.ok preparedInductives =>
           match
-              psEraseDefinitionsLoop
+              psEraseDefinitionsObservedWorker
                 environment
                 preparedInductives.scope
                 declarations
-                [] with
+                observe
+                List.nil
+                List.nil with
           | Except.error error => Except.error error
           | Except.ok lowered =>
-              Except.ok {
-                imports := []
-                structures := preparedStructures.ir
-                inductives := preparedInductives.ir
-                declarations := lowered
-              }
+              Except.ok
+                (PsErasureModuleProduct.mk
+                  (PsVerifiedIrModule.mk
+                    List.nil
+                    preparedStructures.ir
+                    preparedInductives.ir
+                    lowered.declarations)
+                  lowered.correspondence)
+
+def psEraseCoreModuleWithRuntimePrelude
+    (environment : PsEnvironment)
+    (runtimePreludeDeclarations : List PsDeclaration)
+    (declarations : List PsDeclaration) :
+    Except PsErasureError PsVerifiedIrModule :=
+  match
+      psEraseCoreModuleObserved
+        false environment runtimePreludeDeclarations declarations with
+  | Except.error error => Except.error error
+  | Except.ok product => Except.ok product.raw
 
 def psEraseCoreModule
     (environment : PsEnvironment)

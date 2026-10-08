@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-offline-capsule/1",
+  "status": "implementation-available-assurance-pending",
+  "owners": ["scripts/offline-capsule.mjs", "scripts/offline-verifier-cli.mjs", "scripts/savef-graph.mjs"],
+  "knowledgeContract": "psc-knowledge-object/2",
+  "legacyPrototype": "spkf-local-prototype/1 remains metadata-only; its proved labels are not replay receipts",
+  "encoding": "Bounded canonical JSON containing a manifest identity, sorted unique domain-qualified artifact descriptors with canonical base64 bytes, and optional Ed25519 signatures. No file paths, extraction or imported checker code.",
+  "manifest": "psc-evidence-manifest/1 binds the semantic lock, knowledge roots and role-tagged archive artifacts. Caller pins its exact identity and semantic lock independently.",
+  "semanticLock": "Capsules require psc-semantic-lock/1 and a trusted local semanticLockPolicy (expectedSemanticIdentityId, allowedAssumptions artifact IDs, allowedCapabilities, requiredToolchainRoles, optional resourceLimits). The verifier replays byte/graph/policy consistency before any claim checker. Knowledge context must bind the same lock. Arbitrary opaque or legacy prototype locks cannot satisfy this path.",
+  "validity": "Exact consumer-selected semantic identity and scope; all dependency edges checked against six supported target kinds; iterative acyclic closure; explicit allowed assumptions; every referenced artifact rehashed under aggregate budgets.",
+  "claims": "Proved/validated claims require a caller-selected claimId to exact subjectId, checkerId and claimClass mapping and fresh certificate-boundary replay. Unproved, empirical and advisory labels cannot meet required checked claims. Supersession and migration references carry no implicit preservation or context-widening authority.",
+  "provenance": "Ed25519 verifies psc-archive-signature/1 plus exact manifest identity using caller-selected public keys and required signer IDs. Authentication does not imply semantic validity.",
+  "cli": "node scripts/pscv-verify.mjs --capsule FILE --policy TRUSTED_LOCAL_POLICY; only built-in Core proof (with pinned local provider assets) and closed-literal Wasm binary checker adapters are selectable; full compiler and live registry are not required",
+  "outcome": "Audit data only; never creates a CheckedCore handle or reports release acceptance. Unsupported certificates cannot be accepted as proved.",
+  "checkedLocally": "Focused real integer-equality validator replay, actual Ed25519 verification, context/assumption/evidence/subject/tamper/budget/typed-edge rejection, and metadata-only CLI path. No new Lean theorem or global preservation claim.",
+  "remaining": [
+    "Replay committed actual Lean proof slices and target validators through complete shipped checker assets",
+    "Extend the shipped wasm-literal-offline/1 standalone distribution with pinned Core provider assets and an optional Wasm Component capsule",
+    "Bind all high-value release archive roles to actual release sources, toolchains, targets and provenance",
+    "Implement and check explicit cross-context KnowledgeMigration relations and typed negative/reuse records",
+    "Independent parser/resource/signature/hostile-input assurance and archive longevity exercises"
+  ],
+  "references": ["THE_PSCV_COMPILER_REFERENCE_VERSION_3.md#33", "https://nodejs.org/api/crypto.html#cryptoverifyalgorithm-data-key-signature-callback"]
+}

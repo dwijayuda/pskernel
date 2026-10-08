@@ -390,11 +390,54 @@ def psTestInductiveGrouping : Bool :=
         && encoded.contains "\"v\":\"left\""
         && encoded.contains "\"v\":\"right\""
 
+def psTestBridgeStackSafeFolds : Bool :=
+  let combine : String -> String -> String := fun value tail => value ++ "(" ++ tail ++ ")"
+  let checked : String -> String -> Except String String := fun value _ => Except.error value
+  let ordered := psListFoldRight combine ["a", "b", "c"] ""
+  let lastError :=
+    match psListFoldRightExcept checked ["first", "last"] "" with
+    | Except.error value => value == "last"
+    | Except.ok _ => false
+  ordered == "a(b(c()))" && lastError
+
+def psTestBridgeNestedCollectionOrder : Bool :=
+  let bad : String -> PsDeclaration := fun text =>
+    PsDeclaration.inductiveDecl {
+      name := psRootName text
+      levelParams := []
+      type := PsExpr.sortE (PsLevel.succ PsLevel.zero)
+      numParams := 0
+      numIndices := 0
+      constructors := [psRootName (text ++ "Missing")]
+      isStructure := false
+    }
+  let declarations := [bad "first", bad "last"]
+  match psCheckedNestedCollect declarations declarations with
+  | Except.error (PsCheckedAdmissionCodecError.missingConstructor name) =>
+      psNameEq name (psRootName "lastMissing")
+  | _ => false
+
+def psTestBridgeLongDeclarationCollection : Bool :=
+  let declaration := PsDeclaration.axiomDecl (psRootName "ignored") [] (PsExpr.sortE PsLevel.zero)
+  let declarations := List.replicate 20000 declaration
+  match psCheckedNestedCollect declarations declarations with
+  | Except.error _ => false
+  | Except.ok values => values.isEmpty
+
+def psTestBridgeLongJsonJoin : Bool :=
+  let values := (List.range 10000).map fun index =>
+    if index % 3 == 0 then "" else "λ😀" ++ toString index
+  psJsonJoin "," values == String.intercalate "," values
+
 structure PsBridgeNamedTest where
   name : String
   passed : Bool
 
 def psBridgeTests : List PsBridgeNamedTest := [
+  { name := "stack-safe right folds preserve order and diagnostic precedence", passed := psTestBridgeStackSafeFolds },
+  { name := "nested admission collection keeps rightmost failure", passed := psTestBridgeNestedCollectionOrder },
+  { name := "long declaration collection", passed := psTestBridgeLongDeclarationCollection },
+  { name := "long Unicode JSON fragment assembly", passed := psTestBridgeLongJsonJoin },
   { name := "canonical definition payload", passed := psTestCanonicalDefinitionPayload },
   { name := "canonical text newline", passed := psTestCanonicalTextNewline },
   { name := "JSON escaping", passed := psTestJsonEscaping },

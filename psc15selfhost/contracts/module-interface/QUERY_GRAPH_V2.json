@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-stage-query-planner/2",
+  "status": "planner-and-host-semantic-reuse-path-implemented",
+  "owner": "packages/project/src/Ps/Project/QueryGraphV2.lean",
+  "profiles": [
+    "PSC1-selfhost-stable/1",
+    "PSC1-portable-selfhost/1"
+  ],
+  "stages": [
+    "source",
+    "parsed",
+    "elaborated-public",
+    "checked-structural",
+    "certified-behavioral",
+    "assumptions",
+    "runtime",
+    "verified-ir",
+    "specialized-ir",
+    "target"
+  ],
+  "invalidation": "Changes to source, implementation, semantic context, resource policy, target parameters, ordered stage dependencies, fingerprint contracts or semantic fingerprint values rebuild. Duplicate records/dependencies and incomplete identities reject. Source is the stage's declared input projection; a producer cannot silently omit a dependency.",
+  "semanticReuse": "A changed dependency artifact with an unchanged fingerprint requires a consumer-selected rule naming the exact consumer stage, dependency stage and fingerprint contract, with rule artifact and checker identities. The candidate includes both artifacts, both fingerprint projections, the previous pass execution and the full current request for evidence replay.",
+  "authority": "Only rebuild or validateCandidate are returned. There is no green/accepted constructor. Even identical dependency bytes require host replay of exact output/pass evidence and hash/provenance checks. Rule names and cached fingerprint strings are not proofs.",
+  "seed": "The existing QueryGraph/host elaboration seed remains separate. Its ModuleGraph and QueryGraph coding patterns were made portable without changing the APIs; the complete project package now declares and passes the portable implementation profile.",
+  "evidence": "13 focused V2 cases, existing 10 seed query cases and cold/warm host fixture; full PSC1 source checking, TypeScript generation and ProofScript round-trip parity for all four project roots. No global reuse theorem or semantic cache promotion follows.",
+  "runtimeArtifact": "contracts/module-interface/RUNTIME_INTERFACE_ARTIFACT_V1.json: actual combined-module runtime signatures/layouts/imports now have a production artifact/fingerprint and independently replayable projection. This is not a Core or behavioral interface and does not by itself authorize cached output reuse.",
+  "remaining": [
+    "bind per-source-module stage artifacts and complete discovered dependencies",
+    "connect planner projections to live independently validated artifact/evidence handles",
+    "replay real fingerprint adequacy/reuse certificates",
+    "complete admitted Core structural and behavioral interface producers",
+    "global incremental correctness and resource assurance"
+  ],
+  "hostReuseValidation": {
+    "certifiedInterface": "scripts/module-interface-evidence.mjs",
+    "semanticCache": "scripts/semantic-query-cache.mjs",
+    "evidenceCache": "scripts/evidence-cache.mjs",
+    "ruleChecker": "psc-exact-behavioral-interface-reuse/1",
+    "authority": "validated-data-not-kernel-capability",
+    "consumerSelection": "The caller independently selects both expectedCandidateId and expectedActionId. The exact candidate digest binds the entire ordered obligation set; untrusted cached bytes cannot select an action or remove reuse checks."
+  },
+  "v5IdentityGate": "contracts/compiler/QUERY_CONTEXT_V1.json; PsQueryPlanBoundStage explicitly gates old staged planning by profile/extension/action/pass/query identities and rejects trust-expanding/unassured/unknown effects. Host query keys cover every action input, and effect consumption invalidates all undeclared preservation."
+}

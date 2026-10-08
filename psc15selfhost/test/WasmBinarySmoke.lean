@@ -1,5 +1,6 @@
 import Ps.BackendWasm.Lower
 import Ps.BackendWasm.Binary
+import Ps.BackendWasm.ValidateIr
 
 def psWasmSmokeProfile : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }
@@ -218,10 +219,100 @@ def psWasmSmokeU32ArrayThree : PsVerifiedIrExpr :=
     (psWasmSmokeU32ArrayTwo)
     (psWasmSmokeU32Literal 30)
 
+def psWasmSmokeSelectedFunction : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.ifE (PsVerifiedIrExpr.var "choose")
+    (PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "x" psWasmSmokeU32Type]
+      psWasmSmokeU32Type
+      (PsVerifiedIrExpr.intrinsic
+        (PsVerifiedIrIntrinsic.machineIntBinary PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerBinaryOp.add)
+        [] [PsVerifiedIrExpr.var "x", PsVerifiedIrExpr.var "offset"]))
+    (PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "x" psWasmSmokeU32Type]
+      psWasmSmokeU32Type
+      (PsVerifiedIrExpr.intrinsic
+        (PsVerifiedIrIntrinsic.machineIntBinary PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerBinaryOp.sub)
+        [] [PsVerifiedIrExpr.var "x", PsVerifiedIrExpr.var "offset"]))
+
+
+def psWasmSmokeUnitType : PsVerifiedIrType := .primitive .unit
+def psWasmSmokeUnit : PsVerifiedIrExpr := .literal .unit
+def psWasmSmokeUnitCall (name : String) (arguments : List PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  .call (.var name) [] arguments
+
+def psWasmSmokeUnitArray : PsVerifiedIrExpr :=
+  psWasmSmokeArrayPush psWasmSmokeUnitType
+    (psWasmSmokeArrayPush psWasmSmokeUnitType (psWasmSmokeArrayEmpty psWasmSmokeUnitType 2)
+      (PsVerifiedIrExpr.var "unitValue"))
+    (psWasmSmokeUnitCall "unitIdentity" [psWasmSmokeUnit])
+
+def psWasmSmokeUnitDeclarations : List PsVerifiedIrDeclaration :=
+  let unit := psWasmSmokeUnitType
+  let token := psWasmSmokeUnit
+  let boolean := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+  let param := PsVerifiedIrParameter.mk "value" unit
+  let value := PsVerifiedIrExpr.var "value"
+  let decl := fun name parameters result body =>
+    PsVerifiedIrDeclaration.mk name [] parameters result body
+  let call := psWasmSmokeUnitCall
+  let unitArray := psWasmSmokeUnitArray
+  let unitFn := PsVerifiedIrType.function [unit] unit
+  let mapper := PsVerifiedIrExpr.lambda [param] unit (call "unitIdentity" [value])
+  let foldFn := PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "state" unit, param] unit
+    (call "unitIdentity" [PsVerifiedIrExpr.var "state"])
+  let trapping := PsVerifiedIrExpr.lambda [param] unit
+    (PsVerifiedIrExpr.letE "mustEvaluate" psWasmSmokeU32Type
+      (psWasmSmokeArrayGet psWasmSmokeU32Type
+        (psWasmSmokeArrayEmpty psWasmSmokeU32Type 0) (psWasmSmokeNatLiteral 0)) token)
+  [
+    decl "unitValue" [] unit token,
+    decl "unitIdentity" [param] unit value,
+    decl "unitLocal" [] unit
+      (.letE "saved" unit (call "unitIdentity" [PsVerifiedIrExpr.var "unitValue"]) (.var "saved")),
+    decl "unitIf" [PsVerifiedIrParameter.mk "choose" boolean, param] unit
+      (.ifE (.var "choose") (call "unitIdentity" [value]) (.var "unitValue")),
+    decl "unitArgument" [PsVerifiedIrParameter.mk "choose" boolean] unit
+      (call "unitIdentity" [.ifE (.var "choose") (.var "unitValue") (call "unitLocal" [])]),
+    decl "unitMatch" [PsVerifiedIrParameter.mk "choose" boolean] unit
+      (.matchE "MaybeU32" []
+        (.ifE (.var "choose") (.constructor "MaybeU32" "none" [] [])
+          (.constructor "MaybeU32" "some" [] [("value", psWasmSmokeU32Literal 9)]))
+        [("none", [], call "unitLocal" []),
+          ("some", [PsVerifiedIrMatchBinding.mk "value" "matched" psWasmSmokeU32Type],
+            call "unitIdentity" [token])]),
+    decl "unitApply" [PsVerifiedIrParameter.mk "fn" unitFn, param] unit
+      (.call (.var "fn") [] [value]),
+    decl "unitLambda" [PsVerifiedIrParameter.mk "choose" boolean] unit
+      (call "unitApply" [.lambda [param] unit
+        (call "unitIf" [.var "choose", value]), token]),
+    decl "unitRecord" [] unit
+      (.projection "UnitBox" [] (.record "UnitBox" [] [("token", call "unitLocal" [])]) "token"),
+    decl "unitMapSize" [] boolean
+      (.intrinsic .natEq []
+        [psWasmSmokeArraySize unit (psWasmSmokeArrayMap unit unit mapper unitArray), psWasmSmokeNatLiteral 2]),
+    decl "unitMapToU32" [] psWasmSmokeU32Type
+      (psWasmSmokeArrayGet psWasmSmokeU32Type
+        (psWasmSmokeArrayMap unit psWasmSmokeU32Type
+          (.lambda [param] psWasmSmokeU32Type (psWasmSmokeU32Literal 42)) unitArray)
+        (psWasmSmokeNatLiteral 1)),
+    decl "unitFold" [] unit
+      (psWasmSmokeArrayFoldl unit unit foldFn token unitArray
+        (psWasmSmokeNatLiteral 0) (psWasmSmokeNatLiteral 2)),
+    decl "unitTrappingMap" [] (psWasmSmokeArrayType unit)
+      (psWasmSmokeArrayMap unit unit trapping unitArray),
+    decl "unitEmptyMapSize" [] boolean
+      (.intrinsic .natEq []
+        [psWasmSmokeArraySize unit
+          (psWasmSmokeArrayMap unit unit trapping (psWasmSmokeArrayEmpty unit 0)), psWasmSmokeNatLiteral 0]),
+    decl "unitTailCountdown" [PsVerifiedIrParameter.mk "remaining" psWasmSmokeU32Type] unit
+      (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "remaining", psWasmSmokeU32Literal 0])
+        token (call "unitTailCountdown"
+          [.intrinsic (.machineIntBinary .uint32 .sub) [] [.var "remaining", psWasmSmokeU32Literal 1]]))
+  ]
+
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
     imports := []
     structures := [
+      PsVerifiedIrStructure.mk "UnitBox" [] [PsVerifiedIrStructureField.mk "token" psWasmSmokeUnitType],
       {
         name := "Point"
         typeParameters := []
@@ -350,7 +441,85 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
         ]
       }
     ]
-    declarations := [
+    declarations := psWasmSmokeUnitDeclarations ++ [
+      {
+        name := "largeLiteralContentExact"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          let head := String.ofList (List.replicate 4095 'A');
+          let tail := String.ofList (List.replicate 5000 'B');
+          psWasmSmokeStringEq
+            (psWasmSmokeStringLiteral (head ++ "😀é" ++ tail ++ tail))
+            (psWasmSmokeStringAppend
+              (psWasmSmokeStringAppend (psWasmSmokeStringLiteral head)
+                (psWasmSmokeStringLiteral "😀é"))
+              (psWasmSmokeStringAppend (psWasmSmokeStringLiteral tail)
+                (psWasmSmokeStringLiteral tail)))
+      },
+      {
+        name := "longUtf8ByteSizeExact"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natEq []
+          [psWasmSmokeStringUtf8ByteSize
+             (let part := psWasmSmokeStringLiteral (String.ofList (List.replicate 5000 '😀'));
+              let half := psWasmSmokeStringAppend part part;
+              psWasmSmokeStringAppend half half),
+           psWasmSmokeNatLiteral 80000]
+      },
+      {
+        name := "tailCountdown"
+        typeParameters := []
+        parameters := [{ name := "remaining", type := psWasmSmokeU32Type },
+                       { name := "total", type := psWasmSmokeU32Type }]
+        resultType := psWasmSmokeU32Type
+        body := PsVerifiedIrExpr.ifE
+          (PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntCompare PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerCompareOp.eq) []
+            [PsVerifiedIrExpr.var "remaining",
+             PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.machineInteger PsVerifiedIrMachineIntegerType.uint32 0)])
+          (PsVerifiedIrExpr.var "total")
+          (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "tailCountdown") []
+            [PsVerifiedIrExpr.intrinsic
+               (PsVerifiedIrIntrinsic.machineIntBinary PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerBinaryOp.sub) []
+               [PsVerifiedIrExpr.var "remaining", PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.machineInteger PsVerifiedIrMachineIntegerType.uint32 1)],
+             PsVerifiedIrExpr.intrinsic
+               (PsVerifiedIrIntrinsic.machineIntBinary PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerBinaryOp.add) []
+               [PsVerifiedIrExpr.var "total", PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.machineInteger PsVerifiedIrMachineIntegerType.uint32 1)]])
+      },
+
+      {
+        name := "applySelectedFunction"
+        typeParameters := []
+        parameters := [
+          PsVerifiedIrParameter.mk "choose" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool),
+          PsVerifiedIrParameter.mk "offset" psWasmSmokeU32Type,
+          PsVerifiedIrParameter.mk "value" psWasmSmokeU32Type]
+        resultType := psWasmSmokeU32Type
+        body := PsVerifiedIrExpr.call psWasmSmokeSelectedFunction [] [PsVerifiedIrExpr.var "value"]
+      },
+      {
+        name := "applyComputedFunction"
+        typeParameters := []
+        parameters := [PsVerifiedIrParameter.mk "offset" psWasmSmokeU32Type,
+          PsVerifiedIrParameter.mk "value" psWasmSmokeU32Type]
+        resultType := psWasmSmokeU32Type
+        body := PsVerifiedIrExpr.call
+          (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "makeAdder") [] [PsVerifiedIrExpr.var "offset"])
+          [] [PsVerifiedIrExpr.var "value"]
+      },
+      {
+        name := "applyGlobalFunctionValue"
+        typeParameters := []
+        parameters := [PsVerifiedIrParameter.mk "value" psWasmSmokeU32Type]
+        resultType := psWasmSmokeU32Type
+        body := PsVerifiedIrExpr.letE "fn" psWasmSmokeU32FunctionType
+          (PsVerifiedIrExpr.var "incrementU32")
+          (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "fn") [] [PsVerifiedIrExpr.var "value"])
+      },
       {
         name := "addU32"
         typeParameters := []
@@ -2199,6 +2368,8 @@ def main : IO Unit := do
   | Except.ok module =>
       let moduleWithArraySmoke :=
         psWasmAddGcArrayTargetSmoke module
+      let .ok _ := psWasmIrValidateModule moduleWithArraySmoke
+        | throw (IO.userError "PSC1_BACKEND_WASM_BINARY_SMOKE: target validation failed")
       match psWasmEncodeModule moduleWithArraySmoke with
       | Except.error error =>
           let detail :=

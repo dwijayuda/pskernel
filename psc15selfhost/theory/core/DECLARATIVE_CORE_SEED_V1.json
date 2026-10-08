@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-declarative-core-seed/1",
+  "status": "definition-seed-unproved",
+  "semanticProfile": "lean4.34-core",
+  "judgments": [
+    "WellFormedLevel",
+    "LevelEq",
+    "WellFormedExpr",
+    "HasType",
+    "DeclarativeConversion",
+    "KernelAlgorithmicDefEq",
+    "WellFormedDeclaration",
+    "AdmitsDeclaration"
+  ],
+  "relationPolicy": {
+    "declarativeConversion": "mathematical-theory-relation",
+    "algorithmicDefEq": "exact-pinned-compatibility-algorithm",
+    "runtimeValueEquality": "separate-runtime-relation"
+  },
+  "theoremTargets": [
+    {
+      "id": "psc-algorithmic-defeq-sound/1",
+      "status": "target-unproved",
+      "statement": "KernelAlgorithmicDefEq(a,b) implies DeclarativeConversion(a,b)"
+    },
+    {
+      "id": "psc-cache-refines-uncached-defeq/1",
+      "status": "target-unproved",
+      "statement": "cached acceptance implies uncached acceptance for the same query"
+    },
+    {
+      "id": "psc-checker-sound/1",
+      "status": "target-unproved",
+      "statement": "checker acceptance implies declarative admission"
+    },
+    {
+      "id": "psc-environment-model/1",
+      "status": "target-unproved",
+      "statement": "accepted environments admit a declared semantic model under explicit assumptions"
+    }
+  ],
+  "noProofClaim": true,
+  "leanImplementation": "packages/pscv-theory/proof/Ps/Theory/Refinement.lean",
+  "provedSlices": [
+    {
+      "id": "psc-declarative-conversion-refl/1",
+      "status": "proved-lean",
+      "statement": "DeclarativeConversion(expr,expr)",
+      "symbol": "psDeclarativeConversionRefl"
+    },
+    {
+      "id": "psc-kernel-exact-defeq-sound/1",
+      "status": "proved-lean",
+      "statement": "exact syntactic identity produces declarative conversion evidence",
+      "symbol": "psKernelExactDefEqSound"
+    },
+    {
+      "id": "psc-erasure-proof-declaration-omission/1",
+      "status": "proved-lean",
+      "statement": "if the current erasure classifier proves a top-level definition type is Prop, psEraseDefinition omits the declaration",
+      "symbol": "psErasureProofDeclarationOmitted"
+    },
+    {
+      "id": "psc-specialization-literal-preservation/1",
+      "status": "proved-lean",
+      "statement": "specialization preserves the closed monomorphic UInt32 literal module exactly",
+      "symbol": "psSpecializationLiteralModulePreserves"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-compilation-resource/1",
+  "outcomes": [
+    "accepted",
+    "rejectedInvalid",
+    "declinedUnsupported",
+    "resourceExhausted",
+    "internalError",
+    "infrastructureUnavailable"
+  ],
+  "dimensions": [
+    "sourceBytes",
+    "tokenCount",
+    "syntaxNodes",
+    "syntaxDepth",
+    "moduleCount",
+    "importEdges",
+    "declarationCount",
+    "universeSteps",
+    "reductionSteps",
+    "defeqSteps",
+    "unificationSteps",
+    "instanceSearchSteps",
+    "kernelSteps",
+    "erasureNodes",
+    "runtimeIrNodes",
+    "validationSteps",
+    "specializationInstances",
+    "targetIrNodes",
+    "proofNodes",
+    "certificateBytes",
+    "savefObjects",
+    "savefEdges",
+    "generatedBytes",
+    "diagnosticCount",
+    "wallTime",
+    "cpuTime",
+    "peakMemory",
+    "hostStack"
+  ],
+  "monotonicity": {
+    "statement": "if a semantic operation accepts under a smaller compatible budget, increasing that budget must not change the semantic meaning of success",
+    "status": "target-unproved",
+    "regressionEvidence": "psKernelContractResourceMonotonicityTests"
+  },
+  "classificationRule": "resource exhaustion is not semantic rejection and never creates authority"
+}

@@ -1,3 +1,5 @@
+import { maskLeanSource } from './lean-source-mask.mjs';
+
 // Shared structural source rules for portable self-host implementation profiles.
 // The checks are source-structural rather than file-specific repair guards.
 
@@ -24,80 +26,8 @@ export const portableSelfhostStructuralRuleIds = Object.freeze([
   'untyped-match-let',
   'untyped-numeric-choice-let',
   'layout-let-sequencing',
+  'record-update',
 ]);
-
-function maskLean(source, preserveStrings) {
-  let out = '';
-  let index = 0;
-  let blockDepth = 0;
-  let lineComment = false;
-  let inString = false;
-  let escaped = false;
-
-  while (index < source.length) {
-    const ch = source[index];
-    const next = source[index + 1] ?? '';
-
-    if (lineComment) {
-      if (ch === '\n') {
-        lineComment = false;
-        out += '\n';
-      } else {
-        out += ' ';
-      }
-      index++;
-      continue;
-    }
-
-    if (blockDepth > 0) {
-      if (ch === '/' && next === '-') {
-        blockDepth++;
-        out += '  ';
-        index += 2;
-      } else if (ch === '-' && next === '/') {
-        blockDepth--;
-        out += '  ';
-        index += 2;
-      } else {
-        out += ch === '\n' ? '\n' : ' ';
-        index++;
-      }
-      continue;
-    }
-
-    if (inString) {
-      out += preserveStrings ? ch : (ch === '\n' ? '\n' : ' ');
-      if (escaped) {
-        escaped = false;
-      } else if (ch === '\\') {
-        escaped = true;
-      } else if (ch === '"') {
-        inString = false;
-      }
-      index++;
-      continue;
-    }
-
-    if (ch === '-' && next === '-') {
-      lineComment = true;
-      out += '  ';
-      index += 2;
-    } else if (ch === '/' && next === '-') {
-      blockDepth = 1;
-      out += '  ';
-      index += 2;
-    } else if (ch === '"') {
-      inString = true;
-      out += preserveStrings ? '"' : ' ';
-      index++;
-    } else {
-      out += ch;
-      index++;
-    }
-  }
-
-  return out;
-}
 
 function lineNumberAt(source, offset) {
   let line = 1;
@@ -107,47 +37,13 @@ function lineNumberAt(source, offset) {
   return line;
 }
 
-function stripLineComment(line) {
-  let inString = false;
-  let escaped = false;
-  for (let index = 0; index + 1 < line.length; index++) {
-    const ch = line[index];
-    const next = line[index + 1];
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (ch === '\\') escaped = true;
-      else if (ch === '"') inString = false;
-      continue;
-    }
-    if (ch === '"') {
-      inString = true;
-      continue;
-    }
-    if (ch === '-' && next === '-') return line.slice(0, index);
-  }
-  return line;
-}
-
 function indentation(line) {
   return (line.match(/^(\s*)/u)?.[1] ?? '').replace(/\t/gu, '  ').length;
 }
 
-function delimiterDelta(line) {
-  const code = stripLineComment(line);
+function delimiterDelta(code) {
   let depth = 0;
-  let inString = false;
-  let escaped = false;
   for (const ch of code) {
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (ch === '\\') escaped = true;
-      else if (ch === '"') inString = false;
-      continue;
-    }
-    if (ch === '"') {
-      inString = true;
-      continue;
-    }
     if ('([{'.includes(ch)) depth++;
     else if (')]}'.includes(ch)) depth--;
   }
@@ -459,7 +355,7 @@ function layoutLetViolations(source) {
 
     if (
       seenAssignment &&
-      !stripLineComment(lines[end]).trim().endsWith(';')
+      !lines[end].trim().endsWith(';')
     ) {
       hits.push({
         id: 'layout-let-sequencing',
@@ -517,13 +413,39 @@ function scalarMemberViolations(lines) {
   return hits;
 }
 
+
+function recordUpdateViolations(code) {
+  const frames = [];
+  const hits = [];
+  let grouping = 0;
+  for (const token of code.matchAll(/\{|\}|\(|\)|\[|\]|:=|\bwith\b/gu)) {
+    const text = token[0];
+    if (text === '(' || text === '[') { grouping++; continue; }
+    if (text === ')' || text === ']') { grouping--; continue; }
+    if (text === '{') {
+      frames.push({ offset: token.index, grouping, assigned: false });
+      continue;
+    }
+    if (text === '}') { frames.pop(); continue; }
+    const frame = frames.at(-1);
+    if (!frame || frame.grouping !== grouping) continue;
+    if (text === ':=') frame.assigned = true;
+    if (text === 'with' && !frame.assigned) {
+      hits.push({ id: 'record-update', line: lineNumberAt(code, frame.offset),
+        text: code.slice(frame.offset, token.index + 4).trim() });
+      frame.assigned = true;
+    }
+  }
+  return hits;
+}
+
 export function findSelfhostStructuralViolations(
   source,
   enabledRuleIds = portableSelfhostStructuralRuleIds,
 ) {
   const enabled = new Set(enabledRuleIds);
-  const code = maskLean(source, false);
-  const commentsMasked = maskLean(source, true);
+  const code = maskLeanSource(source);
+  const commentsMasked = maskLeanSource(source, { preserveStrings: true });
   const lines = code.split('\n');
   const stringLines = commentsMasked.split('\n');
   const hits = [];
@@ -597,7 +519,6 @@ export function findSelfhostStructuralViolations(
 
     const arithmeticSegment =
       termSegment
-        .replace(/'(?:\\(?:x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|.)|[^'\\])'/gu, ' ')
         .replace(/->/gu, '  ')
         .replace(/=>/gu, '  ');
     if (
@@ -682,11 +603,14 @@ export function findSelfhostStructuralViolations(
     }
   }
 
+  if (enabled.has('record-update')) {
+    hits.push(...recordUpdateViolations(code));
+  }
   if (enabled.has('tuple-construction')) {
     hits.push(...tupleConstructionViolations(code));
   }
   if (enabled.has('layout-let-sequencing')) {
-    hits.push(...layoutLetViolations(source));
+    hits.push(...layoutLetViolations(code));
   }
 
   return hits

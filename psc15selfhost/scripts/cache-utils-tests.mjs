@@ -27,6 +27,7 @@ try {
 
   const first = await cachedTextTransform({
     projectRoot: scratch,
+    cacheTrust: 'bootstrap-local',
     namespace: "text-test",
     contract: { operation: "test", version: 1 },
     input: "source",
@@ -37,6 +38,7 @@ try {
 
   const second = await cachedTextTransform({
     projectRoot: scratch,
+    cacheTrust: 'bootstrap-local',
     namespace: "text-test",
     contract: { operation: "test", version: 1 },
     input: "source",
@@ -46,6 +48,11 @@ try {
   assert(second.value === first.value, "text cache must preserve exact bytes");
   assert(computes === 1, "text cache hit must not recompute");
 
+  const untrusted = await cachedTextTransform({ projectRoot: scratch, namespace: "text-test",
+    contract: { operation: "test", version: 1 }, input: "source", compute: async () => "fresh-untrusted-output" });
+  assert(untrusted.cache === "untrusted-bypass", "untrusted metadata must not authorize cache reuse");
+  assert(untrusted.value === "fresh-untrusted-output", "untrusted calls must compute independently");
+
   await writeFile(
     path.join(process.env.PSC_CACHE_DIR, "text-test", first.key, "output.txt"),
     "corrupt\n",
@@ -53,6 +60,7 @@ try {
   );
   const repaired = await cachedTextTransform({
     projectRoot: scratch,
+    cacheTrust: 'bootstrap-local',
     namespace: "text-test",
     contract: { operation: "test", version: 1 },
     input: "source",
@@ -77,6 +85,7 @@ try {
   ];
   await storeFileSetCache({
     projectRoot: scratch,
+    cacheTrust: 'bootstrap-local',
     namespace: "files-test",
     key: fileKey,
     outputs: fileOutputs,
@@ -86,6 +95,7 @@ try {
   assert(
     await restoreFileSetCache({
       projectRoot: scratch,
+    cacheTrust: 'bootstrap-local',
       namespace: "files-test",
       key: fileKey,
       outputs: fileOutputs,
@@ -101,6 +111,9 @@ try {
     "file-set cache must restore exact declarations",
   );
 
+  assert(!(await restoreFileSetCache({ projectRoot: scratch, namespace: "files-test", key: fileKey,
+    outputs: fileOutputs })), "default untrusted file-set restore must fail closed without evidence");
+
   await writeFile(
     path.join(process.env.PSC_CACHE_DIR, "files-test", fileKey, "index.js"),
     "corrupt-cache\n",
@@ -111,6 +124,7 @@ try {
   assert(
     !(await restoreFileSetCache({
       projectRoot: scratch,
+    cacheTrust: 'bootstrap-local',
       namespace: "files-test",
       key: fileKey,
       outputs: fileOutputs,
@@ -129,6 +143,7 @@ try {
   process.env.PSC_NO_CACHE = "1";
   const cold = await cachedTextTransform({
     projectRoot: scratch,
+    cacheTrust: 'bootstrap-local',
     namespace: "text-test",
     contract: { operation: "test", version: 1 },
     input: "source",
@@ -139,6 +154,7 @@ try {
   assert(
     !(await restoreFileSetCache({
       projectRoot: scratch,
+    cacheTrust: 'bootstrap-local',
       namespace: "files-test",
       key: fileKey,
       outputs: fileOutputs,

@@ -125,8 +125,8 @@ def psTestDualSourceLeanNativeMaybeMatch : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export type Maybe<T0>"
-        && leanOutput.contains "\"none\": <T0>(): Maybe<T0>"
-        && leanOutput.contains "\"some\": <T0>(__field0: T0): Maybe<T0>"
+        && leanOutput.contains "[\"none\"]: <T0>(): Maybe<T0>"
+        && leanOutput.contains "[\"some\"]: <T0>(__field0: T0): Maybe<T0>"
         && leanOutput.contains "export const present: Maybe<bigint>"
         && leanOutput.contains "Maybe[\"some\"]<bigint>(1n)"
         && leanOutput.contains "export function getOrZero(m: Maybe<bigint>): bigint"
@@ -148,7 +148,7 @@ def psTestDualSourceLeanNativeStructureProjection : Bool :=
         && leanOutput.contains "export interface User"
         && leanOutput.contains "readonly age: bigint;"
         && leanOutput.contains "export const user: User"
-        && leanOutput.contains "age: 33n"
+        && leanOutput.contains "[\"age\"]: 33n"
         && leanOutput.contains
           "export function ageOf(u: User): bigint { while (true) { return u.age; } }"
   | _, _ => false
@@ -434,11 +434,25 @@ def psTestVerifiedIrValidationAcceptsStructuralReferences : Bool :=
           "value"
           (PsVerifiedIrExpr.literal
             (PsVerifiedIrLiteral.natural 42)))
-        List.nil)
+        List.nil);
+  let module : PsVerifiedIrModule :=
+    PsVerifiedIrModule.mk
+      List.nil
+      (List.cons psVerifiedIrValidationBox List.nil)
+      (List.cons psVerifiedIrValidationMaybe List.nil)
+      (List.cons
+        (PsVerifiedIrDeclaration.mk
+          "probe"
+          List.nil
+          List.nil
+          (PsVerifiedIrType.named
+            "Box"
+            (List.cons psVerifiedIrValidationNatType List.nil))
+          body)
+        List.nil);
   match
       psValidateErasedIrModule
-        (PsErasedIrModule.mk
-          (psVerifiedIrValidationModule body)) with
+        (PsErasedIrModule.mk module) with
   | Except.error _ => false
   | Except.ok _ => true
 

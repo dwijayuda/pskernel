@@ -1,4 +1,4 @@
-name: PSC15 self-host cloud CI
+name: PSCV hosted compiler cloud CI
 
 on:
   push:
@@ -15,6 +15,12 @@ on:
       - "psc15selfhost/**"
       - ".github/workflows/psc15selfhost-cloud.yml"
   workflow_dispatch:
+    inputs:
+      legacy_selfhost:
+        description: 'Run historical PSC1 source/profile and compiler self-application checks'
+        type: boolean
+        default: false
+        required: false
 
 permissions:
   contents: read
@@ -58,11 +64,17 @@ jobs:
           test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
           node --version
 
+      - name: Check hosted execution policy and PSCV language authority
+        working-directory: psc15selfhost
+        run: npm run check:execution-policy
+
       - name: Audit portable self-host source
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: node check-psc1-source.mjs --all-portable
 
       - name: Enforce portable self-host implementation profiles
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: npm run check:portable-selfhost-profile
 
@@ -74,6 +86,14 @@ jobs:
           npm run check:runtime-semantics
           npm run test:bootstrap-closure-contract
           npm run test:bootstrap-root-minimality
+
+      - name: Check artifact evidence and checked-service boundaries
+        working-directory: psc15selfhost
+        run: |
+          npm run test:pass-evidence
+          npm run test:comparator-v1
+          npm run test:savef
+          npm run test:factorybench
 
       - name: Build semantic compiler layers
         working-directory: psc15selfhost
@@ -92,13 +112,21 @@ jobs:
             PsDriverRust \
             PsBackendWasm \
             psc1 \
+            psc1_translation_tests \
+            psc1_bridge_tests \
+            psc1_ir_specialize_tests \
             psc1_erasure_tests \
+            psc1_verified_ir_strict_tests \
+            pscv_interface_ir_tests \
+            pscv_js_abi_tests \
+            pscv_ir_encoding_tests \
             psc1_project_query_graph_tests \
             psc1_host_project_query_tests \
             psc2_joint_closure_inventory \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
             psc1_backend_js_tests \
+            psc1_backend_js_validate_tests \
             psc1_backend_js_diff_fixture \
             psc1_backend_rust_source_tests \
             psc1_backend_wasm_tests \
@@ -108,23 +136,70 @@ jobs:
         working-directory: psc15selfhost
         run: npm run check:prelude-declaration-parity
 
+      - name: Run historical compiler-source subset checks
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
+        working-directory: psc15selfhost
+        run: npm run check:legacy-compiler-sources
+
+      - name: Run frontend language and specialization corpus
+        working-directory: psc15selfhost
+        run: |
+          lake exe psc1_translation_tests
+          lake exe psc1_bridge_tests
+          lake exe psc1_ir_specialize_tests
+
       - name: Run VerifiedIR and erasure corpus
         working-directory: psc15selfhost
-        run: lake exe psc1_erasure_tests
+        run: |
+          lake exe psc1_erasure_tests
+          npm run test:erasure-eta
+
+      - name: Run strict VerifiedIR invariant corpus
+        working-directory: psc15selfhost
+        run: lake exe psc1_verified_ir_strict_tests
+
+      - name: Check portable interface and link boundaries
+        working-directory: psc15selfhost
+        run: |
+          lake exe pscv_interface_ir_tests
+          lake exe pscv_js_abi_tests
+          node --experimental-vm-modules --test scripts/js-scalar-abi.test.mjs
+          lake exe pscv_ir_encoding_tests
+          node --test scripts/ir-artifact.test.mjs
+          npm run test:ir-invariant-replay
+
+      - name: Run WasmIR target validation corpus
+        working-directory: psc15selfhost
+        run: |
+          lake exe psc1_backend_wasm_ir_tests
+
+      - name: Run JsIR target validation corpus
+        working-directory: psc15selfhost
+        run: |
+          lake exe psc1_backend_js_validate_tests
 
       - name: Check generalized erasure source equality guard
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: node scripts/check-erasure-primitive-application-equality-selfhost-source-syntax.mjs
 
       - name: Run project query graph corpus
         working-directory: psc15selfhost
-        run: lake exe psc1_project_query_graph_tests
+        run: npm run test:project-query-graph
+
+      - name: Check portable logical theory translation
+        working-directory: psc15selfhost
+        run: npm run check:theory-bridge
+
+      - name: Check portable foreign interfaces and WIT boundary
+        working-directory: psc15selfhost
+        run: npm run check:foreign-interface
 
       - name: Run host project query reuse corpus
         working-directory: psc15selfhost
         run: lake exe psc1_host_project_query_tests
 
-      - name: Run minimal self-host corpus
+      - name: Run inherited frontend regression corpus
         working-directory: psc15selfhost
         run: lake exe psc2_minimal_selfhost_tests
 
@@ -138,11 +213,9 @@ jobs:
 
       - name: Differential direct JavaScript against TS to tsc
         working-directory: psc15selfhost
-        run: node scripts/backend-js-differential.test.mjs
-
-      - name: Prove direct JavaScript whole-compiler self-host fixed point
-        working-directory: psc15selfhost
-        run: npm run test:direct-js-selfhost
+        run: |
+          node scripts/backend-js-differential.test.mjs
+          node scripts/backend-js-tail.test.mjs
 
       - name: Run Rust source driver corpus
         working-directory: psc15selfhost
@@ -151,27 +224,26 @@ jobs:
       - name: Run WebAssembly backend corpus
         working-directory: psc15selfhost
         run: |
-          lake exe psc1_backend_wasm_tests
+          npm run check:wasm-translation-validator
           lake exe psc1_backend_wasm_binary_smoke > /tmp/psc15-wasm-bytes.txt
           node scripts/backend-wasm-runtime.test.mjs /tmp/psc15-wasm-bytes.txt
+          npm run test:wasm-runtime-strings
 
       - name: Build and instantiate direct Wasm whole compiler
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: npm run test:direct-wasm-whole-compiler
 
-      - name: Prove direct Wasm whole-compiler self-host fixed point
-        working-directory: psc15selfhost
-        run: npm run test:direct-wasm-selfhost
-
       - name: Self-check portable implementation profiles
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: npm run check:portable-selfhost-contract
 
-      - name: Build checked Lean provider integration
+      - name: Build hosted compiler and checked provider integration
         working-directory: psc15selfhost/lean-checked
         run: |
+          npm --prefix .. run build:psc
           lake build \
-            psc2_lean_checked_seed \
             psc2_lean_kernel_provider \
             psc2_lean_kernel_provider_tests
 
@@ -199,13 +271,21 @@ jobs:
         run: npm run check:semantic-boundaries
 
       - name: Self-check changed compiler IR source
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/Model.lean
 
       - name: Self-check changed compiler API source
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: lake exe psc1 check packages/compiler/src/Ps/Compiler/Api.lean
 
       - name: Self-check bootstrap composition root
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: lake exe psc1 check packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean
+
+      # Self-host source/profile and fixed-point checks are historical opt-in
+      # evidence. They do not constrain the hosted compiler implementation.
+      # Runtime/target validators, differential execution and checked production
+      # integration remain ordinary mandatory compiler checks.

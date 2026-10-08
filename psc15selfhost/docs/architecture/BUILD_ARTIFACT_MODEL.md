@@ -470,3 +470,145 @@ Performance regressions become observable without changing semantic code.
 6. module interface identity, not implementation timestamp, drives downstream invalidation.
 7. persistent artifact formats are canonical and versioned.
 8. resident runtime-object caches are optimization only and remain disposable.
+
+## 20. Observed Rust source route
+
+The checked builder accepts `--backend rust --products source --out module.rs`
+(or `metadata`) with a generated compiler exposing
+`psCompilerRustStagesFromPrepared` or an explicitly selected native seed supporting
+`psc-checked-seed-products/3`. One prepared source supplies the actual
+erasure, strict validation and source-emission snapshots. The existing Rust
+source backend preserves generic RuntimeIR; moving to SpecializedIR is an
+explicit migration obligation, not an invented pass in this graph.
+
+The source product uses `rust-source / psc-rust-source/2021`. Its descriptor,
+bundle, action/query identities, archive and evidence envelope follow the common
+publication path. The inherited bundle group `executableArtifacts` includes
+the `target-source` role, so its name does not mean that Rust was compiled.
+Only source bytes are published; compiler acceptance, native binary output,
+hermeticity and global preservation are not established. The native Rust protocol binds the same source-product contract, requires exactly
+two bounded frames and pins its version/profile in every response. Existing bootstrap Cargo tests remain
+separate observations.
+
+The subsequent native-toolchain step must bind source, Cargo manifest and lock,
+exact toolchain/target, dependencies, flags and observed environment. Cargo's
+[`--locked`, `--offline`, and `--frozen`](https://doc.rust-lang.org/cargo/commands/cargo-build.html)
+have distinct meanings: a lock prevents resolution changes; offline prohibits
+network but can change available resolution; frozen combines both. None alone
+proves a complete isolated input closure. A pinned version or successful
+[`rustc` invocation](https://doc.rust-lang.org/rustc/command-line-arguments.html)
+does not prove ProofScript semantic preservation.
+
+## 21. Wasm Unit value and result boundaries
+
+The private Wasm representation uses an `i32` token for source Unit values in
+parameters, locals, captures, aggregate fields and arrays. Existing Unit
+function results, including Canonical scalar exports, retain zero Wasm results.
+An expression is a value producer even when its source type is Unit.
+
+Lowering therefore bridges these representations explicitly: source calls with
+a Unit result reify a zero token after the call; source function/lambda bodies
+produce a token and discard it at the ABI return. Direct calls use the declared
+parameter types, matching closure calls. The generated array-map/fold callbacks
+apply the same result bridge. No callback, argument or discarded let value may
+be skipped: it can diverge or trap.
+
+The return bridge distributes the final discard through tail conditional arms,
+retaining preceding work and dropping exactly the arm's final token. A final
+constant token can be removed directly. This leaves void calls in tail position
+for the existing tail-call pass; it does not promote a value-producing call
+whose result is still dropped. The exact emitted WasmIR and engine validation
+remain required. Canonical Unit parameters remain unsupported in the scalar
+interop profile, independently of this private representation.
+
+This follows the [Core 3.0 instruction stack rules](https://webassembly.github.io/spec/core/valid/instructions.html)
+and [execution rules](https://webassembly.github.io/spec/core/exec/instructions.html)
+reviewed on 2026-10-08. Focused execution covers Unit calls, control flow,
+storage, closures, array callbacks, trap retention and deep tail recursion.
+These observations do not establish global lowering preservation or validator
+soundness.
+
+## 22. Independent claim policies at artifact consumption
+
+The bundle, observed-context and archive verification APIs accept the same
+optional `claimVerification` selection and `claimPolicy` artifact.
+`claimVerification` contains only consumer-selected checker functions keyed by
+exact implementation identity and the allowed claim assumptions. A policy
+requires explicit verification configuration and is a bounded canonical
+`psc-claim-policy/1` nonempty conjunction. It matches exact subjects, profile
+environment, resource policy, evidence class and checker identities.
+
+A shared capture function snapshots checker choices, assumption lists and policy
+bytes before the first resolver or checker callback. Archive pass assumptions
+are captured separately, so claim callbacks cannot expand the independently
+selected pass policy. Archived data cannot supply executable checker code or
+select a more permissive policy. All claim references are resolved and rehashed;
+each selected checker must return acceptance for the exact expected assertion.
+A missing checker, denied assumption, mismatched response or unsatisfied policy
+rejects consumption. A legacy archive without V5 context also rejects a request
+for claim verification instead of silently ignoring it.
+
+Results retain exact verified-claim counts and the selected policy decision
+inside the bundle result (`buildContext.artifactBundle` for archives). These are
+audit records, not live compiler/release capabilities. A scoped claim decision
+does not change the archive's global semantic, preservation, hermeticity or
+release fields. Without a claim request, historical integrity-only behavior is
+preserved. Production builders continue to emit an empty ClaimSet until actual
+evidence adapters exist; an empty set cannot satisfy a nonempty policy.
+
+Focused fixtures exercise the complete archive-to-checker path, identity and
+assumption mismatches, callback mutation and legacy behavior. Their checkers are
+explicit test doubles. Production checker adapters, command-line selection of
+a trusted checker registry, real evidence production and an assured-release
+policy remain implementation obligations; no preservation theorem is asserted.
+
+## 23. Direct JavaScript declaration maps
+
+The JavaScript builder's `--products declaration-map` and `all` selections
+publish a standalone `.d.ts.map` plus declaration-position and replay-recipe
+artifacts. They require the same source declarations already compared with the
+portable writer and a complete captured source-origin table. Missing required
+products reject the build. The native protocol stays unchanged: its existing
+metadata/declaration selection carries the required source evidence.
+
+The source-signature writer records its actual declaration/export chunk
+positions. The map composer reconstructs source signatures, export bindings
+and OriginGraph, then composes optional original-source preparation. JavaScript
+and declaration maps share UTF-16 conversion, original-source reconstruction
+and unmapped line-boundary handling. Original declaration, executable and
+historical map identities are preserved by this extraction.
+
+[TypeScript's declaration-map option](https://www.typescriptlang.org/tsconfig/declarationMap.html)
+supports navigation back to original source. Its
+[pinned declaration emitter](https://raw.githubusercontent.com/microsoft/TypeScript/v5.9.3/src/compiler/emitter.ts)
+uses a distinct declaration printer and a shared map-writing path. PSC follows
+that separation while retaining source PublicApiIR as the signature owner.
+[ECMA-426](https://tc39.es/ecma426/) supplies the map encoding and coordinate
+conventions. These references were reviewed on 2026-10-08.
+
+The current map is deliberately coarse: declaration and export lines map to
+their source declaration anchor; terminators, synthetic output and absent
+origins remain unmapped. It does not claim token/type-expression correspondence.
+Maps embed the captured original text when preparation evidence is supplied.
+URL annotation is a separate packaging obligation, so existing declaration
+bytes remain unchanged and automatic editor discovery is not claimed.
+
+New products use registry snapshot V2 and uniform derivation/4. V1 snapshots
+and earlier derivations remain readable with their original derivation rules.
+The common graph records the map pass, bundles identify all three products,
+and archive readers reconstruct them against independently pinned parents.
+Successful map replay remains debug metadata, not semantic preservation.
+
+## Opt-in direct-JS source-map linking (V5.1)
+
+`--backend javascript --products linked` selects the existing source/declaration
+map closure, then an explicit packaging pass. Both standalone ECMA-426 maps
+retain their original unlinked printer/declaration positions. Original `.js`
+and `.d.ts` bytes are archived without modification; linked outputs have
+separate ArtifactIds and trailing unmapped `//# sourceMappingURL=` directives.
+The graph publishes linked output files and retains map/recipe evidence;
+the independent archive consumer recomputes both linked identities from four
+original products and refuses mismatched filenames or changed bytes.
+Existing modes and V1/V2 registries retain historical output identities.
+Only V3 and uniform derivation/5 select linking. A link is developer metadata,
+not a proof of target preservation, IDE navigation, reproducibility or DDC.

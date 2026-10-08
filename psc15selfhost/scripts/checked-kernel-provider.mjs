@@ -51,9 +51,26 @@ const descriptors = Object.freeze({
 });
 
 export function checkedKernelDescriptor(selector = defaultCheckedKernel) {
-  const descriptor = descriptors[selector];
+  const descriptor = Object.hasOwn(descriptors, selector) ? descriptors[selector] : undefined;
   if (!descriptor) throw new Error(`PSC2_CHECKED_KERNEL_UNSUPPORTED: ${selector}`);
   return descriptor;
+}
+
+// Resolve ambient executable selection once so an observed build can capture
+// and pass the exact same selection into its later checker invocation.
+export function selectedCheckedKernelOptions(selector, options = {}) {
+  checkedKernelDescriptor(selector);
+  if (selector === 'pskernel-core') return Object.freeze({ coreBinaryPath: path.resolve(
+    options.coreBinaryPath ?? process.env.PSC_KERNEL_CORE_PROVIDER_BIN ??
+    path.join(root, '.lake/build/bin/psc_kernel_core_provider' + nativeSuffix)) });
+  if (selector !== 'lean434') return Object.freeze({});
+  const developmentBinary = path.join(root, 'lean-checked/.lake/build/bin/psc2_lean_kernel_provider' + nativeSuffix);
+  const slimSourceBinary = path.join(root, 'packages/pskernel-lean/.lake/build/bin/psc2_lean_kernel_provider' + nativeSuffix);
+  const binaryPath = options.nativeBinaryPath ?? process.env.PSC_LEAN_KERNEL_PROVIDER_BIN ??
+    (existsSync(developmentBinary) ? developmentBinary : undefined) ??
+    (existsSync(slimSourceBinary) ? slimSourceBinary : undefined);
+  if (!binaryPath) throw new Error('PSC2_CHECKED_NATIVE_PROVIDER_MISSING: build the current native provider or set PSC_LEAN_KERNEL_PROVIDER_BIN; stale package prebuilts are not used by the default checked profile');
+  return Object.freeze({ nativeBinaryPath: path.resolve(binaryPath) });
 }
 
 function assertSemanticIdentity(result, selector) {
@@ -101,23 +118,7 @@ export async function checkAdmissionsWithKernel(
     });
   } else if (selector === 'lean434') {
     const provider = await import('../packages/pskernel-lean/index.mjs');
-    const developmentBinary = path.join(
-      root,
-      'lean-checked/.lake/build/bin/psc2_lean_kernel_provider' + nativeSuffix,
-    );
-    const slimSourceBinary = path.join(
-      root,
-      'packages/pskernel-lean/.lake/build/bin/psc2_lean_kernel_provider' + nativeSuffix,
-    );
-    const binaryPath = options.nativeBinaryPath ??
-      process.env.PSC_LEAN_KERNEL_PROVIDER_BIN ??
-      (existsSync(developmentBinary) ? developmentBinary : undefined) ??
-      (existsSync(slimSourceBinary) ? slimSourceBinary : undefined);
-    if (!binaryPath) {
-      throw new Error(
-        'PSC2_CHECKED_NATIVE_PROVIDER_MISSING: build the current native provider or set PSC_LEAN_KERNEL_PROVIDER_BIN; stale package prebuilts are not used by the default checked profile',
-      );
-    }
+    const { nativeBinaryPath: binaryPath } = selectedCheckedKernelOptions(selector, options);
     result = provider.checkCanonicalAdmissions(admissions, {
       timeoutMs,
       binaryPath,

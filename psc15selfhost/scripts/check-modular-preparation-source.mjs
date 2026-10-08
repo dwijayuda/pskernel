@@ -15,7 +15,7 @@ const cases = [
     'compiler.psCompilerPrepareElaborated(elaborated)',
     'compiler.psCompilerTypeScriptFromPrepared(prepared)',
   ]],
-  ['packages/compiler/src/Ps/Compiler/Api.lean', [
+  ['packages/compiler/src/Ps/Compiler/Candidate.lean', [
     'psCompilerElaborateSourcesWorker sourceKind rest',
     'match psCompilerParseSource sourceKind source with',
     'match psElabModule environment sourceModule with',
@@ -64,8 +64,8 @@ assert(
   !generatedSelfhost.includes('aggregate'),
   'generated-JS selfhost must not contain an implicit aggregate preparation mode',
 );
-const api = await readFile(new URL('../packages/compiler/src/Ps/Compiler/Api.lean', import.meta.url), 'utf8');
-const prepared = api.slice(api.indexOf('structure PsCompilerAdmissionReadyModule'), api.indexOf('def psCompilerTranslateSource'));
+const api = await readFile(new URL('../packages/compiler/src/Ps/Compiler/Candidate.lean', import.meta.url), 'utf8');
+const prepared = await readFile(new URL('../packages/compiler/src/Ps/Compiler/Model.lean', import.meta.url), 'utf8');
 assert.deepEqual([...prepared.matchAll(/^  (\w+) :/gm)].map(item => item[1]), ['declarations']);
 assert(!api.includes('prepared.canonicalAdmissions'), 'admissions must come from the declarations, never a cached serialization');
 const session = await readFile(new URL('./kernel-checked-session.mjs', import.meta.url), 'utf8');

@@ -6,6 +6,7 @@
   "proofscript": {
     "bootstrap": false,
     "portable": true,
+    "implementationProfile": "PSC1-portable-selfhost/1",
     "sourceRoots": [
       "src"
     ],

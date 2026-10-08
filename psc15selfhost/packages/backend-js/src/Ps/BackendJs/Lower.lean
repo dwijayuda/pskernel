@@ -58,7 +58,9 @@ def psJsIdentifierRestSupported
 
 def psJsIdentifierKeyword
     (value : String) : Bool :=
-  if psStringEq value "arguments" then true
+  if psStringEq value "__ps$utf8" then true
+  else if psStringEq value "__ps$utf8Cache" then true
+  else if psStringEq value "arguments" then true
   else if psStringEq value "await" then true
   else if psStringEq value "break" then true
   else if psStringEq value "case" then true
@@ -169,8 +171,9 @@ def psJsPrimitiveTypeSupported
     (type : PsVerifiedIrPrimitiveType) : Bool :=
   psJsPrimitiveTypeSupportedWithProfile Option.none type
 
-def psJsTypeSupportedWithProfileAndFuel
+def psJsTypeSupportedWithPolicyAndFuel
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (fuel : Nat) :
     PsVerifiedIrType -> Bool :=
   match fuel with
@@ -178,8 +181,8 @@ def psJsTypeSupportedWithProfileAndFuel
       fun (_type : PsVerifiedIrType) => false
   | Nat.succ remaining =>
       let smaller : PsVerifiedIrType -> Bool :=
-        psJsTypeSupportedWithProfileAndFuel
-          profile
+        psJsTypeSupportedWithPolicyAndFuel
+          profile uniform
           remaining;
       fun (type : PsVerifiedIrType) =>
         match type with
@@ -201,31 +204,71 @@ def psJsTypeSupportedWithProfileAndFuel
                   | List.nil => smaller elementType
                   | List.cons _ _ => false
             else
-              psListIsEmpty arguments
+              if uniform then psVerifiedIrListAll smaller arguments
+              else psListIsEmpty arguments
+        | PsVerifiedIrType.typeParameter _ => uniform
         | _ => false
 
+-- Existing callers keep the closed specialization contract.
+def psJsTypeSupportedWithProfileAndFuel
+    (profile : Option PsJsTargetProfile)
+    (fuel : Nat) :
+    PsVerifiedIrType -> Bool :=
+  psJsTypeSupportedWithPolicyAndFuel profile false fuel
+
+def psJsTypeSupportedWithPolicy
+    (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
+    (type : PsVerifiedIrType) : Bool :=
+  psJsTypeSupportedWithPolicyAndFuel
+    profile uniform
+    64
+    type
+
+-- Existing callers keep the closed specialization contract.
 def psJsTypeSupportedWithProfile
     (profile : Option PsJsTargetProfile)
     (type : PsVerifiedIrType) : Bool :=
-  psJsTypeSupportedWithProfileAndFuel
-    profile
-    64
-    type
+  psJsTypeSupportedWithPolicy profile false type
 
 def psJsTypeSupported
     (type : PsVerifiedIrType) : Bool :=
   psJsTypeSupportedWithProfile Option.none type
 
-def psJsOneTypeArgumentSupportedWithProfile
+-- Uniform lowering erases only statically checked type arguments. The strict
+-- wrapper still requires no arguments after closed monomorphization.
+def psJsErasedTypeArgumentsSupported
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
+    (arguments : List PsVerifiedIrType) : Bool :=
+  if uniform then
+    let supported : PsVerifiedIrType -> Bool :=
+      psJsTypeSupportedWithPolicy profile uniform;
+    psVerifiedIrListAll supported arguments
+  else psListIsEmpty arguments
+
+def psJsDeclarationTypeParametersSupported
+    (uniform : Bool)
+    (parameters : List PsVerifiedIrTypeParameter) : Bool :=
+  if uniform then true else psListIsEmpty parameters
+
+def psJsOneTypeArgumentSupportedWithPolicy
+    (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (arguments : List PsVerifiedIrType) : Bool :=
   match arguments with
   | List.nil => false
   | List.cons value rest =>
       match rest with
       | List.nil =>
-          psJsTypeSupportedWithProfile profile value
+          psJsTypeSupportedWithPolicy profile uniform value
       | List.cons _ _ => false
+
+-- Existing callers keep the closed specialization contract.
+def psJsOneTypeArgumentSupportedWithProfile
+    (profile : Option PsJsTargetProfile)
+    (arguments : List PsVerifiedIrType) : Bool :=
+  psJsOneTypeArgumentSupportedWithPolicy profile false arguments
 
 def psJsOneTypeArgumentSupported
     (arguments : List PsVerifiedIrType) : Bool :=
@@ -233,8 +276,9 @@ def psJsOneTypeArgumentSupported
     Option.none
     arguments
 
-def psJsTwoTypeArgumentsSupportedWithProfile
+def psJsTwoTypeArgumentsSupportedWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (arguments : List PsVerifiedIrType) : Bool :=
   match arguments with
   | List.nil => false
@@ -245,15 +289,21 @@ def psJsTwoTypeArgumentsSupportedWithProfile
           match tail with
           | List.nil =>
               if
-                  psJsTypeSupportedWithProfile
-                    profile
+                  psJsTypeSupportedWithPolicy
+                    profile uniform
                     first then
-                psJsTypeSupportedWithProfile
-                  profile
+                psJsTypeSupportedWithPolicy
+                  profile uniform
                   second
               else
                 false
           | List.cons _ _ => false
+
+-- Existing callers keep the closed specialization contract.
+def psJsTwoTypeArgumentsSupportedWithProfile
+    (profile : Option PsJsTargetProfile)
+    (arguments : List PsVerifiedIrType) : Bool :=
+  psJsTwoTypeArgumentsSupportedWithPolicy profile false arguments
 
 def psJsTwoTypeArgumentsSupported
     (arguments : List PsVerifiedIrType) : Bool :=
@@ -440,8 +490,9 @@ def psJsLowerLiteral
     Except PsJsLowerError PsJsIrLiteral :=
   psJsLowerLiteralWithProfile Option.none literal
 
-def psJsLowerParameterNamesWithProfile
+def psJsLowerParameterNamesWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (parameters : List PsVerifiedIrParameter) :
     Except PsJsLowerError (List String) :=
   match parameters with
@@ -450,12 +501,12 @@ def psJsLowerParameterNamesWithProfile
   | List.cons parameter rest =>
       if psJsIdentifierSupported parameter.name then
         if
-            psJsTypeSupportedWithProfile
-              profile
+            psJsTypeSupportedWithPolicy
+              profile uniform
               parameter.type then
           match
-              psJsLowerParameterNamesWithProfile
-                profile
+              psJsLowerParameterNamesWithPolicy
+                profile uniform
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
@@ -466,6 +517,13 @@ def psJsLowerParameterNamesWithProfile
       else
         Except.error
           (PsJsLowerError.unsupportedName parameter.name)
+
+-- Existing callers keep the closed specialization contract.
+def psJsLowerParameterNamesWithProfile
+    (profile : Option PsJsTargetProfile)
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsJsLowerError (List String) :=
+  psJsLowerParameterNamesWithPolicy profile false parameters
 
 def psJsLowerParameterNames
     (parameters : List PsVerifiedIrParameter) :
@@ -650,8 +708,9 @@ def psJsLowerFieldsWith
                       (Prod.mk name loweredValue)
                       loweredRest)
 
-def psJsLowerMatchBindingsWithProfile
+def psJsLowerMatchBindingsWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (bindings : List PsVerifiedIrMatchBinding) :
     Except PsJsLowerError (List PsJsIrMatchBinding) :=
   match bindings with
@@ -660,12 +719,12 @@ def psJsLowerMatchBindingsWithProfile
   | List.cons binding rest =>
       if psJsIdentifierSupported binding.name then
         if
-            psJsTypeSupportedWithProfile
-              profile
+            psJsTypeSupportedWithPolicy
+              profile uniform
               binding.type then
           match
-              psJsLowerMatchBindingsWithProfile
-                profile
+              psJsLowerMatchBindingsWithPolicy
+                profile uniform
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
@@ -681,6 +740,13 @@ def psJsLowerMatchBindingsWithProfile
         Except.error
           (PsJsLowerError.unsupportedName binding.name)
 
+-- Existing callers keep the closed specialization contract.
+def psJsLowerMatchBindingsWithProfile
+    (profile : Option PsJsTargetProfile)
+    (bindings : List PsVerifiedIrMatchBinding) :
+    Except PsJsLowerError (List PsJsIrMatchBinding) :=
+  psJsLowerMatchBindingsWithPolicy profile false bindings
+
 def psJsLowerMatchBindings
     (bindings : List PsVerifiedIrMatchBinding) :
     Except PsJsLowerError (List PsJsIrMatchBinding) :=
@@ -688,8 +754,9 @@ def psJsLowerMatchBindings
     Option.none
     bindings
 
-def psJsLowerMatchAlternativesWithProfile
+def psJsLowerMatchAlternativesWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
     (alternatives :
       List
@@ -711,8 +778,8 @@ def psJsLowerMatchAlternativesWithProfile
           match detail with
           | Prod.mk bindings body =>
               match
-                  psJsLowerMatchBindingsWithProfile
-                    profile
+                  psJsLowerMatchBindingsWithPolicy
+                    profile uniform
                     bindings with
               | Except.error error => Except.error error
               | Except.ok loweredBindings =>
@@ -720,8 +787,8 @@ def psJsLowerMatchAlternativesWithProfile
                   | Except.error error => Except.error error
                   | Except.ok loweredBody =>
                       match
-                          psJsLowerMatchAlternativesWithProfile
-                            profile
+                          psJsLowerMatchAlternativesWithPolicy
+                            profile uniform
                             lower
                             rest with
                       | Except.error error => Except.error error
@@ -734,6 +801,23 @@ def psJsLowerMatchAlternativesWithProfile
                                   loweredBindings
                                   loweredBody))
                               loweredRest)
+
+-- Existing callers keep the closed specialization contract.
+def psJsLowerMatchAlternativesWithProfile
+    (profile : Option PsJsTargetProfile)
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
+    Except
+      PsJsLowerError
+      (List
+        (String ×
+          List PsJsIrMatchBinding ×
+          PsJsIrExpr)) :=
+  psJsLowerMatchAlternativesWithPolicy profile false lower alternatives
 
 def psJsLowerMatchAlternativesWith
     (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
@@ -766,8 +850,9 @@ def psJsLowerIdentityWith
   | List.nil =>
       Except.error PsJsLowerError.intrinsicArity
 
-def psJsLowerExprWithProfileAndFuel
+def psJsLowerExprWithPolicyAndFuel
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (fuel : Nat) :
     PsVerifiedIrExpr ->
       Except PsJsLowerError PsJsIrExpr :=
@@ -779,8 +864,8 @@ def psJsLowerExprWithProfileAndFuel
       let smaller :
           PsVerifiedIrExpr ->
             Except PsJsLowerError PsJsIrExpr :=
-        psJsLowerExprWithProfileAndFuel
-          profile
+        psJsLowerExprWithPolicyAndFuel
+          profile uniform
           remaining;
       fun (expr : PsVerifiedIrExpr) =>
         match expr with
@@ -956,8 +1041,8 @@ def psJsLowerExprWithProfileAndFuel
               match operation with
               | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
                   if
-                      psJsOneTypeArgumentSupportedWithProfile
-                        profile
+                      psJsOneTypeArgumentSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -968,8 +1053,8 @@ def psJsLowerExprWithProfileAndFuel
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arraySize =>
                   if
-                      psJsOneTypeArgumentSupportedWithProfile
-                        profile
+                      psJsOneTypeArgumentSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -980,8 +1065,8 @@ def psJsLowerExprWithProfileAndFuel
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayPush =>
                   if
-                      psJsOneTypeArgumentSupportedWithProfile
-                        profile
+                      psJsOneTypeArgumentSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -992,8 +1077,8 @@ def psJsLowerExprWithProfileAndFuel
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayGet =>
                   if
-                      psJsOneTypeArgumentSupportedWithProfile
-                        profile
+                      psJsOneTypeArgumentSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -1004,8 +1089,8 @@ def psJsLowerExprWithProfileAndFuel
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayGetD =>
                   if
-                      psJsOneTypeArgumentSupportedWithProfile
-                        profile
+                      psJsOneTypeArgumentSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -1016,8 +1101,8 @@ def psJsLowerExprWithProfileAndFuel
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arraySet =>
                   if
-                      psJsOneTypeArgumentSupportedWithProfile
-                        profile
+                      psJsOneTypeArgumentSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -1028,8 +1113,8 @@ def psJsLowerExprWithProfileAndFuel
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arraySetIfInBounds =>
                   if
-                      psJsOneTypeArgumentSupportedWithProfile
-                        profile
+                      psJsOneTypeArgumentSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -1040,8 +1125,8 @@ def psJsLowerExprWithProfileAndFuel
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayMap =>
                   if
-                      psJsTwoTypeArgumentsSupportedWithProfile
-                        profile
+                      psJsTwoTypeArgumentsSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -1052,8 +1137,8 @@ def psJsLowerExprWithProfileAndFuel
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayFoldl =>
                   if
-                      psJsTwoTypeArgumentsSupportedWithProfile
-                        profile
+                      psJsTwoTypeArgumentsSupportedWithPolicy
+                        profile uniform
                         typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
@@ -1069,12 +1154,12 @@ def psJsLowerExprWithProfileAndFuel
             resultType
             body =>
             if
-                psJsTypeSupportedWithProfile
-                  profile
+                psJsTypeSupportedWithPolicy
+                  profile uniform
                   resultType then
               match
-                  psJsLowerParameterNamesWithProfile
-                    profile
+                  psJsLowerParameterNamesWithPolicy
+                    profile uniform
                     parameters with
               | Except.error error => Except.error error
               | Except.ok names =>
@@ -1088,7 +1173,7 @@ def psJsLowerExprWithProfileAndFuel
             else
               Except.error PsJsLowerError.unsupportedType
         | PsVerifiedIrExpr.call fn typeArguments arguments =>
-            if psListIsEmpty typeArguments then
+            if psJsErasedTypeArgumentsSupported profile uniform typeArguments then
               match smaller fn with
               | Except.error error => Except.error error
               | Except.ok loweredFn =>
@@ -1108,8 +1193,8 @@ def psJsLowerExprWithProfileAndFuel
             body =>
             if psJsIdentifierSupported name then
               if
-                  psJsTypeSupportedWithProfile
-                    profile
+                  psJsTypeSupportedWithPolicy
+                    profile uniform
                     type then
                 match smaller value with
                 | Except.error error => Except.error error
@@ -1149,7 +1234,7 @@ def psJsLowerExprWithProfileAndFuel
             _structureName
             typeArguments
             fields =>
-            if psListIsEmpty typeArguments then
+            if psJsErasedTypeArgumentsSupported profile uniform typeArguments then
               match psJsLowerFieldsWith smaller fields with
               | Except.error error => Except.error error
               | Except.ok loweredFields =>
@@ -1162,7 +1247,7 @@ def psJsLowerExprWithProfileAndFuel
             typeArguments
             target
             field =>
-            if psListIsEmpty typeArguments then
+            if psJsErasedTypeArgumentsSupported profile uniform typeArguments then
               match smaller target with
               | Except.error error => Except.error error
               | Except.ok loweredTarget =>
@@ -1177,7 +1262,7 @@ def psJsLowerExprWithProfileAndFuel
             constructorName
             typeArguments
             fields =>
-            if psListIsEmpty typeArguments then
+            if psJsErasedTypeArgumentsSupported profile uniform typeArguments then
               match psJsLowerFieldsWith smaller fields with
               | Except.error error => Except.error error
               | Except.ok loweredFields =>
@@ -1192,13 +1277,13 @@ def psJsLowerExprWithProfileAndFuel
             typeArguments
             scrutinee
             alternatives =>
-            if psListIsEmpty typeArguments then
+            if psJsErasedTypeArgumentsSupported profile uniform typeArguments then
               match smaller scrutinee with
               | Except.error error => Except.error error
               | Except.ok loweredScrutinee =>
                   match
-                      psJsLowerMatchAlternativesWithProfile
-                        profile
+                      psJsLowerMatchAlternativesWithPolicy
+                        profile uniform
                         smaller
                         alternatives with
                   | Except.error error => Except.error error
@@ -1209,6 +1294,14 @@ def psJsLowerExprWithProfileAndFuel
                           loweredAlternatives)
             else
               Except.error PsJsLowerError.typeArgumentsUnsupported
+
+-- Existing callers keep the closed specialization contract.
+def psJsLowerExprWithProfileAndFuel
+    (profile : Option PsJsTargetProfile)
+    (fuel : Nat) :
+    PsVerifiedIrExpr ->
+      Except PsJsLowerError PsJsIrExpr :=
+  psJsLowerExprWithPolicyAndFuel profile false fuel
 
 def psJsLowerExprWithFuel
     (fuel : Nat)
@@ -1233,8 +1326,9 @@ def psJsLowerExpr
     Except PsJsLowerError PsJsIrExpr :=
   psJsLowerExprWithFuel 4096 expr
 
-def psJsLowerParametersWithProfile
+def psJsLowerParametersWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (parameters : List PsVerifiedIrParameter) :
     Except PsJsLowerError (List PsJsIrParameter) :=
   match parameters with
@@ -1243,12 +1337,12 @@ def psJsLowerParametersWithProfile
   | List.cons parameter rest =>
       if psJsIdentifierSupported parameter.name then
         if
-            psJsTypeSupportedWithProfile
-              profile
+            psJsTypeSupportedWithPolicy
+              profile uniform
               parameter.type then
           match
-              psJsLowerParametersWithProfile
-                profile
+              psJsLowerParametersWithPolicy
+                profile uniform
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
@@ -1262,6 +1356,13 @@ def psJsLowerParametersWithProfile
         Except.error
           (PsJsLowerError.unsupportedName parameter.name)
 
+-- Existing callers keep the closed specialization contract.
+def psJsLowerParametersWithProfile
+    (profile : Option PsJsTargetProfile)
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsJsLowerError (List PsJsIrParameter) :=
+  psJsLowerParametersWithPolicy profile false parameters
+
 def psJsLowerParameters
     (parameters : List PsVerifiedIrParameter) :
     Except PsJsLowerError (List PsJsIrParameter) :=
@@ -1269,15 +1370,16 @@ def psJsLowerParameters
     Option.none
     parameters
 
-def psJsLowerImportWithProfile
+def psJsLowerImportWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (importInfo : PsVerifiedIrExternalImport) :
     Except PsJsLowerError PsJsIrImport :=
   if psJsIdentifierSupported importInfo.localName then
     if psJsImportNameSupported importInfo.importedName then
       if
-          psJsTypeSupportedWithProfile
-            profile
+          psJsTypeSupportedWithPolicy
+            profile uniform
             importInfo.type then
         Except.ok
           (PsJsIrImport.mk
@@ -1295,6 +1397,13 @@ def psJsLowerImportWithProfile
       (PsJsLowerError.unsupportedName
         importInfo.localName)
 
+-- Existing callers keep the closed specialization contract.
+def psJsLowerImportWithProfile
+    (profile : Option PsJsTargetProfile)
+    (importInfo : PsVerifiedIrExternalImport) :
+    Except PsJsLowerError PsJsIrImport :=
+  psJsLowerImportWithPolicy profile false importInfo
+
 def psJsLowerImport
     (importInfo : PsVerifiedIrExternalImport) :
     Except PsJsLowerError PsJsIrImport :=
@@ -1302,8 +1411,9 @@ def psJsLowerImport
     Option.none
     importInfo
 
-def psJsLowerImportsWithProfile
+def psJsLowerImportsWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (imports : List PsVerifiedIrExternalImport) :
     Except PsJsLowerError (List PsJsIrImport) :=
   match imports with
@@ -1311,18 +1421,25 @@ def psJsLowerImportsWithProfile
       Except.ok List.nil
   | List.cons importInfo rest =>
       match
-          psJsLowerImportWithProfile
-            profile
+          psJsLowerImportWithPolicy
+            profile uniform
             importInfo with
       | Except.error error => Except.error error
       | Except.ok lowered =>
           match
-              psJsLowerImportsWithProfile
-                profile
+              psJsLowerImportsWithPolicy
+                profile uniform
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok (List.cons lowered loweredRest)
+
+-- Existing callers keep the closed specialization contract.
+def psJsLowerImportsWithProfile
+    (profile : Option PsJsTargetProfile)
+    (imports : List PsVerifiedIrExternalImport) :
+    Except PsJsLowerError (List PsJsIrImport) :=
+  psJsLowerImportsWithPolicy profile false imports
 
 def psJsLowerImports
     (imports : List PsVerifiedIrExternalImport) :
@@ -1331,25 +1448,26 @@ def psJsLowerImports
     Option.none
     imports
 
-def psJsLowerDeclarationWithProfile
+def psJsLowerDeclarationWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (declaration : PsVerifiedIrDeclaration) :
     Except PsJsLowerError PsJsIrDeclaration :=
   if psJsIdentifierSupported declaration.name then
-    if psListIsEmpty declaration.typeParameters then
+    if psJsDeclarationTypeParametersSupported uniform declaration.typeParameters then
       if
-          psJsTypeSupportedWithProfile
-            profile
+          psJsTypeSupportedWithPolicy
+            profile uniform
             declaration.resultType then
         match
-            psJsLowerParametersWithProfile
-              profile
+            psJsLowerParametersWithPolicy
+              profile uniform
               declaration.parameters with
         | Except.error error => Except.error error
         | Except.ok parameters =>
             match
-                psJsLowerExprWithProfileAndFuel
-                  profile
+                psJsLowerExprWithPolicyAndFuel
+                  profile uniform
                   4096
                   declaration.body with
             | Except.error error => Except.error error
@@ -1369,6 +1487,13 @@ def psJsLowerDeclarationWithProfile
     Except.error
       (PsJsLowerError.unsupportedName declaration.name)
 
+-- Existing callers keep the closed specialization contract.
+def psJsLowerDeclarationWithProfile
+    (profile : Option PsJsTargetProfile)
+    (declaration : PsVerifiedIrDeclaration) :
+    Except PsJsLowerError PsJsIrDeclaration :=
+  psJsLowerDeclarationWithPolicy profile false declaration
+
 def psJsLowerDeclaration
     (declaration : PsVerifiedIrDeclaration) :
     Except PsJsLowerError PsJsIrDeclaration :=
@@ -1376,8 +1501,9 @@ def psJsLowerDeclaration
     Option.none
     declaration
 
-def psJsLowerDeclarationsWithProfile
+def psJsLowerDeclarationsWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (declarations : List PsVerifiedIrDeclaration) :
     Except PsJsLowerError (List PsJsIrDeclaration) :=
   match declarations with
@@ -1385,18 +1511,25 @@ def psJsLowerDeclarationsWithProfile
       Except.ok List.nil
   | List.cons declaration rest =>
       match
-          psJsLowerDeclarationWithProfile
-            profile
+          psJsLowerDeclarationWithPolicy
+            profile uniform
             declaration with
       | Except.error error => Except.error error
       | Except.ok lowered =>
           match
-              psJsLowerDeclarationsWithProfile
-                profile
+              psJsLowerDeclarationsWithPolicy
+                profile uniform
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok (List.cons lowered loweredRest)
+
+-- Existing callers keep the closed specialization contract.
+def psJsLowerDeclarationsWithProfile
+    (profile : Option PsJsTargetProfile)
+    (declarations : List PsVerifiedIrDeclaration) :
+    Except PsJsLowerError (List PsJsIrDeclaration) :=
+  psJsLowerDeclarationsWithPolicy profile false declarations
 
 def psJsLowerDeclarations
     (declarations : List PsVerifiedIrDeclaration) :
@@ -1405,24 +1538,32 @@ def psJsLowerDeclarations
     Option.none
     declarations
 
-def psJsLowerSpecializedModuleWithProfile
+def psJsLowerSpecializedModuleWithPolicy
     (profile : Option PsJsTargetProfile)
+    (uniform : Bool)
     (module : PsVerifiedIrModule) :
     Except PsJsLowerError PsJsIrModule :=
   match
-      psJsLowerImportsWithProfile
-        profile
+      psJsLowerImportsWithPolicy
+        profile uniform
         module.imports with
   | Except.error error => Except.error error
   | Except.ok imports =>
       match
-          psJsLowerDeclarationsWithProfile
-            profile
+          psJsLowerDeclarationsWithPolicy
+            profile uniform
             module.declarations with
       | Except.error error => Except.error error
       | Except.ok declarations =>
           Except.ok
             (PsJsIrModule.mk imports declarations)
+
+-- Existing callers keep the closed specialization contract.
+def psJsLowerSpecializedModuleWithProfile
+    (profile : Option PsJsTargetProfile)
+    (module : PsVerifiedIrModule) :
+    Except PsJsLowerError PsJsIrModule :=
+  psJsLowerSpecializedModuleWithPolicy profile false module
 
 def psJsLowerSpecializedModule
     (module : PsVerifiedIrModule) :
@@ -1431,16 +1572,23 @@ def psJsLowerSpecializedModule
     Option.none
     module
 
+def psJsLowerSpecializedValidatedModuleWithProfile
+    (profile : Option PsJsTargetProfile)
+    (specialized : PsSpecializedIrModule) :
+    Except PsJsLowerError PsJsIrModule :=
+  psJsLowerSpecializedModuleWithProfile
+    profile
+    specialized.raw
+
 def psJsLowerValidatedModuleWithProfile
     (profile : Option PsJsTargetProfile)
     (validated : PsValidatedIrModule) :
     Except PsJsLowerError PsJsIrModule :=
-  let module : PsVerifiedIrModule := validated.raw;
-  match psIrSpecializeModule module with
+  match psIrSpecializeValidatedModule validated with
   | Except.error error =>
       Except.error (PsJsLowerError.specializationFailed error)
   | Except.ok specialized =>
-      psJsLowerSpecializedModuleWithProfile
+      psJsLowerSpecializedValidatedModuleWithProfile
         profile
         specialized
 
@@ -1458,3 +1606,13 @@ def psJsLowerValidatedModule
   psJsLowerValidatedModuleWithProfile
     Option.none
     validated
+
+-- Uniform representation is an explicit different specialization selection,
+-- never a relaxation of PsSpecializedIrModule's closed-instance contract.
+def psJsLowerUniformSpecializedModuleWithProfile
+    (profile : Option PsJsTargetProfile)
+    (specialized : PsUniformSpecializedIrModule) :
+    Except PsJsLowerError PsJsIrModule :=
+  if psListIsEmpty specialized.raw.imports then
+    psJsLowerSpecializedModuleWithPolicy profile true specialized.raw
+  else Except.error PsJsLowerError.importsUnsupported

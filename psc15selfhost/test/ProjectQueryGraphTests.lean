@@ -17,17 +17,17 @@ def psQueryPreviousSnapshot : PsQuerySnapshot :=
       {
         name := psQueryTestA
         sourceKey := "source-a-v1"
-        interfaceKey := "iface-a-v1"
+        interfaceFingerprint := psModuleInterfaceFingerprintV1 "iface-a-v1"
         dependencyInterfaces := []
       },
       {
         name := psQueryTestB
         sourceKey := "source-b-v1"
-        interfaceKey := "iface-b-v1"
+        interfaceFingerprint := psModuleInterfaceFingerprintV1 "iface-b-v1"
         dependencyInterfaces := [
           {
             name := psQueryTestA
-            interfaceKey := "iface-a-v1"
+            interfaceFingerprint := psModuleInterfaceFingerprintV1 "iface-a-v1"
           }
         ]
       }
@@ -59,7 +59,7 @@ def psTestQueryUnchangedModuleIsGreen : Bool :=
         psQuerySnapshotEmpty
         (psQueryInputA "source-a-v1") with
   | PsQueryDecision.green record =>
-      psStringEq record.interfaceKey "iface-a-v1"
+      psStringEq record.interfaceFingerprint.semanticKey "iface-a-v1"
   | PsQueryDecision.red _ =>
       false
 
@@ -80,7 +80,7 @@ def psTestQueryStableInterfaceStopsPropagation : Bool :=
       psQueryCommitRebuilt
         psQuerySnapshotEmpty
         (psQueryInputA "source-a-v2")
-        "iface-a-v1" with
+        (psModuleInterfaceFingerprintV1 "iface-a-v1") with
   | Except.error _ =>
       false
   | Except.ok current =>
@@ -90,7 +90,7 @@ def psTestQueryStableInterfaceStopsPropagation : Bool :=
             current
             (psQueryInputB [psQueryTestA]) with
       | PsQueryDecision.green record =>
-          psStringEq record.interfaceKey "iface-b-v1"
+          psStringEq record.interfaceFingerprint.semanticKey "iface-b-v1"
       | PsQueryDecision.red _ =>
           false
 
@@ -99,7 +99,7 @@ def psTestQueryChangedInterfaceInvalidatesDependent : Bool :=
       psQueryCommitRebuilt
         psQuerySnapshotEmpty
         (psQueryInputA "source-a-v2")
-        "iface-a-v2" with
+        (psModuleInterfaceFingerprintV1 "iface-a-v2") with
   | Except.error _ =>
       false
   | Except.ok current =>
@@ -145,7 +145,7 @@ def psTestQueryCommitRequiresDependencies : Bool :=
       psQueryCommitRebuilt
         psQuerySnapshotEmpty
         (psQueryInputB [psQueryTestA])
-        "iface-b-v2" with
+        (psModuleInterfaceFingerprintV1 "iface-b-v2") with
   | Except.error
       (PsQueryGraphError.missingDependencyInterface
         owner
@@ -160,7 +160,7 @@ def psTestQueryDuplicateCommitRejected : Bool :=
       psQueryCommitRebuilt
         psQuerySnapshotEmpty
         (psQueryInputA "source-a-v1")
-        "iface-a-v1" with
+        (psModuleInterfaceFingerprintV1 "iface-a-v1") with
   | Except.error _ =>
       false
   | Except.ok current =>
@@ -168,7 +168,7 @@ def psTestQueryDuplicateCommitRejected : Bool :=
           psQueryCommitRebuilt
             current
             (psQueryInputA "source-a-v1")
-            "iface-a-v1" with
+            (psModuleInterfaceFingerprintV1 "iface-a-v1") with
       | Except.error
           (PsQueryGraphError.duplicateRecord name) =>
           psNameEq name psQueryTestA
@@ -180,21 +180,48 @@ def psTestQueryInterfaceChangeDetection : Bool :=
     psQueryInterfaceChanged
       psQueryPreviousSnapshot
       psQueryTestA
-      "iface-a-v1";
+      (psModuleInterfaceFingerprintV1 "iface-a-v1");
   let changed :=
     psQueryInterfaceChanged
       psQueryPreviousSnapshot
       psQueryTestA
-      "iface-a-v2";
+      (psModuleInterfaceFingerprintV1 "iface-a-v2");
   let missing :=
     psQueryInterfaceChanged
       psQueryPreviousSnapshot
       (psQueryTestName "Missing")
-      "iface-new";
+      (psModuleInterfaceFingerprintV1 "iface-new");
   if unchanged then
     false
   else if changed then
     missing
+  else
+    false
+
+def psTestBehavioralModuleInterfaceIdentity : Bool :=
+  let first :=
+    psBehavioralModuleInterfaceV1
+      "spec-v1"
+      "effects-v1"
+      "resources-v1"
+      "assumptions-v1";
+  let same :=
+    psBehavioralModuleInterfaceV1
+      "spec-v1"
+      "effects-v1"
+      "resources-v1"
+      "assumptions-v1";
+  let changed :=
+    psBehavioralModuleInterfaceV1
+      "spec-v2"
+      "effects-v1"
+      "resources-v1"
+      "assumptions-v1";
+  if psBehavioralModuleInterfaceEq first same then
+    if psBehavioralModuleInterfaceEq first changed then
+      false
+    else
+      true
   else
     false
 
@@ -240,6 +267,10 @@ def psProjectQueryTests :
     {
       name := "interface change detection"
       passed := psTestQueryInterfaceChangeDetection
+    },
+    {
+      name := "behavioral interface identity"
+      passed := psTestBehavioralModuleInterfaceIdentity
     }
   ]
 

@@ -40,7 +40,7 @@ for (const arity of [1, 2, 3, 5]) {
   assert.ok(helper.includes(`match rest${arity - 1} with`));
   assert.ok(helper.includes('| List.cons _ _ => Except.error PsTsEmitError.intrinsicArity'));
 }
-const api = await readFile(new URL('../packages/compiler/src/Ps/Compiler/Api.lean', import.meta.url), 'utf8');
+const api = (await Promise.all(['Frontend', 'Candidate'].map(name => readFile(new URL('../packages/compiler/src/Ps/Compiler/' + name + '.lean', import.meta.url), 'utf8')))).join('\n');
 assert.ok(api.includes('let translated : Except PsTranslationError String :='));
 assert.ok(api.includes('String.Internal.append canonicalAdmissions "\\n"'));
 const erasure = await readFile(new URL('../packages/erasure/src/Ps/Erasure/Expr.lean', import.meta.url), 'utf8');

@@ -1,12 +1,10 @@
+import Ps.Foundation.List
 import Ps.Syntax.Ast
 import Ps.Syntax.ParserState
 
 
 def psParseListLength {α : Type} (xs : List α) : Nat :=
-  match xs with
-  | List.nil => 0
-  | List.cons _ tail =>
-      Nat.add 1 (psParseListLength tail)
+  psListLength xs
 
 def psParseListReverseAcc {α : Type}
     (xs : List α) : List α -> List α :=
@@ -99,7 +97,7 @@ def psParseSyntaxNameTailWithFuel
     List String ->
     PsSourcePos ->
     PsSourcePos ->
-    List PsToken ->
+    PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxName) :=
   match fuel with
   | 0 =>
@@ -107,29 +105,29 @@ def psParseSyntaxNameTailWithFuel
           (_segmentsRev : List String)
           (_start : PsSourcePos)
           (_stop : PsSourcePos)
-          (_tokens : List PsToken) =>
+          (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
   | remainingFuel + 1 =>
       let smaller :
           List String ->
           PsSourcePos ->
           PsSourcePos ->
-          List PsToken ->
+          PsTokenCursor ->
           Except PsParseError (PsParseResult PsSyntaxName) :=
         psParseSyntaxNameTailWithFuel remainingFuel;
       fun
           (segmentsRev : List String)
           (start : PsSourcePos)
           (stop : PsSourcePos)
-          (tokens : List PsToken) =>
-        match tokens with
+          (cursor : PsTokenCursor) =>
+        match cursor.remaining with
         | List.nil =>
             Except.ok {
               value := {
                 segments := psParseListReverse segmentsRev
                 span := { start := start, stop := stop }
               }
-              cursor := { remaining := List.nil }
+              cursor := psTokenCursorFromTokens List.nil
             }
         | List.cons dot rest =>
             if psStringEq dot.text "." then
@@ -146,7 +144,7 @@ def psParseSyntaxNameTailWithFuel
                       (List.cons next.text segmentsRev)
                       start
                       next.span.stop
-                      after
+                      (PsTokenCursor.mk after (Nat.sub cursor.remainingCount 2))
                   else
                     Except.error
                       (PsParseError.expectedKind
@@ -159,9 +157,7 @@ def psParseSyntaxNameTailWithFuel
                   segments := psParseListReverse segmentsRev
                   span := { start := start, stop := stop }
                 }
-                cursor := {
-                  remaining := List.cons dot rest
-                }
+                cursor := cursor
               }
 
 def psParseSyntaxNameTail
@@ -175,7 +171,7 @@ def psParseSyntaxNameTail
     segmentsRev
     start
     stop
-    tokens
+    (psTokenCursorFromTokens tokens)
 
 def psParseSyntaxName
     (cursor : PsTokenCursor) :
@@ -184,11 +180,12 @@ def psParseSyntaxName
   | [] => Except.error (PsParseError.unexpectedEnd "identifier")
   | token :: rest =>
       if psTokenKindEq token.kind PsTokenKind.identifier then
-        psParseSyntaxNameTail
+        psParseSyntaxNameTailWithFuel
+          cursor.remainingCount
           (List.cons token.text List.nil)
           token.span.start
           token.span.stop
-          rest
+          (PsTokenCursor.mk rest (Nat.sub cursor.remainingCount 1))
       else
         Except.error
           (PsParseError.expectedKind
@@ -302,7 +299,7 @@ def psParseRecordLiteral
       match
           psParseRecordFieldsWithFuel
             parseTerm
-            (psParseListLength opening.cursor.remaining)
+            (opening.cursor.remainingCount)
             opening.cursor
             List.nil with
       | Except.error error => Except.error error
@@ -588,7 +585,7 @@ def psParseConstructorPatternTail
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
   match psParsePatternBindersWithFuel
-      (psParseListLength cursor.remaining)
+      (cursor.remainingCount)
       cursor
       List.nil with
   | Except.error error => Except.error error

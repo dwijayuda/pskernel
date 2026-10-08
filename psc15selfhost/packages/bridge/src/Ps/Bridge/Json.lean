@@ -1,3 +1,4 @@
+import Ps.Foundation.Text
 def psJsonConcat2
     (left right : String) : String :=
   String.Internal.append left right
@@ -169,15 +170,7 @@ def psJsonQuote (value : String) : String :=
 def psJsonJoin
     (separator : String)
     (values : List String) : String :=
-  match values with
-  | List.nil =>
-      ""
-  | List.cons value rest =>
-      match rest with
-      | List.nil =>
-          value
-      | List.cons _ _ =>
-          psJsonConcat3 value separator (psJsonJoin separator rest)
+  psTextJoin separator values
 
 def psJsonArray (values : List String) : String :=
   psJsonConcat3 "[" (psJsonJoin "," values) "]"
@@ -995,3 +988,102 @@ def psJsonEncodeCanonicalText
   match psJsonEncodeCanonical value with
   | Except.error error => Except.error error
   | Except.ok encoded => Except.ok (psJsonConcat2 encoded "\n")
+
+-- Shared wire primitives. Product request codecs should not import a semantic
+-- IR decoder merely to read canonical decimal strings or array fields.
+def psJsonDecodeNaturalDigits (chars : List Char) : Nat -> Option Nat :=
+  match chars with
+  | List.nil => fun (value : Nat) => Option.some value
+  | List.cons char rest =>
+      let smaller : Nat -> Option Nat := psJsonDecodeNaturalDigits rest;
+      fun (value : Nat) =>
+        let digit : Nat := Char.toNat char;
+        if psJsonNatInRange digit 48 57 then
+          smaller (Nat.add (Nat.mul value 10) (Nat.sub digit 48))
+        else Option.none
+
+def psJsonDecodeNaturalString (value : PsJsonValue) : Option Nat :=
+  match value with
+  | PsJsonValue.string text =>
+      match psJsonStringToChars text with
+      | List.nil => Option.none
+      | List.cons first rest =>
+          let code : Nat := Char.toNat first;
+          if Nat.beq code 48 then
+            match rest with
+            | List.nil => Option.some 0
+            | List.cons _ _ => Option.none
+          else if psJsonNatInRange code 49 57 then
+            psJsonDecodeNaturalDigits rest (Nat.sub code 48)
+          else Option.none
+  | _ => Option.none
+
+def psJsonArrayItem (index : Nat) : List PsJsonValue -> PsJsonValue :=
+  match index with
+  | Nat.zero =>
+      fun (values : List PsJsonValue) =>
+        match values with
+        | List.nil => PsJsonValue.nullE
+        | List.cons value _ => value
+  | Nat.succ remaining =>
+      let smaller : List PsJsonValue -> PsJsonValue := psJsonArrayItem remaining;
+      fun (values : List PsJsonValue) =>
+        match values with
+        | List.nil => PsJsonValue.nullE
+        | List.cons _ rest => smaller rest
+
+-- Resource preflight for array-only request formats. This is not a JSON
+-- validator: the parser and format codec still check syntax and canonical bytes.
+structure PsJsonArrayScan where
+  offset : Nat
+  depth : Nat
+  arrays : Nat
+  quoted : Bool
+  escaped : Bool
+
+def psJsonArrayScanWorker (maxDepth maxArrays : Nat) (fuel : Nat) :
+    String -> PsJsonArrayScan -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_source : String) (_state : PsJsonArrayScan) => false
+  | Nat.succ remaining =>
+      let smaller : String -> PsJsonArrayScan -> Bool :=
+        psJsonArrayScanWorker maxDepth maxArrays remaining;
+      fun (source : String) (state : PsJsonArrayScan) =>
+        if String.Internal.atEnd source (String.Pos.Raw.mk state.offset) then
+          if state.quoted then false else Nat.beq state.depth 0
+        else
+          let code : Nat := Char.toNat (String.Internal.get source (String.Pos.Raw.mk state.offset));
+          let next : Nat := String.Pos.Raw.byteIdx
+            (String.Internal.next source (String.Pos.Raw.mk state.offset));
+          if state.quoted then
+            if state.escaped then
+              smaller source (PsJsonArrayScan.mk next state.depth state.arrays true false)
+            else if Nat.beq code 92 then
+              smaller source (PsJsonArrayScan.mk next state.depth state.arrays true true)
+            else if Nat.beq code 34 then
+              smaller source (PsJsonArrayScan.mk next state.depth state.arrays false false)
+            else
+              smaller source (PsJsonArrayScan.mk next state.depth state.arrays true false)
+          else if Nat.beq code 34 then
+            smaller source (PsJsonArrayScan.mk next state.depth state.arrays true false)
+          else if Nat.beq code 91 then
+            if Nat.blt state.depth maxDepth then
+              if Nat.blt state.arrays maxArrays then
+                smaller source
+                  (PsJsonArrayScan.mk next (Nat.succ state.depth) (Nat.succ state.arrays) false false)
+              else false
+            else false
+          else if Nat.beq code 93 then
+            if Nat.blt 0 state.depth then
+              smaller source (PsJsonArrayScan.mk next (Nat.sub state.depth 1) state.arrays false false)
+            else false
+          else if Nat.beq code 123 then false
+          else if Nat.beq code 125 then false
+          else smaller source (PsJsonArrayScan.mk next state.depth state.arrays false false)
+
+def psJsonArrayRequestWithinLimits (maxBytes maxDepth maxArrays : Nat)
+    (source : String) : Bool :=
+  if Nat.ble (String.utf8ByteSize source) maxBytes then
+    psJsonArrayScanWorker maxDepth maxArrays (Nat.succ (String.utf8ByteSize source))
+      source (PsJsonArrayScan.mk 0 0 0 false false)
+  else false

@@ -27,7 +27,7 @@ def psTestBackendRustIdentity : Bool :=
   | Except.error _ => false
   | Except.ok output =>
       output.contains "#![forbid(unsafe_code)]"
-        && output.contains "pub fn idNat(x: PsNat) -> PsNat { x }"
+        && output.contains "pub fn idNat(x: PsNat) -> PsNat { (x).clone() }"
 
 def psBackendRustIntrinsicModule : PsVerifiedIrModule :=
   {
@@ -159,9 +159,9 @@ def psTestBackendRustAdt : Bool :=
   match psRustEmitModule psBackendRustAdtModule with
   | Except.error _ => false
   | Except.ok output =>
-      output.contains "pub struct Pair { pub left: Box<PsNat>, pub right: Box<PsNat> }"
-        && output.contains "pub enum Maybe<A: Clone> { none {}, some { value: Box<A> } }"
-        && output.contains "Maybe::<PsNat>::some { value: Box::new((x).clone()) }"
+      output.contains "pub struct Pair { pub left: std::rc::Rc<PsNat>, pub right: std::rc::Rc<PsNat> }"
+        && output.contains "pub enum Maybe<A: Clone + 'static> { none {}, some { value: std::rc::Rc<A> } }"
+        && output.contains "Maybe::<PsNat>::some { value: std::rc::Rc::new((x).clone()) }"
         && output.contains "pub fn leftOfPair(pair: Pair) -> PsNat { (*((pair).clone()).left).clone() }"
 
 def psBackendRustStringModule : PsVerifiedIrModule :=
@@ -293,7 +293,7 @@ def psTestBackendRustArrayIntrinsics : Bool :=
   | Except.ok output =>
       output.contains "pub fn arraySizeDemo(xs: Vec<PsNat>) -> PsNat"
         && output.contains "__ps_array_size(&((xs).clone()))"
-        && output.contains "__ps_array_map((arrayIdOnly).clone(), &((xs).clone()))"
+        && output.contains "__ps_array_map((std::rc::Rc::new(arrayIdOnly) as std::rc::Rc<dyn Fn(_) -> _>), &((xs).clone()))"
 
 def psBackendRustValueModule : PsVerifiedIrModule :=
   {
@@ -351,7 +351,7 @@ def psTestBackendRustValues : Bool :=
         && output.contains
           "__ps_nat_add(&((x).clone()), &(((one)()).clone()))"
         && output.contains
-          "pub fn shadowOne(one: PsNat) -> PsNat { one }"
+          "pub fn shadowOne(one: PsNat) -> PsNat { (one).clone() }"
 
 def psTestBackendRustScalarTypes : Bool :=
   psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.uint8 == "u8"
@@ -587,7 +587,7 @@ def psTestBackendRustStaticFunctionStorage : Bool :=
       false
   | Except.ok output =>
       output.contains
-        "pub struct CallbackHolder { pub callback: Box<fn(PsNat) -> PsNat> }"
+        "pub struct CallbackHolder { pub callback: std::rc::Rc<fn(PsNat) -> PsNat> }"
         && output.contains
           "pub fn makeCallbackHolder() -> CallbackHolder"
 
@@ -764,7 +764,7 @@ def psTestBackendRustStaticConstructorFunctionStorage : Bool :=
       false
   | Except.ok output =>
       output.contains
-        "stored { callback: Box<fn(PsNat) -> PsNat> }"
+        "stored { callback: std::rc::Rc<fn(PsNat) -> PsNat> }"
         && output.contains
           "pub fn makeCallbackBox() -> CallbackBox"
 
@@ -938,7 +938,7 @@ def psTestBackendRustDirectFunctionResult : Bool :=
   | Except.ok output =>
       output.contains
         "pub fn makeAdder(offset: PsNat) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
-        && output.contains "{ let __ps_internal_lambda: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = std::rc::Rc::new(move |value: PsNat| "
+        && output.contains "{ let offset = (offset).clone(); let __ps_internal_lambda: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = std::rc::Rc::new(move |value: PsNat| "
 
 def psBackendRustForwardedFunctionResultModule : PsVerifiedIrModule :=
   {
@@ -974,7 +974,7 @@ def psTestBackendRustForwardedFunctionResult : Bool :=
   | Except.ok output =>
       output.contains
         "pub fn returnCallback(callback: std::rc::Rc<dyn Fn(PsNat) -> PsNat>) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
-        && output.contains "{ callback }"
+        && output.contains "{ (callback).clone() }"
 
 def psBackendRustNestedFunctionResultModule : PsVerifiedIrModule :=
   {
@@ -1296,11 +1296,57 @@ def psTestBackendRustCoverageReport : Bool :=
     && unsupported.contains
       "PSC1_RUST_COVERAGE_UNSUPPORTED: module:externalImport"
 
+def psTestRustTailClassification : Bool :=
+  let type := PsVerifiedIrType.primitive .uint32;
+  let call := PsVerifiedIrExpr.call (.var "tail") [] [.var "value"];
+  let declaration := PsVerifiedIrDeclaration.mk "tail" [] [.mk "value" type] type call;
+  let detects := psRustHasTailWorker declaration 100 ["value"];
+  detects call &&
+    !psRustHasTailWorker declaration 100 ["tail", "value"] call &&
+    !detects (.letE "tail" (.function [type] type) (.var "another") call) &&
+    !detects (.intrinsic (.machineIntBinary .uint32 .add) [] [call, .var "value"]) &&
+    !detects (.lambda [.mk "value" type] type call) &&
+    !detects (.call (.var "tail") [] []) &&
+    !psRustHasTailWorker { declaration with typeParameters := [.mk "A"] } 100 ["value"] call
+
+def psTestRustTailEmission : Bool :=
+  let type := PsVerifiedIrType.primitive .uint32;
+  let call := PsVerifiedIrExpr.call (.var "tail") [] [.var "value"];
+  let declaration := PsVerifiedIrDeclaration.mk "tail" [] [.mk "value" type] type
+    (.ifE (.literal (.bool true)) (.var "value") call);
+  match psRustEmitDeclaration [declaration] [] declaration with
+  | .error _ => false
+  | .ok printed =>
+      printed.contains "let mut __ps_internal_tail_state = (value,); loop" &&
+      printed.contains "__ps_internal_tail_state = ((value).clone(),); continue;" &&
+      printed.contains "break { (value).clone() };" &&
+      !(printed.contains "(tail)(")
+
+def psTestRustTailAliasScope : Bool :=
+  let type := PsVerifiedIrType.primitive .uint32;
+  let declaration := PsVerifiedIrDeclaration.mk "worker" [] [.mk "count" type, .mk "value" type] type (.var "value");
+  let alias := PsVerifiedIrExpr.lambda [.mk "next" type] type (.call (.var "worker") [] [.var "count", .var "next"]);
+  let use := PsVerifiedIrExpr.call (.var "smaller") [] [.var "value"];
+  let bound := PsVerifiedIrExpr.letE "smaller" (.function [type] type) alias use;
+  let detects := psRustHasTailWorker declaration 100 ["count", "value"];
+  detects bound &&
+    !detects (.letE "smaller" (.function [type] type) alias
+      (.letE "smaller" (.function [type] type) (.var "other") use)) &&
+    !detects (.letE "smaller" (.function [type] type) alias
+      (.matchE "Holder" [] (.var "holder") [("hold", [.mk "callback" "smaller" (.function [type] type)], use)])) &&
+    !detects (.letE "smaller" (.function [type] type)
+      (.lambda [.mk "next" type] type (.call (.var "worker") [] [.var "next", .var "count"])) use) &&
+    !(psRustTailSameTypes [.mk "A"] [PsVerifiedIrType.named "List" [.typeParameter "A"]]) &&
+    psRustTailSameTypes [.mk "A"] [.typeParameter "A"]
+
 structure PsBackendRustNamedTest where
   name : String
   passed : Bool
 
 def psBackendRustTests : List PsBackendRustNamedTest := [
+  { name := "tail calls respect lexical scope, arity and supported recursion", passed := psTestRustTailClassification },
+  { name := "supported tail calls emit argument-tuple loops", passed := psTestRustTailEmission },
+  { name := "tail worker aliases preserve captures and lexical shadowing", passed := psTestRustTailAliasScope },
   { name := "identity module", passed := psTestBackendRustIdentity },
   { name := "Nat intrinsic", passed := psTestBackendRustIntrinsic },
   { name := "UInt8.ofNat intrinsic", passed := psTestBackendRustUInt8OfNat },

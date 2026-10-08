@@ -1,3 +1,4 @@
+import { maskLeanSource } from './lean-source-mask.mjs';
 import { existsSync, readdirSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -61,81 +62,7 @@ export async function collectSelfhostClosure(profile) {
 
 // Mask comments and string literals while preserving newlines and offsets.
 // Lean block comments are nested, so a depth counter is required.
-export function maskLeanNonCode(source) {
-  let out = '';
-  let i = 0;
-  let blockDepth = 0;
-  let lineComment = false;
-  let string = false;
-  let escaped = false;
-
-  while (i < source.length) {
-    const ch = source[i];
-    const next = source[i + 1] ?? '';
-
-    if (lineComment) {
-      if (ch === '\n') {
-        lineComment = false;
-        out += '\n';
-      } else {
-        out += ' ';
-      }
-      i++;
-      continue;
-    }
-
-    if (blockDepth > 0) {
-      if (ch === '/' && next === '-') {
-        blockDepth++;
-        out += '  ';
-        i += 2;
-      } else if (ch === '-' && next === '/') {
-        blockDepth--;
-        out += '  ';
-        i += 2;
-      } else {
-        out += ch === '\n' ? '\n' : ' ';
-        i++;
-      }
-      continue;
-    }
-
-    if (string) {
-      if (escaped) {
-        escaped = false;
-        out += ch === '\n' ? '\n' : ' ';
-      } else if (ch === '\\') {
-        escaped = true;
-        out += ' ';
-      } else if (ch === '"') {
-        string = false;
-        out += ' ';
-      } else {
-        out += ch === '\n' ? '\n' : ' ';
-      }
-      i++;
-      continue;
-    }
-
-    if (ch === '-' && next === '-') {
-      lineComment = true;
-      out += '  ';
-      i += 2;
-    } else if (ch === '/' && next === '-') {
-      blockDepth = 1;
-      out += '  ';
-      i += 2;
-    } else if (ch === '"') {
-      string = true;
-      out += ' ';
-      i++;
-    } else {
-      out += ch;
-      i++;
-    }
-  }
-  return out;
-}
+export const maskLeanNonCode = maskLeanSource;
 
 export function findForbiddenForms(source, profile) {
   const code = maskLeanNonCode(source);
@@ -220,7 +147,9 @@ export async function checkSelfhostProfile() {
       psconfig.standardLanguageProfile !== profile.standardLanguageProfile) {
     throw new Error('PSC2_SELFHOST_PROFILE_PSCONFIG_LANGUAGE_DRIFT');
   }
-  if (psconfig.implementationProfile !== profile.implementationProfile) {
+  // Explicit legacy checks still enforce the original profile, even when the
+  // active compiler implementation uses the hosted profile.
+  if ((psconfig.historicalSelfhostProfile ?? psconfig.implementationProfile) !== profile.implementationProfile) {
     throw new Error('PSC2_SELFHOST_PROFILE_IMPLEMENTATION_DRIFT');
   }
 

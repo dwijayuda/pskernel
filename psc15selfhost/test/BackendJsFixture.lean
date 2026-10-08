@@ -1,4 +1,4 @@
-import Ps.CompilerIr.Model
+import Ps.CompilerIr.Interface
 
 def psBackendJsNatType : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
@@ -1221,10 +1221,23 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
     ]
   }
 
+-- Explicit host contract for scripts/backend-js-corpus support.js. The runtime
+-- corpus checks its behavior; the interface checker checks the declared ABI.
+def psBackendJsFixtureSupport : PsInterfaceIrContract :=
+  PsInterfaceIrContract.mk "./support.js"
+    "psc-runtime-semantics/1" "psc-runtime-values/1" ["javascript"]
+    ["fixture-support"] (PsInterfaceIrOrigin.host "backend-js-corpus/support")
+    List.nil List.nil
+    [PsInterfaceIrExport.mk "importedAdd" psBackendJsNatBinaryFunctionType,
+      PsInterfaceIrExport.mk "namedIdentity" psBackendJsNatUnaryFunctionType,
+      PsInterfaceIrExport.mk "default" psBackendJsNatUnaryFunctionType]
+
 def psBackendJsFixtureValidated :
     Except String PsValidatedIrModule :=
   match
-      psValidateErasedIrModule
+      psValidateErasedIrModuleWithInterfaces
+        (PsInterfaceIrPolicy.mk "javascript" ["fixture-support"])
+        [psBackendJsFixtureSupport]
         (PsErasedIrModule.mk
           psBackendJsFixtureModule) with
   | Except.error _ =>

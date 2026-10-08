@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-specialization-correspondence/1",
+  "implementation": "scripts/specialization-correspondence.mjs",
+  "relation": "exact-instantiation-with-bijective-instance-names",
+  "input": "canonical psc-runtime-ir-json/1 bytes under verified-ir ArtifactId",
+  "output": "canonical psc-runtime-ir-json/1 bytes under specialized-ir ArtifactId",
+  "integration": [
+    "checked JavaScript service checks actual returned stages before publishing emission",
+    "observed build graph binds checker contract, limits and measured work to specialization PassDefinition/PassExecution",
+    "offline observed-build replay reruns the checker against exact archived input/output bytes"
+  ],
+  "checks": [
+    "all monomorphic roots retain names and are checked; every target definition has a unique reachable source and ground-argument witness",
+    "instance mapping is bijective and independent of producer name mangling and declaration worklist order",
+    "ordered imports, structure fields, constructors, parameters, match alternatives and evaluation operands correspond",
+    "literal values and intrinsic operations remain exact",
+    "type substitution composes through named and function types; generic layouts and direct calls map to justified monomorphic instances",
+    "declaration, lambda, let and match binders preserve lexical scope; generated callee names cannot capture locals",
+    "unknown and unbound types, generic value escape, unsupported higher-order generic calls, duplicate definitions, missing roots, unreferenced output and conflicting instances reject",
+    "bounded canonical decoding, ground type depth, work, instance count and instance-key bytes fail closed"
+  ],
+  "preconditionsNotEstablishedByThisChecker": [
+    "strict input IR validity", "strict output IR validity", "runtime instantiation semantics"
+  ],
+  "focusedEvidence": "Actual Lean producer output for strictly validated recursive List, Box and generic declarations; actual checked direct-JS stages; scope/capture and nested type fixtures; fully rehashed false archive rejection; standalone verifier profile packaging.",
+  "portableCompilerChanges": "none: this independent host assurance implementation does not enter the portable compiler source closure",
+  "globalPreservation": "unproved",
+  "validatorSoundness": "unproved",
+  "independenceLimit": "Independent relation implementation, shared canonical decoder/host and runtime assumptions; no diverse toolchain or complete TCB independence claim.",
+  "remaining": [
+    "producer now preserves declaration/lambda/let/match scopes and rejects generated-callee capture; audit other generated-name collisions and generic escape cases",
+    "exercise complete compiler instances and adversarial campaign during assurance pass",
+    "prove adequacy of this relation for declared runtime semantics or supply independent assurance",
+    "global erasure relation and other target lowering validators"
+  ],
+  "releaseAccepted": false
+}

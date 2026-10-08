@@ -1,11 +1,17 @@
 {
   "schemaVersion": 1,
-  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
   "entries": [
+    {
+      "id": "pscv-architecture/v5.1",
+      "kind": "architecture",
+      "status": "accepted-target",
+      "canonicalPath": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md"
+    },
     {
       "id": "pscv-architecture/v3",
       "kind": "architecture",
-      "status": "accepted-target",
+      "status": "historical",
       "canonicalPath": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"
     },
     {
@@ -13,6 +19,12 @@
       "kind": "source-language",
       "status": "current",
       "canonicalPath": "language-authority.json"
+    },
+    {
+      "id": "pscv-v1",
+      "kind": "verified-language-profile",
+      "status": "target",
+      "canonicalPath": "PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md"
     },
     {
       "id": "proofscript-kernel-contract/1",
@@ -81,6 +93,577 @@
       "id": "spkf/1",
       "kind": "savef-format",
       "status": "target"
+    },
+    {
+      "id": "psc-algorithmic-defeq-cache/1",
+      "kind": "semantic-cache-contract",
+      "status": "current",
+      "canonicalPath": "contracts/semantic/ALGORITHMIC_DEFEQ_CACHE_V1.json"
+    },
+    {
+      "id": "psc-verified-ir-gap-registry/1",
+      "kind": "verified-ir-gap-registry",
+      "status": "current",
+      "canonicalPath": "contracts/ir/VERIFIED_IR_GAPS_V1.json"
+    },
+    {
+      "id": "psc-pass-specialize/1",
+      "kind": "compiler-pass",
+      "status": "current",
+      "canonicalPath": "contracts/ir/SPECIALIZATION_PASS_V1.json"
+    },
+    {
+      "id": "psc-structural-module-interface/1",
+      "kind": "module-interface",
+      "status": "current",
+      "canonicalPath": "contracts/module-interface/STRUCTURAL_MODULE_INTERFACE_V1.json"
+    },
+    {
+      "id": "psc-declarative-core-seed/1",
+      "kind": "theory-seed",
+      "status": "experimental",
+      "canonicalPath": "theory/core/DECLARATIVE_CORE_SEED_V1.json"
+    },
+    {
+      "id": "spkf-local-prototype/1",
+      "kind": "savef-format",
+      "status": "experimental",
+      "canonicalPath": "savef/schemas/KNOWLEDGE_OBJECT_V1.json"
+    },
+    {
+      "id": "pscv-verify/0-prototype",
+      "kind": "offline-verifier",
+      "status": "experimental",
+      "canonicalPath": "scripts/pscv-verify.mjs"
+    },
+    {
+      "id": "factorybench-v4-holdout/0",
+      "kind": "factory-bench",
+      "status": "experimental",
+      "canonicalPath": "factory/bench/FACTORYBENCH_V4_HOLDOUT.json"
+    },
+    {
+      "id": "psc-wasm-translation-validator/0",
+      "kind": "translation-validator",
+      "status": "experimental",
+      "canonicalPath": "contracts/target/WASM_TRANSLATION_VALIDATOR_V0.json"
+    },
+    {
+      "id": "psc-behavioral-module-interface/1",
+      "kind": "module-interface",
+      "status": "current",
+      "canonicalPath": "contracts/module-interface/BEHAVIORAL_MODULE_INTERFACE_V1.json"
+    },
+    {
+      "id": "psc-compilation-resource/1",
+      "kind": "resource-contract",
+      "status": "current",
+      "canonicalPath": "contracts/resource/COMPILATION_RESOURCE_V1.json"
+    },
+    {
+      "id": "psc-kernel-exact-defeq-sound/1",
+      "kind": "formal-proof-slice",
+      "status": "current",
+      "canonicalPath": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+    },
+    {
+      "id": "psc-erasure-preservation/0",
+      "kind": "formal-preservation-contract",
+      "status": "experimental",
+      "canonicalPath": "contracts/ir/ERASURE_PRESERVATION_V0.json"
+    },
+    {
+      "id": "psc-erasure-proof-declaration-omission/1",
+      "kind": "formal-proof-slice",
+      "status": "current",
+      "canonicalPath": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+    },
+    {
+      "id": "psc-specialization-literal-preservation/1",
+      "kind": "formal-proof-slice",
+      "status": "current",
+      "canonicalPath": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+    },
+    {
+      "id": "psc-independence-vector/1",
+      "kind": "assurance-lineage",
+      "status": "current",
+      "canonicalPath": "profiles/assurance/INDEPENDENCE_VECTORS.json"
+    },
+    {
+      "id": "psc-trust-delta/1",
+      "kind": "audit-contract",
+      "status": "current",
+      "canonicalPath": "contracts/audit/TRUST_DELTA_V1.json"
+    },
+    {
+      "id": "psc-semantic-delta/1",
+      "kind": "audit-contract",
+      "status": "current",
+      "canonicalPath": "contracts/audit/SEMANTIC_DELTA_V1.json"
+    },
+    {
+      "id": "psc-theory-bridge/1",
+      "kind": "logical-interoperability",
+      "status": "current",
+      "canonicalPath": "contracts/interface/THEORY_BRIDGE_V1.json"
+    },
+    {
+      "id": "psc-semantic-lock/0",
+      "kind": "semantic-lock",
+      "status": "experimental",
+      "canonicalPath": "psc.semantic-lock.json"
+    },
+    {
+      "id": "psc-archive-profile/0",
+      "kind": "archive-profile",
+      "status": "experimental",
+      "canonicalPath": "contracts/archive/ARCHIVE_PROFILE_V0.json"
+    },
+    {
+      "id": "psc-direct-js-promotion/1",
+      "kind": "promotion-policy",
+      "status": "current",
+      "canonicalPath": "contracts/promotion/DIRECT_JS_PROMOTION_V1.json"
+    },
+    {
+      "id": "psc-bootstrap-assurance/1",
+      "kind": "bootstrap-assurance",
+      "status": "current",
+      "canonicalPath": "contracts/bootstrap/BOOTSTRAP_ASSURANCE_V1.json"
+    },
+    {
+      "id": "pscv-cert/1",
+      "kind": "source-certificate",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/PSCV_CERT_V1.json"
+    },
+    {
+      "id": "psc-certified-source/1",
+      "kind": "certified-source",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/PSCV_CERT_V1.json"
+    },
+    {
+      "id": "psc-savef-semantic-index/1",
+      "kind": "derived-semantic-index",
+      "status": "current-host",
+      "canonicalPath": "contracts/archive/SAVEF_SEMANTIC_INDEX_V1.json"
+    },
+    {
+      "id": "psc-evidence-envelope/1",
+      "kind": "evidence-envelope",
+      "status": "current-host",
+      "canonicalPath": "contracts/archive/EVIDENCE_ENVELOPE_V1.json"
+    },
+    {
+      "id": "psc-js-scalar-abi-plan/1",
+      "kind": "target-adapter",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/JS_SCALAR_ABI_V1.json"
+    },
+    {
+      "id": "psc-certified-module-interface/1",
+      "kind": "module-interface-evidence",
+      "status": "current-host",
+      "canonicalPath": "scripts/module-interface-evidence.mjs"
+    },
+    {
+      "id": "psc-exact-behavioral-interface-reuse/1",
+      "kind": "semantic-reuse-validator",
+      "status": "current-host",
+      "canonicalPath": "scripts/module-interface-evidence.mjs"
+    },
+    {
+      "id": "psc-semantic-reuse-candidate/1",
+      "kind": "semantic-cache-boundary",
+      "status": "current-host",
+      "canonicalPath": "scripts/semantic-query-cache.mjs"
+    },
+    {
+      "id": "psc-savef-retrieval-session/1",
+      "kind": "knowledge-retrieval-boundary",
+      "status": "current-host",
+      "canonicalPath": "scripts/savef-retrieval-session.mjs"
+    },
+    {
+      "id": "psc-diverse-bootstrap-campaign/1",
+      "kind": "bootstrap-campaign",
+      "status": "current-host",
+      "canonicalPath": "scripts/diverse-bootstrap.mjs"
+    },
+    {
+      "id": "psc-js-ir-validator/1",
+      "kind": "target-ir-validator",
+      "status": "current",
+      "canonicalPath": "packages/backend-js/src/Ps/BackendJs/Validate.lean"
+    },
+    {
+      "id": "psc-v5-migration-status/1",
+      "kind": "migration-registry",
+      "status": "current-host",
+      "canonicalPath": "contracts/registry/V5_MIGRATION_STATUS.json"
+    },
+    {
+      "id": "psc-claim-set/1",
+      "kind": "claim-set",
+      "status": "current-host",
+      "canonicalPath": "contracts/claims/CLAIM_SET_V1.json"
+    },
+    {
+      "id": "psc-pass-definition/2",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/passes/PASS_DEFINITION_V2.json"
+    },
+    {
+      "id": "psc-backend-registry/1",
+      "kind": "backend-registry",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_REGISTRY_V1.json"
+    },
+    {
+      "id": "psc-backend-descriptor/1",
+      "kind": "backend-descriptor",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_DESCRIPTOR_V1.json"
+    },
+    {
+      "id": "psc-artifact-bundle/1",
+      "kind": "artifact-bundle",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/ARTIFACT_BUNDLE_V1.json"
+    },
+    {
+      "id": "psc-compiler-ownership/1",
+      "kind": "compiler-ownership",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_OWNERSHIP_V1.json"
+    },
+    {
+      "id": "psc-profile-environment/1",
+      "kind": "profile-environment",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PROFILE_ENVIRONMENT_V1.json"
+    },
+    {
+      "id": "psc-extension-set/1",
+      "kind": "extension-set",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PROFILE_ENVIRONMENT_V1.json"
+    },
+    {
+      "id": "psc-build-action/1",
+      "kind": "build-action",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json"
+    },
+    {
+      "id": "psc-observed-action-binding/1",
+      "kind": "action-binding",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/BUILD_ACTION_V1.json"
+    },
+    {
+      "id": "psc-query-key/1",
+      "kind": "query-context",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/QUERY_CONTEXT_V1.json"
+    },
+    {
+      "id": "psc-public-api-ir/1",
+      "kind": "public-api",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/PUBLIC_API_IR_V1.json"
+    },
+    {
+      "id": "psc-source-preparation-origins/1",
+      "kind": "source-origins",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/SOURCE_PREPARATION_ORIGINS_V1.json"
+    },
+    {
+      "id": "psc-declaration-origins/1",
+      "kind": "source-origins",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/DECLARATION_ORIGINS_V1.json"
+    },
+    {
+      "id": "psc-origin-graph/1",
+      "kind": "origin-graph",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DECLARATION_ORIGINS_V1.json"
+    },
+    {
+      "id": "psc-erasure-declarations/1",
+      "kind": "declaration-correspondence",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-erasure-declaration-map/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/ERASURE_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-specialization-instance-map/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/SPECIALIZATION_INSTANCE_MAP_V1.json"
+    },
+    {
+      "id": "psc-js-generated-positions/1",
+      "kind": "generated-positions",
+      "status": "current-hosted-semantic",
+      "canonicalPath": "contracts/compiler/JS_GENERATED_POSITIONS_V1.json"
+    },
+    {
+      "id": "psc-js-generated-position-map/1",
+      "kind": "generated-positions",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_GENERATED_POSITIONS_V1.json"
+    },
+    {
+      "id": "psc-js-declaration-lineage/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_DECLARATION_LINEAGE_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-source-map/1",
+      "kind": "source-map",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-source-map-recipe/1",
+      "kind": "source-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json"
+    },
+    {
+      "id": "psc-compiler-product-selection/1",
+      "kind": "product-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/PRODUCT_SELECTION_V1.json"
+    },
+    {
+      "id": "psc-source-signature-structural/1",
+      "kind": "source-signature-projection",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-direct-js-declarations-closed-structural/1",
+      "kind": "declaration-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-declarations/1",
+      "kind": "declaration-output",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-source-declaration-signatures/1",
+      "kind": "source-signatures",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-declaration-binding/1",
+      "kind": "declaration-binding",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-uniform-specialized-ir/1",
+      "kind": "specialized-ir",
+      "status": "experimental",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-js-uniform-values/1",
+      "kind": "representation-profile",
+      "status": "experimental",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-uniform-specialization-correspondence/1",
+      "kind": "representation-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-pass-uniform-specialize/1",
+      "kind": "compiler-pass",
+      "status": "experimental",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-js-closed-instances/1",
+      "kind": "representation-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/ir/UNIFORM_SPECIALIZATION_V1.json"
+    },
+    {
+      "id": "psc-direct-js-declarations-uniform-structural/1",
+      "kind": "declaration-profile",
+      "status": "experimental",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-backend-profile-selection/1",
+      "kind": "backend-profile-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V1.json"
+    },
+    {
+      "id": "psc-ts-declaration-request/1",
+      "kind": "declaration-request",
+      "status": "experimental",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATIONS_V1.json"
+    },
+    {
+      "id": "psc-backend-profile-selection/2",
+      "kind": "backend-profile-selection",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/2",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
+    },
+    {
+      "id": "psc-js-uniform-declaration-lineage/1",
+      "kind": "declaration-correspondence",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json"
+    },
+    {
+      "id": "psc-direct-javascript-source-map-recipe/2",
+      "kind": "source-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_V1.json"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/3",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
+    },
+    {
+      "id": "psc-compose-uniform-js-declaration-lineage/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json"
+    },
+    {
+      "id": "psc-emit-uniform-js-source-map/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json"
+    },
+    {
+      "id": "psc-checked-seed-products/1",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V1.json"
+    },
+    {
+      "id": "psc-wasm-canonical-request/1",
+      "kind": "wasm-export-request",
+      "status": "experimental",
+      "canonicalPath": "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json"
+    },
+    {
+      "id": "psc-checked-seed-products/2",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V2.json"
+    },
+    {
+      "id": "psc-checked-seed-products/3",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V3.json"
+    },
+    {
+      "id": "psc-js-declaration-positions/1",
+      "kind": "declaration-positions",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json"
+    },
+    {
+      "id": "psc-direct-js-declaration-map/1",
+      "kind": "declaration-map",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json"
+    },
+    {
+      "id": "psc-direct-js-declaration-map-recipe/1",
+      "kind": "declaration-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json"
+    },
+    {
+      "id": "psc-emit-direct-js-declaration-map/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/4",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
+    },
+    {
+      "id": "psc-direct-js-source-map-link/1",
+      "kind": "source-map-link-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json"
+    },
+    {
+      "id": "psc-direct-js-linked-javascript/1",
+      "kind": "linked-javascript-product",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json"
+    },
+    {
+      "id": "psc-direct-js-linked-declarations/1",
+      "kind": "linked-declarations-product",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json"
+    },
+    {
+      "id": "psc-link-direct-js-source-maps/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/5",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
+    },
+    {
+      "id": "psc-compiler-execution-policy/1",
+      "kind": "compiler-execution-policy",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json"
+    },
+    {
+      "id": "pscv-hosted-lean/1",
+      "kind": "compiler-implementation-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json"
     }
-  ]
+  ],
+  "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"
 }

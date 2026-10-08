@@ -1,0 +1,19 @@
+{
+  "name": "@proofscript/theory-bridge",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": false,
+    "portable": true,
+    "implementationProfile": "PSC1-portable-selfhost/1",
+    "sourceRoots": ["src"],
+    "testRoots": ["test"],
+    "outDir": "dist",
+    "role": "logical-interoperability-theory-bridge"
+  },
+  "dependencies": {
+    "@proofscript/foundation": "0.0.0-dev",
+    "@proofscript/core": "0.0.0-dev"
+  }
+}

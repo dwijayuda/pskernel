@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-compiler-execution-policy/1",
+  "implementationProfile": "pscv-hosted-lean/1",
+  "architecture": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "languageAuthority": {
+    "document": "PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md",
+    "sha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "verificationProfile": "pscv-v1",
+    "verificationSemantics": "PSCV-VERIFY-v1",
+    "certificatePolicy": "PSCV-CERT-v1",
+    "normativeLeanVersion": "4.35.0-rc3",
+    "normativeLeanCommit": "470d5ce1400764999581fd26d5d72b00d990b0f4"
+  },
+  "hostToolchain": {
+    "language": "Lean",
+    "version": "4.34.0",
+    "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "selfHosting": {
+    "goal": false,
+    "requiredForImplementation": false,
+    "psc1PatternsRequired": false,
+    "historicalEvidence": "preserve-exact-recorded-identities",
+    "optionalProfiles": [
+      "PSC1-selfhost-stable/1",
+      "PSC1-portable-selfhost/1"
+    ]
+  },
+  "kernelScope": "consume-contracts-and-evidence-only",
+  "sourcePolicy": "Compiler implementation syntax is checked by the pinned Lean host toolchain. The compiled program's PSCV semantics, accepted source profiles, authority boundaries and evidence requirements remain separate.",
+  "requiredValidation": [
+    "language-authority",
+    "native-compilation",
+    "frontend-semantics",
+    "runtime-and-target-ir",
+    "backend-behavior",
+    "production-authority",
+    "artifact-and-archive-replay",
+    "resource-and-failure-boundaries"
+  ],
+  "conformance": {
+    "implementationComplete": false,
+    "pscvLanguageConformant": false,
+    "globalPreservationProved": false,
+    "assuredRelease": false
+  },
+  "decision": {
+    "date": "2026-10-08",
+    "authority": "explicit-user-instruction",
+    "scope": "Supersedes mandatory self-host goals and PSC1 compiler implementation syntax constraints. Does not waive PSCV source semantics, verified-executable gates, exact evidence or independent assurance requirements.",
+    "execution": "github-cloud-only"
+  }
+}

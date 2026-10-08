@@ -1,12 +1,7 @@
-name: PSC15 direct self-host fixed points
+name: PSC15 historical direct self-host fixed points (manual)
 
 on:
-  pull_request:
-    branches:
-      - psc2/selfhost-lean-kernel
-    paths:
-      - "psc15selfhost/**"
-      - ".github/workflows/psc15-direct-selfhost.yml"
+  # Historical self-host evidence; no longer a default implementation gate.
   workflow_dispatch:
 
 permissions:
@@ -19,7 +14,7 @@ concurrency:
 jobs:
   direct-js:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +46,8 @@ jobs:
             psc1 \
             psc1_ir_specialize_tests \
             psc1_erasure_tests \
-            psc1_backend_js_tests
+            psc1_backend_js_tests \
+            psc1_backend_js_diff_fixture
 
       - name: Run shared and direct JS regressions
         working-directory: psc15selfhost
@@ -59,9 +55,13 @@ jobs:
           lake exe psc1_ir_specialize_tests
           lake exe psc1_erasure_tests
           lake exe psc1_backend_js_tests
+          node scripts/backend-js-tail.test.mjs
+          npm run test:erasure-eta
 
       - name: Prove direct JavaScript whole-compiler fixed point
-        timeout-minutes: 20
+        # Observed full generation 1=2=3 replay at 8d2c070 took 31 minutes.
+        # This allocates runner time; compiler/profile/equality gates are unchanged.
+        timeout-minutes: 40
         working-directory: psc15selfhost
         run: npm run test:direct-js-selfhost
 
@@ -110,6 +110,7 @@ jobs:
           lake exe psc1_backend_wasm_tests
           lake exe psc1_backend_wasm_binary_smoke > /tmp/psc15-wasm-bytes.txt
           node scripts/backend-wasm-runtime.test.mjs /tmp/psc15-wasm-bytes.txt
+          npm run test:wasm-runtime-strings
 
       - name: Build and instantiate direct Wasm whole compiler
         working-directory: psc15selfhost

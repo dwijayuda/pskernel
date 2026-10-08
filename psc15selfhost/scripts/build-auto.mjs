@@ -34,4 +34,4 @@ if (!existsSync(bootstrapCompiler)) {
   process.stdout.write("PSC1_BUILD_AUTO: using existing generated JavaScript compiler\n");
 }
 
-run(["run", "build:psc"]);
+run(["run", "build:psc:legacy-selfhost"]);

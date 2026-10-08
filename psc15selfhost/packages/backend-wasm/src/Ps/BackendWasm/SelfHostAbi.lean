@@ -8,6 +8,9 @@ def psWasmSelfHostAbiStringNewName : String :=
 def psWasmSelfHostAbiStringSetName : String :=
   "__ps_selfhost_string_set"
 
+def psWasmSelfHostAbiStringFinishName : String :=
+  "__ps_selfhost_string_finish"
+
 def psWasmSelfHostAbiBytesIsNilName : String :=
   "__ps_selfhost_bytes_is_nil"
 
@@ -35,31 +38,42 @@ def psWasmSelfHostAbiFunctions : List PsWasmFunction :=
       name := psWasmSelfHostAbiStringNewName
       typeName := Option.none
       parameters := [PsWasmValueType.i32]
-      results := [psWasmStringRef]
+      results := [psWasmStringCharsRef]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
-        PsWasmInstruction.arrayNewDefault psWasmStringCharsName,
-        PsWasmInstruction.localGet 0,
-        PsWasmInstruction.structNew psWasmStringName
+        PsWasmInstruction.arrayNewDefault psWasmStringCharsName
       ]
     },
     {
       name := psWasmSelfHostAbiStringSetName
       typeName := Option.none
       parameters := [
-        psWasmStringRef,
+        psWasmStringCharsRef,
         PsWasmValueType.i32,
         PsWasmValueType.i32
       ]
       results := []
       locals := []
       body := [
+        PsWasmInstruction.localGet 2,
+        PsWasmInstruction.call psWasmCharUtf8WidthFn,
+        PsWasmInstruction.drop,
         PsWasmInstruction.localGet 0,
-        PsWasmInstruction.structGet psWasmStringName 0,
         PsWasmInstruction.localGet 1,
         PsWasmInstruction.localGet 2,
         PsWasmInstruction.arraySet psWasmStringCharsName
+      ]
+    },
+    {
+      name := psWasmSelfHostAbiStringFinishName
+      typeName := Option.none
+      parameters := [psWasmStringCharsRef]
+      results := [psWasmStringRef]
+      locals := []
+      body := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.call psWasmStringFromCharsFn
       ]
     },
     {
@@ -112,6 +126,9 @@ def psWasmSelfHostAbiExports : List (String × String) :=
       psWasmSelfHostAbiStringSetName
       psWasmSelfHostAbiStringSetName,
     Prod.mk
+      psWasmSelfHostAbiStringFinishName
+      psWasmSelfHostAbiStringFinishName,
+    Prod.mk
       psWasmSelfHostAbiBytesIsNilName
       psWasmSelfHostAbiBytesIsNilName,
     Prod.mk
@@ -122,9 +139,24 @@ def psWasmSelfHostAbiExports : List (String × String) :=
       psWasmSelfHostAbiBytesTailName
   ]
 
+def psWasmHasSelfHostByteListType
+    (structures : List PsWasmStructType) (name : String) : Bool :=
+  match structures with
+  | List.nil => false
+  | List.cons type rest =>
+      if psStringEq type.name name then true
+      else psWasmHasSelfHostByteListType rest name
+
+def psWasmNeedsSelfHostGcAbi (module : PsWasmModule) : Bool :=
+  if psWasmHasSelfHostByteListType module.structures psWasmSelfHostAbiByteListName then
+    if psWasmHasSelfHostByteListType module.structures psWasmSelfHostAbiByteListNilName then
+      psWasmHasSelfHostByteListType module.structures psWasmSelfHostAbiByteListConsName
+    else false
+  else false
+
 def psWasmAddSelfHostGcAbi
     (module : PsWasmModule) : PsWasmModule :=
-  {
+  if psWasmNeedsSelfHostGcAbi module then {
     structures := module.structures
     arrays := module.arrays
     functionTypes := module.functionTypes
@@ -137,4 +169,4 @@ def psWasmAddSelfHostGcAbi
       psListAppend
         module.exports
         psWasmSelfHostAbiExports
-  }
+  } else module

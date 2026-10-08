@@ -1,4 +1,6 @@
 import Ps.CompilerIr.Specialize
+import Ps.CompilerIr.Encode
+import Ps.CompilerIr.Validate
 
 def psIrSpecU32 : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
@@ -363,9 +365,84 @@ def psTestSpecializationWorklistDeduplicates : Bool :=
   else
     false
 
-def main : IO Unit := do
-  if psTestGenericSpecialization
-      && psTestSpecializationWorklistDeduplicates then
+def psTestSpecializationPassEvidence : Bool :=
+  let validated : PsValidatedIrModule :=
+    PsValidatedIrModule.mk psIrSpecModule;
+  match
+      psIrSpecializeValidatedModuleWithExecution
+        "fixture-input"
+        "fixture-output"
+        validated with
+  | Except.error _ =>
+      false
+  | Except.ok result =>
+      psStringEq
+        result.execution.passDefinitionId
+        "psc-pass-specialize/1"
+        && psStringEq
+          result.execution.inputIdentity
+          "fixture-input"
+        && psStringEq
+          result.execution.outputIdentity
+          "fixture-output"
+        && psIrSpecNoGenericStructure
+          result.specialized.raw.structures
+        && psIrSpecNoGenericInductive
+          result.specialized.raw.inductives
+        && psIrSpecNoGenericDeclaration
+          result.specialized.raw.declarations
+
+def psIrSpecFunctionType : PsVerifiedIrType := .function [psIrSpecU32] psIrSpecU32
+
+def psIrSpecLocalCall : PsVerifiedIrExpr :=
+  .call (.var "id") [] [.literal (.machineInteger .uint32 42)]
+
+def psIrSpecScopeModule : PsVerifiedIrModule :=
+  PsVerifiedIrModule.mk [] []
+    [PsVerifiedIrInductive.mk "Handler" []
+      [PsVerifiedIrConstructor.mk "handler" [PsVerifiedIrConstructorField.mk "run" psIrSpecFunctionType]]]
+    [PsVerifiedIrDeclaration.mk "id" [PsVerifiedIrTypeParameter.mk "A"]
+      [PsVerifiedIrParameter.mk "value" psIrSpecA] psIrSpecA (.var "value"),
+     PsVerifiedIrDeclaration.mk "parameterScope" [] [PsVerifiedIrParameter.mk "id" psIrSpecFunctionType]
+      psIrSpecU32 psIrSpecLocalCall,
+     PsVerifiedIrDeclaration.mk "letScope" [] [] psIrSpecU32
+      (.letE "id" psIrSpecFunctionType
+        (.lambda [PsVerifiedIrParameter.mk "x" psIrSpecU32] psIrSpecU32 (.var "x")) psIrSpecLocalCall),
+     PsVerifiedIrDeclaration.mk "lambdaScope" [] [] (.function [psIrSpecFunctionType] psIrSpecU32)
+      (.lambda [PsVerifiedIrParameter.mk "id" psIrSpecFunctionType] psIrSpecU32 psIrSpecLocalCall),
+     PsVerifiedIrDeclaration.mk "matchScope" [] [PsVerifiedIrParameter.mk "h" (.named "Handler" [])]
+      psIrSpecU32 (.matchE "Handler" [] (.var "h")
+        [("handler", [PsVerifiedIrMatchBinding.mk "run" "id" psIrSpecFunctionType], psIrSpecLocalCall)])]
+
+def psTestSpecializationCaptureRejected : Bool :=
+  let source := PsVerifiedIrModule.mk [] [] []
+    [PsVerifiedIrDeclaration.mk "id" [PsVerifiedIrTypeParameter.mk "A"]
+      [PsVerifiedIrParameter.mk "value" psIrSpecA] psIrSpecA (.var "value"),
+     PsVerifiedIrDeclaration.mk "capture" [] [PsVerifiedIrParameter.mk "id$spec$U32" psIrSpecFunctionType]
+      psIrSpecU32 (.call (.var "id") [psIrSpecU32] [.literal (.machineInteger .uint32 42)])]
+  match psValidateErasedIrModule (PsErasedIrModule.mk source) with
+  | .error _ => false
+  | .ok _ =>
+      match psIrSpecializeModule source with
+      | .error .unsupportedGenericCall => true
+      | _ => false
+
+def main (args : List String) : IO Unit := do
+  if args == ["--artifacts"] || args == ["--scope-artifacts"] then
+    let source := if args == ["--scope-artifacts"] then psIrSpecScopeModule else psIrSpecModule
+    let .ok checked := psValidateErasedIrModule (PsErasedIrModule.mk source)
+      | throw (IO.userError "SOURCE_INVALID")
+    let .ok specialized := psIrSpecializeValidatedModule checked
+      | throw (IO.userError "SPECIALIZE_FAILED")
+    let .ok _ := psValidateErasedIrModule (PsErasedIrModule.mk specialized.raw)
+      | throw (IO.userError "TARGET_INVALID")
+    let .ok input := psIrEncodeModule checked.raw | throw (IO.userError "SOURCE_ENCODING")
+    let .ok output := psIrEncodeModule specialized.raw | throw (IO.userError "TARGET_ENCODING")
+    IO.println (psJsonObject [("verifiedIr", psJsonQuote input), ("specializedIr", psJsonQuote output)])
+  else if psTestGenericSpecialization
+      && psTestSpecializationWorklistDeduplicates
+      && psTestSpecializationPassEvidence
+      && psTestSpecializationCaptureRejected then
     IO.println "PSC1_IR_SPECIALIZE_TESTS: PASS"
   else
     throw (IO.userError "PSC1_IR_SPECIALIZE_TESTS: FAIL")

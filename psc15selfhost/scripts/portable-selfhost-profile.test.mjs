@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import path from 'node:path';
+import { mkdtemp, writeFile, rm, rmdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import {
   findSelfhostStructuralViolations,
   portableSelfhostStructuralRuleIds,
@@ -8,6 +10,7 @@ import {
 
 import {
   collectPortableSelfhostEntryRoots,
+  collectImportClosure,
   collectPortableSelfhostPackages,
   readPortableSelfhostProfile,
 } from './portable-selfhost-profile.mjs';
@@ -18,6 +21,20 @@ function ids(source) {
     portableSelfhostStructuralRuleIds,
   ).map(hit => hit.id);
 }
+
+test('portable import closure resolves theory packages and rejects unknown or missing imports', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'psc-import-closure-'));
+  const file = path.join(directory, 'Root.lean');
+  try {
+    await writeFile(file, 'import Ps.TheoryBridge.Model\n');
+    const closure = await collectImportClosure([file], true);
+    assert([...closure.keys()].some(name => name.endsWith(path.join('TheoryBridge', 'Model.lean'))));
+    for (const name of ['Ps.Unknown.Module', 'Ps.TheoryBridge.Missing']) {
+      await writeFile(file, 'import ' + name + '\n');
+      await assert.rejects(collectImportClosure([file], true), /IMPORT_UNRESOLVED/);
+    }
+  } finally { await rm(file, { force: true }); await rmdir(directory); }
+});
 
 test('recursive equation definitions are rejected but explicit structural recursion is accepted', () => {
   const bad = [
@@ -282,8 +299,12 @@ test('portable entry roots minimally cover the backend-wasm package graph', asyn
   );
   assert.deepEqual(
     entries.map(sourcePath => path.basename(sourcePath)).sort(),
-    ['Binary.lean', 'Lower.lean', 'SelfHostAbi.lean'],
+    ['CanonicalRequest.lean', 'Encode.lean', 'LiteralEvidence.lean', 'SelfHostAbi.lean'],
   );
+  const closure = await collectImportClosure(entries, true);
+  for (const sourcePath of packages[0].roots) {
+    assert(closure.has(path.resolve(sourcePath)), 'uncovered backend source: ' + sourcePath);
+  }
 });
 
 test('portable entry roots minimally cover the backend-js package graph', async () => {
@@ -296,7 +317,7 @@ test('portable entry roots minimally cover the backend-js package graph', async 
   );
   assert.deepEqual(
     entries.map(sourcePath => path.basename(sourcePath)).sort(),
-    ['Print.lean'],
+    ['Encode.lean', 'Print.lean'],
   );
 });
 
@@ -315,4 +336,24 @@ test('layout-only lets are rejected while explicit sequencing remains valid', ()
     '  value',
   ].join('\n');
   assert(!ids(good).includes('layout-let-sequencing'));
+});
+
+test('record updates require explicit portable constructors without rejecting record literals', () => {
+  for (const source of [
+    'def f := { state with operands := rest }',
+    'def f := { (choose state) with value := next }',
+    'def f := { state\n  with value := next }',
+    'def f := { outer := { inner with value := next } }',
+  ]) assert(ids(source).includes('record-update'), source);
+  for (const source of [
+    'def f := State.mk rest state.flag',
+    'def f := { value := next, flag := false }',
+    'def f := { value := match state with | Option.none => 0 | Option.some value => value }',
+    'def f := { value := { inner := next } }',
+    'def f := "{ state with value := next }"',
+    '-- { state with value := next }\ndef f := 0',
+    "/- { state with value := next } -/\ndef f := 0",
+    "def brace : Char := '{'\ndef f := match x with | _ => 0",
+  ]) assert(!ids(source).includes('record-update'), source);
+  assert.equal(findSelfhostStructuralViolations('def f := { state with x := next }', []).length, 0);
 });

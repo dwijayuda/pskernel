@@ -114,4 +114,33 @@ assertSemanticBoundary(
   "def psEraseCoreModule env declarations := declarations\n",
 );
 
+for (const emitter of ['psJsEmitValidatedModuleWithTargetProfile', 'psJsEmitValidatedModuleStackSafeWithTargetProfile', 'psWasmLowerValidatedModule']) {
+  assertSemanticBoundary('packages/driver-js/src/Ps/DriverJs/Bootstrap.lean',
+    'def emit prepared := match psCompilerVerifiedIrFromPrepared prepared with\n' +
+    '  | Except.ok ir => ' + emitter + ' profile ir\n');
+}
+assertSemanticBoundary(
+  'packages/driver-wasm/src/Ps/DriverWasm/SelfHostProgress.lean',
+  [
+    'def lower prepared := match psCompilerVerifiedIrFromPrepared prepared with',
+    '  | Except.ok ir =>',
+    '    match psIrSpecializeValidatedModule ir with',
+    '    | Except.ok specialized => psWasmLowerSpecializedValidatedModule profile specialized',
+  ].join('\n'),
+);
+assertHas(
+  'packages/driver-wasm/src/Ps/DriverWasm/SelfHostProgress.lean',
+  [
+    'def lower prepared := match psCompilerVerifiedIrFromPrepared prepared with',
+    '  | Except.ok ir => psWasmLowerSpecializedValidatedModule profile forged',
+  ].join('\n'),
+  'PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR',
+  'specialized lowerer without the typed specialization transition rejected',
+);
+for (const emitter of ['psJsEmitValidatedModuleUnchecked', 'psJsEmitModule', 'psWasmLowerModule']) {
+  assertHas('packages/driver-js/src/Ps/DriverJs/Bootstrap.lean',
+    'def emit prepared := match psCompilerVerifiedIrFromPrepared prepared with\n' +
+    '  | Except.ok ir => ' + emitter + ' profile ir.raw\n',
+    'PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR', 'raw or forged-prefix emitter rejected');
+}
 process.stdout.write("PSC2_SEMANTIC_BOUNDARY_CONTRACT: PASS\n");

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-direct-js-promotion/1",
+  "target": "direct-js-canonical-bootstrap",
+  "currentStatus": "gated-not-promoted",
+  "required": [
+    "psc-runtime-semantics/1",
+    "psc-verified-ir/1",
+    "psc-specialized-ir/1",
+    "global-erasure-preservation-or-validator",
+    "global-specialization-preservation-or-validator",
+    "direct-js-whole-compiler-fixed-point",
+    "direct-js-runtime-differential",
+    "checked-authority-production-path"
+  ],
+  "currentBlockers": [
+    "global erasure preservation remains target-unproved beyond proved slices",
+    "global specialization preservation remains target-unproved beyond proved slices",
+    "direct JsIR target-preservation proof/translation validator is not yet complete"
+  ],
+  "policy": {
+    "noAutomaticPromotion": true,
+    "fixedPointAloneInsufficient": true,
+    "fallbackForbidden": true
+  },
+  "targetIrValidation": {
+    "status": "implemented-exact-retained-target-ir-assurance-pending",
+    "implementation": "packages/backend-js/src/Ps/BackendJs/Validate.lean",
+    "productionBoundary": "Ps.BackendJs.Print validates JsIR before printing",
+    "regression": "test/BackendJsValidateTests.lean",
+    "preservation": "not-established",
+    "exactArtifact": "Ps.CompilerJavaScriptStages retains canonical jsIr produced by the same lowering execution consumed by validation/printing; checked host/archive evidence binds psc-js-ir-json/1."
+  }
+}

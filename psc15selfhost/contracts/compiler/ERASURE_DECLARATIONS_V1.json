@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-erasure-declarations/1",
+  "mapContract": "psc-erasure-declaration-map/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "table": [
+    "contract",
+    "declaration-inventory",
+    "entries"
+  ],
+  "entry": [
+    "structuredCoreName",
+    "disposition"
+  ],
+  "dispositions": {
+    "runtime": [
+      "runtime",
+      "actualRuntimeDeclarationName"
+    ],
+    "proofErased": [
+      "proof-erased"
+    ],
+    "other": [
+      "no-runtime-declaration"
+    ]
+  },
+  "producer": "One existing erasure algorithm with optional observation: actual definition/partial results supply the emitted name or Prop-omission disposition; other declaration kinds explicitly have no emitted RuntimeIR declaration. Runtime layout and constructor representation are separate.",
+  "pipeline": "TS/direct-JS/direct-Wasm stage products retain correspondence from the same erasure execution as RuntimeIR, validation and backend emission. Historical selected modules may omit it; malformed present metadata rejects.",
+  "consumers": [
+    "bounded checked service",
+    "two-phase native compiler host",
+    "actual observed build graph",
+    "typed debug ArtifactBundle",
+    "graph-driven output publication",
+    "exact archive replay"
+  ],
+  "validation": [
+    "Exact canonical decoding and exhaustive ordered coverage of PublicApiIR structured names.",
+    "Every emitted runtime name matches the complete ordered RuntimeIR declaration list without duplicates or guessing mangling.",
+    "Disposition must match the source declaration kind; omitted definition/partial proof status is an observation, not independently rechecked by this decoder.",
+    "Map binds exact public-api, runtime-ir and table ArtifactIds; replay requires caller-pinned subject identities."
+  ],
+  "coordinateUse": "Compose declaration OriginGraph and erasure map only via the same exact PublicApiIR identity; expression, layout and specialization/target origins remain separate obligations.",
+  "assurance": {
+    "inventoryCorrespondenceChecked": true,
+    "proofDispositionIndependentlyChecked": false,
+    "semanticPreservationProved": false,
+    "serializedMetadataCreatesAuthority": false
+  },
+  "remaining": [
+    "Independent type/body erasure correctness or checked preservation theorem",
+    "Fine-grained expression and aggregate-layout correspondence",
+    "Specialization/target origin transfer",
+    "Direct-JS generic export policy and declaration/source-map emission"
+  ]
+}

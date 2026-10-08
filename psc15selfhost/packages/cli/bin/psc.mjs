@@ -27,11 +27,12 @@ function option(args, name) {
 
 function usage() {
   return [
-    "ProofScript self-host CLI",
+    "PSCV compiler CLI",
     "",
     "usage:",
     "  psc bootstrap",
-    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]",
+    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts|output.wasm|output.rs> [--backend typescript|javascript|wasm|rust] [--products source|executable|metadata|declarations|source-map|declaration-map|linked|all] [--js-representation closed|uniform] [--wasm-exports <selection.json>] [--compiler <compiler.js> | --seed <binary>] [--kernel <provider>] [--security-profile <profile>] [--archive-max-bytes <n>] [--archive-max-total-bytes <n>]",
+    "  psc build-unchecked <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]  # bootstrap/internal",
     "  psc translate <input.lean|input.ps> --to <lean|ps> [--out <output>] [--compiler <compiler.js>]",
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",
     "  psc emit-ps <input.lean|input.ps> [--out <output.ps>] [--compiler <compiler.js>]",
@@ -41,7 +42,8 @@ function usage() {
     "  psc fixed-point",
     "",
     "defaults:",
-    `  compiler: ${defaultCompiler}`,
+    "  build: native checked compiler (prepare with npm run build:hosted)",
+    `  legacy translation/selfhost compiler: ${defaultCompiler}`,
     `  workspace: ${defaultWorkspace}`,
     `  next generation: ${defaultGeneration}`,
   ].join("\n");
@@ -72,17 +74,16 @@ if (!command || command === "--help" || command === "-h") {
   run(npm, ["run", "fixed-point"]);
 } else if (command === "build") {
   const entry = args[1];
+  if (!entry || entry.startsWith("--") || !args.includes("--out")) throw new Error(usage());
+  // The checked builder owns option validation and provider-specific defaults.
+  // Forward the explicit request intact instead of supplying a bootstrap module.
+  run(node, ["scripts/checked-build.mjs", ...args.slice(1)]);
+} else if (command === "build-unchecked") {
+  const entry = args[1];
   const output = option(args, "--out");
   const compiler = option(args, "--compiler") ?? defaultCompiler;
-
   if (!entry || !output) throw new Error(usage());
-
-  run(node, [
-    "scripts/compile-with-generated.mjs",
-    compiler,
-    entry,
-    output,
-  ]);
+  run(node, ["scripts/compile-with-generated.mjs", compiler, entry, output]);
 } else if (command === "project" && args[1] === "emit") {
   const entry = args[2];
   const target = option(args, "--to");

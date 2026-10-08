@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-direct-js-declaration-map/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "status": "source-writer-position-map-and-common-build-archive-routing-cloud-validated-at-885988b2",
+  "owner": "scripts/js-declaration-map.mjs",
+  "format": "ECMA-426 version 3",
+  "profiles": [
+    "psc-direct-js-declarations-closed-structural/1",
+    "psc-direct-js-declarations-uniform-structural/1"
+  ],
+  "positionContract": "psc-js-declaration-positions/1",
+  "recipeContract": "psc-direct-js-declaration-map-recipe/1",
+  "producer": "The existing source-signature declaration writer optionally records UTF-8 byte and zero-based UTF-16 start/end coordinates for declaration and export chunks. The original declarations/signatures/binding identities are unchanged. Live checked hosts still compare declaration bytes with the portable writer.",
+  "composition": [
+    "Reconstruct the exact source-signature/export binding before using any generated positions.",
+    "Reconstruct OriginGraph over the same PublicApiIR and exact prepared sources.",
+    "Compose optional original-source preparation with exact byte anchors and shared UTF-16 coordinate conversion.",
+    "Map each selected declaration/export chunk's first line to its source declaration start; unmap terminators and synthetic/empty output.",
+    "No token/type-expression origin or optimized-instance source signature is inferred."
+  ],
+  "publication": {
+    "selection": "JavaScript declaration-map or all. Required declarations and source origins must exist; no fallback. The metadata dependency closure may also publish available JavaScript debug products.",
+    "suffix": ".d.ts.map",
+    "positionsSuffix": ".declaration-positions.json",
+    "recipeSuffix": ".declaration-map-recipe.json",
+    "bundleGroup": "debugArtifacts",
+    "linking": "standalone-map-declarations-unchanged",
+    "sourceMappingURL": false
+  },
+  "registry": {
+    "baseSnapshot": "contracts/backends/BACKEND_REGISTRY_V2.json",
+    "formatContract": "psc-backend-registry/1",
+    "backendVersion": "psc-v5-backends/2",
+    "uniformDerivation": "psc-uniform-js-backend-derivation/4",
+    "historical": "Registry V1 and uniform derivations 1/2/3 are retained; new products do not rewrite their historical bytes."
+  },
+  "consumer": "Independent consumer pins declaration, signature, binding, origin and optional preparation/source identities plus profile/file. It snapshots selections and output records before asynchronous resolution, rehashes inputs, replays the writer and reconstructs all output identities.",
+  "limits": {
+    "artifactBytes": 134217728,
+    "totalBytes": 536870912,
+    "artifacts": 8250,
+    "sources": 4096
+  },
+  "authority": "debug-metadata-only",
+  "globalPreservationProved": false,
+  "validation": [
+    "scripts/js-declaration-map.test.mjs: Node SourceMap decoding, closed/uniform signatures, exact original/prepared origins, BOM/CRLF/import gaps/astral columns, mutation and fresh-hash rejection.",
+    "scripts/checked-build.test.mjs: actual native closed/uniform publication with portable byte comparison and offline archive replay.",
+    "Existing JavaScript source-map tests cover unchanged behavior after shared coordinate extraction."
+  ],
+  "remaining": [
+    "Token/type-expression and general expression origins",
+    "Automatic sourceMappingURL packaging with explicit linked-output identity",
+    "Broader named/dependent public signatures",
+    "Portable map serializer",
+    "Global source/runtime/backend preservation and assured release"
+  ],
+  "references": [
+    "https://www.typescriptlang.org/tsconfig/declarationMap.html",
+    "https://raw.githubusercontent.com/microsoft/TypeScript/v5.9.3/src/compiler/emitter.ts",
+    "https://tc39.es/ecma426/"
+  ],
+  "referenceReviewed": "2026-10-08",
+  "cloudValidation": {
+    "commit": "885988b2e82fe7bad45e115ddec5c35f04c81cf0",
+    "mainRun": 37714593700,
+    "mainJob": 113108071900,
+    "conclusion": "success",
+    "parityRun": 37714593365,
+    "parityJob": 113108069909,
+    "parityConclusion": "success",
+    "scope": [
+      "closed-and-uniform-prepared-and-original-source-map-reconstruction",
+      "utf16-bom-crlf-import-gap-and-mutation-boundaries",
+      "generated-selection-and-actual-native-closed-uniform-publication",
+      "portable-declaration-byte-comparison-and-offline-archive-replay",
+      "full-existing-main-compiler-selfhost-isolation-gates"
+    ],
+    "proofImplication": "none"
+  }
+}

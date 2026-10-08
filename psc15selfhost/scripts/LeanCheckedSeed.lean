@@ -1,4 +1,5 @@
 import Ps.Host.LeanChecked
+import Ps.Host.CheckedSeedProducts
 import Lean.Data.Json
 import Lean.Message
 
@@ -61,6 +62,23 @@ def psCheckedSeedTests : IO Unit := do
   psCheckedSeedAssert "direct recursion classification retains nested self arguments"
     (psCheckedNestedDirect (psRootName "Family") (PsExpr.app self parameter) &&
       !psCheckedNestedDirect (psRootName "Family") (PsExpr.app self self))
+  let rustRequest := Lean.Json.arr #[Lean.Json.str psCheckedSeedRustProtocol,
+    Lean.Json.str "rust", Lean.Json.str "psc-rust-source/2021", Lean.Json.bool true,
+    Lean.Json.bool false, Lean.Json.bool false]
+  psCheckedSeedAssert "Rust transport pins a separate source capability"
+    ((psCheckedSeedRustDecode rustRequest.compress).isOk &&
+      !(psCheckedSeedProductsDecode rustRequest.compress).isOk &&
+      !(psCheckedSeedCanonicalDecode rustRequest.compress).isOk)
+  for (target, profile, declarations, sourceMap) in [
+      ("javascript", "psc-rust-source/2021", false, false),
+      ("rust", "psc-js-closed-instances/1", false, false),
+      ("rust", "psc-rust-source/2021", true, false),
+      ("rust", "psc-rust-source/2021", false, true)] do
+    let wire := (Lean.Json.arr #[Lean.Json.str psCheckedSeedRustProtocol,
+      Lean.Json.str target, Lean.Json.str profile, Lean.Json.bool false,
+      Lean.Json.bool declarations, Lean.Json.bool sourceMap]).compress
+    psCheckedSeedAssert "Rust transport rejects target/profile/product expansion"
+      (!(psCheckedSeedRustDecode wire).isOk)
   IO.println "PSC2_LEAN_CHECKED_NATIVE: PASS"
 
 def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do
@@ -86,7 +104,7 @@ def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do
 -- prepared Lean value remains alive while the host checks its canonical
 -- admissions. Erasure/emission runs only after the host replies `emit`.
 def psCheckedSeedPreparedSession
-    (prepared : PsCompilerAdmissionReadyModule) : IO Unit := do
+    (prepared : PsCompilerAdmissionReadyModule) (origins : String) : IO Unit := do
   let .ok admissions := psCompilerAdmissionsFromPrepared prepared
     | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
   let stdout ← IO.getStdout
@@ -101,23 +119,30 @@ def psCheckedSeedPreparedSession
       | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
     if currentAdmissions != admissions then
       throw (IO.userError "PSC2_CHECKED_PAYLOAD_CHANGED")
-    match psCompilerTypeScriptFromPrepared prepared with
+    let .ok publicApi := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "PSC2_CHECKED_PUBLIC_API_FAILED")
+    match psCompilerTypeScriptStagesFromPrepared prepared with
     | .error _ => throw (IO.userError "PSC2_CHECKED_EMISSION_FAILED")
     | .ok output =>
-        stdout.putStrLn (psCheckedSeedMessage "emitted" "typescript" output)
+        stdout.putStrLn (Lean.Json.mkObj [
+          ("phase", Lean.Json.str "emitted"), ("typescript", Lean.Json.str output.typeScript),
+          ("runtimeIr", Lean.Json.str output.runtimeIr), ("verifiedIr", Lean.Json.str output.verifiedIr),
+          ("publicApi", Lean.Json.str publicApi), ("declarationOrigins", Lean.Json.str origins),
+          ("erasureCorrespondence", Lean.Json.str output.erasureCorrespondence)]).compress
         stdout.flush
   else
     throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")
 
 def psCheckedSeedSession
-    (kind : PsCompilerSourceKind) (sourcePath : String) : IO Unit := do
+    (kind : PsCompilerSourceKind) (sourcePath : String) (products : Bool := false) (protocol : String := psCheckedSeedProductsProtocol) : IO Unit := do
   let source ← IO.FS.readFile sourcePath
-  let .ok prepared := psCompilerPrepareSource kind source
+  let .ok product := psCompilerPrepareSourceWithOrigins kind source
     | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
-  psCheckedSeedPreparedSession prepared
+  if products then psCheckedSeedProductsSession product.prepared product.origins protocol
+  else psCheckedSeedPreparedSession product.prepared product.origins
 
 def psCheckedSeedModulesSession
-    (kind : PsCompilerSourceKind) (sourcePath : String) : IO Unit := do
+    (kind : PsCompilerSourceKind) (sourcePath : String) (products : Bool := false) (protocol : String := psCheckedSeedProductsProtocol) : IO Unit := do
   let source ← IO.FS.readFile sourcePath
   let .ok json := Lean.Json.parse source
     | throw (IO.userError "PSC2_CHECKED_MODULES_JSON")
@@ -127,9 +152,10 @@ def psCheckedSeedModulesSession
     match entry.getStr? with
     | .error _ => throw (IO.userError "PSC2_CHECKED_MODULES_SOURCE")
     | .ok text => pure text
-  let .ok prepared := psCompilerPrepareSources kind sources
+  let .ok product := psCompilerPrepareSourcesWithOrigins kind sources
     | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
-  psCheckedSeedPreparedSession prepared
+  if products then psCheckedSeedProductsSession product.prepared product.origins protocol
+  else psCheckedSeedPreparedSession product.prepared product.origins
 
 def psCheckedSeedDiagnoseAdmissions (sourcePath : String) : IO Unit := do
   let source ← IO.FS.readFile sourcePath
@@ -154,6 +180,18 @@ def main (args : List String) : IO Unit := do
   | ["--check-ps"] => psCheckedSeedRun false .proofScript
   | ["--emit-lean"] => psCheckedSeedRun true .lean
   | ["--emit-ps"] => psCheckedSeedRun true .proofScript
+  | ["--session-products-v3-lean", sourcePath] => psCheckedSeedSession .lean sourcePath true psCheckedSeedRustProtocol
+  | ["--session-products-v3-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath true psCheckedSeedRustProtocol
+  | ["--session-products-v3-modules-lean", sourcePath] => psCheckedSeedModulesSession .lean sourcePath true psCheckedSeedRustProtocol
+  | ["--session-products-v3-modules-ps", sourcePath] => psCheckedSeedModulesSession .proofScript sourcePath true psCheckedSeedRustProtocol
+  | ["--session-products-v2-lean", sourcePath] => psCheckedSeedSession .lean sourcePath true psCheckedSeedCanonicalProtocol
+  | ["--session-products-v2-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath true psCheckedSeedCanonicalProtocol
+  | ["--session-products-v2-modules-lean", sourcePath] => psCheckedSeedModulesSession .lean sourcePath true psCheckedSeedCanonicalProtocol
+  | ["--session-products-v2-modules-ps", sourcePath] => psCheckedSeedModulesSession .proofScript sourcePath true psCheckedSeedCanonicalProtocol
+  | ["--session-products-lean", sourcePath] => psCheckedSeedSession .lean sourcePath true
+  | ["--session-products-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath true
+  | ["--session-products-modules-lean", sourcePath] => psCheckedSeedModulesSession .lean sourcePath true
+  | ["--session-products-modules-ps", sourcePath] => psCheckedSeedModulesSession .proofScript sourcePath true
   | ["--session-lean", sourcePath] => psCheckedSeedSession .lean sourcePath
   | ["--session-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath
   | ["--session-modules-lean", sourcePath] => psCheckedSeedModulesSession .lean sourcePath

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-checked-seed-resources/1",
+  "implementation": [
+    "scripts/checked-seed-protocol.mjs",
+    "scripts/checked-seed-session.mjs"
+  ],
+  "status": "implemented-native-session-boundary",
+  "rules": [
+    "Bound source bytes/count and serialized snapshot bytes before starting the compiler process.",
+    "Count raw stdout bytes and bound each frame before UTF-8 decoding and JSON parsing. Legacy and direct non-declaration sessions, including explicit Canonical psc-checked-seed-products/2 sessions, allow two frames; explicitly selected psc-checked-seed-products/1 declaration sessions allow exactly one additional writer response.",
+    "Bound diagnostics, admissions before checker invocation and total emitted source/IR bytes before returning a successful session.",
+    "Each asynchronous protocol/checker wait has a phase timeout. Kill the selected compiler child on failure and confirm its close before removing temporary inputs; unconfirmed termination is infrastructureUnavailable.",
+    "Preserve prepared -> trusted checker acceptance -> emit/checked. Direct declaration requests remain in the same native prepared session after exact staged-subject checks; any limit/failure aborts without successful data.",
+    "Bind configured native session limits and whole-session observations into affected pass records, explicitly without per-pass resource attribution."
+  ],
+  "outcomes": [
+    "resourceExhausted",
+    "infrastructureUnavailable"
+  ],
+  "completeBudgetCoverage": false,
+  "limitations": [
+    "Trusted host event loop: a synchronous in-process checker cannot be preempted by a timer.",
+    "A timed-out asynchronous checker may finish later, but its result cannot authorize emission in this failed session.",
+    "Limits describe protocol bytes and asynchronous waiting, not process CPU, peak memory, descendants, compiler-internal work or host stack.",
+    "No malicious-host sandbox, global resource monotonicity theorem or preservation theorem follows."
+  ]
+}

@@ -5,6 +5,8 @@
 **Branch audited:** psc2/selfhost-lean-kernel
 **Baseline:** 1df9e01ba1c4d73382c0e30c69de06022ba0cedd
 **Primary implementation subtree:** psc15selfhost/
+**Normative language authority:** psc15selfhost/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md (`pscv-v1`, `PSCV-VERIFY-v1`, `PSCV-CERT-v1`; Lean 4.35.0-rc3 semantic pin)
+**Current compiler milestone:** `psc2-compiler-v1`; PSCV conformance remains a target until all PSCV gates close
 **Predecessors:** psc15selfhost/THE_PSCV_COMPILER_REFERENCE.md and psc15selfhost/THE_PSCV_COMPILER_REFERENCE_VERSION_2.md
 **Research date:** 2026-10-06
 **Acceptance rule:** equal-weight average at least 9.90 and no requested criterion below 9.90
@@ -903,49 +905,52 @@ No criterion is scored 10. Future implementation, independent replication, hosti
 
 # 49. Strongest near-term implementation sequence
 
+**Execution-scope override for `pscv/v3-execution`:** PSKernel implementation, algorithmic-defeq/cache proof work, checker-soundness proof work, semantic-model/consistency proof work, and other kernel-internal development are owned by the separate kernel branch/workstream. This PSCV compiler branch must not modify kernel implementation or proof sources. It consumes only the frozen KernelContract/provider interfaces plus exact imported kernel evidence identities. Kernel architecture remains part of the system model, but kernel development is not part of this branch's execution plan.
+
 1. Register current/frozen/experimental/target architecture identities.
 2. Close the AdmissionReady production authority bypass.
-3. Add ProviderSecurityProfile separate from semantic compatibility.
+3. Integrate ProviderSecurityProfile separately from semantic compatibility without modifying provider internals.
 4. Add and enforce compiler-wide TrustManifest.
-5. Formalize algorithmic defeq and cache-refinement contracts.
-6. Close the current VerifiedIR invariant gap matrix.
-7. Introduce explicit SpecializedIR capability.
-8. Unify PassDefinition, BuildAction, SemanticFingerprint, and evidence.
-9. Prototype Comparator-v1.
-10. Seed declarative theory for binding, universes, typing, declarative conversion, and algorithmic conversion.
-11. Prove high-risk checker refinement slices.
-12. Introduce StructuralModuleInterface and BehavioralModuleInterface.
-13. Drive QueryGraph reuse from semantic interface fingerprints.
-14. Prove erasure noninterference/preservation.
-15. Prove specialization preservation.
-16. Add Wasm translation validation or preservation for the first closed slice.
-17. Implement minimal SAVEF theory graph.
-18. Build portable verifier capsule.
-19. Freeze FactoryBench holdout before broad knowledge exposure.
-20. Promote direct JavaScript only after semantic and fixed-point gates close.
-21. Run a verified/diverse bootstrap campaign.
+5. Close the current VerifiedIR invariant gap matrix.
+6. Introduce explicit SpecializedIR capability.
+7. Unify PassDefinition, BuildAction, SemanticFingerprint, and evidence.
+8. Complete Comparator-v1 compiler-side sandbox/export/replay plumbing using external provider interfaces.
+9. Introduce StructuralModuleInterface and BehavioralModuleInterface.
+10. Drive QueryGraph reuse from semantic interface fingerprints.
+11. Implement erasure preservation hooks/validators while leaving expensive global proofs to the assurance phase.
+12. Implement specialization preservation hooks/independent correspondence validation while leaving expensive global proofs to the assurance phase.
+13. Add complete target-IR validation architecture, starting with JsIR/WasmIR.
+14. Implement target-specific ABI adapters through InterfaceIR/WIT/native adapter contracts.
+15. Implement SAVEF theory/knowledge graph, persistent derived index, and validated tool retrieval.
+16. Build portable verifier/archive capsule.
+17. Complete FactoryBench execution infrastructure while keeping real holdout experiments deferred.
+18. Finish direct JS/Rust/Wasm self-host implementation and exact fixed-point infrastructure.
+19. Complete B9/DDC execution tooling and later import actual diverse evidence.
+20. Freeze V3 compiler architecture once all non-kernel implementation capabilities are connected.
 
 ---
 
 # 50. Immediate milestone acceptance criteria
 
-The next architecture milestone requires:
+The next **PSCV compiler-branch** architecture milestone requires:
 
 1. production drivers cannot erase from AdmissionReady;
 2. CheckedCoreCapability is required by type/dependency topology;
-3. provider identity includes semantic target and implementation/security identity;
+3. provider identity includes semantic target and implementation/security identity without modifying provider internals;
 4. provider failure never falls back;
-5. TrustManifest matches computed import closure;
-6. defeq cache policy is explicit and tested against non-transitivity hazards;
-7. VerifiedIR gap matrix is machine-readable;
+5. TrustManifest matches computed compiler/host import closure;
+6. imported kernel contract/evidence identities are exact and treated as external dependencies;
+7. VerifiedIR gap matrix is machine-readable and implementation gaps are explicit;
 8. SpecializedIR is a distinct capability;
 9. specialization emits PassDefinition/PassExecution evidence;
-10. one ModuleInterface fingerprint drives actual QueryGraph reuse;
-11. Comparator-v1 sandbox/export/replay prototype exists;
-12. one declarative theory slice has checker-refinement proof or executable proof skeleton;
-13. one Wasm lowering slice has proof or translation validation;
-14. one SAVEF object stores resulting theorem/pass/interface evidence;
-15. FactoryBench holdout is frozen before those objects are searchable.
+10. one certified ModuleInterface fingerprint drives actual QueryGraph semantic reuse;
+11. Comparator-v1 sandbox/export/replay plumbing exists against external provider interfaces;
+12. JsIR/WasmIR validation boundaries are explicit and fail closed;
+13. target ABI adapter capabilities are explicit and unsupported targets fail closed;
+14. one SAVEF object stores resulting pass/interface evidence and the persistent index remains non-authoritative;
+15. FactoryBench holdout remains sealed before knowledge exposure;
+16. Direct JS/Rust/Wasm self-host infrastructure preserves exact fixed-point acceptance criteria;
+17. no file under the kernel implementation/proof workstream is modified by this branch.
 
 ---
 

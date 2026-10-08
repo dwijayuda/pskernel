@@ -31,6 +31,7 @@ inductive PsWasmInstruction where
   | drop
   | unreachable
   | call (name : String)
+  | returnCall (name : String)
   | return_
   | ifStart (result : Option PsWasmValueType)
   | else_
@@ -112,6 +113,7 @@ inductive PsWasmInstruction where
   | refFunc (functionName : String)
   | refCastFunction (typeName : String)
   | callRef (typeName : String)
+  | returnCallRef (typeName : String)
 
 structure PsWasmStructField where
   name : String

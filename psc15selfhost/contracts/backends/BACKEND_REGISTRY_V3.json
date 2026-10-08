@@ -1,0 +1,418 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-backend-registry/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "backendVersion": "psc-v5-backends/3",
+  "artifactBundleContract": "psc-artifact-bundle/1",
+  "backends": [
+    {
+      "backendId": "typescript",
+      "backendKind": "sourceTarget",
+      "packagePath": "packages/backend-ts",
+      "inputDomain": "verified-ir",
+      "inputContract": "psc-runtime-ir-json/1",
+      "lowerPassId": "psc-verified-ir-to-typescript/1",
+      "targetRepresentationId": null,
+      "targetValidatorId": null,
+      "emitterId": "psTsEmitValidatedModule",
+      "runtimeContractId": "psc-runtime-semantics/1",
+      "selfHostRole": "minimal-bootstrap-ecosystem-differential",
+      "assuranceClass": "trustedImplementation",
+      "supportedCapabilities": [
+        "target-source",
+        "javascript-via-pinned-tsc",
+        "declarations-via-pinned-tsc",
+        "source-maps-via-pinned-tsc"
+      ],
+      "unsupportedCapabilities": [
+        "global-preservation",
+        "public-api-correspondence"
+      ],
+      "products": {
+        "executableArtifacts": [
+          {
+            "role": "target-source",
+            "domain": "typescript-source",
+            "contract": "psc-typescript-source/es2022",
+            "requiresToolchain": false
+          },
+          {
+            "role": "javascript",
+            "domain": "javascript-output",
+            "contract": "typescript-emitted-file/1",
+            "requiresToolchain": true
+          }
+        ],
+        "publicApiArtifacts": [
+          {
+            "role": "source-api",
+            "domain": "public-api",
+            "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration",
+            "domain": "declarations-output",
+            "contract": "typescript-emitted-file/1",
+            "requiresToolchain": true
+          }
+        ],
+        "debugArtifacts": [
+          {
+            "role": "source-origins",
+            "domain": "source-origins",
+            "contract": "psc-source-preparation-origins/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "origin-graph",
+            "domain": "origin-graph",
+            "contract": "psc-origin-graph/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "erasure-map",
+            "domain": "erasure-map",
+            "contract": "psc-erasure-declaration-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "source-map",
+            "domain": "source-map-output",
+            "contract": "typescript-emitted-file/1",
+            "requiresToolchain": true
+          }
+        ],
+        "interfaceArtifacts": [
+          {
+            "role": "javascript-scalar-binding",
+            "domain": "abi-plan",
+            "contract": "psc-js-scalar-abi-plan/1",
+            "requiresToolchain": false
+          }
+        ]
+      },
+      "ownershipDebt": "Current generic RuntimeIR source backend is preserved. V5.1 SpecializedIR input and PublicApiIR declaration correspondence remain migration obligations."
+    },
+    {
+      "backendId": "javascript",
+      "backendKind": "directTargetIR",
+      "packagePath": "packages/backend-js",
+      "inputDomain": "specialized-ir",
+      "inputContract": "psc-runtime-ir-json/1",
+      "lowerPassId": "psc-specialized-ir-to-js-ir/1",
+      "targetRepresentationId": "psc-js-ir-json/1",
+      "targetValidatorId": "psc-js-ir-validator/1",
+      "emitterId": "psJsEmitValidatedModuleStackSafeWithTargetProfile",
+      "runtimeContractId": "psc-runtime-semantics/1",
+      "selfHostRole": "direct-js-fixed-point-long-term-npm",
+      "assuranceClass": "trustedImplementation",
+      "supportedCapabilities": [
+        "direct-esm",
+        "target-ir-validation",
+        "standalone-declaration-source-maps",
+        "closed-structural-source-declarations",
+        "standalone-source-declaration-maps",
+        "explicit-source-map-linking"
+      ],
+      "unsupportedCapabilities": [
+        "generic-and-dependent-source-declarations",
+        "expression-source-maps",
+        "global-preservation",
+        "automatic-source-map-linking"
+      ],
+      "products": {
+        "executableArtifacts": [
+          {
+            "role": "javascript",
+            "domain": "javascript-output",
+            "contract": "psc-direct-javascript/es2022",
+            "requiresToolchain": false
+          },
+          {
+            "role": "linked-javascript",
+            "domain": "linked-javascript-output",
+            "contract": "psc-direct-js-linked-javascript/1",
+            "requiresToolchain": false
+          }
+        ],
+        "publicApiArtifacts": [
+          {
+            "role": "source-api",
+            "domain": "public-api",
+            "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declarations",
+            "domain": "declarations-output",
+            "contract": "psc-direct-javascript-declarations/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration-signatures",
+            "domain": "declaration-signatures",
+            "contract": "psc-source-declaration-signatures/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration-binding",
+            "domain": "declaration-binding",
+            "contract": "psc-direct-javascript-declaration-binding/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "linked-declarations",
+            "domain": "linked-declarations-output",
+            "contract": "psc-direct-js-linked-declarations/1",
+            "requiresToolchain": false
+          }
+        ],
+        "debugArtifacts": [
+          {
+            "role": "source-origins",
+            "domain": "source-origins",
+            "contract": "psc-source-preparation-origins/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "origin-graph",
+            "domain": "origin-graph",
+            "contract": "psc-origin-graph/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "erasure-map",
+            "domain": "erasure-map",
+            "contract": "psc-erasure-declaration-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "specialization-instances",
+            "domain": "specialization-map",
+            "contract": "psc-specialization-instance-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "generated-positions",
+            "domain": "generated-position-map",
+            "contract": "psc-js-generated-position-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration-lineage",
+            "domain": "declaration-lineage",
+            "contract": "psc-js-declaration-lineage/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "source-map",
+            "domain": "source-map-output",
+            "contract": "psc-direct-javascript-source-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "source-map-recipe",
+            "domain": "source-map-recipe",
+            "contract": "psc-direct-javascript-source-map-recipe/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration-positions",
+            "domain": "declaration-positions",
+            "contract": "psc-js-declaration-positions/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration-map",
+            "domain": "declaration-map-output",
+            "contract": "psc-direct-js-declaration-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "declaration-map-recipe",
+            "domain": "declaration-map-recipe",
+            "contract": "psc-direct-js-declaration-map-recipe/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "source-map-link-recipe",
+            "domain": "source-map-link-recipe",
+            "contract": "psc-direct-js-source-map-link/1",
+            "requiresToolchain": false
+          }
+        ],
+        "interfaceArtifacts": [
+          {
+            "role": "javascript-scalar-binding",
+            "domain": "abi-plan",
+            "contract": "psc-js-scalar-abi-plan/1",
+            "requiresToolchain": false
+          }
+        ]
+      },
+      "ownershipDebt": "Opt-in linked-source-map packaging retains original printer and declaration identities; separately identified linked target products do not establish semantic preservation. Expression origins and broader signatures remain open."
+    },
+    {
+      "backendId": "wasm",
+      "backendKind": "directTargetIR",
+      "packagePath": "packages/backend-wasm",
+      "inputDomain": "specialized-ir",
+      "inputContract": "psc-runtime-ir-json/1",
+      "lowerPassId": "psc-specialized-ir-to-wasm-ir/1",
+      "targetRepresentationId": "psc-wasm-ir-json/1",
+      "targetValidatorId": "psc-wasm-ir-validator/1",
+      "emitterId": "psWasmEncodeModule",
+      "runtimeContractId": "psc-runtime-semantics/1",
+      "selfHostRole": "direct-wasm-fixed-point-private-abi",
+      "assuranceClass": "trustedImplementation",
+      "supportedCapabilities": [
+        "core-wasm",
+        "gc-runtime",
+        "target-ir-validation",
+        "private-selfhost-abi",
+        "closed-canonical-scalar-exports"
+      ],
+      "unsupportedCapabilities": [
+        "general-component-runtime",
+        "async-canonical-abi",
+        "resource-handle-runtime",
+        "global-preservation"
+      ],
+      "products": {
+        "executableArtifacts": [
+          {
+            "role": "private-selfhost-binary",
+            "domain": "wasm-output",
+            "contract": "psc-direct-wasm/wasm32",
+            "requiresToolchain": false
+          },
+          {
+            "role": "canonical-scalar-binary",
+            "domain": "wasm-binary",
+            "contract": "webassembly-core/1",
+            "requiresToolchain": false
+          }
+        ],
+        "publicApiArtifacts": [
+          {
+            "role": "source-api",
+            "domain": "public-api",
+            "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          }
+        ],
+        "debugArtifacts": [
+          {
+            "role": "source-origins",
+            "domain": "source-origins",
+            "contract": "psc-source-preparation-origins/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "origin-graph",
+            "domain": "origin-graph",
+            "contract": "psc-origin-graph/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "erasure-map",
+            "domain": "erasure-map",
+            "contract": "psc-erasure-declaration-map/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "specialization-instances",
+            "domain": "specialization-map",
+            "contract": "psc-specialization-instance-map/1",
+            "requiresToolchain": false
+          }
+        ],
+        "interfaceArtifacts": [
+          {
+            "role": "foreign-interface",
+            "domain": "interface-ir",
+            "contract": "psc-interface-ir-json/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "canonical-binding",
+            "domain": "abi-plan",
+            "contract": "psc-wasm-canonical-scalar-exports/1",
+            "requiresToolchain": false
+          }
+        ]
+      },
+      "ownershipDebt": "Core Wasm, private self-host ABI and Component/Canonical ABI remain separate target profiles; checked Canonical driver routing remains pending."
+    },
+    {
+      "backendId": "rust",
+      "backendKind": "sourceTarget",
+      "packagePath": "packages/backend-rust",
+      "inputDomain": "verified-ir",
+      "inputContract": "psc-runtime-ir-json/1",
+      "lowerPassId": "psc-verified-ir-to-rust/1",
+      "targetRepresentationId": null,
+      "targetValidatorId": null,
+      "emitterId": "psRustEmitValidatedModule",
+      "runtimeContractId": "psc-runtime-semantics/1",
+      "selfHostRole": "native-systems-diverse-bootstrap",
+      "assuranceClass": "trustedImplementation",
+      "supportedCapabilities": [
+        "target-source",
+        "source-generics",
+        "native-via-pinned-rustc"
+      ],
+      "unsupportedCapabilities": [
+        "independent-source-validator",
+        "global-preservation"
+      ],
+      "products": {
+        "executableArtifacts": [
+          {
+            "role": "target-source",
+            "domain": "rust-source",
+            "contract": "psc-rust-source/2021",
+            "requiresToolchain": false
+          },
+          {
+            "role": "native-binary",
+            "domain": "native-output",
+            "contract": "psc-rust-native/1",
+            "requiresToolchain": true
+          }
+        ],
+        "publicApiArtifacts": [
+          {
+            "role": "source-api",
+            "domain": "public-api",
+            "contract": "psc-public-api-ir/1",
+            "requiresToolchain": false
+          }
+        ],
+        "debugArtifacts": [
+          {
+            "role": "source-origins",
+            "domain": "source-origins",
+            "contract": "psc-source-preparation-origins/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "origin-graph",
+            "domain": "origin-graph",
+            "contract": "psc-origin-graph/1",
+            "requiresToolchain": false
+          },
+          {
+            "role": "erasure-map",
+            "domain": "erasure-map",
+            "contract": "psc-erasure-declaration-map/1",
+            "requiresToolchain": false
+          }
+        ],
+        "interfaceArtifacts": []
+      },
+      "ownershipDebt": "Generic validated RuntimeIR input remains current. Rust source emission has no persistent RustIR; observed production graph and exact native toolchain closure remain pending."
+    }
+  ]
+}

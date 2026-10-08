@@ -1,7 +1,16 @@
-# PSC2 minimal self-host status
+# PSCV compiler bootstrap/self-host status
 
-Status (2026-10-04): the project uses a **compiler-only bootstrap**. The generated
+Status (2026-10-07): the project uses a **compiler-only bootstrap**. The generated
 compiler closure contains **55 source modules** and no kernel package.
+
+The normative verified-language target is now
+`PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md` (`pscv-v1`, `PSCV-VERIFY-v1`,
+`PSCV-CERT-v1`, Lean 4.35.0-rc3 semantic pin). The current executable compiler
+and self-host closure remain the inherited `psc2-compiler-v1` / PSC1-portable
+implementation milestone until the full PSCV verification, specification-coverage,
+effect, assumption, erasure, and compile-gating obligations are implemented.
+The authority migration therefore changes the target specification, not the
+current conformance claim.
 
 The active compiler source profile is now machine-enforced as `PSC1-selfhost-stable/1`.
 Every bootstrap change is expected to pass the static profile, the whole-closure

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-rust-fixed-point-observation/1",
+  "commit": "9c61a5e6e2761dc0c5fba82be38b22078acd43a2",
+  "repository": "dwijayuda/pskernel",
+  "runId": 37543432920,
+  "jobId": 112541632056,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37543432920",
+  "conclusion": "success",
+  "observation": {
+    "modules": 66,
+    "sourceClosureSha256": "40f888e983ec3a5e5e6d5edcc3f3f11c4959b8c8abc90a067dfb88fbb7fa4d92",
+    "generatedRustBytes": 2810845,
+    "generation1Equals2": true,
+    "generation2Equals3": true,
+    "generation2CompilerBuiltAndExecuted": true,
+    "toolchain": {
+      "lean": "4.34.0",
+      "rust": "1.98.1",
+      "node": "22"
+    },
+    "checkedBy": "scripts/direct-rust-selfhost-fixed-point.mjs"
+  },
+  "repeatObservations": [
+    { "commit": "8d2c070d87ce6ce46e8d3bb0a50151575465be29", "runId": 37547807862, "jobId": 112556211734, "conclusion": "success", "sameSourceClosureAndGeneratedBytes": true },
+    { "commit": "66ee434217ab1b4bf2501790ada813434cfdd93f", "pullRequestMergeCommit": "c6993dc24c72de723ac1319eba0d02d5e6b56628", "runId": 37552329385, "jobId": 112570474710, "conclusion": "success", "completedAt": "2026-10-07T00:53:28.6690680Z", "sameSourceClosureAndGeneratedBytes": true }
+  ],
+  "scope": "Byte equality of generated Rust source across native generations for this exact source closure and cloud toolchain. Native executable byte reproducibility was not checked.",
+  "notEstablished": [
+    "global compiler correctness",
+    "general stack safety",
+    "preservation-connected bootstrap",
+    "diverse double compiling",
+    "verified executable",
+    "JS/Wasm fixed points",
+    "direct-JS promotion",
+    "final V3 acceptance"
+  ]
+}

@@ -1,5 +1,6 @@
 import Ps.BackendWasm.Lower
 import Ps.BackendWasm.Binary
+import Ps.BackendWasm.Validate
 
 def psWasmProfile32 : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }
@@ -1033,6 +1034,7 @@ def psTestWasmRuntimeUnitRepresentation : Bool :=
           []
           []
           []
+          []
           (Option.some PsWasmValueType.i32)
           psWasmUInt8OfNatTestState
           (PsVerifiedIrExpr.literal
@@ -1187,6 +1189,75 @@ def psTestWasmCharToNatIntrinsic : Bool :=
       psStringEq functionName psWasmNatOfU32Fn
   | _ => false
 
+def psWasmValidationSource : PsSpecializedIrModule :=
+  PsSpecializedIrModule.mk
+    {
+      imports := []
+      structures := []
+      inductives := []
+      declarations := [
+        {
+          name := "answer"
+          typeParameters := []
+          parameters := []
+          resultType :=
+            PsVerifiedIrType.primitive
+              PsVerifiedIrPrimitiveType.uint32
+          body :=
+            PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.machineInteger
+                PsVerifiedIrMachineIntegerType.uint32
+                42)
+        }
+      ]
+    }
+
+def psTestWasmTranslationValidator : Bool :=
+  match
+      psWasmLowerSpecializedValidatedModule
+        psWasmProfile32
+        psWasmValidationSource with
+  | Except.error _ =>
+      false
+  | Except.ok lowered =>
+      match
+          psWasmValidateSpecializedLiteralModule
+            psWasmValidationSource
+            lowered with
+      | Except.error _ =>
+          false
+      | Except.ok _ =>
+          true
+
+def psTestWasmTranslationValidatorRejectsDrift : Bool :=
+  let drifted : PsWasmModule := {
+    structures := []
+    arrays := []
+    functionTypes := []
+    functions := [
+      {
+        name := "answer"
+        typeName := none
+        parameters := []
+        results := [PsWasmValueType.i32]
+        locals := []
+        body := [PsWasmInstruction.i32Const 43]
+      }
+    ]
+    functionRefs := []
+    exports := [("answer", "answer")]
+  };
+  match
+      psWasmValidateSpecializedLiteralModule
+        psWasmValidationSource
+        drifted with
+  | Except.error
+      (PsWasmTranslationValidationError.functionMismatch
+        name) =>
+      psStringEq name "answer"
+  | _ =>
+      false
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
@@ -1275,8 +1346,80 @@ def psTestWasmNatConstructorIdentityInvariant : Bool :=
             && bit1.fields.length == 2
       | _ => false
 
-    def main : IO Unit := do
-  if psTestWasmScalarLowering
+def psTestWasmTailPositions : Bool :=
+  let body := [PsWasmInstruction.localGet 0,
+    PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+      PsWasmInstruction.call "nonTail", PsWasmInstruction.i32Const 1, PsWasmInstruction.i32Add,
+    PsWasmInstruction.else_,
+      PsWasmInstruction.localGet 1,
+      PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+        PsWasmInstruction.call "direct",
+      PsWasmInstruction.else_,
+        PsWasmInstruction.callRef "indirect",
+      PsWasmInstruction.end_,
+    PsWasmInstruction.end_];
+  match psWasmTailCalls body with
+  | [.localGet 0, .ifStart _, .call nonTail, .i32Const 1, .i32Add,
+     .else_, .localGet 1, .ifStart _, .returnCall direct, .else_,
+     .returnCallRef indirect, .end_, .end_] =>
+      nonTail == "nonTail" && direct == "direct" && indirect == "indirect"
+  | _ => false
+
+def psTestWasmUnitReturnBridge : Bool :=
+  let body := [PsWasmInstruction.localGet 0,
+    PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+      PsWasmInstruction.call "left", PsWasmInstruction.i32Const 0,
+    PsWasmInstruction.else_,
+      PsWasmInstruction.localGet 1,
+      PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+        PsWasmInstruction.callRef "right", PsWasmInstruction.i32Const 0,
+      PsWasmInstruction.else_,
+        PsWasmInstruction.localGet 2,
+      PsWasmInstruction.end_,
+    PsWasmInstruction.end_]
+  match psWasmTailCalls (psWasmDiscardUnit body) with
+  | [.localGet 0, .ifStart none, .returnCall left, .else_,
+      .localGet 1, .ifStart none, .returnCallRef right, .else_,
+      .localGet 2, .drop, .end_, .end_] => left == "left" && right == "right"
+  | _ => false
+
+def psTestWasmBulkEncoding : Bool :=
+  let instructions := (List.range 20000).flatMap fun _ =>
+    [PsWasmInstruction.i32Const 42, PsWasmInstruction.drop]
+  let expected := (List.range 20000).flatMap fun _ =>
+    [psWasmByte 65, psWasmByte 42, psWasmByte 26]
+  let encoded :=
+    match psWasmEncodeInstructions [] [] [] [] instructions with
+    | Except.ok bytes => bytes == expected
+    | Except.error _ => false
+  let firstError :=
+    match psWasmEncodeInstructions [] [] [] []
+        [PsWasmInstruction.call "first", PsWasmInstruction.call "last"] with
+    | Except.error (PsWasmEncodeError.unknownFunction name) => name == "first"
+    | _ => false
+  encoded && firstError
+
+def psTestWasmBulkListOperations : Bool :=
+  let values := List.range 65536
+  let mapped := psListMap Nat.succ values
+  let appendOk := psListAppend values [65536, 65537] == List.range 65538
+  let mapOk := mapped == values.map Nat.succ
+  let mapExceptOk :=
+    match psListMapExcept (fun (value : Nat) => (Except.ok (value + 1) : Except String Nat)) values with
+    | Except.ok result => result == mapped
+    | Except.error _ => false
+  let firstError :=
+    match psListMapExcept (fun (value : Nat) => (Except.error value : Except Nat Nat)) [3, 7] with
+    | Except.error value => value == 3
+    | Except.ok _ => false
+  appendOk && mapOk && mapExceptOk && firstError
+
+def main : IO Unit := do
+  if psTestWasmBulkEncoding
+      && psTestWasmBulkListOperations
+      && psTestWasmUnitReturnBridge
+      && psTestWasmTailPositions
+      && psTestWasmScalarLowering
       && psTestWasmNatConstructorIdentityInvariant
       && psTestWasmWordProfiles
       && psTestWasmMachineIntegerOps
@@ -1293,6 +1436,8 @@ def psTestWasmNatConstructorIdentityInvariant : Bool :=
       && psTestWasmInductiveMatchLowering
       && psTestWasmRecursiveListLowering
       && psTestWasmClosureLowering
+      && psTestWasmTranslationValidator
+      && psTestWasmTranslationValidatorRejectsDrift
       && psTestWasmUleb
       && psTestWasmSignedLeb
       && psTestWasmBinaryModule then

@@ -4,7 +4,7 @@
   "sourceProfile": "ps-standard-0.9-r3",
   "requiredLanguageProfile": "psc2-language-v1",
   "standardLanguageProfile": "psc2-standard-language-v1",
-  "implementationProfile": "PSC1-selfhost-stable/1",
+  "implementationProfile": "pscv-hosted-lean/1",
   "entry": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
   "sourceRoots": [
     "packages"
@@ -15,5 +15,6 @@
     "emitTypeScript": true,
     "declaration": true,
     "sourceMap": true
-  }
+  },
+  "historicalSelfhostProfile": "PSC1-selfhost-stable/1"
 }

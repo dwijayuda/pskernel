@@ -21,6 +21,9 @@
     }
   },
   "dependencies": {
-    "@proofscript/compiler-ir-next": "0.0.0-dev"
+    "@proofscript/compiler-ir-next": "0.0.0-dev",
+    "@proofscript/bridge-next": "0.0.0-dev",
+    "@proofscript/interface-ir": "0.0.0-dev",
+    "@proofscript/foundation": "0.0.0-dev"
   }
 }

@@ -103,6 +103,7 @@ for (const relativePath of generated) {
   const outputPath = path.join(outputWorkspace, relativePath);
   const source = await readFile(inputPath, "utf8");
   const canonicalResult = await cachedTextTransform({
+    cacheTrust: 'bootstrap-local',
     projectRoot: selfhostRoot,
     namespace: "translate-source-v1",
     contract: {

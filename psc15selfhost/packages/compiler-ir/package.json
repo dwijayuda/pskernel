@@ -17,5 +17,10 @@
       "id": "psc-runtime-semantics/1",
       "sha256": "d610e1a1936dd1b090a44a8293a68436bc9300ad5c82872e8faf4e1e6b97ae03"
     }
+  },
+  "dependencies": {
+    "@proofscript/bridge-next": "0.0.0-dev",
+    "@proofscript/foundation": "0.0.0-dev",
+    "@proofscript/core": "0.0.0-dev"
   }
 }

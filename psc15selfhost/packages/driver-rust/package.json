@@ -14,10 +14,12 @@
     "testRoots": [
       "test"
     ],
-    "implementationProfile": "PSC1-portable-selfhost/1"
+    "implementationProfile": "PSC1-portable-selfhost/1",
+    "authorityRole": "bootstrap-transform"
   },
   "dependencies": {
     "@proofscript/compiler-next": "0.0.0-dev",
-    "@proofscript/backend-rust-next": "0.0.0-dev"
+    "@proofscript/backend-rust-next": "0.0.0-dev",
+    "@proofscript/compiler-ir-next": "0.0.0-dev"
   }
 }

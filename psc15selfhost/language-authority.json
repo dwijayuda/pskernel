@@ -1,13 +1,27 @@
 {
-  "schemaVersion": 1,
-  "document": "PSC2_COMPLETE_LANGUAGE_AND_JS_PLATFORM.md",
-  "sha256": "43c583f7b87413b1f7ba2719b31a3706ebe15e4d87a4df2a48f4aaed05332752",
+  "schemaVersion": 2,
+  "document": "PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md",
+  "sha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
   "languageEdition": "ps-0.9-r3",
   "sourceProfile": "ps-standard-0.9-r3",
   "requiredLanguageProfile": "psc2-language-v1",
   "standardLanguageProfile": "psc2-standard-language-v1",
-  "javaScriptPlatformProfile": "psc-js-platform-v1",
-  "leanVersion": "4.34.0",
-  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
-  "compilerConformance": "bootstrap-subset-until-psc2-language-v1-complete"
+  "leanCompatibilityProfile": "lean-subset-psc2-v1",
+  "verificationProfile": "pscv-v1",
+  "closedAssurancePolicy": "pscv-closed-v1",
+  "boundaryAssurancePolicy": "pscv-boundary-v1",
+  "verificationSemantics": "PSCV-VERIFY-v1",
+  "certificatePolicy": "PSCV-CERT-v1",
+  "currentCompilerMilestone": "psc2-compiler-v1",
+  "targetCompilerConformance": "pscv-compiler-v1",
+  "implementationProfile": "pscv-hosted-lean/1",
+  "normativeLeanVersion": "4.35.0-rc3",
+  "normativeLeanCommit": "470d5ce1400764999581fd26d5d72b00d990b0f4",
+  "implementationConformance": "Hosted Lean implementation retains the inherited PSC2 accepted-language capability milestone until the complete pscv-v1 verification and compile-gating closure is implemented; host implementation syntax is not source-language conformance.",
+  "bootstrapLean": {
+    "version": "4.34.0",
+    "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "historicalImplementationProfile": "PSC1-selfhost-stable/1",
+  "executionPolicy": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json"
 }

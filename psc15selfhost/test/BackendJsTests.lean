@@ -1,4 +1,5 @@
 import BackendJsFixture
+import BackendJsTailFixture
 import Ps.BackendJs.Print
 
 def psBackendJsExpected : String :=
@@ -6,6 +7,7 @@ def psBackendJsExpected : String :=
   "import { importedAdd as externalAdd } from \"./support.js\";\n" ++
   "import { namedIdentity } from \"./support.js\";\n" ++
   "import { default as externalDefault } from \"./support.js\";\n" ++
+  "let __ps$utf8Cache;\nfunction __ps$utf8(source) { if (__ps$utf8Cache?.source === source) return __ps$utf8Cache; const entries = new Map(); let size = 0n; for (const char of source) { const cp = char.codePointAt(0) ?? 0; const width = BigInt(cp <= 0x7f ? 1 : cp <= 0x7ff ? 2 : cp <= 0xffff ? 3 : 4); entries.set(size, [char, width]); size += width; } return (__ps$utf8Cache = { source, entries, size }); }\n" ++
   "export const answer = 42n;\n" ++
   "export function idNat(x) { return x; }\n" ++
   "export function plusOne(x) { return (x + 1n); }\n" ++
@@ -20,10 +22,10 @@ def psBackendJsExpected : String :=
   "export function intNegDemo(value) { return (-(value)); }\n" ++
   "export function boolAndDemo(left, right) { return (left && right); }\n" ++
   "export function stringLengthDemo(value) { return ((__ps_s) => BigInt(Array.from(__ps_s).length))(value); }\n" ++
-  "export function stringUtf8ByteSizeDemo(value) { return ((__ps_s) => { let __ps_n = 0n; for (const __ps_c of __ps_s) { const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); __ps_n += __ps_w; } return __ps_n; })(value); }\n" ++
-  "export function stringNextDemo(value, position) { return ((__ps_s, __ps_p) => { let __ps_i = 0n; for (const __ps_c of __ps_s) { const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); if (__ps_i === __ps_p) return __ps_p + __ps_w; if (__ps_i > __ps_p) return __ps_p + 1n; __ps_i += __ps_w; } return __ps_p + 1n; })(value, position); }\n" ++
-  "export function stringGetDemo(value, position) { return ((__ps_s, __ps_p) => { let __ps_i = 0n; for (const __ps_c of __ps_s) { if (__ps_i === __ps_p) return __ps_c; if (__ps_i > __ps_p) return \"A\"; const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); __ps_i += __ps_w; } return \"A\"; })(value, position); }\n" ++
-  "export function stringAtEndDemo(value, position) { return ((__ps_s, __ps_p) => { let __ps_n = 0n; for (const __ps_c of __ps_s) { const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); __ps_n += __ps_w; } return __ps_p >= __ps_n; })(value, position); }\n" ++
+  "export function stringUtf8ByteSizeDemo(value) { return __ps$utf8(value).size; }\n" ++
+  "export function stringNextDemo(value, position) { return ((__ps_s, __ps_p) => __ps_p + (__ps$utf8(__ps_s).entries.get(__ps_p)?.[1] ?? 1n))(value, position); }\n" ++
+  "export function stringGetDemo(value, position) { return ((__ps_s, __ps_p) => __ps$utf8(__ps_s).entries.get(__ps_p)?.[0] ?? \"A\")(value, position); }\n" ++
+  "export function stringAtEndDemo(value, position) { return ((__ps_s, __ps_p) => __ps_p >= __ps$utf8(__ps_s).size)(value, position); }\n" ++
   "export function stringExtractDemo(value, start, stop) { return ((__ps_s, __ps_b, __ps_e) => { if (__ps_b >= __ps_e) return \"\"; let __ps_i = 0n; let __ps_started = false; let __ps_out = \"\"; for (const __ps_c of __ps_s) { const __ps_cp = __ps_c.codePointAt(0) ?? 0; const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); if (!__ps_started) { if (__ps_i === __ps_b) __ps_started = true; else { __ps_i += __ps_w; continue; } } if (__ps_i === __ps_e) return __ps_out; __ps_out += __ps_c; __ps_i += __ps_w; } return __ps_out; })(value, start, stop); }\n" ++
   "export function arrayEmptyDemo(capacity) { return (() => { void (capacity); return []; })(); }\n" ++
   "export function arraySizeDemo(array) { return BigInt((array).length); }\n" ++
@@ -38,12 +40,12 @@ def psBackendJsExpected : String :=
   "export function externalNamedDemo(value) { return namedIdentity(value); }\n" ++
   "export function externalDefaultDemo(value) { return externalDefault(value); }\n" ++
   "export function genericIdNat(value) { return genericId$spec$Nat(value); }\n" ++
-  "export function pointSum(left, right) { return (() => { const point = ({ \"x\": left, \"y\": right }); return ((point)[\"x\"] + (point)[\"y\"]); })(); }\n" ++
-  "export function boxNatGet(value) { return (() => { const box = ({ \"value\": value }); return (box)[\"value\"]; })(); }\n" ++
-  "export function maybeSomeOrZero(value) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return 0n; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { \"value\": value } })); }\n" ++
+  "export function pointSum(left, right) { return ((point) => ((point)[\"x\"] + (point)[\"y\"]))(({ [\"x\"]: left, [\"y\"]: right })); }\n" ++
+  "export function boxNatGet(value) { return ((box) => (box)[\"value\"])(({ [\"value\"]: value })); }\n" ++
+  "export function maybeSomeOrZero(value) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return 0n; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { [\"value\"]: value } })); }\n" ++
   "export function maybeNoneOr(fallback) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return fallback; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"none\", \"$ps$fields\": {  } })); }\n" ++
-  "export function optionNatSome(value) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return 0n; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { \"value\": value } })); }\n" ++
-  "export function matchTempCollision(__ps$match$0, value) { return ((__ps$match$1) => { switch (__ps$match$1[\"$ps$tag\"]) { case \"none\": { return __ps$match$0; } case \"some\": { const payload = __ps$match$1[\"$ps$fields\"][\"value\"]; return (__ps$match$0 + payload); } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { \"value\": value } })); }\n" ++
+  "export function optionNatSome(value) { return ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"none\": { return 0n; } case \"some\": { const payload = __ps$match$0[\"$ps$fields\"][\"value\"]; return payload; } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { [\"value\"]: value } })); }\n" ++
+  "export function matchTempCollision(__ps$match$0, value) { return ((__ps$match$1) => { switch (__ps$match$1[\"$ps$tag\"]) { case \"none\": { return __ps$match$0; } case \"some\": { const payload = __ps$match$1[\"$ps$fields\"][\"value\"]; return (__ps$match$0 + payload); } } throw new Error(\"invalid ProofScript constructor tag\"); })(({ \"$ps$tag\": \"some\", \"$ps$fields\": { [\"value\"]: value } })); }\n" ++
   "export function u8AddWrap(left, right) { return (((left + right)) & 255); }\n" ++
   "export function i8MulWrap(left, right) { return (((Math.imul(left, right)) << 24) >> 24); }\n" ++
   "export function u64Xor(left, right) { return BigInt.asUintN(64, ((left ^ right))); }\n" ++
@@ -52,7 +54,7 @@ def psBackendJsExpected : String :=
   "export const u8Literal44 = Number(BigInt.asUintN(8, 44n));\n" ++
   "export function float32Mul(left, right) { return Math.fround((left * right)); }\n" ++
   "export function floatDiv(left, right) { return (left / right); }\n" ++
-  "export function letNatDemo(x) { return (() => { const y = (x + 1n); return (y * 2n); })(); }\n" ++
+  "export function letNatDemo(x) { return ((y) => (y * 2n))((x + 1n)); }\n" ++
   "export function applyLambda(x) { return ((y) => (y + 2n))(x); }\n" ++
   "export function genericId$spec$Nat(x) { return x; }\n"
 
@@ -132,7 +134,7 @@ def psTestBackendJsAcceptsStructureMetadata : Bool :=
       | Except.ok output =>
           psStringEq
             output
-            "// generated by ProofScript direct JsIR v1\n"
+            (String.Internal.append "// generated by ProofScript direct JsIR v1\n" psJsStringRuntimeSupport)
 
 def psBackendJsUnsupportedIntrinsicModule : PsVerifiedIrModule :=
   {
@@ -439,7 +441,7 @@ def psTestBackendJsTailLoop : Bool :=
   | Except.error _ => false
   | Except.ok output =>
       output.contains
-        "export function tail(n) { while (true) { [n] = [n]; continue; } }"
+        "export function tail(n) { let __ps$tail$state = [n]; while (true) { const [n] = __ps$tail$state; __ps$tail$state = [n]; continue; } }"
         && !output.contains "function* __ps$impl$tail"
 
 
@@ -505,15 +507,61 @@ def psTestBackendJsNestedTailMatchHygiene : Bool :=
       output.contains "const __ps$tail$match$0"
         && output.contains "const __ps$tail$match$1"
         && output.contains
-          "[value] = [next2]; continue;"
+          "__ps$tail$state = [next2]; continue;"
 
+
+def psTestBackendJsTextJoin : Bool :=
+  let lengths : List Nat := [0, 1, 2, 3, 4, 7, 8, 9, 31, 32, 33, 1025]
+  lengths.all fun count =>
+    let chunks : List String := (List.range count).map fun index =>
+      if index % 3 == 0 then "" else "λ😀:" ++ toString index
+    ["", ", ", "界"].all fun separator =>
+      psTextJoin separator chunks == String.intercalate separator chunks
+
+def psTestBackendJsTextPersistence : Bool :=
+  let first := psTextBuilderAppend psTextBuilderEmpty "first"
+  let second := psTextBuilderAppend first "λ"
+  let third := psTextBuilderAppend second "😀"
+  psTextBuilderFinish first == "first" &&
+    psTextBuilderFinish second == "firstλ" &&
+    psTextBuilderFinish third == "firstλ😀"
+
+def psBackendJsWriterDeclarations : List PsJsIrDeclaration := [
+  { name := "first", parameters := [], body := PsJsIrExpr.literal (PsJsIrLiteral.natural 1) },
+  { name := "second", parameters := [], body := PsJsIrExpr.literal (PsJsIrLiteral.natural 2) },
+  { name := "third", parameters := [], body := PsJsIrExpr.literal (PsJsIrLiteral.natural 3) }
+]
+
+def psTestBackendJsWriterOrder : Bool :=
+  let expected := "export const first = 1n;\nexport const second = 2n;\nexport const third = 3n;\n"
+  match psJsPrintDeclarations psBackendJsWriterDeclarations with
+  | Except.error _ => false
+  | Except.ok ordinary =>
+      match psJsPrintDeclarationsStackSafe psBackendJsWriterDeclarations with
+      | Except.error _ => false
+      | Except.ok stackSafe => ordinary == expected && stackSafe == expected
+
+def psTestBackendJsWriterFirstError : Bool :=
+  let reject : PsJsIrDeclaration -> Except PsJsEmitError String :=
+    fun declaration =>
+      if declaration.name == "first" then Except.error PsJsEmitError.malformedIr
+      else Except.error PsJsEmitError.fuelExhausted
+  match psJsPrintDeclarationsWith reject psBackendJsWriterDeclarations psTextBuilderEmpty with
+  | Except.error PsJsEmitError.malformedIr => true
+  | _ => false
 
 structure PsBackendJsNamedTest where
   name : String
   passed : Bool
 
 def psBackendJsTests : List PsBackendJsNamedTest := [
+  { name := "portable text join boundaries and Unicode", passed := psTestBackendJsTextJoin },
+  { name := "persistent text builder snapshots", passed := psTestBackendJsTextPersistence },
+  { name := "normal and stack-safe writer declaration order", passed := psTestBackendJsWriterOrder },
+  { name := "writer preserves first diagnostic", passed := psTestBackendJsWriterFirstError },
+  { name := "removed worker aliases cannot be captured as values", passed := psJsTailFixtureCapturedAliasDeclined },
   { name := "fixture emission", passed := psTestBackendJsFixtureEmission },
+  { name := "UTF-8 runtime name rejection", passed := !psJsIdentifierSupported "__ps$utf8" && !psJsIdentifierSupported "__ps$utf8Cache" },
   { name := "keyword rejection", passed := psTestBackendJsRejectsKeywordName },
   { name := "structure metadata", passed := psTestBackendJsAcceptsStructureMetadata },
   { name := "word-sized no-profile rejection", passed := psTestBackendJsRejectsWordSizedWithoutProfile },

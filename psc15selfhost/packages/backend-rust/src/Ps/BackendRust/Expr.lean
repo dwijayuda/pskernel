@@ -1,4 +1,9 @@
-import Ps.BackendRust.Type
+import Ps.BackendRust.Captures
+
+def psRustCloneExprPrinted (expr : PsVerifiedIrExpr) (printed : String) : String :=
+  match expr with
+  | PsVerifiedIrExpr.var _ => printed
+  | _ => psRustClonePrinted printed
 
 def psRustEmitExprListWith
     (emitExpr :
@@ -20,7 +25,7 @@ def psRustEmitExprListWith
           | Except.ok printedRest =>
               Except.ok
                 (List.cons
-                  (psRustClonePrinted printed)
+                  (psRustCloneExprPrinted expr printed)
                   printedRest)
 
 def psRustEmitFieldListWith
@@ -40,9 +45,9 @@ def psRustEmitFieldListWith
           let rendered : String :=
             psRustConcat3
               (psRustIdentifier (Prod.fst field))
-              ": Box::new("
+              ": std::rc::Rc::new("
               (psRustConcat2
-                (psRustClonePrinted printed)
+                (psRustCloneExprPrinted (Prod.snd field) printed)
                 ")");
           match psRustEmitFieldListWith emitExpr rest with
           | Except.error error =>
@@ -963,7 +968,9 @@ def psRustEmitMatchBindingLets
   psRustEmitMatchBindingLetsWorker bindings 0
 
 def psRustEmitAlternativeListWith
+    (locals : List String)
     (emitExpr :
+      List String ->
       PsVerifiedIrExpr ->
       Except PsRustEmitError String)
     (inductiveName : String)
@@ -985,7 +992,7 @@ def psRustEmitAlternativeListWith
         Prod.fst payload;
       let body : PsVerifiedIrExpr :=
         Prod.snd payload;
-      match emitExpr body with
+      match emitExpr (psRustAddBindingNames bindings locals) body with
       | Except.error error =>
           Except.error error
       | Except.ok printedBody =>
@@ -1005,6 +1012,7 @@ def psRustEmitAlternativeListWith
               (psRustEmitMatchBindingLets bindings)
               (psRustConcat2 printedBody " }");
           match psRustEmitAlternativeListWith
+              locals
               emitExpr
               inductiveName
               rest with
@@ -1013,25 +1021,35 @@ def psRustEmitAlternativeListWith
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
 
-def psRustEmitExprWithFuel
+def psRustEmitExprWorker
+    (declarations : List PsVerifiedIrDeclaration)
     (fuel : Nat) :
+    List String ->
     PsVerifiedIrExpr ->
     Except PsRustEmitError String :=
   match fuel with
   | Nat.zero =>
-      fun (_expr : PsVerifiedIrExpr) =>
+      fun (_locals : List String) (_expr : PsVerifiedIrExpr) =>
         Except.error PsRustEmitError.fuelExhausted
   | Nat.succ remaining =>
-      let emitNested :
-          PsVerifiedIrExpr ->
-          Except PsRustEmitError String :=
-        psRustEmitExprWithFuel remaining;
-      fun (expr : PsVerifiedIrExpr) =>
+      let smaller :
+          List String -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
+        psRustEmitExprWorker declarations remaining;
+      fun (locals : List String) (expr : PsVerifiedIrExpr) =>
+        let emitNested : PsVerifiedIrExpr -> Except PsRustEmitError String :=
+          smaller locals;
+        let emitStored : PsVerifiedIrExpr -> Except PsRustEmitError String :=
+          psRustEmitStoredExprWith declarations locals emitNested;
         match expr with
         | PsVerifiedIrExpr.literal literal =>
           Except.ok (psRustEmitLiteral literal)
         | PsVerifiedIrExpr.var name =>
-          Except.ok (psRustIdentifier name)
+          if psRustStringListContains locals name then
+            Except.ok (psRustClonePrinted (psRustIdentifier name))
+          else
+            match psRustFindFunctionArity declarations name with
+            | Option.none => Except.ok (psRustClonePrinted (psRustIdentifier name))
+            | Option.some arity => Except.ok (psRustEmitGlobalFunctionValue name arity)
         | PsVerifiedIrExpr.intrinsic operation _ arguments =>
           match psRustEmitExprListWith emitNested arguments with
           | Except.error error =>
@@ -1056,13 +1074,17 @@ def psRustEmitExprWithFuel
                 | Except.error error =>
                     Except.error error
                 | Except.ok closureType =>
-                    match emitNested body with
+                    match smaller (psRustAddParameterNames parameters locals) body with
                     | Except.error error =>
                         Except.error error
                     | Except.ok printedBody =>
                         Except.ok
                           (psRustConcat4
-                            "{ let __ps_internal_lambda: "
+                            (psRustConcat3 "{ "
+                              (psRustEmitCaptureClones
+                                (psRustCollectCapturesWorker locals remaining
+                                  (psRustParameterNames parameters) body List.nil))
+                              "let __ps_internal_lambda: ")
                             closureType
                             " = std::rc::Rc::new(move |"
                             (psRustConcat4
@@ -1071,7 +1093,11 @@ def psRustEmitExprWithFuel
                               printedBody
                               "); __ps_internal_lambda }"))
         | PsVerifiedIrExpr.call fn _ arguments =>
-          match emitNested fn with
+          let emittedFn : Except PsRustEmitError String :=
+            match fn with
+            | PsVerifiedIrExpr.var name => Except.ok (psRustIdentifier name)
+            | _ => emitNested fn;
+          match emittedFn with
           | Except.error error =>
               Except.error error
           | Except.ok printedFn =>
@@ -1092,7 +1118,7 @@ def psRustEmitExprWithFuel
           | Except.error error =>
               Except.error error
           | Except.ok printedValue =>
-              match emitNested body with
+              match smaller (List.cons name locals) body with
               | Except.error error =>
                   Except.error error
               | Except.ok printedBody =>
@@ -1111,7 +1137,7 @@ def psRustEmitExprWithFuel
                                 closureType
                                 " = "
                                 (psRustConcat4
-                                  (psRustClonePrinted printedValue)
+                                  (psRustCloneExprPrinted value printedValue)
                                   "; "
                                   printedBody
                                   " }")))
@@ -1122,7 +1148,7 @@ def psRustEmitExprWithFuel
                         (psRustIdentifier name)
                         " = "
                         (psRustConcat4
-                          (psRustClonePrinted printedValue)
+                          (psRustCloneExprPrinted value printedValue)
                           "; "
                           printedBody
                           " }"))
@@ -1154,7 +1180,7 @@ def psRustEmitExprWithFuel
           | Except.error error =>
               Except.error error
           | Except.ok generic =>
-              match psRustEmitFieldListWith emitNested fields with
+              match psRustEmitFieldListWith emitStored fields with
               | Except.error error =>
                   Except.error error
               | Except.ok printedFields =>
@@ -1174,7 +1200,7 @@ def psRustEmitExprWithFuel
               Except.ok
                 (psRustConcat4
                   "(*("
-                  (psRustClonePrinted printedTarget)
+                  (psRustCloneExprPrinted target printedTarget)
                   ")."
                   (psRustConcat2
                     (psRustIdentifier field)
@@ -1188,7 +1214,7 @@ def psRustEmitExprWithFuel
           | Except.error error =>
               Except.error error
           | Except.ok generic =>
-              match psRustEmitFieldListWith emitNested fields with
+              match psRustEmitFieldListWith emitStored fields with
               | Except.error error =>
                   Except.error error
               | Except.ok printedFields =>
@@ -1224,7 +1250,8 @@ def psRustEmitExprWithFuel
               Except.error error
           | Except.ok printedScrutinee =>
               match psRustEmitAlternativeListWith
-                  emitNested
+                  locals
+                  smaller
                   inductiveName
                   alternatives with
               | Except.error error =>
@@ -1233,11 +1260,15 @@ def psRustEmitExprWithFuel
                   Except.ok
                     (psRustConcat4
                       "(match "
-                      (psRustClonePrinted printedScrutinee)
+                      (psRustCloneExprPrinted scrutinee printedScrutinee)
                       " { "
                       (psRustConcat2
                         (psRustJoin ", " printedAlternatives)
                         " })"))
+
+def psRustEmitExprWithFuel
+    (fuel : Nat) (expr : PsVerifiedIrExpr) : Except PsRustEmitError String :=
+  psRustEmitExprWorker List.nil fuel List.nil expr
 
 def psRustEmitExpr
     (expr : PsVerifiedIrExpr) :

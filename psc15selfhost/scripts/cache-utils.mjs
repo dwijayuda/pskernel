@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { canonicalBytes } from './artifact-evidence.mjs';
 
 export const pscCacheSchemaVersion = 1;
 
@@ -26,10 +27,25 @@ export function pscCacheRoot(projectRoot) {
 
 function cacheKey(contract, input) {
   const hash = createHash("sha256");
-  hash.update(JSON.stringify(contract), "utf8");
+  hash.update(canonicalBytes(contract));
   hash.update("\0", "utf8");
   hash.update(input);
   return hash.digest("hex");
+}
+
+function component(value) {
+  if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/u.test(value)) throw new Error('PSC_CACHE_PATH_COMPONENT');
+  return value;
+}
+
+function entryPath(projectRoot, namespace, key) {
+  if (!/^[a-f0-9]{64}$/u.test(key)) throw new Error('PSC_CACHE_KEY');
+  return path.join(pscCacheRoot(projectRoot), component(namespace), key);
+}
+
+function trustedBootstrap(cacheTrust) {
+  if (!['untrusted', 'bootstrap-local'].includes(cacheTrust)) throw new Error('PSC_CACHE_TRUST_CLASS');
+  return cacheTrust === 'bootstrap-local';
 }
 
 export async function cachedTextTransform({
@@ -38,13 +54,17 @@ export async function cachedTextTransform({
   contract,
   input,
   compute,
+  cacheTrust = 'untrusted',
 }) {
+  // Hashes supplied by a cache are not evidence. Untrusted callers use the
+  // evidence-cache verifier; this legacy path is explicitly bootstrap-local.
+  if (!trustedBootstrap(cacheTrust)) return { value: await compute(), cache: 'untrusted-bypass' };
   if (!pscCacheEnabled()) {
     return { value: await compute(), cache: "disabled" };
   }
 
   const key = cacheKey(contract, input);
-  const entryDir = path.join(pscCacheRoot(projectRoot), namespace, key);
+  const entryDir = entryPath(projectRoot, namespace, key);
   const outputPath = path.join(entryDir, "output.txt");
   const manifestPath = path.join(entryDir, "manifest.json");
 
@@ -98,9 +118,11 @@ export async function restoreFileSetCache({
   namespace,
   key,
   outputs,
+  cacheTrust = 'untrusted',
 }) {
+  if (!trustedBootstrap(cacheTrust)) return false;
   if (!pscCacheEnabled()) return false;
-  const entryDir = path.join(pscCacheRoot(projectRoot), namespace, key);
+  const entryDir = entryPath(projectRoot, namespace, key);
   const manifestPath = path.join(entryDir, "manifest.json");
   if (!existsSync(manifestPath)) return false;
 
@@ -116,16 +138,16 @@ export async function restoreFileSetCache({
 
     const staged = [];
     for (const output of outputs) {
-      const cachedPath = path.join(entryDir, output.cacheName);
+      const cachedPath = path.join(entryDir, component(output.cacheName));
       if (!existsSync(cachedPath)) return false;
       const bytes = await readFile(cachedPath);
       if (sha256Bytes(bytes) !== manifest.files[output.cacheName]) return false;
-      staged.push([cachedPath, output.path]);
+      staged.push([bytes, output.path]);
     }
 
-    for (const [cachedPath, outputPath] of staged) {
+    for (const [bytes, outputPath] of staged) {
       await mkdir(path.dirname(outputPath), { recursive: true });
-      await copyFile(cachedPath, outputPath);
+      await writeFile(outputPath, bytes);
     }
     return true;
   } catch {
@@ -138,16 +160,18 @@ export async function storeFileSetCache({
   namespace,
   key,
   outputs,
+  cacheTrust = 'untrusted',
 }) {
+  if (!trustedBootstrap(cacheTrust)) return;
   if (!pscCacheEnabled()) return;
-  const entryDir = path.join(pscCacheRoot(projectRoot), namespace, key);
+  const entryDir = entryPath(projectRoot, namespace, key);
   await mkdir(entryDir, { recursive: true });
 
   const files = {};
   for (const output of outputs) {
     const bytes = await readFile(output.path);
     files[output.cacheName] = sha256Bytes(bytes);
-    await writeFile(path.join(entryDir, output.cacheName), bytes);
+    await writeFile(path.join(entryDir, component(output.cacheName)), bytes);
   }
 
   await writeFile(

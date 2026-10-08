@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "passId": "psc-pass-specialize/1",
+  "inputContract": "psc-verified-ir/1",
+  "outputContract": "psc-specialized-ir/1",
+  "semanticRelation": "psc-specialization-runtime-refinement/1",
+  "resourceContract": "psc-resource-specialization/1",
+  "currentAssurance": "actual-independent-correspondence-check-global-soundness-unproved",
+  "correspondenceContract": "contracts/ir/SPECIALIZATION_CORRESPONDENCE_V1.json",
+  "targetAssurance": "formal-proof-or-translation-validation",
+  "implementation": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+  "observedExecution": "packages/driver-js/src/Ps/DriverJs/Stages.lean and scripts/checked-build-evidence.mjs retain actual before/after artifacts, revalidate specialized output, and bind the host execution to psc-pass-specialize/1. A postcondition check establishes supported IR invariants under the validator assumption, not semantic preservation.",
+  "provedSlices": [
+    {
+      "id": "psc-specialization-literal-preservation/1",
+      "status": "proved-lean",
+      "scope": "closed monomorphic UInt32 literal module is preserved exactly",
+      "evidence": "packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
+    }
+  ],
+  "globalPreservation": {
+    "status": "target-unproved"
+  }
+}

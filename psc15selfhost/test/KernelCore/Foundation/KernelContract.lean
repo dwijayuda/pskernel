@@ -233,6 +233,30 @@ def psKernelContractResourceTests : Bool :=
   Nat.beq (psKernelContractResultTag (psKernelV1AdmitDeclaration cancelled (psKernelContractAxiom "A"))) 3 &&
   countFailed
 
+def psKernelContractResourceMonotonicityTests : Bool :=
+  let empty := psKernelEnvironmentEmpty
+  let small := PsKernelKernelSession.mk empty
+    (PsKernelResourcePolicy.mk 64 0 128 false 0)
+    psKernelProviderDefault
+  let larger := PsKernelKernelSession.mk empty
+    (PsKernelResourcePolicy.mk 128 0 128 false 0)
+    psKernelProviderDefault
+  match
+      psKernelV1CheckExpression
+        small
+        List.nil
+        PsKernelDefinitionSafety.safe
+        psKernelContractSort,
+      psKernelV1CheckExpression
+        larger
+        List.nil
+        PsKernelDefinitionSafety.safe
+        psKernelContractSort with
+  | Except.ok _, Except.ok _ =>
+      true
+  | _, _ =>
+      false
+
 def psKernelContractProviderTests : Bool :=
   let wrong := PsKernelProviderCapability.mk
     (PsKernelTargetIdentity.mk "KernelContract-v1" "4.35.0" "wrong") Option.none
@@ -245,4 +269,5 @@ def psKernelContractProviderTests : Bool :=
 
 def psKernelContractTests : Bool :=
   psKernelContractDiagnosticTests && psKernelContractAdmissionTests &&
-    psKernelContractExpressionTests && psKernelContractResourceTests && psKernelContractProviderTests
+    psKernelContractExpressionTests && psKernelContractResourceTests &&
+    psKernelContractResourceMonotonicityTests && psKernelContractProviderTests

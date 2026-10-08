@@ -4,6 +4,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { readGeneratedSourceClosure } from "./selfhost-source-workspace.mjs";
+import { loadWasmSelfhostCompiler, compileWasmSelfhostProgress } from './wasm-selfhost-progress.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -31,14 +32,11 @@ const generation1 = path.join(outRoot, "compiler.gen1.wasm");
 const generation2 = path.join(outRoot, "compiler.gen2.wasm");
 const generation3 = path.join(outRoot, "compiler.gen3.wasm");
 
-const compilerExport = "psCompilerWasm32ProofScriptSourcesBytesOrEmpty";
-const sourceListEmptyExport = "psCompilerSelfHostSourceListEmpty";
-const sourceListConsExport = "psCompilerSelfHostSourceListCons";
-const stringNewExport = "__ps_selfhost_string_new";
-const stringSetExport = "__ps_selfhost_string_set";
-const bytesIsNilExport = "__ps_selfhost_bytes_is_nil";
-const bytesHeadExport = "__ps_selfhost_bytes_head";
-const bytesTailExport = "__ps_selfhost_bytes_tail";
+const startedAt = performance.now();
+function phase(name) {
+  process.stdout.write("PSC2_DIRECT_WASM_SELFHOST_PHASE: " + name +
+    " elapsedMs=" + String(Math.round(performance.now() - startedAt)) + "\n");
+}
 
 function run(command, args) {
   const result = spawnSync(command, args, {
@@ -59,79 +57,6 @@ function run(command, args) {
   }
 }
 
-function requiredFunction(exports, name) {
-  const value = exports[name];
-  if (typeof value !== "function") {
-    throw new Error("PSC2_DIRECT_WASM_SELFHOST_EXPORT_MISSING: " + name);
-  }
-  return value;
-}
-
-async function loadCompiler(bytes) {
-  const module = await WebAssembly.compile(bytes);
-  const instance = await WebAssembly.instantiate(module, {});
-  const exports = instance.exports;
-  return {
-    compile: requiredFunction(exports, compilerExport),
-    sourceListEmpty: requiredFunction(exports, sourceListEmptyExport),
-    sourceListCons: requiredFunction(exports, sourceListConsExport),
-    stringNew: requiredFunction(exports, stringNewExport),
-    stringSet: requiredFunction(exports, stringSetExport),
-    bytesIsNil: requiredFunction(exports, bytesIsNilExport),
-    bytesHead: requiredFunction(exports, bytesHeadExport),
-    bytesTail: requiredFunction(exports, bytesTailExport),
-  };
-}
-
-function wasmString(api, text) {
-  const chars = Array.from(text);
-  const value = api.stringNew(chars.length);
-  for (let index = 0; index < chars.length; index += 1) {
-    const codePoint = chars[index].codePointAt(0);
-    if (codePoint === undefined) {
-      throw new Error("PSC2_DIRECT_WASM_SELFHOST_CODEPOINT");
-    }
-    api.stringSet(value, index, codePoint);
-  }
-  return value;
-}
-
-function byteList(api, value) {
-  const bytes = [];
-  let cursor = value;
-  const maxBytes = 512 * 1024 * 1024;
-  while (api.bytesIsNil(cursor) === 0) {
-    if (bytes.length >= maxBytes) {
-      throw new Error("PSC2_DIRECT_WASM_SELFHOST_OUTPUT_LIMIT");
-    }
-    const byte = api.bytesHead(cursor);
-    if (!Number.isInteger(byte) || byte < 0 || byte > 255) {
-      throw new Error(
-        "PSC2_DIRECT_WASM_SELFHOST_BYTE_RANGE: " + String(byte),
-      );
-    }
-    bytes.push(byte);
-    cursor = api.bytesTail(cursor);
-  }
-  return Uint8Array.from(bytes);
-}
-
-function sourceList(api, sources) {
-  let result = api.sourceListEmpty();
-  for (let index = sources.length - 1; index >= 0; index -= 1) {
-    result = api.sourceListCons(wasmString(api, sources[index]), result);
-  }
-  return result;
-}
-
-function compileWith(api, sources) {
-  const output = byteList(api, api.compile(sourceList(api, sources)));
-  if (output.length === 0) {
-    throw new Error("PSC2_DIRECT_WASM_SELFHOST_COMPILE_FAILED_OR_EMPTY");
-  }
-  return output;
-}
-
 function bytesEqual(left, right) {
   if (left.length !== right.length) return false;
   for (let index = 0; index < left.length; index += 1) {
@@ -143,6 +68,7 @@ function bytesEqual(left, right) {
 await rm(outRoot, { recursive: true, force: true });
 await mkdir(outRoot, { recursive: true });
 
+phase("bootstrap-workspace");
 run(process.execPath, [
   "scripts/bootstrap-project.mjs",
   path.relative(root, entryLean),
@@ -166,30 +92,36 @@ const nativeArgs = existsSync(nativeCompiler)
       "--out",
       path.relative(root, generation1),
     ];
+phase("native-generation-1");
 run(nativeCommand, nativeArgs);
 
 const closure = await readGeneratedSourceClosure(entryPs, workspace);
 if (!closure || closure.ordered.length === 0) {
   throw new Error("PSC2_DIRECT_WASM_SELFHOST_CLOSURE_EMPTY");
 }
-const sources = closure.ordered.map((item) => item.source);
+const sources = closure.ordered.map(item => ({ source: item.source, path: path.relative(workspace, item.path).split(path.sep).join('/') }));
+phase("source-closure:" + String(sources.length) + ":" + closure.closureSha256);
 
 const generation1Bytes = new Uint8Array(await readFile(generation1));
-const compiler1 = await loadCompiler(generation1Bytes);
-const generation2Bytes = compileWith(compiler1, sources);
+phase("load-generation-1:bytes:" + String(generation1Bytes.length));
+const compiler1 = await loadWasmSelfhostCompiler(generation1Bytes);
+const generation2Bytes = compileWasmSelfhostProgress(compiler1, sources, name => phase("generation-2:" + name));
 await writeFile(generation2, generation2Bytes);
 
 if (!bytesEqual(generation1Bytes, generation2Bytes)) {
   throw new Error("PSC2_DIRECT_WASM_SELFHOST_BOOTSTRAP_FIXED_POINT_MISMATCH");
 }
+phase("generation-1-equals-2");
 
-const compiler2 = await loadCompiler(generation2Bytes);
-const generation3Bytes = compileWith(compiler2, sources);
+phase("load-generation-2");
+const compiler2 = await loadWasmSelfhostCompiler(generation2Bytes);
+const generation3Bytes = compileWasmSelfhostProgress(compiler2, sources, name => phase("generation-3:" + name));
 await writeFile(generation3, generation3Bytes);
 
 if (!bytesEqual(generation2Bytes, generation3Bytes)) {
   throw new Error("PSC2_DIRECT_WASM_SELFHOST_SELF_FIXED_POINT_MISMATCH");
 }
+phase("generation-2-equals-3");
 
 process.stdout.write(
   [

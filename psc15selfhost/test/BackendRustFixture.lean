@@ -1,5 +1,99 @@
 import Ps.BackendRust.Module
 
+def psBackendRustLetClosureFixture : PsVerifiedIrDeclaration :=
+  let natType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  PsVerifiedIrDeclaration.mk "makeAdderViaLet" []
+    [PsVerifiedIrParameter.mk "offset" natType]
+    (PsVerifiedIrType.function [natType] natType)
+    (PsVerifiedIrExpr.letE "captured" natType (PsVerifiedIrExpr.var "offset")
+      (PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "value" natType] natType
+        (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
+          [PsVerifiedIrExpr.var "value", PsVerifiedIrExpr.var "captured"])))
+
+def psBackendRustSharedCaptureFixture : PsVerifiedIrDeclaration :=
+  let natType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  let fnType := PsVerifiedIrType.function [natType] natType;
+  let closure := PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "value" natType] natType
+    (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
+      [PsVerifiedIrExpr.var "value", PsVerifiedIrExpr.var "offset"]);
+  PsVerifiedIrDeclaration.mk "sharedCapture" []
+    [PsVerifiedIrParameter.mk "offset" natType, PsVerifiedIrParameter.mk "value" natType]
+    natType
+    (PsVerifiedIrExpr.letE "first" fnType closure
+      (PsVerifiedIrExpr.letE "second" fnType closure
+        (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
+          [PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "first") [] [PsVerifiedIrExpr.var "value"],
+           PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "second") [] [PsVerifiedIrExpr.var "offset"]])))
+
+def psBackendRustGlobalCallbackFixture : PsVerifiedIrDeclaration :=
+  let natType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  let fnType := PsVerifiedIrType.function [natType] natType;
+  PsVerifiedIrDeclaration.mk "globalCallback" [] [PsVerifiedIrParameter.mk "value" natType] natType
+    (PsVerifiedIrExpr.letE "arrayIdOnly" fnType
+      (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "returnCallback") []
+        [PsVerifiedIrExpr.var "arrayIdOnly"])
+      (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "arrayIdOnly") [] [PsVerifiedIrExpr.var "value"]))
+
+def psBackendRustConditionalCallbackFixture : PsVerifiedIrDeclaration :=
+  let natType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  PsVerifiedIrDeclaration.mk "conditionalCallback" []
+    [PsVerifiedIrParameter.mk "choose" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool),
+     PsVerifiedIrParameter.mk "value" natType] natType
+    (PsVerifiedIrExpr.call
+      (PsVerifiedIrExpr.ifE (PsVerifiedIrExpr.var "choose")
+        (PsVerifiedIrExpr.var "arrayIdOnly") (PsVerifiedIrExpr.var "countDown")) []
+      [PsVerifiedIrExpr.var "value"])
+
+def psRustTailFixtureType : PsVerifiedIrType := .primitive .uint32
+
+def psRustTailFixtureBinary (operation : PsVerifiedIrIntegerBinaryOp)
+    (left right : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  .intrinsic (.machineIntBinary .uint32 operation) [] [left, right]
+
+def psRustTailFixtureLit (value : Int) : PsVerifiedIrExpr := .literal (.machineInteger .uint32 value)
+
+def psRustTailSwapFixture : PsVerifiedIrDeclaration :=
+  .mk "tailSwap" [] [.mk "count" psRustTailFixtureType, .mk "left" psRustTailFixtureType, .mk "right" psRustTailFixtureType]
+    psRustTailFixtureType
+    (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "count", psRustTailFixtureLit 0])
+      (.var "left")
+      (.call (.var "tailSwap") []
+        [psRustTailFixtureBinary .sub (.var "count") (psRustTailFixtureLit 1), .var "right", .var "left"]))
+
+def psRustTailShadowFixture : PsVerifiedIrDeclaration :=
+  .mk "tailShadow" [] [.mk "count" psRustTailFixtureType, .mk "value" psRustTailFixtureType] psRustTailFixtureType
+    (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "count", psRustTailFixtureLit 0])
+      (.var "value")
+      (.letE "value" psRustTailFixtureType (psRustTailFixtureBinary .add (.var "value") (psRustTailFixtureLit 1))
+        (.call (.var "tailShadow") [] [psRustTailFixtureBinary .sub (.var "count") (psRustTailFixtureLit 1), .var "value"])))
+
+def psRustTailChainFixture : PsVerifiedIrDeclaration :=
+  let chain := PsVerifiedIrType.named "SharedChain" [psRustTailFixtureType];
+  .mk "tailChainCount" [] [.mk "chain" chain, .mk "count" psRustTailFixtureType] psRustTailFixtureType
+    (.matchE "SharedChain" [psRustTailFixtureType] (.var "chain")
+      [("empty", [], .var "count"),
+       ("link", [.mk "head" "head" psRustTailFixtureType, .mk "tail" "tail" chain],
+         .call (.var "tailChainCount") [] [.var "tail", psRustTailFixtureBinary .add (.var "count") (psRustTailFixtureLit 1)])])
+
+def psRustTailAliasFixture (functionName aliasName shadowName : String) : PsVerifiedIrDeclaration :=
+  .mk functionName [] [.mk "count" psRustTailFixtureType, .mk "value" psRustTailFixtureType] psRustTailFixtureType
+    (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "count", psRustTailFixtureLit 0]) (.var "value")
+      (.letE "remaining" psRustTailFixtureType (psRustTailFixtureBinary .sub (.var "count") (psRustTailFixtureLit 1))
+        (.letE aliasName (.function [psRustTailFixtureType] psRustTailFixtureType)
+          (.lambda [.mk "next" psRustTailFixtureType] psRustTailFixtureType
+            (.call (.var functionName) [] [.var "remaining", .var "next"]))
+          (.letE shadowName psRustTailFixtureType (psRustTailFixtureLit 0)
+            (.call (.var aliasName) [] [psRustTailFixtureBinary .add (.var "value") (psRustTailFixtureLit 1)])))))
+
+def psRustTailGenericFixture : PsVerifiedIrDeclaration :=
+  let type := PsVerifiedIrType.typeParameter "A";
+  .mk "genericTailAlias" [.mk "A"] [.mk "count" psRustTailFixtureType, .mk "value" type] type
+    (.ifE (.intrinsic (.machineIntCompare .uint32 .eq) [] [.var "count", psRustTailFixtureLit 0]) (.var "value")
+      (.letE "remaining" psRustTailFixtureType (psRustTailFixtureBinary .sub (.var "count") (psRustTailFixtureLit 1))
+        (.letE "smaller" (.function [type] type)
+          (.lambda [.mk "next" type] type (.call (.var "genericTailAlias") [type] [.var "remaining", .var "next"]))
+          (.call (.var "smaller") [] [.var "value"]))))
+
 def psBackendRustCompileFixture : PsVerifiedIrModule :=
   {
     imports := []
@@ -33,6 +127,11 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
       }
     ]
     inductives := [
+      PsVerifiedIrInductive.mk "SharedChain" [PsVerifiedIrTypeParameter.mk "A"]
+        [PsVerifiedIrConstructor.mk "empty" [],
+         PsVerifiedIrConstructor.mk "link"
+           [PsVerifiedIrConstructorField.mk "head" (PsVerifiedIrType.typeParameter "A"),
+            PsVerifiedIrConstructorField.mk "tail" (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"])]],
       {
         name := "Maybe"
         typeParameters := [{ name := "A" }]
@@ -72,6 +171,19 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
       }
     ]
     declarations := [
+      psRustTailSwapFixture,
+      psRustTailShadowFixture,
+      psRustTailChainFixture,
+      psRustTailAliasFixture "tailAlias" "smaller" "remaining",
+      psRustTailAliasFixture "tailAliasBeforeBinder" "remaining" "count",
+      psRustTailGenericFixture,
+      PsVerifiedIrDeclaration.mk "shareChain" [PsVerifiedIrTypeParameter.mk "A"]
+        [PsVerifiedIrParameter.mk "value" (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"])]
+        (PsVerifiedIrType.named "SharedChain" [PsVerifiedIrType.typeParameter "A"]) (PsVerifiedIrExpr.var "value"),
+      psBackendRustLetClosureFixture,
+      psBackendRustSharedCaptureFixture,
+      psBackendRustGlobalCallbackFixture,
+      psBackendRustConditionalCallbackFixture,
       {
         name := "idUInt8"
         typeParameters := []

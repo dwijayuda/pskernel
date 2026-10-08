@@ -51,4 +51,29 @@ assert.equal(exportedFunction("arrayFoldRange")(), 53);
 assert.equal(exportedFunction("arrayFoldStopBeyond")(), 42);
 assert.equal(exportedFunction("arrayFoldStartBeyond")(), 7);
 
+assert.equal(exportedFunction("applySelectedFunction")(1, 2, 40), 42);
+assert.equal(exportedFunction("applySelectedFunction")(0, 2, 40), 38);
+assert.equal(exportedFunction("applyComputedFunction")(2, 40), 42);
+assert.equal(exportedFunction("applyGlobalFunctionValue")(41), 42);
+
+assert.equal(exportedFunction("tailCountdown")(200000, 0), 200000);
+assert.equal(exportedFunction("longUtf8ByteSizeExact")(), 1);
+assert.equal(exportedFunction("largeLiteralContentExact")(), 1);
+
+
+for (const name of ['unitValue', 'unitLocal', 'unitRecord', 'unitFold'])
+  assert.equal(exportedFunction(name)(), undefined, name + ' keeps zero-result ABI');
+assert.equal(exportedFunction('unitIdentity')(0), undefined);
+for (const choice of [0, 1]) {
+  assert.equal(exportedFunction('unitIf')(choice, 0), undefined);
+  assert.equal(exportedFunction('unitArgument')(choice), undefined);
+  assert.equal(exportedFunction('unitMatch')(choice), undefined);
+  assert.equal(exportedFunction('unitLambda')(choice), undefined);
+}
+assert.equal(exportedFunction('unitMapSize')(), 1);
+assert.equal(exportedFunction('unitMapToU32')(), 42);
+assert.equal(exportedFunction('unitEmptyMapSize')(), 1);
+assert.throws(() => exportedFunction('unitTrappingMap')(), WebAssembly.RuntimeError);
+assert.equal(exportedFunction('unitTailCountdown')(200000), undefined);
 console.log("PSC1_BACKEND_WASM_RUNTIME: PASS");
+

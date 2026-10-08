@@ -1,38 +1,5 @@
-import Ps.Compiler.Api
-import Ps.BackendTs.Module
+import Ps.DriverTs.Bootstrap
+import Ps.DriverTs.Stages
 
-inductive PsCompilerTypeScriptError where
-  | compiler (error : PsCompilerError)
-  | emit (error : PsTsEmitError)
-
-def psCompilerTypeScriptFromPrepared
-    (prepared : PsCompilerAdmissionReadyModule) :
-    Except PsCompilerTypeScriptError String :=
-  match psCompilerVerifiedIrFromPrepared prepared with
-  | Except.error error =>
-      Except.error (PsCompilerTypeScriptError.compiler error)
-  | Except.ok ir =>
-      match psTsEmitValidatedModule ir with
-      | Except.error error =>
-          Except.error (PsCompilerTypeScriptError.emit error)
-      | Except.ok output =>
-          Except.ok output
-
-def psCompilerTypeScriptFromElaborated
-    (elaborated : PsElabModuleResult) :
-    Except PsCompilerTypeScriptError String :=
-  match psCompilerPrepareElaborated elaborated with
-  | Except.error error =>
-      Except.error (PsCompilerTypeScriptError.compiler error)
-  | Except.ok prepared =>
-      psCompilerTypeScriptFromPrepared prepared
-
-def psCompilerTypeScriptSource
-    (sourceKind : PsCompilerSourceKind)
-    (source : String) :
-    Except PsCompilerTypeScriptError String :=
-  match psCompilerPrepareSource sourceKind source with
-  | Except.error error =>
-      Except.error (PsCompilerTypeScriptError.compiler error)
-  | Except.ok prepared =>
-      psCompilerTypeScriptFromPrepared prepared
+-- Compatibility facade for bootstrap-only compiler composition.
+-- Production emission is mediated by scripts/compiler-checked-service.mjs.

@@ -1,5 +1,5 @@
 import Ps.Foundation.List
-import Ps.BackendRust.Expr
+import Ps.BackendRust.Tail
 import Ps.BackendRust.ValueRefs
 import Ps.BackendRust.Runtime
 
@@ -13,7 +13,7 @@ def psRustTypeParameterNames
         (psRustConcat3
           (psRustIdentifier parameter.name)
           ": "
-          "Clone")
+          "Clone + 'static")
         (psRustTypeParameterNames rest)
 
 def psRustGenericNames
@@ -30,9 +30,12 @@ def psRustGenericNames
         ">"
         ""
 
-def psRustBoxedStorageType
+-- Runtime values are immutable. Sharing fields keeps derived Clone shallow:
+-- Box<T>::clone recursively copied full syntax/list trees at every binding.
+-- Call recursion and final-owner destruction still require separate treatment.
+def psRustSharedStorageType
     (printedType : String) : String :=
-  psRustConcat3 "Box<" printedType ">"
+  psRustConcat3 "std::rc::Rc<" printedType ">"
 
 def psRustEmitStructureFieldList
     (fields : List PsVerifiedIrStructureField) :
@@ -52,7 +55,7 @@ def psRustEmitStructureFieldList
                   "pub "
                   (psRustIdentifier field.name)
                   ": "
-                  (psRustBoxedStorageType printedType);
+                  (psRustSharedStorageType printedType);
               match psRustEmitStructureFieldList rest with
               | Except.error error =>
                   Except.error error
@@ -71,7 +74,7 @@ def psRustEmitStructureFieldList
                 "pub "
                 (psRustIdentifier field.name)
                 ": "
-                (psRustBoxedStorageType printedType);
+                (psRustSharedStorageType printedType);
             match psRustEmitStructureFieldList rest with
             | Except.error error =>
                 Except.error error
@@ -115,7 +118,7 @@ def psRustEmitConstructorFieldList
                 psRustConcat3
                   (psRustIdentifier field.name)
                   ": "
-                  (psRustBoxedStorageType printedType);
+                  (psRustSharedStorageType printedType);
               match psRustEmitConstructorFieldList rest with
               | Except.error error =>
                   Except.error error
@@ -133,7 +136,7 @@ def psRustEmitConstructorFieldList
               psRustConcat3
                 (psRustIdentifier field.name)
                 ": "
-                (psRustBoxedStorageType printedType);
+                (psRustSharedStorageType printedType);
             match psRustEmitConstructorFieldList rest with
             | Except.error error =>
                 Except.error error
@@ -311,16 +314,9 @@ def psRustEmitDeclarationResultType
       psRustEmitType declaration.resultType
 
 def psRustPrepareDeclarationBody
-    (declaration : PsVerifiedIrDeclaration)
+    (_declaration : PsVerifiedIrDeclaration)
     (printedBody : String) : String :=
-  if psRustTypeContainsFunction declaration.resultType then
-    match declaration.body with
-    | PsVerifiedIrExpr.lambda _ _ _ =>
-        psRustConcat2 "move " printedBody
-    | _ =>
-        printedBody
-  else
-    printedBody
+  printedBody
 
 def psRustEmitFunctionResultExprWorker
     (fuel : Nat) :
@@ -348,7 +344,7 @@ def psRustEmitFunctionResultExprWorker
             | Except.error error =>
                 Except.error error
             | Except.ok printed =>
-                Except.ok (psRustConcat2 "move " printed)
+                Except.ok printed
         | PsVerifiedIrExpr.var _ =>
             psRustEmitExprWithFuel remaining expr
         | PsVerifiedIrExpr.call fn typeArguments arguments =>
@@ -404,6 +400,7 @@ def psRustEmitFunctionResultExpr
     expr
 
 def psRustEmitDeclaration
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (valueNames : List String)
     (declaration : PsVerifiedIrDeclaration) :
     Except PsRustEmitError String :=
@@ -432,12 +429,7 @@ def psRustEmitDeclaration
                 Except.error error
             | Except.ok rewrittenBody =>
                 let emittedBody :=
-                  if psRustTypeContainsFunction declaration.resultType then
-                    psRustEmitFunctionResultExpr
-                      declaration.name
-                      rewrittenBody
-                  else
-                    psRustEmitExpr rewrittenBody;
+                  psRustEmitDeclarationBody allDeclarations declaration locals rewrittenBody;
                 match emittedBody with
                 | Except.error error =>
                     Except.error error
@@ -509,6 +501,7 @@ def psRustValueDeclarationNames
           psRustValueDeclarationNames rest
 
 def psRustEmitDeclarationList
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (valueNames : List String)
     (declarations : List PsVerifiedIrDeclaration) :
     Except PsRustEmitError (List String) :=
@@ -516,11 +509,11 @@ def psRustEmitDeclarationList
   | List.nil =>
       Except.ok List.nil
   | List.cons declaration rest =>
-      match psRustEmitDeclaration valueNames declaration with
+      match psRustEmitDeclaration allDeclarations valueNames declaration with
       | Except.error error =>
           Except.error error
       | Except.ok printed =>
-          match psRustEmitDeclarationList valueNames rest with
+          match psRustEmitDeclarationList allDeclarations valueNames rest with
           | Except.error error =>
               Except.error error
           | Except.ok printedRest =>
@@ -1259,7 +1252,7 @@ def psRustEmitModule
                 | Except.error error =>
                     Except.error error
                 | Except.ok inductives =>
-                    match psRustEmitDeclarationList valueNames module.declarations with
+                    match psRustEmitDeclarationList module.declarations valueNames module.declarations with
                     | Except.error error =>
                         Except.error error
                     | Except.ok declarations =>

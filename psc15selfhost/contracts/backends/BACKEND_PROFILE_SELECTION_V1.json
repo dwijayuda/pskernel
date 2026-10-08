@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-backend-profile-selection/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "status": "historical-producer-and-exact-replay-retained",
+  "purpose": "Bind an explicitly selected representation to a deterministic derivation of the existing four-lane backend registry.",
+  "selectedProfile": "psc-js-uniform-values/1",
+  "base": "Exact separately identified psc-backend-registry/1 with four lanes and the existing closed JS input/lowerer/validator/writer.",
+  "derivation": "Change only the JavaScript lane input to uniform-specialized-ir/psc-uniform-specialized-ir/1, lower pass to psc-uniform-ir-to-js-ir/1 and selected staged API. Preserve other lanes and the shared JsIR validator/runtime/writer. Capability and product lists state available uniform generic declarations and omit unsupported closed-instance maps and source-map composition.",
+  "record": [
+    "schemaVersion",
+    "contract",
+    "backendId",
+    "profile",
+    "baseRegistryId",
+    "selectedRegistryId",
+    "authority"
+  ],
+  "producer": "scripts/backend-contract.mjs: selectUniformJavaScriptRegistryV1",
+  "consumers": [
+    "scripts/observed-build-context.mjs: explicit host selection before descriptor/action/query/bundle creation",
+    "scripts/backend-contract.mjs: bounded fresh derivation during bundle verification",
+    "scripts/observed-build-archive.mjs: exact uniform selection and target inventory replay"
+  ],
+  "binding": [
+    "Bundle evidence contains exactly one selection when its descriptor consumes uniform-specialized-ir.",
+    "The target profile binds the selection identity; every observed action and query binds that target profile.",
+    "Context verification requires a connected verified-to-uniform-to-JsIR-to-JS pipeline and rejects simultaneous closed-specialized artifacts.",
+    "Archive replay compares uniform payload bytes with exact VerifiedIR, validates complete JsIR declaration/parameter inventory and regenerates selected source declarations."
+  ],
+  "compatibility": "Existing registry, descriptor, bundle and graph schema versions stay exact. Historical closed records need no selection record. No automatic profile inference or fallback; no fifth backend. Current producers use selection/2. The version-1 derivation is frozen, including its historical driver-entry emitterId; replay never silently upgrades those bytes or claims correct backend-emitter ownership for them.",
+  "assurance": {
+    "authority": "audit-record-only",
+    "hermeticityVerified": false,
+    "preservationVerified": false,
+    "releaseAccepted": false
+  },
+  "remaining": [
+    "Uniform source-origin composition and maps",
+    "Portable declaration serializer and production checked CLI profile selection",
+    "Independent target representation and global preservation assurance"
+  ]
+}

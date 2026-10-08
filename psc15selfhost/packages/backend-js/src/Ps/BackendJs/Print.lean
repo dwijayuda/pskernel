@@ -1,27 +1,22 @@
 import Ps.BackendJs.Lower
+import Ps.BackendJs.Validate
+import Ps.BackendJs.TailAlias
 import Ps.Bridge.Json
 import Ps.Foundation.List
 import Ps.Foundation.Name
+import Ps.Foundation.Text
 
 inductive PsJsEmitError where
   | lower (error : PsJsLowerError)
+  | targetValidation (error : PsJsIrValidationError)
   | fuelExhausted
   | malformedIr
 
 def psJsJoin
     (separator : String)
     (values : List String) : String :=
-  match values with
-  | List.nil => ""
-  | List.cons value rest =>
-      match rest with
-      | List.nil => value
-      | List.cons _ _ =>
-          String.Internal.append
-            value
-            (String.Internal.append
-              separator
-              (psJsJoin separator rest))
+  psTextJoin separator values
+
 
 def psJsConcat2
     (a b : String) : String :=
@@ -290,17 +285,7 @@ def psJsRuntimeUnary
           ""
           ["((__ps_s) => BigInt(Array.from(__ps_s).length))(", value, ")"])
   | PsJsIrRuntimeOp.stringUtf8ByteSize =>
-      Except.ok
-        (psJsJoin
-          ""
-          [
-            "((__ps_s) => { let __ps_n = 0n; for (const __ps_c of __ps_s) { ",
-            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
-            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
-            "__ps_n += __ps_w; } return __ps_n; })(",
-            value,
-            ")"
-          ])
+      Except.ok (psJsJoin "" ["__ps$utf8(", value, ").size"])
   | PsJsIrRuntimeOp.arrayEmptyWithCapacity =>
       Except.ok
         (psJsJoin
@@ -353,51 +338,17 @@ def psJsRuntimeBinary
             ")"
           ])
   | PsJsIrRuntimeOp.stringNext =>
-      Except.ok
-        (psJsJoin
-          ""
-          [
-            "((__ps_s, __ps_p) => { let __ps_i = 0n; for (const __ps_c of __ps_s) { ",
-            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
-            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
-            "if (__ps_i === __ps_p) return __ps_p + __ps_w; ",
-            "if (__ps_i > __ps_p) return __ps_p + 1n; ",
-            "__ps_i += __ps_w; } return __ps_p + 1n; })(",
-            left,
-            ", ",
-            right,
-            ")"
-          ])
+      Except.ok (psJsJoin ""
+        ["((__ps_s, __ps_p) => __ps_p + (__ps$utf8(__ps_s).entries.get(__ps_p)?.[1] ?? 1n))(",
+         left, ", ", right, ")"])
   | PsJsIrRuntimeOp.stringGet =>
-      Except.ok
-        (psJsJoin
-          ""
-          [
-            "((__ps_s, __ps_p) => { let __ps_i = 0n; for (const __ps_c of __ps_s) { ",
-            "if (__ps_i === __ps_p) return __ps_c; ",
-            "if (__ps_i > __ps_p) return \"A\"; ",
-            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
-            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
-            "__ps_i += __ps_w; } return \"A\"; })(",
-            left,
-            ", ",
-            right,
-            ")"
-          ])
+      Except.ok (psJsJoin ""
+        ["((__ps_s, __ps_p) => __ps$utf8(__ps_s).entries.get(__ps_p)?.[0] ?? \"A\")(",
+         left, ", ", right, ")"])
   | PsJsIrRuntimeOp.stringAtEnd =>
-      Except.ok
-        (psJsJoin
-          ""
-          [
-            "((__ps_s, __ps_p) => { let __ps_n = 0n; for (const __ps_c of __ps_s) { ",
-            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
-            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
-            "__ps_n += __ps_w; } return __ps_p >= __ps_n; })(",
-            left,
-            ", ",
-            right,
-            ")"
-          ])
+      Except.ok (psJsJoin ""
+        ["((__ps_s, __ps_p) => __ps_p >= __ps$utf8(__ps_s).size)(",
+         left, ", ", right, ")"])
   | PsJsIrRuntimeOp.arrayPush =>
       Except.ok
         (psJsJoin
@@ -714,8 +665,9 @@ def psJsPrintFieldWith
             (psJsJoin
               ""
               [
+                "[",
                 psJsonQuote name,
-                ": ",
+                "]: ",
                 printedValue
               ])
 
@@ -941,26 +893,22 @@ def psJsPrintExprWithModeAndFuel
                         (psJsJoin
                           ""
                           [
-                            "(yield* (function*() { const ",
+                            "(yield* (function*(",
                             name,
-                            " = ",
-                            printedValue,
-                            "; return ",
+                            ") { return ",
                             printedBody,
-                            "; })())"
+                            "; })(", printedValue, "))"
                           ])
                     else
                       Except.ok
                         (psJsJoin
                           ""
                           [
-                            "(() => { const ",
+                            "((",
                             name,
-                            " = ",
-                            printedValue,
-                            "; return ",
+                            ") => ",
                             printedBody,
-                            "; })()"
+                            ")(", printedValue, ")"
                           ])
         | PsJsIrExpr.ifE
             condition
@@ -1112,12 +1060,8 @@ def psJsPrintImport
 
 def psJsPrintImports
     (imports : List PsJsIrImport) : String :=
-  match imports with
-  | List.nil => ""
-  | List.cons importInfo rest =>
-      psJsConcat2
-        (psJsPrintImport importInfo)
-        (psJsPrintImports rest)
+  psTextJoin "" (psListMap psJsPrintImport imports)
+
 
 def psJsParameterName
     (parameter : PsJsIrParameter) : String :=
@@ -1151,23 +1095,150 @@ def psJsPrintDeclaration
               ") { return "
               (psJsConcat2 body "; }\n"))
 
+-- Generated coordinates are separate from parser positions: UTF-8 byte
+-- offsets plus zero-based ECMAScript lines and UTF-16 columns.
+structure PsJsGeneratedPosition where
+  byteOffset : Nat
+  line : Nat
+  column : Nat
+  previousCR : Bool
+
+def psJsGeneratedPositionZero : PsJsGeneratedPosition :=
+  PsJsGeneratedPosition.mk 0 0 0 false
+
+def psJsAdvanceGeneratedChar
+    (position : PsJsGeneratedPosition)
+    (char : Char)
+    (byteWidth : Nat) : PsJsGeneratedPosition :=
+  let codePoint : Nat := Char.toNat char;
+  let nextByte : Nat := Nat.add position.byteOffset byteWidth;
+  if Nat.beq codePoint 10 then
+    if position.previousCR then
+      PsJsGeneratedPosition.mk nextByte position.line 0 false
+    else
+      PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 false
+  else if Nat.beq codePoint 13 then
+    PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 true
+  else if Nat.beq codePoint 8232 then
+    PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 false
+  else if Nat.beq codePoint 8233 then
+    PsJsGeneratedPosition.mk nextByte (Nat.succ position.line) 0 false
+  else if Nat.ble codePoint 65535 then
+    PsJsGeneratedPosition.mk nextByte position.line (Nat.succ position.column) false
+  else
+    PsJsGeneratedPosition.mk nextByte position.line (Nat.add position.column 2) false
+
+def psJsAdvanceGeneratedTextWorker
+    (fuel : Nat) :
+    String -> Nat -> PsJsGeneratedPosition ->
+    Except PsJsEmitError PsJsGeneratedPosition :=
+  match fuel with
+  | Nat.zero =>
+      fun (text : String) (offset : Nat) (position : PsJsGeneratedPosition) =>
+        if String.Internal.atEnd text (String.Pos.Raw.mk offset) then Except.ok position
+        else Except.error PsJsEmitError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          String -> Nat -> PsJsGeneratedPosition ->
+          Except PsJsEmitError PsJsGeneratedPosition :=
+        psJsAdvanceGeneratedTextWorker remaining;
+      fun (text : String) (offset : Nat) (position : PsJsGeneratedPosition) =>
+        if String.Internal.atEnd text (String.Pos.Raw.mk offset) then Except.ok position
+        else
+          let char : Char := String.Internal.get text (String.Pos.Raw.mk offset);
+          let next : Nat := String.Pos.Raw.byteIdx
+            (String.Internal.next text (String.Pos.Raw.mk offset));
+          smaller text next (psJsAdvanceGeneratedChar position char (Nat.sub next offset))
+
+def psJsAdvanceGeneratedText
+    (position : PsJsGeneratedPosition)
+    (text : String) : Except PsJsEmitError PsJsGeneratedPosition :=
+  psJsAdvanceGeneratedTextWorker (Nat.succ (String.utf8ByteSize text)) text 0 position
+
+structure PsJsGeneratedDeclarationSpan where
+  name : String
+  start : PsJsGeneratedPosition
+  stop : PsJsGeneratedPosition
+
+structure PsJsPrintedModule where
+  text : String
+  spans : List PsJsGeneratedDeclarationSpan
+
+def psJsEncodeGeneratedPosition (position : PsJsGeneratedPosition) : String :=
+  psJsonArray [
+    psNatToString position.byteOffset,
+    psNatToString position.line,
+    psNatToString position.column
+  ]
+
+def psJsEncodeGeneratedSpan (span : PsJsGeneratedDeclarationSpan) : String :=
+  psJsonArray [
+    psJsonQuote span.name,
+    psJsEncodeGeneratedPosition span.start,
+    psJsEncodeGeneratedPosition span.stop
+  ]
+
+def psJsEncodeGeneratedPositions (spans : List PsJsGeneratedDeclarationSpan) : String :=
+  psJsonArray [
+    psJsonQuote "psc-js-generated-positions/1",
+    psJsonQuote "declaration-emission-chunk",
+    psJsonArray (psListMap psJsEncodeGeneratedSpan spans)
+  ]
+
+-- One actual printing fold. Legacy callers collect no spans and do not scan
+-- text for coordinates. Observed callers measure each actual chunk once.
+def psJsPrintDeclarationsObservedWith
+    (print : PsJsIrDeclaration -> Except PsJsEmitError String)
+    (declarations : List PsJsIrDeclaration) :
+    Bool -> PsTextBuilder -> PsJsGeneratedPosition ->
+    List PsJsGeneratedDeclarationSpan -> Except PsJsEmitError PsJsPrintedModule :=
+  match declarations with
+  | List.nil =>
+      fun (_observe : Bool) (builder : PsTextBuilder)
+          (_position : PsJsGeneratedPosition) (spansRev : List PsJsGeneratedDeclarationSpan) =>
+        Except.ok
+          (PsJsPrintedModule.mk (psTextBuilderFinish builder) (psListReverse spansRev))
+  | List.cons declaration rest =>
+      let smaller :
+          Bool -> PsTextBuilder -> PsJsGeneratedPosition ->
+          List PsJsGeneratedDeclarationSpan -> Except PsJsEmitError PsJsPrintedModule :=
+        psJsPrintDeclarationsObservedWith print rest;
+      fun (observe : Bool) (builder : PsTextBuilder)
+          (position : PsJsGeneratedPosition) (spansRev : List PsJsGeneratedDeclarationSpan) =>
+        match print declaration with
+        | Except.error error => Except.error error
+        | Except.ok printed =>
+            let nextBuilder : PsTextBuilder := psTextBuilderAppend builder printed;
+            if observe then
+              match psJsAdvanceGeneratedText position printed with
+              | Except.error error => Except.error error
+              | Except.ok nextPosition =>
+                  smaller true nextBuilder nextPosition
+                    (List.cons
+                      (PsJsGeneratedDeclarationSpan.mk declaration.name position nextPosition)
+                      spansRev)
+            else smaller false nextBuilder position spansRev
+
+def psJsPrintDeclarationsWith
+    (print : PsJsIrDeclaration -> Except PsJsEmitError String)
+    (declarations : List PsJsIrDeclaration) :
+    PsTextBuilder -> Except PsJsEmitError String :=
+  fun (builder : PsTextBuilder) =>
+    match
+        psJsPrintDeclarationsObservedWith print declarations
+          false builder psJsGeneratedPositionZero List.nil with
+    | Except.error error => Except.error error
+    | Except.ok product => Except.ok product.text
+
 def psJsPrintDeclarations
     (declarations : List PsJsIrDeclaration) :
     Except PsJsEmitError String :=
-  match declarations with
-  | List.nil =>
-      Except.ok ""
-  | List.cons declaration rest =>
-      match psJsPrintDeclaration declaration with
-      | Except.error error => Except.error error
-      | Except.ok printed =>
-          match psJsPrintDeclarations rest with
-          | Except.error error => Except.error error
-          | Except.ok printedRest =>
-              Except.ok
-                (psJsConcat2
-                  printed
-                  printedRest)
+  psJsPrintDeclarationsWith
+    psJsPrintDeclaration declarations psTextBuilderEmpty
+
+
+def psJsStringRuntimeSupport : String :=
+  "let __ps$utf8Cache;\nfunction __ps$utf8(source) { if (__ps$utf8Cache?.source === source) return __ps$utf8Cache; const entries = new Map(); let size = 0n; for (const char of source) { const cp = char.codePointAt(0) ?? 0; const width = BigInt(cp <= 0x7f ? 1 : cp <= 0x7ff ? 2 : cp <= 0xffff ? 3 : 4); entries.set(size, [char, width]); size += width; } return (__ps$utf8Cache = { source, entries, size }); }\n"
 
 def psJsStackRuntimeSupport : String :=
   psJsJoin
@@ -1299,6 +1370,7 @@ def psJsTailPrintAlternativesWith
 
 def psJsTailEmitWithFuel
     (declaration : PsJsIrDeclaration)
+    (available : String -> Bool)
     (fuel : Nat) :
     Nat -> PsJsIrExpr -> Option String :=
   match fuel with
@@ -1310,6 +1382,7 @@ def psJsTailEmitWithFuel
           Nat -> PsJsIrExpr -> Option String :=
         psJsTailEmitWithFuel
           declaration
+          available
           remaining;
       fun (matchDepth : Nat) (expr : PsJsIrExpr) =>
         let sameDepth : PsJsIrExpr -> Option String :=
@@ -1335,12 +1408,7 @@ def psJsTailEmitWithFuel
                           (psJsJoin
                             ""
                             [
-                              "[",
-                              psJsJoin
-                                ", "
-                                (psJsTailParameterNames
-                                  declaration.parameters),
-                              "] = [",
+                              "__ps$tail$state = [",
                               psJsJoin ", " printedArguments,
                               "]; continue;"
                             ])
@@ -1383,17 +1451,16 @@ def psJsTailEmitWithFuel
                   match sameDepth body with
                   | Option.none => Option.none
                   | Option.some printedBody =>
-                      Option.some
-                        (psJsJoin
-                          ""
-                          [
-                            "const ",
-                            name,
-                            " = ",
-                            printedValue,
-                            "; ",
-                            printedBody
-                          ])
+                      let temp := String.Internal.append "__ps$tail$value$" (psNatToString remaining);
+                      if available temp then
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "{ const ", temp, " = ", printedValue,
+                              "; { const ", name, " = ", temp, "; ", printedBody, " } }"
+                            ])
+                      else Option.none
         | PsJsIrExpr.ifE condition thenBranch elseBranch =>
             match
                 psJsTailPrintNonRecursive
@@ -1470,30 +1537,30 @@ def psJsPrintTailLoop
   match declaration.parameters with
   | List.nil => Option.none
   | List.cons _ _ =>
-      match
-          psJsTailEmitWithFuel
-            declaration
-            4096
-            0
-            declaration.body with
-      | Option.none => Option.none
-      | Option.some printedBody =>
-          let parameters : String :=
-            psJsJoin
-              ", "
-              (psJsTailParameterNames declaration.parameters);
-          Option.some
-            (psJsJoin
-              ""
-              [
-                "export function ",
-                declaration.name,
-                "(",
-                parameters,
-                ") { while (true) { ",
-                printedBody,
-                " } }\n"
-              ])
+      let names := psJsTailParameterNames declaration.parameters;
+      let uses : PsJsIrExpr -> String -> Bool := psJsExprUsesNameWithFuel 4096;
+      let available : String -> Bool := fun (name : String) =>
+        if psStringEq name declaration.name then false
+        else if psJsTailContains names name then false
+        else if uses declaration.body name then false else true;
+      if uses declaration.body declaration.name then
+        if available "__ps$tail$state" then
+          match psJsTailRewriteWithFuel declaration uses available 4096 names List.nil declaration.body with
+          | Option.none => Option.none
+          | Option.some rewritten =>
+              match psJsTailEmitWithFuel declaration available 4096 0 rewritten with
+              | Option.none => Option.none
+              | Option.some printedBody =>
+                  let parameters := psJsJoin ", " names;
+                  Option.some
+                    (psJsJoin "" [
+                      "export function ", declaration.name, "(", parameters,
+                      ") { let __ps$tail$state = [", parameters,
+                      "]; while (true) { const [", parameters,
+                      "] = __ps$tail$state; ", printedBody, " } }\n"
+                    ])
+        else Option.none
+      else Option.none
 
 def psJsPrintDeclarationStackSafe
     (declaration : PsJsIrDeclaration) :
@@ -1566,20 +1633,26 @@ def psJsPrintDeclarationStackSafe
 def psJsPrintDeclarationsStackSafe
     (declarations : List PsJsIrDeclaration) :
     Except PsJsEmitError String :=
-  match declarations with
-  | List.nil =>
-      Except.ok ""
-  | List.cons declaration rest =>
-      match psJsPrintDeclarationStackSafe declaration with
-      | Except.error error => Except.error error
-      | Except.ok printed =>
-          match psJsPrintDeclarationsStackSafe rest with
-          | Except.error error => Except.error error
-          | Except.ok printedRest =>
-              Except.ok
-                (psJsConcat2
-                  printed
-                  printedRest)
+  psJsPrintDeclarationsWith
+    psJsPrintDeclarationStackSafe declarations psTextBuilderEmpty
+
+
+def psJsPrintStackSafePrelude (module : PsJsIrModule) : String :=
+  psJsJoin "" [
+    "// generated by ProofScript direct JsIR v1 stack-safe\n",
+    psJsPrintImports module.imports,
+    psJsStringRuntimeSupport,
+    psJsStackRuntimeSupport
+  ]
+
+def psJsPrintModuleStackSafeWithPositions
+    (module : PsJsIrModule) : Except PsJsEmitError PsJsPrintedModule :=
+  let prelude : String := psJsPrintStackSafePrelude module;
+  match psJsAdvanceGeneratedText psJsGeneratedPositionZero prelude with
+  | Except.error error => Except.error error
+  | Except.ok position =>
+      psJsPrintDeclarationsObservedWith psJsPrintDeclarationStackSafe module.declarations
+        true (psTextBuilderAppend psTextBuilderEmpty prelude) position List.nil
 
 def psJsPrintModuleStackSafe
     (module : PsJsIrModule) :
@@ -1587,17 +1660,7 @@ def psJsPrintModuleStackSafe
   match psJsPrintDeclarationsStackSafe module.declarations with
   | Except.error error => Except.error error
   | Except.ok declarations =>
-      let imports : String :=
-        psJsPrintImports module.imports;
-      Except.ok
-        (psJsJoin
-          ""
-          [
-            "// generated by ProofScript direct JsIR v1 stack-safe\n",
-            imports,
-            psJsStackRuntimeSupport,
-            declarations
-          ])
+      Except.ok (psJsConcat2 (psJsPrintStackSafePrelude module) declarations)
 
 def psJsPrintModule
     (module : PsJsIrModule) :
@@ -1613,6 +1676,7 @@ def psJsPrintModule
           [
             "// generated by ProofScript direct JsIR v1\n",
             imports,
+            psJsStringRuntimeSupport,
             declarations
           ])
 
@@ -1627,7 +1691,11 @@ def psJsEmitValidatedModuleStackSafeWithTargetProfile
   | Except.error error =>
       Except.error (PsJsEmitError.lower error)
   | Except.ok jsIr =>
-      psJsPrintModuleStackSafe jsIr
+      match psJsValidateModule jsIr with
+      | Except.error error =>
+          Except.error (PsJsEmitError.targetValidation error)
+      | Except.ok _ =>
+          psJsPrintModuleStackSafe jsIr
 
 def psJsEmitValidatedModuleWithTargetProfile
     (profile : PsJsTargetProfile)
@@ -1640,7 +1708,11 @@ def psJsEmitValidatedModuleWithTargetProfile
   | Except.error error =>
       Except.error (PsJsEmitError.lower error)
   | Except.ok jsIr =>
-      psJsPrintModule jsIr
+      match psJsValidateModule jsIr with
+      | Except.error error =>
+          Except.error (PsJsEmitError.targetValidation error)
+      | Except.ok _ =>
+          psJsPrintModule jsIr
 
 def psJsEmitValidatedModule
     (module : PsValidatedIrModule) :
@@ -1649,4 +1721,8 @@ def psJsEmitValidatedModule
   | Except.error error =>
       Except.error (PsJsEmitError.lower error)
   | Except.ok jsIr =>
-      psJsPrintModule jsIr
+      match psJsValidateModule jsIr with
+      | Except.error error =>
+          Except.error (PsJsEmitError.targetValidation error)
+      | Except.ok _ =>
+          psJsPrintModule jsIr

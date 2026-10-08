@@ -52,9 +52,18 @@ inductive PsSourceSignatureBinding where
   | typeParameter (index : Nat)
   | valueParameter
 
-def psSourceSignatureScalar (name : PsName) : Option PsSourceScalarType :=
+def psSourceSignatureRootText (name : PsName) : Option String :=
   match name with
-  | PsName.str PsName.anonymous text =>
+  | PsName.str parent text =>
+      match parent with
+      | PsName.anonymous => Option.some text
+      | _ => Option.none
+  | _ => Option.none
+
+def psSourceSignatureScalar (name : PsName) : Option PsSourceScalarType :=
+  match psSourceSignatureRootText name with
+  | Option.none => Option.none
+  | Option.some text =>
       if psStringEq text "Nat" then Option.some PsSourceScalarType.nat
       else if psStringEq text "Int" then Option.some PsSourceScalarType.int
       else if psStringEq text "UInt8" then Option.some PsSourceScalarType.uint8
@@ -74,7 +83,17 @@ def psSourceSignatureScalar (name : PsName) : Option PsSourceScalarType :=
       else if psStringEq text "String" then Option.some PsSourceScalarType.string
       else if psStringEq text "Unit" then Option.some PsSourceScalarType.unit
       else Option.none
-  | _ => Option.none
+
+def psSourceSignatureArrayHead (expression : PsExpr) : Bool :=
+  match expression with
+  | PsExpr.constE name levels =>
+      match levels with
+      | List.nil =>
+          match psSourceSignatureRootText name with
+          | Option.none => false
+          | Option.some text => psStringEq text "Array"
+      | List.cons _ _ => false
+  | _ => false
 
 def psSourceSignatureBindingAt
     (scope : List PsSourceSignatureBinding) : Nat -> Option PsSourceSignatureBinding :=
@@ -106,21 +125,24 @@ def psSourceSignaturePrefixWorker
         psSourceSignaturePrefixWorker maxDepth remaining;
       fun (state : PsSourceSignaturePrefix) =>
         match state.body with
-        | PsExpr.forallE name (PsExpr.sortE level) body binder =>
-            if Nat.blt state.count maxDepth then
-              match level with
-              | PsLevel.succ _ =>
-                  smaller
-                    (PsSourceSignaturePrefix.mk
-                      body
-                      (List.cons
-                        (PsSourceSignatureParameter.mk name binder state.count)
-                        state.parametersRev)
-                      (List.cons (PsSourceSignatureBinding.typeParameter state.count) state.scope)
-                      (Nat.succ state.count))
-              | _ => Except.error PsSourceSignatureError.propositionOrAmbiguousSort
-            else
-              Except.error PsSourceSignatureError.resourceExhausted
+        | PsExpr.forallE name type body binder =>
+            match type with
+            | PsExpr.sortE level =>
+                if Nat.blt state.count maxDepth then
+                  match level with
+                  | PsLevel.succ _ =>
+                      smaller
+                        (PsSourceSignaturePrefix.mk
+                          body
+                          (List.cons
+                            (PsSourceSignatureParameter.mk name binder state.count)
+                            state.parametersRev)
+                          (List.cons (PsSourceSignatureBinding.typeParameter state.count) state.scope)
+                          (Nat.succ state.count))
+                  | _ => Except.error PsSourceSignatureError.propositionOrAmbiguousSort
+                else
+                  Except.error PsSourceSignatureError.resourceExhausted
+            | _ => Except.ok state
         | _ => Except.ok state
 
 -- Continuations are data; native and self-hosted execution need no source-type
@@ -147,20 +169,25 @@ def psSourceSignatureProjectStep
     Except PsSourceSignatureError PsSourceSignatureState :=
   if Nat.ble depth maxDepth then
     match expression with
-    | PsExpr.constE name List.nil =>
-        match psSourceSignatureScalar name with
-        | Option.none => Except.error PsSourceSignatureError.namedTypeUnsupported
-        | Option.some scalar =>
-            Except.ok (PsSourceSignatureState.mk rest (List.cons (PsSourceSignatureType.scalar scalar) values))
-    | PsExpr.constE _ _ =>
-        Except.error PsSourceSignatureError.namedTypeUnsupported
+    | PsExpr.constE name levels =>
+        match levels with
+        | List.nil =>
+            match psSourceSignatureScalar name with
+            | Option.none => Except.error PsSourceSignatureError.namedTypeUnsupported
+            | Option.some scalar =>
+                Except.ok (PsSourceSignatureState.mk rest (List.cons (PsSourceSignatureType.scalar scalar) values))
+        | List.cons _ _ => Except.error PsSourceSignatureError.namedTypeUnsupported
     | PsExpr.bvar index =>
         match psSourceSignatureBindingAt scope index with
-        | Option.some (PsSourceSignatureBinding.typeParameter parameter) =>
-            Except.ok (PsSourceSignatureState.mk rest (List.cons (PsSourceSignatureType.parameter parameter) values))
-        | _ => Except.error PsSourceSignatureError.dependentValueTypeUnsupported
-    | PsExpr.app (PsExpr.constE (PsName.str PsName.anonymous text) List.nil) element =>
-        if psStringEq text "Array" then
+        | Option.none => Except.error PsSourceSignatureError.dependentValueTypeUnsupported
+        | Option.some binding =>
+            match binding with
+            | PsSourceSignatureBinding.typeParameter parameter =>
+                Except.ok (PsSourceSignatureState.mk rest (List.cons (PsSourceSignatureType.parameter parameter) values))
+            | PsSourceSignatureBinding.valueParameter =>
+                Except.error PsSourceSignatureError.dependentValueTypeUnsupported
+    | PsExpr.app head element =>
+        if psSourceSignatureArrayHead head then
           Except.ok
             (PsSourceSignatureState.mk
               (List.cons (PsSourceSignatureTask.project element scope (Nat.succ depth))
@@ -248,8 +275,11 @@ def psSourceSignatureWorker
         match state.tasks with
         | List.nil =>
             match state.values with
-            | List.cons result List.nil => Except.ok result
-            | _ => Except.error PsSourceSignatureError.internalStack
+            | List.nil => Except.error PsSourceSignatureError.internalStack
+            | List.cons result tail =>
+                match tail with
+                | List.nil => Except.ok result
+                | List.cons _ _ => Except.error PsSourceSignatureError.internalStack
         | List.cons task rest =>
             match psSourceSignatureStep maxDepth task rest state.values with
             | Except.error error => Except.error error

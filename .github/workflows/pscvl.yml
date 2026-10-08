@@ -56,3 +56,4 @@ jobs:
           ! lake exe pscvl check examples/fail_raw_io.ps
           ! lake exe pscvl check examples/fail_noncomputable.ps
           ! lake exe pscvl check examples/fail_missing_arg.ps
+          ! lake exe pscvl check examples/fail_unresolved_implicit.ps

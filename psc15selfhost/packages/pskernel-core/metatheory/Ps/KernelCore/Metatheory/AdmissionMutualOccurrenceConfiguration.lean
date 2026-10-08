@@ -292,3 +292,112 @@ theorem psKernelSimpleMutualAppInfo_semantic_shape
                                   hReflexive targets member hMember indices hExcluded index hIndex
   | _ =>
       simp [psKernelSimpleMutualAppInfo, hFn] at hRun
+
+
+/--
+Every returned recursive-field target is a real family shape and every
+returned result index structurally excludes all family names. Traversal fuel
+and checker fuel remain independent, as in the executable analyzer.
+-/
+theorem psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel_indices_refines
+    (fuel : Nat) (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw) :
+    ∀ (checkerFuel : Nat) (session : PsKernelCheckerSession)
+      (targets : List PsKernelName) (shapes : List PsKernelSimpleMutualTypeShape)
+      (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+      (field : PsKernelOpenBinder) (domain : PsKernelExpr)
+      (revArgs : List PsKernelOpenBinder) (applied : PsKernelExpr)
+      (result : PsKernelMutualRecursiveArgumentResult)
+      (recursive : PsKernelSimpleMutualRecursiveField),
+      psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel fuel checkerFuel
+        session targets shapes levels params field domain revArgs applied = Except.ok result ->
+      result.recursiveInfo = some recursive ->
+      recursive.field = field ∧
+      ∃ shape : PsKernelSimpleMutualTypeShape,
+        psKernelMutualTypeShapeListGet shapes recursive.target = some shape ∧
+        psKernelExprListLength recursive.indices = psKernelOpenBinderListLength shape.indices ∧
+        (∀ target : PsKernelName, List.Mem target targets ->
+          ∀ index : PsKernelExpr, List.Mem index recursive.indices ->
+            PsKernelNoTargetConstantOccurrence target index) := by
+  induction fuel with
+  | zero =>
+      intro checkerFuel session targets shapes levels params field domain
+        revArgs applied result recursive hRun hInfo
+      simp [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel] at hRun
+  | succ remaining ih =>
+      intro checkerFuel session targets shapes levels params field domain
+        revArgs applied result recursive hRun hInfo
+      cases hDirect : psKernelSimpleMutualAppInfo targets shapes levels params domain with
+      | some direct =>
+          have hResult : PsKernelMutualRecursiveArgumentResult.mk session
+              (some (PsKernelSimpleMutualRecursiveField.mk field
+                (psKernelReverseOpenBinders revArgs) direct.target direct.indices)) = result := by
+            simpa [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel, hDirect] using hRun
+          cases hResult
+          have hRecursive := Option.some.inj hInfo
+          cases hRecursive
+          obtain ⟨shape, hShape, hHead, hPrefix, hLength, hExcluded⟩ :=
+            psKernelSimpleMutualAppInfo_semantic_shape hString hReflexive
+              targets shapes levels params domain direct hDirect
+          exact ⟨rfl, shape, hShape, hLength, hExcluded⟩
+      | none =>
+          cases hWhnf : psKernelSessionWhnf checkerFuel session domain with
+          | error message =>
+              simp [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                hDirect, hWhnf] at hRun
+          | ok reduced =>
+              cases hApp : psKernelSimpleMutualAppInfo targets shapes levels params reduced.1 with
+              | some info =>
+                  have hResult : PsKernelMutualRecursiveArgumentResult.mk reduced.2
+                      (some (PsKernelSimpleMutualRecursiveField.mk field
+                        (psKernelReverseOpenBinders revArgs) info.target info.indices)) = result := by
+                    simpa [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                      hDirect, hWhnf, hApp] using hRun
+                  cases hResult
+                  have hRecursive := Option.some.inj hInfo
+                  cases hRecursive
+                  obtain ⟨shape, hShape, hHead, hPrefix, hLength, hExcluded⟩ :=
+                    psKernelSimpleMutualAppInfo_semantic_shape hString hReflexive
+                      targets shapes levels params reduced.1 info hApp
+                  exact ⟨rfl, shape, hShape, hLength, hExcluded⟩
+              | none =>
+                  simp only [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                    hDirect, hWhnf, hApp] at hRun
+                  cases hShape : reduced.1 with
+                  | forallE userName argDomain body binderInfo =>
+                      cases hNegative : psKernelSimpleMutualContainsConst targets argDomain with
+                      | true =>
+                          simp [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                            hDirect, hWhnf, hApp, hShape, hNegative] at hRun
+                      | false =>
+                          let opened := psKernelSessionWithLocal reduced.2 userName
+                            (psKernelExprConsumeTypeAnnotations argDomain) binderInfo
+                          let arg := PsKernelOpenBinder.mk opened.1 userName
+                            (psKernelExprConsumeTypeAnnotations argDomain) binderInfo
+                          have hTail : psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
+                              remaining checkerFuel opened.2 targets shapes levels params field
+                              (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
+                              (arg :: revArgs) (PsKernelExpr.app applied (PsKernelExpr.fvar opened.1)) =
+                                Except.ok result := by
+                            simpa [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                              hDirect, hWhnf, hApp, hShape, hNegative, opened, arg] using hRun
+                          exact ih checkerFuel opened.2 targets shapes levels params field
+                            (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
+                            (arg :: revArgs) (PsKernelExpr.app applied (PsKernelExpr.fvar opened.1))
+                            result recursive hTail hInfo
+                  | _ =>
+                      cases hDomain : psKernelSimpleMutualContainsConst targets domain with
+                      | true =>
+                          simp [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                            hDirect, hWhnf, hApp, hShape, hDomain] at hRun
+                      | false =>
+                          cases hReduced : psKernelSimpleMutualContainsConst targets reduced.1 with
+                          | true =>
+                              simp [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                                hDirect, hWhnf, hApp, hShape, hDomain, hReduced] at hRun
+                          | false =>
+                              have hResult : PsKernelMutualRecursiveArgumentResult.mk reduced.2 none = result := by
+                                simpa [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                                  hDirect, hWhnf, hApp, hShape, hDomain, hReduced] using hRun
+                              cases hResult
+                              cases hInfo

@@ -8,7 +8,19 @@
     "psc": "./packages/cli/bin/psc.mjs"
   },
   "workspaces": [
-    "packages/*",
+    "packages/bootstrap",
+    "packages/foundation",
+    "packages/syntax",
+    "packages/core",
+    "packages/environment",
+    "packages/meta",
+    "packages/elab",
+    "packages/bridge",
+    "packages/compiler-ir",
+    "packages/erasure",
+    "packages/compiler",
+    "packages/backend-ts",
+    "packages/cli",
     "host",
     "stdlib"
   ],
@@ -126,7 +138,12 @@
     "build:auto": "node scripts/build-auto.mjs",
     "build:dual": "npm run build:lake && npm run build:psc",
     "generation:next": "node scripts/selfhost-generation.mjs",
-    "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs"
+    "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs",
+    "build:kernel-core": "lake build psc_kernel_core_provider",
+    "test:kernel-core-provider": "lake exe psc_kernel_core_provider_tests && node --test scripts/checked-kernel-core.test.mjs",
+    "selfhost:core": "node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core",
+    "selfhost:core:fast": "node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core --fast",
+    "selfhost:baseline": "node scripts/selfhost-baseline.mjs --assert-unchanged"
   },
   "devDependencies": {
     "typescript": "5.8.3"

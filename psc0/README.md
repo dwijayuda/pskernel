@@ -43,3 +43,15 @@ treated as current implementation or verification results.
 
 When working inside this directory, use its own toolchain/commands and
 consult `legacy/README.md` before attempting historical extension tests.
+
+## Native PSKernel Core self-host integration (workstream)
+
+The 2026-10-03 compiler-only fixed-point source remains unchanged. The native
+PSKernel Core migration is documented in [docs/NATIVE_CORE_SELFHOST.md](docs/NATIVE_CORE_SELFHOST.md).
+The `pskernel-core` selector targets the Lean-compiled native kernel source,
+not the archived JavaScript checker. The historical Lean-WASM checker is still
+available only by explicit selection; there is no automatic fallback.
+
+This integration is a candidate until its branch CI confirms native provider
+checks and full compiler bootstrap/selfhost/repeat equality. In particular,
+a code-copy or source-tree lock does not prove semantic acceptance.

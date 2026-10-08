@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -69,7 +69,38 @@ export async function runCheckedSeedSession({
 
     const kernelResult = await checkAdmissions(prepared.admissions);
     if (kernelResult?.accepted !== true) {
-      throw new Error(`PSC2_KERNEL_REJECTED: ${kernelResult?.errorKind ?? 'kernel-rejection'}`);
+      // Reproduce any full-corpus rejection without modifying kernel semantics.
+      // The full canonical request is written only to an explicitly selected
+      // diagnostic path, never into a successful checked artifact.
+      const diagnosticPath = process.env.PSC0_DIAGNOSTIC_ADMISSIONS;
+      if (diagnosticPath) {
+        const destination = path.resolve(diagnosticPath);
+        await mkdir(path.dirname(destination), { recursive: true });
+        await writeFile(destination, prepared.admissions, 'utf8');
+      }
+      const entryIndex = kernelResult?.declarationIndex;
+      let declarationName = '';
+      if (Number.isSafeInteger(entryIndex) && entryIndex >= 0) {
+        try {
+          const request = JSON.parse(prepared.admissions).admissions?.[entryIndex];
+          const name = request?.kind === 'inductive'
+            ? request?.declaration?.ts?.[0]?.n : request?.declaration?.n;
+          const parts = []; let current = name;
+          for (let depth = 0; depth < 64 && current && typeof current === 'object'; depth++) {
+            if (current.k === 'a') break;
+            if (current.k !== 's' && current.k !== 'n') break;
+            parts.push(String(current.v));
+            current = current.p;
+          }
+          if (parts.length) declarationName = ' declaration=' + JSON.stringify(parts.reverse().join('.'));
+        } catch { /* The native checker already rejects malformed wire data. */ }
+      }
+      const errorKind = kernelResult?.errorKind ?? 'kernel-rejection';
+      const declarationIndex = Number.isSafeInteger(kernelResult?.declarationIndex) &&
+        kernelResult.declarationIndex >= 0 ? ` declarationIndex=${kernelResult.declarationIndex}` : '';
+      const message = typeof kernelResult?.message === 'string'
+        ? ` message=${JSON.stringify(kernelResult.message.slice(0, 1024))}` : '';
+      throw new Error(`PSC2_KERNEL_REJECTED: ${errorKind}${declarationIndex}${message}`);
     }
 
     child.stdin.end(emit ? 'emit\n' : 'checked\n');

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-historical-compiler-source-tree-lock",
+  "authorityCommit": "d4298a712d1e2ea6505185d311e9af10a698b2ca",
+  "baselineGitCommit": "37f63c39d4a07189938046c64152bba25d789450",
+  "sourceCount": 55,
+  "originalSourceFixedPointSha256": "ee6dd22f1b74b97113cc1a5e36aadad3cceecb2b152653f2c0dc26dd07aa22f7",
+  "originalCompilerTypeScriptSha256": "fb173a348d1555d1ff224b9977f6fee68591b79f781a6b292c2572648415b033",
+  "originalCompilerJavaScriptSha256": "74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76",
+  "portablePackageTrees": {
+    "bootstrap": "d44c6541cc3cd854a45c6075a860b0418e0d8079",
+    "foundation": "add691e33348b60339eb1b7c3b31b1df93a5151d",
+    "syntax": "7a49723da023f0bbf7a23a664df6935d335aa56b",
+    "core": "6ed4b582de43d309ac10b77ab57ebdd9d0dfd0fe",
+    "environment": "40043a8a49b5056585c4b9d15bda035385e56b2f",
+    "meta": "1ae59c68cc2555d9220fd56ce204c85fba14862d",
+    "elab": "1a27a5f209d0dddf17a555d23a9a16849618ebab",
+    "bridge": "a23edbb4969b92b8129a888069f0812013c7a40c",
+    "compiler-ir": "76f476f77d905057d4074a8518863a93f5d6400a",
+    "erasure": "b1921ffbea41f34a8790957190a65e67f0dbb1f9",
+    "compiler": "3fa3abc7fc1c3e6c9dcf54986aa5eea36efbf7e0",
+    "backend-ts": "8c653d4b37351b8ae3d0f3aeb3d56d0b71bf296b"
+  }
+}

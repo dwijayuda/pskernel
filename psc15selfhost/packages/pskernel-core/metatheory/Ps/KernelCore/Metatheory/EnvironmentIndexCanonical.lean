@@ -781,3 +781,114 @@ theorem psKernelEnvironmentIndexInsert_small_refines_authoritative
         _ = psKernelFindConstantInList
               query
               (List.cons info constants) := hRemove
+
+
+/-
+Trie insertion replaces exactly the selected hash bucket.  If the query has
+the same declaration name, the inserted declaration is now the first match;
+otherwise the old lookup is preserved, including same-hash collisions.
+-/
+theorem psKernelEnvironmentIndexInsert_branch_refines_lookup
+    (left right : PsKernelEnvironmentIndex)
+    (info : PsKernelConstantInfo)
+    (query : PsKernelName) :
+    psKernelFindConstantInList
+        query
+        (psKernelEnvironmentIndexFind
+          (psKernelEnvironmentIndexInsert
+            (PsKernelEnvironmentIndex.branch left right)
+            info)
+          query) =
+      psKernelFindConstantInList
+        query
+        (List.cons
+          info
+          (psKernelEnvironmentIndexFind
+            (PsKernelEnvironmentIndex.branch left right)
+            query)) := by
+  let root := PsKernelEnvironmentIndex.branch left right
+  let name := psKernelConstantInfoName info
+  let oldBucket :=
+    psKernelEnvironmentIndexFindWorker
+      16 root (psKernelEnvironmentNameHash name)
+  let next :=
+    List.cons info
+      (psKernelEnvironmentIndexRemoveName name oldBucket)
+  have hInsert :
+      psKernelEnvironmentIndexInsert root info =
+        psKernelEnvironmentIndexSetWorker
+          16 root (psKernelEnvironmentNameHash name) next := by
+    rfl
+  change
+    psKernelFindConstantInList query
+        (psKernelEnvironmentIndexFind
+          (psKernelEnvironmentIndexInsert root info)
+          query) =
+      psKernelFindConstantInList query
+        (List.cons info
+          (psKernelEnvironmentIndexFind root query))
+  rw [hInsert]
+  cases hSame : psKernelNameEq name query with
+  | true =>
+      have hHash :
+          psKernelEnvironmentNameHash name =
+            psKernelEnvironmentNameHash query :=
+        psKernelEnvironmentNameHash_of_nameEq_true name query hSame
+      have hCandidates :
+          psKernelEnvironmentIndexFind
+              (psKernelEnvironmentIndexSetWorker
+                16 root (psKernelEnvironmentNameHash name) next)
+              query =
+            next := by
+        rw [psKernelEnvironmentIndexFind_setWorker_eq_worker]
+        rw [← hHash]
+        exact
+          psKernelEnvironmentIndexFindWorker_setWorker_same
+            16 root (psKernelEnvironmentNameHash name) next
+      rw [hCandidates]
+      simp [next, psKernelFindConstantInList, hSame, name]
+  | false =>
+      have hRemove :
+          psKernelFindConstantInList query next =
+            psKernelFindConstantInList query oldBucket := by
+        simpa [next, psKernelFindConstantInList, hSame] using
+          psKernelEnvironmentIndexRemoveName_find_other
+            oldBucket name query hSame
+      by_cases hHash :
+          psKernelEnvironmentNameHash name =
+            psKernelEnvironmentNameHash query
+      · have hCandidates :
+            psKernelEnvironmentIndexFind
+                (psKernelEnvironmentIndexSetWorker
+                  16 root (psKernelEnvironmentNameHash name) next)
+                query =
+              next := by
+          rw [psKernelEnvironmentIndexFind_setWorker_eq_worker]
+          rw [← hHash]
+          exact
+            psKernelEnvironmentIndexFindWorker_setWorker_same
+              16 root (psKernelEnvironmentNameHash name) next
+        have hBucket :
+            oldBucket = psKernelEnvironmentIndexFind root query := by
+          change
+            psKernelEnvironmentIndexFindWorker
+                16 root (psKernelEnvironmentNameHash name) =
+              psKernelEnvironmentIndexFindWorker
+                16 root (psKernelEnvironmentNameHash query)
+          rw [hHash]
+        rw [hCandidates, hRemove, hBucket]
+        simp [psKernelFindConstantInList, hSame, name]
+      · have hUnchanged :
+            psKernelEnvironmentIndexFind
+                (psKernelEnvironmentIndexSetWorker
+                  16 root (psKernelEnvironmentNameHash name) next)
+                query =
+              psKernelEnvironmentIndexFind root query := by
+          rw [psKernelEnvironmentIndexFind_setWorker_eq_worker]
+          rw [
+            psKernelEnvironmentIndexFindWorker_setWorker_other_name_hash
+              root name query next hHash
+          ]
+          rfl
+        rw [hUnchanged]
+        simp [psKernelFindConstantInList, hSame, name]

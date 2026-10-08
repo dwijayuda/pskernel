@@ -9,6 +9,8 @@ calls, indexed inductive headers, extended effect syntax, etc.) is not yet
 implemented; each accepted spelling below has an unambiguous Lean lowering.
 -/
 
+open Lean
+
 namespace PSCVL
 
 syntax (name := pscvConst) "const " ident ":" term ":=" term : command
@@ -26,7 +28,7 @@ syntax (name := pscvFunction) "function " ident "(" pscvBinder,* ")" ":" term ":
 macro_rules
   | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term := $body:term) => do
     let mut leanBinders : Array (TSyntax ``Lean.Parser.Term.bracketedBinder) := #[]
-    for b in bs.getElems do
+    for b in bs do
       let `(pscvBinder| $x:ident : $t:term) := b
         | Macro.throwUnsupported
       leanBinders := leanBinders.push (← `(($x:ident : $t:term)))
@@ -42,7 +44,7 @@ macro_rules
   | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term
       requires $pre:term ensures $rv:ident => $post:term := $body:term) => do
     let mut leanBinders : Array (TSyntax ``Lean.Parser.Term.bracketedBinder) := #[]
-    for b in bs.getElems do
+    for b in bs do
       let `(pscvBinder| $x:ident : $t:term) := b
         | Macro.throwUnsupported
       leanBinders := leanBinders.push (← `(($x:ident : $t:term)))

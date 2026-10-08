@@ -350,6 +350,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.DefEqKnotReflectionConfiguration,
     `Ps.KernelCore.Metatheory.DefEqKnotCoreConfiguration,
     `Ps.KernelCore.Metatheory.DefEqKnotPropositionConfiguration,
+    `Ps.KernelCore.Metatheory.DefEqKnotLazyConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionConfiguration,
     `Ps.KernelCore.Metatheory.CheckedProjectionConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionSemantics,

@@ -867,6 +867,149 @@ A proof of array index in `Fin n` does not, without an additional backend preser
 
 A conforming future release record MUST bind source and transitive import closure, approved spec identities, frozen grammar and environment digest, pinned Lean/PSKernel checker interface, deterministic classes/coercions, registered WPs, runtime primitive contracts, all four target backend descriptors, actual toolchain versions, proof/erasure/correspondence evidence, and exact host capability/ABI assumptions. The currently **PENDING** Standard environment digest remains an external release blocker. This document creates no imaginary digest or certificate.
 
+## 16B. Implementation-independent semantic obligations and falsifiable conformance cases
+
+This appendix defines **checks needed before a compiler implementation can claim conformance**, not new PSCV type theory or operational semantics. Only the approved parent source reference can own the exact interpretation of source constructs.
+
+### 16B.1 Three-stage source language acceptance
+
+~~~text
+Γ; E ⊢ module : SHP2-source
+ iff
+   ParentPSCVParse(module, frozenGrammar) = syntaxTree
+   AND ParentPSCVElaborate(E, syntaxTree) = typedCore
+   AND FeatureFilter(syntaxTree, SHP2FeatureTable) = allowed
+   AND ExactImportsAndRegistries(E, module)
+   AND NoForbiddenExecutableDependency(typedCore)
+~~~
+
+1. **Syntax acceptance:** parse the exact inherited SourceFile and EOF, no arbitrary Lean/JS/TS/Rust fallback.
+2. **Static semantics:** type, name, instance, coercion, totality, effect and source inference rules use the pinned standard environment and parent PSCV semantics.
+3. **SHP2 compiler-source admission:** check extra restrictions on entire syntactic and imported executable dependency closure; the full parent may admit constructs that the source profile excludes.
+
+Successful elaboration is not PSCV-CERT and does not prove target preservation. A target that cannot lower valid source fails **target emission**, not source typing.
+
+### 16B.2 Distinct observable exits of verified do
+
+~~~text
+ControlOutcome A E :=
+    Normal(A)
+  | Return(A)
+  | Break
+  | Continue
+  | Error(E)
+~~~
+
+This is checker pseudocode, not an added Core inductive. The concrete translation remains owned by `PSCV-VERIFY-v1` and registered effects. A portable implementation MUST preserve these branches:
+- `Normal` satisfies its typed result and specified postcondition.
+- `Return` exits the intended surrounding block early, satisfies its postcondition and suppresses subsequent effects.
+- `Break` exits the current registered loop and discharges the break frame/exit obligation.
+- `Continue` skips the remainder of the body while preserving the loop invariant and progressing the finite iterator.
+- `Error` obeys the exact registered typed error and state rollback/retention model, never undefined/panic as success.
+- `Ghost` changes cannot affect any runtime branch, error, externally modeled effect, source result or emitted bytes after erasure.
+
+The falsifier is a small `do` program with a local mutable accumulator and a return, break, continue or error at the same reachable point; compare *both* return values and side-effect traces after all four target emissions. This prevents a target that "runs" but violates early-exit semantics from passing conformance.
+
+### 16B.3 Source examples and negative cases
+
+These examples are **illustrative parent grammar shapes**, not test executions. An admitted source example requires a real parser, elaborator, proof checker and target run before obtaining SHP2-TARGET evidence.
+
+~~~proofscript
+function identity {α: Type}(x: α): α := {
+  x
+}
+
+function callNat(x: Nat): Nat := {
+  identity(x)
+}
+
+function withLocals(): Nat := do {
+  let mut n := 0
+  n := n + 1
+  return n
+}
+~~~
+
+| Negative family | Failure ownership | Reason |
+|---|---|---|
+| Multiple semicolon-delimited terms in one function body | parent parser | braced definition body contains one term, not a JS block |
+| `f(())` mistaken for `f()` | elaboration | Unit argument differs from empty argument/default completion |
+| Numeric `if (123)` | elaboration | no JS truthiness |
+| Import after non-import top-level command | parent import header rule | grammar does not allow delayed import |
+| `partial def` in executable source | parent PSCV profile | verified compiler must be total |
+| Semicolon-separated source do statements | parent PSCV grammar | defined newline sequencing required |
+| Parent-valid general `while` | SHP2 filter | excluded from initial compiler source only |
+| Runtime branch on ghost value | certification/erasure | no proof-ghost executable dependence |
+| Imported user axiom/proof hole | proof/trust closure | no unchecked theorem authority |
+| Arbitrarily large Nat mapped into JS Number | target emission/correspondence | source exactness must be preserved |
+| Exhausted reduction reported as semantic inequality | checker operation | unknown/resource limit not false rejection |
+
+Negative families above are not executable code fixtures; concrete conformance implementation MUST instantiate them with complete, fully parsed programs and stable expected diagnostic identifiers.
+
+### 16B.4 Target-neutral runtime conformance vectors
+
+| ID | Source observation and boundary case | Targets / relevant false acceptance |
+|---|---|---|
+| CV-NAT-01 | `Nat` above 2^53 and negative `Int` extremes | JS/TS Number truncation, Rust/Wasm width loss |
+| CV-ARITH-02 | Nat/Int division, remainder, subtraction at boundaries | host-specific quotient/remainder and underflow |
+| CV-WIDTH-03 | UInt/Int fixed widths, shifts, overflow, word-size narrowing | Rust debug/release difference, JS 32-bit implicit operators |
+| CV-UTF8-04 | ASCII, multibyte, non-BMP, malformed source bytes | JS/Java UTF-16 indexing, Go replacement rune |
+| CV-ADT-05 | nested inductive constructor and erased proof fields | forged variant, invalid tagged runtime value |
+| CV-ARRAY-06 | index 0, length-1, length, huge index, empty array | silent undefined, trap/panic or negative index |
+| CV-MAP-07 | same bindings, different hash seeds, collisions and insertion order | changed deterministic output hash |
+| CV-CLOSURE-08 | generic specialization and nested immutable captures | invalid closure conversion or type erasure |
+| CV-EFFECT-09 | State+Except failure after state change | transactional versus state-retaining mismatch |
+| CV-FOR-10 | finite iterator, break, continue, return and error | wrong number/order of effects or exit |
+| CV-DEEP-11 | deep AST/list and approved worklist | JS/Wasm stack assumptions |
+| CV-SOURCE-12 | UTF-8 byte span and line-ending conversion | wrong source maps and diagnostics |
+| CV-IR-13 | malformed unknown type/ref/constructor | unchecked target IR acceptance |
+| CV-WASM-14 | control/operand stack, locals, ABI imports/exports, memory | Wasm validation alone confused with preservation |
+| CV-BOOT-15 | entire emitted compiler re-enters its full source | hidden stage0/Lean fallback |
+
+Expected values MUST come from the approved PSCV source semantics or independently checked reference, not solely from copying one target's output. Do not invent a signed division/remainder policy without mechanically extracting its pinned parent definition; the test must reflect the actual specification.
+
+For successful pure operations, compare source values and canonical output artifacts; for typed failures, compare exact error categories and declared observations. External IO is compared only under a stated capability/host assumption. When unknown/resource exhaustion occurs, it may not be promoted to semantic success or a proof of falsehood.
+
+### 16B.5 Per-feature implementation and certification gates
+
+~~~text
+F0-or-F1 feature promotion requires:
+  [ ] exact parent grammar/rule IDs and source negative cases
+  [ ] frozen environment/name/instance/coercion meaning and digest
+  [ ] source typing, total recursion and local WP/VC evidence
+  [ ] approved effect, error, frame, loop and ghost obligations where relevant
+  [ ] checked Core and precise imported assumption closure
+  [ ] Core erasure and target-neutral RuntimeIR correspondence
+  [ ] TS source, pinned tsc and JS runtime execution
+  [ ] independent direct JS source without mandatory tsc
+  [ ] Wasm binary, actual engine, full ABI and host adapter
+  [ ] Rust source, pinned rustc, and real native execution
+  [ ] malformed/negative/resource and large-input target conformance
+  [ ] entire canonical compiler import/dependency closure compatibility
+
+Additional certified-release conditions:
+  [ ] independent approved specification coverage
+  [ ] kernel-accepted proof terms, no disallowed imported axioms
+  [ ] totality, loop/early-exit/frame and effect closure
+  [ ] ghost/proof erasure evidence
+  [ ] target preservation or independently validated equivalence
+  [ ] PSCV-CERT issuance only when all mandatory requirements are closed
+~~~
+
+Each unchecked box is an **implementation blocker**, not a documentation omission. The source profile may still be proposed while these boxes remain open. No compiler passes this gate by accepting only a small `Good.ps` demo.
+
+### 16B.6 Compiler-only vs standalone-kernel self-host
+
+The [surveyed status][PSC-STATUS] describes a 55-module compiler-only seed without the kernel in its generated closure. Therefore a future 16-path matrix has two explicit inventories:
+1. compiler/runtime import closure, executable and host process/Wasm/Node/native adapters; and
+2. checked-session provider/kernel identity, external logical assumptions and owned/non-owned status.
+
+A compiler using a separately declared provider may qualify as **compiler-only self-hosted**, provided the source compiler can re-enter its own complete parser/elaborator/IR/backend pipeline without a hidden Lean/PSC1 compiler. A standalone PSCV+PSKernel distribution requires independent kernel-source, binary and provider/interface evidence. The two claims cannot be conflated.
+
+### 16B.7 AI proof records and specification integrity
+
+A proof/VC record MUST bind immutable approved specification identity, exact source/Core/import hashes, elaboration environment, termination/effect/ghost/frame obligations, proof-term replay outcome, allowed axioms, kernel checker identity and independently identified backend preservation assumptions. AI agents MAY propose code, lemmas and proof terms, but cannot change the approved specification or weaken source/certificate acceptance to obtain a green result.
+
 ## 17. Evaluation of the proposed language reference
 
 ### 17.1 Scope of the score

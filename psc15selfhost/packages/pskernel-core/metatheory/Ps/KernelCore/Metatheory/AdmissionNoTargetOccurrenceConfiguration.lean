@@ -63,24 +63,24 @@ theorem psKernelExprContainsConst_false_refines_absence
   induction expr with
   | bvar index =>
       intro _
-      trivial
+      simp [PsKernelNoTargetConstantOccurrence]
   | fvar name =>
       intro _
-      trivial
+      simp [PsKernelNoTargetConstantOccurrence]
   | mvar name =>
       intro _
-      trivial
+      simp [PsKernelNoTargetConstantOccurrence]
   | sort level =>
       intro _
-      trivial
+      simp [PsKernelNoTargetConstantOccurrence]
   | const name levels =>
       intro hAbsent
       have hName :
           psKernelNameEq name target = false := by
         simpa [psKernelExprContainsConst] using hAbsent
-      exact
-        psKernelNameEq_false_ne_of_string_reflexive
-          hString name target hName
+      simpa only [PsKernelNoTargetConstantOccurrence] using
+        (psKernelNameEq_false_ne_of_string_reflexive
+          hString name target hName)
   | app fn arg ihFn ihArg =>
       intro hAbsent
       cases hFn : psKernelExprContainsConst target fn with
@@ -90,6 +90,7 @@ theorem psKernelExprContainsConst_false_refines_absence
           have hArg :
               psKernelExprContainsConst target arg = false := by
             simpa [psKernelExprContainsConst, hFn] using hAbsent
+          simp only [PsKernelNoTargetConstantOccurrence]
           exact ⟨ihFn hFn, ihArg hArg⟩
   | lam name type body binderInfo ihType ihBody =>
       intro hAbsent
@@ -100,6 +101,7 @@ theorem psKernelExprContainsConst_false_refines_absence
           have hBody :
               psKernelExprContainsConst target body = false := by
             simpa [psKernelExprContainsConst, hType] using hAbsent
+          simp only [PsKernelNoTargetConstantOccurrence]
           exact ⟨ihType hType, ihBody hBody⟩
   | forallE name type body binderInfo ihType ihBody =>
       intro hAbsent
@@ -110,6 +112,7 @@ theorem psKernelExprContainsConst_false_refines_absence
           have hBody :
               psKernelExprContainsConst target body = false := by
             simpa [psKernelExprContainsConst, hType] using hAbsent
+          simp only [PsKernelNoTargetConstantOccurrence]
           exact ⟨ihType hType, ihBody hBody⟩
   | letE name type value body nondep ihType ihValue ihBody =>
       intro hAbsent
@@ -127,15 +130,16 @@ theorem psKernelExprContainsConst_false_refines_absence
                 simpa [
                   psKernelExprContainsConst, hType, hValue
                 ] using hAbsent
+              simp only [PsKernelNoTargetConstantOccurrence]
               exact ⟨ihType hType, ihValue hValue, ihBody hBody⟩
   | lit literal =>
       intro _
-      trivial
+      simp [PsKernelNoTargetConstantOccurrence]
   | mdata metadata body ihBody =>
       intro hAbsent
-      exact
-        ihBody
-          (by simpa [psKernelExprContainsConst] using hAbsent)
+      simpa only [PsKernelNoTargetConstantOccurrence] using
+        (ihBody
+          (by simpa [psKernelExprContainsConst] using hAbsent))
   | proj typeName index body ihBody =>
       intro hAbsent
       cases hName : psKernelNameEq typeName target with
@@ -145,6 +149,7 @@ theorem psKernelExprContainsConst_false_refines_absence
           have hBody :
               psKernelExprContainsConst target body = false := by
             simpa [psKernelExprContainsConst, hName] using hAbsent
+          simp only [PsKernelNoTargetConstantOccurrence]
           exact
             ⟨psKernelNameEq_false_ne_of_string_reflexive
               hString typeName target hName,

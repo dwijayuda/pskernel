@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { ownedCheckedIdentity } from './checked-kernel-identity.mjs';
 
-const kernelUrl = new URL('../packages/pskernel-core/dist/foundation.js', import.meta.url);
+const kernelUrl = new URL('../legacy/packages/pskernel-core/dist/foundation.js', import.meta.url);
 if (createHash('sha256').update(readFileSync(kernelUrl)).digest('hex') !== ownedCheckedIdentity.generatedKernelSha256) {
   throw new Error('PSC2_OWNED_GENERATED_IDENTITY');
 }

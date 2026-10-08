@@ -101,32 +101,6 @@ lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
   roots := #[`Ps.Bootstrap.SelfHost]
 
-lean_lib PsBackendRust where
-  srcDir := "packages/backend-rust/src"
-  roots := #[
-    `Ps.BackendRust.Identifier,
-    `Ps.BackendRust.Type,
-    `Ps.BackendRust.Expr,
-    `Ps.BackendRust.ValueRefs,
-    `Ps.BackendRust.Runtime,
-    `Ps.BackendRust.Module,
-    `Ps.BackendRust.Coverage,
-    `Ps.BackendRust.Compiler
-  ]
-
-lean_lib PsBackendWasm where
-  srcDir := "packages/backend-wasm/src"
-  roots := #[
-    `Ps.BackendWasm.Model,
-    `Ps.BackendWasm.Type,
-    `Ps.BackendWasm.LowerInt,
-    `Ps.BackendWasm.LowerFloat,
-    `Ps.BackendWasm.RuntimeNat,
-    `Ps.BackendWasm.RuntimeInt,
-    `Ps.BackendWasm.Binary,
-    `Ps.BackendWasm.Lower
-  ]
-
 lean_lib PsHost where
   srcDir := "host/src"
   roots := #[
@@ -135,8 +109,10 @@ lean_lib PsHost where
     `Ps.Host.CompilerDriver
   ]
 
+-- Regression-only extension; compiler fixed-point closure never imports Ps.Project.
+-- Source is preserved in legacy while BootstrapTests still exercises it.
 lean_lib PsProject where
-  srcDir := "packages/project/src"
+  srcDir := "legacy/packages/project/src"
   roots := #[`Ps.Project.ModuleGraph]
 
 lean_lib PsMeta where
@@ -157,25 +133,6 @@ lean_lib PsElab where
     `Ps.Elab.Literal,
     `Ps.Elab.Term,
     `Ps.Elab.Declaration
-  ]
-
-lean_lib PsKernelOwned where
-  srcDir := "packages/pskernel-core/src"
-  roots := #[
-    `Ps.Kernel.Data, `Ps.Kernel.Structural, `Ps.Kernel.Natural,
-    `Ps.Kernel.Expr, `Ps.Kernel.Binding, `Ps.Kernel.Order,
-    `Ps.Kernel.Universe, `Ps.Kernel.LevelCheck, `Ps.Kernel.LevelInstantiate, `Ps.Kernel.ExprInstantiate, `Ps.Kernel.BuiltinNat, `Ps.Kernel.BuiltinText, `Ps.Kernel.Environment,
-    `Ps.Kernel.Reduction, `Ps.Kernel.Conversion, `Ps.Kernel.TypeCheck,
-    `Ps.Kernel.Admission, `Ps.Kernel.UnitInductive, `Ps.Kernel.NatInductive, `Ps.Kernel.RecordInductive,
-    `Ps.Kernel.EnumInductive, `Ps.Kernel.SumInductive, `Ps.Kernel.AlgebraicData, `Ps.Kernel.AlgebraicReduction, `Ps.Kernel.AlgebraicHeader, `Ps.Kernel.Closing, `Ps.Kernel.Occurrence, `Ps.Kernel.ExpressionEquality, `Ps.Kernel.Positivity, `Ps.Kernel.AlgebraicConstructor, `Ps.Kernel.Parameters, `Ps.Kernel.AlgebraicMinor, `Ps.Kernel.AlgebraicRecursor, `Ps.Kernel.AlgebraicAdmission, `Ps.Kernel.Bootstrap, `Ps.Kernel.JointAdmission, `Ps.Kernel.Bootstrap
-  ]
-
-lean_lib PSC1KernelReferenceFoundations where
-  srcDir := "packages/pskernel"
-  roots := #[
-    `PSC1Kernel.Name,
-    `PSC1Kernel.Level,
-    `PSC1Kernel.Expr
   ]
 
 @[default_target]
@@ -199,41 +156,9 @@ lean_exe psc1_backend_ts_tests where
   srcDir := "test"
   root := `BackendTsTests
 
-lean_exe psc1_backend_wasm_tests where
-  srcDir := "test"
-  root := `BackendWasmTests
-
 lean_exe psc1_ir_specialize_tests where
   srcDir := "test"
   root := `IrSpecializeTests
-
-lean_exe psc1_backend_rust_tests where
-  srcDir := "test"
-  root := `BackendRustTests
-
-lean_exe psc1_backend_rust_let_function_result_tests where
-  srcDir := "test"
-  root := `BackendRustLetFunctionResultTests
-
-lean_exe psc1_backend_rust_let_function_result_fixture where
-  srcDir := "test"
-  root := `BackendRustLetFunctionResultFixture
-
-lean_exe psc1_backend_rust_fixture where
-  srcDir := "test"
-  root := `BackendRustFixture
-
-lean_exe psc1_backend_rust_source_tests where
-  srcDir := "test"
-  root := `BackendRustSourceTests
-
-lean_exe psc1_backend_diff_fixture where
-  srcDir := "test"
-  root := `BackendDifferentialFixture
-
-lean_exe psc1_backend_wasm_binary_smoke where
-  srcDir := "test"
-  root := `WasmBinarySmoke
 
 lean_exe psc1_erasure_tests where
   srcDir := "test"

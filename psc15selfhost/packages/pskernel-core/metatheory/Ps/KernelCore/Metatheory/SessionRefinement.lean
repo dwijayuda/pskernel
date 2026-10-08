@@ -165,3 +165,56 @@ theorem psKernelSessionCheck_success_preserves_context_core
           simp [hRun] at hSuccess
           rcases hSuccess with ⟨rfl, rfl⟩
           rfl
+
+
+/-
+The executable session wrappers preserve their context.  These structural
+facts matter when composing header and body validation: a successful check
+can update caches/freshness, but must not switch environments or local scopes.
+-/
+theorem psKernelSessionWhnf_success_preserves_context_core
+    (fuel : Nat)
+    (session nextSession : PsKernelCheckerSession)
+    (expr result : PsKernelExpr)
+    (hSuccess :
+      psKernelSessionWhnf fuel session expr =
+        Except.ok (Prod.mk result nextSession)) :
+    nextSession.context = session.context := by
+  unfold psKernelSessionWhnf at hSuccess
+  cases hRun :
+      psKernelCheckerWhnf
+        fuel session.context session.state expr with
+  | error error =>
+      simp [hRun] at hSuccess
+  | ok run =>
+      cases run with
+      | mk reduced nextState =>
+          simp [hRun] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          rfl
+
+theorem psKernelSessionEnsureSort_success_preserves_context_core
+    (fuel : Nat)
+    (session nextSession : PsKernelCheckerSession)
+    (expr : PsKernelExpr)
+    (level : PsKernelLevel)
+    (hSuccess :
+      psKernelSessionEnsureSort fuel session expr =
+        Except.ok (Prod.mk level nextSession)) :
+    nextSession.context = session.context := by
+  cases hWhnf :
+      psKernelSessionWhnf fuel session expr with
+  | error error =>
+      simp [psKernelSessionEnsureSort, hWhnf] at hSuccess
+  | ok whnfRun =>
+      rcases whnfRun with ⟨reduced, whnfSession⟩
+      have hContext :=
+        psKernelSessionWhnf_success_preserves_context_core
+          fuel session whnfSession expr reduced hWhnf
+      cases reduced with
+      | sort sortLevel =>
+          simp [psKernelSessionEnsureSort, hWhnf] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact hContext
+      | _ =>
+          simp [psKernelSessionEnsureSort, hWhnf] at hSuccess

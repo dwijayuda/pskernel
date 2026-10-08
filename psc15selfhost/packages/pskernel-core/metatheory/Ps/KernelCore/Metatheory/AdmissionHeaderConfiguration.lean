@@ -113,3 +113,78 @@ theorem psKernelCheckConstantBaseWithSession_configuration_refines
                             ⟨inferredType, level, hChecked.1, ?_, ?_⟩
                           · simpa [hContext] using hSortSound.1
                           · simpa [hContext] using hSortSound.2
+
+
+/-
+Header validation threads checker state but never changes the session context.
+This is required to transport the successful header's configuration invariant
+into the body validator in the same authoritative environment.
+-/
+theorem psKernelCheckConstantBaseWithSession_success_preserves_context
+    (fuel : Nat)
+    (session nextSession : PsKernelCheckerSession)
+    (base : PsKernelConstantBase)
+    (hRun :
+      psKernelCheckConstantBaseWithSession fuel session base =
+        Except.ok nextSession) :
+    nextSession.context = session.context := by
+  cases hContains :
+      psKernelEnvironmentContains
+        session.context.environment base.name with
+  | true =>
+      simp [psKernelCheckConstantBaseWithSession, hContains] at hRun
+  | false =>
+      cases hDup : psKernelNameHasDuplicates base.levelParams with
+      | true =>
+          simp [psKernelCheckConstantBaseWithSession, hContains, hDup] at hRun
+      | false =>
+          cases hNoFree : psKernelCheckNoMVarNoFVar base.type with
+          | error error =>
+              simp [
+                psKernelCheckConstantBaseWithSession,
+                hContains, hDup, hNoFree
+              ] at hRun
+          | ok noFree =>
+              cases hLevels :
+                  psKernelCheckLevelParams base.type base.levelParams with
+              | error error =>
+                  simp [
+                    psKernelCheckConstantBaseWithSession,
+                    hContains, hDup, hNoFree, hLevels
+                  ] at hRun
+              | ok checkedLevels =>
+                  cases hCheck :
+                      psKernelSessionCheck fuel session base.type with
+                  | error error =>
+                      simp [
+                        psKernelCheckConstantBaseWithSession,
+                        hContains, hDup, hNoFree, hLevels, hCheck
+                      ] at hRun
+                  | ok checkedRun =>
+                      rcases checkedRun with ⟨inferredType, checkedSession⟩
+                      have hCheckContext :=
+                        psKernelSessionCheck_success_preserves_context_core
+                          fuel session checkedSession
+                          base.type inferredType hCheck
+                      cases hSort :
+                          psKernelSessionEnsureSort
+                            fuel checkedSession inferredType with
+                      | error error =>
+                          simp [
+                            psKernelCheckConstantBaseWithSession,
+                            hContains, hDup, hNoFree,
+                            hLevels, hCheck, hSort
+                          ] at hRun
+                      | ok sortRun =>
+                          rcases sortRun with ⟨level, sortSession⟩
+                          have hSortContext :=
+                            psKernelSessionEnsureSort_success_preserves_context_core
+                              fuel checkedSession sortSession
+                              inferredType level hSort
+                          simp [
+                            psKernelCheckConstantBaseWithSession,
+                            hContains, hDup, hNoFree,
+                            hLevels, hCheck, hSort
+                          ] at hRun
+                          rcases hRun with rfl
+                          exact hSortContext.trans hCheckContext

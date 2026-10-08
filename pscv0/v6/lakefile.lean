@@ -40,3 +40,8 @@ lean_lib PscvReuseProbeRuntimeIr where
 lean_lib PscvReuseProbeInterfaceIr where
   srcDir := "../packages/interface-ir/src"
   roots := #[`Ps.InterfaceIr.Model, `Ps.InterfaceIr.Validate]
+
+-- Research-only behavioral probe of imported old typed IR/WIT validators.
+lean_exe pscv_v6_reuse_smoke where
+  srcDir := "test/lean"
+  root := `ReuseBehavior

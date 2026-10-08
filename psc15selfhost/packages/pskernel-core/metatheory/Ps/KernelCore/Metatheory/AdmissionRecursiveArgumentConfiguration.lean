@@ -647,6 +647,16 @@ Raw field-spine typing and exact residual refinement. Recursive analysis may
 allocate temporary function arguments; its monotone ordinal history is kept,
 while the parent's semantic caches and active declarations are restored.
 -/
+theorem psKernelBoolOrGuard_true_iff (left right : Bool) :
+    ((if left then true else right) = true) ↔
+      (left = true ∨ right = true) := by
+  cases left <;> cases right <;> decide
+
+theorem psKernelBoolOrGuard_false_iff (left right : Bool) :
+    ((if left then true else right) = false) ↔
+      ¬ (left = true ∨ right = true) := by
+  cases left <;> cases right <;> decide
+
 theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
     (fuel : Nat)
     (hNative : PsKernelNativeReductionSoundLaw)
@@ -703,9 +713,15 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                       (if psKernelLevelLe fieldSort.1 resultLevel then true
                        else psKernelLevelNormalizesToZero resultLevel) with
                   | false =>
+                      have hRejected := (psKernelBoolOrGuard_false_iff
+                        (psKernelLevelLe fieldSort.1 resultLevel)
+                        (psKernelLevelNormalizesToZero resultLevel)).mp hUniverse
                       simp [psKernelOpenSimpleConstructorFieldsWithFuel,
-                        hCheck, hSort, hUniverse] at hRun
+                        hCheck, hSort, hRejected] at hRun
                   | true =>
+                      have hAllowed := (psKernelBoolOrGuard_true_iff
+                        (psKernelLevelLe fieldSort.1 resultLevel)
+                        (psKernelLevelNormalizesToZero resultLevel)).mp hUniverse
                       let opened := psKernelSessionWithLocal fieldSort.2
                         userName (psKernelExprConsumeTypeAnnotations domain)
                         binderInfo
@@ -715,7 +731,7 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                           remaining opened.2 target levels params numIndices domain with
                       | error message =>
                           simp [psKernelOpenSimpleConstructorFieldsWithFuel,
-                            hCheck, hSort, hUniverse, opened, hAnalysis] at hRun
+                            hCheck, hSort, hAllowed, opened, hAnalysis] at hRun
                       | ok analysis =>
                           have hCheckSound :=
                             psKernelSessionCheck_concrete_refines_typing
@@ -772,7 +788,7 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                                 (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
                                 (field :: revFields) nextRecursive = Except.ok result := by
                             simpa [psKernelOpenSimpleConstructorFieldsWithFuel,
-                              hCheck, hSort, hUniverse, opened, field,
+                              hCheck, hSort, hAllowed, opened, field,
                               hAnalysis, child, nextRecursive] using hRun
                           rcases ih child target levels params numIndices resultLevel
                             (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
@@ -815,12 +831,6 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                           have hFreshOriginal : psKernelLocalContextFind
                               session.context.localContext opened.1 = none := by
                             simpa [opened, hSortContext, hCheckContext] using hFresh
-                          have hAllowed :
-                              psKernelLevelLe fieldSort.1 resultLevel = true ∨
-                                psKernelLevelNormalizesToZero resultLevel = true := by
-                            cases hLe : psKernelLevelLe fieldSort.1 resultLevel with
-                            | true => exact Or.inl hLe
-                            | false => exact Or.inr (by simpa [hLe] using hUniverse)
                           refine ⟨field :: fields, ?_, ?_, hFinalConfig,
                             Eq.trans hFinalEnv hChildEnv, ?_⟩
                           · exact Eq.trans hFields

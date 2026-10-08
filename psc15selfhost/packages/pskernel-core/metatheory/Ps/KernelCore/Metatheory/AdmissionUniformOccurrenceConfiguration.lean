@@ -541,13 +541,13 @@ theorem psKernelSimpleCheckUniformOccurrencesWorker_success_refines
               hHead
             ] using hSuccess
           intro expr hMember
-          simp only [List.mem_cons] at hMember
-          rcases hMember with hEq | hTailMember
-          · subst expr
-            exact
-              psKernelSimpleCheckUniformOccurrence_success_refines
-                declaredNames expectedLevels numParams head 0 hHead
-          · exact (ih hTail) expr hTailMember
+          cases hMember with
+          | head =>
+              exact
+                psKernelSimpleCheckUniformOccurrence_success_refines
+                  declaredNames expectedLevels numParams head 0 hHead
+          | tail hTailMember =>
+              exact (ih hTail) expr hTailMember
 
 theorem psKernelSimpleCheckUniformOccurrences_success_refines
     (declaredNames levelParams : List PsKernelName)

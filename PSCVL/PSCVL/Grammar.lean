@@ -131,6 +131,53 @@ private partial def forbiddenSyntax (s : Syntax) : Option String :=
     else none
   | _ => none
 
+/-- This is the *implemented normative fragment*, deliberately smaller
+than the complete Appendix A/Chapter 20 grammar. It fails closed on known
+Lean-only forms; the development-preview mode keeps the earlier prototype
+examples separate from claims of Standard PSCV source acceptance.
+
+Authority: ProofScript PSCV Normative RC v2, §§5, 8-10, 19-20, A.6, A.14-18.
+A full recursive allowlist is still required for release conformance. -/
+private partial def normativeRejection (s : Syntax) : Option String :=
+  match s with
+  | .node _ kind args =>
+    let k := kind.toString
+    if k == "Lean.Parser.Term.doSeqIndent" then
+      some "PSCV Standard requires braced do { ... } with newline sequencing (A.18)"
+    else if k == "Lean.Parser.Tactic.tacticSeq1Indented" then
+      some "PSCV Standard requires braced by { ... } proof terms (A.15)"
+    else if k == "Lean.Parser.Command.declValEqns" then
+      some "PSCV Standard does not admit native Lean equation-declaration bodies (A.8)"
+    else if k == "termIfThenElse" || k == "termDepIfThenElse" then
+      some "PSCV Standard uses braced if (condition) { ... } else { ... } (A.6)"
+    else if k == "Lean.Parser.Term.match" then
+      some "PSCV Standard match requires the owned braced single-scrutinee form (A.11)"
+    else if k == "Lean.Parser.Tactic.tacticSeq1Indented" then
+      some "PSCV Standard forbids unbraced proof tactic sequences"
+    else if k.startsWith "Lean.Parser.Tactic." &&
+      !(["Lean.Parser.Tactic.tacticSeq", "Lean.Parser.Tactic.tacticSeqBracketed",
+         "Lean.Parser.Tactic.tacticRfl", "Lean.Parser.Tactic.exact",
+         "Lean.Parser.Tactic.intro", "Lean.Parser.Tactic.intros",
+         "Lean.Parser.Tactic.assumption", "Lean.Parser.Tactic.constructor",
+         "Lean.Parser.Tactic.apply", "Lean.Parser.Tactic.refine",
+         "Lean.Parser.Tactic.decide", "Lean.Parser.Tactic.omega",
+         "Lean.Parser.Tactic.simp", "Lean.Parser.Tactic.simpa",
+         "Lean.Parser.Tactic.rw", "Lean.Parser.Tactic.change",
+         "Lean.Parser.Tactic.unfold", "Lean.Parser.Tactic.dsimp",
+         "Lean.Parser.Tactic.byCases", "Lean.Parser.Tactic.byContra",
+         "Lean.Parser.Tactic.cases", "Lean.Parser.Tactic.induction",
+         "Lean.Parser.Tactic.exfalso", "Lean.Parser.Tactic.subst",
+         "Lean.Parser.Tactic.generalize", "Lean.Parser.Tactic.rcases",
+         "Lean.Parser.Tactic.rintro", "Lean.Parser.Tactic.obtain",
+         "Lean.Parser.Tactic.use", "Lean.Parser.Tactic.ext",
+         "Lean.Parser.Tactic.exact?", "Lean.Parser.Tactic.grind",
+         "Lean.Parser.Tactic.classical", "Lean.Parser.Tactic.calc",
+         "Lean.Parser.Tactic.optConfig"] : List String).contains k then
+      some s!"PSCV Standard does not admit this Lean tactic node: {k} (Chapter 20)"
+    else
+      args.toList.findSome? normativeRejection
+  | _ => none
+
 /-- Inspect a closed set of command kinds with Lean's actual parser. Do not
 elaborate anything before this check. Every source import is rejected as a
 top-level terminal command until a versioned dependency manifest exists. -/
@@ -144,7 +191,8 @@ private partial def syntaxNodeKinds (s : Syntax) : Array String :=
 fragment. This is a development aid to mechanize Appendix A compatibility
 rather than inferring allowed syntax from text or tests. No elaboration runs. -/
 def auditSourceSyntax (source fileName : String) (env : Environment)
-    (opts : Options) : Except String (Array String) := Id.run do
+    (opts : Options) (normative : Bool := false) :
+    Except String (Array String) := Id.run do
   let input := Parser.mkInputContext source fileName
   let mut parserState : Parser.ModuleParserState := {}
   let mut messages : MessageLog := {}
@@ -168,6 +216,9 @@ def auditSourceSyntax (source fileName : String) (env : Environment)
       return .error why
     if let some why := forbiddenLoop stx then
       return .error why
+    if normative then
+      if let some why := normativeRejection stx then
+        return .error why
     if let some why := rejectAttributes stx then
       return .error why
     for kind in syntaxNodeKinds stx do
@@ -177,8 +228,8 @@ def auditSourceSyntax (source fileName : String) (env : Environment)
     messages := nextMessages
 
 def validateSourceSyntax (source fileName : String) (env : Environment)
-    (opts : Options) : Except String Unit := do
-  let _ ← auditSourceSyntax source fileName env opts
+    (opts : Options) (normative : Bool := false) : Except String Unit := do
+  let _ ← auditSourceSyntax source fileName env opts normative
   return ()
 
 end PSCVL

@@ -12,7 +12,7 @@ open Lean
 
 namespace PSCVL
 
-private def checkFile (path : String) : IO UInt32 := do
+private def checkFile (path : String) (normative : Bool) : IO UInt32 := do
   unless path.endsWith ".ps" do
     IO.eprintln "PSCVL expects a .ps source file"
     return 2
@@ -26,7 +26,7 @@ private def checkFile (path : String) : IO UInt32 := do
   let opts := ({} : Options)
     |>.setBool `experimental.vcgen true
     |>.setBool `experimental.intrinsic true
-  match validateSourceSyntax source path env opts with
+  match validateSourceSyntax source path env opts normative with
   | .error msg =>
     IO.eprintln s!"PSCVL source-profile error: {msg}"
     return 1
@@ -68,10 +68,11 @@ private def syntaxKinds (path : String) : IO UInt32 := do
 def cli (args : List String) : IO UInt32 := do
   try
     match args with
-    | ["check", path] => checkFile path
+    | ["check", path] => checkFile path true
+    | ["check-preview", path] => checkFile path false
     | ["syntax-kinds", path] => syntaxKinds path
     | _ =>
-      IO.eprintln "usage: lake exe pscvl {check|syntax-kinds} <source.ps>"
+      IO.eprintln "usage: lake exe pscvl {check|check-preview|syntax-kinds} <source.ps>"
       IO.eprintln "No PSCV certified compilation or executable emission exists in this prototype."
       return 2
   catch e =>

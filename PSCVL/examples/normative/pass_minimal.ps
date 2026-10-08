@@ -1,0 +1,9 @@
+-- Appendix A.8, A.15, Chapter 20: owned function and braced proof.
+function increment(n : Nat) : Nat := { n + 1 }
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := increment(2)
+
+theorem root_positive : root > 0 := by {
+  decide
+}

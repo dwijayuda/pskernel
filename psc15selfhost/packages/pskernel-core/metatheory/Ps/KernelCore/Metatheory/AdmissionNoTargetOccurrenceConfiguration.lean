@@ -238,3 +238,37 @@ theorem psKernelValidateSimpleConstructorResult_success_indices_absent
           exact
             psKernelSimpleIndicesContainTarget_false_refines_absence
               hString target actualIndices hContains
+
+
+/-- Structural absence with the comparator reflexivity premise discharged. -/
+theorem psKernelExprContainsConst_false_refines_absence_unconditional
+    (target : PsKernelName)
+    (expr : PsKernelExpr)
+    (hAbsent : psKernelExprContainsConst target expr = false) :
+    PsKernelNoTargetConstantOccurrence target expr :=
+  psKernelExprContainsConst_false_refines_absence
+    psKernelStringEqReflexiveLaw_proved target expr hAbsent
+
+theorem psKernelSimpleIndicesContainTarget_false_refines_absence_unconditional
+    (target : PsKernelName)
+    (indices : List PsKernelExpr)
+    (hAbsent : psKernelSimpleIndicesContainTarget target indices = false) :
+    ∀ expr : PsKernelExpr, List.Mem expr indices ->
+      PsKernelNoTargetConstantOccurrence target expr :=
+  psKernelSimpleIndicesContainTarget_false_refines_absence
+    psKernelStringEqReflexiveLaw_proved target indices hAbsent
+
+theorem psKernelValidateSimpleConstructorResult_success_indices_absent_unconditional
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (result : PsKernelExpr)
+    (indices : List PsKernelExpr)
+    (hSuccess : psKernelValidateSimpleConstructorResult
+      target levels params numIndices result = Except.ok indices) :
+    ∀ expr : PsKernelExpr, List.Mem expr indices ->
+      PsKernelNoTargetConstantOccurrence target expr :=
+  psKernelValidateSimpleConstructorResult_success_indices_absent
+    psKernelStringEqReflexiveLaw_proved
+    target levels params numIndices result indices hSuccess

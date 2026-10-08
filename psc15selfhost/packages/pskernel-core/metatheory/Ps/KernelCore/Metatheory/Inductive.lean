@@ -329,6 +329,21 @@ inductive PsKernelRawConstructorFieldSpineValid
           fields)
         residual
 
+  /--
+  Preserve the allocation history of temporary argument binders without
+  changing active declarations. This step consumes no constructor binder
+  or expression and preserves the exact raw residual spine.
+  -/
+  | ordinalHistory
+      (older newer finalContext : PsKernelLocalContext)
+      (type residual : PsKernelExpr)
+      (fields : List PsKernelOpenBinder)
+      (hHistory : PsKernelLocalContextOrdinalHistoryExtends older newer)
+      (hSpine : PsKernelRawConstructorFieldSpineValid
+        environment resultLevel newer type finalContext fields residual) :
+      PsKernelRawConstructorFieldSpineValid
+        environment resultLevel older type finalContext fields residual
+
 
 def PsKernelSessionCheckSoundAtFuel
     (fuel : Nat) : Prop :=

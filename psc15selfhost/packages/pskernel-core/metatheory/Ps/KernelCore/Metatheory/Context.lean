@@ -949,3 +949,40 @@ theorem psKernelLocalContextAddLet_extends_freshBound
         context.decls =
       Option.some decl at hFind
   exact hFind
+
+
+/--
+Admission may retain ordinal allocation history from temporary function
+arguments after restoring the active declarations. This relation changes no
+lookup-visible declaration and cannot move the ordinal counter backwards.
+It allocates no new local and relaxes no freshness or typing requirement.
+-/
+def PsKernelLocalContextOrdinalHistoryExtends
+    (older newer : PsKernelLocalContext) : Prop :=
+  older.decls = newer.decls ∧ older.nextIndex ≤ newer.nextIndex
+
+theorem psKernelLocalContextOrdinalHistoryExtends_lookup_extends
+    (older newer : PsKernelLocalContext)
+    (hHistory : PsKernelLocalContextOrdinalHistoryExtends older newer) :
+    PsKernelLocalContextExtends older newer := by
+  intro name decl hFind
+  unfold psKernelLocalContextFind at hFind ⊢
+  simpa [hHistory.1] using hFind
+
+theorem psKernelLocalContextOrdinalHistoryExtends_freshBound
+    (older newer : PsKernelLocalContext)
+    (nextFresh : Nat)
+    (hHistory : PsKernelLocalContextOrdinalHistoryExtends older newer)
+    (hBound : PsKernelLocalContextFreshBound older nextFresh) :
+    PsKernelLocalContextFreshBound newer nextFresh := by
+  intro decl hMember
+  have hOld : List.Mem decl older.decls := by
+    simpa [hHistory.1] using hMember
+  exact hBound decl hOld
+
+theorem psKernelLocalContextOrdinalHistoryExtends_trans
+    (first second third : PsKernelLocalContext)
+    (hFirst : PsKernelLocalContextOrdinalHistoryExtends first second)
+    (hSecond : PsKernelLocalContextOrdinalHistoryExtends second third) :
+    PsKernelLocalContextOrdinalHistoryExtends first third :=
+  ⟨Eq.trans hFirst.1 hSecond.1, Nat.le_trans hFirst.2 hSecond.2⟩

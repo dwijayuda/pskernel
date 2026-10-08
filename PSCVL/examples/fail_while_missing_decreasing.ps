@@ -1,0 +1,8 @@
+@[pscv_export, pscv_type_spec]
+def badWhile (n : Nat) : Id Nat := do
+  let mut i := n
+  while i > 0
+      invariant exit => if exit then i = 0 else True
+    do
+    i := i - 1
+  return i

@@ -80,6 +80,31 @@ private def excludedName (name : Name) : Bool :=
 /-- An identifier is different from a keyword token in Lean's syntax tree.
 Apply the source exclusions to both; otherwise imported built-in primitives
 can bypass restrictions that checked only `Syntax.atom` keywords. -/
+/-- The PSCV A.18 while grammar requires both an invariant and a
+decreasing measure. Lean accepts weaker loop surface forms; parse-time
+normalization must NOT silently promote those forms to PSCV. -/
+private partial def forbiddenLoop (s : Syntax) : Option String :=
+  match s with
+  | .node _ kind args =>
+    if kind == ``Lean.Parser.Term.doWhile then
+      if s[2].isNone then
+        some "PSCV while requires an explicit invariant"
+      else if s[3].isNone then
+        some "PSCV while requires an explicit decreasing measure"
+      else
+        args.toList.findSome? forbiddenLoop
+    else if kind == ``Lean.Parser.Term.doRepeat ||
+            kind == ``Lean.Parser.Term.doRepeatUntil then
+      some "PSCV does not admit Lean repeat/repeat-until loops"
+    else if kind == ``Lean.Parser.Term.doFor then
+      if !(s[3].isNone) then
+        some "PSCV for loops do not take a decreasing clause"
+      else
+        args.toList.findSome? forbiddenLoop
+    else
+      args.toList.findSome? forbiddenLoop
+  | _ => none
+
 private partial def forbiddenSyntax (s : Syntax) : Option String :=
   match s with
   | .node _ kind args =>
@@ -136,6 +161,8 @@ def auditSourceSyntax (source fileName : String) (env : Environment)
     unless allowedCommand stx do
       return .error s!"PSCVL closed command profile rejects: {stx.getKind}"
     if let some why := forbiddenSyntax stx then
+      return .error why
+    if let some why := forbiddenLoop stx then
       return .error why
     if let some why := rejectAttributes stx then
       return .error why

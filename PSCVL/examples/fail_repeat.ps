@@ -1,0 +1,7 @@
+@[pscv_export, pscv_type_spec]
+def badRepeat (n : Nat) : Id Nat := do
+  let mut i := n
+  repeat
+    if i = 0 then break
+    i := i - 1
+  return i

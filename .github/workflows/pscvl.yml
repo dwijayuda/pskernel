@@ -71,6 +71,9 @@ jobs:
           ! lake exe pscvl check examples/fail_ghost_leak.ps
           ! lake exe pscvl check examples/fail_unsafe_cast.ps
           ! lake exe pscvl check examples/fail_direct_erased.ps
+          ! lake exe pscvl check examples/fail_while_missing_invariant.ps
+          ! lake exe pscvl check examples/fail_while_missing_decreasing.ps
+          ! lake exe pscvl check examples/fail_repeat.ps
           # A negative fixture must fail for the intended semantic reason,
           # not merely because a valid PSCV syntax form was mistyped.
           expect_rejection() {

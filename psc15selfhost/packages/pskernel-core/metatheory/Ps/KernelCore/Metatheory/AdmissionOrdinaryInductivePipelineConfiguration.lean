@@ -174,11 +174,14 @@ theorem psKernelAddSimpleInductive_success_full_pipeline
                                                         ctorResult = Except.ok result := by
                                                     simp only [safety, psKernelOrdinaryInitialInductiveInfo,
                                                       Nat.succ_eq_add_one] at hCtors
-                                                    simpa only [psKernelAddSimpleInductive, hDuplicates,
+                                                    simp only [psKernelAddSimpleInductive, hDuplicates,
                                                       allNames, hUnique, hFresh, hOccurrences, hClosed,
                                                       hLevels, hHeader, hSort, hParams, hIndices, hShape,
-                                                      psKernelOrdinaryInitialInductiveInfo, safety, hCtors,
-                                                      psKernelOrdinaryFinishAdmission] using hRun
+                                                      psKernelOrdinaryInitialInductiveInfo, safety, hCtors] at hRun
+                                                    simp only [psKernelOrdinaryFinishAdmission]
+                                                    repeat (first
+                                                      | exact hRun
+                                                      | (split at hRun <;> simp_all only []))
                                                   exact ⟨headerResult, sortResult, paramResult, indexResult,
                                                     resultLevel, ctorResult,
                                                     (by first | exact hHeader | rfl),

@@ -65,3 +65,31 @@ theorem psKernelAddMutualRecursorInfos_index_refines
             (PsKernelConstantInfo.recInfo info))
           (psKernelEnvironmentAddUnchecked_index_refines
             environment (PsKernelConstantInfo.recInfo info) hIndex)
+
+
+theorem psKernelAddMutualInductiveInfos_refines_extension
+    (infos : List PsKernelInductiveInfo)
+    (environment : PsKernelEnvironment) :
+    PsKernelEnvironmentExtendsBy
+      environment
+      (psKernelAddMutualInductiveInfos infos environment)
+      (List.reverse
+        (List.map
+          (fun info : PsKernelInductiveInfo =>
+            PsKernelConstantInfo.inductInfo info)
+          infos)) := by
+  induction infos generalizing environment with
+  | nil =>
+      exact psKernelEnvironmentExtendsBy_refl environment
+  | cons info rest ih =>
+      have hTail :=
+        ih (psKernelEnvironmentAddUnchecked
+          environment (PsKernelConstantInfo.inductInfo info))
+      simpa [
+        psKernelAddMutualInductiveInfos,
+        PsKernelEnvironmentExtendsBy,
+        psKernelEnvironmentAddUnchecked,
+        List.map,
+        List.reverse_cons,
+        List.append_assoc
+      ] using hTail

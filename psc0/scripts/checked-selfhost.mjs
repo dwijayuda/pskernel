@@ -59,11 +59,21 @@ async function promote(staging, name) {
   await rename(staging, destination);
 }
 
-async function bootstrap(kernel) {
+async function bootstrap(kernel, fast = false) {
   // Fail fast on the real PSC1 project parse/elaboration gate before the
   // broader bootstrap suite or the longer checked seed session.
   runNpm(['run', 'bootstrap:check']);
-  runNpm(['run', 'bootstrap:lean']);
+  if (fast) {
+    // Fast is only legal while the historical portable source is byte-identical.
+    run(process.execPath, ['scripts/selfhost-baseline.mjs', '--assert-unchanged']);
+    runNpm(['run', 'check:bootstrap-closure']);
+  } else {
+    runNpm(['run', 'bootstrap:lean']);
+  }
+  if (kernel === 'pskernel-core') {
+    // Native Core checker. No JS semantic execution or Lean-WASM fallback.
+    run('lake', ['build', 'psc_kernel_core_provider'], root);
+  }
   const hostTargets = kernel === 'lean434'
     ? ['build', 'psc2_lean_checked_seed', 'psc2_lean_kernel_provider']
     : ['build', 'psc2_lean_checked_seed'];
@@ -142,9 +152,12 @@ async function compare(kernel) {
 const args = process.argv.slice(2);
 const stage = args.shift();
 let kernel = defaultCheckedKernel;
+let fast = false;
 while (args.length) {
   const flag = args.shift();
-  if (flag === '--kernel') {
+  if (flag === '--fast') {
+    fast = true;
+  } else if (flag === '--kernel') {
     const value = args.shift();
     if (!value || value.startsWith('--')) throw new Error('Missing value for --kernel');
     kernel = value;
@@ -154,11 +167,11 @@ while (args.length) {
 }
 checkedKernelDescriptor(kernel);
 base = path.join(root, 'dist/checked', kernel);
-if (!stage) throw new Error('usage: checked-selfhost.mjs bootstrap|next|fixed-point|verify [--kernel lean434-wasm|pskernel-core|lean434]');
+if (!stage) throw new Error('usage: checked-selfhost.mjs bootstrap|next|fixed-point|verify [--kernel pskernel-core|lean434-wasm|lean434] [--fast (unchanged historical source only)]');
 
 switch (stage) {
   case 'bootstrap':
-    await bootstrap(kernel);
+    await bootstrap(kernel, fast);
     break;
   case 'next':
     await next('bootstrap', 'selfhost', kernel);
@@ -167,7 +180,7 @@ switch (stage) {
     await compare(kernel);
     break;
   case 'fixed-point':
-    await bootstrap(kernel);
+    await bootstrap(kernel, fast);
     await next('bootstrap', 'selfhost', kernel);
     await next('selfhost', 'repeat', kernel);
     await compare(kernel);

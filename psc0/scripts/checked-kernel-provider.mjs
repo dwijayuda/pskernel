@@ -1,20 +1,19 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkedKernelIdentity, ownedCheckedIdentity } from './checked-kernel-identity.mjs';
+import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
 
-export const defaultCheckedKernel = 'lean434-wasm';
-export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'pskernel-core', 'lean434']);
+export const defaultCheckedKernel = 'pskernel-core';
+export const checkedKernelSelectors = Object.freeze(['pskernel-core', 'lean434-wasm', 'lean434']);
 
 const descriptors = Object.freeze({
   'pskernel-core': Object.freeze({
     selector: 'pskernel-core', package: '@proofscript/pskernel-core',
-    execution: 'psc-generated-js', version: ownedCheckedIdentity.version,
-    generatedKernelSha256: ownedCheckedIdentity.generatedKernelSha256,
-    sourceManifestSha256: ownedCheckedIdentity.sourceManifestSha256,
+    execution: 'lean-native', authority: 'selected-pskernel-core',
+    kernelContract: 'proofscript-kernel-contract/1',
   }),
   'lean434-wasm': Object.freeze({
     selector: 'lean434-wasm',
@@ -60,10 +59,10 @@ export async function checkAdmissionsWithKernel(
   let result;
 
   if (selector === 'pskernel-core') {
-    const provider = await import('./checked-owned-kernel.mjs');
-    result = await provider.checkOwnedAdmissions(admissions, {
+    const provider = await import('./checked-kernel-core.mjs');
+    result = provider.checkCoreAdmissions(admissions, {
       timeoutMs,
-      ...(options.maxSteps !== undefined ? { maxSteps: options.maxSteps } : {}),
+      ...(options.coreBinaryPath ? { binaryPath: options.coreBinaryPath } : {}),
     });
   } else if (selector === 'lean434-wasm') {
     const provider = await import('../packages/pskernel-lean-wasm/index.mjs');

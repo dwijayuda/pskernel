@@ -12,11 +12,19 @@ const emptyAdmissions = JSON.stringify({
   version: 2,
 });
 
-test('Lean WASM is the checked-profile default and remains host-side', () => {
-  assert.equal(defaultCheckedKernel, 'lean434-wasm');
-  assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-lean-wasm');
-  assert.equal(checkedKernelDescriptor().execution, 'wasm-node');
+test('native PSKernel Core is selected by default; Lean WASM is an explicit alternative', () => {
+  assert.equal(defaultCheckedKernel, 'pskernel-core');
+  assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-core');
+  assert.equal(checkedKernelDescriptor().execution, 'lean-native');
+  assert.equal(checkedKernelDescriptor('lean434-wasm').execution, 'wasm-node');
 });
+test('native PSKernel Core accepts canonical empty module', async () => {
+  const checked = await checkAdmissionsWithKernel(emptyAdmissions, 'pskernel-core');
+  assert.equal(checked.descriptor.selector, 'pskernel-core');
+  assert.equal(checked.result.accepted, true);
+  assert.equal(checked.result.provider, 'pskernel-core-native');
+});
+
 
 test('real bundled WASM provider accepts canonical empty module', async () => {
   const checked = await checkAdmissionsWithKernel(emptyAdmissions, 'lean434-wasm');

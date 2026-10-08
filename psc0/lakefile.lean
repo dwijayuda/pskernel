@@ -135,6 +135,110 @@ lean_lib PsElab where
     `Ps.Elab.Declaration
   ]
 
+lean_lib PsKernelCore where
+  srcDir := "packages/pskernel-core/src"
+  roots := #[
+    `Ps.KernelCore.Core.Name,
+    `Ps.KernelCore.Core.Level,
+    `Ps.KernelCore.Core.Expr,
+    `Ps.KernelCore.Core.Substitution.ListOps,
+    `Ps.KernelCore.Core.Substitution.Lift,
+    `Ps.KernelCore.Core.Substitution.Instantiate,
+    `Ps.KernelCore.Core.Substitution.Beta,
+    `Ps.KernelCore.Core.Substitution.Abstract,
+    `Ps.KernelCore.Core.Declaration,
+    `Ps.KernelCore.Core.LocalContext,
+    `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
+    `Ps.KernelCore.Environment.Operations,
+    `Ps.KernelCore.Runtime.Acceleration.Cache,
+    `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
+    `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
+    `Ps.KernelCore.Checker.State,
+    `Ps.KernelCore.Checker.Context,
+    `Ps.KernelCore.Checker.Ops,
+    `Ps.KernelCore.Checker.Knot,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveData,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveNat,
+    `Ps.KernelCore.Checker.Reduction.Primitives,
+    `Ps.KernelCore.Checker.Reduction.KernelReductions,
+    `Ps.KernelCore.Checker.Reduction.WhnfCore,
+    `Ps.KernelCore.Checker.Reduction.Whnf,
+    `Ps.KernelCore.Checker.Projection,
+    `Ps.KernelCore.Checker.Inference.Helpers,
+    `Ps.KernelCore.Checker.Inference.Core,
+    `Ps.KernelCore.Checker.Inference,
+    `Ps.KernelCore.Checker.Recursor.Analysis,
+    `Ps.KernelCore.Checker.Recursor.Reduction,
+    `Ps.KernelCore.Checker.DefEq.BinderSpines,
+    `Ps.KernelCore.Checker.DefEq.Quick,
+    `Ps.KernelCore.Checker.DefEq.Support,
+    `Ps.KernelCore.Checker.DefEq.DeltaStep,
+    `Ps.KernelCore.Checker.DefEq.LazyDelta,
+    `Ps.KernelCore.Checker.DefEq.FinalRules,
+    `Ps.KernelCore.Checker.DefEq.Shortcuts,
+    `Ps.KernelCore.Checker.DefEq.FullShape,
+    `Ps.KernelCore.Checker.Session,
+    `Ps.KernelCore.Admission.Declaration.Validation,
+    `Ps.KernelCore.Admission.Declaration.Admission,
+    `Ps.KernelCore.Admission.Quot.Bootstrap,
+    `Ps.KernelCore.Admission.Quot.Admission,
+    `Ps.KernelCore.Admission.Inductive.Common.Parameters,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Constructor,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.ConstructorAdmission,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Common.Elimination,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Admission,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Analysis,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Header,
+    `Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Admission,
+    `Ps.KernelCore.Admission.Inductive.Nested.Types,
+    `Ps.KernelCore.Admission.Inductive.Nested.ReservedNames,
+    `Ps.KernelCore.Admission.Inductive.Nested.Rebase,
+    `Ps.KernelCore.Admission.Inductive.Nested.Discover,
+    `Ps.KernelCore.Admission.Inductive.Nested.Flatten,
+    `Ps.KernelCore.Admission.Inductive.Nested.RestoreExpr,
+    `Ps.KernelCore.Admission.Inductive.Nested.Restore,
+    `Ps.KernelCore.Admission.Inductive.Nested.Validation,
+    `Ps.KernelCore.Admission.Inductive.Nested.Commit,
+    `Ps.KernelCore.Admission.Inductive.Nested.Admission,
+    `Ps.KernelCore.Admission.Inductive.Types,
+    `Ps.KernelCore.Admission.Inductive.Common.Occurrence,
+    `Ps.KernelCore.Admission.Inductive.Common.RecursorValidation,
+    `Ps.KernelCore.Environment.Semantic,
+    `Ps.KernelCore.Environment.Environment,
+    `Ps.KernelCore.Environment.Lookup,
+    `Ps.KernelCore.Runtime.Capability.Types,
+    `Ps.KernelCore.Checker.ResourcePolicy,
+    `Ps.KernelCore.API.Outcome,
+    `Ps.KernelCore.API.KernelContractV1,
+    `Ps.KernelCore.API.Provider,
+    `Ps.KernelCore.API.Session,
+    `Ps.KernelCore.API.Kernel,
+    `Ps.KernelCore.SelfHost
+  ]
+
+
+-- Host-only native PSKernel Core provider; never imported by the PSC0 fixed-point root.
+lean_lib PsKernelCoreProviderHost where
+  srcDir := "host/src"
+  roots := #[
+    `Ps.Host.KernelCoreProvider.Error, `Ps.Host.KernelCoreProvider.Convert,
+    `Ps.Host.KernelCoreProvider.Protocol, `Ps.Host.KernelCoreProvider.Prelude,
+    `Ps.Host.KernelCoreProvider.Admission, `Ps.Host.KernelCoreProvider.Response
+  ]
+
+lean_exe psc_kernel_core_provider where
+  srcDir := "host/src"
+  root := `Ps.Host.KernelCoreProvider.Main
+
+lean_exe psc_kernel_core_provider_tests where
+  srcDir := "test"
+  root := `KernelCoreProviderTests
+
+
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"

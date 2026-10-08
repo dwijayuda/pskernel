@@ -1,0 +1,116 @@
+name: PSC0 native kernel self-host
+
+on:
+  pull_request:
+    paths:
+      - 'psc0/**'
+      - '.github/workflows/psc0-native-selfhost.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'psc0/**'
+      - '.github/workflows/psc0-native-selfhost.yml'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: 'Reproduce the full checked compiler-only fixed point'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  native-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Classify semantic changes
+        id: scope
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            portable:
+              - 'psc0/packages/bootstrap/**'
+              - 'psc0/packages/foundation/**'
+              - 'psc0/packages/syntax/**'
+              - 'psc0/packages/core/**'
+              - 'psc0/packages/environment/**'
+              - 'psc0/packages/meta/**'
+              - 'psc0/packages/elab/**'
+              - 'psc0/packages/bridge/**'
+              - 'psc0/packages/compiler-ir/**'
+              - 'psc0/packages/erasure/**'
+              - 'psc0/packages/compiler/**'
+              - 'psc0/packages/backend-ts/**'
+              - 'psc0/psconfig.json'
+              - 'psc0/lakefile.lean'
+            checker:
+              - 'psc0/packages/pskernel-core/src/**'
+              - 'psc0/host/src/Ps/Host/KernelCoreProvider/**'
+              - 'psc0/scripts/checked-kernel-identity.mjs'
+              - 'psc0/scripts/checked-kernel-provider.mjs'
+              - 'psc0/scripts/checked-kernel-core.mjs'
+              - 'psc0/scripts/kernel-contract.mjs'
+              - 'psc0/scripts/checked-prepared-session.mjs'
+              - 'psc0/scripts/checked-build.mjs'
+              - 'psc0/scripts/checked-selfhost.mjs'
+              - 'psc0/scripts/checked-seed-session.mjs'
+              - 'psc0/scripts/selfhost-baseline.mjs'
+              - 'psc0/docs/continuity/PSC0_SOURCE_TREE_BASELINE.json'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Restore incremental Lake outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            psc0/.lake/build
+            psc0/lean-checked/.lake/build
+          key: psc0-core-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-${{ github.sha }}
+          restore-keys: |
+            psc0-core-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
+      - name: Install only pinned TypeScript for historical compiler
+        run: npm install --workspaces=false --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Cheap source invariants
+        run: |
+          node scripts/selfhost-baseline.mjs --json
+          node --test scripts/selfhost-baseline.test.mjs scripts/checked-selfhost-preflight.test.mjs
+          node scripts/check-owned-kernel-default-source.mjs
+          node scripts/bootstrap-root-minimality-tests.mjs
+      - name: Build native PSKernel Core provider
+        run: lake build psc_kernel_core_provider psc_kernel_core_provider_tests
+      - name: Run bounded native provider tests
+        run: |
+          lake exe psc_kernel_core_provider_tests
+          node --test scripts/checked-kernel-core.test.mjs scripts/checked-kernel-provider.test.mjs
+      - name: Reproduce checked compiler fixed point only on semantic changes or demand
+        if: >-
+          ${{ steps.scope.outputs.portable == 'true' ||
+              steps.scope.outputs.checker == 'true' ||
+              (github.event_name == 'workflow_dispatch' && inputs.full == true) }}
+        run: |
+          if node scripts/selfhost-baseline.mjs --assert-unchanged; then
+            node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core --fast
+          else
+            node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core
+          fi
+      - name: Explain skipped fixed point
+        if: >-
+          ${{ steps.scope.outputs.portable != 'true' &&
+              steps.scope.outputs.checker != 'true' &&
+              !(github.event_name == 'workflow_dispatch' && inputs.full == true) }}
+        run: echo "PSC0_CHECKED_FIXED_POINT: SKIPPED (no compiler/kernel semantic change)"

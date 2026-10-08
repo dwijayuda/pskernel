@@ -1,18 +1,15 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { defaultCheckedKernel, checkedKernelSelectors, checkedKernelDescriptor } from './checked-kernel-provider.mjs';
 import { bootstrapPackageViolation } from './bootstrap-closure-contract.mjs';
+import { coreCheckedIdentity } from './checked-kernel-identity.mjs';
 
-assert.equal(defaultCheckedKernel, 'lean434-wasm');
-assert.deepEqual(checkedKernelSelectors, ['lean434-wasm', 'pskernel-core', 'lean434']);
-assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-lean-wasm');
-assert.equal(checkedKernelDescriptor().execution, 'wasm-node');
-for (const name of ['pskernel-core','pskernel-lean','pskernel-lean-wasm','pskernel-core.old']) {
-  assert(bootstrapPackageViolation(name));
+assert.equal(defaultCheckedKernel, 'pskernel-core');
+assert.deepEqual(checkedKernelSelectors, ['pskernel-core', 'lean434-wasm', 'lean434']);
+assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-core');
+assert.equal(checkedKernelDescriptor().execution, 'lean-native');
+assert.equal(coreCheckedIdentity.provider, 'pskernel-core-native');
+assert.equal(checkedKernelDescriptor('lean434-wasm').execution, 'wasm-node');
+for (const name of ['pskernel-core', 'pskernel-lean', 'pskernel-lean-wasm', 'pskernel']) {
+  assert(bootstrapPackageViolation(name), 'kernel must remain outside portable self-host closure: ' + name);
 }
-for (const file of ['checked-owned-kernel.mjs', 'checked-owned-kernel-worker.mjs']) {
-  const source = readFileSync(new URL(file, import.meta.url), 'utf8');
-  assert(!/pskernel-lean|lean434|runCheckedSeedSession|\.\.\/.*test\//u.test(source),
-    'owned runtime must remain self-contained when explicitly selected');
-}
-console.log('PSC2_WASM_DEFAULT_SOURCE: PASS (WASM host default; every kernel outside compiler bootstrap closure)');
+console.log('PSC0_NATIVE_CORE_DEFAULT: PASS (explicit kernel choice, no fallback, compiler closure unchanged)');

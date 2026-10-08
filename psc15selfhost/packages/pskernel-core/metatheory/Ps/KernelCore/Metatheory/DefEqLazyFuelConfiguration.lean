@@ -449,3 +449,201 @@ theorem psKernelNatZeroPair_defeq
         (PsKernelLiteral.nat 0)
         (PsKernelLiteral.nat 0)
         rfl)
+
+/-
+The fast Nat.succ comparison is justified by the independent successor
+representation on both operands and recursive DefEq on their predecessors.
+-/
+theorem psKernelNatPredPair_defeq
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (left right leftPred rightPred : PsKernelExpr)
+    (hLeft :
+      psKernelExprNatPred left = Option.some leftPred)
+    (hRight :
+      psKernelExprNatPred right = Option.some rightPred)
+    (hPred :
+      PsKernelDefEqJudgment
+        environment localContext leftPred rightPred) :
+    PsKernelDefEqJudgment
+      environment localContext left right := by
+  exact
+    PsKernelDefEqJudgment.natSuccessorPred
+      left right leftPred rightPred
+      (psKernelExprNatPred_some_refines
+        left leftPred hLeft)
+      (psKernelExprNatPred_some_refines
+        right rightPred hRight)
+      hPred
+
+
+/-
+Complete fuel induction for lazy-delta equality.
+
+The induction uses the established abstract callback contracts for recursive
+DefEq, WHNF/core WHNF, Nat reduction and native reduction. Its success cases
+are justified by an independent Nat-zero rule, successor congruence, or the
+already-proved eager-Nat/native/lazy-step continuation. It introduces no
+algorithmic DefEq transitivity or new trusted reduction assumptions.
+-/
+theorem psKernelDefEqLazyReductionWithFuel_configuration_sound
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (hCore : PsKernelWhnfCoreConfigurationSound coreWhnf)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw) :
+    PsKernelDeltaResultConfigurationSound
+      (psKernelDefEqLazyReductionWithFuel
+        fuel defeq whnf coreWhnf) := by
+  have hQuick :
+      PsKernelOptionalDefEqConfigurationSound
+        (psKernelDefEqQuick defeq) :=
+    psKernelDefEqQuick_configuration_sound
+      defeq hDefEq hString
+  have hStep :
+      PsKernelDeltaStepConfigurationSound
+        (psKernelDefEqLazyStep defeq coreWhnf) :=
+    psKernelDefEqLazyStep_configuration_sound
+      defeq coreWhnf hDefEq hQuick hCore hString
+  induction fuel with
+  | zero =>
+      intro context state nextState left right answer hConfig hRun
+      simp [psKernelDefEqLazyReductionWithFuel] at hRun
+  | succ remaining ih =>
+      intro context state nextState left right answer hConfig hRun
+      let resume :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          PsKernelExpr ->
+          Except String
+            (Prod PsKernelDeltaResult PsKernelCheckerState) :=
+        psKernelDefEqLazyReductionWithFuel
+          remaining defeq whnf coreWhnf
+      have hResume :
+          PsKernelDeltaResultConfigurationSound resume := by
+        simpa [resume] using ih
+      have hAfter :
+          PsKernelDeltaResultConfigurationSound
+            (psKernelDefEqLazyReductionAfterPred
+              resume defeq whnf coreWhnf) :=
+        psKernelDefEqLazyReductionAfterPred_configuration_sound
+          resume defeq whnf coreWhnf
+          hResume hDefEq hWhnf hStep hNative
+      by_cases hZeroPair :
+          psKernelExprIsNatZero left = true ∧
+            psKernelExprIsNatZero right = true
+      · have hGuard :
+            (if psKernelExprIsNatZero left then
+               psKernelExprIsNatZero right
+             else
+               false) = true := by
+          simp [hZeroPair.1, hZeroPair.2]
+        simp [
+          psKernelDefEqLazyReductionWithFuel,
+          hGuard
+        ] at hRun
+        rcases hRun with ⟨rfl, rfl⟩
+        exact
+          ⟨
+            hConfig,
+            psKernelNatZeroPair_defeq
+              context.environment context.localContext
+              left right hZeroPair.1 hZeroPair.2
+          ⟩
+      · have hGuard :
+            (if psKernelExprIsNatZero left then
+               psKernelExprIsNatZero right
+             else
+               false) = false := by
+          cases hLeftZero : psKernelExprIsNatZero left with
+          | false =>
+              rfl
+          | true =>
+              cases hRightZero : psKernelExprIsNatZero right with
+              | false =>
+                  rfl
+              | true =>
+                  exact False.elim
+                    (hZeroPair ⟨hLeftZero, hRightZero⟩)
+        cases hLeftPred : psKernelExprNatPred left with
+        | none =>
+            have hAfterRun :
+                psKernelDefEqLazyReductionAfterPred
+                    resume defeq whnf coreWhnf
+                    context state left right =
+                  Except.ok (Prod.mk answer nextState) := by
+              simpa [
+                psKernelDefEqLazyReductionWithFuel,
+                hGuard, hLeftPred, resume
+              ] using hRun
+            exact
+              hAfter
+                context state nextState left right answer
+                hConfig hAfterRun
+        | some leftPred =>
+            cases hRightPred : psKernelExprNatPred right with
+            | none =>
+                have hAfterRun :
+                    psKernelDefEqLazyReductionAfterPred
+                        resume defeq whnf coreWhnf
+                        context state left right =
+                      Except.ok (Prod.mk answer nextState) := by
+                  simpa [
+                    psKernelDefEqLazyReductionWithFuel,
+                    hGuard, hLeftPred, hRightPred, resume
+                  ] using hRun
+                exact
+                  hAfter
+                    context state nextState left right answer
+                    hConfig hAfterRun
+            | some rightPred =>
+                cases hEq :
+                    defeq context state leftPred rightPred with
+                | error error =>
+                    simp [
+                      psKernelDefEqLazyReductionWithFuel,
+                      hGuard, hLeftPred, hRightPred, hEq
+                    ] at hRun
+                | ok eqRun =>
+                    rcases eqRun with ⟨eqValue, eqState⟩
+                    have hEqSound :=
+                      hDefEq
+                        context state eqState
+                        leftPred rightPred eqValue
+                        hConfig hEq
+                    simp [
+                      psKernelDefEqLazyReductionWithFuel,
+                      hGuard, hLeftPred, hRightPred, hEq
+                    ] at hRun
+                    rcases hRun with ⟨rfl, rfl⟩
+                    refine ⟨hEqSound.1, ?_⟩
+                    cases eqValue with
+                    | false =>
+                        trivial
+                    | true =>
+                        exact
+                          psKernelNatPredPair_defeq
+                            context.environment context.localContext
+                            left right leftPred rightPred
+                            hLeftPred hRightPred
+                            (hEqSound.2 rfl)

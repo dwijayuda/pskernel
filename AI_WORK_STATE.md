@@ -242,3 +242,8 @@ Architectural blockers still remaining:
 - Next proof boundary: the Nat-successor predecessor fast path, complete `psKernelDefEqLazyReductionWithFuel` induction, and concrete DefEq checker-knot composition. Retain exact non-transitive algorithmic DefEq rules.
 - The following checkpoint introduces a specific successor representation and predecessor congruence semantic rule; it is not yet independently green until its proof CI passes.
 
+
+## Nat-successor refinement checkpoint — 2026-10-08
+- Full proof run **#616** green at `5bff3bb2bdaea54390feb97b148c3c419a859800`.
+- The independent `PsKernelNatSuccessorRep` and executable predecessor-recognition refinement are registered and green. Both Nat literal successors and one-argument Nat.succ constructor forms are supported; the nullary constructor is rejected.
+- Next candidate closes the entire bounded `psKernelDefEqLazyReductionWithFuel` contract using specific zero/successor cases and already-verified Nat/native/delta callbacks. Verify the next CI before marking this candidate green.

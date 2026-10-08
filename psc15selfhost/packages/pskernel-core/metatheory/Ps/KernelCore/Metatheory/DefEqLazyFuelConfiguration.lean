@@ -87,16 +87,11 @@ theorem psKernelDefEqLazyReductionAfterPred_configuration_sound
       (psKernelDefEqLazyReductionAfterPred
         resume defeq whnf coreWhnf) := by
   intro context state nextState left right answer hConfig hRun
-  cases hEager :
-      (if context.eagerReduce then
-         true
-       else if psKernelExprHasFVar left then
-         false
-       else if psKernelExprHasFVar right then
-         false
-       else
-         true) with
-  | false =>
+  by_cases hEager :
+      context.eagerReduce = true ∨
+        (psKernelExprHasFVar left = false ∧
+          psKernelExprHasFVar right = false)
+  case neg =>
       have hNativeRun :
           psKernelDefEqNativeThenLazyStep
               resume defeq coreWhnf context state left right =
@@ -108,7 +103,7 @@ theorem psKernelDefEqLazyReductionAfterPred_configuration_sound
           hResume hDefEq hStep hNative
           context state nextState left right answer
           hConfig hNativeRun
-  | true =>
+  case pos =>
       cases hLeftNat :
           psKernelReduceNatWith whnf context state left with
       | error error =>

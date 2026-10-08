@@ -1,0 +1,74 @@
+name: PSCV Lean 4 native frontend (experimental)
+
+on:
+  push:
+    branches:
+      - pscv/lean4-native-frontend-experiment
+    paths:
+      - "psc15selfhost/lean4-frontend/**"
+      - ".github/workflows/pscv-lean4-frontend.yml"
+  pull_request:
+    paths:
+      - "psc15selfhost/lean4-frontend/**"
+      - ".github/workflows/pscv-lean4-frontend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean-kernel-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install independent pinned Lean toolchains
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.35.0-rc3
+      - name: Test source preflight
+        run: node --test psc15selfhost/lean4-frontend/test/policy.test.mjs
+      - name: Build existing PSC2 native .ps-to-Lean translator
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+          lake build psc
+      - name: Check translated ProofScript with Lean 4.35 kernel
+        working-directory: psc15selfhost
+        run: node lean4-frontend/psc-lean.mjs check lean4-frontend/test/Good.ps
+      - name: Emit checked Lean source (not PSCV-CERT)
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          node lean4-frontend/psc-lean.mjs emit-lean lean4-frontend/test/Good.ps --out /tmp/PSCVGenerated.lean
+          grep -q 'def add' /tmp/PSCVGenerated.lean
+      - name: Emit native C only under explicit development policy
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          node lean4-frontend/psc-lean.mjs emit-c lean4-frontend/test/Good.ps --out /tmp/PSCVGenerated.c --development-unverified
+          test -s /tmp/PSCVGenerated.c
+          if node lean4-frontend/psc-lean.mjs emit-c lean4-frontend/test/Good.ps --out /tmp/must-not-exist.c; then
+            echo "ERROR: emitted C without development-unverified gate"; exit 1
+          fi
+          test ! -e /tmp/must-not-exist.c
+      - name: Reject malformed source and unsupported PSCV verification
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          for input in BadType Forbidden UnsupportedContract; do
+            if node lean4-frontend/psc-lean.mjs check "lean4-frontend/test/$input.ps"; then
+              echo "ERROR: unexpectedly accepted $input"; exit 1
+            fi
+          done

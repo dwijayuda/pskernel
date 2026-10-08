@@ -1,0 +1,4 @@
+function increment(x: Nat): Nat
+  requires x > 0
+  ensures result => result > x
+  := { x + 1 }

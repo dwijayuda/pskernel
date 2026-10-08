@@ -62,14 +62,14 @@ theorem psKernelAddSimpleConstructorsWithFuel_index_refines
                   cases hRun
               | ok checkedLevels =>
                   simp only [hLevels] at hRun
-                  let closedSession :=
-                    psKernelMkCheckerSession
-                      work decl.levelParams safety
-                      headerSession.context.maxRecDepth
-                      headerSession.context.maxNatSize
                   cases hType :
                       psKernelSessionCheck
-                        remaining closedSession ctor.type with
+                        remaining
+                        (psKernelMkCheckerSession
+                          work decl.levelParams safety
+                          headerSession.context.maxRecDepth
+                          headerSession.context.maxNatSize)
+                        ctor.type with
                   | error error =>
                       simp only [hType] at hRun
                       cases hRun
@@ -85,11 +85,12 @@ theorem psKernelAddSimpleConstructorsWithFuel_index_refines
                           cases hRun
                       | ok sortValue =>
                           simp only [hSort] at hRun
-                          let ctorSession :=
-                            psKernelSessionWithEnvironment headerSession work
                           cases hParams :
                               psKernelOpenSimpleConstructorParams
-                                remaining ctorSession params ctor.type with
+                                remaining
+                                (psKernelSessionWithEnvironment
+                                  headerSession work)
+                                params ctor.type with
                           | error error =>
                               simp only [hParams] at hRun
                               cases hRun

@@ -348,6 +348,10 @@ theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_indices_absent
                   exact psKernelSimpleIndicesContainTarget_false_refines_absence
                     hReflexive target actualIndices hContains
           | none =>
+              -- Consume the application dispatcher equation before splitting
+              -- the reduced shape, so all branches share the same run.
+              simp only [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                hWhnf, hApp] at hRun
               cases hShape : reduced with
               | forallE userName domain body binderInfo =>
                   cases hDomainWhnf :

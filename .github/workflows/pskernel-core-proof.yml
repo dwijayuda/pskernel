@@ -6,6 +6,8 @@ on:
       - pscv/prove-pskernel-core-v1
     paths:
       - "psc15selfhost/packages/pskernel-core/**"
+      - "psc15selfhost/test/KernelCore/**"
+      - "psc15selfhost/test/PsKernelCoreFoundationTests.lean"
       - "psc15selfhost/package.json"
       - "psc15selfhost/scripts/check-pskernel-core-proofs.mjs"
       - ".github/workflows/pskernel-core-proof.yml"

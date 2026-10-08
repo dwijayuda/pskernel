@@ -29,6 +29,8 @@ From pscv0/v6 with the pinned Lean toolchain installed:
     lake build PscvCore PscvExtensions PscvKernel pscv_v6_dev pscv_v6_native_tests
     lake exe pscv_v6_native_tests
     lake exe pscv_v6_dev --version
+    lake exe pscv_v6_dev core-smoke
+    lake exe pscv_v6_kernel_dev kernel-empty-smoke
 
 Tests check a real logical identity theorem and reject an incorrect proof body, and enforce extension restrictions. Separate CI calls existing native/Wasm pskernel-lean 4.34 npm packages as **independent oracles**; their identities are not silently treated as the 4.35-rc3 checker.
 

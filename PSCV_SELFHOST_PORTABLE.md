@@ -6,7 +6,7 @@
 **Source of truth for current execution state:** `pscv/v3-execution`, inspected commit `93add6da4e501c57f9016c7c3666ea52c87a66e7`  
 **Lean semantic reference:** `4.35.0-rc3` / `470d5ce1400764999581fd26d5d72b00d990b0f4`; existing bootstrap `4.34.0` / `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`  
 **Status:** design research with source-backed decisions and falsifiable implementation gates, **not** a proof of compiler correctness, backend self-host closure, measured AI proof speed, or a PSCV verified executable.  
-**Audit state:** *Iteration 1 (94/100 design traceability, provisional); a later appendix will contain the independent final audit and any corrected score.*  
+**Audit state:** *Iteration 2 (96/100 design traceability, provisional). An explicit 100-point, evidence-keyed audit follows in the next revision.*  
 
 > **Authority and truth rule:** the [PSCV normative language reference][EV-NORM] and [V5.1 compiler design][EV-V51] control grammar, logic, runtime behavior, trust and existing compiler boundaries. This *source implementation profile* is a narrower subset, not a replacement specification. "Verified by Lean" is not "PSCV-CERT-v1", "validated IR" is not certified source, "fixed point" is not compiler-preservation evidence, and no untested source or runtime representation gains authority from this document.
 
@@ -304,7 +304,217 @@ The **previous 88.2/100** was an *unvalidated subjective architecture preference
 6. CompCert/CakeML papers support *architectural feasibility* of preservation and bootstrap, not a theorem about this PSCV project [EV-COMPCERT][EV-CAKEML].
 7. A source-profile gate must test **transitive dependencies** and kernel assumptions, not just keyword occurrence or syntactic `unsafe` absence.
 
-## 10. Reference link ledger
+## 10. Proof obligations and semantic relations — implementation-ready specification
+
+The model below is **a proposed target**, not a completed PSCV formalization. It makes the proof obligations precise enough to review independently. The existing PSCV language reference remains authority on Core, defeq, recursion, proof/erasure and effect semantics [EV-NORM].
+
+### 10.1 The four refinement boundaries
+
+Let `S` be a closed, well-profiled PSCV source module, `EL(S)` its Lean-checked Core elaboration, `EP(S)` its future PSKernel-checked Core elaboration, `RL`/`RP` their runtime erasures, and `Compile_t` the target backend for `t∈{TS,JS,Wasm,Rust}`. Write `Obs(M,input)` for a declared observable behavior including success/result, typed error, explicit emitted bytes, and boundary effects. Resource exhaustion belongs to a separate observable capability, not a fake semantic success.
+
+**Boundary A: approved source -> Lean Core.**
+
+~~~text
+AcceptSource(profile, envDigest, S)
+∧ LeanElaborates(S, C_L, env)
+∧ LeanKernelChecks(C_L, allowedAssumptions)
+⇒ SourceRelation(profile, S, C_L)
+~~~
+
+**Unproved obligation:** the final implication needs a source-fidelity/lowering theorem or independent validator for every admitted PSCV source family. Lean elaboration alone does not prove its own conformance to PSCV-owned grammar, `PS-UNIFY-v1`, frozen instance order or semantics.
+
+**Boundary B: Lean Core ↔ PSCV checked Core.**
+
+~~~text
+CheckedLean(C_L, env_L)
+∧ CheckedPSKernel(C_P, env_P)
+∧ SameSemanticProfile(env_L, env_P)
+⇒ CoreRelation(C_L, C_P)
+~~~
+
+This relation is a future theorem/validator requiring pin-accurate elaboration semantics, name/universe/recursor translations and proof assumptions. A double-acceptance test is useful differential evidence, **not** in itself proof of `CoreRelation`.
+
+**Boundary C: checked Core -> erased/validated RuntimeIR.**
+
+~~~text
+Checked(C) ∧ ApprovedSpec(C) ∧ AllowedDependencyClosure(C)
+∧ VerificationVCsClosed(C) ∧ ErasureSafe(C)
+∧ Erase(C) = R ∧ ValidateRuntimeIR(R)
+⇒ RuntimeSemanticsCorrespond(C, R)
+~~~
+
+Raw IR well-formedness alone does not establish runtime correspondence. Dependency traversal must cover imported code; `sorry`/`axiom` trust, noncomputable executable dependencies and host capabilities cannot be hidden by renamed or generated definitions. Proof and ghost state may be erased only under a noninterference argument [EV-NORM].
+
+**Boundary D: validated RuntimeIR -> target executable.**
+
+~~~text
+ValidatedRuntimeIR(R) ∧ BackendAccepted(t, R)
+∧ TargetValid(t, Compile_t(R))
+∧ CorrespondenceEvidence(t, R, Compile_t(R))
+⇒ Beh(Compile_t(R)) ⊑ AllowedBeh(R)
+~~~
+
+The relation's exact simulation/refinement strength, nondeterminism and resource assumptions must be fixed per backend. `TargetValid` alone (tsc/rustc/Wasm validation) is insufficient. This follows the distinction documented by CompCert between accepting a program and preserving its allowed observable behaviors [EV-COMPCERT][EV-COMP-TCB].
+
+### 10.2 Local-mutation, finite-loop and error-state laws
+
+For P1 source `let mut x := v; body`, target lowering must preserve substitution, capture and control-exit facts; aliased runtime references cannot escape from the mutable local. Proposed proof-shaped lemmas:
+
+~~~text
+SHP2-STATE-SSA:
+  evalSource(doLocal(state, body), input)
+  ≃ evalCore(lowerLocalToSSA(state, body), input)
+
+SHP2-STATE-ERROR:
+  runCompilerM(s, m) = Except.error(e)
+  ⇒ no observable successful post-state was published
+
+SHP2-FOR:
+  VerifiedFiniteIterator(iter)
+  ∧ validInvariant(init)
+  ∧ forStepPreservesInvariant
+  ∧ decreasesRemainingCursor
+  ⇒ totalLoopAndExitPostcondition
+
+SHP2-EARLY-EXIT:
+  for every Return/Break/Continue/Error exit,
+  corresponding reachable post/frame obligations hold
+
+SHP2-ERASURE:
+  erase(ghostOnlyChange(program)) has the same observable
+  runtime behavior as erase(program), under approved premises
+~~~
+
+These are **theorem statements to instantiate in Lean/PSCV**, not actual theorem names that exist in code or claims of proved lemmas. The ICFP 2022 `do` formalization [EV-DO][EV-DO-CODE] supplies research evidence for local-mutation-as-pure-code translation, not a free proof of these PSCV-specific laws.
+
+**Typed exception ordering:** for F0 `CompilerM Error State A := State -> Except Error (A,State)`, failures discard the successful state (logically transactional). Explicit diagnostics or partial progress must be modeled as error payload or a separately registered result type. Reject any backend lowering that retains mutable state as an untyped side effect despite this contract.
+
+**Proof preconditions on finite `for`:** certification requires a theorem establishing iterator finiteness and bounds; if user state influences a loop's postcondition, require an invariant or an approved library theorem that implies the same initiation/preservation/exit obligations. `break` and `continue` cannot silently bypass VC checks [EV-NORM].
+
+### 10.3 AI-proof architecture: replace opaque large goals with local certificates
+
+For each major P0/P1 library abstraction, version:
+- *logical model*: abstract value/effect relation;
+- *implementation*: total function/library module and target-specific representation when any;
+- *local VC*: pre/post, decreases, frame, error conditions and erasure;
+- *named supporting lemmas*: ≤a manageable proof dependency scope, not an arbitrary global simp search;
+- *evidence*: kernel replay, exact theorem dependency/axiom list, checked spec ID, source/Core digest and optional backend correspondence.
+
+**Mandatory anti-vacuity rule:** `False` or weakened premises are not acceptable substitutes for approved specifications; the property must be approved independently of the candidate proof. AI agents may search, split obligations, propose lemmas and produce proof terms, but must not edit the authority-bound specification or assume away failing inputs. A module-level test is not a logical proof.
+
+**Complexity budgeting:** collect per-function VC count, normalized expression size, maximal structural recursion depth, per-proof imported theorem closure, instance-search branch count, number of state variables exposed to each VC, and controlled proof replay time. Compare two equivalent P1 idioms experimentally rather than choosing syntax on source-line count. This metric set is a **measurement protocol**, not observed AI speedup.
+
+### 10.4 Assurance families and untrusted boundaries
+
+| Claim | Authority / evidence | Must NOT be inferred from |
+|---|---|---|
+| Syntax accepted | Closed source parser + env/profile identity | Lean accepting broader syntax |
+| Source semantics correct | Pinned source/Lean Core relation | Translation printer textual parity alone |
+| Kernel accepted | Lean or PSKernel checked proof term and allowed axioms | Test green or native evaluation |
+| Specification approved | Immutable approved spec ID & coverage manifest | Proof of tautology or generated spec |
+| Termination/effect/VC closed | Verified recursion/WP/loop/call-site proofs | `partial` or fuel count with fake result |
+| Runtime erasure valid | Checked noninterference and executable closure | Successful raw IR validation |
+| Backend generated well-formed target | Target-specific IR validator/tsc/rustc/Wasm checker | Kernel proof of source term |
+| Backend preserves semantics | Target theorem or independently checked relation with assumptions | Successful execution of a few tests |
+| Self-host compiler | Full source closure recompiled by generated target | Emitted demo or one backend printer |
+| Verified independent toolchain | PSCV-CERT/ClaimSet + approved exact provider/TCB/target evidence | Fixed point, reproducibility, provenance or AI confidence |
+
+**TCB caveat:** Lean's trusted kernel can check proof terms, but the soundness of native generated binaries also depends on erasure/compiler/runtime and foreign toolchains unless corresponding preservation evidence discharges the boundary. Research on CompCert's trusted-base subtleties [EV-COMP-TCB] is directly relevant. A proof assistant's acceptance must not silently upgrade the JS engine, tsc, rustc, Wasm validator, filesystem or WIT adapter into proved-correct components.
+
+## 11. Feature-to-source-to-backend conformance crosswalk
+
+**Purpose:** prevent claiming F0 merely because parsing succeeds. Every row requires positive and negative tests for *source semantics*, *self-host compiler Core*, *erasure*, *runtime*, *four backends*, *proof obligations* and *full closure*.
+
+| F0 family (proposed) | Normative authority / Lean precedent | Portable lowering or runtime obligation | Four-target acceptance | Proof/test IDs |
+|---|---|---|---|---|
+| Total function, transparent `abbrev` | [EV-NORM][EV-REC] | Core binder/substitution and recursion | all four execute exact call behavior | `SHP2-TOTAL-*` |
+| Indexed ADT, structure, match | [EV-NORM][EV-LEAN] | Positive constructors, recursors, typed match erasure | all four ADT variants + exhaustive cases | `SHP2-ADT-*` |
+| Generic types and immutable closures | [EV-NORM][EV-RUST] | Closed specialization, explicit captures | TS/JS closures; Wasm closure conversion; Rust closure env | `SHP2-GEN-*` |
+| `Option`/`Except` typed error | [EV-NORM][EV-VERUS] | Distinct success/error Core and semantic branches | no silent JS throw/Rust panic/Wasm trap | `SHP2-ERROR-*` |
+| `do`/local `let mut` | [EV-NORM][EV-DO] | SSA/state WP and no alias escape | target value semantics, same exit behavior | `SHP2-SSA-*` |
+| Finite `for`, break/continue | [EV-NORM][EV-DO] | Certified iterator progress, invariant/exit VCs | target-specific loops obey same order | `SHP2-FOR-*` |
+| Reader/State/Except effect stack | [EV-NORM][EV-VERUS] | Explicit State→Except result, agreed rollback | compare retained vs discarded state on errors | `SHP2-WP-*` |
+| Structural/well-founded recursion | [EV-NORM][EV-REC] | Kernel decrease proof and equation relation | stack-safe executable recursion/worklist | `SHP2-RECUR-*` |
+| Nat/Int/fixed-width math | [EV-NORM][EV-WASM-CORE] | Exact signedness, overflow, div/mod and narrowing | JS BigInt, Wasm big Nat, Rust exact ints | `SHP2-NUM-*` |
+| UTF-8 `String`/`ByteArray`/source offsets | [EV-NORM][EV-WASM] | exact bytes, scalar decoding, source positions | test surrogate/invalid-byte/large-offset cases | `SHP2-UTF8-*` |
+| Array and deterministic map/builder | [EV-NORM][EV-GO-SPEC] | bounds, equality/hash and stable ordering | no unordered iteration affecting bytes | `SHP2-COLL-*` |
+| Contracts/proofs and ghost state | [EV-NORM][EV-DAFNY] | approved spec + VC + checked erasure | proof/ghost eliminated on all targets | `SHP2-CERT-*` |
+| Import closure, attributes, instances | [EV-NORM][EV-LEAN] | frozen environment and semantic identity | no implicit target-dependent import/deriving | `SHP2-ENV-*` |
+| Typed RuntimeIR + specialization | [EV-IR][EV-V51] | constructor/ref validation & specialization relation | shared backend input and target IR checks | `SHP2-IR-*` |
+| Checked kernel-provider boundary | [EV-STATUS][EV-HOST] | exact API/checked session + approved assumptions | host/provider composition explicit in each target | `SHP2-PROVIDER-*` |
+
+For *each* feature and each of JS/TS/Wasm/Rust, generated source, target IR, actual emitted artifact, runtime execution and negative cases must be inspected independently. A future Python/PHP/Java/Go backend repeats this same feature table with its own runtime/model assumptions, without revising the ProofScript source semantics.
+
+### 11.1 Negative-input and edge-case matrix
+
+| Family | Distinct negative/edge obligations |
+|---|---|
+| Parse/lex/UTF-8 | invalid bytes, nested comments, EOF in string, malformed escaped tokens, mixed line endings, surrogate input, correct byte spans |
+| Elaboration/types | nonexistent instance, conflicting name, wrongly unified metavariable, source-level coercion ambiguity, unsupported Lean macro leak |
+| Termination | nondecreasing recursion, unbounded mutable iterator, fake fuel success, size proof violation, unproved while invariant |
+| Effects | error returned with mutated state, missing `errors` branch, raw IO in closed profile, unmodeled FFI, invalid old/frame clause |
+| ADT/generics | impossible branch, missing constructor fields, unknown type args, mismatched specialized body, higher-rank unsupported values |
+| Runtime numbers | 2^53±1 in JS, 32/64-bit overflow edge, negative remainder, divide by zero, USize narrow, extreme Nat |
+| Collections | array out-of-bounds, map collision and rehash, unstable hash seed, iterator invalidation, huge-index narrowing |
+| Source maps | UTF-8 multibyte offsets, CRLF normalization, generated names, missing origin, invalid mapping reference |
+| Wasm | invalid typed operand/control stacks, unset locals, heap refs, max memory, ABI import/export/signature mismatch, unclosed host call |
+| Trust/assurance | proof hole, user axiom, noncomputable executable import, ghost leak, false postcondition, skipped mandatory spec |
+| Resource | oversized input, deep AST, huge numeric literal, recursion stack, memory failure, parser/generator budget, correct typed `Unknown` |
+| Self-host | hidden Lean call from Stage2, mismatched compiler source module, missing backend driver/provider, weak byte-only fixed-point claim |
+
+**Selected Wasm standard caveat:** Wasm Core 3.0's validation algorithm [EV-WASM-VAL] tracks control, operand and local-initialization states; validation is necessary for target well-formedness but **not a preservation theorem**. The current PSCV backend research [EV-WASM] explicitly records validation/ABI incompleteness. A future four-backend acceptance document must freeze the Wasm engine feature set, memory/GC/reference strategy, host imports, capability model and re-entry CLI ABI.
+
+### 11.2 Target-specific proof and source product integrity
+
+- **TypeScript:** the emitted `.ts`, generated `.d.ts`/maps and pinned `tsc` conversion must correspond to observed checked exports. TS syntax/type checking alone does not verify executable semantics. Do not require TS for direct JS output; preserve independent backend evidence.
+- **Direct JS:** JS representation profile, JsIR, validated printed code, exact BigInt/UTF-8 runtime and declaration/source-map consistency, plus checked CLI execution.
+- **Wasm:** typed WasmIR, full target/engine validation, ABI and host import/export certificates, deep stack/runtime, exact byte memory semantics and actual executable full compiler.
+- **Rust:** typed emitted Rust source, compile with pinned `rustc` and target triple, explicit runtime library, no hidden unsafe semantics admitted in P0, native CLI self-reentry.
+- **All four:** artifact bundles preserve semantics, ABI, debug source maps, public API and evidence separately. A source-map failure cannot mint a kernel capability; debug metadata cannot substitute for executable semantics.
+
+## 12. Controlled experiment and migration stop/go gates
+
+### 12.1 Feature dependency order (not "rewrite the most broken test")
+
+~~~text
+Exact profiles + frozen Standard environment identity
+   → Nat/Int/UTF-8/Array/Error & deterministic builder laws
+   → do/let-mut/early-return (state+error model and generated VCs)
+   → finite for + certified iterator + break/continue
+   → total mutual/well-founded recursion + proof infrastructure
+   → closed Lean-host frontend + exact source Core adapter
+   → native PSCV frontend support for same language
+   → checked erasure/RuntimeIR preservation + backend contracts
+   → four whole-compiler executables
+   → 16-cell full compiler re-entry
+   → independent proof/performance and release assurance
+~~~
+
+**No major migration without preceding semantic family:** a new `for` parser form must not be marked self-host-safe until all backend and proof-family criteria are satisfied. A new `HashMap` convenience method must declare deterministic enumeration and exact runtime semantics. Existing source should remain on `PSC1-selfhost-stable/1` until the candidate compiled closure, not merely its lean source, is compatible.
+
+### 12.2 First experiments before whole compiler rewrite
+
+**Experiment A (source productivity + proof):** choose lexer cursor bounds, IR validator and AST traversal. Implement each in PSC1 style, pure P0 functional style and `do/let mut/for` P1 style. Compare identical specs, normalized IR, four target results and controlled AI proof replay.
+
+**Experiment B (state+error):** implement a backtracking parser combinator as `State -> Except Error (Value,State)`; check rollback vs retained-state counterexamples on every backend, including compiled Wasm and native Rust. Deliberately failing parse paths must preserve semantics.
+
+**Experiment C (full-closure feasibility):** choose a nontrivial compiler subsystem (e.g., lexer + parser + diagnostic) and compile the complete transitive import closure into TS, direct JS, Wasm and Rust. Test deep stack/resource limits. Stop if any essential runtime primitive is missing: implement it as a family, not a one-off workaround.
+
+**Experiment D (Lean-Core runtime adapter):** prove/validate a small closed source→checked Lean Core→PSCV RuntimeIR→target diagram first, including one recursive ADT, generic call, State/Except, erased proof field, and a negative case with unsupported closure. No cert issuance during development.
+
+**Experiment E (controlled four-compiler bootstrap):** after the entire compiler closure is portable, run actual re-entry from generated compilers; verify all 16 paths and provider dependence. Only then evaluate multi-stage fixed-point evidence and independent checker assurance.
+
+### 12.3 Performance and correctness gate policy
+
+For every experiment, record source lines and AST complexity **as secondary ergonomics metrics**, proof obligations, independent kernel acceptance, timeouts, compilation wall-clock/peak memory, generated artifact size, runtime CPU/memory, deep-stack behavior, exact output identity and target-specific assumptions. Optimize performance only under preserved semantics. Cross-backend comparisons must not conflate differences in JIT/native/Wasm host runtime with source-language correctness.
+
+**AI proof study:** target a 24-task × 3-source-style × at least 5-independent-trial protocol where feasible; report total trials, failures and confidence intervals. The numerical proof-effort target is conditional on controlled measurements; no AI proof performance benefit is currently established. Prioritize reducing global theorem dependence and tracking proof-maintenance change amplification, not gaming token counts.
+
+**Falsification rule:** if equivalent pure source systematically proves faster or runs faster with equal maintainability, downgrade ergonomic P1 features for that subsystem. If a P1 feature causes unacceptable verification complexity, do not weaken proof checks; restrict its admissible lowering, library abstraction or profile tier. If a backend cannot preserve a required F0 runtime operation, reject the output and retain a documented blocker.
+
+
+
+## 14. Reference link ledger
 
 [EV-NORM]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md
 [EV-V51]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md
@@ -337,4 +547,4 @@ The **previous 88.2/100** was an *unvalidated subjective architecture preference
 
 ---
 
-**Iteration 1 draft complete. The evidence-audit rubric and final 97-point check follow in the next revision; this draft makes no 97+ quality claim.**
+**Iteration 2 technical crosswalk complete. The explicit weighted evidence-audit and final review follow.**

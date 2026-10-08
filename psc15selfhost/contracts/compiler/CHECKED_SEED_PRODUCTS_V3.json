@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-checked-seed-products/3",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "status": "rust-source-native-transport-implemented-cloud-validation-pending",
+  "owners": [
+    "host/src/Ps/Host/CheckedSeedProducts.lean",
+    "scripts/LeanCheckedSeed.lean",
+    "scripts/checked-seed-session.mjs",
+    "scripts/checked-build.mjs"
+  ],
+  "scope": "Compiler-host source product transport; no kernel/provider implementation changes.",
+  "entry": "--session-products-v3[-modules]-lean|ps. Version 3 explicitly selects the Rust source capability; versions 1 and 2 keep their exact target/profile sets.",
+  "request": [
+    "psc-checked-seed-products/3",
+    "rust",
+    "psc-rust-source/2021",
+    "metadata:Boolean",
+    false,
+    false
+  ],
+  "requestLimits": {
+    "selectorUtf8Bytes": 4096
+  },
+  "response": "Exactly two bounded frames. Emitted fields are phase/protocol/target/representation/rustSource/runtimeIr/verifiedIr; metadata additionally requires publicApi/erasureCorrespondence/declarationOrigins. No specializedIr or invented RustIR/native binary.",
+  "invariants": [
+    "One prepared source is retained across the live parent acceptance and one staged Rust emission.",
+    "Admissions are checked before and after emission.",
+    "The parent pins exact field inventory, profile, protocol, bytes, stage equality, optional source/erasure/origin inventories, EOF and successful process exit.",
+    "The common build graph binds the existing generic validated RuntimeIR-to-Rust source pass, selected source artifact, descriptor/bundle/action/query identities and archive.",
+    "No tsc, Cargo or rustc invocation is implied by the source product."
+  ],
+  "compatibility": "Legacy TypeScript, products/1 JS/private wasm32 and products/2 Canonical Wasm remain exact with no protocol fallback. Internal shared six-field decoding does not relax per-version capability validation.",
+  "limitations": [
+    "Native getLine allocation and compiler CPU/memory remain unproved.",
+    "The current Rust emitter retains generic RuntimeIR; migration to V5 SpecializedIR remains explicit.",
+    "Exact native Cargo/toolchain/dependency capture and source-to-native acceptance remain pending.",
+    "Source kernel acceptance, frame integrity and Rust source production are not semantic preservation."
+  ],
+  "globalPreservationProved": false,
+  "releasePromotion": false
+}

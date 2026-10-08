@@ -21,7 +21,7 @@ import {
   checkedKernelDescriptor,
   defaultCheckedKernel,
 } from './checked-kernel-provider.mjs';
-import { runCheckedSeedSession, checkedSeedProductsProtocol } from './checked-seed-session.mjs';
+import { runCheckedSeedSession, checkedSeedProductsProtocol, checkedSeedRustSourceProfile } from './checked-seed-session.mjs';
 import { pinnedTypeScriptVersionText, resolveTypeScriptCli } from './typescript-cli.mjs';
 import { captureTypeScriptToolInputs, verifyTypeScriptToolInputs } from './typescript-tool-inputs.mjs';
 import { captureCheckedProviderInputs, verifyCheckedProviderInputs } from './checked-provider-inputs.mjs';
@@ -91,7 +91,6 @@ export async function buildChecked({
     : undefined;
   if (dualCheck) checkedKernelDescriptor(dualCheck);
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
-  if (seedPath && selected.backend === 'rust' && !checkOnly) throw new Error('PSC2_CHECKED_RUST_NATIVE_TRANSPORT_UNAVAILABLE');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
   if (jsAbiPolicyPath !== undefined && !['typescript', 'javascript'].includes(selected.backend)) throw new Error('PSC2_CHECKED_JS_ABI_TARGET');
   if (wasmCanonicalSelectionPath !== undefined && selected.backend !== 'wasm') throw new Error('PSC2_CHECKED_WASM_EXPORT_TARGET');
@@ -157,8 +156,8 @@ export async function buildChecked({
       checkAdmissions,
       emit: !checkOnly,
       resourceLimits: seedResourceLimits,
-      productRequest: selected.backend === 'typescript' || (checkOnly && selected.backend === 'rust') ? undefined : {
-        target: selected.backend, representation: selected.javaScriptRepresentation, ...selected.selection,
+      productRequest: selected.backend === 'typescript' ? undefined : {
+        target: selected.backend, representation: selected.backend === 'rust' ? checkedSeedRustSourceProfile : selected.javaScriptRepresentation, ...selected.selection,
         ...(wasmCanonicalSelection ? { wasmCanonicalSelection } : {}) },
       certificationContext: {
         provider: checkedKernelIdentity(kernel),

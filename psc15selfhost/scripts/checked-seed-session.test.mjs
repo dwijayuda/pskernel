@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { runCheckedSeedSession } from './checked-seed-session.mjs';
+import { runCheckedSeedSession, checkedSeedRustProtocol, checkedSeedRustSourceProfile } from './checked-seed-session.mjs';
 import { checkAdmissionsWithKernel } from './checked-kernel-provider.mjs';
 
 const binaryPath = fileURLToPath(new URL('../lean-checked/.lake/build/bin/psc2_lean_checked_seed' +
@@ -98,3 +98,32 @@ test('Canonical native selection rejects wrong targets, missing artifacts and po
   }
   assert.equal(accessed,false);
 });
+
+test('Rust seed selection rejects other representations and optional product expansion before spawning', async () => {
+  const good = { target: 'rust', representation: checkedSeedRustSourceProfile, metadata: false, declarations: false, sourceMap: false };
+  for (const productRequest of [{ ...good, representation: 'psc-js-closed-instances/1' },
+    { ...good, declarations: true }, { ...good, sourceMap: true }, { ...good, wasmCanonicalSelection: {} }])
+    await assert.rejects(runCheckedSeedSession({ binaryPath: 'missing-binary', sourceKind: 'lean', source: '',
+      emit: true, productRequest, checkAdmissions: () => { throw new Error('MUST_NOT_CHECK'); } }), /PRODUCT_SELECTION/);
+});
+
+for (const sourceKind of ['lean', 'ps']) test('native Rust source transport retains ' + sourceKind + ' session and exact stage bytes',
+  { skip: !available }, async () => {
+    const source = sourceKind === 'lean' ? 'def answer : Nat := 42\n' : 'const answer: Nat := { 42 }\n';
+    const productRequest = { target: 'rust', representation: checkedSeedRustSourceProfile,
+      metadata: false, declarations: false, sourceMap: false };
+    let checks = 0;
+    const result = await runCheckedSeedSession({ binaryPath, sourceKind, source, emit: true, productRequest,
+      checkAdmissions: async admissions => {
+        checks++; productRequest.target = 'wasm'; // selection was already captured
+        return (await checkAdmissionsWithKernel(admissions, 'lean434')).result;
+      } });
+    assert.equal(checks, 1);
+    assert.equal(result.productProtocol, checkedSeedRustProtocol);
+    assert.equal(result.directProduct.target, 'rust');
+    assert.match(result.directProduct.payload, /pub fn answer/);
+    assert.deepEqual(Object.keys(result.directProduct.stages), ['runtimeIr', 'verifiedIr']);
+    assert.equal(result.directProduct.stages.runtimeIr, result.directProduct.stages.verifiedIr);
+    assert.equal(result.directProduct.publicApi, undefined);
+    assert.equal(result.resourceObservation.observed.frames, 2);
+  });

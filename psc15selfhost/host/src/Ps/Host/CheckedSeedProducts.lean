@@ -1,13 +1,13 @@
 import Ps.DriverJs.Compiler
 import Ps.DriverWasm.Compiler
+import Ps.DriverRust.Compiler
 import Lean.Data.Json
 
 -- Native host transport only. Commands describe products; acceptance authority
 -- remains the parent host's live selected-provider decision for this session.
 def psCheckedSeedProductsProtocol : String := "psc-checked-seed-products/1"
 def psCheckedSeedCanonicalProtocol : String := "psc-checked-seed-products/2"
-def psCheckedSeedProductsProtocolFor (canonical : Bool) : String :=
-  if canonical then psCheckedSeedCanonicalProtocol else psCheckedSeedProductsProtocol
+def psCheckedSeedRustProtocol : String := "psc-checked-seed-products/3"
 
 structure PsCheckedSeedProductsRequest where
   target : String
@@ -17,7 +17,8 @@ structure PsCheckedSeedProductsRequest where
   sourceMap : Bool
   canonicalRequest : Option String := none
 
-def psCheckedSeedProductsDecode (text : String) : Except String PsCheckedSeedProductsRequest := do
+-- Shared six-field shape; each public version separately pins its capability.
+def psCheckedSeedProductsTuple (protocol text : String) : Except String PsCheckedSeedProductsRequest := do
   if text.utf8ByteSize > 4096 then throw "PSC2_CHECKED_SEED_PRODUCT_REQUEST_RESOURCE"
   let json ← Lean.Json.parse text
   let items ← json.getArr?
@@ -28,14 +29,29 @@ def psCheckedSeedProductsDecode (text : String) : Except String PsCheckedSeedPro
   let metadata ← items[3]!.getBool?
   let declarations ← items[4]!.getBool?
   let sourceMap ← items[5]!.getBool?
-  if tag != psCheckedSeedProductsProtocol then throw "PSC2_CHECKED_SEED_PRODUCT_REQUEST_SCHEMA"
-  if target != "javascript" && target != "wasm" then throw "PSC2_CHECKED_SEED_PRODUCT_TARGET"
-  if representation != "psc-js-closed-instances/1" && representation != "psc-js-uniform-values/1" then
-    throw "PSC2_CHECKED_SEED_PRODUCT_REPRESENTATION"
-  if target != "javascript" &&
-      (representation != "psc-js-closed-instances/1" || declarations || sourceMap) then
-    throw "PSC2_CHECKED_SEED_PRODUCT_TARGET"
+  if tag != protocol then throw "PSC2_CHECKED_SEED_PRODUCT_REQUEST_SCHEMA"
   pure ⟨target, representation, metadata, declarations, sourceMap, none⟩
+
+def psCheckedSeedProductsDecode (text : String) : Except String PsCheckedSeedProductsRequest := do
+  let request ← psCheckedSeedProductsTuple psCheckedSeedProductsProtocol text
+  if request.target != "javascript" && request.target != "wasm" then throw "PSC2_CHECKED_SEED_PRODUCT_TARGET"
+  if request.representation != "psc-js-closed-instances/1" && request.representation != "psc-js-uniform-values/1" then
+    throw "PSC2_CHECKED_SEED_PRODUCT_REPRESENTATION"
+  if request.target != "javascript" &&
+      (request.representation != "psc-js-closed-instances/1" || request.declarations || request.sourceMap) then
+    throw "PSC2_CHECKED_SEED_PRODUCT_TARGET"
+  pure request
+
+def psCheckedSeedRustDecode (text : String) : Except String PsCheckedSeedProductsRequest := do
+  let request ← psCheckedSeedProductsTuple psCheckedSeedRustProtocol text
+  if request.target != "rust" || request.representation != "psc-rust-source/2021" ||
+      request.declarations || request.sourceMap then throw "PSC2_CHECKED_SEED_RUST_SELECTION"
+  pure request
+
+def psCheckedSeedProductsProtocolFor (request : PsCheckedSeedProductsRequest) : String :=
+  if request.target == "rust" then psCheckedSeedRustProtocol
+  else if request.canonicalRequest.isSome then psCheckedSeedCanonicalProtocol
+  else psCheckedSeedProductsProtocol
 
 -- Version 2 is explicit Canonical Wasm selection. Version 1 stays exact.
 def psCheckedSeedCanonicalDecode (text : String) : Except String PsCheckedSeedProductsRequest := do
@@ -77,7 +93,7 @@ def psCheckedSeedProductsEmit
     (request : PsCheckedSeedProductsRequest) (prepared : PsCompilerAdmissionReadyModule)
     (origins : String) : IO (List (String × Lean.Json)) := do
   let common := [("phase", Lean.Json.str "emitted"),
-    ("protocol", Lean.Json.str (psCheckedSeedProductsProtocolFor request.canonicalRequest.isSome)),
+    ("protocol", Lean.Json.str (psCheckedSeedProductsProtocolFor request)),
     ("target", Lean.Json.str request.target), ("representation", Lean.Json.str request.representation)]
   let metadata := request.metadata || request.sourceMap
   if request.target == "javascript" then
@@ -97,6 +113,12 @@ def psCheckedSeedProductsEmit
       ("verifiedIr", Lean.Json.str verifiedIr), (selectedKey, Lean.Json.str selectedIr),
       ("jsIr", Lean.Json.str jsIr)] ++ products ++
       if metadata then [("generatedPositions", Lean.Json.str positions)] else [])
+  else if request.target == "rust" then
+    let .ok output := psCompilerRustStagesFromPrepared prepared
+      | throw (IO.userError "PSC2_CHECKED_RUST_EMISSION_FAILED")
+    let products ← psCheckedSeedProductsMetadata request prepared origins output.erasureCorrespondence
+    pure (common ++ [("rustSource", Lean.Json.str output.rustSource), ("runtimeIr", Lean.Json.str output.runtimeIr),
+      ("verifiedIr", Lean.Json.str output.verifiedIr)] ++ products)
   else
     let (wasm, runtimeIr, verifiedIr, specializedIr, wasmIr, erasure, interfaceProducts) ←
       match request.canonicalRequest with
@@ -124,8 +146,9 @@ def psCheckedSeedProductsReadLine : IO String := do
   pure (line.dropEnd 1).toString
 
 def psCheckedSeedProductsSession
-    (prepared : PsCompilerAdmissionReadyModule) (origins : String) (canonical : Bool := false) : IO Unit := do
-  let protocol := psCheckedSeedProductsProtocolFor canonical
+    (prepared : PsCompilerAdmissionReadyModule) (origins : String) (protocol : String := psCheckedSeedProductsProtocol) : IO Unit := do
+  if protocol != psCheckedSeedProductsProtocol && protocol != psCheckedSeedCanonicalProtocol &&
+      protocol != psCheckedSeedRustProtocol then throw (IO.userError "PSC2_CHECKED_SEED_PRODUCT_PROTOCOL")
   let .ok admissions := psCompilerAdmissionsFromPrepared prepared
     | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
   let stdout ← IO.getStdout
@@ -138,7 +161,9 @@ def psCheckedSeedProductsSession
       ("protocol", Lean.Json.str protocol)]).compress
     stdout.flush
     return
-  let decoded := if canonical then psCheckedSeedCanonicalDecode command else psCheckedSeedProductsDecode command
+  let decoded := if protocol == psCheckedSeedRustProtocol then psCheckedSeedRustDecode command
+    else if protocol == psCheckedSeedCanonicalProtocol then psCheckedSeedCanonicalDecode command
+    else psCheckedSeedProductsDecode command
   let .ok request := decoded
     | throw (IO.userError "PSC2_CHECKED_SEED_PRODUCT_REQUEST")
   psCheckedSeedProductsAssertPrepared prepared admissions

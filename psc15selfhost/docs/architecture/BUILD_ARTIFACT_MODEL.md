@@ -475,7 +475,8 @@ Performance regressions become observable without changing semantic code.
 
 The checked builder accepts `--backend rust --products source --out module.rs`
 (or `metadata`) with a generated compiler exposing
-`psCompilerRustStagesFromPrepared`. One prepared source supplies the actual
+`psCompilerRustStagesFromPrepared` or an explicitly selected native seed supporting
+`psc-checked-seed-products/3`. One prepared source supplies the actual
 erasure, strict validation and source-emission snapshots. The existing Rust
 source backend preserves generic RuntimeIR; moving to SpecializedIR is an
 explicit migration obligation, not an invented pass in this graph.
@@ -485,8 +486,8 @@ bundle, action/query identities, archive and evidence envelope follow the common
 publication path. The inherited bundle group `executableArtifacts` includes
 the `target-source` role, so its name does not mean that Rust was compiled.
 Only source bytes are published; compiler acceptance, native binary output,
-hermeticity and global preservation are not established. Native seed Rust
-emission currently rejects explicitly. Existing bootstrap Cargo tests remain
+hermeticity and global preservation are not established. The native Rust protocol binds the same source-product contract, requires exactly
+two bounded frames and pins its version/profile in every response. Existing bootstrap Cargo tests remain
 separate observations.
 
 The subsequent native-toolchain step must bind source, Cargo manifest and lock,

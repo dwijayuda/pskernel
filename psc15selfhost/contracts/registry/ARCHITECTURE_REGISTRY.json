@@ -585,6 +585,12 @@
       "kind": "native-product-transport",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V2.json"
+    },
+    {
+      "id": "psc-checked-seed-products/3",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V3.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

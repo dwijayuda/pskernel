@@ -19,6 +19,8 @@ import { createPscvCertification } from './certified-source.mjs';
 
 export const checkedSeedProductsProtocol = 'psc-checked-seed-products/1';
 export const checkedSeedCanonicalProtocol = 'psc-checked-seed-products/2';
+export const checkedSeedRustProtocol = 'psc-checked-seed-products/3';
+export const checkedSeedRustSourceProfile = 'psc-rust-source/2021';
 
 function selectSeedProducts(value) {
   const names = ['declarations', 'metadata', 'representation', 'sourceMap', 'target'];
@@ -32,28 +34,32 @@ function selectSeedProducts(value) {
     if (!descriptor || !Object.hasOwn(descriptor, 'value')) throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
     fields[key] = descriptor.value;
   }
-  if (!['javascript', 'wasm'].includes(fields.target) ||
-      ![closedJsRepresentationProfile, uniformJsRepresentationProfile].includes(fields.representation) ||
-      ['metadata', 'declarations', 'sourceMap'].some(key => typeof fields[key] !== 'boolean') ||
-      (fields.target !== 'javascript' && (fields.representation !== closedJsRepresentationProfile ||
-        fields.declarations || fields.sourceMap))) throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
+  if (!['javascript', 'wasm', 'rust'].includes(fields.target) ||
+      ['metadata', 'declarations', 'sourceMap'].some(key => typeof fields[key] !== 'boolean'))
+    throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
+  const profiles = fields.target === 'rust' ? [checkedSeedRustSourceProfile] :
+    [closedJsRepresentationProfile, uniformJsRepresentationProfile];
+  if (!profiles.includes(fields.representation) ||
+      (fields.target !== 'javascript' && (fields.declarations || fields.sourceMap)) ||
+      (fields.target === 'wasm' && fields.representation !== closedJsRepresentationProfile))
+    throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
   const canonical = Object.hasOwn(fields, 'wasmCanonicalSelection');
   if (canonical && fields.target !== 'wasm') throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
   const wasmPolicy = canonical ? captureWasmCanonicalSelection(fields.wasmCanonicalSelection) : undefined;
   delete fields.wasmCanonicalSelection;
-  const protocol = canonical ? checkedSeedCanonicalProtocol : checkedSeedProductsProtocol;
+  const protocol = fields.target === 'rust' ? checkedSeedRustProtocol : canonical ? checkedSeedCanonicalProtocol : checkedSeedProductsProtocol;
   const wire = JSON.stringify([protocol, fields.target, fields.representation,
     fields.metadata, fields.declarations, fields.sourceMap, ...(wasmPolicy ? [wasmPolicy.wire] : [])]);
   if (Buffer.byteLength(wire) > (canonical ? 2101248 : 4096)) throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
   return Object.freeze({ ...fields, protocol, wire, wasmPolicy });
 }
 
-function seedDirectProduct(completed, selected, limits, observation, sources) {
+function seedSelectedProduct(completed, selected, limits, observation, sources) {
   const uniform = selected.representation === uniformJsRepresentationProfile;
   const metadata = selected.metadata || selected.sourceMap, api = metadata || selected.declarations;
-  const outputKey = selected.target === 'javascript' ? 'javaScript' : 'wasm';
-  const stageKeys = ['runtimeIr', 'verifiedIr', uniform ? 'uniformSpecializedIr' : 'specializedIr',
-    selected.target === 'javascript' ? 'jsIr' : 'wasmIr'];
+  const outputKey = selected.target === 'javascript' ? 'javaScript' : selected.target === 'rust' ? 'rustSource' : 'wasm';
+  const stageKeys = ['runtimeIr', 'verifiedIr', ...(selected.target === 'rust' ? [] :
+    [uniform ? 'uniformSpecializedIr' : 'specializedIr', selected.target === 'javascript' ? 'jsIr' : 'wasmIr'])];
   const textKeys = [...stageKeys, ...(selected.wasmPolicy ? ['interfaceJson', 'bindingJson'] : []), ...(api ? ['publicApi', 'erasureCorrespondence'] : []),
     ...(metadata ? ['declarationOrigins', ...(selected.target === 'javascript' ? ['generatedPositions'] : [])] : [])];
   const keys = ['phase', 'protocol', 'target', 'representation', outputKey, ...textKeys].sort();
@@ -62,14 +68,15 @@ function seedDirectProduct(completed, selected, limits, observation, sources) {
       completed.target !== selected.target || completed.representation !== selected.representation ||
       textKeys.some(key => typeof completed[key] !== 'string'))
     throw new Error('PSC2_CHECKED_SEED_PRODUCT_RESULT');
-  if (selected.target === 'javascript' ? typeof completed.javaScript !== 'string' :
-      !Array.isArray(completed.wasm) || completed.wasm.some(byte => !Number.isInteger(byte) || byte < 0 || byte > 255))
+  if (selected.target === 'wasm' ?
+      !Array.isArray(completed.wasm) || completed.wasm.some(byte => !Number.isInteger(byte) || byte < 0 || byte > 255) :
+      typeof completed[outputKey] !== 'string')
     throw new Error('PSC2_CHECKED_SEED_PRODUCT_BYTES');
   observation.generatedBytes = textKeys.reduce((sum, key) => sum + Buffer.byteLength(completed[key]), 0) +
-    (selected.target === 'javascript' ? Buffer.byteLength(completed.javaScript) : completed.wasm.length);
+    (selected.target === 'wasm' ? completed.wasm.length : Buffer.byteLength(completed[outputKey]));
   if (observation.generatedBytes > limits.generatedBytes)
     throw checkedSeedExhausted('generatedBytes', limits.generatedBytes, observation.generatedBytes);
-  const payload = selected.target === 'javascript' ? completed.javaScript : Uint8Array.from(completed.wasm);
+  const payload = selected.target === 'wasm' ? Uint8Array.from(completed.wasm) : completed[outputKey];
   const stages = Object.freeze(Object.fromEntries(stageKeys.map(key => [key, completed[key]])));
   const bound = { maxBytes: limits.generatedBytes };
   const ir = checkedIrStageArtifacts(stages, bound), target = checkedTargetIrStageArtifacts(stages, bound);
@@ -78,7 +85,7 @@ function seedDirectProduct(completed, selected, limits, observation, sources) {
   if (uniform) {
     verifyUniformSpecialization(ir.verifiedIr, selectedIr, bound);
     assertJsDeclarationInventory(decodeIrArtifact(ir.verifiedIr.bytes, bound), decodeJsIrArtifact(target.jsIr.bytes, bound));
-  } else verifySpecializationCorrespondence(ir.verifiedIr, selectedIr, bound);
+  } else if (selected.target !== 'rust') verifySpecializationCorrespondence(ir.verifiedIr, selectedIr, bound);
   if (api) {
     decodePublicApi(Buffer.from(completed.publicApi), bound);
     decodeErasureDeclarations(Buffer.from(completed.erasureCorrespondence), {
@@ -168,7 +175,7 @@ export async function runCheckedSeedSession({
   const stderr = [];
   try {
     await writeFile(sourceFile, snapshot, 'utf8');
-    child = spawn(path.resolve(binaryPath), [`--session-${selected ? (selected.wasmPolicy ? 'products-v2-' : 'products-') : ''}${sources === undefined ? '' : 'modules-'}${sourceKind}`, sourceFile], {
+    child = spawn(path.resolve(binaryPath), [`--session-${selected ? (selected.target === 'rust' ? 'products-v3-' : selected.wasmPolicy ? 'products-v2-' : 'products-') : ''}${sources === undefined ? '' : 'modules-'}${sourceKind}`, sourceFile], {
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });
@@ -242,7 +249,7 @@ export async function runCheckedSeedSession({
     const completed = await nextFrame(emit ? 'emitted' : 'checked');
     let directProduct;
     if (emit && selected) {
-      const captured = seedDirectProduct(completed, selected, limits, observation, inputSources);
+      const captured = seedSelectedProduct(completed, selected, limits, observation, inputSources);
       directProduct = captured.product;
       if (captured.declarationRequest !== undefined) {
         child.stdin.end(captured.declarationRequest + '\n');

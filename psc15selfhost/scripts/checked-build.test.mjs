@@ -576,10 +576,32 @@ for (const products of ['source', 'metadata']) test('checked Rust ' + products +
     }
   });
 
-test('Rust source route rejects incompatible policy and unavailable native emission before loading files', async () => {
+test('Rust source route rejects incompatible policy before loading files', async () => {
   for (const [options, pattern] of [
-    [{ seedPath: 'missing-seed' }, /RUST_NATIVE_TRANSPORT_UNAVAILABLE/],
     [{ jsAbiPolicyPath: 'missing-policy' }, /JS_ABI_TARGET/],
     [{ outputPath: 'out.js' }, /OUTPUT_KIND/],
   ]) await assert.rejects(buildChecked({ entryPath: 'missing-source', outputPath: 'out.rs', backend: 'rust', ...options }), pattern);
 });
+
+test('actual native generic Rust source publishes a shared source bundle with bounded version-3 transport',
+  { skip: !native }, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'psc-native-rust-source-'));
+    try {
+      const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.rs');
+      await writeFile(entryPath, 'def identity (A : Type) (value : A) : A := value\ndef answer : Nat := identity Nat 42\n');
+      const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'lean434',
+        backend: 'rust', products: 'metadata', archiveResourceLimits: nativeArchiveLimits });
+      assert.equal(receipt.seedProductProtocol, 'psc-checked-seed-products/3');
+      assert.equal(receipt.seedResources.observed.frames, 2);
+      assert.equal(receipt.rustTarget.compilerInvoked, false);
+      assert.match(await readFile(outputPath, 'utf8'), /pub fn identity/);
+      assert.ok(receipt.publicApi && receipt.erasureMap);
+      const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json')));
+      assertPasses(graph, ['psc-verified-ir-to-rust/1']);
+      const bundle = JSON.parse(await readFile(path.join(dir, 'out.artifact-bundle.json')));
+      assert.deepEqual(bundle.executableArtifacts.map(item => item.role), ['target-source']);
+      const replay = await verifyObservedBuildArchive(await readFile(path.join(dir, 'out.build-archive.json')),
+        { expectedGraphId: receipt.buildGraph, allowedAssumptions: allowedAssumptionsFromGraph(graph), resourceLimits: nativeArchiveLimits });
+      assert.equal(replay.kind, 'accepted', replay.reason); assert.equal(replay.preservationVerified, false);
+    } finally { await rm(dir, { recursive: true, force: true }); }
+  });

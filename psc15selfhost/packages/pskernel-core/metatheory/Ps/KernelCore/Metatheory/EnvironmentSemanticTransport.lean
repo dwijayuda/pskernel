@@ -514,3 +514,70 @@ theorem psKernelSessionWithEnvironment_configuration_preserves
     PsKernelCheckerStateSemanticSound.environment_weaken
       session.context.environment environment session.context.localContext
       session.state hExt hConfig.1 hIndex hConfig.2.2⟩
+
+/--
+Replacing metadata for a name introduced by the transaction preserves every
+other authoritative lookup. Positive comparator soundness suffices here;
+negative occurrence exclusion is not involved.
+-/
+theorem psKernelReplaceEnvironmentConstant_preserves_other_lookup
+    (hString : PsKernelStringEqSoundLaw)
+    (replacement : PsKernelConstantInfo)
+    (name : PsKernelName)
+    (hDifferent : name ≠ psKernelConstantInfoName replacement)
+    (constants : List PsKernelConstantInfo) :
+    psKernelFindConstantInList name
+      (psKernelReplaceEnvironmentConstant
+        (psKernelConstantInfoName replacement) replacement constants) =
+      psKernelFindConstantInList name constants := by
+  induction constants with
+  | nil => rfl
+  | cons info rest ih =>
+      cases hTarget : psKernelNameEq (psKernelConstantInfoName info)
+          (psKernelConstantInfoName replacement) with
+      | false =>
+          simp [psKernelReplaceEnvironmentConstant, hTarget,
+            psKernelFindConstantInList, ih]
+      | true =>
+          have hSame := psKernelNameEq_sound_of_string_law hString
+            (psKernelConstantInfoName info) (psKernelConstantInfoName replacement) hTarget
+          have hReplacementQuery :
+              psKernelNameEq (psKernelConstantInfoName replacement) name = false := by
+            cases hEq : psKernelNameEq (psKernelConstantInfoName replacement) name with
+            | false => rfl
+            | true =>
+                exact False.elim (hDifferent
+                  (psKernelNameEq_sound_of_string_law hString
+                    (psKernelConstantInfoName replacement) name hEq).symm)
+          have hInfoQuery : psKernelNameEq (psKernelConstantInfoName info) name = false := by
+            simpa [hSame] using hReplacementQuery
+          simp [psKernelReplaceEnvironmentConstant, hTarget,
+            psKernelFindConstantInList, hReplacementQuery, hInfoQuery]
+
+/--
+An inductive transaction can update its newly introduced metadata without
+claiming that the provisional metadata itself was preserved. The extension
+is relative to the original environment where the transaction name was absent.
+-/
+theorem psKernelEnvironmentReplaceUnchecked_fresh_origin_semantic_extends
+    (older work : PsKernelEnvironment)
+    (replacement : PsKernelConstantInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hExt : PsKernelEnvironmentSemanticExtends older work)
+    (hFresh : psKernelFindConstantInList
+      (psKernelConstantInfoName replacement) older.constants = none) :
+    PsKernelEnvironmentSemanticExtends older
+      (psKernelEnvironmentReplaceUnchecked work replacement) := by
+  refine ⟨?_, fun h => hExt.2 h⟩
+  intro name info hFind
+  have hDifferent : name ≠ psKernelConstantInfoName replacement := by
+    intro hSame
+    subst name
+    rw [hFresh] at hFind
+    cases hFind
+  change psKernelFindConstantInList name
+    (psKernelReplaceEnvironmentConstant
+      (psKernelConstantInfoName replacement) replacement work.constants) = some info
+  rw [psKernelReplaceEnvironmentConstant_preserves_other_lookup
+    hString replacement name hDifferent work.constants]
+  exact hExt.1 name info hFind

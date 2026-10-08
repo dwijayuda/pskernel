@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.EnvironmentReplaceIndexConfiguration
 import Ps.KernelCore.Metatheory.AdmissionConstructorHistoryConfiguration
 import Ps.KernelCore.Metatheory.AdmissionInductiveNamesConfiguration
 import Ps.KernelCore.Metatheory.AdmissionHeaderSpineConfiguration
@@ -459,3 +460,80 @@ theorem PsKernelCheckedOrdinaryConstructorHistory.exact_extension
       · simpa [PsKernelEnvironmentExtendsBy, psKernelOrdinaryConstructorHistoryInfos,
           psKernelEnvironmentAddUnchecked, List.reverse_cons, List.append_assoc] using ih.1
       · exact ih.2
+
+/-- Fresh constructor publication preserves every previously resolved constant. -/
+theorem PsKernelCheckedOrdinaryConstructorHistory.semantic_extension
+    (hString : PsKernelStringEqSoundLaw)
+    {decl : PsKernelSimpleInductiveDecl} {levels : List PsKernelLevel}
+    {params : List PsKernelOpenBinder} {numIndices : Nat}
+    {resultLevel : PsKernelLevel} {headerLocal : PsKernelLocalContext}
+    {work finalEnvironment : PsKernelEnvironment} {index : Nat}
+    {ctors : List PsKernelSimpleConstructorDecl}
+    {shapes : List PsKernelSimpleConstructorShape}
+    (hHistory : PsKernelCheckedOrdinaryConstructorHistory decl levels params
+      numIndices resultLevel headerLocal work index ctors shapes finalEnvironment) :
+    PsKernelEnvironmentSemanticExtends work finalEnvironment := by
+  induction hHistory with
+  | done work index => exact PsKernelEnvironmentSemanticExtends.refl work
+  | step work index ctor rest tailShapes finalEnvironment inferredType level
+      fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
+      apply PsKernelEnvironmentSemanticExtends.trans work _ finalEnvironment _ ih
+      apply psKernelEnvironmentAddUnchecked_fresh_semantic_extends _ _ hString
+      exact hFresh
+
+/--
+Updating the provisional inductive flags preserves the original environment and
+the authoritative index. Provisional metadata remains present through the
+constructor history; its replacement is not asserted to preserve its old value.
+-/
+theorem PsKernelCheckedOrdinaryConstructorHistory.final_metadata_refines
+    (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    (environment : PsKernelEnvironment)
+    (decl : PsKernelSimpleInductiveDecl) (headerIndices : List PsKernelOpenBinder)
+    (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+    (resultLevel : PsKernelLevel) (headerLocal : PsKernelLocalContext)
+    (ctors : List PsKernelSimpleConstructorDecl)
+    (shapes : List PsKernelSimpleConstructorShape)
+    (ctorEnvironment : PsKernelEnvironment)
+    (replacement : PsKernelInductiveInfo)
+    (hName : replacement.base.name = decl.name)
+    (hFresh : psKernelFindConstantInList decl.name environment.constants = none)
+    (hIndex : PsKernelEnvironmentIndexRefines ctorEnvironment)
+    (hHistory : PsKernelCheckedOrdinaryConstructorHistory decl levels params
+      (psKernelOpenBinderListLength headerIndices) resultLevel headerLocal
+      (psKernelEnvironmentAddUnchecked environment (PsKernelConstantInfo.inductInfo
+        (psKernelOrdinaryInitialInductiveInfo decl headerIndices)))
+      0 ctors shapes ctorEnvironment) :
+    PsKernelEnvironmentSemanticExtends environment
+      (psKernelEnvironmentReplaceUnchecked ctorEnvironment
+        (PsKernelConstantInfo.inductInfo replacement)) ∧
+    PsKernelEnvironmentIndexRefines
+      (psKernelEnvironmentReplaceUnchecked ctorEnvironment
+        (PsKernelConstantInfo.inductInfo replacement)) := by
+  let initialInfo := psKernelOrdinaryInitialInductiveInfo decl headerIndices
+  let initialEnvironment := psKernelEnvironmentAddUnchecked environment
+    (PsKernelConstantInfo.inductInfo initialInfo)
+  have hOriginal : PsKernelEnvironmentSemanticExtends environment initialEnvironment := by
+    apply psKernelEnvironmentAddUnchecked_fresh_semantic_extends _ _ hString
+    exact hFresh
+  have hCtorExt : PsKernelEnvironmentSemanticExtends initialEnvironment ctorEnvironment :=
+    hHistory.semantic_extension hString
+  have hOriginalExt := PsKernelEnvironmentSemanticExtends.trans
+    environment initialEnvironment ctorEnvironment hOriginal hCtorExt
+  have hPresent : psKernelFindConstantInList decl.name initialEnvironment.constants =
+      some (PsKernelConstantInfo.inductInfo initialInfo) := by
+    simp [initialEnvironment, initialInfo, psKernelOrdinaryInitialInductiveInfo,
+      psKernelEnvironmentAddUnchecked, psKernelFindConstantInList,
+      psKernelConstantInfoName, psKernelConstantInfoBase,
+      psKernelNameEq_refl_of_string_law hReflexive decl.name]
+  refine ⟨?_, ?_⟩
+  · apply psKernelEnvironmentReplaceUnchecked_fresh_origin_semantic_extends
+      environment ctorEnvironment (PsKernelConstantInfo.inductInfo replacement)
+      hString hOriginalExt
+    simpa [psKernelConstantInfoName, psKernelConstantInfoBase, hName] using hFresh
+  · apply psKernelEnvironmentReplaceUnchecked_index_refines ctorEnvironment
+      (PsKernelConstantInfo.inductInfo replacement)
+      (PsKernelConstantInfo.inductInfo initialInfo) hIndex
+    simpa [psKernelConstantInfoName, psKernelConstantInfoBase, hName] using
+      hCtorExt.1 decl.name (PsKernelConstantInfo.inductInfo initialInfo) hPresent

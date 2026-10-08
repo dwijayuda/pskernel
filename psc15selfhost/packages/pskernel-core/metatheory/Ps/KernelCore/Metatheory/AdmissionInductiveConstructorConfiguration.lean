@@ -139,7 +139,21 @@ theorem psKernelAddSimpleConstructorsWithFuel_index_refines
                                           psKernelAddSimpleConstructorsWithFuel
                                             remaining decl safety resultLevel
                                             levels params numIndices headerSession
-                                            nextWork (Nat.succ index) rest with
+                                            (psKernelEnvironmentAddUnchecked
+                                              work
+                                              (PsKernelConstantInfo.ctorInfo
+                                                (PsKernelConstructorInfo.mk
+                                                  (PsKernelConstantBase.mk
+                                                    ctor.name
+                                                    decl.levelParams
+                                                    ctor.type)
+                                                  decl.name
+                                                  index
+                                                  decl.numParams
+                                                  (psKernelOpenBinderListLength
+                                                    fieldsResult.fields)
+                                                  decl.isUnsafe)))
+                                            (Nat.succ index) rest with
                                       | error error =>
                                           simp only [hTail] at hRun
                                           cases hRun

@@ -121,7 +121,7 @@ macro_rules
 /-- A one-term braced body is grouping, not a record/object literal. -/
 syntax (name := pscvBracedExpression) "{" term "}" : term
 
-macro_rules
+macro_rules (kind := pscvBracedExpression)
   | `({ $inside:term }) => `(($inside:term))
 
 /-- Pure/verified function declarations can have one-sided contracts. A missing

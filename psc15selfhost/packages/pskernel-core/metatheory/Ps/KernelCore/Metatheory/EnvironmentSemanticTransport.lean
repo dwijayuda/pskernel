@@ -342,3 +342,51 @@ theorem PsKernelTypingJudgment.environment_weaken
 termination_by structural h
 
 end
+
+
+theorem psKernelEnvironmentAddUnchecked_fresh_semantic_extends
+    (environment : PsKernelEnvironment)
+    (added : PsKernelConstantInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hFresh : psKernelFindConstantInList
+      (psKernelConstantInfoName added) environment.constants = none) :
+    PsKernelEnvironmentSemanticExtends environment
+      (psKernelEnvironmentAddUnchecked environment added) := by
+  refine ⟨?_, fun h => h⟩
+  intro name info hFind
+  cases hCollision : psKernelNameEq (psKernelConstantInfoName added) name with
+  | true =>
+      have hName := psKernelNameEq_sound_of_string_law
+        hString (psKernelConstantInfoName added) name hCollision
+      have hAbsent : psKernelFindConstantInList name environment.constants = none := by
+        simpa [hName] using hFresh
+      rw [hAbsent] at hFind
+      cases hFind
+  | false =>
+      simpa [psKernelEnvironmentAddUnchecked, psKernelFindConstantInList,
+        hCollision] using hFind
+
+theorem PsKernelCheckerStateSemanticSound.environment_weaken
+    (older newer : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (state : PsKernelCheckerState)
+    (hExt : PsKernelEnvironmentSemanticExtends older newer)
+    (hState : PsKernelCheckerStateSemanticSound older localContext state) :
+    PsKernelCheckerStateSemanticSound newer localContext state := by
+  rcases hState with ⟨hInferOnly, hChecked, hCore, hWhnf, hUnfold, hSuccess⟩
+  refine ⟨True.intro, ?_, ?_, ?_, ?_, ?_⟩
+  · intro expr result hGet
+    exact PsKernelTypingJudgment.environment_weaken older newer hExt
+      (hChecked expr result hGet)
+  · intro expr result hGet
+    exact PsKernelReductionClosure.environment_weaken older newer hExt
+      (hCore expr result hGet)
+  · intro expr result hGet
+    exact PsKernelReductionClosure.environment_weaken older newer hExt
+      (hWhnf expr result hGet)
+  · intro expr result hGet
+    exact PsKernelReductionClosure.environment_weaken older newer hExt
+      (hUnfold expr result hGet)
+  · intro left right hContains
+    exact PsKernelDefEqJudgment.environment_weaken older newer hExt
+      (hSuccess left right hContains)

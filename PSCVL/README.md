@@ -1,99 +1,42 @@
-# PSCVL — Lean-powered experimental PSCV frontend
+# PSCVL — Lean-powered ProofScript/PSCV frontend (experimental)
 
-**Status: narrow implementation prototype, NOT a PSCV-certified compiler.**
+**Status: executable frontend + experimental verification preflight, NOT full PSCV v1 conformance or a certified compiler.**
 
-PSCVL is an independent Lean-written implementation lane on the `main` branch.
-It delegates parsing of Lean-compatible source, macro expansion, elaboration,
-dependent type checking and kernel checking to **official Lean 4.35.0-rc3**.
-It does not copy/replace `pscv0`, `psc15selfhost`, `pskernel-lean`,
-`pskernel-lean-wasm`, or any PSKernel checker.
+Source: [normative PSCV language reference](../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md) §2, §8–10, §21, §28–32 and Appendices A/F/I/J. Compiler architecture: [PSCV V6](../pscv0/THE_PSCV_COMPILER_REFERENCE_VERSION_6.md). Pin: **official Lean 4.35.0-rc3**. This is a **separate Lean-powered experiment** from V6's eventual standalone-native PSCV compiler, not a revision of its accepted architecture.
 
-## Normative basis
-
-- [PSCV verified language reference](../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md):
-  §§2, 8–9, 21, 28–30, 32 and appendices A/F/I.
-- [PSCV V6 compiler reference](../pscv0/THE_PSCV_COMPILER_REFERENCE_VERSION_6.md).
-- [Language authority lock](../pscv0/language-authority.json)
-  (`ps-0.9-r3`, `pscv-v1`, `pscv-closed-v1`, `PSCV-VERIFY-v1`,
-  `PSCV-CERT-v1`, official Lean 4.35.0-rc3 reference pin).
-
-**Important architecture difference:** PSCVL deliberately uses the Lean
-frontend *at build/check time*, whereas V6 proposes a standalone native PSCV
-frontend. This is an experimental, separate shortcut to explore development
-cost and reuse—not a silent revision of the V6 architectural contract.
-
-## Build and check
-
-Requires `elan` / `lake` and the pinned Lean toolchain. From `PSCVL/`:
+From `PSCVL/` with the pinned Lean toolchain installed:
 
 ```sh
 lake build
-lake exe pscvl check examples/pass.ps
+lake exe pscvl check examples/pass_language.ps
+lake exe pscvl check examples/pass_state.ps
+lake exe pscvl check examples/pass_while.ps
 ```
 
-Negative examples must fail:
+The CLI accepts only `check FILE.ps`. A successful check prints **UNCERTIFIED**. It does not generate native code, a Lean module, `.olean`, a `PSCV-CERT-v1`, or any executable artifact. No verified emission occurs.
 
-```sh
-! lake exe pscvl check examples/fail_unsafe.ps
-! lake exe pscvl check examples/fail_partial.ps
-! lake exe pscvl check examples/fail_axiom.ps
-! lake exe pscvl check examples/fail_sorry.ps
-! lake exe pscvl check examples/fail_missing_spec.ps
-```
+## Implemented in Lean (.lean)
 
-The check works in-process with `Lean.Elab.process`: Lean does the
-real parsing/elaboration, and a mandatory, driver-injected `#pscv_gate`
-inspects local elaborated constant information and transitive axioms of
-marked executable roots. It does **not** emit binaries, Lean objects, or
-`PSCV-CERT-v1` certificates.
+- `PSCVL/Syntax.lean` adds bounded ProofScript spellings: `const`, `function f(x: A, y: B)`, implicit/instance binders, explicit defaults, the optional-`Unit` zero-source-argument convention, adjacent curried calls `f(a,b)`, a finite `refine type` to Lean `Subtype`, and one-sided/two-sided `requires`/`ensures` function syntax. Some braced single-expression and `if (c) {a} else {b}` forms are supported after CI validation. Not all PSCV grammar forms exist.
+- Lean's native `def`, `theorem`, `example`, `structure`, `inductive`, `instance`, `match`, total recursion, dependent types and tactics cover their Lean-compatible subsets. This is *not* a faithful implementation of every PSCV-specific lexical/layout/grammar restriction.
+- The pinned Lean `Std.WP` intrinsic `requires`/`ensures`, proof-only `assert`, and annotated `for`/`while` can produce checked specification theorems and reject open verification conditions. Current exercised effect families include `Id` and `StateM`. The upstream facilities are experimental; PSCV verification semantics must be frozen and validated independently.
+- `PSCVL/Grammar.lean` checks a conservative set of *top-level* Lean AST command kinds before elaboration; rejects source imports, parser/extension commands, several proof escapes and unapproved attributes. This **does not fully restrict nested expression, tactic, notation, or macro syntax** to Appendix A. Source is trusted input; it is not a sandbox.
+- `PSCVL/Policy.lean` requires at least one `@[pscv_export, pscv_type_spec]` root, rejects local `axiom`, `unsafe` and `partial` declarations, checks local declarations' transitive axiom use (allowing only `propext`, `Quot.sound`, `Classical.choice`), and rejects directly `noncomputable` executable roots and direct raw-`IO` export types. This is **preliminary** and not a dependency/effect-closure certification.
 
-## Current source contract
+`pscv_type_spec` is only a developer annotation, **not an externally approved spec identity**. Lean kernel acceptance and theorem closure are **not** proof of application-level specification coverage or compiler preservation.
 
-- File extension `.ps`. The Lean-compatible `def`, `theorem`, `example`
-  and core term syntax is accepted through the official Lean frontend.
-- Demonstration ProofScript aliases: `const name : T := expr`;
-  `function name(x : T) : U := expr`;
-  `function name(x : T, y : U) : V := expr`. These are limited syntax macros
-  that lower to ordinary Lean `def`, not independent elaboration/type rules.
-- At least one executable `def` must be tagged
-  `@[pscv_export, pscv_type_spec]`. The tags signal a *candidate* approved
-  specification; they do **not** authenticate an externally approved spec.
-- New local `axiom`, `unsafe`, and `partial` declarations reject.
-  Exported roots also reject transitive axioms outside `propext`,
-  `Quot.sound` and `Classical.choice`; this is a preliminary conservative
-  policy, not a complete trusted-closure audit.
-- Source `import` lines are blocked as a basic v0 usability restriction.
-  This is **not a malicious-input sandbox** or a complete grammar restriction.
+## Implementation and conformance boundaries
 
-## Not yet implemented — critical boundary
+See [CONFORMANCE.md](CONFORMANCE.md) for a chapter-to-feature matrix and evidence status. Significant incomplete work:
 
-**A green check proves neither behavioral correctness nor PSCV conformance.**
-PSCVL has no closed PSCV grammar validation, import/dependency manifest,
-approved-spec digest, executable reachability graph, comprehensive effect
-discipline, VC generation, module-by-module proof coverage, authoritative
-assumption policy, semantic backend correspondence, checked erasure,
-certification, or executable emission. Because Lean elaborators/macros run
-programs, `check` is for *trusted source only*. Untrusted npm extensions
-are not admitted or isolated.
+1. **Exact grammar** of source, term, proof, and verified-do clauses; typed named/default calls, groups, closed options/attributes/notations, and import/module graph (current module imports are intentionally blocked).
+2. **Verification semantics** independent of experimental Lean drift: complete given/requires/ensures, frame/reads/modifies, typed errors, `old`, `ghost`/noninterference, contracts at call sites, effects WP-law evidence, and explicit `verify` attachment.
+3. **Approved specification and assurance:** immutable approved identity/digest, full exported API coverage, proof and assumption closure across imports, all reachable effects, proof replay, noncomputable/FFI closure and checked erasure.
+4. **Actual compiler**: validated checked executable IR, native code production only after PSCV-CERT gate, compiler-preservation evidence, backend/runtime mappings, independently replayable certification.
+5. **Trust and distribution**: extension isolation/capability policy, dependency identity, deterministic build outputs, npm integration and full conformance testing.
 
-In particular, source definitions may typecheck successfully while lacking
-their intended behavioral specification. The simple type-spec tag cannot
-be substituted for the approved specification identity required by
-[§30](../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md#30-program-validation-and-verified-compilation).
+The CI workflow tests the supported positive fragment plus negative policy and verification cases. Passing those examples is not language coverage or certification. **Do not treat this prototype as production assured code.**
 
-## Next architecture milestones
+## Development principles
 
-1. Pre-elaboration closed grammar validation using Lean's syntax tree, not
-   raw keyword filtering; exact support/rejection matrix from appendix I.
-2. Full ProofScript binder/call/body syntax and verified contracts,
-   `requires`/`ensures`, VC generation and proof-only constructs.
-3. Immutable approved specification identity and explicit export/dependency
-   closure; separately test proof closure and coverage.
-4. Trusted extension capability firewall; input isolation.
-5. Only after all certification conditions hold: native Lean code generation
-   / artifact emission with honest `PSCV-CERT-v1` claims.
-6. Evaluate retained frontend-via-Lean versus V6 standalone compilation on
-   actual size, reliability, performance and distribution measurements.
-
-The prototype deliberately avoids duplicating a parser, elaborator, kernel
-or maintaining transitional self-host source just for historical continuity.
+Use GitHub as source of truth; implement reusable feature families and their tests rather than patches for individual examples. Do not alter the existing PSCV compiler or PSKernel-owned kernels. Never permit source options or extensions to strengthen proof authority, and never unblock executable emission based only on an annotation or a successful Lean check.

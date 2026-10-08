@@ -14,8 +14,8 @@
 |---|---|---|
 | @proofscript/pscv-core | packages/core/src/Pscv/Core/Model.lean | Lean.Declaration-based immutable candidate model |
 | @proofscript/pscv-extensions | packages/extensions/src/Pscv/Extensions/Policy.lean | Typed extension classes, reject in-process authority and closed-profile syntax changes |
-| @proofscript/pscv-kernel | packages/kernel/src/Pscv/Kernel/Checker.lean | Official Lean 4.35 kernel declaration checking, not PSCV certification |
-| @proofscript/pscv-cli | packages/cli/src/PscvDevMain.lean | Native development tool, incomplete compilation commands rejected |
+| @proofscript/pscv-kernel | packages/kernel/src/Pscv/Kernel/Checker.lean | Official Separate native Lean 4.35 kernel checker, including closed-profile axiom/unsafe declaration rejection; not PSCV certification |
+| @proofscript/pscv-cli | packages/cli/src/PscvDevMain.lean | Small native development tool without full Lean kernel import; incomplete compilation commands rejected |
 
 Build these using the pinned root lean-toolchain and lakefile.lean. npm package manifests currently ship Lean source; real native platform artifacts will be added only after measured binaries and release tests. Node .mjs is permitted for external provider oracle tests or thin launch shims but must not implement compiler, kernel authority, grammar or passes.
 

@@ -2,6 +2,7 @@ import Ps.KernelCore.Metatheory.DefEqProjectionShortcutConfiguration
 import Ps.KernelCore.Metatheory.ExprEq
 import Ps.KernelCore.Metatheory.ContextState
 import Ps.KernelCore.Metatheory.DefEqFinalConfiguration
+import Ps.KernelCore.Metatheory.DefEqLazyConfiguration
 
 /-
 Reusable concrete DefEq knot boundaries.
@@ -224,3 +225,146 @@ theorem psKernelDefEqKnot_proof_irrelevance_branch
       PsKernelDefEqJudgment.reduceCompare
         originalLeft originalRight left right
         hLeft hRight hCore⟩
+
+
+/-
+Three reusable publication bridges for the knot's final stages.  The
+implementation writes a success-cache entry for the *original* pair.  Such
+publication is sound only after the positive intermediate result has been
+transported back through actual reduction closures.
+-/
+theorem psKernelDefEqKnot_publish_optional
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (originalLeft originalRight left right : PsKernelExpr)
+    (inputValue outputValue : Bool)
+    (hLeft :
+      PsKernelReductionClosure
+        context.environment context.localContext originalLeft left)
+    (hRight :
+      PsKernelReductionClosure
+        context.environment context.localContext originalRight right)
+    (hPost :
+      PsKernelOptionalDefEqPostcondition
+        context state left right (Option.some inputValue))
+    (hRun :
+      (Except.ok
+          (psKernelDefEqFinish
+            state originalLeft originalRight inputValue) :
+        Except String (Prod Bool PsKernelCheckerState)) =
+      Except.ok (Prod.mk outputValue nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (outputValue = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext
+          originalLeft originalRight) := by
+  have hLift :=
+    psKernelDefEqKnot_lift_optional
+      context state originalLeft originalRight
+      left right (Option.some inputValue)
+      hLeft hRight hPost
+  exact
+    psKernelDefEqFinish_result_sound_ok
+      context state nextState
+      originalLeft originalRight inputValue outputValue
+      hLift.1
+      (fun hTrue =>
+        hLift.2 (congrArg Option.some hTrue))
+      hRun
+
+
+theorem psKernelDefEqKnot_publish_recursive_comparison
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (context : PsKernelCheckerContext)
+    (state comparedState nextState : PsKernelCheckerState)
+    (originalLeft originalRight left right : PsKernelExpr)
+    (inputValue outputValue : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hLeft :
+      PsKernelReductionClosure
+        context.environment context.localContext originalLeft left)
+    (hRight :
+      PsKernelReductionClosure
+        context.environment context.localContext originalRight right)
+    (hCompare :
+      defeq context state left right =
+        Except.ok (Prod.mk inputValue comparedState))
+    (hRun :
+      (Except.ok
+          (psKernelDefEqFinish
+            comparedState originalLeft originalRight inputValue) :
+        Except String (Prod Bool PsKernelCheckerState)) =
+      Except.ok (Prod.mk outputValue nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (outputValue = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext
+          originalLeft originalRight) := by
+  have hCompared :=
+    hDefEq
+      context state comparedState left right inputValue
+      hConfig hCompare
+  exact
+    psKernelDefEqKnot_finish_after_reduction
+      context comparedState nextState
+      originalLeft originalRight left right
+      inputValue outputValue
+      hCompared.1 hLeft hRight hCompared.2 hRun
+
+
+theorem psKernelDefEqKnot_publish_delta_decision
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (originalLeft originalRight left right : PsKernelExpr)
+    (inputValue outputValue : Bool)
+    (hLeft :
+      PsKernelReductionClosure
+        context.environment context.localContext originalLeft left)
+    (hRight :
+      PsKernelReductionClosure
+        context.environment context.localContext originalRight right)
+    (hDelta :
+      PsKernelDeltaResultPostcondition
+        context state left right
+        (PsKernelDeltaResult.decided inputValue))
+    (hRun :
+      (Except.ok
+          (psKernelDefEqFinish
+            state originalLeft originalRight inputValue) :
+        Except String (Prod Bool PsKernelCheckerState)) =
+      Except.ok (Prod.mk outputValue nextState)) :
+    PsKernelCheckerConfigurationSound context nextState ∧
+      (outputValue = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext
+          originalLeft originalRight) := by
+  have hOriginal :=
+    psKernelDeltaResultPostcondition_transport
+      context state
+      originalLeft originalRight left right
+      (PsKernelDeltaResult.decided inputValue)
+      hLeft hRight hDelta
+  have hSemantic :
+      inputValue = true ->
+        PsKernelDefEqJudgment
+          context.environment context.localContext
+          originalLeft originalRight := by
+    cases inputValue with
+    | false =>
+        intro hFalse
+        cases hFalse
+    | true =>
+        intro _
+        exact hOriginal.2
+  exact
+    psKernelDefEqFinish_result_sound_ok
+      context state nextState
+      originalLeft originalRight inputValue outputValue
+      hOriginal.1 hSemantic hRun

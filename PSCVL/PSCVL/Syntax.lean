@@ -27,8 +27,9 @@ syntax ident ":" term ":=" term : pscvBinder
 
 declare_syntax_cat pscvNonExplicitBinder
 syntax "{" ident ":" term "}" : pscvNonExplicitBinder
-syntax "⦃" ident ":" term "⦄" : pscvNonExplicitBinder
+syntax "{{" ident ":" term "}}" : pscvNonExplicitBinder
 syntax "[" ident ":" term "]" : pscvNonExplicitBinder
+syntax "[" term "]" : pscvNonExplicitBinder
 
 private def explicitLeanBinders (bs : Array (TSyntax `pscvBinder)) :
     MacroM (Array (TSyntax ``Lean.Parser.Term.bracketedBinder)) := do
@@ -53,10 +54,12 @@ private def nonExplicitLeanBinders (bs : Array (TSyntax `pscvNonExplicitBinder))
     match b with
     | `(pscvNonExplicitBinder| {$x:ident : $t:term}) =>
         result := result.push (← `(bracketedBinder| {$x:ident : $t:term}))
-    | `(pscvNonExplicitBinder| ⦃$x:ident : $t:term⦄) =>
+    | `(pscvNonExplicitBinder| {{$x:ident : $t:term}}) =>
         result := result.push (← `(bracketedBinder| ⦃$x:ident : $t:term⦄))
     | `(pscvNonExplicitBinder| [$x:ident : $t:term]) =>
         result := result.push (← `(bracketedBinder| [$x:ident : $t:term]))
+    | `(pscvNonExplicitBinder| [$t:term]) =>
+        result := result.push (← `(bracketedBinder| [$t:term]))
     | _ => Macro.throwUnsupported
   return result
 

@@ -360,6 +360,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.DefEqKnotConfiguration,
     `Ps.KernelCore.Metatheory.CheckerKnotConfiguration,
     `Ps.KernelCore.Metatheory.SessionConcreteRefinement,
+    `Ps.KernelCore.Metatheory.PublicKernelConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionDefinitionConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionHeaderConfiguration,
     `Ps.KernelCore.Metatheory.CheckerInitialConfiguration,

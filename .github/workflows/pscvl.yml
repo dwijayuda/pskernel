@@ -2,7 +2,7 @@ name: PSCVL Lean-powered frontend
 
 on:
   push:
-    branches: [main, feature/pscvl-lean-frontend]
+    branches: [main, feature/pscvl-lean-frontend, feature/pscvl-normative-grammar]
     paths:
       - 'PSCVL/**'
       - '.github/workflows/pscvl.yml'

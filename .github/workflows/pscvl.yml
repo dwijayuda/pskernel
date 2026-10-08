@@ -102,7 +102,7 @@ jobs:
             local input="$1" expected="$2"
             local output rc
             set +e
-            output=$(lake exe pscvl check "$input" 2>&1)
+            output=$(lake exe pscvl check-preview "$input" 2>&1)
             rc=$?
             set -e
             printf '%s\n' "$output"

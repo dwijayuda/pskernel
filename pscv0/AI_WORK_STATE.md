@@ -10,6 +10,18 @@
 - Current specification authority: [PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md](PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md).
 - Layout commit archives historical documentation and the unreferenced `pskernel-core.old2` snapshot. It deliberately retains operational compiler/packages/host/scripts/test closures and all four backends, so a new V6 implementation can be staged without destroying the existing baseline.
 
+## 2026-10-08 V6 kernel-first npm core checkpoint
+
+Implementation branch: [pscv/v6-minimal-npm-core](https://github.com/dwijayuda/pskernel/tree/pscv/v6-minimal-npm-core/pscv0/v6), draft [PR #83](https://github.com/dwijayuda/pskernel/pull/83).
+
+- **Clean V6 source:** four small npm packages (pscv-core, pscv-kernel, pscv-extensions, pscv-cli) under v6/. They have no source imports from prior PSC2/PSC1/self-host compiler or backend implementation. No compatibility preservation is required when implementing the new compiler.
+- **Live official-provider integration:** pskernel-lean 4.34 native and pskernel-lean-wasm 4.34 through public npm exports, exact provider identities, bounded v2 admission envelopes, native override and checkout fallback disabled, Wasm bundled verification retained.
+- **Negative authority tests:** E5/E6/U3, unknown extension fields, unsafe paths, closed PSCV/Standard E1 syntax, false verified-build claims and provider envelope errors fail closed.
+- **Cloud evidence:** PSCV V6 minimal npm core run [37755747470](https://github.com/dwijayuda/pskernel/actions/runs/37755747470) passed both jobs. Real native/Wasm provider job tested 10 cases, all passed: valid fully closed theorem, bogus proof body of the same proposition, invalid theorem, unsupported declaration and empty admissions for both transports. Unit job and package tarball dry-run passed independently.
+- **Not implementation complete:** this P0 does not parse/elaborate .ps, issue PSCV-CERT, compile TS/JS/Wasm/Rust, prove source/Lean correspondence, sandbox running plugin code, or publish npm packages. build/verify deliberately reject. Normative PSCV pin is Lean 4.35-rc3; provider 4.34 cannot be silently treated as verified-profile compatible.
+
+Next work: build the real small PSCV frontend and checked Core from the normative grammar (not port old source), introduce a native checked-session issuer, then exact-proof obligations and .proof.lean bridge. Keep compiler source/interface clean and archive/delete superseded implementation only when replacement functionality and regression evidence exist. Do not modify kernel internals; separate workstream owns soundness and promotion.
+
 ## Pending implementation tasks
 
 1. Verify unchanged functional baseline and clean-machine native `psc` closure.

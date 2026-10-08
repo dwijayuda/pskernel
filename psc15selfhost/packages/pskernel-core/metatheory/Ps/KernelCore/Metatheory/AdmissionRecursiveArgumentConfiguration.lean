@@ -787,9 +787,10 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                                 resultLevel
                                 (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
                                 (field :: revFields) nextRecursive = Except.ok result := by
-                            simpa [psKernelOpenSimpleConstructorFieldsWithFuel,
-                              hCheck, hSort, hAllowed, opened, field,
-                              hAnalysis, child, nextRecursive] using hRun
+                            cases hInfo : analysis.recursiveInfo <;>
+                              simpa [psKernelOpenSimpleConstructorFieldsWithFuel,
+                                hCheck, hSort, hAllowed, opened, field,
+                                hAnalysis, child, nextRecursive, hInfo] using hRun
                           rcases ih child target levels params numIndices resultLevel
                             (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
                             (field :: revFields) nextRecursive result hChildConfig hTailRun
@@ -861,8 +862,10 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                               (by simpa [opened, psKernelSessionWithLocal,
                                 psKernelCheckerContextWithLocalContext,
                                 hSortContext, hCheckContext] using hScopeHistory)
-                              (by simpa [hChildEnv, field, nextRecursive]
-                                using hFinalHistory hReflexive)
+                              (by
+                                cases hInfo : analysis.recursiveInfo <;>
+                                  simpa [hChildEnv, field, nextRecursive, hInfo]
+                                    using hFinalHistory hReflexive)
       | _ =>
           simp only [psKernelOpenSimpleConstructorFieldsWithFuel] at hRun
           cases hRun

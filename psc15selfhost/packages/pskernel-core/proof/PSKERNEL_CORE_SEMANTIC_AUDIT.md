@@ -13,10 +13,10 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 44 |
-| B | 9 |
-| C | 19 |
-| D | 7 |
+| A | 50 |
+| B | 6 |
+| C | 17 |
+| D | 6 |
 | **Total canonical source/proof pairs** | **79** |
 
 The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and is used when grading `Checker/Inference/Core`; it is not one of the 79 canonical source/proof pairs.
@@ -28,18 +28,18 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `API/Kernel.lean` | **A** | Public check-expression, WHNF, and true-defeq successes now refine independent typing/reduction/defeq judgments under explicit checker-operation soundness contracts; fail-closed orchestration remains proved. |
 | `API/KernelContractV1.lean` | **C** | Contract identity/version facts. |
 | `API/Outcome.lean` | **C** | Outcome classification/control facts. |
-| `API/Provider.lean` | **A** | Under explicit string-runtime reflexivity/soundness TCB laws, `psKernelProviderCompatible = true` is equivalent to exact pinned `KernelContract-v1` target identity (Lean 4.34.0 and the pinned commit). |
+| `API/Provider.lean` | **A** | Under the named positive string soundness law and an unresolved explicit string-reflexivity condition, `psKernelProviderCompatible = true` is equivalent to exact pinned `KernelContract-v1` target identity (Lean 4.34.0 and the pinned commit). |
 | `API/Session.lean` | **A** | Session environment construction is proved semantically transparent to native-evaluator installation and preserves `EnvironmentIndexRefines`, alongside fail-closed preflight facts. |
 | `Admission/Declaration/Admission.lean` | **A** | Successful checked safe-definition/theorem admission now refines the shared `PsKernelDeclarationExtension`; remaining declaration variants are being closed on the same relation. |
 | `Admission/Declaration/Validation.lean` | **A** | Successful definition-body validation refines `PsKernelDefinitionBodyValid`, including closedness, universe-parameter discipline, typing, and declared-type defeq under explicit checker soundness contracts. |
 | `Admission/Inductive/Common/Elimination.lean` | **A** | K-target is characterized exactly as Prop/zero-level + one fieldless constructor, and successful elimination-only-at-zero decisions expose the semantic reason large elimination is forbidden. |
 | `Admission/Inductive/Common/Occurrence.lean` | **A** | Successful fuel-bounded uniform-occurrence checking refines the fuel-free `PsKernelUniformOccurrenceSafe` predicate; declared occurrences certify exact parameter arity, universe levels, offset, and uniform bvar arguments. |
-| `Admission/Inductive/Common/Parameters.lean` | **B** | Reusable binder/list structure plus opening base case. |
+| `Admission/Inductive/Common/Parameters.lean` | **A** | Cross-module checked header and raw constructor parameter-spine refinement (full proof/native #732). Independent binder typing, context/freshness and exact residual evidence; not full inductive admission. |
 | `Admission/Inductive/Common/RecursorValidation.lean` | **A** | Successful recursor-rule validation refines `PsKernelSimpleRecursorRulesValid`, proving each generated rule RHS is typed and definitionally equal to the expected closed motive application under explicit session soundness contracts. |
 | `Admission/Inductive/Mutual/Admission.lean` | **C** | Selected rejection/empty transaction behavior. |
-| `Admission/Inductive/Mutual/AdmissionLoops.lean` | **D** | Empty-worker base case only. |
-| `Admission/Inductive/Mutual/Analysis.lean` | **B** | Reusable structural analysis lemmas; mutual positivity relation incomplete. |
-| `Admission/Inductive/Mutual/Header.lean` | **B** | Header/list structural invariants. |
+| `Admission/Inductive/Mutual/AdmissionLoops.lean` | **A** | Independent per-type and whole-family constructor publication histories (full proof/native #765): closed checked typing, owner-shape suffix provenance, positivity/result evidence, canonical freshness/lookup/index preservation. Mutual recursor loops and final transaction remain incomplete. |
+| `Admission/Inductive/Mutual/Analysis.lean` | **A** | Independent family-wide occurrence/index exclusion and recursive-argument positive grammar (#759), with distinct traversal/checker fuel and scope-history invariants. Comparator reflexivity is an explicit unresolved condition. |
+| `Admission/Inductive/Mutual/Header.lean` | **A** | Checked remaining-header history (#759): closed Sort typing, raw parameter and checked index spines, normalized universe equality, exact declaration/shape/name provenance. Full mutual transaction remains incomplete. |
 | `Admission/Inductive/Mutual/Recursor.lean` | **C** | Recursor worker base/control facts; semantic recursor construction incomplete. |
 | `Admission/Inductive/Nested/Admission.lean` | **C** | Reserved-name failure propagation. |
 | `Admission/Inductive/Nested/Commit.lean` | **C** | Commit helper base cases. |
@@ -51,9 +51,9 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Admission/Inductive/Nested/RestoreExpr.lean` | **C** | Lookup/map/fuel base behavior; restoration relation incomplete. |
 | `Admission/Inductive/Nested/Types.lean` | **D** | Structure eta only. |
 | `Admission/Inductive/Nested/Validation.lean` | **C** | Length/fuel control; restored-type preservation incomplete. |
-| `Admission/Inductive/Ordinary/Admission.lean` | **C** | Fresh-name empty behavior only. |
+| `Admission/Inductive/Ordinary/Admission.lean` | **A** | Actual admission success entails independent checked header/constructor-prefix semantics (#759), with canonical lookup extension and indexes. Later final metadata/K-policy (#763) is validated; complete well-formed admission and generated universe freshness are not claimed. |
 | `Admission/Inductive/Ordinary/Constructor.lean` | **A** | Successful constructor-result validation refines `PsKernelSimpleConstructorResultValid`: exact datatype head/name, universes, parameter consumption, index arity, and absence of recursive occurrences in result indices; recursive-field positivity remains a downstream obligation. |
-| `Admission/Inductive/Ordinary/ConstructorAdmission.lean` | **C** | Fuel exhaustion only. |
+| `Admission/Inductive/Ordinary/ConstructorAdmission.lean` | **A** | Independent progressively checked constructor publication history (#737/#765): checked closed typing, raw parameters/fields, positivity and recursive metadata, exact result indices, canonical freshness, ordered publication and semantic lookup/index refinement. |
 | `Admission/Inductive/Ordinary/Recursor.lean` | **B** | Recursor helper/list laws; generated-rule semantic validity incomplete. |
 | `Admission/Inductive/Types.lean` | **B** | Basic list/name/binder helper laws. |
 | `Admission/Quot/Admission.lean` | **A** | Successful Quot initialization refines the shared `PsKernelQuotExtension`, with exact four-declaration semantic history and runtime preservation. |
@@ -88,7 +88,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Core/Expr.lean` | **A** | `psKernelExprEq = true` now refines an independent structural-expression equality relation and therefore the formal non-transitive defeq judgment; spine/fvar/list helper laws remain available. |
 | `Core/Level.lean` | **A** | Under the explicit string-runtime comparator soundness law, structural level equality is sound and `psKernelLevelEquivalent = true` implies equality of normalized universe levels; offset/list normalization foundations remain supporting evidence. |
 | `Core/LocalContext.lean` | **A** | Successful authoritative local-context lookup is proved to return a declaration present in `context.decls` whose kernel name matches the queried name; add/value structural laws remain as supporting invariants. |
-| `Core/Name.lean` | **A** | Name equality now has symmetry/transitivity and, under explicit string-runtime reflexivity/soundness TCB laws, `psKernelNameEq = true ↔` actual `PsKernelName` equality. |
+| `Core/Name.lean` | **A** | Name equality now has symmetry/transitivity and, under the named positive string soundness law and an unresolved explicit string-reflexivity condition, `psKernelNameEq = true ↔` actual `PsKernelName` equality. |
 | `Core/Substitution/Abstract.lean` | **A** | Production free-variable abstraction now refines a total fuel-free reference semantics; singleton abstraction/instantiation roundtrip is being generalized over the full tree. |
 | `Core/Substitution/Beta.lean` | **A** | Single-lambda cheap beta is proved to either preserve the original term or realize the formal `PsKernelReductionStep.beta`; closed-body and identity cases remain as concrete corollaries. |
 | `Core/Substitution/Instantiate.lean` | **A** | `InstantiateAt`/`Instantiate`/`Instantiate1`/`InstantiateRev` now refine total fuel-free reference semantics; arbitrary-depth closed instantiation is proved identity. |
@@ -115,3 +115,28 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 6. Admission: formal environment-well-formedness/extension judgment for declarations and Quot.
 7. Inductives: positivity, constructor result shape, elimination, recursor generation, mutual and nested flatten/restore preservation.
 8. Public boundary: compose the above into KernelContract success => semantic judgment / well-formed extension theorems.
+
+## Evidence refresh — 2026-10-08
+
+Counts above apply the stated A/B/C/D criteria to validated cross-module evidence,
+as already done for the typing metatheory. Six grades change: three B, two C,
+and one D become A. The baseline 44/9/19/7 becomes **50/6/17/6**. Every changed
+row names its independent semantic/history theorem family and full CI checkpoint;
+no grade changes for companion presence alone. Other rows retain their prior
+grades pending the final whole-tree review.
+
+A is evidence of a nontrivial semantic/refinement theorem under its explicitly
+named conditions. It does **not** mean unconditional or complete semantic closure
+of every executable path. This is a partial evidence refresh, not the final
+acceptance audit. The total canonical source/proof pairing remains 79.
+
+Existing named trusted premises are `PsKernelNativeReductionSoundLaw` and
+`PsKernelStringEqSoundLaw`. Comparator reflexivity is unresolved and conditional,
+rather than an adopted new TCB law. The generated elimination-universe name
+requires a checked specification/distinctness bridge for the pinned opaque
+bootstrap string operations; that bridge is **unproved**, not assumed.
+See ../metatheory/PSKERNEL_CORE_INDUCTIVE_CLOSURE_BLOCKERS.md.
+
+Full ordinary environment well-formedness, mutual recursor/header transaction,
+nested flatten/rebase/restore refinement, the final Kernel/API/session theorem
+family, integration reconciliation and final conformance gates remain open.

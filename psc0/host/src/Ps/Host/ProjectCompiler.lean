@@ -285,6 +285,8 @@ def psHostElabErrorText : PsElabError -> String
   | .structuralRecursionInvariantArgument =>
       "structuralRecursionInvariantArgument"
   | .structuralRecursionInternal => "structuralRecursionInternal"
+  | .structuralRecursionDependentParameter => "structuralRecursionDependentParameter"
+  | .structuralRecursionEscapingReference => "structuralRecursionEscapingReference"
 
 def psHostParseSource
     (path source : String) : IO PsSyntaxModule := do

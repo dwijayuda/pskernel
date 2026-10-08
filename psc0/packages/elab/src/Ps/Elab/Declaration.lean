@@ -1,6 +1,6 @@
 import Ps.Core.Declaration
 import Ps.Core.Equality
-import Ps.Elab.Term
+import Ps.Elab.Recursion
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -57,7 +57,8 @@ def psElabStructuralRecursionFromSource
     (functionName : PsName)
     (bindersRev : List PsElabTypedBinder)
     (body : PsSyntaxTerm)
-    (context : PsElabContext) :
+    (context : PsElabContext)
+    (resultType : PsExpr) :
     Option PsElabStructuralRecursion :=
   match body with
   | .matchE scrutinee _ _ =>
@@ -91,7 +92,9 @@ def psElabStructuralRecursionFromSource
                               functionName
                               explicitParameterIds
                               recursiveParameterIndex
-                              List.nil)
+                              List.nil
+                              resultType
+                              true)
                   | _ =>
                       Option.none
               | none =>
@@ -157,7 +160,8 @@ def psElabDeclarationParts
                           name
                           binderResult.bindersRev
                           valueSyntax
-                          typeResult.context);
+                          typeResult.context
+                          typeResult.term);
                   match
                       psElabTerm
                         valueContext
@@ -1335,7 +1339,51 @@ def psElabDeclaration
   | .structureDecl _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
 
-def psElabDeclarationBatch
+-- Elaborate the canonical worker with the original source self name, then give
+-- its closed core declaration an internal numeric name. Recursive core terms are
+-- recursors, so this rename cannot leave an unresolved self constant behind.
+def psElabNormalizedDefinition
+    (environment : PsEnvironment) (sourceName : PsSyntaxName)
+    (normalized : PsElabStructuralNormalization) :
+    Except PsElabError PsElabDeclarationBatchResult :=
+  match psElabDeclarationParts environment sourceName
+      normalized.workerBinders normalized.workerType normalized.workerValue false with
+  | Except.error error => Except.error error
+  | Except.ok workerResult =>
+      match workerResult.declaration with
+      | PsDeclaration.definitionDecl _ levels workerType workerValue =>
+          let worker := PsDeclaration.definitionDecl
+            normalized.workerName levels workerType workerValue;
+          match psEnvironmentAdd environment worker with
+          | Option.none =>
+              Except.error (PsElabError.duplicateDeclaration normalized.workerName)
+          | Option.some workerEnvironment =>
+              let context := psElabContextWithEnvironment
+                normalized.publicContext workerEnvironment;
+              let application := psExprApplyMany
+                (PsExpr.constE normalized.workerName List.nil)
+                normalized.workerArguments;
+              match psElabResolvedTerm context application
+                  (Option.some normalized.publicType) with
+              | Except.error error => Except.error error
+              | Except.ok checked =>
+                  let meta := checked.context.metaContext;
+                  let closed := psCloseElabTypedBinders meta
+                    normalized.publicBindersRev
+                    (psMetaInstantiate meta checked.term)
+                    (psMetaInstantiate meta normalized.publicType);
+                  if psExprHasUnresolvedMeta (Prod.fst closed) then
+                    Except.error PsElabError.unresolvedMetavariable
+                  else if psExprHasUnresolvedMeta (Prod.snd closed) then
+                    Except.error PsElabError.unresolvedMetavariable
+                  else
+                    let public := PsDeclaration.definitionDecl
+                      normalized.publicName List.nil (Prod.snd closed) (Prod.fst closed);
+                    Except.ok (PsElabDeclarationBatchResult.mk
+                      (List.cons worker (List.cons public List.nil)))
+      | _ => Except.error PsElabError.structuralRecursionInternal
+
+def psElabDeclarationBatchStable
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
     Except PsElabError PsElabDeclarationBatchResult :=
@@ -1362,6 +1410,30 @@ def psElabDeclarationBatch
           Except.ok
             (PsElabDeclarationBatchResult.mk
               (List.cons result.declaration List.nil))
+
+-- Historical callers can request the stable single/batch elaborator explicitly.
+-- The ordinary module path adds exactly one typed normalization attempt for the
+-- one capability refusal it implements. All other errors propagate unchanged.
+def psElabDeclarationBatch
+    (environment : PsEnvironment) (source : PsSyntaxDeclaration) :
+    Except PsElabError PsElabDeclarationBatchResult :=
+  match psElabDeclarationBatchStable environment source with
+  | Except.ok result => Except.ok result
+  | Except.error error =>
+      match error with
+      | PsElabError.structuralRecursionInvariantArgument =>
+          match source with
+          | PsSyntaxDeclaration.definition name binders type value span =>
+              match psElabPlanStructuralNormalization
+                  environment name binders type value span with
+              | Except.error failure => Except.error failure
+              | Except.ok plan =>
+                  match plan with
+                  | Option.none => Except.error error
+                  | Option.some normalized =>
+                      psElabNormalizedDefinition environment name normalized
+          | _ => Except.error error
+      | _ => Except.error error
 
 def psPrependBatchReverse
     (declarations : List PsDeclaration)

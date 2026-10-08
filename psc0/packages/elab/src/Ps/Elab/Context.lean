@@ -8,6 +8,8 @@ structure PsElabStructuralRecursion where
   explicitParameterIds : List Nat
   recursiveParameterIndex : Nat
   calls : List (Prod Nat Nat)
+  resultType : PsExpr
+  collectCalls : Bool
 
 def psElabStructuralRecursionFindCall
     (calls : List (Prod Nat Nat))

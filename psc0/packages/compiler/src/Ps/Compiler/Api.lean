@@ -19,6 +19,13 @@ inductive PsCompilerError where
 structure PsCompilerAdmissionReadyModule where
   declarations : List PsDeclaration
 
+-- A preparation checkpoint is local to one compiler instance. Keep the complete
+-- environment and declaration accumulator together; neither is a checked claim.
+structure PsCompilerPreparationState where
+  sourceKind : PsCompilerSourceKind
+  environment : PsEnvironment
+  declarationsRev : List PsDeclaration
+
 def psCompilerTranslateSource
     (sourceKind targetKind : PsCompilerSourceKind)
     (source : String) :
@@ -106,32 +113,76 @@ def psCompilerPrepareSource
   | Except.ok elaborated =>
       psCompilerPrepareElaborated elaborated
 
+-- Preparation remains pure. Hosts may retain a successful ordered prefix and
+-- resume it only when its exact compiler, source kind and source prefix agree.
+def psCompilerPreparationStart
+    (sourceKind : PsCompilerSourceKind) : PsCompilerPreparationState :=
+  PsCompilerPreparationState.mk
+    sourceKind psSelfHostProdPreludeEnvironment List.nil
+
+def psCompilerPreparationStepParsed
+    (state : PsCompilerPreparationState)
+    (sourceModule : PsSyntaxModule) :
+    Except PsCompilerError PsCompilerPreparationState :=
+  match psElabModule state.environment sourceModule with
+  | Except.error error =>
+      Except.error (PsCompilerError.elaboration error)
+  | Except.ok elaborated =>
+      Except.ok
+        (PsCompilerPreparationState.mk
+          state.sourceKind elaborated.environment
+          (psListAppend (psListReverse elaborated.declarations) state.declarationsRev))
+
+def psCompilerPreparationStep
+    (state : PsCompilerPreparationState)
+    (source : String) :
+    Except PsCompilerError PsCompilerPreparationState :=
+  match psCompilerParseSource state.sourceKind source with
+  | Except.error error => Except.error error
+  | Except.ok sourceModule =>
+      psCompilerPreparationStepParsed state sourceModule
+
+def psCompilerPreparationElaborated
+    (state : PsCompilerPreparationState) : PsElabModuleResult :=
+  PsElabModuleResult.mk state.environment (psListReverse state.declarationsRev)
+
+def psCompilerPreparationFinish
+    (state : PsCompilerPreparationState) :
+    Except PsCompilerError PsCompilerAdmissionReadyModule :=
+  psCompilerPrepareElaborated (psCompilerPreparationElaborated state)
+
+def psCompilerPreparationSourcesWorker
+    (sources : List String) :
+    PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState :=
+  match sources with
+  | List.nil =>
+      fun (state : PsCompilerPreparationState) => Except.ok state
+  | List.cons source rest =>
+      let smaller : PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState :=
+        psCompilerPreparationSourcesWorker rest;
+      fun (state : PsCompilerPreparationState) =>
+        match psCompilerPreparationStep state source with
+        | Except.error error => Except.error error
+        | Except.ok next => smaller next
+
 def psCompilerElaborateSourcesWorker
     (sourceKind : PsCompilerSourceKind) (sources : List String) :
     PsEnvironment -> List PsDeclaration -> Except PsCompilerError PsElabModuleResult :=
-  match sources with
-  | List.nil =>
-      fun (environment : PsEnvironment) (declarationsRev : List PsDeclaration) =>
-        Except.ok (PsElabModuleResult.mk environment (psListReverse declarationsRev))
-  | List.cons source rest =>
-      let smaller : PsEnvironment -> List PsDeclaration -> Except PsCompilerError PsElabModuleResult :=
-        psCompilerElaborateSourcesWorker sourceKind rest;
-      fun (environment : PsEnvironment) (declarationsRev : List PsDeclaration) =>
-        match psCompilerParseSource sourceKind source with
-        | Except.error error => Except.error error
-        | Except.ok sourceModule =>
-            match psElabModule environment sourceModule with
-            | Except.error error => Except.error (PsCompilerError.elaboration error)
-            | Except.ok elaborated =>
-                smaller elaborated.environment
-                  (psListAppend (psListReverse elaborated.declarations) declarationsRev)
+  fun (environment : PsEnvironment) (declarationsRev : List PsDeclaration) =>
+    match
+        psCompilerPreparationSourcesWorker sources
+          (PsCompilerPreparationState.mk sourceKind environment declarationsRev) with
+    | Except.error error => Except.error error
+    | Except.ok state => Except.ok (psCompilerPreparationElaborated state)
 
 def psCompilerPrepareSources
     (sourceKind : PsCompilerSourceKind) (sources : List String) :
     Except PsCompilerError PsCompilerAdmissionReadyModule :=
-  match psCompilerElaborateSourcesWorker sourceKind sources psSelfHostProdPreludeEnvironment List.nil with
+  match
+      psCompilerPreparationSourcesWorker sources
+        (psCompilerPreparationStart sourceKind) with
   | Except.error error => Except.error error
-  | Except.ok elaborated => psCompilerPrepareElaborated elaborated
+  | Except.ok state => psCompilerPreparationFinish state
 
 def psCompilerCheckSource
     (sourceKind : PsCompilerSourceKind)

@@ -1,0 +1,204 @@
+name: PSC0 SH1 language qualification
+
+on:
+  push:
+    branches: ['psc0/sh1-implementation-v1']
+    paths:
+      - 'psc0/packages/bootstrap/**'
+      - 'psc0/packages/foundation/**'
+      - 'psc0/packages/syntax/**'
+      - 'psc0/packages/core/**'
+      - 'psc0/packages/environment/**'
+      - 'psc0/packages/meta/**'
+      - 'psc0/packages/elab/**'
+      - 'psc0/packages/bridge/**'
+      - 'psc0/packages/compiler-ir/**'
+      - 'psc0/packages/erasure/**'
+      - 'psc0/packages/compiler/**'
+      - 'psc0/packages/backend-ts/**'
+      - 'psc0/packages/cli/**'
+      - 'psc0/host/**'
+      - 'psc0/test/**'
+      - 'psc0/scripts/**'
+      - 'psc0/check-psc1-source.mjs'
+      - 'psc0/lakefile.lean'
+      - 'psc0/lean-toolchain'
+      - 'psc0/psconfig.json'
+      - 'psc0/package.json'
+      - '.github/workflows/psc0-sh1.yml'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: 'Qualify current-source C2/C3 after the candidate gate'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc0-sh1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      qualified: ${{ steps.qualify.outcome == 'success' }}
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preserve an immutable historical source checkout
+        uses: actions/checkout@v4
+        with:
+          ref: 37f63c39d4a07189938046c64152bba25d789450
+          path: historical-source
+          sparse-checkout: psc0
+      - uses: actions/setup-node@v4
+        id: node
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Install isolated pinned TypeScript
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-sh1-tools" --ignore-scripts --no-package-lock --no-audit --no-fund typescript@5.8.3
+          echo "$RUNNER_TEMP/psc0-sh1-tools/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Verify host syntax and bootstrap source restrictions
+        run: |
+          node --check scripts/sh1-qualify.mjs
+          node --check scripts/sh1-capabilities.mjs
+          node --check scripts/sh1-check-admissions.mjs
+          node --check scripts/generated-preparation-session.mjs
+          node --check scripts/original-ir-inventory.mjs
+          node check-psc1-source.mjs
+          node scripts/bootstrap-root-minimality-tests.mjs
+      - name: Restore historical native build
+        id: historical-lake
+        uses: actions/cache/restore@v4
+        with:
+          path: historical-source/psc0/.lake/build
+          key: psc0-sh1-historical-lake-v1-${{ runner.os }}-${{ runner.arch }}-37f63c39d4a07189938046c64152bba25d789450
+      - name: Identify the pinned recovery recipe and toolchain
+        id: seed-identity
+        run: node scripts/sh1-qualify.mjs seed-identity --source ../historical-source/psc0
+      - name: Restore exact historical seed
+        id: seed-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: psc0/.selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
+          key: psc0-sh1-seed-v1-${{ steps.seed-identity.outputs.identity }}
+      - name: Verify seed digests or recover once from the preserved source
+        run: node scripts/sh1-qualify.mjs recover-seed --source ../historical-source/psc0 --out .selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
+      - name: Retain historical native outputs before testing changed source
+        if: ${{ steps.historical-lake.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: historical-source/psc0/.lake/build
+          key: ${{ steps.historical-lake.outputs.cache-primary-key }}
+      - name: Retain verified seed before testing changed source
+        if: ${{ steps.seed-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: psc0/.selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
+          key: ${{ steps.seed-cache.outputs.cache-primary-key }}
+      - name: Restore incremental current compiler build
+        id: current-lake
+        uses: actions/cache/restore@v4
+        with:
+          path: psc0/.lake/build
+          key: psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-${{ github.sha }}
+          restore-keys: |
+            psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
+      - name: Build current native compiler
+        id: native
+        run: lake build psc1
+      - name: Build and execute the generated current compiler
+        run: node scripts/sh1-qualify.mjs candidate --seed .selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450/index.js --out dist/sh1 --native .lake/build/bin/psc1
+      - name: Qualify exact current-source C2/C3 at a promotion checkpoint
+        id: qualify
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full) || contains(github.event.head_commit.message, '[sh1-qualify]') }}
+        run: node scripts/sh1-qualify.mjs fixed-point --out dist/sh1
+      - name: Retain incremental native outputs
+        if: ${{ always() && steps.native.outcome != 'skipped' && steps.current-lake.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: psc0/.lake/build
+          key: ${{ steps.current-lake.outputs.cache-primary-key }}
+      - name: Retain compiler evidence and exact generated artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-sh1-${{ github.sha }}
+          path: |
+            psc0/dist/sh1
+            psc0/.selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 30
+
+  kernel-admissions:
+    needs: compiler
+    if: ${{ needs.compiler.outputs.qualified == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the independently qualified native provider at its exact source revision
+        uses: actions/checkout@v4
+        with:
+          ref: 963030dc2d154008fccc82e7c8ed29331f138799
+          path: provider-source
+          sparse-checkout: psc0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: provider-source/psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Restore pinned native provider build
+        id: provider-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: provider-source/psc0/.lake/build
+          key: psc0-sh1-provider-v1-${{ runner.os }}-${{ runner.arch }}-963030dc2d154008fccc82e7c8ed29331f138799
+      - name: Build the existing provider target without editing its implementation
+        working-directory: provider-source/psc0
+        run: lake build psc_kernel_core_provider
+      - name: Retain the pinned provider build
+        if: ${{ steps.provider-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: provider-source/psc0/.lake/build
+          key: ${{ steps.provider-cache.outputs.cache-primary-key }}
+      - name: Read exact compiler qualification artifacts from this run
+        uses: actions/download-artifact@v4
+        with:
+          name: psc0-sh1-${{ github.sha }}
+          path: qualification-artifacts
+      - name: Obtain actual provider decisions for the qualified admission streams
+        working-directory: psc0
+        run: node scripts/sh1-check-admissions.mjs --provider-root ../provider-source/psc0 --artifacts ../qualification-artifacts/dist/sh1
+      - name: Retain provider acceptance or the exact rejection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-sh1-kernel-${{ github.sha }}
+          path: qualification-artifacts/dist/sh1/kernel-admissions.json
+          if-no-files-found: ignore
+          retention-days: 30

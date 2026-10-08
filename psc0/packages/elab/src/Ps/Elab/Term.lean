@@ -1,4 +1,5 @@
 import Ps.Core.Abstract
+import Ps.Core.Equality
 import Ps.Core.Subst
 import Ps.Environment.Resolve
 import Ps.Meta.Infer
@@ -37,6 +38,8 @@ inductive PsElabError where
   | structuralRecursionNotDecreasing
   | structuralRecursionInvariantArgument
   | structuralRecursionInternal
+  | structuralRecursionDependentParameter
+  | structuralRecursionEscapingReference
 
 structure PsElabTermResult where
   context : PsElabContext
@@ -1549,9 +1552,11 @@ def psElabPushRecursiveHypothesesWorker
                       explicitParameterIds := recursion.explicitParameterIds
                       recursiveParameterIndex := recursion.recursiveParameterIndex
                       calls :=
-                        List.cons
-                          (Prod.mk field.id pushed.id)
-                          recursion.calls
+                        if recursion.collectCalls then
+                          List.cons (Prod.mk field.id pushed.id) recursion.calls
+                        else recursion.calls
+                      resultType := recursion.resultType
+                      collectCalls := recursion.collectCalls
                     };
                     psElabContextWithStructuralRecursion
                       withLocal
@@ -1916,6 +1921,49 @@ def psElabExprListAppend
     List PsExpr :=
   psElabExprListAppendWorker left right
 
+-- Only matches on the structural major or a tracked child may register new
+-- decreasing arguments. An unrelated nested match retains outer hypotheses but
+-- cannot manufacture decrease evidence for its own fields. A narrower nested
+-- result telescope also cannot supply the whole worker's induction hypothesis.
+def psElabStructuralParameterAt
+    (ids : List Nat) : Nat -> Option Nat :=
+  match ids with
+  | List.nil => fun (_index : Nat) => Option.none
+  | List.cons id rest =>
+      let smaller : Nat -> Option Nat := psElabStructuralParameterAt rest;
+      fun (index : Nat) =>
+        match index with
+        | Nat.zero => Option.some id
+        | Nat.succ next => smaller next
+
+def psElabStructuralMatchContext
+    (context : PsElabContext) (scrutinee expectedType : PsExpr) : PsElabContext :=
+  match context.structuralRecursion with
+  | Option.none => context
+  | Option.some recursion =>
+      let sameResult := psExprAlphaEq
+        (psMetaInstantiate context.metaContext expectedType)
+        (psMetaInstantiate context.metaContext recursion.resultType);
+      let permitted : Bool :=
+        if sameResult then
+          match scrutinee with
+          | PsExpr.fvar id =>
+              match psElabStructuralParameterAt
+                  recursion.explicitParameterIds recursion.recursiveParameterIndex with
+              | Option.none => false
+              | Option.some majorId =>
+                  if Nat.beq id majorId then true
+                  else
+                    match psElabStructuralRecursionFindCall recursion.calls id with
+                    | Option.none => false
+                    | Option.some _ => true
+          | _ => false
+        else false;
+      psElabContextWithStructuralRecursion context
+        (Option.some (PsElabStructuralRecursion.mk
+          recursion.functionName recursion.explicitParameterIds
+          recursion.recursiveParameterIndex recursion.calls recursion.resultType permitted))
+
 def psElabMatch
     (elaborate :
       PsElabContext ->
@@ -2021,7 +2069,10 @@ def psElabMatch
                                             typeView.args
                                             instantiatedExpected
                                             alternatives
-                                            scrutineeResult.context
+                                            (psElabStructuralMatchContext
+                                              scrutineeResult.context
+                                              scrutineeResult.term
+                                              instantiatedExpected)
                                             inductiveInfo.constructors with
                                         | Except.error error =>
                                             Except.error error
@@ -2784,6 +2835,11 @@ def psElabValidateStructuralCall
     recursion
     index
     hypothesisId
+def psElabStructuralNameIsLocal (context : PsElabContext) (name : PsName) : Bool :=
+  match psLocalFindUser context.localContext name with
+  | Option.none => false
+  | Option.some _ => true
+
 def psTryElabStructuralSelfCall
     (context : PsElabContext)
     (fn : PsSyntaxTerm)
@@ -2799,6 +2855,8 @@ def psTryElabStructuralSelfCall
           match psSyntaxNameToName sourceName with
           | Option.some calledName =>
               if psElabBoolNot (psNameEq calledName recursion.functionName) then
+                Except.ok Option.none
+              else if psElabStructuralNameIsLocal context calledName then
                 Except.ok Option.none
               else if
                   psElabNatNe
@@ -2826,6 +2884,20 @@ def psTryElabStructuralSelfCall
       | _ =>
           Except.ok Option.none
 
+def psElabStructuralReferenceEscapes
+    (context : PsElabContext) (sourceName : PsSyntaxName) : Bool :=
+  match context.structuralRecursion with
+  | Option.none => false
+  | Option.some recursion =>
+      match psSyntaxNameToName sourceName with
+      | Option.none => false
+      | Option.some name =>
+          if psNameEq name recursion.functionName then
+            match psLocalFindUser context.localContext name with
+            | Option.none => true
+            | Option.some _ => false
+          else false
+
 def psElabTermWithFuel
     (fuel : Nat) :
     PsElabContext ->
@@ -2850,17 +2922,20 @@ def psElabTermWithFuel
           fun (expected : Option PsExpr) =>
             match term with
             | .reference name =>
-                match psElabReference context name Option.none with
-                | Except.error error => Except.error error
-                | Except.ok reference =>
-                    match psElabApplyArgs
-                        smaller
-                        reference
-                        []
-                        [] with
-                    | Except.error error => Except.error error
-                    | Except.ok application =>
-                        psElabFinishApplication application expected
+                if psElabStructuralReferenceEscapes context name then
+                  Except.error PsElabError.structuralRecursionEscapingReference
+                else
+                  match psElabReference context name Option.none with
+                  | Except.error error => Except.error error
+                  | Except.ok reference =>
+                      match psElabApplyArgs
+                          smaller
+                          reference
+                          []
+                          [] with
+                      | Except.error error => Except.error error
+                      | Except.ok application =>
+                          psElabFinishApplication application expected
             | .natural text _ =>
                 psElabNatural context text expected
             | .string text _ =>

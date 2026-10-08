@@ -1,6 +1,7 @@
 import Ps.KernelCore.Metatheory.DefEqProjectionShortcutConfiguration
 import Ps.KernelCore.Metatheory.ExprEq
 import Ps.KernelCore.Metatheory.ContextState
+import Ps.KernelCore.Metatheory.DefEqFinalConfiguration
 
 /-
 Reusable concrete DefEq knot boundaries.
@@ -140,3 +141,86 @@ theorem psKernelDefEqKnot_finish_after_reduction
           originalLeft originalRight left right
           hLeft hRight (hSemantic hTrue))
       hRun
+
+/-
+Algorithmic proof-irrelevance phase in the concrete checker knot.
+
+It classifies the *inferred type* of the left type as a proposition, then
+compares the two inferred types using the recursive DefEq callback.  This
+establishes the independent algorithmic DefEq judgment, not yet the stronger
+typed proof-irrelevance theorem needed for final admission soundness.
+-/
+theorem psKernelDefEqKnot_proof_irrelevance_branch
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (inferType whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hDefEq : PsKernelDefEqConfigurationSound defeq)
+    (hInfer : PsKernelInferOnlyConfigurationPreserves inferType)
+    (hWhnf : PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state leftState propState rightState finalState : PsKernelCheckerState)
+    (originalLeft originalRight left right leftType rightType : PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound context state)
+    (hLeft :
+      PsKernelReductionClosure
+        context.environment context.localContext originalLeft left)
+    (hRight :
+      PsKernelReductionClosure
+        context.environment context.localContext originalRight right)
+    (hLeftInfer :
+      inferType context state left =
+        Except.ok (Prod.mk leftType leftState))
+    (hProp :
+      psKernelDefEqIsPropWith
+          inferType whnf context leftState leftType =
+        Except.ok (Prod.mk true propState))
+    (hRightInfer :
+      inferType context propState right =
+        Except.ok (Prod.mk rightType rightState))
+    (hEqual :
+      defeq context rightState leftType rightType =
+        Except.ok (Prod.mk true finalState)) :
+    PsKernelCheckerConfigurationSound context finalState ∧
+      PsKernelDefEqJudgment
+        context.environment context.localContext
+        originalLeft originalRight := by
+  have hLeftConfig :=
+    hInfer context state leftState left leftType hConfig hLeftInfer
+  have hPropConfig :=
+    psKernelDefEqIsPropWith_configuration_preserves
+      inferType whnf hInfer hWhnf
+      context leftState propState leftType true
+      hLeftConfig hProp
+  obtain ⟨leftTypeType, level, hTypeSort, hLevelZero⟩ :=
+    psKernelDefEqIsPropWith_true_refines
+      inferType whnf hInfer hWhnf
+      context leftState propState leftType
+      hLeftConfig hProp
+  have hRightConfig :=
+    hInfer
+      context propState rightState
+      right rightType hPropConfig hRightInfer
+  have hTypes :=
+    hDefEq
+      context rightState finalState
+      leftType rightType true
+      hRightConfig hEqual
+  have hCore :
+      PsKernelDefEqJudgment
+        context.environment context.localContext left right :=
+    PsKernelDefEqJudgment.proofIrrelevanceAlgorithmic
+      left right leftType rightType leftTypeType level
+      hTypeSort hLevelZero (hTypes.2 rfl)
+  exact
+    ⟨hTypes.1,
+      PsKernelDefEqJudgment.reduceCompare
+        originalLeft originalRight left right
+        hLeft hRight hCore⟩

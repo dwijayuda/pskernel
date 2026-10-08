@@ -1,25 +1,23 @@
 import Ps.KernelCore.Metatheory.AdmissionDefinitionTransactionConfiguration
+import Ps.KernelCore.Metatheory.AdmissionIndexConfiguration
 
 /-
 Unsafe recursive definition admission is a two-environment transaction.
 
 The header is checked against the original environment.  The body is checked
-against the *work* environment that already contains the recursive definition.
-
-The work environment's accelerated index must independently refine its
-authoritative constants.  This theorem exposes that premise explicitly;
-closing index preservation under psKernelEnvironmentAdd is a separate proof
-obligation, not a silently trusted theorem or an invented typing certificate.
+against the work environment containing the recursive declaration.  Its
+authoritative index refinement is now derived from the checked environment-add
+result rather than assumed.  Body checking remains a separate checked-session
+certificate in the extended environment.
 -/
 
-theorem psKernelAddDefinition_unsafe_configuration_refines_of_work_index
+theorem psKernelAddDefinition_unsafe_configuration_refines
     (fuel : Nat)
     (environment result : PsKernelEnvironment)
     (value : PsKernelDefinitionInfo)
     (maxRecDepth maxNatSize : Nat)
     (hUnsafe : value.safety = PsKernelDefinitionSafety.unsafeDef)
     (hIndex : PsKernelEnvironmentIndexRefines environment)
-    (hWorkIndex : PsKernelEnvironmentIndexRefines result)
     (hNative : PsKernelNativeReductionSoundLaw)
     (hString : PsKernelStringEqSoundLaw)
     (hRun :
@@ -90,6 +88,14 @@ theorem psKernelAddDefinition_unsafe_configuration_refines_of_work_index
                   headerSession, hHeader, hAdd, bodySession, hBody
                 ] using hRun
               subst result
+              have hWorkIndex :
+                  PsKernelEnvironmentIndexRefines work :=
+                psKernelEnvironmentAdd_success_index_refines
+                  environment
+                  work
+                  (PsKernelConstantInfo.defnInfo value)
+                  hIndex
+                  hAdd
               have hBodyInitial :
                   PsKernelCheckerConfigurationSound
                     bodySession.context bodySession.state :=

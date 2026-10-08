@@ -9,7 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 test('checked bootstrap runs the real PSC1 project preflight before the checked seed session', async () => {
   const source = await readFile(path.join(root, 'scripts/checked-selfhost.mjs'), 'utf8');
   const bootstrap = source.match(
-    /async function bootstrap\(kernel\) \{[\s\S]*?(?=\nasync function next\b)/,
+    /async function bootstrap\(kernel, fast = false\) \{[\s\S]*?(?=\nasync function next\b)/,
   )?.[0];
   assert.ok(bootstrap, 'bootstrap function missing');
 

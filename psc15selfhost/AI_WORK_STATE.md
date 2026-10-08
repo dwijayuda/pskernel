@@ -6,6 +6,8 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
+- **2026-10-08 Unit profile correction:** 43ea76c3 main run 37710749796/job 113095840404 stopped at the portable audit because a new explanatory comment used JavaScript comment syntax in a Lean file. Corrected it to Lean comments; no profile rule or implementation behavior changed. Native Rust transport implementation continues in parallel with the cloud rerun.
+
 - **2026-10-08 Wasm Unit boundary implementation:** whole-compiler failure at 0acb52bc was caused by conflating Unit expression values (existing i32 storage) with zero-result function ABI. Added explicit call/return conversion for direct calls, zero-argument globals, closures and generated array callbacks; direct arguments now use declared types. Unit body control flow keeps a value until the return boundary, whose branch-aware discard preserves evaluation/traps and void tail calls. External Unit signatures and Canonical scalar parameter restrictions are unchanged. Added exact target validation plus focused runtime cases for locals/records/if/match/closures/map/fold/traps and 200000 tail calls. Cloud validation pending; no preservation theorem asserted.
 
 - **2026-10-08 Rust ownership registration:** 70bf2a16 main run 37710030527/job 113093537485 correctly rejected the Rust stage's new direct compiler-ir import because driver-rust had not declared that dependency. Registered the existing compiler-ir package, following the other staged drivers; ownership policy is unchanged. Provider parity independently passed run 37710030615/job 113093537812. Rust downstream product checks await the next cloud run.

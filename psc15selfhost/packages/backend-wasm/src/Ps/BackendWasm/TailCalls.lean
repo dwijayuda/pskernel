@@ -47,10 +47,10 @@ def psWasmTailCallFunction (value : PsWasmFunction) : PsWasmFunction :=
 def psWasmTailCallFunctions (values : List PsWasmFunction) : List PsWasmFunction :=
   psListMap psWasmTailCallFunction values
 
-// Unit expressions have an i32 token, while source Unit function results use
-// the existing zero-result ABI. Discard only the final token in each returning
-// branch. Removing a final synthesized zero retains preceding void calls in
-// tail position; other producers retain an explicit drop.
+-- Unit expressions have an i32 token, while source Unit function results use
+-- the existing zero-result ABI. Discard only the final token in each returning
+-- branch. Removing a final constant token retains preceding void calls in
+-- tail position; other producers retain an explicit drop.
 def psWasmDiscardUnitWorker (reversed : List PsWasmInstruction) :
     Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
   match reversed with

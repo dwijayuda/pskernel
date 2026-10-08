@@ -417,4 +417,4 @@ theorem PsKernelCheckedOrdinaryConstructorHistory.shape_provenance
   | done => rfl
   | step work index ctor rest tailShapes finalEnvironment inferredType level
       fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
-      simpa using congrArg (List.cons _) ih
+      simpa using congrArg (List.cons ctor) ih

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
-import { createClaimSet, decodeClaimSet, verifyClaimSet, evaluateClaimPolicy } from './claim-set.mjs';
+import { createClaimSet, decodeClaimSet, verifyClaimSet, evaluateClaimPolicy, captureClaimConsumerPolicy } from './claim-set.mjs';
 
 function fixture(kind = 'TargetToolAccepted', evidenceClass = 'target-tool-acceptance') {
   const artifacts = new Map();
@@ -96,4 +96,20 @@ test('caller mutation cannot rewrite the live verified snapshot', async () => {
   const result = evaluateClaimPolicy(verified, f.policy([{ ...f.requirement, subjects: decodeClaimSet(f.record).claims[0].subjects }]));
   assert.equal(artifactKey(result.claimSetId), expected);
   assert.equal(result.policySatisfied, true);
+});
+
+test('consumer capture rejects implicit verification, dynamic fields and malformed policies before callbacks', () => {
+  const f = fixture();
+  assert.throws(() => captureClaimConsumerPolicy({ claimPolicy: f.policy() }), /VERIFICATION_REQUIRED/);
+  let invoked = false;
+  const getters = { get checkers() { invoked = true; return f.options.checkers; } };
+  for (const claimVerification of [null, [], { resolveArtifact: f.options.resolveArtifact }, getters,
+    { checkers: new Map([['invalid', 'executable path']]) }, { allowedAssumptions: ['duplicate', 'duplicate'] }]) {
+    assert.throws(() => captureClaimConsumerPolicy({ claimVerification }), /POLICY|DUPLICATE/);
+  }
+  assert.equal(invoked, false);
+  for (const claimPolicy of [f.policy([]), { identity: f.policy().identity, bytes: Buffer.from('changed') },
+    { identity: f.policy().identity, bytes: Buffer.alloc(1024 * 1024 + 1) }]) {
+    assert.throws(() => captureClaimConsumerPolicy({ claimVerification: {}, claimPolicy }), /LIST|ARTIFACT_BYTES|POLICY/);
+  }
 });

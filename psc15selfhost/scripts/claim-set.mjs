@@ -106,14 +106,7 @@ export async function verifyClaimSet(record, { resolveArtifact, checkers = new M
   return result;
 }
 
-/** Policy-defined exact conjunction; no implicit lattice promotion.
- * A live verification result is required. Serialization cannot recreate it.
- * Satisfaction is an audit decision, not an authority-bearing release capability.
- */
-export function evaluateClaimPolicy(verified, policyArtifact) {
-  const stored = verifiedSets.get(verified);
-  if (!stored) fail('LIVE_VERIFICATION_REQUIRED');
-  const value = stored.value;
+function policyValue(policyArtifact) {
   if (!(policyArtifact?.bytes instanceof Uint8Array) || policyArtifact.bytes.byteLength > bound.maxBytes) fail('POLICY');
   verifyArtifact(policyArtifact.bytes, policyArtifact.identity);
   if (policyArtifact.identity.domain !== 'claim-policy' || policyArtifact.identity.contract !== 'psc-claim-policy/1') fail('POLICY');
@@ -132,6 +125,52 @@ export function evaluateClaimPolicy(verified, policyArtifact) {
     list(requirement.checkerImplementationIds, identity, 1);
     return canonicalBytes(requirement, bound).toString('utf8');
   }, 1);
+  return policy;
+}
+
+/** Capture consumer choices before any resolver or checker can run.
+ * Archived assertions never supply this policy or install implementations.
+ * Each public consumer captures again, so a caller-held snapshot is not authority.
+ */
+export function captureClaimConsumerPolicy({ claimVerification, claimPolicy } = {}) {
+  if (claimPolicy !== undefined && claimVerification === undefined) fail('VERIFICATION_REQUIRED');
+  if (claimVerification === undefined) return Object.freeze({});
+  if (!claimVerification || typeof claimVerification !== 'object' || Array.isArray(claimVerification) ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(claimVerification))) fail('POLICY');
+  const fields = {};
+  for (const key of Reflect.ownKeys(claimVerification)) {
+    const field = Object.getOwnPropertyDescriptor(claimVerification, key);
+    if (!['checkers', 'allowedAssumptions'].includes(key) || !field || !Object.hasOwn(field, 'value')) fail('POLICY');
+    fields[key] = field.value;
+  }
+  const checkers = fields.checkers === undefined ? new Map() : fields.checkers;
+  if (!(checkers instanceof Map)) fail('POLICY');
+  const selected = new Map(Map.prototype.entries.call(checkers));
+  for (const [key, checker] of selected) if (typeof key !== 'string' || typeof checker !== 'function') fail('POLICY');
+  const assumptions = copy(fields.allowedAssumptions === undefined ? [] : fields.allowedAssumptions);
+  list(assumptions, text);
+  let policy;
+  if (claimPolicy !== undefined) {
+    if (!(claimPolicy?.bytes instanceof Uint8Array) || claimPolicy.bytes.byteLength > bound.maxBytes) fail('POLICY');
+    policy = { identity: copy(claimPolicy.identity), bytes: Buffer.from(claimPolicy.bytes) };
+    policyValue(policy);
+    Object.freeze(policy);
+  }
+  return Object.freeze({
+    claimVerification: Object.freeze({ checkers: selected, allowedAssumptions: Object.freeze(assumptions) }),
+    ...(policy ? { claimPolicy: policy } : {}),
+  });
+}
+
+/** Policy-defined exact conjunction; no implicit lattice promotion.
+ * A live verification result is required. Serialization cannot recreate it.
+ * Satisfaction is an audit decision, not an authority-bearing release capability.
+ */
+export function evaluateClaimPolicy(verified, policyArtifact) {
+  const stored = verifiedSets.get(verified);
+  if (!stored) fail('LIVE_VERIFICATION_REQUIRED');
+  const value = stored.value;
+  const policy = policyValue(policyArtifact);
   const equal = (a, b) => canonicalBytes(a, bound).equals(canonicalBytes(b, bound));
   const missing = policy.requirements.filter(required => !value.claims.some(item =>
     item.kind === required.kind && equal(item.subjects, required.subjects) &&

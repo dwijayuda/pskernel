@@ -4,7 +4,7 @@
   "owner": "scripts/claim-set.mjs",
   "role": "host-evidence-contract",
   "authority": "audit-record-only",
-  "status": "implemented-consumer-integration-pending",
+  "status": "implemented-bundle-context-archive-consumer-policy-routing-cloud-validation-pending",
   "representation": "Canonical bounded JSON with exact typed ArtifactIds; assertions remain untrusted until fresh consumer-selected checker replay.",
   "claims": [
     "Parsed",
@@ -49,12 +49,24 @@
     "depth": 24,
     "nodes": 30000
   },
-  "validation": "scripts/claim-set.test.mjs; fixture checkers validate infrastructure behavior only",
+  "validation": "scripts/claim-set.test.mjs; scripts/backend-contract.test.mjs; scripts/observed-build-context.test.mjs. Fixture checkers validate infrastructure behavior only; fresh cloud validation pending.",
   "remaining": [
-    "Production backend bundle consumers",
+    "Built-in offline CLI checker registry and real evidence producers",
     "Pinned real checker adapters for each supported claim",
     "AuthorityBroker isolation and complete influence closure",
     "Assured release policy and real evidence campaigns",
     "Global preservation remains unproved"
-  ]
+  ],
+  "consumerIntegration": {
+    "entrypoints": [
+      "verifyArtifactBundle",
+      "verifyObservedContextProducts",
+      "verifyObservedBuildArchive"
+    ],
+    "selection": "Caller supplies claimVerification.checkers and allowedAssumptions, plus optional exact claimPolicy artifact. Policy requires explicit verification configuration.",
+    "snapshot": "Shared capture validates and copies selected checker map, assumptions and bounded canonical policy bytes before any resolver/checker callback.",
+    "enforcement": "Every assertion is freshly checked under selected implementations; optional nonempty exact conjunction must be satisfied. Missing V5 context, unavailable checkers, denied assumptions and unsatisfied requirements reject.",
+    "output": "Exact scoped verification and optional policy decision are reported in the bundle result; archive global semanticClaimsVerified, preservationVerified and releaseAccepted remain false.",
+    "default": "Producer ClaimSet remains empty until actual evidence exists. Omitted claim verification preserves historical integrity-only reading; archive data never installs checker code or policy."
+  }
 }

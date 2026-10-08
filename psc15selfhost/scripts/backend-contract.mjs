@@ -1,7 +1,7 @@
 import { uniformJsRepresentationProfile, uniformSpecializationContract } from './uniform-specialization.mjs';
 import { verifyProfileEnvironment } from './build-context.mjs';
 import { artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
-import { decodeClaimSet, verifyClaimSet } from './claim-set.mjs';
+import { captureClaimConsumerPolicy, decodeClaimSet, verifyClaimSet, evaluateClaimPolicy } from './claim-set.mjs';
 
 const fail = code => { throw new Error('PSC_BACKEND_' + code); };
 const bound = { maxBytes: 2 * 1024 * 1024, maxDepth: 32, maxNodes: 60000 };
@@ -234,7 +234,8 @@ export function decodeArtifactBundle(record) { return bundleValue(record); }
 /** Requires an independently selected bundle identity. All product groups have
  * separate identities; debug products can never satisfy an evidence requirement.
  */
-export async function verifyArtifactBundle(record, { expectedBundleId, resolveArtifact, claimVerification } = {}) {
+export async function verifyArtifactBundle(record, { expectedBundleId, resolveArtifact, claimVerification, claimPolicy } = {}) {
+  const consumer = captureClaimConsumerPolicy({ claimVerification, claimPolicy });
   const value = bundleValue(record), bundleIdentity = copy(record.identity);
   if (id(expectedBundleId) !== id(bundleIdentity) || typeof resolveArtifact !== 'function') fail('CONSUMER_POLICY');
   const resolved = new Map();
@@ -270,10 +271,14 @@ export async function verifyArtifactBundle(record, { expectedBundleId, resolveAr
     ...productGroups.flatMap(group => value[group].map(item => item.artifact))].map(id));
   for (const claim of claims.claims) if (id(claim.profileEnvironmentId) !== id(value.profileEnvironmentId) ||
       claim.subjects.some(subject => !subjects.has(id(subject)))) fail('CLAIM_SUBJECT');
-  const verifiedClaims = claimVerification === undefined ? undefined :
-    await verifyClaimSet(claimRecord, { ...claimVerification, resolveArtifact: async identity => (await resolve(identity)).bytes });
+  const verifiedClaims = consumer.claimVerification === undefined ? undefined :
+    await verifyClaimSet(claimRecord, { ...consumer.claimVerification, resolveArtifact: async identity => (await resolve(identity)).bytes });
+  const claimPolicyDecision = consumer.claimPolicy === undefined ? undefined :
+    evaluateClaimPolicy(verifiedClaims, consumer.claimPolicy);
+  if (claimPolicyDecision && !claimPolicyDecision.policySatisfied) fail('CLAIM_POLICY_UNSATISFIED');
   return Object.freeze({ bundleId: bundleIdentity, backendId: value.backendId, integrityVerified: true,
     claimsVerified: verifiedClaims !== undefined, ...(verifiedClaims ? { verifiedClaims } : {}),
+    ...(claimPolicyDecision ? { claimPolicyDecision } : {}),
     ...(profileSelection ? { profileSelection } : {}),
     authority: 'audit-record-only', preservationVerified: false, releaseAccepted: false });
 }

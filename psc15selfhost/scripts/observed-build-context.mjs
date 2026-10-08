@@ -3,7 +3,7 @@ import { createQueryKey, verifyQueryKey, applyPassEffects } from './query-contex
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 import { createExtensionSet, createProfileEnvironment, createBuildAction, decodeBuildAction,
   verifyBuildAction } from './build-context.mjs';
-import { createClaimSet } from './claim-set.mjs';
+import { captureClaimConsumerPolicy, createClaimSet } from './claim-set.mjs';
 import { createBackendDescriptor, decodeBackendRegistry, decodeBackendDescriptor, selectUniformJavaScriptRegistry, createArtifactBundle, verifyArtifactBundle } from './backend-contract.mjs';
 
 const fail = code => { throw new Error('PSC_OBSERVED_CONTEXT_' + code); };
@@ -198,18 +198,22 @@ export async function verifyObservedActionBinding(record, { resolveArtifact } = 
 /** Archives predating V5 remain readable. Once any V5 product is present the
  * entire context/binding set is mandatory; partial upgrades fail closed.
  */
-export async function verifyObservedContextProducts(graph, { resolveArtifact }) {
+export async function verifyObservedContextProducts(graph, { resolveArtifact, claimVerification, claimPolicy } = {}) {
+  const consumer = captureClaimConsumerPolicy({ claimVerification, claimPolicy });
   const entries = graph.entries;
   const scoped = entries.filter(entry => ['build-action', 'action-binding', 'profile-environment',
     'backend-descriptor', 'artifact-bundle', 'query-key'].includes(entry.identity.domain));
-  if (!scoped.length) return { present: false, hermeticityVerified: false };
+  if (!scoped.length) {
+    if (consumer.claimVerification !== undefined) fail('CLAIM_CONTEXT_REQUIRED');
+    return { present: false, hermeticityVerified: false };
+  }
   const select = domain => entries.filter(entry => entry.identity.domain === domain).map(entry => entry.identity);
   const single = domain => { const ids = select(domain); if (ids.length !== 1) fail('SINGLE_' + domain); return ids[0]; };
   const profileId = single('profile-environment'), bundleId = single('artifact-bundle');
   const descriptorId = single('backend-descriptor'), sourceId = single('source-snapshot');
   const record = async identity => ({ identity, bytes: await resolveArtifact(identity) });
   const bundleRecord = await record(bundleId), bundle = JSON.parse(bundleRecord.bytes);
-  const bundleResult = await verifyArtifactBundle(bundleRecord, { expectedBundleId: bundleId, resolveArtifact });
+  const bundleResult = await verifyArtifactBundle(bundleRecord, { expectedBundleId: bundleId, resolveArtifact, ...consumer });
   if (!equal(bundle.profileEnvironmentId, profileId) || !equal(bundle.backendDescriptorId, descriptorId) ||
       !equal(bundle.sourceSubjectId, sourceId)) fail('BUNDLE_BINDING');
   const hasUniform = entries.some(entry => entry.identity.domain === 'uniform-specialized-ir');

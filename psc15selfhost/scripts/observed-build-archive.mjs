@@ -1,3 +1,4 @@
+import { captureClaimConsumerPolicy } from './claim-set.mjs';
 import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { verifyObservedContextProducts } from './observed-build-context.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact, verifyPassExecution } from './artifact-evidence.mjs';
@@ -132,13 +133,18 @@ export function packObservedBuildArchive(build, resourceLimits) {
 /** Consumer supplies the expected graph identity and allowed assumptions.
  * No archived path is read/extracted and no source is loaded. Optional closed-IR
  * replay runs only the validator explicitly selected and pinned by the caller.
+ * Claim verification/policy are independently selected and captured before callbacks.
+ * Exact selected claims are reported inside buildContext.artifactBundle; successful
+ * policy evaluation never upgrades the global preservation or release fields.
  * Fresh pass integrity checking does not replay kernel checking or preservation.
  */
-export async function verifyObservedBuildArchive(input, { expectedGraphId, allowedAssumptions, resourceLimits, irValidation, irLinkValidation } = {}) {
+export async function verifyObservedBuildArchive(input, { expectedGraphId, allowedAssumptions, resourceLimits, irValidation, irLinkValidation, claimVerification, claimPolicy } = {}) {
   try {
+    const consumer = captureClaimConsumerPolicy({ claimVerification, claimPolicy });
     const bound = observedBuildArchiveLimits(resourceLimits), expectedKey = identityKey(expectedGraphId);
     if (!Array.isArray(allowedAssumptions) || allowedAssumptions.some(id => typeof id !== 'string' || !id) ||
         new Set(allowedAssumptions).size !== allowedAssumptions.length) fail('ASSUMPTION_POLICY');
+    const passAssumptions = [...allowedAssumptions];
     if (!(input instanceof Uint8Array) || input.byteLength > bound.maxArchiveBytes) fail('RESOURCE_EXHAUSTED');
     const archive = decodeComparatorJson(Buffer.from(input), { maxBytes: bound.maxArchiveBytes });
     exact(archive, ['contract', 'graphId', 'artifacts']);
@@ -161,7 +167,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     const graph = graphValue(resolveArtifact(archive.graphId), bound);
     if (graph.entries.length + 1 !== blobs.size) fail('ARTIFACT_SET');
     for (const entry of graph.entries) resolveArtifact(entry.identity);
-    const buildContext = await verifyObservedContextProducts(graph, { resolveArtifact });
+    const buildContext = await verifyObservedContextProducts(graph, { resolveArtifact, ...consumer });
     const irInvariantReplays = [], irLinkInvariantReplays = [];
     if (irValidation !== undefined && irLinkValidation !== undefined) fail('IR_VALIDATION_POLICY');
     if (irLinkValidation !== undefined) {
@@ -207,7 +213,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
     }
     const executions = [], runtimeInterfaceProjections = [], specializationCorrespondences = [], uniformSpecializationCorrespondences = [], jsAbiPlans = [], targetIrArtifacts = [], wasmCanonicalProjections = [], wasmCanonicalSignatures = [];
     for (const identity of graph.executions) {
-      const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions });
+      const result = await verifyPassExecution({ identity, bytes: resolveArtifact(identity) }, { resolveArtifact, allowedAssumptions: passAssumptions });
       executions.push(result);
       const execution = JSON.parse(resolveArtifact(identity));
       const definition = JSON.parse(resolveArtifact(execution.passDefinitionId));

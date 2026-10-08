@@ -527,3 +527,37 @@ reviewed on 2026-10-08. Focused execution covers Unit calls, control flow,
 storage, closures, array callbacks, trap retention and deep tail recursion.
 These observations do not establish global lowering preservation or validator
 soundness.
+
+## 22. Independent claim policies at artifact consumption
+
+The bundle, observed-context and archive verification APIs accept the same
+optional `claimVerification` selection and `claimPolicy` artifact.
+`claimVerification` contains only consumer-selected checker functions keyed by
+exact implementation identity and the allowed claim assumptions. A policy
+requires explicit verification configuration and is a bounded canonical
+`psc-claim-policy/1` nonempty conjunction. It matches exact subjects, profile
+environment, resource policy, evidence class and checker identities.
+
+A shared capture function snapshots checker choices, assumption lists and policy
+bytes before the first resolver or checker callback. Archive pass assumptions
+are captured separately, so claim callbacks cannot expand the independently
+selected pass policy. Archived data cannot supply executable checker code or
+select a more permissive policy. All claim references are resolved and rehashed;
+each selected checker must return acceptance for the exact expected assertion.
+A missing checker, denied assumption, mismatched response or unsatisfied policy
+rejects consumption. A legacy archive without V5 context also rejects a request
+for claim verification instead of silently ignoring it.
+
+Results retain exact verified-claim counts and the selected policy decision
+inside the bundle result (`buildContext.artifactBundle` for archives). These are
+audit records, not live compiler/release capabilities. A scoped claim decision
+does not change the archive's global semantic, preservation, hermeticity or
+release fields. Without a claim request, historical integrity-only behavior is
+preserved. Production builders continue to emit an empty ClaimSet until actual
+evidence adapters exist; an empty set cannot satisfy a nonempty policy.
+
+Focused fixtures exercise the complete archive-to-checker path, identity and
+assumption mismatches, callback mutation and legacy behavior. Their checkers are
+explicit test doubles. Production checker adapters, command-line selection of
+a trusted checker registry, real evidence production and an assured-release
+policy remain implementation obligations; no preservation theorem is asserted.

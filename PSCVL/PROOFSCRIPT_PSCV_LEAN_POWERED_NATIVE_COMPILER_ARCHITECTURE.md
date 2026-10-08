@@ -474,3 +474,117 @@ Two release flavors may improve size:
 **Supply-chain policy:** Pin exact Lean commit and packaged binary hashes; include source/module/runtime manifest identities, third-party licenses/notices, checksum/SBOM, and signatures where distributed. Lean's own [LICENSE](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/LICENSE) is Apache-2.0; check other bundled tools independently. Avoid silent download of a newer Lean version or changed Standard registry.
 
 **Cost decision:** PSCV does not need to self-host to provide a standalone `psc`. PSCV's compiler remains written in Lean even after users never see or install Lean themselves.
+
+
+## 13. Current implementation: exact reuse and gaps
+
+The researched baseline is a **small working feasibility frontend**, *not* native compilation or complete PSCV conformance. Respect existing evidence without preserving mismatched syntax purely for compatibility.
+
+| Existing file | Verified baseline behavior | Minimal next refactor |
+|---|---|---|
+| [`Main.lean`](Main.lean) | `import Lean`, `Lean.Elab.Frontend`, loads `PSCVL.Policy`, runs a grammar check, then `Elab.process` with internal `#pscv_gate`; CLI `check`, `check-preview`, `syntax-kinds` | Keep as CLI composition root; replace string-appended gate as the **final** assurance mechanism; add identity-bound module compile path only when certification exists |
+| [`PSCVL/Syntax.lean`](PSCVL/Syntax.lean) | Bounded `function`, `const`, call/named argument, braced conditional and `refine type`, `ghost`, concrete `Except errors` | Implement exact Appendix A grammar and dedicated AST/lowering; retain verified correct macros, add missing clauses and negative tests |
+| [`PSCVL/Grammar.lean`](PSCVL/Grammar.lean) | Top-level command whitelist, recursive dangerous-name/tactic checks and some Standard restrictions | Replace partial denylists with **complete recursive allowed-source** grammar, tested independent of Lean's permissive environment |
+| [`PSCVL/Effect.lean`](PSCVL/Effect.lean) | Checked propositions for pure/reader/state/typed errors and correspondence to `Std.WP.wp` | Reuse as thin semantic bridge; freeze effect law/spec registry, call and error obligations |
+| [`PSCVL/Policy.lean`](PSCVL/Policy.lean) | Local `unsafe`/`partial`/axiom exclusion, `collectAxioms`, root tags, direct `IO`/noncomputability checks | Maintain developer preflight, but implement complete imported closure, approval identity, certified result and unbypassable handoff |
+| [`lakefile.lean`](lakefile.lean), [`lean-toolchain`](lean-toolchain) | Native Lean-built PSCVL CLI package, pinned `leanprover/lean4:v4.35.0-rc3` | Keep; package Lean-native app and later bundle entire compiler SDK |
+| [`CONFORMANCE.md`](CONFORMANCE.md), [`NORMATIVE_ALIGNMENT.md`](NORMATIVE_ALIGNMENT.md) | Explicit partial/missing coverage ledger | Keep authoritative about implementation status; link each new rule to positive+negative tests |
+| [`pscvl.yml`](../.github/workflows/pscvl.yml) | Green bounded Lean frontend smoke suite at baseline | Add full conformance, checker replay, import/cache/certificate and native/no-native tests |
+
+**Evidence disclaimer:** A passing `lake exe pscvl check ...` establishes *preliminary Lean elaboration and the current limited policy only*. `check-preview` intentionally admits more Lean source and is never ProofScript Standard conformance. Neither command builds a `.olean`, PSCV certificate, C file or native executable today.
+
+## 14. Milestone plan and explicit acceptance gates
+
+| Gate | New PSCVL code needed; maximize Lean reuse | Required acceptance evidence |
+|---|---|---|
+| **M0: preserve baseline** | Keep current CLI, normative authority digest, existing fixtures, module pin and CI; separate experimental preview | Existing smoke CI green; no native emission and no unsupported full-conformance claim |
+| **M1: complete language L1** | UTF-8/lexical checker; Appendix-A command/term/pattern/proof/do grammar; finite owned lowering; import/public-import closure | Every normative grammar family and Appendix-I mapping has executable positive and negative cases; no uncontrolled Lean AST falls through |
+| **M2: deterministic Standard semantics** | Use Lean Meta, core checking and declaration elaboration; implement/adapt `PS-UNIFY-v1`, deterministic instances/default/coercions and module lookup; freeze env manifest | Identical frozen source/profile/env gives equivalent accepted terms and failures; target counterexamples to permissive Lean behavior are rejected or lowered correctly |
+| **M3: verification V1** | Reuse pinned `Std.WP`/VCGen/intrinsic verification; PSCV call/frame/old/error/ghost adapters | All applicable body, caller, every-return, iterator/while/recursion, error, effect and erasure obligations generated and checked |
+| **M4: approved specification S1** | Canonical formal claim IDs, externally approved immutable digest, exported coverage and anti-weakening | Missing/changed/weakened claim invalidates dependent proof/certificate; no self-approval by implementation annotation |
+| **M5: proof/trust/certification C1** | Lean kernel and `leanchecker` replay + PSCV imported proof/axiom/effect/runtime closure | False proof, admitted holes, stale imports, forbidden unsafe/partial/noncomputable/IO, altered effects, forged certificates all reject |
+| **M6: Lean native N1** | Minimal gated `LeanDriver`, deterministic generated Lean files, stock Lean compiler/LCNF/C/Lake | Native emits *only* after accepted certificate; native tests and separately stated compiler assurance; no unchecked-emission path |
+| **M7: standalone `psc` release** | Native `psc` built by Lean and platform SDK bundle; npm/platform selector optional | On clean supported OS with **no Lean/Elan installed**, `psc check`, `verify`, `build --verified` work with only bundled dependencies; provenance/licensing/replay pass |
+| **M8: performance and maintenance** | Use existing Lean/Lake compiled module caches/precompilation first; inspect measured bottlenecks | Warm/cold build measurements, bounded resources, no semantic regressions, version-lock/upgrade tests |
+
+**Preferred implementation order:** M1 language grammar and M2 deterministic elaboration give a sound platform for M3 verification; implementation experiments may be parallelized, but **do not change the definition of a completed gate to make tests green**. Existing `Std.WP` experiments are useful, not a replacement for full effect closure. Do not begin JS/Wasm/Rust backend rewrites or self-hosting inside PSCVL until the native target justifies them.
+
+### 14.1 Mandatory conformance/negative regression families
+
+Use Appendix-J `PS-CONF-*`/`PSCV-CONF-*` IDs, including **expected rejection diagnostics or semantic observations**, not merely exit status:
+
+1. UTF-8/BOM/lone-CR/TAB/whitespace, comment-newline ownership, strict call adjacency and indentation.
+2. `f(x,y)` vs `f (x,y)` vs `f((x,y))`; required/empty/default calls; named/duplicate/unknown/non-suffix arguments; source-visible binder targets.
+3. Braced one-term declaration bodies, braced conditionals, tuple/record comma and trailing comma policies, structure/class field layout, instance/where/do/tactic newline separators.
+4. Single-scrutinee match, linear/exhaustive bounded patterns, nested constructors, dependent/indexed types and positivity.
+5. Fixed Standard notation and Chapter-20 tactic heads/argument shapes; reject arbitrary Lean tactics, bullets, `case`, syntax/macros/options and import-driven grammar registration.
+6. Deterministic local/imported instance choices, default-instance phase, `PS-UNIFY-v1` cases and coercion limits, both for accepted and Lean-only results.
+7. Contract success/error semantics, false `ensures`, missed caller precondition, open `assert`, invalid invariant, missing/nondecreasing measure, erroneous `break`/`continue` proof.
+8. `old` refers to pre-state; `reads`/`modifies` frame checks; typed error path is not success; library WP monotonicity/pure/bind/operation laws.
+9. Ghost-to-runtime return, control-flow, public exception, external operation and observable-resource leaks; runtime noncomputability.
+10. Approved-spec gaps or digest weakening; stale/mismatched import/spec/`olean`/manifest; forged `verified` JSON/attribute; replay mismatch.
+11. Invalid source/evidence/assumption/certificate must never invoke native codegen or leave publicly claimable verified binary; clean certificate must generate executable with tested runtime semantics.
+12. Fresh supported-platform installation without globally installed Lean, Elan or Lake, followed by deterministic build/provenance and license checks.
+
+### 14.2 Native behavior corpus
+
+Once the native bridge is authorized, test actual executables on admitted PSCV semantics: `Nat`/`Int`, fixed-width integers, Boolean/Prop separation, `String`/`Char`, arrays/lists, options/exceptions, tuples, structures, inductives, closure/function application, recursion, and the four approved effect families. For application-world interaction, test the explicit **boundary adapter** separately from the closed pure core. Backend tests support **compiler evidence**, not proof that every host behavior conforms to logic.
+
+## 15. Reliability, performance and threat boundaries
+
+| Risk | Minimum response |
+|---|---|
+| More powerful Lean syntax hidden inside admitted top-level `def` | Recursive positive AST allowlist for terms/tactics/do, source token/span checks, generated-tree validation |
+| Imported dependency registers arbitrary Lean syntax/tactic/VC rule or changes instance precedence | Closed source grammar and initial manifest; exact import/public-import identity, deterministic exported semantic registrations |
+| Lean's default elaborator silently changes PSCV source meaning | Chapter-22 constrained algorithm / checked observable decisions, differential conformance tests, fail closed |
+| Macro expands to a forbidden axiom, unsafe declaration, or unapproved proof shortcut | Post-expansion source policy, kernel check, transitive axiom/unsafe closure and independent replay |
+| `@[pscv_type_spec]` or cached “verified” flag masquerades as approved spec | Immutable approved claim digest, explicit approval/coverage data and certified-only internal state |
+| `Erased` does not establish ghost noninterference | Mandatory proof/validator of erasure over all returned data, branches, exceptions and observable operations |
+| VC search times out, proof cache missing, checker fails, memory exhausted | Distinguish unknown/incomplete from false; no successful PSCV emission |
+| Native codegen starts before certification | Gated API + isolated build stages + negative CI observing zero C/object/binary emission |
+| Lean compiler optimization or C/runtime code breaks source semantics | Record independent compiler/native assurance, test/differential/translation validation or proof as selected policy requires |
+| Native world effects treated as proved | Strict effect closure and explicit closed vs boundary identity with assumption/evidence classification |
+| Binary accidentally loads ambient/incompatible Lean library | Bundle pinned libraries; verify toolchain/library search paths, digests and target ABI |
+| Reference upgraded without versioning | Exact Lean pin and Standard/verification manifest digest; new profile version and full regression when semantics change |
+
+**Performance priorities AFTER correctness:** use Lean's `.olean` and Lake module caching, build-graph invalidation, compiled trusted library/precompile support, then profile parser/elaboration/VC solving/replay/LCNF/C/link stages separately. Favor whole-family simplifications over tests-fix-patch loops. Do not invent a new `.psk`/`.psenv` binary format or custom IR merely for packaging; leverage Lean's existing module artifacts first.
+
+## 16. Alternatives rejected and remaining research questions
+
+| Alternative | Reason to reject for initial PSCVL |
+|---|---|
+| New kernel, typechecker and general dependent language elaborator | Unnecessary duplication and larger trusted surface |
+| Fork and embed modified Lean 4 source tree | Upgrade/maintenance cost; does not by itself solve the normative source distinction |
+| TypeScript/JS/Rust-first transpilation instead of Lean native | Additional runtime semantics and translation-assurance work before native grammar/verification closure |
+| Accept unrestricted Lean then ban just `unsafe` and `partial` | Fails grammar, prover, deterministic elaboration, options, registrations and effect closure |
+| Treat successful `vcgen`, `@[spec]`, `.olean` or tests as PSCV certificate | Does not prove approved specification coverage, imported trust/effects or erasure/native preservation |
+| Emit an executable first and verify later | Violates mandatory PSCV verified-build gate |
+| Copy Lean's C/LLVM emitter or implement a PSCV backend IR now | No language-feature benefit, unnecessarily expands maintenance/assurance |
+| Require end users to install Elan/Lean/Lake | Not needed for a supported bundled native SDK |
+
+**Open tasks, not claimed solved:** Freeze correct Standard/verification registry digests; implement PS-UNIFY deterministic acceptance; prove/test semantic correspondence of owned lowering and VCs; formalize approved-spec and certificate encodings; validate full module graph and imported trust; establish end-to-end codegen gate; determine actual platform-dependent bundle sizes/dependencies/licenses; measure performance; build clean-machine releases.
+
+## 17. Resulting product, acceptance summary and bibliography
+
+~~~text
+User installs ProofScript once (no separate user-managed Lean installation).
+User writes .ps and approves formal behavioral specification.
+psc checks exact PSCV source grammar and frozen Standard semantics.
+Lean 4.35.0-rc3 elaborates and kernel-checks the admitted definitions/proofs.
+Lean Std.WP and VCGen generate proof evidence under PSCV-VERIFY-v1.
+PSCVL validates requirements, caller VCs, effects, termination, trust,
+     imports, ghost erasure and independent evidence/replay.
+Only verified and approved PSCV-CERT-v1 enables Lean native compilation.
+Existing Lean LCNF/C/runtime/toolchain produces the executable.
+User receives native binary + traceable, properly scoped assurance report.
+~~~
+
+**This is a target description, not a statement of present functionality.** PSCVL at the researched baseline has **not** completed full L1/V1/S1/C1/N1/E1 certification or native compilation; it must retain “UNCERTIFIED” until then. An accepted proof establishes the *approved formal proposition* relative to its axioms and assumptions, not every unstated software requirement or the correctness of external services, compiler passes or operating systems.
+
+**Primary normative authority:** [ProofScript PSCV Language Reference RC-v2](../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md), especially §2, §5–10, §18–24, §30–32, Appendices A/I/J/K.
+
+**Pinned Lean implementation evidence:** the [exact Lean 4.35.0-rc3 commit](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4) and the source-index table in §3, particularly [frontend](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Frontend.lean), [contract expansion](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Tactic/Do/Contract.lean), [VCGen](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Tactic/Do/VCGen.lean), [WP laws](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Std/WP/Monad/Basic.lean), [LCNF/C emitter](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean), [Lake build actions](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/Lake/Build/Actions.lean), [leanchecker](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/LeanChecker.lean), [pinned Lake README](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/README.md).
+
+**Informative upstream manuals (moving, non-normative):** [Lean elaboration/compilation](https://lean-lang.org/doc/reference/latest/Elaboration-and-Compilation/), [Lean build-tool distribution](https://lean-lang.org/doc/reference/latest/Build-Tools-and-Distribution/), [Lake](https://lean-lang.org/doc/reference/latest/Build-Tools-and-Distribution/Lake/).
+
+**Existing implementation-evidence ledgers:** [PSC VL conformance](CONFORMANCE.md), [normative alignment](NORMATIVE_ALIGNMENT.md), [PSCVL README](README.md); green bounded PSCVL [GitHub Actions run](https://github.com/dwijayuda/pskernel/actions/runs/37792775050) for the researched 2026-10-08 main commit. These are not release-conformance certificates.

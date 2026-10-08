@@ -385,13 +385,15 @@
         "scripts/canonical-exports.mjs",
         "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
         "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json",
-        "scripts/wasm-canonical-artifact.mjs",
-        "packages/backend-wasm/src/Ps/BackendWasm/CanonicalRequest.lean",
-        "packages/driver-wasm/src/Ps/DriverWasm/Canonical.lean"
+        "scripts/wasm-canonical-artifact.mjs"
       ],
       "inheritedImplementationStatus": "partial",
       "assurance": "pending",
-      "disposition": "Keep InterfaceIR/WIT/Canonical ABI separate from PublicApiIR. Scalar producer, bounded portable request, actual prepared-source driver and closed host adapter are connected through live generated/native checked selection and graph/descriptor/bundle/envelope publication. Cloud integration validation, broad adapters and independent WIT evidence remain pending."
+      "disposition": "Keep InterfaceIR/WIT/Canonical ABI separate from PublicApiIR. Scalar producer, bounded portable request, actual prepared-source driver and closed host adapter are connected through live generated/native checked selection and graph/descriptor/bundle/envelope publication. Cloud integration validation, broad adapters and independent WIT evidence remain pending.",
+      "addedOwners": [
+        "packages/backend-wasm/src/Ps/BackendWasm/CanonicalRequest.lean",
+        "packages/driver-wasm/src/Ps/DriverWasm/Canonical.lean"
+      ]
     },
     {
       "id": "logical-interop",

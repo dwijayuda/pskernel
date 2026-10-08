@@ -26,6 +26,13 @@ for (const item of migration.workstreams) {
   const old = legacy.workstreams.find(old => old.id === item.id);
   same(item.existingOwners, old.owners, 'lost owner: ' + item.id);
   same(item.v3Sections, old.sections, 'lost section: ' + item.id);
+  const added = item.addedOwners ?? [];
+  unique([...item.existingOwners, ...added], 'duplicate owner: ' + item.id);
+  for (const owner of added) {
+    assert.equal(typeof owner, 'string');
+    assert.ok(!owner.startsWith('/') && !owner.includes('..') && !owner.includes('\\'), 'invalid owner path');
+    await access(new URL(owner, root));
+  }
   assert.ok(item.classifications.length > 0);
   for (const classification of item.classifications) assert.ok(migration.classificationVocabulary.includes(classification));
 }

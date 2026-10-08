@@ -78,11 +78,11 @@ theorem psKernelLevelNormalizesToZero_true_semantic
           have hRight : psKernelLevelNormalizesToZero right = true := by
             simpa [psKernelLevelNormalizesToZero, hLeft] using hZero
           intro parameterValue metavariableValue
-          simp [psKernelAdmissionLevelValue, ihLeft hLeft, ihRight hRight]
+          simp [psKernelAdmissionLevelValue, ihLeft hLeft parameterValue metavariableValue, ihRight hRight parameterValue metavariableValue]
   | imax left right ihLeft ihRight =>
       have hRight : psKernelLevelNormalizesToZero right = true := hZero
       intro parameterValue metavariableValue
-      simp [psKernelAdmissionLevelValue, ihRight hRight]
+      simp [psKernelAdmissionLevelValue, ihRight hRight parameterValue metavariableValue]
   | param name => simp [psKernelLevelNormalizesToZero] at hZero
   | mvar name => simp [psKernelLevelNormalizesToZero] at hZero
 
@@ -97,23 +97,21 @@ theorem psKernelLevelNormalizesToZero_false_positive_at_one
       cases hLeft : psKernelLevelNormalizesToZero left with
       | false =>
           have hPositive := ihLeft hLeft
-          simp only [psKernelAdmissionLevelValue]
-          omega
+          exact Nat.lt_of_lt_of_le hPositive (Nat.le_max_left _ _)
       | true =>
           have hRight : psKernelLevelNormalizesToZero right = false := by
             simpa [psKernelLevelNormalizesToZero, hLeft] using hNonZero
           have hPositive := ihRight hRight
-          simp only [psKernelAdmissionLevelValue]
-          omega
+          exact Nat.lt_of_lt_of_le hPositive (Nat.le_max_right _ _)
   | imax left right ihLeft ihRight =>
       have hRight : psKernelLevelNormalizesToZero right = false := hNonZero
       have hPositive := ihRight hRight
       simp only [psKernelAdmissionLevelValue]
       have hNotZero : psKernelAdmissionLevelValue (fun _ => 1) (fun _ => 1) right ≠ 0 := by omega
       simp only [hNotZero, ↓reduceIte]
-      omega
-  | param name => decide
-  | mvar name => decide
+      exact Nat.lt_of_lt_of_le hPositive (Nat.le_max_right _ _)
+  | param name => simp [psKernelAdmissionLevelValue]
+  | mvar name => simp [psKernelAdmissionLevelValue]
 
 theorem psKernelLevelNormalizesToZero_false_semantic
     (level : PsKernelLevel)
@@ -139,22 +137,20 @@ theorem psKernelLevelIsNotZero_true_semantic
       | true =>
           intro parameterValue metavariableValue
           have hPositive := ihLeft hLeft parameterValue metavariableValue
-          simp only [psKernelAdmissionLevelValue]
-          omega
+          exact Nat.lt_of_lt_of_le hPositive (Nat.le_max_left _ _)
       | false =>
           have hRight : psKernelLevelIsNotZero right = true := by
             simpa [psKernelLevelIsNotZero, hLeft] using hNonZero
           intro parameterValue metavariableValue
           have hPositive := ihRight hRight parameterValue metavariableValue
-          simp only [psKernelAdmissionLevelValue]
-          omega
+          exact Nat.lt_of_lt_of_le hPositive (Nat.le_max_right _ _)
   | imax left right ihLeft ihRight =>
       have hRight : psKernelLevelIsNotZero right = true := hNonZero
       intro parameterValue metavariableValue
       have hPositive := ihRight hRight parameterValue metavariableValue
       have hNotZero : psKernelAdmissionLevelValue parameterValue metavariableValue right ≠ 0 := by omega
       simp only [psKernelAdmissionLevelValue, hNotZero, ↓reduceIte]
-      omega
+      exact Nat.lt_of_lt_of_le hPositive (Nat.le_max_right _ _)
   | param name => simp [psKernelLevelIsNotZero] at hNonZero
   | mvar name => simp [psKernelLevelIsNotZero] at hNonZero
 

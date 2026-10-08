@@ -8,3 +8,4 @@ lean_lib PSCVL where
 
 @[default_target] lean_exe pscvl where
   root := `Main
+  supportInterpreter := true

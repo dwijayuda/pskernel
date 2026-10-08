@@ -892,3 +892,98 @@ theorem psKernelEnvironmentIndexInsert_branch_refines_lookup
           rfl
         rw [hUnchanged]
         simp [psKernelFindConstantInList, hSame, name]
+
+
+theorem psKernelFindConstantInList_cons_transport
+    (info : PsKernelConstantInfo)
+    (left right : List PsKernelConstantInfo)
+    (query : PsKernelName)
+    (hLookup :
+      psKernelFindConstantInList query left =
+        psKernelFindConstantInList query right) :
+    psKernelFindConstantInList query (List.cons info left) =
+      psKernelFindConstantInList query (List.cons info right) := by
+  cases hSame :
+      psKernelNameEq (psKernelConstantInfoName info) query with
+  | true =>
+      simp [psKernelFindConstantInList, hSame]
+  | false =>
+      simpa [psKernelFindConstantInList, hSame] using hLookup
+
+
+/-
+Authoritative index refinement is stable under *every* publicly constructible
+root index representation. The proof is extensional, so it requires no
+unjustified shape or reachability precondition on the old index.
+-/
+theorem psKernelEnvironmentIndexInsert_refines_authoritative
+    (index : PsKernelEnvironmentIndex)
+    (constants : List PsKernelConstantInfo)
+    (info : PsKernelConstantInfo)
+    (hRefines :
+      ∀ query : PsKernelName,
+        psKernelFindConstantInList
+            query
+            (psKernelEnvironmentIndexFind index query) =
+          psKernelFindConstantInList query constants)
+    (query : PsKernelName) :
+    psKernelFindConstantInList
+        query
+        (psKernelEnvironmentIndexFind
+          (psKernelEnvironmentIndexInsert index info)
+          query) =
+      psKernelFindConstantInList
+        query
+        (List.cons info constants) := by
+  cases index with
+  | empty =>
+      have hOld :
+          psKernelFindConstantInList query List.nil =
+            psKernelFindConstantInList query constants := by
+        simpa [psKernelEnvironmentIndexFind] using hRefines query
+      calc
+        psKernelFindConstantInList
+            query
+            (psKernelEnvironmentIndexFind
+              (psKernelEnvironmentIndexInsert
+                PsKernelEnvironmentIndex.empty info)
+              query) =
+          psKernelFindConstantInList query (List.cons info List.nil) := by
+          rfl
+        _ = psKernelFindConstantInList
+              query
+              (List.cons info constants) :=
+          psKernelFindConstantInList_cons_transport
+            info List.nil constants query hOld
+  | small values =>
+      have hOld :
+          psKernelFindConstantInList query values =
+            psKernelFindConstantInList query constants := by
+        simpa [psKernelEnvironmentIndexFind] using hRefines query
+      exact
+        (psKernelEnvironmentIndexInsert_small_refines_authoritative
+          values info query).trans
+          (psKernelFindConstantInList_cons_transport
+            info values constants query hOld)
+  | bucket values =>
+      have hOld :
+          psKernelFindConstantInList query values =
+            psKernelFindConstantInList query constants := by
+        simpa [psKernelEnvironmentIndexFind] using hRefines query
+      exact
+        (psKernelEnvironmentIndexInsert_bucket_refines_authoritative
+          values info query).trans
+          (psKernelFindConstantInList_cons_transport
+            info values constants query hOld)
+  | branch left right =>
+      exact
+        (psKernelEnvironmentIndexInsert_branch_refines_lookup
+          left right info query).trans
+          (psKernelFindConstantInList_cons_transport
+            info
+            (psKernelEnvironmentIndexFind
+              (PsKernelEnvironmentIndex.branch left right)
+              query)
+            constants
+            query
+            (hRefines query))

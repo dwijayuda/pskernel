@@ -1,4 +1,5 @@
 import Ps.KernelCore.Admission.Inductive.Ordinary.Admission
+import Ps.KernelCore.Admission.Inductive.Mutual.Admission
 import Ps.KernelCore.Metatheory.AdmissionIndexConfiguration
 
 /-
@@ -101,3 +102,137 @@ theorem psKernelSimpleNameListUnique_true_no_duplicates
         psKernelSimpleNameListUnique,
         hDuplicates
       ] at hUnique
+
+
+/-
+Only the early naming guards are projected from successful top-level admission.
+The deeper constructor, recursor and positivity checks are not claimed closed
+by these theorems; those require separate transaction refinement.
+-/
+theorem psKernelAddSimpleInductive_success_name_guards
+    (fuel : Nat)
+    (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleInductiveDecl)
+    (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hRun :
+      psKernelAddSimpleInductive
+          fuel environment decl maxRecDepth maxNatSize =
+        Except.ok result) :
+    psKernelNameHasDuplicates decl.levelParams = false ∧
+      psKernelSimpleNameListUnique
+        (List.cons decl.name
+          (List.cons
+            (psKernelSimpleRecName decl.name)
+            (psKernelSimpleCtorNames decl.ctors))) = true ∧
+      PsKernelInductiveNamesAbsent
+        environment
+        (List.cons decl.name
+          (List.cons
+            (psKernelSimpleRecName decl.name)
+            (psKernelSimpleCtorNames decl.ctors))) := by
+  let allNames : List PsKernelName :=
+    List.cons decl.name
+      (List.cons
+        (psKernelSimpleRecName decl.name)
+        (psKernelSimpleCtorNames decl.ctors))
+  cases hDuplicates :
+      psKernelNameHasDuplicates decl.levelParams with
+  | true =>
+      simp [psKernelAddSimpleInductive, hDuplicates] at hRun
+  | false =>
+      cases hUnique :
+          psKernelSimpleNameListUnique allNames with
+      | false =>
+          simp [
+            psKernelAddSimpleInductive,
+            hDuplicates, allNames, hUnique
+          ] at hRun
+      | true =>
+          cases hFresh :
+              psKernelCheckFreshInductiveNames
+                allNames environment with
+          | error message =>
+              simp [
+                psKernelAddSimpleInductive,
+                hDuplicates, allNames, hUnique, hFresh
+              ] at hRun
+          | ok witness =>
+              cases witness
+              have hAbsent :=
+                psKernelCheckFreshInductiveNames_refines_canonical
+                  allNames environment hIndex hFresh
+              exact ⟨hDuplicates, hUnique, hAbsent⟩
+
+
+theorem psKernelAddSimpleMutualInductive_success_name_guards
+    (fuel : Nat)
+    (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hRun :
+      psKernelAddSimpleMutualInductive
+          fuel environment decl maxRecDepth maxNatSize =
+        Except.ok result) :
+    psKernelNameHasDuplicates decl.levelParams = false ∧
+      psKernelNatLt
+        (psKernelSimpleMutualTypeCount decl.types) 2 = false ∧
+      psKernelSimpleNameListUnique
+        (psKernelMutualNameListAppend
+          (psKernelSimpleMutualNames decl.types)
+          (psKernelMutualNameListAppend
+            (psKernelSimpleMutualRecNames decl.types)
+            (psKernelSimpleMutualCtorNames decl.types))) = true ∧
+      PsKernelInductiveNamesAbsent
+        environment
+        (psKernelMutualNameListAppend
+          (psKernelSimpleMutualNames decl.types)
+          (psKernelMutualNameListAppend
+            (psKernelSimpleMutualRecNames decl.types)
+            (psKernelSimpleMutualCtorNames decl.types))) := by
+  let allNames : List PsKernelName :=
+    psKernelMutualNameListAppend
+      (psKernelSimpleMutualNames decl.types)
+      (psKernelMutualNameListAppend
+        (psKernelSimpleMutualRecNames decl.types)
+        (psKernelSimpleMutualCtorNames decl.types))
+  cases hDuplicates :
+      psKernelNameHasDuplicates decl.levelParams with
+  | true =>
+      simp [
+        psKernelAddSimpleMutualInductive, hDuplicates
+      ] at hRun
+  | false =>
+      cases hMinTypes :
+          psKernelNatLt
+            (psKernelSimpleMutualTypeCount decl.types) 2 with
+      | true =>
+          simp [
+            psKernelAddSimpleMutualInductive,
+            hDuplicates, hMinTypes
+          ] at hRun
+      | false =>
+          cases hUnique :
+              psKernelSimpleNameListUnique allNames with
+          | false =>
+              simp [
+                psKernelAddSimpleMutualInductive,
+                hDuplicates, hMinTypes, allNames, hUnique
+              ] at hRun
+          | true =>
+              cases hFresh :
+                  psKernelCheckFreshInductiveNames
+                    allNames environment with
+              | error message =>
+                  simp [
+                    psKernelAddSimpleMutualInductive,
+                    hDuplicates, hMinTypes, allNames,
+                    hUnique, hFresh
+                  ] at hRun
+              | ok witness =>
+                  cases witness
+                  have hAbsent :=
+                    psKernelCheckFreshInductiveNames_refines_canonical
+                      allNames environment hIndex hFresh
+                  exact ⟨hDuplicates, hMinTypes, hUnique, hAbsent⟩

@@ -53,6 +53,15 @@ jobs:
             checker:
               - 'psc0/packages/pskernel-core/src/**'
               - 'psc0/host/src/Ps/Host/KernelCoreProvider/**'
+              - 'psc0/host/**'
+              - 'psc0/lean-checked/**'
+              - 'psc0/scripts/**'
+              - 'psc0/stdlib/**'
+              - 'psc0/package.json'
+              - 'psc0/lake-manifest.json'
+              - 'psc0/lean-toolchain'
+              - 'psc0/packages/cli/**'
+              - '.github/workflows/psc0-native-selfhost.yml'
               - 'psc0/scripts/checked-kernel-identity.mjs'
               - 'psc0/scripts/checked-kernel-provider.mjs'
               - 'psc0/scripts/checked-kernel-core.mjs'
@@ -67,6 +76,10 @@ jobs:
         with:
           node-version: '22'
       - uses: leanprover/lean-action@v1
+        if: >-
+          ${{ steps.scope.outputs.portable == 'true' ||
+              steps.scope.outputs.checker == 'true' ||
+              (github.event_name == 'workflow_dispatch' && inputs.full == true) }}
         with:
           lake-package-directory: psc0
           auto-config: false
@@ -75,6 +88,10 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: false
       - name: Restore incremental Lake outputs
+        if: >-
+          ${{ steps.scope.outputs.portable == 'true' ||
+              steps.scope.outputs.checker == 'true' ||
+              (github.event_name == 'workflow_dispatch' && inputs.full == true) }}
         uses: actions/cache@v4
         with:
           path: |
@@ -84,6 +101,10 @@ jobs:
           restore-keys: |
             psc0-core-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
       - name: Install only pinned TypeScript for historical compiler
+        if: >-
+          ${{ steps.scope.outputs.portable == 'true' ||
+              steps.scope.outputs.checker == 'true' ||
+              (github.event_name == 'workflow_dispatch' && inputs.full == true) }}
         run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
       - name: Cheap source invariants
         run: |
@@ -92,8 +113,16 @@ jobs:
           node scripts/check-owned-kernel-default-source.mjs
           node scripts/bootstrap-root-minimality-tests.mjs
       - name: Build native PSKernel Core provider
+        if: >-
+          ${{ steps.scope.outputs.portable == 'true' ||
+              steps.scope.outputs.checker == 'true' ||
+              (github.event_name == 'workflow_dispatch' && inputs.full == true) }}
         run: lake build psc_kernel_core_provider psc_kernel_core_provider_tests
       - name: Run bounded native provider tests
+        if: >-
+          ${{ steps.scope.outputs.portable == 'true' ||
+              steps.scope.outputs.checker == 'true' ||
+              (github.event_name == 'workflow_dispatch' && inputs.full == true) }}
         run: |
           lake exe psc_kernel_core_provider_tests
           node --test scripts/checked-kernel-core.test.mjs scripts/checked-kernel-provider.test.mjs
@@ -102,12 +131,22 @@ jobs:
           ${{ steps.scope.outputs.portable == 'true' ||
               steps.scope.outputs.checker == 'true' ||
               (github.event_name == 'workflow_dispatch' && inputs.full == true) }}
+        env:
+          PSC0_DIAGNOSTIC_ADMISSIONS: dist/diagnostics/core-admissions-rejected.json
         run: |
           if node scripts/selfhost-baseline.mjs --assert-unchanged; then
             node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core --fast
           else
             node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core
           fi
+      - name: Retain exact rejected canonical admissions for kernel conformance research
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-native-core-rejection
+          path: psc0/dist/diagnostics/core-admissions-rejected.json
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Explain skipped fixed point
         if: >-
           ${{ steps.scope.outputs.portable != 'true' &&

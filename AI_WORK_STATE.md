@@ -428,3 +428,34 @@ Architectural blockers still remaining:
 - This is an admission freshness correction, not a change to defeq/cache
   semantics or Arena infrastructure. Verify full CI before calling it green.
 - Full transaction/positivity semantics remain incomplete.
+
+
+## Verified admission freshness / concrete recursor checkpoint — 2026-10-09
+- **Full proof #706 GREEN** at `744b70444a4bebcd28afbb36bd622375f5575b49`:
+  configured concrete recursor-rule validation and independent constructor
+  result semantic-shape composition are registered and validated.
+- **Full proof #707 GREEN** at `0f9f3823899ab06c5d37ffa345c01d8b5fc96b10`:
+  the admission/checker allocation collision witness, the corrected reserved
+  allocation, its distinct-next-name regression, and configuration-preservation
+  theorem compile together. No fresh-bound invariant was weakened.
+- #708's proof step also passed, but newly enabled native foundation conformance
+  failed at the recursor aggregate. Its test still required an inferOnly cache
+  entry for an fvar key, contrary to the previously proved cache eligibility
+  fix. That assertion now requires absence while retaining reference result
+  equality. Whole-family review found the same stale expectation in the DefEq
+  differential helper; it now requires success cache presence for eligible
+  keys and absence for ineligible keys. Generic map storage tests are unchanged.
+- #709 isolated a proof-alignment failure in the new recursive-argument index
+  exclusion induction: splitting the reduced expression changed the key of
+  the already-known application-dispatch equation. Candidate `de697002...`
+  consumes that equation before the shape split, fixing the shared boundary
+  rather than individual expression constructors.
+- The proof workflow now includes native foundation conformance and triggers on
+  its test-source paths, so test changes cannot silently miss this gate.
+- Pending: verify the new recursive-argument index theorem and full native
+  foundation conformance on the latest HEAD. No native conformance pass has
+  yet been claimed for the latest source.
+- StringEq reflexivity remains explicitly conditional at the opaque Internal
+  runtime boundary. Native-reduction and StringEq soundness remain named TCB
+  laws. Full positivity, ordinary/mutual/nested transaction refinement,
+  final public composition, final audit, and integration remain incomplete.

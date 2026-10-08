@@ -293,7 +293,7 @@ A useful source-to-output decomposition is `.lean text → Parser Syntax → Ela
 | `builtin_initialize` | Registers persistent compiler extension | [Specialize.lean:30](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L30) | compiler | Environment mutation/trust |
 | `set_option` | Controls compiler/linter options | [Basic.lean:21](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L21) | Init | Pinned build configuration |
 | `trace[Compiler...]` | Compiler debug tracing | [Specialize.lean:406](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L406) | compiler | Diagnostics not semantic proof |
-| `s!"..."` | String interpolation | [PassManager.lean:134](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PassManager.lean#L134) | compiler | Encoding/output determinism |
+| `s!"..."` | String interpolation | [EmitC.lean:235](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L235) | compiler | Encoding/output determinism |
 | `m!"..."` | Structured diagnostics | [SynthInstance.lean:263](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Meta/SynthInstance.lean#L263) | meta | Host diagnostics |
 | `panic!` | Unreachable branch runtime assertion | [Specialize.lean:332](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L332) | compiler | Replace with typed failure or proof in PSCV |
 | `opaque` runtime fast path | Opaque declaration + implementation binding | [Basic.lean:125](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Basic.lean#L125) | compiler | Assumption must be inventoried |
@@ -322,9 +322,148 @@ A useful source-to-output decomposition is `.lean text → Parser Syntax → Ela
 | Lake command elaborator | Elaborates build DSL command | [Package.lean:21](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/Lake/DSL/Package.lean#L21) | Lake | Custom host command handling |
 | `IO.println` | Observable program IO | [Basic.lean:531](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L531) | Init | Not kernel proof |
 | `ByteArray` | Raw byte buffer and UTF-8 representation | [Basic.lean:65](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/String/Basic.lean#L65) | Init | Portable bytes not host String indices |
-| `HashMap`/maps | Efficient lookup and memoization | [Specialize.lean:30](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L30) | compiler | Deterministic output ordering needed |
+| `HashMap`/maps | Efficient lookup and memoization | [Specialize.lean:75](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L75) | compiler | Deterministic output ordering needed |
 | `String` and UTF-8 | Unicode and bytesize proofs | [Basic.lean:41](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/String/Basic.lean#L41) | Init | Byte-offset correctness |
 | `Array` literal and indexing | Arrays including proof-bearing bounds | [Basic.lean:29](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L29) | Init | Cross-backend array model |
 | `Name` | Hierarchical declaration identity | [PassManager.lean:141](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PassManager.lean#L141) | compiler | Semantic namespace identity |
 | `Expr` | Lean Core expression datatype | [CompilerM.lean:193](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CompilerM.lean#L193) | compiler | Not the executable RuntimeIR |
 | `Syntax/TSyntax` | Concrete parsed source AST | [Quotation.lean:27](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Quotation.lean#L27) | elaborator | Need explicit source fidelity relation |
+
+
+## 13. Case studies: how Lean writes its actual compiler
+
+This section ties syntax to real architectural responsibilities instead of merely enumerating tokens.
+
+### 13.1 Typed compiler monads and Reader/State layers
+
+[`src/Lean/Compiler/LCNF/CompilerM.lean` L49–55](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CompilerM.lean#L49-L55) declares a compiler monad as a composition of a read-only context, mutable compilation state and Lean's `CoreM`. It then defines `Monad CompilerM` and helper operations such as `withReader`. This is *ordinary Lean programming* with higher-kinded type constructors, typeclasses, generic functions, records, lambdas, and effects—not merely theorem-proving syntax.
+
+The design lesson for PSCV is to use **registered Reader/State/typed-error effects**, with explicit source semantics and WP theorems, instead of forcing every pass to take and return a manually bundled giant state record. It does not justify arbitrary mutable heap aliasing.
+
+### 13.2 Simple loops and accumulator mutation in passes
+
+[`PassManager.lean` L130–148](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PassManager.lean#L130-L148) illustrates a conventional compiler algorithm: iterate through an array of pass descriptors, validate invariants, accumulate the first/last occurrence of a chosen pass, then destructure a pair of options or fail with a typed error. It uses `for`, `let mut`, conditional expressions, `Option`, pair patterns, `do` and `throwError`.
+
+This pattern is substantially clearer than an ad hoc multi-argument fuel worker for ordinary finite traversals. For a verified portable compiler, each local mutation can be translated to a state/SSA relation while iterator finiteness, index bounds and early-exit postconditions are discharged with reusable library lemmas.
+
+### 13.3 Dependent-index loops, C output and runtime assumptions
+
+[`EmitC.lean` L197–200](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L197-L200) uses an indexed for-loop with a proof-bearing loop variable; [`EmitC.lean` L403–410](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L403-L410) uses a mutable local and `while true` to chase references; [`EmitC.lean` L973–978](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L973-L978) handles code-generation errors.
+
+That code shows the distinction between what Lean's compiler **uses** and what PSCV's verified implementation profile should **admit**. Lean can write an unbounded `while` because it is an ordinary compiler implementation. PSCV's closed verified program must prove a measure/invariant (or use a registered total traversal), and target emission must preserve the error and output-byte behavior.
+
+### 13.4 Termination strategies are mixed, not uniformly total
+
+[`InferType.lean` L120–148](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/InferType.lean#L120-L148) contains mutually recursive partial type-inference helpers. [`Specialize.lean` L273–280](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L273-L280), by contrast, uses an explicit `termination_by` measure for a local recursive traversal. [`Init/Data/String/Basic.lean` L73–86](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/String/Basic.lean#L73-L86) uses `termination_by` with `decreasing_by ... omega` for UTF-8 processing.
+
+Thus **partial recursion and verified well-founded recursion coexist within the same upstream codebase**. The important question for a future PSCV compiler source is which algorithm families can be made total through standard iterators, worklists and explicit termination measures without destabilizing runtime behavior and proof size.
+
+### 13.5 Phased IR and indexed types
+
+[`LCNF/Basic.lean` L37–55](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Basic.lean#L37-L55) defines a `Purity` datatype and instances. Throughout LCNF, terms and declarations are indexed by their purity/phase, and operations distinguish pure and impure IR shapes. [`IR/Basic.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/Basic.lean) defines another purpose-specific compiler representation.
+
+This supports the principle already present in PSCV V5.1: only create a new IR where there is a real semantic or representation boundary, but use types to prevent phases from being accidentally mixed. A type-indexed implementation is not sufficient evidence of runtime semantic preservation.
+
+### 13.6 Meta syntax, macros, quotation and the actual parser
+
+[`Parser/Command.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Parser/Command.lean) defines grammar/parser combinators and declaration modifiers. [`Elab/Macro.lean` L18–40](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Macro.lean#L18-L40) shows a command elaborator generating syntax declarations/`macro_rules`. [`Elab/BuiltinDo/For.lean` L24–35](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/BuiltinDo/For.lean#L24-L35) performs a macro expansion on typed `doFor` syntax quotations. [`Elab/Quotation.lean` L27–33](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Quotation.lean#L27-L33) manipulates syntax with hygienic macro scopes.
+
+**This is a powerful but high-trust-clarity feature family.** Lean 4 makes its compiler frontend extensible in Lean itself. For PSCV, the practical bootstrap approach is to reuse pinned Lean syntax/elaboration as *an untrusted development producer*, while the portable source grammar remains closed and the checked Core and imported-axiom effects remain explicit. ProofScript should not accidentally inherit every parser extension loaded into Lean's environment.
+
+### 13.7 Intrinsic contracts and VC generation in Lean 4.35
+
+The pinned [`Elab/Tactic/Do/Contract.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Tactic/Do/Contract.lean) contains implementation of experimental intrinsic `given`/`requires`/`ensures` contract syntax, generating a `spec` theorem proved through `vcgen`. The pinned [`VCGen.lean` L40–65](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Tactic/Do/VCGen.lean#L40-L65) uses a partially recursive metaprogram and mutable state to generate proof goals. [`Std/WP/Basic.lean` L62–81](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Std/WP/Basic.lean#L62-L81) defines the underlying weakest-precondition typeclass and theorems.
+
+This is a direct research connection for PSCV verification. It is **not evidence** that all PSCV-owned source contracts, effects, ghost/erasure and release `PSCV-CERT` semantics have already been implemented by the experimental Lean frontend or by the production PSCV compiler.
+
+### 13.8 Foundational collections and native runtime
+
+[`Init/Data/Array/Basic.lean` L29–31](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L29-L31) even defines array-literal syntax using `syntax` and `macro_rules`, showing that some "built-in-looking" language conveniences are actually **library-provided syntax**. The same file includes an [`@[extern]` native array operation](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L165) and an [unsafe optimized operation](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L512).
+
+Therefore the compiler's apparent safe `Array` API may rely on separately trusted runtime primitives. PSCV can use analogous performance-oriented backend adapters only with precise representation, bounds, mutability and target-runtime correspondence evidence.
+
+### 13.9 Build DSL, IDE and effects outside the semantic compiler
+
+[`Lake/DSL/Syntax.lean` L25](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/Lake/DSL/Syntax.lean#L25) uses scoped syntax for the build system, [`Lake/DSL/Package.lean` L21](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/Lake/DSL/Package.lean#L21) implements command elaboration, and [`Lean/Server/FileWorker.lean` L365](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Server/FileWorker.lean#L365) uses `ReaderT ... (StateRefT ... IO)` to manage editor workloads. These features are vital to *the overall Lean toolchain*, but not necessarily a good fit for a four-backend **verified compiler semantic core**.
+
+## 14. Research already present in pskernel/study
+
+| Research folder | What exists in the repository | Correct use and version caveat |
+|---|---|---|
+| [`study/lean4-4.34.0`](https://github.com/dwijayuda/pskernel/tree/main/study/lean4-4.34.0) | Full Lean 4.34 source layout, `src/Lean/Compiler`, `Elab`, `Meta`, C++ kernel/runtime, docs, tests, stage0 | Use for local 4.34 behavior and origin comparison; current PSCV pin is 4.35-rc3 |
+| [`study/lean4-4.34.0/doc/dev/bootstrap.md`](https://github.com/dwijayuda/pskernel/blob/main/study/lean4-4.34.0/doc/dev/bootstrap.md) | Upstream bootstrapping explanation with stage0 C and stage1–stage3 self-compilation | Confirms stages, not source/target compiler correctness proof |
+| [`study/lean4-language-reference`](https://github.com/dwijayuda/pskernel/tree/main/study/lean4-language-reference) | Mirrored rendered Lean language reference; Syntax, Definitions, Types, Tactics, IO, Macros, Imports | Useful for all supported grammar families, **not** an exact Lean4.35 source pin |
+| [`study/functional_programming_in_lean`](https://github.com/dwijayuda/pskernel/tree/main/study/functional_programming_in_lean) | Tutorial/book including monads, transforms, dependent types and performance | Explanatory pedagogy, not kernel specification |
+| [`study/theorem_proving_in_lean4`](https://github.com/dwijayuda/pskernel/tree/main/study/theorem_proving_in_lean4) | Theorem/proof programming and tactics | Proof-source examples, not proof of PSCV compilation |
+| [`study/lean4lean-master`](https://github.com/dwijayuda/pskernel/tree/main/study/lean4lean-master) | Separate Lean-for-Lean implementation of Lean kernel, written mostly in Lean | Alternative checker research; not the official upstream C++ kernel or independent PSKernel |
+| [`study/HTPIwL`](https://github.com/dwijayuda/pskernel/tree/main/study/HTPIwL) | Logic and proof-engineering background | Conceptual foundations only |
+
+**Direct file-level cross-check:** the local 4.34 [`CompilerM.lean`](https://github.com/dwijayuda/pskernel/blob/main/study/lean4-4.34.0/src/Lean/Compiler/LCNF/CompilerM.lean#L49) has the `ReaderT ... StateRefT ... CoreM` construction; local [`PassManager.lean`](https://github.com/dwijayuda/pskernel/blob/main/study/lean4-4.34.0/src/Lean/Compiler/LCNF/PassManager.lean#L130-L148) uses finite `for` and `let mut`; local [`Elab/Tactic/Do/Contract.lean`](https://github.com/dwijayuda/pskernel/blob/main/study/lean4-4.34.0/src/Lean/Elab/Tactic/Do/Contract.lean) already contains intrinsic contract infrastructure. The 4.35-rc3 version has additional code; features and behavior must be checked at the correct pin rather than inferred by similar filenames.
+
+## 15. Two different questions: language usage versus verified portability
+
+The feature inventory includes **three fundamentally different categories**:
+
+1. **Actual Lean language constructs:** grammar-level source forms such as `inductive`, `structure`, `def`, `partial def`, `by`, `match`, `do`, `fun`, `let mut`, `for`, `namespace`, `syntax`, `macro_rules`.
+2. **Library-provided syntax and APIs:** `Array`, `StateT`, `ReaderT`, `ExceptT`, `ForIn`, `HashMap`, `String`, indexed operations and `WP`. These are essential to how the code works, but they are not each a new kernel language construct.
+3. **Compiler/runtime/host mechanisms:** `@[extern]`, `@[implemented_by]`, `builtin_initialize`, `IO`/`Task`, Lake DSL, generated C, LLVM backend and C++ kernel. These are real features and boundaries, but they do not prove a self-hosted implementation is total or portable across other runtimes.
+
+Failing to distinguish the categories can make PSCV's desired self-host source language either too primitive (because useful library abstractions are rejected) or too broad (because host-only Lean metadata/FFI is mistaken for portable executable semantics).
+
+## 16. PSCV self-host-portable feature selection from Lean evidence
+
+The following is **advice inferred from the inventory**, not a change to the canonical [SHP2 language reference](https://github.com/dwijayuda/pskernel/blob/main/PSCV_SELFHOST_PORTABLE_LANGUAGE_REFERENCE.md). The approved ProofScript/PSCV language semantics remain authority.
+
+| Lean feature family used in source | Suggested PSCV implementation profile | Benefit | Proof/portability obstacle |
+|---|---|---|---|
+| `def`, `structure`, `inductive`, `match` | **Core required** | Type-safe AST/IR and structural induction | Type and recursor/erasure mapping |
+| Generics, implicit arguments, classes/instances | **Closed registered subset** | Reusable compiler abstraction | Instance/coercion search determinism |
+| `fun` and higher-order immutable operations | **Core required** | Visitors, folds, functional passes | Closure conversion, specialization |
+| `do` / monadic bind | **Required, limited effects** | Readable compiler states and errors | Exact WP and state/error ordering |
+| `let mut` (local only) | **Required** | Efficient and readable accumulators | SSA/state lowering and local proof VCs |
+| Finite `for` | **Required, certified iterator** | Less recursive boilerplate | Iterator termination and break/continue invariant |
+| `while` | **Deferred in self-host source** | Convenient for worklists | Invariant/decreasing obligations; full PSCV still supports |
+| `termination_by`/`decreasing_by` | **Required** | Total algorithms beyond syntactic subterm | Proof cost and runtime recursion strategy |
+| `mutual` recursion | **Required when proven total** | Syntax/elaboration and inference | Joint well-founded measure |
+| `Option`, `Except`, `ReaderT`, `StateT` | **Registered effects/library** | Error and context handling | State+error composition/rollback |
+| `Array`, `ByteArray`, `String`, `HashMap` | **Registered abstract value library** | Runtime efficiency | UTF-8, bounds, deterministic maps, exact integers |
+| `theorem`, `by`, `simp`, `omega`, `grind` | **Proof-only/profile-pinned** | AI assistance in metatheory | Kernel-replayed terms and exact theorem imports |
+| `macro`, `syntax`, `elab`, quotation | **Lean host/tooling only initially** | Extensible development tools | Frozen grammar/source fidelity, runtime portability |
+| `partial`, `unsafe`, runtime `opaque` escape | **Exclude from verified closed executable source** | Lean performance convenience | Totality, trust and runtime meaning |
+| `@[extern]`, `@[implemented_by]`, FFI | **Explicit audited runtime boundary** | Native fast paths and host integration | Target-by-target semantic preservation |
+| `IO`, server tasks, Lake DSL | **Host/tooling boundary** | Real compiler CLI, build and IDE support | External effects and platform assumptions |
+
+**Do not copy Lean's codebase unchanged as PSCV source** and assume full self-hosting. Lean 4.35 uses source features outside the current `PSC1-selfhost-stable/1` parser/elaborator/backend closure, including `partial`/`unsafe`/macros/managed runtime state; this inventory supplies the evidence to identify and prioritize capability-family work.
+
+## 17. What "all language features" means here, and what remains unverified
+
+**High confidence in the listed feature families:** a pinned source-file link and nearby code confirm each positive usage or implementation. **High confidence in the audited compiler file count:** the 117-file tree and retrieval covered all compiler `.lean` files. **Lower confidence in raw keyword frequency:** the one-pass lexical heuristic is not a Lean parser, so comments, documentation and generated syntax quotations can appear as false positives or undercounts. **Explicitly not claimed:** 100% classification of all individual constructs in all 2,536 `.lean` files, or a complete static feature support database generated by building the pinned compiler.
+
+The report should not be read as saying all Lean syntax is used by LCNF. For example, tactic syntax is implemented/used in `Elab`/`Init`/`Std`, while LCNF mostly uses ordinary typed functions, ADTs, mutable local code and compiler monads. Similarly, `axiom` and `noncomputable` are parsed language declarations but this research did not establish pervasive use of such declarations in the compiler backend. Features such as `nonrec`, `meta def`, `partial_fixpoint`, all user notation spellings, exotic tactic extensions and `run_tac` may be supported by Lean but require a separate **actual-source occurrence check** before adding them to a positive usage census.
+
+**Open follow-up for a strictly exhaustive inventory:** run a pinned Lean 4.35 frontend/AST classifier over every target file and emit a machine-generated, line-indexed feature-use manifest. Its report must distinguish lexical source syntax, macro quotations, code strings, comments, expansion-generated constructs, imported-library dependencies, and runtime extensions; compare with this human-reviewed feature-family inventory. No such executable classifier or compile/test run was performed in the present research.
+
+## 18. Primary source links and technical reading order
+
+- [Lean 4.35.0-rc3 compiler](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler)
+- [Lean 4.35 parser](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Parser)
+- [Lean 4.35 elaborator](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab)
+- [Lean 4.35 Meta](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Meta)
+- [Lean 4.35 Init](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init)
+- [Lean 4.35 Std/WP](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Std/WP)
+- [Lean 4.35 Lake](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/Lake)
+- [Lean 4.35 native C++ kernel](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/kernel)
+- [Lean 4.35 runtime](https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/runtime)
+- [Pinned Lean 4.34 bootstrap explanation stored in pskernel](https://github.com/dwijayuda/pskernel/blob/main/study/lean4-4.34.0/doc/dev/bootstrap.md)
+- [Lean Language Reference — declarations](https://lean-lang.org/doc/reference/latest/Definitions/)
+- [Lean Language Reference — dependent types](https://lean-lang.org/doc/reference/latest/The-Type-System/)
+- [Lean Language Reference — monads and do](https://lean-lang.org/doc/reference/latest/Functors___-Monads-and--do--Notation/Syntax/)
+- [Lean Language Reference — macros and quotation](https://lean-lang.org/doc/reference/latest/Notations-and-Macros/Macros/)
+- [Lean Language Reference — recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/)
+- [Lean Language Reference — elaborators](https://lean-lang.org/doc/reference/latest/Notations-and-Macros/Elaborators/)
+- [Lean Language Reference — tactics and proofs](https://lean-lang.org/doc/reference/latest/Tactic-Proofs/)
+- [SHP2 long-term self-host portable language proposal](https://github.com/dwijayuda/pskernel/blob/main/PSCV_SELFHOST_PORTABLE_LANGUAGE_REFERENCE.md)
+
+---
+
+**Research status:** source-grounded inventory finished to feature-family level. The current document is a research/reference artifact only; no compiler/kernel implementation, language grammar, self-host acceptance or proof assurance was modified or certified by creating it.

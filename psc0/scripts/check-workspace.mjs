@@ -1,7 +1,7 @@
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { allowedBootstrapPackageNames, forbiddenBootstrapPackages } from "./bootstrap-closure-contract.mjs";
+import { allowedBootstrapPackageNames, bootstrapPackageViolation } from "./bootstrap-closure-contract.mjs";
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptsDir, "..");
@@ -23,7 +23,7 @@ async function readJson(file) {
 }
 
 for (const packageName of nonWorkspacePackageDirs) {
-  if (!forbiddenBootstrapPackages.has(packageName)) {
+  if (!bootstrapPackageViolation(packageName)) {
     throw new Error(`PSC1_NON_WORKSPACE_PACKAGE_NOT_FORBIDDEN: ${packageName}`);
   }
 }

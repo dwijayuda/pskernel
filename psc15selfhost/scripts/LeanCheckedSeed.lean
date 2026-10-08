@@ -67,8 +67,8 @@ def psCheckedSeedTests : IO Unit := do
     Lean.Json.bool false, Lean.Json.bool false]
   psCheckedSeedAssert "Rust transport pins a separate source capability"
     ((psCheckedSeedRustDecode rustRequest.compress).isOk &&
-      (psCheckedSeedProductsDecode rustRequest.compress).isError &&
-      (psCheckedSeedCanonicalDecode rustRequest.compress).isError)
+      !(psCheckedSeedProductsDecode rustRequest.compress).isOk &&
+      !(psCheckedSeedCanonicalDecode rustRequest.compress).isOk)
   for (target, profile, declarations, sourceMap) in [
       ("javascript", "psc-rust-source/2021", false, false),
       ("rust", "psc-js-closed-instances/1", false, false),
@@ -78,7 +78,7 @@ def psCheckedSeedTests : IO Unit := do
       Lean.Json.str target, Lean.Json.str profile, Lean.Json.bool false,
       Lean.Json.bool declarations, Lean.Json.bool sourceMap]).compress
     psCheckedSeedAssert "Rust transport rejects target/profile/product expansion"
-      (psCheckedSeedRustDecode wire).isError
+      (!(psCheckedSeedRustDecode wire).isOk)
   IO.println "PSC2_LEAN_CHECKED_NATIVE: PASS"
 
 def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do

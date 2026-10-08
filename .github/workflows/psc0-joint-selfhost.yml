@@ -1,0 +1,113 @@
+name: PSC0 joint compiler and kernel self-host
+
+on:
+  pull_request:
+    paths:
+      - 'psc0/packages/pskernel-core/src/**'
+      - 'psc0/scripts/joint-*.mjs'
+      - 'psc0/scripts/psc1kernel-generated-smoke.mjs'
+      - 'psc0/scripts/workspace-layout.mjs'
+      - 'psc0/scripts/checked-*.mjs'
+      - 'psc0/package.json'
+      - '.github/workflows/psc0-joint-selfhost.yml'
+  push:
+    branches:
+      - 'psc0/joint-compiler-kernel-selfhost-v1'
+    paths:
+      - 'psc0/packages/pskernel-core/src/**'
+      - 'psc0/scripts/joint-*.mjs'
+      - 'psc0/scripts/workspace-layout.mjs'
+      - 'psc0/package.json'
+      - '.github/workflows/psc0-joint-selfhost.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: psc0/.lake/build
+          key: psc0-joint-lean-\${{ runner.os }}-\${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-\${{ github.sha }}
+          restore-keys: |
+            psc0-joint-lean-\${{ runner.os }}-\${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
+            psc0-core-\${{ runner.os }}-
+      - name: Check complete kernel implementation closure
+        run: |
+          node scripts/joint-kernel-closure.mjs --assert-full
+          node --test scripts/joint-kernel-closure.test.mjs
+          node scripts/selfhost-baseline.mjs --assert-unchanged
+          node scripts/bootstrap-root-minimality-tests.mjs
+      - name: Build compiler source-check tool
+        run: lake build psc1
+      - name: Check KernelCore root with actual PSC1 frontend
+        run: lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+
+  kernel-generated-fixed-point:
+    needs: source-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            psc0/.lake/build
+            psc0/lean-checked/.lake/build
+          key: psc0-joint-generate-\${{ runner.os }}-\${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-\${{ github.sha }}
+          restore-keys: |
+            psc0-joint-generate-\${{ runner.os }}-\${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
+            psc0-joint-lean-\${{ runner.os }}-
+            psc0-core-\${{ runner.os }}-
+      - name: Install pinned compiler TypeScript without optional backends
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Build native checked kernel and portable compiler frontend
+        run: lake build psc1 psc_kernel_core_provider
+      - name: Generate and check kernel with PSC0-generated compiler
+        run: node scripts/joint-selfhost.mjs generate
+        env:
+          NODE_OPTIONS: --max-old-space-size=12288
+      - name: Upload independent kernel-generation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-joint-kernel-generation
+          path: |
+            psc0/dist/joint-kernel/kernel-fixed-point.json
+            psc0/dist/joint-kernel/bootstrap/kernel/index.checked.json
+            psc0/dist/joint-kernel/selfhost/kernel/index.checked.json
+            psc0/dist/joint-kernel/bootstrap/workspace/.proofscript-bootstrap.json
+            psc0/dist/joint-kernel/selfhost/workspace/.proofscript-selfhost.json
+          if-no-files-found: ignore
+          retention-days: 14

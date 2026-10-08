@@ -851,7 +851,7 @@ theorem psKernelEnvironmentIndexInsert_branch_refines_lookup
       have hRemove :
           psKernelFindConstantInList query next =
             psKernelFindConstantInList query oldBucket := by
-        simpa [next, psKernelFindConstantInList, hSame] using
+        simpa [next, name, psKernelFindConstantInList, hSame] using
           psKernelEnvironmentIndexRemoveName_find_other
             oldBucket name query hSame
       by_cases hHash :

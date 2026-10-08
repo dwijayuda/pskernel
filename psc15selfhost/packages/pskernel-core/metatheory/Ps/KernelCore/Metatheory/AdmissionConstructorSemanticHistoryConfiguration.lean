@@ -418,3 +418,44 @@ theorem PsKernelCheckedOrdinaryConstructorHistory.shape_provenance
   | step work index ctor rest tailShapes finalEnvironment inferredType level
       fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
       simpa using congrArg (List.cons ctor) ih
+
+
+/-- Canonical metadata sequence in constructor ordinal order. -/
+def psKernelOrdinaryConstructorHistoryInfos
+    (decl : PsKernelSimpleInductiveDecl) (index : Nat)
+    (shapes : List PsKernelSimpleConstructorShape) : List PsKernelConstantInfo :=
+  match shapes with
+  | [] => []
+  | shape :: rest =>
+      PsKernelConstantInfo.ctorInfo
+        (PsKernelConstructorInfo.mk
+          (PsKernelConstantBase.mk shape.ctor.name decl.levelParams shape.ctor.type)
+          decl.name index decl.numParams
+          (psKernelOpenBinderListLength shape.fields) decl.isUnsafe) ::
+        psKernelOrdinaryConstructorHistoryInfos decl (Nat.succ index) rest
+
+/--
+The independent constructor history determines exact publication order and
+preserves runtime/Quot state, in addition to canonical lookup extension.
+-/
+theorem PsKernelCheckedOrdinaryConstructorHistory.exact_extension
+    {decl : PsKernelSimpleInductiveDecl} {levels : List PsKernelLevel}
+    {params : List PsKernelOpenBinder} {numIndices : Nat}
+    {resultLevel : PsKernelLevel} {headerLocal : PsKernelLocalContext}
+    {work finalEnvironment : PsKernelEnvironment} {index : Nat}
+    {ctors : List PsKernelSimpleConstructorDecl}
+    {shapes : List PsKernelSimpleConstructorShape}
+    (hHistory : PsKernelCheckedOrdinaryConstructorHistory decl levels params
+      numIndices resultLevel headerLocal work index ctors shapes finalEnvironment) :
+    PsKernelEnvironmentExtendsBy work finalEnvironment
+      (List.reverse (psKernelOrdinaryConstructorHistoryInfos decl index shapes)) ∧
+    finalEnvironment.quotInitialized = work.quotInitialized := by
+  induction hHistory with
+  | done work index =>
+      exact ⟨psKernelEnvironmentExtendsBy_refl work, rfl⟩
+  | step work index ctor rest tailShapes finalEnvironment inferredType level
+      fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
+      refine ⟨?_, ?_⟩
+      · simpa [PsKernelEnvironmentExtendsBy, psKernelOrdinaryConstructorHistoryInfos,
+          psKernelEnvironmentAddUnchecked, List.reverse_cons, List.append_assoc] using ih.1
+      · exact ih.2

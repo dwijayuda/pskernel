@@ -331,6 +331,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionConstructorSemanticHistoryConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionOrdinaryInductivePipelineConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionRecursorSemanticConfiguration,
+    `Ps.KernelCore.Metatheory.AdmissionEliminationConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionConstructorParamsConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionInductiveHeaderConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionUniformOccurrenceConfiguration,

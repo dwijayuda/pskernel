@@ -613,3 +613,49 @@ Architectural blockers still remaining:
   StringEq reflexivity is still an unresolved explicit conditional obligation.
   Full ordinary/mutual/nested publication and recursor generation, public/API
   composition, semantic audit and integration remain open; audit=44/9/19/7.
+
+## Verified ordinary prefix and mutual semantic opening — 2026-10-08
+- **Full proof and native conformance #759 GREEN** at
+  `b7a8658b6a3fdf31ccde34a96a628a924b4a6fca`,
+  run https://github.com/dwijayuda/pskernel/actions/runs/37850758162.
+- Successful ordinary admission now entails the independent
+  `PsKernelOrdinaryInductiveConstructorPrefixValid` certificate: checked
+  closed header Sort typing, parameter/index spines, exact parameter arity,
+  fresh ordered constructor history, typing/positivity/recursive metadata/
+  result-index evidence, canonical lookup extension and refined indexes.
+  This ends before final datatype metadata/recursor publication; it is not
+  a complete well-formed ordinary inductive environment extension.
+- Mutual structural occurrence and result-index exclusion hold for every
+  family member, explicitly conditional on comparator reflexivity.
+  Canonical target selection denotes an actual header shape. Independent
+  family-name alignment turns that selection into membership in the family.
+- Mutual recursive analysis preserves configuration and ordinal history with
+  separate traversal/checker fuels; its independent positive grammar records
+  checked reduction, fresh function arguments, negative domains, and exact
+  recursive-field metadata. The raw field theorem composes checked Sort typing,
+  universe bounds, positivity, recursive record order, cache scope restoration
+  and exact residuals. The original configuration interface is retained.
+- Mutual constructor open-shape composition explicitly requires that the
+  supplied owner ordinal select the metadata's actual header shape. The outer
+  mutual type traversal must discharge this invariant; it is not a hidden TCB
+  assumption. Remaining mutual headers now carry independent checked typing,
+  raw parameter spines, checked index spines, normalized universe equality
+  and exact source declaration/shape/name provenance.
+- Fuel-free ordinary recursor rule typing and generated constructor-name/
+  field-count metadata are validated. Rule conversion uses one direct positive
+  DefEq judgment; no transitivity or infer-only typing is introduced.
+- Failures #735–#758 were proof alignment/dependency issues, including normalized
+  metadata projections, dependent successful equations, local field records,
+  and occurrence guards after shape elimination. No production changes or
+  acceptance weakening were made at this checkpoint.
+- Current candidates add exact constructor declaration publication order and
+  independent universe/structural membership/large-elimination semantics.
+  Check their full CI before claiming them green.
+- Native reduction and positive StringEq soundness remain the named existing
+  TCB laws. StringEq reflexivity is unresolved and explicitly conditional;
+  no new opaque-runtime bridge premise or axiom was adopted.
+- Still open: complete ordinary final publication and well-formed extension;
+  full mutual constructor/header/recursor transaction composition; nested
+  flatten/rebase/restore publication; public Kernel/API/session family; semantic
+  audit and integration reconciliation/final gates. Audit remains 44/9/19/7.
+  Integration reverified unchanged at `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`.

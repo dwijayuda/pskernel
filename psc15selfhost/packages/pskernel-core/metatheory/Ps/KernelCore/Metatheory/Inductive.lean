@@ -1,4 +1,6 @@
 import Ps.KernelCore.Metatheory.Judgments
+import Ps.KernelCore.Metatheory.SessionConcreteRefinement
+import Ps.KernelCore.Metatheory.SessionRefinement
 import Ps.KernelCore.Admission.Inductive.Common.Occurrence
 import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
 import Ps.KernelCore.Admission.Inductive.Common.RecursorValidation
@@ -453,3 +455,109 @@ inductive PsKernelSimpleRecursorRulesValid
         session
         (List.cons shape shapeRest)
         (List.cons rule ruleRest)
+
+/--
+Concrete recursor rule validation, threading the actual sound configuration
+through checked typing and positive DefEq for every rule in order.
+The only trust laws are the named native-reduction and StringEq soundness laws.
+-/
+theorem psKernelValidateSimpleRecursorRulesWorker_configuration_refines
+    (shapes : List PsKernelSimpleConstructorShape)
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (params ruleBinders : List PsKernelOpenBinder)
+    (motive : PsKernelExpr)
+    (levels : List PsKernelLevel)
+    (rules : List PsKernelRecursorRule)
+    (hConfig : PsKernelCheckerConfigurationSound
+      session.context session.state)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelValidateSimpleRecursorRulesWorker
+      shapes fuel session params ruleBinders motive levels rules =
+        Except.ok ()) :
+    PsKernelSimpleRecursorRulesValid
+      fuel params ruleBinders motive levels session shapes rules := by
+  induction shapes generalizing session rules with
+  | nil =>
+      cases rules with
+      | nil => exact PsKernelSimpleRecursorRulesValid.nil session
+      | cons rule rest =>
+          simp [psKernelValidateSimpleRecursorRulesWorker] at hRun
+  | cons shape shapeRest ih =>
+      cases rules with
+      | nil =>
+          simp [psKernelValidateSimpleRecursorRulesWorker] at hRun
+      | cons rule ruleRest =>
+          cases hCheck : psKernelSessionCheck fuel session rule.rhs with
+          | error message =>
+              simp [psKernelValidateSimpleRecursorRulesWorker, hCheck] at hRun
+          | ok checked =>
+              rcases checked with ⟨gotType, checkedSession⟩
+              let expectedType := psKernelCloseOpenBinders
+                (psKernelOpenBinderListAppend ruleBinders shape.fields)
+                (psKernelSimpleMotiveApp motive shape.resultIndices
+                  (psKernelSimpleCtorApp levels params shape))
+              cases hCompare : psKernelSessionIsDefEq
+                  fuel checkedSession gotType expectedType with
+              | error message =>
+                  simp [psKernelValidateSimpleRecursorRulesWorker,
+                    hCheck, expectedType, hCompare] at hRun
+              | ok compared =>
+                  rcases compared with ⟨equal, equalSession⟩
+                  cases equal with
+                  | false =>
+                      simp [psKernelValidateSimpleRecursorRulesWorker,
+                        hCheck, expectedType, hCompare] at hRun
+                  | true =>
+                      have hTyping := psKernelSessionCheck_concrete_refines_typing
+                        fuel hNative hString session checkedSession
+                        rule.rhs gotType hConfig hCheck
+                      have hCheckedContext :=
+                        psKernelSessionCheck_success_preserves_context_core
+                          fuel session checkedSession rule.rhs gotType hCheck
+                      have hCheckedConfig : PsKernelCheckerConfigurationSound
+                          checkedSession.context checkedSession.state := by
+                        simpa [hCheckedContext] using hTyping.2
+                      have hEq := psKernelSessionIsDefEq_concrete_refines_defeq
+                        fuel hNative hString checkedSession equalSession
+                        gotType expectedType hCheckedConfig hCompare
+                      have hEqualContext :=
+                        psKernelSessionIsDefEq_success_preserves_context_core
+                          fuel checkedSession equalSession
+                          gotType expectedType true hCompare
+                      have hEqualConfig : PsKernelCheckerConfigurationSound
+                          equalSession.context equalSession.state := by
+                        simpa [hEqualContext] using hEq.2
+                      have hTailRun : psKernelValidateSimpleRecursorRulesWorker
+                          shapeRest fuel equalSession params ruleBinders
+                          motive levels ruleRest = Except.ok () := by
+                        simpa [psKernelValidateSimpleRecursorRulesWorker,
+                          hCheck, expectedType, hCompare] using hRun
+                      exact PsKernelSimpleRecursorRulesValid.cons
+                        session checkedSession equalSession shape shapeRest
+                        rule ruleRest gotType hCheck hTyping.1
+                        (by simpa [expectedType] using hCompare)
+                        (by simpa [expectedType] using hEq.1)
+                        (ih equalSession ruleRest hEqualConfig hTailRun)
+
+theorem psKernelValidateSimpleRecursorRules_configuration_refines
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (params ruleBinders : List PsKernelOpenBinder)
+    (motive : PsKernelExpr)
+    (levels : List PsKernelLevel)
+    (shapes : List PsKernelSimpleConstructorShape)
+    (rules : List PsKernelRecursorRule)
+    (hConfig : PsKernelCheckerConfigurationSound
+      session.context session.state)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelValidateSimpleRecursorRules
+      fuel session params ruleBinders motive levels shapes rules =
+        Except.ok ()) :
+    PsKernelSimpleRecursorRulesValid
+      fuel params ruleBinders motive levels session shapes rules := by
+  exact psKernelValidateSimpleRecursorRulesWorker_configuration_refines
+    shapes fuel session params ruleBinders motive levels rules
+    hConfig hNative hString hRun

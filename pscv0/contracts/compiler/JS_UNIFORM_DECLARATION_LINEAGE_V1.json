@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-js-uniform-declaration-lineage/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "profile": "psc-js-uniform-values/1",
+  "granularity": "declaration-batch-to-emission-chunk",
+  "parents": [
+    "originGraphId: exact declaration OriginGraph",
+    "erasureMapId: exact observed erasure declaration inventory",
+    "uniformSpecializedIrId: exact tagged uniform representation artifact",
+    "generatedPositionMapId: actual JsIR printer chunk positions",
+    "verifiedIrId: unchanged validated RuntimeIR snapshot"
+  ],
+  "edge": [
+    "generatedPositionIndex",
+    "runtimeDeclarationIndex",
+    "erasureEntryIndex",
+    "sourceOriginEntryIndex"
+  ],
+  "composition": [
+    "Reconstruct exact source, erasure and generated-position metadata parents from their bounded fixed child inventory.",
+    "Require exact runtime/verified bytes and the tagged uniform payload to equal that same VerifiedIR.",
+    "Validate the complete retained RuntimeIR-to-JsIR declaration and parameter inventory.",
+    "Join actual retained declaration names to observed erasure owners and exact source-origin entries. No name-mangling inference or specialization instances.",
+    "Use shared lineage/map composition; archive readers pin the profile, five parents and every edge. Publish descriptive debug metadata separately from executable bytes."
+  ],
+  "passes": {
+    "lineage": "psc-compose-uniform-js-declaration-lineage/1",
+    "sourceMap": "psc-emit-uniform-js-source-map/1",
+    "recipe": "psc-direct-javascript-source-map-recipe/2"
+  },
+  "resources": {
+    "maxArtifactBytes": 134217728,
+    "maxDistinctBytes": 536870912,
+    "maxArtifacts": 4120,
+    "maxSources": 4096,
+    "dependencyTraversal": "fixed two-level inventory"
+  },
+  "compatibility": "Closed lineage/1 bytes and source-map recipe/1 remain unchanged. The common map encoding accepts the new uniform lineage through recipe/2; unknown profiles reject.",
+  "assurance": {
+    "declarationCompositionChecked": true,
+    "targetInventoryChecked": true,
+    "independentSourceElaborationChecked": false,
+    "independentErasureSemanticsChecked": false,
+    "expressionCorrespondenceChecked": false,
+    "semanticPreservationProved": false,
+    "metadataCreatesAuthority": false
+  },
+  "remaining": [
+    "Expression and synthetic helper origin events",
+    "Portable map serializer and declaration maps",
+    "Automatic map URL linking and direct checked CLI selection",
+    "Independent source-to-runtime semantics and global preservation"
+  ]
+}

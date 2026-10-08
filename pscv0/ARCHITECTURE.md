@@ -1,0 +1,272 @@
+# PSCV compiler bootstrap/self-host architecture
+
+Status: bootstrap architecture for `psc15selfhost/`.
+
+This directory owns the smallest stable compiler/bootstrap implementation used by
+the PSCV workstream. The current executable compiler milestone remains
+`psc2-compiler-v1`; the normative target language/profile authority is PSCV.
+Everything outside `psc15selfhost/` is reference material only and is not a
+bootstrap dependency.
+
+## Bootstrap and language-authority contract
+
+The normative verified-language target is fixed by
+`PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md` and `language-authority.json`.
+The current compiler source continues to use the inherited PSC2/PSC1 bootstrap
+profiles until the complete PSCV gates are implemented; changing the authority
+document does not fabricate PSCV conformance.
+
+```text
+languageEdition = ps-0.9-r3
+sourceProfile = ps-standard-0.9-r3
+requiredLanguageProfile = psc2-language-v1
+standardLanguageProfile = psc2-standard-language-v1
+verificationProfile = pscv-v1
+verificationSemantics = PSCV-VERIFY-v1
+certificatePolicy = PSCV-CERT-v1
+currentCompilerMilestone = psc2-compiler-v1
+targetCompilerConformance = pscv-compiler-v1
+normativeLean = 4.35.0-rc3 @ 470d5ce1400764999581fd26d5d72b00d990b0f4
+implementationProfile = PSC1-selfhost-stable/1
+bootstrapHost = official Lean 4 + Lake
+selfHostBackend = TypeScript / JavaScript
+```
+
+`PSC1-selfhost-stable/1` is only an implementation discipline for compiler source.
+It is not an alternate or legacy `.ps` grammar. Every generated and accepted Standard
+`.ps` file uses the r3 grammar. Unsupported r3 features reject until implemented;
+the compiler must not claim `psc2-compiler-v1` conformance until the complete required
+`psc2-language-v1` feature closure is implemented.
+
+The compiler does not need to be written using every language feature that it can
+accept. New PSC2 syntax and elaboration features should normally be implemented using
+the stable self-host implementation discipline, then dogfooded into compiler source
+only after the fixed point remains stable.
+
+`.lean` is the handwritten bootstrap/reference compiler source. Canonical `.ps`
+source is generated in `ps-0.9-r3` and becomes authoritative for the JavaScript
+self-host generation after source, semantic and fixed-point parity gates pass.
+
+## Smallest stable semantic closure
+
+The self-host fixed point is import-closure based. It may contain only the packages
+needed for the semantic compiler plus one executable backend:
+
+```text
+bootstrap                 # tiny composition root only
+foundation
+syntax
+core
+environment
+meta
+elab
+bridge
+compiler-ir
+erasure
+compiler                  # backend-neutral semantic compiler
+backend-ts                # the one bootstrap backend
+portable stdlib modules imported by the compiler
+```
+
+`project`/module-graph support, Rust and Wasm remain valuable extensions, but they are
+not prerequisites for producing the PSC2 compiler generation. Their source and broader
+regression tests remain in the workspace while staying outside the fixed-point import
+closure. `packages/pskernel` is likewise a bounded Lean reference/assurance package for
+now: it has its own Core model and is not silently treated as the compiler's checked-core
+provider. Integrating it is a later, explicit kernel-provider milestone.
+
+The self-host path is:
+
+```text
+PSC1-selfhost-stable/1 .lean compiler source
+        |
+        | official Lean 4 + Lake
+        v
+Lean-hosted PSC2 bootstrap compiler
+        |
+        | canonical translation
+        v
+generated .ps compiler source
+        |
+        | PSC2 compiler -> TypeScript -> tsc
+        v
+JavaScript compiler generation N
+        |
+        | compile the same generated .ps source again
+        v
+JavaScript compiler generation N+1
+        |
+        +-> source parity
+        +-> compiler fixed-point parity
+```
+
+A fixed point is a compiler-bootstrap claim. It is not by itself a claim of full Lean
+4 equivalence or final kernel soundness.
+
+## Semantic layers
+
+Keep capabilities moving upward:
+
+```text
+Ecosystem / FFI / future InterfaceIR
+                 |
+Libraries / tactics / async / resources
+                 |
+Controlled syntax / derive / compiler plugins
+                 |
+Frontend: parser -> resolver -> Meta -> elaborator
+                 |
+Canonical Core
+                 |
+Kernel admission provider
+                 |
+CheckedCore
+                 |
+Erasure
+                 |
+VerifiedIR
+                 |
+Backend plugins: TS / Rust / Wasm / future targets
+```
+
+If a capability can be a library, make it a library. If it is syntax sugar, lower it.
+If it needs controlled compiler participation, put it behind a versioned extension
+boundary. If it is target-specific, keep it below VerifiedIR or behind an FFI boundary.
+Core/kernel changes are exceptional.
+
+## Current bootstrap admission boundary
+
+The current PSC1-compatible implementation can encode elaborated declarations into the
+canonical checked-admissions protocol, but this encoding is not itself a proof that a
+real `pskernel` provider admitted the module. Therefore the bootstrap compiler uses the
+honest intermediate name `PsCompilerAdmissionReadyModule`.
+
+```text
+source
+  -> parse / resolve / elaborate
+  -> AdmissionReadyModule
+  -> erasure
+  -> VerifiedIR
+  -> TypeScript
+```
+
+Every executable backend exposed by the bootstrap compiler MUST consume VerifiedIR
+created through this preparation boundary. No public compiler-service path may go
+straight from arbitrary elaborated declarations to backend emission.
+
+`PsCompilerAdmissionReadyModule` stores only the declarations. Every admissions
+request encodes those declarations directly; there is no second cached payload or
+caller-provided environment. Before erasure, the compiler validates codec support
+and reconstructs the environment from the bootstrap prelude and those declarations.
+Preparation alone is weaker than genuine kernel admission. The checked host freezes
+the prepared graph before checking, holds the accepted graph behind a session-local
+handle, re-encodes and compares its exact accepted payload before emission, and emits
+from that same graph. Native Lean sessions retain the same immutable prepared value.
+
+When the independent kernel provider is wired into this directory, the stable seam is:
+
+```text
+AdmissionReadyModule
+  -> kernel provider
+  -> CheckedCore / CheckedModule
+  -> erasure
+```
+
+At that milestone erasure should accept only the checked artifact. Do not fake this
+milestone by renaming codec validation to `CheckedCore`.
+
+## Package responsibilities
+
+- `packages/compiler`: frontend orchestration, admission-ready boundary and VerifiedIR.
+  It must not import `Ps.Backend*`.
+- `packages/backend-ts`: TypeScript lowering plus the thin bootstrap compiler adapter.
+- `packages/bootstrap`: composition root selecting the one backend required to produce
+  the next compiler generation. It should stay tiny.
+- `packages/project`: portable project/module-graph extension; kept outside the first
+  compiler fixed point until the compiler itself actually needs it.
+- `packages/backend-rust`, `packages/backend-wasm`: optional VerifiedIR consumers.
+- `host`: Lean bootstrap IO, project loading and `tsc` process integration.
+- `stdlib`: portable ordinary ProofScript libraries needed by compiler source.
+- `packages/pskernel`: bounded assurance/reference kernel until an explicit adapter
+  makes it the checked-core provider.
+
+## Gate layering
+
+Bootstrap-critical gates are intentionally narrower than whole-workspace regression:
+
+```text
+check:source:bootstrap -> PSC1 source-profile audit for fixed-point packages
+check:source:all       -> source-profile audit for every portable package
+test:bootstrap         -> semantic compiler + TS fixed-point prerequisites
+test:regression        -> broad legacy/core/project regression suite
+test:extensions        -> Rust/Wasm backend extension suites
+test:all               -> all three test layers
+```
+
+`bootstrap` and `fixed-point` depend only on the bootstrap source audit and
+`test:bootstrap`. `npm test` and `npm run check` retain the broader all-portable source
+audit and `test:all` assurance, so shrinking the fixed-point closure does not delete or
+silently weaken existing regression coverage.
+
+## Growth rules
+
+1. Keep the compiler semantic API backend-neutral.
+2. Keep TypeScript in a thin bootstrap adapter, not in the frontend/elaborator API.
+3. Keep project tooling, Rust/Wasm and future targets outside the fixed-point dependency
+   closure until the compiler generation truly requires them.
+4. Preserve package boundaries. Reduce dependencies; do not collapse the compiler into
+   one monolithic source file.
+5. Host IO, filesystem traversal and `tsc` invocation stay in `host/` or Node scripts;
+   portable semantic modules stay PSC1-compatible.
+6. New PSC2 features record their implementation profile and lowering target. They do
+   not enter the trusted Core merely for ergonomics.
+7. Plugins cannot admit proofs or bypass the kernel boundary.
+8. The minimal bootstrap gate is authoritative for self-host closure; broader regression
+   and backend conformance tests remain separate required release gates.
+
+## Initial PSC2 bootstrap language growth
+
+After the minimal compiler reaches a stable fixed point, grow the accepted source
+profile in small independently gated steps. The preferred first usability layer is:
+
+```text
+richer patterns
+namespace ergonomics
+method notation
+practical local/mutual recursion lowering
+structured proof terms
+```
+
+These features should lower through the existing frontend/elaboration pipeline and
+should not enlarge the kernel unless evidence proves a genuine semantic need.
+
+Contracts/VC generation, `simp`/automation, deriving, async/Task/Resource, FFI,
+InterfaceIR, external plugin loading, Rust/Wasm bootstrap, LSP and large libraries are
+post-fixed-point platform work. They may be developed in parallel, but they do not
+block the smallest PSC2 self-host.
+
+
+## Production architecture guidance
+
+The current file remains the authority for the **implemented minimal self-host bootstrap**.
+Long-term production hardening is documented separately so forward design cannot be mistaken
+for a completed bootstrap guarantee.
+
+Start at:
+
+- `docs/architecture/README.md`
+- `docs/architecture/PRODUCTION_ARCHITECTURE.md`
+- `docs/architecture/TRUST_SECURITY_MODEL.md`
+- `docs/architecture/BUILD_ARTIFACT_MODEL.md`
+- `docs/architecture/COMPATIBILITY_CONTRACTS.md`
+- `docs/architecture/IMPLEMENTATION_ROADMAP.md`
+
+Those documents preserve the semantic spine in this file while planning the transition to
+a genuine kernel-owned `CheckedCore` boundary, construction-IR/VerifiedIR validation split,
+IR-only backend dependencies, direct JS/Wasm ownership, capability-scoped extensibility,
+incremental query/CAS builds, hermetic toolchains, separate compilation, semantic lockfiles,
+and reproducible signed releases.
+
+`docs/continuity/PSC2_NEXT_BOOTSTRAP.md` remains the forward bootstrap/compiler-verification
+continuity document. The production architecture documents refine it into smaller guides and
+ADRs; they do not silently supersede current executable gates.

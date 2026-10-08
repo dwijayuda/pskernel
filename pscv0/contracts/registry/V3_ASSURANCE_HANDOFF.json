@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-v3-assurance-handoff/1",
+  "mode": "implementation-first",
+  "releaseAccepted": false,
+  "policy": "Run focused compilation and boundary checks during implementation. Independent testing and checked global proofs remain required for final acceptance.",
+  "obligations": [
+    {
+      "id": "comparator-isolation-and-checkers",
+      "status": "pending",
+      "required": "Run the new comparator session against a real digest-pinned Linux producer and pinned actual kernel providers, exercise hostile exports and runtime escape/cleanup cases, and supply provider/runtime hardening evidence. Current decoder/session tests use mock kernels and container orchestration; no formal theorem or real sandbox assurance follows."
+    },
+    {
+      "id": "authority-adversarial",
+      "status": "pending",
+      "required": "Exercise the actual generated compiler and pinned provider through production checked service, cross-session replay, policy mutation, rejection, target routing, revocation and closure; audit every production import path."
+    },
+    {
+      "id": "global-core-soundness",
+      "status": "external-kernel-workstream",
+      "required": "Import exact, independently reviewable kernel soundness/model/cache-refinement evidence from the separate kernel branch. The PSCV compiler branch must not implement or modify kernel theory/checker internals; it only binds the resulting evidence and provider identities into TrustManifest/AssuranceVector/release evidence."
+    },
+    {
+      "id": "global-erasure-specialization",
+      "status": "unproved",
+      "required": "Lean-check global erasure/specialization preservation, or independently validate every actual transformation under a precisely declared supported contract. The host specialization correspondence checker now covers all encoded expression constructors and checks actual staged JS/archived instances independently of producer name mangling. Strict source/output validity and adequacy for runtime semantics remain preconditions; global validator soundness and erasure preservation are unproved. Run whole-compiler and adversarial campaigns; local slices do not discharge this obligation."
+    },
+    {
+      "id": "backend-preservation",
+      "status": "pending",
+      "required": "Check complete supported backend semantics, differential/adversarial corpora, artifact validators and ABI adapters; unsupported slices must fail closed. JavaScript now lowers saturated decreasing-worker aliases to loops with frozen captures and immutable iteration parameters; focused source/printer execution and the portable round-trip contract pass. Global preservation and the actual whole-compiler fixed point remain separate obligations."
+    },
+    {
+      "id": "selfhost-fixed-points",
+      "status": "partial",
+      "required": "Rust whole-compiler fixed point passed at 9c61a5e, 8d2c070 and 66ee434: 66 modules, generation 1=2=3 Rust source, 2810845 bytes. JavaScript passed at 8d2c070 for 63 modules, then the complete dedicated JS job passed at 66ee434 (run 37552329402/job 112570474936): 65 modules, generation 1=2=3, 2485478 bytes. The separate Wasm job at 66ee434 timed out inside generation-2 compilation. At 166c6a3, direct-Wasm job 112872237530/run 37644676992 passed all gates: 80 modules, generation 1=2=3 exact Wasm bytes, 756957 bytes, source closure 5a0f8ab44e94848834959628d120ed259a9449a4673a99eed918e7245b1ae9a1. See contracts/bootstrap/RUST_FIXED_POINT_V1.json and JS_FIXED_POINT_V1.json. Recheck changed closures and preserve the recorded fixed points. This does not establish native binary reproducibility, global compiler correctness, promotion or DDC."
+    },
+    {
+      "id": "bootstrap-diversity",
+      "status": "pending",
+      "required": "Produce B9 diverse bootstrap and B10 verified bootstrap evidence with actual toolchain independence vectors and artifact identities."
+    },
+    {
+      "id": "resource-adversarial",
+      "status": "pending",
+      "required": "Exercise all declared resource limits, cancellation, malformed inputs, cycles, large/deep certificates, cache poisoning and small-to-larger budget behavior; prove monotonicity only if Lean checks it."
+    },
+    {
+      "id": "savef-offline-replay",
+      "status": "pending",
+      "required": "Replay actual compiler-preservation proof/validator certificates, trust closure and pinned release archives offline; metadata/hash closure is insufficient. A standalone pinned Lean Wasm profile checks a real closed implication-identity proof and rejects an invalid proof outside the checkout. A scoped SAVEF operation now replays actual Wasm literal certificates and records real artifact reuse only after fresh output validation, including actual PSC-emitted bytes. These focused fixtures do not discharge source preservation, broader theorem/interface reuse, diverse checking, runtime hardening, signed release or global assurance obligations. Portable linked-IR replay now has an implementation with exact host-contract policy and per-subject archive coverage; independently exercise it and retain native validator/runtime assumptions. It does not discharge source preservation or host implementation behavior."
+    },
+    {
+      "id": "factorybench-holdout",
+      "status": "pending",
+      "required": "Freeze and seal actual tasks independently, run all ablations and resource accounting, and publish reproducible evidence without making holdout searchable to the factory."
+    },
+    {
+      "id": "final-v3-acceptance",
+      "status": "pending",
+      "required": "Assess every V3 acceptance criterion using actual artifacts, independent validators or Lean-checked theorems as required; milestone source scans are not final evidence."
+    },
+    {
+      "id": "logical-translation-preservation",
+      "status": "unproved",
+      "required": "Bind actual source/destination checked admissions and canonical artifacts to the portable closed-renaming validator, replay its relation through a registered independent checker, and Lean-check preservation. Current 19 executable cases and PSC1 source/emission parity establish no global theorem; cross-foundation morphisms and general inductive/proof translations remain unsupported."
+    },
+    {
+      "id": "foreign-interface-adapters",
+      "status": "pending",
+      "required": "Check emitted WIT with an independent pinned Component Model parser, implement actual target runtime adapters and bind them to validated modules/artifacts, then exercise canonical ABI behavior, ownership/lifetimes, capability confinement and async cancellation. Portable structural checks and the 17-case WIT fixture do not establish runtime ABI behavior or global adapter soundness."
+    }
+  ],
+  "kernelWorkstreamPolicy": {
+    "ownership": "external-separate-branch",
+    "forbiddenOnThisBranch": [
+      "kernel implementation changes",
+      "kernel defeq/cache changes",
+      "kernel checker-soundness proofs",
+      "kernel semantic-model/consistency proofs"
+    ],
+    "allowedIntegration": [
+      "KernelContract identity",
+      "provider identity/security metadata",
+      "imported kernel evidence identity",
+      "comparator calls through provider interfaces"
+    ],
+    "releaseDependency": "Final V3 release may depend on imported kernel assurance evidence, but producing that evidence is out of scope for pscv/v3-execution."
+  }
+}

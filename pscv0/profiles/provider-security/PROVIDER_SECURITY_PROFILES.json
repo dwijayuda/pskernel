@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-provider-security/1",
+  "semanticProfile": "lean4.34-core",
+  "providers": {
+    "lean434-wasm": {
+      "securityRevision": "lean4-4.34.0-pinned-wasm",
+      "runtimeFamily": "lean-4.34.0-derived-wasm",
+      "knownLimitations": [
+        "Pinned compatibility provider predates Lean 4.34.1 runtime hardening.",
+        "Bundled WASM prelude parity is narrower than current native prelude."
+      ]
+    },
+    "lean434": {
+      "securityRevision": "lean4-4.34.0-pinned-native",
+      "runtimeFamily": "lean-4.34.0-native",
+      "knownLimitations": [
+        "Pinned compatibility provider predates Lean 4.34.1 runtime hardening."
+      ]
+    },
+    "pskernel-core": {
+      "securityRevision": "pskernel-core-native-on-lean-4.34.0",
+      "runtimeFamily": "lean-4.34.0-native",
+      "knownLimitations": [
+        "Owned semantic checker remains candidate authority; native execution is built with the pinned Lean 4.34.0 toolchain."
+      ]
+    },
+    "pskernel-core.old3": {
+      "securityRevision": "archived-generated-js",
+      "runtimeFamily": "node-js",
+      "knownLimitations": [
+        "Archived assurance provider; not a production promotion candidate."
+      ]
+    }
+  },
+  "profiles": [
+    {
+      "id": "development-v1",
+      "assurance": "development",
+      "allowedSelectors": [
+        "lean434-wasm",
+        "lean434",
+        "pskernel-core",
+        "pskernel-core.old3"
+      ],
+      "purpose": "Preserve current development and compatibility workflows while recording exact provider security revision."
+    },
+    {
+      "id": "compatibility-v1",
+      "assurance": "compatibility",
+      "allowedSelectors": [
+        "lean434-wasm",
+        "lean434",
+        "pskernel-core"
+      ],
+      "purpose": "Compatibility/conformance work; not a claim of hostile-input runtime hardening."
+    },
+    {
+      "id": "paranoid-v1",
+      "assurance": "paranoid",
+      "allowedSelectors": [],
+      "purpose": "Fail closed until a provider implementation satisfying the post-4.34.0 hostile-input hardening policy is explicitly registered."
+    }
+  ]
+}

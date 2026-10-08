@@ -1,0 +1,26 @@
+{
+  "name": "@proofscript/driver-js-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": false,
+    "portable": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "outDir": "dist",
+    "role": "javascript-compiler-driver",
+    "testRoots": [
+      "test"
+    ],
+    "implementationProfile": "PSC1-portable-selfhost/1",
+    "authorityRole": "bootstrap-transform"
+  },
+  "dependencies": {
+    "@proofscript/compiler-next": "0.0.0-dev",
+    "@proofscript/backend-js-next": "0.0.0-dev",
+    "@proofscript/compiler-ir-next": "0.0.0-dev",
+    "@proofscript/interface-ts": "0.0.0-dev"
+  }
+}

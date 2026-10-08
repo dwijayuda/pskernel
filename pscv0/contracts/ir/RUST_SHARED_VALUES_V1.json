@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-rust-shared-values/1",
+  "scope": "Rust target storage for immutable VerifiedIR structure and inductive fields",
+  "representation": "Generated fields use std::rc::Rc<T> instead of Box<T>. Derived Clone shares each stored field; constructors allocate a new shared field, projections and pattern bindings copy only the accessed value. VerifiedIR remains target-independent.",
+  "reason": "Box<T>::clone clones its pointee. Derived Clone over recursive Box fields therefore copied entire syntax/list trees during ordinary variable use, calls, captures and pattern matching. Rc clone increments ownership without recursively cloning the pointee.",
+  "compatibility": "Generated Rust source field types change from Box<T> to Rc<T>. External Rust code manually constructing fields must use Rc::new. External VerifiedIR imports still reject; no new foreign ABI is implied. Rc is single-threaded; no Send/Sync or thread-safe sharing contract is claimed.",
+  "remaining": ["stack-safe call recursion", "stack-safe final-owner destruction of deep trees", "bounded allocator/resource policy", "complete Rust fixed point", "global target preservation proof or independent validator"],
+  "focusedEvidence": "Lean emitter/source tests, the full portable executable contract and Rust metadata type checking pass. GitHub run 37541394649/job 112534992942 at 09efc87 passed the actual Cargo fixture, including a 30000-node generated value with zero descendant Clone calls, and whole-compiler generation/native build. Native generation 2 still overflowed its stack. The fixture dismantles its final chain iteratively; it does not establish general stack-safe destruction or a full fixed point.",
+  "sources": ["https://doc.rust-lang.org/std/rc/index.html", "https://doc.rust-lang.org/std/boxed/struct.Box.html"],
+  "globalPreservation": "unproved",
+  "fixedPoint": "pending"
+}

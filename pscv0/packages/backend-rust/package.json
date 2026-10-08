@@ -1,0 +1,28 @@
+{
+  "name": "@proofscript/backend-rust-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": false,
+    "portable": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "rust-backend-extension",
+    "runtimeSemantics": {
+      "id": "psc-runtime-semantics/1",
+      "sha256": "d610e1a1936dd1b090a44a8293a68436bc9300ad5c82872e8faf4e1e6b97ae03"
+    },
+    "implementationProfile": "PSC1-portable-selfhost/1"
+  },
+  "dependencies": {
+    "@proofscript/compiler-ir-next": "0.0.0-dev",
+    "@proofscript/bridge-next": "0.0.0-dev",
+    "@proofscript/foundation": "0.0.0-dev"
+  }
+}

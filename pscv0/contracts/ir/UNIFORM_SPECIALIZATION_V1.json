@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-uniform-specialized-ir/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "status": "portable-producer-live-declarations-and-uniform-origin-map-descriptor-archive-routing-implemented",
+  "problem": "Closed monomorphization does not preserve an arbitrary generic public export. Direct declarations require a source generic API to have an actual callable export.",
+  "representationProfile": "psc-js-uniform-values/1",
+  "input": "The same PsValidatedIrModule obtained by strict RuntimeIR validation; no weakening of generic scope, type or invariant checks.",
+  "selection": "PsUniformSpecializedIrModule retains exactly the validated RuntimeIR, including unused generic declarations and all static type arguments. It is a distinct selection wrapper, not PsSpecializedIrModule or a live authority token.",
+  "envelope": [
+    "psc-uniform-specialized-ir/1",
+    "psc-js-uniform-values/1",
+    "exact canonical RuntimeIR array"
+  ],
+  "target": "Direct JS with the existing 64-bit scalar representations, JavaScript value parameters, arrays and object field/tag layouts. Type arguments affect static checking but do not become runtime arguments.",
+  "lowering": "Shared policy-aware lowerer checks supported type forms and intrinsic arities, then drops static type annotations/arguments. Unknown types remain unsupported. Existing WithProfile APIs pass the closed policy and retain all prior rejection behavior.",
+  "stages": "psCompilerUniformJavaScriptStagesFromPrepared emits uniformSpecializedIr instead of specializedIr. Shared prepared-input capture, strict validator, JsIR validator, encoder and stack-safe printer avoid parallel implementations.",
+  "correspondence": "The bounded host checker verifies the explicit envelope and exact byte identity with caller-selected VerifiedIR. It does not infer strict validity from serialized bytes or prove target representation adequacy.",
+  "unsupported": [
+    "Foreign/imported functions in this initial uniform profile",
+    "Dependent runtime values or new runtime representation primitives",
+    "Higher-rank/named public types and generic constant declarations without a runtime function",
+    "Automatic representation selection and production checked CLI routing"
+  ],
+  "portableProfiles": [
+    "PSC1-selfhost-stable/1",
+    "PSC1-portable-selfhost/1"
+  ],
+  "compatibility": "Closed specialization, its ground-type requirements, Wasm/default-JS profiles and existing APIs remain unchanged. The new entry is selected explicitly; no fallback after closed specialization failure.",
+  "assurance": {
+    "globalPreservationProved": false,
+    "targetRepresentationAdequacyProved": false,
+    "releasePromotion": false,
+    "serializedAuthority": false
+  },
+  "remaining": [
+    "Production checked CLI selection",
+    "Higher-rank/named public types and generic constant policies",
+    "Expression and declaration-position maps, portable map serialization and automatic linking",
+    "Uniform source/target preservation argument and later independent assurance"
+  ],
+  "closedRepresentationProfile": "psc-js-closed-instances/1",
+  "hostSelection": "createCheckedCompilerService selects javaScriptRepresentation once at construction; default is closed. A uniform session requires its exact selected staged API, checks every required stage and exact VerifiedIR/envelope identity, and cannot fall back to closed or legacy APIs. Logical source certificates remain separate from representation selection.",
+  "declarations": "The explicitly paired psc-direct-js-declarations-uniform-structural/1 profile consumes exact source PublicApiIR and uniform selection subjects. It retains prefix source generics, checks alpha-correspondence with RuntimeIR, and binds complete JsIR export inventory without inferring signatures from instances. The same frozen prepared source feeds the portable interface-ts writer; the checked service requires exact agreement with independently checked host bytes before publication.",
+  "archive": "The common graph records psc-pass-uniform-specialize/1 and psc-uniform-ir-to-js-ir/1 with exact profile parameters. Explicit context selection derives the JS registry; descriptors, target profiles, actions, queries and bundles bind it. Fresh archive replay checks the exact envelope relation, complete target inventory and all declaration subjects.",
+  "origins": "Shared declaration composition reconstructs exact observed source/erasure/print metadata and pins the uniform artifact plus VerifiedIR. Edges identify actual retained RuntimeIR declarations, without synthetic specialization instances. Standalone ECMA-426 maps use recipe/2 and selected derivation/3; archived earlier derivations remain unchanged."
+}

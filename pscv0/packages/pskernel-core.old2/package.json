@@ -1,0 +1,65 @@
+{
+  "name": "@proofscript/pskernel-core.old2",
+  "version": "0.1.0-checker.14",
+  "private": true,
+  "description": "Archived legacy owned PSC-compiled dependent term-checker checkpoint; private, experimental, and non-authoritative",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/metadata.d.ts",
+      "import": "./src/metadata.mjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "manifests",
+    "scripts",
+    "test",
+    "README.md",
+    "ARCHITECTURE.md",
+    "FOUNDATION.md",
+    "BINDING_UNIVERSES.md",
+    "CHECKER.md",
+    "THIRD_PARTY_NOTICES.md",
+    "ALGEBRAIC.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check:source": "node scripts/source.mjs",
+    "build": "node scripts/build.mjs",
+    "verify:build": "node scripts/verify-build.mjs",
+    "test:oracle": "node scripts/oracle.mjs",
+    "prepack": "node scripts/verify-build.mjs && node scripts/verify-evidence.mjs",
+    "test:semantic-oracle": "node scripts/semantic-oracle.mjs",
+    "test:level-differential": "node scripts/level-differential.mjs",
+    "release:check": "node scripts/release-check.mjs",
+    "prepublishOnly": "node scripts/release-check.mjs",
+    "test:checker-oracle": "node scripts/checker-oracle.mjs",
+    "test:checker-differential": "node scripts/checker-differential.mjs",
+    "test:polymorphic-differential": "node scripts/polymorphic-differential.mjs",
+    "verify:evidence": "node scripts/verify-evidence.mjs",
+    "test:unit-differential": "node scripts/unit-differential.mjs",
+    "test:nat-differential": "node scripts/nat-differential.mjs",
+    "test:literal-differential": "node scripts/literal-differential.mjs",
+    "test:record-differential": "node scripts/record-differential.mjs",
+    "test:enum-differential": "node scripts/enum-differential.mjs",
+    "test:sum-differential": "node scripts/sum-differential.mjs",
+    "test:algebraic-differential": "node scripts/algebraic-differential.mjs"
+  },
+  "dependencies": {},
+  "proofscript": {
+    "bootstrap": false,
+    "portable": true,
+    "targetPortable": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "archived-owned-kernel-old2-off-bootstrap",
+    "authoritative": false
+  }
+}

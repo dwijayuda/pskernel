@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-rust-tail-loops/1",
+  "implementation": "packages/backend-rust/src/Ps/BackendRust/Tail.lean",
+  "scope": "Saturated unshadowed self calls at exactly unchanged declaration type arguments, directly or through recognized let-bound eta-forwarding worker aliases, in declaration tail position through if, let-body and match-alternative branches.",
+  "transformation": "A mutable tuple carries parameters between loop iterations. Every new argument uses ordinary expression emission in the same order and all arguments are evaluated before assigning the tuple. Each iteration introduces fresh immutable parameter bindings. Returning branches break with the ordinary emitted value; tail self calls assign the tuple and continue.",
+  "bindingRules": "Declaration parameters, let binders and match binders shadow function/alias names. Recognized closures forward an outer-variable prefix and their exact unchanged parameter suffix. Captures are frozen before the alias binder in reserved internal names, preserving captures across later shadowing. Other closure uses retain ordinary emission. Changing type applications, arity mismatches, nested lambda body execution and non-tail occurrences are not rewritten.",
+  "unchangedPaths": [
+    "changing-type polymorphic recursion",
+    "arbitrary indirect recursion",
+    "mutual recursion",
+    "non-tail recursion",
+    "final-owner destruction"
+  ],
+  "limits": "Detection and emission use decreasing fuel. Ordinary expression errors and emission fuel exhaustion remain errors; no unsupported case is asserted to be validated.",
+  "focusedEvidence": "Lean classifier/emitter and existing Rust source cases pass. Actual emitted fixtures and native regression bodies pass Rust metadata type checking. The full PSC1 portable contract passes (9 roots, 1 emission entry, 13 closure modules). Native cloud regressions check 100000-plus iterations, argument swaps, shadowing, captured-variable rebinding, generic forwarding and 30000-node match traversal. Execution/fixed-point outcomes are recorded separately in AI_WORK_STATE.md.",
+  "semanticBoundary": "Uses existing immutable runtime-value semantics. External callback/destructor observability and foreign ABI behavior are not added to that contract. No stack-size increase, unsafe code, profile relaxation or general preservation claim.",
+  "globalPreservation": "unproved",
+  "aliasImplementation": "packages/backend-rust/src/Ps/BackendRust/TailAlias.lean"
+}

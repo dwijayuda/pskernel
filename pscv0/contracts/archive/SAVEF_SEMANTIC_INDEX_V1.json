@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-savef-semantic-index/1",
+  "implementation": "scripts/savef-index.mjs",
+  "persistence": "single canonical rebuildable semantic-index.json under a caller-selected index root",
+  "authority": "derived-non-authoritative",
+  "indexedFields": [
+    "knowledge object identity",
+    "kind",
+    "authority class",
+    "semantic identity",
+    "scope",
+    "assumptions",
+    "claim ids/status",
+    "dependencies",
+    "payload",
+    "license"
+  ],
+  "rules": [
+    "Only canonical, hash-valid psc-knowledge-object/2 records are indexed.",
+    "The index contains derived metadata and may be deleted/rebuilt without changing semantic authority.",
+    "Query results are candidate object identities only and always require fresh SAVEF ValidUnder/certificate validation before reuse.",
+    "Exact semantic-identity/scope filters are domain-separated canonical artifact identities; byte differences are not silently normalized.",
+    "Index reads and writes are bounded; malformed, noncanonical, duplicate and resource-exhausted state fails closed."
+  ],
+  "notClaims": [
+    "semantic validity",
+    "certificate validity",
+    "proof correctness",
+    "reuse authority",
+    "self-amplification"
+  ]
+}

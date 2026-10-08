@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-profile-environment/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "owner": "scripts/build-context.mjs",
+  "fields": [
+    "languageEdition",
+    "semanticProfileId",
+    "standardEnvironmentId",
+    "extensionSetId",
+    "importedStructuralInterfaceIds",
+    "importedBehavioralInterfaceIds",
+    "semanticOptions"
+  ],
+  "extensionSet": {
+    "contract": "psc-extension-set/1",
+    "fields": [
+      "extensionId",
+      "implementationId",
+      "influenceClass"
+    ],
+    "order": "preserved and identity-relevant",
+    "classes": [
+      "E0",
+      "E1",
+      "E2",
+      "E3",
+      "E4",
+      "E5",
+      "E6"
+    ],
+    "authority": "influence declarations are not sandbox or permission grants"
+  },
+  "currentProducer": "scripts/observed-build-context.mjs binds the actual selected compiler and acceptance context, current language-authority snapshot, source kind and flattened import mode. The standard environment is conservatively identified by the embedded compiler. No dynamic extension loader exists; builtin prelude additions remain part of that embedded environment.",
+  "verification": "Consumer-selected expected identity, bounded canonical schema, rehash each declared subject and extension implementation. Profile integrity does not prove complete observed semantic closure.",
+  "remaining": [
+    "portable typed producer and per-module structural/behavioral interface producers",
+    "sandboxed extension host and influence closure",
+    "standard environment semantic identity independent of compiler implementation"
+  ]
+}

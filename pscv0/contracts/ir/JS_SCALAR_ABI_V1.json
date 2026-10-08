@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-js-scalar-abi-plan/1",
+  "status": "implemented-production-bound-synchronous-scalar-profile",
+  "planner": "packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean",
+  "runtimeAdapter": "scripts/js-scalar-abi.mjs",
+  "runtimeSemantics": "psc-runtime-semantics/1",
+  "target": "javascript",
+  "scope": "Own synchronous imported functions whose arguments and result are primitive VerifiedIR values. Every import is derived from a freshly revalidated module and interface context. Exact canonical plan bytes must be independently pinned by the consumer.",
+  "representation": {
+    "nat": "nonnegative bigint",
+    "int": "bigint",
+    "smallMachineIntegers": "canonical integer number in exact signed/unsigned range, excluding negative zero",
+    "wideMachineIntegers": "bigint in exact range; word-sized types require explicit 32/64-bit target",
+    "float": "IEEE binary64 number, preserving signed zero and allowing NaN/infinities",
+    "float32": "number exactly representable in binary32, including signed zero, NaN and infinities",
+    "char": "one Unicode scalar",
+    "string": "well-formed Unicode scalar sequence",
+    "bool": "boolean",
+    "unit": "undefined"
+  },
+  "rules": [
+    "A module with invalid bodies, unresolved/mismatched interfaces, unsupported target or denied capabilities cannot produce a plan.",
+    "The host independently checks canonical bytes, identity, exact schema, scalar types, unique local names and capability grants before observing providers.",
+    "Bindings snapshot explicit own data-property host functions; accessors are rejected. No module path, network URL or checker code is loaded from a plan.",
+    "Each call checks exact arity and argument values before invocation, then result values before release. There is no implicit coercion or numeric wrapping.",
+    "Frozen null-prototype bindings preserve original selected functions across namespace mutation. Host exceptions propagate as failures; promises fail scalar result checking.",
+    "Plan size/depth/node/import/arity limits and per-call string/integer limits fail closed. Host function CPU, allocations and effects are not bounded by this adapter."
+  ],
+  "evidence": {
+    "leanCases": 8,
+    "hostGroups": 4,
+    "actualTargetClient": "PSC-emitted JavaScript linked to the real adapter in the VM-module integration fixture",
+    "portable": "PSC1 source check plus structural rules; broad/global assurance pending",
+    "productionBinding": "checked build graph records exact VerifiedIR -> ABI plan pass, archives policy/plan, EvidenceEnvelope references both, and offline archive replay recomputes the relation"
+  },
+  "unsupported": [
+    "aggregate/named/generic values",
+    "higher-order callbacks",
+    "value imports",
+    "resource ownership and borrowed lifetimes",
+    "async functions, streams, futures",
+    "Wasm Component canonical ABI and native Rust/C ABIs"
+  ],
+  "authority": "Adapter conformance to primitive representation does not prove foreign behavior, confine capabilities, validate host Proxy behavior, establish CheckedCore authority, promote direct JS or close the global external-ABI gap.",
+  "remaining": [
+    "aggregate/resource/async JavaScript adapter profiles",
+    "independent whole-adapter preservation evidence",
+    "other value profiles and target ABIs",
+    "global link preservation",
+    "Wasm Component and native Rust/C adapter profiles"
+  ],
+  "globalPreservation": "unproved"
+}

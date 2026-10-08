@@ -1,0 +1,25 @@
+{
+  "name": "@proofscript/cli-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "portable": false,
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "bootstrap-cli"
+  },
+  "dependencies": {
+    "@proofscript/compiler-next": "0.0.0-dev",
+    "@proofscript/bootstrap-host-lean": "0.0.0-dev"
+  },
+  "bin": {
+    "psc": "./bin/psc.mjs"
+  }
+}

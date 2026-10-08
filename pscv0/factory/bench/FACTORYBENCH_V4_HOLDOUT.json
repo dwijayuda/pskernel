@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "contract": "factorybench-v4-holdout/0",
+  "status": "policy-frozen-tasks-pending",
+  "searchableByFactory": false,
+  "baselineBranch": "pscv/v3-execution",
+  "baselineCommit": "9951adc3ffd606541f4c70abddad2e17a49a4b9c",
+  "arms": [
+    "B0-no-retrieval",
+    "B1-text-retrieval",
+    "B2-typed-retrieval",
+    "B3-typed-reuse",
+    "B4-negative-knowledge-certificates"
+  ],
+  "metrics": [
+    "acceptedOutputRate",
+    "humanInterventions",
+    "modelCalls",
+    "tokens",
+    "wallTime",
+    "verifierCalls",
+    "repairCycles",
+    "evidenceSize",
+    "reuseCount",
+    "resourceCost",
+    "assuranceVector",
+    "regressions"
+  ],
+  "leakagePolicy": "task content must not enter savef/index or agent retrieval before benchmark execution",
+  "successPolicy": "productivity or accepted-success improvement under approximately fixed model/tool/acceptance policy with no assurance regression"
+}

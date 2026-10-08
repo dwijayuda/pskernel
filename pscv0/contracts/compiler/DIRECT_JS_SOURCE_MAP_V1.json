@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-direct-javascript-source-map/1",
+  "recipeContract": "psc-direct-javascript-source-map-recipe/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "format": "ECMA-426 source map version 3",
+  "implementation": "Host debug adapter over portable actual-source/erasure/print observations; no tsc invocation.",
+  "granularity": "declaration-first-generated-line",
+  "subjects": [
+    "Exact source-to-JS declaration lineage",
+    "Exact unchanged JavaScript printer output",
+    "Optional original-source preparation map and caller-pinned source snapshot",
+    "Optional output filename"
+  ],
+  "mappingPolicy": [
+    "Reconstruct lineage and optional original-source preparation before consuming any edge.",
+    "Convert actual source byte offsets to LF-delimited zero-based lines and UTF-16 columns; never reuse scalar parser columns.",
+    "Use binary search on reconstructed copied segments for original byte anchors; removed source gaps are not widened.",
+    "Map declaration chunk start only through its first generated line; unmap at the first line terminator or chunk end.",
+    "Explicitly unmap the module prefix and intervening/synthetic code; do not invent EOF character mappings.",
+    "Encode signed 32-bit ECMA-426 VLQ using arithmetic, with source/original deltas retained across lines and generated-column reset only.",
+    "Terminate mapping lines explicitly, including the last nonempty line; the permitted final empty line avoids terminal unmapped-segment ambiguity in the pinned Node consumer.",
+    "Embed exact sourcesContent; source URLs are relative escaped display names. Do not infer token-level symbol names."
+  ],
+  "publication": {
+    "sourceMapSuffix": ".js.map",
+    "recipeSuffix": ".source-map-recipe.json",
+    "executableMutation": false,
+    "linking": "standalone map; sourceMappingURL packaging not implemented",
+    "typedBundleGroup": "debugArtifacts",
+    "archive": "caller-pinned inputs; reconstruct full map and recipe identities"
+  },
+  "resources": {
+    "maxArtifactBytes": 134217728,
+    "maxDistinctBytes": 536870912,
+    "maxArtifacts": 8250,
+    "maxSources": 4096,
+    "maxMappingSegments": 1000000,
+    "signedVlqBits": 32
+  },
+  "assurance": {
+    "declarationMapReconstructed": true,
+    "expressionCorrespondenceChecked": false,
+    "semanticPreservationProved": false,
+    "metadataCreatesAuthority": false
+  },
+  "remaining": [
+    "Expression/synthetic helper origin events and fine-grained token/name mappings",
+    "Automatic sourceMappingURL packaging with an explicit linked-output identity",
+    "Portable map serializer and direct checked CLI backend selection",
+    "Declaration position maps and broader named/dependent public types",
+    "Global preservation and complete V5 conformance"
+  ],
+  "references": [
+    "https://tc39.es/ecma426/",
+    "https://tc39.es/ecma262/2026/multipage/ecmascript-language-lexical-grammar.html#sec-line-terminators",
+    "https://github.com/nodejs/node/blob/v22.23.3/lib/internal/source_map/source_map.js"
+  ],
+  "recipeContracts": [
+    "psc-direct-javascript-source-map-recipe/1",
+    "psc-direct-javascript-source-map-recipe/2"
+  ],
+  "uniformRecipe": {
+    "contract": "psc-direct-javascript-source-map-recipe/2",
+    "schemaVersion": 2,
+    "profile": "psc-js-uniform-values/1",
+    "lineage": "psc-js-uniform-declaration-lineage/1",
+    "compatibility": "The output ECMA-426 map format and encoding policy remain source-map/1. Recipe/2 has an explicit uniform profile and distinct lineage; recipe/1 is preserved for closed records.",
+    "producerAndReplay": "Shared host composer reconstructs exact profile-specific metadata before encoding; common service/graph/bundle/query/archive routing consumes uniform maps without fabricated specialization products."
+  }
+}

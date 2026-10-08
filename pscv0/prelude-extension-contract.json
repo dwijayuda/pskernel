@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "extensions": [
+    {
+      "name": "UInt8.ofNat",
+      "insertBefore": "UInt8",
+      "declaration": {
+        "kind": "axiom",
+        "levelParameters": [],
+        "metadata": null,
+        "name": "UInt8.ofNat",
+        "type": {
+          "b": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "UInt8"
+            }
+          },
+          "bi": "default",
+          "k": "forall",
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "n"
+          },
+          "t": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            }
+          }
+        },
+        "value": null
+      }
+    }
+  ]
+}

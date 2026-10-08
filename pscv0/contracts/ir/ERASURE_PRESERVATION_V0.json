@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-erasure-preservation/0",
+  "implementation": "packages/erasure/src/Ps/Erasure",
+  "semanticRelation": "psc-core-to-runtime-refinement/1",
+  "currentAssurance": "closed-slice-formal-plus-regression",
+  "provedSlices": [
+    {
+      "id": "psc-erasure-proof-declaration-omission/1",
+      "status": "proved-lean",
+      "scope": "top-level definition classified as Prop is omitted by psEraseDefinition",
+      "evidence": "packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
+    }
+  ],
+  "regressionEvidence": [
+    "psc1_erasure_tests"
+  ],
+  "globalPreservation": {
+    "status": "target-unproved"
+  },
+  "ghostNoninterference": {
+    "status": "target-unproved-beyond-omission-slice"
+  }
+}

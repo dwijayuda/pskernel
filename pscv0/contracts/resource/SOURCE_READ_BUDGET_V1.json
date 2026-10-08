@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-source-read-budget/1",
+  "implementation": "scripts/source-read-budget.mjs",
+  "integration": ["scripts/checked-source-snapshot.mjs", "scripts/selfhost-source-workspace.mjs", "scripts/checked-build.mjs"],
+  "status": "implemented-source-read-boundary",
+  "defaults": { "sourceBytes": 134217728, "fileBytes": 16777216, "manifestBytes": 4194304, "moduleCount": 4096, "importEdges": 65536, "importDepth": 512 },
+  "rules": [
+    "Bound regular-file reads before allocation, including generated-workspace manifests. Reject malformed UTF-8 instead of replacement decoding.",
+    "Track raw source bytes, manifest bytes, distinct visited modules, parsed import edges and maximum traversal depth. The entry depth is zero; repeated already visited modules are not charged twice.",
+    "Keep source-root, generated-membership, closure-hash, homogeneous-language, cycle and missing-import checks mandatory.",
+    "Reject unknown, negative or non-safe-integer limits. Exhaustion throws kind resourceExhausted with the configured dimension before compiler loading or output publication.",
+    "Bind configured source limits into preparation ActionId and observed counts into PassExecution. Check-only receipts also expose the observation.",
+    "Compatible larger limits preserve the source snapshot identity; no global resource monotonicity theorem is claimed."
+  ],
+  "completeBudgetCoverage": false,
+  "remaining": ["compiler-internal work", "CPU time", "peak memory", "host stack", "global resource monotonicity proof"],
+  "evidence": "Focused generated/standalone source fixtures, small-to-larger limits, early exhaustion and actual checked-build action binding; extensive adversarial/formal assurance remains pending."
+}

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-checked-seed-products/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "status": "native-product-transport-implemented-cloud-validation-pending",
+  "scope": "Compiler host transport only; no kernel implementation or checker policy changes.",
+  "owners": [
+    "host/src/Ps/Host/CheckedSeedProducts.lean",
+    "scripts/LeanCheckedSeed.lean",
+    "scripts/checked-seed-session.mjs",
+    "scripts/checked-build.mjs"
+  ],
+  "selection": {
+    "entry": "Explicit --session-products[-modules]-lean|ps native seed arguments; no legacy fallback.",
+    "request": "Six-element JSON array: [contract, target, representation, metadata, declarations, sourceMap].",
+    "targets": [
+      "javascript",
+      "wasm"
+    ],
+    "representations": [
+      "psc-js-closed-instances/1",
+      "psc-js-uniform-values/1"
+    ],
+    "constraints": "Uniform, declarations and sourceMap are JavaScript-only. Wasm retains the existing private wasm32 self-host ABI."
+  },
+  "stateMachine": [
+    "Prepare source once and retain the immutable prepared Lean value; send protocol-pinned prepared admissions.",
+    "Parent performs its selected fresh kernel check and validates provider identity/certification context before sending a product request or checked-only acknowledgement.",
+    "Native seed compares exact admissions, emits selected target stages once, and compares admissions again before responding.",
+    "When declarations are requested, the host checks actual source/runtime/target/export subjects and sends the shared bounded canonical portable writer request. The native seed validates the selected declaration profile and invokes the writer on the same prepared source.",
+    "Host requires exact portable/independent declaration bytes, expected protocol/phase/target/profile and field inventory, bounded output, EOF and successful child exit before returning any product.",
+    "The common builder independently reconstructs graph products, selected declarations and optional original-source maps before publication."
+  ],
+  "bounds": {
+    "legacyFrames": 2,
+    "directFramesWithoutDeclarations": 2,
+    "directFramesWithDeclarations": 3,
+    "framing": "Existing byte limits apply before fatal UTF-8 decoding and JSON parsing; the extra response is enabled only by explicit selected direct declarations.",
+    "requests": "Initial selector <=4096 UTF-8 bytes at native decode; declaration wire <=1 MiB and output <=64 MiB through the shared portable request codec.",
+    "scope": "Host command production and protocol responses are bounded. Native getLine allocation, CPU, memory and compiler-internal work are not proven bounded."
+  },
+  "compatibility": "Legacy two-phase TypeScript/check-only entrypoints and default frame policy are retained. Unknown direct protocol/targets/profiles/fields and extra frames reject; no fallback.",
+  "products": "Public API/erasure fields are transmitted only for metadata or declaration requests; origin/generated-position fields only for metadata/map requests. The portable staged producer may still compute them internally.",
+  "authority": "live-parent-check-and-live-native-prepared-session; serialized records are descriptive only",
+  "remaining": [
+    "Rust checked build routing",
+    "Complete transcript/input closure and isolated authority broker",
+    "Global preservation, portable execution closure and extensive assurance"
+  ],
+  "globalPreservationProved": false,
+  "releasePromotion": false,
+  "canonicalSuccessor": "psc-checked-seed-products/2 provides explicit Canonical selection; version 1 never silently changes its private Wasm ABI."
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@proofscript/psc2-lean-checked-host",
+  "private": true,
+  "version": "0.0.0-dev",
+  "type": "module",
+  "scripts": {
+    "psc": "node psc.mjs",
+    "build": "lake build psc2_lean_checked_seed psc2_lean_kernel_provider",
+    "test": "node --test ../scripts/checked-*.test.mjs",
+    "bootstrap": "node ../scripts/checked-selfhost.mjs bootstrap",
+    "fixed-point": "node ../scripts/checked-selfhost.mjs fixed-point"
+  }
+}

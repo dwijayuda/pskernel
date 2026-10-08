@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "847aac5560ae203fee659884e0c788eb8fd7231c",
+  "recorded": "2026-10-03T12:11:17.575Z",
+  "ownedCheckedPairProduced": false,
+  "ownedJointSelfHosted": false,
+  "releaseReady": false,
+  "semanticKernelUnchanged": true,
+  "testedKernelBuild": {
+    "schemaVersion": 1,
+    "packageVersion": "0.1.0-checker.13",
+    "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+    "seedSha256": "a0673677219da539df555961129385ae4cf5099f303f0c883dd3a26f726449ff",
+    "seedSourceCommit": "cc79e84014ed1d49b0c31971e0a8ceb99b32472c",
+    "typescriptVersion": "5.8.3",
+    "nodeVersion": "v26.7.0",
+    "leanCheck": "PSC2_CHECK: PASS (795 declarations)",
+    "psCheck": "PSC2_CHECK: PASS (795 declarations)",
+    "canonicalPsEmissionParity": true,
+    "generatedOutputEdited": false,
+    "canCheckProofs": false,
+    "outputs": [
+      {
+        "path": "dist/foundation.d.ts",
+        "sha256": "a1e7755c409a540317b979aefc4c9628f2dc77d989dc3d259670c9e391aa1272"
+      },
+      {
+        "path": "dist/foundation.js",
+        "sha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0"
+      },
+      {
+        "path": "dist/foundation.lean",
+        "sha256": "c595df18b77eb4edb3706bacbea9385c04530645889185e3818abce23204f222"
+      },
+      {
+        "path": "dist/foundation.ps",
+        "sha256": "0bd02eb8e8ffb8a77538b561b954f33650bd0971af4626ed951a91c207792c24"
+      },
+      {
+        "path": "dist/foundation.ts",
+        "sha256": "73dc695fbdf4b452ee58c6d5739114f3a33addbdb4a5adf4e6ca5caeb5e93d74"
+      }
+    ]
+  },
+  "hostFiles": [
+    {
+      "path": "scripts/checked-owned-kernel.mjs",
+      "sha256": "2b0db537c0931f925104facb6c208c8699431fe1be6caa44f8b36f4149a2e493"
+    },
+    {
+      "path": "scripts/checked-owned-kernel-worker.mjs",
+      "sha256": "6609c7bbe2136e3b54bd8254d6cfec0cb817e0a42cfa4326130c0276a7317e2e"
+    },
+    {
+      "path": "scripts/checked-owned-wire.test.mjs",
+      "sha256": "feb1976db461a3378da4bbb38aec00136d390a47d67c8830be3ae7658c7edf23"
+    }
+  ],
+  "windows": {
+    "base": "847aac5560ae203fee659884e0c788eb8fd7231c",
+    "root": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\wire-integration-847aac55\\psc15selfhost",
+    "started": "2026-10-03T11:52:35.600Z",
+    "commands": [
+      {
+        "stage": "identity",
+        "command": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "packages/pskernel-core/scripts/verify-evidence.mjs"
+        ],
+        "exitCode": 0,
+        "error": null,
+        "logSha256": "6ca95d619e206123e3cbbcbb72670c525803709e0ab46082a0941f66856ee0e6",
+        "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-algebraic-847aac55\\psc15selfhost\\.continuation\\wire-integration-tests-v2-identity.log"
+      },
+      {
+        "stage": "routing",
+        "command": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "scripts/check-owned-kernel-receipt.mjs"
+        ],
+        "exitCode": 0,
+        "error": null,
+        "logSha256": "12d8e6760927217bc3abc5f4c541f23cb51322034b5afa3a48f03870991466b2",
+        "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-algebraic-847aac55\\psc15selfhost\\.continuation\\wire-integration-tests-v2-routing.log"
+      },
+      {
+        "stage": "host",
+        "command": [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "--test",
+          "--test-reporter=tap",
+          "scripts/checked-build.test.mjs",
+          "scripts/checked-enum-build.test.mjs",
+          "scripts/checked-owned-enum.test.mjs",
+          "scripts/checked-owned-kernel-checkpoint.test.mjs",
+          "scripts/checked-owned-kernel.test.mjs",
+          "scripts/checked-owned-literal.test.mjs",
+          "scripts/checked-owned-nat.test.mjs",
+          "scripts/checked-owned-projection.test.mjs",
+          "scripts/checked-owned-record.test.mjs",
+          "scripts/checked-owned-sum.test.mjs",
+          "scripts/checked-owned-text.test.mjs",
+          "scripts/checked-owned-unit.test.mjs",
+          "scripts/checked-owned-wire.test.mjs",
+          "scripts/checked-projection-build.test.mjs",
+          "scripts/checked-sum-build.test.mjs",
+          "scripts/checked-text-build.test.mjs"
+        ],
+        "exitCode": 0,
+        "error": null,
+        "logSha256": "867a89a70f56d69b54bdbb5955087ffacde4b16a0008d26f5b42a9d1769394aa",
+        "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-algebraic-847aac55\\psc15selfhost\\.continuation\\wire-integration-tests-v2-host.log"
+      }
+    ],
+    "ownedCheckedPairProduced": false,
+    "ownedJointSelfHosted": false,
+    "releaseReady": false,
+    "finished": "2026-10-03T11:55:57.429Z",
+    "counts": {
+      "tests": 173,
+      "pass": 172,
+      "fail": 0,
+      "skipped": 1
+    }
+  },
+  "linux": {
+    "command": [
+      "wsl.exe",
+      "--exec",
+      "/bin/sh",
+      "-c",
+      "cd '/mnt/c/Users/user/Documents/Codex/2026-10-02/referenced-chatgpt-conversation-this-is-an/work/wire-integration-847aac55/psc15selfhost' && /usr/bin/node --test --test-reporter=tap scripts/checked-owned-wire.test.mjs scripts/checked-owned-kernel.test.mjs scripts/checked-owned-text.test.mjs"
+    ],
+    "started": "2026-10-03T11:59:54.488Z",
+    "finished": "2026-10-03T12:00:52.830Z",
+    "exitCode": 0,
+    "logSha256": "bdebfb6387dacf53c37318bce1363d97c41e6abb713023629de381b0cbd4a467",
+    "counts": {
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "skipped": 0
+    },
+    "testedRoot": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\wire-integration-847aac55\\psc15selfhost",
+    "testedKernelSourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+    "runnerSourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+    "note": "The shared launcher recorded its algebraic-candidate cwd identity. The explicit shell cd and this subject identity identify the checker.13 integration tree actually tested."
+  },
+  "archive": {
+    "path": "run-artifacts.json.gz",
+    "sha256": "ba4d587cf0e82d79d326bddd96b6e9071777e5e7a381e7e6115f527e3013ffed",
+    "uncompressedSha256": "9d37ddf5045172b7fdde2cef345e37b6756eacf270d07d60cc61f0ebd320d878"
+  }
+}

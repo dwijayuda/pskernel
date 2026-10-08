@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-compiler-ownership/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "scope": "Declared package identities and Lean src imports; complements existing portable, runtime-neutrality, production-authority and host-closure guards. This static ownership audit is not sandbox or compiler-preservation evidence.",
+  "packages": [
+    {
+      "folder": "backend-js",
+      "name": "@proofscript/backend-js-next",
+      "role": "backend"
+    },
+    {
+      "folder": "backend-rust",
+      "name": "@proofscript/backend-rust-next",
+      "role": "backend"
+    },
+    {
+      "folder": "backend-ts",
+      "name": "@proofscript/backend-ts-next",
+      "role": "backend"
+    },
+    {
+      "folder": "backend-wasm",
+      "name": "@proofscript/backend-wasm-next",
+      "role": "backend"
+    },
+    {
+      "folder": "bootstrap",
+      "name": "@proofscript/psc2-bootstrap",
+      "role": "composition"
+    },
+    {
+      "folder": "bridge",
+      "name": "@proofscript/bridge-next",
+      "role": "semantic"
+    },
+    {
+      "folder": "cli",
+      "name": "@proofscript/cli-next",
+      "role": "host-cli"
+    },
+    {
+      "folder": "compiler-ir",
+      "name": "@proofscript/compiler-ir-next",
+      "role": "semantic"
+    },
+    {
+      "folder": "compiler",
+      "name": "@proofscript/compiler-next",
+      "role": "semantic"
+    },
+    {
+      "folder": "core",
+      "name": "@proofscript/core",
+      "role": "semantic"
+    },
+    {
+      "folder": "driver-js",
+      "name": "@proofscript/driver-js-next",
+      "role": "driver"
+    },
+    {
+      "folder": "driver-rust",
+      "name": "@proofscript/driver-rust-next",
+      "role": "driver"
+    },
+    {
+      "folder": "driver-ts",
+      "name": "@proofscript/driver-ts-next",
+      "role": "driver"
+    },
+    {
+      "folder": "driver-wasm",
+      "name": "@proofscript/driver-wasm-next",
+      "role": "driver"
+    },
+    {
+      "folder": "elab",
+      "name": "@proofscript/elab-next",
+      "role": "semantic"
+    },
+    {
+      "folder": "environment",
+      "name": "@proofscript/environment-next",
+      "role": "semantic"
+    },
+    {
+      "folder": "erasure",
+      "name": "@proofscript/erasure-next",
+      "role": "semantic"
+    },
+    {
+      "folder": "foundation",
+      "name": "@proofscript/foundation",
+      "role": "semantic"
+    },
+    {
+      "folder": "interface-ir",
+      "name": "@proofscript/interface-ir",
+      "role": "interop"
+    },
+    {
+      "folder": "interface-ts",
+      "name": "@proofscript/interface-ts",
+      "role": "interop"
+    },
+    {
+      "folder": "meta",
+      "name": "@proofscript/meta-next",
+      "role": "semantic"
+    },
+    {
+      "folder": "project",
+      "name": "@proofscript/project-next",
+      "role": "incremental"
+    },
+    {
+      "folder": "pscv-theory",
+      "name": "@proofscript/pscv-theory",
+      "role": "assurance"
+    },
+    {
+      "folder": "syntax",
+      "name": "@proofscript/syntax-next",
+      "role": "semantic"
+    },
+    {
+      "folder": "theory-bridge",
+      "name": "@proofscript/theory-bridge",
+      "role": "assurance"
+    }
+  ],
+  "externalPackages": [
+    {
+      "folder": "pskernel-core",
+      "name": "@proofscript/pskernel-core",
+      "modulePrefix": "Ps.KernelCore.",
+      "allowedConsumers": [
+        "pscv-theory"
+      ]
+    },
+    {
+      "folder": "host",
+      "name": "@proofscript/bootstrap-host-lean",
+      "modulePrefix": "Ps.Host.",
+      "allowedConsumers": [
+        "cli"
+      ]
+    }
+  ],
+  "bootstrapEntryDependencies": {
+    "src/Ps/Bootstrap/SelfHostJs.lean": "driver-js",
+    "src/Ps/Bootstrap/SelfHostRust.lean": "driver-rust",
+    "src/Ps/Bootstrap/SelfHostWasm.lean": "driver-wasm"
+  },
+  "neutralRuntimeFiles": [
+    "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+    "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+    "packages/compiler-ir/src/Ps/CompilerIr/Decode.lean",
+    "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+    "packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean"
+  ],
+  "ownershipDebt": "compiler-ir/JsAbi remains physically in place but belongs logically to interface-ts. Legacy frontend/bridge/Core names and exact contracts remain unchanged. No kernel implementation/metatheory change.",
+  "requiredCompanionSeparation": [
+    "SAVEF",
+    "FactoryBench",
+    "archive-policy",
+    "AI-orchestration"
+  ],
+  "globalPreservationProved": false
+}

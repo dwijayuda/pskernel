@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-bounded-host-execution/1",
+  "processImplementation": "scripts/bounded-process.mjs",
+  "isolationImplementation": "scripts/isolated-producer.mjs",
+  "source": "https://docs.docker.com/reference/cli/docker/container/run/",
+  "processRules": [
+    "Absolute executable and working directory, explicit environment, no shell and hidden Windows window.",
+    "Bound input, stdout, stderr and wall time. Snapshot input bytes before sending them.",
+    "Classify timeout, cancellation and output/input limits as resource exhaustion; process crashes are not semantic rejection.",
+    "Require process termination confirmation. Unknown CPU, memory and host-stack measurements remain null.",
+    "Successful process exit returns untrusted bytes and has no kernel authority."
+  ],
+  "producerRules": [
+    "Only a local runtime endpoint and an explicitly pinned, already-present image digest are allowed; no implicit pull.",
+    "Require a Linux image for the selected architecture and reject image-declared writable volumes.",
+    "Disable network, host mounts, ambient credential forwarding, health checks and host log accumulation.",
+    "Use a non-root user, read-only root, dropped capabilities, no-new-privileges and bounded scratch, memory, swap, processes and CPU allocation.",
+    "On completion or failure, remove only this invocation's random container name and confirm absence if removal reports failure."
+  ],
+  "status": "implementation-available-runtime-assurance-pending",
+  "limitations": [
+    "A process wrapper alone does not isolate descendants, memory or CPU.",
+    "Container/runtime/OS hardening is an external assumption and does not upgrade ProviderSecurityProfile or enable the paranoid profile.",
+    "Local checks exercise real bounded child processes and mock container orchestration. No real container execution or escape-resistance claim is made.",
+    "Integration with the complete challenge/export/statement/assumption/checker comparator protocol remains required.",
+    "Compiler-wide resource coverage and monotonicity remain incomplete/unproved."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded direct kernel conversion probes on the recorded provider prelude; not full Lean compatibility",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+  "harnessSha256": "bdc15bb543fc7d22709563df20222496316005c79f7ee83cc18370c7fa6f2e4b",
+  "cases": 671,
+  "matched": 671,
+  "mismatches": [],
+  "recordsPath": "dist/evidence/level-differential-records.json",
+  "recordsSha256": "8ed5587eb9629d5134981359cd689f9b041c0cbd778c58077d17142e0ee62fec"
+}

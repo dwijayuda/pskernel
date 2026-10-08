@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-foreign-interface/1",
+  "status": "portable-interface-wit-and-synchronous-canonical-layout-planning-implemented-runtime-adapters-pending",
+  "owner": "packages/interface-ir/src/Ps/InterfaceIr",
+  "profiles": [
+    "PSC1-selfhost-stable/1",
+    "PSC1-portable-selfhost/1"
+  ],
+  "separation": "This is a new foreign value/ownership contract. It does not silently extend psc-runtime-values/1, change VerifiedIR meanings, or close the external ABI validation gap.",
+  "model": [
+    "typed functions",
+    "scalar and named types",
+    "records",
+    "variants",
+    "enums",
+    "lists",
+    "options",
+    "results and typed errors",
+    "tuples",
+    "owned resources",
+    "borrowed resources",
+    "futures",
+    "streams",
+    "async functions",
+    "target availability",
+    "capability imports and exports"
+  ],
+  "validation": "Unique conservative lowercase kebab identifiers, resolved acyclic type graph, resource-only handles, supported target presence, exact imported/exported interface resolution and declared capability policy. Depth exhaustion is a separate failure. Every WIT emission freshly validates its raw input.",
+  "borrowProfile": "Only direct synchronous function parameters may borrow a resource. Borrowed results, nested borrows and async borrows are unsupported and rejected. Resource values require explicit own or borrow in the model.",
+  "wit": {
+    "source": "https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md",
+    "target": "component-model",
+    "output": "Deterministic package, interface and world declarations with percent-escaped identifiers, named aggregates, resource handles, results, futures and streams. Owned resources use the WIT resource-name shorthand.",
+    "unsupported": [
+      "cross-package use/imported types",
+      "package versions",
+      "flags",
+      "resource methods and constructors",
+      "component binary generation",
+      "canonical ABI runtime lowering and lifting"
+    ],
+    "independentParserValidation": "pending external Component Model parser; independent in-repo renderer relation implemented",
+    "independentRelationValidation": "scripts/interface-ir-artifact.mjs independently decodes canonical InterfaceIR, re-renders deterministic WIT, and requires exact supplied WIT bytes; psc-interface-ir-wit-rendering/1 does not establish Canonical ABI or runtime behavior."
+  },
+  "authority": "A validated interface and emitted declaration are data, not CheckedCore, executable compatibility evidence, a preservation theorem or release acceptance.",
+  "remaining": [
+    "Canonical ABI/component binary lowering and runtime adapters",
+    "target runtime adapters",
+    "VerifiedIR link integration with actual target adapters",
+    "independent WIT parser and runtime behavior checks",
+    "global preservation and ownership soundness"
+  ],
+  "canonicalArtifact": {
+    "contract": "psc-interface-ir-json/1",
+    "producer": "packages/interface-ir/src/Ps/InterfaceIr/Encode.lean",
+    "independentDecoder": "scripts/interface-ir-artifact.mjs",
+    "authority": "interface-data-not-runtime-or-kernel-authority"
+  },
+  "canonicalAbi": {
+    "profile": "psc-canonical-abi-sync-layout/1",
+    "owner": "packages/interface-ir/src/Ps/InterfaceIr/CanonicalAbi.lean",
+    "reference": "https://github.com/WebAssembly/component-model/blob/a25fc0b372dd21f07f0242c46e98bd0f1ea0c0e1/design/mvp/CanonicalABI.md",
+    "referenceKind": "Component Model design revision; distinct from Core Wasm specification",
+    "scope": "Pure synchronous memory32/memory64 layout and lift/lower core-signature planning from validated InterfaceIR.",
+    "rules": [
+      "exact scalar alignment/size and pointer-width string/list pairs",
+      "record/tuple offsets and trailing alignment",
+      "variant minimal discriminant width, aligned payload area and flat-type joins",
+      "16-flat-parameter/1-flat-result limits with direction-specific indirect result convention",
+      "every declared value type is sized under memory64 and rejected at 2^28 bytes",
+      "topological named-layout cache with exact flat counts and a 17-slot prefix",
+      "owned/borrowed resource slots flag the need for a separate handle table; raw resources reject",
+      "async/future/stream planning rejects under this synchronous profile"
+    ],
+    "resources": "Depth fuel and type-size limits fail closed. One shared dependency/depth analysis rejects invalid graphs and preserves valid acyclic type-depth thresholds without repeated named expansion; layouts use its dependency order. Flat prefixes are capped at 17 while arities remain exact. Input metadata and field-offset lists remain host-budget obligations; no total work bound or global resource theorem is claimed.",
+    "remaining": [
+      "actual linear-memory lifting/lowering and realloc/post-return integration",
+      "resource handle ownership, borrow scope and drop runtime",
+      "component binary emission and independent parser/runtime validation",
+      "async state machine and cancellation profile",
+      "global adapter preservation"
+    ],
+    "validation": "portable/native cloud validated at 82ab4cd (run 37652202947/job 112898694777); global preservation unproved",
+    "authority": "layout/signature data only; no executable adapter, CheckedCore, source preservation or lifetime proof"
+  },
+  "typeAnalysis": {
+    "owner": "packages/interface-ir/src/Ps/InterfaceIr/Validate.lean",
+    "scope": "Portable cached definition-body depths and dependency order shared with Canonical ABI layout planning.",
+    "rules": [
+      "each accepted definition body is summarized once; unresolved definitions use bounded topological passes",
+      "named nodes consume one unit plus cached body depth under the inherited typeDepth contract",
+      "cycles, missing names, raw-resource values, nested/returned/async borrows and disallowed future/stream types reject",
+      "function validation reuses the interface graph; layout planning consumes its ordered definitions"
+    ],
+    "limitations": "Polynomial list-based lookup and deferred passes; no constant/linear-time or formal cost claim. Inputs with multiple independent errors may report a different first failure.",
+    "validation": "portable/native cloud validated at 82ab4cd (run 37652202947/job 112898694777); global preservation unproved"
+  },
+  "memoryCodec": {
+    "contract": "psc-canonical-memory-sync-utf8/1",
+    "owner": "scripts/canonical-memory.mjs",
+    "role": "Host value runtime primitive for caller-pinned InterfaceIR; not a production foreign function adapter or canon-lift/canon-lower lifecycle.",
+    "reference": "https://github.com/WebAssembly/component-model/blob/a25fc0b372dd21f07f0242c46e98bd0f1ea0c0e1/design/mvp/CanonicalABI.md",
+    "scope": [
+      "memory32/memory64 scalar and aggregate loads/stores in caller-supplied WebAssembly.Memory",
+      "records/tuples, discriminants, optional/result payloads, lists, UTF-8 strings and exact signed/unsigned 64-bit values",
+      "memory64 type-size bound and capped independent flat-layout summaries compared to the portable planner",
+      "byte/node/string/depth budgets, checked pointer arithmetic, current memory views after realloc/growth",
+      "input snapshots validate own data properties before allocation/writes; invalid UTF-8, bounds, tags and scalar values reject"
+    ],
+    "unsupported": [
+      "shared memory",
+      "resource ownership and borrowing tables",
+      "async/future/stream values",
+      "general component call lifecycle; the separate closed-export profile implements synchronous calls and selected post-return",
+      "component binaries and production import binding"
+    ],
+    "hostAssumptions": [
+      "memory and realloc are caller-selected trusted host capabilities; realloc must provide properly owned, disjoint allocations",
+      "Proxy objects and allocator effects are not sandboxed",
+      "allocation or memory failures may leave prior writes/allocations; no rollback or automatic deallocation is promised",
+      "the JavaScript codec is host runtime support; the portable compiler remains PSC1"
+    ],
+    "validation": "e78ee2b passed full main cloud CI (37655133216/job 112908206215), including twelve memory/core-value groups, actual Wasm i64 allocator/identity calls, independent portable layout comparison and inherited compiler/profile gates.",
+    "assurance": "No global adapter preservation, resource ownership, conformance or release claim.",
+    "coreValues": {
+      "contract": "psc-canonical-core-values-sync-utf8/1",
+      "scope": "lowerValue/liftValue convert one named component value to/from Wasm JS core-value arrays, with maxFlat=16 parameters or maxFlat=1 results.",
+      "rules": [
+        "signed Number/BigInt JS boundary values normalized to unsigned bits internally",
+        "scalar truncation/sign extension, Unicode validation, float bit reinterpretation and variant payload joins",
+        "unused variant payload slots are zero-filled on lower and consumed on lift",
+        "large values use aligned memory allocation or an explicit outPointer; unused outPointer rejects",
+        "memory64 realloc receives four i64 parameters, including alignment"
+      ],
+      "authority": "Value/type planning and conversion data; the separate closed-export binding profile uses it. No source checking or general component/resource lifetime authority."
+    }
+  },
+  "coreSignatureBoundary": "contracts/interface/WASM_CORE_SIGNATURES_V1.json",
+  "closedCoreExports": "contracts/interface/CANONICAL_CLOSED_EXPORTS_V1.json"
+}

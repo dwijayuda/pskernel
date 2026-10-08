@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-public-api-ir/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "domain": "public-api",
+  "logicalOwner": "public-api",
+  "physicalOwner": "packages/compiler-ir",
+  "representation": {
+    "module": [
+      "contract",
+      "visibilityPolicy",
+      "declarations"
+    ],
+    "visibilityPolicy": "all-prepared-declarations",
+    "constant": [
+      "constant",
+      "kind",
+      "structuredName",
+      "universeParameters",
+      "CoreType"
+    ],
+    "inductive": [
+      "inductive",
+      "structuredName",
+      "universeParameters",
+      "CoreType",
+      "numParams",
+      "numIndices",
+      "constructorNames",
+      "isStructure"
+    ],
+    "constructor": [
+      "constructor",
+      "structuredName",
+      "universeParameters",
+      "CoreType",
+      "inductiveName",
+      "constructorIndex",
+      "numParams",
+      "numFields",
+      "recursiveFields"
+    ],
+    "recursor": [
+      "recursor",
+      "structuredName",
+      "universeParameters",
+      "CoreType",
+      "inductiveNames",
+      "numParams",
+      "numIndices",
+      "numMotives",
+      "numMinors"
+    ],
+    "CoreType": "Exact pre-erasure PsExpr types encoded with the existing canonical bridge expression codec, retaining dependent binders, universe parameters and binder visibility. Declaration values are never fields of this IR."
+  },
+  "producer": "psCompilerPublicApiFromPrepared on the same immutable prepared object retained by a live checked host or native two-phase session; candidate/internal API itself grants no authority.",
+  "inputBinding": "Observed psc-project-public-api/1 binds exact CertifiedSource, selected implementation, provider profile and resource policy. ProfileEnvironment and BuildAction binding is inherited from the surrounding V5 bundle.",
+  "consumers": [
+    "bounded host encoding/scope decoder",
+    "checked compiler service including independent public API output before runtime lowering",
+    "native checked seed transport",
+    "observed graph/archive",
+    "typed backend ArtifactBundle publicApiArtifacts"
+  ],
+  "compatibility": "Selected historical compiler modules/seeds may omit this product. When requested, a present malformed API or payload rejects; missing source API is never inferred from SpecializedIR or target bytes. Live executable-only emission does not invoke source API projection.",
+  "distinctions": [
+    "Source PublicApiIR is not the runtime structural interface, behavioral interface or foreign InterfaceIR.",
+    "Current projection includes every prepared declaration, including generated members; a future explicit source export/visibility policy must version the contract.",
+    "Matching PublicApiIR bytes alone do not justify behavioral, definitional-equality or executable cache reuse.",
+    "Bridge nested-recursion normalization remains part of trusted source-to-admissions composition; this producer does not independently prove it.",
+    "Source signatures do not imply that every source declaration has an executable export."
+  ],
+  "remaining": [
+    "Independent checked-Core projection correspondence",
+    "Explicit public/generic target export policy and runtime ABI correspondence",
+    "OriginGraph node attachment and source symbol accessibility closure",
+    "Direct-JS declaration/map emitter consuming this IR",
+    "Fine-grained public fingerprint producers and adequacy validators"
+  ],
+  "authority": "descriptive-source-signature-artifact-only",
+  "globalPreservationProved": false,
+  "targetCorrespondenceVerified": false,
+  "releasePromotion": false,
+  "productSelectionContract": "psc-compiler-product-selection/1"
+}

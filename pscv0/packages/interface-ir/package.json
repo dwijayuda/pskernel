@@ -1,0 +1,23 @@
+{
+  "name": "@proofscript/interface-ir",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": false,
+    "portable": true,
+    "implementationProfile": "PSC1-portable-selfhost/1",
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "foreign-interface-contracts-and-adapters"
+  },
+  "dependencies": {
+    "@proofscript/foundation": "0.0.0-dev",
+    "@proofscript/bridge-next": "0.0.0-dev"
+  }
+}

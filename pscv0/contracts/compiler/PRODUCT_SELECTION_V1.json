@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-compiler-product-selection/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "scope": "Live checked compiler host product selection; not a semantic profile or live authority capability.",
+  "operations": {
+    "emitArtifact": "Executable and all metadata available from the selected compiler; present malformed requested metadata rejects this product request.",
+    "emitExecutableArtifact": "Executable and required IR evidence only; optional PublicApiIR/origin/erasure/generated-position products are not read or decoded.",
+    "emit": "TypeScript executable-only convenience operation.",
+    "emitPublicApiArtifact": "Independent requested source API product.",
+    "emitOriginGraph": "Independent requested declaration origin product, with required PublicApiIR dependency.",
+    "emitDeclarationsArtifact": "Explicit direct-JS source declaration request under the session's fixed closed or uniform structural profile; returns executable and source declaration products from one staged emission, without requesting origin/generated-position products.",
+    "emitSelectedArtifact": "Explicit own boolean metadata/declarations/sourceMap flags; one staged emission serves their dependency closure. Declarations and required source maps are JavaScript products. sourceMap requires a complete available origin closure and fails if absent; metadata alone retains all-available semantics."
+  },
+  "acceptance": [
+    "Kernel acceptance uses the same frozen prepared Core and exact admissions, independently of optional origin-table shape.",
+    "A present malformed/failing origin-aware preparation API or missing/malformed prepared Core rejects without duplicate preparation or fallback.",
+    "Malformed origin-table data becomes an error only when origins are requested; accessors are not invoked.",
+    "Selected target-stage APIs execute once per emission. Failure, malformed required stage data, changed RuntimeIR/VerifiedIR bytes and failed specialization correspondence still reject executable-only output.",
+    "Selected stage fields must be own data properties. Unrequested metadata fields are neither read nor recursively frozen.",
+    "Source API projection and debug reconstruction are not invoked for executable-only output. Only selected returned products count against the output byte budget.",
+    "Revocation, session identity, CertifiedSource binding and target authorization apply to every selection.",
+    "Executable emission and source API projection recheck live session membership and exact admissions after invoking the selected producer and before returning its product."
+  ],
+  "specialization": "Executable-only emission runs the existing independent exact-instantiation relation without allocating a debug witness map. Full metadata emission retains witnesses from the same relation.",
+  "compatibility": "emitArtifact keeps its strict all-available-metadata behavior. No automatic fallback follows a requested-product failure. A caller explicitly requests executable-only output on its existing live handle.",
+  "limits": [
+    "This host selection does not stop a selected portable staged producer from internally computing observation tables.",
+    "This is not a hostile-JavaScript sandbox or a resource theorem.",
+    "Exact Cargo/rustc dependency/toolchain capture, specialized-input migration, broader Canonical wrappers and broader named/dependent declaration types remain pending."
+  ],
+  "authority": "selection-does-not-create-or-expand-authority",
+  "globalPreservationProved": false,
+  "releasePromotion": false,
+  "buildRouting": {
+    "owner": "scripts/checked-build.mjs",
+    "cli": "packages/cli/bin/psc.mjs",
+    "backend": "Explicit typescript/javascript/wasm/rust; default typescript, never inferred from a file suffix.",
+    "products": {
+      "typescript": "metadata preserves the existing TS+tsc executable/declaration/source-map bundle; other product modes reject.",
+      "javascript": "executable (default), metadata (all available metadata), declarations (portable source declarations), source-map (standalone JavaScript map), declaration-map (required source declarations and standalone declaration map with metadata), or all (declarations plus both map products). Explicit linked mode publishes separate sourceMappingURL-attached JavaScript and declaration identities, retaining original unlinked bytes in the archive.",
+      "wasm": "executable (default) or metadata. Without --wasm-exports the existing private wasm32 self-host ABI is selected. With an explicit psc-wasm-canonical-selection/1 file, 32/64-bit source words and only its scalar exports are selected; interface/binding/policy products are required with the binary.",
+      "rust": "source (default) or metadata emits .rs through the generated checked compiler or explicit products/3 native session and shared graph/archive/bundle publication. Current input is generic ValidatedRuntimeIR; no RustIR is invented. Source emission does not run Cargo/rustc or produce a native binary."
+    },
+    "representation": "--js-representation closed|uniform pins the live JavaScript profile before checking; other backends reject uniform.",
+    "compiler": "An explicitly selected generated module must expose its selected staged API. The checked provider-specific default is retained; the CLI no longer injects an unrelated bootstrap compiler.",
+    "validation": [
+      "Target/product/profile/suffix combinations reject before source/compiler loading; selected native direct sessions require the exact versioned protocol with no legacy fallback.",
+      "One live checked source session emits the selected direct products; session is closed after capture.",
+      "The graph compares all three requested declaration product identities and bytes with the live portable-comparison result.",
+      "Required source maps use generated-session live lineage or exact versioned native captured tables, then compose captured original-source preparation coordinates and output filename.",
+      "Only the TypeScript lane resolves or invokes tsc; direct lanes retain all graph/archive/descriptor/bundle/envelope checks.",
+      "Executable-only closed graphs check specialization correspondence without constructing a debug witness map.",
+      "Declaration maps use the same portable-compared declaration bytes and required captured source origins. A separate pass replays source-signature writer positions, composes original coordinates and publishes a versioned debug product; neither native transport tuple nor executable bytes change.",
+      "Linked selection requires both bound maps and exact filenames; new pass and archive replay independently reconstruct linked products."
+    ],
+    "publication": "The existing single graph output inventory drives staged writes and per-file publication; receipt is last. No directory-atomic transaction or cleanup of pre-existing unselected files is claimed.",
+    "nativeTransport": "Explicit psc-checked-seed-products/1 native transport supports direct JavaScript/wasm32 and selected products over one retained prepared source. Legacy TypeScript transport remains unchanged. Explicit products/3 supports Rust source/metadata with its Rust source representation contract and two frames; no legacy protocol fallback.",
+    "canonicalWasm": "Generated and native products/2 sessions pin exact policy before checking and require the selected portable staged API. Shared independent interface projection and actual target/binary signature checks precede common graph/descriptor/bundle/envelope publication.",
+    "rustSource": "The registry's executableArtifacts group includes role target-source. The evidence-envelope executableArtifact field binds its rust-source identity; it is not a native-executable acceptance claim. Receipt rustTarget.compilerInvoked and nativeBinaryProduced are false."
+  }
+}

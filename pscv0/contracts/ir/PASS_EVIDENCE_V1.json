@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-pass-evidence/1",
+  "portableModel": "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean",
+  "hostImplementation": "scripts/artifact-evidence.mjs",
+  "productionIntegration": "scripts/checked-build-evidence.mjs",
+  "archiveIntegration": "scripts/observed-build-archive.mjs; checked-build publishes all graph-listed byte snapshots before the receipt; standalone verifier checks observed byte closure and pass integrity with an independently selected graph and assumption policy",
+  "canonicalEncoding": {
+    "id": "psc-canonical-json/1",
+    "objects": "Plain data only; keys sorted by UTF-16 code units; no getters, symbols or toJSON hooks.",
+    "arrays": "Dense ordered arrays without extra properties.",
+    "scalars": "null, booleans, strings with JSON escaping and safe integers except negative zero.",
+    "bounds": "Depth, node count and output byte count are bounded; cycles and unsupported values reject."
+  },
+  "artifactIdentity": "SHA-256 of exact canonical or target bytes, with explicit domain, schema, contract and byte length. The artifact key hashes the full descriptor, preserving domain separation.",
+  "semanticFingerprint": "Exact artifact identity is the conservative default. Ignoring byte differences requires a separate reuse contract and evidence.",
+  "actionIdentity": "Canonical pass-definition identity, ordered input artifacts, explicit parameters, semantic identity, resource policy and dependencies. Records with incomplete implementation closure are not sufficient for untrusted cache reuse.",
+  "verification": [
+    "Re-hash execution, definition, implementation, action, dependencies and every input/output artifact.",
+    "Recompute ActionId; validate input/output contracts, assumption policy and exact fingerprint provenance.",
+    "Resolve evidence bytes and invoke caller-configured independent checkers against the exact relation, action, input, output and assumption subject.",
+    "A missing required evidence kind or unavailable checker fails closed.",
+    "Integrity verification is not preservation verification; serialized records never mint kernel authority."
+  ],
+  "currentBuildCoverage": [
+    "source preparation and kernel checking as an observed composite edge",
+    "actual checked Core to canonical RuntimeIR erasure artifact when the staged API is present",
+    "actual RuntimeIR validation with distinct domain-bound VerifiedIR artifact and equal bytes",
+    "actual validated IR to TypeScript as a composite lowering/printing edge",
+    "TypeScript to JavaScript/declarations/source map with actual flags and output basename",
+    "installed TypeScript and selected native platform package trees retained as byte-bound pass implementation inputs, with complete before/after inventory checks",
+    "selected kernel provider runtime-file profiles captured around checking and bound to acceptance-context/action dependencies",
+    "enforced source-reading limits and observed byte/module/import counts bound to the preparation action and execution record",
+    "native-session protocol limits and whole-session byte observations bound to affected passes without claiming per-pass attribution",
+    "checked-service direct JavaScript staged emission and graph/archive support for actual erasure, validation, specialization and final output; default production build remains TypeScript",
+    "actual runtime structural-interface projection from archived VerifiedIR, with independent projection replay and a receipt-bound interface fingerprint",
+    "checked-service direct Wasm staged emission and six-edge graph with actual erasure/validation/specialization/binary snapshots",
+    "independent bounded specialization correspondence replay in checked service, build graph and offline archive; validator global soundness remains unproved",
+    "actual VerifiedIR to canonical JavaScript scalar ABI policy/plan artifact, with policy identity bound to the pass and offline relation replay",
+    "certified behavioral-interface reuse obligations validated before untrusted evidence-cache hits",
+    "production executable EvidenceEnvelope target-adapter identities preserved for downstream audit",
+    "actual validated JsIR retained between specialization and JavaScript printing",
+    "actual ABI-completed validated WasmIR retained between specialization and Wasm binary encoding",
+    "direct backend build graphs split SpecializedIR -> target IR -> executable artifact edges and offline archive replay decodes target IR schemas"
+  ],
+  "remaining": [
+    "backend-interior stage artifacts, other-target specialization snapshots and default-build direct-JS integration after promotion gates",
+    "complete generated compiler/runtime closure and ambient inputs beyond captured provider profiles and TypeScript packages",
+    "independent complete preservation evidence",
+    "full resource budget coverage",
+    "archive release semantic lock, licenses and provenance beyond the observed build records"
+  ],
+  "portableDigestRule": "A portable record supplied with artifact labels remains requiresByteVerification. Legacy specialization records remain unbound. Neither implies byte verification or a proof.",
+  "stageEncoding": "contracts/ir/IR_ARTIFACT_ENCODING_V1.json",
+  "typeScriptToolInputs": "contracts/ir/TYPESCRIPT_TOOL_INPUTS_V1.json",
+  "providerInputs": "contracts/ir/CHECKED_PROVIDER_INPUTS_V1.json",
+  "sourceResources": "contracts/resource/SOURCE_READ_BUDGET_V1.json",
+  "semanticReuse": "QueryGraphV2 candidates require exact certified-interface reuse-rule replay before the ordinary ActionId/pass-evidence cache validator can return cached outputs.",
+  "targetAdapterEvidence": "psc-verified-ir-to-js-abi-plan/1 is the first production target-adapter evidence edge; broader target profiles reuse the same PassExecution/Envelope model.",
+  "targetIrEvidence": {
+    "javascript": {
+      "stage": "jsIr",
+      "contract": "psc-js-ir-json/1",
+      "validator": "psc-js-ir-validator/1",
+      "preservation": "not-established"
+    },
+    "wasm": {
+      "stage": "wasmIr",
+      "contract": "psc-wasm-ir-json/1",
+      "validator": "psc-wasm-ir-validator/1",
+      "preservation": "not-established"
+    }
+  }
+}

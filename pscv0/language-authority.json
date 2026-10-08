@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "document": "PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md",
+  "sha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+  "languageEdition": "ps-0.9-r3",
+  "sourceProfile": "ps-standard-0.9-r3",
+  "requiredLanguageProfile": "psc2-language-v1",
+  "standardLanguageProfile": "psc2-standard-language-v1",
+  "leanCompatibilityProfile": "lean-subset-psc2-v1",
+  "verificationProfile": "pscv-v1",
+  "closedAssurancePolicy": "pscv-closed-v1",
+  "boundaryAssurancePolicy": "pscv-boundary-v1",
+  "verificationSemantics": "PSCV-VERIFY-v1",
+  "certificatePolicy": "PSCV-CERT-v1",
+  "currentCompilerMilestone": "psc2-compiler-v1",
+  "targetCompilerConformance": "pscv-compiler-v1",
+  "implementationProfile": "PSC1-selfhost-stable/1",
+  "normativeLeanVersion": "4.35.0-rc3",
+  "normativeLeanCommit": "470d5ce1400764999581fd26d5d72b00d990b0f4",
+  "implementationConformance": "current compiler remains the PSC2/bootstrap implementation milestone until the complete pscv-v1 verification and compile-gating closure is implemented",
+  "bootstrapLean": {
+    "version": "4.34.0",
+    "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  }
+}

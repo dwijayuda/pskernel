@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-runtime-interface-json/1",
+  "portableProducer": "packages/compiler-ir/src/Ps/CompilerIr/InterfaceArtifact.lean",
+  "independentProjectionChecker": "scripts/runtime-interface-artifact.mjs",
+  "status": "production-artifact-and-offline-projection-available",
+  "representation": "Canonical tagged tuple with explicit runtime-semantics/value profiles, ordered imports, all structure/inductive layouts and declaration signatures including generic binders, parameter names/types and result types. Declaration bodies are the sole omitted IR field.",
+  "inputBinding": "The production graph projects its actual archived VerifiedIR into a runtime-interface ArtifactId, records a separate pass, retains the exact bytes and exposes the identity in the checked receipt. Input validity still depends on the separately recorded strict validator.",
+  "fingerprint": "The domain/schema/contract-qualified artifact key is an exact fingerprint of this projection. Body-only edits preserve it; any encoded signature, layout, import, order or profile change invalidates it. All declarations/layouts are retained conservatively; visibility is not inferred.",
+  "offlineReplay": "The observed archive verifier recomputes this specific projection against exact archived input/output bytes. A fully rehashed false projection is rejected even when the consumer independently pins its graph. Other semantic claims and preservation remain unverified.",
+  "notImplied": ["Core unfolding/conversion compatibility", "behavioral specification", "effect/resource/capability equivalence", "source-module interface adequacy", "backend semantic equivalence", "automatic QueryGraph cache reuse", "global incremental correctness"],
+  "remaining": ["bind per-source-module rather than combined runtime-module interfaces", "integrate consumer-specific planner/evidence policies", "produce checked behavioral interfaces", "global adequacy and incremental correctness proofs"]
+}

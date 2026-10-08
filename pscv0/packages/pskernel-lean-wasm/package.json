@@ -1,0 +1,58 @@
+{
+  "name": "@proofscript/pskernel-lean-wasm",
+  "version": "4.34.0",
+  "description": "WebAssembly execution provider for the ProofScript Lean 4.34 kernel assurance path",
+  "type": "module",
+  "private": false,
+  "exports": {
+    ".": "./index.mjs",
+    "./metadata/lean": "./LEAN_SOURCE_PIN.json",
+    "./metadata/emscripten": "./EMSCRIPTEN_PIN.json",
+    "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
+    "./metadata/prebuilt": "./PREBUILT_WASM_MANIFEST.json",
+    "./package.json": "./package.json",
+    "./metadata/proofscript-source": "./PROOFSCRIPT_SOURCE_MANIFEST.json"
+  },
+  "files": [
+    "index.mjs",
+    "host/",
+    "wasm/",
+    "provider/",
+    "kernel/",
+    "source/",
+    "scripts/",
+    "patches/",
+    "LEAN_LICENSE",
+    "KERNEL_SOURCE_MANIFEST.json",
+    "PROOFSCRIPT_SOURCE_MANIFEST.json",
+    "PREBUILT_WASM_MANIFEST.json",
+    "LEAN_SOURCE_PIN.json",
+    "EMSCRIPTEN_PIN.json",
+    "README.md",
+    "BUILDING.md"
+  ],
+  "scripts": {
+    "build:wasm": "bash scripts/build-wasm.sh && node scripts/write-prebuilt-manifest.mjs",
+    "verify:source": "node host/source-distribution.test.mjs",
+    "verify:prebuilt": "node host/verify-prebuilt.mjs",
+    "build:kernel": "npm run build:wasm"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "proofscript": {
+    "bootstrap": false,
+    "portable": false,
+    "sourceRoots": [
+      "provider"
+    ],
+    "testRoots": [
+      "provider-test"
+    ],
+    "outDir": "dist",
+    "role": "external-lean-kernel-provider-wasm"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-wasm-canonical-scalar-exports/1",
+  "status": "portable-driver-generated-native-selection-and-publication-implemented-cloud-validation-pending",
+  "source": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
+  "input": "PsSpecializedIrModule, freshly strictly revalidated; no external imports",
+  "selection": "Explicit source declaration / foreign function names, 1..1024 exports; foreign names and uniqueness validated by InterfaceIR; parameter labels are positional arg0..arg15.",
+  "supported": "Synchronous bool/char, fixed-width signed/unsigned integers, f32/f64, usize/isize resolved from the actual target word profile; zero-result Unit returns.",
+  "rejected": "Unit parameters; Nat/Int/String/aggregate/function/unknown/generic values at the export boundary; polymorphic selected declarations; more than 16 arguments; imports, resources, async.",
+  "output": {
+    "binary": "Actual lowered Wasm with only selected foreign export names",
+    "interfaceJson": "psc-interface-ir-json/1 derived from actual source declarations",
+    "bindingJson": "Contract, runtime semantics, wordBits, interfaceName, and functionName/coreExport/sourceName bindings",
+    "target": "Exact validated PsWasmModule used for binary encoding, retained for the driver's canonical WasmIR snapshot"
+  },
+  "invariants": [
+    "No source signature supplied by the host substitutes for actual revalidated IR declarations.",
+    "Source parameter order and primitive semantics are retained; source parameter spelling is not assumed to be a legal WIT name.",
+    "The independent Canonical ABI planner determines expected core signatures; the actual target functions reached by exports are checked against those signatures.",
+    "Structural and operand/control WasmIR validation runs on the exact module subsequently encoded.",
+    "Only explicitly selected exports are externally visible; internal GC/runtime helpers retain their private representation.",
+    "The scalar profile uses no linear memory; wordBits describes source machine words and does not imply memory64.",
+    "Unit results already lower to zero core results. Unsupported representations require future conversion wrappers, never silent reinterpretation.",
+    "Artifacts are data, not CheckedCore/CertifiedSource authority or a preservation theorem."
+  ],
+  "hostConsumer": "scripts/canonical-exports.mjs with consumer-pinned exact interface/binary identities and bindings projected to functionName/coreExport.",
+  "validation": {
+    "native": "test/WasmCanonicalExportsTests.lean",
+    "actualBinary": "scripts/wasm-canonical-exports.test.mjs",
+    "portable": "PSC1-portable-selfhost/1 structural audit and explicit PSC1 source check in check:foreign-interface; explicit PSC1 check of DriverWasm.Canonical and its import closure",
+    "precedingCloud": {
+      "commit": "3090317d925cc3934c34034d603c28d73fb87aec",
+      "runId": 37661580595,
+      "jobId": 112930171287,
+      "focusedStep": "Check portable foreign interfaces and WIT boundary",
+      "conclusion": "success; full run tail cancelled by concurrent docs update"
+    }
+  },
+  "remaining": [
+    "Fresh cloud validation of the new prepared driver, live selection and native build routes",
+    "Aggregate/string/large-argument conversion wrappers",
+    "Core/Component imports and resource/async lifetimes",
+    "Global source/backend/adapter preservation proof or independently validated relation"
+  ],
+  "hostEvidence": {
+    "implementation": "scripts/wasm-canonical-artifact.mjs",
+    "selectionContract": "psc-wasm-canonical-selection/1",
+    "projection": "Independent bounded reconstruction of InterfaceIR and binding JSON from exact SpecializedIR and export-selection bytes",
+    "binary": "Closed exact export surface, numeric core signatures, and optional WasmIR source-name/function-index routing; engine validation without instantiation",
+    "graph": "checked-build-evidence.mjs records selection, interface, binding, target IR, binary and signature-validation artifacts",
+    "offline": "observed-build-archive.mjs repeats projection and signature checks from consumer-pinned archived graph bytes",
+    "scope": "Signature projection and target acceptance only; strict body invariants, source authority and behavioral preservation remain separate."
+  },
+  "portableRequest": {
+    "contract": "psc-wasm-canonical-request/1",
+    "source": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalRequest.lean",
+    "wire": "[\"psc-wasm-canonical-request/1\",\"32\"|\"64\",namespace,package,world,interface,[[sourceName,foreignName],...]]",
+    "limits": {
+      "utf8Bytes": 1048576,
+      "nestingDepth": 3,
+      "arrays": 1026,
+      "exports": 1024,
+      "stringUtf8Bytes": 4096
+    },
+    "canonical": "Exact re-encoding; decimal word width is a string; unknown versions, objects, alternate encodings and malformed shapes reject.",
+    "sharedPreflight": "Bridge.Json array-request preflight is shared with the portable TypeScript declaration request; parsing and schema validation remain separate."
+  },
+  "driver": {
+    "source": "packages/driver-wasm/src/Ps/DriverWasm/Canonical.lean",
+    "entry": "psCompilerWasmCanonicalStagesFromPrepared",
+    "authority": "bootstrap-transform-only",
+    "inputs": "One actual prepared source, shared erasure/validation/specialization with the private Wasm driver",
+    "outputs": "Exact RuntimeIR/VerifiedIR/SpecializedIR/WasmIR, emitted bytes, erasure correspondence, InterfaceIR and binding JSON from that compilation",
+    "production": "Generated checked-service policy and explicit native products/2 transport pin selection before admission, share independent projection/signature checks, and bind the common graph/descriptor/bundle/envelope/publication."
+  },
+  "productionSelection": {
+    "service": "createCheckedCompilerService({ wasmCanonicalSelection })",
+    "build": "buildChecked({ backend: 'wasm', wasmCanonicalSelectionPath })",
+    "cli": "psc build SOURCE --backend wasm --wasm-exports selection.json --out out.wasm",
+    "policy": "psc-wasm-canonical-selection/1 pinned exact bytes; omitted selection retains private wasm32.",
+    "products": [
+      ".wasm",
+      ".interface-ir.json",
+      ".wasm-abi-plan.json",
+      ".wasm-export-selection.json",
+      "common evidence bundle/graph/archive/envelope/receipt"
+    ],
+    "publication": "Required interface/binding products accompany every Canonical binary, even executable-only; optional source metadata remains independently selected.",
+    "descriptor": "Existing Wasm registry lane records the exact selection as interfaceAdapterId. Target action/query identities bind selection and word width through the observed lowering pass.",
+    "validation": "Independent source projection, exact binary export signatures and WasmIR source-name/function-index routing; no global behavioral preservation claim."
+  }
+}

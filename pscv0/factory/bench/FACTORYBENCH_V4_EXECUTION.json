@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-factory-campaign/1",
+  "status": "harness-and-persistent-validated-retrieval-implemented-real-holdout-campaign-pending",
+  "owner": "scripts/factory-bench.mjs",
+  "holdout": "freezeFactoryHoldout creates a salted commitment and a separate PRIVATE vault containing prompts/oracles. Vault and derived campaign artifacts must remain outside factory filesystem and retrieval access. The codec does not claim encryption or adversarial process isolation.",
+  "policy": "One pinned policy artifact binds producer/model/acceptor/tool identities, required assurance and measured call/token/tool/output/wall limits. All tasks execute all five arms with deterministically rotated order. Production deployment must attest actual adapter identities and provide process isolation.",
+  "arms": {
+    "B0": "No retrieval or reuse",
+    "B1": "Text representation of non-negative retrieval corpus",
+    "B2": "Text plus typed knowledge after ValidUnder; no reuse operations",
+    "B3": "Typed retrieval plus registered theorem/interface/pass operations",
+    "B4": "Typed reuse plus scoped negative knowledge and registered certificate operations"
+  },
+  "leakage": "Rejects exact prompt/oracle bytes in retrieval artifacts or rendered text, and corpus entries declaring any frozen task origin. Paraphrase/derivative contamination requires an independent audit; empty provenance is not proof of independence.",
+  "acceptance": "Exact task/oracle/output subject and configured assurance floor. Claimed use tokens must correspond to actual live operations, and their output relation must be accepted by the reuse session. Search exposure never counts as reuse.",
+  "measurements": "Host-observed model calls and adapter token usage, wall time, output/knowledge/certificate verifier calls, rejected-candidate revisions, retrieval exposure, accepted reuse, evidence bytes and explicit assurance. Missing token usage is marked incomplete. CPU/RSS are null when unobserved. Human interventions are zero because this runner has no intervention API.",
+  "resources": "Byte/count budgets fail closed; wall timeout aborts cooperative adapters and prevents late acceptance. Hard preemption and external worker termination require the deployment's bounded isolated adapters. Remaining token budget is passed to the registered model adapter; observed overshoot refuses acceptance and further calls.",
+  "retention": "Campaign identity and per-arm rows plus private output/use/event artifacts are returned for operator-controlled archival. Neither vault nor result artifacts are automatically indexed or published.",
+  "claims": {
+    "selfAmplification": "not-established",
+    "releaseAccepted": false
+  },
+  "remaining": [
+    "independently selected and actually sealed real holdout",
+    "registered real model/tool/acceptance adapters",
+    "adversarial worker isolation and full resource telemetry",
+    "full B0-B4 campaign and statistical/regression analysis under fixed assurance"
+  ],
+  "retrieval": "scripts/savef-retrieval-session.mjs connects the persistent derived index to fresh ValidUnder, registered reuse operations and accepted ReuseEvent publication. Factory deployment may use this tool rather than a pre-rendered corpus; neither path grants authority from retrieval alone."
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-checked-seed-products/2",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "status": "canonical-wasm-native-selection-implemented-cloud-validation-pending",
+  "owners": [
+    "host/src/Ps/Host/CheckedSeedProducts.lean",
+    "scripts/LeanCheckedSeed.lean",
+    "scripts/checked-seed-session.mjs",
+    "scripts/checked-build.mjs"
+  ],
+  "scope": "Compiler-host transport only. No kernel implementation, acceptance or private ABI changes.",
+  "entry": "--session-products-v2[-modules]-lean|ps. Protocol version must agree in prepared, checked and emitted responses; no downgrade or private fallback.",
+  "request": [
+    "psc-checked-seed-products/2",
+    "wasm",
+    "psc-js-closed-instances/1",
+    "metadata:Boolean",
+    false,
+    false,
+    "canonical request string under psc-wasm-canonical-request/1"
+  ],
+  "representationField": "Retained closed value from the version-1 tuple; it does not select a JS backend or the private Wasm ABI. Only explicit Canonical Wasm is admitted by version 2.",
+  "requestLimits": {
+    "selectorUtf8Bytes": 2101248,
+    "portableWireUtf8Bytes": 1048576,
+    "portableStringUtf8Bytes": 4096,
+    "portableExports": 1024
+  },
+  "response": "Exactly two bounded frames, including checked-only mode. Emission includes exact interfaceJson/bindingJson in addition to Wasm bytes and mandatory RuntimeIR/VerifiedIR/SpecializedIR/WasmIR; metadata also includes PublicApiIR, erasure and origin tables.",
+  "invariants": [
+    "One actual prepared source lives across parent acceptance and one selected staged emission.",
+    "Exact admissions are rechecked before and after target emission.",
+    "The host snapshots and pins export selection bytes before starting the process.",
+    "Both native and generated hosts use the same independent projection and target/binary signature checks.",
+    "Unknown fields, version mismatch, failed checks, extra frames, timeout or unsuccessful process exit cannot return a product.",
+    "Builder graph products must equal the captured selected policy/interface/binding bytes before publication."
+  ],
+  "compatibility": "psc-checked-seed-products/1 remains exact for direct JS/private wasm32. Legacy TS transport remains unchanged.",
+  "limitations": [
+    "Native getLine allocation and total compiler CPU/memory remain unproved.",
+    "The current runtime supports closed scalar synchronous Canonical exports only.",
+    "Signature agreement and source acceptance do not prove source-to-target preservation.",
+    "Imported callbacks, aggregate conversion, resource/async lifetimes and complete component runtime remain pending."
+  ],
+  "globalPreservationProved": false,
+  "releasePromotion": false
+}

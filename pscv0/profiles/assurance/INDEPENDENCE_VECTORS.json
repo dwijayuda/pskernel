@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-independence-vector/1",
+  "semanticProfile": "lean4.34-core",
+  "providers": {
+    "lean434-wasm": {
+      "theoryOrigin": "Lean-4.34",
+      "algorithmOrigin": "official-Lean-kernel",
+      "sourceDerivation": "official-Lean-C++-kernel",
+      "implementationLanguage": "C++/Wasm",
+      "compilerToolchain": "pinned-Lean-Wasm-provider-build",
+      "runtime": "Node+WebAssembly",
+      "memoryManager": "Lean-runtime-in-Wasm",
+      "parserOrDecoder": "proofscript-checked-admissions adapter",
+      "organization": "Lean upstream + ProofScript adapter",
+      "proofFoundation": "Lean-4.34 kernel implementation",
+      "independenceNotes": [
+        "Independent from PSKernel Core implementation source.",
+        "Shares the Lean-4.34 semantic target."
+      ]
+    },
+    "lean434": {
+      "theoryOrigin": "Lean-4.34",
+      "algorithmOrigin": "official-Lean-kernel",
+      "sourceDerivation": "official-Lean-C++-kernel",
+      "implementationLanguage": "C++/native",
+      "compilerToolchain": "Lean-4.34 native",
+      "runtime": "native-Lean-runtime",
+      "memoryManager": "Lean-reference-counting-runtime",
+      "parserOrDecoder": "proofscript-checked-admissions native adapter",
+      "organization": "Lean upstream + ProofScript adapter",
+      "proofFoundation": "Lean-4.34 kernel implementation",
+      "independenceNotes": [
+        "Execution-runtime diversity from the Wasm provider is limited because both derive from the official Lean kernel."
+      ]
+    },
+    "pskernel-core": {
+      "theoryOrigin": "Lean-4.34 compatibility map",
+      "algorithmOrigin": "ProofScript-owned reimplementation",
+      "sourceDerivation": "independent PSC1-portable Lean source",
+      "implementationLanguage": "Lean subset / ProofScript-portable",
+      "compilerToolchain": "Lean-4.34 native for current provider executable",
+      "runtime": "native-Lean-runtime",
+      "memoryManager": "Lean-reference-counting-runtime",
+      "parserOrDecoder": "ProofScript KernelContract-v1 host adapter",
+      "organization": "ProofScript",
+      "proofFoundation": "PSKernel implementation plus differential/conformance evidence",
+      "independenceNotes": [
+        "Implementation source and checker organization are independent from the official Lean kernel.",
+        "Current native executable still shares the pinned Lean compiler/runtime.",
+        "Formal whole-checker refinement is not yet complete."
+      ]
+    }
+  },
+  "policy": {
+    "booleanIndependenceForbidden": true,
+    "highAssuranceMustRecordSharedAxes": true,
+    "diversityDoesNotImplyMajorityVote": true
+  }
+}

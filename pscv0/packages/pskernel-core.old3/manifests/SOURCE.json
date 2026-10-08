@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "src/Ps/Kernel/Data.lean",
+      "sha256": "e71ef2bcde6cc9c749abc9460caf5cec33aebdb9eda85f6dae473e710f94c35c"
+    },
+    {
+      "path": "src/Ps/Kernel/Structural.lean",
+      "sha256": "ffcf10c56e1398760541b3db0c04a295a4d73ae44800b03527dacca50a5fd3d2"
+    },
+    {
+      "path": "src/Ps/Kernel/Natural.lean",
+      "sha256": "e633fbc78975f78f3f16b05f8b4cae273b9c99487ff072c2bf04588a81cebc9a"
+    },
+    {
+      "path": "src/Ps/Kernel/Expr.lean",
+      "sha256": "66805596a8e328f1c6806b1984118ab37446bf93089dd4d1d4e56cb587d5f53d"
+    },
+    {
+      "path": "src/Ps/Kernel/Binding.lean",
+      "sha256": "40fcef876aee29aa3ccdd06676aece840d8b1e71bf40711833f52bfdb4d02635"
+    },
+    {
+      "path": "src/Ps/Kernel/Order.lean",
+      "sha256": "f53c5a9abbecd674a9f7cb783b54006386cc2df22e0de30328444274096e9f77"
+    },
+    {
+      "path": "src/Ps/Kernel/Universe.lean",
+      "sha256": "e701f0cea10936096dad4678fe2ca480c760323ee5fe68e0c8a50f4402ba577f"
+    },
+    {
+      "path": "src/Ps/Kernel/LevelCheck.lean",
+      "sha256": "e170073b648beb378f6fda6eed3858b36d873fda2244a720bf77cd4efaaa2216"
+    },
+    {
+      "path": "src/Ps/Kernel/LevelInstantiate.lean",
+      "sha256": "a959dce67164ba7ff73b519c2d45369791a866a8eb474094d97ae7a1bf6fea6b"
+    },
+    {
+      "path": "src/Ps/Kernel/ExprInstantiate.lean",
+      "sha256": "7c9f68756f8f2cebb07d4e9207725f5784732c9fbdd218546ad38fb9031cf732"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicData.lean",
+      "sha256": "b482b600a187545d7dac25fbc7e92f50fdc59a68dcef3cb42db0b68b0cecc828"
+    },
+    {
+      "path": "src/Ps/Kernel/Environment.lean",
+      "sha256": "44049d7f7a09f34a965172389ea1c8cbae3fffb83709cf643f979f8277279abb"
+    },
+    {
+      "path": "src/Ps/Kernel/BuiltinNat.lean",
+      "sha256": "55f059d7bcd098b57fd2579ab741c4c624f488641293eb2e47b3b07dbf63a71d"
+    },
+    {
+      "path": "src/Ps/Kernel/BuiltinText.lean",
+      "sha256": "1f7d13b4288f8c96fe614d7b998e936bf923d9392c7059371fadf45dff342ec4"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicReduction.lean",
+      "sha256": "89dc8873d341a5cd2ccff40ac9b306f26406f7cb42a597993220e9c9e97c4a6a"
+    },
+    {
+      "path": "src/Ps/Kernel/Reduction.lean",
+      "sha256": "9dffb2f10a5e16e83d2c9e930fe61449cebab7b3b65fb937fad547ced841f6b6"
+    },
+    {
+      "path": "src/Ps/Kernel/Conversion.lean",
+      "sha256": "e34be5a4be848edb3315171fab61a709fef0070bc71ca349b994affdb70b8ecb"
+    },
+    {
+      "path": "src/Ps/Kernel/TypeCheck.lean",
+      "sha256": "99341b9267878889df7bf34b7ed1434465718ed47a265255929a90c20a8e0a99"
+    },
+    {
+      "path": "src/Ps/Kernel/Admission.lean",
+      "sha256": "8c7d7549727d099f74c02b7f8af36b3374292083fe4a31cfd5f8ebe7ea98a3ad"
+    },
+    {
+      "path": "src/Ps/Kernel/UnitInductive.lean",
+      "sha256": "c3bb990cb0652310e02794d3976f43e8b71c8f639c9f4eb3a51f5cd7731a27ba"
+    },
+    {
+      "path": "src/Ps/Kernel/NatInductive.lean",
+      "sha256": "51e970e371b50e9dcbe79379534898db53c391b390786328e27c7974252c083d"
+    },
+    {
+      "path": "src/Ps/Kernel/RecordInductive.lean",
+      "sha256": "cfbecf661c5a4d31e7af767d2510beba3e6663ec6d3aada44c07d00a471248c0"
+    },
+    {
+      "path": "src/Ps/Kernel/EnumInductive.lean",
+      "sha256": "a9489c8e62733604bb3b40b3d8930861da094c4eae12f777e8b010b9d7828c9c"
+    },
+    {
+      "path": "src/Ps/Kernel/SumInductive.lean",
+      "sha256": "0847c46e326adafad7b3aae8ce199285df83a707d877df3422af76b760e2d3e4"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicHeader.lean",
+      "sha256": "21cee7dac26c0656123bd58e922f7a2b3ed299205858dbca0c583cfc9a99fade"
+    },
+    {
+      "path": "src/Ps/Kernel/Closing.lean",
+      "sha256": "be6cbc897202666f09e382ae2740c1c8ea15dd148d462f48389d8590ceafa207"
+    },
+    {
+      "path": "src/Ps/Kernel/Occurrence.lean",
+      "sha256": "683e69690b0695e4241befc4ad8ea87ddd1144b0659cb247eb4dc7300db239cc"
+    },
+    {
+      "path": "src/Ps/Kernel/ExpressionEquality.lean",
+      "sha256": "a11bd034c0df503d265cfad716e28941bc0254b47330414c226d16a19e703cf2"
+    },
+    {
+      "path": "src/Ps/Kernel/Positivity.lean",
+      "sha256": "2d15081ee31224a5bbe963de98a091a2d5309526d37c2c4047f64faa46b3b841"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicConstructor.lean",
+      "sha256": "0c1f098ad8fdabed0caaddecc6a3de1819818424a910123e58c9738df750eb2c"
+    },
+    {
+      "path": "src/Ps/Kernel/Parameters.lean",
+      "sha256": "a72ef711750694782f2e16e20762f4f337210f7f7ee33e196126fc0e043bc377"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicMinor.lean",
+      "sha256": "194a2ff39e61aeb61c84a9dbe87c15d348a7f8700cf0d53f4733eaec24b4a298"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicRecursor.lean",
+      "sha256": "6bb82e59807ccff3f4dab6360e5cb4aabbec05e043cbfacc660a35ac22478d7a"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicAdmission.lean",
+      "sha256": "1a6c16ca3ea86978a5409c6b742c895e7133ebedc12f1ef69d44cab2d03381b5"
+    },
+    {
+      "path": "src/Ps/Kernel/JointAdmission.lean",
+      "sha256": "315cf46fe9ac95dd70d596bd5bdb69b0edbf7a095f05c1a7489d41dcd8fa1d18"
+    },
+    {
+      "path": "src/Ps/Kernel/Bootstrap.lean",
+      "sha256": "b4c6e3423d6641daa4059221459c0eaa4905ddad6f8c2ddf7c9ac6065c2a7344"
+    }
+  ]
+}

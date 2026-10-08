@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-js-fixed-point-observation/1",
+  "commit": "8d2c070d87ce6ce46e8d3bb0a50151575465be29",
+  "pullRequestMergeCommit": "92051c78b270d3af4e8f28d2338a09b009d11944",
+  "baseCommit": "cae6b6d5fb3d50138889e1aeb74436e7b5ea5316",
+  "repository": "dwijayuda/pskernel",
+  "runId": 37547807880,
+  "jobId": 112556123955,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37547807880",
+  "step": 38,
+  "stepConclusion": "success",
+  "jobConclusion": "cancelled-during-later-wasm-step",
+  "observation": {
+    "modules": 63,
+    "sourceClosureSha256": "8e808b2c8aa661db2d8b3eb644de05a9928b9a4ebfa5516125f4ce8763ced5e7",
+    "generatedJavaScriptBytes": 2429673,
+    "generation1Equals2": true,
+    "generation2Equals3": true,
+    "generation2CompilerImportedAndExecuted": true,
+    "nativeGenerationStartedAt": "2026-10-06T23:47:14.8643620Z",
+    "fixedPointCompletedAt": "2026-10-07T00:18:13.1373026Z",
+    "toolchain": { "lean": "4.34.0", "node": "22" },
+    "checkedBy": "scripts/direct-js-selfhost-fixed-point.mjs"
+  },
+  "laterObservations": [
+    {
+      "commit": "66ee434217ab1b4bf2501790ada813434cfdd93f",
+      "pullRequestMergeCommit": "c6993dc24c72de723ac1319eba0d02d5e6b56628",
+      "runId": 37552329402,
+      "jobId": 112570474936,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37552329402",
+      "step": 8,
+      "stepConclusion": "success",
+      "jobConclusion": "success",
+      "workflowConclusion": "failure-in-separate-wasm-job",
+      "modules": 65,
+      "sourceClosureSha256": "ce10c976b081a1be45da6159c5fa1af5e3cc7d74ff288e17d59cfabf482cf317",
+      "generatedJavaScriptBytes": 2485478,
+      "generation1Equals2": true,
+      "generation2Equals3": true,
+      "generation2CompilerImportedAndExecuted": true,
+      "nativeGenerationStartedAt": "2026-10-07T00:32:13.1270198Z",
+      "fixedPointCompletedAt": "2026-10-07T01:06:29.8514247Z",
+      "toolchain": { "lean": "4.34.0", "node": "22" }
+    }
+  ],
+  "scope": "Exact generated JavaScript source equality across three generations for each recorded source closure. Later source changes require fresh replay. Distinguish JS job/step success from the workflow-wide Wasm failure.",
+  "notEstablished": ["global compiler correctness", "global erasure/specialization/backend preservation", "diverse double compiling", "verified executable", "Wasm fixed point", "direct-JS promotion", "final V3 acceptance"]
+}

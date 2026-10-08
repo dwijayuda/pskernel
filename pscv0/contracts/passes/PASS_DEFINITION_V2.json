@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 2,
+  "contract": "psc-pass-definition/2",
+  "portableModel": "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean",
+  "hostImplementation": "scripts/artifact-evidence.mjs",
+  "legacy": "psc-pass-definition/1 remains readable with unchanged homogeneous output checks.",
+  "products": "Nonempty ordered inputArtifacts/outputArtifacts tuples bind unique roles, exact domains and contracts. Cardinality, position, domain and contract all match at recording and replay.",
+  "effects": "Explicit required/preserved/invalidated analyses, interfaces and fingerprints, supported profiles, origin policy/reason, authority effect and assurance class. Unavailable preservation is conservatively invalidated; proof/validator labels require references and still need evidence replay.",
+  "authority": "audit-record-only",
+  "consumer": "All new observed passes use v2 typed products/effects. scripts/query-context.mjs consumes effect declarations for conservative invalidation; archive replay and the cache adapter validate exact definition/implementation/profile/input bindings.",
+  "globalPreservationProved": false,
+  "remaining": [
+    "Declare finer preservation only when real evidence supports it",
+    "Wire origin policies to produced OriginGraph artifacts",
+    "Independent semantic validation of preservation metadata"
+  ]
+}

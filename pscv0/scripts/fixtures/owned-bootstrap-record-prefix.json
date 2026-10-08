@@ -1,0 +1,405 @@
+[
+  {
+    "declaration": {
+      "lp": [
+        {
+          "k": "s",
+          "p": {
+            "k": "a"
+          },
+          "v": "_pscCheckedMotive"
+        }
+      ],
+      "np": 0,
+      "ts": [
+        {
+          "cs": [
+            {
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "_pscCheckedNestedUnit"
+                },
+                "v": "unit"
+              },
+              "t": {
+                "k": "const",
+                "ls": [
+                  {
+                    "k": "p",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "_pscCheckedMotive"
+                    }
+                  }
+                ],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "_pscCheckedNestedUnit"
+                }
+              }
+            }
+          ],
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "_pscCheckedNestedUnit"
+          },
+          "t": {
+            "k": "sort",
+            "l": {
+              "k": "p",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "_pscCheckedMotive"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "kind": "inductive"
+  },
+  {
+    "declaration": {
+      "lp": [],
+      "np": 0,
+      "ts": [
+        {
+          "cs": [
+            {
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "PsSourcePos"
+                },
+                "v": "mk"
+              },
+              "t": {
+                "b": {
+                  "b": {
+                    "b": {
+                      "k": "const",
+                      "ls": [],
+                      "n": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsSourcePos"
+                      }
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "column"
+                    },
+                    "t": {
+                      "k": "const",
+                      "ls": [],
+                      "n": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "Nat"
+                      }
+                    }
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "line"
+                  },
+                  "t": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Nat"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "byteOffset"
+                },
+                "t": {
+                  "k": "const",
+                  "ls": [],
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "Nat"
+                  }
+                }
+              }
+            }
+          ],
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "PsSourcePos"
+          },
+          "t": {
+            "k": "sort",
+            "l": {
+              "k": "s",
+              "o": {
+                "k": "z"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "kind": "inductive"
+  },
+  {
+    "declaration": {
+      "lp": [],
+      "np": 0,
+      "ts": [
+        {
+          "cs": [
+            {
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "PsSourceSpan"
+                },
+                "v": "mk"
+              },
+              "t": {
+                "b": {
+                  "b": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsSourceSpan"
+                    }
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "stop"
+                  },
+                  "t": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsSourcePos"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "start"
+                },
+                "t": {
+                  "k": "const",
+                  "ls": [],
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsSourcePos"
+                  }
+                }
+              }
+            }
+          ],
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "PsSourceSpan"
+          },
+          "t": {
+            "k": "sort",
+            "l": {
+              "k": "s",
+              "o": {
+                "k": "z"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "kind": "inductive"
+  },
+  {
+    "declaration": {
+      "lp": [],
+      "np": 0,
+      "ts": [
+        {
+          "cs": [
+            {
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "PsLexCursor"
+                },
+                "v": "mk"
+              },
+              "t": {
+                "b": {
+                  "b": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsLexCursor"
+                    }
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "position"
+                  },
+                  "t": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsSourcePos"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "remaining"
+                },
+                "t": {
+                  "a": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Char"
+                    }
+                  },
+                  "f": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "List"
+                    }
+                  },
+                  "k": "app"
+                }
+              }
+            }
+          ],
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "PsLexCursor"
+          },
+          "t": {
+            "k": "sort",
+            "l": {
+              "k": "s",
+              "o": {
+                "k": "z"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "kind": "inductive"
+  }
+]

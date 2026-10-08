@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-semantic-lock/1",
+  "status": "declared-closure-integrity-implementation-semantic-assurance-pending",
+  "owners": ["scripts/semantic-lock.mjs", "scripts/offline-capsule.mjs", "scripts/offline-verifier-cli.mjs"],
+  "legacy": "psc.semantic-lock.json remains the historical psc-semantic-lock/0 workspace prototype. It is not a completed V1 release lock and cannot satisfy V1 capsule verification.",
+  "binding": "Canonical lock bytes identify semantic identity, trust manifest, root packages and each package's version, source manifest, structural and behavioral interfaces, semantic profile, theory manifest, assumption artifacts, capabilities, RuntimeSemantics, VerifiedIR, target ABI, evidence policy, tool identities and dependency interfaces.",
+  "sourceManifest": "psc-source-manifest/1 contains exact logical path and ArtifactId pairs; all referenced source bytes must resolve and rehash. Traversal and case-folded path collisions reject. Paths are never extracted.",
+  "dependencyPolicy": "Complete declared acyclic reachable package graph; exact structural and behavioral dependency identities; matching semantic/theory/runtime/IR/ABI contexts; transitive declared capabilities and assumptions cannot be laundered. Cross-context bridges require a future explicit supported contract.",
+  "consumerPolicy": ["expectedLockId", "expectedSemanticIdentityId", "allowedAssumptions", "allowedCapabilities", "requiredToolchainRoles", "resourceLimits"],
+  "limits": "Bounded canonical lock, package/source/artifact counts, per-artifact and aggregate bytes; each resolved artifact is snapshotted and rehashed. Untrusted resolvers require their own process/I/O time isolation.",
+  "capsuleIntegration": "The offline verifier requires V1 lock replay and a knowledge context containing the same exact semanticLockId before certificate replay. The capsule cannot choose consumer assumptions, capability permissions or expected semantic identity.",
+  "auditCommand": "node scripts/pscv-verify.mjs --diff-locks LEFT RIGHT reports exact root, package-field, semantic-identity and declared-trust changes. It neither resolves dependencies nor labels changed bytes representation-only safe.",
+  "authority": "Integrity and declared consistency only. Referenced profile/theory/interface/trust/evidence artifacts are pinned bytes, not independently interpreted semantic proofs. Import-discovery completeness, full TCB closure, specification truth, behavioral adequacy and preservation remain separate requirements. Every verification result keeps semanticClaimsVerified=false and releaseAccepted=false.",
+  "remaining": ["derive a complete actual release lock from observed compiler/provider/toolchain closures", "check producer-discovered source/import completeness independently", "interpret each pinned semantic/interface/evidence contract through admitted checkers", "migration preservation evidence", "ship actual replayable release archives"]
+}

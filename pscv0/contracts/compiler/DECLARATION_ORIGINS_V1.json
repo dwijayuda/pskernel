@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-declaration-origins/1",
+  "graphContract": "psc-origin-graph/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "granularity": "declaration-batch",
+  "table": [
+    "contract",
+    "granularity",
+    "sourceCount",
+    "entries"
+  ],
+  "entry": [
+    "preparedSourceIndex",
+    "structuredCoreDeclarationName",
+    "start",
+    "stop"
+  ],
+  "position": [
+    "zeroBasedUtf8ByteOffset",
+    "oneBasedLine",
+    "oneBasedUnicodeScalarColumn"
+  ],
+  "producer": "Optional observation of each actual psElabDeclarationBatch in the shared elaboration fold; every generated declaration in the batch retains the parser's declaration span.",
+  "preparation": "psCompilerPrepareSourceWithOrigins / psCompilerPrepareSourcesWithOrigins retain prepared Core and a separate encoded side table. Legacy APIs use the same fold with observation disabled. The checked service/native seed prepare once and retain that exact prepared value through kernel acceptance.",
+  "graph": "Host psc-origin-graph/1 binds the exact portable table, PublicApiIR and ordered prepared-source ArtifactIds. Existing preparation-origin products bind those exact prepared bytes to captured original-file byte fragments.",
+  "validation": [
+    "Bounded canonical decoding; exact declaration count/order/names match PublicApiIR.",
+    "Every span endpoint is an actual UTF-8 boundary and matches parser line/scalar-column coordinates in exact prepared source text.",
+    "Every graph reference rehashes under its declared domain/contract; caller pins public API and ordered source inputs.",
+    "Generated constructors, recursors and members share the originating declaration span; no more precise expression location is inferred."
+  ],
+  "consumers": [
+    "live checked compiler service",
+    "two-phase native compiler host",
+    "actual checked builder and graph-driven publication",
+    "typed debug ArtifactBundle",
+    "observed archive exact replay"
+  ],
+  "unmappedStages": [
+    "runtime-ir",
+    "specialized-ir",
+    "target-ir"
+  ],
+  "compatibility": "Selected historical compiler modules/seeds may omit origin support. A present malformed/failing preparation API or missing/malformed prepared Core rejects without duplicate preparation. In the live host, malformed origin-table shape is retained as a lazy requested-product error and does not decide kernel acceptance or executable-only emission. Native transport selection remains pending. No debug record can construct a live capability.",
+  "assurance": {
+    "declarationBoundsAndCoverageChecked": true,
+    "expressionCorrespondenceChecked": false,
+    "globalPreservationProved": false,
+    "debugMetadataCreatesAuthority": false
+  },
+  "remaining": [
+    "Stable fine-grained expression origin nodes",
+    "Explicit origin transfer through erasure and specialization",
+    "JsIR/declaration writer generated positions and ECMA-426 mapping emission",
+    "Independent frontend/Core semantic correspondence evidence"
+  ],
+  "productSelectionContract": "psc-compiler-product-selection/1"
+}

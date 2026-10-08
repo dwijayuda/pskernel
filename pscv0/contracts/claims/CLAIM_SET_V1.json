@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-claim-set/1",
+  "owner": "scripts/claim-set.mjs",
+  "role": "host-evidence-contract",
+  "authority": "audit-record-only",
+  "status": "implemented-bundle-context-archive-consumer-policy-routing-cloud-validation-pending",
+  "representation": "Canonical bounded JSON with exact typed ArtifactIds; assertions remain untrusted until fresh consumer-selected checker replay.",
+  "claims": [
+    "Parsed",
+    "Resolved",
+    "Elaborated",
+    "ProfileConformant",
+    "KernelAccepted",
+    "SpecificationCovered",
+    "PSCVCertified",
+    "RuntimeIRValidated",
+    "SpecializationValidated",
+    "TargetIRValidated",
+    "TargetToolAccepted",
+    "SemanticPreservationChecked",
+    "IndependentCheckerAccepted",
+    "SelfHostFixedPoint",
+    "Reproducible",
+    "ProvenanceBound",
+    "SourceBinaryCorrespondenceDDC"
+  ],
+  "requiredBindings": [
+    "exact ordered subjects",
+    "ProfileEnvironment artifact identity",
+    "evidence class and exact evidence identities",
+    "consumer-selected checker implementation",
+    "explicit assumptions",
+    "resource policy identity"
+  ],
+  "assuredRelease": "Derived only from a caller-pinned nonempty psc-claim-policy/1 exact conjunction. Raw AssuredRelease assertions reject. Policy satisfaction is audit data and does not mint a release capability.",
+  "noImplications": [
+    "TargetToolAccepted does not imply SemanticPreservationChecked",
+    "SelfHostFixedPoint does not imply KernelAccepted",
+    "Reproducible does not imply SourceBinaryCorrespondenceDDC",
+    "ProvenanceBound does not imply SemanticPreservationChecked",
+    "Integrity verification does not establish any semantic claim"
+  ],
+  "limits": {
+    "claimSetBytes": 1048576,
+    "claims": 256,
+    "subjectsPerClaim": 64,
+    "evidencePerClaim": 256,
+    "depth": 24,
+    "nodes": 30000
+  },
+  "validation": "scripts/claim-set.test.mjs; scripts/backend-contract.test.mjs; scripts/observed-build-context.test.mjs. Fixture checkers validate infrastructure behavior only; fresh cloud validation pending.",
+  "remaining": [
+    "Built-in offline CLI checker registry and real evidence producers",
+    "Pinned real checker adapters for each supported claim",
+    "AuthorityBroker isolation and complete influence closure",
+    "Assured release policy and real evidence campaigns",
+    "Global preservation remains unproved"
+  ],
+  "consumerIntegration": {
+    "entrypoints": [
+      "verifyArtifactBundle",
+      "verifyObservedContextProducts",
+      "verifyObservedBuildArchive"
+    ],
+    "selection": "Caller supplies claimVerification.checkers and allowedAssumptions, plus optional exact claimPolicy artifact. Policy requires explicit verification configuration.",
+    "snapshot": "Shared capture validates and copies selected checker map, assumptions and bounded canonical policy bytes before any resolver/checker callback.",
+    "enforcement": "Every assertion is freshly checked under selected implementations; optional nonempty exact conjunction must be satisfied. Missing V5 context, unavailable checkers, denied assumptions and unsatisfied requirements reject.",
+    "output": "Exact scoped verification and optional policy decision are reported in the bundle result; archive global semanticClaimsVerified, preservationVerified and releaseAccepted remain false.",
+    "default": "Producer ClaimSet remains empty until actual evidence exists. Omitted claim verification preserves historical integrity-only reading; archive data never installs checker code or policy."
+  }
+}

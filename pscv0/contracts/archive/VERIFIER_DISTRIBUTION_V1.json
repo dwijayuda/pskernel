@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-verifier-distribution/1",
+  "defaultProfile": "wasm-literal-offline/1",
+  "profiles": [
+    {"id": "wasm-literal-offline/1", "checkerKinds": ["wasm-literal"], "providerSelectors": []},
+    {"id": "lean434-wasm-offline/1", "checkerKinds": ["wasm-literal", "core-proof"], "providerSelectors": ["lean434-wasm"], "security": "existing development-v1/compatibility-v1 only; paranoid-v1 remains rejected"}
+  ],
+  "status": "standalone-supported-profile-implementation-assurance-pending",
+  "owners": ["scripts/build-verifier-distribution.mjs", "scripts/verifier-launcher.mjs"],
+  "build": "npm run build:offline-verifier -- --out NEW_DIRECTORY [--profile lean434-wasm-offline/1]; output must not already exist. Exact copied file bytes are pinned by a canonical manifest published last.",
+  "run": "node pscv-verify.mjs --manifest-sha256 INDEPENDENTLY_PINNED_HASH --capsule FILE --policy TRUSTED_LOCAL_POLICY",
+  "diff": "node pscv-verify.mjs --manifest-sha256 INDEPENDENTLY_PINNED_HASH --diff-locks LEFT RIGHT",
+  "buildArchive": "node pscv-verify.mjs --manifest-sha256 INDEPENDENTLY_PINNED_HASH --build-archive FILE --policy TRUSTED_LOCAL_POLICY; integrity of observed records only, never source preservation or complete tool discovery",
+  "includes": ["SAVEF typed graph checks", "V1 semantic lock byte/graph/policy replay", "configured Ed25519 signature verification", "independent closed-i32-literal Wasm certificate checker", "lock comparison", "static ESM source/data closure and exact manifest"],
+  "leanWasmAssets": "The explicit Lean profile includes the actual pinned provider wrapper, prebuilt verifier, CJS launcher, Wasm module, prebuilt/source/toolchain manifests and Lean license. The existing provider verifies its prebuilt manifest; the packager also checks the exact copied snapshots and the launcher verifies every shipped file before replay. This is not proof of source-binary correspondence or complete source-distribution closure.",
+  "excluded": ["full compiler", "npm dependencies", "live registry or network requirement", "native/owned Core provider assets", "Wasm Component verifier runtime"],
+  "runtimeAssumptions": "Trusted external Node.js 22+ runtime, launcher distribution channel and local filesystem/process execution. Authenticate the launcher separately and obtain the manifest digest independently. Self-hashing is not secure boot, a hostile-host sandbox or protection against check/import filesystem races.",
+  "sourceInventory": "Build computes reviewed static ESM/literal-URL dependencies plus explicit profile assets. It rejects non-Node external imports, escape paths and unrecognized dynamic import owners. Only the exact Lean Wasm dynamic import is supplied in that profile; all other provider imports remain unshipped and selector-disabled. The source scan is not a general JavaScript security proof or a complete operating-system TCB inventory.",
+  "launcher": "Only Node built-ins load before the expected manifest hash and bounded declared file hashes are checked. Paths are constrained; symlink files/ancestor directories, malformed descriptors, missing files and changed bytes fail closed. Core policies require an explicit provider list wholly contained in the selected distribution profile; omissions and unshipped selectors reject before provider construction. Existing provider-security restrictions still apply.",
+  "focusedEvidence": "Both actual distributions ran from separate temporary directories with no compiler or node_modules. The minimal profile replayed a supported Wasm binary certificate, V1 lock and observed-build fixture. The Lean profile (29 files, about 2.4 MB at this checkpoint) replayed the actual closed theorem forall P : Prop, P -> P through the shipped kernel, rejected an invalid proof of the same statement, unavailable/default providers, paranoid policy and changed Wasm bytes. Lock/task metadata in these fixtures is fictional. No global compiler theorem follows.",
+  "remaining": ["actual release archive and provenance signing", "native/independent provider profiles and diversity evidence", "Wasm Component portability target", "complete release source/license inventory", "independent adversarial review and global assurance"],
+  "releaseAccepted": false
+}

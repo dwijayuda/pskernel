@@ -588,10 +588,31 @@ theorem psKernelDefEqLazyReductionWithFuel_configuration_sound
                    resume defeq whnf coreWhnf
                    context state left right) =
               Except.ok (Prod.mk answer nextState) := by
-          simpa [
+          simp [
             psKernelDefEqLazyReductionWithFuel,
-            hZeroPair, resume
-          ] using hRun
+            hZeroPair
+          ] at hRun
+          change
+            (match psKernelExprNatPred left with
+             | Option.some leftPred =>
+                 match psKernelExprNatPred right with
+                 | Option.some rightPred =>
+                     match defeq context state leftPred rightPred with
+                     | Except.error error => Except.error error
+                     | Except.ok result =>
+                         Except.ok
+                           (Prod.mk
+                             (PsKernelDeltaResult.decided
+                               (Prod.fst result))
+                             (Prod.snd result))
+                 | Option.none =>
+                     psKernelDefEqLazyReductionAfterPred
+                       resume defeq whnf coreWhnf context state left right
+             | Option.none =>
+                 psKernelDefEqLazyReductionAfterPred
+                   resume defeq whnf coreWhnf context state left right) =
+              Except.ok (Prod.mk answer nextState) at hRun
+          exact hRun
         cases hLeftPred : psKernelExprNatPred left with
         | none =>
             have hAfterRun :

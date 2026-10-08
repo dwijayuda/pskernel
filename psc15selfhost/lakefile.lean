@@ -327,6 +327,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionInductiveNamesConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionInductiveConstructorConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionInductiveHeaderConfiguration,
+    `Ps.KernelCore.Metatheory.AdmissionUniformOccurrenceConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionParameterConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionNestedHeaderConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionNestedNoAuxConfiguration,

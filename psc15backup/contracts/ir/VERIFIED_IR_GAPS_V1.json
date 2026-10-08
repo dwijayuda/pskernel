@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-verified-ir-gap-registry/1",
+  "verifiedIrContract": "psc-verified-ir/1",
+  "implemented": [
+    "no-reachable-unknown-runtime-type",
+    "record-target-structure-exists",
+    "projection-target-structure-exists",
+    "structure-type-argument-arity",
+    "record-field-membership",
+    "projection-field-membership",
+    "constructor-inductive-exists",
+    "match-inductive-exists",
+    "inductive-type-argument-arity",
+    "constructor-membership",
+    "match-alternative-constructor-membership",
+    "constructor-field-membership",
+    "match-binding-field-membership",
+    "machine-integer-literal-canonical-range",
+    "validation-fuel-fail-closed",
+    "global-declaration-and-type-name-uniqueness",
+    "general-named-type-resolution-and-arity",
+    "variable-scope-and-name-resolution",
+    "call-arity",
+    "call-argument-and-result-typing",
+    "record-field-completeness",
+    "constructor-field-completeness",
+    "duplicate-record-and-constructor-fields",
+    "duplicate-match-bindings",
+    "field-value-typing",
+    "intrinsic-type-and-value-argument-rules",
+    "if-condition-and-result-typing",
+    "match-exhaustiveness",
+    "duplicate-match-alternatives",
+    "match-branch-result-type-equality",
+    "explicit-external-interface-resolution",
+    "external-export-signature-compatibility",
+    "recursive-public-layout-compatibility",
+    "semantic-and-runtime-values-profile-compatibility",
+    "declared-target-availability",
+    "declared-runtime-capabilities-and-transitive-link-propagation",
+    "module-link-compatibility"
+  ],
+  "gaps": [
+    "target-specific-external-abi-adapter-validation"
+  ],
+  "boundaryScope": {
+    "contract": "contracts/ir/INTERFACE_LINK_V1.json",
+    "previousExternalGap": "external-import-interface-and-abi-compatibility",
+    "closedPart": "Declared interface, signature, nominal recursive layout, runtime-values profile, target and capability compatibility.",
+    "remainingPart": "Aggregate/resource/async JavaScript adapters, Wasm Component canonical ABI and native Rust/C adapters, plus global adapter preservation/host-behavior assurance.",
+    "moduleLinkProfile": "Complete acyclic graph with monomorphic exports derived from actual validated module bodies; unsupported generic exports and cycles reject.",
+    "scalarAdapter": "contracts/ir/JS_SCALAR_ABI_V1.json: synchronous primitive JavaScript adapter is production-bound to exact VerifiedIR, capability policy, build graph/archive and EvidenceEnvelope with independent offline plan replay.",
+    "targetMatrix": {
+      "typescriptToJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
+      "directJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
+      "rust": "external imports fail closed with externalImportUnsupported; native adapter implementation remains pending",
+      "coreWasm": "External imports fail closed with unsupportedModuleFeature. The explicit scalar export path derives InterfaceIR from revalidated SpecializedIR, checks actual target signatures, validates WasmIR and emits selected closed exports. Generated/native checked driver and CLI selection publish exact policy/interface/binding/target/binary artifacts through the common graph, bundle, EvidenceEnvelope and archive. Actual memory32/memory64 native publication and independent signature replay passed cloud CI; aggregate/resource/async adapters and body preservation remain pending.",
+      "componentModel": "Portable InterfaceIR/WIT, synchronous layout/signature planning, memory/core-value codecs, signature-checked closed-core export binding and compiler-selected scalar exports exist. The closed scalar Core Wasm route is production-bound to the EvidenceEnvelope and archive. Component binaries, imports/callbacks, aggregate/resource/async adapters and lifetimes, independent WIT checking and global preservation remain pending."
+    }
+  },
+  "policy": {
+    "unknownMeaningMustNotBeAddedSilently": true,
+    "strengtheningMayRemainV1OnlyWhenAlreadyRequiredByContract": true,
+    "newExecutableSemanticsRequiresVersionDecision": true
+  },
+  "evidence": {
+    "validator": "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+    "regressionCorpus": "test/VerifiedIrStrictTests.lean",
+    "interfaceLinkCorpus": "test/InterfaceIrTests.lean",
+    "interfaceLinkCases": 20,
+    "interfaceLinkEvidence": "Focused local Lean build, 20-case corpus and PSC1 check; cloud and global soundness pending.",
+    "strictRegressionCases": 31,
+    "cloudStrictCorpus": {
+      "commit": "8835161aae436a7da320a41f2814d2d89888aa2e",
+      "runId": 37507278125,
+      "jobId": 112419614389,
+      "step": "Run strict VerifiedIR invariant corpus",
+      "conclusion": "success"
+    },
+    "scope": "Implemented executable checks, not a proof of validator soundness or completed global preservation. Full self-host fixed points remain pending.",
+    "jsScalarProductionBinding": "scripts/js-abi-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs + EvidenceEnvelope targetAdapters",
+    "wasmCanonicalScalarProjection": "scripts/wasm-canonical-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs; source/target/binary signatures only, no body-preservation claim",
+    "wasmCanonicalProductionCloud": {
+      "commit": "a47b047eb324db0df711b73d47b1f6211c126418",
+      "runId": 37711862947,
+      "jobId": 113099636619,
+      "conclusion": "success",
+      "scope": "Actual native Canonical scalar memory32/memory64 checked build publication and archive replay; no body-preservation or general Component Model claim."
+    }
+  }
+}

@@ -1,0 +1,443 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "052630ebbb3b3526894db29512adea3f65fcd8cd",
+  "recorded": "2026-10-03T07:41:59.994Z",
+  "ownedJointSelfHosted": false,
+  "releaseReady": false,
+  "generatedOutputEdited": false,
+  "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+  "build": {
+    "schemaVersion": 1,
+    "packageVersion": "0.1.0-checker.10",
+    "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+    "seedSha256": "a0673677219da539df555961129385ae4cf5099f303f0c883dd3a26f726449ff",
+    "seedSourceCommit": "cc79e84014ed1d49b0c31971e0a8ceb99b32472c",
+    "typescriptVersion": "5.8.3",
+    "nodeVersion": "v26.7.0",
+    "leanCheck": "PSC2_CHECK: PASS (643 declarations)",
+    "psCheck": "PSC2_CHECK: PASS (643 declarations)",
+    "canonicalPsEmissionParity": true,
+    "generatedOutputEdited": false,
+    "canCheckProofs": false,
+    "outputs": [
+      {
+        "path": "dist/foundation.d.ts",
+        "sha256": "cf34c27fdee006d721292ff5b8dccec282b91e587a3054330aef6b8730e5af41"
+      },
+      {
+        "path": "dist/foundation.js",
+        "sha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3"
+      },
+      {
+        "path": "dist/foundation.lean",
+        "sha256": "70e6aeea8aa3b34d34af6693c1decb71501dab3fb0ddd3ce336a30baec8a00fd"
+      },
+      {
+        "path": "dist/foundation.ps",
+        "sha256": "d13127c8b74b677ebf054becbf2bfd3214a8ed82acb112307103ae58f31808db"
+      },
+      {
+        "path": "dist/foundation.ts",
+        "sha256": "137046d6f4bd1af399ea44f2b27f98c7d77659a88485ac088cfce13cbbe3e76c"
+      }
+    ]
+  },
+  "nativeBuild": {
+    "name": "native",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\check-owned-candidate-native.cjs",
+      "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-projection-052630eb\\psc15selfhost\\packages\\pskernel-core",
+      "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-projection-052630eb\\psc15selfhost\\.continuation\\attempt3-native"
+    ],
+    "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-projection-052630eb\\psc15selfhost\\packages\\pskernel-core",
+    "started": "2026-10-03T04:02:27.751Z",
+    "sourceSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+    "finished": "2026-10-03T04:03:20.433Z",
+    "exitCode": 0,
+    "signal": null,
+    "error": null,
+    "logSha256": "1af655456ff031706322bb7ab15e937471ebf3b43b19ad530f7cb82babc4d8bd"
+  },
+  "verifiedLogRuns": [
+    {
+      "file": "attempt1-source.log.json",
+      "exitCode": 1,
+      "source": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+      "counts": {}
+    },
+    {
+      "file": "attempt1-windows.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {
+        "tests": 104,
+        "pass": 104,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "file": "attempt2-build.log.json",
+      "exitCode": 0,
+      "source": "f41dc3743ec4194ab9f9a53a4fa71c8f32fd52cc57438d1bde46007472742d2a",
+      "counts": {}
+    },
+    {
+      "file": "attempt2-native.log.json",
+      "exitCode": 1,
+      "source": "f41dc3743ec4194ab9f9a53a4fa71c8f32fd52cc57438d1bde46007472742d2a",
+      "counts": {}
+    },
+    {
+      "file": "attempt2-source.log.json",
+      "exitCode": 0,
+      "source": "f41dc3743ec4194ab9f9a53a4fa71c8f32fd52cc57438d1bde46007472742d2a",
+      "counts": {}
+    },
+    {
+      "file": "attempt3-build.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "attempt3-native.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "attempt3-source.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "differential1-record-elimination-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-comparisons-checker-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-comparisons-level-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-comparisons-literal-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-comparisons-nat-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-comparisons-polymorphic-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-comparisons-record-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-comparisons-unit-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-linux-integration.json",
+      "exitCode": 1,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {
+        "tests": 91,
+        "pass": 91,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "file": "final-linux-kernel.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {
+        "tests": 489,
+        "pass": 489,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "file": "final-oracles-checker-oracle.log.json",
+      "exitCode": 1,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-oracles-oracle.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "final-oracles-semantic-oracle.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "focused1-focused.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "oracle-corrected-checker-differential.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    },
+    {
+      "file": "oracle-corrected-checker-oracle.log.json",
+      "exitCode": 0,
+      "source": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "counts": {}
+    }
+  ],
+  "completedPosixGuards": {
+    "command": [
+      "wsl.exe",
+      "--exec",
+      "/bin/sh",
+      "/mnt/c/Users/user/Documents/Codex/2026-10-02/referenced-chatgpt-conversation-this-is-an/work/owned-projection-052630eb/psc15selfhost/.continuation/lf-posix-guards.sh"
+    ],
+    "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-projection-052630eb\\psc15selfhost",
+    "started": "2026-10-03T07:35:33.652Z",
+    "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+    "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-projection-052630eb\\psc15selfhost\\.continuation\\resume-posix-guards.log",
+    "finished": "2026-10-03T07:36:18.423Z",
+    "exitCode": 0,
+    "error": null,
+    "logSha256": "e6b1f6314e7398113fb3fc9072e4a79fafbd6156638897155f4f9113fe2bc98f"
+  },
+  "preservedProbes": {
+    "recorded": "2026-10-03T04:23:04.393Z",
+    "results": [
+      {
+        "file": "preserved75-admissions.json.gz",
+        "sha256": "20715347d21c3151b02207cb0b17e4827fa098c1c97861c6438df79b2863a722",
+        "admissionCount": 1556,
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.10",
+          "profile": "owned-closed-record-elimination/7",
+          "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+          "generatedKernelSha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3",
+          "accepted": false,
+          "errorKind": "unsupported-inductive-shape",
+          "admissionIndex": 14
+        }
+      },
+      {
+        "file": "current76-admissions.json.gz",
+        "sha256": "9c53bc3498ca18c8b82c1e6933c6a5c75e61fd702e60d1dd438c6176b5e63202",
+        "admissionCount": 1568,
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.10",
+          "profile": "owned-closed-record-elimination/7",
+          "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+          "generatedKernelSha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3",
+          "accepted": false,
+          "errorKind": "unsupported-inductive-shape",
+          "admissionIndex": 14
+        }
+      },
+      {
+        "prefixCount": 1,
+        "inputSha256": "a8b3728c37b4f6969b7e5393b7e757ddcfceaf79e7320b2731e398f4b986b0d7",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.10",
+          "profile": "owned-closed-record-elimination/7",
+          "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+          "generatedKernelSha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3",
+          "accepted": true,
+          "admissionCount": 1,
+          "steps": 3287
+        }
+      },
+      {
+        "prefixCount": 2,
+        "inputSha256": "2cc4d55c0efce39a4aeabf75a05f83b0afd6a36ced513aebdc750c345ceaf641",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.10",
+          "profile": "owned-closed-record-elimination/7",
+          "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+          "generatedKernelSha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3",
+          "accepted": true,
+          "admissionCount": 2,
+          "steps": 6665
+        }
+      },
+      {
+        "prefixCount": 3,
+        "inputSha256": "c8840b6e88ea02791da8348d08af9cc087ce8d408e1ef5d4e19a13a8ade9b9ce",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.10",
+          "profile": "owned-closed-record-elimination/7",
+          "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+          "generatedKernelSha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3",
+          "accepted": true,
+          "admissionCount": 3,
+          "steps": 11293
+        }
+      },
+      {
+        "prefixCount": 4,
+        "inputSha256": "bd1bb153fb464e6afa31b00b5cb8bd877972152d533dee9bb08064b7731f5867",
+        "result": {
+          "protocol": "pskernel-core/1",
+          "provider": "psc-generated-owned",
+          "version": "0.1.0-checker.10",
+          "profile": "owned-closed-record-elimination/7",
+          "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+          "generatedKernelSha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3",
+          "accepted": false,
+          "errorKind": "unknownConstant",
+          "admissionIndex": 3,
+          "steps": 11499
+        }
+      }
+    ],
+    "ownedJointSelfHosted": false
+  },
+  "currentClosure": {
+    "baseCommit": "052630ebbb3b3526894db29512adea3f65fcd8cd",
+    "candidateChanges": true,
+    "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+    "sourceClosureSha256": "d2a0a6620dd34a3fc73a05ea6cd1584843574460853fa763ddc31b5e7bb7ca99",
+    "sourceCount": 76,
+    "seedSha256": "3d9663ed5870d1961f42808f4480e32dbf82d0862f3757f5d4c5d7ad7b21a9b2",
+    "ownedJointSelfHosted": false,
+    "admissionsSha256": "8f31b0c37597e5219beb95499f8e9b23762baa42d8663c6df66b48f9d9caa186",
+    "admissionCount": 1570,
+    "result": {
+      "protocol": "pskernel-core/1",
+      "provider": "psc-generated-owned",
+      "version": "0.1.0-checker.10",
+      "profile": "owned-closed-record-elimination/7",
+      "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+      "generatedKernelSha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3",
+      "accepted": false,
+      "errorKind": "unsupported-inductive-shape",
+      "admissionIndex": 14
+    },
+    "descriptor": {
+      "selector": "pskernel-core",
+      "package": "@proofscript/pskernel-core",
+      "execution": "psc-generated-js",
+      "version": "0.1.0-checker.10",
+      "generatedKernelSha256": "06ff66420250031403fd72257da012e36c38b84822c35c3064ab33af96ddc0b3",
+      "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28"
+    }
+  },
+  "inventory": {
+    "counts": {
+      "compiler": 1916,
+      "kernel": 643,
+      "prelude": 81
+    },
+    "requiredPrelude": 55,
+    "requiredAssumptions": 36,
+    "unresolvedDependencies": []
+  },
+  "eliminationDifferential": {
+    "schemaVersion": 1,
+    "scope": "Closed-record projection typing, bounds, substitution and iota with dependent computed-result witnesses; not general inductive completeness",
+    "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+    "harnessSha256": "52266f3ee24f1313b48f4e0a47f97d8de9caa51f482f2d772e5309652369cbe1",
+    "provider": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.34.0",
+      "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+      "profile": "lean4.34-core",
+      "status": "version"
+    },
+    "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+    "cases": 128,
+    "matched": 128,
+    "accepted": 53,
+    "rejected": 75,
+    "deliberatelyUnsupported": [
+      "dependent constructor fields",
+      "parameters and indices",
+      "recursive records",
+      "Prop or higher-universe families"
+    ],
+    "recordsPath": "dist/evidence/record-elimination-differential-records.json",
+    "recordsSha256": "a44651d2fbef076a9386c62e2a03d847fd46f3b5fdc86611a07a134c8904d622"
+  },
+  "archives": [
+    {
+      "path": "current76-admissions.json.gz",
+      "sha256": "78676bcd6083fd69745a6b28dbfb0207e2be9f4d2ee4026ac3f2f4d8a0b87d00",
+      "bytes": 311132,
+      "uncompressedSha256": "8f31b0c37597e5219beb95499f8e9b23762baa42d8663c6df66b48f9d9caa186",
+      "uncompressedBytes": 11736568
+    },
+    {
+      "path": "current76-declarations.json.gz",
+      "sha256": "594959e00ca9bfd499ce434719c0e6d9148574992e49d234ace2b79a8443b31c",
+      "bytes": 343223,
+      "uncompressedSha256": "e710d631e9ad493e9c16d6c7dd4f6011ee99decd3a72dc57a91b821e8dc0be91",
+      "uncompressedBytes": 12296183
+    },
+    {
+      "path": "current76-snapshot.json.gz",
+      "sha256": "681478bed5941af0de84d80da36d6e3363ff35947a4d728897a728e0cd5d09b2",
+      "bytes": 410933,
+      "uncompressedSha256": "d9ea7608a0142ed44bf949d21834093d917495fd1713ebbc6c2df7d189dfc8d4",
+      "uncompressedBytes": 3588378
+    },
+    {
+      "path": "current76-summary.json.gz",
+      "sha256": "8079dd3795621403dd2362eb57360e45c2b2fca6e320952efebfcea814976e8b",
+      "bytes": 179181,
+      "uncompressedSha256": "8233e454ca4cc2f9e72dca6a8d8f518778737870ce3cbd333ada0ea1ed0ceb9d",
+      "uncompressedBytes": 1913731
+    },
+    {
+      "path": "run-artifacts.json.gz",
+      "sha256": "592c14654aaae2ced453333268b493b52e87849c185b1057373ab374695385f6",
+      "bytes": 82653,
+      "uncompressedSha256": "802ef93c64805cae57f9740001e06e39449bf3e22dbbbc2cfefc065fbd16e98c",
+      "uncompressedBytes": 783703
+    }
+  ],
+  "note": "Recovered interrupted source-built candidate and verified its source/output/evidence identities and recorded log hashes. Earlier unsuccessful aggregate stages remain unsuccessful; the isolated POSIX closure rerun passed. Exact preserved old inputs remain at the record-fields checkpoint."
+}

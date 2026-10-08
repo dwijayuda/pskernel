@@ -1,0 +1,11 @@
+# Portable source guards and bootstrap snapshots use canonical LF on all hosts.
+*.lean text eol=lf
+*.ps text eol=lf
+
+# Preserve the transferred package's source, generated output and evidence hashes.
+packages/pskernel-core.old3/** -text
+# Provider manifests identify exact source and generated artifact bytes too.
+packages/pskernel-lean-wasm/** -text
+
+# Preserve checkpoint compressed inputs and receipt bytes.
+docs/continuity/owned-record-fields-2026-10-03/** -text

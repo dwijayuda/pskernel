@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "repository": "dwijayuda/pskernel",
+  "seedSourceCommit": "cc79e84014ed1d49b0c31971e0a8ceb99b32472c",
+  "psc1Sha256": "a0673677219da539df555961129385ae4cf5099f303f0c883dd3a26f726449ff",
+  "leanProviderSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "typescriptVersion": "5.8.3",
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "note": "Locally built Windows seed at the recorded source commit and exact Lean 4.34 pin. Separate measured regeneration; previous checkpoint evidence remains in its recorded Git commit. No automatic download or fallback.",
+  "previousCheckpoint": {
+    "version": "0.1.0-checker.13",
+    "integrationCommit": "847aac5560ae203fee659884e0c788eb8fd7231c",
+    "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82"
+  }
+}

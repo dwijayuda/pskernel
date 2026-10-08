@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-wasm-core-signatures/1",
+  "owner": "scripts/wasm-core-signatures.mjs",
+  "references": [
+    "https://webassembly.github.io/spec/core/binary/types.html",
+    "https://webassembly.github.io/spec/core/binary/modules.html"
+  ],
+  "referenceRevision": "Core WebAssembly 3.0 documentation dated 2026-10-03, consulted 2026-10-07",
+  "scope": "Exact caller-pinned core-Wasm artifact inspection for numeric function signatures and exported memory address widths before adapter instantiation.",
+  "rules": [
+    "copy and verify the exact binary under wasm-binary/webassembly-core/1",
+    "validate/compile the copied bytes with the selected WebAssembly engine without instantiating them",
+    "account for imported functions and each type in explicit recursive groups, including GC structs/arrays and subtypes",
+    "retain reference types as nonnumeric metadata; numeric adapter requirements reject them",
+    "preserve every UTF-8 export/import name code point, including an initial BOM",
+    "read nonshared memory32/memory64 limits with bounded unsigned-64 decoding",
+    "reject unexpected signatures, memory widths, unsupported type/limit forms and exhausted metadata budgets",
+    "return immutable metadata and use private inspection handles for signature requirements"
+  ],
+  "resources": "Input bytes, names and decoded metadata entries are bounded. Engine compilation and platform allocation remain host runtime assumptions, not a global resource proof.",
+  "authority": "Binary/interface inspection data only. It does not independently validate instructions, prove behavior or source preservation, execute imports/start functions, or create compiler/kernel authority.",
+  "remaining": [
+    "general Canonical call/import lifecycle; closed synchronous export binding is implemented separately",
+    "post-return and resource ownership",
+    "component binary emission/validation",
+    "global preservation"
+  ],
+  "validation": "79a90af passed full main cloud CI (37656246970/job 112912009591), including real-engine signature/index/start/name cases and literal exact-name/numeric regressions."
+}

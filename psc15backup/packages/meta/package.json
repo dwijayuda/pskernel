@@ -1,0 +1,22 @@
+{
+  "name": "@proofscript/meta-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "role": "meta",
+    "universeMeta": "separate-context",
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist"
+  },
+  "dependencies": {
+    "@proofscript/core": "0.0.0-dev",
+    "@proofscript/environment-next": "0.0.0-dev"
+  }
+}

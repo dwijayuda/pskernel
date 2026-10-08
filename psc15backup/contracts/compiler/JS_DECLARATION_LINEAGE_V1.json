@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-js-declaration-lineage/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "granularity": "declaration-batch-to-emission-chunk",
+  "parents": [
+    "exact declaration OriginGraph",
+    "exact erasure declaration map",
+    "independently reconstructed specialization instance map",
+    "actual JS generated-position map",
+    "byte-preserving VerifiedIR snapshot"
+  ],
+  "edge": [
+    "generatedPositionIndex",
+    "specializationInstanceIndex",
+    "erasureEntryIndex",
+    "sourceOriginEntryIndex"
+  ],
+  "composition": [
+    "Reconstruct all four parent products from bounded exact child artifacts; compare complete identities.",
+    "Require identical PublicApiIR for source/erasure inventories and unchanged RuntimeIR-to-VerifiedIR bytes.",
+    "Require specialization input to be the same VerifiedIR and match complete SpecializedIR-to-JsIR declaration/parameter name order.",
+    "Join actual runtime names and independently checked specialization instance owners; never infer mangled names.",
+    "Publish a separate debug artifact and metadata pass; archives pin all five parent identities and recompute every edge."
+  ],
+  "resources": {
+    "maxArtifactBytes": 134217728,
+    "maxDistinctBytes": 536870912,
+    "maxArtifacts": 4120,
+    "maxSources": 4096,
+    "dependencyTraversal": "fixed two-level parent/subject inventory; synchronous production and asynchronous archive resolution"
+  },
+  "consumers": [
+    "checked direct-JS service",
+    "observed build graph and common publication inventory",
+    "typed debug ArtifactBundle",
+    "offline observed archive replay"
+  ],
+  "assurance": {
+    "declarationCompositionChecked": true,
+    "targetInventoryChecked": true,
+    "independentSourceElaborationChecked": false,
+    "independentErasureSemanticsChecked": false,
+    "expressionCorrespondenceChecked": false,
+    "semanticPreservationProved": false,
+    "metadataCreatesAuthority": false
+  },
+  "remaining": [
+    "expression and synthetic helper origin events",
+    "global preservation and independent source-to-runtime semantic checking"
+  ],
+  "uniformCompanion": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json"
+}

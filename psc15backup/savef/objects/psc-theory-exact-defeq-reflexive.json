@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "FormalEvidence",
+  "semanticProfile": "lean4.34-core",
+  "authorityClass": "formal-evidence",
+  "scope": {
+    "theory": "psc-declarative-core-seed/1",
+    "slice": "exact-defeq-reflexivity"
+  },
+  "dependsOn": [
+    "psc-declarative-core-seed/1"
+  ],
+  "assumes": [],
+  "claims": [
+    {
+      "id": "psc-declarative-conversion-refl/1",
+      "status": "proved"
+    },
+    {
+      "id": "psc-kernel-exact-defeq-sound/1",
+      "status": "proved"
+    }
+  ],
+  "evidenceRefs": [
+    "lean:packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
+  ],
+  "payload": {
+    "implementation": "packages/pscv-theory/src/Ps/Theory/Core.lean",
+    "scope": "reflexive exact-identity slice only"
+  },
+  "objectId": "sha256:99503f9f17fabe443ef02b3532599c503eea6a891eabfea271e4e6d5a54cb6f7"
+}

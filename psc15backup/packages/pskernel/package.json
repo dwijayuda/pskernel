@@ -1,0 +1,18 @@
+{
+  "name": "@proofscript/psc1-kernel-reference",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": false,
+    "portable": false,
+    "sourceRoots": [
+      "."
+    ],
+    "testRoots": [
+      "PSC1Kernel/Test"
+    ],
+    "outDir": "dist",
+    "role": "bounded-kernel-assurance-reference"
+  }
+}

@@ -1,0 +1,682 @@
+{
+  "schemaVersion": 1,
+  "semanticCommit": "25aafa3e0d831d35f1e25ab8fc0f90ebef6471d3",
+  "parentCommit": "a28bf13df3c1c1776594296bc93a904a0c0cc092",
+  "branch": "refs/heads/psc2/selfhost-lean-kernel",
+  "recorded": "2026-10-03T11:15:31.681Z",
+  "ownedJointSelfHosted": false,
+  "ownedCheckedPairProduced": false,
+  "releaseReady": false,
+  "primitivePolicy": "packages/pskernel-core/PRIMITIVE_POLICY.md",
+  "build": {
+    "schemaVersion": 1,
+    "packageVersion": "0.1.0-checker.13",
+    "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+    "seedSha256": "a0673677219da539df555961129385ae4cf5099f303f0c883dd3a26f726449ff",
+    "seedSourceCommit": "cc79e84014ed1d49b0c31971e0a8ceb99b32472c",
+    "typescriptVersion": "5.8.3",
+    "nodeVersion": "v26.7.0",
+    "leanCheck": "PSC2_CHECK: PASS (795 declarations)",
+    "psCheck": "PSC2_CHECK: PASS (795 declarations)",
+    "canonicalPsEmissionParity": true,
+    "generatedOutputEdited": false,
+    "canCheckProofs": false,
+    "outputs": [
+      {
+        "path": "dist/foundation.d.ts",
+        "sha256": "a1e7755c409a540317b979aefc4c9628f2dc77d989dc3d259670c9e391aa1272"
+      },
+      {
+        "path": "dist/foundation.js",
+        "sha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0"
+      },
+      {
+        "path": "dist/foundation.lean",
+        "sha256": "c595df18b77eb4edb3706bacbea9385c04530645889185e3818abce23204f222"
+      },
+      {
+        "path": "dist/foundation.ps",
+        "sha256": "0bd02eb8e8ffb8a77538b561b954f33650bd0971af4626ed951a91c207792c24"
+      },
+      {
+        "path": "dist/foundation.ts",
+        "sha256": "73dc695fbdf4b452ee58c6d5739114f3a33addbdb4a5adf4e6ca5caeb5e93d74"
+      }
+    ]
+  },
+  "fullClosure": {
+    "baseCommit": "a28bf13df3c1c1776594296bc93a904a0c0cc092",
+    "candidateChanges": true,
+    "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+    "sourceClosureSha256": "d3d2af290cdbac506e6d7f59152d6d48f22f771bfb3dd03e0a0bbf6fc7c526b5",
+    "sourceCount": 79,
+    "seedSha256": "3d9663ed5870d1961f42808f4480e32dbf82d0862f3757f5d4c5d7ad7b21a9b2",
+    "ownedJointSelfHosted": false,
+    "admissionsSha256": "9469899a2ac4be5e0d8ff9ad39d63e8f5eb176f01869ce9288dba5e5ea2e3024",
+    "admissionCount": 1615,
+    "result": {
+      "protocol": "pskernel-core/1",
+      "provider": "psc-generated-owned",
+      "version": "0.1.0-checker.13",
+      "profile": "owned-utf8-string-literals/10",
+      "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+      "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+      "accepted": false,
+      "errorKind": "unsupported-inductive-family",
+      "admissionIndex": 80
+    },
+    "descriptor": {
+      "selector": "pskernel-core",
+      "package": "@proofscript/pskernel-core",
+      "execution": "psc-generated-js",
+      "version": "0.1.0-checker.13",
+      "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+      "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82"
+    }
+  },
+  "inventory": {
+    "counts": {
+      "compiler": 1916,
+      "kernel": 795,
+      "prelude": 81
+    },
+    "requiredPrelude": [
+      "Prod.rec",
+      "Prod.mk",
+      "Prod",
+      "Except.rec",
+      "Except.ok",
+      "Except.error",
+      "Except",
+      "Option.rec",
+      "Option.some",
+      "Option.none",
+      "Option",
+      "List.rec",
+      "List.cons",
+      "List.nil",
+      "List",
+      "ite",
+      "Bool.decEq",
+      "Decidable",
+      "Eq",
+      "Prod.snd",
+      "Prod.fst",
+      "String.Pos.Raw.byteIdx",
+      "String.Pos.Raw.mk",
+      "String.Internal.atEnd",
+      "String.Internal.get",
+      "String.Internal.next",
+      "String.utf8ByteSize",
+      "String.Internal.append",
+      "String.Internal.length",
+      "String.singleton",
+      "String.push",
+      "Char.toNat",
+      "Char.ofNat",
+      "Char",
+      "Unit.unit",
+      "Unit",
+      "Bool.false",
+      "Bool.true",
+      "Bool",
+      "String",
+      "Int.repr",
+      "Int.ofNat",
+      "Int",
+      "Nat.blt",
+      "Nat.ble",
+      "Nat.beq",
+      "Nat.mod",
+      "Nat.div",
+      "Nat.mul",
+      "Nat.sub",
+      "Nat.add",
+      "Nat.rec",
+      "Nat.succ",
+      "Nat.zero",
+      "Nat"
+    ],
+    "requiredAssumptions": [
+      {
+        "owner": "prelude",
+        "name": "ite",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Bool.decEq",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Decidable",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Eq",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Prod.snd",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Prod.fst",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Pos.Raw.byteIdx",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Pos.Raw.mk",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.atEnd",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.get",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.next",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.utf8ByteSize",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.append",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.Internal.length",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.singleton",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String.push",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Char.toNat",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Char.ofNat",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Char",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Unit.unit",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Unit",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Bool.false",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Bool.true",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Bool",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "String",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Int.repr",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Int.ofNat",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Int",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.blt",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.ble",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.beq",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.mod",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.div",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.mul",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.sub",
+        "kind": "axiom"
+      },
+      {
+        "owner": "prelude",
+        "name": "Nat.add",
+        "kind": "axiom"
+      }
+    ],
+    "unresolvedDependencies": [],
+    "kernelAdmissionBlockers": []
+  },
+  "freshRuns": [
+    {
+      "label": "text-kernel-linux-v2",
+      "counts": {
+        "tests": 612,
+        "pass": 612,
+        "fail": 0,
+        "skipped": 0
+      },
+      "command": [
+        "wsl.exe",
+        "--exec",
+        "/bin/sh",
+        "-c",
+        "cd '/mnt/c/Users/user/Documents/Codex/2026-10-02/referenced-chatgpt-conversation-this-is-an/work/owned-text-a28bf13d/psc15selfhost/packages/pskernel-core' && /usr/bin/node --test test/*.test.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-text-a28bf13d\\psc15selfhost\\packages\\pskernel-core",
+      "started": "2026-10-03T10:51:24.487Z",
+      "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-text-a28bf13d\\psc15selfhost\\.continuation\\text-kernel-linux-v2.log",
+      "finished": "2026-10-03T11:00:28.449Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "0396a4f46a9465034b46ae45a422f0e85a3768f25eae1212f9598e080c78c4d7"
+    },
+    {
+      "label": "text-host-windows-clean",
+      "counts": {
+        "tests": 168,
+        "pass": 167,
+        "fail": 0,
+        "skipped": 1
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "--test-reporter=tap",
+        "scripts/checked-build.test.mjs",
+        "scripts/checked-enum-build.test.mjs",
+        "scripts/checked-owned-enum.test.mjs",
+        "scripts/checked-owned-kernel-checkpoint.test.mjs",
+        "scripts/checked-owned-kernel.test.mjs",
+        "scripts/checked-owned-literal.test.mjs",
+        "scripts/checked-owned-nat.test.mjs",
+        "scripts/checked-owned-projection.test.mjs",
+        "scripts/checked-owned-record.test.mjs",
+        "scripts/checked-owned-sum.test.mjs",
+        "scripts/checked-owned-text.test.mjs",
+        "scripts/checked-owned-unit.test.mjs",
+        "scripts/checked-projection-build.test.mjs",
+        "scripts/checked-sum-build.test.mjs",
+        "scripts/checked-text-build.test.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-text-a28bf13d\\psc15selfhost",
+      "started": "2026-10-03T11:10:11.599Z",
+      "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-text-a28bf13d\\psc15selfhost\\.continuation\\text-host-windows-clean.log",
+      "finished": "2026-10-03T11:11:16.827Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "f471a6302e9b98d59e80c737f4cf88e25fa2c9379e90f227168dba940417b297"
+    },
+    {
+      "label": "text-guards-linux-final",
+      "counts": null,
+      "command": [
+        "wsl.exe",
+        "--exec",
+        "/bin/sh",
+        "-c",
+        "set -eu; cd '/mnt/c/Users/user/Documents/Codex/2026-10-02/referenced-chatgpt-conversation-this-is-an/work/owned-text-a28bf13d/psc15selfhost'; export TSC='/mnt/c/Users/user/Documents/Codex/2026-10-02/referenced-chatgpt-conversation-this-is-an/work/toolchain/node_modules/typescript/lib/tsc.js'; for s in check-selfhost-source-syntax check-selfhost-totality-source check-semantic-boundaries check-bootstrap-closure bootstrap-root-minimality-tests selfhost-source-isolation-tests bootstrap-manifest-tests check-owned-kernel-receipt; do /usr/bin/node scripts/$s.mjs; done"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-text-a28bf13d\\psc15selfhost\\packages\\pskernel-core",
+      "started": "2026-10-03T11:07:37.488Z",
+      "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-text-a28bf13d\\psc15selfhost\\.continuation\\text-guards-linux-final.log",
+      "finished": "2026-10-03T11:09:29.884Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "d1ad433d290e56cdf8d4169a24abb9bf4fbcba437dd11600903417faea053456"
+    },
+    {
+      "label": "text-production",
+      "counts": {
+        "tests": 25,
+        "pass": 25,
+        "fail": 0,
+        "skipped": 0
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "--test-reporter=tap",
+        "scripts/checked-owned-text.test.mjs",
+        "scripts/checked-text-build.test.mjs"
+      ],
+      "cwd": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-text-a28bf13d\\psc15selfhost",
+      "started": "2026-10-03T10:44:13.110Z",
+      "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+      "log": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\owned-text-a28bf13d\\psc15selfhost\\.continuation\\text-production.log",
+      "finished": "2026-10-03T10:44:34.805Z",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "logSha256": "f7f7c441c6fe73ec75a8212e3b5e682d617020c35f4b32daa69dcd0e0ec88822"
+    },
+    {
+      "label": "integrated-text",
+      "counts": {
+        "tests": 83,
+        "pass": 83,
+        "fail": 0,
+        "skipped": 0
+      },
+      "root": "C:\\Users\\user\\Documents\\Codex\\2026-10-02\\referenced-chatgpt-conversation-this-is-an\\work\\text-integration-a28bf13d\\psc15selfhost",
+      "preparedSourcePartitionIdentical": true,
+      "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+      "started": "2026-10-03T11:13:21.082Z",
+      "commands": [
+        {
+          "args": [
+            "packages/pskernel-core/scripts/verify-evidence.mjs"
+          ],
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "args": [
+            "scripts/check-owned-kernel-receipt.mjs"
+          ],
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        },
+        {
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "scripts/checked-build.test.mjs",
+            "scripts/checked-enum-build.test.mjs",
+            "scripts/checked-owned-enum.test.mjs",
+            "scripts/checked-owned-nat.test.mjs",
+            "scripts/checked-sum-build.test.mjs",
+            "scripts/checked-owned-sum.test.mjs",
+            "scripts/checked-owned-text.test.mjs",
+            "scripts/checked-text-build.test.mjs"
+          ],
+          "exitCode": 0,
+          "signal": null,
+          "error": null
+        }
+      ],
+      "finished": "2026-10-03T11:14:16.581Z",
+      "logSha256": "e4b32630b358fe5a20ffc3d447e04d68768a25691692d67f73c6afd2d2ff8e0b"
+    }
+  ],
+  "exactProbes": [
+    {
+      "label": "prefix1",
+      "inputSha256": "34f8f9c6ef5b7faa8dca2232bf410c3af6b6afe405e5ba25983f091104efd24d",
+      "admissionCount": 1,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": true,
+        "admissionCount": 1,
+        "steps": 3327
+      }
+    },
+    {
+      "label": "prefix2",
+      "inputSha256": "12f6dd1f7e4f40954557f517cb08e3e5f72048e7e9d00fede82867cce8de2aa2",
+      "admissionCount": 2,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": true,
+        "admissionCount": 2,
+        "steps": 6903
+      }
+    },
+    {
+      "label": "prefix3",
+      "inputSha256": "a29cbd4e84a49b344c662dbdd41b029c6a316067457728802c66887a5befbd73",
+      "admissionCount": 3,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": true,
+        "admissionCount": 3,
+        "steps": 11549
+      }
+    },
+    {
+      "label": "prefix4",
+      "inputSha256": "4e1b0cb16bdc57b55d70b28729ae9e0fb1886bc1b3716150cb71a33b77d23767",
+      "admissionCount": 4,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": false,
+        "errorKind": "unknownConstant",
+        "admissionIndex": 3,
+        "steps": 11779
+      }
+    },
+    {
+      "label": "PsTokenKind-alone",
+      "inputSha256": "314684d1e4e8ece9f834778c1abc0b7ce228d57ee14355f037ea04baf9ce59d7",
+      "admissionCount": 1,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": true,
+        "admissionCount": 1,
+        "steps": 11159
+      }
+    },
+    {
+      "label": "PsToken-with-records-and-kind",
+      "inputSha256": "ea55f72ced88f1acf0b39bdbd0d0ef077ea0046f129357ed50a12c8807be8e9c",
+      "admissionCount": 5,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": true,
+        "admissionCount": 5,
+        "steps": 29186
+      }
+    },
+    {
+      "label": "PsLexError-with-records",
+      "inputSha256": "bba11f309a670ad58f0eabeee6f7739455fcce9410221e2703b96c5ba397fbbb",
+      "admissionCount": 4,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": true,
+        "admissionCount": 4,
+        "steps": 25368
+      }
+    },
+    {
+      "label": "preserved75-full",
+      "inputSha256": "20715347d21c3151b02207cb0b17e4827fa098c1c97861c6438df79b2863a722",
+      "admissionCount": 1556,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": false,
+        "errorKind": "unsupported-inductive-family",
+        "admissionIndex": 80
+      }
+    },
+    {
+      "label": "current79-full",
+      "inputSha256": "9469899a2ac4be5e0d8ff9ad39d63e8f5eb176f01869ce9288dba5e5ea2e3024",
+      "admissionCount": 1615,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "psc-generated-owned",
+        "version": "0.1.0-checker.13",
+        "profile": "owned-utf8-string-literals/10",
+        "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+        "generatedKernelSha256": "6ff1b9ed30c30f4638f123bc8ab8ec6e68ea4c0a6f5a00e06e8ecd5b6279f5b0",
+        "accepted": false,
+        "errorKind": "unsupported-inductive-family",
+        "admissionIndex": 80
+      }
+    }
+  ],
+  "archives": [
+    {
+      "path": "current79-snapshot.json.gz",
+      "origin": "current79/snapshot.json",
+      "sha256": "f2a2518cde84d2713c81aadc2ec0d1da4b4fc83d2f1b212fc2255536dc3589ab",
+      "bytes": 428718,
+      "uncompressedSha256": "1235bc7fa755f2d4a3f7ae2650e735d090a4d58f2d7f50fd2ff57678316bea04",
+      "uncompressedBytes": 3793957
+    },
+    {
+      "path": "current79-admissions.json.gz",
+      "origin": "current79/admissions.json",
+      "sha256": "eb3ee44c1db830a8b9ffe8f2c64c2908b2541db5a5d977a00f554762502f0356",
+      "bytes": 325677,
+      "uncompressedSha256": "9469899a2ac4be5e0d8ff9ad39d63e8f5eb176f01869ce9288dba5e5ea2e3024",
+      "uncompressedBytes": 12280083
+    },
+    {
+      "path": "current79-declarations.json.gz",
+      "origin": "current79/declarations.json",
+      "sha256": "6a7a79ebc9e7881630bfded2387c4480e47bcf0aa5207e3b137a9bace00697b7",
+      "bytes": 361649,
+      "uncompressedSha256": "8db2b043527c2825d40ef8482d2737d50f47c9d43d92f0bcf03e576e9c5a629c",
+      "uncompressedBytes": 12936527
+    },
+    {
+      "path": "current79-summary.json.gz",
+      "origin": "current79/summary.json",
+      "sha256": "c30c58e8c9f99ea04a32a985626de9eee09f335af47395a43032177195302105",
+      "bytes": 189286,
+      "uncompressedSha256": "ae878d9cceb094ea4597ce462f237863179e4c79a2f7f407649b131ab294620e",
+      "uncompressedBytes": 2032523
+    },
+    {
+      "path": "integrated79-snapshot.json.gz",
+      "origin": "integrated prepared source partition",
+      "sha256": "892632320613238ac088e3ac5549e64735196b22311cdec3219df73bd5d86b4e",
+      "bytes": 428742,
+      "uncompressedSha256": "70bdaf7626371d2ed9cf688974b5a0d4263fc5b58f8776f026b5882914f3eed9",
+      "uncompressedBytes": 3794443
+    },
+    {
+      "path": "run-artifacts.json.gz",
+      "origin": "executed scripts and logs including retained failed attempts",
+      "sha256": "c816156813449a396fe39f6bef74762cae5f4155fdf81371e5933251531f6edf",
+      "bytes": 522776,
+      "uncompressedSha256": "715f85008ce49b4a7f615c56e1adadd5b68a2ca5299fab207881202d07d88e19",
+      "uncompressedBytes": 4453039
+    }
+  ]
+}

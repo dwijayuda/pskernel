@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "profile": "PSC1-portable-selfhost/1",
+  "proofScriptLanguageEdition": "ps-0.9-r3",
+  "proofScriptSourceProfile": "ps-standard-0.9-r3",
+  "inheritsForbiddenLeanFormsFrom": "PSC1-selfhost-stable/1",
+  "includeImportClosure": true,
+  "structuralRules": [
+    "recursive-equation-definition",
+    "structural-recursion-call-shape",
+    "term-arithmetic-operator",
+    "scalar-member-capability",
+    "opaque-primitive-match",
+    "explicit-option-constructors",
+    "term-list-append",
+    "term-list-cons",
+    "numeric-tuple-projection",
+    "tuple-construction",
+    "grouped-dot-application",
+    "string-literal-pattern",
+    "boolean-convenience",
+    "to-string-convenience",
+    "value-length-dot-notation",
+    "value-conversion-dot-notation",
+    "leading-dot-term-constructor",
+    "untyped-lambda-binder",
+    "untyped-lambda-let",
+    "untyped-match-let",
+    "untyped-numeric-choice-let",
+    "layout-let-sequencing",
+    "record-update"
+  ],
+  "executableContract": {
+    "pscCheckSourceRoots": true,
+    "pscTypeScriptEntryRoots": true,
+    "pscProofScriptEntryRoots": true
+  }
+}

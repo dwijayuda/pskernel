@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-behavioral-module-interface/1",
+  "fields": [
+    "specificationKey",
+    "effectKey",
+    "resourceKey",
+    "assumptionKey"
+  ],
+  "composition": "psc-certified-module-interface/1",
+  "authority": "interface-evidence-only; reuse validation and cache hits cannot mint CheckedCore/CertifiedSource authority",
+  "currentStatus": "implemented-evidence-bound-exact-reuse",
+  "reusePolicy": "QueryGraphV2 emits consumer-selected exact behavioral reuse obligations; host replay verifies structural projection, all four behavioral subjects and configured evidence before evidence-cache validation.",
+  "implementation": "packages/project/src/Ps/Project/ModuleInterface.lean",
+  "hostEvidence": "scripts/module-interface-evidence.mjs",
+  "cacheIntegration": "scripts/semantic-query-cache.mjs"
+}

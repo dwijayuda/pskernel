@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "target": {
+    "product": "Lean",
+    "version": "4.34.0",
+    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "policy": {
+    "goal": "acceptance-compatible-kernel",
+    "semanticSource": "packages/pskernel-core/src/Ps/KernelCore",
+    "ruleStatusValues": [
+      "implemented-differential",
+      "implemented-source",
+      "missing"
+    ],
+    "featureCompleteWhen": "all required rules are implemented and the conformance suite is green"
+  },
+  "rules": [
+    {
+      "id": "PSK-LEVEL",
+      "area": "universe equality/normalization",
+      "pskernelSymbol": "psKernelLevelEquivalent",
+      "leanLocator": "src/kernel/level.cpp",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-TC-SORT",
+      "area": "sort inference",
+      "pskernelSymbol": "psKernelInferCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::infer_type_core",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-TC-CONST",
+      "area": "constant inference/universe instantiation",
+      "pskernelSymbol": "psKernelInferCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::infer_type_core",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-TC-APP",
+      "area": "application checking",
+      "pskernelSymbol": "psKernelInferCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::infer_app",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-TC-LAM",
+      "area": "lambda inference",
+      "pskernelSymbol": "psKernelInferCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::infer_lambda",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-TC-PI",
+      "area": "Pi inference",
+      "pskernelSymbol": "psKernelInferCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::infer_pi",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-TC-LET",
+      "area": "let inference",
+      "pskernelSymbol": "psKernelInferCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::infer_let",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-TC-LIT",
+      "area": "Nat/String literal inference",
+      "pskernelSymbol": "psKernelInferCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::infer_lit",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-TC-PROJ",
+      "area": "primitive projection inference",
+      "pskernelSymbol": "psKernelInferProjectionWith",
+      "leanLocator": "src/kernel/type_checker.cpp::infer_proj",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-RED-BETA",
+      "area": "beta reduction",
+      "pskernelSymbol": "psKernelWhnfCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::whnf_core",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-RED-ZETA",
+      "area": "let/zeta reduction",
+      "pskernelSymbol": "psKernelWhnfCoreWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::whnf_core",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-RED-DELTA",
+      "area": "definition unfolding",
+      "pskernelSymbol": "psKernelUnfoldDefinition",
+      "leanLocator": "src/kernel/type_checker.cpp::unfold_definition",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-RED-PROJ",
+      "area": "projection reduction",
+      "pskernelSymbol": "psKernelReduceProjCore",
+      "leanLocator": "src/kernel/type_checker.cpp::reduce_proj",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-RED-NAT",
+      "area": "optimized Nat reductions",
+      "pskernelSymbol": "psKernelReduceNatWith",
+      "leanLocator": "src/kernel/type_checker.cpp::reduce_nat",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-RED-QUOT",
+      "area": "Quot lift/ind computation",
+      "pskernelSymbol": "psKernelReduceQuotWith",
+      "leanLocator": "src/kernel/type_checker.cpp::reduce_quot",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-RED-REC",
+      "area": "inductive recursor computation",
+      "pskernelSymbol": "psKernelReduceRecursorWith",
+      "leanLocator": "src/kernel/type_checker.cpp::reduce_recursor",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-DEFEQ-CACHE",
+      "area": "non-transitive pair caches",
+      "pskernelSymbol": "psKernelExprPairSetInsert",
+      "leanLocator": "src/kernel/type_checker.h::state",
+      "status": "implemented-source"
+    },
+    {
+      "id": "PSK-DEFEQ-PROOF",
+      "area": "proof irrelevance",
+      "pskernelSymbol": "psKernelDefEqIsPropWith",
+      "leanLocator": "src/kernel/type_checker.cpp::is_def_eq_proof_irrel",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-DEFEQ-DELTA",
+      "area": "lazy delta ordering",
+      "pskernelSymbol": "psKernelDefEqLazyReductionWithFuel",
+      "leanLocator": "src/kernel/type_checker.cpp::lazy_delta_reduction",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-DEFEQ-FUNETA",
+      "area": "function eta",
+      "pskernelSymbol": "psKernelDefEqLambdaEtaLeftWith",
+      "leanLocator": "src/kernel/type_checker.cpp::try_eta_expansion",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-DEFEQ-STRUCTETA",
+      "area": "structure eta",
+      "pskernelSymbol": "psKernelDefEqEtaStructWith",
+      "leanLocator": "src/kernel/type_checker.cpp::try_eta_struct",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-DEFEQ-STRING",
+      "area": "string literal expansion",
+      "pskernelSymbol": "psKernelDefEqStringLitExpansionWith",
+      "leanLocator": "src/kernel/type_checker.cpp::try_string_lit_expansion",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-DEFEQ-UNIT",
+      "area": "fieldless structure equality",
+      "pskernelSymbol": "psKernelDefEqUnitLikeWith",
+      "leanLocator": "src/kernel/type_checker.cpp::is_def_eq_unit_like",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-AXIOM",
+      "area": "axiom admission",
+      "pskernelSymbol": "psKernelAddAxiom",
+      "leanLocator": "src/kernel/environment.cpp::add_axiom",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-DEF",
+      "area": "definition admission",
+      "pskernelSymbol": "psKernelAddDefinition",
+      "leanLocator": "src/kernel/environment.cpp::add_definition",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-THM",
+      "area": "theorem admission",
+      "pskernelSymbol": "psKernelAddTheorem",
+      "leanLocator": "src/kernel/environment.cpp::add_theorem",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-OPAQUE",
+      "area": "opaque admission",
+      "pskernelSymbol": "psKernelAddOpaque",
+      "leanLocator": "src/kernel/environment.cpp::add_opaque",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-MUTDEF",
+      "area": "unsafe/partial mutual definitions",
+      "pskernelSymbol": "psKernelAddMutualDefinitions",
+      "leanLocator": "src/kernel/environment.cpp::add_mutual",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-QUOT",
+      "area": "Quot initialization",
+      "pskernelSymbol": "psKernelAddQuot",
+      "leanLocator": "src/kernel/quot.cpp",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-IND",
+      "area": "ordinary/indexed inductives",
+      "pskernelSymbol": "psKernelAddSimpleInductive",
+      "leanLocator": "src/kernel/inductive.cpp",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-MUTIND",
+      "area": "mutual inductives",
+      "pskernelSymbol": "psKernelAddSimpleMutualInductive",
+      "leanLocator": "src/kernel/inductive.cpp",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-ADMIT-NESTED",
+      "area": "nested inductive flatten/restore",
+      "pskernelSymbol": "psKernelAddSimpleNestedInductive",
+      "leanLocator": "src/kernel/inductive.cpp",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-NATIVE-BOOL",
+      "area": "Lean.reduceBool native reduction",
+      "pskernelSymbol": "psKernelReduceNative",
+      "leanLocator": "src/kernel/type_checker.cpp::reduce_native",
+      "status": "implemented-differential"
+    },
+    {
+      "id": "PSK-NATIVE-NAT",
+      "area": "Lean.reduceNat native reduction",
+      "pskernelSymbol": "psKernelReduceNative",
+      "leanLocator": "src/kernel/type_checker.cpp::reduce_native",
+      "status": "implemented-differential"
+    }
+  ]
+}

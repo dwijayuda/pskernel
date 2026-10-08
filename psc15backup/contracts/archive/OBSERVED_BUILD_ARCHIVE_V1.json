@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-observed-build-archive/1",
+  "status": "implemented-focused-checks-global-assurance-pending",
+  "owners": [
+    "scripts/observed-build-archive.mjs",
+    "scripts/checked-build.mjs",
+    "scripts/ir-invariant-replay.mjs"
+  ],
+  "producer": "Each emitting checked build publishes NAME.build-archive.json with the exact observed graph and every listed source, compiler-entry, static-host-source, admissions, implementation, acceptance-context, pass-definition, action, execution and target-output byte snapshot. The receipt binds both graph and archive identities and is published last. Check-only mode still returns a receipt without claiming an emission archive.",
+  "format": "Canonical single-file JSON, sorted unique domain/contract-qualified ArtifactIds and canonical base64 bytes. No filesystem paths are extracted; graph source locations are informational only.",
+  "consumerPolicy": {
+    "contract": "psc-observed-build-consumer-policy/1",
+    "expectedGraphId": "independently selected ArtifactId",
+    "allowedAssumptions": "explicit consumer-selected list",
+    "resourceLimits": "optional archive/artifact/aggregate/count/graph byte bounds",
+    "irValidation": "Optional caller-selected configuration: absolute binary/cwd, expectedBinaryId, optional env and resource limits. Never loaded from the archive; every retained verified/specialized IR subject must replay or verification fails closed."
+  },
+  "run": "pscv-verify --build-archive NAME.build-archive.json --policy TRUSTED_LOCAL_POLICY; the standalone distribution additionally requires --manifest-sha256 INDEPENDENTLY_PINNED_HASH",
+  "verification": [
+    "Bound input before copying, parse canonical UTF-8 JSON, reject duplicate/order/schema violations and noncanonical base64.",
+    "Rehash every archived artifact, require the independently selected graph and exactly its listed artifact set.",
+    "Bind inline structured records to their bytes and require every declared ArtifactId reference to resolve.",
+    "Recompute each pass action, definitions, implementation identity, input/output contracts, fingerprints and allowed assumptions with the existing pass verifier. Unsupported evidence checkers are not loaded from the archive.",
+    "When irValidation is explicitly requested, preflight canonical closed IR, pin validator bytes before/after execution and freshly run strict validation. Missing subjects reject; unsupported external link context, exhaustion and infrastructure failure cannot become acceptance."
+  ],
+  "result": "Default Accepted means observed-artifact-integrity-only. Explicit successful closed-IR replay adds closedIrInvariantsVerified and its individual exact subject/validator identities. fullInputClosureEstablished, semanticClaimsVerified, preservationVerified and releaseAccepted remain false. No live checked compiler handle is created; only the independently selected validator may be executed.",
+  "limits": {
+    "maxArchiveBytes": 268435456,
+    "maxArtifactBytes": 134217728,
+    "maxTotalBytes": 201326592,
+    "maxArtifacts": 4096,
+    "maxGraphBytes": 16777216
+  },
+  "remaining": [
+    "discover and bind complete generated compiler, provider, runtime and TypeScript input/tool closure",
+    "fresh independent semantic/preservation evidence",
+    "release semantic lock and licenses/provenance/signatures",
+    "hostile-host isolation and full resource accounting",
+    "linked-module IR invariant replay and validator soundness"
+  ],
+  "releaseAccepted": false,
+  "producerResourcePolicy": {
+    "api": "buildChecked({ archiveResourceLimits })",
+    "cli": [
+      "--archive-max-bytes <canonical nonnegative decimal>",
+      "--archive-max-total-bytes <canonical nonnegative decimal>"
+    ],
+    "defaults": "Existing limits are unchanged; no automatic growth from observed input sizes or compiler/provider choice.",
+    "snapshot": "Only own integer data properties are accepted and frozen before source/compiler loading.",
+    "record": "The receipt records selected producer limits descriptively; an archive verifier always applies its independently selected consumer limits.",
+    "preflight": "Count and aggregate/per-artifact byte checks precede any base64 conversion. Exact canonical archive byte size is preflighted from the empty-data skeleton plus base64 lengths.",
+    "exhaustion": "Typed resource, observed, limit and responsible ArtifactId where applicable; no captured input is omitted and no partial receipt is published.",
+    "nativeIntegration": "The cloud two-native-binary integration explicitly selects 320 MiB aggregate and 448 MiB encoded archive bounds, retaining the 128 MiB per-artifact default. This is resource policy, not weakened semantic or self-host acceptance."
+  }
+}

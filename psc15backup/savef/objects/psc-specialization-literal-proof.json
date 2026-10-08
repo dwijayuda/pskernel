@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "FormalEvidence",
+  "semanticProfile": "ps-0.9-r3",
+  "authorityClass": "formal-evidence",
+  "scope": {
+    "pass": "psc-pass-specialize/1",
+    "slice": "monomorphic-u32-literal-module"
+  },
+  "dependsOn": [
+    "psc-pass-specialize/1",
+    "psc-specialized-ir/1"
+  ],
+  "assumes": [],
+  "claims": [
+    {
+      "id": "psc-specialization-literal-preservation/1",
+      "status": "proved"
+    }
+  ],
+  "evidenceRefs": [
+    "lean:packages/pscv-theory/proof/Ps/Theory/Refinement.lean"
+  ],
+  "payload": {
+    "symbol": "psSpecializationLiteralModulePreserves",
+    "globalPassAssurance": "contract-regression-unproved"
+  },
+  "objectId": "sha256:ab90170527409b0e255724921cf5777855511cdbe19ad483cfc716d2e79e1483"
+}

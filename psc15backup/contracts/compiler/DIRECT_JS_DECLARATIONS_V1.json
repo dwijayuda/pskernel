@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-direct-javascript-declarations/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "implementation": "portable-source-producer-and-writer-with-live-checked-session-routing-and-host-correspondence-checker",
+  "source": "Exact pre-erasure PublicApiIR types. Runtime/Specialized/JsIR are used only to validate correspondence and bind actual exports, never to infer the source API.",
+  "products": [
+    {
+      "domain": "declarations-output",
+      "contract": "psc-direct-javascript-declarations/1",
+      "suffix": ".d.ts"
+    },
+    {
+      "domain": "declaration-signatures",
+      "contract": "psc-source-declaration-signatures/1",
+      "suffix": ".declaration-signatures.json"
+    },
+    {
+      "domain": "declaration-binding",
+      "contract": "psc-direct-javascript-declaration-binding/1",
+      "suffix": ".declaration-binding.json"
+    }
+  ],
+  "supportedSourceTypes": [
+    "Exact built-in scalar constants with no universe arguments",
+    "Nondependent runtime function binders, including higher-order function parameters",
+    "Array with zero universe arguments and a supported element type, matching psPreludeEnvArray0 / psPreludeArrayOf"
+  ],
+  "genericProjection": "The structural source-signature projection retains a prefix of syntactically non-Prop type binders, structured source names and de Bruijn references. Closed publication rejects generics. Explicit uniform publication requires a real retained generic function export, alpha-maps source parameter indices to observed RuntimeIR parameter names, and checks exact arity and function shape.",
+  "validation": [
+    "Bounded canonical source/IR/table decoding and exact artifact kinds/bytes.",
+    "Complete observed erasure inventory and source-name/order correspondence.",
+    "RuntimeIR and VerifiedIR bytes identical; closed specialization reruns the independent correspondence relation, while uniform selection requires its exact tagged payload to preserve VerifiedIR bytes.",
+    "Complete selected IR/JsIR declaration and parameter inventories agree.",
+    "Each source-derived signature equals its observed RuntimeIR signature, including generic alpha-correspondence and flattened runtime calling convention.",
+    "Every JsIR declaration has exactly one source-owned export; actual names come from observation, not name-mangling guesses.",
+    "Bounded verification pins all seven profile-specific subjects and selected profile, then reconstructs all three products. Common graph/bundle/archive routing supports both closed and explicitly selected uniform profiles."
+  ],
+  "representation": {
+    "wordSize": 64,
+    "precision": "JavaScript runtime representation, without refinement types for Nat bounds, integer ranges, Unicode scalar constraints or float precision.",
+    "valueDeclarations": "Private collision-free declaration aliases with explicit ES export aliases retain exact emitted names.",
+    "emptyModule": "Explicit export {} preserves module status."
+  },
+  "independence": "Requested declaration failure does not decide kernel acceptance or executable-only output. Origin and generated-position maps are not dependencies of declarations.",
+  "toolchain": "Generation never calls tsc. The pinned repository TypeScript compiler is a focused independent consumer check only.",
+  "unsupported": [
+    "Generic runtime exports under the current closed specializer",
+    "Dependent value types, proposition erasure inference, higher-rank generics",
+    "Named type aliases, structures/inductives and type-level computation",
+    "Declaration position maps",
+    "Runtime refinements, independently proved source projection or executable preservation",
+    "Generic constants that would require inventing a callable factory"
+  ],
+  "assumptions": [
+    "Exact checked PublicApiIR projection",
+    "Observed erasure dispositions",
+    "Strict source/target IR validity",
+    "Selected JS printer exports the JsIR declaration inventory"
+  ],
+  "authority": "descriptive-product-only",
+  "globalPreservationProved": false,
+  "releasePromotion": false,
+  "selectedProfiles": [
+    "psc-direct-js-declarations-closed-structural/1",
+    "psc-direct-js-declarations-uniform-structural/1"
+  ],
+  "portableSourceProjection": {
+    "model": "packages/compiler-ir/src/Ps/CompilerIr/SourceSignature.lean",
+    "codec": "packages/compiler-ir/src/Ps/CompilerIr/SourceSignatureEncode.lean",
+    "logicalOwner": "public-api",
+    "algorithm": "Explicit task/value worklist and bounded prefix scan; curried structural fuel recursion; lexical scope markers preserve source generic indices and reject dependent runtime values.",
+    "resourcePolicy": "At most 128 prefix binders/scope entries/type depth; caller-selected positive work-step budget (default 400000) plus separately bounded prefix work. The host comparator counts source nodes, so resource units are intentionally not equated.",
+    "output": "Canonical psc-source-signature-structural/1 signature objects retain exact source binder names and visibility. No source normalization, target inference, live authority or semantic theorem.",
+    "status": "portable-producer-and-native-host-comparison-implemented"
+  },
+  "portableDeclarationWriter": {
+    "path": "packages/interface-ts/src/Ps/InterfaceTs/Declarations.lean",
+    "owner": "interface-ts",
+    "entry": "psTsEmitDeclarations",
+    "profile": "PSC1-portable-selfhost/1",
+    "inputs": "Body-free PublicApiIR plus increasing source-index/exact-export-name requests from independently checked erasure/export binding; closed or uniform JavaScript64 profile.",
+    "algorithm": "Single forward declaration scan and explicit type/output worklist; structural fuel recursion and balanced text builder. Generic indices, ASCII export names, source-index order/range and output budgets reject explicitly.",
+    "resourcePolicy": "Positive caller-selected writer steps and output bytes; default 1000000 steps and 64 MiB. Each selected source projection separately uses its 400000-step/128-depth limit. Identifier scanning is bounded by its output-sized byte length. Projection resource units are not writer steps.",
+    "authority": "Candidate bytes only: caller must validate complete source/runtime/export correspondence and uniqueness; no standalone inventory or type-preservation authority.",
+    "status": "portable-producer-live-checked-service-routing-and-independent-host-byte-check-implemented",
+    "validation": "Actual native closed/uniform signature/writer byte comparisons and pinned TypeScript consumption passed through step 15 at 48bf311. Its full portable source checks passed, but TypeScript emission of the newly reached driver closure failed and is under typed diagnosis. Native direct-product transport and full portable execution still await cloud checks; no completed self-hosting claim."
+  },
+  "livePortableRouting": {
+    "requestContract": "psc-ts-declaration-request/1",
+    "codec": "packages/interface-ts/src/Ps/InterfaceTs/Request.lean",
+    "driver": "packages/driver-js/src/Ps/DriverJs/Declarations.lean",
+    "entry": "psCompilerJavaScriptDeclarationsFromPrepared",
+    "selection": "Only explicitly requested declarations call this entry. The immutable checked-session JS representation policy determines its declaration profile; absent/failing/malformed API rejects the requested product without a fallback.",
+    "flow": "Independent host factory checks exact source/runtime/export subjects, supplies its ordered binding requests, then compares portable bytes exactly before publication. The same frozen admitted prepared module is used; no re-preparation or second executable emission.",
+    "limits": "Canonical four-item JSON array [contract, declarationProfile, decimal-string outputByteLimit, [decimal-string sourceIndex, exportName][]]. Input <=1 MiB, nesting <=3 and <=4098 arrays before parsing, at most 4096 requests, source indices <=1000000, output limit 1..64 MiB, writer steps <=1000000. Host checks request and output budgets and fresh liveness.",
+    "authority": "Descriptive product only. Exact byte agreement is not source/runtime semantic preservation or declaration target acceptance.",
+    "nativeTransport": "psc-checked-seed-products/1 keeps prepared source alive while the host derives exact bindings, then compares the native portable writer's bytes. Both host transports share createPortableJsDeclarationRequest in scripts/js-declarations.mjs."
+  }
+}

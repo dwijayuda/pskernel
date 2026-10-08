@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-bootstrap-assurance/1",
+  "rule": "bootstrap properties are independent evidence classes",
+  "levels": [
+    {
+      "id": "B0",
+      "name": "source-profile-closure",
+      "status": "implemented-gated"
+    },
+    {
+      "id": "B1",
+      "name": "canonical-source-representability",
+      "status": "implemented-gated"
+    },
+    {
+      "id": "B2",
+      "name": "reference-generation",
+      "status": "implemented"
+    },
+    {
+      "id": "B3",
+      "name": "self-application",
+      "status": "implemented-gated"
+    },
+    {
+      "id": "B4",
+      "name": "semantic-fixed-point",
+      "status": "implemented-gated"
+    },
+    {
+      "id": "B5",
+      "name": "artifact-fixed-point",
+      "status": "implemented-gated"
+    },
+    {
+      "id": "B6",
+      "name": "preservation-connected-self-host",
+      "status": "partial-proved-slices"
+    },
+    {
+      "id": "B7",
+      "name": "direct-js-bootstrap",
+      "status": "implemented-gated"
+    },
+    {
+      "id": "B8",
+      "name": "direct-wasm-bootstrap",
+      "status": "implemented-gated"
+    },
+    {
+      "id": "B9",
+      "name": "diverse-bootstrap-ddc",
+      "status": "campaign-runner-implemented-real-diverse-evidence-pending"
+    },
+    {
+      "id": "B10",
+      "name": "verified-bootstrap",
+      "status": "target-incomplete"
+    }
+  ],
+  "evidenceSources": {
+    "B0": [
+      "check:portable-selfhost-profile",
+      "check:source:all"
+    ],
+    "B3": [
+      "fixed-point",
+      "direct self-host workflows"
+    ],
+    "B7": [
+      "test:direct-js-selfhost"
+    ],
+    "B8": [
+      "test:direct-wasm-selfhost"
+    ],
+    "B6": [
+      "psc-erasure-preservation/0",
+      "psc-specialization-literal-preservation/1"
+    ],
+    "B9": [
+      "scripts/diverse-bootstrap.mjs",
+      "scripts/diverse-bootstrap.test.mjs"
+    ]
+  },
+  "antiConflation": [
+    "fixed-point-is-not-compiler-correctness",
+    "reproducibility-is-not-ddc",
+    "different-backend-is-not-automatically-diverse",
+    "verified-source-is-not-verified-executable"
+  ],
+  "observedEvidence": [
+    "contracts/bootstrap/RUST_FIXED_POINT_V1.json"
+  ],
+  "b9Implementation": {
+    "contract": "psc-diverse-bootstrap-campaign/1",
+    "relation": "caller-selected exact or independently checked same-target relation",
+    "diversity": "required axes must differ explicitly; different backend alone is not accepted as diversity",
+    "authority": "audit-record-only",
+    "remaining": "run genuinely diverse compiler/toolchain routes against the same compiler source and comparison artifact"
+  }
+}

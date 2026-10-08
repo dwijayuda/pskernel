@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-core-renaming/1",
+  "status": "supported-slice-implementation-global-preservation-unproved",
+  "owner": "packages/theory-bridge/src/Ps/TheoryBridge/Translate.lean",
+  "profiles": ["PSC1-selfhost-stable/1", "PSC1-portable-selfhost/1"],
+  "scope": "Closed, bijective constant renaming between axiom/definition/theorem views with an identical declared semantic profile. Source and destination theories must independently pass their actual kernel before any logical authority is claimed.",
+  "translation": "Renames declaration and constant names; preserves universe parameters, literal payloads and binder/de Bruijn structure; recursively translates applications, lambdas, foralls and lets. Free locals, metavariables, loose bound variables, unknown universe parameters, unknown symbols and projections fail closed.",
+  "validation": "Total unique source and destination symbol maps, exact axiom-map coverage and agreement, explicit source and destination axiom allowlists, and alpha-structural equality of actual translated types and bodies against destination declarations. Empty/changed identities and unknown features are rejected.",
+  "unsupported": ["cross-foundation interpretations", "inductives/constructors/recursors", "projections", "opaque/partial declarations", "additional destination declarations", "general proof-term reconstruction"],
+  "authority": "The result is a syntactic relation with source/destination context, not CheckedCore or a theorem. preservation remains global-preservation-unproved. Artifact identity strings still require host byte binding.",
+  "focusedChecks": "19 Lean executable boundary cases, PSC1 check of 140 declarations, portable structural profile and all-portable source audit. These checks do not prove global translation preservation.",
+  "remaining": ["canonical source/destination/admissions artifact binding", "registered offline checker adapter and live kernel-bound inputs", "general theory morphisms and explicit preservation certificates", "Lean-checked renaming preservation theorem"]
+}

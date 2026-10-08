@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-algorithmic-defeq-cache/1",
+  "semanticProfile": "lean4.34-core",
+  "judgment": "KernelAlgorithmicDefEq",
+  "relationProperties": {
+    "soundAgainstDeclarativeConversion": true,
+    "complete": false,
+    "transitive": false,
+    "equivalenceClosurePermitted": false
+  },
+  "permittedCacheOperations": [
+    "exact-query-pair-memoization"
+  ],
+  "forbiddenCacheOperations": [
+    "union-find-equivalence-closure",
+    "transitive-closure",
+    "neighbor-query-substitution"
+  ],
+  "requiredEvidence": [
+    "positive-hit-replays-uncached-judgment",
+    "query-order-regression-corpus"
+  ],
+  "currentOwners": [
+    "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean",
+    "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq"
+  ]
+}

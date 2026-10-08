@@ -1,0 +1,24 @@
+{
+  "name": "@proofscript/pscv-theory",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": false,
+    "portable": true,
+    "implementationProfile": "PSC1-portable-selfhost/1",
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "declarative-theory-and-refinement-seed"
+  },
+  "dependencies": {
+    "@proofscript/pskernel-core": "0.0.0-dev",
+    "@proofscript/erasure-next": "0.0.0-dev",
+    "@proofscript/compiler-ir-next": "0.0.0-dev"
+  }
+}

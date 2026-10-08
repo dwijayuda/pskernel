@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "profile": "linux-x64-node22-small-workloads-v1",
+  "samples": 3,
+  "decision": "Every sample must meet each absolute ceiling; relative speed is informational.",
+  "native": {
+    "pskernel_cold_whnf_ns": { "unit": "ms", "limit": 20, "operations": 1000 },
+    "pskernel_cold_defeq_ns": { "unit": "ms", "limit": 20, "operations": 1000 },
+    "beta_pskernel_ns": { "unit": "ms", "limit": 20, "operations": 1000 },
+    "application_check_pskernel_ns": { "unit": "ms", "limit": 20, "operations": 1000 },
+    "dependent_application_check_pskernel_ns": { "unit": "ms", "limit": 20, "operations": 1000 },
+    "recursor_pskernel_ns": { "unit": "ms", "limit": 50, "operations": 1000 },
+    "inductive_admission_pskernel_ns": { "unit": "ms", "limit": 100, "operations": 100 },
+    "indexed_inductive_admission_pskernel_ns": { "unit": "ms", "limit": 100, "operations": 100 },
+    "mutual_inductive_admission_pskernel_ns": { "unit": "ms", "limit": 200, "operations": 100 },
+    "nested_inductive_admission_pskernel_ns": { "unit": "ms", "limit": 300, "operations": 100 },
+    "nested_wide_admission_pskernel_ns": { "unit": "ms", "limit": 250, "operations": 50 },
+    "structural_defeq_pskernel_ns": { "unit": "ms", "limit": 20, "operations": 1000 },
+    "peakRss": { "unit": "MiB", "limit": 256 }
+  },
+  "cross": {
+    "native.beta_whnf_16": { "unit": "ms", "limit": 50, "operations": 1000 },
+    "native.beta_defeq_16": { "unit": "ms", "limit": 20, "operations": 1000 },
+    "native.checked_application_8": { "unit": "ms", "limit": 20, "operations": 1000 },
+    "native.peakRss": { "unit": "MiB", "limit": 256 },
+    "js.beta_whnf_16": { "unit": "ms", "limit": 20000, "operations": 1000 },
+    "js.beta_defeq_16": { "unit": "ms", "limit": 3000, "operations": 1000 },
+    "js.checked_application_8": { "unit": "ms", "limit": 2000, "operations": 1000 },
+    "js.import": { "unit": "ms", "limit": 500 },
+    "js.firstCall.beta_whnf_16": { "unit": "ms", "limit": 100 },
+    "js.firstCall.beta_defeq_16": { "unit": "ms", "limit": 100 },
+    "js.firstCall.checked_application_8": { "unit": "ms", "limit": 100 },
+    "js.admit1": { "unit": "ms", "limit": 5, "operations": 1 },
+    "js.admit128": { "unit": "ms", "limit": 250, "operations": 128 },
+    "js.reject4": { "unit": "ms", "limit": 10, "operations": 4 },
+    "js.peakRss": { "unit": "MiB", "limit": 512 }
+  }
+}

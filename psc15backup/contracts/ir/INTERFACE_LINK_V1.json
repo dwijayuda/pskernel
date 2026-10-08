@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-interface-link/1",
+  "runtimeValuesProfile": "psc-runtime-values/1",
+  "runtimeSemantics": "psc-runtime-semantics/1",
+  "validator": "packages/compiler-ir/src/Ps/CompilerIr/Interface.lean",
+  "linkValidator": "packages/compiler-ir/src/Ps/CompilerIr/Link.lean",
+  "scope": "Compatibility of declared runtime values and dependency graphs. This does not prove a foreign implementation obeys its declared contract or provide machine ABI adapters.",
+  "rules": [
+    "The default VerifiedIR validator rejects external imports without an explicit interface context.",
+    "An explicit context has unique module identities, valid closed exports, resolved public shapes, a supported semantic/value profile, target availability and allowed capability requirements.",
+    "Imports bind the exact selected module and exported name; function and value types must match.",
+    "Every named type reachable from an import has identical public field/constructor order, names, types and generic binders in provider and consumer, including recursive layouts.",
+    "Linked-module exports are derived from actual declarations and every body is independently revalidated; callers cannot substitute an asserted export signature for a body.",
+    "All imports resolve within the complete graph or explicit host contracts. Private exports, duplicate module identities and dependency cycles reject.",
+    "A module declares at least the capabilities required by each dependency, so capabilities cannot disappear through transitive links.",
+    "The result retains selected interfaces, target policy and a deterministic dependency order. Host contracts retain explicit assumption identities.",
+    "Validation depth exhaustion rejects; it never changes an unknown result into acceptance."
+  ],
+  "supportedRepresentation": "The existing target-neutral VerifiedIR types: primitive values, owned functions, Array, named records and variants. Representation equality is nominal and exact; no structural cast, foreign pointer, borrowed lifetime or erased type is inferred.",
+  "unsupported": [
+    "polymorphic exported declarations at the external module boundary",
+    "cyclic module initialization",
+    "foreign resource/handle ownership and destruction protocols",
+    "borrowed values, async streams and futures",
+    "automatic WIT, native ABI or foreign calling-convention conversion"
+  ],
+  "remaining": [
+    "target-specific adapter implementation and independent validation",
+    "artifact/evidence binding of each dependency interface and resulting linked artifacts",
+    "global semantic link preservation and validator soundness"
+  ],
+  "assurance": "implementation-available-global-preservation-unproved",
+  "targetAdapterProfiles": [
+    "contracts/ir/JS_SCALAR_ABI_V1.json"
+  ]
+}

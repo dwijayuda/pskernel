@@ -1,0 +1,10 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const seed=JSON.parse(await readFile(path.join(root,"theory/core/DECLARATIVE_CORE_SEED_V1.json"),"utf8"));
+if(seed.contract!=="psc-declarative-core-seed/1"||seed.status!=="definition-seed-unproved"||seed.noProofClaim!==true) throw new Error("PSC_THEORY_SEED_STATUS");
+const required=["HasType","DeclarativeConversion","KernelAlgorithmicDefEq","AdmitsDeclaration"];
+for(const judgment of required) if(!seed.judgments.includes(judgment)) throw new Error("PSC_THEORY_SEED_JUDGMENT: "+judgment);
+for(const target of seed.theoremTargets??[]) if(target.status!=="target-unproved") throw new Error("PSC_THEORY_SEED_FALSE_PROOF: "+target.id);
+process.stdout.write("PSCV_DECLARATIVE_THEORY_SEED: PASS ("+seed.theoremTargets.length+" explicit unproved targets)\n");

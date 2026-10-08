@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "contract": "spkf-local-prototype/1",
+  "hashDomain": "spkf-local-prototype/1\\u0000",
+  "requiredFields": [
+    "schemaVersion",
+    "kind",
+    "semanticProfile",
+    "authorityClass",
+    "scope",
+    "dependsOn",
+    "assumes",
+    "claims",
+    "evidenceRefs",
+    "payload",
+    "objectId"
+  ],
+  "claimStatuses": [
+    "proved",
+    "validated",
+    "empirical",
+    "target-unproved",
+    "advisory"
+  ],
+  "authorityClasses": [
+    "semantic-authority",
+    "validation-authority",
+    "formal-evidence",
+    "empirical-evidence",
+    "provenance-evidence",
+    "advisory"
+  ]
+}

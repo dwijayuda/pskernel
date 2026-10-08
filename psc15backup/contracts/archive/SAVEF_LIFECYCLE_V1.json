@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-savef-lifecycle/1",
+  "status": "implementation-available-assurance-pending",
+  "owner": "scripts/savef-lifecycle.mjs",
+  "failureKnowledge": "psc-failure-knowledge/1 binds context, scope, failed strategy, reproducer, evidence, validity horizon and supersession. Exact validity and byte checks still return advisory authority only.",
+  "migration": "psc-knowledge-migration/1 binds source/destination objects and contexts, transformation, preservation claim and explicit losses. Caller selects exact subject/checker/claim class and allowed losses; registered certificate replay is required. Destination validity is always a separate fresh check.",
+  "reuse": "A live knowledge handle requires current graph validity. A host-registered operation records actual task/input/output/knowledge IDs. A live use handle can create a psc-reuse-event/1 only after a host-selected output validator accepts the exact task/output/use subject. Serialized, cross-task, revoked and consumed handles cannot create events.",
+  "eventFields": ["consumerTaskId", "consumedKnowledgeIds", "useId", "useType", "acceptedOutputId", "counterfactualArm", "costObservation", "assuranceBefore", "assuranceAfter"],
+  "authority": "Observed accepted reuse under explicit trusted operation/output adapters; no causal productivity or global theorem claim. Retrieval alone produces zero reuse events.",
+  "realOperation": "contracts/archive/SAVEF_WASM_LITERAL_REUSE_V1.json: actual pinned Wasm literal artifact reuse, independent certificate replay and fresh output validation with source-byte implementation witnesses; no retrieval-only event or compiler-preservation claim.",
+  "remaining": ["broader theorem/interface/pass operation adapters and complete implementation closure", "persistent index and supersession closure", "independent migration preservation proofs", "resource and concurrent-host hardening"]
+}

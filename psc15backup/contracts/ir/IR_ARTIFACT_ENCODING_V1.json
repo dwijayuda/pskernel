@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-runtime-ir-json/1",
+  "encoder": "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+  "decoder": "scripts/ir-artifact.mjs",
+  "representation": "Canonical JSON tagged arrays, preserving every constructor tag, ordered binder/field/constructor/alternative list, type argument and body; arbitrary-precision integers use canonical decimal strings. Primitive/intrinsic tags are explicit and exhaustive.",
+  "moduleTuple": [
+    "psc-runtime-ir-json/1",
+    "ordered imports",
+    "ordered structures",
+    "ordered inductives",
+    "ordered declarations"
+  ],
+  "roles": "RuntimeIR, VerifiedIR and SpecializedIR use distinct artifact domains. The encoding carries no checked flag or transferable authority; even invalid construction IR is encodable.",
+  "bounds": "Portable type/expression encoding uses decreasing depth fuel; exhaustion is an error. Host decoding enforces byte/depth/node bounds and iteratively validates the complete schema. The current pure encoder does not claim a global allocation/CPU budget.",
+  "pipeline": {
+    "implementation": "packages/driver-ts/src/Ps/DriverTs/Stages.lean",
+    "meaning": "A single actual erasure, validation and TypeScript-emission execution returns snapshots of its stage values plus the target. The host requires the original live checked handle and re-derives admissions before invoking it. The native seed emits stage fields only after the explicit checked-host emit response.",
+    "production": "checked-build records separate source-check, Core-to-RuntimeIR, RuntimeIR-validation, and VerifiedIR-to-TypeScript edges, then the existing tsc edge. All listed stage bytes are retained in the archive.",
+    "compatibility": "Older compiler/seed APIs with no stage fields retain explicitly composite coverage. A present but malformed/failing staged API cannot fall back to a legacy emitter. Validation snapshots must preserve exact IR bytes; backend interior lowering/printing remain composite."
+  },
+  "directJavaScriptPipeline": {
+    "implementation": "packages/driver-js/src/Ps/DriverJs/Stages.lean",
+    "meaning": "A single staged execution strictly validates erasure and specialization output, lowers once to JsIR, structurally validates and snapshots that exact JsIR, and prints the same value.",
+    "graph": "Observed graph edges separately retain source checking/certification where present, erasure, strict IR validation, runtime interface, ABI plan, specialization, JsIR lowering and JavaScript printing. The archive replays supported scoped relations; global preservation is unproved.",
+    "remaining": "Direct-JS promotion, complete lowering/printer preservation and independently established assurance remain pending."
+  },
+  "directWasmPipeline": {
+    "implementation": "packages/driver-wasm/src/Ps/DriverWasm/Stages.lean",
+    "meaning": "A single staged execution strictly validates erasure and specialization output, lowers once, completes the private bootstrap ABI, validates and snapshots the exact WasmIR, and encodes the same value.",
+    "graph": "Observed graph edges separately retain source checking/certification where present, erasure, strict validation, runtime interface, specialization, WasmIR lowering/ABI completion, and binary encoding.",
+    "remaining": "Broader target ABI adapters, full recursive-type equivalence and lowering/ABI/encoder preservation remain pending. The represented profile has portable operand/control/local/GC typing; the recorded 166c6a3 whole-Wasm fixed point is a scoped observation only."
+  },
+  "assurance": "Encoding/schema integrity and observed stage provenance only. The strict validator, erasure and emitter remain explicitly trusted unless independent evidence is attached.",
+  "globalPreservation": "unproved",
+  "remaining": [
+    "independent erasure/specialization/backend preservation evidence",
+    "Rust SpecializedIR and target-interior snapshots for all backends",
+    "complete generated compiler/provider/runtime/tsc input closure",
+    "portable total resource policy"
+  ],
+  "portableDecoder": "packages/compiler-ir/src/Ps/CompilerIr/Decode.lean",
+  "closedInvariantReplay": {
+    "contract": "psc-closed-ir-invariant-replay/1",
+    "portableOwner": "packages/compiler-ir/src/Ps/CompilerIr/ValidateArtifact.lean",
+    "nativeEntry": "host/src/Ps/Host/IrReplay.lean",
+    "hostOwner": "scripts/ir-invariant-replay.mjs",
+    "constructionBoundary": "Decoding yields construction IR only. Exact canonical re-encoding is required before fresh strict validation.",
+    "scope": "Closed modules only. External imports require separate link-context replay and decline rather than accept.",
+    "authority": "No serialized artifact creates CheckedCore or CertifiedSource; a successful report checks IR invariants only.",
+    "trust": "Caller pins native validator bytes and selects a stable executable path/runtime. Global decoder/validator soundness and hostile-host isolation are unproved."
+  },
+  "linkedInvariantReplay": {
+    "contract": "psc-linked-ir-invariant-replay/1",
+    "encoding": "psc-ir-link-json/1",
+    "portableOwner": "packages/compiler-ir/src/Ps/CompilerIr/LinkArtifact.lean",
+    "hostOwners": [
+      "scripts/ir-link-artifact.mjs",
+      "scripts/ir-invariant-replay.mjs"
+    ],
+    "tuple": [
+      "psc-ir-link-json/1",
+      "[target, allowedCapabilities]",
+      "ordered host interface contracts",
+      "ordered [moduleId, exportNames, declaredCapabilities, canonical raw IR] units"
+    ],
+    "hostContractTuple": [
+      "moduleId",
+      "semanticProfile",
+      "abiProfile",
+      "targets",
+      "requiredCapabilities",
+      "origin tag",
+      "structures",
+      "inductives",
+      "exports"
+    ],
+    "consumerPolicy": "The consumer chooses the exact target/capability sequence and allowlists artifact identities of complete host contracts. An archived assumption label cannot authorize a new signature/layout. Linked exports are derived from actual declarations by the portable validator.",
+    "validation": "Exact canonical re-encoding, strict body/signature/layout checks, declared exports, capability propagation and acyclic dependency ordering. Host contract implementation behavior remains an explicit pinned assumption.",
+    "archive": "Optional irLinkValidation supplies one or more consumer-selected context artifacts and a pinned validator. Every retained verified/specialized IR subject must be covered by exact canonical bytes in a freshly accepted context; closed and linked replay modes are mutually exclusive. Contexts are not automatically discovered or given source authority.",
+    "resourceScope": "Each context is bounded in bytes/depth/nodes/native wall time/output; aggregate context bytes and count use archive limits. This is not a process sandbox or a globally proved cost bound.",
+    "authority": "none",
+    "preservation": "unproved",
+    "validationStatus": "focused-cloud-and-portable-validated",
+    "validationEvidence": {
+      "commit": "55270430412cf3bebce73249a4e64aab78890f28",
+      "workflowRun": 37647567801,
+      "job": 112882220062,
+      "conclusion": "success",
+      "scope": "complete main cloud workflow, native link/archive corpus and explicit PSC1 LinkArtifact source check"
+    }
+  }
+}

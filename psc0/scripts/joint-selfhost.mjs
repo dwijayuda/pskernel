@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -96,119 +96,206 @@ async function ensureCompiler() {
   return assertCompilerReceipt();
 }
 
+// Fully validated Lean-native PSC0 emission is the TypeScript/JavaScript
+// reference. The generated-JS compiler must still independently prepare,
+// elaborate, admit and emit the same TypeScript source: it cannot inherit
+// this checking decision. Identical bytes may share one expensive pinned
+// TypeScript 5.8.3 compile, without disabling its strict type checker.
 async function generate() {
   const kernelSource = await analyzeKernelClosure();
-  const compilerReceipt = await ensureCompiler();
+  await ensureCompiler();
   const compilerSha = await digestFile(compiler);
   const nativeSha = await digestFile(native);
+  const nativeJs = path.join(out, 'native/kernel/index.js');
+  const nativeTs = path.join(out, 'native/kernel/index.ts');
+  const nativeAdmissionsPath = path.join(out, 'native/kernel/index.admissions.json');
+  const nativeReceiptPath = path.join(out, 'native/kernel/index.checked.json');
+  for (const required of [nativeJs, nativeTs, nativeAdmissionsPath, nativeReceiptPath]) {
+    if (!existsSync(required)) {
+      throw new Error('PSC0_JOINT_NATIVE_REFERENCE_MISSING: ' + relative(required));
+    }
+  }
+  const reference = await readJson(nativeReceiptPath);
+  const nativeSnapshot = await readCheckedSourceSnapshot(path.join(root, kernelEntryRelative));
+  const expectedProvider = checkedKernelIdentity('pskernel-core');
+  if (reference.kind !== 'psc2-checked-build' || reference.schemaVersion !== 3 ||
+      reference.compiler?.engine !== 'native-seed' ||
+      reference.compiler?.sha256 !== await digestFile(defaultCheckedSeed) ||
+      reference.sourceCount !== kernelSource.moduleCount ||
+      reference.sourceClosureSha256 !== nativeSnapshot.closureSha256 ||
+      (await digestFile(nativeTs)) !== reference.typeScriptSha256 ||
+      (await digestFile(nativeJs)) !== reference.javaScriptSha256 ||
+      (await digestFile(nativeAdmissionsPath)) !== reference.canonicalAdmissionsSha256 ||
+      Object.entries(expectedProvider).some(([field, value]) => reference.provider?.[field] !== value)) {
+    throw new Error('PSC0_JOINT_NATIVE_REFERENCE_INVALID');
+  }
+  // A cached native receipt never authorizes the JS compiler or checker:
+  // re-admit the canonical stream with the current native provider.
+  const nativeDecision = checkCoreAdmissions(await readFile(nativeAdmissionsPath, 'utf8'));
+  if (!nativeDecision.accepted) {
+    throw new Error('PSC0_JOINT_NATIVE_REFERENCE_KERNEL_REJECTED: ' +
+      String(nativeDecision.errorKind ?? nativeDecision.message));
+  }
+  console.log('PSC0_JOINT_NATIVE_REFERENCE: PASS typeScriptBytes=' +
+    (await readFile(nativeTs)).length + ' admissionsSha256=' + reference.canonicalAdmissionsSha256);
+
   const bootstrapWorkspace = path.join(out, 'bootstrap/workspace');
   const selfhostWorkspace = path.join(out, 'selfhost/workspace');
+  const bootstrapTs = path.join(out, 'bootstrap/source/index.ts');
+  const selfhostTs = path.join(out, 'selfhost/source/index.ts');
   const bootstrapJs = path.join(out, 'bootstrap/kernel/index.js');
   const selfhostJs = path.join(out, 'selfhost/kernel/index.js');
-
-  // Deliberately retranslate source to avoid cached output authorizing changed source.
   run(process.execPath, [
     'scripts/bootstrap-project.mjs', kernelEntryRelative, relative(bootstrapWorkspace),
   ], 1800000);
   const firstManifest = await loadManifest(bootstrapWorkspace, 'bootstrap');
   if (firstManifest.sourceCount !== kernelSource.moduleCount) {
-    throw new Error('PSC0_JOINT_KERNEL_CLOSURE_SOURCE_COUNT_MISMATCH');
+    throw new Error('PSC0_JOINT_KERNEL_SOURCE_COUNT_MISMATCH');
   }
   const sourceKey = hash([
-    'psc0-joint-checked-kernel/1', kernelSource.sourceSha256,
+    'psc0-joint-source-equivalent/2', kernelSource.sourceSha256,
     firstManifest.closureSha256, compilerSha, nativeSha,
-    JSON.stringify(checkedKernelIdentity('pskernel-core')),
+    reference.typeScriptSha256, reference.canonicalAdmissionsSha256,
+    JSON.stringify(expectedProvider),
   ].join('\n'));
-  const stored = path.join(out, 'kernel-fixed-point.json');
-  let old;
-  try { old = await readJson(stored); } catch { /* fresh build */ }
-  // Reuse only if the entire checked content (including provider executable)
-  // is identical and the emitted output hashes still match the checked receipts.
-  if (old?.sourceKey !== sourceKey) old = null;
-  let firstReceipt;
-  if (old?.bootstrapChecked && existsSync(bootstrapJs)) {
-    try {
-      firstReceipt = await readJson(bootstrapJs.replace(/\.js$/u, '.checked.json'));
-      await assertKernelOutput(bootstrapJs, firstReceipt, firstManifest, compilerSha);
-      console.log('PSC0_JOINT_REUSE_CHECKED_BOOTSTRAP: PASS');
-    } catch { firstReceipt = undefined; }
+  const evidencePath = path.join(out, 'kernel-fixed-point.json');
+  let previous;
+  try { previous = await readJson(evidencePath); } catch { /* fresh */ }
+  if (previous?.sourceKey !== sourceKey) previous = undefined;
+
+  async function assertCheckedSource(tsFile, receipt, manifest, label) {
+    if (receipt.kind !== 'psc2-checked-typescript' ||
+        receipt.schemaVersion !== 3 || receipt.emission !== 'typescript-only' ||
+        receipt.compiler?.engine !== 'generated-js' ||
+        receipt.compiler?.sha256 !== compilerSha ||
+        receipt.sourceCount !== manifest.sourceCount ||
+        receipt.sourceClosureSha256 !== manifest.closureSha256 ||
+        receipt.typeScriptSha256 !== await digestFile(tsFile) ||
+        receipt.canonicalAdmissionsSha256 !==
+          await digestFile(tsFile.replace(/\.ts$/u, '.admissions.json')) ||
+        Object.entries(expectedProvider).some(([field, value]) => receipt.provider?.[field] !== value)) {
+      throw new Error('PSC0_JOINT_GENERATED_SOURCE_RECEIPT_INVALID: ' + label);
+    }
+    if (receipt.typeScriptSha256 !== reference.typeScriptSha256) {
+      throw new Error('PSC0_JOINT_GENERATED_TYPESCRIPT_NOT_EQUIVALENT: ' + label +
+        ' generated=' + receipt.typeScriptSha256 + ' native=' + reference.typeScriptSha256);
+    }
+    if (receipt.canonicalAdmissionsSha256 !== reference.canonicalAdmissionsSha256) {
+      throw new Error('PSC0_JOINT_GENERATED_ADMISSIONS_NOT_EQUIVALENT: ' + label +
+        ' generated=' + receipt.canonicalAdmissionsSha256 +
+        ' native=' + reference.canonicalAdmissionsSha256);
+    }
+    // A reused receipt must never substitute for the current kernel:
+    // recheck its independently generated canonical admissions.
+    const decision = checkCoreAdmissions(await readFile(
+      tsFile.replace(/\.ts$/u, '.admissions.json'), 'utf8'));
+    if (!decision.accepted) {
+      throw new Error('PSC0_JOINT_GENERATED_ADMISSIONS_REJECTED: ' + label + ' ' +
+        String(decision.declarationIndex ?? '-') + ' ' +
+        String(decision.message ?? decision.errorKind));
+    }
+    console.log('PSC0_JOINT_GENERATED_SOURCE_PARITY: PASS generation=' + label +
+      ' typescriptSha256=' + receipt.typeScriptSha256);
   }
-  if (!firstReceipt) {
-    await mkdir(path.dirname(bootstrapJs), { recursive: true });
-    firstReceipt = await buildChecked({
-      entryPath: path.join(bootstrapWorkspace, firstManifest.entry),
+  async function generateCheckedSource(entry, tsFile, manifest, generation) {
+    let receipt;
+    if (previous?.[generation + 'SourceChecked'] && existsSync(tsFile) &&
+        existsSync(tsFile.replace(/\.ts$/u, '.checked.json'))) {
+      try {
+        receipt = await readJson(tsFile.replace(/\.ts$/u, '.checked.json'));
+        await assertCheckedSource(tsFile, receipt, manifest, generation);
+        console.log('PSC0_JOINT_REUSE_GENERATED_SOURCE: PASS ' + generation);
+        return receipt;
+      } catch (error) {
+        console.log('PSC0_JOINT_CACHE_REJECTED: ' + String(error.message).slice(0, 250));
+        receipt = undefined;
+      }
+    }
+    await mkdir(path.dirname(tsFile), { recursive: true });
+    receipt = await buildChecked({
+      entryPath: entry,
       compilerPath: compiler,
-      outputPath: bootstrapJs,
+      outputPath: tsFile,
+      emission: 'typescript-only',
       kernel: 'pskernel-core',
     });
-    await assertKernelOutput(bootstrapJs, firstReceipt, firstManifest, compilerSha);
+    await assertCheckedSource(tsFile, receipt, manifest, generation);
+    return receipt;
   }
-  console.log('PSC0_JOINT_GENERATED_KERNEL_CHECKED: PASS generation=bootstrap');
-  // The output is executable semantics, not merely a TypeScript emission claim.
-  run(process.execPath, ['scripts/psc1kernel-generated-smoke.mjs', relative(bootstrapJs)], 300000);
-  const storedBase = {
-    schemaVersion: 1, status: 'incomplete',
+  async function shareCompiledJavaScript(tsFile, target) {
+    if (await digestFile(tsFile) !== reference.typeScriptSha256) {
+      throw new Error('PSC0_JOINT_UNCHECKED_JS_REUSE_FORBIDDEN');
+    }
+    await mkdir(path.dirname(target), { recursive: true });
+    await copyFile(nativeJs, target);
+    if (await digestFile(target) !== reference.javaScriptSha256) {
+      throw new Error('PSC0_JOINT_COPIED_JAVASCRIPT_MISMATCH');
+    }
+    run(process.execPath, ['scripts/psc1kernel-generated-smoke.mjs', relative(target)], 300000);
+  }
+
+  const first = await generateCheckedSource(
+    path.join(bootstrapWorkspace, firstManifest.entry), bootstrapTs, firstManifest, 'bootstrap');
+  await shareCompiledJavaScript(bootstrapTs, bootstrapJs);
+  const baseEvidence = {
+    schemaVersion: 2,
+    status: 'bootstrap-source-equivalent',
     sourceKey, kernelSourceSha256: kernelSource.sourceSha256,
     sourceCount: firstManifest.sourceCount, kernelClosureSha256: firstManifest.closureSha256,
     nativeProviderSha256: nativeSha, checkedCompilerSha256: compilerSha,
-    bootstrapChecked: true, bootstrapJavaScriptSha256: firstReceipt.javaScriptSha256,
-    bootstrapTypeScriptSha256: firstReceipt.typeScriptSha256,
-    // Generated-JS checker promotion requires separate canonical wire and
-    // full-compiler replay evidence; it is not established by a smoke check.
-    generatedKernelAdmitsCompiler: false, jointCheckerFixedPoint: false,
+    nativeReferenceTypeScriptSha256: reference.typeScriptSha256,
+    nativeReferenceJavaScriptSha256: reference.javaScriptSha256,
+    nativeReferenceAdmissionsSha256: reference.canonicalAdmissionsSha256,
+    bootstrapSourceChecked: true,
+    bootstrapTypeScriptSha256: first.typeScriptSha256,
+    bootstrapJavaScriptSha256: reference.javaScriptSha256,
+    generatedCompilerSelfhost: true,
+    // A generated JS kernel has not yet checked the compiler. Code is copied
+    // from a FULLY typechecked native-reference TS source after independent
+    // generated-JS source byte equality, not recompiled a second time.
+    javaScriptProvenance: 'verified-native-tsc-output-of-byte-identical-generated-typescript',
+    generatedKernelAdmitsCompiler: false,
+    jointCheckerFixedPoint: false,
   };
   await mkdir(out, { recursive: true });
-  await writeFile(stored, JSON.stringify(storedBase, null, 2) + '\n');
+  await writeFile(evidencePath, JSON.stringify(baseEvidence, null, 2) + '\n');
 
   run(process.execPath, [
     'scripts/reemit-project-with-generated.mjs', relative(compiler),
     relative(bootstrapWorkspace), relative(selfhostWorkspace),
   ], 1200000);
   run(process.execPath, [
-    'scripts/compare-source-workspaces.mjs', relative(bootstrapWorkspace), relative(selfhostWorkspace),
+    'scripts/compare-source-workspaces.mjs',
+    relative(bootstrapWorkspace), relative(selfhostWorkspace),
   ], 300000);
-  const nextManifest = await loadManifest(selfhostWorkspace, 'selfhost');
-  if (firstManifest.closureSha256 !== nextManifest.closureSha256) {
+  const secondManifest = await loadManifest(selfhostWorkspace, 'selfhost');
+  if (firstManifest.closureSha256 !== secondManifest.closureSha256) {
     throw new Error('PSC0_JOINT_KERNEL_SOURCE_FIXED_POINT_MISMATCH');
   }
-  let nextReceipt;
-  if (old?.selfhostChecked && existsSync(selfhostJs)) {
-    try {
-      nextReceipt = await readJson(selfhostJs.replace(/\.js$/u, '.checked.json'));
-      await assertKernelOutput(selfhostJs, nextReceipt, nextManifest, compilerSha);
-      console.log('PSC0_JOINT_REUSE_CHECKED_SELFHOST: PASS');
-    } catch { nextReceipt = undefined; }
-  }
-  if (!nextReceipt) {
-    await mkdir(path.dirname(selfhostJs), { recursive: true });
-    nextReceipt = await buildChecked({
-      entryPath: path.join(selfhostWorkspace, nextManifest.entry),
-      compilerPath: compiler,
-      outputPath: selfhostJs,
-      kernel: 'pskernel-core',
-    });
-    await assertKernelOutput(selfhostJs, nextReceipt, nextManifest, compilerSha);
-  }
+  const second = await generateCheckedSource(
+    path.join(selfhostWorkspace, secondManifest.entry), selfhostTs, secondManifest, 'selfhost');
   run(process.execPath, [
-    'scripts/compare-selfhost.mjs', relative(bootstrapJs.replace(/\.js$/u, '.ts')),
-    relative(selfhostJs.replace(/\.js$/u, '.ts')),
+    'scripts/compare-selfhost.mjs', relative(bootstrapTs), relative(selfhostTs),
   ], 300000);
-  if (firstReceipt.javaScriptSha256 !== nextReceipt.javaScriptSha256 ||
-      firstReceipt.typeScriptSha256 !== nextReceipt.typeScriptSha256) {
-    throw new Error('PSC0_JOINT_KERNEL_GENERATED_ARTIFACT_FIXED_POINT_MISMATCH');
+  await shareCompiledJavaScript(selfhostTs, selfhostJs);
+  if (first.typeScriptSha256 !== second.typeScriptSha256 ||
+      first.canonicalAdmissionsSha256 !== second.canonicalAdmissionsSha256) {
+    throw new Error('PSC0_JOINT_SOURCE_OR_ADMISSIONS_FIXED_POINT_MISMATCH');
   }
-  run(process.execPath, ['scripts/psc1kernel-generated-smoke.mjs', relative(selfhostJs)], 300000);
   const final = {
-    ...storedBase, status: 'kernel-generated-fixed-point',
-    selfhostChecked: true, kernelSourceFixedPoint: true,
-    kernelEmittedFixedPoint: true, kernelGeneratedRuntimeSmoke: true,
-    selfhostJavaScriptSha256: nextReceipt.javaScriptSha256,
-    selfhostTypeScriptSha256: nextReceipt.typeScriptSha256,
+    ...baseEvidence,
+    status: 'kernel-generated-fixed-point',
+    kernelSourceFixedPoint: true,
+    kernelEmittedFixedPoint: true,
+    kernelGeneratedRuntimeSmoke: true,
+    selfhostSourceChecked: true,
+    selfhostTypeScriptSha256: second.typeScriptSha256,
+    selfhostJavaScriptSha256: reference.javaScriptSha256,
   };
-  await writeFile(stored, JSON.stringify(final, null, 2) + '\n');
-  console.log('PSC0_JOINT_KERNEL_SOURCE_AND_GENERATED_FIXED_POINT: PASS sourceModules=' + firstManifest.sourceCount);
-  console.log('PSC0_JOINT_KERNEL_JS_RUNTIME_SMOKE: PASS');
-  console.log('PSC0_JOINT_FULL_CHECKER_PROMOTION: NOT_YET (generated JS checker must replay compiler admissions)');
+  await writeFile(evidencePath, JSON.stringify(final, null, 2) + '\n');
+  console.log('PSC0_JOINT_KERNEL_SOURCE_AND_GENERATED_FIXED_POINT: PASS sourceModules=' +
+    firstManifest.sourceCount + ' execution=' + final.javaScriptProvenance);
+  console.log('PSC0_JOINT_FULL_CHECKER_PROMOTION: NOT_YET (JS checker must replay compiler admissions)');
 }
 
 async function exportGeneratedPrelude() {

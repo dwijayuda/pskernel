@@ -1,0 +1,10 @@
+-- PSCV typed-error clauses are proved about actual Except return values.
+function alwaysFail(n : Nat) : Except String Nat
+  errors err => err = "bad" := Except.error "bad"
+
+function onlyGood(n : Nat) : Except String Nat
+  ensures result => result = n
+  errors err => err = "unused" := Except.ok n
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := 4

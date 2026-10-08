@@ -1,0 +1,4 @@
+function unsound : Except String Nat
+  errors err => err = "good" := Except.error "bad"
+@[pscv_export, pscv_type_spec]
+def root : Nat := 4

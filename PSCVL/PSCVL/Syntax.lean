@@ -160,4 +160,66 @@ macro_rules
   | `(doElem| ghost mut $name:ident := $value:term) =>
       `(doElem| erased mut $name:ident := $value:term)
 
+/-- PSCV's 'errors' clause for *concrete* `Except ε α` functions.
+The theorem generated here checks the actual typed error path. The success
+postcondition, when present, is checked as a separate branch of the same
+kernel proposition. This deliberately does not claim polymorphic WP laws for
+arbitrary error monad transformers or external effects. -/
+private def exceptContractArgs (bs : Array (TSyntax `pscvBinder)) : MacroM (Array Term) := do
+  let mut args := #[]
+  for b in bs do
+    match b with
+    | `(pscvBinder| $x:ident : $_:term) =>
+      args := args.push ⟨x.raw⟩
+    | `(pscvBinder| $x:ident : $_:term := $_:term) =>
+      args := args.push ⟨x.raw⟩
+    | _ => Macro.throwUnsupported
+  return args
+
+private def exceptContractCall (f : Ident) (args : Array Term) : MacroM Term := do
+  let mut applied : Term := ⟨f.raw⟩
+  for a in args do
+    applied ← `($applied:term $a:term)
+  return applied
+
+syntax (name := pscvExceptErrors)
+  "function " ident "(" pscvBinder,* ")" ":" term
+  "errors" ident "=>" term ":=" term : command
+
+macro_rules
+  | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term
+      errors $err:ident => $errPost:term := $body:term) => do
+    let binders ← explicitLeanBinders bs
+    let args ← exceptContractArgs bs
+    let call ← exceptContractCall f args
+    let proofName := mkIdentFrom f (f.getId ++ `pscv_errors)
+    let defCmd ← `(command| def $f:ident $binders* : $result:term := $body:term)
+    let checked ← `(command|
+      theorem $proofName:ident $binders* :
+        PSCVL.Effect.errorWP $call:term (fun _ => True)
+          (fun $err:ident => $errPost:term) := by
+        simp [PSCVL.Effect.errorWP, $f:ident])
+    return mkNullNode #[defCmd, checked]
+
+syntax (name := pscvExceptEnsuresErrors)
+  "function " ident "(" pscvBinder,* ")" ":" term
+  "ensures" ident "=>" term
+  "errors" ident "=>" term ":=" term : command
+
+macro_rules
+  | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term
+      ensures $ok:ident => $okPost:term
+      errors $err:ident => $errPost:term := $body:term) => do
+    let binders ← explicitLeanBinders bs
+    let args ← exceptContractArgs bs
+    let call ← exceptContractCall f args
+    let proofName := mkIdentFrom f (f.getId ++ `pscv_errors)
+    let defCmd ← `(command| def $f:ident $binders* : $result:term := $body:term)
+    let checked ← `(command|
+      theorem $proofName:ident $binders* :
+        PSCVL.Effect.errorWP $call:term (fun $ok:ident => $okPost:term)
+          (fun $err:ident => $errPost:term) := by
+        simp [PSCVL.Effect.errorWP, $f:ident])
+    return mkNullNode #[defCmd, checked]
+
 end PSCVL

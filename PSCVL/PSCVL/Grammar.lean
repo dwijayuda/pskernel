@@ -59,7 +59,7 @@ private def allowedCommand (s : Syntax) : Bool :=
       "PSCVL.pscvConst", "PSCVL.pscvConstInferred",
       "PSCVL.pscvFunction", "PSCVL.pscvImplicitFunction",
       "PSCVL.pscvFunctionContract", "PSCVL.pscvFunctionEnsures", "PSCVL.pscvFunctionRequires",
-      "PSCVL.pscvRefine",
+      "PSCVL.pscvRefine", "PSCVL.pscvExceptErrors", "PSCVL.pscvExceptEnsuresErrors",
       "Lean.Parser.Command.namespace", "Lean.Parser.Command.section",
       "Lean.Parser.Command.end", "Lean.Parser.Command.open",
       "Lean.Parser.Command.variable", "Lean.Parser.Command.universe",

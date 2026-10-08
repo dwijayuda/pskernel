@@ -49,6 +49,36 @@ def PsKernelMutualBodyEvidence
       inferredType value.base.type
 
 
+theorem psKernelMutualWorkEnvironment_refines_extension
+    (values : List PsKernelDefinitionInfo)
+    (environment : PsKernelEnvironment) :
+    PsKernelEnvironmentExtendsBy
+      environment
+      (psKernelMutualWorkEnvironment values environment)
+      (List.reverse
+        (List.map
+          (fun value : PsKernelDefinitionInfo =>
+            PsKernelConstantInfo.defnInfo value)
+          values)) := by
+  induction values generalizing environment with
+  | nil =>
+      exact psKernelEnvironmentExtendsBy_refl environment
+  | cons value rest ih =>
+      have hTail :=
+        ih
+          (psKernelEnvironmentAddUnchecked
+            environment
+            (PsKernelConstantInfo.defnInfo value))
+      simpa [
+        psKernelMutualWorkEnvironment,
+        PsKernelEnvironmentExtendsBy,
+        psKernelEnvironmentAddUnchecked,
+        List.map,
+        List.reverse_cons,
+        List.append_assoc
+      ] using hTail
+
+
 theorem psKernelCheckMutualHeaders_configuration_refines
     (values : List PsKernelDefinitionInfo) :
     ∀ (fuel : Nat)
@@ -236,7 +266,15 @@ theorem psKernelAddMutualDefinitions_configuration_refines
       psKernelAddMutualDefinitions
           fuel environment values maxRecDepth maxNatSize =
         Except.ok result) :
-    PsKernelEnvironmentIndexRefines result ∧
+    PsKernelEnvironmentExtendsBy
+        environment
+        result
+        (List.reverse
+          (List.map
+            (fun value : PsKernelDefinitionInfo =>
+              PsKernelConstantInfo.defnInfo value)
+            values)) ∧
+      PsKernelEnvironmentIndexRefines result ∧
       PsKernelMutualAll
         (PsKernelMutualHeaderEvidence environment) values ∧
       PsKernelMutualAll
@@ -288,7 +326,19 @@ theorem psKernelAddMutualDefinitions_configuration_refines
                       hSafe, hHeaders, work, hBodies
                     ] using hRun
                   subst result
-                  refine ⟨hWorkIndex, ?_, ?_⟩
+                  have hExtension :
+                      PsKernelEnvironmentExtendsBy
+                        environment
+                        work
+                        (List.reverse
+                          (List.map
+                            (fun value : PsKernelDefinitionInfo =>
+                              PsKernelConstantInfo.defnInfo value)
+                            (List.cons first rest))) :=
+                    psKernelMutualWorkEnvironment_refines_extension
+                      (List.cons first rest)
+                      environment
+                  refine ⟨hExtension, hWorkIndex, ?_, ?_⟩
                   · exact
                       psKernelCheckMutualHeaders_configuration_refines
                         (List.cons first rest)

@@ -1,4 +1,5 @@
 import Ps.KernelCore.Admission.Declaration.Admission
+import Ps.KernelCore.Metatheory.AdmissionMutualConfiguration
 import Ps.KernelCore.Metatheory.AdmissionRefinement
 
 theorem psKernelMutualWorkEnvironment_nil
@@ -743,35 +744,6 @@ theorem psKernelAddOpaque_success_refines_extension
       (PsKernelConstantInfo.opaqueInfo value)
       hSuccess
 
-
-theorem psKernelMutualWorkEnvironment_refines_extension
-    (values : List PsKernelDefinitionInfo)
-    (environment : PsKernelEnvironment) :
-    PsKernelEnvironmentExtendsBy
-      environment
-      (psKernelMutualWorkEnvironment values environment)
-      (List.reverse
-        (List.map
-          (fun value : PsKernelDefinitionInfo =>
-            PsKernelConstantInfo.defnInfo value)
-          values)) := by
-  induction values generalizing environment with
-  | nil =>
-      exact psKernelEnvironmentExtendsBy_refl environment
-  | cons value rest ih =>
-      have hTail :=
-        ih
-          (psKernelEnvironmentAddUnchecked
-            environment
-            (PsKernelConstantInfo.defnInfo value))
-      simpa [
-        psKernelMutualWorkEnvironment,
-        PsKernelEnvironmentExtendsBy,
-        psKernelEnvironmentAddUnchecked,
-        List.map,
-        List.reverse_cons,
-        List.append_assoc
-      ] using hTail
 
 theorem psKernelAddMutualDefinitions_success_refines_extension
     (fuel : Nat)

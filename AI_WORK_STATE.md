@@ -321,3 +321,12 @@ Architectural blockers still remaining:
 - TCB boundaries \`PsKernelNativeReductionSoundLaw\` and
   \`PsKernelStringEqSoundLaw\` remain explicit. Do not replace these with
   unconditional soundness claims.
+
+
+## Index-preserving recursive admission and checked mutual definitions — 2026-10-08
+- Full `PSKernel Core proof` gate **#653** green at `c5665ed1677b4de2bf27d04ac569c6679e8d42cf`. A semantic source fix makes insertion into an externally constructible root-bucket index preserve previously readable declarations; the existing branch/small/empty behavior is unchanged. Canonical index proofs were moved into an importable metatheory module, with a retained proof companion and regression.
+- Full gate **#659** green at `7c35cb6f43a33a72f2b8f2a2f0d3119b420e3171`: index insertion refines the authoritative declaration list for all public root forms and hash collisions, checked/unchecked environment insertion preserves index refinement, and the mutual work environment preserves the index invariant by induction. Unsafe single-definition admission now derives its recursive work-index premise from successful checked insertion, rather than assuming it.
+- Full gate **#661** green at `1d085f49df113cb4a7bb8dc943f632a7b4ae3a66`: successful mutual-definition validation yields independent typed-header evidence for every member in the original environment, and checked body/DefEq evidence for every member in the completed recursive work environment. A Prop-valued list-evidence judgment is used because the pinned Lean baseline has no `List.Forall` declaration.
+- The current follow-up commit is consolidating authoritative environment-extension evidence into the registered mutual-admission metatheory; verify its CI before calling this extra composition green.
+- Mechanical inventory at this checkpoint: **79/79** canonical source modules have canonical `.proof.lean` companions; five additional standalone metatheory proof files exist. File pairing is not the same as semantic assurance completion.
+- **Still open:** ordinary, mutual and nested inductive admission/refinement and restoration; final public Kernel/API/session refinement composition; explicit TCB inventory and semantic audit refresh; integration reconciliation and final conformance gates. `PsKernelNativeReductionSoundLaw` and `PsKernelStringEqSoundLaw` remain named premises, never unconditional conclusions.

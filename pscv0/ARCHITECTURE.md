@@ -1,26 +1,33 @@
-# PSCV0 V6 — clean core ownership
+# PSCV0 V6 — Lean-native architecture
 
-**Architecture target:** [THE_PSCV_COMPILER_REFERENCE_VERSION_6.md](THE_PSCV_COMPILER_REFERENCE_VERSION_6.md). **Working design and P0 npm implementation:** [v6/CORE_NPM_ARCHITECTURE.md](v6/CORE_NPM_ARCHITECTURE.md).
+**Reference:** [THE_PSCV_COMPILER_REFERENCE_VERSION_6.md](THE_PSCV_COMPILER_REFERENCE_VERSION_6.md).
+**Current implementation/reuse plan:** [v6/LEAN_NATIVE_REUSE_RESEARCH.md](v6/LEAN_NATIVE_REUSE_RESEARCH.md).
 
-## Ownership model
+## Native implementation package ownership
 
-~~~text
-pscv0/v6/
-  packages/extensions  # canonical data-only E0-E4 manifests, no plugin execution
-  packages/kernel      # pinned native/Wasm Lean 4.34 provider selection and decision
-  packages/core        # source/profile identity and kernel-admission composition
-  packages/cli         # psc-core development CLI, not production psc
-  test/                 # negative and provider-integration checks
-~~~
+| Source owner | Responsibility |
+|---|---|
+| v6/packages/core/src | Candidate Lean Core representation and immutable semantic contracts |
+| v6/packages/extensions/src | Typed E0–E6 extension classes and closed-profile restriction |
+| v6/packages/kernel/src | Lean 4.35-rc3 kernel declaration checking, admission-only status |
+| v6/packages/cli/src | Native development executable and explicit unsupported stage errors |
+| v6/test/lean | Native proof acceptance/rejection and policy smoke |
+| v6/test/provider-oracles.test.mjs | External oracle test tooling for separately packaged Lean 4.34 native/Wasm kernel binaries |
+| v6/lakefile.lean | Pinned native build and **research-only** old-source compatibility probes |
 
-**Target semantic pipeline (not yet implemented by P0):** .ps -> versioned grammar / elaborator -> typed Core -> exact provider-checked Core -> approved specifications and mandatory .proof.ps / optional .proof.lean obligations -> PSCV-CERT -> erased/validated runtime IR -> TS, direct JS, Wasm or Rust -> typed ArtifactBundle.
+**Desired production spine, not yet implemented:** .ps source and profile -> deterministic parsing/name resolution -> typed elaborated Lean Core -> session-bound checked Core -> approved specification and .proof.ps/.proof.lean obligation closure -> PSCV certificate -> erasure -> validated RuntimeIR -> TS/direct JS/Wasm/Rust backend -> ArtifactBundle.
 
-**Critical security separation:** untrusted npm feature packages must never import into the kernel/authority process; syntax and proof producers emit candidates for independent validation; semantic E5/E6 changes require explicit audited semantic revisions, not arbitrary npm plugin registration. A kernel-accepted declaration stream is not proof that a source .ps program was elaborated correctly or backend code preserves behavior.
+Compiler modules and executable feature implementations are .lean. npm package.json manifests describe their distribution, and compiled native artifacts are produced by Lean 4/Lake. Third-party feature packages cannot execute arbitrary JS or Lean code in the authority process; a future host must isolate native/Wasm workers and validate all outputs.
 
-**Toolchain pins:** present npm kernel providers run Lean 4.34.0. Normative PSCV uses Lean 4.35.0-rc3. Verified-profile completion requires a matching provider and standard-environment lock or independently verified compatibility. Self-hosting is not required for initial native releases.
+## Constraints
 
-## Previous implementation
+- Do not transplant old PSC1-selfhost-stable/1 grammar or handwritten low-level source styles as an implementation requirement. Self-host remains later optional work.
+- Use Lean.Expr/Declaration/Environment as logical candidate representation; source-to-Core fidelity and execution preservation need separate evidence.
+- Do not conflate Lean 4.34 pskernel-lean provider acceptance with the normative Lean 4.35-rc3 PSCV checker.
+- No plugin-supplied axioms, unchecked elaborator, unsafe effect or fabricated certificate may make a false theorem valid.
+- Import old Lean algorithm packages only after bounded capability extraction, semantic testing and actual value of reuse are demonstrated. Research-only Lake probe imports are not runtime dependencies.
+- A native compiler binary need not bundle Lean frontend or Lake for users, but must package and audit its real Lean runtime dependencies.
 
-Existing packages/, scripts/, host/ and other PSC2 work remain only until replacement/deletion can be done without incorrectly claiming finished functionality. The fresh v6/ implementation makes no imports from that code. The prior codebase is not being preserved as a constraint on parser design, implementation language choices, package structure, user UX or extension APIs. Existing proof/kernel providers are consumed through their **public npm interfaces**, not source-relative imports.
+## Stage boundaries
 
-Read [legacy/V5.1](legacy/THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md) for historical evidence; it is not V6 implementation authority.
+N0 native compilation and kernel/extension policy checks; N1 .ps source syntax; N2 checked Core; N3 RuntimeIR/erasure; N4 all four backends; N5 mixed proofs/verified certification; N6 native npm distributions and isolated feature runners; N7 assurance/performance and optional self-host. No implementation completeness is asserted before passing each gate.

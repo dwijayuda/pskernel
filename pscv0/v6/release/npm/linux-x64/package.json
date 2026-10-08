@@ -1,0 +1,31 @@
+{
+  "name": "@proofscript/pscv-cli-linux-x64-gnu",
+  "version": "0.0.1-dev",
+  "private": true,
+  "description": "Experimental Lean-compiled PSCV V6 development binary for Linux x64 glibc; not full compiler",
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "libc": [
+    "glibc"
+  ],
+  "type": "module",
+  "bin": {
+    "pscv-v6-dev": "./bin/pscv-v6-dev"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LEAN_PIN.txt"
+  ],
+  "proofscript": {
+    "implementationLanguage": "lean4",
+    "buildToolchain": "leanprover/lean4:v4.35.0-rc3",
+    "buildHost": "Lean 4 native",
+    "certified": false,
+    "fullCompiler": false
+  }
+}

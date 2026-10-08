@@ -1,0 +1,20 @@
+{
+  "name": "@proofscript/pscv-extensions",
+  "version": "0.0.1-dev",
+  "private": true,
+  "description": "Lean 4 source package for native-extension-policy, PSCV V6",
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "proofscript": {
+    "implementationLanguage": "lean4",
+    "leanToolchain": "leanprover/lean4:v4.35.0-rc3",
+    "sourceRoots": [
+      "src"
+    ],
+    "role": "native-extension-policy",
+    "releasedNativeArtifact": false,
+    "verificationClaims": []
+  }
+}

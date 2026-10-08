@@ -94,6 +94,7 @@ jobs:
         run: node scripts/joint-selfhost.mjs generate-native
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+          PSC0_BUILD_TRACE: '1'
       - name: Upload native-compiler kernel generation evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -102,18 +103,20 @@ jobs:
           path: |
             psc0/dist/joint-kernel/kernel-native-generation.json
             psc0/dist/joint-kernel/native/kernel/index.checked.json
+            psc0/dist/joint-kernel/native/kernel/index.admissions.json
+            psc0/dist/joint-kernel/native/kernel/index.ts
             psc0/dist/joint-kernel/native/kernel/index.js
           if-no-files-found: ignore
           retention-days: 14
 
   kernel-generated-fixed-point:
-    needs: source-contract
+    needs: [source-contract, native-kernel-artifact]
     # Ordinary PR edits use cheap source/adapter checks only. Run the full
     # expensive generation on an explicit 'enhancement' labeling event or
     # manual dispatch, never on every synchronize/update.
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event.action == 'labeled' && github.event.label.name == 'enhancement') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 110
+    timeout-minutes: 210
     defaults:
       run:
         working-directory: psc0
@@ -157,10 +160,16 @@ jobs:
           key: psc0-joint-artifacts-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/package.json', 'psc0/packages/pskernel-core/src/**/*.lean', 'psc0/packages/bootstrap/src/**/*.lean', 'psc0/scripts/joint-selfhost.mjs', 'psc0/scripts/checked-build.mjs') }}
           restore-keys: |
             psc0-joint-artifacts-${{ runner.os }}-
-      - name: Generate and check kernel with PSC0-generated compiler
+      - name: Download freshly checked native kernel TypeScript and JavaScript reference
+        uses: actions/download-artifact@v4
+        with:
+          name: psc0-native-kernel-generation
+          path: psc0/dist/joint-kernel
+      - name: Generate native-checked TypeScript with PSC0-generated compiler
         run: node scripts/joint-selfhost.mjs generate
         env:
           NODE_OPTIONS: --max-old-space-size=12288
+          PSC0_BUILD_TRACE: '1'
       - name: Check the generated kernel as a real checker of compiler admissions
         timeout-minutes: 40
         run: node scripts/joint-selfhost.mjs verify-generated
@@ -177,8 +186,12 @@ jobs:
             psc0/dist/checked/pskernel-core/bootstrap/packages/compiler/index.checked.json
             psc0/dist/joint-kernel/bootstrap/kernel/index.js
             psc0/dist/joint-kernel/selfhost/kernel/index.js
-            psc0/dist/joint-kernel/bootstrap/kernel/index.checked.json
-            psc0/dist/joint-kernel/selfhost/kernel/index.checked.json
+            psc0/dist/joint-kernel/bootstrap/source/index.checked.json
+            psc0/dist/joint-kernel/bootstrap/source/index.admissions.json
+            psc0/dist/joint-kernel/bootstrap/source/index.ts
+            psc0/dist/joint-kernel/selfhost/source/index.checked.json
+            psc0/dist/joint-kernel/selfhost/source/index.admissions.json
+            psc0/dist/joint-kernel/selfhost/source/index.ts
             psc0/dist/joint-kernel/bootstrap/workspace/.proofscript-bootstrap.json
             psc0/dist/joint-kernel/selfhost/workspace/.proofscript-selfhost.json
           if-no-files-found: ignore

@@ -246,7 +246,7 @@ theorem psKernelNameHasDuplicates_cons_false_refines
   cases hMember : psKernelNameListContains head tail with
   | true => simp [psKernelNameHasDuplicates, hMember] at hUnique
   | false =>
-      exact ⟨hMember, by simpa [psKernelNameHasDuplicates, hMember] using hUnique⟩
+      exact ⟨rfl, by simpa [psKernelNameHasDuplicates, hMember] using hUnique⟩
 
 /--
 Fresh remaining names stay absent when a disjoint declaration is inserted.
@@ -261,9 +261,13 @@ theorem psKernelInductiveNamesAbsent_add_disjoint
     (hDisjoint : psKernelNameListContains (psKernelConstantInfoName added) names = false) :
     PsKernelInductiveNamesAbsent
       (psKernelEnvironmentAddUnchecked environment added) names := by
+  revert hDisjoint
   induction hAbsent with
-  | nil => exact PsKernelInductiveNamesAbsent.nil
+  | nil =>
+      intro hDisjoint
+      exact PsKernelInductiveNamesAbsent.nil
   | cons name rest hNameAbsent hRestAbsent ih =>
+      intro hDisjoint
       cases hEqual : psKernelNameEq (psKernelConstantInfoName added) name with
       | true =>
           simp [psKernelNameListContains, hEqual] at hDisjoint

@@ -325,6 +325,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.EnvironmentReplaceIndexConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionQuotIndexConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionInductiveNamesConfiguration,
+    `Ps.KernelCore.Metatheory.AdmissionInductiveConstructorConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualConfiguration,
     `Ps.KernelCore.Metatheory.SessionRefinement,
     `Ps.KernelCore.Metatheory.Delta,

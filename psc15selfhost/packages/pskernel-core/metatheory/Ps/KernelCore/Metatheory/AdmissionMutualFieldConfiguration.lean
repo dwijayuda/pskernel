@@ -74,7 +74,7 @@ theorem psKernelOpenSimpleMutualConstructorFieldsWithFuel_raw_spine_refines
                           remaining opened.2 targets shapes levels params field domain with
                       | error message =>
                           simp [psKernelOpenSimpleMutualConstructorFieldsWithFuel,
-                            hCheck, hSort, hAllowed, opened, hAnalysis] at hRun
+                            hCheck, hSort, hAllowed, opened, field, hAnalysis] at hRun
                       | ok analysis =>
                           have hCheckSound :=
                             psKernelSessionCheck_concrete_refines_typing

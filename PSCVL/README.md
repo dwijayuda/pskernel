@@ -41,7 +41,7 @@ Negative examples must fail:
 ! lake exe pscvl check examples/fail_missing_spec.ps
 ```
 
-The check works in-process with `Lean.Elab.Frontend.process`: Lean does the
+The check works in-process with `Lean.Elab.process`: Lean does the
 real parsing/elaboration, and a mandatory, driver-injected `#pscv_gate`
 inspects local elaborated constant information and transitive axioms of
 marked executable roots. It does **not** emit binaries, Lean objects, or

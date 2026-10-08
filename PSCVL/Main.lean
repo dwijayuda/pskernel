@@ -28,7 +28,7 @@ private def checkFile (path : String) : IO UInt32 := do
   -- The gate is injected by the driver, not opt-in source syntax. Append it
   -- only after the user input has been completely parsed/elaborated.
   let checkedSource := source ++ "\n\n#pscv_gate\n"
-  let (_, messages) ← Elab.Frontend.process checkedSource env {} (some path)
+  let (_, messages) ← Elab.process checkedSource env {} (some path)
   for message in messages.markAllReported.reported do
     IO.eprintln (← message.toString)
   if messages.hasErrors then

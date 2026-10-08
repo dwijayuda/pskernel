@@ -131,29 +131,22 @@ theorem psKernelDefEqProjectionShortcut_configuration_sound
                   (psKernelWhnfCoreWithRecursorFuel
                     fuel defeq)
                   hDefEq hQuick hCore hString
-              have hBudget :
-                  fuel =
-                    Nat.add
-                      (Nat.add
-                        (psKernelExprNodeCount leftExpr)
-                        (psKernelExprNodeCount rightExpr))
-                      1 := by
-                rfl
               cases hLazy :
                   psKernelDefEqLazyProjReductionWithFuel
-                    fuel
+                    (psKernelExprNodeCount leftExpr +
+                      psKernelExprNodeCount rightExpr + 1)
                     defeq
-                    (psKernelWhnfCoreWithRecursorFuel fuel defeq)
+                    (psKernelWhnfCoreWithRecursorFuel
+                      (psKernelExprNodeCount leftExpr +
+                        psKernelExprNodeCount rightExpr + 1) defeq)
                     context state
                     leftExpr rightExpr leftName leftIndex with
               | error error =>
-                  rw [hBudget] at hLazy
                   simp [
                     psKernelDefEqProjectionShortcut,
                     hName, hIndex, hLazy
                   ] at hRun
               | ok lazyRun =>
-                  rw [hBudget] at hLazy
                   rcases lazyRun with ⟨value, lazyState⟩
                   have hLazySound :=
                     psKernelDefEqLazyProjReductionWithFuel_configuration_sound

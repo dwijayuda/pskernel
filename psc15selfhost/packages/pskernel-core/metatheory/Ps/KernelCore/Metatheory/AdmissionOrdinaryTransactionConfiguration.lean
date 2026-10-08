@@ -176,17 +176,23 @@ theorem psKernelAddSimpleInductive_success_transaction_refines
     change psKernelFindConstantInList (psKernelSimpleRecName decl.name)
       (psKernelReplaceEnvironmentConstant decl.name (PsKernelConstantInfo.inductInfo replacement)
         ctorResult.environment.constants) = none
-    rw [psKernelReplaceEnvironmentConstant_preserves_other_lookup hString
+    have hOther := psKernelReplaceEnvironmentConstant_preserves_other_lookup hString
       (PsKernelConstantInfo.inductInfo replacement) (psKernelSimpleRecName decl.name)
-      hNamesDifferent ctorResult.environment.constants]
+      hNamesDifferent ctorResult.environment.constants
+    have hReplacementName :
+        psKernelConstantInfoName (PsKernelConstantInfo.inductInfo replacement) = decl.name := rfl
+    rw [hReplacementName] at hOther
+    rw [hOther]
     exact hRecCtor
   have hResultExt : PsKernelEnvironmentSemanticExtends environment result := by
     rw [hSuffix.1]
     apply PsKernelEnvironmentSemanticExtends.trans environment prepared.environment _ _ _
     · simpa [hPreparedEnv] using hWorkExt
     · apply psKernelEnvironmentAddUnchecked_fresh_semantic_extends _ _ hString
-      simpa [hPreparedEnv, prepared, psKernelOrdinaryPrepareRecursor,
-        psKernelConstantInfoName, psKernelConstantInfoBase] using hRecWork
+      change psKernelFindConstantInList (psKernelSimpleRecName decl.name)
+        prepared.environment.constants = none
+      rw [hPreparedEnv]
+      exact hRecWork
   have hExact := hHistory.exact_extension
   refine ⟨sortResult.1, resultLevel, paramResult, indexResult, ctorResult, elimOnlyAtZero,
     hHeaderTyping, ?_, ?_, psKernelOpenSimpleHeaderParams_success_length fuel sortResult.2

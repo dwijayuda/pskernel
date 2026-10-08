@@ -132,14 +132,69 @@ def psHostCompilerAdmissions
   | Except.ok encoded =>
       IO.print encoded
 
+-- Preserve the typed failure stage and named subject at the host boundary.
+-- A generic "outside subset" message hides validation failures as emitter gaps.
+def psHostCompilerTypeScriptFailure (error : PsCompilerTypeScriptError) : String :=
+  match error with
+  | PsCompilerTypeScriptError.emit inner =>
+      match inner with
+      | PsTsEmitError.fuelExhausted => "emit.fuel-exhausted"
+      | PsTsEmitError.unsupportedIntrinsic => "emit.unsupported-intrinsic"
+      | PsTsEmitError.intrinsicArity => "emit.intrinsic-arity"
+      | PsTsEmitError.unknownStructure name => "emit.unknown-structure:" ++ name
+      | PsTsEmitError.unknownInductive name => "emit.unknown-inductive:" ++ name
+      | PsTsEmitError.genericValueUnsupported name => "emit.generic-value:" ++ name
+      | PsTsEmitError.targetWordSizeRequired => "emit.target-word-size-required"
+  | PsCompilerTypeScriptError.compiler inner =>
+      match inner with
+      | PsCompilerError.erasure erased =>
+          match erased with
+          | PsErasureError.fuelExhausted => "compiler.erasure.fuel-exhausted"
+          | PsErasureError.binderMismatch => "compiler.erasure.binder-mismatch"
+          | PsErasureError.looseBoundVariable => "compiler.erasure.loose-bound-variable"
+          | PsErasureError.unresolvedMetavariable => "compiler.erasure.unresolved-metavariable"
+          | PsErasureError.unknownLocal id => "compiler.erasure.unknown-local:" ++ toString id
+          | PsErasureError.erasedLocalUsed id => "compiler.erasure.erased-local-used:" ++ toString id
+          | PsErasureError.unsupportedRuntimeTerm => "compiler.erasure.unsupported-runtime-term"
+          | PsErasureError.unsupportedApplication => "compiler.erasure.unsupported-application"
+          | PsErasureError.unknownConstant name => "compiler.erasure.unknown-constant:" ++ psEncodeCodecName name
+      | PsCompilerError.irValidation invalid =>
+          match invalid with
+          | PsVerifiedIrValidationError.unresolvedRuntimeType => "compiler.ir-validation.unresolved-runtime-type"
+          | PsVerifiedIrValidationError.validationFuelExhausted => "compiler.ir-validation.fuel-exhausted"
+          | PsVerifiedIrValidationError.unknownStructure name => "compiler.ir-validation.unknown-structure:" ++ name
+          | PsVerifiedIrValidationError.unknownInductive name => "compiler.ir-validation.unknown-inductive:" ++ name
+          | PsVerifiedIrValidationError.unknownConstructor owner name => "compiler.ir-validation.unknown-constructor:" ++ owner ++ ":" ++ name
+          | PsVerifiedIrValidationError.unknownStructureField owner field => "compiler.ir-validation.unknown-field:" ++ owner ++ ":" ++ field
+          | PsVerifiedIrValidationError.unknownConstructorField owner name field => "compiler.ir-validation.unknown-constructor-field:" ++ owner ++ ":" ++ name ++ ":" ++ field
+          | PsVerifiedIrValidationError.typeArgumentArity name => "compiler.ir-validation.type-argument-arity:" ++ name
+          | PsVerifiedIrValidationError.invalidMachineIntegerLiteral _ => "compiler.ir-validation.invalid-machine-literal"
+          | PsVerifiedIrValidationError.duplicateGlobalName name => "compiler.ir-validation.duplicate-global:" ++ name
+          | PsVerifiedIrValidationError.duplicateTypeParameter name => "compiler.ir-validation.duplicate-type-parameter:" ++ name
+          | PsVerifiedIrValidationError.duplicateParameter name => "compiler.ir-validation.duplicate-parameter:" ++ name
+          | PsVerifiedIrValidationError.duplicateField owner field => "compiler.ir-validation.duplicate-field:" ++ owner ++ ":" ++ field
+          | PsVerifiedIrValidationError.duplicateAlternative name => "compiler.ir-validation.duplicate-alternative:" ++ name
+          | PsVerifiedIrValidationError.unknownTypeName name => "compiler.ir-validation.unknown-type:" ++ name
+          | PsVerifiedIrValidationError.unknownTypeParameter name => "compiler.ir-validation.unknown-type-parameter:" ++ name
+          | PsVerifiedIrValidationError.unknownVariable name => "compiler.ir-validation.unknown-variable:" ++ name
+          | PsVerifiedIrValidationError.expressionTypeMismatch => "compiler.ir-validation.expression-type-mismatch"
+          | PsVerifiedIrValidationError.callArity => "compiler.ir-validation.call-arity"
+          | PsVerifiedIrValidationError.intrinsicArity => "compiler.ir-validation.intrinsic-arity"
+          | PsVerifiedIrValidationError.intrinsicTypeArgumentArity => "compiler.ir-validation.intrinsic-type-argument-arity"
+          | PsVerifiedIrValidationError.fieldCompleteness owner => "compiler.ir-validation.field-completeness:" ++ owner
+          | PsVerifiedIrValidationError.matchExhaustiveness owner => "compiler.ir-validation.match-exhaustiveness:" ++ owner
+          | PsVerifiedIrValidationError.invalidExternalImport name => "compiler.ir-validation.invalid-import:" ++ name
+          | PsVerifiedIrValidationError.emptyMatch => "compiler.ir-validation.empty-match"
+      | _ => "compiler." ++ psHostCompilerTranslationErrorCode inner
+
 def psHostCompilerTypeScriptSource
     (inputPath : String) : IO String := do
   let elaborated ← psHostCompilerElaborateProject inputPath
   match psCompilerTypeScriptFromElaborated elaborated with
-  | Except.error _ =>
+  | Except.error error =>
       throw
         (IO.userError
-          "PSC2_CLI_TS_EMIT_FAILED: source is outside the executable TypeScript backend subset")
+          ("PSC2_CLI_TS_EMIT_FAILED: " ++ psHostCompilerTypeScriptFailure error))
   | Except.ok output =>
       pure output
 

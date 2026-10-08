@@ -15,6 +15,8 @@ without inventing any second logic or confusing tests with verified evidence.
 
 namespace PSCVL.Effect
 
+open scoped Std.WP Lean.Order
+
 universe u v
 
 /-- A pure computation's weakest precondition is its requested postcondition. -/

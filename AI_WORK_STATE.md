@@ -681,3 +681,27 @@ Architectural blockers still remaining:
   Native reduction and positive StringEq soundness are named trusted laws;
   StringEq reflexivity remains an explicit unresolved conditional obligation.
   Audit remains 44/9/19/7.
+
+## Mutual family constructor publication checkpoint — 2026-10-08
+- **Full proof and native conformance #765 GREEN** at
+  `027bbe14daf49b363ecdf6ebd97cc266ea23a253`,
+  run https://github.com/dwijayuda/pskernel/actions/runs/37852934698.
+- Final ordinary datatype metadata replacement now derives original canonical
+  lookup preservation and authoritative index refinement from fresh-origin
+  constructor history. K targets have an independent always-zero universe,
+  singleton constructor, empty-field certificate.
+- Independent mutual per-type histories combine checked closed constructor
+  typing, raw/open constructor semantics, positivity and recursive metadata,
+  result-family/index evidence, freshness and exact ordered publication.
+  The outer family history derives owner shape identity from its suffix invariant,
+  and derives remaining canonical freshness from global name uniqueness.
+  The root suffix invariant is proved, not assumed as a new trusted law.
+- Latest candidates expose the exact ordinary recursor-validation suffix and
+  compose generated rule metadata, checked recursor Sort typing, independently
+  typed rules, exact publication and index refinement. Their latest CI must
+  pass before these candidates are considered validated.
+- Ordinary full transaction/well-formed extension, mutual recursor/header
+  transaction closure, nested semantics, Kernel/API/session composition,
+  semantic audit and integration remain incomplete. Audit=44/9/19/7.
+  NativeReductionSoundLaw and StringEqSoundLaw remain named trusted laws;
+  StringEqReflexiveLaw remains an explicitly unresolved conditional obligation.

@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.AdmissionOrdinaryFinishConfiguration
 import Ps.KernelCore.Metatheory.AdmissionParameterConfiguration
 import Ps.KernelCore.Metatheory.AdmissionConstructorSemanticHistoryConfiguration
 
@@ -6,7 +7,7 @@ Exact successful checked prefix of ordinary admission. This executable
 projection is composed with independent semantic contracts below; it is not
 itself a well-formed environment certificate.
 -/
-theorem psKernelAddSimpleInductive_success_constructor_pipeline
+theorem psKernelAddSimpleInductive_success_full_pipeline
     (fuel : Nat) (environment result : PsKernelEnvironment)
     (decl : PsKernelSimpleInductiveDecl) (maxRecDepth maxNatSize : Nat)
     (hRun : psKernelAddSimpleInductive fuel environment decl maxRecDepth maxNatSize =
@@ -29,7 +30,9 @@ theorem psKernelAddSimpleInductive_success_constructor_pipeline
         (psKernelOpenBinderListLength indexResult.binders) paramResult.session
         (psKernelEnvironmentAddUnchecked environment (PsKernelConstantInfo.inductInfo
           (psKernelOrdinaryInitialInductiveInfo decl indexResult.binders)))
-        0 decl.ctors = Except.ok ctorResult := by
+        0 decl.ctors = Except.ok ctorResult ∧
+      psKernelOrdinaryFinishAdmission fuel environment decl maxRecDepth maxNatSize
+        paramResult indexResult resultLevel ctorResult = Except.ok result := by
   let allNames : List PsKernelName :=
     List.cons decl.name
       (List.cons
@@ -165,6 +168,17 @@ theorem psKernelAddSimpleInductive_success_constructor_pipeline
                                                     hLevels, hHeader, hSort, hParams, hIndices, hShape,
                                                     psKernelOrdinaryInitialInductiveInfo, safety, hCtors] at hRun
                                               | ok ctorResult =>
+                                                  have hFinish :
+                                                      psKernelOrdinaryFinishAdmission fuel environment decl
+                                                        maxRecDepth maxNatSize paramResult indexResult resultLevel
+                                                        ctorResult = Except.ok result := by
+                                                    simp only [safety, psKernelOrdinaryInitialInductiveInfo,
+                                                      Nat.succ_eq_add_one] at hCtors
+                                                    simpa [psKernelAddSimpleInductive, hDuplicates,
+                                                      allNames, hUnique, hFresh, hOccurrences, hClosed,
+                                                      hLevels, hHeader, hSort, hParams, hIndices, hShape,
+                                                      psKernelOrdinaryInitialInductiveInfo, safety, hCtors,
+                                                      psKernelOrdinaryFinishAdmission] using hRun
                                                   exact ⟨headerResult, sortResult, paramResult, indexResult,
                                                     resultLevel, ctorResult,
                                                     (by first | exact hHeader | rfl),
@@ -172,11 +186,43 @@ theorem psKernelAddSimpleInductive_success_constructor_pipeline
                                                     (by first | exact hParams | rfl),
                                                     (by first | exact hIndices | rfl),
                                                     (by first | exact hShape | rfl),
-                                                    (by first | exact hCtors | rfl)⟩
+                                                    (by first | exact hCtors | rfl), hFinish⟩
                                           | _ =>
                                               simp [psKernelAddSimpleInductive, hDuplicates, allNames, hUnique,
                                                 hFresh, hOccurrences, hClosed, hLevels, hHeader, hSort,
                                                 hParams, hIndices, hShape] at hRun
+
+
+theorem psKernelAddSimpleInductive_success_constructor_pipeline
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hRun : psKernelAddSimpleInductive fuel environment decl maxRecDepth maxNatSize =
+      Except.ok result) :
+    ∃ (headerResult : PsKernelExpr × PsKernelCheckerSession)
+      (sortResult : PsKernelLevel × PsKernelCheckerSession)
+      (paramResult indexResult : PsKernelOpenBindersResult)
+      (resultLevel : PsKernelLevel) (ctorResult : PsKernelAddConstructorsResult),
+      psKernelSessionCheck fuel
+        (psKernelMkCheckerSession environment decl.levelParams
+          (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef else PsKernelDefinitionSafety.safe)
+          maxRecDepth maxNatSize) decl.type = Except.ok headerResult ∧
+      psKernelSessionEnsureSort fuel headerResult.2 headerResult.1 = Except.ok sortResult ∧
+      psKernelOpenSimpleHeaderParams fuel sortResult.2 decl.type decl.numParams = Except.ok paramResult ∧
+      psKernelOpenSimpleHeaderIndices fuel paramResult.session paramResult.result = Except.ok indexResult ∧
+      indexResult.result = PsKernelExpr.sort resultLevel ∧
+      psKernelAddSimpleConstructorsWithFuel (Nat.succ fuel) decl
+        (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef else PsKernelDefinitionSafety.safe)
+        resultLevel (psKernelLevelParamsToLevels decl.levelParams) paramResult.binders
+        (psKernelOpenBinderListLength indexResult.binders) paramResult.session
+        (psKernelEnvironmentAddUnchecked environment (PsKernelConstantInfo.inductInfo
+          (psKernelOrdinaryInitialInductiveInfo decl indexResult.binders)))
+        0 decl.ctors = Except.ok ctorResult := by
+  obtain ⟨headerResult, sortResult, paramResult, indexResult, resultLevel, ctorResult,
+    hHeader, hSort, hParams, hIndices, hResult, hCtors, hFinish⟩ :=
+    psKernelAddSimpleInductive_success_full_pipeline
+      fuel environment result decl maxRecDepth maxNatSize hRun
+  exact ⟨headerResult, sortResult, paramResult, indexResult, resultLevel, ctorResult,
+    hHeader, hSort, hParams, hIndices, hResult, hCtors⟩
 
 
 /--

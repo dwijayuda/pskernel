@@ -1,0 +1,26 @@
+-- All four value/effect relations use Lean kernel-checked propositions.
+theorem pure_rel : PSCVL.Effect.pureWP (2 : Nat) (fun x => x = 2) := by
+  rfl
+
+theorem reader_rel :
+    PSCVL.Effect.readerWP (pure 3 : ReaderM Nat Nat)
+      (fun result _env => result = 3) 7 := by
+  rfl
+
+theorem error_rel :
+    PSCVL.Effect.errorWP (Except.error "bad" : Except String Nat)
+      (fun _ => False) (fun err => err = "bad") := by
+  rfl
+
+theorem state_rel :
+    PSCVL.Effect.stateRel (pure 5 : StateM Nat Nat)
+      (fun s => s = 2) (fun before value after => value = 5 ∧ after = before) := by
+  intro old _
+  simp [PSCVL.Effect.stateRel]
+
+theorem frame_rel :
+    PSCVL.Effect.preserves (pure 4 : StateM Nat Nat) (fun n => n) := by
+  exact PSCVL.Effect.preserves_pure _ _
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := 5

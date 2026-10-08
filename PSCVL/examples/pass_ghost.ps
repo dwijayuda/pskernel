@@ -1,0 +1,10 @@
+-- Ghost state is proof-only and must not be returned in runtime data.
+@[pscv_export, pscv_type_spec]
+def countEven (xs : List Nat) : Id Nat
+    ensures result => result % 2 = 0 := do
+  let mut count := 0
+  ghost mut processed : List Nat := []
+  for x in xs invariant _before _after => count = 2 * processed.length do
+    count := count + 2
+    processed := x :: processed
+  return count

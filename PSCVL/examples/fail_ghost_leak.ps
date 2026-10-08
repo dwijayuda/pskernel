@@ -1,0 +1,7 @@
+-- The ghost value must not leak into executable results.
+@[pscv_export, pscv_type_spec]
+def leaked (xs : List Nat) : Id Nat := do
+  ghost mut collected : List Nat := []
+  for x in xs do
+    collected := x :: collected
+  return collected.length

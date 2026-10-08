@@ -1,5 +1,6 @@
 import Lean
 import Std.WP
+import PSCVL.Effect
 import Lean.Compiler.NoncomputableAttr
 import Lean.Util.FoldConsts
 import PSCVL.Syntax

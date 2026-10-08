@@ -1,12 +1,10 @@
 import Lean
 
 /-!
-ProofScript-owned syntax is lowered into Lean's pinned parser/elaborator.
-These are additive *bounded* aliases, not a separate type checker.
-
-The comprehensive ProofScript A.18 grammar (braced blocks, comma-separated
-calls, indexed inductive headers, extended effect syntax, etc.) is not yet
-implemented; each accepted spelling below has an unambiguous Lean lowering.
+A finite, ProofScript-owned syntax bridge. It always lowers to genuine Lean
+4.35.0-rc3 commands/terms; no separate typing rules or proof axioms.
+All source forms absent from this file remain unsupported, even when their
+keywords resemble facilities from the normative PSCV language reference.
 -/
 
 open Lean
@@ -14,28 +12,72 @@ open Lean
 namespace PSCVL
 
 syntax (name := pscvConst) "const " ident ":" term ":=" term : command
+syntax (name := pscvConstInferred) "const " ident ":=" term : command
 
 macro_rules
   | `(const $name:ident : $ty:term := $value:term) =>
     `(def $name : $ty := $value)
+  | `(const $name:ident := $value:term) =>
+    `(def $name := $value)
 
-/-- One comma-delimited explicit ProofScript binder (no JS-like defaults). -/
 declare_syntax_cat pscvBinder
 syntax ident ":" term : pscvBinder
+syntax ident ":" term ":=" term : pscvBinder
+
+declare_syntax_cat pscvNonExplicitBinder
+syntax "{" ident ":" term "}" : pscvNonExplicitBinder
+syntax "⦃" ident ":" term "⦄" : pscvNonExplicitBinder
+syntax "[" ident ":" term "]" : pscvNonExplicitBinder
+
+private def explicitLeanBinders (bs : Array (TSyntax `pscvBinder)) :
+    MacroM (Array (TSyntax ``Lean.Parser.Term.bracketedBinder)) := do
+  let mut result := #[]
+  for b in bs do
+    match b with
+    | `(pscvBinder| $x:ident : $t:term := $d:term) =>
+        result := result.push (← `(bracketedBinder| ($x:ident : $t:term := $d:term)))
+    | `(pscvBinder| $x:ident : $t:term) =>
+        result := result.push (← `(bracketedBinder| ($x:ident : $t:term)))
+    | _ => Macro.throwUnsupported
+  if bs.isEmpty then
+    -- Exact PSCV zero-source-parameter sugar: an optional Unit binder,
+    -- NOT a distinct JavaScript-style zero-arity function.
+    result := result.push (← `(bracketedBinder| (_unit : Unit := ())))
+  return result
+
+private def nonExplicitLeanBinders (bs : Array (TSyntax `pscvNonExplicitBinder)) :
+    MacroM (Array (TSyntax ``Lean.Parser.Term.bracketedBinder)) := do
+  let mut result := #[]
+  for b in bs do
+    match b with
+    | `(pscvNonExplicitBinder| {$x:ident : $t:term}) =>
+        result := result.push (← `(bracketedBinder| {$x:ident : $t:term}))
+    | `(pscvNonExplicitBinder| ⦃$x:ident : $t:term⦄) =>
+        result := result.push (← `(bracketedBinder| ⦃$x:ident : $t:term⦄))
+    | `(pscvNonExplicitBinder| [$x:ident : $t:term]) =>
+        result := result.push (← `(bracketedBinder| [$x:ident : $t:term]))
+    | _ => Macro.throwUnsupported
+  return result
 
 syntax (name := pscvFunction) "function " ident "(" pscvBinder,* ")" ":" term ":=" term : command
-
 macro_rules
   | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term := $body:term) => do
-    let mut leanBinders : Array (TSyntax ``Lean.Parser.Term.bracketedBinder) := #[]
-    for b in bs do
-      let `(pscvBinder| $x:ident : $t:term) := b
-        | Macro.throwUnsupported
-      leanBinders := leanBinders.push (← `(bracketedBinder| ($x:ident : $t:term)))
-    `(def $f:ident $leanBinders* : $result:term := $body:term)
+    let binders ← explicitLeanBinders bs
+    `(def $f:ident $binders* : $result:term := $body:term)
 
-/-- Contracted function syntax is the same verified Lean 4.35 contract
-semantics as `def`: `f.spec` must be proved by Lean's `vcgen`. -/
+/-- Non-explicit PSCV binders share Lean's implicit, strict-implicit, and
+instance elaborator, rather than emulating the semantics in a new compiler. -/
+syntax (name := pscvImplicitFunction)
+  "function " ident pscvNonExplicitBinder+ "(" pscvBinder,* ")" ":" term ":=" term : command
+
+macro_rules
+  | `(function $f:ident $implicitBs:pscvNonExplicitBinder* ($[$bs:pscvBinder],*) : $result:term := $body:term) => do
+    let imps ← nonExplicitLeanBinders implicitBs
+    let args ← explicitLeanBinders bs
+    `(def $f:ident $imps* $args* : $result:term := $body:term)
+
+/-- Contracted functions use the proof-producing intrinsic Lean 4.35
+WP semantics: `f.spec` must be discharged by pinned `vcgen`. -/
 syntax (name := pscvFunctionContract)
   "function " ident "(" pscvBinder,* ")" ":" term
   "requires" term "ensures" ident "=>" term ":=" term : command
@@ -43,16 +85,12 @@ syntax (name := pscvFunctionContract)
 macro_rules
   | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term
       requires $pre:term ensures $rv:ident => $post:term := $body:term) => do
-    let mut leanBinders : Array (TSyntax ``Lean.Parser.Term.bracketedBinder) := #[]
-    for b in bs do
-      let `(pscvBinder| $x:ident : $t:term) := b
-        | Macro.throwUnsupported
-      leanBinders := leanBinders.push (← `(bracketedBinder| ($x:ident : $t:term)))
-    `(def $f:ident $leanBinders* : $result:term
+    let binders ← explicitLeanBinders bs
+    `(def $f:ident $binders* : $result:term
         requires $pre:term
         ensures $rv:ident => $post:term := $body:term)
 
-/-- Finite refinement-type sugar lowering to Lean's kernel-checked Subtype. -/
+/-- Finite refinement sugar, elaborated as a kernel-checked Lean Subtype. -/
 syntax (name := pscvRefine) "refine " "type " ident ":=" term
   "where " ident "=>" term : command
 
@@ -60,9 +98,8 @@ macro_rules
   | `(refine type $name:ident := $t:term where $x:ident => $predicate:term) =>
     `(abbrev $name : Type := { $x:ident : $t:term // $predicate:term })
 
-/-- Adjacent calls are ProofScript curried calls, not Lean tuple application:
-    `f(a,b,c)` expands to `f a b c`; `f()` completes no explicit arguments.
-    `noWs` enforces the normative no-whitespace postfix-call boundary. -/
+/-- Adjacent ProofScript calls are curried: f(a,b,c) = f a b c.
+The Lean `noWs` parser combinator enforces adjacency to '(' exactly. -/
 syntax:max (name := pscvCall) term:max noWs "(" term,* ")" : term
 
 macro_rules

@@ -1,0 +1,12 @@
+-- PSCV optional/default and implicit binder source forms.
+function zero() : Nat := 0
+function withDefault(n : Nat := 7) : Nat := n
+function identity {α : Type}(value : α) : α := value
+function implicitZero {α : Type}() : Nat := 0
+
+const inferred := (1 : Nat)
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := zero() + withDefault() + identity(2) + implicitZero()
+
+theorem zero_is_zero : zero() = 0 := by rfl

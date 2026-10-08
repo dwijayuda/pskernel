@@ -538,3 +538,32 @@ Architectural blockers still remaining:
   public refinement. StringEq reflexivity remains explicit and unresolved.
 - Audit remains A/B/C/D = 44/9/19/7; integration head remains
   `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`. No final completion claim.
+
+## Verified ordinary constructor opening — 2026-10-09
+- **Full proof/native conformance #716 GREEN** at
+  `13f5d375ba39ba0f4a2ee7fce561e5043e420992`:
+  recursive-argument analysis preserves monotone local ordinal history.
+- **Full proof/native conformance #723 GREEN** at
+  `8f850d38f44830eeac592ae8f16f8fad83fc03c2`:
+  raw constructor field-spine refinement composes checked domain Sort typing,
+  universe validation, fresh binder allocation, ordinal history, and restored
+  parent caches. Independent positive field history ties actual returned
+  recursive-field records to their independently justified classifications.
+  Ordinary constructor open-shape composition includes raw parameters, raw
+  fields, positivity/recursive metadata, canonical result head and parameter
+  prefix, index arity and structural target exclusion.
+- Alignment failures #717–#722 were proof-only: Boolean universe guard
+  normalization and proof-dependent optional metadata matches. Reusable
+  guard equivalences and independent metadata-order construction resolved
+  the family. Production acceptance criteria were unchanged.
+- Positivity and exclusion remain explicitly conditional on unresolved
+  `PsKernelStringEqReflexiveLaw`; native and positive StringEq soundness remain
+  the existing named TCB laws. This is not full ordinary admission closure.
+- Current candidates: structural transport of semantic judgments and caches
+  under authoritative lookup-preserving environment extension (not arbitrary
+  replacement), and checked header binder-step/spine configuration refinement.
+  Verify their full CI before treating either as green.
+- Still open: constructor/declaration environment history and complete
+  ordinary/mutual/nested publication, recursor generation metadata, final
+  Kernel/API/session family, audit, integration and final gates. Audit remains
+  A/B/C/D=44/9/19/7.

@@ -497,3 +497,32 @@ network but can change available resolution; frozen combines both. None alone
 proves a complete isolated input closure. A pinned version or successful
 [`rustc` invocation](https://doc.rust-lang.org/rustc/command-line-arguments.html)
 does not prove ProofScript semantic preservation.
+
+## 21. Wasm Unit value and result boundaries
+
+The private Wasm representation uses an `i32` token for source Unit values in
+parameters, locals, captures, aggregate fields and arrays. Existing Unit
+function results, including Canonical scalar exports, retain zero Wasm results.
+An expression is a value producer even when its source type is Unit.
+
+Lowering therefore bridges these representations explicitly: source calls with
+a Unit result reify a zero token after the call; source function/lambda bodies
+produce a token and discard it at the ABI return. Direct calls use the declared
+parameter types, matching closure calls. The generated array-map/fold callbacks
+apply the same result bridge. No callback, argument or discarded let value may
+be skipped: it can diverge or trap.
+
+The return bridge distributes the final discard through tail conditional arms,
+retaining preceding work and dropping exactly the arm's final token. A final
+constant token can be removed directly. This leaves void calls in tail position
+for the existing tail-call pass; it does not promote a value-producing call
+whose result is still dropped. The exact emitted WasmIR and engine validation
+remain required. Canonical Unit parameters remain unsupported in the scalar
+interop profile, independently of this private representation.
+
+This follows the [Core 3.0 instruction stack rules](https://webassembly.github.io/spec/core/valid/instructions.html)
+and [execution rules](https://webassembly.github.io/spec/core/exec/instructions.html)
+reviewed on 2026-10-08. Focused execution covers Unit calls, control flow,
+storage, closures, array callbacks, trap retention and deep tail recursion.
+These observations do not establish global lowering preservation or validator
+soundness.

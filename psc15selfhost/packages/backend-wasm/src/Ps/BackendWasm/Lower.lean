@@ -94,6 +94,32 @@ def psWasmLowerResultType
       | Option.none => Except.error PsWasmLowerError.unsupportedType
       | Option.some valueType => Except.ok [valueType]
 
+-- Every source expression yields one runtime value. Only the function ABI
+-- erases Unit results. Keep the conversion here instead of teaching individual
+-- conditionals, matches and storage forms conflicting Unit representations.
+def psWasmUnitType (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.unit => true
+      | _ => false
+  | _ => false
+
+def psWasmCallValueInstructions (type : PsVerifiedIrType)
+    (call : PsWasmInstruction) : List PsWasmInstruction :=
+  if psWasmUnitType type then
+    List.cons call (List.cons (PsWasmInstruction.i32Const 0) List.nil)
+  else
+    List.cons call List.nil
+
+def psWasmFunctionBodyExpected (type : PsVerifiedIrType)
+    (expected : Option PsWasmValueType) : Option PsWasmValueType :=
+  if psWasmUnitType type then Option.some PsWasmValueType.i32 else expected
+
+def psWasmFunctionBodyResult (type : PsVerifiedIrType)
+    (body : List PsWasmInstruction) : List PsWasmInstruction :=
+  if psWasmUnitType type then psWasmDiscardUnit body else body
+
 def psWasmLowerParameterTypes
     (profile : PsWasmTargetProfile)
     (parameters : List PsVerifiedIrParameter) :
@@ -3072,7 +3098,7 @@ def psWasmLowerArrayMapWith
                                             locals := [
                                               outputInfo.elementValueType
                                             ]
-                                            body := [
+                                            body := psListAppend [
                                               PsWasmInstruction.localGet 2,
                                               PsWasmInstruction.localGet 1,
                                               PsWasmInstruction.arrayLen,
@@ -3091,9 +3117,11 @@ def psWasmLowerArrayMapWith
                                                   baseName
                                                   0,
                                                 PsWasmInstruction.refCastFunction
-                                                  codeTypeName,
-                                                PsWasmInstruction.callRef
-                                                  codeTypeName,
+                                                  codeTypeName
+                                            ] (psListAppend
+                                              (psWasmCallValueInstructions outputType
+                                                (PsWasmInstruction.callRef codeTypeName))
+                                              [
                                                 PsWasmInstruction.localSet 4,
                                                 PsWasmInstruction.localGet 3,
                                                 PsWasmInstruction.localGet 2,
@@ -3110,7 +3138,7 @@ def psWasmLowerArrayMapWith
                                               PsWasmInstruction.else_,
                                                 PsWasmInstruction.localGet 3,
                                               PsWasmInstruction.end_
-                                            ]
+                                            ])
                                           };
                                           let finalState : PsWasmLowerState :=
                                             psWasmAppendGeneratedFunction
@@ -3128,7 +3156,7 @@ def psWasmLowerArrayMapWith
                                                   ]
                                                   (psListAppend
                                                     loweredArray.instructions
-                                                    [
+                                                    (psListAppend [
                                                       PsWasmInstruction.localSet
                                                         arrayLocal,
                                                       PsWasmInstruction.localGet
@@ -3158,9 +3186,11 @@ def psWasmLowerArrayMapWith
                                                           baseName
                                                           0,
                                                         PsWasmInstruction.refCastFunction
-                                                          codeTypeName,
-                                                        PsWasmInstruction.callRef
-                                                          codeTypeName,
+                                                          codeTypeName
+                                                    ] (psListAppend
+                                                      (psWasmCallValueInstructions outputType
+                                                        (PsWasmInstruction.callRef codeTypeName))
+                                                      [
                                                         PsWasmInstruction.localGet
                                                           arrayLocal,
                                                         PsWasmInstruction.arrayLen,
@@ -3179,7 +3209,7 @@ def psWasmLowerArrayMapWith
                                                         PsWasmInstruction.call
                                                           helperName,
                                                       PsWasmInstruction.end_
-                                                    ]))
+                                                    ]))))
                                             state := finalState
                                           }
 
@@ -3405,7 +3435,7 @@ def psWasmLowerArrayFoldlWith
                                                                             locals := [
                                                                               accumulatorValueType
                                                                             ]
-                                                                            body := [
+                                                                            body := psListAppend [
                                                                               PsWasmInstruction.localGet
                                                                                 2,
                                                                               PsWasmInstruction.localGet
@@ -3431,9 +3461,11 @@ def psWasmLowerArrayFoldlWith
                                                                                   baseName
                                                                                   0,
                                                                                 PsWasmInstruction.refCastFunction
-                                                                                  codeTypeName,
-                                                                                PsWasmInstruction.callRef
-                                                                                  codeTypeName,
+                                                                                  codeTypeName
+                                                                            ] (psListAppend
+                                                                              (psWasmCallValueInstructions accumulatorType
+                                                                                (PsWasmInstruction.callRef codeTypeName))
+                                                                              [
                                                                                 PsWasmInstruction.localSet
                                                                                   5,
                                                                                 PsWasmInstruction.localGet
@@ -3455,7 +3487,7 @@ def psWasmLowerArrayFoldlWith
                                                                                 PsWasmInstruction.localGet
                                                                                   4,
                                                                               PsWasmInstruction.end_
-                                                                            ]
+                                                                            ])
                                                                           };
                                                                           let finalState :
                                                                               PsWasmLowerState :=
@@ -4359,12 +4391,12 @@ def psWasmLowerFunctionValueCall
                                       ]
                     (psListAppend
                       loweredArguments.instructions
-                      [
-                                            PsWasmInstruction.localGet closureLocal,
-                                            PsWasmInstruction.structGet baseName 0,
-                                            PsWasmInstruction.refCastFunction codeTypeName,
-                                            PsWasmInstruction.callRef codeTypeName
-                                          ])
+                      (psListAppend
+                        [PsWasmInstruction.localGet closureLocal,
+                          PsWasmInstruction.structGet baseName 0,
+                          PsWasmInstruction.refCastFunction codeTypeName]
+                        (psWasmCallValueInstructions resultType
+                          (PsWasmInstruction.callRef codeTypeName))))
                 state := loweredArguments.state
               }
 
@@ -4413,18 +4445,21 @@ def psWasmLowerCallWith
                     "call-binding-not-function:"
                     name))
       | Option.none =>
-          match
-              psWasmLowerExprListWith
-                lower Option.none state arguments with
-          | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                instructions :=
-                  psListAppend
-                    lowered.instructions
-                    [PsWasmInstruction.call name]
-                state := lowered.state
-              }
+          match psStrictFindDeclaration module.declarations name with
+          | Option.none => Except.error (PsWasmLowerError.unknownVariable name)
+          | Option.some declaration =>
+              match
+                  psWasmLowerTypedArgumentsWith profile lower state
+                    (psWasmParameterTypes declaration.parameters) arguments with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    instructions :=
+                      psListAppend lowered.instructions
+                        (psWasmCallValueInstructions declaration.resultType
+                          (PsWasmInstruction.call name))
+                    state := lowered.state
+                  }
   | _ =>
       match
           psStrictInferExprWithFuel
@@ -5032,7 +5067,7 @@ def psWasmLowerLambdaWith
                               match
                                   lowerWithBindings
                                     bodyBindings
-                                    expected
+                                    (psWasmFunctionBodyExpected resultType expected)
                                     preparedCaptures.state
                                     body with
                               | Except.error error => Except.error error
@@ -5050,7 +5085,7 @@ def psWasmLowerLambdaWith
                                     body :=
                                       psListAppend
                                         preparedCaptures.instructions
-                                        (loweredBody.instructions)
+                                        (psWasmFunctionBodyResult resultType loweredBody.instructions)
                                   };
                                   let finalState :=
                                     psWasmAddGeneratedLambda
@@ -5192,7 +5227,7 @@ def psWasmLowerExprWorker
                       match expected with
                       | Option.none =>
                           Except.ok {
-                            instructions := []
+                            instructions := [PsWasmInstruction.i32Const 0]
                             state := state
                           }
                       | Option.some valueType =>
@@ -5216,7 +5251,7 @@ def psWasmLowerExprWorker
                           match declaration.parameters with
                           | List.nil =>
                               Except.ok {
-                                instructions := [PsWasmInstruction.call name]
+                                instructions := psWasmCallValueInstructions declaration.resultType (PsWasmInstruction.call name)
                                 state := state
                               }
                           | List.cons _ _ =>
@@ -5531,7 +5566,7 @@ def psWasmLowerDeclaration
                     structures
                     inductives
                     bindings
-                    expected
+                    (psWasmFunctionBodyExpected declaration.resultType expected)
                     initialState
                     declaration.body with
               | Except.error error => Except.error error
@@ -5543,7 +5578,7 @@ def psWasmLowerDeclaration
                       parameters := parameters
                       results := results
                       locals := lowered.state.localTypes
-                      body := lowered.instructions
+                      body := psWasmFunctionBodyResult declaration.resultType lowered.instructions
                     }
                     state := lowered.state
                   }

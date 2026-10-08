@@ -1365,6 +1365,24 @@ def psTestWasmTailPositions : Bool :=
       nonTail == "nonTail" && direct == "direct" && indirect == "indirect"
   | _ => false
 
+def psTestWasmUnitReturnBridge : Bool :=
+  let body := [PsWasmInstruction.localGet 0,
+    PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+      PsWasmInstruction.call "left", PsWasmInstruction.i32Const 0,
+    PsWasmInstruction.else_,
+      PsWasmInstruction.localGet 1,
+      PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+        PsWasmInstruction.callRef "right", PsWasmInstruction.i32Const 0,
+      PsWasmInstruction.else_,
+        PsWasmInstruction.localGet 2,
+      PsWasmInstruction.end_,
+    PsWasmInstruction.end_]
+  match psWasmTailCalls (psWasmDiscardUnit body) with
+  | [.localGet 0, .ifStart none, .returnCall left, .else_,
+      .localGet 1, .ifStart none, .returnCallRef right, .else_,
+      .localGet 2, .drop, .end_, .end_] => left == "left" && right == "right"
+  | _ => false
+
 def psTestWasmBulkEncoding : Bool :=
   let instructions := (List.range 20000).flatMap fun _ =>
     [PsWasmInstruction.i32Const 42, PsWasmInstruction.drop]
@@ -1399,6 +1417,7 @@ def psTestWasmBulkListOperations : Bool :=
 def main : IO Unit := do
   if psTestWasmBulkEncoding
       && psTestWasmBulkListOperations
+      && psTestWasmUnitReturnBridge
       && psTestWasmTailPositions
       && psTestWasmScalarLowering
       && psTestWasmNatConstructorIdentityInvariant

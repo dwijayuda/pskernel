@@ -75,12 +75,13 @@ function parseCli(argv) {
   return { command, input: path.resolve(input), output: output && path.resolve(output) };
 }
 
-function run(command, args, cwd) {
+function run(command, args, cwd, extraEnv = {}) {
   const result = spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
     windowsHide: true,
+    env: { ...process.env, ...extraEnv },
   });
   if (result.error) {
     throw new Error('PSCV_LEAN_TOOL: ' + command + ': ' + result.error.message);
@@ -151,7 +152,12 @@ async function main() {
     // Explicitly named development-only emission. PSCV verified builds are
     // fail-closed until PSCV-CERT-v1 and its semantic gates are implemented.
     const cPath = path.join(directory, 'PSCVGenerated.c');
-    run(lean, ['-c', cPath, generatedPath], frontendDir);
+    // Lean 4.35 requires native compilation inputs to reside within its root.
+    // Running inside the isolated source directory keeps that invariant.
+    // Explicitly select the pinned toolchain because the temporary directory
+    // does not itself contain a lean-toolchain file.
+    run(lean, ['-c', cPath, generatedPath], directory,
+      { LEAN_TOOLCHAIN: 'leanprover/lean4:v4.35.0-rc3' });
     await copyFile(cPath, options.output);
     console.log('PSCV_LEAN_EMIT_C_DEVELOPMENT_UNVERIFIED: ' + options.output);
   } finally {

@@ -6,6 +6,8 @@ Branch: pscv/v3-execution
 
 ## Active execution
 
+- **2026-10-08 declaration-map host inventory correction:** 7d3220e main run 37713775567/job 113105467103 passed both portable source audits and rejected the undeclared new static host modules at the TrustManifest gate. Added js-declaration-map.mjs and source-map-origins.mjs to the exact sorted host inventory, retaining closure equality and all authority rules. Downstream map/integration checks remain pending; this is a compiler-host inventory correction, not a kernel/provider change.
+
 - **2026-10-08 direct-JS declaration maps:** source-signature writer now optionally records declaration/export positions without changing existing declaration product identities. Shared coordinate/original-source composition serves both JavaScript and declaration maps. Added required declaration-map/all build selection, common map pass and archive reconstruction, explicit registry snapshot V2/uniform derivation/4 with retained historical readers, and focused Node/actual native publication cases. Maps remain standalone and declaration-granularity; automatic linking, token/expression origins and broader public types remain pending. Cloud validation pending. Per latest user direction, finish this stage and report progress/remaining scope before starting another stage.
 
 - **2026-10-08 ClaimSet consumer cloud validation:** 09ae1662d88f3be948cf1797af5a59361fe7f05b passed full main run 37712984304/job 113102943084. Exact policy consumers, callback-mutation checks and legacy archive behavior pass alongside the complete compiler/self-host/integration gates. This is infrastructure evidence only; production ClaimSets still require real checker adapters and evidence before any nonempty assertion.

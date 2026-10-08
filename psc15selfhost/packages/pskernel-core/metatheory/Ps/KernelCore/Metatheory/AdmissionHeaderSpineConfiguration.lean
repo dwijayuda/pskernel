@@ -263,6 +263,9 @@ theorem psKernelOpenSimpleHeaderIndicesWithFuel_configuration_refines
                         psKernelOpenSimpleHeaderParamStep_configuration_refines
                           remaining hNative hString session type
                           ((opened.2, binder), openedBody) hConfig hStepRun
+                      have hOpenedEnvironment :
+                          opened.2.context.environment = session.context.environment :=
+                        hStepSound.2.1
                       have hTailRun : psKernelOpenSimpleHeaderIndicesWithFuel
                           remaining opened.2 openedBody (binder :: revIndices) =
                             Except.ok result := by
@@ -280,7 +283,7 @@ theorem psKernelOpenSimpleHeaderIndicesWithFuel_configuration_refines
                           session.context.localContext opened.2.context.localContext
                           result.session.context.localContext type openedBody result.result
                           binder binders hStepSound.2.2.2
-                          (by simpa [hStepSound.2.1] using hSpine)
+                          (by simpa [hOpenedEnvironment] using hSpine)
           | _ =>
               have hSound := psKernelSessionWhnf_concrete_refines_reduction
                 remaining hNative hString session reducedSession type _ hConfig hWhnf

@@ -236,3 +236,42 @@ theorem psKernelAddSimpleMutualInductive_success_name_guards
                     psKernelCheckFreshInductiveNames_refines_canonical
                       allNames environment hIndex hFresh
                   exact ⟨rfl, rfl, rfl, hAbsent⟩
+
+
+theorem psKernelNameHasDuplicates_cons_false_refines
+    (head : PsKernelName) (tail : List PsKernelName)
+    (hUnique : psKernelNameHasDuplicates (head :: tail) = false) :
+    psKernelNameListContains head tail = false ∧
+      psKernelNameHasDuplicates tail = false := by
+  cases hMember : psKernelNameListContains head tail with
+  | true => simp [psKernelNameHasDuplicates, hMember] at hUnique
+  | false =>
+      exact ⟨hMember, by simpa [psKernelNameHasDuplicates, hMember] using hUnique⟩
+
+/--
+Fresh remaining names stay absent when a disjoint declaration is inserted.
+This derives every progressive constructor work-environment freshness
+obligation from the existing naming guards rather than assuming it afresh.
+-/
+theorem psKernelInductiveNamesAbsent_add_disjoint
+    (environment : PsKernelEnvironment)
+    (added : PsKernelConstantInfo)
+    (names : List PsKernelName)
+    (hAbsent : PsKernelInductiveNamesAbsent environment names)
+    (hDisjoint : psKernelNameListContains (psKernelConstantInfoName added) names = false) :
+    PsKernelInductiveNamesAbsent
+      (psKernelEnvironmentAddUnchecked environment added) names := by
+  induction hAbsent with
+  | nil => exact PsKernelInductiveNamesAbsent.nil
+  | cons name rest hNameAbsent hRestAbsent ih =>
+      cases hEqual : psKernelNameEq (psKernelConstantInfoName added) name with
+      | true =>
+          simp [psKernelNameListContains, hEqual] at hDisjoint
+      | false =>
+          have hTail : psKernelNameListContains
+              (psKernelConstantInfoName added) rest = false := by
+            simpa [psKernelNameListContains, hEqual] using hDisjoint
+          exact PsKernelInductiveNamesAbsent.cons name rest
+            (by simpa [psKernelEnvironmentAddUnchecked,
+              psKernelFindConstantInList, hEqual] using hNameAbsent)
+            (ih hTail)

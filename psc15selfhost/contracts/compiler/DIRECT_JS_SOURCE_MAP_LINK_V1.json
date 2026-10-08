@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-direct-js-source-map-link/1",
+  "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
+  "status": "implementation-pending-cloud-validation",
+  "owner": "scripts/js-source-map-link.mjs",
+  "passId": "psc-link-direct-js-source-maps/1",
+  "scope": "Opt-in closed/uniform direct-JS checked build packages both already validated standalone ECMA-426 maps into separately identified linked JS/declaration outputs.",
+  "invariants": [
+    "Require exact map.file names, immutable unlinked printer/declaration bytes and exact map ArtifactIds.",
+    "Reject conflicting pre-existing sourceMappingURL directives and unsafe output basenames.",
+    "Append comments only after existing output positions; added comment origins are unmapped.",
+    "Archive independently reconstructs both linked output byte identities and canonical link recipe.",
+    "Do not upgrade logical authority or infer semantic preservation from linking."
+  ],
+  "contractProducts": [
+    {
+      "domain": "linked-javascript-output",
+      "contract": "psc-direct-js-linked-javascript/1"
+    },
+    {
+      "domain": "linked-declarations-output",
+      "contract": "psc-direct-js-linked-declarations/1"
+    },
+    {
+      "domain": "source-map-link-recipe",
+      "contract": "psc-direct-js-source-map-link/1"
+    }
+  ],
+  "registryVersion": "psc-v5-backends/3",
+  "uniformDerivation": "psc-uniform-js-backend-derivation/5",
+  "globalPreservationProved": false,
+  "assuredRelease": false,
+  "cloudValidation": "pending"
+}

@@ -48,7 +48,7 @@ export function selectCheckedBuildProducts({
   javaScriptRepresentation = closedJsRepresentationProfile,
 } = {}) {
   if (!['typescript', 'javascript', 'wasm', 'rust'].includes(backend)) throw new Error('PSC2_CHECKED_BACKEND');
-  if (!['executable', 'metadata', 'declarations', 'source-map', 'all', 'source', 'declaration-map'].includes(products)) throw new Error('PSC2_CHECKED_PRODUCTS');
+  if (!['executable', 'metadata', 'declarations', 'source-map', 'all', 'source', 'declaration-map', 'linked'].includes(products)) throw new Error('PSC2_CHECKED_PRODUCTS');
   if (![closedJsRepresentationProfile, uniformJsRepresentationProfile].includes(javaScriptRepresentation) ||
       (backend !== 'javascript' && javaScriptRepresentation !== closedJsRepresentationProfile))
     throw new Error('PSC2_CHECKED_JAVASCRIPT_REPRESENTATION');
@@ -57,10 +57,11 @@ export function selectCheckedBuildProducts({
       (backend === 'rust' && !['source', 'metadata'].includes(products)) ||
       (backend !== 'rust' && products === 'source'))
     throw new Error('PSC2_CHECKED_PRODUCT_TARGET');
-  const declarationMap = products === 'declaration-map' || products === 'all';
+  const linking = products === 'linked';
+  const declarationMap = products === 'declaration-map' || products === 'all' || linking;
   const selection = Object.freeze({ metadata: products === 'metadata' || declarationMap,
-    declarations: products === 'declarations' || declarationMap, sourceMap: products === 'source-map' || products === 'all' });
-  return Object.freeze({ backend, products, javaScriptRepresentation, selection, declarationMap,
+    declarations: products === 'declarations' || declarationMap, sourceMap: products === 'source-map' || products === 'all' || linking });
+  return Object.freeze({ backend, products, javaScriptRepresentation, selection, declarationMap, linking,
     ...(selection.declarations ? { declarationProfile: javaScriptRepresentation === uniformJsRepresentationProfile ?
       directJsUniformDeclarationProfile : directJsDeclarationProfile } : {}) });
 }
@@ -101,7 +102,7 @@ export async function buildChecked({
   const stem = output === undefined ? undefined : path.basename(output).replace(extension, '');
   const [languageAuthorityValue, backendRegistryValue] = await Promise.all([
     readFile(path.join(root, 'language-authority.json'), 'utf8'),
-    readFile(path.join(root, selected.declarationMap ? 'contracts/backends/BACKEND_REGISTRY_V2.json' : 'contracts/backends/BACKEND_REGISTRY_V1.json'), 'utf8'),
+    readFile(path.join(root, selected.linking ? 'contracts/backends/BACKEND_REGISTRY_V3.json' : selected.declarationMap ? 'contracts/backends/BACKEND_REGISTRY_V2.json' : 'contracts/backends/BACKEND_REGISTRY_V1.json'), 'utf8'),
   ]);
   const languageAuthority = canonicalArtifact(JSON.parse(languageAuthorityValue), 'language-authority', 'psc-language-authority-snapshot/1');
   const backendRegistry = canonicalArtifact(JSON.parse(backendRegistryValue), 'backend-registry', 'psc-backend-registry/1');
@@ -291,7 +292,7 @@ export async function buildChecked({
       compilerKind: compilerIdentity.engine, outputStem: stem, irStages,
       javaScriptRepresentation: selected.javaScriptRepresentation, declarationProfile: selected.declarationProfile,
       includeSpecializationInstances: selected.selection.metadata || selected.selection.sourceMap,
-      includeDeclarationMap: selected.declarationMap,
+      includeDeclarationMap: selected.declarationMap, includeLinkedSourceMaps: selected.linking,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
       hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi,
       sourceOrigins: selected.selection.metadata || selected.selection.sourceMap ? snapshot.sourceOrigins : undefined,
@@ -305,6 +306,7 @@ export async function buildChecked({
       }
     }
     if (selected.declarationMap && !observed.directDeclarationMap) throw new Error('PSC2_CHECKED_DECLARATION_MAP_BUILD_BINDING');
+    if (selected.linking && !observed.directMapLinks) throw new Error('PSC2_CHECKED_MAP_LINK_BUILD_BINDING');
     if (selected.selection.sourceMap) {
       if (!observed.directSourceMap) throw new Error('PSC2_CHECKED_SOURCE_MAP_BUILD_BINDING');
       if (compilerIdentity.engine === 'native-seed') {
@@ -346,6 +348,8 @@ export async function buildChecked({
       Object.entries(evidence.directDeclarations).map(([key, record]) => [key, record.identity]));
     if (evidence.directDeclarationMap) receipt.directDeclarationMap = Object.fromEntries(
       Object.entries(evidence.directDeclarationMap).map(([key, record]) => [key, record.identity]));
+    if (evidence.directMapLinks) receipt.directMapLinks = Object.fromEntries(
+      Object.entries(evidence.directMapLinks).map(([key, record]) => [key, record.identity]));
     if (evidence.directSourceMap) receipt.directSourceMap = {
       sourceMap: evidence.directSourceMap.sourceMap.identity, recipe: evidence.directSourceMap.recipe.identity };
     if (evidence.jsAbi) {

@@ -1,4 +1,5 @@
 import { verifyDirectJsDeclarationMap } from './js-declaration-map.mjs';
+import { verifyDirectJsSourceMapLinks } from './js-source-map-link.mjs';
 import { captureClaimConsumerPolicy } from './claim-set.mjs';
 import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { verifyObservedContextProducts } from './observed-build-context.mjs';
@@ -320,6 +321,31 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
           expectedOriginGraphId: one('origin-graph'), expectedPreparationOriginsId: one('source-origins', true),
           expectedSourceSnapshotId: one('source-snapshot', true), expectedProfile: execution.action.parameters.profile,
           expectedFile: execution.action.parameters.outputFile, maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes,
+        });
+      }
+      if (definition.passId === 'psc-link-direct-js-source-maps/1') {
+        if (definition.semanticRelationId !== 'psc-ecma426-source-map-comment-packaging/1' ||
+            execution.inputs.length !== 1 || execution.outputs.length !== 3 ||
+            execution.inputs[0].domain !== 'javascript-output' ||
+            execution.inputs[0].contract !== 'psc-direct-javascript/es2022' ||
+            execution.outputs[0].domain !== 'linked-javascript-output' ||
+            execution.outputs[1].domain !== 'linked-declarations-output' ||
+            execution.outputs[2].domain !== 'source-map-link-recipe' ||
+            execution.action.parameters.mode !== 'explicit-linked') fail('JS_MAP_LINK_SUBJECT');
+        const exactly = domain => {
+          const ids = execution.action.dependencies.filter(id => id.domain === domain);
+          if (ids.length !== 1) fail('JS_MAP_LINK_SUBJECT');
+          return { identity: ids[0], bytes: resolveArtifact(ids[0]) };
+        };
+        verifyDirectJsSourceMapLinks({
+          linkedJavaScript: { identity: execution.outputs[0], bytes: resolveArtifact(execution.outputs[0]) },
+          linkedDeclarations: { identity: execution.outputs[1], bytes: resolveArtifact(execution.outputs[1]) },
+          recipe: { identity: execution.outputs[2], bytes: resolveArtifact(execution.outputs[2]) },
+        }, {
+          javaScript: { identity: execution.inputs[0], bytes: resolveArtifact(execution.inputs[0]) },
+          declarations: exactly('declarations-output'), sourceMap: exactly('source-map-output'),
+          declarationMap: exactly('declaration-map-output'), expectedStem: execution.action.parameters.outputStem,
+          maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes,
         });
       }
       if (['psc-emit-direct-js-source-map/1', 'psc-emit-uniform-js-source-map/1'].includes(definition.passId)) {

@@ -67,6 +67,7 @@
       "scripts/js-declaration-map.mjs",
       "scripts/js-declarations.mjs",
       "scripts/js-generated-positions.mjs",
+      "scripts/js-source-map-link.mjs",
       "scripts/js-source-map.mjs",
       "scripts/kernel-checked-session.mjs",
       "scripts/kernel-contract.mjs",

@@ -4,7 +4,7 @@ import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtif
 import { createExtensionSet, createProfileEnvironment, createBuildAction, decodeBuildAction,
   verifyBuildAction } from './build-context.mjs';
 import { captureClaimConsumerPolicy, createClaimSet } from './claim-set.mjs';
-import { createBackendDescriptor, decodeBackendRegistry, decodeBackendDescriptor, selectUniformJavaScriptRegistry, uniformJavaScriptDeclarationMapDerivation, createArtifactBundle, verifyArtifactBundle } from './backend-contract.mjs';
+import { createBackendDescriptor, decodeBackendRegistry, decodeBackendDescriptor, selectUniformJavaScriptRegistry, uniformJavaScriptDeclarationMapDerivation, uniformJavaScriptMapLinkDerivation, createArtifactBundle, verifyArtifactBundle } from './backend-contract.mjs';
 
 const fail = code => { throw new Error('PSC_OBSERVED_CONTEXT_' + code); };
 const equal = (a, b) => canonicalBytes(a).equals(canonicalBytes(b));
@@ -77,7 +77,9 @@ export function bindObservedBuildContext(build, { languageAuthority, backendRegi
   if (uniform) {
     checkUniformPipeline(build.graph, resolve);
     const selected = selectUniformJavaScriptRegistry(backendRegistry,
-      decodeBackendRegistry(backendRegistry).backendVersion === 'psc-v5-backends/2'
+      decodeBackendRegistry(backendRegistry).backendVersion === 'psc-v5-backends/3'
+        ? { derivationId: uniformJavaScriptMapLinkDerivation } :
+        decodeBackendRegistry(backendRegistry).backendVersion === 'psc-v5-backends/2'
         ? { derivationId: uniformJavaScriptDeclarationMapDerivation } : {});
     backendRegistry = add(selected.registry); selection = add(selected.selection);
   }

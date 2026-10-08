@@ -598,3 +598,17 @@ and earlier derivations remain readable with their original derivation rules.
 The common graph records the map pass, bundles identify all three products,
 and archive readers reconstruct them against independently pinned parents.
 Successful map replay remains debug metadata, not semantic preservation.
+
+## Opt-in direct-JS source-map linking (V5.1)
+
+`--backend javascript --products linked` selects the existing source/declaration
+map closure, then an explicit packaging pass. Both standalone ECMA-426 maps
+retain their original unlinked printer/declaration positions. Original `.js`
+and `.d.ts` bytes are archived without modification; linked outputs have
+separate ArtifactIds and trailing unmapped `//# sourceMappingURL=` directives.
+The graph publishes linked output files and retains map/recipe evidence;
+the independent archive consumer recomputes both linked identities from four
+original products and refuses mismatched filenames or changed bytes.
+Existing modes and V1/V2 registries retain historical output identities.
+Only V3 and uniform derivation/5 select linking. A link is developer metadata,
+not a proof of target preservation, IDE navigation, reproducibility or DDC.

@@ -375,6 +375,8 @@ for (const [backend, products, representation] of [
   ['javascript', 'all', closedJsRepresentationProfile],
   ['javascript', 'all', uniformJsRepresentationProfile],
   ['javascript', 'source-map', closedJsRepresentationProfile],
+  ['javascript', 'linked', closedJsRepresentationProfile],
+  ['javascript', 'linked', uniformJsRepresentationProfile],
   ['javascript', 'declaration-map', uniformJsRepresentationProfile],
   ['javascript', 'executable', closedJsRepresentationProfile],
   ['wasm', 'executable', closedJsRepresentationProfile],
@@ -395,7 +397,7 @@ for (const [backend, products, representation] of [
       assert.equal(receipt.typeScriptToolInputs, undefined); assert.equal(receipt.typeScriptSha256, undefined);
       assert.equal(existsSync(path.join(dir, 'out.ts')), false);
       const counts = (await import(pathToFileURL(compilerPath).href)).counts();
-      assert.deepEqual(counts, { preparations: 1, emissions: 1, declarations: ['all', 'declaration-map'].includes(products) ? 1 : 0 });
+      assert.deepEqual(counts, { preparations: 1, emissions: 1, declarations: ['all', 'declaration-map', 'linked'].includes(products) ? 1 : 0 });
       const certificate = JSON.parse(await readFile(path.join(dir, 'out.pscv-cert.json')));
       assert.deepEqual(certificate.context.targets, [backend]);
       const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json')));
@@ -404,8 +406,18 @@ for (const [backend, products, representation] of [
       const archived = await verifyObservedBuildArchive(await readFile(path.join(dir, 'out.build-archive.json')),
         { expectedGraphId: receipt.buildGraph, allowedAssumptions: allowedAssumptionsFromGraph(graph) });
       assert.equal(archived.kind, 'accepted', archived.reason); assert.equal(archived.semanticClaimsVerified, false);
-      if (['all', 'declaration-map'].includes(products)) {
-        assert.equal(await readFile(path.join(dir, 'out.d.ts'), 'utf8'), 'export {};\n');
+      if (['all', 'declaration-map', 'linked'].includes(products)) {
+        const publishedDeclarations = await readFile(path.join(dir, 'out.d.ts'), 'utf8');
+        if (products === 'linked') {
+          assert.match(publishedDeclarations, /sourceMappingURL=out\.d\.ts\.map/);
+          assert.match(await readFile(outputPath, 'utf8'), /sourceMappingURL=out\.js\.map/);
+          assert.equal(passIds(graph).includes('psc-link-direct-js-source-maps/1'), true);
+          assert.ok(receipt.directMapLinks.linkedJavaScript);
+          const bundle = JSON.parse(await readFile(path.join(dir, 'out.artifact-bundle.json')));
+          assert.ok(bundle.executableArtifacts.some(item => item.role === 'linked-javascript'));
+          assert.ok(bundle.publicApiArtifacts.some(item => item.role === 'linked-declarations'));
+          assert.ok(bundle.debugArtifacts.some(item => item.role === 'source-map-link-recipe'));
+        } else assert.equal(publishedDeclarations, 'export {};\n');
         assert.equal(JSON.parse(await readFile(path.join(dir, 'out.js.map'))).version, 3);
         assert.equal(receipt.declarationProduction.hostBytesCompared, true);
         assert.equal(JSON.parse(await readFile(path.join(dir, 'out.d.ts.map'))).version, 3);
@@ -445,11 +457,13 @@ test('a malformed direct stage does not publish executable or receipt files', { 
 // compiler/provider binaries. Per-artifact and count bounds remain defaults.
 const nativeArchiveLimits = Object.freeze({ maxTotalBytes: 320 * 1024 * 1024, maxArchiveBytes: 448 * 1024 * 1024 });
 
-for (const [backend, representation, source] of [
+for (const [backend, representation, source, linked = false] of [
   ['javascript', closedJsRepresentationProfile, 'def answer : Nat := 42\n'],
   ['javascript', uniformJsRepresentationProfile, 'def identity (A : Type) (value : A) : A := value\n'],
+  ['javascript', closedJsRepresentationProfile, 'def answer : Nat := 42\n', true],
+  ['javascript', uniformJsRepresentationProfile, 'def identity (A : Type) (value : A) : A := value\n', true],
   ['wasm', closedJsRepresentationProfile, 'def identity (value : Nat) : Nat := value\n'],
-]) test(`actual native source -> checked ${backend}/${representation} -> shared published bundle`,
+]) test(`actual native source -> checked ${backend}/${representation}${linked ? '/linked' : ''} -> shared published bundle`,
   { skip: !native }, async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'psc-native-direct-products-'));
     const previousCli = process.env.PSC_TYPESCRIPT_CLI;
@@ -459,7 +473,7 @@ for (const [backend, representation, source] of [
       const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, backend === 'wasm' ? 'out.wasm' : 'out.js');
       await writeFile(entryPath, source);
       const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'lean434',
-        backend, archiveResourceLimits: nativeArchiveLimits, javaScriptRepresentation: representation, products: backend === 'wasm' ? 'executable' : 'all' });
+        backend, archiveResourceLimits: nativeArchiveLimits, javaScriptRepresentation: representation, products: backend === 'wasm' ? 'executable' : linked ? 'linked' : 'all' });
       assert.equal(receipt.compiler.engine, 'native-seed');
       assert.equal(receipt.archiveResourceLimits.maxTotalBytes, nativeArchiveLimits.maxTotalBytes);
       assert.equal(receipt.typeScriptToolInputs, undefined);
@@ -475,6 +489,11 @@ for (const [backend, representation, source] of [
         else assert.equal(module.answer, 42n);
         assert.equal(receipt.declarationProduction.hostBytesCompared, true);
         assert.equal(JSON.parse(await readFile(path.join(dir, 'out.js.map'))).version, 3);
+        if (linked) {
+          assert.match(await readFile(outputPath, 'utf8'), /sourceMappingURL=out\.js\.map/);
+          assert.match(await readFile(path.join(dir, 'out.d.ts'), 'utf8'), /sourceMappingURL=out\.d\.ts\.map/);
+          assert.ok(receipt.directMapLinks.linkedJavaScript);
+        }
         const declarationMap = JSON.parse(await readFile(path.join(dir, 'out.d.ts.map')));
         assert.equal(declarationMap.file, 'out.d.ts');
         assert.equal(declarationMap.sourcesContent[0], source);

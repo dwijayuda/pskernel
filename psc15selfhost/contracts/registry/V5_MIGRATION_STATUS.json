@@ -325,9 +325,12 @@
       ],
       "inheritedImplementationStatus": "implementation-available-exact-js-wasm-target-ir-assurance-pending",
       "assurance": "pending",
-      "disposition": "Keep four first-class lanes, JsIR/WasmIR validation, emitters and runtime fixes. TS/Rust remain source backends. Register explicit descriptors and bundles; target acceptance is not preservation. Rust generated checked source products now retain actual generic RuntimeIR validation/emission edges and use common artifact publication. Explicit products/3 native Rust source routing is connected. Cargo toolchain capture and specialized-input migration remain pending. Direct-JS declaration maps now reuse source-signature writer coordinates and source-origin composition through common graph/descriptor/bundle/archive routing; linking and expression/type-token origins remain open.",
+      "disposition": "Keep four first-class lanes, JsIR/WasmIR validation, emitters and runtime fixes. TS/Rust remain source backends. Register explicit descriptors and bundles; target acceptance is not preservation. Rust generated checked source products now retain actual generic RuntimeIR validation/emission edges and use common artifact publication. Explicit products/3 native Rust source routing is connected. Cargo toolchain capture and specialized-input migration remain pending. Direct-JS declaration maps now reuse source-signature writer coordinates and source-origin composition through common graph/descriptor/bundle/archive routing; selected link packaging pending cloud validation; expression/type-token origins remain open.",
       "addedOwners": [
-        "packages/driver-rust/src/Ps/DriverRust/Stages.lean"
+        "packages/driver-rust/src/Ps/DriverRust/Stages.lean",
+        "scripts/js-source-map-link.mjs",
+        "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+        "contracts/backends/BACKEND_REGISTRY_V3.json"
       ]
     },
     {
@@ -1067,7 +1070,7 @@
       "backendKind": "directTargetIR",
       "role": "long-term JS/npm lane; selected closed/uniform declarations and declaration-granularity maps",
       "descriptorStatus": "implemented",
-      "bundleStatus": "generated-native-closed-uniform-build-and-standalone-declaration-map-routing-cloud-validated-at-885988b2",
+      "bundleStatus": "standalone-maps-cloud-validated-at-885988b2-opt-in-linked-output-implementation-pending-cloud-validation",
       "preservation": "not-established-globally"
     },
     {
@@ -1201,7 +1204,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "declarations-javascript-maps-and-standalone-declaration-maps-generated-native-routing-cloud-validated-at-885988b2-linking-and-broader-signatures-pending",
+      "status": "declarations-and-standalone-maps-cloud-validated-at-885988b2-explicit-linked-output-implemented-cloud-validation-pending-broader-signatures-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1688,6 +1691,41 @@
     },
     {
       "id": "psc-uniform-js-backend-derivation/4",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
+    },
+    {
+      "id": "psc-direct-js-source-map-link/1",
+      "kind": "source-map-link-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-js-linked-javascript/1",
+      "kind": "linked-javascript-product",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-direct-js-linked-declarations/1",
+      "kind": "linked-declarations-product",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+      "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-link-direct-js-source-maps/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_SOURCE_MAP_LINK_V1.json",
+      "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/5",
       "kind": "backend-profile-derivation",
       "status": "current-host",
       "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",

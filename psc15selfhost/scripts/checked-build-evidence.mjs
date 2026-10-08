@@ -1,4 +1,5 @@
 import { createDirectJsDeclarationMap } from './js-declaration-map.mjs';
+import { createDirectJsSourceMapLinks } from './js-source-map-link.mjs';
 import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, passDefinition, recordPassExecution, verifyArtifact } from './artifact-evidence.mjs';
 import { createHash } from 'node:crypto';
@@ -49,9 +50,11 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   javaScript, directJavaScript, directWasm, rustSource, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
   pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence, generatedPositions, declarationProfile, javaScriptRepresentation = closedJsRepresentationProfile,
-  includeSpecializationInstances = true, includeDeclarationMap = false }) {
+  includeSpecializationInstances = true, includeDeclarationMap = false, includeLinkedSourceMaps = false }) {
   if (typeof includeDeclarationMap !== 'boolean' || (includeDeclarationMap && declarationProfile === undefined))
     throw new Error('PSC_BUILD_GRAPH_DECLARATION_MAP_SELECTION');
+  if (typeof includeLinkedSourceMaps !== 'boolean' || (includeLinkedSourceMaps && (!includeDeclarationMap || !outputStem ||
+      declarationProfile === undefined || directJavaScript === undefined))) throw new Error('PSC_BUILD_GRAPH_LINK_SELECTION');
   if (typeof includeSpecializationInstances !== 'boolean') throw new Error('PSC_BUILD_GRAPH_PRODUCT_SELECTION');
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
@@ -82,6 +85,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   let directSourceMap;
   let directDeclarations;
   let directDeclarationMap;
+  let directMapLinks;
   if (declarationProfile !== undefined && (directBackend !== 'javascript' || declarationProfile !== (uniformJavaScript ? directJsUniformDeclarationProfile : directJsDeclarationProfile)))
     throw new Error('PSC_BUILD_GRAPH_DECLARATION_PROFILE');
   if (generatedPositions !== undefined && directBackend !== 'javascript') throw new Error('PSC_BUILD_GRAPH_GENERATED_POSITION_TARGET');
@@ -363,7 +367,8 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           observedStages: ['javascript-lower', 'validate-js-ir', 'snapshot-js-ir'],
           validator: 'psc-js-ir-validator/1', globalPreservationProved: false },
         baseDependencies, ['trusted-javascript-lowering', 'trusted-js-ir-validator']);
-      const js = bytes(directJavaScript, 'javascript-output', 'psc-direct-javascript/es2022', { kind: 'output-file', suffix: '.js' });
+      const js = bytes(directJavaScript, 'javascript-output', 'psc-direct-javascript/es2022', includeLinkedSourceMaps ?
+        { kind: 'archive-required', role: 'unlinked-javascript-printer-output' } : { kind: 'output-file', suffix: '.js' });
       executableArtifact = js.identity;
       const printOutputs = [js], printDependencies = [...baseDependencies];
       if (generatedPositions !== undefined) {
@@ -390,7 +395,8 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           ...(uniformJavaScript ? { uniformSpecializedIr: specializedIr } : { specializedIr }), jsIr, javaScript: js,
         } });
         directDeclarations = {
-          declarations: add(product.declarations, { kind: 'output-file', suffix: '.d.ts' }),
+          declarations: add(product.declarations, includeLinkedSourceMaps ?
+            { kind: 'archive-required', role: 'unlinked-source-declarations' } : { kind: 'output-file', suffix: '.d.ts' }),
           sourceSignatures: add(product.sourceSignatures, { kind: 'output-file', suffix: '.declaration-signatures.json' }),
           binding: add(product.binding, { kind: 'output-file', suffix: '.declaration-binding.json' }),
         };
@@ -462,6 +468,28 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           [], undefined, { originPolicy: 'synthesize', authorityEffect: 'none',
             originReason: 'Emit coarse declaration anchors with explicit unmapped generated code and exact optional source-preparation composition.' });
       }
+      if (includeLinkedSourceMaps) {
+        if (!directDeclarations || !directSourceMap || !directDeclarationMap)
+          throw new Error('PSC_BUILD_GRAPH_LINK_SUBJECTS_REQUIRED');
+        const linked = createDirectJsSourceMapLinks({ javaScript: js,
+          declarations: directDeclarations.declarations, sourceMap: directSourceMap.sourceMap,
+          declarationMap: directDeclarationMap.declarationMap, outputStem });
+        directMapLinks = {
+          linkedJavaScript: add(linked.linkedJavaScript, { kind: 'output-file', suffix: '.js' }),
+          linkedDeclarations: add(linked.linkedDeclarations, { kind: 'output-file', suffix: '.d.ts' }),
+          recipe: add(linked.recipe, { kind: 'output-file', suffix: '.source-map-link-recipe.json' }),
+        };
+        execute('psc-link-direct-js-source-maps/1', js, Object.values(directMapLinks), implementation,
+          'psc-ecma426-source-map-comment-packaging/1',
+          { outputStem, mode: 'explicit-linked', observedStages: ['verify-map-output-names',
+            'append-unmapped-sourceMappingURL', 'bind-linked-output-identities'],
+            semanticPreservationProved: false, executableBytesUnchanged: false },
+          [...baseDependencies, directDeclarations.declarations.identity, directSourceMap.sourceMap.identity,
+            directDeclarationMap.declarationMap.identity], [], undefined,
+          { originPolicy: 'synthesize', authorityEffect: 'none',
+            originReason: 'Append unmapped sourceMappingURL comments after all original declaration and printer positions.' });
+        executableArtifact = directMapLinks.linkedJavaScript.identity;
+      }
     } else {
       if (!targetStages.wasmIr) throw new Error('PSC_BUILD_GRAPH_WASM_TARGET_IR_REQUIRED');
       const wasmIr = add(targetStages.wasmIr, { kind: 'archive-required', role: 'actual-validated-wasm-ir' });
@@ -526,6 +554,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ...(directSourceMap ? { directSourceMap } : {}),
     ...(directDeclarations ? { directDeclarations } : {}),
     ...(directDeclarationMap ? { directDeclarationMap } : {}),
+    ...(directMapLinks ? { directMapLinks } : {}),
     ...(executableArtifact ? { executableArtifact } : {}),
     ...(canonicalAdapter ? { wasmCanonical: canonicalAdapter } : {}),
     ...(jsAbiPlan && jsAbiPolicyArtifact ? { jsAbi: Object.freeze({ plan: jsAbiPlan, policy: jsAbiPolicyArtifact }) } : {}),

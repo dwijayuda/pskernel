@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
 import { createClaimSet } from './claim-set.mjs';
 import { createBackendDescriptor, decodeBackendDescriptor, createArtifactBundle, verifyArtifactBundle,
-  selectUniformJavaScriptRegistry, selectUniformJavaScriptRegistryV1, uniformJavaScriptDeclarationMapDerivation, backendSelectionContract, verifyBackendProfileSelection } from './backend-contract.mjs';
+  selectUniformJavaScriptRegistry, selectUniformJavaScriptRegistryV1, uniformJavaScriptDeclarationMapDerivation, uniformJavaScriptMapLinkDerivation, backendSelectionContract, verifyBackendProfileSelection } from './backend-contract.mjs';
 
 const registryValue = JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V1.json', import.meta.url), 'utf8'));
 function fixture(backendId) {
@@ -197,5 +197,21 @@ test('declaration maps require the explicit current product inventory and versio
   assert.equal(lane.products.debugArtifacts.filter(item => item.role === 'declaration-map').length, 1);
   const old = fixture('javascript');
   assert.throws(() => selectUniformJavaScriptRegistry(old.registry,
+    { derivationId: uniformJavaScriptDeclarationMapDerivation }), /SELECTION_DECLARATION_MAP_BASE/);
+});
+
+test('opt-in linked output has exact versioned uniform registry and retains historical derivations', async () => {
+  const v3 = JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V3.json', import.meta.url), 'utf8'));
+  const base = canonicalArtifact(v3, 'backend-registry', 'psc-backend-registry/1');
+  const selected = selectUniformJavaScriptRegistry(base, { derivationId: uniformJavaScriptMapLinkDerivation });
+  const values = new Map([base, selected.registry, selected.selection].map(item => [artifactKey(item.identity), item.bytes]));
+  const checked = await verifyBackendProfileSelection(selected.selection, {
+    expectedRegistryId: selected.registry.identity, resolveArtifact: id => values.get(artifactKey(id)) });
+  assert.equal(checked.bindingVerified, true);
+  const lane = JSON.parse(selected.registry.bytes).backends.find(item => item.backendId === 'javascript');
+  assert.ok(lane.products.executableArtifacts.some(item => item.role === 'linked-javascript'));
+  assert.ok(lane.products.publicApiArtifacts.some(item => item.role === 'linked-declarations'));
+  assert.ok(lane.products.debugArtifacts.some(item => item.role === 'source-map-link-recipe'));
+  assert.throws(() => selectUniformJavaScriptRegistry(base,
     { derivationId: uniformJavaScriptDeclarationMapDerivation }), /SELECTION_DECLARATION_MAP_BASE/);
 });

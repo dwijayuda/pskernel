@@ -39,3 +39,7 @@ Tests check a real logical identity theorem and reject an incorrect proof body, 
 .ps frontend, source-to-Core fidelity, normative Standard manifest, .proof.ps/.proof.lean proof closure, PSCV-CERT, erasure, four backend packages, extension sandbox, release packaging, semantic preservation. The native development CLI rejects unsupported compilation.
 
 There is no requirement to keep old PSC1/self-host source restrictions. Reuse existing Lean code selectively when it materially reduces work and preserves explicit correctness boundaries.
+
+## Lean native binary-size research
+
+The first native CLI and checker each measured about 118.5 MB unstripped. A nearly empty Lean program from the same toolchain was only 4.4 MB (2.8 MB fully stripped), so the large build is not the minimum Lean runtime cost. The trusted checker is now being kept behind a separate import/provider boundary. See the [size evidence and research](LEAN_NATIVE_REUSE_RESEARCH.md) and [CI](https://github.com/dwijayuda/pskernel/actions/runs/37759921812). The corrected lightweight compiler must be measured again before making a reduction claim.

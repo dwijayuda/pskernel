@@ -1,0 +1,12 @@
+-- Only a bounded Lean-compatible PSCV subset is implemented.
+@[pscv_export, pscv_type_spec]
+def increment (n : Nat) : Nat := n + 1
+
+theorem increment_pos (n : Nat) : 0 < increment n := by
+  simp [increment]
+
+const answer : Nat := 42
+
+function twice(x : Nat) : Nat := x + x
+
+function add(x : Nat, y : Nat) : Nat := x + y

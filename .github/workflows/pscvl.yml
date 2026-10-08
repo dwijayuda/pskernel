@@ -1,0 +1,40 @@
+name: PSCVL Lean-powered frontend
+
+on:
+  push:
+    branches: [main, feature/pscvl-lean-frontend]
+    paths:
+      - 'PSCVL/**'
+      - '.github/workflows/pscvl.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'PSCVL/**'
+      - '.github/workflows/pscvl.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pscvl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Exercise Lean frontend, approved root and negative policies
+        working-directory: PSCVL
+        shell: bash
+        run: |
+          set -euxo pipefail
+          lake exe pscvl check examples/pass.ps
+          ! lake exe pscvl check examples/fail_unsafe.ps
+          ! lake exe pscvl check examples/fail_partial.ps
+          ! lake exe pscvl check examples/fail_axiom.ps
+          ! lake exe pscvl check examples/fail_sorry.ps
+          ! lake exe pscvl check examples/fail_missing_spec.ps

@@ -1,0 +1,22 @@
+-- Lean-compatible subset: structures, inductives, instances, dependent types, match.
+structure PairNat where
+  left : Nat
+  right : Nat
+
+instance : Inhabited PairNat where
+  default := ⟨0, 0⟩
+
+inductive Choice where
+  | none : Choice
+  | some : Nat → Choice
+
+def get : Choice → Nat
+  | .none => 0
+  | .some n => n
+
+def choose (x : Nat) : { n : Nat // n = x } := ⟨x, rfl⟩
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := get (Choice.some 2)
+
+theorem root_bounded : root ≤ 2 := by decide

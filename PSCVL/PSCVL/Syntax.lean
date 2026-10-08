@@ -60,4 +60,16 @@ macro_rules
   | `(refine type $name:ident := $t:term where $x:ident => $predicate:term) =>
     `(abbrev $name : Type := { $x:ident : $t:term // $predicate:term })
 
+/-- Adjacent calls are ProofScript curried calls, not Lean tuple application:
+    `f(a,b,c)` expands to `f a b c`; `f()` completes no explicit arguments.
+    `noWs` enforces the normative no-whitespace postfix-call boundary. -/
+syntax:max (name := pscvCall) term:max noWs "(" term,* ")" : term
+
+macro_rules
+  | `($f:term($[$args:term],*)) => do
+    let mut app := f
+    for arg in args do
+      app ← `($app:term $arg:term)
+    return app
+
 end PSCVL

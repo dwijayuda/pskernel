@@ -1,5 +1,7 @@
 import Lean
 import Std.WP
+import Lean.Compiler.NoncomputableAttr
+import Lean.Util.FoldConsts
 import PSCVL.Syntax
 
 /-!
@@ -40,6 +42,10 @@ def elabPscvGate : CommandElab := fun _ => do
     if let .axiomInfo _ := info then
       throwError "PSCVL rejects source axiom: {c.name}"
     if pscvExportAttr.hasTag env c.name then
+      if Lean.isNoncomputable env c.name then
+        throwError "PSCVL executable export {c.name} is noncomputable"
+      if info.type.getUsedConstants.contains ``IO then
+        throwError "PSCVL closed export {c.name} uses raw IO (no verified effect model)"
       roots := roots + 1
       unless pscvTypeSpecAttr.hasTag env c.name do
         throwError "PSCVL export {c.name} is missing @[pscv_type_spec]"

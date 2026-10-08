@@ -9,4 +9,4 @@ function verified(n : Nat) : Id Nat
     ensures r => r = n := pure n
 
 @[pscv_export, pscv_type_spec]
-def root : Nat := quad 1 2 3 4 + zero
+def root : Nat := quad(1, 2, 3, 4) + zero()

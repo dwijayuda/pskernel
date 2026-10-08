@@ -1,0 +1,11 @@
+-- Lean intrinsic WP semantics: proof-producing total while loop.
+@[pscv_export, pscv_type_spec]
+def countDown (n : Nat) : Id Nat
+    ensures r => r = 0 := do
+  let mut i := n
+  while i > 0
+      invariant exit => if exit then i = 0 else True
+      decreasing i
+    do
+    i := i - 1
+  return i

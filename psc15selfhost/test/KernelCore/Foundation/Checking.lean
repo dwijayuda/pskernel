@@ -1,3 +1,4 @@
+import Ps.KernelCore.Admission.Inductive.Common.Parameters
 import KernelCore.Foundation.Core
 
 def psKernelReferenceExprOptionEq
@@ -972,3 +973,49 @@ def psKernelCoreRecursorTests : Bool :=
   | _, _ =>
       false
 
+
+/-- Positive DefEq result classification for the negative scope regression. -/
+def psKernelScopeRegressionTrue
+    (result : Except String (Bool × PsKernelCheckerState)) : Bool :=
+  match result with
+  | Except.ok (equal, _) => equal
+  | Except.error _ => false
+
+/--
+A closed-key DefEq cache may still depend on a temporary local context when
+the raw environment contains a declaration whose type refers to that local.
+The historical state-only scope handoff must be observed to return true,
+while the cold parent and the corrected scope handoff must reject equality.
+This tests raw checker-state scope isolation, not well-formed admission of the
+deliberately malformed global environment.
+-/
+def psKernelAdmissionScopeCacheIsolationRegression : Bool :=
+  let base := PsKernelName.str PsKernelName.anonymous "ScopeProp"
+  let fresh := PsKernelName.num base 0
+  let leftName := PsKernelName.str PsKernelName.anonymous "ScopeProofLeft"
+  let rightName := PsKernelName.str PsKernelName.anonymous "ScopeProofRight"
+  let addProof := fun (env : PsKernelEnvironment) (name : PsKernelName) =>
+    psKernelEnvironmentAddUnchecked env (PsKernelConstantInfo.axiomInfo {
+      base := { name := name, levelParams := [], type := PsKernelExpr.fvar fresh }
+      isUnsafe := false
+    })
+  let env := addProof (addProof psKernelEnvironmentEmpty leftName) rightName
+  let parent := psKernelMkCheckerSession env [] PsKernelDefinitionSafety.safe 100 100
+  let childLocal := psKernelLocalContextAddLocal parent.context.localContext
+    fresh base (PsKernelExpr.sort PsKernelLevel.zero) PsKernelBinderInfo.default
+  let childContext := psKernelCheckerContextWithLocalContext parent.context childLocal
+  let childState := { psKernelCheckerStateEmpty with nextFresh := 1 }
+  let left := PsKernelExpr.const leftName []
+  let right := PsKernelExpr.const rightName []
+  match psKernelIsDefEq 2048 childContext childState left right with
+  | Except.ok (true, learned) =>
+      let analyzed := PsKernelCheckerSession.mk childContext learned
+      let restored := psKernelSessionRestoreLocalScope parent analyzed
+      let cold := psKernelIsDefEq 2048 parent.context parent.state left right
+      let historical := psKernelIsDefEq 2048 parent.context learned left right
+      let safe := psKernelIsDefEq 2048 restored.context restored.state left right
+      psKernelExprPairSetContains learned.success left right &&
+        psKernelScopeRegressionTrue historical &&
+        !(psKernelScopeRegressionTrue cold) &&
+        !(psKernelScopeRegressionTrue safe)
+  | _ => false

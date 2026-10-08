@@ -664,18 +664,9 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                       | Except.ok recursiveResult =>
                           let child0 :=
                             child;
-                          let analysisLocal :=
-                            recursiveResult.session.context.localContext;
-                          let continuationLocal :=
-                            PsKernelLocalContext.mk
-                              child0.context.localContext.decls
-                              analysisLocal.nextIndex;
                           let continuation :=
-                            PsKernelCheckerSession.mk
-                              (psKernelCheckerContextWithLocalContext
-                                child0.context
-                                continuationLocal)
-                              recursiveResult.session.state;
+                            psKernelSessionRestoreLocalScope
+                              child0 recursiveResult.session;
                           let nextRecursive :
                               List PsKernelSimpleMutualRecursiveField :=
                             match

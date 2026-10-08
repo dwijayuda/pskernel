@@ -427,3 +427,36 @@ theorem psKernelSessionWithLocal_preserves_configuration
   simpa only [psKernelSessionWithLocal] using
     psKernelCheckerFreshLocal_preserves_configuration
       session.context session.state userName type binderInfo hString hConfig
+
+/--
+Scope exit preserves the parent's configuration independently of temporary
+analysis state. The restored local declaration list has the same lookup view;
+only its ordinal allocation history is retained from the child.
+-/
+theorem psKernelSessionRestoreLocalScope_preserves_configuration
+    (parent child : PsKernelCheckerSession)
+    (hConfig : PsKernelCheckerConfigurationSound
+      parent.context parent.state) :
+    PsKernelCheckerConfigurationSound
+      (psKernelSessionRestoreLocalScope parent child).context
+      (psKernelSessionRestoreLocalScope parent child).state := by
+  let continuationLocal := PsKernelLocalContext.mk
+    parent.context.localContext.decls child.context.localContext.nextIndex
+  let restored := psKernelCheckerStateExitLocalScope parent.state child.state
+  have hRestored := psKernelCheckerStateExitLocalScope_preserves_configuration
+    parent.context parent.state child.state hConfig
+  have hExt : PsKernelLocalContextExtends
+      parent.context.localContext continuationLocal := by
+    intro name decl hFind
+    simpa [continuationLocal, psKernelLocalContextFind] using hFind
+  rcases hRestored with ⟨hIndex, hFresh, hSemantic⟩
+  have hSemanticNext := psKernelCheckerStateSemanticSound_contextWeaken
+    parent.context.environment parent.context.localContext continuationLocal
+    restored hExt hSemantic
+  change PsKernelEnvironmentIndexRefines parent.context.environment ∧
+    PsKernelLocalContextFreshBound continuationLocal restored.nextFresh ∧
+    PsKernelCheckerStateSemanticSound parent.context.environment
+      continuationLocal restored
+  exact ⟨hIndex, (by
+    simpa [continuationLocal, PsKernelLocalContextFreshBound] using hFresh),
+    hSemanticNext⟩

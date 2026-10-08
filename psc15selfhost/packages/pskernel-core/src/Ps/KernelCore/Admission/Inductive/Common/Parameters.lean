@@ -17,6 +17,20 @@ def psKernelSessionWithLocal
   Prod.mk fresh
     (PsKernelCheckerSession.mk nextContext (Prod.snd freshResult))
 
+
+/--
+Leave a temporary admission-analysis scope. Preserve its allocated ordinal
+history and monotone global freshness, but restore the parent's semantic
+caches rather than publishing entries learned with temporary local binders.
+-/
+def psKernelSessionRestoreLocalScope
+    (parent child : PsKernelCheckerSession) : PsKernelCheckerSession :=
+  let continuationLocal := PsKernelLocalContext.mk
+    parent.context.localContext.decls child.context.localContext.nextIndex;
+  PsKernelCheckerSession.mk
+    (psKernelCheckerContextWithLocalContext parent.context continuationLocal)
+    (psKernelCheckerStateExitLocalScope parent.state child.state)
+
 def psKernelReverseOpenBindersWorker
     (values : List PsKernelOpenBinder) :
     List PsKernelOpenBinder -> List PsKernelOpenBinder :=

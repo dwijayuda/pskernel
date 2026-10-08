@@ -498,18 +498,8 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
                       | Except.ok analysis =>
                           let child0 :=
                             Prod.snd localResult;
-                          let analysisLocal :=
-                            analysis.session.context.localContext;
-                          let continuationLocal :=
-                            PsKernelLocalContext.mk
-                              child0.context.localContext.decls
-                              analysisLocal.nextIndex;
                           let child :=
-                            PsKernelCheckerSession.mk
-                              (psKernelCheckerContextWithLocalContext
-                                child0.context
-                                continuationLocal)
-                              analysis.session.state;
+                            psKernelSessionRestoreLocalScope child0 analysis.session;
                           let nextRecursive :
                               List PsKernelSimpleRecursiveField :=
                             match analysis.recursiveInfo with

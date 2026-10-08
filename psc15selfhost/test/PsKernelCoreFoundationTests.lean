@@ -45,6 +45,8 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_CORE_RUNTIME_INVARIANT: FAIL")
+  else if !psKernelAdmissionScopeCacheIsolationRegression then
+    throw (IO.userError "PSC1_KERNEL_CORE_ADMISSION_SCOPE_CACHE_ISOLATION: FAIL")
   else if !psKernelCoreWhnfTests then
     throw
       (IO.userError

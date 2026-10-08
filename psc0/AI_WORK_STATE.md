@@ -21,12 +21,21 @@ checks actual original-IR call paths and argument order, emits that same IR,
 and compares bounded runtime behavior. It runs on N1 and C1/C2/C3, not the old Q.
 The separate provider job also checks its exact C2/C3 admission streams.
 
-Cloud outcomes for this repair are pending. Preserve C2-versus-C3 product
-equality; Q may produce a different C1 TypeScript product while its C1 executable
+Run 37852341550 passed the first bounded native gate for this repair at
+cf8fbd784944a98b1e390b709685ca54c2511827. The original-IR assertions and
+generated/native behavior checks passed; full C1/C2/C3 and provider outcomes
+remain pending. Preserve C2-versus-C3 product equality; Q may produce a different
+C1 TypeScript product while its C1 executable
 already contains the new erasure implementation. A remains the selected seed.
 The diagnostic IR inventory must determine the new finding counts. This
 checkpoint does not implement the separate call-expression typing obligations
 or activate strict SH/1 runtime enforcement.
+
+The next coherent portable expression-checker design is recorded in
+[docs/selfhost-language/RUNTIME_IR_PLAN.md](docs/selfhost-language/RUNTIME_IR_PLAN.md).
+It preserves type/value scope, ordered simultaneous substitution, exact IR
+calling conventions and explicit resource failures. It is a plan, not an
+additional implemented or strictly qualified capability.
 
 ## Previous checkpoint: next three-helper source migration
 

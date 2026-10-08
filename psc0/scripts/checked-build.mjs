@@ -13,7 +13,7 @@ import {
   defaultCheckedKernel,
 } from './checked-kernel-provider.mjs';
 import { runCheckedSeedSession } from './checked-seed-session.mjs';
-import { resolveTypeScriptCli } from './typescript-cli.mjs';
+import { assertPinnedTypeScriptCli, strictTypeScriptArgs, checkedTypeScriptToolchain } from './typescript-cli.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -105,6 +105,7 @@ export async function buildChecked({
     canonicalAdmissionsSha256: digest(admissions),
   };
   if (checkOnly) return receipt;
+  receipt.typeScriptToolchain = checkedTypeScriptToolchain;
   if (typeof typeScript !== 'string') throw new Error('PSC2_CHECKED_TS_RESULT');
   const output = path.resolve(outputPath);
   if (!/\.(?:ts|js)$/u.test(output)) throw new Error('PSC2_CHECKED_OUTPUT_KIND');
@@ -144,20 +145,14 @@ export async function buildChecked({
 
   // Kernel acceptance has already happened. TypeScript writes only into staging;
   // a failed tsc cannot create a new final output or checked receipt.
-  const tsc = resolveTypeScriptCli();
-  const version = spawnSync(process.execPath, [tsc, '--version'], { encoding: 'utf8', timeout: 10000 });
-  if (version.error || version.status !== 0 || version.stdout.trim() !== 'Version 5.8.3') {
-    throw new Error('PSC2_CHECKED_TYPESCRIPT_PIN: require TypeScript 5.8.3');
-  }
+  const tsc = assertPinnedTypeScriptCli();
   await mkdir(path.dirname(output), { recursive: true });
   const staging = await mkdtemp(path.join(path.dirname(output), '.checked-stage-'));
   try {
     const tsFile = path.join(staging, stem + '.ts');
     await writeFile(tsFile, typeScript);
     trace('tsc-start', 'typescriptBytes=' + Buffer.byteLength(typeScript, 'utf8'));
-    const run = spawnSync(process.execPath, [tsc, tsFile, '--target', 'ES2022', '--module', 'ES2022',
-      '--moduleResolution', 'bundler', '--strict', '--declaration', '--sourceMap',
-      '--noEmitOnError', '--skipLibCheck', '--pretty', 'false'], {
+    const run = spawnSync(process.execPath, [tsc, tsFile, ...strictTypeScriptArgs], {
       encoding: 'utf8', timeout: 120000, maxBuffer: 16 * 1024 * 1024, windowsHide: true,
     });
     trace('tsc-completed', 'exit=' + String(run.error?.code ?? run.status));

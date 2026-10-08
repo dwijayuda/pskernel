@@ -18,7 +18,7 @@ Profile:   lean4.34-core
 
 Do not substitute another Lean release when validating this provider profile.
 
-For host scripts, CI uses Node 22. TypeScript is needed only when a `psc build ...` path continues from kernel admission into TS/JS generation; the workspace pins TypeScript `5.8.3`.
+For host scripts, CI uses Node 22. TypeScript is needed only when a `psc build ...` path continues from kernel admission into TS/JS generation; the workspace pins TypeScript `7.0.2` (native Go compiler).
 
 ## 2. Normal npm use: no Lean build required
 
@@ -234,17 +234,17 @@ A build without `--kernel lean434` preserves the existing self-host/bootstrap be
 
 ### TypeScript for gated JS builds
 
-The workspace pins `typescript@5.8.3`. If `tsc` is not available on your machine, install/use that exact version before testing JS output:
+The workspace pins `typescript@7.0.2`. If `tsc` is not available on your machine, install/use that exact version before testing JS output:
 
 ```text
-npm install --global typescript@5.8.3
+npm install --global typescript@7.0.2
 tsc --version
 ```
 
 Expected:
 
 ```text
-Version 5.8.3
+Version 7.0.2
 ```
 
 This TypeScript requirement is for the final TS -> JS build stage, not for Lean kernel admission itself.

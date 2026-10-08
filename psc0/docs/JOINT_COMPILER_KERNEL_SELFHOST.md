@@ -33,7 +33,7 @@ Command from psc0/: npm run joint:kernel
 2. Recreate the current kernel's canonical ProofScript source workspace
    using the real PSC1 Lean->ProofScript translator, excluding proof/metatheory.
 3. Build the full strictly typechecked native-PSC0 reference executable
-   using pinned TypeScript 5.8.3 and native PSKernel Core checking. Preserve
+   using pinned TypeScript 7.0.2 and native PSKernel Core checking. Preserve
    actual source TS, output JS, canonical admissions and the checked receipt.
 4. Execute the PSC0-generated JavaScript compiler on the separately
    translated kernel source. It must elaborate every module and obtain fresh
@@ -77,7 +77,7 @@ checked generation, supports Lake cache restoration, and leaves
 proof/metatheory entirely outside runtime build targets.
 
 Lean 4.34 remains the initial native compiler/runtime used for bootstrapping
-PSKernel Core, and TypeScript 5.8.3 compiles the generated TypeScript to JS.
+PSKernel Core, and TypeScript 7.0.2 compiles the generated TypeScript to JS.
 Native PSKernel Core remains the selected development checker. The generated
 JS kernel is a separate execution/compatibility workstream.
 
@@ -178,3 +178,24 @@ A follow-up architectural profiler should diagnose its actual preparation,
 checker and erasure/emission timing separately, not patch individual tests.
 The generated JS kernel's independent full compiler checking and repeated
 joint fixed point are still separate mandatory acceptance gates.
+
+## Mandatory TS7.0.2 toolchain cutover (2026-10-09)
+
+The active PSC0 workspace now uses exactly TypeScript 7.0.2 as its
+TypeScript-to-JavaScript toolchain. The earlier JavaScript output hashes
+are historical observations, not matching-current-toolchain evidence.
+No dual TypeScript compiler path or fallback is retained. Both the native
+PSC0 host and the generated-compiler/checked-build host enforce the exact
+TS7 version and pass '--ignoreConfig' for explicitly named .ts files.
+Checked full-emission and TypeScript-source receipts include a structured
+TS7 toolchain identity, and consumers require it. The kernel admission
+check remains prior to all executable output. Repeat-generation JS fixed
+points must be regenerated and validated with the new compiler, not assumed
+from their unchanged TypeScript source hashes.
+
+Evidence: PR #86, Actions #37851336504: strict native TypeScript 7.0.2
+accepted the actual 79-module generated kernel TypeScript and emitted a
+runnable JS kernel in 23.279 seconds (429 MiB peak RSS), versus an older
+TypeScript compile exceeding a 120-second time limit on the same source.
+The independent generated-JS PSC0 compiler remains a separate performance
+and correctness gate, and joint checker promotion is not implied.

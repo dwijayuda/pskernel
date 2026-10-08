@@ -354,7 +354,7 @@ if (
       toolPrefix,
       "--no-audit",
       "--no-fund",
-      "typescript@5.8.3",
+      "typescript@7.0.2",
     ],
     { cwd: root, stdio: "inherit", encoding: "utf8" },
   );

@@ -10,6 +10,7 @@ import { assertBootstrapWorkspaceManifest } from './bootstrap-manifest.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkCoreAdmissions } from './checked-kernel-core.mjs';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
+import { checkedTypeScriptToolchain } from './typescript-cli.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const out = path.join(root, 'dist/joint-kernel');
@@ -44,6 +45,7 @@ async function assertCompilerReceipt() {
     if (receipt.provider?.[name] !== value) throw new Error('PSC0_JOINT_COMPILER_PROVIDER_MISMATCH: ' + name);
   }
   if (receipt.kind !== 'psc2-checked-build' || receipt.schemaVersion !== 3 ||
+      JSON.stringify(receipt.typeScriptToolchain) !== JSON.stringify(checkedTypeScriptToolchain) ||
       receipt.sourceCount !== baseline.sourceCount ||
       receipt.typeScriptSha256 !== baseline.originalCompilerTypeScriptSha256 ||
       (await digestFile(compiler)) !== receipt.javaScriptSha256 ||
@@ -66,6 +68,7 @@ async function assertCompilerReceipt() {
 
 async function assertKernelOutput(js, receipt, manifest, compilerSha) {
   if (receipt.kind !== 'psc2-checked-build' || receipt.schemaVersion !== 3 ||
+      JSON.stringify(receipt.typeScriptToolchain) !== JSON.stringify(checkedTypeScriptToolchain) ||
       receipt.sourceCount !== manifest.sourceCount ||
       receipt.sourceClosureSha256 !== manifest.closureSha256 ||
       receipt.compiler?.sha256 !== compilerSha ||
@@ -119,6 +122,7 @@ async function generate() {
   const nativeSnapshot = await readCheckedSourceSnapshot(path.join(root, kernelEntryRelative));
   const expectedProvider = checkedKernelIdentity('pskernel-core');
   if (reference.kind !== 'psc2-checked-build' || reference.schemaVersion !== 3 ||
+      JSON.stringify(reference.typeScriptToolchain) !== JSON.stringify(checkedTypeScriptToolchain) ||
       reference.compiler?.engine !== 'native-seed' ||
       reference.compiler?.sha256 !== await digestFile(defaultCheckedSeed) ||
       reference.sourceCount !== kernelSource.moduleCount ||
@@ -156,7 +160,7 @@ async function generate() {
     'psc0-joint-source-equivalent/2', kernelSource.sourceSha256,
     firstManifest.closureSha256, compilerSha, nativeSha,
     reference.typeScriptSha256, reference.canonicalAdmissionsSha256,
-    JSON.stringify(expectedProvider),
+    JSON.stringify(checkedTypeScriptToolchain), JSON.stringify(expectedProvider),
   ].join('\n'));
   const evidencePath = path.join(out, 'kernel-fixed-point.json');
   let previous;
@@ -166,6 +170,7 @@ async function generate() {
   async function assertCheckedSource(tsFile, receipt, manifest, label) {
     if (receipt.kind !== 'psc2-checked-typescript' ||
         receipt.schemaVersion !== 3 || receipt.emission !== 'typescript-only' ||
+        JSON.stringify(receipt.typeScriptToolchain) !== JSON.stringify(checkedTypeScriptToolchain) ||
         receipt.compiler?.engine !== 'generated-js' ||
         receipt.compiler?.sha256 !== compilerSha ||
         receipt.sourceCount !== manifest.sourceCount ||
@@ -411,6 +416,7 @@ async function generateNative() {
   });
   if (receipt.kind !== 'psc2-checked-build' ||
       receipt.schemaVersion !== 3 ||
+      JSON.stringify(receipt.typeScriptToolchain) !== JSON.stringify(checkedTypeScriptToolchain) ||
       receipt.sourceCount !== closure.moduleCount ||
       receipt.sourceClosureSha256 !== snapshot.closureSha256 ||
       receipt.compiler?.engine !== 'native-seed' ||
@@ -455,6 +461,7 @@ async function verifyNativeGeneratedChecker() {
   const receipt = await readJson(receiptPath);
   const wireText = await readFile(admissionsFile, 'utf8');
   if (receipt.kind !== 'psc2-checked-build' || receipt.schemaVersion !== 3 ||
+      JSON.stringify(receipt.typeScriptToolchain) !== JSON.stringify(checkedTypeScriptToolchain) ||
       receipt.compiler?.engine !== 'native-seed' ||
       receipt.provider?.provider !== 'pskernel-core-native' ||
       (await digestFile(nativeJs)) !== receipt.javaScriptSha256 ||

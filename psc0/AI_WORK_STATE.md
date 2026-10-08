@@ -78,3 +78,12 @@ correct dependency-free manifest and explicitly register Ps.Elab.Recursion in La
 Preserve the historical changed-argument refusal test by selecting BatchStable; the
 enhanced path is covered by the generated raw-source capability corpus. Rerun the
 same coherent qualification after these integration corrections.
+
+## Native build checkpoint
+
+Run37831457914 at e52c30313b1e9124864a304a41f3b4b4c8f74bd0 recovered and
+cached S0 successfully (JavaScript SHA25674dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76).
+The new recursion module, context and term changes compiled natively. The wrapper
+used two Lean4.34 reserved words as local names (`meta` and `public`); rename them
+to metaContext and publicDeclaration together. No semantic acceptance rule changed.
+Candidate and full qualification remain pending; reuse the cached seed/build outputs.

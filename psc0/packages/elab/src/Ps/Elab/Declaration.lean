@@ -1367,20 +1367,20 @@ def psElabNormalizedDefinition
                   (Option.some normalized.publicType) with
               | Except.error error => Except.error error
               | Except.ok checked =>
-                  let meta := checked.context.metaContext;
-                  let closed := psCloseElabTypedBinders meta
+                  let metaContext := checked.context.metaContext;
+                  let closed := psCloseElabTypedBinders metaContext
                     normalized.publicBindersRev
-                    (psMetaInstantiate meta checked.term)
-                    (psMetaInstantiate meta normalized.publicType);
+                    (psMetaInstantiate metaContext checked.term)
+                    (psMetaInstantiate metaContext normalized.publicType);
                   if psExprHasUnresolvedMeta (Prod.fst closed) then
                     Except.error PsElabError.unresolvedMetavariable
                   else if psExprHasUnresolvedMeta (Prod.snd closed) then
                     Except.error PsElabError.unresolvedMetavariable
                   else
-                    let public := PsDeclaration.definitionDecl
+                    let publicDeclaration := PsDeclaration.definitionDecl
                       normalized.publicName List.nil (Prod.snd closed) (Prod.fst closed);
                     Except.ok (PsElabDeclarationBatchResult.mk
-                      (List.cons worker (List.cons public List.nil)))
+                      (List.cons worker (List.cons publicDeclaration List.nil)))
       | _ => Except.error PsElabError.structuralRecursionInternal
 
 def psElabDeclarationBatchStable

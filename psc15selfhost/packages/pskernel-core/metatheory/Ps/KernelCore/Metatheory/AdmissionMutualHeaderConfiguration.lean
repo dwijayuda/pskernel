@@ -87,6 +87,7 @@ theorem psKernelAddSimpleMutualInductive_success_first_header_refines
                       cases hTypes : decl.types with
                       | nil =>
                           simp only [hTypes] at hMinTypes hUniform
+                          simp only [allNames, hTypes] at hUnique hFresh
                           simp [
                             psKernelAddSimpleMutualInductive,
                             hDuplicates, hMinTypes, allNames,
@@ -94,6 +95,7 @@ theorem psKernelAddSimpleMutualInductive_success_first_header_refines
                           ] at hRun
                       | cons first remaining =>
                           simp only [hTypes] at hMinTypes hUniform
+                          simp only [allNames, hTypes] at hUnique hFresh
                           cases hClosed :
                               psKernelCheckNoMVarNoFVar first.type with
                           | error message =>

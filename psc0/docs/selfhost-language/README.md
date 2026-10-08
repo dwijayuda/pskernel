@@ -16,7 +16,7 @@ Read [SPEC.md](SPEC.md) for the proposed language and lowering obligations, [MIG
 
 PSC0's root configuration and original 12-package compiler closure do **not** select `PSC1-selfhost-stable/1` or `PSC1-portable-selfhost/1`. Its root has neither corresponding profile manifest. Its configuration says implementation `PSC1`, accepted language `PSC2-bootstrap`, version `0.7`, with `Ps.Bootstrap.SelfHost` as entry.[CFG]
 
-There is an important exception in the same directory: the copied JS, Rust and Wasm package manifests explicitly declare `PSC1-portable-selfhost/1`, while marking themselves `bootstrap:false`. These metadata came with the later packages; they are not evidence that the old PSC0 compiler implements that profile or includes those packages in its fixed point.[MANJS][MANRS][MANWASM] This mixture of an older compiler and newer copied packages makes the profile labels particularly confusing.
+There is an important exception in the same directory: the copied JS, Rust and Wasm package manifests explicitly declare `PSC1-portable-selfhost/1`, while marking themselves `bootstrap:false`. These metadata came with the later packages; they are not evidence that the old PSC0 compiler implements that profile or includes those packages in its fixed point.[MANJS], [MANRS], [MANWASM] This mixture of an older compiler and newer copied packages makes the profile labels particularly confusing.
 
 PSC0 nevertheless has the same underlying kind of restriction: its own parser, elaborator, recursion recognizer, primitive prelude and backend cover less than the host Lean compiler. Being valid PSC1-compatible Lean source, or passing a broad forbidden-API check, is insufficient to establish that the generated PSC compiler can consume that source.
 
@@ -35,7 +35,7 @@ The architecture already describes the right bootstrap discipline: implement new
 | Source provenance | All 12 whole-package Git trees exactly match historical `d4298a7...` |
 | Kernel claim | A new checked current-source fixed point is not established by those preserved source identities |
 
-The graph and size figures were computed from GitHub source and tree objects, not from a compiler run. Lines include comments and blank lines, excluding the phantom empty line after a terminal newline. Bytes are Git blob sizes, not JavaScript string lengths. The historical hashes and declaration count come from the existing receipt.[R][S][C] The five excluded source files are explicitly recorded in the JSON inventory; in particular, `CompilerIr/Specialize.lean` being present does not make it part of the 55-module bootstrap.
+The graph and size figures were computed from GitHub source and tree objects, not from a compiler run. Lines include comments and blank lines, excluding the phantom empty line after a terminal newline. Bytes are Git blob sizes, not JavaScript string lengths. The historical hashes and declaration count come from the existing receipt.[R], [S], [C] The five excluded source files are explicitly recorded in the JSON inventory; in particular, `CompilerIr/Specialize.lean` being present does not make it part of the 55-module bootstrap.
 
 | Package | Modules in entry closure | Source lines |
 | --- | ---: | ---: |
@@ -62,7 +62,7 @@ The closure's declaration inventory contains **1,205 ordinary defs, 47 inductive
 
 The syntax AST has definitions, partial definitions, theorems, inductives and structures. It has typed lambda binders and flat constructor patterns. It has no general source declaration for classes or instances, no arbitrary macro expansion system, and no recursive pattern tree. The presence of instance synthesis modules does not create source syntax that the parser lacks.[AST]
 
-PSC0's `.ps` parser uses `def`, `partial def`, `theorem`, `inductive` and `structure`; definitions require a final semicolon. Its call parser distinguishes adjacent `f(` and even rewrites empty `f()` to application to Unit. A later `function`/brace-oriented PSC syntax must not be pasted into this codebase and described as an already accepted language.[PP][PARSECALL]
+PSC0's `.ps` parser uses `def`, `partial def`, `theorem`, `inductive` and `structure`; definitions require a final semicolon. Its call parser distinguishes adjacent `f(` and even rewrites empty `f()` to application to Unit. A later `function`/brace-oriented PSC syntax must not be pasted into this codebase and described as an already accepted language.[PP], [PARSECALL]
 
 This is an implementation boundary, not a fundamental requirement that a self-hosted language be awkward. An ergonomic surface can compile into a much smaller core.
 
@@ -82,7 +82,7 @@ The existing list library demonstrates that this is a usable encoding: reverse, 
 
 The broad source checker masks strings/comments and rejects host-dependent APIs and unsupported commands. That is useful policy, but it does not prove parse, elaboration or runtime support.[CHECK]
 
-Separate function-specific scripts check exact text: a particular worker signature, helper names, typed lambda spellings, an identifier called `smaller`, and explicit Option constructors. One gate explicitly rejects changed-index recursion and even shorter constructor spelling. Another requires a private reverse helper and rejects ordinary reverse calls.[G][G2]
+Separate function-specific scripts check exact text: a particular worker signature, helper names, typed lambda spellings, an identifier called `smaller`, and explicit Option constructors. One gate explicitly rejects changed-index recursion and even shorter constructor spelling. Another requires a private reverse helper and rejects ordinary reverse calls.[G], [G2]
 
 These scripts preserved known working source during bootstrapping. They also make routine refactors fail independently of semantics. Deleting them first would lose evidence; keeping them permanently would undermine the new language. Replace each family only after reusable capability checks and focused positive/negative semantic fixtures cover its actual invariant.
 
@@ -90,13 +90,13 @@ These scripts preserved known working source during bootstrapping. They also mak
 
 A source term must also fit the prelude, elaborator, proof admission protocol, erasure and runtime representations. The core can contain type-level material that does not have an executable representation. Conversely, the IR enum can list a primitive without establishing support for every operation or every backend.
 
-PSC0 returns a raw `PsVerifiedIrModule` after erasure. It has no later `PsValidatedIrModule` wrapper on this path, and TS prints `.unknown` as TypeScript `unknown`.[API][IR][TYPE] The class name “Verified” must not be treated as evidence that all runtime invariants have been independently checked.
+PSC0 returns a raw `PsVerifiedIrModule` after erasure. It has no later `PsValidatedIrModule` wrapper on this path, and TS prints `.unknown` as TypeScript `unknown`.[API], [IR], [TYPE] The class name “Verified” must not be treated as evidence that all runtime invariants have been independently checked.
 
 SH/1 therefore needs an explicit post-erasure capability check, first in report mode against the old closure and then enforced for newly promoted source. It should verify scopes, arities, constructor/record layouts, supported primitive signatures and absence of unresolved runtime types. It must retain legitimate scoped type parameters; generic programming is not the same as an unresolved type.
 
 ### 2.5 Portable does not mean “every copied backend already works”
 
-The newly copied JS, Rust, Wasm and kernel-core packages are outside the first bootstrap closure. The original IR lacks wrapper types and entry points referenced by those newer backends. Examples include `PsValidatedIrModule`, `PsSpecializedIrModule`, `PsUniformSpecializedIrModule`, `Ps.CompilerIr.Validate`, and the JS printer's `Ps.Foundation.Text`. The Lake configuration and source resolver also do not integrate them as a coherent PSC0 backend set.[JSLOWER][JSP][WASMLOWER][RSMOD][LAKE]
+The newly copied JS, Rust, Wasm and kernel-core packages are outside the first bootstrap closure. The original IR lacks wrapper types and entry points referenced by those newer backends. Examples include `PsValidatedIrModule`, `PsSpecializedIrModule`, `PsUniformSpecializedIrModule`, `Ps.CompilerIr.Validate`, and the JS printer's `Ps.Foundation.Text`. The Lake configuration and source resolver also do not integrate them as a coherent PSC0 backend set.[JSLOWER], [JSP], [WASMLOWER], [RSMOD], [LAKE]
 
 The correct first target remains the original TS-to-JS lane. Cross-backend conformance is an additional, explicitly earned target capability. Do not shrink the language to the accidental intersection of incompatible copied code, or import the entire later IR architecture merely to rename a profile.
 
@@ -106,9 +106,9 @@ The correct first target remains the original TS-to-JS lane. Cross-backend confo
 
 `build:psc` really does read the current handwritten entry, emit a `.ps` workspace, emit a Lean replay, then compile the generated workspace. It is more useful than blindly reusing an old dist tree. It does **not** run the resulting candidate compiler on its own current source or prove equality between candidate generations.[BUILD]
 
-`selfhost-generation.mjs` also unconditionally emits Lean replay. The top-level `fixed-point` script starts with the full bootstrap chain, and nested scripts repeat source/closure checks. `compare-selfhost.mjs` compares the two paths supplied to it; the configured compiler comparison is TS equality, not a general all-artifact proof.[GEN][PKG][COMPARE]
+`selfhost-generation.mjs` also unconditionally emits Lean replay. The top-level `fixed-point` script starts with the full bootstrap chain, and nested scripts repeat source/closure checks. `compare-selfhost.mjs` compares the two paths supplied to it; the configured compiler comparison is TS equality, not a general all-artifact proof.[GEN], [PKG], [COMPARE]
 
-There is no current-source resident compiler/session cache or start/step/finish preparation API on main PSC0. The driver requires aggregate `psCompilerPrepareSources` and imports a compiler for an invocation. `build:auto` only checks whether the expected generated JS file exists; it does not authenticate its source provenance. `clean` deletes dist. An immutable, recoverable seed must live outside mutable dist or be fetched by digest.[DRIVER][AUTO][CLEAN]
+There is no current-source resident compiler/session cache or start/step/finish preparation API on main PSC0. The driver requires aggregate `psCompilerPrepareSources` and imports a compiler for an invocation. `build:auto` only checks whether the expected generated JS file exists; it does not authenticate its source provenance. `clean` deletes dist. An immutable, recoverable seed must live outside mutable dist or be fetched by digest.[DRIVER], [AUTO], [CLEAN]
 
 ### Module invalidation requires more than import edges
 
@@ -118,9 +118,9 @@ An initial incremental implementation should cache parsing per source and resume
 
 ### Native checking is a separate performance workstream
 
-On main, the old `--kernel pskernel-core` route imports a legacy generated provider, not the newly copied kernel-core source.[WORKER][IDENTITY] An active branch, `psc0/native-core-selfhost-v1`, is implementing native integration. At the inspected `b109be0...` snapshot, its checked fixed-point workflow failed full-corpus acceptance; passing bounded provider tests did not establish a checked full compiler.[NATIVE][RUN]
+On main, the old `--kernel pskernel-core` route imports a legacy generated provider, not the newly copied kernel-core source.[WORKER], [IDENTITY] An active branch, `psc0/native-core-selfhost-v1`, is implementing native integration. At the inspected `b109be0...` snapshot, its checked fixed-point workflow failed full-corpus acceptance; passing bounded provider tests did not establish a checked full compiler.[NATIVE], [RUN]
 
-That branch already has a 12-package source-tree lock, an opt-in fast path, scoped CI and Lake caching. Its fast path skips broad regression only when the preserved package trees match; it still runs the checked pipeline. It is not a cache of provider acceptance, and its tree lock alone does not cover host/config/provider/toolchain identity. Reuse its accepted work instead of duplicating it in the language branch.[NATIVELOCK][NATIVECHECK]
+That branch already has a 12-package source-tree lock, an opt-in fast path, scoped CI and Lake caching. Its fast path skips broad regression only when the preserved package trees match; it still runs the checked pipeline. It is not a cache of provider acceptance, and its tree lock alone does not cover host/config/provider/toolchain identity. Reuse its accepted work instead of duplicating it in the language branch.[NATIVELOCK], [NATIVECHECK]
 
 A reduction-budget failure is not evidence that changing PSC source syntax will solve kernel performance. The language plan can proceed with parser, elaborator and TS evidence while provider correctness/performance work remains explicit.
 

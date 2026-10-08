@@ -89,7 +89,7 @@
       "id": "recursion.varying-parameters",
       "tier": "required-new",
       "current": "not-implemented",
-      "proposal": "Typed generalization of nondependent varying value parameters into a function-valued motive; retain the existing low-level structural checker.",
+      "proposal": "Typed generalization of nondependent varying value parameters into a function-valued motive; canonical internal worker preserves fixed/major erasure parameters, and a wrapper preserves the original public binder order and kinds.",
       "implementationAreas": [
         "packages/elab/src/Ps/Elab/Declaration.lean",
         "packages/elab/src/Ps/Elab/Context.lean",
@@ -104,7 +104,10 @@
         "fixed-parameters-in-different-positions",
         "function-valued-result",
         "reject-dependent-generalization",
-        "reject-recursive-escape"
+        "reject-recursive-escape",
+        "state-before-major",
+        "stable-generic-and-erased-proof-parameters",
+        "public-calling-convention"
       ]
     },
     {
@@ -134,7 +137,7 @@
       "id": "runtime.closed-ir",
       "tier": "required-new-before-strict-promotion",
       "current": "raw-ir-no-independent-validator",
-      "proposal": "Report original IR first; enforce scope, arity, layouts, primitive signatures, runtime type closure and import closure once inventoried.",
+      "proposal": "Report original IR first; enforce scope, arity, layouts, primitive signatures, runtime type closure and import closure once inventoried. Include literal/result-type and selected scalar range/width invariants.",
       "fixtures": [
         "unbound-runtime-variable",
         "type-parameter-scope",
@@ -142,7 +145,9 @@
         "intrinsic-arity",
         "constructor-layout",
         "duplicate-match",
-        "nonexhaustive-match"
+        "nonexhaustive-match",
+        "literal-type-consistency",
+        "selected-scalar-range-width"
       ]
     },
     {
@@ -243,16 +248,7 @@
     "proposed",
     "implemented",
     "generated-tested",
-    "seed-qualified"
-  ],
-  "mandatoryGates": [
-    "old-seed-builds-feature-implementation",
-    "focused-positive-and-negative-capabilities",
-    "raw-authoring-replay-by-generated-compilers",
-    "declared-current-generation-equality",
-    "runtime-representation-inventory-and-enforcement",
-    "actual-provider-acceptance-for-checked-claim",
-    "immutable-recoverable-seed"
+    "compiler-qualified"
   ],
   "stages": [
     {
@@ -276,7 +272,7 @@
     },
     {
       "id": "M3",
-      "name": "Improved seed qualification",
+      "name": "Improved compiler-qualified seed checkpoint",
       "dependsOn": [
         "M1",
         "M2"
@@ -315,13 +311,16 @@
       "name": "Optional .ps source authority",
       "dependsOn": [
         "M4",
-        "M5",
         "M6"
-      ]
+      ],
+      "additionalGate": "All enabled capabilities used by authored .ps source are qualified; unrelated optional M5 conveniences are not prerequisites."
     }
   ],
   "cacheContract": {
-    "minimumExecutingIdentity": "exact compiler implementation digest and import/session identity",
+    "minimumExecutingIdentity": {
+      "persistentResults": "Exact executing implementation digest and complete stage inputs; reuse across sessions only through supported serialization.",
+      "inMemorySnapshots": "Exact generated compiler import/session identity, in addition to implementation identity."
+    },
     "parse": [
       "source bytes",
       "source kind",
@@ -338,7 +337,16 @@
       "resource limits"
     ],
     "invalidation": "First changed module through semantic suffix until complete state equality is established; import-only invalidation is insufficient.",
-    "emission": "Whole prepared closure until independent module emission is implemented.",
+    "emission": {
+      "granularity": "Whole prepared closure until independent module emission is implemented.",
+      "key": [
+        "prepared closure",
+        "emitter implementation",
+        "runtime and prelude",
+        "target",
+        "options"
+      ]
+    },
     "provider": [
       "exact ordered canonical admission bytes",
       "starting prelude/environment",
@@ -347,7 +355,13 @@
       "resource policy"
     ],
     "authority": "Cache receipts do not create checked provider handles.",
-    "failures": "Missing/corrupt entries recompute; timeout/cancellation/exhaustion remain operational, not permanent semantic invalidity."
+    "failures": "Missing/corrupt entries recompute; timeout/cancellation/exhaustion remain operational, not permanent semantic invalidity.",
+    "compiledJavaScript": [
+      "TS bytes",
+      "TypeScript version",
+      "tsconfig and compiler options",
+      "relevant package and runtime resolution"
+    ]
   },
   "concurrentWork": {
     "branch": "psc0/native-core-selfhost-v1",
@@ -366,5 +380,50 @@
     "analysis": "README.md",
     "specification": "SPEC.md",
     "migration": "MIGRATION.md"
+  },
+  "qualification": {
+    "compilerQualified": {
+      "requires": [
+        "old-seed-builds-feature-implementation",
+        "focused-positive-and-negative-capabilities",
+        "raw-authoring-replay-by-generated-compilers",
+        "C2-versus-C3-deterministic-product-equality",
+        "relevant-runtime-tests",
+        "immutable-recoverable-seed"
+      ],
+      "stage": "M3",
+      "impliesStrictSh1": false,
+      "impliesKernelChecked": false
+    },
+    "strictSh1": {
+      "requires": [
+        "compiler-qualified",
+        "all-required-language-capabilities",
+        "runtime-representation-inventory-and-enforcement"
+      ],
+      "stages": [
+        "M3",
+        "M6"
+      ],
+      "impliesKernelChecked": false
+    },
+    "kernelChecked": {
+      "requires": [
+        "actual-selected-provider-acceptance",
+        "exact-admissions-prelude-provider-options-identity"
+      ],
+      "orthogonalTo": "compiler and strict-profile qualification"
+    }
+  },
+  "currentGenerationContract": {
+    "definitions": [
+      "C1 = S0(A)",
+      "C2 = C1(A)",
+      "C3 = C2(A)"
+    ],
+    "identicalInput": "Same exact raw current authored source A; repeat for migrated source B.",
+    "equality": "Canonical source, ordered admissions, TS and JS products of C1(A) versus C2(A), associated with C2 versus C3.",
+    "oldSeedBoundary": "C1 versus C2 compiler artifacts may differ.",
+    "receipts": "Record each execution separately; provenance fields are not required to be byte equal."
   }
 }

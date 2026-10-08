@@ -6,7 +6,7 @@ Status: proposed sequence; no compiler, host or kernel implementation is changed
 
 The language track owns source capability design, portable normalization, compiler preparation APIs, source migration and generated-compiler evidence. The existing native-provider track owns kernel conversion, provider resource handling and native checked acceptance. Reuse accepted work from that track; do not overwrite it or import an unverified provider merely to make a language milestone look complete.
 
-At inspected native commit `b109be0075630dd17b791e3b0c5fcad016df53e8`, bounded provider checks passed but the full compiler workflow failed on a reduction budget. Its 12-package baseline lock, scoped CI, explicit workspaces and Lake caching already address part of the iteration problem.[NATIVE][RUN][NATIVELOCK][NATIVECHECK]
+At inspected native commit `b109be0075630dd17b791e3b0c5fcad016df53e8`, bounded provider checks passed but the full compiler workflow failed on a reduction budget. Its 12-package baseline lock, scoped CI, explicit workspaces and Lake caching already address part of the iteration problem.[NATIVE], [RUN], [NATIVELOCK], [NATIVECHECK]
 
 Language implementation and small generated fixtures can proceed while that issue is resolved. A failed full-corpus acceptance must continue to block a claim that the native checked self-host milestone has passed.
 
@@ -28,7 +28,7 @@ A fresh environment can obtain or rebuild the pinned seed and verify its bytes. 
 
 **Why first**
 
-`build:auto` currently chooses by JS-file existence and `clean` deletes dist. A pleasant authoring language is unhelpful if one broken update strands the compiler.[AUTO][CLEAN]
+`build:auto` currently chooses by JS-file existence and `clean` deletes dist. A pleasant authoring language is unhelpful if one broken update strands the compiler.[AUTO], [CLEAN]
 
 ### M1 — establish fast, source-aware development
 
@@ -62,21 +62,21 @@ A small new typed recursion planning/normalization module in `packages/elab`, in
 
 - Implement changing-parameter generalization using the algorithm in SPEC.
 - Start with direct explicit matches, ordinary non-indexed constructors and Nat successor fields.
-- Keep the old recursive-call validator for the normalized representation.
+- Emit the canonical internal worker with fixed/major outer parameters and generalized state in the motive; preserve the public interface with a wrapper. Keep the old recursive-call validator and the existing erasure parameter distinction for this representation.
 - Add positive and negative cases before migrating compiler source.
 - Expose deterministic normalized-source output and origin mapping where source emission needs it.
 
 **Acceptance**
 
-The old seed builds the improved compiler while all its implementation source still uses the old accepted subset. The resulting generated compiler accepts accumulator/fuel-state examples and rejects nondecrease, unrelated children and unsupported dependent cases. Test two state parameters with swapping to catch accidental sequential updates.
+The old seed builds the improved compiler while all its implementation source still uses the old accepted subset. The resulting generated compiler accepts accumulator/fuel-state examples and rejects nondecrease, unrelated children and unsupported dependent cases. Test two state parameters with swapping, state before the major, and stable generic/erased proof parameters to catch calling-convention, erasure-map and sequential-update errors.
 
-The historical negative invariant test is not merely deleted: keep an equivalent old-mode test and add new-mode success plus new semantic failure cases.[TEST][TERM]
+The historical negative invariant test is not merely deleted: keep an equivalent old-mode test and add new-mode success plus new semantic failure cases.[TEST], [TERM]
 
-### M3 — qualify an improved seed before dogfooding
+### M3 — qualify an improved compiler seed before dogfooding
 
 Run the current-source generation procedure in section 3. Include raw authoring inputs that exercise the new normalizer, not only pre-normalized generated workspaces. Keep canonical-source fixed-point evidence as a separate lane.
 
-Promote a versioned seed only with recorded claims. If full provider acceptance is pending, label the candidate's compiler/runtime evidence accurately; do not mint a checked seed claim.
+Promote a versioned **compiler-qualified** seed only after the current-source equality and capability/runtime gates pass. This checkpoint permits controlled migration; it is not yet strict SH/1 qualification if M6 is incomplete. Strict SH/1 additionally requires all mandatory capabilities and runtime IR enforcement. Kernel-checked qualification is a separate axis and requires actual selected-provider acceptance. If that acceptance is pending, retain the compiler-only label.
 
 This stage breaks the bootstrap cycle: the compiler learns the feature while written in the old subset, then its source can begin using it.
 
@@ -86,7 +86,7 @@ This stage breaks the bootstrap cycle: the compiler learns the feature while wri
 
 **Second family: fuel and explicit state.** Migrate workers returning functions of context, indices, accumulators or result state. Preserve exhaustion behavior, first-error order and state-on-error policy.
 
-**Third family: compiler internals.** Apply the same established conversion to declaration preparation, elaboration, erasure and emission helpers. Change the normalizer's own implementation only after its capability is seed-qualified.
+**Third family: compiler internals.** Apply the same established conversion to declaration preparation, elaboration, erasure and emission helpers. Change the normalizer's own implementation only after its capability is compiler-qualified.
 
 Choose low-impact representatives first, then expand one verified family. Do not rewrite all high-fan-in modules together. In the measured import graph, Foundation.Name has 42 transitive importers, Core.Expr 31 and Environment.Basic 21; even small public changes can be broad. The ordered environment can make semantic invalidation broader still.
 
@@ -113,13 +113,13 @@ Add the small original-IR checker described in SPEC, initially reporting the old
 
 Preserve the original TS path. Do not make the copied direct JS/Rust/Wasm backends prerequisites. Integrate a new target only after choosing a coherent IR interface, wiring its build/driver dependencies, and demonstrating the scalar/ADT/function contract and generated self-host evidence for that target.
 
-This work can overlap M2–M5 when its changes are isolated and separately qualified.
+This work can overlap M2–M5 when its changes are isolated and separately qualified. M3 and M6 together, plus all required capability gates, are prerequisites for strict SH/1 qualification; M3 alone is a limited compiler checkpoint.
 
 ### M7 — optionally make .ps authoritative
 
 Consider this only after the generated PSC compiler can parse ordinary authored `.ps`, normalize the enabled SH/1 capabilities, check/compile its full source, produce stable successive generations and support useful diagnostics.
 
-Do one controlled extension/authority migration with source correspondence checks. Do not simultaneously rename declarations, switch punctuation, change runtime representations and replace the provider. Keeping `.lean` as the authoring spelling is a valid outcome if it gives the best workflow; self-hosting depends on which compiler consumes it, not the filename extension.
+Require qualification of every enabled capability used by the authoritative source; completion of every optional M5 convenience is not required. Do one controlled extension/authority migration with source correspondence checks. Do not simultaneously rename declarations, switch punctuation, change runtime representations and replace the provider. Keeping `.lean` as the authoring spelling is a valid outcome if it gives the best workflow; self-hosting depends on which compiler consumes it, not the filename extension.
 
 ## 3. Correct generation and promotion procedure
 
@@ -128,12 +128,12 @@ Let A be the exact source tree containing the improved compiler, written in the 
 1. Build C1 = S0(A).
 2. Build C2 = C1(A), actually reading the same current A.
 3. Build C3 = C2(A), again from that exact A.
-4. Compare the required canonical source, admissions, TS, and JS artifacts for the current generations, with all toolchains/configurations fixed.
+4. Require equality of the deterministic canonical source, ordered admissions, TS and JS emitted when C1 and C2 consume that same raw A: the build products associated with C2 and C3. Pin all toolchains/configurations. Record each execution's provenance separately; parent/executing-compiler fields in receipts are not required to match.
 5. Execute the raw new-authoring capability corpus using the generated C2 and C3. Record the normalized source, results and provider acceptance separately.
 
-C1 can legitimately differ from C2 when the compiler's emitter or normalization behavior changes across the seed boundary. The historical lane retains its original comparisons; the new lane must identify precisely which successive current-generation artifacts are expected to be equal. Do not demand old-seed byte equality for every compiler improvement.
+C1 can legitimately differ from C2 when the compiler's emitter or normalization behavior changes across the seed boundary. The historical lane retains its original comparisons; the new lane specifically requires C2-versus-C3 product equality. Any permitted artifact normalization must be explicitly specified before comparison, not introduced to hide a mismatch. Do not demand old-seed byte equality for every compiler improvement.
 
-After promotion, let B be compiler source migrated to ordinary SH/1. Repeat the same procedure using the promoted seed, and make each generated compiler consume B's **raw authored source**. If every generation only sees a pre-normalized workspace, the fixed point does not exercise the authoring normalizer.
+After promotion, let B be compiler source migrated to ordinary SH/1. Repeat the same procedure and C2-versus-C3 product equality using the promoted seed, and make each generated compiler consume B's **raw authored source**. If every generation only sees a pre-normalized workspace, the fixed point does not exercise the authoring normalizer.
 
 A syntax-only translation route is insufficient here. The shared preparation/normalization seam must support ordinary authoring input and supply deterministic canonical output in its ordered environment. Source emission and compilation must use the same lowering implementation.
 
@@ -162,7 +162,7 @@ The following workflow names describe functionality to implement. They are not c
 | Checked qualification | Seed promotion and relevant provider/semantic changes | Required admissions accepted by selected provider plus source/generation evidence |
 | Historical reproduction | Bootstrap changes or explicit recovery audit | Reproduce preserved old source/seed contract independently |
 
-On main today, `npm run build:psc` is the closest existing current-source build, and `npm run fixed-point` is the coarse full-chain route. The former is not candidate self-application; the latter is expensive to repeat per edit.[BUILD][PKG]
+On main today, `npm run build:psc` is the closest existing current-source build, and `npm run fixed-point` is the coarse full-chain route. The former is not candidate self-application; the latter is expensive to repeat per edit.[BUILD], [PKG]
 
 ### Cache identities and safe invalidation
 
@@ -198,7 +198,7 @@ Measure these representative scenarios before and after an iteration change:
 
 A warm no-change source loop should do zero unnecessary parse/elaboration work. A leaf source edit should reuse its valid prefix. A parser/compiler implementation change must invalidate affected sessions even if source filenames did not change. These are testable workflow properties; no speed multiplier is asserted without timings.
 
-For generated runtime, measure representative lexer/parser scans, list/index helpers and a real compiler corpus. Inspect whether existing count/tail-loop paths are retained. Profile a demonstrated hot path before extending generic loopification or replacing collections. Current array push/set copy; changing lists to arrays can worsen repeated accumulation.[EXPR][MOD]
+For generated runtime, measure representative lexer/parser scans, list/index helpers and a real compiler corpus. Inspect whether existing count/tail-loop paths are retained. Profile a demonstrated hot path before extending generic loopification or replacing collections. Current array push/set copy; changing lists to arrays can worsen repeated accumulation.[EXPR], [MOD]
 
 Run full performance comparisons at milestones, not every keystroke. Set time budgets after the baseline is measured; do not invent a tenfold improvement target from source inspection.
 

@@ -24,14 +24,14 @@ The historical source compatibility lane remains available during transition. A 
 | Runtime | Existing scalar/regular generic representations with explicit checks | Separately specified optional scalar/target extensions |
 | Host | No portable host IO or foreign implementation APIs | Host adapters remain outside the compiler language |
 
-Keep explicit types on match-valued local lets when no expected result type is available. “Inferred locals” means the existing supported inference cases, not a promise of full Lean inference.[AST][TERM]
+Keep explicit types on match-valued local lets when no expected result type is available. “Inferred locals” means the existing supported inference cases, not a promise of full Lean inference.[AST], [LET], [MATCH]
 
 ## 2. Source and module rules
 
 1. Top-level executable declarations MUST have explicit parameter and result types. Type parameters may remain implicit where existing PSC elaboration supports them. Implicit host-generated parameters, arbitrary notation and macro expansion are outside the contract.
 2. Module identities and import ordering MUST be deterministic. The initial package allowlist remains the twelve compiler packages; adding a helper module inside one of them changes the new closure count, not the historical 55-module receipt.[CONTRACT]
 3. The implementation MUST keep source-span/origin information through normalization for diagnostics and migration reporting.
-4. The generated `.ps` printer MUST emit the old parser's supported syntax unless a separate parser/printer capability is deliberately promoted. In particular, do not substitute the later `function` syntax.[PP][PARSECALL]
+4. The generated `.ps` printer MUST emit the old parser's supported syntax unless a separate parser/printer capability is deliberately promoted. In particular, do not substitute the later `function` syntax.[PP], [PARSECALL]
 5. New source conveniences MUST be implemented inside the portable compiler. An external JS rewrite or native-Lean-only preprocessing step cannot be the sole implementation of a self-host authoring feature.
 6. Existing translator and compiler entry points MUST agree on whether input is ordinary authoring source or normalized source. A syntax-only parse/print round trip does not establish semantic normalization.
 
@@ -53,7 +53,7 @@ The current architecture deliberately keeps handwritten `.lean` authoritative un
 | Functions | Monomorphic runtime function values, captures and returned functions; top-level rank-1 generic definitions |
 | Proofs/types | Existing admitted compile-time proof/type erasure; no runtime type reflection or dependent layout promise |
 
-The original TS mapping uses bigint for Nat/Int, boolean for Bool, string for Char/String, and undefined for Unit. It supports parametric records/data/functions. It does not thereby support first-class polymorphic values, polymorphic recursion, arbitrary dependent runtime types or unresolved types treated as dynamic Any.[TYPE][IR]
+The original TS mapping uses bigint for Nat/Int, boolean for Bool, string for Char/String, and undefined for Unit. It supports parametric records/data/functions. It does not thereby support first-class polymorphic values, polymorphic recursion, arbitrary dependent runtime types or unresolved types treated as dynamic Any.[TYPE], [IR]
 
 The contract does not change existing numeric or text semantics during a source refactor. Add boundary fixtures for zero divisors, large integers, non-ASCII scalars and byte positions before treating another target as conformant.[EXPR]
 
@@ -63,7 +63,7 @@ Arrays already have IR/emission support, but current TS push/set copy arrays. Ke
 
 Unchecked indexing requires its pre-erasure proof/provenance or a separately established bounds contract. A post-erasure type/arity checker cannot recreate a deleted bounds proof.
 
-Fixed-width integers and floating operations are separate optional scalar capabilities. USize/ISize require an explicit target width, and merely printing their type as bigint is insufficient. The current IR does not even contain a float-literal constructor, so an arithmetic enum is not a complete source language.[IR][TYPE] None is a prerequisite for accumulator ergonomics.
+Fixed-width integers and floating operations are separate optional scalar capabilities. USize/ISize require an explicit target width, and merely printing their type as bigint is insufficient. The current IR does not even contain a float-literal constructor, so an arithmetic enum is not a complete source language.[IR], [TYPE] None is a prerequisite for accumulator ergonomics.
 
 The portable closure MUST remain closed over a declared runtime primitive/prelude set. Adding a new source convenience SHOULD NOT introduce a runtime primitive.
 
@@ -83,7 +83,7 @@ def reverseInto {alpha : Type}
       reverseInto tail (List.cons item out)
 ```
 
-The current grammar can express this form, but the recursive-call validator rejects the changing explicit accumulator. Existing code manually uses a function-valued worker instead.[TERM][LIST]
+The current grammar can express this form, but the recursive-call validator rejects the changing explicit accumulator. Existing code manually uses a function-valued worker instead.[TERM], [LIST]
 
 The normalized form is schematically:
 
@@ -97,23 +97,26 @@ def reverseWorker {alpha : Type}
       fun (out : List alpha) => next (List.cons item out)
 ```
 
-This is an explanatory encoding. The compiler may keep the public declaration and use an internal typed recursion plan instead of exposing a new helper name. Emitted helper names, when needed, MUST be deterministic and hygienic.
+This is an explanatory encoding. The minimum implementation emits a hygienic internal worker in this canonical shape and preserves the original public interface with a wrapper where needed. The public declaration name, type, implicit binder kinds and parameter order MUST remain unchanged; a source function taking state before its major must not silently acquire a different calling convention. Worker names MUST be deterministic and collision-free.
 
 ### Required algorithm
 
 For a function whose inputs consist of fixed parameters, one structural major, and varying ordinary value parameters:
 
-1. Resolve binder identities and the declaration's actual self references. A same-spelled shadowed local is not a recursive call.
-2. Select one unambiguous structural major. The initial implementation accepts supported ordinary non-indexed inductives and Nat successor/predecessor matching. Ambiguous cases require a diagnostic, not arbitrary selection.
-3. Track constructor-child provenance from matches on that major. A same-typed field from an unrelated value is not evidence of decrease.
-4. Analyze recursive calls and classify fixed versus varying parameters. Fixed arguments MUST preserve their resolved identities.
-5. Check binder-type dependencies before reordering or generalizing anything. Initially varying parameter types and the result MUST be independent of the major and unsupported changing indices. Varying parameters may depend on stable type parameters. Either compute a valid dependency closure or reject a more dependent case.
-6. Generalize the varying parameter telescope into the recursion result: for state types S1, S2 and result R, the motive returns `S1 -> S2 -> R`. The hypothesis for a smaller child has that function type.
-7. Introduce typed state lambdas in each branch. Replace a direct recursive call with the appropriate child's hypothesis applied to the new varying arguments, preserving simultaneous argument values and evaluation order.
-8. Feed the normalized declaration through the existing elaboration/admission/erasure route. Preserve existing structural validation for the normalized form.
-9. Verify deterministic output, source correspondence, and execution. A well-typed result alone does not prove that the transformation preserved what the source computes.
+1. Preserve the original public declaration name, type, implicit binder kinds and parameter order. Plan a wrapper when the internal worker's parameter order differs.
+2. Resolve binder identities and the declaration's actual self references. A same-spelled shadowed local is not a recursive call.
+3. Select one unambiguous structural major. Initially accept supported ordinary non-indexed inductives and Nat successor/predecessor matching. Ambiguous cases require a diagnostic, not arbitrary selection.
+4. Track constructor-child provenance from matches on that major. A same-typed field from an unrelated value is not evidence of decrease.
+5. Analyze recursive calls and classify fixed versus varying parameters. Fixed arguments MUST preserve their resolved identities.
+6. Check every binder dependency before moving parameters. No retained runtime binder type, generalized state type or runtime result type may depend on the major or a moved varying value binder. Stable type/fixed parameters may be dependencies only where the existing runtime contract supports them. Reject any case that requires a dependent telescope in this first slice.
+7. Generalize the varying parameter telescope into the recursion result: for state types S1, S2 and result R, the motive returns `S1 -> S2 -> R`. The hypothesis for a smaller child has that function type.
+8. Introduce typed state lambdas in each branch. Replace a direct recursive call with the appropriate child's hypothesis applied to the new varying arguments, preserving simultaneous argument values and evaluation order.
+9. Emit the canonical worker with only fixed parameters and the major in its outer recursion-parameter set; keep generalized state in the motive/hypothesis function telescope. Emit the public wrapper without changing its external binder order.
+10. Feed this form through existing elaboration, admission and erasure. Verify deterministic output, source correspondence and execution. A well-typed result alone does not prove that the transformation preserved what the source computes.
 
-The first implementation belongs in a small typed planning/normalization module under `elab`, integrated from Declaration/Context/Term. It MUST itself be written in the old accepted subset so the old seed can build it. Direct recursor construction can replace the normalization later if evidence and performance justify it.
+**Erasure boundary:** existing erasure records outer runtime parameters, changes one major argument when reconstructing recursion, and finishes the application using the hypothesis domain. Generalized state MUST NOT remain in the list it treats as fixed outer arguments, or a future normalizer could reinsert stale state or duplicate arguments.[EOPEN], [EREC] This is an implementation obligation, not an observed current bug.
+
+The first implementation belongs in a small typed planning/normalization module under `elab`, integrated from Declaration/Context/Term. It MUST itself be written in the old accepted subset so the old seed can build it. A later direct-recursor alternative may avoid wrappers only with an explicit fixed/major/generalized parameter map consumed correctly by erasure after type/proof erasure and eta expansion; that larger change needs its own conformance evidence.
 
 ### Required refusals
 
@@ -136,9 +139,9 @@ Do not “fix” the current implementation by deleting `structuralRecursionInva
 
 ### A. Body wrappers and recursive equations
 
-The present recognizer requires a root match. Equation parsing can produce a lambda-wrapped body that the recognizer does not see.[DECL][EQUATION]
+The present recognizer requires a root match. Equation parsing can produce a lambda-wrapped body that the recognizer does not see.[DECL], [EQUATION]
 
-Route explicit matches and supported equation clauses through the same typed recursion plan. Admit a leading local let or alias only when scope, dependencies, evaluation and structural provenance are preserved. Do not float an arbitrary computation across a match just because it is syntactically a let.
+Route explicit matches and supported equation clauses through the same typed recursion plan. Initially admit a leading local let only with a nonrecursive RHS and no unsupported dependent-result or major/branch evaluation dependency; aliases require tracked provenance. Preserve scope and demand behavior. Do not float an arbitrary computation across a match just because it is syntactically a let.
 
 A type ascription must constrain the original expression. It must not disappear before its type has been checked. Aliases of the major or its child require tracked identity/provenance, not name-based substitution.
 
@@ -158,7 +161,7 @@ Do not promise that a generic callee's callback domain is always known before la
 
 ### D. Explicit errors first; Except-only do later
 
-Current PSC do syntax lowers to names `compilerBind` and `compilerPure`; it is not general Monad or Except do. The associated stdlib is outside the bootstrap closure.[DO][STDLIB][CONTRACT]
+Current PSC do syntax lowers to names `compilerBind` and `compilerPure`; it is not general Monad or Except do. The associated stdlib is outside the bootstrap closure.[DO], [STDLIB], [CONTRACT]
 
 First reuse explicit Except matches and `psListMapExcept`; add a few ordinary helpers in the existing foundation package only when call sites justify them.
 
@@ -168,7 +171,7 @@ For explicit state, document whether a function is `State -> Except Error (Value
 
 ## 6. Runtime IR validation
 
-Current PSC0 erasure returns the original raw `PsVerifiedIrModule`; TS accepts its `.unknown` type. Add a small validator for this actual model rather than copying later wrapper APIs wholesale.[API][IR][TYPE]
+Current PSC0 erasure returns the original raw `PsVerifiedIrModule`; TS accepts its `.unknown` type. Add a small validator for this actual model rather than copying later wrapper APIs wholesale.[API], [IR], [TYPE]
 
 The checker MUST cover:
 
@@ -178,6 +181,7 @@ The checker MUST cover:
 - Record/constructor field layouts and projection types.
 - Exhaustive, nonduplicate flat matches.
 - Intrinsic signatures and the selected primitive ledger.
+- Literal/result-type consistency and the selected scalar capability's range, signedness, canonicalization and target-width invariants.
 - Import/call closure and unresolved runtime `.unknown`.
 
 Run it in report mode on the entire existing closure first. Distinguish deliberate erasure, supported parametric types and actual unknown runtime types. Enforce it on new SH/1 source only after the migration has accounted for historical cases. A wrapper name is optional; actual checks and evidence are required.
@@ -192,13 +196,15 @@ A future profile checker MUST parse source through the real frontend. Lexical ho
 
 Replace function-specific marker gates only after a generated compiler passes the positive and negative capability fixtures that cover their purpose. Keep the historical gates for the historical reproduction lane.
 
-Required accumulator fixtures include empty/single/multiple elements, two changing parameters, argument swapping, fixed parameters in different positions, function-valued results, Nat fuel/state, and all refusal cases above. When extensions are enabled, add equation/match equivalence, nested defaults and expected-type lambda tests.
+Required accumulator fixtures include empty/single/multiple elements, two changing parameters, argument swapping, state before the major, fixed parameters in different positions, stable generic and erased proof parameters around runtime arguments, function-valued results, Nat fuel/state, and all refusal cases above. When extensions are enabled, add equation/match equivalence, nested defaults and expected-type lambda tests.
 
 Where normalization is intended to preserve canonical admissions exactly, require equality. Where helper introduction or a deliberate normalization change alters declaration structure, require approved structural differences plus reference/runtime correspondence and new generation equality. Never require every legitimate migrated source file to emit the old seed's artifact bytes.
 
 ## 8. Qualification and versioning
 
-A capability is **proposed** until implementation exists; **implemented** after focused checks; **generated-tested** only after the generated compiler consumes ordinary authoring examples; and **seed-qualified** only after the required current-source generations and provider claims have been recorded.
+A capability is **proposed** until implementation exists; **implemented** after focused checks; **generated-tested** only after the generated compiler consumes ordinary authoring examples; and **compiler-qualified** after the required current-source generation equality and capability/runtime tests.
+
+Qualification has separate axes. A **compiler-qualified seed** can support controlled migration with its limited claims. **Strict SH/1 qualification** additionally requires all mandatory capabilities and runtime IR enforcement (M6). **Kernel-checked qualification** requires actual selected-provider acceptance and is recorded independently. A compiler-only checkpoint does not imply either stricter claim.
 
 The seed manifest MUST include the language/capability set, normalizer version, exact executing compiler, source closure, prelude/runtime, target/toolchain, provider identity and evidence level. Do not let a profile string grant a stronger claim than the evidence.
 
@@ -220,3 +226,7 @@ Authoring readability and runtime efficiency are separate acceptance dimensions.
 [EQUATION]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean#L2488-L2523
 [DO]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean#L69-L95
 [STDLIB]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/stdlib/ProofScript/Compiler/Effect.lean
+[LET]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/elab/src/Ps/Elab/Term.lean#L862-L907
+[MATCH]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/elab/src/Ps/Elab/Term.lean#L1919-L1938
+[EOPEN]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/erasure/src/Ps/Erasure/Definition.lean#L224-L249
+[EREC]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/erasure/src/Ps/Erasure/Expr.lean#L987-L1063

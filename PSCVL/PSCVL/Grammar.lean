@@ -84,7 +84,9 @@ private partial def forbiddenSyntax (s : Syntax) : Option String :=
   match s with
   | .node _ kind args =>
     let k := kind.toString
-    if k == "Lean.Parser.Term.runTactic" || k == "Lean.Parser.Tactic.runTac" then
+    if k == "Lean.Parser.Term.runTactic" || k == "Lean.Parser.Tactic.runTac"
+        || k == "Lean.Parser.Term.doErased"
+        || k == "Lean.Parser.Term.doErasedArrow" then
       some s!"untrusted metaprogramming syntax `{k}`"
     else
       args.toList.findSome? forbiddenSyntax

@@ -1,9 +1,10 @@
-import Lean.Declaration
+import Init
 
 /-!
-Minimal PSCV Core implementation-boundary models, intentionally using Lean's
-own Name, Expr and Declaration representations instead of recreating a kernel.
-This is not a completed PSCV source frontend or a certification issuer.
+Minimal, dependency-light PSCV source/profile contracts. The default compiler
+must not import Lean.Environment, Lean.Declaration, the full elaborator or a
+kernel checker only to identify source policy. These are *descriptive* values,
+not semantic authority or a PSCV certificate.
 -/
 namespace Pscv
 
@@ -17,19 +18,5 @@ def Profile.identity : Profile → String
   | .standard => "ps-standard-0.9-r3"
   | .verified => "pscv-v1"
   | .leanExtensible => "ps-lean-extensible-0.9-r3"
-
-structure CoreCandidate where
-  sourceId : String
-  declarations : Array Lean.Declaration
-
-inductive EvidenceLevel where
-  | candidate
-  | kernelAdmissionsChecked
-  deriving Repr, BEq
-
-structure KernelAdmissionReport where
-  provider : String
-  checkedDeclarations : Nat
-  evidenceLevel : EvidenceLevel
 
 end Pscv

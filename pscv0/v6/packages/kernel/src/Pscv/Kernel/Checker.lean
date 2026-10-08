@@ -2,16 +2,33 @@ import Lean.Environment
 import Pscv.Core.Model
 
 /-!
-Build-toolchain Lean kernel checking for immutable declaration candidates.
-This is a **different** provider than pskernel-lean@4.34.0: the build is pinned
-to Lean 4.35.0-rc3. P0 reports only admission checking, never PSCV-CERT.
-The external npm native/Wasm 4.34 providers remain independent oracles.
+Official Lean 4.35 build-toolchain kernel checker in a separate native provider
+package. No arbitrary source/extension can mint checked authority: this P0
+accepts candidate Lean.Declaration values only and returns diagnostic results.
 -/
+namespace Pscv
+
+structure CoreCandidate where
+  sourceId : String
+  declarations : Array Lean.Declaration
+
+inductive EvidenceLevel where
+  | candidate
+  | kernelAdmissionsChecked
+  deriving Repr, BEq
+
+structure KernelAdmissionReport where
+  provider : String
+  checkedDeclarations : Nat
+  evidenceLevel : EvidenceLevel
+
+end Pscv
+
 namespace Pscv.Kernel
 
--- Profile-owned guard, independent of Lean's logical kernel. Lean permits
--- axioms by design, but arbitrary user/extension axioms cannot enter pscv-closed-v1.
--- Boundary policy exceptions will need distinct explicit assumption contracts.
+-- Separate PSCV closed-profile axioms/unsafe policy from Lean kernel typing.
+-- These guards are conservative P0 placeholders; they do not implement the
+-- complete verified-assumption, effect, erasure, or specification coverage.
 def checkClosedDeclaration : Lean.Declaration → Except String Unit
   | .axiomDecl _ => .error "PSCV_CLOSED_PROFILE_AXIOM_DENIED"
   | .quotDecl => .error "PSCV_FOUNDATION_REVISION_REQUIRED"

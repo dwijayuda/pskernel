@@ -139,6 +139,9 @@ jobs:
           else
             node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core
           fi
+      - name: Diagnose native core resource exhaustion on rejected corpus
+        if: failure()
+        run: node scripts/core-kernel-resource-probe.mjs dist/diagnostics/core-admissions-rejected.json
       - name: Retain exact rejected canonical admissions for kernel conformance research
         if: failure()
         uses: actions/upload-artifact@v4

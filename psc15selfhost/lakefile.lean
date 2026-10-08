@@ -359,6 +359,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SessionConcreteRefinement,
     `Ps.KernelCore.Metatheory.AdmissionDefinitionConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionHeaderConfiguration,
+    `Ps.KernelCore.Metatheory.CheckerInitialConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionConfiguration,
     `Ps.KernelCore.Metatheory.CheckedProjectionConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionSemantics,

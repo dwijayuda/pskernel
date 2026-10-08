@@ -68,9 +68,13 @@ theorem psKernelAddDefinition_nonunsafe_configuration_refines
     | unsafeDef =>
         exact False.elim (hNotUnsafe hSafety)
     | safe =>
-        simpa [psKernelAddDefinition, hSafety, session] using hRun
+        unfold psKernelAddDefinition at hRun
+        rw [hSafety] at hRun
+        exact hRun
     | partialDef =>
-        simpa [psKernelAddDefinition, hSafety, session] using hRun
+        unfold psKernelAddDefinition at hRun
+        rw [hSafety] at hRun
+        exact hRun
   cases hHeader :
       psKernelCheckConstantBaseWithSession
         fuel session value.base with

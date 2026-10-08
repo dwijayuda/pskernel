@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.EnvironmentSemanticTransport
 import Ps.KernelCore.Admission.Inductive.Ordinary.Admission
 import Ps.KernelCore.Admission.Inductive.Mutual.Admission
 import Ps.KernelCore.Metatheory.AdmissionIndexConfiguration
@@ -279,3 +280,62 @@ theorem psKernelInductiveNamesAbsent_add_disjoint
             (by simpa [psKernelEnvironmentAddUnchecked,
               psKernelFindConstantInList, hEqual] using hNameAbsent)
             (ih hTail)
+
+/--
+Negative membership implies syntactic name exclusion only with comparator
+reflexivity. This obligation is explicit and is not derived from positive
+StringEq soundness.
+-/
+theorem psKernelNameListContains_false_excludes_equal
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    (needle : PsKernelName) (names : List PsKernelName)
+    (hAbsent : psKernelNameListContains needle names = false) :
+    ∀ name : PsKernelName, List.Mem name names -> name ≠ needle := by
+  revert hAbsent
+  induction names with
+  | nil =>
+      intro hAbsent name hMember
+      cases hMember
+  | cons head tail ih =>
+      intro hAbsent name hMember hEqual
+      cases hHead : psKernelNameEq needle head with
+      | true =>
+          simp [psKernelNameListContains, hHead] at hAbsent
+      | false =>
+          have hTail : psKernelNameListContains needle tail = false := by
+            simpa [psKernelNameListContains, hHead] using hAbsent
+          cases hMember with
+          | head =>
+              have hSelf := psKernelNameEq_refl_of_string_law hReflexive needle
+              simpa [hEqual, hSelf] using hHead
+          | tail hMember =>
+              exact ih hTail name hMember hEqual
+
+/-- Metadata replacement for a disjoint transaction name preserves absence. -/
+theorem psKernelInductiveNamesAbsent_replace_disjoint
+    (hString : PsKernelStringEqSoundLaw)
+    (environment : PsKernelEnvironment) (replacement : PsKernelConstantInfo)
+    (names : List PsKernelName)
+    (hAbsent : PsKernelInductiveNamesAbsent environment names)
+    (hDisjoint : ∀ name : PsKernelName, List.Mem name names ->
+      name ≠ psKernelConstantInfoName replacement) :
+    PsKernelInductiveNamesAbsent
+      (psKernelEnvironmentReplaceUnchecked environment replacement) names := by
+  revert hDisjoint
+  induction hAbsent with
+  | nil =>
+      intro hDisjoint
+      exact PsKernelInductiveNamesAbsent.nil
+  | cons name rest hName hRest ih =>
+      intro hDisjoint
+      have hHead := hDisjoint name (List.Mem.head rest)
+      have hTail : ∀ other : PsKernelName, List.Mem other rest ->
+          other ≠ psKernelConstantInfoName replacement :=
+        fun other hMem => hDisjoint other (List.Mem.tail name hMem)
+      refine PsKernelInductiveNamesAbsent.cons name rest ?_ (ih hTail)
+      change psKernelFindConstantInList name
+        (psKernelReplaceEnvironmentConstant (psKernelConstantInfoName replacement)
+          replacement environment.constants) = none
+      rw [psKernelReplaceEnvironmentConstant_preserves_other_lookup
+        hString replacement name hHead environment.constants]
+      exact hName

@@ -36,3 +36,13 @@ Next work: build the real small PSCV frontend and checked Core from the normativ
 ## Boundary and evidence policy
 
 No V6 native release, proof interoperability, npm publication, complete compiler preservation or certification evidence is newly established by the layout change. Do not edit kernel/provider internals in this workstream; consume only their interfaces and independent results.
+
+## 2026-10-08 Lean-native source reuse and binary-size checkpoint
+
+- Replaced initial JS-authored V6 core/extension/checker/CLI implementation with pinned Lean 4.35.0-rc3 `.lean` source packages built natively. Development npm manifests contain Lean source; no finished compiler or PSCV certification claimed.
+- Confirmed a native Lean compiler P0 and kernel checker plus npm Linux x64 tarballs in cloud CI. Independent existing Lean 4.34 native/Wasm provider oracle tests still run through npm facade exports; no cross-version equivalence claim.
+- Research-only old Foundation, RuntimeIR, InterfaceIR, WIT validation and ProofScript parser source/import roots compile under Lean 4.35rc3; a targeted old IR/WIT behavior probe passed. Historical self-host restrictions are not requirements for new V6.
+- Measured minimal Lean executable 4,401,136 bytes unstripped and 2,800,952 bytes after full stripping, against old V6 CLI 118,477,856 bytes unstripped. The oversized CLI imported Lean.Declaration transitively. Commit 516585c9a7daa2357cbc1ff3981457aa01eb4ea2 separates lightweight Init-only Core contracts from Lean.Declaration-bound kernel package; fresh core size pending.
+- Proof safety: Lean's kernel intentionally supports axioms, so the P0 checker additionally rejects arbitrary unapproved axiom, unsafe and partial declaration candidates in the closed-policy path. This is not complete PSCV specification, assumption or effect checking.
+- Upstream official Lean 4.35 has a special minimal initializer for checker-only binaries; its preconditions must be audited before use. No assumption of immediate binary shrink without fresh CI evidence.
+- No implementation claim for `.ps` grammar, source→Core correctness, `.proof.lean`, PSCV-CERT, four backend output, plugin isolation or native package release.

@@ -311,6 +311,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.CacheSemantic,
     `Ps.KernelCore.Metatheory.EnvironmentIndexHash,
     `Ps.KernelCore.Metatheory.EnvironmentIndexRefinement,
+    `Ps.KernelCore.Metatheory.EnvironmentIndexCanonical,
     `Ps.KernelCore.Metatheory.NativeReduction,
     `Ps.KernelCore.Metatheory.PrimitiveNatReduction,
     `Ps.KernelCore.Metatheory.QuotReduction,

@@ -546,8 +546,8 @@ theorem psKernelSimpleCheckUniformOccurrencesWorker_success_refines
               exact
                 psKernelSimpleCheckUniformOccurrence_success_refines
                   declaredNames expectedLevels numParams head 0 hHead
-          | tail hTailMember =>
-              exact (ih hTail) expr hTailMember
+          | tail =>
+              exact (ih hTail) expr (by assumption)
 
 theorem psKernelSimpleCheckUniformOccurrences_success_refines
     (declaredNames levelParams : List PsKernelName)

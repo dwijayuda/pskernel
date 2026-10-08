@@ -567,3 +567,27 @@ Architectural blockers still remaining:
   ordinary/mutual/nested publication, recursor generation metadata, final
   Kernel/API/session family, audit, integration and final gates. Audit remains
   A/B/C/D=44/9/19/7.
+
+## Checked header spines and environment transport checkpoint — 2026-10-08
+- Full proof and native conformance **#732 GREEN** at
+  `ad6f3d37a8cccf1e217564d1e967501af11c3e3a`.
+  Checked header parameter/index spines refine independent typed binder steps
+  with reduction, freshness, ordinal monotonicity and sound returned configurations.
+- All ten mutually recursive semantic judgments transport through canonical
+  lookup-preserving environment extension, using their joint recursors.
+  Accelerated non-recursive-structure evidence explicitly requires refined
+  indexes on both environments. Cache/session environment transport therefore
+  preserves its actual index and semantic invariants; arbitrary replacement
+  is not certified. No new semantic rule or trust premise was added.
+- **#734 GREEN** at `b0e2bc57aeef70b077ba02aa27a7c2358f71b07a`:
+  progressive name absence follows from canonical freshness and executable
+  disjoint-name guards.
+- Current candidate composes checked ordinary constructor publication history:
+  exact ordered shapes, closed checked typing, independently validated raw
+  parameters/fields/positivity/recursive metadata/result indices, canonical
+  freshness, lookup-preserving extension and final index refinement.
+  Its CI must pass before this candidate is called proved.
+- StringEq reflexivity remains explicitly conditional and unresolved, rather
+  than an adopted additional TCB assumption. Full ordinary/mutual/nested
+  transaction closure, recursor generation, public theorem family, audit and
+  integration remain incomplete. Audit remains A/B/C/D=44/9/19/7.

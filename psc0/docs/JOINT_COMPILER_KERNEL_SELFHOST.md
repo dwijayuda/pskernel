@@ -32,16 +32,20 @@ Command from psc0/: npm run joint:kernel
    digests and PSKernel Core provider identity.
 2. Recreate the current kernel's canonical ProofScript source workspace
    using the real PSC1 Lean->ProofScript translator, excluding proof/metatheory.
-3. Use the generated PSC0 compiler to elaborate that kernel source and
-   use the native PSKernel Core checker to admit the canonical declarations
-   before emitting TypeScript and JavaScript.
-4. Exercise the generated JavaScript kernel's foundation, WHNF, defeq,
-   inductive, nested, mutual and duplicate-rejection smoke corpus.
-5. Re-emit the kernel's ProofScript source from the generated compiler,
-   compare the canonical source closure, then compile and check the
-   emitted kernel again.
-6. Compare both checked kernel artifacts and record all source, compiler,
-   native checker and generated artifact digests.
+3. Build the full strictly typechecked native-PSC0 reference executable
+   using pinned TypeScript 5.8.3 and native PSKernel Core checking. Preserve
+   actual source TS, output JS, canonical admissions and the checked receipt.
+4. Execute the PSC0-generated JavaScript compiler on the separately
+   translated kernel source. It must elaborate every module and obtain fresh
+   native PSKernel Core acceptance before emitting only checked TS source.
+   The source-only receipt is a distinct non-executable record.
+5. Require byte-identical emitted TS and canonical admissions between native
+   and generated-compiler paths before reusing the already strictly compiled
+   JS bytes. Any mismatch is a failure, never a native fallback.
+6. Re-emit kernel source from the generated compiler, compare the full source
+   closure, repeat generation and verify both TS and admissions equality.
+7. Run executable generated-kernel smoke tests and record provenance, all
+   content hashes and explicit pending joint checker acceptance claims.
 
 Cache reuse is keyed to exact compiler, source, provider binary and profile
 identity. Every reused checked artifact is separately checked against its
@@ -140,3 +144,37 @@ they can be used for new checked artifact production.
 The deliberate GitHub full-certification event runs both the fast native
 kernel-generation lane and the slower generated-compiler/kernel lane, while
 routine PR edits run lightweight profile and wire checks only.
+
+## TypeScript timeout diagnosis and no-duplicate-tsc staging (2026-10-09)
+
+Run: https://github.com/dwijayuda/pskernel/actions/runs/37834917811
+
+The native-PSC0 kernel build and its generated JS runtime smoke passed.
+The generated-JS compiler then spent roughly 50 minutes on the complete
+79-module compiler workload before a second TypeScript compilation reached
+its separate 120-second subprocess timeout. The slow JS compiler preparation
+and the eventual TypeScript timeout are distinct performance problems.
+
+A new buildChecked emission mode named 'typescript-only' preserves the
+same mandatory native PSKernel Core canonical-admissions check and emits an
+atomic TS source, admissions stream and 'psc2-checked-typescript' audit
+receipt, with NO JavaScript. An existing sibling JS file is forbidden.
+The usual full checked-build mode, strict TypeScript checking, and 120-second
+timeout remain unchanged. PSC0_BUILD_TRACE=1 records elapsed times and sizes
+at source-snapshot, generated preparation, admissions check, TS emission
+and tsc boundaries.
+
+The joint workflow builds the full native reference and strictly compiles its
+TypeScript ONCE with pinned tsc. The generated JS compiler must independently
+produce the exact same TS bytes and exact same admissions bytes under a fresh
+kernel check. Only with both matching can it associate that single full
+reference compilation's JS with the independently generated source.
+A distinct provenance string records this optimization. No receipt or hash
+alone is checking authority; cache reuse replays current native checking.
+
+Remaining issue: TypeScript-only emission removes the second tsc cost but
+DOES NOT solve the approximately 50-minute generated-JS frontend runtime.
+A follow-up architectural profiler should diagnose its actual preparation,
+checker and erasure/emission timing separately, not patch individual tests.
+The generated JS kernel's independent full compiler checking and repeated
+joint fixed point are still separate mandatory acceptance gates.

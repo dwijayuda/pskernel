@@ -110,6 +110,7 @@ theorem stateWP_pinned {σ α : Type u} (prog : StateM σ α)
 including distinct success and error postconditions. -/
 theorem errorWP_pinned {ε α : Type u} (prog : Except ε α)
     (ok : α → Prop) (failed : ε → Prop) :
-    errorWP prog ok failed ↔ Std.WP.wp prog ok failed := Iff.rfl
+    errorWP prog ok failed ↔ Std.WP.wp prog ok failed := by
+  cases prog <;> exact Iff.rfl
 
 end PSCVL.Effect

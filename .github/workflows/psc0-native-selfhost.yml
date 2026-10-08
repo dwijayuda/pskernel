@@ -84,7 +84,7 @@ jobs:
           restore-keys: |
             psc0-core-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
       - name: Install only pinned TypeScript for historical compiler
-        run: npm install --workspaces=false --ignore-scripts --no-package-lock --no-audit --no-fund
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
       - name: Cheap source invariants
         run: |
           node scripts/selfhost-baseline.mjs --json

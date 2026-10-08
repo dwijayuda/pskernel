@@ -35,7 +35,7 @@ for the exact commit checked; no permanent success is inferred from this documen
 After installing Lean 4.34 and the pinned TypeScript dependency:
 
 ```sh
-npm install --workspaces=false --ignore-scripts --no-package-lock
+npm install --ignore-scripts --no-package-lock
 lake build psc_kernel_core_provider
 lake exe psc_kernel_core_provider_tests
 node --test scripts/checked-kernel-core.test.mjs

@@ -8,7 +8,19 @@
     "psc": "./packages/cli/bin/psc.mjs"
   },
   "workspaces": [
-    "packages/*",
+    "packages/bootstrap",
+    "packages/foundation",
+    "packages/syntax",
+    "packages/core",
+    "packages/environment",
+    "packages/meta",
+    "packages/elab",
+    "packages/bridge",
+    "packages/compiler-ir",
+    "packages/erasure",
+    "packages/compiler",
+    "packages/backend-ts",
+    "packages/cli",
     "host",
     "stdlib"
   ],

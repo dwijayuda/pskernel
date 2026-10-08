@@ -1,11 +1,13 @@
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { forbiddenBootstrapPackages } from "./bootstrap-closure-contract.mjs";
+import { allowedBootstrapPackageNames, forbiddenBootstrapPackages } from "./bootstrap-closure-contract.mjs";
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptsDir, "..");
-const nonWorkspacePackageDirs = new Set(["pskernel-lean"]);
+const nonWorkspacePackageDirs = new Set(["pskernel-lean", "pskernel-lean-wasm", "pskernel-core", "backend-js", "backend-wasm", "backend-rust"]);
+// These packages are native host providers or optional extensions; they are NOT
+// dependencies of the minimal compiler-only npm bootstrap workspace.
 
 async function exists(file) {
   try {
@@ -27,21 +29,14 @@ for (const packageName of nonWorkspacePackageDirs) {
 }
 
 const rootPackage = await readJson(path.join(root, "package.json"));
-const expectedWorkspaces = ["packages/*", "host", "stdlib"];
-for (const workspace of expectedWorkspaces) {
-  if (!rootPackage.workspaces?.includes(workspace)) {
-    throw new Error(`PSC1_WORKSPACE_ROOT_MISSING: ${workspace}`);
-  }
+const expectedWorkspaces = [
+  ...allowedBootstrapPackageNames.map(name => 'packages/' + name),
+  'packages/cli', 'host', 'stdlib',
+];
+if (JSON.stringify(rootPackage.workspaces) !== JSON.stringify(expectedWorkspaces)) {
+  throw new Error('PSC0_WORKSPACE_WHITELIST_DRIFT: only compiler closure, CLI, host and stdlib may be npm workspaces');
 }
-
-const packageDirs = [];
-for (const entry of await readdir(path.join(root, "packages"), { withFileTypes: true })) {
-  if (entry.isDirectory() && !nonWorkspacePackageDirs.has(entry.name)) {
-    packageDirs.push(path.join(root, "packages", entry.name));
-  }
-}
-packageDirs.push(path.join(root, "host"));
-packageDirs.push(path.join(root, "stdlib"));
+const packageDirs = expectedWorkspaces.map(relative => path.join(root, relative));
 
 for (const packageDir of packageDirs) {
   const manifestPath = path.join(packageDir, "package.json");

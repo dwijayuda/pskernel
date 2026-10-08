@@ -5,12 +5,13 @@
   "workspaces": [
     "packages/*"
   ],
-  "description": "Lean 4.35-rc3 native-first PSCV compiler workspace; npm is distribution",
+  "description": "Lean 4.35-rc3 native-first PSCV compiler with copied pinned Lean 4.34 native/Wasm kernel providers",
   "scripts": {
     "build:native": "lake build PscvCore PscvExtensions PscvKernel pscv_v6_dev pscv_v6_kernel_dev pscv_v6_native_tests",
     "test:native": "lake exe pscv_v6_native_tests",
     "test": "npm run test:native",
     "test:provider-oracles": "node --test test/provider-oracles.test.mjs",
-    "pack:dry": "npm pack --dry-run --workspace @proofscript/pscv-core && npm pack --dry-run --workspace @proofscript/pscv-kernel && npm pack --dry-run --workspace @proofscript/pscv-extensions && npm pack --dry-run --workspace @proofscript/pscv-cli"
+    "pack:dry": "npm pack --dry-run --workspace @proofscript/pscv-core && npm pack --dry-run --workspace @proofscript/pscv-kernel && npm pack --dry-run --workspace @proofscript/pscv-extensions && npm pack --dry-run --workspace @proofscript/pscv-cli",
+    "check:kernel-package-copies": "npm run verify:prebuilt --workspace @proofscript/pskernel-lean && npm run verify:prebuilt --workspace @proofscript/pskernel-lean-wasm"
   }
 }

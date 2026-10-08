@@ -57,6 +57,7 @@ jobs:
           set -euo pipefail
           lake exe pscv_v6_dev --version
           lake exe pscv_v6_dev capabilities
+          lake exe pscv_v6_dev providers
           lake exe pscv_v6_dev core-smoke
           lake exe pscv_v6_kernel_dev kernel-empty-smoke
           if lake exe pscv_v6_dev build src/Main.ps; then
@@ -127,13 +128,18 @@ jobs:
       - name: Install only V6 npm package metadata
         working-directory: pscv0/v6
         run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Link existing pinned official Lean provider npm facades
+      - name: Verify provider copies and npm workspace resolution
         working-directory: pscv0/v6
+        shell: bash
         run: |
           set -euo pipefail
-          mkdir -p node_modules/@proofscript
-          ln -sfn ../../../packages/pskernel-lean node_modules/@proofscript/pskernel-lean
-          ln -sfn ../../../packages/pskernel-lean-wasm node_modules/@proofscript/pskernel-lean-wasm
+          test "$(realpath node_modules/@proofscript/pskernel-lean)" = "$(realpath packages/pskernel-lean)"
+          test "$(realpath node_modules/@proofscript/pskernel-lean-wasm)" = "$(realpath packages/pskernel-lean-wasm)"
+          test "$(git rev-parse HEAD:pscv0/v6/packages/pskernel-lean)" = "$(git rev-parse HEAD:pscv0/packages/pskernel-lean)"
+          test "$(git rev-parse HEAD:pscv0/v6/packages/pskernel-lean-wasm)" = "$(git rev-parse HEAD:pscv0/packages/pskernel-lean-wasm)"
+      - name: Verify copied native and Wasm prebuilt binaries
+        working-directory: pscv0/v6
+        run: npm run check:kernel-package-copies
       - name: Run independent provider checks, no PSCV certification claim
         working-directory: pscv0/v6
         run: npm run test:provider-oracles

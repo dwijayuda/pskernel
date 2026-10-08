@@ -1,5 +1,6 @@
 import Pscv.Kernel.Checker
 import Pscv.Extensions.Policy
+import Pscv.Kernel.ProviderCatalog
 
 namespace Pscv.NativeSmoke
 
@@ -66,7 +67,17 @@ def mainTest : IO Bool := do
   } with
     | .error _ => true
     | .ok _ => false
-  return good && bad && axiomDenied && closedRejects && extensibleAccepts && semanticDenied
+  let providersPinned :=
+    Pscv.Kernel.availableProviders.size == 2 &&
+    Pscv.Kernel.availableProviders.all (fun p =>
+      p.leanVersion == "4.34.0" &&
+      p.protocol == "pskernel-lean/1" &&
+      p.kernelProfile == "lean4.34-core" &&
+      p.leanCommit == "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b")
+  let rejectedAsV6 :=
+    !(Pscv.Kernel.providerSupportsKernelProfile (Pscv.Profile.identity .verified))
+  return good && bad && axiomDenied && closedRejects && extensibleAccepts && semanticDenied &&
+    providersPinned && rejectedAsV6
 
 end Pscv.NativeSmoke
 

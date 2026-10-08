@@ -169,3 +169,13 @@ Evidence: https://github.com/dwijayuda/pskernel/actions/runs/37759921812. This i
 Research-only old source compatibility has now also built the prior ProofScript parser (`Ps.Syntax.ParseProofScript` and its declared import roots) under Lean 4.35.0-rc3: https://github.com/dwijayuda/pskernel/actions/runs/37759640927 . This proves source compilation at that pin, not grammar completeness or semantic correctness of the old parser.
 
 **Packaging constraint:** npm source manifests may depend on Lean modules at build time; the published native CLI should contain only the necessary runtime closure and can ship the heavy checker as an optional or separately installed package. Default compiler architecture must make it possible to build/parse simple `.ps` files without loading a complete Lean proof frontend.
+
+## 12. Copied native and Wasm Lean kernel npm packages
+
+V6 now contains complete, **Git-tree-identical** copies of both existing working kernel npm packages under `pscv0/v6/packages/pskernel-lean` and `pscv0/v6/packages/pskernel-lean-wasm`. These include their official Lean 4.34 C++ kernel sources, `.lean` provider code and source snapshots, prebuilt artifacts, immutable pinned manifests and public npm API shims. Keep these byte-identical initially; refactor source or package metadata only when the replacement behavior can be independently checked.
+
+The V6 root npm workspace resolves these local copies by their actual package identities and versions; CI checks local resolution, package source-tree identity, bundled integrity and native/Wasm admission accept/reject cases. A new small Lean provider catalog records exact identity without importing Lean.Environment into the lightweight compiler CLI. This is concrete re-use of old code, **not** an attempt to preserve the older PSC1 self-host compiler architecture.
+
+Version gap: the copied kernels check their pinned `lean4.34-core` admission profile; normative V6 remains `lean4.35.0-rc3`. Reuse the 4.34 providers for that precise contract until the required compatibility evidence or a matching 4.35 provider becomes available. Source-to-Core correctness and PSCV certification still require V6's independent checks.
+
+The old lexer, frontend diagnostics, RuntimeIR validators, erasure, WIT/ABI and four backend implementations remain valuable migration candidates; use them rather than rewriting automatically when extraction does not enlarge the authority boundary or silently change semantics. The complete V6 reference is the target architecture.

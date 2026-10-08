@@ -46,3 +46,12 @@ No V6 native release, proof interoperability, npm publication, complete compiler
 - Proof safety: Lean's kernel intentionally supports axioms, so the P0 checker additionally rejects arbitrary unapproved axiom, unsafe and partial declaration candidates in the closed-policy path. This is not complete PSCV specification, assumption or effect checking.
 - Upstream official Lean 4.35 has a special minimal initializer for checker-only binaries; its preconditions must be audited before use. No assumption of immediate binary shrink without fresh CI evidence.
 - No implementation claim for `.ps` grammar, source→Core correctness, `.proof.lean`, PSCV-CERT, four backend output, plugin isolation or native package release.
+
+## 2026-10-08 copied Lean 4.34 kernel npm packages into V6
+
+- Copied the entire tracked Git trees of `pscv0/packages/pskernel-lean/` and `pscv0/packages/pskernel-lean-wasm/` to `pscv0/v6/packages/`, without changing original upstream/provider sources, 4.34 pins, release bundles or manifest digests. This is intentional functional reuse; provider source refactoring is deferred.
+- The V6 npm workspace now resolves copied native/Wasm provider packages by their original public `@proofscript/*` npm identities. Existing prebuilt integrity verification and real accepted/rejected canonical-admission tests continue as V6 package conformance evidence.
+- Added Lean-written provider metadata catalog for native/Wasm selection without loading the large Lean.Environment checker into the minimal CLI. This is configuration data, not kernel or certification authority.
+- **Version gate unchanged:** V6 normative semantics are pinned to 4.35.0-rc3; both copied provider packages are 4.34.0. Their results do not automatically satisfy `pscv-v1`, source-fidelity, specification-coverage, `.proof.lean` bridge or `PSCV-CERT-v1`.
+- The old compiler's `.lean` files may be directly reused where needed, but older self-host architecture, PSC1 profile restrictions and bootstrap import closure are not binding on V6. The V6 reference remains authoritative.
+- Native provider-session integration and real `.ps` end-to-end compilation remain not implemented; no verified executable claim is added by these copies.

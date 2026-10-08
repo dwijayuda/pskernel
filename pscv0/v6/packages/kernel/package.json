@@ -15,6 +15,24 @@
     ],
     "role": "lean-native-kernel-interface",
     "releasedNativeArtifact": false,
-    "verificationClaims": []
+    "verificationClaims": [],
+    "kernelProviderPackages": [
+      "@proofscript/pskernel-lean",
+      "@proofscript/pskernel-lean-wasm"
+    ],
+    "kernelProviderSemanticPin": "lean4.34-core",
+    "normativeV6SemanticPin": "lean4.35.0-rc3"
+  },
+  "peerDependencies": {
+    "@proofscript/pskernel-lean": "4.34.0",
+    "@proofscript/pskernel-lean-wasm": "4.34.0"
+  },
+  "peerDependenciesMeta": {
+    "@proofscript/pskernel-lean": {
+      "optional": true
+    },
+    "@proofscript/pskernel-lean-wasm": {
+      "optional": true
+    }
   }
 }

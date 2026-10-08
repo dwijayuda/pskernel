@@ -15,7 +15,7 @@ lean_lib PscvExtensions where
 
 lean_lib PscvKernel where
   srcDir := "packages/kernel/src"
-  roots := #[`Pscv.Kernel.Checker]
+  roots := #[`Pscv.Kernel.Checker, `Pscv.Kernel.ProviderCatalog]
 
 @[default_target]
 lean_exe pscv_v6_dev where

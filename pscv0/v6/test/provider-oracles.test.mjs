@@ -1,8 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { realpathSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 // Test tooling only: all compiler/library implementations are written in Lean.
 import * as native from '@proofscript/pskernel-lean';
 import * as wasm from '@proofscript/pskernel-lean-wasm';
+
+test('both kernel npm specifiers resolve to the copied V6 workspace packages', () => {
+  const expectedPin = '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
+  for (const name of ['pskernel-lean', 'pskernel-lean-wasm']) {
+    const specifier = '@proofscript/' + name;
+    const actual = realpathSync(fileURLToPath(import.meta.resolve(specifier)));
+    const expected = realpathSync(fileURLToPath(new URL('../packages/' + name + '/index.mjs', import.meta.url)));
+    assert.equal(actual, expected, 'Kernel provider import must resolve to local V6 copy');
+    const packageRoot = new URL('../packages/' + name + '/', import.meta.url);
+    const meta = JSON.parse(readFileSync(new URL('package.json', packageRoot), 'utf8'));
+    assert.equal(meta.name, specifier);
+    assert.equal(meta.version, '4.34.0');
+    const pin = JSON.parse(readFileSync(new URL('LEAN_SOURCE_PIN.json', packageRoot), 'utf8'));
+    assert.equal(pin.commit ?? pin.leanCommit, expectedPin);
+  }
+});
 
 const format = 'proofscript-checked-admissions';
 const EMPTY = JSON.stringify({admissions:[],format,version:2})+'\n';

@@ -9,7 +9,9 @@
 |---|---|
 | v6/packages/core/src | Candidate Lean Core representation and immutable semantic contracts |
 | v6/packages/extensions/src | Typed E0–E6 extension classes and closed-profile restriction |
-| v6/packages/kernel/src | Lean 4.35-rc3 kernel declaration checking, admission-only status |
+| v6/packages/kernel/src | Lean 4.35-rc3 kernel declaration checking and small Lean 4.34 npm provider catalog; admission-only status |
+| v6/packages/pskernel-lean | Full copied working Lean 4.34 native kernel npm provider |
+| v6/packages/pskernel-lean-wasm | Full copied working Lean 4.34 Wasm kernel npm provider |
 | v6/packages/cli/src | Native development executable and explicit unsupported stage errors |
 | v6/test/lean | Native proof acceptance/rejection and policy smoke |
 | v6/test/provider-oracles.test.mjs | External oracle test tooling for separately packaged Lean 4.34 native/Wasm kernel binaries |
@@ -31,3 +33,9 @@ Compiler modules and executable feature implementations are .lean. npm package.j
 ## Stage boundaries
 
 N0 native compilation and kernel/extension policy checks; N1 .ps source syntax; N2 checked Core; N3 RuntimeIR/erasure; N4 all four backends; N5 mixed proofs/verified certification; N6 native npm distributions and isolated feature runners; N7 assurance/performance and optional self-host. No implementation completeness is asserted before passing each gate.
+
+## Kernel package adoption
+
+V6's complete local copies of `@proofscript/pskernel-lean@4.34.0` and `@proofscript/pskernel-lean-wasm@4.34.0` are accepted as reusable provider implementations, without source refactoring at this checkpoint. Their original npm APIs and binary/source integrity manifests remain intact. The V6 architecture still requires provider-neutral checked-session composition, explicit 4.35 semantic compatibility before PSCV-v1 certification, and no implicit plugin or registry proof authority.
+
+Other existing `.lean` algorithms may be reused selectively, including old parser, RuntimeIR, erasure and backends. The V6 reference rather than the historical self-host layout determines package boundaries.

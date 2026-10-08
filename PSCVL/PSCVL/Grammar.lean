@@ -33,7 +33,8 @@ private def allowedCommand (s : Syntax) : Bool :=
     allowedDeclarationKind s[1].getKind.toString
   else
     ([
-      "PSCVL.pscvConst", "PSCVL.pscvFunction1", "PSCVL.pscvFunction2",
+      "PSCVL.pscvConst", "PSCVL.pscvFunction", "PSCVL.pscvFunctionContract",
+      "PSCVL.pscvRefine",
       "Lean.Parser.Command.namespace", "Lean.Parser.Command.section",
       "Lean.Parser.Command.end", "Lean.Parser.Command.open",
       "Lean.Parser.Command.variable", "Lean.Parser.Command.universe",

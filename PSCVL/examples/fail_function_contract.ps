@@ -1,0 +1,5 @@
+function invalid(n : Nat) : Id Nat
+    requires True
+    ensures r => r > n := pure n
+@[pscv_export, pscv_type_spec]
+def root : Nat := 0

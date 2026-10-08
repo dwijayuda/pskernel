@@ -1,0 +1,12 @@
+-- Finite ProofScript grammar aliases lower to kernel-checked Lean.
+refine type Positive := Nat where x => x > 0
+
+function zero() : Nat := 0
+function quad(a : Nat, b : Nat, c : Nat, d : Nat) : Nat := a + b + c + d
+
+function verified(n : Nat) : Id Nat
+    requires n > 0
+    ensures r => r = n := pure n
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := quad 1 2 3 4 + zero

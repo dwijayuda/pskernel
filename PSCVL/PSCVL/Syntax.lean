@@ -1,10 +1,12 @@
 import Lean
 
 /-!
-A *small, deliberately incomplete* ProofScript syntax bridge. The Lean parser
-handles all source forms that are already Lean-compatible. These two aliases
-are from the PSCV language reference §§8–9; broader ProofScript grammar is
-not accepted or silently approximated.
+ProofScript-owned syntax is lowered into Lean's pinned parser/elaborator.
+These are additive *bounded* aliases, not a separate type checker.
+
+The comprehensive ProofScript A.18 grammar (braced blocks, comma-separated
+calls, indexed inductive headers, extended effect syntax, etc.) is not yet
+implemented; each accepted spelling below has an unambiguous Lean lowering.
 -/
 
 namespace PSCVL
@@ -15,16 +17,45 @@ macro_rules
   | `(const $name:ident : $ty:term := $value:term) =>
     `(def $name : $ty := $value)
 
-syntax (name := pscvFunction1) "function " ident "(" ident ":" term ")" ":" term ":=" term : command
+/-- One comma-delimited explicit ProofScript binder (no JS-like defaults). -/
+declare_syntax_cat pscvBinder
+syntax ident ":" term : pscvBinder
+
+syntax (name := pscvFunction) "function " ident "(" pscvBinder,* ")" ":" term ":=" term : command
 
 macro_rules
-  | `(function $name:ident ($x:ident : $a:term) : $b:term := $body:term) =>
-    `(def $name ($x : $a) : $b := $body)
+  | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term := $body:term) => do
+    let mut leanBinders : Array (TSyntax ``Lean.Parser.Term.bracketedBinder) := #[]
+    for b in bs.getElems do
+      let `(pscvBinder| $x:ident : $t:term) := b
+        | Macro.throwUnsupported
+      leanBinders := leanBinders.push (← `(($x:ident : $t:term)))
+    `(def $f:ident $leanBinders* : $result:term := $body:term)
 
-syntax (name := pscvFunction2) "function " ident "(" ident ":" term "," ident ":" term ")" ":" term ":=" term : command
+/-- Contracted function syntax is the same verified Lean 4.35 contract
+semantics as `def`: `f.spec` must be proved by Lean's `vcgen`. -/
+syntax (name := pscvFunctionContract)
+  "function " ident "(" pscvBinder,* ")" ":" term
+  "requires" term "ensures" ident "=>" term ":=" term : command
 
 macro_rules
-  | `(function $name:ident ($x:ident : $a:term, $y:ident : $b:term) : $result:term := $body:term) =>
-    `(def $name ($x : $a) ($y : $b) : $result := $body)
+  | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term
+      requires $pre:term ensures $rv:ident => $post:term := $body:term) => do
+    let mut leanBinders : Array (TSyntax ``Lean.Parser.Term.bracketedBinder) := #[]
+    for b in bs.getElems do
+      let `(pscvBinder| $x:ident : $t:term) := b
+        | Macro.throwUnsupported
+      leanBinders := leanBinders.push (← `(($x:ident : $t:term)))
+    `(def $f:ident $leanBinders* : $result:term
+        requires $pre:term
+        ensures $rv:ident => $post:term := $body:term)
+
+/-- Finite refinement-type sugar lowering to Lean's kernel-checked Subtype. -/
+syntax (name := pscvRefine) "refine " "type " ident ":=" term
+  "where " ident "=>" term : command
+
+macro_rules
+  | `(refine type $name:ident := $t:term where $x:ident => $predicate:term) =>
+    `(abbrev $name : Type := { $x:ident : $t:term // $predicate:term })
 
 end PSCVL

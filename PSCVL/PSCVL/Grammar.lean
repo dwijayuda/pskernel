@@ -77,7 +77,7 @@ private def excludedName (name : Name) : Bool :=
     "IO"] : List String).any (fun banned =>
       value == banned || value.endsWith ("." ++ banned))
 
-/-- An identifier is different from a keyword token in Lean's syntax tree.
+/- An identifier is different from a keyword token in Lean's syntax tree.
 Apply the source exclusions to both; otherwise imported built-in primitives
 can bypass restrictions that checked only `Syntax.atom` keywords. -/
 /-- The PSCV A.18 while grammar requires both an invariant and a

@@ -242,3 +242,115 @@ theorem psKernelAddSimpleConstructorsWithFuel_checked_semantic_history
                                             PsKernelEnvironmentSemanticExtends.trans
                                               work nextWork tailResult.environment hStepExt hTailExt,
                                             hFinalIndex⟩
+
+/-- Exact provisional metadata used by ordinary admission, kept in metatheory. -/
+def psKernelOrdinaryInitialInductiveInfo
+    (decl : PsKernelSimpleInductiveDecl)
+    (indices : List PsKernelOpenBinder) : PsKernelInductiveInfo :=
+  PsKernelInductiveInfo.mk
+    (PsKernelConstantBase.mk decl.name decl.levelParams decl.type)
+    decl.numParams (psKernelOpenBinderListLength indices)
+    [decl.name] (psKernelSimpleCtorNames decl.ctors) 0 false false decl.isUnsafe
+
+/--
+Compose the actual checked header-opening and constructor pipeline. Naming
+premises are the already established top-level guards, not independent
+per-constructor freshness or per-work-environment cache assumptions.
+This certificate ends before final metadata and recursor publication.
+-/
+theorem psKernelOrdinaryHeaderConstructorPipeline_configuration_refines
+    (fuel : Nat) (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    (decl : PsKernelSimpleInductiveDecl)
+    (safety : PsKernelDefinitionSafety)
+    (sortedHeader : PsKernelCheckerSession)
+    (paramResult indexResult : PsKernelOpenBindersResult)
+    (resultLevel : PsKernelLevel)
+    (ctorResult : PsKernelAddConstructorsResult)
+    (hConfig : PsKernelCheckerConfigurationSound sortedHeader.context sortedHeader.state)
+    (hNames : PsKernelInductiveNamesAbsent sortedHeader.context.environment
+      (decl.name :: psKernelSimpleRecName decl.name :: psKernelSimpleCtorNames decl.ctors))
+    (hUnique : psKernelNameHasDuplicates
+      (decl.name :: psKernelSimpleRecName decl.name :: psKernelSimpleCtorNames decl.ctors) = false)
+    (hParams : psKernelOpenSimpleHeaderParams fuel sortedHeader decl.type decl.numParams =
+      Except.ok paramResult)
+    (hIndices : psKernelOpenSimpleHeaderIndices fuel paramResult.session paramResult.result =
+      Except.ok indexResult)
+    (hResult : indexResult.result = PsKernelExpr.sort resultLevel)
+    (hCtors : psKernelAddSimpleConstructorsWithFuel (Nat.succ fuel) decl safety
+      resultLevel (psKernelLevelParamsToLevels decl.levelParams) paramResult.binders
+      (psKernelOpenBinderListLength indexResult.binders) paramResult.session
+      (psKernelEnvironmentAddUnchecked sortedHeader.context.environment
+        (PsKernelConstantInfo.inductInfo
+          (psKernelOrdinaryInitialInductiveInfo decl indexResult.binders)))
+      0 decl.ctors = Except.ok ctorResult) :
+    PsKernelCheckedHeaderBinderSpine sortedHeader.context.environment
+      sortedHeader.context.localContext decl.type paramResult.binders
+      paramResult.session.context.localContext paramResult.result ∧
+    PsKernelCheckedHeaderBinderSpine sortedHeader.context.environment
+      paramResult.session.context.localContext paramResult.result indexResult.binders
+      indexResult.session.context.localContext (PsKernelExpr.sort resultLevel) ∧
+    PsKernelCheckedOrdinaryConstructorHistory decl
+      (psKernelLevelParamsToLevels decl.levelParams) paramResult.binders
+      (psKernelOpenBinderListLength indexResult.binders) resultLevel
+      paramResult.session.context.localContext
+      (psKernelEnvironmentAddUnchecked sortedHeader.context.environment
+        (PsKernelConstantInfo.inductInfo
+          (psKernelOrdinaryInitialInductiveInfo decl indexResult.binders)))
+      0 decl.ctors ctorResult.shapes ctorResult.environment ∧
+    PsKernelEnvironmentSemanticExtends sortedHeader.context.environment ctorResult.environment ∧
+    PsKernelEnvironmentIndexRefines ctorResult.environment := by
+  have hParamSound := psKernelOpenSimpleHeaderParams_configuration_refines
+    fuel decl.numParams hNative hString sortedHeader decl.type paramResult hConfig hParams
+  have hIndexSound := psKernelOpenSimpleHeaderIndices_configuration_refines
+    fuel hNative hString paramResult.session paramResult.result indexResult
+    hParamSound.1 hIndices
+  have hFresh : psKernelFindConstantInList decl.name
+      sortedHeader.context.environment.constants = none ∧
+      PsKernelInductiveNamesAbsent sortedHeader.context.environment
+        (psKernelSimpleCtorNames decl.ctors) := by
+    cases hNames with
+    | cons _ _ hHead hTail =>
+        cases hTail with
+        | cons _ _ _ hCtorsAbsent => exact ⟨hHead, hCtorsAbsent⟩
+  have hUniqueTail := psKernelNameHasDuplicates_cons_false_refines decl.name
+    (psKernelSimpleRecName decl.name :: psKernelSimpleCtorNames decl.ctors) hUnique
+  have hCtorUnique := psKernelNameHasDuplicates_cons_false_refines
+    (psKernelSimpleRecName decl.name) (psKernelSimpleCtorNames decl.ctors) hUniqueTail.2
+  have hDisjoint : psKernelNameListContains decl.name
+      (psKernelSimpleCtorNames decl.ctors) = false := by
+    cases hEqual : psKernelNameEq decl.name (psKernelSimpleRecName decl.name) with
+    | true => simp [psKernelNameListContains, hEqual] at hUniqueTail
+    | false => simpa [psKernelNameListContains, hEqual] using hUniqueTail.1
+  let initial := PsKernelConstantInfo.inductInfo
+    (psKernelOrdinaryInitialInductiveInfo decl indexResult.binders)
+  let work := psKernelEnvironmentAddUnchecked sortedHeader.context.environment initial
+  have hInitialName : psKernelConstantInfoName initial = decl.name := rfl
+  have hWorkIndex : PsKernelEnvironmentIndexRefines work :=
+    psKernelEnvironmentAddUnchecked_index_refines
+      sortedHeader.context.environment initial hConfig.1
+  have hWorkExt : PsKernelEnvironmentSemanticExtends
+      sortedHeader.context.environment work :=
+    psKernelEnvironmentAddUnchecked_fresh_semantic_extends
+      sortedHeader.context.environment initial hString
+      (by simpa [hInitialName] using hFresh.1)
+  have hWorkNames : PsKernelInductiveNamesAbsent work
+      (psKernelSimpleCtorNames decl.ctors) :=
+    psKernelInductiveNamesAbsent_add_disjoint
+      sortedHeader.context.environment initial (psKernelSimpleCtorNames decl.ctors)
+      hFresh.2 (by simpa [hInitialName] using hDisjoint)
+  have hParamExt : PsKernelEnvironmentSemanticExtends
+      paramResult.session.context.environment work := by
+    simpa [hParamSound.2.1] using hWorkExt
+  obtain ⟨hHistory, hCtorExt, hFinalIndex⟩ :=
+    psKernelAddSimpleConstructorsWithFuel_checked_semantic_history
+      (Nat.succ fuel) decl safety resultLevel
+      (psKernelLevelParamsToLevels decl.levelParams) paramResult.binders
+      (psKernelOpenBinderListLength indexResult.binders) paramResult.session work
+      0 decl.ctors ctorResult hWorkIndex hParamSound.1 hParamExt
+      hWorkNames hCtorUnique.2 hReflexive hNative hString hCtors
+  refine ⟨hParamSound.2.2, ?_, hHistory, ?_, hFinalIndex⟩
+  · simpa [hParamSound.2.1, hResult] using hIndexSound.2.2
+  · exact PsKernelEnvironmentSemanticExtends.trans
+      sortedHeader.context.environment work ctorResult.environment hWorkExt hCtorExt

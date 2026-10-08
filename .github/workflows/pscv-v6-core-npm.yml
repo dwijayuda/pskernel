@@ -43,6 +43,9 @@ jobs:
       - name: Build compiler packages and native executable from Lean sources
         working-directory: pscv0/v6
         run: npm run build:native
+      - name: Research-only build probe for old Lean RuntimeIR and InterfaceIR modules
+        working-directory: pscv0/v6
+        run: lake build PscvReuseProbeFoundation PscvReuseProbeRuntimeIr PscvReuseProbeInterfaceIr
       - name: Execute actual Lean kernel proof-acceptance/rejection and extension checks
         working-directory: pscv0/v6
         run: npm test

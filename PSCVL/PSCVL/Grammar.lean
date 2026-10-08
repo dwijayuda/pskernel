@@ -97,7 +97,9 @@ private partial def forbiddenLoop (s : Syntax) : Option String :=
             kind == ``Lean.Parser.Term.doRepeatUntil then
       some "PSCV does not admit Lean repeat/repeat-until loops"
     else if kind == ``Lean.Parser.Term.doFor then
-      if !(s[3].isNone) then
+      if s[1].getSepArgs.size != 1 then
+        some "PSCV for requires exactly one collection"
+      else if !(s[3].isNone) then
         some "PSCV for loops do not take a decreasing clause"
       else
         args.toList.findSome? forbiddenLoop
@@ -119,7 +121,9 @@ private partial def forbiddenSyntax (s : Syntax) : Option String :=
     if excludedName name then some s!"forbidden PSCV identifier '{name}'"
     else none
   | .atom _ value =>
-    if (["run_tac", "native_decide", "sorry", "unsafe", "partial",
+    if value == ";" then
+      some "PSCV does not admit Lean semicolon statement/tactic separators"
+    else if (["run_tac", "native_decide", "sorry", "unsafe", "partial",
          "macro", "macro_rules", "elab", "initialize", "set_option",
          "syntax", "declare_syntax_cat", "implemented_by", "extern",
          "run_cmd", "deriving", "scoped", "assert!"] : List String).contains value then

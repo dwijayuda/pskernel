@@ -1,0 +1,6 @@
+@[pscv_export, pscv_type_spec]
+def invalid (xs ys : List Nat) : Id Nat := do
+  let mut total := 0
+  for x in xs, y in ys do
+    total := total + x + y
+  return total

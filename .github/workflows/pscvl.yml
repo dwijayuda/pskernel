@@ -34,6 +34,10 @@ jobs:
           set -euxo pipefail
           lake exe pscvl check examples/pass.ps
           lake exe pscvl syntax-kinds examples/pass_ghost.ps
+          lake exe pscvl syntax-kinds examples/pass_lean_core.ps
+          lake exe pscvl syntax-kinds examples/pass_effect_relations.ps
+          lake exe pscvl syntax-kinds examples/pass_contract.ps
+          lake exe pscvl syntax-kinds examples/pass_typed_errors.ps
           lake exe pscvl check examples/pass_contract.ps
           lake exe pscvl check examples/pass_language.ps
           lake exe pscvl check examples/pass_lean_core.ps
@@ -74,6 +78,8 @@ jobs:
           ! lake exe pscvl check examples/fail_while_missing_invariant.ps
           ! lake exe pscvl check examples/fail_while_missing_decreasing.ps
           ! lake exe pscvl check examples/fail_repeat.ps
+          ! lake exe pscvl check examples/fail_multiple_for.ps
+          ! lake exe pscvl check examples/fail_semicolon.ps
           # A negative fixture must fail for the intended semantic reason,
           # not merely because a valid PSCV syntax form was mistyped.
           expect_rejection() {

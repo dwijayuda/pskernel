@@ -284,3 +284,134 @@ theorem psKernelValidateSimpleConstructorResult_semantic_shape
     hLength,
     psKernelValidateSimpleConstructorResult_success_indices_absent
       hReflexive target levels params numIndices result indices hRun⟩
+
+/--
+Every recursive-argument index returned by the ordinary analyzer excludes
+the recursive target structurally, including after traversing function
+arguments. This is independent of traversal fuel and keeps the unresolved
+StringEq reflexivity requirement explicit.
+-/
+theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_indices_absent
+    (fuel : Nat)
+    (hReflexive : PsKernelStringEqReflexiveLaw) :
+    ∀ (session : PsKernelCheckerSession)
+      (target : PsKernelName)
+      (levels : List PsKernelLevel)
+      (params : List PsKernelOpenBinder)
+      (numIndices : Nat)
+      (type : PsKernelExpr)
+      (revArgs : List PsKernelOpenBinder)
+      (result : PsKernelRecursiveArgumentResult)
+      (args : List PsKernelOpenBinder)
+      (indices : List PsKernelExpr),
+      psKernelAnalyzeSimpleRecursiveArgumentWithFuel
+        fuel session target levels params numIndices type revArgs =
+          Except.ok result ->
+      result.recursiveInfo = some (args, indices) ->
+      ∀ expr : PsKernelExpr, List.Mem expr indices ->
+        PsKernelNoTargetConstantOccurrence target expr := by
+  induction fuel with
+  | zero =>
+      intro session target levels params numIndices type revArgs
+        result args indices hRun hInfo
+      simp [psKernelAnalyzeSimpleRecursiveArgumentWithFuel] at hRun
+  | succ remaining ih =>
+      intro session target levels params numIndices type revArgs
+        result args indices hRun hInfo
+      cases hWhnf : psKernelSessionWhnf remaining session type with
+      | error message =>
+          simp [psKernelAnalyzeSimpleRecursiveArgumentWithFuel, hWhnf] at hRun
+      | ok reducedResult =>
+          rcases reducedResult with ⟨reduced, reducedSession⟩
+          cases hApp : psKernelSimpleInductiveAppIndices
+              target levels params numIndices reduced with
+          | some actualIndices =>
+              cases hContains : psKernelSimpleIndicesContainTarget
+                  target actualIndices with
+              | true =>
+                  simp [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                    hWhnf, hApp, hContains] at hRun
+              | false =>
+                  have hResult :
+                      PsKernelRecursiveArgumentResult.mk reducedSession
+                        (some (psKernelReverseOpenBinders revArgs, actualIndices)) =
+                          result := by
+                    simpa [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                      hWhnf, hApp, hContains] using hRun
+                  cases hResult
+                  have hPair :
+                      (psKernelReverseOpenBinders revArgs, actualIndices) =
+                        (args, indices) := Option.some.inj hInfo
+                  have hIndices : actualIndices = indices :=
+                    congrArg Prod.snd hPair
+                  subst indices
+                  exact psKernelSimpleIndicesContainTarget_false_refines_absence
+                    hReflexive target actualIndices hContains
+          | none =>
+              cases hShape : reduced with
+              | forallE userName domain body binderInfo =>
+                  cases hDomainWhnf :
+                      psKernelSessionWhnf remaining reducedSession domain with
+                  | error message =>
+                      simp [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                        hWhnf, hApp, hShape, hDomainWhnf] at hRun
+                  | ok domainReduced =>
+                      cases hNegative :
+                          (if psKernelExprContainsConst target domain then true
+                          else psKernelExprContainsConst target domainReduced.1) with
+                      | true =>
+                          simp [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                            hWhnf, hApp, hShape, hDomainWhnf, hNegative] at hRun
+                      | false =>
+                          cases hCheck : psKernelSessionCheck
+                              remaining domainReduced.2 domain with
+                          | error message =>
+                              simp [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                                hWhnf, hApp, hShape, hDomainWhnf, hNegative, hCheck] at hRun
+                          | ok domainType =>
+                              cases hSort : psKernelSessionEnsureSort
+                                  remaining domainType.2 domainType.1 with
+                              | error message =>
+                                  simp [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                                    hWhnf, hApp, hShape, hDomainWhnf, hNegative,
+                                    hCheck, hSort] at hRun
+                              | ok sortResult =>
+                                  let opened := psKernelSessionWithLocal
+                                    sortResult.2 userName
+                                    (psKernelExprConsumeTypeAnnotations domain)
+                                    binderInfo
+                                  let binder := PsKernelOpenBinder.mk
+                                    opened.1 userName
+                                    (psKernelExprConsumeTypeAnnotations domain)
+                                    binderInfo
+                                  have hTailRun :
+                                      psKernelAnalyzeSimpleRecursiveArgumentWithFuel
+                                        remaining opened.2 target levels params
+                                        numIndices
+                                        (psKernelExprInstantiate1 body
+                                          (PsKernelExpr.fvar opened.1))
+                                        (binder :: revArgs) = Except.ok result := by
+                                    simpa [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                                      hWhnf, hApp, hShape, hDomainWhnf, hNegative,
+                                      hCheck, hSort, opened, binder] using hRun
+                                  exact ih opened.2 target levels params numIndices
+                                    (psKernelExprInstantiate1 body
+                                      (PsKernelExpr.fvar opened.1))
+                                    (binder :: revArgs) result args indices hTailRun hInfo
+              | _ =>
+                  cases hContains :
+                      (if psKernelExprContainsConst target type then true
+                       else psKernelExprContainsConst target reduced) with
+                  | true =>
+                      simp only [hShape] at hContains
+                      simp [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                        hWhnf, hApp, hShape, hContains] at hRun
+                  | false =>
+                      simp only [hShape] at hContains
+                      have hResult :
+                          PsKernelRecursiveArgumentResult.mk
+                            reducedSession none = result := by
+                        simpa [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
+                          hWhnf, hApp, hShape, hContains] using hRun
+                      cases hResult
+                      cases hInfo

@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto';
 import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkedKernelDescriptor, defaultCheckedKernel } from './checked-kernel-provider.mjs';
+import { checkedTypeScriptToolchain } from './typescript-cli.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let base;
@@ -45,6 +46,7 @@ async function validateGeneration(generation, kernel) {
     throw new Error('PSC2_CHECKED_GENERATION_KERNEL');
   }
   if (receipt.kind !== 'psc2-checked-build' || receipt.schemaVersion !== 3 ||
+      JSON.stringify(receipt.typeScriptToolchain) !== JSON.stringify(checkedTypeScriptToolchain) ||
       hash(await readFile(compiler)) !== receipt.javaScriptSha256 ||
       hash(await readFile(compiler.replace(/\.js$/u, '.ts'))) !== receipt.typeScriptSha256 ||
       hash(await readFile(compiler.replace(/\.js$/u, '.admissions.json'))) !== receipt.canonicalAdmissionsSha256) {

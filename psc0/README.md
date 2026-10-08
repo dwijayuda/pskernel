@@ -55,3 +55,13 @@ available only by explicit selection; there is no automatic fallback.
 This integration is a candidate until its branch CI confirms native provider
 checks and full compiler bootstrap/selfhost/repeat equality. In particular,
 a code-copy or source-tree lock does not prove semantic acceptance.
+
+## Active TypeScript toolchain (2026-10-09)
+
+PSC0 now pins **TypeScript 7.0.2 only** for strict checked TS/JS emission.
+The native Go-based compiler requires '--ignoreConfig' with explicit input
+files. Build/host callers assert the exact version before invoking the CLI.
+The original source closure and earlier fixed-point receipts remain
+historical evidence; new JS artifacts require fresh TS7 checking, source
+and admission-hash integrity, and a new fixed-point certification.
+See 'docs/JOINT_COMPILER_KERNEL_SELFHOST.md' for the ongoing integration.

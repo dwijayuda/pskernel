@@ -1,4 +1,5 @@
 import { readFile, writeFile, mkdir, mkdtemp, rename, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -12,7 +13,7 @@ import {
   defaultCheckedKernel,
 } from './checked-kernel-provider.mjs';
 import { runCheckedSeedSession } from './checked-seed-session.mjs';
-import { resolveTypeScriptCli } from './typescript-cli.mjs';
+import { assertPinnedTypeScriptCli, strictTypeScriptArgs, checkedTypeScriptToolchain } from './typescript-cli.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -30,17 +31,31 @@ export async function buildChecked({
   compilerPath,
   seedPath,
   checkOnly = false,
+  emission = 'full',
   kernel = defaultCheckedKernel,
 }) {
   const kernelDescriptor = checkedKernelDescriptor(kernel);
+  if (!['full', 'typescript-only'].includes(emission)) throw new Error('PSC2_CHECKED_EMISSION_MODE');
+  if (checkOnly && emission !== 'full') throw new Error('PSC2_CHECKED_CHECK_ONLY_EMISSION');
+  const startTime = process.hrtime.bigint();
+  const trace = (stage, details = '') => {
+    if (process.env.PSC0_BUILD_TRACE !== '1') return;
+    const elapsed = Number(process.hrtime.bigint() - startTime) / 1e9;
+    const heapMiB = Math.round(process.memoryUsage().heapUsed / 1048576);
+    console.log('PSC2_CHECKED_STAGE: ' + stage + ' elapsedSeconds=' + elapsed.toFixed(3) +
+      ' heapMiB=' + heapMiB + (details ? ' ' + details : ''));
+  };
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
   const snapshot = await readCheckedSourceSnapshot(entryPath);
+  trace('source-snapshot', 'modules=' + snapshot.ordered.length);
   let admissions;
   let typeScript;
   let compilerIdentity;
   const checkAdmissions = async text => {
+    trace('admissions-ready', 'admissionsBytes=' + Buffer.byteLength(text, 'utf8'));
     const checked = await checkAdmissionsWithKernel(text, kernel);
+    trace('native-kernel-complete', 'accepted=' + String(checked.result?.accepted));
     return checked.result;
   };
 
@@ -57,6 +72,7 @@ export async function buildChecked({
     });
     admissions = result.admissions;
     typeScript = result.typeScript;
+    trace('native-seed-finished');
   } else {
     const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
     compilerIdentity = { engine: 'generated-js', sha256: digest(await readFile(file)) };
@@ -70,7 +86,11 @@ export async function buildChecked({
       return checkAdmissions(text);
     }, checkedKernelIdentity(kernel));
     const handle = await session.checkSources(kind, snapshot.sources);
-    if (!checkOnly) typeScript = session.emit(handle);
+    trace('generated-compiler-prepared-and-checked');
+    if (!checkOnly) {
+      typeScript = session.emit(handle);
+      trace('generated-compiler-emitted', 'typescriptBytes=' + Buffer.byteLength(typeScript, 'utf8'));
+    }
   }
 
   const receipt = {
@@ -85,28 +105,57 @@ export async function buildChecked({
     canonicalAdmissionsSha256: digest(admissions),
   };
   if (checkOnly) return receipt;
+  receipt.typeScriptToolchain = checkedTypeScriptToolchain;
   if (typeof typeScript !== 'string') throw new Error('PSC2_CHECKED_TS_RESULT');
   const output = path.resolve(outputPath);
   if (!/\.(?:ts|js)$/u.test(output)) throw new Error('PSC2_CHECKED_OUTPUT_KIND');
   const stem = path.basename(output).replace(/\.(?:ts|js)$/u, '');
+  trace('typescript-ready', 'typescriptBytes=' + Buffer.byteLength(typeScript, 'utf8'));
+
+  // Explicit diagnostic/equality mode: kernel admission is mandatory and the
+  // result is a typed *source* receipt, never a checked executable. No tsc
+  // subprocess is started. A separate fully checked native build must compile
+  // identical TypeScript before its JavaScript can be reused.
+  if (emission === 'typescript-only') {
+    if (!output.endsWith('.ts')) throw new Error('PSC2_CHECKED_TYPESCRIPT_OUTPUT_REQUIRED');
+    if (existsSync(output.replace(/\.ts$/u, '.js'))) {
+      throw new Error('PSC2_CHECKED_TYPESCRIPT_ONLY_STALE_JAVASCRIPT');
+    }
+    await mkdir(path.dirname(output), { recursive: true });
+    const staging = await mkdtemp(path.join(path.dirname(output), '.checked-source-stage-'));
+    try {
+      receipt.kind = 'psc2-checked-typescript';
+      receipt.emission = 'typescript-only';
+      receipt.typeScriptSha256 = digest(typeScript);
+      receipt.typeScriptBytes = Buffer.byteLength(typeScript, 'utf8');
+      await writeFile(path.join(staging, stem + '.ts'), typeScript);
+      await writeFile(path.join(staging, stem + '.admissions.json'), admissions);
+      // Publish the audit receipt last; it grants no authority to emit JS.
+      await rename(path.join(staging, stem + '.ts'), output);
+      await rename(path.join(staging, stem + '.admissions.json'),
+        output.replace(/\.ts$/u, '.admissions.json'));
+      await writeFile(path.join(staging, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n');
+      await rename(path.join(staging, 'receipt.json'), output.replace(/\.ts$/u, '.checked.json'));
+    } finally {
+      await rm(staging, { recursive: true, force: true });
+    }
+    trace('checked-typescript-published');
+    return receipt;
+  }
 
   // Kernel acceptance has already happened. TypeScript writes only into staging;
   // a failed tsc cannot create a new final output or checked receipt.
-  const tsc = resolveTypeScriptCli();
-  const version = spawnSync(process.execPath, [tsc, '--version'], { encoding: 'utf8', timeout: 10000 });
-  if (version.error || version.status !== 0 || version.stdout.trim() !== 'Version 5.8.3') {
-    throw new Error('PSC2_CHECKED_TYPESCRIPT_PIN: require TypeScript 5.8.3');
-  }
+  const tsc = assertPinnedTypeScriptCli();
   await mkdir(path.dirname(output), { recursive: true });
   const staging = await mkdtemp(path.join(path.dirname(output), '.checked-stage-'));
   try {
     const tsFile = path.join(staging, stem + '.ts');
     await writeFile(tsFile, typeScript);
-    const run = spawnSync(process.execPath, [tsc, tsFile, '--target', 'ES2022', '--module', 'ES2022',
-      '--moduleResolution', 'bundler', '--strict', '--declaration', '--sourceMap',
-      '--noEmitOnError', '--skipLibCheck', '--pretty', 'false'], {
+    trace('tsc-start', 'typescriptBytes=' + Buffer.byteLength(typeScript, 'utf8'));
+    const run = spawnSync(process.execPath, [tsc, tsFile, ...strictTypeScriptArgs], {
       encoding: 'utf8', timeout: 120000, maxBuffer: 16 * 1024 * 1024, windowsHide: true,
     });
+    trace('tsc-completed', 'exit=' + String(run.error?.code ?? run.status));
     if (run.error) throw run.error;
     if (run.status !== 0) throw new Error(`PSC2_CHECKED_TSC_FAILED: ${run.stdout}\n${run.stderr}`);
     receipt.typeScriptSha256 = digest(typeScript);
@@ -131,6 +180,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   while (args.length) {
     const flag = args.shift();
     if (flag === '--check') options.checkOnly = true;
+    else if (flag === '--typescript-only') options.emission = 'typescript-only';
     else if (['--out', '--compiler', '--seed', '--kernel'].includes(flag)) {
       const value = args.shift();
       if (!value || value.startsWith('--')) throw new Error(`Missing value for ${flag}`);

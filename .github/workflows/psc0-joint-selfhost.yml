@@ -1,0 +1,213 @@
+name: PSC0 joint compiler and kernel self-host
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled]
+    paths:
+      - 'psc0/packages/pskernel-core/src/**'
+      - 'psc0/scripts/joint-*.mjs'
+      - 'psc0/scripts/psc1kernel-generated-smoke.mjs'
+      - 'psc0/scripts/workspace-layout.mjs'
+      - 'psc0/scripts/checked-*.mjs'
+      - 'psc0/package.json'
+      - '.github/workflows/psc0-joint-selfhost.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: psc0-joint-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: psc0/.lake/build
+          key: psc0-joint-lean-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-${{ github.sha }}
+          restore-keys: |
+            psc0-joint-lean-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
+            psc0-core-${{ runner.os }}-
+      - name: Validate build scripts and prepared-session invariants
+        run: |
+          node --check scripts/checked-build.mjs
+          node --check scripts/joint-selfhost.mjs
+          node --check scripts/checked-typescript-source-smoke.mjs
+          node --test scripts/checked-prepared-session.test.mjs
+      - name: Validate generated kernel canonical-admission decoder
+        run: node --test scripts/generated-core-provider.test.mjs
+      - name: Check complete kernel implementation closure
+        run: |
+          node scripts/joint-kernel-closure.mjs --assert-full
+          node --test scripts/joint-kernel-closure.test.mjs
+          node scripts/selfhost-baseline.mjs --assert-unchanged
+          node scripts/bootstrap-root-minimality-tests.mjs
+      - name: Build compiler source-check tool
+        run: lake build psc1
+      - name: Check KernelCore root with actual PSC1 frontend
+        run: lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+
+  native-kernel-artifact:
+    needs: source-contract
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.action == 'labeled' && github.event.label.name == 'enhancement') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            psc0/.lake/build
+            psc0/lean-checked/.lake/build
+          key: psc0-joint-native-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean', 'psc0/packages/pskernel-core/src/**/*.lean') }}
+          restore-keys: |
+            psc0-joint-native-${{ runner.os }}-
+            psc0-core-${{ runner.os }}-
+      - name: Install pinned compiler TypeScript
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Emit kernel JS through Lean-native PSC0 compiler and native PSKernel Core
+        run: node scripts/joint-selfhost.mjs generate-native
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          PSC0_BUILD_TRACE: '1'
+      - name: Smoke-check source-only receipts without skipping native kernel admission
+        run: node scripts/checked-typescript-source-smoke.mjs
+        env:
+          PSC0_BUILD_TRACE: '1'
+      - name: Differentially check the actual generated JS kernel against native Core
+        run: node scripts/joint-selfhost.mjs verify-native-generated
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Upload native-compiler kernel generation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-native-kernel-generation
+          path: |
+            psc0/dist/joint-kernel/kernel-native-generation.json
+            psc0/dist/joint-kernel/checked-prelude.json
+            psc0/dist/joint-kernel/native/kernel/index.checked.json
+            psc0/dist/joint-kernel/native/kernel/index.admissions.json
+            psc0/dist/joint-kernel/native/kernel/index.ts
+            psc0/dist/joint-kernel/native/kernel/index.js
+          if-no-files-found: ignore
+          retention-days: 14
+
+  kernel-generated-fixed-point:
+    needs: [source-contract, native-kernel-artifact]
+    # Ordinary PR edits use cheap source/adapter checks only. Run the full
+    # expensive generation on an explicit 'enhancement' labeling event or
+    # manual dispatch, never on every synchronize/update.
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.action == 'labeled' && github.event.label.name == 'enhancement') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 210
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            psc0/.lake/build
+            psc0/lean-checked/.lake/build
+          key: psc0-joint-generate-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-${{ github.sha }}
+          restore-keys: |
+            psc0-joint-generate-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
+            psc0-joint-lean-${{ runner.os }}-
+            psc0-core-${{ runner.os }}-
+      - name: Install pinned compiler TypeScript without optional backends
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Build native checked kernel and portable compiler frontend
+        run: lake build psc1 psc_kernel_core_provider
+      - name: Run bounded native core API and transport checks
+        run: |
+          lake exe psc_kernel_core_provider_tests
+          node --test scripts/checked-kernel-core.test.mjs
+      - name: Restore content-bound checked compiler and kernel artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            psc0/dist/checked/pskernel-core/bootstrap
+            psc0/dist/joint-kernel
+          key: psc0-joint-artifacts-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/package.json', 'psc0/packages/pskernel-core/src/**/*.lean', 'psc0/packages/bootstrap/src/**/*.lean', 'psc0/scripts/joint-selfhost.mjs', 'psc0/scripts/checked-build.mjs') }}
+          restore-keys: |
+            psc0-joint-artifacts-${{ runner.os }}-
+      - name: Download freshly checked native kernel TypeScript and JavaScript reference
+        uses: actions/download-artifact@v4
+        with:
+          name: psc0-native-kernel-generation
+          path: psc0/dist/joint-kernel
+      - name: Generate native-checked TypeScript with PSC0-generated compiler
+        run: node scripts/joint-selfhost.mjs generate
+        env:
+          NODE_OPTIONS: --max-old-space-size=12288
+          PSC0_BUILD_TRACE: '1'
+      - name: Check the generated kernel as a real checker of compiler admissions
+        timeout-minutes: 40
+        run: node scripts/joint-selfhost.mjs verify-generated
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Upload independent kernel-generation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-joint-kernel-generation
+          path: |
+            psc0/dist/joint-kernel/kernel-fixed-point.json
+            psc0/dist/joint-kernel/checked-prelude.json
+            psc0/dist/checked/pskernel-core/bootstrap/packages/compiler/index.checked.json
+            psc0/dist/joint-kernel/bootstrap/kernel/index.js
+            psc0/dist/joint-kernel/selfhost/kernel/index.js
+            psc0/dist/joint-kernel/bootstrap/source/index.checked.json
+            psc0/dist/joint-kernel/bootstrap/source/index.admissions.json
+            psc0/dist/joint-kernel/bootstrap/source/index.ts
+            psc0/dist/joint-kernel/selfhost/source/index.checked.json
+            psc0/dist/joint-kernel/selfhost/source/index.admissions.json
+            psc0/dist/joint-kernel/selfhost/source/index.ts
+            psc0/dist/joint-kernel/bootstrap/workspace/.proofscript-bootstrap.json
+            psc0/dist/joint-kernel/selfhost/workspace/.proofscript-selfhost.json
+          if-no-files-found: ignore
+          retention-days: 14

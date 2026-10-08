@@ -37,7 +37,7 @@ def psTypeScriptCli : IO String := do
         let resolved ← IO.FS.realPath candidate
         if (resolved.toString.replace "\\" "/").endsWith "/typescript/bin/tsc" then
           return resolved.toString
-  throw (IO.userError "PSC1_TYPESCRIPT_CLI_MISSING: install TypeScript 5.8.3 locally or on PATH")
+  throw (IO.userError "PSC1_TYPESCRIPT_CLI_MISSING: install TypeScript 7.0.2 locally or on PATH")
 
 def psTypeScriptVersion : IO String := do
   let output ← IO.Process.output {
@@ -57,11 +57,15 @@ def psTypeScriptVersion : IO String := do
 def psCompileTypeScriptFile
     (typeScriptPath : String) :
     IO PsTypeScriptCompileResult := do
+  let pinnedVersion ← psTypeScriptVersion
+  if pinnedVersion != "7.0.2" then
+    throw (IO.userError ("PSC1_TYPESCRIPT_VERSION_MISMATCH: expected 7.0.2, got " ++ pinnedVersion))
   let output ← IO.Process.output {
     cmd := "node"
     args := #[
       ← psTypeScriptCli,
       typeScriptPath,
+      "--ignoreConfig",
       "--target", "ES2022",
       "--module", "ES2022",
       "--moduleResolution", "bundler",
@@ -94,14 +98,13 @@ def psCompileTypeScriptFile
     throw (IO.userError "PSC1_TS_COMPILE_MISSING_DECLARATION")
   if !(← System.FilePath.pathExists sourceMapPath) then
     throw (IO.userError "PSC1_TS_COMPILE_MISSING_SOURCE_MAP")
-  let version ← psTypeScriptVersion
   pure {
     typeScriptPath := typeScriptPath
     javascriptPath := javascriptPath
     declarationPath := declarationPath
     sourceMapPath := sourceMapPath
     diagnostics := diagnostics
-    typescriptVersion := version
+    typescriptVersion := pinnedVersion
   }
 
 def psWriteAndCompileTypeScript

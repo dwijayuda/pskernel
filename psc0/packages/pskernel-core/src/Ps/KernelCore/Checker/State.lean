@@ -164,7 +164,7 @@ def psKernelCheckerStateExitLocalScope
     (parent child : PsKernelCheckerState) :
     PsKernelCheckerState :=
   {
-    nextFresh := Nat.max parent.nextFresh child.nextFresh
+    nextFresh := if Nat.ble parent.nextFresh child.nextFresh then child.nextFresh else parent.nextFresh
     inferOnly := parent.inferOnly
     checkedInfer := parent.checkedInfer
     whnfCore := parent.whnfCore

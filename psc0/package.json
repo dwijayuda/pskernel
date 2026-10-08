@@ -143,9 +143,14 @@
     "test:kernel-core-provider": "lake exe psc_kernel_core_provider_tests && node --test scripts/checked-kernel-core.test.mjs",
     "selfhost:core": "node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core",
     "selfhost:core:fast": "node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core --fast",
-    "selfhost:baseline": "node scripts/selfhost-baseline.mjs --assert-unchanged"
+    "selfhost:baseline": "node scripts/selfhost-baseline.mjs --assert-unchanged",
+    "joint:preflight": "node scripts/joint-selfhost.mjs preflight && node --test scripts/joint-kernel-closure.test.mjs",
+    "joint:kernel": "node scripts/joint-selfhost.mjs generate",
+    "joint:smoke": "node scripts/psc1kernel-generated-smoke.mjs dist/joint-kernel/bootstrap/kernel/index.js",
+    "joint:verify-generated": "node scripts/joint-selfhost.mjs verify-generated",
+    "joint:native": "node scripts/joint-selfhost.mjs generate-native"
   },
   "devDependencies": {
-    "typescript": "5.8.3"
+    "typescript": "7.0.2"
   }
 }

@@ -1,0 +1,147 @@
+name: PSC0 TypeScript 7 compiler and kernel fixed point
+
+on:
+  push:
+    branches: ['psc0/joint-compiler-kernel-selfhost-v1']
+    paths:
+      - 'psc0/package.json'
+      - 'psc0/scripts/typescript-cli.mjs'
+      - 'psc0/scripts/typescript-7-toolchain.test.mjs'
+      - 'psc0/scripts/checked-build.mjs'
+      - 'psc0/scripts/compile-with-generated.mjs'
+      - 'psc0/scripts/checked-selfhost.mjs'
+      - 'psc0/scripts/joint-selfhost.mjs'
+      - 'psc0/host/src/Ps/Host/TypeScriptCompiler.lean'
+      - '.github/workflows/psc0-typescript7-selfhost.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc0-ts7-selfhost-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  toolchain-and-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            psc0/.lake/build
+            psc0/lean-checked/.lake/build
+          key: psc0-ts7-lean-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean', 'psc0/host/src/Ps/Host/TypeScriptCompiler.lean') }}
+          restore-keys: |
+            psc0-core-${{ runner.os }}-
+      - name: Install pinned native TypeScript 7.0.2
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Check TS7 identity and changed code syntax
+        run: |
+          node --test scripts/typescript-7-toolchain.test.mjs
+          node --check scripts/checked-build.mjs
+          node --check scripts/compile-with-generated.mjs
+          node --check scripts/checked-selfhost.mjs
+          node --check scripts/joint-selfhost.mjs
+          node --check scripts/selfhost-replay-runtime.test.mjs
+          node scripts/selfhost-baseline.mjs --assert-unchanged
+      - name: Build PSC1 native Lean frontend
+        run: lake build psc1
+      - name: Exercise actual native PSC1 host and TS7 strict emitter
+        run: |
+          mkdir -p dist/ts7-smoke
+          lake exe psc1 build test/fixtures/selfhost-nat-recursion.lean --out dist/ts7-smoke/answer.js
+          node --check dist/ts7-smoke/answer.js
+          PATH="$PWD/node_modules/.bin:$PATH" node --test scripts/native-typescript-cli.test.mjs
+      - name: Preserve TS7 native host smoke outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-ts7-host-smoke
+          path: |
+            psc0/dist/ts7-smoke/answer.js
+            psc0/dist/ts7-smoke/answer.d.ts
+            psc0/dist/ts7-smoke/answer.js.map
+          if-no-files-found: ignore
+          retention-days: 14
+
+  compiler-fixed-point:
+    needs: toolchain-and-host
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            psc0/.lake/build
+            psc0/lean-checked/.lake/build
+          key: psc0-ts7-full-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean', 'psc0/host/src/Ps/Host/TypeScriptCompiler.lean') }}
+          restore-keys: |
+            psc0-ts7-lean-${{ runner.os }}-
+            psc0-core-${{ runner.os }}-
+      - name: Install pinned native TypeScript 7.0.2
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Check TS7 identity
+        run: node --test scripts/typescript-7-toolchain.test.mjs
+      - name: Reproduce native PSKernel Core checked compiler fixed point with TS7
+        run: node scripts/checked-selfhost.mjs fixed-point --kernel pskernel-core --fast
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+          PSC0_BUILD_TRACE: '1'
+      - name: Verify bootstrap/selfhost/repeat TS7 receipt identities
+        run: |
+          node --input-type=module -e '
+          import fs from "node:fs";
+          const base = "dist/checked/pskernel-core/";
+          for (const stage of ["bootstrap", "selfhost", "repeat"]) {
+            const r = JSON.parse(fs.readFileSync(base + stage + "/packages/compiler/index.checked.json", "utf8"));
+            if (r.kind !== "psc2-checked-build" ||
+                r.typeScriptToolchain?.version !== "7.0.2" ||
+                r.typeScriptToolchain?.profile !== "strict-es2022-esm-ignoreconfig/1" ||
+                r.provider?.provider !== "pskernel-core-native")
+              throw Error("PSC0_TS7_RECEIPT_MISMATCH: " + stage);
+            console.log("PSC0_TS7_CERT_RECEIPT: PASS stage=" + stage +
+              " ts=" + r.typeScriptSha256 + " js=" + r.javaScriptSha256);
+          }'
+      - name: Archive current TS7 fixed-point evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-ts7-compiler-fixedpoint
+          path: |
+            psc0/dist/checked/pskernel-core/bootstrap/packages/compiler/index.checked.json
+            psc0/dist/checked/pskernel-core/selfhost/packages/compiler/index.checked.json
+            psc0/dist/checked/pskernel-core/repeat/packages/compiler/index.checked.json
+          if-no-files-found: ignore
+          retention-days: 14

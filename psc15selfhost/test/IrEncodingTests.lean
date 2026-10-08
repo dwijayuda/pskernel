@@ -1,3 +1,4 @@
+import Ps.CompilerIr.Decode
 import Ps.DriverJs.Declarations
 import Ps.CompilerIr.SourceSignatureEncode
 import Ps.DriverTs.Stages
@@ -158,6 +159,23 @@ def psTsDeclarationFailureFixture : IO Unit := do
   match psTsDecodeDeclarationCommand overCount with
   | .error .resource => pure ()
   | _ => throw (IO.userError "DECLARATION_REQUEST_COUNT")
+  for text in ["0", "7", "1000000", "18446744073709551616"] do
+    let .some decoded := psJsonDecodeNaturalString (.string text)
+      | throw (IO.userError "JSON_NAT_CANONICAL_REJECTED")
+    if psNatToString decoded != text then throw (IO.userError "JSON_NAT_VALUE_CHANGED")
+    let .ok oldApi := psIrDecodeNatural (.string text)
+      | throw (IO.userError "IR_NAT_COMPATIBILITY_REJECTED")
+    if oldApi != decoded then throw (IO.userError "IR_NAT_COMPATIBILITY_CHANGED")
+  for text in ["", "00", "01", "-0", "-1", "+1", "1.0", "1e0", " 1", "1 ", "١"] do
+    match psJsonDecodeNaturalString (.string text), psIrDecodeNatural (.string text) with
+    | .none, .error .schema => pure ()
+    | _, _ => throw (IO.userError "JSON_NAT_NONCANONICAL_ACCEPTED")
+  match psJsonDecodeNaturalString (.number "1") with
+  | .none => pure ()
+  | _ => throw (IO.userError "JSON_NAT_NUMBER_NOT_STRING")
+  match psJsonArrayItem 0 [.string "first"], psJsonArrayItem 1 [.string "first"] with
+  | .string "first", .nullE => pure ()
+  | _, _ => throw (IO.userError "JSON_ARRAY_ITEM_CHANGED")
   IO.println "PSCV_PORTABLE_DECLARATIONS: PASS"
 
 def main (args : List String) : IO Unit := do

@@ -988,3 +988,46 @@ def psJsonEncodeCanonicalText
   match psJsonEncodeCanonical value with
   | Except.error error => Except.error error
   | Except.ok encoded => Except.ok (psJsonConcat2 encoded "\n")
+
+-- Shared wire primitives. Product request codecs should not import a semantic
+-- IR decoder merely to read canonical decimal strings or array fields.
+def psJsonDecodeNaturalDigits (chars : List Char) : Nat -> Option Nat :=
+  match chars with
+  | List.nil => fun (value : Nat) => Option.some value
+  | List.cons char rest =>
+      let smaller : Nat -> Option Nat := psJsonDecodeNaturalDigits rest;
+      fun (value : Nat) =>
+        let digit : Nat := Char.toNat char;
+        if psJsonNatInRange digit 48 57 then
+          smaller (Nat.add (Nat.mul value 10) (Nat.sub digit 48))
+        else Option.none
+
+def psJsonDecodeNaturalString (value : PsJsonValue) : Option Nat :=
+  match value with
+  | PsJsonValue.string text =>
+      match psJsonStringToChars text with
+      | List.nil => Option.none
+      | List.cons first rest =>
+          let code : Nat := Char.toNat first;
+          if Nat.beq code 48 then
+            match rest with
+            | List.nil => Option.some 0
+            | List.cons _ _ => Option.none
+          else if psJsonNatInRange code 49 57 then
+            psJsonDecodeNaturalDigits rest (Nat.sub code 48)
+          else Option.none
+  | _ => Option.none
+
+def psJsonArrayItem (index : Nat) : List PsJsonValue -> PsJsonValue :=
+  match index with
+  | Nat.zero =>
+      fun (values : List PsJsonValue) =>
+        match values with
+        | List.nil => PsJsonValue.nullE
+        | List.cons value _ => value
+  | Nat.succ remaining =>
+      let smaller : List PsJsonValue -> PsJsonValue := psJsonArrayItem remaining;
+      fun (values : List PsJsonValue) =>
+        match values with
+        | List.nil => PsJsonValue.nullE
+        | List.cons _ rest => smaller rest

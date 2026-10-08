@@ -1,5 +1,5 @@
 import Ps.InterfaceTs.Declarations
-import Ps.CompilerIr.Decode
+import Ps.Bridge.Json
 
 structure PsTsDeclarationCommand where
   profile : PsTsDeclarationProfile
@@ -67,9 +67,9 @@ def psTsDecodeDeclarationNatural (digits : Nat) (value : PsJsonValue) :
   match value with
   | PsJsonValue.string text =>
       if Nat.ble (String.utf8ByteSize text) digits then
-        match psIrDecodeNatural value with
-        | Except.error _ => Except.error PsTsDeclarationRequestError.schema
-        | Except.ok result => Except.ok result
+        match psJsonDecodeNaturalString value with
+        | Option.none => Except.error PsTsDeclarationRequestError.schema
+        | Option.some result => Except.ok result
       else Except.error PsTsDeclarationRequestError.resource
   | _ => Except.error PsTsDeclarationRequestError.schema
 
@@ -78,9 +78,9 @@ def psTsDecodeDeclarationRequest (value : PsJsonValue) :
   match value with
   | PsJsonValue.array values =>
       if Nat.beq (psListLength values) 2 then
-        match psIrDecodeItem 1 values with
+        match psJsonArrayItem 1 values with
         | PsJsonValue.string name =>
-            match psTsDecodeDeclarationNatural 7 (psIrDecodeItem 0 values) with
+            match psTsDecodeDeclarationNatural 7 (psJsonArrayItem 0 values) with
             | Except.error error => Except.error error
             | Except.ok sourceIndex =>
                 if Nat.ble sourceIndex 1000000 then
@@ -120,14 +120,14 @@ def psTsDecodeDeclarationCommandValue (value : PsJsonValue) :
   match value with
   | PsJsonValue.array fields =>
       if Nat.beq (psListLength fields) 4 then
-        match psIrDecodeItem 0 fields with
+        match psJsonArrayItem 0 fields with
         | PsJsonValue.string tag =>
             if psStringEq tag "psc-ts-declaration-request/1" then
-              match psIrDecodeItem 1 fields with
+              match psJsonArrayItem 1 fields with
               | PsJsonValue.string profileText =>
-                  match psIrDecodeItem 3 fields with
+                  match psJsonArrayItem 3 fields with
                   | PsJsonValue.array values =>
-                      psTsDecodeDeclarationCommandFields profileText (psIrDecodeItem 2 fields) values
+                      psTsDecodeDeclarationCommandFields profileText (psJsonArrayItem 2 fields) values
                   | _ => Except.error PsTsDeclarationRequestError.schema
               | _ => Except.error PsTsDeclarationRequestError.schema
             else Except.error PsTsDeclarationRequestError.schema

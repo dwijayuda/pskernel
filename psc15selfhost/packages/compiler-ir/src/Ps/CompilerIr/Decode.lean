@@ -250,26 +250,15 @@ def psIrDecodeSimpleIntrinsic (value : PsJsonValue) : Except PsIrDecodeError PsV
       else Except.error PsIrDecodeError.schema
   | _ => Except.error PsIrDecodeError.schema
 
-def psIrDecodeNaturalDigits (chars : List Char) : Nat -> Except PsIrDecodeError Nat :=
-  match chars with
-  | List.nil => fun (value : Nat) => Except.ok value
-  | List.cons char rest =>
-      let smaller : Nat -> Except PsIrDecodeError Nat := psIrDecodeNaturalDigits rest;
-      fun (value : Nat) =>
-        let digit : Nat := Char.toNat char;
-        if psJsonNatInRange digit 48 57 then
-          smaller (Nat.add (Nat.mul value 10) (Nat.sub digit 48))
-        else Except.error PsIrDecodeError.schema
+def psIrDecodeNaturalDigits (chars : List Char) (value : Nat) : Except PsIrDecodeError Nat :=
+  match psJsonDecodeNaturalDigits chars value with
+  | Option.none => Except.error PsIrDecodeError.schema
+  | Option.some number => Except.ok number
 
 def psIrDecodeNatural (value : PsJsonValue) : Except PsIrDecodeError Nat :=
-  match value with
-  | PsJsonValue.string text =>
-      match psIrDecodeNaturalDigits (psJsonStringToChars text) 0 with
-      | Except.error error => Except.error error
-      | Except.ok number =>
-          if psStringEq (psNatToString number) text then Except.ok number
-          else Except.error PsIrDecodeError.schema
-  | _ => Except.error PsIrDecodeError.schema
+  match psJsonDecodeNaturalString value with
+  | Option.none => Except.error PsIrDecodeError.schema
+  | Option.some number => Except.ok number
 
 def psIrDecodeInteger (value : PsJsonValue) : Except PsIrDecodeError Int :=
   match value with
@@ -288,18 +277,7 @@ def psIrDecodeInteger (value : PsJsonValue) : Except PsIrDecodeError Int :=
   | _ => Except.error PsIrDecodeError.schema
 
 def psIrDecodeItem (index : Nat) : List PsJsonValue -> PsJsonValue :=
-  match index with
-  | Nat.zero =>
-      fun (values : List PsJsonValue) =>
-        match values with
-        | List.nil => PsJsonValue.nullE
-        | List.cons value _ => value
-  | Nat.succ remaining =>
-      let smaller : List PsJsonValue -> PsJsonValue := psIrDecodeItem remaining;
-      fun (values : List PsJsonValue) =>
-        match values with
-        | List.nil => PsJsonValue.nullE
-        | List.cons _ rest => smaller rest
+  psJsonArrayItem index
 
 def psIrDecodeTuple {alpha : Type} (count : Nat)
     (build : List PsJsonValue -> Except PsIrDecodeError alpha)

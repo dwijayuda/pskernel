@@ -42,7 +42,7 @@ private def rejectAttributes (s : Syntax) : Option String := Id.run do
   -- declaration[0] is declModifiers; its optional attribute block is field 1.
   let attrs := s[0][1]
   let permitted : List String := [
-    "simp", "instance", "default_instance", "priority",
+    "simp", "instance", "default_instance",
     "pscv_export", "pscv_type_spec"
   ]
   if let some bad := (attributeIdentifiers attrs).find? (fun id =>

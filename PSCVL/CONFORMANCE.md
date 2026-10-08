@@ -12,15 +12,15 @@ Legend: **Covered** = executable positive+negative smoke tests of the bounded st
 | §7 names, namespaces, scopes | Partial | Some Lean-compatible names/commands; no PSCV deterministic scope/conformance proof |
 | §8 basic `def`, `const`, `function` | Partial | Plain Lean declarations, comma binders, defaults and Unit sugar; not full PSCV ownership |
 | §8 `abbrev`, `opaque`, `instance` | Partial | Lean subset, subject to gate and trusted imported environment |
-| §9 binders and explicit groups | Partial | Explicit/default and `{implicit}`/`⦃strict⦄`/`[instance]` on functions; no full declaration-family coverage |
+| §9 binders and explicit groups | Partial | Explicit/default and `{implicit}`/`{{strict}}`/`[C α]` on functions; no full declaration-family coverage |
 | §10 terms/calls/records/if | Partial | Native Lean terms, adjacent positional curried `f(a,b)`, finite braced grouping and if; named calls, record separators and full precedence not frozen |
 | §§11–15 structures, inductives, patterns | Partial | Lean-compatible `structure`, `inductive`, `match`; not full PSCV comma and pattern profile |
 | §§16–19 dependent types, reduction, proofs | Partial | Delegate to official Lean elaborator and kernel; exact PSCV Standard unifier/environment remains unpinned |
-| §20 tactic grammar | **Missing** | Lean proof syntax currently not wholly limited to the reference's exact Standard tactic grammar |
+| §20 tactic grammar | Partial | Default `check` rejects unbraced `by` and unenumerated known tactic heads; complete exact tactic variants and non-Latin source spellings still not limited to the reference's exact Standard tactic grammar |
 | §21 pure function contracts | Partial | Lean 4.35 `Std.WP` intrinsic builds `.spec`; opens VCs reject; no complete PSCV contract syntax or independently pinned semantics |
-| §21 verified loop/assert/do | Partial | Lean intrinsic `assert`, `for` invariant and `while` decreasing smoke tests; PSCV braced verified-do and `ghost` absent |
-| §21 `given`, frame, `old`, errors | **Missing** | No full PSCV parsing/validation, frame/effect/error policy, specification identity |
-| §21 effect models | Partial | Exercised `Id` and `StateM`; typed errors, reader, law evidence, closure/replay not complete |
+| §21 verified loop/assert/do | Partial | Lean intrinsic `assert`, `for` invariant and `while` decreasing in explicit **preview** mode; owned `ghost` and braced `do` fragment admitted by strict mode; owned PSCV for/while bodies remain to implement |
+| §21 `given`, frame, `old`, errors | Partial | Pinned `given` and concrete `Except` error-proof subset available; full `reads`/`modifies`/`old` syntax and effect model/certificate missing |
+| §21 effect models | Partial | `Id`, `StateM`, `ReaderM`, and `Except` with checked local/pinned-WP correspondence; verified closure/registry/digests pending |
 | §22 elaborate/unify/typeclasses/default/named | Partial | Lean engine; PSCV's specified source/default/named rules not implemented in full |
 | §23 computational meaning and erasure | **Missing** | No checked IR, executable provenance or erasure-preservation evidence |
 | §24 Standard environment and manifest | **Missing** | Built-in pinned Lean prelude only; missing approved PSCV Standard environment manifest and digest |
@@ -30,11 +30,17 @@ Legend: **Covered** = executable positive+negative smoke tests of the bounded st
 | §31 source/verification conformance | **Missing** | No full rule-to-test matrix or independent conformance oracle |
 | §32 closed verified profile | **Missing** | Cannot claim verified executable status |
 
+## Validation modes and authoritative source
+
+The uploaded Normative RC v2 is the exact same Git blob as `../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md`, blob `208f128c13be2e07fde25ca413641a48df214324`. See [NORMATIVE_ALIGNMENT.md](NORMATIVE_ALIGNMENT.md).
+
+`check` is strict about an implemented RC-v2 fragment but remains **not release-conformant**. `check-preview` preserves earlier Lean frontend feasibility tests and must not be used as PSCV source-conformance evidence. Both remain uncertified.
+
 ## Validated positive examples
 
 `pass.ps`, `pass_contract.ps`, `pass_language.ps`, `pass_lean_core.ps`,
 `pass_state.ps`, `pass_while.ps`, `pass_binders.ps`,
-`pass_standard_attr.ps`, `pass_braces_and_contracts.ps` (last pending final CI).
+`pass_standard_attr.ps`, `pass_braces_and_contracts.ps`, `pass_given.ps`, `pass_effect_relations.ps`, `pass_ghost.ps`, `pass_typed_errors.ps` (**development preview**), plus `normative/pass_minimal.ps`, `normative/pass_strict_binders.ps` under strict source checking.
 
 ## Negative example families
 

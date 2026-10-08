@@ -8,19 +8,28 @@ From `PSCVL/` with the pinned Lean toolchain installed:
 
 ```sh
 lake build
-lake exe pscvl check examples/pass_language.ps
-lake exe pscvl check examples/pass_state.ps
-lake exe pscvl check examples/pass_while.ps
+lake exe pscvl check examples/normative/pass_minimal.ps
+lake exe pscvl check examples/normative/pass_strict_binders.ps
+lake exe pscvl check-preview examples/pass_language.ps
+lake exe pscvl check-preview examples/pass_state.ps
+lake exe pscvl check-preview examples/pass_while.ps
 ```
 
-The CLI accepts only `check FILE.ps`. A successful check prints **UNCERTIFIED**. It does not generate native code, a Lean module, `.olean`, a `PSCV-CERT-v1`, or any executable artifact. No verified emission occurs.
+The CLI distinguishes source profiles:
+- `lake exe pscvl check FILE.ps` uses the **new strict, still incomplete PSCV RC-v2 source-fragment gate**. Known Lean-only syntax is rejected before elaboration. Green output remains **UNCERTIFIED**; it is not proof of full Appendix-A conformance.
+- `lake exe pscvl check-preview FILE.ps` uses the **older bounded Lean-compatibility prototype grammar**, explicitly *not* the PSCV Standard source profile. Existing examples that rely on indentation-only native Lean `by`/`do` run here.
+- `lake exe pscvl syntax-kinds FILE.ps` inventories accepted parser kinds without elaborating source. This is for building a recursive grammar whitelist.
+
+See [NORMATIVE_ALIGNMENT.md](NORMATIVE_ALIGNMENT.md), which binds this effort to the exact committed normative RC-v2 source.
+
+The CLI accepts only `check`, `check-preview`, or `syntax-kinds` for a `.ps` input file. A successful check prints **UNCERTIFIED**. It does not generate native code, a Lean module, `.olean`, a `PSCV-CERT-v1`, or any executable artifact. No verified emission occurs.
 
 ## Implemented in Lean (.lean)
 
-- `PSCVL/Syntax.lean` adds bounded ProofScript spellings: `const`, `function f(x: A, y: B)`, implicit/instance binders, explicit defaults, the optional-`Unit` zero-source-argument convention, adjacent curried calls `f(a,b)`, a finite `refine type` to Lean `Subtype`, and one-sided/two-sided `requires`/`ensures` function syntax. Some braced single-expression and `if (c) {a} else {b}` forms are supported after CI validation. Not all PSCV grammar forms exist.
+- `PSCVL/Syntax.lean` adds bounded ProofScript spellings: `const`, `function f(x: A, y: B)`, implicit/instance binders, explicit defaults, the optional-`Unit` zero-source-argument convention, adjacent curried calls `f(a,b)`, a finite `refine type` to Lean `Subtype`, and one-sided/two-sided `requires`/`ensures` function syntax. Braced single-expression and `if (c) {a} else {b}` forms are supported. The strict-implicit owned binder now uses the normative ASCII `{{α : Type}}`, and anonymous instance binders use `[C α]`. Not all PSCV grammar forms exist.
 - Lean's native `def`, `theorem`, `example`, `structure`, `inductive`, `instance`, `match`, total recursion, dependent types and tactics cover their Lean-compatible subsets. This is *not* a faithful implementation of every PSCV-specific lexical/layout/grammar restriction.
-- The pinned Lean `Std.WP` intrinsic `requires`/`ensures`, proof-only `assert`, and annotated `for`/`while` can produce checked specification theorems and reject open verification conditions. Current exercised effect families include `Id` and `StateM`. The upstream facilities are experimental; PSCV verification semantics must be frozen and validated independently.
-- `PSCVL/Grammar.lean` checks a conservative set of *top-level* Lean AST command kinds before elaboration; rejects source imports, parser/extension commands, several proof escapes and unapproved attributes. This **does not fully restrict nested expression, tactic, notation, or macro syntax** to Appendix A. Source is trusted input; it is not a sandbox.
+- The pinned Lean `Std.WP` intrinsic `given`/`requires`/`ensures`, proof-only `assert`, owned `ghost` lowering, and preview-only annotated `for`/`while` can produce checked specification theorems and reject open verification conditions. Current exercised effect families include `Id`, `StateM`, `ReaderM`, and concrete `Except`; a typed-error clause is available for concrete `Except` results. These relations have kernel-checked correspondence theorems to the pinned Lean WP instances. The upstream facilities are experimental; PSCV verification semantics must be frozen and validated independently.
+- `PSCVL/Grammar.lean` checks a conservative set of *top-level* Lean AST command kinds before elaboration; rejects source imports, parser/extension commands, several proof escapes and unapproved attributes. This now has a stricter default that rejects known Lean-only indentation proof/do syntax and native equations, but **does not fully restrict nested expression, tactic, notation, or macro syntax** to Appendix A. Source is trusted input; it is not a sandbox.
 - `PSCVL/Policy.lean` requires at least one `@[pscv_export, pscv_type_spec]` root, rejects local `axiom`, `unsafe` and `partial` declarations, checks local declarations' transitive axiom use (allowing only `propext`, `Quot.sound`, `Classical.choice`), and rejects directly `noncomputable` executable roots and direct raw-`IO` export types. This is **preliminary** and not a dependency/effect-closure certification.
 
 `pscv_type_spec` is only a developer annotation, **not an externally approved spec identity**. Lean kernel acceptance and theorem closure are **not** proof of application-level specification coverage or compiler preservation.

@@ -32,6 +32,8 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+          # Refuse to run normative conformance against a silently changed specification.
+          test "$(git hash-object ../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md)" = "208f128c13be2e07fde25ca413641a48df214324"
           lake exe pscvl check examples/normative/pass_minimal.ps
           lake exe pscvl check examples/normative/pass_strict_binders.ps
           expect_normative_error() {
@@ -47,6 +49,7 @@ jobs:
           }
           expect_normative_error examples/normative/fail_unbraced_proof.ps "requires braced by"
           expect_normative_error examples/normative/fail_unbraced_do.ps "requires braced do"
+          expect_normative_error examples/normative/fail_bad_attribute.ps "undeclared attribute"
           expect_normative_error examples/normative/fail_equations.ps "equation-declaration bodies"
           lake exe pscvl check-preview examples/pass.ps
           lake exe pscvl syntax-kinds examples/pass_ghost.ps

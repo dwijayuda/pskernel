@@ -1,0 +1,147 @@
+import Ps.KernelCore.Metatheory.AdmissionInductiveHeaderConfiguration
+import Ps.KernelCore.Metatheory.Inductive
+import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
+
+/-
+Raw constructor-parameter spine assurance, with checker configuration.
+
+Successful parameter opening can consume only a syntactic forall binder.
+Each domain comparison is a concrete checked-session DefEq computation.
+The recursive worker carries the SAME environment and local context, while
+its checker state may evolve; this theorem transports both semantic evidence
+and configuration through that exact recursion.
+
+Outer WHNF may NOT manufacture a new Pi binder for this admission rule.
+-/
+theorem psKernelOpenSimpleConstructorParamsWithFuel_raw_spine_refines
+    (fuel : Nat) :
+    ∀ (session : PsKernelCheckerSession)
+      (params : List PsKernelOpenBinder)
+      (type : PsKernelExpr)
+      (result : PsKernelExprSessionResult),
+      PsKernelCheckerConfigurationSound
+          session.context session.state ->
+      PsKernelNativeReductionSoundLaw ->
+      PsKernelStringEqSoundLaw ->
+      psKernelOpenSimpleConstructorParamsWithFuel
+          fuel session params type =
+        Except.ok result ->
+      PsKernelRawConstructorParamSpineValid
+          session.context.environment
+          session.context.localContext
+          params type result.result ∧
+        result.session.context = session.context ∧
+        PsKernelCheckerConfigurationSound
+          session.context result.session.state := by
+  induction fuel with
+  | zero =>
+      intro session params type result hConfig hNative hString hRun
+      simp [psKernelOpenSimpleConstructorParamsWithFuel] at hRun
+  | succ remaining ih =>
+      intro session params type result hConfig hNative hString hRun
+      cases params with
+      | nil =>
+          simp [psKernelOpenSimpleConstructorParamsWithFuel] at hRun
+          cases hRun
+          exact
+            ⟨PsKernelRawConstructorParamSpineValid.nil type,
+             rfl, hConfig⟩
+      | cons param rest =>
+          cases type with
+          | forallE userName domain body binderInfo =>
+              simp only [psKernelOpenSimpleConstructorParamsWithFuel] at hRun
+              cases hCompare :
+                  psKernelSessionIsDefEq
+                    remaining session domain param.type with
+              | error message =>
+                  simp only [hCompare] at hRun
+                  cases hRun
+              | ok compared =>
+                  simp only [hCompare] at hRun
+                  rcases compared with ⟨equal, comparedSession⟩
+                  cases equal with
+                  | false =>
+                      simp at hRun
+                  | true =>
+                      have hEq :=
+                        psKernelSessionIsDefEq_concrete_refines_defeq
+                          remaining hNative hString
+                          session comparedSession
+                          domain param.type
+                          hConfig hCompare
+                      have hContext :=
+                        psKernelSessionIsDefEq_success_preserves_context_core
+                          remaining session comparedSession
+                          domain param.type true hCompare
+                      have hNextConfig :
+                          PsKernelCheckerConfigurationSound
+                            comparedSession.context
+                            comparedSession.state := by
+                        simpa [hContext] using hEq.2
+                      have hTailRun :
+                          psKernelOpenSimpleConstructorParamsWithFuel
+                              remaining comparedSession rest
+                              (psKernelExprInstantiate1
+                                body
+                                (PsKernelExpr.fvar param.internalName)) =
+                            Except.ok result := by
+                        simpa using hRun
+                      have hRecursive :=
+                        ih comparedSession rest
+                          (psKernelExprInstantiate1
+                            body
+                            (PsKernelExpr.fvar param.internalName))
+                          result
+                          hNextConfig hNative hString hTailRun
+                      have hRest :
+                          PsKernelRawConstructorParamSpineValid
+                            session.context.environment
+                            session.context.localContext
+                            rest
+                            (psKernelExprInstantiate1
+                              body
+                              (PsKernelExpr.fvar param.internalName))
+                            result.result := by
+                        simpa [hContext] using hRecursive.1
+                      have hFinalContext :
+                          result.session.context = session.context :=
+                        Eq.trans hRecursive.2.1 hContext
+                      have hFinalConfig :
+                          PsKernelCheckerConfigurationSound
+                            session.context result.session.state := by
+                        simpa [hContext] using hRecursive.2.2
+                      exact
+                        ⟨PsKernelRawConstructorParamSpineValid.cons
+                          param rest userName domain body result.result
+                          binderInfo hEq.1 hRest,
+                         hFinalContext,
+                         hFinalConfig⟩
+          | _ =>
+              simp [psKernelOpenSimpleConstructorParamsWithFuel] at hRun
+
+theorem psKernelOpenSimpleConstructorParams_raw_spine_refines
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (params : List PsKernelOpenBinder)
+    (type : PsKernelExpr)
+    (result : PsKernelExprSessionResult)
+    (hConfig :
+      PsKernelCheckerConfigurationSound session.context session.state)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun :
+      psKernelOpenSimpleConstructorParams
+          fuel session params type =
+        Except.ok result) :
+    PsKernelRawConstructorParamSpineValid
+        session.context.environment
+        session.context.localContext
+        params type result.result ∧
+      result.session.context = session.context ∧
+      PsKernelCheckerConfigurationSound
+        session.context result.session.state := by
+  exact
+    psKernelOpenSimpleConstructorParamsWithFuel_raw_spine_refines
+      (Nat.succ fuel) session params type result
+      hConfig hNative hString
+      (by simpa [psKernelOpenSimpleConstructorParams] using hRun)

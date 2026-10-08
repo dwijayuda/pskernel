@@ -7,6 +7,6 @@ function implicitZero {α : Type}() : Nat := 0
 const inferred := (1 : Nat)
 
 @[pscv_export, pscv_type_spec]
-def root : Nat := zero() + withDefault() + identity(2) + implicitZero()
+def root : Nat := zero() + withDefault() + identity(2)
 
 theorem zero_is_zero : zero() = 0 := by rfl

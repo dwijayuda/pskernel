@@ -849,20 +849,20 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                                 (Nat.succ remaining) hNative hString hReflexive
                                 opened.2 target levels params numIndices domain []
                                 analysis hOpenedConfig hAnalysisRun
-                            apply PsKernelOrdinaryConstructorFieldsValid.cons
+                            exact PsKernelOrdinaryConstructorFieldsValid.cons
                               session.context.localContext child.context.localContext
                               result.session.context.localContext opened.1 userName
                               domain body result.result binderInfo fieldSort.1
                               revFields result.fields revRecursive result.recursiveFields
                               analysis.recursiveInfo hFreshOriginal hDomain hAllowed
-                            · simpa [opened, psKernelSessionWithLocal,
+                              (by simpa [opened, psKernelSessionWithLocal,
                                 psKernelCheckerContextWithLocalContext,
-                                hSortContext, hCheckContext] using hPositive
-                            · simpa [opened, psKernelSessionWithLocal,
+                                hSortContext, hCheckContext] using hPositive)
+                              (by simpa [opened, psKernelSessionWithLocal,
                                 psKernelCheckerContextWithLocalContext,
-                                hSortContext, hCheckContext] using hScopeHistory
-                            · simpa [hChildEnv, field, nextRecursive]
-                                using hFinalHistory hReflexive
+                                hSortContext, hCheckContext] using hScopeHistory)
+                              (by simpa [hChildEnv, field, nextRecursive]
+                                using hFinalHistory hReflexive)
       | _ =>
           simp only [psKernelOpenSimpleConstructorFieldsWithFuel] at hRun
           cases hRun

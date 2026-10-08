@@ -153,16 +153,21 @@ theorem psKernelAddSimpleInductive_success_header_refines
                                       headerSession nextSession
                                       decl.type inferredType
                                       hInitial hHeader
+                                  have hContext :=
+                                    psKernelSessionCheck_success_preserves_context_core
+                                      fuel headerSession nextSession
+                                      decl.type inferredType hHeader
+                                  have hNextConfig :
+                                      PsKernelCheckerConfigurationSound
+                                        nextSession.context
+                                        nextSession.state := by
+                                    simpa [hContext] using hTyped.2
                                   have hReduced :=
                                     psKernelSessionEnsureSort_concrete_refines_reduction
                                       fuel hNative hString
                                       nextSession finalSession
                                       inferredType level
-                                      hTyped.2 hSort
-                                  have hContext :=
-                                    psKernelSessionCheck_success_preserves_context_core
-                                      fuel headerSession nextSession
-                                      decl.type inferredType hHeader
+                                      hNextConfig hSort
                                   refine ⟨inferredType, level, ?_, ?_⟩
                                   · simpa [
                                       headerSession, safety,

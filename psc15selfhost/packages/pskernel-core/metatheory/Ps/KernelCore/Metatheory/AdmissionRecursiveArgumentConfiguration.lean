@@ -860,3 +860,87 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
             PsKernelRawConstructorFieldSpineValid.done _ _ (by rfl),
             hConfig, rfl, fun _ =>
               PsKernelOrdinaryConstructorFieldsValid.done _ _ _ _ (by rfl)⟩
+
+
+/--
+Fuel-free semantic evidence for the opened ordinary constructor shape.
+Header typing in the closed work environment is a separate required component
+of complete constructor admission, not inferred from this opening judgment.
+-/
+def PsKernelOrdinaryConstructorOpenShapeValid
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (resultLevel : PsKernelLevel)
+    (type : PsKernelExpr)
+    (fields : List PsKernelOpenBinder)
+    (recursiveFields : List PsKernelSimpleRecursiveField)
+    (indices : List PsKernelExpr) : Prop :=
+  ∃ (afterParams residual : PsKernelExpr) (finalContext : PsKernelLocalContext),
+    PsKernelRawConstructorParamSpineValid
+      environment localContext params type afterParams ∧
+    PsKernelRawConstructorFieldSpineValid
+      environment resultLevel localContext afterParams
+      finalContext fields residual ∧
+    PsKernelOrdinaryConstructorFieldsValid
+      environment target levels params numIndices resultLevel
+      localContext afterParams [] [] finalContext fields recursiveFields residual ∧
+    psKernelExprGetAppFn residual = PsKernelExpr.const target levels ∧
+    PsKernelConstructorResultParamPrefix
+      params (psKernelExprGetAppArgs residual) indices ∧
+    psKernelExprListLength indices = numIndices ∧
+    (∀ expr : PsKernelExpr, List.Mem expr indices ->
+      PsKernelNoTargetConstantOccurrence target expr)
+
+theorem psKernelOpenSimpleConstructor_shape_refines
+    (fuel : Nat)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    (session : PsKernelCheckerSession)
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (resultLevel : PsKernelLevel)
+    (type : PsKernelExpr)
+    (afterParams : PsKernelExprSessionResult)
+    (opened : PsKernelOpenFieldsResult)
+    (indices : List PsKernelExpr)
+    (hConfig : PsKernelCheckerConfigurationSound session.context session.state)
+    (hParams : psKernelOpenSimpleConstructorParams fuel session params type =
+      Except.ok afterParams)
+    (hFields : psKernelOpenSimpleConstructorFields fuel afterParams.session
+      target levels params numIndices resultLevel afterParams.result =
+        Except.ok opened)
+    (hResult : psKernelValidateSimpleConstructorResult
+      target levels params numIndices opened.result = Except.ok indices) :
+    PsKernelOrdinaryConstructorOpenShapeValid
+      session.context.environment session.context.localContext target levels
+      params numIndices resultLevel type opened.fields opened.recursiveFields indices ∧
+    PsKernelCheckerConfigurationSound opened.session.context opened.session.state ∧
+    opened.session.context.environment = session.context.environment := by
+  have hParamSound := psKernelOpenSimpleConstructorParams_raw_spine_refines
+    fuel session params type afterParams hConfig hNative hString hParams
+  have hParamConfig : PsKernelCheckerConfigurationSound
+      afterParams.session.context afterParams.session.state := by
+    simpa [hParamSound.2.1] using hParamSound.2.2
+  rcases psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
+      (Nat.succ fuel) hNative hString afterParams.session target levels
+      params numIndices resultLevel afterParams.result [] [] opened hParamConfig
+      (by simpa [psKernelOpenSimpleConstructorFields] using hFields) with
+    ⟨fields, hFieldEq, hSpine, hFinalConfig, hFinalEnv, hHistory⟩
+  have hFieldsEq : opened.fields = fields := by
+    simpa [psKernelReverseOpenBinders, psKernelReverseOpenBindersWorker] using hFieldEq
+  have hResultSound := psKernelValidateSimpleConstructorResult_semantic_shape
+    hString hReflexive target levels params numIndices opened.result indices hResult
+  refine ⟨?_, hFinalConfig, ?_⟩
+  · refine ⟨afterParams.result, opened.result, opened.session.context.localContext,
+      hParamSound.1, ?_, ?_, hResultSound⟩
+    · simpa [hParamSound.2.1, hFieldsEq] using hSpine
+    · simpa [hParamSound.2.1] using hHistory hReflexive
+  · exact Eq.trans hFinalEnv
+      (congrArg PsKernelCheckerContext.environment hParamSound.2.1)

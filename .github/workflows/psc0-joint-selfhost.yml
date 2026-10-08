@@ -45,6 +45,12 @@ jobs:
           restore-keys: |
             psc0-joint-lean-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
             psc0-core-${{ runner.os }}-
+      - name: Validate build scripts and prepared-session invariants
+        run: |
+          node --check scripts/checked-build.mjs
+          node --check scripts/joint-selfhost.mjs
+          node --check scripts/checked-typescript-source-smoke.mjs
+          node --test scripts/checked-prepared-session.test.mjs
       - name: Validate generated kernel canonical-admission decoder
         run: node --test scripts/generated-core-provider.test.mjs
       - name: Check complete kernel implementation closure
@@ -94,6 +100,10 @@ jobs:
         run: node scripts/joint-selfhost.mjs generate-native
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+          PSC0_BUILD_TRACE: '1'
+      - name: Smoke-check source-only receipts without skipping native kernel admission
+        run: node scripts/checked-typescript-source-smoke.mjs
+        env:
           PSC0_BUILD_TRACE: '1'
       - name: Upload native-compiler kernel generation evidence
         if: always()

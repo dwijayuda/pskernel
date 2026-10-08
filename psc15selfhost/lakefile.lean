@@ -364,6 +364,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionDefinitionTransactionConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionValueConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionPropositionConfiguration,
+    `Ps.KernelCore.Metatheory.AdmissionTheoremConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionConfiguration,
     `Ps.KernelCore.Metatheory.CheckedProjectionConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionSemantics,

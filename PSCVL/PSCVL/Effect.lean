@@ -89,4 +89,25 @@ theorem preserves_pure {σ α β : Type u} (x : α) (view : σ → β) :
   intro before
   rfl
 
+/-- The PSCVL pure relation is definitionally equivalent to the pinned
+Lean `Std.WP.wp` interpretation; it is not a parallel semantic authority. -/
+theorem pureWP_pinned {α : Type u} (value : Id α) (post : α → Prop) :
+    pureWP value post ↔ Std.WP.wp value post () := Iff.rfl
+
+/-- Kernel-checked correspondence to Lean 4.35 ReaderM weakest preconditions. -/
+theorem readerWP_pinned {ρ α : Type u} (prog : ReaderM ρ α)
+    (post : α → ρ → Prop) (env : ρ) :
+    readerWP prog post env ↔ Std.WP.wp prog post () env := Iff.rfl
+
+/-- Kernel-checked correspondence to Lean 4.35 StateM weakest preconditions. -/
+theorem stateWP_pinned {σ α : Type u} (prog : StateM σ α)
+    (post : α → σ → Prop) (initial : σ) :
+    stateWP prog post initial ↔ Std.WP.wp prog post () initial := Iff.rfl
+
+/-- Kernel-checked correspondence to Lean 4.35 Except weakest preconditions,
+including distinct success and error postconditions. -/
+theorem errorWP_pinned {ε α : Type u} (prog : Except ε α)
+    (ok : α → Prop) (failed : ε → Prop) :
+    errorWP prog ok failed ↔ Std.WP.wp prog ok failed := Iff.rfl
+
 end PSCVL.Effect

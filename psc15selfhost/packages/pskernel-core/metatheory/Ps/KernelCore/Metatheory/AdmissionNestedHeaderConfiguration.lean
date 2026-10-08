@@ -51,11 +51,13 @@ theorem psKernelAddSimpleNestedInductive_success_first_header_refines
       | ok uniform =>
           cases hTypes : decl.types with
           | nil =>
+              simp only [hTypes] at hUniform
               simp [
                 psKernelAddSimpleNestedInductive,
                 hReserved, hUniform, hTypes
               ] at hRun
           | cons first rest =>
+              simp only [hTypes] at hUniform
               let safety :=
                 if decl.isUnsafe then
                   PsKernelDefinitionSafety.unsafeDef
@@ -104,7 +106,7 @@ theorem psKernelAddSimpleNestedInductive_success_first_header_refines
                           session checkedSession sortedSession
                           first.type inferredType level
                           hInitial hChecked hSort
-                      refine ⟨first, rest, inferredType, level, hTypes, ?_, ?_⟩
+                      refine ⟨first, rest, inferredType, level, rfl, ?_, ?_⟩
                       · simpa [
                           session, safety,
                           psKernelMkCheckerSession,

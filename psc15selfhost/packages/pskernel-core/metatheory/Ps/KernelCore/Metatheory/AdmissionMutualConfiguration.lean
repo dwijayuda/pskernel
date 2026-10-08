@@ -1,6 +1,7 @@
 import Ps.KernelCore.Metatheory.AdmissionIndexConfiguration
 import Ps.KernelCore.Metatheory.AdmissionHeaderConfiguration
 import Ps.KernelCore.Metatheory.AdmissionDefinitionConfiguration
+import Ps.KernelCore.Metatheory.CheckerInitialConfiguration
 
 /-
 The mutual-declaration transaction checks every header in the *original*
@@ -9,6 +10,21 @@ This file records those two distinct independently checked facts. Neither
 infer-only callbacks nor environment extension alone are used as typing
 certificates.  Native-reduction and StringEq laws remain explicit.
 -/
+
+/-
+Explicit Prop-valued list evidence independent of Std/List extensions. Each
+successful recursive checker pass yields one certificate per list member.
+-/
+inductive PsKernelMutualAll (P : PsKernelDefinitionInfo -> Prop) :
+    List PsKernelDefinitionInfo -> Prop where
+  | nil : PsKernelMutualAll P List.nil
+  | cons
+      (head : PsKernelDefinitionInfo)
+      (rest : List PsKernelDefinitionInfo)
+      (hHead : P head)
+      (hRest : PsKernelMutualAll P rest) :
+      PsKernelMutualAll P (List.cons head rest)
+
 
 def PsKernelMutualHeaderEvidence
     (environment : PsKernelEnvironment)
@@ -47,12 +63,12 @@ theorem psKernelCheckMutualHeaders_configuration_refines
           values fuel environment first
           maxRecDepth maxNatSize seen =
         Except.ok () ->
-      List.Forall (PsKernelMutualHeaderEvidence environment) values := by
+      PsKernelMutualAll (PsKernelMutualHeaderEvidence environment) values := by
   induction values with
   | nil =>
       intro fuel environment first maxRecDepth maxNatSize
         seen hIndex hNative hString hRun
-      exact List.Forall.nil
+      exact PsKernelMutualAll.nil
   | cons value rest ih =>
       intro fuel environment first maxRecDepth maxNatSize
         seen hIndex hNative hString hRun
@@ -118,7 +134,7 @@ theorem psKernelCheckMutualHeaders_configuration_refines
                           hSafety, hLevels, hSeen,
                           session, hHeader
                         ] using hRun
-                      refine List.Forall.cons ?_ ?_
+                      refine PsKernelMutualAll.cons value rest ?_ ?_
                       · refine ⟨inferredType, level, ?_, ?_⟩
                         · simpa [
                             session, psKernelMkCheckerSession,
@@ -148,12 +164,12 @@ theorem psKernelCheckMutualBodies_configuration_refines
           values fuel environment safety
           maxRecDepth maxNatSize =
         Except.ok () ->
-      List.Forall (PsKernelMutualBodyEvidence environment) values := by
+      PsKernelMutualAll (PsKernelMutualBodyEvidence environment) values := by
   induction values with
   | nil =>
       intro fuel environment safety maxRecDepth maxNatSize
         hIndex hNative hString hRun
-      exact List.Forall.nil
+      exact PsKernelMutualAll.nil
   | cons value rest ih =>
       intro fuel environment safety maxRecDepth maxNatSize
         hIndex hNative hString hRun
@@ -192,7 +208,7 @@ theorem psKernelCheckMutualBodies_configuration_refines
               psKernelCheckMutualBodies,
               session, hBody
             ] using hRun
-          refine List.Forall.cons ?_ ?_
+          refine PsKernelMutualAll.cons value rest ?_ ?_
           · refine ⟨bodyType, ?_, ?_⟩
             · simpa [
                 session, psKernelMkCheckerSession,
@@ -221,9 +237,9 @@ theorem psKernelAddMutualDefinitions_configuration_refines
           fuel environment values maxRecDepth maxNatSize =
         Except.ok result) :
     PsKernelEnvironmentIndexRefines result ∧
-      List.Forall
+      PsKernelMutualAll
         (PsKernelMutualHeaderEvidence environment) values ∧
-      List.Forall
+      PsKernelMutualAll
         (PsKernelMutualBodyEvidence result) values := by
   cases values with
   | nil =>

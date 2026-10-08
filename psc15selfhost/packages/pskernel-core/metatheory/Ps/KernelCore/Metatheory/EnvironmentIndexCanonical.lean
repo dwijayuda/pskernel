@@ -691,3 +691,93 @@ theorem psKernelEnvironmentIndexInsert_bucket_refines_authoritative
               (psKernelConstantInfoName info)
               query
               hSame
+
+
+
+theorem psKernelFindConstantInList_cons_removeName_lookup
+    (info : PsKernelConstantInfo)
+    (constants : List PsKernelConstantInfo)
+    (query : PsKernelName) :
+    psKernelFindConstantInList
+        query
+        (List.cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            (psKernelConstantInfoName info)
+            constants)) =
+      psKernelFindConstantInList
+        query
+        (List.cons info constants) := by
+  cases hSame :
+      psKernelNameEq (psKernelConstantInfoName info) query with
+  | true =>
+      simp [psKernelFindConstantInList, hSame]
+  | false =>
+      simpa [psKernelFindConstantInList, hSame] using
+        psKernelEnvironmentIndexRemoveName_find_other
+          constants
+          (psKernelConstantInfoName info)
+          query
+          hSame
+
+
+theorem psKernelEnvironmentIndexInsert_small_refines_authoritative
+    (constants : List PsKernelConstantInfo)
+    (info : PsKernelConstantInfo)
+    (query : PsKernelName) :
+    psKernelFindConstantInList
+        query
+        (psKernelEnvironmentIndexFind
+          (psKernelEnvironmentIndexInsert
+            (PsKernelEnvironmentIndex.small constants)
+            info)
+          query) =
+      psKernelFindConstantInList
+        query
+        (List.cons info constants) := by
+  have hRemove :=
+    psKernelFindConstantInList_cons_removeName_lookup
+      info constants query
+  cases hSize :
+      Nat.ble
+        (psKernelEnvironmentIndexListLength
+          (List.cons
+            info
+            (psKernelEnvironmentIndexRemoveName
+              (psKernelConstantInfoName info)
+              constants)))
+        psKernelEnvironmentIndexSmallLimit with
+  | true =>
+      simpa [
+        psKernelEnvironmentIndexInsert,
+        psKernelEnvironmentIndexFind,
+        hSize
+      ] using hRemove
+  | false =>
+      have hBuild :=
+        psKernelEnvironmentIndexBuild_refines_authoritative
+          (List.cons
+            info
+            (psKernelEnvironmentIndexRemoveName
+              (psKernelConstantInfoName info)
+              constants))
+          query
+      calc
+        psKernelFindConstantInList
+            query
+            (psKernelEnvironmentIndexFind
+              (psKernelEnvironmentIndexInsert
+                (PsKernelEnvironmentIndex.small constants)
+                info)
+              query) =
+          psKernelFindConstantInList
+            query
+            (List.cons
+              info
+              (psKernelEnvironmentIndexRemoveName
+                (psKernelConstantInfoName info)
+                constants)) := by
+            simpa [psKernelEnvironmentIndexInsert, hSize] using hBuild
+        _ = psKernelFindConstantInList
+              query
+              (List.cons info constants) := hRemove

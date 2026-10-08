@@ -442,6 +442,62 @@ async function generateNative() {
     closure.moduleCount + ' output=' + relative(output));
 }
 
+// Independent, bounded checking tests using the actual executable JS kernel
+// already produced by the successful native PSC0 route. These do not assume
+// the generated-JS PSC0 compiler's slow kernel build has completed.
+async function verifyNativeGeneratedChecker() {
+  const nativeJs = path.join(out, 'native/kernel/index.js');
+  const receiptPath = path.join(out, 'native/kernel/index.checked.json');
+  const admissionsFile = path.join(out, 'native/kernel/index.admissions.json');
+  if (![nativeJs, receiptPath, admissionsFile].every(existsSync)) {
+    throw new Error('PSC0_JOINT_NATIVE_CONFORMANCE_INPUT_MISSING');
+  }
+  const receipt = await readJson(receiptPath);
+  const wireText = await readFile(admissionsFile, 'utf8');
+  if (receipt.kind !== 'psc2-checked-build' || receipt.schemaVersion !== 3 ||
+      receipt.compiler?.engine !== 'native-seed' ||
+      receipt.provider?.provider !== 'pskernel-core-native' ||
+      (await digestFile(nativeJs)) !== receipt.javaScriptSha256 ||
+      hash(wireText) !== receipt.canonicalAdmissionsSha256) {
+    throw new Error('PSC0_JOINT_NATIVE_CONFORMANCE_RECEIPT_INVALID');
+  }
+  const nativeFull = checkCoreAdmissions(wireText);
+  if (!nativeFull.accepted) {
+    throw new Error('PSC0_JOINT_NATIVE_KERNEL_SOURCE_REJECTED');
+  }
+  const prelude = await exportGeneratedPrelude();
+  const wire = JSON.parse(wireText);
+  if (wire.version !== 2 || wire.format !== 'proofscript-checked-admissions' ||
+      !Array.isArray(wire.admissions) || wire.admissions.length === 0) {
+    throw new Error('PSC0_JOINT_NATIVE_SOURCE_WIRE_UNEXPECTED');
+  }
+  const smallPositive = JSON.stringify({
+    format: wire.format, version: 2, admissions: [wire.admissions[0]],
+  });
+  const cases = [
+    { name: 'empty', wire: JSON.stringify({ format: wire.format, version: 2, admissions: [] }), accept: true },
+    { name: 'first-kernel-declaration', wire: smallPositive, accept: true },
+    { name: 'wrong-version', wire: JSON.stringify({ format: wire.format, version: 1, admissions: [] }), accept: false },
+    { name: 'unknown-admission', wire: JSON.stringify({ format: wire.format, version: 2,
+      admissions: [{ kind: 'unknown', declaration: {} }] }), accept: false },
+    { name: 'empty-inductive', wire: JSON.stringify({ format: wire.format, version: 2,
+      admissions: [{ kind: 'inductive', declaration: { lp: [], np: 0, ts: [] } }] }), accept: false },
+  ];
+  for (const item of cases) {
+    const nativeDecision = checkCoreAdmissions(item.wire);
+    const jsDecision = await runGeneratedChecker(nativeJs, prelude, item.wire, 300000);
+    if (nativeDecision.accepted !== item.accept || jsDecision.accepted !== item.accept) {
+      throw new Error('PSC0_JOINT_NATIVE_JS_CONFORMANCE_DISAGREEMENT: ' + item.name +
+        ' native=' + String(nativeDecision.accepted) + ' js=' + String(jsDecision.accepted) +
+        ' error=' + String(jsDecision.message ?? jsDecision.errorKind));
+    }
+    console.log('PSC0_JOINT_NATIVE_JS_DIFFERENTIAL: PASS case=' + item.name +
+      ' accepted=' + String(item.accept));
+  }
+  console.log('PSC0_JOINT_NATIVE_JS_DIFFERENTIAL_CORPUS: PASS cases=' + cases.length +
+    ' (limited conformance evidence; NOT full generated checker promotion)');
+}
+
 const mode = process.argv[2] ?? 'generate';
 if (mode === 'preflight') {
   const report = await analyzeKernelClosure();
@@ -453,6 +509,8 @@ if (mode === 'preflight') {
   await generateNative();
 } else if (mode === 'verify-generated') {
   await verifyGeneratedChecker();
+} else if (mode === 'verify-native-generated') {
+  await verifyNativeGeneratedChecker();
 } else {
-  throw new Error('usage: joint-selfhost.mjs preflight|generate|generate-native|verify-generated');
+  throw new Error('usage: joint-selfhost.mjs preflight|generate|generate-native|verify-generated|verify-native-generated');
 }

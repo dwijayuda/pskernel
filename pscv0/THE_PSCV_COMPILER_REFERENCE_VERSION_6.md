@@ -5,7 +5,7 @@
 **Repository:** [`dwijayuda/pskernel`](https://github.com/dwijayuda/pskernel)  
 **Audited branch / HEAD (2026-10-08):** `pscv/v3-execution` / `93add6da4e501c57f9016c7c3666ea52c87a66e7`  
 **Primary source tree:** `psc15selfhost/`  
-**Previous architecture:** [`THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md`](THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md)  
+**Previous architecture:** [`THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md`](legacy/THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md)  
 **Normative language authority:** [`PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md`](PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md)  
 **Inherited design contracts:** Semantic Spine, Claim Lattice, Authority Firewall, ProfileEnvironment, Build/Query Identity, typed ArtifactBundle, KernelContract, PSCV-CERT, RuntimeIR/target validation.  
 **Base language edition:** `ps-0.9-r3` · **closed verified profile:** `pscv-v1` · **verification semantics:** `PSCV-VERIFY-v1` · **certificate policy:** `PSCV-CERT-v1`  
@@ -627,7 +627,7 @@ At the audited `pscv/v3-execution` HEAD:
 | Extension isolation | V5.1 E0–E6 model and host infrastructure | Final AuthorityBroker/execution-host acceptance pending |
 | Release/provenance | TrustManifest/ClaimSet/artifact/archive infrastructure | Native npm/binary product assurance and platform CI pending |
 
-[`AI_WORK_STATE.md`](AI_WORK_STATE.md) estimated approximately **60–70% compiler-side V5.1 implementation** at a specific checkpoint, explicitly excluding kernel work and final assurance; this is a historical planning estimate, **not** V6 implementation readiness. New V6 deployment, mixed-proof bridge and registry requirements introduce unmeasured work.
+[`AI_WORK_STATE.md`](legacy/AI_WORK_STATE.md) estimated approximately **60–70% compiler-side V5.1 implementation** at a specific checkpoint, explicitly excluding kernel work and final assurance; this is a historical planning estimate, **not** V6 implementation readiness. New V6 deployment, mixed-proof bridge and registry requirements introduce unmeasured work.
 
 **Parallel workstream safety:** V6 is an architecture proposal. Do not edit PSKernel kernel/provider internals, defeq/cache implementation or kernel metatheory here. Kernel workstream independently owns implementation and promotion evidence. Preserve branch history and V5.1 evidence; do not mark V6 as master target until adopted through an explicit design migration.
 
@@ -777,10 +777,10 @@ The CLI must distinguish `check` (syntax/type/kernel?), `verify` (PSCV obligatio
 
 Repository sources (audited branch; some documents explicitly predate current HEAD):
 
-1. [V5.1 compiler architecture](THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md) — semantic spine, extension model, backends, claim lattice, migration and explicit target-score meaning.
+1. [V5.1 compiler architecture](legacy/THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md) — semantic spine, extension model, backends, claim lattice, migration and explicit target-score meaning.
 2. [Normative PSCV language reference](PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md) — closed `pscv-v1`, bounded Lean syntax, `PSCV-VERIFY-v1`, `PSCV-CERT-v1`, specification and proof closure, semantic version pins and **PENDING** Standard manifest digest.
-3. [Current architecture and bootstrap profile](ARCHITECTURE.md) — current `psc2-compiler-v1`, stable self-host source and Lean bootstrap identity.
-4. [Current work-state checkpoint](AI_WORK_STATE.md) — V5.1 implementation gates, honest gaps and CI identifiers; read again before implementation.
+3. [Current architecture and bootstrap profile](legacy/ARCHITECTURE.md) — current `psc2-compiler-v1`, stable self-host source and Lean bootstrap identity.
+4. [Current work-state checkpoint](legacy/AI_WORK_STATE.md) — V5.1 implementation gates, honest gaps and CI identifiers; read again before implementation.
 5. [Native Lake targets](lakefile.lean), [native CLI source](packages/cli/src/PsCli.lean), [production JS checked service](scripts/compiler-checked-service.mjs).
 6. [PSKernel Core ownership/status](packages/pskernel-core/README.md), [Lean-checked host boundary](host/src/Ps/Host/LeanChecked.lean), [backend registry](contracts/backends/BACKEND_REGISTRY_V3.json).
 7. [Existing npm workspaces](package.json), [CLI npm bootstrap package](packages/cli/package.json), [compiler npm package](packages/compiler/package.json).

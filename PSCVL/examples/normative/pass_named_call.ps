@@ -1,0 +1,9 @@
+-- Appendix A.9 / Chapter 22.3: named suffix addresses real telescope binders.
+function addNamed(x : Nat, y : Nat) : Nat := { x + y }
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := addNamed(y := 2, x := 3)
+
+theorem root_is_five : root = 5 := by {
+  rfl
+}

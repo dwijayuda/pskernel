@@ -102,15 +102,34 @@ macro_rules
   | `(refine type $name:ident := $t:term where $x:ident => $predicate:term) =>
     `(abbrev $name : Type := { $x:ident : $t:term // $predicate:term })
 
-/-- Adjacent ProofScript calls are curried: f(a,b,c) = f a b c.
-The Lean `noWs` parser combinator enforces adjacency to '(' exactly. -/
-syntax:max (name := pscvCall) term:max noWs "(" term,* ")" : term
+/-- Appendix A.9: adjacent parenthesized calls have a positional prefix
+followed by a named-argument suffix. They lower to Lean's ordinary curried
+application and named-binder instantiation, not dynamic object dispatch. -/
+declare_syntax_cat pscvCallArgument
+syntax ident ":=" term : pscvCallArgument
+syntax term : pscvCallArgument
+
+syntax:max (name := pscvCall)
+  term:max noWs "(" pscvCallArgument,* ")" : term
 
 macro_rules
-  | `($f:term($[$args:term],*)) => do
+  | `($f:term($[$args:pscvCallArgument],*)) => do
     let mut app := f
+    let mut seenNamed := false
+    let mut names : Array Name := #[]
     for arg in args do
-      app ← `($app:term $arg:term)
+      match arg with
+      | `(pscvCallArgument| $x:ident := $value:term) =>
+        if names.contains x.getId then
+          Macro.throwError s!"PSCV named call argument supplied twice: {x.getId}"
+        seenNamed := true
+        names := names.push x.getId
+        app ← `($app:term ($x:ident := $value:term))
+      | `(pscvCallArgument| $value:term) =>
+        if seenNamed then
+          Macro.throwError "PSCV positional call arguments must precede named arguments"
+        app ← `($app:term $value:term)
+      | _ => Macro.throwUnsupported
     return app
 
 /-- PSCV pure conditional with explicit grouping and braces. It lowers to

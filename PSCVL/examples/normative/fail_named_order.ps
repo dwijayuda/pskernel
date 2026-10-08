@@ -1,0 +1,3 @@
+function addNamed(x : Nat, y : Nat) : Nat := { x + y }
+@[pscv_export, pscv_type_spec]
+def root : Nat := addNamed(x := 1, 2)

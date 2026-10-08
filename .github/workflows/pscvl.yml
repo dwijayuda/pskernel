@@ -36,6 +36,9 @@ jobs:
           test "$(git hash-object ../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md)" = "208f128c13be2e07fde25ca413641a48df214324"
           lake exe pscvl check examples/normative/pass_minimal.ps
           lake exe pscvl check examples/normative/pass_strict_binders.ps
+          lake exe pscvl check examples/normative/pass_named_call.ps
+          expect_normative_error examples/normative/fail_named_order.ps "positional call arguments must precede"
+          expect_normative_error examples/normative/fail_named_duplicate.ps "supplied twice"
           expect_normative_error() {
             local input="$1" expected="$2"
             local output rc

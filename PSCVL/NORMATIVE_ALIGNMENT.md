@@ -27,7 +27,7 @@ Lean syntax may silently expand the Standard source language.
 | A.6 braced conditionals and single-term bodies | Finite owned variants implemented | Bounded supported fragment only, full precedence/AST closure pending |
 | A.11 braced single-scrutinee match | Native Lean match/equation syntax accepted | Strict rejects known native nonconforming source; owned canonical match translation remains missing |
 | A.18 `for` / `while` braced bodies | Native Lean `for .. do`/`while .. do` preview | Full owned braced loop grammar/verified equivalence still missing; preview is never PSCV conformance |
-| A.9 named calls / trailing commas | Only positional `f(a,b)`; no full suffix grammar | Missing, fail closed when parser cannot express it; full named elaboration must match Chapter 22 |
+| A.9 named calls / trailing commas | Earlier had only positional `f(a,b)` | Bounded named suffix now implemented with positive and negative tests; full Chapter-22 named/telescope semantics and optional trailing comma coverage remain pending |
 | A.2 modules/import header, §6/§7 | Source imports rejected | Missing until deterministic certified import graph and exact Standard environment are implemented |
 | §5 lexical discipline, A.6 full nested terms | Depends on Lean lexer/parser with some exclusions | Not yet a complete closed grammar; must implement UTF-8/BOM/CRLF/tab rules and recursive whitelist |
 | §20 complete Standard tactic variants | Broad Lean proof parsing in preview | Strict checks known nonconforming tactic forms; complete chapter-20 grammar and all PS-CONF cases pending |

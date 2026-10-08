@@ -13,7 +13,7 @@ Legend: **Covered** = executable positive+negative smoke tests of the bounded st
 | §8 basic `def`, `const`, `function` | Partial | Plain Lean declarations, comma binders, defaults and Unit sugar; not full PSCV ownership |
 | §8 `abbrev`, `opaque`, `instance` | Partial | Lean subset, subject to gate and trusted imported environment |
 | §9 binders and explicit groups | Partial | Explicit/default and `{implicit}`/`{{strict}}`/`[C α]` on functions; no full declaration-family coverage |
-| §10 terms/calls/records/if | Partial | Native Lean terms, adjacent positional curried `f(a,b)`, finite braced grouping and if; named calls, record separators and full precedence not frozen |
+| §10 terms/calls/records/if | Partial | Native Lean terms, adjacent positional and bounded named-suffix curried `f(a,b)` with duplicate/order tests, finite braced grouping and if; full named telescope semantics, record separators and precedence not frozen |
 | §§11–15 structures, inductives, patterns | Partial | Lean-compatible `structure`, `inductive`, `match`; not full PSCV comma and pattern profile |
 | §§16–19 dependent types, reduction, proofs | Partial | Delegate to official Lean elaborator and kernel; exact PSCV Standard unifier/environment remains unpinned |
 | §20 tactic grammar | Partial | Default `check` rejects unbraced `by` and unenumerated known tactic heads; complete exact tactic variants and non-Latin source spellings still not limited to the reference's exact Standard tactic grammar |

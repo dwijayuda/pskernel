@@ -1,6 +1,6 @@
 # PSCV Self-Host Portable Language Reference — Candidate Version 1.0
 
-**Document kind:** standalone, proposed compiler-implementation *language profile reference*.  
+**Document kind:** standalone, proposed compiler-implementation *language profile reference*; **V1.1 research-audited draft**.  
 **Proposed profile identifier:** `PSCV-selfhost-portable/2` (abbreviation: SHP2).  
 **Language:** ProofScript `.ps`, within the approved `pscv-v1` grammar and semantic profile.  
 **Created:** 2026-10-08. Repository: `dwijayuda/pskernel` on `main`.  
@@ -771,6 +771,102 @@ Measure:
 
 **SHP2-AI-5:** if the measured pure style proves faster for a subsystem, use that style; SHP2 is a **capability subset**, not a demand that every compiler function be imperative. Honest proof-efficiency recommendations are conditional on controlled results and independent theorem replay.
 
+## 16A. Pinned-source audit and semantic crosswalk (V1.1)
+
+**Research purpose:** replace loosely inferred portability claims with verifiable language-reference correspondences. Pinned PSCV and upstream-source snapshots are normative or version-stable evidence; newer official manuals are informative unless the parent PSCV semantic profile explicitly adopts their rules. A working hyperlink is *not by itself* implementation evidence.
+
+### 16A.1 Five-language and verified-compiler research matrix
+
+| Topic | Primary authoritative reference | Explicit PSCV self-host source restriction | Falsifying conformance test |
+|---|---|---|---|
+| Lean inductives, recursors | [R-LEAN-IND] and [PSC-LANG] Ch. 4, 13, 16–18 | total ADTs/recursors without new logical primitive | reject negative or ill-typed inductive/recursive construction |
+| Lean `do`, `ForIn`, local mutation | [R-LEAN-DO] and [R-DO-FORMAL] | finite `for` and `let mut` lower to checked typed state | compare normal, return, break, continue and error exits |
+| Lean recursion, `partial` | [R-LEAN-REC] | no partial reachable runtime definition | reject failed decreasing proof and bogus fuel success |
+| TypeScript generics | [R-TS-GEN] | bounded runtime specialization with exact source types | reject missing generic arguments/unsupported higher-rank closure |
+| TypeScript narrowing | [R-TS-NARROW] | tagged unions implement, but do not define, inductive semantics | reject unregistered constructor/runtime tag |
+| TypeScript type erasure | [R-TS-ERASE], [R-TS-BASIC] | typed TS output is not a runtime validator/kernel proof | incorrectly-tagged emitted JS value must fail explicitly |
+| ECMAScript Number/BigInt | [R-ECMA-2026] | no narrowing unbounded `Nat` or `Int` to Number | compare 2^53±1 and huge signed/unsigned values |
+| ECMAScript String | [R-ECMA-2026] | UTF-8 byte positions never JS 16-bit code-unit indices | non-BMP Unicode and malformed byte source spans |
+| Rust expression order | [R-RUST-EXPR] | preserve source evaluation/error behavior | nested calls with distinct error traces |
+| Rust integer overflow | [R-RUST-OVERFLOW] | pinned PSCV fixed-width semantics on all build modes | same source edge results with overflow checking on/off |
+| Rust ownership and unsafe | [R-RUST-BORROW] | backend may use ownership; SHP2 has no aliased pointer API | escaped mutable reference/observable pointer identity rejects |
+| Go maps | [R-GO-SPEC] | hash lookup never determines compiler artifact order | randomized insertion/collisions have same canonical bytes |
+| Go UTF-8 range | [R-GO-SPEC] | no replacement-rune swallowing invalid source bytes | malformed byte sequence diagnosed without loss |
+| CompCert front-end caveat | [R-COMPCERT-FRONTEND], [R-COMPCERT] | parser/desugaring requires independent evidence | checked target IR cannot mask wrong source parse |
+| CakeML bootstrap | [R-CAKEML] | preserve frozen stage source and semantic identity | self-host compiler actually re-enters source, no Lean fallback |
+| Dafny multi-target | [R-DAFNY] | each backend needs a runtime correspondence and admitted FFI model | target-dependent exception/string differences fail |
+| Verus modes | [R-VERUS-MODES] | existing PSCV spec/proof/exec classification stays authoritative | ghost runtime branch fails certified erasure |
+
+**Inference boundary:** these sources support *feasibility and risks of source features*; none supplies a theorem or controlled AI proof-efficiency study for SHP2. Do not treat published Lean `do` correctness as proof of PSCV's future translator.
+
+### 16A.2 Actual compiler-code patterns and bootstrap boundaries
+
+The [pinned Lean 4.35 LCNF compiler][R-LEAN-CORE] uses typed inductives/records, Reader/State compiler monads, local helpers, early return, finite loops, local mutation and also partial definitions. SHP2 adopts the first group with explicit proof obligations and excludes uncontrolled partial executable functions. The [pinned Rust MIR pass][R-RUST-MIR] and [Go compiler README][R-GO-COMPILER] provide evidence for multi-stage IRs and practical loops, not for copying their target language's native runtime semantics.
+
+The surveyed [existing source profile][PSC-SEED] explicitly restricts mutual recursion, termination commands, tactics, mutable local bindings and loops; [source standard][PSC-SRC-STANDARD] calls these *bootstrap restrictions*, not the permanent programming language. [Current status][PSC-STATUS] records a 55-module **compiler-only** source closure excluding the kernel. Production checking goes through the [checked host service][PSC-HOST], not a standalone unchecked bootstrap driver facade. Source-profile migration cannot silently change the kernel/provider ownership boundary.
+
+### 16A.3 Pinned rule-ID trace verified against the PSCV language reference
+
+| SHP2 concern | Exact parent rule identity | Required interpretation |
+|---|---|---|
+| Whole-file parsing | `[grammar.source-file]`, `[grammar.closure]` | full SourceFile, EOF, no raw Lean fallback |
+| Call-gap and empty calls | `[grammar.parenthesized-call-adjacency]` and Chapters 9–10 | `f()` is not `f(())`, parent static call rules |
+| Total structural/mutual recursion | `[recursion.structural]`, `[recursion.mutual]` | strict subterm or pinned total joint check |
+| Well-founded recursion | `[pscv.recursion.well-founded]` | kernel-accepted decrease proof |
+| Local mutation and sequencing | `[pscv.do.verified]`, `[pscv.do.local-mutation]` | checked local effect state, no escaping aliases |
+| Finite iteration | `[pscv.loop.for]` | verified iterator + loop VCs |
+| Parent general while | `[pscv.loop.while]`, `[pscv.grammar.loop-clauses]` | parent admits while; SHP2 additionally excludes from source |
+| Verified effects | `[pscv.effect.standard]`, `[pscv.effect.frame]` | approved pure/Reader/State/Except and frame rules |
+| Errors and postconditions | `[pscv.effect.error-post]` | distinct success and error branches |
+| Independent specification | `[pscv.spec.coverage]` | meaningful approved spec, not mere tautology |
+| Verified emission | `[pscv.no-proof-no-build]` | unresolved source/assumption/erasure/proofs block certification |
+
+All names in this table occur in the audited 4.35-rc3-pinned PSCV source. A *rule ID* names the intended source contract; it is not a theorem about the current compiler.
+
+### 16A.4 Feature-maturity record (future manifest, not existing file)
+
+~~~text
+SHP2FeatureRecord = {
+  id:                  stable feature ID
+  parentRules:         exact PSCV rule IDs
+  sourceProfile:       pinned source/env digest
+  leanCoreRelation:    checked relation or open
+  nativeCoreRelation:  checked relation or open
+  totality:            structural/decrease/finite iterator evidence
+  effectModel:         registered WP and State/Error semantics
+  runtime:             abstract value model
+  targets:             TS, JS, Wasm, Rust evidence each
+  proofClosure:        assumptions, approved spec, ghosts, erasure
+  operationalStatus:   not implemented / checked / measured / certified
+}
+~~~
+
+This is a **requirements sketch**, not executable JSON or a claim that the registry exists. Evidence is per target; a backend that cannot implement a source feature must reject target emission rather than reinterpret source acceptance.
+
+### 16A.5 State/error monad order is semantic, not a compiler convenience
+
+The parent PSCV reference requires verified State, Reader and typed Except-like effects but does not automatically authorize every transformer composition. For a future library the following **proposed** types have different meanings:
+
+~~~text
+Transactional effect: State -> Except Error (Value,State)
+  write(1); error(e)   => Error(e), no successful final state
+
+State-retaining effect: State -> (Except Error Value,State)
+  write(1); error(e)   => (Error(e),1), final state available
+~~~
+
+Choosing one type without an approved WP, frame theorem, imported law identity and four-target representation is unsound. A pure transformer is not a promise to undo real filesystem/network side effects. The initial SHP2 source may admit only registered single effects while a combined effect remains F1.
+
+### 16A.6 Dependent proof indices vs runtime value representation
+
+SHP2 inherits `Prop`, dependent Pi, indexed inductives, `Subtype` and `Fin`. Proof-only indices may be erased only when source semantics and backend erasure remain observationally equivalent. Runtime-relevant dependent indices/closures require a *separate* validated representation and specialization mechanism. The source checker must produce identical typing judgments across target choices; an unsupported target representation fails **after** source checking, not as a target-dependent type error.
+
+A proof of array index in `Fin n` does not, without an additional backend preservation contract, prove that arbitrary Wasm linear memory access or JS buffer indexing is physically safe. Keep proof-theory evidence separate from runtime ABI and allocation assumptions.
+
+### 16A.7 Source and certificate version locks
+
+A conforming future release record MUST bind source and transitive import closure, approved spec identities, frozen grammar and environment digest, pinned Lean/PSKernel checker interface, deterministic classes/coercions, registered WPs, runtime primitive contracts, all four target backend descriptors, actual toolchain versions, proof/erasure/correspondence evidence, and exact host capability/ABI assumptions. The currently **PENDING** Standard environment digest remains an external release blocker. This document creates no imaginary digest or certificate.
+
 ## 17. Evaluation of the proposed language reference
 
 ### 17.1 Scope of the score
@@ -910,6 +1006,17 @@ These are live public language-reference URLs or commit-pinned repository source
 [R-CAKEML]: https://cakeml.org/index.html
 [R-DAFNY]: https://dafny.org/latest/DafnyRef/DafnyRef.html
 [R-VERUS]: https://verus-lang.github.io/verus/guide/
+[R-LEAN-CORE]: https://github.com/leanprover/lean4/tree/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF
+[R-DO-FORMAL]: https://www.microsoft.com/en-us/research/publication/do-unchained-embracing-local-imperativity-in-a-purely-functional-language/
+[R-TS-BASIC]: https://www.typescriptlang.org/docs/handbook/2/basic-types.html
+[R-ECMA-2026]: https://tc39.es/ecma262/2026/multipage/ecmascript-data-types-and-values.html
+[R-RUST-MIR]: https://github.com/rust-lang/rust/blob/36aeef32c6c012e1af17af53a820aac042846c43/compiler/rustc_mir_transform/src/inline.rs
+[R-RUST-OVERFLOW]: https://doc.rust-lang.org/reference/expressions/operator-expr.html
+[R-GO-COMPILER]: https://github.com/golang/go/blob/3b98eddbcd66230a78c4893f32099b5d3045a334/src/cmd/compile/README.md
+[R-COMPCERT-FRONTEND]: https://compcert.org/man/manual003.html
+[R-VERUS-MODES]: https://verus-lang.github.io/verus/guide/modes.html
+[PSC-SEED]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/selfhost-profile.json
+[PSC-SRC-STANDARD]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/docs/SELFHOST_SOURCE_STANDARD.md
 [R-VERUS-MODES]: https://verus-lang.github.io/verus/guide/modes.html
 [R-DO-PAPER]: https://www.microsoft.com/en-us/research/publication/do-unchained-embracing-local-imperativity-in-a-purely-functional-language/
 [R-DO-SUPP]: https://zenodo.org/records/6684085

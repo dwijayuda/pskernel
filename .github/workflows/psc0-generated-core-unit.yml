@@ -1,0 +1,24 @@
+name: PSC0 generated PSKernel Core adapter unit
+
+on:
+  pull_request:
+    paths:
+      - 'psc0/scripts/generated-core-*.mjs'
+      - '.github/workflows/psc0-generated-core-unit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  adapter-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate canonical wire decoder and fail-closed JS checker adapter
+        working-directory: psc0
+        run: node --test scripts/generated-core-provider.test.mjs

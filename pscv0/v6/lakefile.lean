@@ -64,3 +64,8 @@ lean_lib PscvReuseProbeSyntax where
 lean_exe pscv_v6_kernel_dev where
   srcDir := "packages/kernel/src"
   root := `PscvKernelMain
+
+-- Research-only pure Lean executable baseline: measure default runtime overhead.
+lean_exe pscv_v6_minimal_probe where
+  srcDir := "test/lean"
+  root := `MinimalProbe

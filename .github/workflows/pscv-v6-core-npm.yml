@@ -63,6 +63,22 @@ jobs:
             echo "ERROR: incomplete compiler falsely accepted a build" >&2
             exit 1
           fi
+      - name: Measure minimal Lean executable and aggressive stripping
+        working-directory: pscv0/v6
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build pscv_v6_minimal_probe
+          hello=".lake/build/bin/pscv_v6_minimal_probe"
+          test -x "$hello"
+          echo "Minimal Lean binary bytes (unstripped): $(wc -c < "$hello")"
+          cp "$hello" /tmp/pscv-v6-minimal-debug-stripped
+          strip --strip-debug /tmp/pscv-v6-minimal-debug-stripped
+          echo "Minimal Lean binary bytes (debug stripped): $(wc -c < /tmp/pscv-v6-minimal-debug-stripped)"
+          cp "$hello" /tmp/pscv-v6-minimal-all-stripped
+          strip --strip-all /tmp/pscv-v6-minimal-all-stripped
+          echo "Minimal Lean binary bytes (all stripped): $(wc -c < /tmp/pscv-v6-minimal-all-stripped)"
+          env -i PATH=/usr/bin:/bin /tmp/pscv-v6-minimal-all-stripped
       - name: Stage native Linux npm package and check minimal runtime path
         working-directory: pscv0/v6
         shell: bash

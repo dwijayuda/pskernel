@@ -23,6 +23,10 @@ permissions:
 
 jobs:
   native-core:
+    # PRs against the intermediate native-selfhost branch use their dedicated
+    # joint checker workflow. Re-run this full compiler-only gate when the
+    # integration branch is proposed for main, not for every nested PR edit.
+    if: ${{ github.event_name != 'pull_request' || github.base_ref == 'main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     defaults:

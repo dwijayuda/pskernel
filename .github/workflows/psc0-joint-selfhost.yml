@@ -10,16 +10,11 @@ on:
       - 'psc0/scripts/checked-*.mjs'
       - 'psc0/package.json'
       - '.github/workflows/psc0-joint-selfhost.yml'
-  push:
-    branches:
-      - 'psc0/joint-compiler-kernel-selfhost-v1'
-    paths:
-      - 'psc0/packages/pskernel-core/src/**'
-      - 'psc0/scripts/joint-*.mjs'
-      - 'psc0/scripts/workspace-layout.mjs'
-      - 'psc0/package.json'
-      - '.github/workflows/psc0-joint-selfhost.yml'
   workflow_dispatch:
+
+concurrency:
+  group: psc0-joint-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -94,6 +89,10 @@ jobs:
         run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
       - name: Build native checked kernel and portable compiler frontend
         run: lake build psc1 psc_kernel_core_provider
+      - name: Run bounded native core API and transport checks
+        run: |
+          lake exe psc_kernel_core_provider_tests
+          node --test scripts/checked-kernel-core.test.mjs
       - name: Generate and check kernel with PSC0-generated compiler
         run: node scripts/joint-selfhost.mjs generate
         env:

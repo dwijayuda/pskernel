@@ -6,19 +6,16 @@ def psKernelSessionWithLocal
     (type : PsKernelExpr)
     (binderInfo : PsKernelBinderInfo) :
     Prod PsKernelName PsKernelCheckerSession :=
-  let opened :=
-    psKernelCheckerContextWithLocal
-      session.context
-      userName
-      type
-      binderInfo;
-  let nextSession :=
-    PsKernelCheckerSession.mk
-      (Prod.snd opened)
-      session.state;
-  Prod.mk
-    (Prod.fst opened)
-    nextSession
+  let freshResult :=
+    psKernelCheckerStateFreshName session.state userName;
+  let fresh := Prod.fst freshResult;
+  let nextLocal :=
+    psKernelLocalContextAddLocal
+      session.context.localContext fresh userName type binderInfo;
+  let nextContext :=
+    psKernelCheckerContextWithLocalContext session.context nextLocal;
+  Prod.mk fresh
+    (PsKernelCheckerSession.mk nextContext (Prod.snd freshResult))
 
 def psKernelReverseOpenBindersWorker
     (values : List PsKernelOpenBinder) :

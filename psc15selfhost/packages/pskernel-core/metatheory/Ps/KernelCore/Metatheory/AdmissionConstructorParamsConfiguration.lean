@@ -405,3 +405,25 @@ theorem psKernelValidateSimpleConstructorResult_success_refines
                 hIndices,
               hRecursive
             ⟩
+
+
+/--
+Admission uses the checker's global fresh-name source and advances its state.
+This gives the same freshness/configuration contract as checker binder opening.
+-/
+theorem psKernelSessionWithLocal_preserves_configuration
+    (session : PsKernelCheckerSession)
+    (userName : PsKernelName)
+    (type : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (hString : PsKernelStringEqSoundLaw)
+    (hConfig : PsKernelCheckerConfigurationSound
+      session.context session.state) :
+    PsKernelCheckerConfigurationSound
+      (Prod.snd (psKernelSessionWithLocal
+        session userName type binderInfo)).context
+      (Prod.snd (psKernelSessionWithLocal
+        session userName type binderInfo)).state := by
+  simpa only [psKernelSessionWithLocal] using
+    psKernelCheckerFreshLocal_preserves_configuration
+      session.context session.state userName type binderInfo hString hConfig

@@ -410,3 +410,21 @@ Architectural blockers still remaining:
   Neither is silently inferred from the other.
 - Concrete configured recursor-rule validator remains a candidate pending
   full proof validation; ordinary/mutual/nested full admission still open.
+
+
+### Admission/checker name allocation mismatch — candidate correction
+- Architecture review found that `psKernelSessionWithLocal` formerly called
+  `psKernelCheckerContextWithLocal` (local nextIndex allocation) and left
+  checker state.nextFresh unchanged. On an empty session, the installed local
+  and the checker's next name for the same base are both `base.0`.
+- Added an exact definitional historical collision witness and a regression
+  requiring the admission name and subsequent checker name to differ.
+- Source correction allocates through `psKernelCheckerStateFreshName`,
+  adds that reserved name to the local context, and threads the advanced
+  checker state. This is the same mechanism used by checked binder opening.
+- Added a configuration-preservation theorem consuming the existing checker
+  fresh-local theorem, with the same sound-input configuration and StringEq
+  soundness premise. No invariant was weakened.
+- This is an admission freshness correction, not a change to defeq/cache
+  semantics or Arena infrastructure. Verify full CI before calling it green.
+- Full transaction/positivity semantics remain incomplete.

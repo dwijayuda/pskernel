@@ -1,5 +1,72 @@
 # AI Work State
 
+## Current PSKernel Core checkpoint — 2026-10-08
+- Proof HEAD before this state update: `7fc10594f7e26216aa30b709e586786221138415`.
+- Latest verified full proof and native conformance: **#775 GREEN** at
+  `db5b89aa2c01efd6059d9fbea301ff4fbfef72f4`,
+  https://github.com/dwijayuda/pskernel/actions/runs/37855918241.
+- Integration HEAD reverified unchanged:
+  `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`.
+  No merge or force push performed.
+- Partial audit evidence refresh: **A/B/C/D = 50/6/17/6**, total 79 canonical
+  pairs. Six changes are individually tied to independent semantic/history
+  theorems and green full CI; no upgrade for file pairing alone. This is not
+  the final acceptance audit.
+
+### Proved and CI-validated in the latest checkpoint
+- Independent universe/structural-member semantics and checked large-elimination
+  policy, plus propositional singleton fieldless K-target evidence.
+- Exact ordinary constructor declaration publication order and runtime/Quot
+  preservation; final datatype metadata replacement preserves original
+  canonical lookups and authoritative indexes.
+- Checked mutual per-type and whole-family constructor histories. Owner identity
+  follows a proved root/suffix invariant. Remaining family name freshness
+  follows existing global naming guards. Typing, positivity, recursive metadata,
+  result-index exclusion, progressive environment and cache/freshness contracts
+  remain explicit.
+- Ordinary recursor suffix: checked recursor Sort typing, independent rule RHS
+  typing, generated rule constructor-name/field-count metadata, exact recursor
+  publication and final refined index.
+- `psKernelAddSimpleInductive_success_transaction_refines` now yields
+  `PsKernelOrdinaryInductiveTransactionValid`: checked header/constructor
+  semantics, uniform occurrences, elimination/K policy, recursor semantics,
+  canonical lookup extension and runtime/Quot/index preservation.
+  This **does not claim complete environment well-formedness**.
+- Candidate-search exit theorem retains the unchecked fuel-boundary alternative.
+  It does not infer unconditional generated universe-name freshness.
+- Concrete checked typing remains separate from infer-only preservation.
+  Audit prose no longer claims infer-only results certify typing.
+
+### Genuine unresolved primitive-specification blocker
+- Generated elimination-universe candidates use pinned Lean's opaque external
+  `String.Internal.append` and decimal representation. Their pairwise
+  distinctness/non-exhaustion has no established checked primitive bridge here.
+  Comparator soundness/reflexivity do not specify append and cannot discharge
+  this property. No actual native append defect is asserted.
+- Existing named trusted premises remain `PsKernelNativeReductionSoundLaw`
+  and `PsKernelStringEqSoundLaw`. `PsKernelStringEqReflexiveLaw` remains an
+  explicit unresolved conditional obligation, not an adopted additional TCB law.
+- No candidate-distinctness axiom, new trusted string bridge, silently
+  strengthened law, source acceptance change or proof-convenience production
+  reimplementation was introduced.
+- Review:
+  `psc15selfhost/packages/pskernel-core/metatheory/PSKERNEL_CORE_INDUCTIVE_CLOSURE_BLOCKERS.md`.
+  Intervention needed: identify/provide a checked bridge applicable to the
+  pinned bootstrap externs, or explicitly revise the permitted proof boundary.
+
+### Incomplete acceptance work
+- Complete ordinary well-formed environment extension, including generated
+  universe parameter scope/freshness.
+- Full mutual checked-header/constructor/recursor/final publication transaction.
+- Nested flatten/rebase/restore/provenance and transaction semantic refinement.
+- Final explicit Kernel/API/session implementation-refinement family.
+- Full semantic audit, integration reconciliation and final acceptance gates.
+- This is a meaningful green checkpoint, **not task completion**.
+  All work used GitHub/cloud CI exclusively; no local checkout/build/test or
+  production source changes were made during these milestones.
+
+## Historical checkpoints
+
 ## Repository
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`

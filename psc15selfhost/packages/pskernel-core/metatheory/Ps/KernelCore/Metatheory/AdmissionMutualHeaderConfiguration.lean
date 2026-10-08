@@ -86,12 +86,14 @@ theorem psKernelAddSimpleMutualInductive_success_first_header_refines
                   | ok uniform =>
                       cases hTypes : decl.types with
                       | nil =>
+                          simp only [hTypes] at hMinTypes hUniform
                           simp [
                             psKernelAddSimpleMutualInductive,
                             hDuplicates, hMinTypes, allNames,
                             hUnique, hFresh, hUniform, hTypes
                           ] at hRun
                       | cons first remaining =>
+                          simp only [hTypes] at hMinTypes hUniform
                           cases hClosed :
                               psKernelCheckNoMVarNoFVar first.type with
                           | error message =>
@@ -171,7 +173,7 @@ theorem psKernelAddSimpleMutualInductive_success_first_header_refines
                                               first.type inferredType level
                                               hInitial hChecked hSort
                                           refine ⟨first, remaining, inferredType,
-                                            level, hTypes, ?_, ?_⟩
+                                            level, rfl, ?_, ?_⟩
                                           · simpa [
                                               session, safety,
                                               psKernelMkCheckerSession,

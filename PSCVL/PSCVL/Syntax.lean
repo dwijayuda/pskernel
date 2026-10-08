@@ -31,7 +31,7 @@ macro_rules
     for b in bs do
       let `(pscvBinder| $x:ident : $t:term) := b
         | Macro.throwUnsupported
-      leanBinders := leanBinders.push (← `(($x:ident : $t:term)))
+      leanBinders := leanBinders.push (← `(bracketedBinder| ($x:ident : $t:term)))
     `(def $f:ident $leanBinders* : $result:term := $body:term)
 
 /-- Contracted function syntax is the same verified Lean 4.35 contract
@@ -47,7 +47,7 @@ macro_rules
     for b in bs do
       let `(pscvBinder| $x:ident : $t:term) := b
         | Macro.throwUnsupported
-      leanBinders := leanBinders.push (← `(($x:ident : $t:term)))
+      leanBinders := leanBinders.push (← `(bracketedBinder| ($x:ident : $t:term)))
     `(def $f:ident $leanBinders* : $result:term
         requires $pre:term
         ensures $rv:ident => $post:term := $body:term)

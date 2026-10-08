@@ -591,6 +591,36 @@
       "kind": "native-product-transport",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V3.json"
+    },
+    {
+      "id": "psc-js-declaration-positions/1",
+      "kind": "declaration-positions",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json"
+    },
+    {
+      "id": "psc-direct-js-declaration-map/1",
+      "kind": "declaration-map",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json"
+    },
+    {
+      "id": "psc-direct-js-declaration-map-recipe/1",
+      "kind": "declaration-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json"
+    },
+    {
+      "id": "psc-emit-direct-js-declaration-map/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/4",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

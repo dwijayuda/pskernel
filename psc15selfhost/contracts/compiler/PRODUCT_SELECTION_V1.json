@@ -38,7 +38,7 @@
     "backend": "Explicit typescript/javascript/wasm/rust; default typescript, never inferred from a file suffix.",
     "products": {
       "typescript": "metadata preserves the existing TS+tsc executable/declaration/source-map bundle; other product modes reject.",
-      "javascript": "executable (default), metadata (all available metadata), declarations (required portable source declarations), source-map (required standalone map without declarations), or all (declarations and required map).",
+      "javascript": "executable (default), metadata (all available metadata), declarations (portable source declarations), source-map (standalone JavaScript map), declaration-map (required source declarations and standalone declaration map with metadata), or all (declarations plus both map products).",
       "wasm": "executable (default) or metadata. Without --wasm-exports the existing private wasm32 self-host ABI is selected. With an explicit psc-wasm-canonical-selection/1 file, 32/64-bit source words and only its scalar exports are selected; interface/binding/policy products are required with the binary.",
       "rust": "source (default) or metadata emits .rs through the generated checked compiler or explicit products/3 native session and shared graph/archive/bundle publication. Current input is generic ValidatedRuntimeIR; no RustIR is invented. Source emission does not run Cargo/rustc or produce a native binary."
     },
@@ -50,7 +50,8 @@
       "The graph compares all three requested declaration product identities and bytes with the live portable-comparison result.",
       "Required source maps use generated-session live lineage or exact versioned native captured tables, then compose captured original-source preparation coordinates and output filename.",
       "Only the TypeScript lane resolves or invokes tsc; direct lanes retain all graph/archive/descriptor/bundle/envelope checks.",
-      "Executable-only closed graphs check specialization correspondence without constructing a debug witness map."
+      "Executable-only closed graphs check specialization correspondence without constructing a debug witness map.",
+      "Declaration maps use the same portable-compared declaration bytes and required captured source origins. A separate pass replays source-signature writer positions, composes original coordinates and publishes a versioned debug product; neither native transport tuple nor executable bytes change."
     ],
     "publication": "The existing single graph output inventory drives staged writes and per-file publication; receipt is last. No directory-atomic transaction or cleanup of pre-existing unselected files is claimed.",
     "nativeTransport": "Explicit psc-checked-seed-products/1 native transport supports direct JavaScript/wasm32 and selected products over one retained prepared source. Legacy TypeScript transport remains unchanged. Explicit products/3 supports Rust source/metadata with its Rust source representation contract and two frames; no legacy protocol fallback.",

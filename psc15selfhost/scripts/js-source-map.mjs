@@ -2,7 +2,8 @@ import { uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtifact } from './artifact-evidence.mjs';
 import { decodeComparatorJson } from './comparator-export.mjs';
 import { createJsDeclarationLineage, loadJsDeclarationLineageSubjects, jsDeclarationLineageProfile, jsDeclarationLineageParentKeys } from './js-declaration-lineage.mjs';
-import { createSourcePreparationArtifacts, mapPreparedOffset, sourcePreparationContract } from './source-preparation-origins.mjs';
+import { mapPreparedOffset } from './source-preparation-origins.mjs';
+import { sourceCoordinates, sourceMapOrigins, generatedLineEnds } from './source-map-origins.mjs';
 import { encodeSourceMapMappings } from './source-map-encoding.mjs';
 
 export const directJsSourceMapContract = 'psc-direct-javascript-source-map/1';
@@ -16,35 +17,6 @@ function policy(file, maxBytes, maxTotalBytes) {
   if (![maxBytes, maxTotalBytes].every(n => Number.isSafeInteger(n) && n > 0)) fail('RESOURCE_POLICY');
   if (file !== null && (typeof file !== 'string' || !file || !file.isWellFormed() || file.length > 4096)) fail('FILE');
 }
-function sourceCoordinates(text, offsets) {
-  const result = new Map(); let byte = 0, line = 0, column = 0;
-  function check() { if (offsets.has(byte)) result.set(byte, [line, column]); }
-  check();
-  // PSC source lines are LF-delimited; scalar parser columns must not be
-  // copied into source maps. Convert the actual original text to UTF-16.
-  for (const char of text) {
-    byte += Buffer.byteLength(char);
-    if (char === '\n') { line++; column = 0; } else column += char.length;
-    check();
-  }
-  if (result.size !== offsets.size) fail('SOURCE_BOUNDARY');
-  return result;
-}
-function generatedLineEnds(text, requested) {
-  const ends = new Map(); let byte = 0, line = 0, column = 0, previousCR = false;
-  for (const char of text) {
-    if (char === '\n' && previousCR) {
-      byte++; previousCR = false; continue;
-    }
-    if (char === '\r' || char === '\n' || char === '\u2028' || char === '\u2029') {
-      if (requested.has(line)) ends.set(line, [byte, line, column]);
-      line++; column = 0;
-    } else column += char.length;
-    byte += Buffer.byteLength(char); previousCR = char === '\r';
-  }
-  return ends;
-}
-
 /** Standalone ECMA-426 map of declaration anchors, produced without tsc.
  * Input is exact lineage plus optional exact original-source preparation.
  * The executable bytes are unchanged; URL annotation/linking is a separate
@@ -78,32 +50,9 @@ export function createDirectJsSourceMap({ lineage, resolveArtifact, preparationO
   const generatedEntries = read(resolve(positions.tableId), maxBytes)[2];
   const javaScript = utf8(resolve(positions.javascriptId).bytes);
   const javaScriptByteLength = Buffer.byteLength(javaScript);
-  if ((preparationOrigins === null) !== (sourceSnapshot === null)) fail('PREPARATION_PAIR');
-  let sourceFiles;
-  if (preparationOrigins !== null) {
-    preparationOrigins = add(preparationOrigins); sourceSnapshot = add(sourceSnapshot);
-    if (preparationOrigins.identity.domain !== 'source-origins' ||
-        preparationOrigins.identity.contract !== sourcePreparationContract) fail('PREPARATION_ID');
-    const preparation = read(preparationOrigins, maxBytes);
-    if (!Array.isArray(preparation.files) || preparation.files.length > 4096 ||
-        !same(preparation.sourceSubjectId, sourceSnapshot.identity)) fail('PREPARATION_SUBJECT');
-    const records = preparation.files.map(item => ({ path: item.path, preparedIndex: item.preparedIndex,
-      source: utf8(resolve(item.originalId).bytes), prepared: utf8(resolve(item.preparedId).bytes), segments: item.segments }));
-    const replay = createSourcePreparationArtifacts(records, sourceSnapshot);
-    if (!same(replay.map.identity, preparationOrigins.identity)) fail('PREPARATION_BINDING');
-    sourceFiles = preparation.files.filter(item => item.preparedIndex !== null).map(item => ({
-      text: utf8(resolve(item.originalId).bytes), preparedId: item.preparedId, segments: item.segments,
-      // A relative display URL with one encoded filename component cannot
-      // introduce an absolute scheme, traversal or query from a source path.
-      url: 'psc-source/' + item.preparedIndex + '/file-' + encodeURIComponent(item.path),
-    }));
-  } else {
-    sourceFiles = origin.sourceIds.map((id, index) => ({
-      text: utf8(resolve(id).bytes), preparedId: id, segments: null, url: 'psc-prepared-source/' + index + '.psc',
-    }));
-  }
-  if (sourceFiles.length !== origin.sourceIds.length ||
-      sourceFiles.some((item, index) => !same(item.preparedId, origin.sourceIds[index]))) fail('SOURCE_CHAIN');
+  if (preparationOrigins !== null) preparationOrigins = add(preparationOrigins);
+  if (sourceSnapshot !== null) sourceSnapshot = add(sourceSnapshot);
+  const sourceFiles = sourceMapOrigins({ origin, preparationOrigins, sourceSnapshot, resolve, read, maxBytes });
   const offsets = sourceFiles.map(() => new Set()), anchors = [];
   for (const edge of value.edges) {
     const source = sourceEntries[edge[3]], generated = generatedEntries[edge[0]];

@@ -4,7 +4,7 @@ import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, verifyArtif
 import { createExtensionSet, createProfileEnvironment, createBuildAction, decodeBuildAction,
   verifyBuildAction } from './build-context.mjs';
 import { captureClaimConsumerPolicy, createClaimSet } from './claim-set.mjs';
-import { createBackendDescriptor, decodeBackendRegistry, decodeBackendDescriptor, selectUniformJavaScriptRegistry, createArtifactBundle, verifyArtifactBundle } from './backend-contract.mjs';
+import { createBackendDescriptor, decodeBackendRegistry, decodeBackendDescriptor, selectUniformJavaScriptRegistry, uniformJavaScriptDeclarationMapDerivation, createArtifactBundle, verifyArtifactBundle } from './backend-contract.mjs';
 
 const fail = code => { throw new Error('PSC_OBSERVED_CONTEXT_' + code); };
 const equal = (a, b) => canonicalBytes(a).equals(canonicalBytes(b));
@@ -76,12 +76,17 @@ export function bindObservedBuildContext(build, { languageAuthority, backendRegi
   let selection;
   if (uniform) {
     checkUniformPipeline(build.graph, resolve);
-    const selected = selectUniformJavaScriptRegistry(backendRegistry);
+    const selected = selectUniformJavaScriptRegistry(backendRegistry,
+      decodeBackendRegistry(backendRegistry).backendVersion === 'psc-v5-backends/2'
+        ? { derivationId: uniformJavaScriptDeclarationMapDerivation } : {});
     backendRegistry = add(selected.registry); selection = add(selected.selection);
   }
   const registry = decodeBackendRegistry(backendRegistry);
   const registration = registry.backends.find(entry => entry.backendId === backendId);
   if (!registration) fail('BACKEND');
+  for (const entry of entries.filter(entry => ['declaration-positions', 'declaration-map-output', 'declaration-map-recipe'].includes(entry.identity.domain)))
+    if (!registration.products.debugArtifacts.some(product => product.domain === entry.identity.domain &&
+        product.contract === entry.identity.contract)) fail('DECLARATION_MAP_REGISTRY');
   const implementationId = one('implementation', 'psc-hosted-compiler-implementation/1');
   const compilerId = one('compiler', 'psc-compiler-module/1');
   const sourceSubjectId = one('source-snapshot', 'psc-source-snapshot/1');

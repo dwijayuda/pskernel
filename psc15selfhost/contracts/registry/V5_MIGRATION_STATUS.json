@@ -325,7 +325,7 @@
       ],
       "inheritedImplementationStatus": "implementation-available-exact-js-wasm-target-ir-assurance-pending",
       "assurance": "pending",
-      "disposition": "Keep four first-class lanes, JsIR/WasmIR validation, emitters and runtime fixes. TS/Rust remain source backends. Register explicit descriptors and bundles; target acceptance is not preservation. Rust generated checked source products now retain actual generic RuntimeIR validation/emission edges and use common artifact publication. Explicit products/3 native Rust source routing is connected. Cargo toolchain capture and specialized-input migration remain pending.",
+      "disposition": "Keep four first-class lanes, JsIR/WasmIR validation, emitters and runtime fixes. TS/Rust remain source backends. Register explicit descriptors and bundles; target acceptance is not preservation. Rust generated checked source products now retain actual generic RuntimeIR validation/emission edges and use common artifact publication. Explicit products/3 native Rust source routing is connected. Cargo toolchain capture and specialized-input migration remain pending. Direct-JS declaration maps now reuse source-signature writer coordinates and source-origin composition through common graph/descriptor/bundle/archive routing; linking and expression/type-token origins remain open.",
       "addedOwners": [
         "packages/driver-rust/src/Ps/DriverRust/Stages.lean"
       ]
@@ -1112,7 +1112,7 @@
       "classifications": [
         "claimset-evidence"
       ],
-      "status": "contract-policy-verifier-and-bundle-context-archive-consumer-routing-implemented-cloud-validation-and-real-evidence-adapters-pending",
+      "status": "contract-policy-verifier-and-bundle-context-archive-routing-cloud-validated-at-09ae1662-real-evidence-adapters-pending",
       "requirement": "Machine-readable exact-subject claims, explicit selected-checker evidence policies, no automatic cross-claim promotion."
     },
     {
@@ -1189,7 +1189,7 @@
       "classifications": [
         "origin-source-maps"
       ],
-      "status": "closed-and-uniform-exact-declaration-composition-and-standalone-maps-implemented-expression-origins-pending",
+      "status": "closed-uniform-javascript-and-declaration-maps-implemented-exact-chunk-replay-cloud-validation-pending-expression-origins-open",
       "requirement": "Exact source-to-target origins and per-pass preserve/merge/synthesize/drop reasons; separate non-authoritative metadata."
     },
     {
@@ -1201,7 +1201,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "closed-uniform-declarations-maps-generated-native-build-routing-and-portable-emission-cloud-validated-at-a47b047e-declaration-maps-and-broader-public-types-pending",
+      "status": "declarations-javascript-maps-and-declaration-maps-common-generated-native-routing-implemented-cloud-validation-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1657,6 +1657,41 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V3.json",
       "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-js-declaration-positions/1",
+      "kind": "declaration-positions",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-js-declaration-map/1",
+      "kind": "declaration-map",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-direct-js-declaration-map-recipe/1",
+      "kind": "declaration-map-replay",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json",
+      "classification": "origin-source-maps"
+    },
+    {
+      "id": "psc-emit-direct-js-declaration-map/1",
+      "kind": "compiler-pass",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/DIRECT_JS_DECLARATION_MAP_V1.json",
+      "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-uniform-js-backend-derivation/4",
+      "kind": "backend-profile-derivation",
+      "status": "current-host",
+      "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
+      "classification": "backend"
     }
   ],
   "implementationCloud": {
@@ -1675,6 +1710,6 @@
       "portable-selfhost"
     ],
     "proofImplication": "none",
-    "subsequentClaimConsumerChanges": "fresh-cloud-validation-pending"
+    "subsequentClaimConsumerChanges": "full-main-cloud-pass-at-09ae1662-run-37712984304-job-113102943084"
   }
 }

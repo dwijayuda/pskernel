@@ -1,3 +1,4 @@
+import { verifyDirectJsDeclarationMap } from './js-declaration-map.mjs';
 import { captureClaimConsumerPolicy } from './claim-set.mjs';
 import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationArtifact, verifyUniformSpecialization } from './uniform-specialization.mjs';
 import { verifyObservedContextProducts } from './observed-build-context.mjs';
@@ -299,6 +300,27 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
           [key, { identity: execution.outputs[index], bytes: resolveArtifact(execution.outputs[index]) }]));
         await verifyDirectJsDeclarations(product, { resolveArtifact, expectedSubjects,
           expectedProfile: execution.action.parameters.profile, maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes });
+      }
+      if (definition.passId === 'psc-emit-direct-js-declaration-map/1') {
+        if (execution.inputs.length !== 1 || execution.outputs.length !== 3 ||
+            execution.inputs[0].domain !== 'declarations-output' || execution.inputs[0].contract !== 'psc-direct-javascript-declarations/1' ||
+            definition.semanticRelationId !== 'psc-source-declaration-chunks-to-ecma426/1' ||
+            typeof execution.action.parameters.profile !== 'string') fail('DECLARATION_MAP_SUBJECT');
+        const dependencies = execution.action.dependencies;
+        const one = (domain, optional = false) => {
+          const ids = dependencies.filter(id => id.domain === domain);
+          if (ids.length !== 1 && !(optional && ids.length === 0)) fail('DECLARATION_MAP_SUBJECT');
+          return ids[0] ?? null;
+        };
+        const product = Object.fromEntries(['declarationPositions', 'declarationMap', 'recipe'].map((key, index) =>
+          [key, { identity: execution.outputs[index], bytes: resolveArtifact(execution.outputs[index]) }]));
+        await verifyDirectJsDeclarationMap(product, {
+          resolveArtifact, expectedDeclarationsId: execution.inputs[0],
+          expectedSourceSignaturesId: one('declaration-signatures'), expectedBindingId: one('declaration-binding'),
+          expectedOriginGraphId: one('origin-graph'), expectedPreparationOriginsId: one('source-origins', true),
+          expectedSourceSnapshotId: one('source-snapshot', true), expectedProfile: execution.action.parameters.profile,
+          expectedFile: execution.action.parameters.outputFile, maxBytes: bound.maxArtifactBytes, maxTotalBytes: bound.maxTotalBytes,
+        });
       }
       if (['psc-emit-direct-js-source-map/1', 'psc-emit-uniform-js-source-map/1'].includes(definition.passId)) {
         const uniformMap = definition.passId === 'psc-emit-uniform-js-source-map/1';

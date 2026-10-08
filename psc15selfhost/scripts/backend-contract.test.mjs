@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
 import { createClaimSet } from './claim-set.mjs';
 import { createBackendDescriptor, decodeBackendDescriptor, createArtifactBundle, verifyArtifactBundle,
-  selectUniformJavaScriptRegistry, selectUniformJavaScriptRegistryV1, backendSelectionContract, verifyBackendProfileSelection } from './backend-contract.mjs';
+  selectUniformJavaScriptRegistry, selectUniformJavaScriptRegistryV1, uniformJavaScriptDeclarationMapDerivation, backendSelectionContract, verifyBackendProfileSelection } from './backend-contract.mjs';
 
 const registryValue = JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V1.json', import.meta.url), 'utf8'));
 function fixture(backendId) {
@@ -181,4 +181,21 @@ test('earlier selection/2 derivation remains replayable without newly implemente
   assert.equal(JSON.parse(current.registry.bytes).backends.find(item => item.backendId === 'javascript').products.debugArtifacts
     .find(item => item.role === 'source-map-recipe').contract, 'psc-direct-javascript-source-map-recipe/2');
   assert.notEqual(artifactKey(historical.registry.identity), artifactKey(current.registry.identity));
+});
+
+test('declaration maps require the explicit current product inventory and versioned uniform derivation', async () => {
+  const value = JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V2.json', import.meta.url), 'utf8'));
+  const base = canonicalArtifact(value, 'backend-registry', 'psc-backend-registry/1');
+  assert.deepEqual(value.backends.filter(item => item.backendId !== 'javascript'),
+    registryValue.backends.filter(item => item.backendId !== 'javascript'));
+  const selected = selectUniformJavaScriptRegistry(base, { derivationId: uniformJavaScriptDeclarationMapDerivation });
+  const records = new Map([base, selected.registry, selected.selection].map(item => [artifactKey(item.identity), item.bytes]));
+  const result = await verifyBackendProfileSelection(selected.selection, {
+    expectedRegistryId: selected.registry.identity, resolveArtifact: id => records.get(artifactKey(id)) });
+  assert.equal(result.bindingVerified, true);
+  const lane = JSON.parse(selected.registry.bytes).backends.find(item => item.backendId === 'javascript');
+  assert.equal(lane.products.debugArtifacts.filter(item => item.role === 'declaration-map').length, 1);
+  const old = fixture('javascript');
+  assert.throws(() => selectUniformJavaScriptRegistry(old.registry,
+    { derivationId: uniformJavaScriptDeclarationMapDerivation }), /SELECTION_DECLARATION_MAP_BASE/);
 });

@@ -375,6 +375,7 @@ for (const [backend, products, representation] of [
   ['javascript', 'all', closedJsRepresentationProfile],
   ['javascript', 'all', uniformJsRepresentationProfile],
   ['javascript', 'source-map', closedJsRepresentationProfile],
+  ['javascript', 'declaration-map', uniformJsRepresentationProfile],
   ['javascript', 'executable', closedJsRepresentationProfile],
   ['wasm', 'executable', closedJsRepresentationProfile],
 ]) test(`direct ${backend}/${products}/${representation} publishes selected graph products without TypeScript`,
@@ -394,7 +395,7 @@ for (const [backend, products, representation] of [
       assert.equal(receipt.typeScriptToolInputs, undefined); assert.equal(receipt.typeScriptSha256, undefined);
       assert.equal(existsSync(path.join(dir, 'out.ts')), false);
       const counts = (await import(pathToFileURL(compilerPath).href)).counts();
-      assert.deepEqual(counts, { preparations: 1, emissions: 1, declarations: products === 'all' ? 1 : 0 });
+      assert.deepEqual(counts, { preparations: 1, emissions: 1, declarations: ['all', 'declaration-map'].includes(products) ? 1 : 0 });
       const certificate = JSON.parse(await readFile(path.join(dir, 'out.pscv-cert.json')));
       assert.deepEqual(certificate.context.targets, [backend]);
       const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json')));
@@ -403,10 +404,13 @@ for (const [backend, products, representation] of [
       const archived = await verifyObservedBuildArchive(await readFile(path.join(dir, 'out.build-archive.json')),
         { expectedGraphId: receipt.buildGraph, allowedAssumptions: allowedAssumptionsFromGraph(graph) });
       assert.equal(archived.kind, 'accepted', archived.reason); assert.equal(archived.semanticClaimsVerified, false);
-      if (products === 'all') {
+      if (['all', 'declaration-map'].includes(products)) {
         assert.equal(await readFile(path.join(dir, 'out.d.ts'), 'utf8'), 'export {};\n');
         assert.equal(JSON.parse(await readFile(path.join(dir, 'out.js.map'))).version, 3);
         assert.equal(receipt.declarationProduction.hostBytesCompared, true);
+        assert.equal(JSON.parse(await readFile(path.join(dir, 'out.d.ts.map'))).version, 3);
+        assert.ok(receipt.directDeclarationMap.declarationMap);
+        assert.equal(passIds(graph).includes('psc-emit-direct-js-declaration-map/1'), true);
       } else if (products === 'source-map') {
         assert.equal(existsSync(path.join(dir, 'out.d.ts')), false);
         assert.equal(JSON.parse(await readFile(path.join(dir, 'out.js.map'))).version, 3);
@@ -471,6 +475,12 @@ for (const [backend, representation, source] of [
         else assert.equal(module.answer, 42n);
         assert.equal(receipt.declarationProduction.hostBytesCompared, true);
         assert.equal(JSON.parse(await readFile(path.join(dir, 'out.js.map'))).version, 3);
+        const declarationMap = JSON.parse(await readFile(path.join(dir, 'out.d.ts.map')));
+        assert.equal(declarationMap.file, 'out.d.ts');
+        assert.equal(declarationMap.sourcesContent[0], source);
+        const bundle = JSON.parse(await readFile(path.join(dir, 'out.artifact-bundle.json')));
+        assert.ok(bundle.debugArtifacts.some(item => item.role === 'declaration-map' &&
+          artifactKey(item.artifact) === artifactKey(receipt.directDeclarationMap.declarationMap)));
         assert.match(await readFile(path.join(dir, 'out.d.ts'), 'utf8'),
           representation === uniformJsRepresentationProfile ? /<T0>/ : /bigint/);
       }

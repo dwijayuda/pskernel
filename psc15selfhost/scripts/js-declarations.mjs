@@ -59,8 +59,8 @@ export function createPortableJsDeclarationRequest({ profile, bindings, maxBytes
  * and JsIR inventories only bind names/calling conventions and reject drift.
  * No source type is recovered from a specialized instance or printed JS.
  */
-export function createDirectJsDeclarations({ subjects, profile = directJsDeclarationProfile,
-  maxBytes = 128 * 1024 * 1024, maxTotalBytes = 512 * 1024 * 1024 }) {
+function buildDirectJsDeclarations({ subjects, profile = directJsDeclarationProfile,
+  maxBytes = 128 * 1024 * 1024, maxTotalBytes = 512 * 1024 * 1024 }, capturePositions) {
   limits(maxBytes, maxTotalBytes);
   const uniform = profile === directJsUniformDeclarationProfile;
   const ids = Object.fromEntries(Object.entries(subjects ?? {}).map(([key, value]) => [key, value?.identity]));
@@ -83,11 +83,21 @@ export function createDirectJsDeclarations({ subjects, profile = directJsDeclara
   if (runtime[1].length || target[1].length) fail('IMPORTS_UNSUPPORTED');
   const targetIndices = new Map(target[2].map((value, index) => [value[0], index]));
   const signatures = [], bindings = [], pieces = [];
-  let cursor = 0, outputBytes = 0;
-  function write(value) {
+  const positions = [];
+  let cursor = 0, outputBytes = 0, line = 0, column = 0;
+  function write(value, sourceIndex = null, role = null) {
+    const start = capturePositions ? [outputBytes, line, column] : null;
     outputBytes += Buffer.byteLength(value);
     if (outputBytes > maxBytes || total + outputBytes > maxTotalBytes) fail('RESOURCE');
     pieces.push(value);
+    if (capturePositions) {
+      // This writer emits LF line terminators; source type spellings are ASCII.
+      // UTF-16 columns remain explicit so a future spelling extension is safe.
+      for (const char of value) {
+        if (char === '\n') { line++; column = 0; } else column += char.length;
+      }
+      if (sourceIndex !== null) positions.push([sourceIndex, role, start, [outputBytes, line, column]]);
+    }
   }
   for (let sourceIndex = 0; sourceIndex < table[2].length; sourceIndex++) {
     const entry = table[2][sourceIndex];
@@ -110,8 +120,8 @@ export function createDirectJsDeclarations({ subjects, profile = directJsDeclara
     const parameters = signature.typeParameters.length ?
       '<' + signature.typeParameters.map(parameter => parameter.name).join(', ') + '>' : '';
     const printed = parameters + printSourceSignatureType(signature.type);
-    write('declare const ' + localName + ': ' + printed + ';\n');
-    write('export { ' + localName + ' as ' + exportName + ' };\n');
+    write('declare const ' + localName + ': ' + printed + ';\n', sourceIndex, 'declaration');
+    write('export { ' + localName + ' as ' + exportName + ' };\n', sourceIndex, 'export');
     signatures.push({ sourceIndex, sourceName: entry[0], signature });
     bindings.push({ sourceIndex, exportName, targetIndex });
   }
@@ -135,8 +145,24 @@ export function createDirectJsDeclarations({ subjects, profile = directJsDeclara
   }, 'declaration-binding', directJsDeclarationBindingContract);
   if ([sourceSignatures, binding].some(item => item.bytes.byteLength > maxBytes) ||
       total + outputBytes + sourceSignatures.bytes.byteLength + binding.bytes.byteLength > maxTotalBytes) fail('RESOURCE');
-  return { declarations, sourceSignatures, binding };
+  if (!capturePositions) return { declarations, sourceSignatures, binding };
+  const declarationPositions = canonicalArtifact({
+    schemaVersion: 1, contract: 'psc-js-declaration-positions/1',
+    declarationsId: declarations.identity, bindingId: binding.identity,
+    publicApiId: subjects.publicApi.identity, coordinateContract: 'utf8-byte+zero-based-utf16',
+    granularity: 'source-declaration-chunks', positions, authority: 'debug-metadata-only',
+  }, 'declaration-positions', 'psc-js-declaration-positions/1');
+  if (declarationPositions.bytes.byteLength > maxBytes || total + outputBytes + sourceSignatures.bytes.byteLength +
+      binding.bytes.byteLength + declarationPositions.bytes.byteLength > maxTotalBytes) fail('RESOURCE');
+  return { declarations, sourceSignatures, binding, declarationPositions };
 }
+
+export function createDirectJsDeclarations(options) { return buildDirectJsDeclarations(options, false); }
+
+/** Positions come from the same source-signature writer, never reverse parsing
+ * target code. The original three products retain their historical identities.
+ */
+export function createDirectJsDeclarationPositions(options) { return buildDirectJsDeclarations(options, true); }
 
 export async function verifyDirectJsDeclarations(product, {
   resolveArtifact, expectedSubjects, expectedProfile = directJsDeclarationProfile,

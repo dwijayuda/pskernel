@@ -561,3 +561,40 @@ assumption mismatches, callback mutation and legacy behavior. Their checkers are
 explicit test doubles. Production checker adapters, command-line selection of
 a trusted checker registry, real evidence production and an assured-release
 policy remain implementation obligations; no preservation theorem is asserted.
+
+## 23. Direct JavaScript declaration maps
+
+The JavaScript builder's `--products declaration-map` and `all` selections
+publish a standalone `.d.ts.map` plus declaration-position and replay-recipe
+artifacts. They require the same source declarations already compared with the
+portable writer and a complete captured source-origin table. Missing required
+products reject the build. The native protocol stays unchanged: its existing
+metadata/declaration selection carries the required source evidence.
+
+The source-signature writer records its actual declaration/export chunk
+positions. The map composer reconstructs source signatures, export bindings
+and OriginGraph, then composes optional original-source preparation. JavaScript
+and declaration maps share UTF-16 conversion, original-source reconstruction
+and unmapped line-boundary handling. Original declaration, executable and
+historical map identities are preserved by this extraction.
+
+[TypeScript's declaration-map option](https://www.typescriptlang.org/tsconfig/declarationMap.html)
+supports navigation back to original source. Its
+[pinned declaration emitter](https://raw.githubusercontent.com/microsoft/TypeScript/v5.9.3/src/compiler/emitter.ts)
+uses a distinct declaration printer and a shared map-writing path. PSC follows
+that separation while retaining source PublicApiIR as the signature owner.
+[ECMA-426](https://tc39.es/ecma426/) supplies the map encoding and coordinate
+conventions. These references were reviewed on 2026-10-08.
+
+The current map is deliberately coarse: declaration and export lines map to
+their source declaration anchor; terminators, synthetic output and absent
+origins remain unmapped. It does not claim token/type-expression correspondence.
+Maps embed the captured original text when preparation evidence is supplied.
+URL annotation is a separate packaging obligation, so existing declaration
+bytes remain unchanged and automatic editor discovery is not claimed.
+
+New products use registry snapshot V2 and uniform derivation/4. V1 snapshots
+and earlier derivations remain readable with their original derivation rules.
+The common graph records the map pass, bundles identify all three products,
+and archive readers reconstruct them against independently pinned parents.
+Successful map replay remains debug metadata, not semantic preservation.

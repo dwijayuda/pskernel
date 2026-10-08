@@ -66,6 +66,7 @@ export const legacyBackendSelectionContract = 'psc-backend-profile-selection/1';
 export const backendSelectionContract = 'psc-backend-profile-selection/2';
 export const uniformJavaScriptDerivationV2 = 'psc-uniform-js-backend-derivation/2';
 export const uniformJavaScriptDerivation = 'psc-uniform-js-backend-derivation/3';
+export const uniformJavaScriptDeclarationMapDerivation = 'psc-uniform-js-backend-derivation/4';
 
 /** A deterministic specialization of the existing registry, not a fifth lane.
  * The base remains a separately identified input. A selected registry does not
@@ -112,13 +113,13 @@ export function selectUniformJavaScriptRegistryV1(baseRecord) {
  * Future capabilities require a new derivation identity and retained readers.
  */
 export function selectUniformJavaScriptRegistry(baseRecord, { derivationId = uniformJavaScriptDerivation } = {}) {
-  if (![uniformJavaScriptDerivationV2, uniformJavaScriptDerivation].includes(derivationId)) fail('SELECTION_DERIVATION');
+  if (![uniformJavaScriptDerivationV2, uniformJavaScriptDerivation, uniformJavaScriptDeclarationMapDerivation].includes(derivationId)) fail('SELECTION_DERIVATION');
   const value = decodeBackendRegistry(selectUniformJavaScriptRegistryV1(baseRecord).registry);
   const backend = value.backends.find(item => item.backendId === 'javascript');
   backend.emitterId = 'psJsEmitValidatedModuleStackSafeWithTargetProfile';
   backend.supportedCapabilities.push('portable-structural-source-declarations');
   backend.ownershipDebt = 'Explicit uniform representation retains validated generic RuntimeIR. The backend owns the shared validated JsIR writer; interface-ts owns portable source declarations and the driver composes them. Uniform source-map composition, named/dependent public types, checked CLI selection and global preservation remain pending.';
-  if (derivationId === uniformJavaScriptDerivation) {
+  if ([uniformJavaScriptDerivation, uniformJavaScriptDeclarationMapDerivation].includes(derivationId)) {
     backend.supportedCapabilities.push('standalone-declaration-source-maps');
     backend.unsupportedCapabilities = backend.unsupportedCapabilities.filter(capability => capability !== 'uniform-source-map-composition');
     backend.products.debugArtifacts.push(
@@ -126,6 +127,18 @@ export function selectUniformJavaScriptRegistry(baseRecord, { derivationId = uni
       { role: 'source-map', domain: 'source-map-output', contract: 'psc-direct-javascript-source-map/1', requiresToolchain: false },
       { role: 'source-map-recipe', domain: 'source-map-recipe', contract: 'psc-direct-javascript-source-map-recipe/2', requiresToolchain: false });
     backend.ownershipDebt = 'The backend owns the validated JsIR writer, interface-ts owns portable source declarations and the driver composes them. Uniform declaration origins use exact retained RuntimeIR inventory with shared source-map encoding. Expression origins, declaration maps, named/dependent public types, checked CLI selection and global preservation remain pending.';
+  }
+  if (derivationId === uniformJavaScriptDeclarationMapDerivation) {
+    const expected = [
+      ['declaration-positions', 'declaration-positions', 'psc-js-declaration-positions/1'],
+      ['declaration-map', 'declaration-map-output', 'psc-direct-js-declaration-map/1'],
+      ['declaration-map-recipe', 'declaration-map-recipe', 'psc-direct-js-declaration-map-recipe/1'],
+    ];
+    if (value.backendVersion !== 'psc-v5-backends/2' ||
+        expected.some(([role, domain, contract]) => !backend.products.debugArtifacts.some(product =>
+          product.role === role && product.domain === domain && product.contract === contract && !product.requiresToolchain)) ||
+        !backend.supportedCapabilities.includes('standalone-source-declaration-maps')) fail('SELECTION_DECLARATION_MAP_BASE');
+    backend.ownershipDebt = 'Uniform source signatures and exact declaration origins feed standalone declaration maps. The source writer retains generic binders and shares coordinate composition with JavaScript maps. Expression/token origins, linking, broader named/dependent types and global preservation remain pending.';
   }
   const registry = canonicalArtifact(value, 'backend-registry', 'psc-backend-registry/1');
   decodeBackendRegistry(registry);

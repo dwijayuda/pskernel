@@ -57,7 +57,8 @@ private def allowedCommand (s : Syntax) : Bool :=
   else
     ([
       "PSCVL.pscvConst", "PSCVL.pscvConstInferred",
-      "PSCVL.pscvFunction", "PSCVL.pscvImplicitFunction", "PSCVL.pscvFunctionContract",
+      "PSCVL.pscvFunction", "PSCVL.pscvImplicitFunction",
+      "PSCVL.pscvFunctionContract", "PSCVL.pscvFunctionEnsures", "PSCVL.pscvFunctionRequires",
       "PSCVL.pscvRefine",
       "Lean.Parser.Command.namespace", "Lean.Parser.Command.section",
       "Lean.Parser.Command.end", "Lean.Parser.Command.open",

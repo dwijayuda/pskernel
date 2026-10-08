@@ -1,0 +1,14 @@
+-- Finite ProofScript braced terms and both one-sided contracts.
+const incremented : Nat := { (1 : Nat) + 2 }
+
+function choose(a : Nat, b : Nat) : Nat :=
+  if (a < b) { a } else { b }
+
+function preserved(n : Nat) : Id Nat
+  ensures r => r = n := pure n
+
+function guarded(n : Nat) : Id Nat
+  requires n > 0 := pure n
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := choose(1, 2) + incremented

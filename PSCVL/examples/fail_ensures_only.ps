@@ -1,0 +1,4 @@
+function wrong(n : Nat) : Id Nat
+  ensures r => r > n := pure n
+@[pscv_export, pscv_type_spec]
+def root : Nat := 1

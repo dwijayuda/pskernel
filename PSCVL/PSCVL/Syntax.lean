@@ -109,4 +109,43 @@ macro_rules
       app ← `($app:term $arg:term)
     return app
 
+/-- PSCV pure conditional with explicit grouping and braces. It lowers to
+Lean's ordinary typed `if`, and retains proof obligations. -/
+syntax (name := pscvBracedIf)
+  "if" "(" term ")" "{" term "}" "else" "{" term "}" : term
+
+macro_rules
+  | `(if ($condition:term) { $onTrue:term } else { $onFalse:term }) =>
+    `(if $condition then $onTrue else $onFalse)
+
+/-- A one-term braced body is grouping, not a record/object literal. -/
+syntax (name := pscvBracedExpression) "{" term "}" : term
+
+macro_rules
+  | `({ $inside:term }) => `(($inside:term))
+
+/-- Pure/verified function declarations can have one-sided contracts. A missing
+side is the true/top predicate in the pinned Lean WP contract semantics. -/
+syntax (name := pscvFunctionEnsures)
+  "function " ident "(" pscvBinder,* ")" ":" term
+  "ensures" ident "=>" term ":=" term : command
+
+macro_rules
+  | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term
+      ensures $rv:ident => $post:term := $body:term) => do
+    let binders ← explicitLeanBinders bs
+    `(def $f:ident $binders* : $result:term
+        ensures $rv:ident => $post:term := $body:term)
+
+syntax (name := pscvFunctionRequires)
+  "function " ident "(" pscvBinder,* ")" ":" term
+  "requires" term ":=" term : command
+
+macro_rules
+  | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term
+      requires $pre:term := $body:term) => do
+    let binders ← explicitLeanBinders bs
+    `(def $f:ident $binders* : $result:term
+        requires $pre:term := $body:term)
+
 end PSCVL

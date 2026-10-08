@@ -247,3 +247,38 @@ Architectural blockers still remaining:
 - Full proof run **#616** green at `5bff3bb2bdaea54390feb97b148c3c419a859800`.
 - The independent `PsKernelNatSuccessorRep` and executable predecessor-recognition refinement are registered and green. Both Nat literal successors and one-argument Nat.succ constructor forms are supported; the nullary constructor is rejected.
 - Next candidate closes the entire bounded `psKernelDefEqLazyReductionWithFuel` contract using specific zero/successor cases and already-verified Nat/native/delta callbacks. Verify the next CI before marking this candidate green.
+
+
+## Concrete checker-knot soundness checkpoint — 2026-10-08
+
+- Full `PSKernel Core proof` CI run **#639** is **green** at commit
+  `a7c8d11a2a28718e4a773ac9d8f9f2883dc5834e`.
+- New registered metatheory modules close the concrete `psKernelIsDefEqWithFuel`
+  fuel induction. The executable branches are composed from independent
+  state/semantic contracts for structural/cache checks, Quick, reflection,
+  reduced Quick, proposition classification, lazy delta, projection shortcut,
+  second full core-WHNF, changed/recursive comparison, full shape, and
+  final-rule continuation. Original-pair success publication is justified by
+  explicit reduction closures. **No unrestricted algorithmic DefEq
+  transitivity** was introduced.
+- `CheckerKnotConfiguration.lean` establishes the concrete public
+  checked-inference, infer-only configuration-preservation, WHNF, and DefEq
+  contracts from the fuel theorem. The optimized beta-spine law is discharged
+  by the existing proof.
+- `SessionConcreteRefinement.lean` specializes checked-session typing,
+  infer-only configuration preservation, WHNF reduction, and positive DefEq
+  refinement to those executable contracts, with a sound initial checker
+  configuration as an explicit precondition. Infer-only success is **not**
+  claimed to be a typing certificate.
+- **Remaining explicit TCB boundaries:** `PsKernelNativeReductionSoundLaw`
+  and `PsKernelStringEqSoundLaw`. The current checker theorem is conditional
+  on these laws and must not be represented as an unconditional kernel
+  metatheory theorem.
+- Next semantic frontier: use concrete configured session contracts in
+  declaration validation/admission; establish well-formed environment
+  extensions for axiom/definition/theorem/opaque admission; complete ordinary,
+  mutual, and nested inductive transaction refinement; compose public
+  Kernel/API/session implementation-refinement theorem family.
+- Preserve current audit A=44, B=9, C=19, D=7 (79 pairs) until criteria-based
+  reclassification. Reconcile integration only with explicit cross-branch
+  review; no Arena infrastructure or host workarounds in this proof branch.

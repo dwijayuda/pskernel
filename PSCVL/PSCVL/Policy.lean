@@ -1,4 +1,5 @@
 import Lean
+import Std.WP
 import PSCVL.Syntax
 
 /-!
@@ -45,10 +46,13 @@ def elabPscvGate : CommandElab := fun _ => do
       match info with
       | .defnInfo _ => pure ()
       | _ => throwError "PSCVL candidate executable root {c.name} must be a def"
-      let axioms ← collectAxioms c.name
-      for ax in axioms do
-        unless permittedFoundationAxiom ax do
-          throwError "PSCVL export {c.name} depends on disallowed axiom {ax}"
+  -- Every local declaration must have permitted logical foundations, not only
+  -- exported roots: an unexported theorem or helper cannot silently carry sorry.
+  for c in locals do
+    let axioms ← collectAxioms c.name
+    for ax in axioms do
+      unless permittedFoundationAxiom ax do
+        throwError "PSCVL declaration {c.name} depends on disallowed axiom {ax}"
   if roots == 0 then
     throwError "PSCVL requires an explicit @[pscv_export, pscv_type_spec] executable root"
   logInfo m!"PSCVL preflight: {roots} candidate root(s) passed; NO PSCV-CERT-v1 claim or executable emission"

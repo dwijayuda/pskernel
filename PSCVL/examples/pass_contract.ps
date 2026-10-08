@@ -1,0 +1,9 @@
+-- This uses Lean 4.35's pinned, proof-producing intrinsic verification.
+@[pscv_export, pscv_type_spec]
+def guarded (n : Nat) : Id Nat
+    requires n > 0
+    ensures r => r = n := pure n
+
+theorem guarded_positive (n : Nat) : n > 0 → n > 0 := by
+  intro h
+  exact h

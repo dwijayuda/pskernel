@@ -33,8 +33,16 @@ jobs:
         run: |
           set -euxo pipefail
           lake exe pscvl check examples/pass.ps
+          lake exe pscvl check examples/pass_contract.ps
           ! lake exe pscvl check examples/fail_unsafe.ps
           ! lake exe pscvl check examples/fail_partial.ps
           ! lake exe pscvl check examples/fail_axiom.ps
           ! lake exe pscvl check examples/fail_sorry.ps
           ! lake exe pscvl check examples/fail_missing_spec.ps
+          ! lake exe pscvl check examples/fail_unproved_contract.ps
+          ! lake exe pscvl check examples/fail_no_roots.ps
+          ! lake exe pscvl check examples/fail_macro.ps
+          ! lake exe pscvl check examples/fail_eval.ps
+          ! lake exe pscvl check examples/fail_option.ps
+          ! lake exe pscvl check examples/fail_import.ps
+          ! lake exe pscvl check examples/fail_standalone_sorry.ps

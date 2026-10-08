@@ -1,5 +1,6 @@
 import Lean
 import Lean.Elab.Frontend
+import PSCVL.Grammar
 import PSCVL.Policy
 
 /-!
@@ -16,21 +17,24 @@ private def checkFile (path : String) : IO UInt32 := do
     IO.eprintln "PSCVL expects a .ps source file"
     return 2
   let source ← IO.FS.readFile path
-  -- The initial prototype has a frozen prelude. Its sources cannot choose
-  -- imports: dependency/capability identity is not implemented yet.
-  if (source.splitOn "\n").any (fun line =>
-       let l := line.trimAscii.toString
-       l.startsWith "import " || l.startsWith "public import ") then
-    IO.eprintln "PSCVL: source imports are unsupported; only the pinned PSCVL prelude is available"
-    return 2
   initSearchPath (← findSysroot)
   -- Matches the official Lean frontend's initialization sequence.
   unsafe enableInitializersExecution
   let env ← importModules #[{ module := `PSCVL.Policy }] {} (trustLevel := 0) (loadExts := true)
+  -- PSCV fixes the experiment options as part of its frontend identity;
+  -- user `set_option` commands cannot change them.
+  let opts := ({} : Options)
+    |>.setBool `experimental.vcgen true
+    |>.setBool `experimental.intrinsic true
+  match validateSourceSyntax source path env opts with
+  | .error msg =>
+    IO.eprintln s!"PSCVL source-profile error: {msg}"
+    return 1
+  | .ok () => pure ()
   -- The gate is injected by the driver, not opt-in source syntax. Append it
   -- only after the user input has been completely parsed/elaborated.
   let checkedSource := source ++ "\n\n#pscv_gate\n"
-  let (_, messages) ← Elab.process checkedSource env {} (some path)
+  let (_, messages) ← Elab.process checkedSource env opts (some path)
   for message in messages.markAllReported.reported do
     IO.eprintln (← message.toString)
   if messages.hasErrors then

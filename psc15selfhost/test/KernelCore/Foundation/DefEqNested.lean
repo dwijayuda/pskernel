@@ -134,10 +134,12 @@ def psKernelDefEqDifferential
       Bool.and
         ((Prod.fst portableResult) == referenceResult)
         (if Prod.fst portableResult then
-          psKernelExprPairSetContains
-            (Prod.snd portableResult).success
-            left
-            right
+          let cached := psKernelExprPairSetContains
+            (Prod.snd portableResult).success left right
+          if psKernelSemanticPairCacheEligible left right then
+            cached
+          else
+            Bool.not cached
          else
           true)
   | Except.error portableError, Except.error referenceError =>

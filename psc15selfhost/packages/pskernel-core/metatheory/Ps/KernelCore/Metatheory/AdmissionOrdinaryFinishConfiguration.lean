@@ -672,7 +672,7 @@ theorem psKernelOrdinaryFinishAdmission_success_recursor_semantics
                   simp only [hRules] at hRun
                   have hPublication : result = work2 := (Except.ok.inj hRun).symm
                   subst result
-                  refine ⟨elimOnlyAtZero, hElim, rfl, ⟨sorted.1, ?_⟩, ?_,
+                  refine ⟨elimOnlyAtZero, (by first | exact hElim | rfl), rfl, ⟨sorted.1, ?_⟩, ?_,
                     psKernelOrdinaryPrepareRecursor_rule_metadata decl paramResult indexResult
                       resultLevel ctorResult elimOnlyAtZero, hWorkIndex⟩
                   · apply PsKernelTypingJudgment.convert prepared.info.base.type checked.1

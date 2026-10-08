@@ -1,0 +1,63 @@
+name: PSCV V6 minimal npm core
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "pscv0/v6/**"
+      - ".github/workflows/pscv-v6-core-npm.yml"
+  push:
+    branches: ["pscv/v6-minimal-npm-core"]
+    paths:
+      - "pscv0/v6/**"
+      - ".github/workflows/pscv-v6-core-npm.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install only local npm workspaces, without lifecycle scripts
+        working-directory: pscv0/v6
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Test no-false-authority and explicit extension policies
+        working-directory: pscv0/v6
+        run: npm test
+      - name: Inspect package tarball contents
+        working-directory: pscv0/v6
+        run: npm run pack:dry
+
+  pinned-lean-kernel-providers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install isolated V6 npm workspaces without lifecycle scripts
+        working-directory: pscv0/v6
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Link only exact in-repository published-kernel package facades
+        working-directory: pscv0/v6
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p node_modules/@proofscript
+          ln -sfn ../../../packages/pskernel-lean node_modules/@proofscript/pskernel-lean
+          ln -sfn ../../../packages/pskernel-lean-wasm node_modules/@proofscript/pskernel-lean-wasm
+          test -f node_modules/@proofscript/pskernel-lean/LEAN_SOURCE_PIN.json
+          test -f node_modules/@proofscript/pskernel-lean-wasm/LEAN_SOURCE_PIN.json
+      - name: Real native and Wasm kernel admission acceptance/rejection
+        working-directory: pscv0/v6
+        env:
+          PSCV_REAL_KERNELS: "1"
+        run: npm run test:real-kernels

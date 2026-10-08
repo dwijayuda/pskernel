@@ -1,0 +1,10 @@
+{
+  "name": "@proofscript/pscv-extensions",
+  "version": "0.0.1-dev",
+  "description": "Data-only, fail-closed extension manifests for the PSCV V6 compiler",
+  "type": "module",
+  "files": ["index.mjs", "README.md"],
+  "exports": { ".": "./index.mjs" },
+  "engines": { "node": ">=22" },
+  "license": "UNLICENSED"
+}

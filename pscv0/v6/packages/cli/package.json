@@ -1,0 +1,11 @@
+{
+  "name": "@proofscript/pscv-cli",
+  "version": "0.0.1-dev",
+  "description": "Development CLI for the new minimal PSCV core; not a complete PSCV compiler",
+  "type": "module",
+  "files": ["bin/psc-core.mjs", "README.md"],
+  "bin": { "psc-core": "./bin/psc-core.mjs" },
+  "dependencies": { "@proofscript/pscv-core": "0.0.1-dev" },
+  "engines": { "node": ">=22" },
+  "license": "UNLICENSED"
+}

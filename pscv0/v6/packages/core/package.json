@@ -1,0 +1,14 @@
+{
+  "name": "@proofscript/pscv-core",
+  "version": "0.0.1-dev",
+  "description": "Minimal authority-conscious PSCV compiler composition boundary",
+  "type": "module",
+  "files": ["index.mjs", "README.md"],
+  "exports": { ".": "./index.mjs" },
+  "dependencies": {
+    "@proofscript/pscv-kernel": "0.0.1-dev",
+    "@proofscript/pscv-extensions": "0.0.1-dev"
+  },
+  "engines": { "node": ">=22" },
+  "license": "UNLICENSED"
+}

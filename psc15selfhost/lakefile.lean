@@ -333,6 +333,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionUniformOccurrenceConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionUniformPreflightConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionNoTargetOccurrenceConfiguration,
+    `Ps.KernelCore.Metatheory.AdmissionRecursiveArgumentConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionParameterConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionNestedHeaderConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionNestedNoAuxConfiguration,

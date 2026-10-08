@@ -1,13 +1,19 @@
 {
   "formatVersion": 1,
-  "kind": "language-and-migration-proposal",
+  "kind": "language-contract-and-migration-ledger",
   "id": "PSC0-SH/1",
-  "status": "proposed",
+  "status": "bounded-recursion-compiler-qualified; strict-runtime-enforcement-pending",
   "activation": {
     "selectedByPsconfig": false,
     "enforcementInstalled": false,
-    "compilerImplementationChanged": false,
-    "firstQualifyingSeed": null
+    "compilerImplementationChanged": true,
+    "firstQualifyingSeed": {
+      "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+      "runId": 37831951758
+    },
+    "qualifiedSeedManifest": "selfhost-seed.json",
+    "enforcementMeaning": "Complete strict profile enforcement remains pending; bounded recursion checks are implemented."
   },
   "repository": "dwijayuda/pskernel",
   "baselineRef": "37f63c39d4a07189938046c64152bba25d789450",
@@ -49,7 +55,8 @@
       "fixtures": [
         "parser-printer-parity",
         "declaration-signature-required"
-      ]
+      ],
+      "baseline": "implemented"
     },
     {
       "id": "data.regular-algebraic",
@@ -59,7 +66,8 @@
       "fixtures": [
         "generic-list-record-constructor",
         "record-field-layout"
-      ]
+      ],
+      "baseline": "implemented"
     },
     {
       "id": "functions.rank1",
@@ -71,7 +79,8 @@
         "returned-function",
         "reject-higher-rank-runtime",
         "reject-polymorphic-recursion"
-      ]
+      ],
+      "baseline": "implemented-with-runtime-limits"
     },
     {
       "id": "recursion.structural",
@@ -83,18 +92,19 @@
         "nat-predecessor",
         "reject-original-major",
         "reject-unrelated-child"
-      ]
+      ],
+      "baseline": "implemented-in-direct-match-form"
     },
     {
       "id": "recursion.varying-parameters",
       "tier": "required-new",
-      "current": "not-implemented",
+      "current": "compiler-qualified-bounded-generalization",
       "proposal": "Typed generalization of nondependent varying value parameters into a function-valued motive; canonical internal worker preserves fixed/major erasure parameters, and a wrapper preserves the original public binder order and kinds.",
       "implementationAreas": [
+        "packages/elab/src/Ps/Elab/Recursion.lean",
         "packages/elab/src/Ps/Elab/Declaration.lean",
         "packages/elab/src/Ps/Elab/Context.lean",
-        "packages/elab/src/Ps/Elab/Term.lean",
-        "new isolated elab recursion planning module"
+        "packages/elab/src/Ps/Elab/Term.lean"
       ],
       "fixtures": [
         "list-accumulator",
@@ -108,6 +118,17 @@
         "state-before-major",
         "stable-generic-and-erased-proof-parameters",
         "public-calling-convention"
+      ],
+      "baseline": "not-implemented",
+      "firstQualifiedSeed": {
+        "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+        "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "runId": 37831951758
+      },
+      "evidenceFiles": [
+        "scripts/sh1-capabilities.mjs",
+        "test/fixtures/selfhost-sh1-accumulators.lean",
+        "test/fixtures/selfhost-sh1-accumulators.ps"
       ]
     },
     {
@@ -119,7 +140,8 @@
         "except-first-error",
         "state-on-error",
         "short-circuit"
-      ]
+      ],
+      "baseline": "implemented"
     },
     {
       "id": "runtime.baseline-scalars",
@@ -131,12 +153,13 @@
         "nat-zero-divisors",
         "unicode-scalar",
         "utf8-position"
-      ]
+      ],
+      "baseline": "implemented-on-original-ts-lane"
     },
     {
       "id": "runtime.closed-ir",
       "tier": "required-new-before-strict-promotion",
-      "current": "raw-ir-no-independent-validator",
+      "current": "report-only-inventory-implemented; strict-validation-pending",
       "proposal": "Report original IR first; enforce scope, arity, layouts, primitive signatures, runtime type closure and import closure once inventoried. Include literal/result-type and selected scalar range/width invariants.",
       "fixtures": [
         "unbound-runtime-variable",
@@ -148,7 +171,17 @@
         "nonexhaustive-match",
         "literal-type-consistency",
         "selected-scalar-range-width"
-      ]
+      ],
+      "baseline": "raw-ir-no-independent-validator",
+      "observed": {
+        "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+        "traversalComplete": true,
+        "findings": {
+          "call-arity-needs-expression-typing": 245,
+          "call-type-arity": 19
+        },
+        "strictSh1Qualified": false
+      }
     },
     {
       "id": "source.declaration-wrappers",
@@ -160,7 +193,8 @@
         "let-before-match",
         "alias-provenance",
         "type-ascription-not-dropped"
-      ]
+      ],
+      "baseline": "root-match-discovery-only"
     },
     {
       "id": "inference.expected-lambda",
@@ -171,7 +205,8 @@
         "known-expected-domain",
         "unknown-domain-requires-annotation",
         "shadowing-capture"
-      ]
+      ],
+      "baseline": "typed-lambda-binders-required"
     },
     {
       "id": "source.nested-patterns",
@@ -183,7 +218,8 @@
         "nested-default-order",
         "exhaustiveness",
         "nested-child-provenance"
-      ]
+      ],
+      "baseline": "flat-pattern-ast"
     },
     {
       "id": "effects.except-do",
@@ -195,7 +231,8 @@
         "typed-bind",
         "no-later-callback-after-error",
         "native-generated-parity"
-      ]
+      ],
+      "baseline": "custom-compilerBind-compilerPure-dsl-only"
     },
     {
       "id": "runtime.total-array",
@@ -206,7 +243,8 @@
         "get-default",
         "set-if-in-bounds",
         "array-copy-semantics"
-      ]
+      ],
+      "baseline": "ts-array-intrinsics-exist-no-direct-compiler-source-use"
     },
     {
       "id": "runtime.extra-scalars",
@@ -217,7 +255,8 @@
         "target-word-size-required",
         "wrapping-integer",
         "float32-rounding"
-      ]
+      ],
+      "baseline": "partial-ts-emitter-support"
     },
     {
       "id": "targets.additional-backends",
@@ -227,7 +266,8 @@
       "fixtures": [
         "target-runtime-contract",
         "target-current-source-generations"
-      ]
+      ],
+      "baseline": "copied-packages-incompatible-with-original-ir"
     }
   ],
   "excludedFromMinimum": [
@@ -254,21 +294,24 @@
     {
       "id": "M0",
       "name": "Recoverable baseline",
-      "dependsOn": []
+      "dependsOn": [],
+      "status": "historical-recovery-and-source-based-qualified-recipe"
     },
     {
       "id": "M1",
       "name": "Current-source development and preparation seam",
       "dependsOn": [
         "M0"
-      ]
+      ],
+      "status": "generated-tested-and-development-gate-passed"
     },
     {
       "id": "M2",
       "name": "Typed changing-parameter recursion",
       "dependsOn": [
         "M0"
-      ]
+      ],
+      "status": "compiler-qualified"
     },
     {
       "id": "M3",
@@ -276,21 +319,24 @@
       "dependsOn": [
         "M1",
         "M2"
-      ]
+      ],
+      "status": "initial-compiler-qualified-and-provider-accepted"
     },
     {
       "id": "M4",
       "name": "Source-family migration",
       "dependsOn": [
         "M3"
-      ]
+      ],
+      "status": "Foundation.List-entering-qualification"
     },
     {
       "id": "M5",
       "name": "Bounded authoring conveniences",
       "dependsOn": [
         "M3"
-      ]
+      ],
+      "status": "planned-extensions"
     },
     {
       "id": "M6",
@@ -304,7 +350,8 @@
         "M3",
         "M4",
         "M5"
-      ]
+      ],
+      "status": "diagnostic-inventory-only"
     },
     {
       "id": "M7",
@@ -313,7 +360,8 @@
         "M4",
         "M6"
       ],
-      "additionalGate": "All enabled capabilities used by authored .ps source are qualified; unrelated optional M5 conveniences are not prerequisites."
+      "additionalGate": "All enabled capabilities used by authored .ps source are qualified; unrelated optional M5 conveniences are not prerequisites.",
+      "status": "optional-not-started"
     }
   ],
   "cacheContract": {
@@ -365,21 +413,24 @@
   },
   "concurrentWork": {
     "branch": "psc0/native-core-selfhost-v1",
-    "observedRef": "b109be0075630dd17b791e3b0c5fcad016df53e8",
-    "policy": "Reuse accepted provider/fast-path work; do not duplicate or modify kernel/provider implementation in this language proposal."
+    "observedRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "policy": "Reuse accepted provider/fast-path work; do not duplicate or modify kernel/provider implementation in this language proposal.",
+    "nativeBaselineRun": 37825822957
   },
   "nonClaims": [
-    "New parser or normalizer implementation",
-    "Fresh compiler build or benchmark",
-    "New compiler fixed point",
-    "Native checked full-corpus success",
+    "Unrestricted PSC1 or Lean support",
+    "Strict SH/1 runtime enforcement",
     "Copied backend integration",
-    "Measured performance speedup"
+    "Conformance on every platform or target",
+    "A measured speedup of the generated compiler itself",
+    "Kernel implementation or metatheory changes on this branch"
   ],
   "documents": {
     "analysis": "README.md",
     "specification": "SPEC.md",
-    "migration": "MIGRATION.md"
+    "migration": "MIGRATION.md",
+    "implementation": "IMPLEMENTATION.md",
+    "evidence": "qualification-evidence.json"
   },
   "qualification": {
     "compilerQualified": {
@@ -424,6 +475,12 @@
     "identicalInput": "Same exact raw current authored source A; repeat for migrated source B.",
     "equality": "Canonical source, ordered admissions, TS and JS products of C1(A) versus C2(A), associated with C2 versus C3.",
     "oldSeedBoundary": "C1 versus C2 compiler artifacts may differ.",
-    "receipts": "Record each execution separately; provenance fields are not required to be byte equal."
+    "receipts": "Record each execution separately; provenance fields are not required to be byte equal.",
+    "afterSeedPromotion": [
+      "Q is the pinned qualified compiler from A",
+      "C1 = Q(B)",
+      "C2 = C1(B)",
+      "C3 = C2(B)"
+    ]
   }
 }

@@ -7,14 +7,22 @@ const cases = [
     'compiler.psCompilerPrepareSources(project.sourceKind, sources)',
     'compiler.psCompilerTypeScriptFromPrepared(prepared)',
   ]],
+  // Shape/ownership guard for the pure prefix seam. Generated session admission
+  // correspondence and transition cases provide the semantic evidence.
   ['packages/compiler/src/Ps/Compiler/Api.lean', [
-    'psCompilerElaborateSourcesWorker sourceKind rest',
-    'match psCompilerParseSource sourceKind source with',
-    'match psElabModule environment sourceModule with',
-    'smaller elaborated.environment',
-    '(psListAppend (psListReverse elaborated.declarations) declarationsRev)',
-    'psCompilerElaborateSourcesWorker sourceKind sources psSelfHostProdPreludeEnvironment List.nil',
-    '| Except.ok elaborated => psCompilerPrepareElaborated elaborated',
+    'sourceKind psSelfHostProdPreludeEnvironment List.nil',
+    'psCompilerPreparationStepParsed state sourceModule',
+    'state.sourceKind elaborated.environment',
+    'PsElabModuleResult.mk state.environment (psListReverse state.declarationsRev)',
+    'psCompilerPrepareElaborated (psCompilerPreparationElaborated state)',
+    '(PsCompilerPreparationState.mk sourceKind environment declarationsRev) with',
+    'psCompilerPreparationSourcesWorker rest',
+    'match psCompilerParseSource state.sourceKind source with',
+    'match psElabModule state.environment sourceModule with',
+    '| Except.ok next => smaller next',
+    '(psListAppend (psListReverse elaborated.declarations) state.declarationsRev)',
+    '(psCompilerPreparationStart sourceKind) with',
+    '| Except.ok state => psCompilerPreparationFinish state',
     'Except.ok (PsCompilerAdmissionReadyModule.mk elaborated.declarations)',
     'match psEncodeCheckedAdmissionsCanonical prepared.declarations with',
     'Except.ok (String.Internal.append canonicalAdmissions "\\n")',
@@ -45,8 +53,22 @@ for (const [file, markers] of cases) {
   for (const marker of markers) assert.throws(() => validate(source.replaceAll(marker, 'removed')));
 }
 const api = await readFile(new URL('../packages/compiler/src/Ps/Compiler/Api.lean', import.meta.url), 'utf8');
-const prepared = api.slice(api.indexOf('structure PsCompilerAdmissionReadyModule'), api.indexOf('def psCompilerTranslateSource'));
-assert.deepEqual([...prepared.matchAll(/^  (\w+) :/gm)].map(item => item[1]), ['declarations']);
+function structureFields(name) {
+  const lines = api.split(/\r?\n/u);
+  const start = lines.indexOf('structure ' + name + ' where');
+  assert(start !== -1, 'missing preparation structure: ' + name);
+  const fields = [];
+  for (let index = start + 1; index < lines.length; index++) {
+    const line = lines[index];
+    if (line !== '' && !/^[ \t]/u.test(line)) break;
+    const field = /^[ \t]+([^ \t:]+)[ \t]*:/u.exec(line);
+    if (field) fields.push(field[1]);
+  }
+  return fields;
+}
+assert.deepEqual(structureFields('PsCompilerAdmissionReadyModule'), ['declarations']);
+assert.deepEqual(structureFields('PsCompilerPreparationState'),
+  ['sourceKind', 'environment', 'declarationsRev']);
 assert(!api.includes('prepared.canonicalAdmissions'), 'admissions must come from the declarations, never a cached serialization');
 const session = await readFile(new URL('./checked-prepared-session.mjs', import.meta.url), 'utf8');
 assert(session.indexOf('freezeGraph(prepared);') < session.indexOf('const admissions = admissionsFrom(compiler, prepared);'));

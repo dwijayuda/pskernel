@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+  "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+  "moduleCount": 56,
+  "evidence": "compiler-qualified-current-source-fixed-point",
+  "equation": "C1=S0(A); C2=C1(A); C3=C2(A); compare C2 and C3 products",
+  "rawAuthoringSourceConsumedEveryGeneration": true,
+  "artifacts": {
+    "canonicalSurfaceSourceSha256": "bb7fd97996339bdde40c3a92280d69a05d57f01f51626226a10a85aa548ebf41",
+    "normalizedCanonicalAdmissionsSha256": "15c85c7b8b6102472ff261c96c6901d4eb133c5a9443e06323a7d4b012ae6397",
+    "typescriptSha256": "b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1",
+    "javascriptSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096"
+  },
+  "c1CompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+  "c2CompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+  "c3CompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+  "rawCapabilityKinds": [
+    "lean",
+    "proofScript"
+  ],
+  "canonicalSourceContract": "Existing surface printer; normalized worker representation is compared through canonical admissions.",
+  "runtimeIrStrictQualification": "not-claimed",
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

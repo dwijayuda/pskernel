@@ -590,6 +590,14 @@ if (command === 'seed-identity') {
 } else if (command === 'candidate') {
   const authoring = await selectedAuthoringSeed(option(args, '--seed', undefined));
   const closure = await sourceClosure(root);
+  const libraryCompiler = await loadCompiler(authoring.compilerPath, {
+    expectedSha256: authoring.expectedSha256,
+  });
+  await runFoundationConformance({
+    ...libraryCompiler,
+    executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',
+    root, outDir: path.join(outDir, 'foundation'), tsc,
+  });
   const generation = await buildGeneration(authoring.compilerPath, closure, path.join(outDir, 'C1'), {
     expectedSha256: authoring.expectedSha256, authoringSeed: authoring.provenance,
   });
@@ -606,11 +614,6 @@ if (command === 'seed-identity') {
   });
   await runIterationConformance({
     ...loaded, compilerPath: generation.outputJs, root, outDir: path.join(outDir, 'iteration'),
-  });
-  await runFoundationConformance({
-    compiler: generation.compiler, compilerSha256: generation.compilerSha256,
-    executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',
-    root, outDir: path.join(outDir, 'foundation'), tsc,
   });
   assert.equal((await sourceClosure(root)).sha256, closure.sha256, 'PSC0_SH1_SOURCE_CHANGED_DURING_RUN');
   process.stdout.write('PSC0_SH1_CANDIDATE: PASS (verified selected seed, current raw source and generated capability execution)\n');

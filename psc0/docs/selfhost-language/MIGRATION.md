@@ -1,6 +1,6 @@
 # PSC0-SH/1 implementation and migration plan
 
-Status: proposed sequence; no compiler, host or kernel implementation is changed by this research branch. Baseline and scope are defined in [README.md](README.md). Language requirements are in [SPEC.md](SPEC.md).
+Status: M0–M3 have an initial qualified implementation at `e91b9558d665879871b8bf0893915ae64b27c7fe`; Foundation.List is the bounded M4 source checkpoint now entering qualification. M5 remains optional follow-on authoring work, M6 has a diagnostic inventory, and M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The original baseline and scope are in [README.md](README.md), and language requirements are in [SPEC.md](SPEC.md).
 
 ## 1. Execute two coordinated tracks
 
@@ -64,7 +64,7 @@ A small new typed recursion planning/normalization module in `packages/elab`, in
 - Start with direct explicit matches, ordinary non-indexed constructors and Nat successor fields.
 - Emit the canonical internal worker with fixed/major outer parameters and generalized state in the motive; preserve the public interface with a wrapper. Keep the old recursive-call validator and the existing erasure parameter distinction for this representation.
 - Add positive and negative cases before migrating compiler source.
-- Expose deterministic normalized-source output and origin mapping where source emission needs it.
+- Retain source spans through normalization. Use the existing printer for deterministic canonical surface source, and compare lowered worker Core through canonical admissions; a syntax-only printer is not labeled semantic normalization.
 
 **Acceptance**
 
@@ -95,6 +95,21 @@ For each family, produce a dry-run inventory with source location, detected capa
 **Acceptance per family**
 
 Changed source is accepted by the promoted generated compiler; relevant semantic and boundary fixtures pass; expected structural differences are reviewed; existing loopification is preserved or its change is explained. Retire only the shape guards covered by replacement capability tests. Commit each family separately so rollback is a normal revert.
+
+
+### Concrete next candidates after the Foundation checkpoint
+
+Use the same qualified capability for these small follow-on changes, retaining public worker/wrapper names and complete types initially. Each family gets a direct behavior comparison before expensive compiler generation. Existing primitive, admission and unrelated source guards remain in force.
+
+| Order | Candidate | Existing spelling guard to replace | Required correspondence |
+| --- | --- | --- | --- |
+| 1 | `psExprApplyManyWorker` in `Elab/Term.lean` | `check-elab-apply-many-selfhost-source-syntax.mjs` | Empty list preserves the starting expression; two arguments build left-associated applications in order; an existing application prefix is preserved |
+| 2 | `psErasureAddUniqueStringWorker` in `Erasure/Definition.lean` | `check-erasure-add-unique-string-selfhost-source-syntax.mjs` | No/one/multiple collisions, duplicates, zero fuel and exact exhaustion suffix behavior |
+| 3 | `psExprAppViewAccWorker` in `Elab/Term.lean` | `check-elab-app-view-selfhost-source-syntax.mjs` | Head and argument order, a nonempty accumulator suffix, direct expected trees and a construction/decomposition round trip |
+
+The first and third workers descend through immediate List/PsExpr constructor fields and change a nondependent value accumulator. The second descends through Nat fuel with a fixed used-name list and a changing String base. None requires a new parser or termination capability. Preserve the unique-name helper's existing exhaustion behavior: with zero fuel and base `x`, it returns `x_overflow`; a collision at fuel one can return `x__overflow`. An algorithm change belongs in a separate checkpoint.
+
+Retire a spelling guard only when its purpose is covered by the new capability/correspondence evidence. Keep the normalizer and broad high-fan-in refactors out of the first follow-on family.
 
 ### M5 — add conveniences in measured priority order
 
@@ -152,12 +167,12 @@ Missing evidence is a pending claim, not a reason to rename admission-ready outp
 
 ## 4. The efficient development workflow
 
-The following workflow names describe functionality to implement. They are not commands already installed by this research branch.
+The implemented ordinary route is `npm run dev:sh1`, which builds current native PSC, emits N1 from raw current source and exercises N1 on the bounded language/session/CLI corpus. `npm run iterate:sh1 -- ... --loop` provides optional resident preparation reuse. Full selected-seed C1/C2/C3 and provider checks remain promotion commands, selected in CI by `[sh1-qualify]` or a full manual dispatch. Exact usage, recovery and measured scope are in [IMPLEMENTATION.md](IMPLEMENTATION.md).
 
 | Workflow | When | Work and claim |
 | --- | --- | --- |
 | Edit feedback | Every edit | Real parser/profile checks, changed preparation suffix, focused diagnostics; no fixed-point claim |
-| Candidate build/test | Compiler behavior change | Build from current source with the pinned seed, load the resulting candidate, run relevant capability/runtime cases |
+| Candidate build/test | Ordinary compiler edits | Build native PSC incrementally, emit N1 from raw current source, then execute the generated compiler's bounded capability/runtime/session cases; no selected-seed ancestry claim |
 | Current-source self-application | Feature or source-family milestone | Successive current-source generations and equality, with exact provenance |
 | Checked qualification | Seed promotion and relevant provider/semantic changes | Required admissions accepted by selected provider plus source/generation evidence |
 | Historical reproduction | Bootstrap changes or explicit recovery audit | Reproduce preserved old source/seed contract independently |

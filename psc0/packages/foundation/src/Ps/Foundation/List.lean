@@ -14,22 +14,20 @@ def psListAny {alpha : Type} (predicate : alpha -> Bool) (values : List alpha) :
   | List.cons value rest =>
       if predicate value then true else psListAny predicate rest
 
-def psListReverseAcc {alpha : Type} (values : List alpha) : List alpha -> List alpha :=
+def psListReverseAcc {alpha : Type}
+    (values : List alpha) (acc : List alpha) : List alpha :=
   match values with
-  | List.nil => fun (acc : List alpha) => acc
-  | List.cons value rest =>
-      let smaller : List alpha -> List alpha := psListReverseAcc rest;
-      fun (acc : List alpha) => smaller (List.cons value acc)
+  | List.nil => acc
+  | List.cons value rest => psListReverseAcc rest (List.cons value acc)
 
 def psListReverse {alpha : Type} (values : List alpha) : List alpha :=
   psListReverseAcc values List.nil
 
-def psListAppend {alpha : Type} (left : List alpha) : List alpha -> List alpha :=
+def psListAppend {alpha : Type}
+    (left : List alpha) (right : List alpha) : List alpha :=
   match left with
-  | List.nil => fun (right : List alpha) => right
-  | List.cons value rest =>
-      let smaller : List alpha -> List alpha := psListAppend rest;
-      fun (right : List alpha) => List.cons value (smaller right)
+  | List.nil => right
+  | List.cons value rest => List.cons value (psListAppend rest right)
 
 def psListMap {alpha beta : Type} (convert : alpha -> beta) (values : List alpha) : List beta :=
   match values with
@@ -48,22 +46,21 @@ def psListMapExcept {alpha beta error : Type}
           | Except.error failure => Except.error failure
           | Except.ok results => Except.ok (List.cons result results)
 
-def psListTake {alpha : Type} (count : Nat) : List alpha -> List alpha :=
+def psListTake {alpha : Type}
+    (count : Nat) (values : List alpha) : List alpha :=
   match count with
-  | Nat.zero => fun (_values : List alpha) => List.nil
+  | Nat.zero => List.nil
   | Nat.succ remaining =>
-      let smaller : List alpha -> List alpha := psListTake remaining;
-      fun (values : List alpha) =>
-        match values with
-        | List.nil => List.nil
-        | List.cons value rest => List.cons value (smaller rest)
+      match values with
+      | List.nil => List.nil
+      | List.cons value rest => List.cons value (psListTake remaining rest)
 
-def psListZip {alpha beta : Type} (left : List alpha) : List beta -> List (Prod alpha beta) :=
+def psListZip {alpha beta : Type}
+    (left : List alpha) (right : List beta) : List (Prod alpha beta) :=
   match left with
-  | List.nil => fun (_right : List beta) => List.nil
+  | List.nil => List.nil
   | List.cons value rest =>
-      let smaller : List beta -> List (Prod alpha beta) := psListZip rest;
-      fun (right : List beta) =>
-        match right with
-        | List.nil => List.nil
-        | List.cons other others => List.cons (Prod.mk value other) (smaller others)
+      match right with
+      | List.nil => List.nil
+      | List.cons other others =>
+          List.cons (Prod.mk value other) (psListZip rest others)

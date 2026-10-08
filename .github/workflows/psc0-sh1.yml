@@ -2,7 +2,7 @@ name: PSC0 SH1 language qualification
 
 on:
   push:
-    branches: ['psc0/sh1-development-gate-v1']
+    branches: ['psc0/sh1-implementation-v1']
     paths:
       - 'psc0/packages/bootstrap/**'
       - 'psc0/packages/foundation/**'
@@ -106,6 +106,7 @@ jobs:
           node --check scripts/sh1-foundation-conformance.mjs
           node check-psc1-source.mjs
           node scripts/bootstrap-root-minimality-tests.mjs
+          node scripts/check-modular-preparation-source.mjs
       - name: Restore the selected qualified compiler bytes
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
         uses: actions/cache/restore@v4
@@ -184,6 +185,38 @@ jobs:
       - name: Verify or recover the selected qualified authoring seed
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
         run: node scripts/sh1-qualify.mjs recover-qualified-seed --source ../qualified-source/psc0 --artifact ../qualified-artifact/dist/sh1 --out dist/sh1-seed-recovery
+      - name: Report retained seed IR type-argument findings
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          const paths = [
+            '../qualified-artifact/dist/sh1/C3/original-ir-inventory.json',
+            'dist/sh1-seed-recovery/C2/original-ir-inventory.json',
+          ];
+          let reported = false;
+          for (const path of paths) {
+            let report;
+            try { report = JSON.parse(await readFile(path, 'utf8')); }
+            catch (error) {
+              if (error.code !== 'ENOENT') console.log('PSC0_SH1_IR_DETAIL_UNAVAILABLE: ' + path + ': ' + error.message);
+              continue;
+            }
+            if (report?.kind !== 'psc0-original-ir-inventory' || !Array.isArray(report.findings)) {
+              console.log('PSC0_SH1_IR_DETAIL_UNAVAILABLE: ' + path + ': unexpected report shape');
+              continue;
+            }
+            const findings = report.findings.filter(item => item?.code === 'call-type-arity');
+            console.log('PSC0_SH1_IR_DETAIL_COUNTS: ' + JSON.stringify({
+              path, traversalComplete: report.traversalComplete, findingCounts: report.findingCounts,
+              printedTypeArityFindings: findings.length, omittedFindingDetails: report.omittedFindingDetails,
+            }));
+            for (const finding of findings) console.log('PSC0_SH1_IR_TYPE_ARITY: ' + JSON.stringify(finding));
+            reported = true;
+            break;
+          }
+          if (!reported) console.log('PSC0_SH1_IR_DETAIL_SKIP: no readable retained or recovery original-IR report');
+          NODE
       - name: Retain the verified qualified authoring seed
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' && steps.qualified-cache.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4

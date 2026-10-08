@@ -126,7 +126,9 @@
     "build:auto": "node scripts/build-auto.mjs",
     "build:dual": "npm run build:lake && npm run build:psc",
     "generation:next": "node scripts/selfhost-generation.mjs",
-    "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs"
+    "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs",
+    "dev:sh1": "lake build psc1 && node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1",
+    "iterate:sh1": "node scripts/sh1-iterate.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"

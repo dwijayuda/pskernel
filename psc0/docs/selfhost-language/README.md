@@ -1,6 +1,8 @@
 # PSC0 self-host language: findings and decisions
 
-Status: research and implementation proposal, 2026-10-08. This directory does not activate a language profile, change a compiler, replace a seed, or claim a newly reproduced fixed point.
+Status: historical research baseline with a working implementation, 2026-10-08. The bounded recursion capability is compiler-qualified at `e91b9558d665879871b8bf0893915ae64b27c7fe`, and its exact admissions passed the pinned provider. Foundation.List is entering the next source-migration qualification. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the implemented commands and boundaries; [qualification-evidence.json](qualification-evidence.json) records exact results. Strict runtime profile enforcement remains pending.
+
+The audit and its source citations below describe the immutable baseline, not a claim that implementation is still absent. Later implementation evidence is recorded separately; the historical 55-module inventory remains unchanged.
 
 Baseline: `dwijayuda/pskernel@37f63c39d4a07189938046c64152bba25d789450`, specifically `psc0/`. The later `pscv0/` implementation was not used as evidence of capabilities present in PSC0.
 

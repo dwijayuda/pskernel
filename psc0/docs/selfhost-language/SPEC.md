@@ -1,6 +1,6 @@
-# PSC0-SH/1: proposed self-host authoring contract
+# PSC0-SH/1: self-host authoring contract and capability plan
 
-Status: **proposed, not implemented or selected by psconfig**. The words MUST and MUST NOT below describe acceptance requirements for a future implementation. They are not claims about the current compiler.
+Status: the bounded varying-parameter recursion capability is **compiler-qualified** at `e91b9558d665879871b8bf0893915ae64b27c7fe`; its exact admissions passed the pinned provider. The full strict PSC0-SH/1 profile remains pending runtime enforcement (M6), and psconfig retains the existing PSC1 bootstrap lane. The words MUST and MUST NOT describe the complete contract, including obligations still pending. [IMPLEMENTATION.md](IMPLEMENTATION.md) defines the implemented checkpoint boundaries; [qualification-evidence.json](qualification-evidence.json) distinguishes compiler, provider and strict-runtime evidence.
 
 Scope: the PSC0 compiler implementation and its portable dependencies. Initial executable target: existing TypeScript-to-JavaScript bootstrap lane. Initial authoritative source: PSC1-compatible `.lean`, parsed by PSC0's own frontend. Existing generated `.ps` remains the canonical exchange form.
 
@@ -71,7 +71,7 @@ The portable closure MUST remain closed over a declared runtime primitive/prelud
 
 ### Desired authoring form
 
-The following is an illustrative proposed SH/1 example. It is not asserted to compile with the current PSC0 generated compiler.
+The following authoring form is exercised by the qualified generated-compiler corpus. Its supported boundaries are the explicit typed/generalization conditions below.
 
 ```lean
 def reverseInto {alpha : Type}
@@ -83,7 +83,7 @@ def reverseInto {alpha : Type}
       reverseInto tail (List.cons item out)
 ```
 
-The current grammar can express this form, but the recursive-call validator rejects the changing explicit accumulator. Existing code manually uses a function-valued worker instead.[TERM], [LIST]
+The historical grammar can express this form, but its stable recursive-call validator rejects the changing explicit accumulator. The enhanced ordinary declaration path now applies typed normalization on that precise refusal, while the explicit stable path retains the historical behavior. Existing worker-shaped source remains accepted.[TERM], [LIST]
 
 The normalized form is schematically:
 
@@ -190,7 +190,7 @@ Kernel admission establishes core typing relative to its environment. The IR che
 
 ## 7. Capability evidence and enforcement
 
-Each capability has a stable identifier, current support status, proposed semantics, negative cases, test family and first qualifying seed. The proposal JSON records these fields without pretending that a test suite already exists.
+Each capability has a stable identifier, current support status, proposed semantics, negative cases, test family and first qualifying seed. The capability JSON distinguishes the historical baseline, implemented/qualified evidence and planned fixture families. A planned fixture name alone does not grant support.
 
 A future profile checker MUST parse source through the real frontend. Lexical host/API bans may remain an early filter, but a regular-expression list cannot establish support for typed recursion or runtime representation.
 

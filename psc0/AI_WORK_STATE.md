@@ -2,6 +2,52 @@
 
 Updated: 2026-10-08 UTC.
 
+## Current checkpoint: qualified seed and first source migration
+
+Initial implementation A (e91b9558d665879871b8bf0893915ae64b27c7fe) passed
+run 37831951758. Its C1, C2 and C3 canonical surface, canonical admissions,
+TypeScript and JavaScript products all agree. The generated compiler digest is
+9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096.
+The separately pinned provider at 963030dc2d154008fccc82e7c8ed29331f138799
+accepted both distinct exact admission streams from this qualification.
+
+This checkpoint fast-forwards the implementation branch through the successful
+host-tooling checkpoint 9641928bcf7d5394f46e19a31a8ae3fd096d44b5 and its
+evidence child 8e9ed135249705e16234e2cdaa80b5dbb9a57774. It installs the
+actual A source/toolchain/product pin in selfhost-seed.json, preserves the
+original qualification and provider receipts, and restores the workflow branch
+filter to psc0/sh1-implementation-v1.
+
+Foundation.List is the only portable source family changed in this checkpoint:
+reverseAcc, append, take and zip now expose ordinary explicit value parameters.
+Public names, full Pi types, binder kinds and argument order are preserved.
+The selected qualified seed checks public-type alpha-equality and the bounded
+behavior/partial-application matrix before expensive C1 generation. This
+migrated source B has not yet earned its own C2/C3 or provider result.
+
+Normal pushes use the native candidate gate; [sh1-qualify] requests the
+selected-seed C1/C2/C3 promotion milestone. dev:sh1 and iterate:sh1 are
+additive package commands. Preserve the immutable S0 -> A -> B recovery path:
+historical S0 rebuilds A, while verified A accepts B's new authoring forms.
+A remains the selected seed until a later capability requires an explicit
+parent-seed recovery plan.
+
+The early modular-preparation source guard now checks the actual pure prefix
+API and independently delimits its two structures, while preserving every
+unchanged checked-session boundary. The workflow also prints retained A IR
+type-argument findings when available; that read-only report is not a gate.
+
+Strict PSC0-SH/1 runtime enforcement is still pending. A's complete diagnostic
+IR traversal reports 245 calls needing expression typing and 19 type-argument
+arity findings, with no other recorded categories. Current capability, provider
+acceptance and strict-runtime claims remain separate.
+
+Next: finish B's one full cloud qualification, record its exact receipts and
+public-type/behavior correspondence, and publish the final migration guidance.
+No kernel/provider implementation changes, local execution or extra full runs.
+
+Earlier checkpoint notes below retain their original execution-time status.
+
 ## Active objective
 
 Implement the accepted self-host authoring and iteration plan from research commit
@@ -24,7 +70,7 @@ The historical 55-module record remains immutable.
 - Use focused validation for a complete implementation slice, then current-source
   C2/C3 qualification at the milestone.
 
-## Current work
+## Implemented architecture
 
 - Recursion: canonical stable/major worker plus function-valued generalized state;
   preserve public binder kinds and argument order with a wrapper. Reject unsupported
@@ -51,7 +97,7 @@ worker/core structure is represented by canonical admissions. The minimum checkp
 does not add a second elaboration-aware source printer. Generated compilers must
 consume raw authored forms, so the new lowering path is exercised directly.
 
-## Evidence and next checkpoint
+## Initial implementation checkpoint (historical)
 
 The first coherent implementation checkpoint contains portable recursion lowering,
 preparation/session reuse, raw capability fixtures, C2/C3 qualification, diagnostic IR

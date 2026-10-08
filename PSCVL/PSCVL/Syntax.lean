@@ -1,4 +1,5 @@
 import Lean
+import PSCVL.Effect
 
 /-!
 A finite, ProofScript-owned syntax bridge. It always lowers to genuine Lean

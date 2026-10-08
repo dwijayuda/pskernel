@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "kind": "language-contract-and-migration-ledger",
   "id": "PSC0-SH/1",
-  "status": "bounded-recursion-and-first-source-family-compiler-qualified; strict-runtime-enforcement-pending",
+  "status": "bounded-recursion-multiple-source-families-and-recursive-generic-erasure-compiler-qualified; strict-runtime-enforcement-pending",
   "activation": {
     "selectedByPsconfig": false,
     "enforcementInstalled": false,
@@ -13,7 +13,7 @@
       "runId": 37831951758
     },
     "qualifiedSeedManifest": "selfhost-seed.json",
-    "enforcementMeaning": "Complete strict profile enforcement remains pending; bounded recursion checks are implemented."
+    "enforcementMeaning": "Complete strict profile enforcement remains pending; bounded recursion and ordered recursive generic-argument preservation have separate compiler/provider evidence."
   },
   "repository": "dwijayuda/pskernel",
   "baselineRef": "37f63c39d4a07189938046c64152bba25d789450",
@@ -159,7 +159,7 @@
     {
       "id": "runtime.closed-ir",
       "tier": "required-new-before-strict-promotion",
-      "current": "report-only-inventory-implemented; strict-validation-pending",
+      "current": "report-only-inventory-and-qualified-recursive-generic-repair; compositional-type-checker-and-strict-validation-pending",
       "proposal": "Report original IR first; enforce scope, arity, layouts, primitive signatures, runtime type closure and import closure once inventoried. Include literal/result-type and selected scalar range/width invariants.",
       "fixtures": [
         "unbound-runtime-variable",
@@ -174,7 +174,36 @@
       ],
       "baseline": "raw-ir-no-independent-validator",
       "observed": {
-        "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
+        "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+        "runId": 37852341550,
+        "generations": [
+          "C2",
+          "C3"
+        ],
+        "traversalComplete": true,
+        "findings": {
+          "call-arity-needs-expression-typing": 244,
+          "call-type-arity": 0
+        },
+        "strictSh1Qualified": false,
+        "countsMeaning": "The original C2/C3 reports contain only the 244 expression-typing category; absent categories are recorded here as zero because traversal completed.",
+        "initialC1": {
+          "executingCompiler": "Selected Q from A",
+          "findings": {
+            "call-arity-needs-expression-typing": 244,
+            "call-type-arity": 19
+          },
+          "interpretation": "Old Q produces C1's full-source IR; the C1 executable already contains the repair."
+        }
+      },
+      "previousObserved": {
+        "sourceRef": "671685c3f0059574405a1e630dd965d421a26f05",
+        "runId": 37851669475,
+        "generations": [
+          "C1",
+          "C2",
+          "C3"
+        ],
         "traversalComplete": true,
         "findings": {
           "call-arity-needs-expression-typing": 244,
@@ -182,20 +211,77 @@
         },
         "strictSh1Qualified": false
       },
-      "previousObserved": {
-        "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
-        "traversalComplete": true,
-        "findings": {
-          "call-arity-needs-expression-typing": 245,
-          "call-type-arity": 19
-        },
-        "strictSh1Qualified": false
-      },
       "nextBoundedWork": [
-        "Preserve ordered current-declaration generic arguments during erasure and recursive-IH reconstruction.",
-        "Validate correctly scoped one-, two- and three-parameter recursive instantiations without declaration-name exemptions.",
-        "Add callee-expression typing and scoped generic substitution; retain separate primitive/layout/semantic obligations."
-      ]
+        "Implement portable typed environments/signatures, callee-expression inference, simultaneous scoped substitution and exact argument/result checking over the existing IR.",
+        "Integrate typed primitive/layout/import closure and explicit exhaustion; have the host report the portable checker.",
+        "Gate strict emission on successful validation of the same IR object and separately close remaining erasure/backend semantic obligations."
+      ],
+      "observedHistory": [
+        {
+          "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+          "traversalComplete": true,
+          "findings": {
+            "call-arity-needs-expression-typing": 245,
+            "call-type-arity": 19
+          },
+          "strictSh1Qualified": false
+        },
+        {
+          "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
+          "traversalComplete": true,
+          "findings": {
+            "call-arity-needs-expression-typing": 244,
+            "call-type-arity": 19
+          },
+          "strictSh1Qualified": false
+        },
+        {
+          "sourceRef": "671685c3f0059574405a1e630dd965d421a26f05",
+          "runId": 37851669475,
+          "generations": [
+            "C1",
+            "C2",
+            "C3"
+          ],
+          "traversalComplete": true,
+          "findings": {
+            "call-arity-needs-expression-typing": 244,
+            "call-type-arity": 19
+          },
+          "strictSh1Qualified": false
+        }
+      ],
+      "completedBoundedWork": {
+        "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+        "runId": 37852341550,
+        "implementation": "Preserve ordered current-declaration generic arguments across runtime/proof binders and restore them during recursive-IH reconstruction.",
+        "scope": "Declaration generics only; no collection of unrelated local type bindings and no declaration-name exemptions.",
+        "focusedEvidence": {
+          "generations": [
+            "N1",
+            "C1",
+            "C2",
+            "C3"
+          ],
+          "genericCounts": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "exactOriginalIrOrderAndRuntimeArity": true,
+          "sameInspectedIrEmitted": true,
+          "behaviorObservationsPerGeneration": 19,
+          "nativeCorrespondenceGenerations": [
+            "N1",
+            "C1"
+          ]
+        },
+        "compilerQualified": true,
+        "selectedProviderAccepted": true,
+        "strictSh1Qualified": false,
+        "evidence": "docs/selfhost-language/qualification-evidence.json"
+      }
     },
     {
       "id": "source.declaration-wrappers",
@@ -342,7 +428,7 @@
       "dependsOn": [
         "M3"
       ],
-      "status": "first-Foundation.List-family-compiler-qualified-and-provider-accepted; further-families-planned"
+      "status": "Foundation.List-and-three-helper-families-compiler-qualified-and-provider-accepted; further-migrations-scoped"
     },
     {
       "id": "M5",
@@ -365,7 +451,7 @@
         "M4",
         "M5"
       ],
-      "status": "diagnostic-inventory-only"
+      "status": "recursive-generic-argument-repair-compiler-qualified-and-provider-accepted; portable-expression-checker-and-strict-enforcement-pending"
     },
     {
       "id": "M7",
@@ -444,7 +530,8 @@
     "specification": "SPEC.md",
     "migration": "MIGRATION.md",
     "implementation": "IMPLEMENTATION.md",
-    "evidence": "qualification-evidence.json"
+    "evidence": "qualification-evidence.json",
+    "runtimeIrPlan": "RUNTIME_IR_PLAN.md"
   },
   "qualification": {
     "compilerQualified": {
@@ -495,13 +582,46 @@
       "C1 = Q(B)",
       "C2 = C1(B)",
       "C3 = C2(B)"
-    ]
+    ],
+    "currentSourceMeaning": "After selecting Q from A, the B symbol in the executable equation denotes each exact current authored source checkpoint, including helper migration H and generic-erasure E.",
+    "inventoryMeaning": "A generation receipt describes IR produced by its executing compiler. E's old-Q C1 full-source report legitimately differs from repaired C2/C3; fixtures executed by new C1 exercise the repair.",
+    "definitionsApplyTo": "The historical initial A qualification before selecting Q; afterSeedPromotion defines later current-source checkpoints."
   },
   "firstSourceMigration": {
     "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
     "sourceClosureSha256": "4b0e8ed609bdf1c6b7063d2d763f39f0d1c8d33ca7be375fa46bcece018c85ae",
     "compilerSha256": "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
     "runId": 37840481558,
+    "compilerQualified": true,
+    "selectedProviderAccepted": true,
+    "strictSh1Qualified": false,
+    "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "evidence": "docs/selfhost-language/qualification-evidence.json"
+  },
+  "additionalSourceMigrations": [
+    {
+      "name": "compiler helper accumulators",
+      "sourceRef": "671685c3f0059574405a1e630dd965d421a26f05",
+      "runId": 37851669475,
+      "functions": [
+        "psExprApplyManyWorker",
+        "psExprAppViewAccWorker",
+        "psErasureAddUniqueStringWorker"
+      ],
+      "compilerQualified": true,
+      "selectedProviderAccepted": true,
+      "strictSh1Qualified": false,
+      "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "evidence": "docs/selfhost-language/qualification-evidence.json",
+      "sourceClosureSha256": "03c493835b44507fbe692f065f953f9c8252a44edcdf7e62932c3608831d0903",
+      "compilerSha256": "fb7708698c333c1985ae82c0eb5b061c8738f41feffc12f3fddccb1c74fc6855"
+    }
+  ],
+  "recursiveGenericErasureRepair": {
+    "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+    "sourceClosureSha256": "d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2",
+    "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+    "runId": 37852341550,
     "compilerQualified": true,
     "selectedProviderAccepted": true,
     "strictSh1Qualified": false,

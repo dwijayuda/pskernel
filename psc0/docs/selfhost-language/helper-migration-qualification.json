@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "sourceRef": "671685c3f0059574405a1e630dd965d421a26f05",
+  "sourceClosureSha256": "03c493835b44507fbe692f065f953f9c8252a44edcdf7e62932c3608831d0903",
+  "moduleCount": 56,
+  "evidence": "compiler-qualified-current-source-fixed-point",
+  "equation": "Q is the pinned qualified compiler from A; C1=Q(B); C2=C1(B); C3=C2(B); compare C2 and C3 products",
+  "authoringSeed": {
+    "kind": "previous-qualified-authoring-seed",
+    "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+    "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+    "identitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+    "independentAlgorithm": false,
+    "priorQualification": {
+      "evidence": "compiler-qualified-current-source-fixed-point",
+      "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+      "runId": 37831951758,
+      "artifactName": "psc0-sh1-e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "claim": "Compiler-qualified seed; selected-provider acceptance is a separate receipt."
+    }
+  },
+  "rawAuthoringSourceConsumedEveryGeneration": true,
+  "artifacts": {
+    "canonicalSurfaceSourceSha256": "901e79c4ec944be1c1cbfb57b9ab59e9c09fd77ed3df1167abf7de14bded6fd3",
+    "normalizedCanonicalAdmissionsSha256": "948e399d1e81f45a80a57fb1ac6b30324057a032e3d6271105c6305c35ebeb76",
+    "typescriptSha256": "a71a617e6cf2bd586fdeea1de575f13c906bc8abc589555dd36cd6cd8e69317c",
+    "javascriptSha256": "fb7708698c333c1985ae82c0eb5b061c8738f41feffc12f3fddccb1c74fc6855"
+  },
+  "c1CompilerSha256": "fb7708698c333c1985ae82c0eb5b061c8738f41feffc12f3fddccb1c74fc6855",
+  "c2CompilerSha256": "fb7708698c333c1985ae82c0eb5b061c8738f41feffc12f3fddccb1c74fc6855",
+  "c3CompilerSha256": "fb7708698c333c1985ae82c0eb5b061c8738f41feffc12f3fddccb1c74fc6855",
+  "rawCapabilityKinds": [
+    "lean",
+    "proofScript"
+  ],
+  "helperSourceCorrespondence": "helpers/receipt.json",
+  "helperRuntimeGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "canonicalSourceContract": "Existing surface printer; normalized worker representation is compared through canonical admissions.",
+  "runtimeIrStrictQualification": "not-claimed",
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

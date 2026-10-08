@@ -1,18 +1,20 @@
 # PSC0 self-host language: findings and decisions
 
-Status: historical research baseline with a working implementation, 2026-10-08. The bounded recursion capability is compiler-qualified at `e91b9558d665879871b8bf0893915ae64b27c7fe`, and its exact admissions passed the pinned provider. Foundation.List at `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0` has passed its own C2/C3 fixed point and exact-stream provider acceptance in run 37840481558. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the implemented commands and boundaries; [qualification-evidence.json](qualification-evidence.json) records exact results. Strict runtime profile enforcement remains pending.
+Status: historical research baseline with a working implementation, 2026-10-08. The selected authoring seed A (`e91b9558d665879871b8bf0893915ae64b27c7fe`) and Foundation.List migration B are qualified, including their exact-stream provider checks. The three-helper migration H (`671685c3f0059574405a1e630dd965d421a26f05`) passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E (`cf8fbd784944a98b1e390b709685ca54c2511827`) passed compiler qualification and exact provider acceptance on its first execution. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents commands and boundaries; [qualification-evidence.json](qualification-evidence.json) records exact results. Strict runtime profile enforcement remains pending.
 
-The audit and its source citations below describe the immutable baseline, not a claim that implementation is still absent. Later implementation evidence is recorded separately; the historical 55-module inventory remains unchanged.
+The audit and its source citations below describe the immutable baseline. Later implementation evidence is recorded separately; the historical 55-module inventory remains unchanged.
+
+The implementation now accepts the bounded ordinary-parameter recursion capability and has migrated Foundation.List plus three compiler helpers. E preserves declaration generic arguments when erasure reconstructs recursive calls. Its complete C2/C3 inventories contain zero type-argument arity findings and 244 remaining call-expression typing obligations. Those remaining records require a compositional portable checker, specified in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md); they are not 244 demonstrated runtime failures. The selected A seed remains unchanged.
 
 Baseline: `dwijayuda/pskernel@37f63c39d4a07189938046c64152bba25d789450`, specifically `psc0/`. The later `pscv0/` implementation was not used as evidence of capabilities present in PSC0.
 
 ## Decision
 
-Adopt one proposed authoring contract, **PSC0-SH/1**, implemented by the portable PSC compiler and initially written in the existing PSC1-compatible `.lean` syntax. Keep the old canonical `.ps` representation and the historical seed reproducible while the compiler learns to normalize ordinary structural recursion with changing state. Add further conveniences only after their complete path through parsing, lowering, elaboration, admission, erasure and generated execution is demonstrated.
+Adopt one versioned authoring contract, **PSC0-SH/1**, implemented by the portable PSC compiler and initially written in the existing PSC1-compatible `.lean` syntax. Keep the old canonical `.ps` representation and the historical seed reproducible while later capabilities are implemented and qualified. Ordinary structural recursion with supported changing state is already normalized by the portable compiler. Add further conveniences only after their complete path through parsing, lowering, elaboration, admission, erasure and generated execution is demonstrated.
 
 This is a bounded PSC implementation language, not a second general-purpose compiler project. The current handwritten worker/closure encodings should become compiler implementation details. The practical bottlenecks are frontend recognition and bootstrap discipline; the names of the profiles do not themselves solve either problem.
 
-Read [SPEC.md](SPEC.md) for the proposed language and lowering obligations, [MIGRATION.md](MIGRATION.md) for the implementation sequence and development workflow, [proposal.json](proposal.json) for the machine-readable capability plan, and [baseline-evidence.json](baseline-evidence.json) for the immutable source inventory.
+Read [SPEC.md](SPEC.md) for the language contract and remaining obligations, [MIGRATION.md](MIGRATION.md) for completed milestones and the development workflow, [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) for the next portable checker, [proposal.json](proposal.json) for the capability ledger, and [baseline-evidence.json](baseline-evidence.json) for the immutable source inventory.
 
 ## 1. Correct the premise for this directory
 
@@ -159,7 +161,7 @@ Lean's documentation explains how structural recursion becomes recursor applicat
 
 Rust's bootstrap guide distinguishes development-stage builds from later same-result tests and ties source feature use to what the bootstrap compiler understands.[RUST] Its incremental guide motivates dependency tracking and checking whether recomputation actually changed a result.[INC] These are design precedents, not claims that PSC0 already implements Lean's recursion machinery or Rust's query engine.
 
-This investigation used GitHub source/tree/history/workflow reads and primary compiler documentation. No local checkout, build, compiler execution, benchmark, CI dispatch or new fixed-point run was performed. The proposed files are a reviewable solution specification; their existence is not language support or performance evidence.
+The initial research phase used GitHub source/tree/history/workflow reads and primary compiler documentation. That initial audit did not run a local checkout, build, compiler, benchmark or new CI qualification; its specification files alone granted no language support. The later implementation used GitHub branches and cloud qualification, with actual compiler/provider outcomes recorded in [IMPLEMENTATION.md](IMPLEMENTATION.md) and [qualification-evidence.json](qualification-evidence.json). The baseline analysis and citations above retain their original scope.
 
 [A]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/ARCHITECTURE.md
 [R]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/README.md

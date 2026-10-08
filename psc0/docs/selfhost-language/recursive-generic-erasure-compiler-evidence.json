@@ -1,0 +1,2160 @@
+{
+  "schemaVersion": 1,
+  "kind": "preserved-qualification-compiler-log-receipts",
+  "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+  "runId": 37852341550,
+  "compilerJobId": 113568120771,
+  "logUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37852341550/job/113568120771",
+  "notes": [
+    "Receipts below are original JSON objects extracted from completed compiler job log markers, with their original timestamps and marker names. Provider fields in compiler receipts remain unchanged; subsequent provider acceptance is preserved separately.",
+    "Generic full-source C1 inventory is produced by selected Q from source A; the C1 executable contains the repair. Fixed-point acceptance compares C2 and C3."
+  ],
+  "receipts": [
+    {
+      "timestamp": "2026-10-08T22:17:04.0456028Z",
+      "marker": "PSC0_SH1_SEED",
+      "receipt": {
+        "cacheHit": false,
+        "identitySha256": "9ff4523a020329e5cfe6374fa93e17ab267017dd622cc0d7c9f6db71209db6f0",
+        "compilerSha256": "74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76",
+        "sourceRef": "37f63c39d4a07189938046c64152bba25d789450"
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:17:41.1745073Z",
+      "marker": "PSC0_SH1_HELPER_RUNTIME",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "generated-compiler-exported-helper-behavior",
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "coverage": {
+          "nonApplicationHeads": 11,
+          "argumentLists": 7,
+          "prefixes": 2,
+          "suffixes": 2,
+          "nameBases": 3,
+          "usedNameListsPerBase": 7,
+          "attempts": [
+            0,
+            7
+          ],
+          "typedPartialApplications": false,
+          "expressionObservations": 1232,
+          "stringObservations": 336,
+          "observations": 1568
+        },
+        "behavior": "independent application-spine and finite unique-name expectations",
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:17:42.3280356Z",
+      "marker": "PSC0_SH1_GENERIC_ERASURE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "scoped-recursive-generic-erasure",
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
+        "originalIr": {
+          "checks": [
+            "one, two, and three declaration generics in exact declaration order",
+            "interleaved type, erased proposition/proof, and runtime binders",
+            "recursive calls retain the complete runtime argument count",
+            "monomorphic recursive calls retain zero type arguments"
+          ],
+          "observations": [
+            {
+              "declaration": "sh1GenericCopy",
+              "declarationTypeParameters": [
+                "T0"
+              ],
+              "runtimeParameters": [
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0"
+                  ],
+                  "runtimeArity": 1
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMap",
+              "declarationTypeParameters": [
+                "T0",
+                "T1"
+              ],
+              "runtimeParameters": [
+                "convert",
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0",
+                    "T1"
+                  ],
+                  "runtimeArity": 2
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericTriple",
+              "declarationTypeParameters": [
+                "T0",
+                "T1",
+                "T2"
+              ],
+              "runtimeParameters": [
+                "first",
+                "second",
+                "third",
+                "fuel"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericTriple/body/elseBranch/body",
+                  "typeArguments": [
+                    "T0",
+                    "T1",
+                    "T2"
+                  ],
+                  "runtimeArity": 4
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMono",
+              "declarationTypeParameters": [],
+              "runtimeParameters": [
+                "fuel",
+                "value"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMono/body/elseBranch/body",
+                  "typeArguments": [],
+                  "runtimeArity": 2
+                }
+              ]
+            }
+          ],
+          "emittedIr": "The exact original IR inspected above is passed to psTsEmitModule.",
+          "strictSh1Qualified": false
+        },
+        "artifacts": {
+          "admissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+          "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+          "javascriptSha256": "d8906673be1069b9710f2a1b850d31bbc4b47d9e0c6de8185c7c757d525edd75"
+        },
+        "behavior": {
+          "observations": 19,
+          "status": "pass",
+          "exhaustiveForAllInputs": false
+        },
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        },
+        "native": {
+          "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+          "behavior": {
+            "observations": 19,
+            "status": "pass",
+            "exhaustiveForAllInputs": false
+          }
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:17:48.7019694Z",
+      "marker": "PSC0_SH1_CAPABILITIES",
+      "receipt": {
+        "schemaVersion": 1,
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "evidence": "raw-source-generated-execution",
+        "sourceKinds": [
+          {
+            "sourceKind": "lean",
+            "sourceSha256": "d302eff5addc953d147b95e952617e87e543ef60d1f016525945ab68df5ac9e0",
+            "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "typescriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b",
+            "javascriptSha256": "8885eb704373a42f0470bf01646013a2e6d4ab1facb699e7f0a65fcdf512302d",
+            "generatedCompilerConsumedRawSource": true,
+            "behavior": "pass",
+            "nativePscBehavior": "pass",
+            "nativeTypeScriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b"
+          },
+          {
+            "sourceKind": "ps",
+            "sourceSha256": "ab29a5688567281d13a5699ed07f87580f1fc714cd544c1c66a2eeda305010b0",
+            "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "typescriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b",
+            "javascriptSha256": "8885eb704373a42f0470bf01646013a2e6d4ab1facb699e7f0a65fcdf512302d",
+            "generatedCompilerConsumedRawSource": true,
+            "behavior": "pass",
+            "nativePscBehavior": "pass",
+            "nativeTypeScriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b"
+          }
+        ],
+        "negativeCases": [
+          {
+            "name": "narrowed-nested-induction-hypothesis",
+            "sourceSha256": "1c6fc4543d2650c3b18506c39107ec8cc1f3df1302da61fd1c8f73bb6ba907c3",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "unsaturated-recursive-call",
+            "sourceSha256": "879565204119b005493e52868d63b0e0ba8c69624dfd8fbdb329af30d909364a",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionArity"
+            ]
+          },
+          {
+            "name": "nondecreasing-major",
+            "sourceSha256": "fd8b66b959543f6e2f1be3958efff1db883c33dd04dbf6051df2290ceaa2b811",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "unrelated-constructor-child",
+            "sourceSha256": "85eaeb42ac5a652b4dd6f49b2ef9a11d453ea7432f99fd5559c4bd964fa5131a",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "escaping-self-reference",
+            "sourceSha256": "0675b11dbfc09380ff6449950e29b12f1563bccf0f8bafc5d003b44258860d82",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionEscapingReference"
+            ]
+          },
+          {
+            "name": "major-dependent-parameter",
+            "sourceSha256": "aa9a3193d7db8334c703927ae0a19b060eed52acdfb0f6a6dc0d913819060542",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionDependentParameter"
+            ]
+          },
+          {
+            "name": "explicit-historical-stable-mode",
+            "sourceSha256": "bee98d86b07b527f2bdbaca89f42d8286a1c64c41f7f4ffb541c437de83a8555",
+            "diagnosticTags": [
+              "structuralRecursionInvariantArgument"
+            ]
+          }
+        ],
+        "independentExpectedBehavior": [
+          "Nat accumulation",
+          "simultaneous state swapping",
+          "state before structural major",
+          "function results",
+          "erased stable proof binder",
+          "generic List at Nat and String",
+          "public partial application",
+          "existing worker correspondence"
+        ],
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:17:52.4300604Z",
+      "marker": "PSC0_SH1_FOUNDATION_CONFORMANCE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "bounded-foundation-source-correspondence",
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "executingCompiler": "Current native-generated compiler consumes both raw library sources.",
+        "referenceSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
+        "referenceGitBlob": "faf906bd6e2f872887c87eb43c4ad90957da91fc",
+        "authoredProbeSha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819",
+        "publicTypes": {
+          "comparison": "psExprAlphaEq including binder kinds and parameter order",
+          "names": [
+            "psListLength",
+            "psListIsEmpty",
+            "psListAny",
+            "psListReverseAcc",
+            "psListReverse",
+            "psListAppend",
+            "psListMap",
+            "psListMapExcept",
+            "psListTake",
+            "psListZip"
+          ],
+          "result": "pass"
+        },
+        "behavior": "independent JS sequence expectations plus typed PSC partial-application probes",
+        "outputs": [
+          {
+            "source": "reference",
+            "sourceSha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9",
+            "admissionsSha256": "ff0209355636e1a8e2e8014eb015820cb6fe298790ffc603c3051d53d4736975",
+            "typescriptSha256": "feb758050bf872101b86215bccc69796fb1be561f699c292a9c4e78cc517b24d",
+            "javascriptSha256": "a15b56bb5f323e533985b6e172424b7a3ce398fa82d0ff99821a3bd336b46d2d",
+            "coverage": {
+              "lists": 15,
+              "maxLength": 3,
+              "elementValues": [
+                "0",
+                "1"
+              ],
+              "counts": [
+                0,
+                8
+              ],
+              "observations": 1666
+            }
+          },
+          {
+            "source": "current",
+            "sourceSha256": "0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680",
+            "admissionsSha256": "93e87b6a4e9437851cba82742215f9030ad178f2d7bbd006c7dc56589738e213",
+            "typescriptSha256": "74adb1283ad760b8241248ea0f5cf1a2d8253b48173518e1cbad2e9a3f60232f",
+            "javascriptSha256": "55c31a241605f5607f7b293218e4cf00a6bd04ca9371f5b24dc92ac61ede1497",
+            "coverage": {
+              "lists": 15,
+              "maxLength": 3,
+              "elementValues": [
+                "0",
+                "1"
+              ],
+              "counts": [
+                0,
+                8
+              ],
+              "observations": 1666
+            }
+          }
+        ],
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:17:58.0070549Z",
+      "marker": "PSC0_SH1_HELPER_CONFORMANCE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "bounded-compiler-helper-source-correspondence",
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "executingCompiler": "Current native-generated compiler consumes both raw helper source slices.",
+        "referenceSourceRef": "5e3338bf0f389d3704b49958debe496625593197",
+        "referenceGitBlob": "8b00617b9798b65696f03b3613b90888c97a07ba",
+        "currentSourceFiles": [
+          {
+            "path": "packages/elab/src/Ps/Elab/Term.lean",
+            "sha256": "57d58fcb1a899237621e2e257e493e4a42ecd30bbf24e30918725839440dbea4",
+            "referenceGitBlob": "6a2282248cbb01301e8eb1dad1476f1773b4e63a"
+          },
+          {
+            "path": "packages/erasure/src/Ps/Erasure/Definition.lean",
+            "sha256": "5be081ca81c6e57d86e1e0f7c56e047609bfbcc0d877133455ce44fead9a8222",
+            "referenceGitBlob": "77f63f76daf5fd0c569545df8835fb94b6d554c9"
+          }
+        ],
+        "dependencies": [
+          {
+            "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+            "sha256": "8d483f35ad8370305a76724e714a123d560a5e7670f20346336fe5ef5eca06e8"
+          },
+          {
+            "path": "packages/core/src/Ps/Core/Level.lean",
+            "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4"
+          },
+          {
+            "path": "packages/core/src/Ps/Core/Expr.lean",
+            "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6"
+          }
+        ],
+        "authoredProbeSha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9",
+        "publicTypes": {
+          "comparison": "psExprAlphaEq including binder kinds and parameter order",
+          "names": [
+            "psExprApplyManyWorker",
+            "psExprApplyMany",
+            "psExprAppViewAccWorker",
+            "psExprAppViewAcc",
+            "psExprAppView",
+            "psErasureAddUniqueStringWorker",
+            "psErasureAddUniqueString"
+          ],
+          "result": "pass"
+        },
+        "behavior": "independent JS application-spine and finite name-candidate expectations; typed PSC partial application",
+        "sourceScope": "Exact helper declarations and real shared Name/Level/Expr modules; full compiler integration is qualified separately.",
+        "outputs": [
+          {
+            "source": "reference",
+            "sourceSha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909",
+            "coverage": {
+              "nonApplicationHeads": 11,
+              "argumentLists": 7,
+              "prefixes": 2,
+              "suffixes": 2,
+              "nameBases": 3,
+              "usedNameListsPerBase": 7,
+              "attempts": [
+                0,
+                7
+              ],
+              "typedPartialApplications": true,
+              "expressionObservations": 1694,
+              "stringObservations": 504,
+              "observations": 2198
+            },
+            "admissionsSha256": "df755d172dd2030e6a15b65bed21c6fcd75dc6ed9399f2ce69702ae47d23ae5f",
+            "typescriptSha256": "77f0527c13090242a35b5f2958deedfc781bab9c0be55df7aabce33b01cafdf9",
+            "javascriptSha256": "44bb5546e928bfdc01113a12d62a1421cd82d8b3bf454d764993cabd50f35177"
+          },
+          {
+            "source": "current",
+            "sourceSha256": "ee87db3455e2f1f8d439926cdb1802878c91d555dbf967921b795396701ce50b",
+            "coverage": {
+              "nonApplicationHeads": 11,
+              "argumentLists": 7,
+              "prefixes": 2,
+              "suffixes": 2,
+              "nameBases": 3,
+              "usedNameListsPerBase": 7,
+              "attempts": [
+                0,
+                7
+              ],
+              "typedPartialApplications": true,
+              "expressionObservations": 1694,
+              "stringObservations": 504,
+              "observations": 2198
+            },
+            "admissionsSha256": "fa98a6ac1bc4c7baccc5ce5b84ffe81a5eca75497d651290f3f3277af27b0576",
+            "typescriptSha256": "01fd21a4e9565ae78718169f5be7a5ff3eb6d5002fba598c7078bc3593ce240d",
+            "javascriptSha256": "b80ac0f3256ecefa075a9774ee8080142d79c76d6f2d1104a32b803cf358e258"
+          }
+        ],
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:17:58.1365214Z",
+      "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "native-seeded-generated-compiler-candidate",
+        "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+        "sourceClosureSha256": "d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2",
+        "sourceKind": "raw-authoritative-lean",
+        "moduleCount": 56,
+        "nativeCompiler": {
+          "binarySha256": "dff4906a725452a0e321d23a062288920f86c9f21a58460145e801f2a50d3ab2",
+          "path": ".lake/build/bin/psc1",
+          "command": [
+            "build",
+            "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+            "--out",
+            "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/index.js"
+          ],
+          "buildContext": "CI builds the current native target with lake build psc1; binary and workspace identities are recorded separately."
+        },
+        "artifacts": {
+          "javascriptSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+          "typescriptSha256": "d63c80ca1c0d087b4f4d8cc6fa97693fcd7ddb7fb89aaeb67413f4d904109837"
+        },
+        "recipe": {
+          "files": [
+            {
+              "path": "scripts/sh1-qualify.mjs",
+              "sha256": "3425cdbf160fc8fe199c92c47ba9f3245a913ee10318b19aec98441b03effedd"
+            },
+            {
+              "path": "scripts/sh1-capabilities.mjs",
+              "sha256": "3d9cc0ec245f0f11167aa084c74c81cfeb36f86d633178428d058c3e17e1a417"
+            },
+            {
+              "path": "scripts/typescript-cli.mjs",
+              "sha256": "53396f78a28a25e5ace674a81f98dbbd76d523cf9ba34c5ec292c88efe647133"
+            },
+            {
+              "path": "scripts/workspace-layout.mjs",
+              "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1"
+            },
+            {
+              "path": "scripts/generated-preparation-session.mjs",
+              "sha256": "96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad"
+            },
+            {
+              "path": "scripts/original-ir-inventory.mjs",
+              "sha256": "11b55971c068eb2362bd4d0dbdc25fd4654d431bfe4e4f62828357e233e3326b"
+            },
+            {
+              "path": "scripts/sh1-source-snapshot.mjs",
+              "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8"
+            },
+            {
+              "path": "scripts/sh1-seed-manifest.mjs",
+              "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f"
+            },
+            {
+              "path": "scripts/sh1-iterate.mjs",
+              "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8"
+            },
+            {
+              "path": "scripts/sh1-iteration-conformance.mjs",
+              "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4"
+            },
+            {
+              "path": "scripts/sh1-foundation-conformance.mjs",
+              "sha256": "4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-reference.lean",
+              "sha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-probe.lean",
+              "sha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819"
+            },
+            {
+              "path": "scripts/sh1-helper-conformance.mjs",
+              "sha256": "b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-reference.lean",
+              "sha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-probe.lean",
+              "sha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9"
+            },
+            {
+              "path": "scripts/sh1-generic-erasure-conformance.mjs",
+              "sha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+              "sha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de"
+            }
+          ],
+          "sha256": "d7658e57cc4dc298f0816ff8fe2de5e2d640b270f20096a5492f13e873d9754b"
+        },
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 5.8.3"
+        },
+        "candidateClaim": "Native PSC frontend consumes raw current compiler source; generated current compiler executes the raw language and iteration corpus.",
+        "selectedSeedBootstrapProven": false,
+        "currentSourceFixedPointProven": false,
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        },
+        "timingsMs": {
+          "total": 25885.593157
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:18:02.1936384Z",
+      "marker": "PSC0_SH1_FOUNDATION_CONFORMANCE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "bounded-foundation-source-correspondence",
+        "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "executingCompiler": "Same verified selected authoring seed consumes both raw library sources.",
+        "referenceSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
+        "referenceGitBlob": "faf906bd6e2f872887c87eb43c4ad90957da91fc",
+        "authoredProbeSha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819",
+        "publicTypes": {
+          "comparison": "psExprAlphaEq including binder kinds and parameter order",
+          "names": [
+            "psListLength",
+            "psListIsEmpty",
+            "psListAny",
+            "psListReverseAcc",
+            "psListReverse",
+            "psListAppend",
+            "psListMap",
+            "psListMapExcept",
+            "psListTake",
+            "psListZip"
+          ],
+          "result": "pass"
+        },
+        "behavior": "independent JS sequence expectations plus typed PSC partial-application probes",
+        "outputs": [
+          {
+            "source": "reference",
+            "sourceSha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9",
+            "admissionsSha256": "ff0209355636e1a8e2e8014eb015820cb6fe298790ffc603c3051d53d4736975",
+            "typescriptSha256": "9050ca8f291bab29ccef25fe147c138ebf7cac5fb81fe01c49c16c4b8d874c25",
+            "javascriptSha256": "9b75cc6e49ae39c55bea499fdc9884c3e6306c0ff2f0d3a2e3fb90101d17f646",
+            "coverage": {
+              "lists": 15,
+              "maxLength": 3,
+              "elementValues": [
+                "0",
+                "1"
+              ],
+              "counts": [
+                0,
+                8
+              ],
+              "observations": 1666
+            }
+          },
+          {
+            "source": "current",
+            "sourceSha256": "0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680",
+            "admissionsSha256": "93e87b6a4e9437851cba82742215f9030ad178f2d7bbd006c7dc56589738e213",
+            "typescriptSha256": "7c351a1f2015ae0e33a87c6faa27989570b94ac1889ef85aea1e3041647cc751",
+            "javascriptSha256": "176fbfee8815460846b30ba0bc80627b003e15ecdc7353de48da63ad21c5edf6",
+            "coverage": {
+              "lists": 15,
+              "maxLength": 3,
+              "elementValues": [
+                "0",
+                "1"
+              ],
+              "counts": [
+                0,
+                8
+              ],
+              "observations": 1666
+            }
+          }
+        ],
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:18:07.6239337Z",
+      "marker": "PSC0_SH1_HELPER_CONFORMANCE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "bounded-compiler-helper-source-correspondence",
+        "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "executingCompiler": "Same verified selected authoring seed consumes both raw helper source slices.",
+        "referenceSourceRef": "5e3338bf0f389d3704b49958debe496625593197",
+        "referenceGitBlob": "8b00617b9798b65696f03b3613b90888c97a07ba",
+        "currentSourceFiles": [
+          {
+            "path": "packages/elab/src/Ps/Elab/Term.lean",
+            "sha256": "57d58fcb1a899237621e2e257e493e4a42ecd30bbf24e30918725839440dbea4",
+            "referenceGitBlob": "6a2282248cbb01301e8eb1dad1476f1773b4e63a"
+          },
+          {
+            "path": "packages/erasure/src/Ps/Erasure/Definition.lean",
+            "sha256": "5be081ca81c6e57d86e1e0f7c56e047609bfbcc0d877133455ce44fead9a8222",
+            "referenceGitBlob": "77f63f76daf5fd0c569545df8835fb94b6d554c9"
+          }
+        ],
+        "dependencies": [
+          {
+            "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+            "sha256": "8d483f35ad8370305a76724e714a123d560a5e7670f20346336fe5ef5eca06e8"
+          },
+          {
+            "path": "packages/core/src/Ps/Core/Level.lean",
+            "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4"
+          },
+          {
+            "path": "packages/core/src/Ps/Core/Expr.lean",
+            "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6"
+          }
+        ],
+        "authoredProbeSha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9",
+        "publicTypes": {
+          "comparison": "psExprAlphaEq including binder kinds and parameter order",
+          "names": [
+            "psExprApplyManyWorker",
+            "psExprApplyMany",
+            "psExprAppViewAccWorker",
+            "psExprAppViewAcc",
+            "psExprAppView",
+            "psErasureAddUniqueStringWorker",
+            "psErasureAddUniqueString"
+          ],
+          "result": "pass"
+        },
+        "behavior": "independent JS application-spine and finite name-candidate expectations; typed PSC partial application",
+        "sourceScope": "Exact helper declarations and real shared Name/Level/Expr modules; full compiler integration is qualified separately.",
+        "outputs": [
+          {
+            "source": "reference",
+            "sourceSha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909",
+            "coverage": {
+              "nonApplicationHeads": 11,
+              "argumentLists": 7,
+              "prefixes": 2,
+              "suffixes": 2,
+              "nameBases": 3,
+              "usedNameListsPerBase": 7,
+              "attempts": [
+                0,
+                7
+              ],
+              "typedPartialApplications": true,
+              "expressionObservations": 1694,
+              "stringObservations": 504,
+              "observations": 2198
+            },
+            "admissionsSha256": "df755d172dd2030e6a15b65bed21c6fcd75dc6ed9399f2ce69702ae47d23ae5f",
+            "typescriptSha256": "77f0527c13090242a35b5f2958deedfc781bab9c0be55df7aabce33b01cafdf9",
+            "javascriptSha256": "44bb5546e928bfdc01113a12d62a1421cd82d8b3bf454d764993cabd50f35177"
+          },
+          {
+            "source": "current",
+            "sourceSha256": "ee87db3455e2f1f8d439926cdb1802878c91d555dbf967921b795396701ce50b",
+            "coverage": {
+              "nonApplicationHeads": 11,
+              "argumentLists": 7,
+              "prefixes": 2,
+              "suffixes": 2,
+              "nameBases": 3,
+              "usedNameListsPerBase": 7,
+              "attempts": [
+                0,
+                7
+              ],
+              "typedPartialApplications": true,
+              "expressionObservations": 1694,
+              "stringObservations": 504,
+              "observations": 2198
+            },
+            "admissionsSha256": "fa98a6ac1bc4c7baccc5ce5b84ffe81a5eca75497d651290f3f3277af27b0576",
+            "typescriptSha256": "01fd21a4e9565ae78718169f5be7a5ff3eb6d5002fba598c7078bc3593ce240d",
+            "javascriptSha256": "b80ac0f3256ecefa075a9774ee8080142d79c76d6f2d1104a32b803cf358e258"
+          }
+        ],
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:28:15.1883782Z",
+      "marker": "PSC0_SH1_GENERATION",
+      "receipt": {
+        "schemaVersion": 1,
+        "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "authoringSeed": {
+          "kind": "previous-qualified-authoring-seed",
+          "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+          "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+          "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "identitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+          "independentAlgorithm": false,
+          "priorQualification": {
+            "evidence": "compiler-qualified-current-source-fixed-point",
+            "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+            "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+            "runId": 37831951758,
+            "artifactName": "psc0-sh1-e91b9558d665879871b8bf0893915ae64b27c7fe",
+            "claim": "Compiler-qualified seed; selected-provider acceptance is a separate receipt."
+          }
+        },
+        "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+        "sourceClosureSha256": "d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2",
+        "moduleCount": 56,
+        "sourceBytes": 992338,
+        "sourceKind": "raw-authoritative-lean",
+        "language": {
+          "implementation": "PSC1",
+          "candidateCapability": "PSC0-SH/1 structural state generalization"
+        },
+        "recipe": {
+          "files": [
+            {
+              "path": "scripts/sh1-qualify.mjs",
+              "sha256": "3425cdbf160fc8fe199c92c47ba9f3245a913ee10318b19aec98441b03effedd"
+            },
+            {
+              "path": "scripts/sh1-capabilities.mjs",
+              "sha256": "3d9cc0ec245f0f11167aa084c74c81cfeb36f86d633178428d058c3e17e1a417"
+            },
+            {
+              "path": "scripts/typescript-cli.mjs",
+              "sha256": "53396f78a28a25e5ace674a81f98dbbd76d523cf9ba34c5ec292c88efe647133"
+            },
+            {
+              "path": "scripts/workspace-layout.mjs",
+              "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1"
+            },
+            {
+              "path": "scripts/generated-preparation-session.mjs",
+              "sha256": "96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad"
+            },
+            {
+              "path": "scripts/original-ir-inventory.mjs",
+              "sha256": "11b55971c068eb2362bd4d0dbdc25fd4654d431bfe4e4f62828357e233e3326b"
+            },
+            {
+              "path": "scripts/sh1-source-snapshot.mjs",
+              "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8"
+            },
+            {
+              "path": "scripts/sh1-seed-manifest.mjs",
+              "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f"
+            },
+            {
+              "path": "scripts/sh1-iterate.mjs",
+              "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8"
+            },
+            {
+              "path": "scripts/sh1-iteration-conformance.mjs",
+              "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4"
+            },
+            {
+              "path": "scripts/sh1-foundation-conformance.mjs",
+              "sha256": "4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-reference.lean",
+              "sha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-probe.lean",
+              "sha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819"
+            },
+            {
+              "path": "scripts/sh1-helper-conformance.mjs",
+              "sha256": "b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-reference.lean",
+              "sha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-probe.lean",
+              "sha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9"
+            },
+            {
+              "path": "scripts/sh1-generic-erasure-conformance.mjs",
+              "sha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+              "sha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de"
+            }
+          ],
+          "sha256": "d7658e57cc4dc298f0816ff8fe2de5e2d640b270f20096a5492f13e873d9754b"
+        },
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 5.8.3"
+        },
+        "artifacts": {
+          "canonicalSurfaceSourceSha256": "0ddb544ccd1784907511cfe60f59a21a03616c2e17e0a92188cf1b1034950dd8",
+          "normalizedCanonicalAdmissionsSha256": "f55cf731f7c0d6e8a0d025b92b97620cd336011a2164e8d649c16cf81c950d29",
+          "typescriptSha256": "12904147e9b979c4233cc4e96c5fdf4f10bd9b21219c5d8ff072725a96dc800b",
+          "javascriptSha256": "d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c"
+        },
+        "preparation": {
+          "schemaVersion": 1,
+          "kind": "psc0-preparation-session",
+          "evidence": "admission-ready",
+          "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "sourceKind": "lean",
+          "closureSha256": "2a402dc4ae8f551fa18961ee936064cf505ee35cc8ce82c3f3772df4de96dcb7",
+          "moduleCount": 56,
+          "cache": {
+            "prefixModules": 0,
+            "parseHits": 0,
+            "parseMisses": 56,
+            "parseEvictions": 0,
+            "parseUncachedModules": 0,
+            "preparedModules": 56,
+            "finishHit": false,
+            "retainedParsedEntries": 56,
+            "retainedParsedSourceBytes": 988867,
+            "retainedPrefixModules": 56,
+            "retainedPrefixSourceBytes": 988867,
+            "maxParsedEntries": 128,
+            "maxParsedSourceBytes": 8388608
+          },
+          "timingsMs": {
+            "input": 1.086606999999276,
+            "parse": 22019.952664000135,
+            "prepare": 295594.913661,
+            "finish": 56305.12753699999,
+            "freeze": 206.20916899997974,
+            "total": 374130.376916
+          },
+          "warmNoChange": {
+            "schemaVersion": 1,
+            "kind": "psc0-preparation-session",
+            "evidence": "admission-ready",
+            "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+            "sourceKind": "lean",
+            "closureSha256": "2a402dc4ae8f551fa18961ee936064cf505ee35cc8ce82c3f3772df4de96dcb7",
+            "moduleCount": 56,
+            "cache": {
+              "prefixModules": 56,
+              "parseHits": 0,
+              "parseMisses": 0,
+              "parseEvictions": 0,
+              "parseUncachedModules": 0,
+              "preparedModules": 0,
+              "finishHit": true,
+              "retainedParsedEntries": 56,
+              "retainedParsedSourceBytes": 988867,
+              "retainedPrefixModules": 56,
+              "retainedPrefixSourceBytes": 988867,
+              "maxParsedEntries": 128,
+              "maxParsedSourceBytes": 8388608
+            },
+            "timingsMs": {
+              "input": 1.0864200000069104,
+              "parse": 0,
+              "prepare": 0,
+              "finish": 0,
+              "freeze": 0,
+              "total": 1.107772000017576
+            }
+          }
+        },
+        "originalIrInventory": {
+          "report": "original-ir-inventory.json",
+          "traversalComplete": true,
+          "findingCounts": {
+            "call-arity-needs-expression-typing": 244,
+            "call-type-arity": 19
+          },
+          "strictSh1Qualified": false
+        },
+        "timingsMs": {
+          "loadAndPrepare": 374219.33698699996,
+          "admissions": 59361.451602999994,
+          "canonicalSurface": 25102.892416000017,
+          "emit": 143544.07590299996,
+          "tscAndWrite": 5333.8102800000925,
+          "total": 607561.569001
+        },
+        "normalizationEvidence": "Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.",
+        "evidence": "candidate-build",
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:28:15.8217713Z",
+      "marker": "PSC0_SH1_HELPER_RUNTIME",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "generated-compiler-exported-helper-behavior",
+        "compilerSha256": "d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c",
+        "coverage": {
+          "nonApplicationHeads": 11,
+          "argumentLists": 7,
+          "prefixes": 2,
+          "suffixes": 2,
+          "nameBases": 3,
+          "usedNameListsPerBase": 7,
+          "attempts": [
+            0,
+            7
+          ],
+          "typedPartialApplications": false,
+          "expressionObservations": 1232,
+          "stringObservations": 336,
+          "observations": 1568
+        },
+        "behavior": "independent application-spine and finite unique-name expectations",
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:28:16.9942841Z",
+      "marker": "PSC0_SH1_GENERIC_ERASURE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "scoped-recursive-generic-erasure",
+        "compilerSha256": "d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
+        "originalIr": {
+          "checks": [
+            "one, two, and three declaration generics in exact declaration order",
+            "interleaved type, erased proposition/proof, and runtime binders",
+            "recursive calls retain the complete runtime argument count",
+            "monomorphic recursive calls retain zero type arguments"
+          ],
+          "observations": [
+            {
+              "declaration": "sh1GenericCopy",
+              "declarationTypeParameters": [
+                "T0"
+              ],
+              "runtimeParameters": [
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0"
+                  ],
+                  "runtimeArity": 1
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMap",
+              "declarationTypeParameters": [
+                "T0",
+                "T1"
+              ],
+              "runtimeParameters": [
+                "convert",
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0",
+                    "T1"
+                  ],
+                  "runtimeArity": 2
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericTriple",
+              "declarationTypeParameters": [
+                "T0",
+                "T1",
+                "T2"
+              ],
+              "runtimeParameters": [
+                "first",
+                "second",
+                "third",
+                "fuel"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericTriple/body/elseBranch/body",
+                  "typeArguments": [
+                    "T0",
+                    "T1",
+                    "T2"
+                  ],
+                  "runtimeArity": 4
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMono",
+              "declarationTypeParameters": [],
+              "runtimeParameters": [
+                "fuel",
+                "value"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMono/body/elseBranch/body",
+                  "typeArguments": [],
+                  "runtimeArity": 2
+                }
+              ]
+            }
+          ],
+          "emittedIr": "The exact original IR inspected above is passed to psTsEmitModule.",
+          "strictSh1Qualified": false
+        },
+        "artifacts": {
+          "admissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+          "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+          "javascriptSha256": "d8906673be1069b9710f2a1b850d31bbc4b47d9e0c6de8185c7c757d525edd75"
+        },
+        "behavior": {
+          "observations": 19,
+          "status": "pass",
+          "exhaustiveForAllInputs": false
+        },
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        },
+        "native": {
+          "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+          "behavior": {
+            "observations": 19,
+            "status": "pass",
+            "exhaustiveForAllInputs": false
+          }
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:28:23.1002741Z",
+      "marker": "PSC0_SH1_CAPABILITIES",
+      "receipt": {
+        "schemaVersion": 1,
+        "compilerSha256": "d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c",
+        "evidence": "raw-source-generated-execution",
+        "sourceKinds": [
+          {
+            "sourceKind": "lean",
+            "sourceSha256": "d302eff5addc953d147b95e952617e87e543ef60d1f016525945ab68df5ac9e0",
+            "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "typescriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b",
+            "javascriptSha256": "8885eb704373a42f0470bf01646013a2e6d4ab1facb699e7f0a65fcdf512302d",
+            "generatedCompilerConsumedRawSource": true,
+            "behavior": "pass",
+            "nativePscBehavior": "pass",
+            "nativeTypeScriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b"
+          },
+          {
+            "sourceKind": "ps",
+            "sourceSha256": "ab29a5688567281d13a5699ed07f87580f1fc714cd544c1c66a2eeda305010b0",
+            "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "typescriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b",
+            "javascriptSha256": "8885eb704373a42f0470bf01646013a2e6d4ab1facb699e7f0a65fcdf512302d",
+            "generatedCompilerConsumedRawSource": true,
+            "behavior": "pass",
+            "nativePscBehavior": "pass",
+            "nativeTypeScriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b"
+          }
+        ],
+        "negativeCases": [
+          {
+            "name": "narrowed-nested-induction-hypothesis",
+            "sourceSha256": "1c6fc4543d2650c3b18506c39107ec8cc1f3df1302da61fd1c8f73bb6ba907c3",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "unsaturated-recursive-call",
+            "sourceSha256": "879565204119b005493e52868d63b0e0ba8c69624dfd8fbdb329af30d909364a",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionArity"
+            ]
+          },
+          {
+            "name": "nondecreasing-major",
+            "sourceSha256": "fd8b66b959543f6e2f1be3958efff1db883c33dd04dbf6051df2290ceaa2b811",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "unrelated-constructor-child",
+            "sourceSha256": "85eaeb42ac5a652b4dd6f49b2ef9a11d453ea7432f99fd5559c4bd964fa5131a",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "escaping-self-reference",
+            "sourceSha256": "0675b11dbfc09380ff6449950e29b12f1563bccf0f8bafc5d003b44258860d82",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionEscapingReference"
+            ]
+          },
+          {
+            "name": "major-dependent-parameter",
+            "sourceSha256": "aa9a3193d7db8334c703927ae0a19b060eed52acdfb0f6a6dc0d913819060542",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionDependentParameter"
+            ]
+          },
+          {
+            "name": "explicit-historical-stable-mode",
+            "sourceSha256": "bee98d86b07b527f2bdbaca89f42d8286a1c64c41f7f4ffb541c437de83a8555",
+            "diagnosticTags": [
+              "structuralRecursionInvariantArgument"
+            ]
+          }
+        ],
+        "independentExpectedBehavior": [
+          "Nat accumulation",
+          "simultaneous state swapping",
+          "state before structural major",
+          "function results",
+          "erased stable proof binder",
+          "generic List at Nat and String",
+          "public partial application",
+          "existing worker correspondence"
+        ],
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:38:30.4779117Z",
+      "marker": "PSC0_SH1_GENERATION",
+      "receipt": {
+        "schemaVersion": 1,
+        "executingCompilerSha256": "d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c",
+        "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+        "sourceClosureSha256": "d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2",
+        "moduleCount": 56,
+        "sourceBytes": 992338,
+        "sourceKind": "raw-authoritative-lean",
+        "language": {
+          "implementation": "PSC1",
+          "candidateCapability": "PSC0-SH/1 structural state generalization"
+        },
+        "recipe": {
+          "files": [
+            {
+              "path": "scripts/sh1-qualify.mjs",
+              "sha256": "3425cdbf160fc8fe199c92c47ba9f3245a913ee10318b19aec98441b03effedd"
+            },
+            {
+              "path": "scripts/sh1-capabilities.mjs",
+              "sha256": "3d9cc0ec245f0f11167aa084c74c81cfeb36f86d633178428d058c3e17e1a417"
+            },
+            {
+              "path": "scripts/typescript-cli.mjs",
+              "sha256": "53396f78a28a25e5ace674a81f98dbbd76d523cf9ba34c5ec292c88efe647133"
+            },
+            {
+              "path": "scripts/workspace-layout.mjs",
+              "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1"
+            },
+            {
+              "path": "scripts/generated-preparation-session.mjs",
+              "sha256": "96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad"
+            },
+            {
+              "path": "scripts/original-ir-inventory.mjs",
+              "sha256": "11b55971c068eb2362bd4d0dbdc25fd4654d431bfe4e4f62828357e233e3326b"
+            },
+            {
+              "path": "scripts/sh1-source-snapshot.mjs",
+              "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8"
+            },
+            {
+              "path": "scripts/sh1-seed-manifest.mjs",
+              "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f"
+            },
+            {
+              "path": "scripts/sh1-iterate.mjs",
+              "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8"
+            },
+            {
+              "path": "scripts/sh1-iteration-conformance.mjs",
+              "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4"
+            },
+            {
+              "path": "scripts/sh1-foundation-conformance.mjs",
+              "sha256": "4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-reference.lean",
+              "sha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-probe.lean",
+              "sha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819"
+            },
+            {
+              "path": "scripts/sh1-helper-conformance.mjs",
+              "sha256": "b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-reference.lean",
+              "sha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-probe.lean",
+              "sha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9"
+            },
+            {
+              "path": "scripts/sh1-generic-erasure-conformance.mjs",
+              "sha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+              "sha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de"
+            }
+          ],
+          "sha256": "d7658e57cc4dc298f0816ff8fe2de5e2d640b270f20096a5492f13e873d9754b"
+        },
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 5.8.3"
+        },
+        "artifacts": {
+          "canonicalSurfaceSourceSha256": "0ddb544ccd1784907511cfe60f59a21a03616c2e17e0a92188cf1b1034950dd8",
+          "normalizedCanonicalAdmissionsSha256": "f55cf731f7c0d6e8a0d025b92b97620cd336011a2164e8d649c16cf81c950d29",
+          "typescriptSha256": "d63c80ca1c0d087b4f4d8cc6fa97693fcd7ddb7fb89aaeb67413f4d904109837",
+          "javascriptSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816"
+        },
+        "preparation": {
+          "schemaVersion": 1,
+          "kind": "psc0-preparation-session",
+          "evidence": "admission-ready",
+          "compilerSha256": "d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c",
+          "sourceKind": "lean",
+          "closureSha256": "2a402dc4ae8f551fa18961ee936064cf505ee35cc8ce82c3f3772df4de96dcb7",
+          "moduleCount": 56,
+          "cache": {
+            "prefixModules": 0,
+            "parseHits": 0,
+            "parseMisses": 56,
+            "parseEvictions": 0,
+            "parseUncachedModules": 0,
+            "preparedModules": 56,
+            "finishHit": false,
+            "retainedParsedEntries": 56,
+            "retainedParsedSourceBytes": 988867,
+            "retainedPrefixModules": 56,
+            "retainedPrefixSourceBytes": 988867,
+            "maxParsedEntries": 128,
+            "maxParsedSourceBytes": 8388608
+          },
+          "timingsMs": {
+            "input": 1.12755999999996,
+            "parse": 22917.192479000038,
+            "prepare": 296627.24159000005,
+            "finish": 55975.50298399996,
+            "freeze": 198.49073700001463,
+            "total": 375723.70084500004
+          },
+          "warmNoChange": {
+            "schemaVersion": 1,
+            "kind": "psc0-preparation-session",
+            "evidence": "admission-ready",
+            "compilerSha256": "d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c",
+            "sourceKind": "lean",
+            "closureSha256": "2a402dc4ae8f551fa18961ee936064cf505ee35cc8ce82c3f3772df4de96dcb7",
+            "moduleCount": 56,
+            "cache": {
+              "prefixModules": 56,
+              "parseHits": 0,
+              "parseMisses": 0,
+              "parseEvictions": 0,
+              "parseUncachedModules": 0,
+              "preparedModules": 0,
+              "finishHit": true,
+              "retainedParsedEntries": 56,
+              "retainedParsedSourceBytes": 988867,
+              "retainedPrefixModules": 56,
+              "retainedPrefixSourceBytes": 988867,
+              "maxParsedEntries": 128,
+              "maxParsedSourceBytes": 8388608
+            },
+            "timingsMs": {
+              "input": 1.069130000018049,
+              "parse": 0,
+              "prepare": 0,
+              "finish": 0,
+              "freeze": 0,
+              "total": 1.0853450000286102
+            }
+          }
+        },
+        "originalIrInventory": {
+          "report": "original-ir-inventory.json",
+          "traversalComplete": true,
+          "findingCounts": {
+            "call-arity-needs-expression-typing": 244
+          },
+          "strictSh1Qualified": false
+        },
+        "timingsMs": {
+          "loadAndPrepare": 375825.940838,
+          "admissions": 55824.87436800002,
+          "canonicalSurface": 25016.55308699998,
+          "emit": 144590.00386400003,
+          "tscAndWrite": 5298.3241009999765,
+          "total": 606555.697039
+        },
+        "normalizationEvidence": "Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.",
+        "evidence": "candidate-build",
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:38:34.7527141Z",
+      "marker": "PSC0_SH1_CAPABILITIES",
+      "receipt": {
+        "schemaVersion": 1,
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "evidence": "raw-source-generated-execution",
+        "sourceKinds": [
+          {
+            "sourceKind": "lean",
+            "sourceSha256": "d302eff5addc953d147b95e952617e87e543ef60d1f016525945ab68df5ac9e0",
+            "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "typescriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b",
+            "javascriptSha256": "8885eb704373a42f0470bf01646013a2e6d4ab1facb699e7f0a65fcdf512302d",
+            "generatedCompilerConsumedRawSource": true,
+            "behavior": "pass"
+          },
+          {
+            "sourceKind": "ps",
+            "sourceSha256": "ab29a5688567281d13a5699ed07f87580f1fc714cd544c1c66a2eeda305010b0",
+            "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "typescriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b",
+            "javascriptSha256": "8885eb704373a42f0470bf01646013a2e6d4ab1facb699e7f0a65fcdf512302d",
+            "generatedCompilerConsumedRawSource": true,
+            "behavior": "pass"
+          }
+        ],
+        "negativeCases": [
+          {
+            "name": "narrowed-nested-induction-hypothesis",
+            "sourceSha256": "1c6fc4543d2650c3b18506c39107ec8cc1f3df1302da61fd1c8f73bb6ba907c3",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "unsaturated-recursive-call",
+            "sourceSha256": "879565204119b005493e52868d63b0e0ba8c69624dfd8fbdb329af30d909364a",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionArity"
+            ]
+          },
+          {
+            "name": "nondecreasing-major",
+            "sourceSha256": "fd8b66b959543f6e2f1be3958efff1db883c33dd04dbf6051df2290ceaa2b811",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "unrelated-constructor-child",
+            "sourceSha256": "85eaeb42ac5a652b4dd6f49b2ef9a11d453ea7432f99fd5559c4bd964fa5131a",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "escaping-self-reference",
+            "sourceSha256": "0675b11dbfc09380ff6449950e29b12f1563bccf0f8bafc5d003b44258860d82",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionEscapingReference"
+            ]
+          },
+          {
+            "name": "major-dependent-parameter",
+            "sourceSha256": "aa9a3193d7db8334c703927ae0a19b060eed52acdfb0f6a6dc0d913819060542",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionDependentParameter"
+            ]
+          },
+          {
+            "name": "explicit-historical-stable-mode",
+            "sourceSha256": "bee98d86b07b527f2bdbaca89f42d8286a1c64c41f7f4ffb541c437de83a8555",
+            "diagnosticTags": [
+              "structuralRecursionInvariantArgument"
+            ]
+          }
+        ],
+        "independentExpectedBehavior": [
+          "Nat accumulation",
+          "simultaneous state swapping",
+          "state before structural major",
+          "function results",
+          "erased stable proof binder",
+          "generic List at Nat and String",
+          "public partial application",
+          "existing worker correspondence"
+        ],
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:38:34.7975788Z",
+      "marker": "PSC0_SH1_HELPER_RUNTIME",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "generated-compiler-exported-helper-behavior",
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "coverage": {
+          "nonApplicationHeads": 11,
+          "argumentLists": 7,
+          "prefixes": 2,
+          "suffixes": 2,
+          "nameBases": 3,
+          "usedNameListsPerBase": 7,
+          "attempts": [
+            0,
+            7
+          ],
+          "typedPartialApplications": false,
+          "expressionObservations": 1232,
+          "stringObservations": 336,
+          "observations": 1568
+        },
+        "behavior": "independent application-spine and finite unique-name expectations",
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:38:35.4502876Z",
+      "marker": "PSC0_SH1_GENERIC_ERASURE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "scoped-recursive-generic-erasure",
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
+        "originalIr": {
+          "checks": [
+            "one, two, and three declaration generics in exact declaration order",
+            "interleaved type, erased proposition/proof, and runtime binders",
+            "recursive calls retain the complete runtime argument count",
+            "monomorphic recursive calls retain zero type arguments"
+          ],
+          "observations": [
+            {
+              "declaration": "sh1GenericCopy",
+              "declarationTypeParameters": [
+                "T0"
+              ],
+              "runtimeParameters": [
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0"
+                  ],
+                  "runtimeArity": 1
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMap",
+              "declarationTypeParameters": [
+                "T0",
+                "T1"
+              ],
+              "runtimeParameters": [
+                "convert",
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0",
+                    "T1"
+                  ],
+                  "runtimeArity": 2
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericTriple",
+              "declarationTypeParameters": [
+                "T0",
+                "T1",
+                "T2"
+              ],
+              "runtimeParameters": [
+                "first",
+                "second",
+                "third",
+                "fuel"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericTriple/body/elseBranch/body",
+                  "typeArguments": [
+                    "T0",
+                    "T1",
+                    "T2"
+                  ],
+                  "runtimeArity": 4
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMono",
+              "declarationTypeParameters": [],
+              "runtimeParameters": [
+                "fuel",
+                "value"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMono/body/elseBranch/body",
+                  "typeArguments": [],
+                  "runtimeArity": 2
+                }
+              ]
+            }
+          ],
+          "emittedIr": "The exact original IR inspected above is passed to psTsEmitModule.",
+          "strictSh1Qualified": false
+        },
+        "artifacts": {
+          "admissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+          "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+          "javascriptSha256": "d8906673be1069b9710f2a1b850d31bbc4b47d9e0c6de8185c7c757d525edd75"
+        },
+        "behavior": {
+          "observations": 19,
+          "status": "pass",
+          "exhaustiveForAllInputs": false
+        },
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:49:07.8541140Z",
+      "marker": "PSC0_SH1_GENERATION",
+      "receipt": {
+        "schemaVersion": 1,
+        "executingCompilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+        "sourceClosureSha256": "d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2",
+        "moduleCount": 56,
+        "sourceBytes": 992338,
+        "sourceKind": "raw-authoritative-lean",
+        "language": {
+          "implementation": "PSC1",
+          "candidateCapability": "PSC0-SH/1 structural state generalization"
+        },
+        "recipe": {
+          "files": [
+            {
+              "path": "scripts/sh1-qualify.mjs",
+              "sha256": "3425cdbf160fc8fe199c92c47ba9f3245a913ee10318b19aec98441b03effedd"
+            },
+            {
+              "path": "scripts/sh1-capabilities.mjs",
+              "sha256": "3d9cc0ec245f0f11167aa084c74c81cfeb36f86d633178428d058c3e17e1a417"
+            },
+            {
+              "path": "scripts/typescript-cli.mjs",
+              "sha256": "53396f78a28a25e5ace674a81f98dbbd76d523cf9ba34c5ec292c88efe647133"
+            },
+            {
+              "path": "scripts/workspace-layout.mjs",
+              "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1"
+            },
+            {
+              "path": "scripts/generated-preparation-session.mjs",
+              "sha256": "96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad"
+            },
+            {
+              "path": "scripts/original-ir-inventory.mjs",
+              "sha256": "11b55971c068eb2362bd4d0dbdc25fd4654d431bfe4e4f62828357e233e3326b"
+            },
+            {
+              "path": "scripts/sh1-source-snapshot.mjs",
+              "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8"
+            },
+            {
+              "path": "scripts/sh1-seed-manifest.mjs",
+              "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f"
+            },
+            {
+              "path": "scripts/sh1-iterate.mjs",
+              "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8"
+            },
+            {
+              "path": "scripts/sh1-iteration-conformance.mjs",
+              "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4"
+            },
+            {
+              "path": "scripts/sh1-foundation-conformance.mjs",
+              "sha256": "4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-reference.lean",
+              "sha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-foundation-probe.lean",
+              "sha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819"
+            },
+            {
+              "path": "scripts/sh1-helper-conformance.mjs",
+              "sha256": "b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-reference.lean",
+              "sha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-helpers-probe.lean",
+              "sha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9"
+            },
+            {
+              "path": "scripts/sh1-generic-erasure-conformance.mjs",
+              "sha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca"
+            },
+            {
+              "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+              "sha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de"
+            }
+          ],
+          "sha256": "d7658e57cc4dc298f0816ff8fe2de5e2d640b270f20096a5492f13e873d9754b"
+        },
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 5.8.3"
+        },
+        "artifacts": {
+          "canonicalSurfaceSourceSha256": "0ddb544ccd1784907511cfe60f59a21a03616c2e17e0a92188cf1b1034950dd8",
+          "normalizedCanonicalAdmissionsSha256": "f55cf731f7c0d6e8a0d025b92b97620cd336011a2164e8d649c16cf81c950d29",
+          "typescriptSha256": "d63c80ca1c0d087b4f4d8cc6fa97693fcd7ddb7fb89aaeb67413f4d904109837",
+          "javascriptSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816"
+        },
+        "preparation": {
+          "schemaVersion": 1,
+          "kind": "psc0-preparation-session",
+          "evidence": "admission-ready",
+          "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+          "sourceKind": "lean",
+          "closureSha256": "2a402dc4ae8f551fa18961ee936064cf505ee35cc8ce82c3f3772df4de96dcb7",
+          "moduleCount": 56,
+          "cache": {
+            "prefixModules": 0,
+            "parseHits": 0,
+            "parseMisses": 56,
+            "parseEvictions": 0,
+            "parseUncachedModules": 0,
+            "preparedModules": 56,
+            "finishHit": false,
+            "retainedParsedEntries": 56,
+            "retainedParsedSourceBytes": 988867,
+            "retainedPrefixModules": 56,
+            "retainedPrefixSourceBytes": 988867,
+            "maxParsedEntries": 128,
+            "maxParsedSourceBytes": 8388608
+          },
+          "timingsMs": {
+            "input": 1.1409080000594258,
+            "parse": 23053.92588700005,
+            "prepare": 306657.26336099976,
+            "finish": 60124.93032199994,
+            "freeze": 217.82565500005148,
+            "total": 390057.497144
+          },
+          "warmNoChange": {
+            "schemaVersion": 1,
+            "kind": "psc0-preparation-session",
+            "evidence": "admission-ready",
+            "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+            "sourceKind": "lean",
+            "closureSha256": "2a402dc4ae8f551fa18961ee936064cf505ee35cc8ce82c3f3772df4de96dcb7",
+            "moduleCount": 56,
+            "cache": {
+              "prefixModules": 56,
+              "parseHits": 0,
+              "parseMisses": 0,
+              "parseEvictions": 0,
+              "parseUncachedModules": 0,
+              "preparedModules": 0,
+              "finishHit": true,
+              "retainedParsedEntries": 56,
+              "retainedParsedSourceBytes": 988867,
+              "retainedPrefixModules": 56,
+              "retainedPrefixSourceBytes": 988867,
+              "maxParsedEntries": 128,
+              "maxParsedSourceBytes": 8388608
+            },
+            "timingsMs": {
+              "input": 1.1426610000198707,
+              "parse": 0,
+              "prepare": 0,
+              "finish": 0,
+              "freeze": 0,
+              "total": 1.1568520000437275
+            }
+          }
+        },
+        "originalIrInventory": {
+          "report": "original-ir-inventory.json",
+          "traversalComplete": true,
+          "findingCounts": {
+            "call-arity-needs-expression-typing": 244
+          },
+          "strictSh1Qualified": false
+        },
+        "timingsMs": {
+          "loadAndPrepare": 390153.31481799996,
+          "admissions": 61229.71086799994,
+          "canonicalSurface": 25481.08532000007,
+          "emit": 150201.75283599994,
+          "tscAndWrite": 5335.6178190000355,
+          "total": 632401.482623
+        },
+        "normalizationEvidence": "Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.",
+        "evidence": "candidate-build",
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:49:12.5311301Z",
+      "marker": "PSC0_SH1_CAPABILITIES",
+      "receipt": {
+        "schemaVersion": 1,
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "evidence": "raw-source-generated-execution",
+        "sourceKinds": [
+          {
+            "sourceKind": "lean",
+            "sourceSha256": "d302eff5addc953d147b95e952617e87e543ef60d1f016525945ab68df5ac9e0",
+            "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "typescriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b",
+            "javascriptSha256": "8885eb704373a42f0470bf01646013a2e6d4ab1facb699e7f0a65fcdf512302d",
+            "generatedCompilerConsumedRawSource": true,
+            "behavior": "pass"
+          },
+          {
+            "sourceKind": "ps",
+            "sourceSha256": "ab29a5688567281d13a5699ed07f87580f1fc714cd544c1c66a2eeda305010b0",
+            "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "typescriptSha256": "0f8794e78817d04a2968119e98714c7267b728f6c1c6fe61469627a7d99bdf8b",
+            "javascriptSha256": "8885eb704373a42f0470bf01646013a2e6d4ab1facb699e7f0a65fcdf512302d",
+            "generatedCompilerConsumedRawSource": true,
+            "behavior": "pass"
+          }
+        ],
+        "negativeCases": [
+          {
+            "name": "narrowed-nested-induction-hypothesis",
+            "sourceSha256": "1c6fc4543d2650c3b18506c39107ec8cc1f3df1302da61fd1c8f73bb6ba907c3",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "unsaturated-recursive-call",
+            "sourceSha256": "879565204119b005493e52868d63b0e0ba8c69624dfd8fbdb329af30d909364a",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionArity"
+            ]
+          },
+          {
+            "name": "nondecreasing-major",
+            "sourceSha256": "fd8b66b959543f6e2f1be3958efff1db883c33dd04dbf6051df2290ceaa2b811",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "unrelated-constructor-child",
+            "sourceSha256": "85eaeb42ac5a652b4dd6f49b2ef9a11d453ea7432f99fd5559c4bd964fa5131a",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionNotDecreasing"
+            ]
+          },
+          {
+            "name": "escaping-self-reference",
+            "sourceSha256": "0675b11dbfc09380ff6449950e29b12f1563bccf0f8bafc5d003b44258860d82",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionEscapingReference"
+            ]
+          },
+          {
+            "name": "major-dependent-parameter",
+            "sourceSha256": "aa9a3193d7db8334c703927ae0a19b060eed52acdfb0f6a6dc0d913819060542",
+            "diagnosticTags": [
+              "elaboration",
+              "structuralRecursionDependentParameter"
+            ]
+          },
+          {
+            "name": "explicit-historical-stable-mode",
+            "sourceSha256": "bee98d86b07b527f2bdbaca89f42d8286a1c64c41f7f4ffb541c437de83a8555",
+            "diagnosticTags": [
+              "structuralRecursionInvariantArgument"
+            ]
+          }
+        ],
+        "independentExpectedBehavior": [
+          "Nat accumulation",
+          "simultaneous state swapping",
+          "state before structural major",
+          "function results",
+          "erased stable proof binder",
+          "generic List at Nat and String",
+          "public partial application",
+          "existing worker correspondence"
+        ],
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:49:12.5642000Z",
+      "marker": "PSC0_SH1_HELPER_RUNTIME",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "generated-compiler-exported-helper-behavior",
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "coverage": {
+          "nonApplicationHeads": 11,
+          "argumentLists": 7,
+          "prefixes": 2,
+          "suffixes": 2,
+          "nameBases": 3,
+          "usedNameListsPerBase": 7,
+          "attempts": [
+            0,
+            7
+          ],
+          "typedPartialApplications": false,
+          "expressionObservations": 1232,
+          "stringObservations": 336,
+          "observations": 1568
+        },
+        "behavior": "independent application-spine and finite unique-name expectations",
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:49:13.2160883Z",
+      "marker": "PSC0_SH1_GENERIC_ERASURE",
+      "receipt": {
+        "schemaVersion": 1,
+        "evidence": "scoped-recursive-generic-erasure",
+        "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
+        "originalIr": {
+          "checks": [
+            "one, two, and three declaration generics in exact declaration order",
+            "interleaved type, erased proposition/proof, and runtime binders",
+            "recursive calls retain the complete runtime argument count",
+            "monomorphic recursive calls retain zero type arguments"
+          ],
+          "observations": [
+            {
+              "declaration": "sh1GenericCopy",
+              "declarationTypeParameters": [
+                "T0"
+              ],
+              "runtimeParameters": [
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericCopy/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0"
+                  ],
+                  "runtimeArity": 1
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMap",
+              "declarationTypeParameters": [
+                "T0",
+                "T1"
+              ],
+              "runtimeParameters": [
+                "convert",
+                "values"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMap/body/alternatives/tail/head/snd/snd/fields/tail/head/snd",
+                  "typeArguments": [
+                    "T0",
+                    "T1"
+                  ],
+                  "runtimeArity": 2
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericTriple",
+              "declarationTypeParameters": [
+                "T0",
+                "T1",
+                "T2"
+              ],
+              "runtimeParameters": [
+                "first",
+                "second",
+                "third",
+                "fuel"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericTriple/body/elseBranch/body",
+                  "typeArguments": [
+                    "T0",
+                    "T1",
+                    "T2"
+                  ],
+                  "runtimeArity": 4
+                }
+              ]
+            },
+            {
+              "declaration": "sh1GenericMono",
+              "declarationTypeParameters": [],
+              "runtimeParameters": [
+                "fuel",
+                "value"
+              ],
+              "calls": [
+                {
+                  "at": "declaration:sh1GenericMono/body/elseBranch/body",
+                  "typeArguments": [],
+                  "runtimeArity": 2
+                }
+              ]
+            }
+          ],
+          "emittedIr": "The exact original IR inspected above is passed to psTsEmitModule.",
+          "strictSh1Qualified": false
+        },
+        "artifacts": {
+          "admissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+          "typescriptSha256": "86ce3c3aaa0b48a8f8b618a117ea347ee36339d7dd122aee7a48056cbc8f5d8e",
+          "javascriptSha256": "d8906673be1069b9710f2a1b850d31bbc4b47d9e0c6de8185c7c757d525edd75"
+        },
+        "behavior": {
+          "observations": 19,
+          "status": "pass",
+          "exhaustiveForAllInputs": false
+        },
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-10-08T22:49:13.2356687Z",
+      "marker": "PSC0_SH1_FIXED_POINT",
+      "receipt": {
+        "schemaVersion": 1,
+        "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+        "sourceClosureSha256": "d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2",
+        "moduleCount": 56,
+        "evidence": "compiler-qualified-current-source-fixed-point",
+        "equation": "Q is the pinned qualified compiler from A; C1=Q(B); C2=C1(B); C3=C2(B); compare C2 and C3 products",
+        "authoringSeed": {
+          "kind": "previous-qualified-authoring-seed",
+          "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+          "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+          "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "identitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+          "independentAlgorithm": false,
+          "priorQualification": {
+            "evidence": "compiler-qualified-current-source-fixed-point",
+            "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+            "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+            "runId": 37831951758,
+            "artifactName": "psc0-sh1-e91b9558d665879871b8bf0893915ae64b27c7fe",
+            "claim": "Compiler-qualified seed; selected-provider acceptance is a separate receipt."
+          }
+        },
+        "rawAuthoringSourceConsumedEveryGeneration": true,
+        "artifacts": {
+          "canonicalSurfaceSourceSha256": "0ddb544ccd1784907511cfe60f59a21a03616c2e17e0a92188cf1b1034950dd8",
+          "normalizedCanonicalAdmissionsSha256": "f55cf731f7c0d6e8a0d025b92b97620cd336011a2164e8d649c16cf81c950d29",
+          "typescriptSha256": "d63c80ca1c0d087b4f4d8cc6fa97693fcd7ddb7fb89aaeb67413f4d904109837",
+          "javascriptSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816"
+        },
+        "c1CompilerSha256": "d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c",
+        "c2CompilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "c3CompilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+        "rawCapabilityKinds": [
+          "lean",
+          "proofScript"
+        ],
+        "helperSourceCorrespondence": "helpers/receipt.json",
+        "helperRuntimeGenerations": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "recursiveGenericErasureGenerations": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "canonicalSourceContract": "Existing surface printer; normalized worker representation is compared through canonical admissions.",
+        "runtimeIrStrictQualification": "not-claimed",
+        "provider": {
+          "status": "not-attempted",
+          "kernelChecked": false
+        }
+      }
+    }
+  ]
+}

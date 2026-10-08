@@ -2,134 +2,170 @@
 
 Updated: 2026-10-08 UTC.
 
-## Active checkpoint: isolated recursive generic-argument repair
+## Current source and qualification checkpoints
 
-Execution branch for this checkpoint: psc0/sh1-generic-erasure-v1.
-Parent helper migration: 671685c3f0059574405a1e630dd965d421a26f05.
-That migration passed its first bounded native development gate in run
-37851669475; its full selected-seed qualification is running independently.
+The current qualified portable source is the recursive generic-argument repair E,
+`cf8fbd784944a98b1e390b709685ca54c2511827`. It was independently qualified on
+`psc0/sh1-generic-erasure-v1`: compiler and pinned-provider jobs passed on the
+first execution of [run 37852341550](https://github.com/dwijayuda/pskernel/actions/runs/37852341550).
+Its parent helper migration H,
+`671685c3f0059574405a1e630dd965d421a26f05`, independently passed both jobs on
+the first execution of [run 37851669475](https://github.com/dwijayuda/pskernel/actions/runs/37851669475).
 
-The current-definition erasure context now retains ordered declaration generic
-arguments using a reversed accumulator. Type binders add their assigned Tn;
-runtime and erased proof binders preserve the context. Recursive-IH calls use
-those ordered arguments. This repairs the shared empty-type-argument omission
-without collecting unrelated local types or changing kernel/provider internals.
+The canonical integration branch is `psc0/sh1-implementation-v1`; integration
+preserves the E branch's source/qualification provenance and uses a normal
+fast-forward. Documentation-only descendants do not change the qualified
+portable source.
 
-The focused raw fixture covers one/two/three generics, interleaved type,
-proposition/proof and runtime binders, and a monomorphic control. The harness
-checks actual original-IR call paths and argument order, emits that same IR,
-and compares bounded runtime behavior. It runs on N1 and C1/C2/C3, not the old Q.
-The separate provider job also checks its exact C2/C3 admission streams.
+| Checkpoint | Source commit | Result |
+| --- | --- | --- |
+| A: recursion capability and preparation/session implementation | `e91b9558d665879871b8bf0893915ae64b27c7fe` | Compiler-qualified and exact admissions accepted; remains the selected authoring seed |
+| B: Foundation.List migration | `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0` | Compiler-qualified and exact admissions accepted on its first migration execution |
+| H: three compiler helpers | `671685c3f0059574405a1e630dd965d421a26f05` | Compiler-qualified and exact admissions accepted on its first execution |
+| E: recursive generic-argument erasure | `cf8fbd784944a98b1e390b709685ca54c2511827` | Compiler-qualified and exact admissions accepted on its first execution |
 
-Run 37852341550 passed the first bounded native gate for this repair at
-cf8fbd784944a98b1e390b709685ca54c2511827. The original-IR assertions and
-generated/native behavior checks passed; full C1/C2/C3 and provider outcomes
-remain pending. Preserve C2-versus-C3 product equality; Q may produce a different
-C1 TypeScript product while its C1 executable
-already contains the new erasure implementation. A remains the selected seed.
-The diagnostic IR inventory must determine the new finding counts. This
-checkpoint does not implement the separate call-expression typing obligations
-or activate strict SH/1 runtime enforcement.
+Compiler qualification, Core-provider acceptance and strict runtime SH/1 remain
+separate axes. Strict SH/1 is still false, and psconfig retains the existing PSC1
+bootstrap lane. No named profile was activated by these changes.
 
-The next coherent portable expression-checker design is recorded in
-[docs/selfhost-language/RUNTIME_IR_PLAN.md](docs/selfhost-language/RUNTIME_IR_PLAN.md).
-It preserves type/value scope, ordered simultaneous substitution, exact IR
-calling conventions and explicit resource failures. It is a plan, not an
-additional implemented or strictly qualified capability.
+## Completed implementation in this continuation
 
-## Previous checkpoint: next three-helper source migration
+The helper migration H changes only `Elab/Term.lean` and
+`Erasure/Definition.lean` inside the portable closure:
 
-The qualified Foundation checkpoint below remains the previous completed milestone.
-This continuation migrates psExprApplyManyWorker, psExprAppViewAccWorker and
-psErasureAddUniqueStringWorker to ordinary explicit value parameters. Public
-worker/wrapper names, full types, argument ordering and algorithms are preserved.
+- `psExprApplyManyWorker` now takes its expression accumulator as an ordinary
+  explicit parameter.
+- `psExprAppViewAccWorker` now takes its argument accumulator as an ordinary
+  explicit parameter.
+- `psErasureAddUniqueStringWorker` now takes its changing candidate base as an
+  ordinary explicit parameter while descending through Nat fuel.
 
-Only Term.lean and Erasure/Definition.lean change inside the portable compiler
-closure. The three spelling guards now accept the historical and qualified
-forms while preserving their wrapper/primitive checks and unrelated imports.
-A new bounded correspondence harness compiles preserved and current raw helper
-slices with actual Name/Level/Expr source, compares all seven public function
-types and checks application order, accumulator suffixes, typed partial
-application and exact unique-name exhaustion. It runs before expensive C1.
-A cheap behavior check also executes actual exported helpers in N1/C1/C2/C3.
+All public worker/wrapper names, complete types, argument order and algorithms
+are preserved. The unique-name helper retains its exact zero-fuel and collision
+exhaustion suffixes. The three guards accept historical and qualified forms
+while retaining wrapper, primitive and unrelated source/admission checks.
 
-Cloud validation is pending for this new checkpoint. Ordinary development uses
-the existing native-candidate gate; the completed source-family milestone then
-receives selected-Q current-source C1/C2/C3 and exact provider acceptance.
-A remains the selected qualified seed. No strict runtime-profile claim is added.
+The correspondence gate compiles preserved/current raw helper slices with actual
+Name/Level/Expr dependencies. It checks seven public types and 2,198 observations
+per compiled slice, including typed partial applications. A separate 1,568-observation
+check exercises actual exported helpers in each generated compiler. All of these
+checks passed on the first compiler execution of both H and E.
 
-An isolated follow-on erasure change is being designed: preserve the current
-declaration's ordered generic arguments when reconstructing recursive calls.
-It is not part of this helper-migration code checkpoint. Keep kernel/provider
-implementation and metatheory unchanged.
+The isolated E repair changes `Erasure/Basic.lean`, `Erasure/Definition.lean`
+and `Erasure/Expr.lean`. `PsErasureCurrentDefinition` now retains a reversed
+accumulator of the current declaration's generic arguments. Type binders record
+their assigned Tn in order; runtime and erased proof binders preserve the context.
+Recursive induction-hypothesis calls receive the restored declaration order.
+The implementation neither captures unrelated local types nor whitelists helper
+names.
 
-## Completed checkpoint: qualified seed and first source migration
+The focused fixture checks exact original-IR argument order for one, two and
+three generics, interleaved proposition/proof/runtime binders, and a monomorphic
+control. It emits the same IR object whose calls were asserted. All N1/C1/C2/C3
+executions passed 19 behavior observations; N1/C1 also passed native parity.
+Kernel/provider implementation and metatheory were unchanged.
 
-Implementation branch: psc0/sh1-implementation-v1.
-Qualified portable source B: 70d6010ddccbdd6b4939f2fb3c088bfe4e607de0.
-Run 37840481558 passed on its first execution for this migration: compiler job
-113528289107 and provider job 113549202073 both completed successfully.
+## H evidence before the erasure repair
 
-B contains 56 raw source modules / 991,890 bytes. Its raw closure SHA256 is
-4b0e8ed609bdf1c6b7063d2d763f39f0d1c8d33ca7be375fa46bcece018c85ae.
-C1, C2 and C3 agree on canonical surface, canonical admissions, TypeScript and
-JavaScript. The generated compiler SHA256 is
-7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d.
+H's compiler job `113565800146` passed on its first execution in
+[run 37851669475](https://github.com/dwijayuda/pskernel/actions/runs/37851669475);
+provider job `113583716467` also passed on that first execution.
 
-Foundation.List now uses ordinary explicit parameters in reverseAcc, append,
-take and zip. The verified A seed consumed both the preserved reference and
-current raw source before C1. All ten public types and 1,666 observations per
-implementation passed, including typed partial applications and generic zip.
-Raw .lean/.ps capabilities and all seven refusal cases passed in C1/C2/C3.
-Preparation/session/CLI conformance and the corrected ownership guard passed.
+H contains 56 raw modules / 991,563 Git blob bytes, a reduction of 327 bytes
+from B. Raw source closure SHA256:
+`03c493835b44507fbe692f065f953f9c8252a44edcdf7e62932c3608831d0903`.
+C1/C2/C3 agree on canonical surface, ordered admissions, TypeScript and JavaScript.
+N1's TypeScript/JavaScript also agree with the generated generations.
+The generated JavaScript SHA256 is
+`fb7708698c333c1985ae82c0eb5b061c8738f41feffc12f3fddccb1c74fc6855`.
 
-The unchanged provider at 963030dc2d154008fccc82e7c8ed29331f138799 accepted
-B's compiler admissions and the deduplicated raw capability stream. Its binary
-SHA256 remains 88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec.
-Artifact generation preceded this separate provider check; no checked-emission
-claim is inferred. Strict runtime SH/1 enforcement remains pending.
+All three full-source inventories complete with 244 expression-typing obligations
+and 19 type-argument arity findings. E's isolated repair resolves the latter
+category below. H recovered the pinned A seed from its verified cache.
 
-The selected authoring compiler Q remains the qualified A compiler from
-e91b9558d665879871b8bf0893915ae64b27c7fe, with JS SHA256
-9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096.
-B verified all four products from A's retained artifact and materialized the
-content-addressed qualified seed cache. Preserve S0 -> A -> B recovery;
-do not silently claim the historical S0 can compile migrated B.
+The unchanged pinned provider accepted H's two deduplicated compiler/capability
+admission streams after emission. Its preserved receipts are
+[qualification](docs/selfhost-language/helper-migration-qualification.json),
+[helper correspondence](docs/selfhost-language/helper-migration-correspondence.json),
+[small compiler receipts](docs/selfhost-language/helper-migration-compiler-evidence.json)
+and [provider acceptance](docs/selfhost-language/helper-migration-provider.json).
+The provider identity and checked-emission boundary are the same as E below.
 
-Ordinary edits use npm run dev:sh1. The first native development gate at
-9641928bcf7d5394f46e19a31a8ae3fd096d44b5 passed in run 37834854232:
-14.590 seconds for the bounded gate and about 74 seconds for the whole job
-with restored build caches. Its TS/JS exactly match the independently qualified
-A compiler. Full self-application is a separate promotion workload.
+## E evidence and the remaining runtime boundary
 
-B's full generation totals were 983.965s, 968.930s and 984.134s. Warm unchanged
-in-memory preparation reused all 56 modules with zero parse/prepare/finish work
-in about 1.73 ms. These warm numbers exclude source reads and optional emission;
-the generated compiler's cold preparation still takes about 10 minutes.
+Run 37852341550: compiler job `113568120771` and provider job
+`113579690742` both succeeded on the first execution.
 
-The remaining IR inventory is diagnostic: B has 244 call-expression typing
-obligations and 19 type-argument arity findings, with no other recorded categories.
-Retained A details show 19 generic helper calls with zero explicit type arguments.
-Source review identifies an omission in recursive-IH reconstruction: the current
-definition tracks runtime names only and reconstruction supplies List.nil type
-arguments. The report lacks node ancestry, so a one-to-one mapping is not claimed.
-The next M6 slice should preserve ordered current-declaration generic arguments,
-then add callee-expression typing/scoped substitution. No whitelist or checker
-weakening was introduced, and no extra implementation/test cycle was started.
+E contains 56 raw modules / 992,338 Git blob bytes. Raw source closure SHA256:
+`d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2`.
 
-All exact receipts and provenance are indexed in
-docs/selfhost-language/qualification-evidence.json. Original A and B qualification,
-provider and List-correspondence receipts are preserved beside it. This final
-checkpoint updates only documentation/evidence after the qualified B source.
+C2 and C3 agree on canonical surface, ordered admissions, TypeScript and
+JavaScript. Their generated JavaScript SHA256 is
+`b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816`;
+native-generated N1 has the same JavaScript bytes. C1's JavaScript is
+`d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c`.
+Its difference is permitted by the C2-versus-C3 contract: the older Q produced
+C1's IR, while the new C1 executable contains the repaired erasure used for C2.
 
-Follow-on source families, in order: psExprApplyManyWorker,
-psErasureAddUniqueStringWorker, psExprAppViewAccWorker. Keep public types and
-exhaustion/ordering behavior; use focused native comparisons before the next
-planned source-family qualification. Further source migration, optional syntax
-conveniences, strict M6 enforcement and optional .ps authority are documented
-future work, not completed claims.
+The complete C2/C3 IR inventories have **zero type-argument arity findings** and
+**244 call-expression typing obligations**, with no other recorded categories.
+C1 retains the historical 19 type-argument arity findings in its Q-produced IR.
+B's 244-plus-19 result and its empty generic erasure context are historical;
+the new repair must not be listed as future work again. The remaining 244
+records identify unfinished expression typing, not 244 proven runtime failures.
 
-Earlier checkpoint notes below retain their original execution-time status.
+The unchanged pinned provider source is
+`963030dc2d154008fccc82e7c8ed29331f138799`, with binary SHA256
+`88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec`.
+It accepted three deduplicated streams: E compiler admissions, raw .lean/.ps
+capabilities, and the focused generic-erasure fixture. Default fuel 131,072 and
+timeout 60,000 ms were unchanged. Emission preceded this separate check;
+`emissionWasGatedByThisCheck` remains false.
+
+Exact qualification, correspondence, compiler and provider receipts are indexed
+in [docs/selfhost-language/qualification-evidence.json](docs/selfhost-language/qualification-evidence.json).
+E's preserved receipts include
+[qualification](docs/selfhost-language/recursive-generic-erasure-qualification.json),
+[C2 generic conformance](docs/selfhost-language/recursive-generic-erasure-conformance.json),
+[small compiler receipts](docs/selfhost-language/recursive-generic-erasure-compiler-evidence.json)
+and [provider acceptance](docs/selfhost-language/recursive-generic-erasure-provider.json).
+
+## Seed, development workflow and next work
+
+The selected authoring compiler Q remains A from
+`e91b9558d665879871b8bf0893915ae64b27c7fe`, with JavaScript SHA256
+`9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096`.
+Do not silently promote E as the seed or claim the historical S0 can consume
+the migrated source. Preserve the authenticated S0 -> A recovery route and A's
+qualified seed cache/artifact identities.
+
+Ordinary edits use `npm run dev:sh1`; `npm run iterate:sh1 -- ... --loop`
+provides optional resident preparation reuse. Full runs also execute the bounded
+native gate before expensive selected-Q generation. Source-family and semantic
+milestones receive C1/C2/C3 plus exact provider checks, selected by
+`[sh1-qualify]` or full manual dispatch. Independent checkpoint branches may
+qualify in parallel. Both new checkpoints passed their native, compiler and
+provider gates on their first execution, without a semantic test/fix cycle.
+
+H's bounded native gate took 39.951 seconds, and E's took 25.886 seconds.
+Full C1/C2/C3 generation totals were 993.651/1,011.667/991.582 seconds for H and
+607.562/606.556/632.401 seconds for E. These are recorded single-run scopes,
+not a benchmark or a general speedup claim. The earlier 14.590-second
+development result used a smaller bounded gate; warm resident preparation
+measurements exclude source reads and optional emission.
+
+The next planned implementation is the coherent M6 slice in
+[docs/selfhost-language/RUNTIME_IR_PLAN.md](docs/selfhost-language/RUNTIME_IR_PLAN.md):
+one portable expression checker for the current IR, with scoped simultaneous
+type substitution, checked body/initializer annotations, exact function grouping,
+global value/function distinction and explicit resource failures. Keep the host
+inventory as a report of that portable checker.
+
+Strict runtime enforcement additionally needs enabled primitive/layout/import
+and scalar/bounds/text-position contracts, erasure/backend correspondence and
+generated evidence for the enforced path. Neither zero type-arity findings nor
+Core admission acceptance grants strict SH/1. Broader optional source conveniences
+and .ps authority remain separately gated future work.
 
 ## Scope of this work
 
@@ -153,7 +189,13 @@ The historical 55-module record remains immutable.
 - Use focused validation for a complete implementation slice, then current-source
   C2/C3 qualification at the milestone.
 
-## Implemented architecture
+## Historical execution notes
+
+The following notes retain their original execution-time status from the initial
+implementation and first migration. Pending statements below are historical;
+the current checkpoint and next work are stated above.
+
+### Implemented architecture
 
 - Recursion: canonical stable/major worker plus function-valued generalized state;
   preserve public binder kinds and argument order with a wrapper. Reject unsupported
@@ -173,14 +215,14 @@ The historical 55-module record remains immutable.
   This is evidence for the historical native baseline, not acceptance of our new worker
   admissions. New admissions will be checked through a separate pinned provider checkout.
 
-## Design clarification
+### Design clarification
 
 Canonical surface source is the output of the existing syntax translator. Lowered
 worker/core structure is represented by canonical admissions. The minimum checkpoint
 does not add a second elaboration-aware source printer. Generated compilers must
 consume raw authored forms, so the new lowering path is exercised directly.
 
-## Initial implementation checkpoint (historical)
+### Initial implementation checkpoint (historical)
 
 The first coherent implementation checkpoint contains portable recursion lowering,
 preparation/session reuse, raw capability fixtures, C2/C3 qualification, diagnostic IR
@@ -190,7 +232,7 @@ qualification, migrate a bounded Foundation.List family using a pinned qualified
 The independent host IR report is diagnostic evidence; full strict runtime typing and
 PSC0-SH/1 strict profile activation remain separate obligations.
 
-## Review decisions before first execution
+### Review decisions before first execution
 
 The child-provenance boundary also requires alpha-equality of the nested expected
 result telescope and the whole worker result. This prevents a narrower induction
@@ -198,7 +240,7 @@ hypothesis from disguising missing state application. Fixtures include the rejec
 and preservation of valid outer hypotheses. Session results are deeply immutable;
 parsed cache limits are entry/source-text limits, not a hard compiler-heap bound.
 
-## Setup checkpoint after first cloud attempt
+### Setup checkpoint after first cloud attempt
 
 Commit e67647ec4821d609188e6feb5a4de2380857767e started run37831018572.
 Job113496067989 stopped in Lean Action configuration because the historical branch
@@ -208,7 +250,7 @@ Preserve the historical changed-argument refusal test by selecting BatchStable; 
 enhanced path is covered by the generated raw-source capability corpus. Rerun the
 same coherent qualification after these integration corrections.
 
-## Native build checkpoint
+### Native build checkpoint
 
 Run37831457914 at e52c30313b1e9124864a304a41f3b4b4c8f74bd0 recovered and
 cached S0 successfully (JavaScript SHA25674dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76).
@@ -217,7 +259,7 @@ used two Lean4.34 reserved words as local names (`meta` and `public`); rename th
 to metaContext and publicDeclaration together. No semantic acceptance rule changed.
 Candidate and full qualification remain pending; reuse the cached seed/build outputs.
 
-## Development gate validation checkpoint
+### Development gate validation checkpoint
 
 Run37831951758 at e91b9558d665879871b8bf0893915ae64b27c7fe has passed native
 compilation and the generated C1 candidate, including raw capability and session
@@ -243,7 +285,7 @@ implementation workflow branch filter, and apply the staged Foundation.List migr
 with its bounded behavior/public-type correspondence gate. Preserve A's historical
 source recovery path before allowing B to use the new authoring capability.
 
-## Bounded development result
+### Bounded development result
 
 Commit9641928bcf7d5394f46e19a31a8ae3fd096d44b5 passed run37834854232 on its
 first execution. Job113509175107 took74seconds including a15second incremental

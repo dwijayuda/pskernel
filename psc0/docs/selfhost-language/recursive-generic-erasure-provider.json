@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "evidence": "selected-provider-acceptance-for-qualified-compiler-admissions",
+  "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+  "sourceClosureSha256": "d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2",
+  "compilerSha256": "b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816",
+  "provider": {
+    "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+    "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+    "metadata": {
+      "protocol": "pskernel-core/1",
+      "provider": "pskernel-core-native",
+      "leanVersion": "4.34.0",
+      "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+      "profile": "lean4.34-core",
+      "status": "ready"
+    },
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "node": "v22.23.3",
+    "command": [
+      "psc_kernel_core_provider",
+      "--check"
+    ],
+    "resourcePolicy": "Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.",
+    "timeoutMs": 60000
+  },
+  "streams": [
+    {
+      "canonicalAdmissionsSha256": "f55cf731f7c0d6e8a0d025b92b97620cd336011a2164e8d649c16cf81c950d29",
+      "artifacts": [
+        "C2 compiler source",
+        "C3 compiler source"
+      ],
+      "durationMs": 1100.333044,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      }
+    },
+    {
+      "canonicalAdmissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+      "artifacts": [
+        "C2 raw lean capability source",
+        "C2 raw ps capability source",
+        "C3 raw lean capability source",
+        "C3 raw ps capability source"
+      ],
+      "durationMs": 7.2600109999998494,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      }
+    },
+    {
+      "canonicalAdmissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+      "artifacts": [
+        "C2 raw recursive-generic fixture source",
+        "C3 raw recursive-generic fixture source"
+      ],
+      "durationMs": 5.802243999999973,
+      "result": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      }
+    }
+  ],
+  "accepted": true,
+  "emissionWasGatedByThisCheck": false,
+  "qualificationBoundary": "Compiler-only artifacts were generated first; promotion may use this additional exact-stream provider acceptance."
+}

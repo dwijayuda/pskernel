@@ -1,6 +1,6 @@
 # PSC0-SH/1: self-host authoring contract and capability plan
 
-Status: the bounded varying-parameter recursion capability is **compiler-qualified** at `e91b9558d665879871b8bf0893915ae64b27c7fe`; its exact admissions passed the pinned provider. The Foundation.List source migration at `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0` subsequently passed current-source C2/C3 and its own provider check. The full strict PSC0-SH/1 profile remains pending runtime enforcement (M6), and psconfig retains the existing PSC1 bootstrap lane. The words MUST and MUST NOT describe the complete contract, including obligations still pending. [IMPLEMENTATION.md](IMPLEMENTATION.md) defines the implemented checkpoint boundaries; [qualification-evidence.json](qualification-evidence.json) distinguishes compiler, provider and strict-runtime evidence.
+Status: the bounded varying-parameter recursion capability is **compiler-qualified** at the selected authoring seed A, `e91b9558d665879871b8bf0893915ae64b27c7fe`; its exact admissions passed the pinned provider. Foundation.List (B) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and its exact-stream provider check on the first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and its exact-stream provider check on the first execution. E's complete C2/C3 inventories have zero type-argument arity findings and 244 remaining call-expression typing obligations. The full strict PSC0-SH/1 profile remains pending runtime enforcement (M6), and psconfig retains the existing PSC1 bootstrap lane. The words MUST and MUST NOT describe the complete contract, including obligations still pending. [IMPLEMENTATION.md](IMPLEMENTATION.md) defines the implemented checkpoint boundaries; [qualification-evidence.json](qualification-evidence.json) distinguishes compiler, provider and strict-runtime evidence.
 
 Scope: the PSC0 compiler implementation and its portable dependencies. Initial executable target: existing TypeScript-to-JavaScript bootstrap lane. Initial authoritative source: PSC1-compatible `.lean`, parsed by PSC0's own frontend. Existing generated `.ps` remains the canonical exchange form.
 
@@ -114,9 +114,9 @@ For a function whose inputs consist of fixed parameters, one structural major, a
 9. Emit the canonical worker with only fixed parameters and the major in its outer recursion-parameter set; keep generalized state in the motive/hypothesis function telescope. Emit the public wrapper without changing its external binder order.
 10. Feed this form through existing elaboration, admission and erasure. Verify deterministic output, source correspondence and execution. A well-typed result alone does not prove that the transformation preserved what the source computes.
 
-**Erasure boundary:** existing erasure records outer runtime parameters, changes one major argument when reconstructing recursion, and finishes the application using the hypothesis domain. Generalized state MUST NOT remain in the list it treats as fixed outer arguments, or a future normalizer could reinsert stale state or duplicate arguments.[EOPEN], [EREC] This is an implementation obligation, not an observed current bug.
+**Erasure boundary:** existing erasure records outer runtime parameters, changes one major argument when reconstructing recursion, and finishes the application using the hypothesis domain. Generalized state MUST NOT remain in the list it treats as fixed outer arguments, or a future normalizer could reinsert stale state or duplicate arguments.[EOPEN], [EREC] This is an implementation obligation, not an observed current bug. Recursive-call reconstruction MUST also retain the current declaration's ordered generic arguments while preserving the empty list for monomorphic declarations. E supplies that bounded repair and its generated-compiler evidence; declaration generics remain distinct from ambient expression-local type binders.
 
-The first implementation belongs in a small typed planning/normalization module under `elab`, integrated from Declaration/Context/Term. It MUST itself be written in the old accepted subset so the old seed can build it. A later direct-recursor alternative may avoid wrappers only with an explicit fixed/major/generalized parameter map consumed correctly by erasure after type/proof erasure and eta expansion; that larger change needs its own conformance evidence.
+The initial implementation is in a small typed planning/normalization module under `elab`, integrated from Declaration/Context/Term. That first source checkpoint remains written in the old accepted subset so the historical seed can build it. Later source families use the independently qualified A authoring seed. A later direct-recursor alternative may avoid wrappers only with an explicit fixed/major/generalized parameter map consumed correctly by erasure after type/proof erasure and eta expansion; that larger change needs its own conformance evidence.
 
 ### Required refusals
 
@@ -171,7 +171,9 @@ For explicit state, document whether a function is `State -> Except Error (Value
 
 ## 6. Runtime IR validation
 
-Current PSC0 erasure returns the original raw `PsVerifiedIrModule`; TS accepts its `.unknown` type. Add a small validator for this actual model rather than copying later wrapper APIs wholesale.[API], [IR], [TYPE]
+Current PSC0 erasure returns the original raw `PsVerifiedIrModule`; TS accepts its `.unknown` type. The installed inventory is diagnostic. The generic-erasure repair E removes all 19 historical type-argument arity findings from its complete C2/C3 inventories, while 244 call-expression typing obligations remain. This repairs missing recursive-call generic arguments; it does not supply the full runtime checker.
+
+Implement the checker for this actual model rather than copying later wrapper APIs wholesale. [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) gives the next coherent implementation and its acceptance boundaries, including function-valued globals, compositional expression types, simultaneous scoped substitution and explicit exhaustion.[API], [IR], [TYPE]
 
 The checker MUST cover:
 
@@ -184,7 +186,7 @@ The checker MUST cover:
 - Literal/result-type consistency and the selected scalar capability's range, signedness, canonicalization and target-width invariants.
 - Import/call closure and unresolved runtime `.unknown`.
 
-Run it in report mode on the entire existing closure first. Distinguish deliberate erasure, supported parametric types and actual unknown runtime types. Enforce it on new SH/1 source only after the migration has accounted for historical cases. A wrapper name is optional; actual checks and evidence are required.
+Continue report mode on the entire existing closure while the portable checker is implemented. Distinguish deliberate erasure, supported parametric types and actual unknown runtime types. Enforce it on new SH/1 source only after the migration has accounted for historical cases. A wrapper name is optional; actual checks and evidence are required.
 
 Kernel admission establishes core typing relative to its environment. The IR check establishes additional representational constraints. Semantic correspondence/runtime tests address lowering correctness. These claims MUST remain distinguishable.
 

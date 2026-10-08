@@ -1,11 +1,17 @@
 # PSC0 SH/1 implementation and qualification
 
-Status: initial implementation A and the Foundation.List migration B are compiler-qualified,
-and their exact admission streams were accepted by the pinned native provider. B is
-`70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`; A remains the selected recoverable authoring seed.
-This document supplements [SPEC.md](SPEC.md). Strict runtime profile activation remains
-pending M6 enforcement. Exact results and retained receipts are indexed in
-[qualification-evidence.json](qualification-evidence.json).
+Status: implementation A, Foundation.List migration B, the three-helper migration H
+and recursive generic-erasure repair E are compiler-qualified and have separate
+acceptance receipts from the pinned native provider. H is
+`671685c3f0059574405a1e630dd965d421a26f05`; E is
+`cf8fbd784944a98b1e390b709685ca54c2511827`.
+A remains the selected recoverable authoring seed. The canonical implementation
+branch is `psc0/sh1-implementation-v1`; E was qualified independently on
+`psc0/sh1-generic-erasure-v1` before fast-forward integration.
+
+This document supplements [SPEC.md](SPEC.md). Strict runtime profile activation
+remains pending M6 enforcement. Exact source identities, original receipts and
+cloud outcomes are indexed in [qualification-evidence.json](qualification-evidence.json).
 
 ## Implemented capability
 
@@ -154,20 +160,29 @@ preparation stage.
 
 ## Qualification architecture
 
-The workflow separates ordinary development from full semantic promotion.
-Ordinary pushes run `native-candidate`: the current native PSC frontend builds
-N1 from raw current compiler source, then N1 executes the bounded language,
-preparation-session and resident-CLI corpus. The Foundation behavior matrix runs
-when the library source differs from its preserved reference. Gate evidence is
-`native-seeded-generated-compiler-candidate`. The selected bootstrap seed and
-generated current-source fixed point are separate obligations.
+Ordinary pushes run the bounded native development gate. It builds current
+native PSC incrementally, emits N1 from exact raw compiler source, then
+executes the capability, helper, generic-erasure, preparation-session and
+resident-CLI checks. The Foundation comparison runs when that source differs
+from its preserved reference. Native-seeded development evidence remains
+separate from selected-seed ancestry and current-source fixed-point evidence.
 
-A commit message containing `[sh1-qualify]`, or a manual workflow dispatch with
-`full` enabled, selects the promotion path. It verifies or recovers the selected
-authoring seed, runs `candidate` with that seed, and then runs `fixed-point`.
-The current native compiler remains useful as an additional bounded behavior
-comparison. A separately pinned provider job consumes the full run's exact
-admission artifacts and records its own acceptance or rejection.
+A commit containing `[sh1-qualify]`, or a full manual workflow dispatch, runs
+the same native gate before expensive selected-seed generation. The native
+outputs go to `dist/sh1/development`; selected-Q/C1/C2/C3 products remain in
+`dist/sh1`. Their receipts and compiler identities stay separate.
+
+The full path verifies or recovers Q, compares preserved/current raw Foundation
+and helper sources using Q, builds and tests C1, then builds/tests C2 and C3.
+The generic-erasure fixture runs on the new N1/C1/C2/C3 executables, whose
+implementation includes that repair; it is not required of old Q.
+Only C2-versus-C3 product equality is required. A separate pinned-provider job
+checks the exact admission streams after compiler artifact generation.
+
+Concurrency is scoped by branch. H and E qualified concurrently on their
+separate immutable source checkpoints. Routine edits remain native-gated;
+full self-application is reserved for coherent semantic or source-family
+promotion checkpoints.
 
 ### Seed authority
 
@@ -322,8 +337,8 @@ The resident CLI still rereads and hashes source; optional emission remains whol
 
 The original-IR traversal completed. It reported 245 call-arity cases requiring
 expression typing and 19 call type-arity findings, with no other recorded finding
-categories. Those remaining obligations prevent strict SH/1 qualification even
-though the compiler fixed point and Core admission checks passed.
+categories. That historical inventory did not establish strict SH/1 qualification.
+The current E findings and remaining obligations are recorded below.
 
 ## Qualified Foundation.List migration
 
@@ -399,52 +414,173 @@ timings and provenance remain in the evidence index.
 A remains selected in `selfhost-seed.json`. B's successful fixed point does not
 silently replace the historical S0 -> A -> B recovery path or claim S0 accepts B.
 
+## Qualified three-helper migration
+
+H is `671685c3f0059574405a1e630dd965d421a26f05`, qualified on its first
+execution in [run 37851669475](https://github.com/dwijayuda/pskernel/actions/runs/37851669475).
+Only `Elab/Term.lean` and `Erasure/Definition.lean` changed inside the
+portable closure. It contains 56 raw modules / 991,563 bytes, 327 fewer than B.
+
+| Source helper | Change | Preserved contract |
+| --- | --- | --- |
+| `psExprApplyManyWorker` | Ordinary expression accumulator parameter | Left-associated application order and the starting expression |
+| `psExprAppViewAccWorker` | Ordinary argument-list accumulator parameter | Head, argument order and accumulator suffix |
+| `psErasureAddUniqueStringWorker` | Ordinary changing String base parameter | Used-name membership, fuel and exact exhaustion suffix |
+
+The compiler owns the worker/closure transformation. Public worker and wrapper
+names, complete types and argument order remain unchanged. The source guards
+accept both historical and qualified forms while retaining primitive,
+wrapper-order and unrelated admission/module-sequencing checks.
+
+The native N1 and selected-Q routes each compiled the preserved and current
+helper slices using the real Name/Level/Expr dependency source. All seven
+public types passed `psExprAlphaEq`, including binder kinds and order.
+Each source slice passed 2,198 observations covering expression spines, partial
+application, collision lists, Unicode/empty names and exhaustion. Separately,
+each exported N1/C1/C2/C3 helper runtime passed 1,568 observations.
+
+The unique-name algorithm deliberately retains its existing edge behavior:
+zero attempts with `x` yields `x_overflow`; one collision with one attempt can
+yield `x__overflow`. The correspondence checks are bounded observations and
+type comparisons, not a universal semantic-equivalence theorem.
+
+H's C2 and C3 agree on canonical source, canonical admissions, TS and JS.
+C1 also matches those products. Its generated JS SHA256 is
+`fb7708698c333c1985ae82c0eb5b061c8738f41feffc12f3fddccb1c74fc6855`. All three report traversals completed with 244
+expression-typing obligations and 19 generic-argument arity findings.
+The unchanged provider accepted 2 distinct admission streams
+covering the full compiler and raw language capabilities. Helper-slice admission
+streams are not included in that provider claim.
+
+## Qualified recursive generic-erasure repair
+
+E is `cf8fbd784944a98b1e390b709685ca54c2511827`. Both jobs in
+[run 37852341550](https://github.com/dwijayuda/pskernel/actions/runs/37852341550)
+passed on its first execution. E contains 56 raw modules / 992,338 bytes.
+Its source closure is
+`d7866a3c8da745db5b0f6c7ce67381915f6265263615c13a243ec674c1ab13e2`.
+
+The historical A/B erasure context retained the current definition's name and
+runtime parameter names, but not its declaration generic arguments.
+`psOpenMatchMinorHypotheses` consequently reconstructed recursive calls with
+an empty type-argument list. The historical report did not record enough
+callee ancestry to prove a one-to-one source mapping for all 19 findings.
+
+The bounded repair addresses that shared omission:
+
+| Portable source | Implementation |
+| --- | --- |
+| [Erasure/Basic.lean](../../packages/erasure/src/Ps/Erasure/Basic.lean) | Add `typeArgumentsRev` to the current-definition context |
+| [Erasure/Definition.lean](../../packages/erasure/src/Ps/Erasure/Definition.lean) | Accumulate the assigned declaration `Tn` arguments; preserve them across runtime and erased proof binders |
+| [Erasure/Expr.lean](../../packages/erasure/src/Ps/Erasure/Expr.lean) | Restore declaration order and pass the arguments during recursive-IH reconstruction |
+
+Only declaration binders contribute. The change does not collect unrelated
+local type bindings, add declaration-name exceptions or modify the inventory
+checker. Monomorphic calls retain an empty generic list. Accumulation uses
+constant-time cons; order is restored when constructing a recursive call.
+
+The focused raw fixture checks one, two and three generic parameters, including
+type parameters interleaved with erased proposition/proof and runtime binders,
+plus a monomorphic control. N1/C1/C2/C3 each passed exact original-IR type
+argument order and runtime arity assertions, followed by 19 behavior
+observations. N1 and C1 also passed exact native TS and behavior correspondence.
+The harness emits the same original IR object that it inspects.
+
+### Generation handoff and measured results
+
+C1 is built by old Q; its full-source IR inventory therefore records Q's
+lowering. Executing C1 already runs E's repaired implementation. C2 and C3 then
+exercise the repaired compiler on E itself.
+
+| Full-source generation | Executing compiler | Generic-argument arity findings | Call-expression typing obligations |
+| --- | --- | ---: | ---: |
+| C1 | Old selected Q | 19 | 244 |
+| C2 | New C1 | 0 | 244 |
+| C3 | New C2 | 0 | 244 |
+
+Every traversal completed. C1's TS/JS legitimately differ from C2/C3; canonical
+source and admissions agree. C2 and C3 agree on all four required products.
+N1 independently produces the same TS/JS as C2/C3.
+
+| E identity | SHA256 |
+| --- | --- |
+| C1 generated JS | `d3fd03481ce03d4d2f962f932d4987aff28a7dcf68a395467be2dc57f1d60a2c` |
+| C2/C3 and N1 JS | `b6783f5d3ae25fe2da233da3a2c607445efa007a62bbde0275cfa6b8b8b04816` |
+| C2/C3 TS | `d63c80ca1c0d087b4f4d8cc6fa97693fcd7ddb7fb89aaeb67413f4d904109837` |
+| Canonical surface | `0ddb544ccd1784907511cfe60f59a21a03616c2e17e0a92188cf1b1034950dd8` |
+| Canonical admissions | `f55cf731f7c0d6e8a0d025b92b97620cd336011a2164e8d649c16cf81c950d29` |
+
+The bounded E native-candidate gate took 25.886 seconds after the native build.
+The three full generation totals were 607.562s, 606.556s and 632.401s.
+C2 cold preparation took 375.724s; unchanged in-memory preparation reused all
+56 modules with zero parse/prepare/finish work in 1.085ms.
+
+These are single-run measurements on the recorded Linux x64 runner with
+Node v22.23.3, Lean 4.34 and TS 5.8.3. The warm measurement excludes source reads
+and emission. Native and self-application timings describe different workloads;
+runner differences also prevent attributing the difference from A/B/H timings
+to a generated-compiler speedup.
+
+### Exact provider acceptance
+
+The provider remains `963030dc2d154008fccc82e7c8ed29331f138799`, binary SHA256
+`88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec`.
+Default fuel 131072 and timeout 60000ms are unchanged. It accepted three
+deduplicated streams:
+
+- The exact E C2/C3 compiler admissions.
+- The existing raw `.lean`/`.ps` capability admissions from C2/C3.
+- The new raw generic-recursion fixture admissions from C2/C3.
+
+Compiler artifacts were emitted before this separate check. The original
+compiler/fixture receipts keep their then-current provider status; later
+acceptance is preserved in
+[recursive-generic-erasure-provider.json](recursive-generic-erasure-provider.json).
+No kernel/provider implementation or metatheory changed.
+
 ## Remaining runtime IR work
 
-B's C1/C2/C3 inventories all completed with 244 call sites needing expression
-typing and 19 type-argument arity findings, with no other recorded categories.
-The retained A inventory had 245 and 19 respectively. All 19 detailed A records
-have zero explicit type arguments: fifteen expect one, three expect two
-(`psListMap`, `psListZip`, `psTsTailMap`), and one expects three (`psListMapExcept`).
-The owning declarations are generic structurally recursive helpers.
+E removes all 19 recorded generic-argument arity findings from the complete
+current-source C2/C3 inventories. The 244
+`call-arity-needs-expression-typing` records remain. They identify unfinished
+checking obligations, not 244 independently demonstrated incorrect calls.
 
-A concrete omission exists in the unchanged original erasure path:
-`PsErasureCurrentDefinition` stores only the name and runtime parameters;
-opening a type binder does not add its type parameter to that record; and
-`psOpenMatchMinorHypotheses` reconstructs a recursive application with an empty
-type-argument list. This is consistent with the 19 records. The inventory
-does not record callee identity or ancestry, so it does not prove a one-to-one
-mapping from every finding to that path.
+The inventory knows signatures for direct variables/literal lambdas, but does
+not compose result types through function-valued let, if, match, projection
+or call expressions. The next coherent implementation is one portable
+expression checker with typed lexical environments, ordered generic schemes,
+simultaneous scoped substitution, exact function grouping, typed
+primitive/layout signatures and explicit resource-exhaustion results.
 
-See [the current-definition record](../../packages/erasure/src/Ps/Erasure/Basic.lean),
-[definition opening](../../packages/erasure/src/Ps/Erasure/Definition.lean), and
-[recursive-IH reconstruction](../../packages/erasure/src/Ps/Erasure/Expr.lean).
-The smallest follow-on erasure change is to retain ordered generic arguments
-in the current-definition context and use their scoped instantiation when
-reconstructing recursive calls, preserving them across runtime/proof binders.
-Then add call-expression typing and scoped generic substitution to the
-reporting checker. Keep monomorphic calls and their empty type arguments valid.
+[RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) records that design and its acceptance
+sequence. It distinguishes global constants that hold functions from zero-argument
+functions, and rejects silent substitution exhaustion. Its strict entry point must check the
+same IR that it emits.
 
-That continuation needs its own focused evidence. It is not part of this
-already-qualified source migration, and neither the inventory counts nor
-provider acceptance activates strict SH/1 runtime enforcement.
+The checker and remaining primitive, layout, import and lowering/backend
+semantic obligations must be closed before strict SH/1 activation. Neither
+zero generic findings nor selected Core admission acceptance supplies that
+missing runtime enforcement.
 
 ## Migration order
 
-1. Qualify the implementation while it remains consumable by the historical
-   seed. Preserve the exact qualified compiler/source identity.
-2. Configure a recoverable, pinned qualified seed before adopting new authoring
-   forms in compiler source.
-3. Migrate one useful family: Foundation.List accumulator and paired-traversal
-   workers. Preserve public names/types and numeric/list semantics. Compare
-   behavior with the previous qualified implementation.
-4. Qualify the migrated current source at the next promotion checkpoint.
-   Expand to additional families only when this evidence is complete.
-5. Use the native development gate for ordinary edits and prefix preparation reuse
-   for suitable resident sessions. Reserve full fixed-point and provider checking
-   for semantic promotion checkpoints.
+1. Completed: qualify the bounded recursion implementation A while S0 can still
+   build it, then select recoverable Q from A.
+2. Completed: migrate Foundation.List B with preserved public types and bounded
+   reference/runtime correspondence, then qualify its exact source.
+3. Completed: migrate the three compiler helpers H using the same qualified
+   capability and qualify H independently.
+4. Completed: repair ordered recursive generic arguments in isolated E,
+   qualify its original-IR/runtime behavior and current-source C2/C3, and obtain
+   exact-stream provider acceptance.
+5. Next: implement the coherent portable IR checker in
+   [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md). Further source families and optional
+   syntax conveniences remain separately scoped work.
+6. Routine iteration: use the native development gate and suitable resident
+   preparation reuse. Reserve full fixed-point/provider work for semantic
+   promotion checkpoints.
 
-Do not rewrite the whole compiler mechanically, rename the profile to claim
-support, or overwrite the historical 55-module baseline. Exact progress,
-qualified commit/run IDs and any remaining blocker live in
+The selected seed remains A. The historical 55-module baseline and each later
+qualified checkpoint retain their original evidence. Exact current branch,
+source identities and remaining work live in
 [AI_WORK_STATE.md](../../AI_WORK_STATE.md).

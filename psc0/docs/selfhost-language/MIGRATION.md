@@ -1,6 +1,6 @@
 # PSC0-SH/1 implementation and migration plan
 
-Status: M0–M3 have an initial qualified implementation at `e91b9558d665879871b8bf0893915ae64b27c7fe`; the first bounded M4 family, Foundation.List at `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`, passed its C2/C3 fixed point and exact provider acceptance on its first execution in run 37840481558. M5 remains optional follow-on authoring work, M6 has a diagnostic inventory, and M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The original baseline and scope are in [README.md](README.md), and language requirements are in [SPEC.md](SPEC.md).
+Status: M0–M3 have a qualified implementation and selected authoring seed A at `e91b9558d665879871b8bf0893915ae64b27c7fe`. Foundation.List (B, `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and exact provider acceptance on its first execution. M5 remains optional authoring work, M6 still needs portable runtime enforcement, and M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The historical baseline is in [README.md](README.md), language requirements are in [SPEC.md](SPEC.md), and the next coherent M6 implementation is in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md).
 
 ## 1. Execute two coordinated tracks
 
@@ -11,6 +11,8 @@ Historical audit note: at native commit `b109be0075630dd17b791e3b0c5fcad016df53e
 Later evidence supersedes that pending status. The separately pinned provider at `963030dc2d154008fccc82e7c8ed29331f138799` accepted A's exact compiler and capability admission streams in [run 37831951758](https://github.com/dwijayuda/pskernel/actions/runs/37831951758). Each later source checkpoint obtains its own exact-stream decision. This branch consumes that provider without editing its implementation; compiler qualification and provider acceptance retain separate receipts.
 
 ## 2. Ordered implementation units
+
+M0–M3 below preserve the implementation and acceptance requirements met by A. M4 records the migrated source families; M6 distinguishes the completed generic-erasure repair from the remaining portable runtime checker.
 
 ### M0 — preserve and make the baseline recoverable
 
@@ -82,7 +84,7 @@ This stage breaks the bootstrap cycle: the compiler learns the feature while wri
 
 ### M4 — migrate source by feature family
 
-**Completed first family:** Foundation.List now uses ordinary parameters in reverseAcc, append, take and zip. The selected A seed consumed both preserved and migrated sources; all ten public types and 1,666 behavior observations per library passed. The migrated compiler then passed its own raw-source C2/C3 equality and exact provider acceptance. The complete receipts are indexed in [qualification-evidence.json](qualification-evidence.json). Further families remain small, independent migrations under the same A seed.
+**Completed first family:** Foundation.List now uses ordinary parameters in reverseAcc, append, take and zip. The selected A seed consumed both preserved and migrated sources; all ten public types and 1,666 behavior observations per library passed. The migrated compiler then passed its own raw-source C2/C3 equality and exact provider acceptance. The complete receipts are indexed in [qualification-evidence.json](qualification-evidence.json). The second bounded family H qualified under that same A seed and is recorded below. Further migrations remain small, independently qualified units.
 
 **First family: simple total collection/index workers.** Start with a small sample of list traversal, reverse/append/take/zip wrappers and index scans. Reuse existing foundation helpers. Preserve public names/signatures and avoid an accompanying data-structure redesign.[LIST]
 
@@ -99,19 +101,23 @@ For each family, produce a dry-run inventory with source location, detected capa
 Changed source is accepted by the promoted generated compiler; relevant semantic and boundary fixtures pass; expected structural differences are reviewed; existing loopification is preserved or its change is explained. Retire only the shape guards covered by replacement capability tests. Commit each family separately so rollback is a normal revert.
 
 
-### Concrete next candidates after the Foundation checkpoint
+### Second bounded source family: three compiler helpers
 
-Use the same qualified capability for these small follow-on changes, retaining public worker/wrapper names and complete types initially. Each family gets a direct behavior comparison before expensive compiler generation. Existing primitive, admission and unrelated source guards remain in force.
+H at `671685c3f0059574405a1e630dd965d421a26f05` completed the three planned helper migrations in `Elab/Term.lean` and `Erasure/Definition.lean`. Its native gate, full compiler qualification and exact provider acceptance passed on the first execution in [run 37851669475](https://github.com/dwijayuda/pskernel/actions/runs/37851669475). The provider checked the exact compiler and raw capability streams separately after emission.
 
-| Order | Candidate | Existing spelling guard to replace | Required correspondence |
-| --- | --- | --- | --- |
-| 1 | `psExprApplyManyWorker` in `Elab/Term.lean` | `check-elab-apply-many-selfhost-source-syntax.mjs` | Empty list preserves the starting expression; two arguments build left-associated applications in order; an existing application prefix is preserved |
-| 2 | `psErasureAddUniqueStringWorker` in `Erasure/Definition.lean` | `check-erasure-add-unique-string-selfhost-source-syntax.mjs` | No/one/multiple collisions, duplicates, zero fuel and exact exhaustion suffix behavior |
-| 3 | `psExprAppViewAccWorker` in `Elab/Term.lean` | `check-elab-app-view-selfhost-source-syntax.mjs` | Head and argument order, a nonempty accumulator suffix, direct expected trees and a construction/decomposition round trip |
+| Migrated helper | Guard updated to accept historical and qualified forms | Preserved behavior |
+| --- | --- | --- |
+| `psExprApplyManyWorker` | `check-elab-apply-many-selfhost-source-syntax.mjs` | Empty arguments preserve the starting expression; arguments form left-associated applications in order, including an existing application prefix |
+| `psErasureAddUniqueStringWorker` | `check-erasure-add-unique-string-selfhost-source-syntax.mjs` | Collision order, duplicate handling, zero fuel and the exact exhaustion suffix |
+| `psExprAppViewAccWorker` | `check-elab-app-view-selfhost-source-syntax.mjs` | Head and argument order, a nonempty accumulator suffix, direct expected trees and construction/decomposition round trips |
 
-The first and third workers descend through immediate List/PsExpr constructor fields and change a nondependent value accumulator. The second descends through Nat fuel with a fixed used-name list and a changing String base. None requires a new parser or termination capability. Preserve the unique-name helper's existing exhaustion behavior: with zero fuel and base `x`, it returns `x_overflow`; a collision at fuel one can return `x__overflow`. An algorithm change belongs in a separate checkpoint.
+The first and third workers descend through immediate List/PsExpr constructor fields and change a nondependent value accumulator. The second descends through Nat fuel with a fixed used-name list and a changing String base. They now use ordinary explicit value parameters and fully saturated recursive calls. Public worker/wrapper names, complete types and argument order remain unchanged; no new parser or termination capability was needed.
 
-Retire a spelling guard only when its purpose is covered by the new capability/correspondence evidence. Keep the normalizer and broad high-fan-in refactors out of the first follow-on family.
+The bounded correspondence gate compiles preserved and current raw helper slices with the actual Name/Level/Expr dependencies. It compares all seven public function types and 2,198 observations per compiled slice, including typed partial applications. A separate 1,568-observation check executes the actual exported helpers in N1/C1/C2/C3. Both H and E passed those checks on their first compiler execution. H's C1/C2/C3 agree on all four products; E's C2/C3 agree after the intentional generic-erasure change.
+
+The unique-name algorithm deliberately retains its established exhaustion behavior: zero fuel and base `x` returns `x_overflow`; one collision at fuel one can return `x__overflow`. A change to that algorithm belongs in a separate checkpoint. The guards retain their wrapper, primitive and unrelated admission/source checks; no semantic gate was removed.
+
+Choose additional source families from measured remaining authoring cost. Do not schedule these three completed source edits again, and keep broader normalizer/high-fan-in refactors separate.
 
 ### M5 — add conveniences in measured priority order
 
@@ -126,15 +132,21 @@ Use actual remaining workaround counts to choose between items 2 and 3. A parser
 
 ### M6 — strengthen the portable runtime contract
 
-The report-only inventory is installed. B completed all three traversals with 244 call-expression typing obligations and 19 type-argument arity findings. No other category was recorded, and strict qualification remains false.
+The report-only inventory is installed. B's complete traversals recorded 244 call-expression typing obligations and 19 type-argument arity findings. That 19-finding result and the empty current-definition generic context are historical evidence; E implements their bounded repair.
 
-The retained A report locates 19 calls with zero explicit generic arguments in generic recursive helpers. Source inspection identifies a shared omission: `PsErasureCurrentDefinition` stores only runtime parameters, and recursive-IH reconstruction in `psOpenMatchMinorHypotheses` passes an empty type-argument list. The report lacks callee/ancestry detail, so this is an established omission consistent with the findings rather than a proven one-to-one mapping for all nodes. [IMPLEMENTATION.md](IMPLEMENTATION.md) gives the trace and exact evidence scope.
+E at `cf8fbd784944a98b1e390b709685ca54c2511827` preserves the current declaration's ordered generic arguments while type binders are opened, carries them through runtime/proof binders, and supplies them when reconstructing recursive induction-hypothesis calls. It uses only declaration binders; it does not collect every `scope.typeLocals` entry or whitelist affected helper names.
 
-The smallest next erasure change is to preserve the current declaration's ordered generic arguments as type binders are opened, carry them through runtime/proof binders, and pass their scoped instantiation when reconstructing recursive calls. Do not collect every `scope.typeLocals` entry or whitelist the 19 names. Check the one-, two- and three-parameter cases at that planned checkpoint, then add callee-expression typing and scoped substitution for the separate 244 obligations. Runtime primitive typing, layouts and erasure/backend semantic correspondence must also be closed before strict enforcement is activated.
+The focused fixture checks exact original-IR argument order for one, two and three generics, interleaved proposition/proof/runtime binders, and a monomorphic control. It emits the same IR object whose recursive calls were asserted. All N1/C1/C2/C3 fixture executions passed 19 behavior observations; N1/C1 also passed native parity. E's first full compiler run and separate provider job passed in [run 37852341550](https://github.com/dwijayuda/pskernel/actions/runs/37852341550). The pinned provider accepted the compiler, raw capability and focused generic-fixture admission streams after emission; this does not claim that emission itself was gated by checking.
+
+E's C2 and C3 inventories complete with **zero type-argument arity findings** and **244 remaining call-expression typing obligations**, with no other recorded categories. C1's inventory still has the historical 19 findings because the older selected Q produced that first-generation IR. C1's executable contains the repaired erasure and produces the corrected C2 IR; C2 reproduces it for C3. This is the reason for the C2-versus-C3 equality contract, rather than requiring C1 to be byte-identical across a compiler change.
+
+The next coherent unit is a portable expression checker over the existing original IR. [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) specifies compositional callee typing, ordered scoped substitution, checking of annotated bodies/initializers, layout and intrinsic signatures, exact function parameter grouping, global values versus functions, and explicit resource exhaustion. The host inventory should report the portable checker rather than become a separate semantic implementation.
+
+Those 244 records are unfinished typing obligations, not 244 demonstrated runtime failures. Strict enforcement also requires the enabled primitive, scalar/bounds/text-position, import ABI and erasure/backend correspondence contracts. Zero type-arity findings alone does not activate strict SH/1. The current inventory remains diagnostic, and provider acceptance is an independent Core-admission claim.
 
 Preserve the original TS path. Do not make the copied direct JS/Rust/Wasm backends prerequisites. Integrate a new target only after choosing a coherent IR interface, wiring its build/driver dependencies, and demonstrating the scalar/ADT/function contract and generated self-host evidence for that target.
 
-This work can overlap M2–M5 when its changes are isolated and separately qualified. M3 and M6 together, plus all required capability gates, are prerequisites for strict SH/1 qualification; M3 alone is a limited compiler checkpoint.
+This work can overlap M2–M5 when isolated and separately qualified. M3 and M6 together, plus all required capability gates, are prerequisites for strict SH/1 qualification; M3 alone is a limited compiler checkpoint.
 
 ### M7 — optionally make .ps authoritative
 
@@ -173,7 +185,7 @@ Missing evidence is a pending claim, not a reason to rename admission-ready outp
 
 ## 4. The efficient development workflow
 
-The implemented ordinary route is `npm run dev:sh1`, which builds current native PSC, emits N1 from raw current source and exercises N1 on the bounded language/session/CLI corpus. `npm run iterate:sh1 -- ... --loop` provides optional resident preparation reuse. Full selected-seed C1/C2/C3 and provider checks remain promotion commands, selected in CI by `[sh1-qualify]` or a full manual dispatch. Exact usage, recovery and measured scope are in [IMPLEMENTATION.md](IMPLEMENTATION.md).
+The implemented ordinary route is `npm run dev:sh1`, which builds current native PSC, emits N1 from raw current source and exercises N1 on the bounded language/session/CLI corpus. `npm run iterate:sh1 -- ... --loop` provides optional resident preparation reuse. The workflow runs that bounded native-candidate gate before expensive generation even for full runs. Full selected-seed C1/C2/C3 and provider checks remain promotion commands, selected in CI by `[sh1-qualify]` or a full manual dispatch. Independent checkpoint branches may qualify in parallel; ordinary edits do not repeat the complete bootstrap. Exact usage, recovery and measured scope are in [IMPLEMENTATION.md](IMPLEMENTATION.md).
 
 | Workflow | When | Work and claim |
 | --- | --- | --- |

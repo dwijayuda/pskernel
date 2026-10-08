@@ -1,5 +1,6 @@
 import Ps.KernelCore.Metatheory.Comparator
 import Ps.KernelCore.Admission.Inductive.Common.Occurrence
+import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
 
 /-
 Independent, fuel-free structural absence of a named recursive datatype.
@@ -154,3 +155,86 @@ theorem psKernelExprContainsConst_false_refines_absence
             ⟨psKernelNameEq_false_ne_of_string_reflexive
               hString typeName target hName,
              ihBody hBody⟩
+
+
+/-
+A successful result-index occurrence check excludes the recursive target
+from every returned index. This requires comparator reflexivity for the
+negative branch; positive-comparison soundness alone is insufficient.
+-/
+theorem psKernelSimpleIndicesContainTarget_false_refines_absence
+    (hString : PsKernelStringEqReflexiveLaw)
+    (target : PsKernelName) :
+    ∀ (indices : List PsKernelExpr),
+      psKernelSimpleIndicesContainTarget target indices = false ->
+      ∀ (expr : PsKernelExpr),
+        List.Mem expr indices ->
+          PsKernelNoTargetConstantOccurrence target expr := by
+  intro indices
+  induction indices with
+  | nil =>
+      intro _ expr hMember
+      cases hMember
+  | cons head tail ih =>
+      intro hAbsent expr hMember
+      cases hHead :
+          psKernelExprContainsConst target head with
+      | true =>
+          simp [
+            psKernelSimpleIndicesContainTarget, hHead
+          ] at hAbsent
+      | false =>
+          have hTail :
+              psKernelSimpleIndicesContainTarget target tail = false := by
+            simpa [
+              psKernelSimpleIndicesContainTarget, hHead
+            ] using hAbsent
+          cases hMember with
+          | head =>
+              exact
+                psKernelExprContainsConst_false_refines_absence
+                  hString target head hHead
+          | tail =>
+              exact ih hTail expr (by assumption)
+
+
+theorem psKernelValidateSimpleConstructorResult_success_indices_absent
+    (hString : PsKernelStringEqReflexiveLaw)
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (result : PsKernelExpr)
+    (indices : List PsKernelExpr)
+    (hSuccess :
+      psKernelValidateSimpleConstructorResult
+          target levels params numIndices result =
+        Except.ok indices) :
+    ∀ expr : PsKernelExpr,
+      List.Mem expr indices ->
+        PsKernelNoTargetConstantOccurrence target expr := by
+  cases hIndices :
+      psKernelSimpleInductiveAppIndices
+        target levels params numIndices result with
+  | none =>
+      simp [
+        psKernelValidateSimpleConstructorResult, hIndices
+      ] at hSuccess
+  | some actualIndices =>
+      cases hContains :
+          psKernelSimpleIndicesContainTarget target actualIndices with
+      | true =>
+          simp [
+            psKernelValidateSimpleConstructorResult,
+            hIndices, hContains
+          ] at hSuccess
+      | false =>
+          have hIndicesEq : actualIndices = indices := by
+            simpa [
+              psKernelValidateSimpleConstructorResult,
+              hIndices, hContains
+            ] using hSuccess
+          subst indices
+          exact
+            psKernelSimpleIndicesContainTarget_false_refines_absence
+              hString target actualIndices hContains

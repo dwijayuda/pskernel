@@ -393,9 +393,11 @@ theorem psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel_indices_refines
                       | false =>
                           cases hReduced : psKernelSimpleMutualContainsConst targets reduced.1 with
                           | true =>
+                              simp only [hShape] at hReduced
                               simp [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
                                 hDirect, hWhnf, hApp, hShape, hDomain, hReduced] at hRun
                           | false =>
+                              simp only [hShape] at hReduced
                               have hResult : PsKernelMutualRecursiveArgumentResult.mk reduced.2 none = result := by
                                 simpa [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
                                   hDirect, hWhnf, hApp, hShape, hDomain, hReduced] using hRun

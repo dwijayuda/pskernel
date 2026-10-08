@@ -218,3 +218,25 @@ theorem psKernelSessionEnsureSort_success_preserves_context_core
           exact hContext
       | _ =>
           simp [psKernelSessionEnsureSort, hWhnf] at hSuccess
+
+
+theorem psKernelSessionInfer_success_preserves_context_core
+    (fuel : Nat)
+    (session nextSession : PsKernelCheckerSession)
+    (expr result : PsKernelExpr)
+    (hSuccess :
+      psKernelSessionInfer fuel session expr =
+        Except.ok (Prod.mk result nextSession)) :
+    nextSession.context = session.context := by
+  unfold psKernelSessionInfer at hSuccess
+  cases hRun :
+      psKernelCheckerInfer
+        fuel session.context session.state expr with
+  | error error =>
+      simp [hRun] at hSuccess
+  | ok run =>
+      cases run with
+      | mk inferred nextState =>
+          simp [hRun] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          rfl

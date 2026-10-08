@@ -341,6 +341,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionMutualInductiveIndexConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualConstructorConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualConfiguration,
+    `Ps.KernelCore.Metatheory.EnvironmentSemanticTransport,
     `Ps.KernelCore.Metatheory.SessionRefinement,
     `Ps.KernelCore.Metatheory.Delta,
     `Ps.KernelCore.Metatheory.ReductionCongruence,

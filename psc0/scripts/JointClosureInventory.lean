@@ -3,6 +3,15 @@ import Ps.Bridge.CheckedAdmissions
 import Ps.Environment.SelfHostProd
 import Lean.Data.Json
 
+def psInventoryName (value : PsName) : IO Lean.Json := do
+  let .ok parsed := Lean.Json.parse (psEncodeCodecName value)
+    | throw (IO.userError "PSC0_INVENTORY_NAME_JSON")
+  pure parsed
+
+def psInventoryNames (values : List PsName) : IO Lean.Json := do
+  let parsed ← values.mapM psInventoryName
+  pure (Lean.Json.arr parsed.toArray)
+
 -- Read-only native audit. This exports elaborated data, never checked handles.
 def psInventoryExpr (value : PsExpr) : IO Lean.Json := do
   let .ok encoded := psEncodeCodecExpr value
@@ -22,28 +31,41 @@ def psInventoryKind : PsDeclaration -> String
   | .recursorDecl .. => "recursor"
 
 def psInventoryDeclaration (declaration : PsDeclaration) : IO Lean.Json := do
+  let nameWire ← psInventoryName (psDeclarationName declaration)
+  let levelParameterWires ← psInventoryNames (psDeclarationLevelParams declaration)
   let type ← psInventoryExpr (psDeclarationType declaration)
   let value ← match psDeclarationValue declaration with
     | none => pure Lean.Json.null
     | some value => psInventoryExpr value
-  let metadata := match declaration with
-    | .inductiveDecl info => Lean.Json.mkObj [
-        ("parameters", Lean.toJson info.numParams), ("indices", Lean.toJson info.numIndices),
-        ("constructors", Lean.toJson (info.constructors.map psNameToString)),
-        ("structure", Lean.toJson info.isStructure)]
-    | .constructorDecl info => Lean.Json.mkObj [
-        ("family", Lean.toJson (psNameToString info.inductiveName)),
-        ("index", Lean.toJson info.constructorIndex), ("parameters", Lean.toJson info.numParams),
-        ("fields", Lean.toJson info.numFields), ("recursiveFields", Lean.toJson info.recursiveFields)]
-    | .recursorDecl info => Lean.Json.mkObj [
-        ("families", Lean.toJson (info.inductiveNames.map psNameToString)),
-        ("parameters", Lean.toJson info.numParams), ("indices", Lean.toJson info.numIndices),
-        ("motives", Lean.toJson info.numMotives), ("minors", Lean.toJson info.numMinors)]
-    | _ => Lean.Json.null
+  let metadata ← match declaration with
+    | .inductiveDecl info => do
+        let constructorWires ← psInventoryNames info.constructors
+        pure (Lean.Json.mkObj [
+          ("parameters", Lean.toJson info.numParams), ("indices", Lean.toJson info.numIndices),
+          ("constructors", Lean.toJson (info.constructors.map psNameToString)),
+          ("constructorWires", constructorWires),
+          ("structure", Lean.toJson info.isStructure)])
+    | .constructorDecl info => do
+        let familyWire ← psInventoryName info.inductiveName
+        pure (Lean.Json.mkObj [
+          ("family", Lean.toJson (psNameToString info.inductiveName)),
+          ("familyWire", familyWire),
+          ("index", Lean.toJson info.constructorIndex), ("parameters", Lean.toJson info.numParams),
+          ("fields", Lean.toJson info.numFields), ("recursiveFields", Lean.toJson info.recursiveFields)])
+    | .recursorDecl info => do
+        let familyWires ← psInventoryNames info.inductiveNames
+        pure (Lean.Json.mkObj [
+          ("families", Lean.toJson (info.inductiveNames.map psNameToString)),
+          ("familyWires", familyWires),
+          ("parameters", Lean.toJson info.numParams), ("indices", Lean.toJson info.numIndices),
+          ("motives", Lean.toJson info.numMotives), ("minors", Lean.toJson info.numMinors)])
+    | _ => pure Lean.Json.null
   pure (Lean.Json.mkObj [
     ("name", Lean.toJson (psNameToString (psDeclarationName declaration))),
+    ("nameWire", nameWire),
     ("kind", Lean.toJson (psInventoryKind declaration)),
     ("levelParameters", Lean.toJson ((psDeclarationLevelParams declaration).map psNameToString)),
+    ("levelParameterWires", levelParameterWires),
     ("type", type), ("value", value), ("metadata", metadata)])
 
 def psInventoryNestedFailures (all : List PsDeclaration) : IO (Array Lean.Json) := do

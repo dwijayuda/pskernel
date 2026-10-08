@@ -72,10 +72,13 @@ jobs:
           mkdir -p release/npm/linux-x64/bin
           cp "$binary" release/npm/linux-x64/bin/pscv-v6-dev
           chmod 755 release/npm/linux-x64/bin/pscv-v6-dev
-          echo "Native executable bytes: $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
+          echo "Native executable bytes (unstripped): $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
+          strip --strip-debug release/npm/linux-x64/bin/pscv-v6-dev
+          echo "Native executable bytes (debug stripped): $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
           sha256sum release/npm/linux-x64/bin/pscv-v6-dev
           ldd release/npm/linux-x64/bin/pscv-v6-dev || true
           env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/linux-x64/bin/pscv-v6-dev" --version
+          env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/linux-x64/bin/pscv-v6-dev" kernel-empty-smoke
           (cd release/npm/linux-x64 && npm pack --ignore-scripts --pack-destination "$GITHUB_WORKSPACE")
       - uses: actions/upload-artifact@v4
         with:

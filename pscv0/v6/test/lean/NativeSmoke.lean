@@ -25,6 +25,16 @@ def theoremCandidate (index : Nat) : Pscv.CoreCandidate := {
   }]
 }
 
+def unapprovedAxiomCandidate : Pscv.CoreCandidate := {
+  sourceId := "untrusted-extension"
+  declarations := #[.axiomDecl {
+    name := name "FalseProofFromUnapprovedAxiom"
+    levelParams := []
+    type := .sort .zero
+    isUnsafe := false
+  }]
+}
+
 def extension : Pscv.Extensions.Descriptor := {
   name := "@example/syntax"
   className := .syntax
@@ -35,11 +45,15 @@ def extension : Pscv.Extensions.Descriptor := {
 def mainTest : IO Bool := do
   let accepted ← Pscv.Kernel.checkCandidate (theoremCandidate 0)
   let rejected ← Pscv.Kernel.checkCandidate (theoremCandidate 1)
+  let axiomRejected ← Pscv.Kernel.checkCandidate unapprovedAxiomCandidate
   let good := match accepted with
     | .ok report => report.checkedDeclarations == 1
     | .error _ => false
   let bad := match rejected with
     | .error _ => true
+    | .ok _ => false
+  let axiomDenied := match axiomRejected with
+    | .error error => error == "PSCV_CLOSED_PROFILE_AXIOM_DENIED"
     | .ok _ => false
   let closedRejects := match Pscv.Extensions.validate .verified extension with
     | .error _ => true
@@ -52,7 +66,7 @@ def mainTest : IO Bool := do
   } with
     | .error _ => true
     | .ok _ => false
-  return good && bad && closedRejects && extensibleAccepts && semanticDenied
+  return good && bad && axiomDenied && closedRejects && extensibleAccepts && semanticDenied
 
 end Pscv.NativeSmoke
 

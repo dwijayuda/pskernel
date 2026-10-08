@@ -29,7 +29,7 @@ def elabPscvGate : CommandElab := fun _ => do
   -- The pinned Lean environment enumerates this module's elaborated constants,
   -- including generated sub-declarations, not text-matched source keywords.
   let locals ← env.getLocalConstantInfos
-  let mut roots := 0
+  let mut roots : Nat := 0
   for c in locals do
     let info := c.toConstantInfo
     if info.isUnsafe then

@@ -6,5 +6,5 @@ package pscvl where
 lean_lib PSCVL where
   srcDir := "."
 
-lean_exe pscvl where
+@[default_target] lean_exe pscvl where
   root := `Main

@@ -1,4 +1,5 @@
-import Ps.KernelCore.Metatheory.Judgments
+import Ps.KernelCore.Metatheory.ContextState
+import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
 
 /--
 Lookup-preserving extension of the authoritative semantic environment.
@@ -558,3 +559,27 @@ theorem PsKernelCheckerStateSemanticSound.environment_weaken
   · intro left right hContains
     exact PsKernelDefEqJudgment.environment_weaken older newer hExt
       (hSuccess left right hContains)
+
+
+/--
+Changing admission work environments preserves retained session caches only
+when old authoritative lookup information is preserved. Arbitrary environment
+replacement is deliberately not certified by this theorem.
+-/
+theorem psKernelSessionWithEnvironment_configuration_preserves
+    (session : PsKernelCheckerSession)
+    (environment : PsKernelEnvironment)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hExt : PsKernelEnvironmentSemanticExtends
+      session.context.environment environment)
+    (hConfig : PsKernelCheckerConfigurationSound session.context session.state) :
+    PsKernelCheckerConfigurationSound
+      (psKernelSessionWithEnvironment session environment).context
+      (psKernelSessionWithEnvironment session environment).state := by
+  change PsKernelEnvironmentIndexRefines environment ∧
+    PsKernelLocalContextFreshBound session.context.localContext session.state.nextFresh ∧
+    PsKernelCheckerStateSemanticSound environment session.context.localContext session.state
+  exact ⟨hIndex, hConfig.2.1,
+    PsKernelCheckerStateSemanticSound.environment_weaken
+      session.context.environment environment session.context.localContext
+      session.state hExt hConfig.2.2⟩

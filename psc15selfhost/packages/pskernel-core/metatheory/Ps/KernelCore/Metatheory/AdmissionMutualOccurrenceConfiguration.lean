@@ -401,3 +401,115 @@ theorem psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel_indices_refines
                                   hDirect, hWhnf, hApp, hShape, hDomain, hReduced] using hRun
                               cases hResult
                               cases hInfo
+
+
+/--
+Mutual recursive analysis preserves configuration in the actual returned
+scope, its environment, and monotone local allocation history. Independent
+traversal fuel does not reduce the fixed checker fuel.
+-/
+theorem psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel_configuration_history_preserves
+    (fuel : Nat) (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw) :
+    ∀ (checkerFuel : Nat) (session : PsKernelCheckerSession)
+      (targets : List PsKernelName) (shapes : List PsKernelSimpleMutualTypeShape)
+      (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+      (field : PsKernelOpenBinder) (domain : PsKernelExpr)
+      (revArgs : List PsKernelOpenBinder) (applied : PsKernelExpr)
+      (result : PsKernelMutualRecursiveArgumentResult),
+      PsKernelCheckerConfigurationSound session.context session.state ->
+      psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel fuel checkerFuel
+        session targets shapes levels params field domain revArgs applied = Except.ok result ->
+      PsKernelCheckerConfigurationSound result.session.context result.session.state ∧
+      result.session.context.environment = session.context.environment ∧
+      session.context.localContext.nextIndex ≤ result.session.context.localContext.nextIndex := by
+  induction fuel with
+  | zero =>
+      intro checkerFuel session targets shapes levels params field domain
+        revArgs applied result hConfig hRun
+      simp [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel] at hRun
+  | succ remaining ih =>
+      intro checkerFuel session targets shapes levels params field domain
+        revArgs applied result hConfig hRun
+      cases hDirect : psKernelSimpleMutualAppInfo targets shapes levels params domain with
+      | some direct =>
+          have hResult : PsKernelMutualRecursiveArgumentResult.mk session
+              (some (PsKernelSimpleMutualRecursiveField.mk field
+                (psKernelReverseOpenBinders revArgs) direct.target direct.indices)) = result := by
+            simpa [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel, hDirect] using hRun
+          cases hResult
+          exact ⟨hConfig, rfl, Nat.le_refl _⟩
+      | none =>
+          cases hWhnf : psKernelSessionWhnf checkerFuel session domain with
+          | error message =>
+              simp [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                hDirect, hWhnf] at hRun
+          | ok reduced =>
+              have hReducedSound := psKernelSessionWhnf_concrete_refines_reduction
+                checkerFuel hNative hString session reduced.2 domain reduced.1 hConfig hWhnf
+              have hContext := psKernelSessionWhnf_success_preserves_context_core
+                checkerFuel session reduced.2 domain reduced.1 hWhnf
+              have hReducedConfig : PsKernelCheckerConfigurationSound
+                  reduced.2.context reduced.2.state := by
+                simpa [hContext] using hReducedSound.2
+              cases hApp : psKernelSimpleMutualAppInfo targets shapes levels params reduced.1 with
+              | some info =>
+                  have hResult : PsKernelMutualRecursiveArgumentResult.mk reduced.2
+                      (some (PsKernelSimpleMutualRecursiveField.mk field
+                        (psKernelReverseOpenBinders revArgs) info.target info.indices)) = result := by
+                    simpa [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                      hDirect, hWhnf, hApp] using hRun
+                  cases hResult
+                  exact ⟨hReducedConfig,
+                    congrArg PsKernelCheckerContext.environment hContext, by simp [hContext]⟩
+              | none =>
+                  simp only [psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel,
+                    hDirect, hWhnf, hApp] at hRun
+                  cases hShape : reduced.1 with
+                  | forallE userName argDomain body binderInfo =>
+                      cases hNegative : psKernelSimpleMutualContainsConst targets argDomain with
+                      | true => simp [hShape, hNegative] at hRun
+                      | false =>
+                          let opened := psKernelSessionWithLocal reduced.2 userName
+                            (psKernelExprConsumeTypeAnnotations argDomain) binderInfo
+                          let arg := PsKernelOpenBinder.mk opened.1 userName
+                            (psKernelExprConsumeTypeAnnotations argDomain) binderInfo
+                          have hOpenedConfig :=
+                            psKernelSessionWithLocal_preserves_configuration reduced.2 userName
+                              (psKernelExprConsumeTypeAnnotations argDomain) binderInfo
+                              hString hReducedConfig
+                          have hTail : psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
+                              remaining checkerFuel opened.2 targets shapes levels params field
+                              (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
+                              (arg :: revArgs) (PsKernelExpr.app applied (PsKernelExpr.fvar opened.1)) =
+                                Except.ok result := by
+                            simpa [hShape, hNegative, opened, arg] using hRun
+                          have hRest := ih checkerFuel opened.2 targets shapes levels params field
+                            (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
+                            (arg :: revArgs) (PsKernelExpr.app applied (PsKernelExpr.fvar opened.1))
+                            result hOpenedConfig hTail
+                          have hOpenedEnv : opened.2.context.environment =
+                              session.context.environment := by
+                            simp [opened, psKernelSessionWithLocal,
+                              psKernelCheckerContextWithLocalContext, hContext]
+                          have hOpenedOrdinal : session.context.localContext.nextIndex ≤
+                              opened.2.context.localContext.nextIndex := by
+                            simp [opened, psKernelSessionWithLocal,
+                              psKernelCheckerContextWithLocalContext, psKernelLocalContextAddLocal, hContext]
+                          exact ⟨hRest.1, Eq.trans hRest.2.1 hOpenedEnv,
+                            Nat.le_trans hOpenedOrdinal hRest.2.2⟩
+                  | _ =>
+                      cases hDomain : psKernelSimpleMutualContainsConst targets domain with
+                      | true => simp [hShape, hDomain] at hRun
+                      | false =>
+                          cases hReduced : psKernelSimpleMutualContainsConst targets reduced.1 with
+                          | true =>
+                              simp only [hShape] at hReduced
+                              simp [hShape, hDomain, hReduced] at hRun
+                          | false =>
+                              simp only [hShape] at hReduced
+                              have hResult : PsKernelMutualRecursiveArgumentResult.mk reduced.2 none = result := by
+                                simpa [hShape, hDomain, hReduced] using hRun
+                              cases hResult
+                              exact ⟨hReducedConfig,
+                                congrArg PsKernelCheckerContext.environment hContext, by simp [hContext]⟩

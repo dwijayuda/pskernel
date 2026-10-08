@@ -156,3 +156,47 @@ theorem psKernelSessionIsDefEq_concrete_refines_defeq
               session.context session.state comparedState
               left right true hConfig hCompared
           exact ⟨hSound.2 rfl, hSound.1⟩
+
+
+/-
+Sort checking is a WHNF computation over an already inferred type. The
+successful result carries the reduction to the actual Sort returned by the
+executable session, plus preservation of checker configuration.
+-/
+theorem psKernelSessionEnsureSort_concrete_refines_reduction
+    (fuel : Nat)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (session nextSession : PsKernelCheckerSession)
+    (expr : PsKernelExpr)
+    (level : PsKernelLevel)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        session.context session.state)
+    (hRun :
+      psKernelSessionEnsureSort fuel session expr =
+        Except.ok (Prod.mk level nextSession)) :
+    PsKernelReductionClosure
+        session.context.environment session.context.localContext
+        expr (PsKernelExpr.sort level) ∧
+      PsKernelCheckerConfigurationSound
+        session.context nextSession.state := by
+  unfold psKernelSessionEnsureSort at hRun
+  cases hWhnf : psKernelSessionWhnf fuel session expr with
+  | error error =>
+      simp [hWhnf] at hRun
+  | ok whnfRun =>
+      rcases whnfRun with ⟨reduced, whnfSession⟩
+      cases reduced with
+      | sort sortLevel =>
+          have hSound :=
+            psKernelSessionWhnf_concrete_refines_reduction
+              fuel hNative hString
+              session whnfSession
+              expr (PsKernelExpr.sort sortLevel)
+              hConfig hWhnf
+          simp [hWhnf] at hRun
+          rcases hRun with ⟨rfl, rfl⟩
+          exact hSound
+      | _ =>
+          simp [hWhnf] at hRun

@@ -1,4 +1,4 @@
-import Ps.BackendWasm.CanonicalExports
+import Ps.DriverWasm.Compiler
 import Ps.CompilerIr.Encode
 import Ps.BackendWasm.Encode
 
@@ -56,7 +56,53 @@ def canonicalMany (count : Nat) : PsVerifiedIrDeclaration :=
   let parameters := (List.range count).map fun i => PsVerifiedIrParameter.mk ("x" ++ toString i) (.primitive .uint8);
   PsVerifiedIrDeclaration.mk "many" [] parameters (.primitive .uint8) (.var "x0")
 
+def canonicalRequestAccepts (wire : String) : Bool :=
+  match psWasmCanonicalDecodeRequest wire with
+  | Except.ok _ => true
+  | Except.error _ => false
+
+def canonicalRequestChecks : IO Unit := do
+  let request := PsWasmCanonicalRequest.mk (PsWasmTargetProfile.mk .wasm64) canonicalSelection
+  let wire := psWasmCanonicalEncodeRequest request
+  let .ok decoded := psWasmCanonicalDecodeRequest wire
+    | throw (IO.userError "PSC_WASM_CANONICAL_REQUEST_ROUNDTRIP")
+  if psWasmCanonicalEncodeRequest decoded != wire then
+    throw (IO.userError "PSC_WASM_CANONICAL_REQUEST_BYTES")
+  for bad in [wire ++ " ", "[[[[]]]]", "{}", wire.replace "\"64\"" "64",
+      wire.replace "\"64\"" "\"064\"", wire.replace "psc-wasm-canonical-request/1" "unknown/1",
+      psWasmCanonicalEncodeRequest { request with selection := { canonicalSelection with exports := [] } },
+      psWasmCanonicalEncodeRequest { request with selection := { canonicalSelection with
+        exports := List.replicate 1025 (PsWasmCanonicalExport.mk "Source.u8" "echo") } },
+      psWasmCanonicalEncodeRequest { request with selection := { canonicalSelection with
+        exports := [PsWasmCanonicalExport.mk (String.ofList (List.replicate 4097 'a')) "echo"] } }] do
+    if canonicalRequestAccepts bad then throw (IO.userError "PSC_WASM_CANONICAL_REQUEST_ACCEPTED_INVALID")
+  if !psJsonArrayRequestWithinLimits 80 3 3 "[\"[{}]\\\"\",[[]]]" ||
+      psJsonArrayRequestWithinLimits 80 2 3 "[[[]]]" ||
+      psJsonArrayRequestWithinLimits 80 3 2 "[[],[]]" then
+    throw (IO.userError "PSC_JSON_ARRAY_REQUEST_PREFLIGHT")
+  IO.println "PSC_WASM_CANONICAL_REQUEST: PASS"
+
 def main (args : List String) : IO Unit := do
+  if args == ["--prepared32"] || args == ["--prepared64"] then
+    let width := if args == ["--prepared64"] then PsWasmWordSize.wasm64 else PsWasmWordSize.wasm32
+    let source := "def echoWord (value : USize) : USize := value\ndef hidden (value : UInt32) : UInt32 := value\n"
+    let .ok prepared := psCompilerPrepareSource .lean source
+      | throw (IO.userError "PSC_WASM_CANONICAL_PREPARE")
+    let request := PsWasmCanonicalRequest.mk (PsWasmTargetProfile.mk width)
+      (PsWasmCanonicalSelection.mk "psc" "prepared" "world" "api"
+        [PsWasmCanonicalExport.mk "echoWord" "echo-word"])
+    let wire := psWasmCanonicalEncodeRequest request
+    let .ok staged := psCompilerWasmCanonicalStagesFromPrepared wire prepared
+      | throw (IO.userError "PSC_WASM_CANONICAL_PREPARED_STAGES")
+    if staged.runtimeIr != staged.verifiedIr then throw (IO.userError "PSC_WASM_CANONICAL_CHANGED_IR")
+    IO.println (psJsonObject [
+      ("wire", psJsonQuote wire), ("source", psJsonQuote source),
+      ("binary", psJsonArray (staged.wasm.map fun byte => toString byte.toNat)),
+      ("runtimeIr", psJsonQuote staged.runtimeIr), ("verifiedIr", psJsonQuote staged.verifiedIr),
+      ("specializedIr", psJsonQuote staged.specializedIr), ("wasmIr", psJsonQuote staged.wasmIr),
+      ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
+      ("interfaceJson", psJsonQuote staged.interfaceJson), ("bindingJson", psJsonQuote staged.bindingJson)])
+    return
   if args == ["--fixture32"] || args == ["--fixture64"] then
     let width := if args == ["--fixture64"] then PsWasmWordSize.wasm64 else PsWasmWordSize.wasm32;
     match psWasmCompileCanonicalExports (PsWasmTargetProfile.mk width) canonicalSelection canonicalSource with
@@ -75,6 +121,7 @@ def main (args : List String) : IO Unit := do
           Prod.mk "sourceJson" (psJsonQuote sourceJson),
           Prod.mk "targetJson" (psJsonQuote targetJson)]);
     return;
+  canonicalRequestChecks
   let forged := canonicalSingle (PsVerifiedIrDeclaration.mk "forged" [] [] (.primitive .uint32) (.literal (.bool true)));
   let imported := PsSpecializedIrModule.mk { canonicalSource.raw with
     imports := [PsVerifiedIrExternalImport.mk "external" "provider" "external" (.function [] (.primitive .uint32))] };

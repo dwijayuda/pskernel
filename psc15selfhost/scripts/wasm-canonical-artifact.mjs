@@ -7,6 +7,7 @@ import { prepareCanonicalValueTypes } from './canonical-memory.mjs';
 import { inspectWasmCoreArtifact, requireWasmFunctionSignature } from './wasm-core-signatures.mjs';
 
 export const wasmCanonicalSelectionContract='psc-wasm-canonical-selection/1';
+export const wasmCanonicalRequestContract='psc-wasm-canonical-request/1';
 export const wasmCanonicalBindingContract='psc-wasm-canonical-scalar-exports/1';
 export const wasmCanonicalProjectionRelation='psc-specialized-ir-canonical-scalar-interface/1';
 export const wasmCanonicalBinaryRelation='psc-wasm-canonical-scalar-export-signatures/1';
@@ -42,6 +43,22 @@ function checked(input,domain,contract){
   if(input.identity.domain!==domain||input.identity.contract!==contract)fail('INPUT_CONTRACT');
   return input;
 }
+/** Bounded constructor-independent request for the portable driver. The policy
+ * identity is retained separately in the graph; this wire never supplies types.
+ */
+export function createPortableWasmCanonicalRequest(selectionArtifact){
+  checked(selectionArtifact,'abi-policy',wasmCanonicalSelectionContract);
+  const policy=decodeWasmCanonicalSelection(selectionArtifact.bytes);
+  if(![policy.packageNamespace,policy.packageName,policy.worldName,policy.interfaceName,
+      ...policy.exports.flatMap(entry=>[entry.sourceName,entry.foreignName])]
+      .every(value=>Buffer.byteLength(value)<=4096))fail('REQUEST_RESOURCE');
+  const wire=JSON.stringify([wasmCanonicalRequestContract,String(policy.wordBits),
+    policy.packageNamespace,policy.packageName,policy.worldName,policy.interfaceName,
+    policy.exports.map(({sourceName,foreignName})=>[sourceName,foreignName])]);
+  if(Buffer.byteLength(wire)>1048576)fail('REQUEST_RESOURCE');
+  return wire;
+}
+
 const fixed=Object.freeze({
   uint8:'u8',uint16:'u16',uint32:'u32',uint64:'u64',int8:'s8',int16:'s16',int32:'s32',int64:'s64',
   float:'f64',float32:'f32',bool:'bool',char:'char',

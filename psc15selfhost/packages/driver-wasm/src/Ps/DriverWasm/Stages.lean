@@ -72,9 +72,17 @@ def psCompilerWasmStagesFromValidated
   | Except.error error => Except.error (PsCompilerWasmStagesError.specialize error)
   | Except.ok specialized => psCompilerWasmStagesFromSpecialized profile runtime verified erasureCorrespondence specialized
 
-def psCompilerWasmStagesFromPrepared
-    (profile : PsWasmTargetProfile)
-    (prepared : PsCompilerAdmissionReadyModule) : Except PsCompilerWasmStagesError PsCompilerWasmStages :=
+-- Both private and Canonical export paths consume this one prepared-source
+-- transformation. Neither path can substitute host-provided IR for these values.
+structure PsCompilerWasmSpecializedInputs where
+  runtimeIr : String
+  verifiedIr : String
+  erasureCorrespondence : String
+  specialized : PsSpecializedIrModule
+
+def psCompilerWasmSpecializedInputsFromPrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerWasmStagesError PsCompilerWasmSpecializedInputs :=
   match psCompilerErasureProductFromPrepared prepared with
   | Except.error error => Except.error (PsCompilerWasmStagesError.compiler error)
   | Except.ok product =>
@@ -87,4 +95,18 @@ def psCompilerWasmStagesFromPrepared
           | Except.ok validated =>
               match psIrEncodeModule validated.raw with
               | Except.error error => Except.error (PsCompilerWasmStagesError.snapshot error)
-              | Except.ok verified => psCompilerWasmStagesFromValidated profile runtime verified product.correspondence validated
+              | Except.ok verified =>
+                  match psIrSpecializeValidatedModule validated with
+                  | Except.error error => Except.error (PsCompilerWasmStagesError.specialize error)
+                  | Except.ok specialized =>
+                      Except.ok (PsCompilerWasmSpecializedInputs.mk
+                        runtime verified product.correspondence specialized)
+
+def psCompilerWasmStagesFromPrepared
+    (profile : PsWasmTargetProfile)
+    (prepared : PsCompilerAdmissionReadyModule) : Except PsCompilerWasmStagesError PsCompilerWasmStages :=
+  match psCompilerWasmSpecializedInputsFromPrepared prepared with
+  | Except.error error => Except.error error
+  | Except.ok inputs =>
+      psCompilerWasmStagesFromSpecialized profile inputs.runtimeIr inputs.verifiedIr
+        inputs.erasureCorrespondence inputs.specialized

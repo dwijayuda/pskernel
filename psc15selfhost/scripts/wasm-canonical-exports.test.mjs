@@ -6,7 +6,7 @@ import { instantiateCanonicalExports } from './canonical-exports.mjs';
 import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
 import { packObservedBuildArchive, verifyObservedBuildArchive } from './observed-build-archive.mjs';
 import { deriveWasmCanonicalArtifacts, verifyWasmCanonicalProjection, verifyWasmCanonicalBinary,
-  wasmCanonicalSelectionContract, wasmCanonicalBindingContract } from './wasm-canonical-artifact.mjs';
+  wasmCanonicalSelectionContract, wasmCanonicalBindingContract, createPortableWasmCanonicalRequest } from './wasm-canonical-artifact.mjs';
 
 const artifact=(bytes,domain,contract)=>({bytes:Buffer.from(bytes),identity:artifactId(Buffer.from(bytes),domain,contract)});
 function fixture(bits){
@@ -140,4 +140,38 @@ test('observed build archive independently replays source projection and exact t
   const wrong=JSON.parse(subject.targetIr.bytes);wrong[6][0][1]='Source.u16';
   const targetIr=artifact(Buffer.from(JSON.stringify(wrong)),'wasm-ir','psc-wasm-ir-json/1');
   assert.throws(()=>verifyWasmCanonicalBinary({...subject,targetIr}),/TARGET_SIGNATURE_RELATION/);
+});
+
+for(const bits of [32,64])test('portable Canonical driver retains actual prepared-source stages with '+bits+'-bit words',()=>{
+  const packet=JSON.parse(execFileSync('.lake/build/bin/pscv_wasm_canonical_exports_tests',
+    ['--prepared'+bits],{encoding:'utf8',timeout:30000,maxBuffer:8*1024*1024}));
+  const selection=canonicalArtifact({schemaVersion:1,contract:wasmCanonicalSelectionContract,
+    wordBits:bits,packageNamespace:'psc',packageName:'prepared',worldName:'world',interfaceName:'api',
+    exports:[{sourceName:'echoWord',foreignName:'echo-word'}]},'abi-policy',wasmCanonicalSelectionContract);
+  assert.equal(packet.wire,createPortableWasmCanonicalRequest(selection));
+  assert.equal(packet.runtimeIr,packet.verifiedIr);
+  const subject={selection,
+    specializedIr:artifact(Buffer.from(packet.specializedIr),'specialized-ir','psc-runtime-ir-json/1'),
+    targetIr:artifact(Buffer.from(packet.wasmIr),'wasm-ir','psc-wasm-ir-json/1'),
+    interfaceArtifact:artifact(Buffer.from(packet.interfaceJson),'interface-ir','psc-interface-ir-json/1'),
+    binding:artifact(Buffer.from(packet.bindingJson),'abi-plan',wasmCanonicalBindingContract),
+    binary:artifact(packet.binary,'wasm-binary','webassembly-core/1')};
+  assert.equal(verifyWasmCanonicalProjection(subject).projectionChecked,true);
+  const validated=verifyWasmCanonicalBinary(subject);
+  assert.equal(validated.targetSignaturesChecked,true);
+  const api=instantiateCanonicalExports({binary:subject.binary,expectedBinaryId:subject.binary.identity,
+    interfaceArtifact:subject.interfaceArtifact,expectedInterfaceId:subject.interfaceArtifact.identity,
+    interfaceName:'api',bindings:validated.bindings});
+  const value=bits===32?4294967295:18446744073709551615n;
+  assert.equal(api.exports['echo-word'](value),value);
+  assert.deepEqual(Object.keys(api.exports),['echo-word']);
+  assert.equal(validated.preservationVerified,false);
+});
+
+test('portable Canonical selection wire bounds every string independently',()=>{
+  const make=foreignName=>canonicalArtifact({schemaVersion:1,contract:wasmCanonicalSelectionContract,
+    wordBits:32,packageNamespace:'psc',packageName:'request',worldName:'world',interfaceName:'api',
+    exports:[{sourceName:'selected',foreignName}]},'abi-policy',wasmCanonicalSelectionContract);
+  assert.doesNotThrow(()=>createPortableWasmCanonicalRequest(make('a'.repeat(4096))));
+  assert.throws(()=>createPortableWasmCanonicalRequest(make('a'.repeat(4097))),/REQUEST_RESOURCE/);
 });

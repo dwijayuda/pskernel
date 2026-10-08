@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contract": "psc-wasm-canonical-scalar-exports/1",
-  "status": "implemented-native-and-host-scalar-checks-passed-evidence-integration-cloud-pending",
+  "status": "portable-request-and-prepared-source-driver-implemented-cloud-validation-pending",
   "source": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
   "input": "PsSpecializedIrModule, freshly strictly revalidated; no external imports",
   "selection": "Explicit source declaration / foreign function names, 1..1024 exports; foreign names and uniqueness validated by InterfaceIR; parameter labels are positional arg0..arg15.",
@@ -27,7 +27,7 @@
   "validation": {
     "native": "test/WasmCanonicalExportsTests.lean",
     "actualBinary": "scripts/wasm-canonical-exports.test.mjs",
-    "portable": "PSC1-portable-selfhost/1 structural audit and explicit PSC1 source check in check:foreign-interface",
+    "portable": "PSC1-portable-selfhost/1 structural audit and explicit PSC1 source check in check:foreign-interface; explicit PSC1 check of DriverWasm.Canonical and its import closure",
     "precedingCloud": {
       "commit": "3090317d925cc3934c34034d603c28d73fb87aec",
       "runId": 37661580595,
@@ -50,5 +50,27 @@
     "graph": "checked-build-evidence.mjs records selection, interface, binding, target IR, binary and signature-validation artifacts",
     "offline": "observed-build-archive.mjs repeats projection and signature checks from consumer-pinned archived graph bytes",
     "scope": "Signature projection and target acceptance only; strict body invariants, source authority and behavioral preservation remain separate."
+  },
+  "portableRequest": {
+    "contract": "psc-wasm-canonical-request/1",
+    "source": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalRequest.lean",
+    "wire": "[\"psc-wasm-canonical-request/1\",\"32\"|\"64\",namespace,package,world,interface,[[sourceName,foreignName],...]]",
+    "limits": {
+      "utf8Bytes": 1048576,
+      "nestingDepth": 3,
+      "arrays": 1026,
+      "exports": 1024,
+      "stringUtf8Bytes": 4096
+    },
+    "canonical": "Exact re-encoding; decimal word width is a string; unknown versions, objects, alternate encodings and malformed shapes reject.",
+    "sharedPreflight": "Bridge.Json array-request preflight is shared with the portable TypeScript declaration request; parsing and schema validation remain separate."
+  },
+  "driver": {
+    "source": "packages/driver-wasm/src/Ps/DriverWasm/Canonical.lean",
+    "entry": "psCompilerWasmCanonicalStagesFromPrepared",
+    "authority": "bootstrap-transform-only",
+    "inputs": "One actual prepared source, shared erasure/validation/specialization with the private Wasm driver",
+    "outputs": "Exact RuntimeIR/VerifiedIR/SpecializedIR/WasmIR, emitted bytes, erasure correspondence, InterfaceIR and binding JSON from that compilation",
+    "production": "Live checked-session/API/native/CLI selection and versioned descriptor/evidence publication remain pending."
   }
 }

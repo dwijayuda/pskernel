@@ -13,55 +13,6 @@ inductive PsTsDeclarationRequestError where
   | parse (error : PsJsonParseError)
   | emit (error : PsTsDeclarationError)
 
--- The only admitted nesting is the root array, request list and request pair.
--- Bound depth and total arrays before the general JSON parser sees input.
-structure PsTsDeclarationJsonScan where
-  offset : Nat
-  depth : Nat
-  arrays : Nat
-  quoted : Bool
-  escaped : Bool
-
-def psTsDeclarationJsonScanWorker (fuel : Nat) :
-    String -> PsTsDeclarationJsonScan -> Bool :=
-  match fuel with
-  | Nat.zero => fun (_source : String) (_state : PsTsDeclarationJsonScan) => false
-  | Nat.succ remaining =>
-      let smaller : String -> PsTsDeclarationJsonScan -> Bool :=
-        psTsDeclarationJsonScanWorker remaining;
-      fun (source : String) (state : PsTsDeclarationJsonScan) =>
-        if String.Internal.atEnd source (String.Pos.Raw.mk state.offset) then
-          if state.quoted then false else Nat.beq state.depth 0
-        else
-          let code : Nat := Char.toNat (String.Internal.get source (String.Pos.Raw.mk state.offset));
-          let next : Nat := String.Pos.Raw.byteIdx
-            (String.Internal.next source (String.Pos.Raw.mk state.offset));
-          if state.quoted then
-            if state.escaped then
-              smaller source (PsTsDeclarationJsonScan.mk next state.depth state.arrays true false)
-            else if Nat.beq code 92 then
-              smaller source (PsTsDeclarationJsonScan.mk next state.depth state.arrays true true)
-            else if Nat.beq code 34 then
-              smaller source (PsTsDeclarationJsonScan.mk next state.depth state.arrays false false)
-            else
-              smaller source (PsTsDeclarationJsonScan.mk next state.depth state.arrays true false)
-          else if Nat.beq code 34 then
-            smaller source (PsTsDeclarationJsonScan.mk next state.depth state.arrays true false)
-          else if Nat.beq code 91 then
-            if Nat.blt state.depth 3 then
-              if Nat.blt state.arrays 4098 then
-                smaller source
-                  (PsTsDeclarationJsonScan.mk next (Nat.succ state.depth) (Nat.succ state.arrays) false false)
-              else false
-            else false
-          else if Nat.beq code 93 then
-            if Nat.blt 0 state.depth then
-              smaller source (PsTsDeclarationJsonScan.mk next (Nat.sub state.depth 1) state.arrays false false)
-            else false
-          else if Nat.beq code 123 then false
-          else if Nat.beq code 125 then false
-          else smaller source (PsTsDeclarationJsonScan.mk next state.depth state.arrays false false)
-
 def psTsDecodeDeclarationNatural (digits : Nat) (value : PsJsonValue) :
     Except PsTsDeclarationRequestError Nat :=
   match value with
@@ -155,8 +106,7 @@ def psTsEncodeDeclarationCommand (command : PsTsDeclarationCommand) : String :=
 def psTsDecodeDeclarationCommand (source : String) :
     Except PsTsDeclarationRequestError PsTsDeclarationCommand :=
   if Nat.ble (String.utf8ByteSize source) 1048576 then
-    if psTsDeclarationJsonScanWorker (Nat.succ (String.utf8ByteSize source))
-        source (PsTsDeclarationJsonScan.mk 0 0 0 false false) then
+    if psJsonArrayRequestWithinLimits 1048576 3 4098 source then
       match psJsonParse source with
       | Except.error error => Except.error (PsTsDeclarationRequestError.parse error)
       | Except.ok value =>

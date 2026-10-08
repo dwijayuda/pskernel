@@ -385,11 +385,13 @@
         "scripts/canonical-exports.mjs",
         "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
         "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json",
-        "scripts/wasm-canonical-artifact.mjs"
+        "scripts/wasm-canonical-artifact.mjs",
+        "packages/backend-wasm/src/Ps/BackendWasm/CanonicalRequest.lean",
+        "packages/driver-wasm/src/Ps/DriverWasm/Canonical.lean"
       ],
       "inheritedImplementationStatus": "partial",
       "assurance": "pending",
-      "disposition": "Keep InterfaceIR/WIT/Canonical ABI separate from PublicApiIR. Scalar Wasm producer and closed host adapter exist; checked driver routing, broad adapters and independent WIT evidence remain pending."
+      "disposition": "Keep InterfaceIR/WIT/Canonical ABI separate from PublicApiIR. Scalar export producer, bounded portable request, actual prepared-source driver and closed host adapter exist. Live checked routing, profile descriptors, broader adapters and independent WIT evidence remain pending."
     },
     {
       "id": "logical-interop",
@@ -1194,7 +1196,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "closed-uniform-declarations-maps-generated-native-build-routing-implemented-portable-emission-diagnosis-and-finer-origins-pending",
+      "status": "closed-uniform-declarations-maps-generated-native-build-routing-and-portable-emission-implemented-cloud-build-route-validation-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1629,6 +1631,13 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V1.json",
       "classification": "artifact-bundle"
+    },
+    {
+      "id": "psc-wasm-canonical-request/1",
+      "kind": "wasm-export-request",
+      "status": "experimental",
+      "canonicalPath": "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json",
+      "classification": "interface-ir-interop"
     }
   ]
 }

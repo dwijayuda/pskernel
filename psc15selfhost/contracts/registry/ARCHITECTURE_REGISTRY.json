@@ -573,6 +573,12 @@
       "kind": "native-product-transport",
       "status": "current-host",
       "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V1.json"
+    },
+    {
+      "id": "psc-wasm-canonical-request/1",
+      "kind": "wasm-export-request",
+      "status": "experimental",
+      "canonicalPath": "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

@@ -59,18 +59,18 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Admission/Quot/Admission.lean` | **A** | Successful Quot initialization refines the shared `PsKernelQuotExtension`, with exact four-declaration semantic history and runtime preservation. |
 | `Admission/Quot/Bootstrap.lean` | **A** | Successful reserved-name validation now proves every requested Quot name is absent from authoritative semantic declaration history under `EnvironmentIndexRefines`; binder construction laws remain supporting evidence. |
 | `Checker/Context.lean` | **B** | Context construction/freshness/application helper invariants. |
-| `Checker/DefEq/BinderSpines.lean` | **A** | `psKernelDefEqFinish` now preserves checker-state semantic soundness under the isolated successful-pair cache insertion law; binder-spine congruence itself still needs deeper semantic coverage. |
+| `Checker/DefEq/BinderSpines.lean` | **A** | Binder-spine configuration and semantic comparison are composed in the concrete knot (#639), preserving parent semantic caches on scope exit and monotone fresh-name state. |
 | `Checker/DefEq/DeltaStep.lean` | **A** | Successful delta unfolding and projection-app unfolding now refine `PsKernelReductionClosure` through the shared Delta metatheory; quick equal/cache finish paths also refine `PsKernelDefEqJudgment`. |
 | `Checker/DefEq/FinalRules.lean` | **C** | Fuel/control only for final rules. |
-| `Checker/DefEq/FullShape.lean` | **A** | Full-shape Sort and literal success paths now refine the independent algorithmic defeq judgment; app/binder/eta terminal cases remain to be connected. |
+| `Checker/DefEq/FullShape.lean` | **A** | Sort/literal, application, binder, reflection, LazyDelta and symmetric function-eta paths are composed in the concrete checker knot (#639); independent algorithmic DefEq has no unrestricted transitivity. |
 | `Checker/DefEq/LazyDelta.lean` | **C** | Fuel exhaustion only. |
 | `Checker/DefEq/Quick.lean` | **A** | Expression-equality and successful-cache quick paths now refine the independent defeq judgment under explicit `ExprEqSound` / `DefEqCacheSound` invariants; Sort/literal rules are directly bridged. |
 | `Checker/DefEq/Shortcuts.lean` | **C** | Selected disabled shortcut behavior. |
 | `Checker/DefEq/Support.lean` | **D** | Single empty-list aggregation fact. |
-| `Checker/Inference.lean` | **A** | Infer-only and checked public inference wrappers now refine `PsKernelTypingJudgment` under the named `PsKernelInferenceCoreSound` contract. |
-| `Checker/Inference/Core.lean` | **A** | Independent typing refinement now covers Sort/literals/fvar/const, both checked-application acceptance paths, and checked lambda/Π/let rules with explicit opened-body and freshness premises. |
+| `Checker/Inference.lean` | **A** | Concrete checked inference refines independent typing under configuration/index and named native/string laws (#639). Infer-only execution preserves its stated configuration/context invariants; its result is not a typing certificate. |
+| `Checker/Inference/Core.lean` | **A** | The concrete full checked-inference knot is composed (#639), including application, lambda/Pi/let, dependent projection and checked conversions with scope/freshness/cache invariants. Infer-only results remain separate from typing evidence. |
 | `Checker/Inference/Helpers.lean` | **A** | Cache publication now preserves the named checker-state semantic soundness invariant under the isolated inference-cache insertion law; Sort/Pi views and noninterference laws remain. |
-| `Checker/Knot.lean` | **A** | Concrete checker infer/check/WHNF/defeq entry points now compose to independent typing/reduction/defeq judgments under explicit lower-layer soundness contracts; full discharge of those contracts remains pending. |
+| `Checker/Knot.lean` | **A** | Concrete mutually recursive checked inference, WHNF and true DefEq entry points are composed (#639) under configuration/index invariants and explicitly named native-reduction/string-soundness laws. Infer-only execution has preservation contracts, not general typing soundness. |
 | `Checker/Ops.lean` | **D** | Eta/wrapper fact only. |
 | `Checker/Projection.lean` | **A** | Successful dependent projection inference refines `PsKernelTypingJudgment` and `PsKernelProjectionResultJudgment`; parameter application and dependent-field traversal refine dedicated semantic judgments under WHNF/inference/index soundness. |
 | `Checker/Recursor/Analysis.lean` | **A** | Successful recursor-rule lookup proves constructor-name agreement and list membership, and constructor-app recognition refines authoritative semantic-environment constructor metadata under index refinement. |
@@ -79,10 +79,10 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/Reduction/PrimitiveData.lean` | **C** | Primitive base/control facts. |
 | `Checker/Reduction/PrimitiveNat.lean` | **A** | Executable Nat add/sub/mul/mod/div/beq/ble primitive success paths now refine explicit independent primitive reduction rules under their exact gate premises. |
 | `Checker/Reduction/Primitives.lean` | **D** | Single aggregation/fuel fact. |
-| `Checker/Reduction/Whnf.lean` | **A** | Observable WHNF rules now bridge to the independent `PsKernelReductionClosure` relation for reflexive/metadata cases. |
+| `Checker/Reduction/Whnf.lean` | **A** | Concrete core/public WHNF and primitive/native/Nat/delta/cache composition refine independent reduction closure in the checker knot (#639), with configuration and authoritative index invariants. |
 | `Checker/Reduction/WhnfCore.lean` | **A** | Zeta implementation now bridges to the independent `PsKernelReductionClosure`; additional beta/delta/projection coverage remains. |
 | `Checker/ResourcePolicy.lean` | **A** | Successful preflight certifies non-cancellation and nonzero fuel; declaration-size acceptance/denial refine explicit unbounded-or-bounded and overflow arithmetic properties. |
-| `Checker/Session.lean` | **A** | Session infer/check/WHNF/true-defeq successes now forward the independent semantic judgments while preserving the session context; error propagation remains proved. |
+| `Checker/Session.lean` | **A** | Concrete checked-session successes refine independent typing, WHNF and positive DefEq judgments and preserve context/configuration. Infer-only session success supplies preservation evidence, not a typing certificate. |
 | `Checker/State.lean` | **A** | Empty checker state now establishes independent inference-cache and successful-defeq-cache soundness invariants; field-isolation/freshness laws support preservation proofs. |
 | `Core/Declaration.lean` | **B** | Declaration projection/safety/delta facts. |
 | `Core/Expr.lean` | **A** | `psKernelExprEq = true` now refines an independent structural-expression equality relation and therefore the formal non-transitive defeq judgment; spine/fvar/list helper laws remain available. |
@@ -140,3 +140,5 @@ See ../metatheory/PSKERNEL_CORE_INDUCTIVE_CLOSURE_BLOCKERS.md.
 Full ordinary environment well-formedness, mutual recursor/header transaction,
 nested flatten/rebase/restore refinement, the final Kernel/API/session theorem
 family, integration reconciliation and final conformance gates remain open.
+
+The evidence refresh also removes stale infer-only typing claims and stale full-knot closure notes. These corrections do not change grade counts. Earlier green concrete checker work is preserved; it is not restarted or treated as an unresolved callback assumption.

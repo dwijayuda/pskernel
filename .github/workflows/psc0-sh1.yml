@@ -22,6 +22,7 @@ on:
       - 'psc0/scripts/**'
       - 'psc0/check-psc1-source.mjs'
       - 'psc0/lakefile.lean'
+      - 'psc0/lake-manifest.json'
       - 'psc0/lean-toolchain'
       - 'psc0/psconfig.json'
       - 'psc0/package.json'

@@ -211,6 +211,26 @@ export async function runSh1Capabilities({
       '; expected ' + test.expected + ', got ' + JSON.stringify(diagnosticValue(result.error)));
     rejected.push({ name: test.name, sourceSha256: sha256(test.source), diagnosticTags: tags });
   }
+  const stableSource =
+    'inductive ListInv (alpha : Type) where | nil | cons (head : alpha) (tail : ListInv alpha)\n' +
+    'def badInv (base : Nat) (xs : ListInv Nat) : Nat := ' +
+    'match xs with | ListInv.nil => base | ListInv.cons head tail => badInv head tail\n';
+  const stableParsed = unwrap(compiler.psCompilerParseSource(
+    compiler.PsCompilerSourceKind.lean, stableSource), 'STABLE_PARSE');
+  const stablePrelude = compiler.psSelfHostProdPreludeEnvironment;
+  const stableInductive = unwrap(compiler.psElabDeclarationBatchStable(
+    stablePrelude, stableParsed.declarations.head), 'STABLE_INDUCTIVE');
+  const stableEnvironment = unwrap(compiler.psAddDeclarationList(
+    stablePrelude, stableInductive.declarations), 'STABLE_ENVIRONMENT');
+  const stableResult = compiler.psElabDeclarationBatchStable(
+    stableEnvironment, stableParsed.declarations.tail.head);
+  assert.equal(valueTag(stableResult), 'error', 'PSC0_SH1_STABLE_MODE_ACCEPTED_CHANGED_STATE');
+  assert.equal(valueTag(stableResult.error), 'structuralRecursionInvariantArgument');
+  rejected.push({
+    name: 'explicit-historical-stable-mode',
+    sourceSha256: sha256(stableSource),
+    diagnosticTags: diagnosticTags(stableResult.error),
+  });
   const receipt = {
     schemaVersion: 1,
     compilerSha256,

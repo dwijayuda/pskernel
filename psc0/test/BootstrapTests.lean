@@ -2360,8 +2360,19 @@ def psTestRejectChangedInvariantStructuralRecursion : Bool :=
   match psParseLeanSource source with
   | Except.error _ => false
   | Except.ok module =>
-      match psElabModule psTestNatEnvironment module with
-      | Except.error PsElabError.structuralRecursionInvariantArgument => true
+      -- This is the historical stable-profile refusal. The ordinary module
+      -- elaborator now normalizes this case; its success is covered separately.
+      match module.declarations with
+      | [inductiveSource, definitionSource] =>
+          match psElabDeclarationBatchStable psTestNatEnvironment inductiveSource with
+          | Except.error _ => false
+          | Except.ok inductiveBatch =>
+              match psAddDeclarationList psTestNatEnvironment inductiveBatch.declarations with
+              | Except.error _ => false
+              | Except.ok environment =>
+                  match psElabDeclarationBatchStable environment definitionSource with
+                  | Except.error PsElabError.structuralRecursionInvariantArgument => true
+                  | _ => false
       | _ => false
 
 def psTestDualSourcePartialDefinition : Bool :=

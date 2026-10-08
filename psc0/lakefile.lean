@@ -132,6 +132,7 @@ lean_lib PsElab where
     `Ps.Elab.Context,
     `Ps.Elab.Literal,
     `Ps.Elab.Term,
+    `Ps.Elab.Recursion,
     `Ps.Elab.Declaration
   ]
 

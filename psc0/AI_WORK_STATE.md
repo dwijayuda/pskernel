@@ -68,3 +68,13 @@ result telescope and the whole worker result. This prevents a narrower induction
 hypothesis from disguising missing state application. Fixtures include the rejection
 and preservation of valid outer hypotheses. Session results are deeply immutable;
 parsed cache limits are entry/source-text limits, not a hard compiler-heap bound.
+
+## Setup checkpoint after first cloud attempt
+
+Commit e67647ec4821d609188e6feb5a4de2380857767e started run37831018572.
+Job113496067989 stopped in Lean Action configuration because the historical branch
+had no lake-manifest.json; no semantic tests or compiler generation ran. Add the
+correct dependency-free manifest and explicitly register Ps.Elab.Recursion in Lake.
+Preserve the historical changed-argument refusal test by selecting BatchStable; the
+enhanced path is covered by the generated raw-source capability corpus. Rerun the
+same coherent qualification after these integration corrections.

@@ -131,6 +131,14 @@ theorem psKernelDefEqProjectionShortcut_configuration_sound
                   (psKernelWhnfCoreWithRecursorFuel
                     fuel defeq)
                   hDefEq hQuick hCore hString
+              have hBudget :
+                  fuel =
+                    Nat.add
+                      (Nat.add
+                        (psKernelExprNodeCount leftExpr)
+                        (psKernelExprNodeCount rightExpr))
+                      1 := by
+                rfl
               cases hLazy :
                   psKernelDefEqLazyProjReductionWithFuel
                     fuel
@@ -139,11 +147,13 @@ theorem psKernelDefEqProjectionShortcut_configuration_sound
                     context state
                     leftExpr rightExpr leftName leftIndex with
               | error error =>
+                  rw [hBudget] at hLazy
                   simp [
                     psKernelDefEqProjectionShortcut,
-                    hName, hIndex, fuel, hLazy
+                    hName, hIndex, hLazy
                   ] at hRun
               | ok lazyRun =>
+                  rw [hBudget] at hLazy
                   rcases lazyRun with ⟨value, lazyState⟩
                   have hLazySound :=
                     psKernelDefEqLazyProjReductionWithFuel_configuration_sound
@@ -159,7 +169,7 @@ theorem psKernelDefEqProjectionShortcut_configuration_sound
                   | false =>
                       simp [
                         psKernelDefEqProjectionShortcut,
-                        hName, hIndex, fuel, hLazy
+                        hName, hIndex, hLazy
                       ] at hRun
                       rcases hRun with ⟨rfl, rfl⟩
                       exact ⟨hLazySound.1, trivial⟩
@@ -173,7 +183,7 @@ theorem psKernelDefEqProjectionShortcut_configuration_sound
                         simpa using hIndex
                       simp [
                         psKernelDefEqProjectionShortcut,
-                        hName, hIndex, fuel, hLazy
+                        hName, hIndex, hLazy
                       ] at hRun
                       rcases hRun with ⟨rfl, rfl⟩
                       subst rightName

@@ -23,3 +23,13 @@
 ## Boundary and evidence policy
 
 No V6 native release, proof interoperability, npm publication, complete compiler preservation or certification evidence is newly established by the layout change. Do not edit kernel/provider internals in this workstream; consume only their interfaces and independent results.
+
+## Research checkpoint — self-host authoring restrictions (2026-10-08 UTC)
+
+Completed a read-only source/profile/history/CI-evidence analysis of this workspace at main commit `37f63c39d4a07189938046c64152bba25d789450`. The findings and a staged route to ordinary PSC1 authoring are recorded in [PSCV0_SELFHOST_LANGUAGE_ANALYSIS.md](PSCV0_SELFHOST_LANGUAGE_ANALYSIS.md).
+
+The dominant restriction is the current structural-recursion elaborator: a direct match selects one explicit decreasing parameter, while other explicit recursive arguments must retain their original local identities. Curried workers encode varying parameters in the result function. Additional constraints come from source inference/pattern/library completion, erasure and target representations, and enforced historical source-shape policies.
+
+This checkpoint adds documentation only. It does not change compiler/kernel/provider implementations, source profiles, tests or workflows; it establishes no new compiler execution or fixed-point result. Historical JS, Rust and Wasm observations remain tied to their recorded source closures. The pending current V6 baseline, implementation and assurance tasks above are unchanged.
+
+The report also identifies the evidence limit of `selfhost:guard`: its source replay consumes the existing generated workspace. Current handwritten semantic edits require a source-aware route such as the existing current-source fixed-point/resident checks, after a fresh `pscv0` baseline is established.

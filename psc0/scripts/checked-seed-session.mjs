@@ -69,7 +69,12 @@ export async function runCheckedSeedSession({
 
     const kernelResult = await checkAdmissions(prepared.admissions);
     if (kernelResult?.accepted !== true) {
-      throw new Error(`PSC2_KERNEL_REJECTED: ${kernelResult?.errorKind ?? 'kernel-rejection'}`);
+      const errorKind = kernelResult?.errorKind ?? 'kernel-rejection';
+      const declarationIndex = Number.isSafeInteger(kernelResult?.declarationIndex) &&
+        kernelResult.declarationIndex >= 0 ? ` declarationIndex=${kernelResult.declarationIndex}` : '';
+      const message = typeof kernelResult?.message === 'string'
+        ? ` message=${JSON.stringify(kernelResult.message.slice(0, 1024))}` : '';
+      throw new Error(`PSC2_KERNEL_REJECTED: ${errorKind}${declarationIndex}${message}`);
     }
 
     child.stdin.end(emit ? 'emit\n' : 'checked\n');

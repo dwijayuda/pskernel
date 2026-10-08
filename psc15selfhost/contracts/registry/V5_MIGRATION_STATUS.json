@@ -1119,6 +1119,16 @@
   },
   "orderedImplementation": [
     {
+      "order": 0,
+      "id": "pscv-language-conformance",
+      "classifications": [
+        "semantic-compiler-spine",
+        "claimset-evidence"
+      ],
+      "status": "normative-authority-pinned-inherited-frontend-only-complete-rule-inventory-and-verified-executable-gate-pending",
+      "requirement": "Bind language reference Sections 2, 30–32 and Appendix J to real implementations. Complete source/elaboration capabilities and approved specification, coverage, obligation/proof, trust/effect/dependency and erasure closure before normative PSCV verified-executable emission. Existing lower-case pscv-cert/1 does not establish PSCV-CERT-v1 conformance."
+    },
+    {
       "order": 1,
       "id": "claimset",
       "classifications": [
@@ -1809,7 +1819,28 @@
       "rustConclusion": "success",
       "scope": "Hosted execution policy and unchanged mandatory compiler semantic, backend, production, archive and isolation gates. Historical PSC1/self-application checks were explicitly skipped.",
       "proofImplication": "none",
-      "subsequentDefaultBuildRouting": "implementation-added-cloud-validation-pending"
+      "subsequentDefaultBuildRouting": "cloud-validated-at-d43ae7ed"
+    },
+    "hostedDefaultBuildCheckpoint": {
+      "commit": "d43ae7edd916d7639939e2070eb9d18b57212f4c",
+      "mainRun": 37764795277,
+      "mainJob": 113269682175,
+      "conclusion": "success",
+      "rustRun": 37764795361,
+      "rustJob": 113269682902,
+      "rustConclusion": "success",
+      "parityRun": 37764795224,
+      "parityJob": 113269682094,
+      "parityConclusion": "success",
+      "scope": [
+        "normal-native-compiler-build-without-self-application",
+        "default-native-and-explicit-generated-compiler-selection",
+        "default-ts-closed-js-uniform-js-wasm-publication-and-archive-replay",
+        "74-checked-host-regressions",
+        "existing-mandatory-semantic-backend-resource-isolation-gates"
+      ],
+      "selfHostClaim": false,
+      "proofImplication": "none"
     }
   }
 }

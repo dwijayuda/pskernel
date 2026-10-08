@@ -117,15 +117,15 @@ def psCheckedSeedPreparedSession
     throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")
 
 def psCheckedSeedSession
-    (kind : PsCompilerSourceKind) (sourcePath : String) (products : Bool := false) : IO Unit := do
+    (kind : PsCompilerSourceKind) (sourcePath : String) (products : Bool := false) (canonical : Bool := false) : IO Unit := do
   let source ← IO.FS.readFile sourcePath
   let .ok product := psCompilerPrepareSourceWithOrigins kind source
     | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
-  if products then psCheckedSeedProductsSession product.prepared product.origins
+  if products then psCheckedSeedProductsSession product.prepared product.origins canonical
   else psCheckedSeedPreparedSession product.prepared product.origins
 
 def psCheckedSeedModulesSession
-    (kind : PsCompilerSourceKind) (sourcePath : String) (products : Bool := false) : IO Unit := do
+    (kind : PsCompilerSourceKind) (sourcePath : String) (products : Bool := false) (canonical : Bool := false) : IO Unit := do
   let source ← IO.FS.readFile sourcePath
   let .ok json := Lean.Json.parse source
     | throw (IO.userError "PSC2_CHECKED_MODULES_JSON")
@@ -137,7 +137,7 @@ def psCheckedSeedModulesSession
     | .ok text => pure text
   let .ok product := psCompilerPrepareSourcesWithOrigins kind sources
     | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
-  if products then psCheckedSeedProductsSession product.prepared product.origins
+  if products then psCheckedSeedProductsSession product.prepared product.origins canonical
   else psCheckedSeedPreparedSession product.prepared product.origins
 
 def psCheckedSeedDiagnoseAdmissions (sourcePath : String) : IO Unit := do
@@ -163,6 +163,10 @@ def main (args : List String) : IO Unit := do
   | ["--check-ps"] => psCheckedSeedRun false .proofScript
   | ["--emit-lean"] => psCheckedSeedRun true .lean
   | ["--emit-ps"] => psCheckedSeedRun true .proofScript
+  | ["--session-products-v2-lean", sourcePath] => psCheckedSeedSession .lean sourcePath true true
+  | ["--session-products-v2-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath true true
+  | ["--session-products-v2-modules-lean", sourcePath] => psCheckedSeedModulesSession .lean sourcePath true true
+  | ["--session-products-v2-modules-ps", sourcePath] => psCheckedSeedModulesSession .proofScript sourcePath true true
   | ["--session-products-lean", sourcePath] => psCheckedSeedSession .lean sourcePath true
   | ["--session-products-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath true
   | ["--session-products-modules-lean", sourcePath] => psCheckedSeedModulesSession .lean sourcePath true

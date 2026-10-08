@@ -8,7 +8,7 @@
   "status": "implemented-native-session-boundary",
   "rules": [
     "Bound source bytes/count and serialized snapshot bytes before starting the compiler process.",
-    "Count raw stdout bytes and bound each frame before UTF-8 decoding and JSON parsing. Legacy and direct non-declaration sessions allow two frames; explicitly selected psc-checked-seed-products/1 declaration sessions allow exactly one additional writer response.",
+    "Count raw stdout bytes and bound each frame before UTF-8 decoding and JSON parsing. Legacy and direct non-declaration sessions, including explicit Canonical psc-checked-seed-products/2 sessions, allow two frames; explicitly selected psc-checked-seed-products/1 declaration sessions allow exactly one additional writer response.",
     "Bound diagnostics, admissions before checker invocation and total emitted source/IR bytes before returning a successful session.",
     "Each asynchronous protocol/checker wait has a phase timeout. Kill the selected compiler child on failure and confirm its close before removing temporary inputs; unconfirmed termination is infrastructureUnavailable.",
     "Preserve prepared -> trusted checker acceptance -> emit/checked. Direct declaration requests remain in the same native prepared session after exact staged-subject checks; any limit/failure aborts without successful data.",

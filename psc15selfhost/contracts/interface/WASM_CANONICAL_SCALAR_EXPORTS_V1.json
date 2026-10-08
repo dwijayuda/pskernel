@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contract": "psc-wasm-canonical-scalar-exports/1",
-  "status": "portable-request-and-prepared-source-driver-implemented-cloud-validation-pending",
+  "status": "portable-driver-generated-native-selection-and-publication-implemented-cloud-validation-pending",
   "source": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
   "input": "PsSpecializedIrModule, freshly strictly revalidated; no external imports",
   "selection": "Explicit source declaration / foreign function names, 1..1024 exports; foreign names and uniqueness validated by InterfaceIR; parameter labels are positional arg0..arg15.",
@@ -37,7 +37,7 @@
     }
   },
   "remaining": [
-    "Production checked-driver/API/CLI selection routing and EvidenceEnvelope/output publication; build graph and offline relations are implemented",
+    "Fresh cloud validation of the new prepared driver, live selection and native build routes",
     "Aggregate/string/large-argument conversion wrappers",
     "Core/Component imports and resource/async lifetimes",
     "Global source/backend/adapter preservation proof or independently validated relation"
@@ -71,6 +71,22 @@
     "authority": "bootstrap-transform-only",
     "inputs": "One actual prepared source, shared erasure/validation/specialization with the private Wasm driver",
     "outputs": "Exact RuntimeIR/VerifiedIR/SpecializedIR/WasmIR, emitted bytes, erasure correspondence, InterfaceIR and binding JSON from that compilation",
-    "production": "Live checked-session/API/native/CLI selection and versioned descriptor/evidence publication remain pending."
+    "production": "Generated checked-service policy and explicit native products/2 transport pin selection before admission, share independent projection/signature checks, and bind the common graph/descriptor/bundle/envelope/publication."
+  },
+  "productionSelection": {
+    "service": "createCheckedCompilerService({ wasmCanonicalSelection })",
+    "build": "buildChecked({ backend: 'wasm', wasmCanonicalSelectionPath })",
+    "cli": "psc build SOURCE --backend wasm --wasm-exports selection.json --out out.wasm",
+    "policy": "psc-wasm-canonical-selection/1 pinned exact bytes; omitted selection retains private wasm32.",
+    "products": [
+      ".wasm",
+      ".interface-ir.json",
+      ".wasm-abi-plan.json",
+      ".wasm-export-selection.json",
+      "common evidence bundle/graph/archive/envelope/receipt"
+    ],
+    "publication": "Required interface/binding products accompany every Canonical binary, even executable-only; optional source metadata remains independently selected.",
+    "descriptor": "Existing Wasm registry lane records the exact selection as interfaceAdapterId. Target action/query identities bind selection and word width through the observed lowering pass.",
+    "validation": "Independent source projection, exact binary export signatures and WasmIR source-name/function-index routing; no global behavioral preservation claim."
   }
 }

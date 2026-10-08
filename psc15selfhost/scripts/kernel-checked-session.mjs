@@ -77,6 +77,9 @@ export function createKernelCheckedSession(
     throw new Error('PSC2_CHECKED_JAVASCRIPT_REPRESENTATION');
   const uniformJavaScript = javaScriptRepresentation === uniformJsRepresentationProfile;
   const targets = Object.freeze([...(policy.targets ?? ['typescript'])]);
+  const wasmCanonicalRequest = policy.wasmCanonicalRequest;
+  if (wasmCanonicalRequest !== undefined && (!targets.includes('wasm') || typeof wasmCanonicalRequest !== 'string' ||
+      Buffer.byteLength(wasmCanonicalRequest) > 1048576)) throw new Error('PSC2_CHECKED_WASM_EXPORT_POLICY');
   const permittedTargets = new Set(['typescript', 'javascript', 'wasm', 'rust']);
   if (targets.length === 0 || targets.some(target => !permittedTargets.has(target))) throw new Error('PSC2_CHECKED_TARGET_POLICY');
   const security = freezeGraph(structuredClone(providerSecurity));
@@ -146,6 +149,7 @@ export function createKernelCheckedSession(
         assumptionPolicy,
         resourcePolicy,
         targets,
+        ...(wasmCanonicalRequest === undefined ? {} : { wasmExportRequestSha256: hash(wasmCanonicalRequest) }),
         ...(targets.includes('javascript') ? { javaScriptRepresentation } : {}),
         sourceSha256: hash(source),
         canonicalAdmissionsSha256: hash(admissions),
@@ -165,12 +169,12 @@ export function createKernelCheckedSession(
       }
       const stageApi = target === 'typescript' ? 'psCompilerTypeScriptStagesFromPrepared' :
         target === 'javascript' ? (uniformJavaScript ? 'psCompilerUniformJavaScriptStagesFromPrepared' : 'psCompilerJavaScriptStagesFromPrepared') :
-        target === 'wasm' ? 'psCompilerWasmStagesFromPrepared' : undefined;
+        target === 'wasm' ? (wasmCanonicalRequest === undefined ? 'psCompilerWasmStagesFromPrepared' : 'psCompilerWasmCanonicalStagesFromPrepared') : undefined;
       if (stageApi && stageApi in compiler) {
         if (typeof compiler[stageApi] !== 'function') throw new Error('PSC2_CHECKED_EMIT_STAGES_API_SHAPE');
-        if (target === 'wasm' && !compiler.psCompilerWasm32Target) throw new Error('PSC2_CHECKED_WASM_TARGET_MISSING');
+        if (target === 'wasm' && wasmCanonicalRequest === undefined && !compiler.psCompilerWasm32Target) throw new Error('PSC2_CHECKED_WASM_TARGET_MISSING');
         const product = unwrapCompilerResult(target === 'wasm' ?
-          compiler[stageApi](compiler.psCompilerWasm32Target, item.prepared) : compiler[stageApi](item.prepared), 'EMIT_STAGES');
+          compiler[stageApi](wasmCanonicalRequest ?? compiler.psCompilerWasm32Target, item.prepared) : compiler[stageApi](item.prepared), 'EMIT_STAGES');
         const outputKey = target === 'typescript' ? 'typeScript' : target === 'wasm' ? 'wasm' : 'javaScript';
         if (!product || typeof product !== 'object') throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
         const specializationField = target === 'javascript' && uniformJavaScript ? 'uniformSpecializedIr' : 'specializedIr';
@@ -178,7 +182,8 @@ export function createKernelCheckedSession(
           ...(target !== 'typescript' ? [specializationField] : []),
           ...(target === 'javascript' ? ['jsIr'] : []), ...(target === 'wasm' ? ['wasmIr'] : []),
           ...(includeErasureCorrespondence ? ['erasureCorrespondence'] : []),
-          ...(includeMetadata ? ['generatedPositions'] : [])];
+          ...(includeMetadata ? ['generatedPositions'] : []),
+          ...(target === 'wasm' && wasmCanonicalRequest !== undefined ? ['interfaceJson', 'bindingJson'] : [])];
         const staged = {};
         for (const field of fields) {
           const descriptor = Object.getOwnPropertyDescriptor(product, field);
@@ -201,8 +206,13 @@ export function createKernelCheckedSession(
         if (Object.hasOwn(staged, 'generatedPositions') &&
             (target !== 'javascript' || typeof staged.generatedPositions !== 'string'))
           throw new Error('PSC2_CHECKED_GENERATED_POSITIONS_SHAPE');
+        if (target === 'wasm' && wasmCanonicalRequest !== undefined &&
+            (typeof staged.interfaceJson !== 'string' || typeof staged.bindingJson !== 'string'))
+          throw new Error('PSC2_CHECKED_CANONICAL_PRODUCTS_REQUIRED');
         requireStableItem(handle, item);
         return Object.freeze({ output: staged[outputKey],
+          ...(target === 'wasm' && wasmCanonicalRequest !== undefined ? {
+            wasmCanonical: Object.freeze({ interfaceJson: staged.interfaceJson, bindingJson: staged.bindingJson }) } : {}),
           ...(Object.hasOwn(staged, 'generatedPositions') ? { generatedPositions: staged.generatedPositions } : {}),
           ...(Object.hasOwn(staged, 'erasureCorrespondence') ? { erasureCorrespondence: staged.erasureCorrespondence } : {}),
           stages: Object.freeze({
@@ -214,6 +224,7 @@ export function createKernelCheckedSession(
           }) });
       }
       if (target === 'javascript' && uniformJavaScript) throw new Error('PSC2_CHECKED_UNIFORM_STAGES_API_REQUIRED');
+      if (target === 'wasm' && wasmCanonicalRequest !== undefined) throw new Error('PSC2_CHECKED_CANONICAL_STAGES_API_REQUIRED');
       const names = { typescript: 'psCompilerTypeScriptFromPrepared', javascript: 'psCompilerJavaScriptFromPrepared',
         rust: 'psCompilerRustFromPrepared', wasm: 'psCompilerWasmFromPrepared' };
       const name = names[target];

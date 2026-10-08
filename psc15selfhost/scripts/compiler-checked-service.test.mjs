@@ -1,10 +1,11 @@
+import { createPortableWasmCanonicalRequest, deriveWasmCanonicalArtifacts } from './wasm-canonical-artifact.mjs';
 import { fixture as originFixture } from './js-origin-test-fixture.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
 import { createCheckedCompilerService } from './compiler-checked-service.mjs';
 import { uniformJsRepresentationProfile } from './uniform-specialization.mjs';
-import { canonicalBytes } from './artifact-evidence.mjs';
+import { canonicalBytes, canonicalArtifact } from './artifact-evidence.mjs';
 import { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 
 const ok = value => ({ $ps$tag: 'ok', $ps$fields: { value } });
@@ -584,4 +585,80 @@ test('source API projection rechecks liveness before returning a product', async
     service.revoke(handle); return ok('["psc-public-api-ir/1","all-prepared-declarations",[]]');
   };
   assert.throws(() => service.emitPublicApiArtifact(handle), /UNCHECKED_MODULE/);
+});
+
+function canonicalFixture(options={}) {
+  const selection=canonicalArtifact({schemaVersion:1,contract:'psc-wasm-canonical-selection/1',
+    wordBits:32,packageNamespace:'psc',packageName:'live',worldName:'world',interfaceName:'api',
+    exports:[{sourceName:'source',foreignName:'answer'}]},'abi-policy','psc-wasm-canonical-selection/1');
+  const raw=['psc-runtime-ir-json/1',[],[],[],[
+    ['source',[],[],['primitive','uint32'],['literal',['machineInteger','uint32','7']]]]];
+  const ir=JSON.stringify(raw), specialized=canonicalArtifact(raw,'specialized-ir','psc-runtime-ir-json/1');
+  const derived=deriveWasmCanonicalArtifacts(specialized,selection);
+  const target=JSON.stringify(['psc-wasm-ir-json/1',[],[],[],[
+    ['source',['none'],[],[['i32']],[],[['i32Const','7']]]],[],[['answer','source']]]);
+  const binary=[0,97,115,109,1,0,0,0,1,5,1,96,0,1,127,3,2,1,0,
+    7,10,1,6,97,110,115,119,101,114,0,0,10,6,1,4,0,65,7,11];
+  const wire=createPortableWasmCanonicalRequest(selection);
+  let prepared, calls=0, service;
+  const product=()=>({wasm:list(binary),runtimeIr:ir,verifiedIr:ir,specializedIr:ir,wasmIr:target,
+    interfaceJson:derived.interface.bytes.toString(),bindingJson:derived.binding.bytes.toString()});
+  const compiler={
+    psCompilerPrepareSource:(kind,source)=>{prepared={kind,source};return ok(prepared);},
+    psCompilerAdmissionsFromPrepared:value=>{assert.equal(value,prepared);return ok(
+      '{"admissions":[],"format":"proofscript-checked-admissions","version":2}');},
+    psCompilerWasmCanonicalStagesFromPrepared:(request,value)=>{
+      calls++;assert.equal(request,wire);assert.equal(value,prepared);assert.equal(Object.isFrozen(value),true);
+      const output=product();if(options.mutate)options.mutate(output,service);
+      return ok(output);
+    },
+    psCompilerWasmStagesFromPrepared:()=>{throw new Error('PRIVATE_WASM_FALLBACK');},
+    psCompilerPublicApiFromPrepared:()=>{throw new Error('UNREQUESTED_API');},
+  };
+  service=createCheckedCompilerService({compiler,checkAdmissions:()=>({...leanCheckedIdentity,accepted:true}),
+    identity:leanCheckedIdentity,targets:['wasm'],wasmCanonicalSelection:selection,...options.service});
+  return {service,compiler,selection,wire,calls:()=>calls};
+}
+
+test('Canonical checked service pins a copied selection and binds one actual staged emission',async()=>{
+  const fixture=canonicalFixture(), {service,selection,wire}=fixture;
+  selection.bytes.fill(0);
+  const handle=await service.check('lean','selected checked source');
+  const emitted=service.emitSelectedArtifact(handle,'wasm');
+  assert.equal(fixture.calls(),1);
+  assert.equal(emitted.wasmCanonical.validation.targetSignaturesChecked,true);
+  assert.equal(emitted.wasmCanonical.validation.preservationVerified,false);
+  assert.equal(createPortableWasmCanonicalRequest(emitted.wasmCanonical.selection),wire);
+  const instance=new WebAssembly.Instance(new WebAssembly.Module(emitted.payload));
+  assert.equal(instance.exports.answer(),7);
+  assert.deepEqual(Object.keys(instance.exports),['answer']);
+  assert.equal(emitted.publicApi,undefined);
+  assert.equal(emitted.checkedCore.wasmExportRequestSha256,createHash('sha256').update(wire).digest('hex'));
+  emitted.wasmCanonical.selection.bytes.fill(0);
+  assert.equal(service.emitExecutableArtifact(handle,'wasm').wasmCanonical.validation.signaturesChecked,true);
+  service.revoke(handle);
+  assert.throws(()=>service.emitExecutableArtifact(handle,'wasm'),/CERTIFIED_SOURCE_NOT_LIVE/);
+});
+
+test('Canonical checked service has no private fallback and rejects mismatched products',async()=>{
+  for(const mutate of [
+    output=>{delete output.interfaceJson;},
+    output=>{const value=JSON.parse(output.interfaceJson);value[5][0][2][0][2]=['some',['scalar','u16']];
+      output.interfaceJson=JSON.stringify(value);},
+    output=>{const value=JSON.parse(output.bindingJson);value.bindings[0].sourceName='other';
+      output.bindingJson=canonicalBytes(value).toString();},
+    output=>{const value=JSON.parse(output.wasmIr);value[6][0][1]='other';output.wasmIr=JSON.stringify(value);},
+    output=>{output.wasm=list([0,97,115,109,1,0,0,0]);},
+    (output,service)=>{service.close();},
+  ]){
+    const {service}=canonicalFixture({mutate}),handle=await service.check('lean','source');
+    assert.throws(()=>service.emitExecutableArtifact(handle,'wasm'),
+      /CANONICAL_PRODUCTS_REQUIRED|PROJECTION_RELATION|TARGET_SIGNATURE_RELATION|EXPORT_SURFACE|SESSION_CLOSED/);
+  }
+  const {service,compiler}=canonicalFixture(),handle=await service.check('lean','source');
+  delete compiler.psCompilerWasmCanonicalStagesFromPrepared;
+  assert.throws(()=>service.emitExecutableArtifact(handle,'wasm'),/CANONICAL_STAGES_API_REQUIRED/);
+  const bounded=canonicalFixture({service:{maxOutputBytes:1}});
+  const boundedHandle=await bounded.service.check('lean','source');
+  assert.throws(()=>bounded.service.emitExecutableArtifact(boundedHandle,'wasm'),/OUTPUT_RESOURCE_EXHAUSTED/);
 });

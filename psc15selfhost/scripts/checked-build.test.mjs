@@ -1,3 +1,5 @@
+import { instantiateCanonicalExports } from './canonical-exports.mjs';
+import { artifactId, canonicalArtifact, artifactKey } from './artifact-evidence.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
@@ -480,3 +482,60 @@ test('invalid archive policy rejects before loading source or executing a compil
     await assert.rejects(buildChecked({ entryPath: 'missing-source', outputPath: 'out.js',
       backend: 'javascript', archiveResourceLimits }), /PSC_BUILD_ARCHIVE_LIMIT_POLICY/);
 });
+
+test('Canonical Wasm selection requires the explicit Wasm target before source loading',async()=>{
+  await assert.rejects(buildChecked({entryPath:'missing-source',outputPath:'out.js',backend:'javascript',
+    wasmCanonicalSelectionPath:'missing-selection'}),/PSC2_CHECKED_WASM_EXPORT_TARGET/);
+});
+
+for(const wordBits of [32,64])test('actual native Canonical Wasm '+wordBits+' selection publishes and replays bound interface products',
+  {skip:!native},async()=>{
+    const dir=await mkdtemp(path.join(tmpdir(),'psc-native-canonical-'));
+    const previousCli=process.env.PSC_TYPESCRIPT_CLI;
+    try{
+      process.env.PSC_TYPESCRIPT_CLI=path.join(dir,'typescript-must-not-be-loaded');
+      const entryPath=path.join(dir,'Main.lean'),outputPath=path.join(dir,'out.wasm');
+      const wasmCanonicalSelectionPath=path.join(dir,'exports.json');
+      const policy=canonicalArtifact({schemaVersion:1,contract:'psc-wasm-canonical-selection/1',wordBits,
+        packageNamespace:'psc',packageName:'native',worldName:'world',interfaceName:'api',
+        exports:[{sourceName:'echoWord',foreignName:'echo-word'}]},'abi-policy','psc-wasm-canonical-selection/1');
+      await writeFile(entryPath,'def echoWord (value : USize) : USize := value\ndef hidden (value : UInt32) : UInt32 := value\n');
+      await writeFile(wasmCanonicalSelectionPath,policy.bytes);
+      const receipt=await buildChecked({entryPath,outputPath,seedPath:seed,kernel:'lean434',backend:'wasm',
+        products:wordBits===32?'metadata':'executable',wasmCanonicalSelectionPath,archiveResourceLimits:nativeArchiveLimits});
+      assert.equal(receipt.seedProductProtocol,'psc-checked-seed-products/2');
+      assert.equal(receipt.seedResources.observed.frames,2);
+      assert.equal(receipt.typeScriptToolInputs,undefined);
+      assert.equal(artifactKey(receipt.wasmCanonical.selection),artifactKey(policy.identity));
+      const binaryBytes=await readFile(outputPath),interfaceBytes=await readFile(path.join(dir,'out.interface-ir.json'));
+      const binary={bytes:binaryBytes,identity:artifactId(binaryBytes,'wasm-binary','webassembly-core/1')};
+      const interfaceArtifact={bytes:interfaceBytes,identity:receipt.wasmCanonical.interface};
+      const binding=JSON.parse(await readFile(path.join(dir,'out.wasm-abi-plan.json')));
+      const api=instantiateCanonicalExports({binary,expectedBinaryId:binary.identity,
+        interfaceArtifact,expectedInterfaceId:interfaceArtifact.identity,interfaceName:'api',
+        bindings:binding.bindings.map(({functionName,coreExport})=>({functionName,coreExport}))});
+      assert.deepEqual(Object.keys(api.exports),['echo-word']);
+      const value=wordBits===32?4294967295:18446744073709551615n;
+      assert.equal(api.exports['echo-word'](value),value);
+      assert.equal(binding.wordBits,wordBits);
+      const graph=JSON.parse(await readFile(path.join(dir,'out.build-graph.json')));
+      const replay=await verifyObservedBuildArchive(await readFile(path.join(dir,'out.build-archive.json')),
+        {expectedGraphId:receipt.buildGraph,allowedAssumptions:allowedAssumptionsFromGraph(graph),
+          resourceLimits:nativeArchiveLimits});
+      assert.equal(replay.kind,'accepted',replay.reason);
+      assert.equal(replay.wasmCanonicalProjections.length,1);
+      assert.equal(replay.wasmCanonicalSignatures[0].targetSignaturesChecked,true);
+      assert.equal(replay.preservationVerified,false);
+      const descriptor=JSON.parse(await readFile(path.join(dir,'out.backend-descriptor.json')));
+      assert.equal(artifactKey(descriptor.interfaceAdapterId),artifactKey(policy.identity));
+      const bundle=JSON.parse(await readFile(path.join(dir,'out.artifact-bundle.json')));
+      assert.deepEqual(bundle.executableArtifacts.map(item=>item.role),['canonical-scalar-binary']);
+      const envelope=JSON.parse(await readFile(path.join(dir,'out.evidence-envelope.json')));
+      for(const id of Object.values(receipt.wasmCanonical))
+        assert.ok(envelope.targetAdapters.some(actual=>artifactKey(actual)===artifactKey(id)));
+      assert.deepEqual(await readFile(path.join(dir,'out.wasm-export-selection.json')),policy.bytes);
+    }finally{
+      if(previousCli===undefined)delete process.env.PSC_TYPESCRIPT_CLI;else process.env.PSC_TYPESCRIPT_CLI=previousCli;
+      await rm(dir,{recursive:true,force:true});
+    }
+  });

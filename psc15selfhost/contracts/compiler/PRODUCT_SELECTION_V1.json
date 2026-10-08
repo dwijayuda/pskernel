@@ -27,7 +27,7 @@
   "limits": [
     "This host selection does not stop a selected portable staged producer from internally computing observation tables.",
     "This is not a hostile-JavaScript sandbox or a resource theorem.",
-    "Rust checked build routing, canonical Wasm export selection and broader named/dependent declaration types remain pending."
+    "Rust checked build routing, broader Canonical wrappers and broader named/dependent declaration types remain pending."
   ],
   "authority": "selection-does-not-create-or-expand-authority",
   "globalPreservationProved": false,
@@ -39,7 +39,7 @@
     "products": {
       "typescript": "metadata preserves the existing TS+tsc executable/declaration/source-map bundle; other product modes reject.",
       "javascript": "executable (default), metadata (all available metadata), declarations (required portable source declarations), source-map (required standalone map without declarations), or all (declarations and required map).",
-      "wasm": "executable (default) or metadata under the existing private wasm32 self-host ABI; canonical export routing remains separate."
+      "wasm": "executable (default) or metadata. Without --wasm-exports the existing private wasm32 self-host ABI is selected. With an explicit psc-wasm-canonical-selection/1 file, 32/64-bit source words and only its scalar exports are selected; interface/binding/policy products are required with the binary."
     },
     "representation": "--js-representation closed|uniform pins the live JavaScript profile before checking; other backends reject uniform.",
     "compiler": "An explicitly selected generated module must expose its selected staged API. The checked provider-specific default is retained; the CLI no longer injects an unrelated bootstrap compiler.",
@@ -52,6 +52,7 @@
       "Executable-only closed graphs check specialization correspondence without constructing a debug witness map."
     ],
     "publication": "The existing single graph output inventory drives staged writes and per-file publication; receipt is last. No directory-atomic transaction or cleanup of pre-existing unselected files is claimed.",
-    "nativeTransport": "Explicit psc-checked-seed-products/1 native transport supports direct JavaScript/wasm32 and selected products over one retained prepared source. Legacy TypeScript transport remains unchanged."
+    "nativeTransport": "Explicit psc-checked-seed-products/1 native transport supports direct JavaScript/wasm32 and selected products over one retained prepared source. Legacy TypeScript transport remains unchanged.",
+    "canonicalWasm": "Generated and native products/2 sessions pin exact policy before checking and require the selected portable staged API. Shared independent interface projection and actual target/binary signature checks precede common graph/descriptor/bundle/envelope publication."
   }
 }

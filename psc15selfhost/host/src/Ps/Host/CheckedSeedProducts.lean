@@ -5,6 +5,9 @@ import Lean.Data.Json
 -- Native host transport only. Commands describe products; acceptance authority
 -- remains the parent host's live selected-provider decision for this session.
 def psCheckedSeedProductsProtocol : String := "psc-checked-seed-products/1"
+def psCheckedSeedCanonicalProtocol : String := "psc-checked-seed-products/2"
+def psCheckedSeedProductsProtocolFor (canonical : Bool) : String :=
+  if canonical then psCheckedSeedCanonicalProtocol else psCheckedSeedProductsProtocol
 
 structure PsCheckedSeedProductsRequest where
   target : String
@@ -12,6 +15,7 @@ structure PsCheckedSeedProductsRequest where
   metadata : Bool
   declarations : Bool
   sourceMap : Bool
+  canonicalRequest : Option String := none
 
 def psCheckedSeedProductsDecode (text : String) : Except String PsCheckedSeedProductsRequest := do
   if text.utf8ByteSize > 4096 then throw "PSC2_CHECKED_SEED_PRODUCT_REQUEST_RESOURCE"
@@ -31,7 +35,27 @@ def psCheckedSeedProductsDecode (text : String) : Except String PsCheckedSeedPro
   if target != "javascript" &&
       (representation != "psc-js-closed-instances/1" || declarations || sourceMap) then
     throw "PSC2_CHECKED_SEED_PRODUCT_TARGET"
-  pure ⟨target, representation, metadata, declarations, sourceMap⟩
+  pure ⟨target, representation, metadata, declarations, sourceMap, none⟩
+
+-- Version 2 is explicit Canonical Wasm selection. Version 1 stays exact.
+def psCheckedSeedCanonicalDecode (text : String) : Except String PsCheckedSeedProductsRequest := do
+  if text.utf8ByteSize > 2101248 then throw "PSC2_CHECKED_SEED_PRODUCT_REQUEST_RESOURCE"
+  let json ← Lean.Json.parse text
+  let items ← json.getArr?
+  if items.size != 7 then throw "PSC2_CHECKED_SEED_PRODUCT_REQUEST_SCHEMA"
+  let tag ← items[0]!.getStr?
+  let target ← items[1]!.getStr?
+  let representation ← items[2]!.getStr?
+  let metadata ← items[3]!.getBool?
+  let declarations ← items[4]!.getBool?
+  let sourceMap ← items[5]!.getBool?
+  let wire ← items[6]!.getStr?
+  if tag != psCheckedSeedCanonicalProtocol || target != "wasm" ||
+      representation != "psc-js-closed-instances/1" || declarations || sourceMap then
+    throw "PSC2_CHECKED_SEED_CANONICAL_SELECTION"
+  let .ok _ := psWasmCanonicalDecodeRequest wire
+    | throw "PSC2_CHECKED_SEED_CANONICAL_REQUEST"
+  pure ⟨target, representation, metadata, false, false, some wire⟩
 
 def psCheckedSeedProductsAssertPrepared
     (prepared : PsCompilerAdmissionReadyModule) (admissions : String) : IO Unit := do
@@ -53,7 +77,7 @@ def psCheckedSeedProductsEmit
     (request : PsCheckedSeedProductsRequest) (prepared : PsCompilerAdmissionReadyModule)
     (origins : String) : IO (List (String × Lean.Json)) := do
   let common := [("phase", Lean.Json.str "emitted"),
-    ("protocol", Lean.Json.str psCheckedSeedProductsProtocol),
+    ("protocol", Lean.Json.str (psCheckedSeedProductsProtocolFor request.canonicalRequest.isSome)),
     ("target", Lean.Json.str request.target), ("representation", Lean.Json.str request.representation)]
   let metadata := request.metadata || request.sourceMap
   if request.target == "javascript" then
@@ -74,12 +98,23 @@ def psCheckedSeedProductsEmit
       ("jsIr", Lean.Json.str jsIr)] ++ products ++
       if metadata then [("generatedPositions", Lean.Json.str positions)] else [])
   else
-    let .ok output := psCompilerWasmStagesFromPrepared psCompilerWasm32Target prepared
-      | throw (IO.userError "PSC2_CHECKED_EMISSION_FAILED")
-    let products ← psCheckedSeedProductsMetadata request prepared origins output.erasureCorrespondence
-    pure (common ++ [("wasm", Lean.Json.arr (output.wasm.toArray.map fun byte => Lean.toJson byte.toNat)),
-      ("runtimeIr", Lean.Json.str output.runtimeIr), ("verifiedIr", Lean.Json.str output.verifiedIr),
-      ("specializedIr", Lean.Json.str output.specializedIr), ("wasmIr", Lean.Json.str output.wasmIr)] ++ products)
+    let (wasm, runtimeIr, verifiedIr, specializedIr, wasmIr, erasure, interfaceProducts) ←
+      match request.canonicalRequest with
+      | some wire => do
+          let .ok output := psCompilerWasmCanonicalStagesFromPrepared wire prepared
+            | throw (IO.userError "PSC2_CHECKED_CANONICAL_EMISSION_FAILED")
+          pure (output.wasm, output.runtimeIr, output.verifiedIr, output.specializedIr, output.wasmIr,
+            output.erasureCorrespondence,
+            [("interfaceJson", Lean.Json.str output.interfaceJson), ("bindingJson", Lean.Json.str output.bindingJson)])
+      | none => do
+          let .ok output := psCompilerWasmStagesFromPrepared psCompilerWasm32Target prepared
+            | throw (IO.userError "PSC2_CHECKED_EMISSION_FAILED")
+          pure (output.wasm, output.runtimeIr, output.verifiedIr, output.specializedIr, output.wasmIr,
+            output.erasureCorrespondence, [])
+    let products ← psCheckedSeedProductsMetadata request prepared origins erasure
+    pure (common ++ [("wasm", Lean.Json.arr (wasm.toArray.map fun byte => Lean.toJson byte.toNat)),
+      ("runtimeIr", Lean.Json.str runtimeIr), ("verifiedIr", Lean.Json.str verifiedIr),
+      ("specializedIr", Lean.Json.str specializedIr), ("wasmIr", Lean.Json.str wasmIr)] ++ products ++ interfaceProducts)
 
 def psCheckedSeedProductsReadLine : IO String := do
   let line ← (← IO.getStdin).getLine
@@ -89,20 +124,22 @@ def psCheckedSeedProductsReadLine : IO String := do
   pure (line.dropEnd 1).toString
 
 def psCheckedSeedProductsSession
-    (prepared : PsCompilerAdmissionReadyModule) (origins : String) : IO Unit := do
+    (prepared : PsCompilerAdmissionReadyModule) (origins : String) (canonical : Bool := false) : IO Unit := do
+  let protocol := psCheckedSeedProductsProtocolFor canonical
   let .ok admissions := psCompilerAdmissionsFromPrepared prepared
     | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
   let stdout ← IO.getStdout
   stdout.putStrLn (Lean.Json.mkObj [("phase", Lean.Json.str "prepared"),
-    ("protocol", Lean.Json.str psCheckedSeedProductsProtocol), ("admissions", Lean.Json.str admissions)]).compress
+    ("protocol", Lean.Json.str protocol), ("admissions", Lean.Json.str admissions)]).compress
   stdout.flush
   let command ← psCheckedSeedProductsReadLine
   if command == "checked" then
     stdout.putStrLn (Lean.Json.mkObj [("phase", Lean.Json.str "checked"),
-      ("protocol", Lean.Json.str psCheckedSeedProductsProtocol)]).compress
+      ("protocol", Lean.Json.str protocol)]).compress
     stdout.flush
     return
-  let .ok request := psCheckedSeedProductsDecode command
+  let decoded := if canonical then psCheckedSeedCanonicalDecode command else psCheckedSeedProductsDecode command
+  let .ok request := decoded
     | throw (IO.userError "PSC2_CHECKED_SEED_PRODUCT_REQUEST")
   psCheckedSeedProductsAssertPrepared prepared admissions
   let fields ← psCheckedSeedProductsEmit request prepared origins
@@ -124,6 +161,6 @@ def psCheckedSeedProductsSession
       | throw (IO.userError "PSC2_CHECKED_SEED_DECLARATION_FAILED")
     psCheckedSeedProductsAssertPrepared prepared admissions
     stdout.putStrLn (Lean.Json.mkObj [("phase", Lean.Json.str "declarations"),
-      ("protocol", Lean.Json.str psCheckedSeedProductsProtocol),
+      ("protocol", Lean.Json.str protocol),
       ("declarations", Lean.Json.str declarations)]).compress
     stdout.flush

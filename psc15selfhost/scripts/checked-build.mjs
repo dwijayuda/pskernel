@@ -1,4 +1,6 @@
-import { artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
+import { captureWasmCanonicalSelection, wasmCanonicalSelectionContract } from './wasm-canonical-artifact.mjs';
+import { readObservedFileBytes } from './observed-file-bytes.mjs';
+import { artifactId, artifactKey, canonicalArtifact } from './artifact-evidence.mjs';
 import { collectBuildOutputFiles } from './build-output-files.mjs';
 import { bindObservedBuildContext } from './observed-build-context.mjs';
 import { readFile, writeFile, mkdir, mkdtemp, rename, rm } from 'node:fs/promises';
@@ -73,6 +75,7 @@ export async function buildChecked({
   seedResourceLimits,
   archiveResourceLimits,
   jsAbiPolicyPath,
+  wasmCanonicalSelectionPath,
   backend,
   products,
   javaScriptRepresentation,
@@ -88,6 +91,7 @@ export async function buildChecked({
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
   if (jsAbiPolicyPath !== undefined && selected.backend === 'wasm') throw new Error('PSC2_CHECKED_JS_ABI_TARGET');
+  if (wasmCanonicalSelectionPath !== undefined && selected.backend !== 'wasm') throw new Error('PSC2_CHECKED_WASM_EXPORT_TARGET');
   const output = checkOnly ? undefined : path.resolve(outputPath);
   const extension = selected.backend === 'wasm' ? /\.wasm$/u : selected.backend === 'javascript' ? /\.js$/u : /\.(?:ts|js)$/u;
   if (output !== undefined && !extension.test(output)) throw new Error('PSC2_CHECKED_OUTPUT_KIND');
@@ -98,6 +102,13 @@ export async function buildChecked({
   ]);
   const languageAuthority = canonicalArtifact(JSON.parse(languageAuthorityValue), 'language-authority', 'psc-language-authority-snapshot/1');
   const backendRegistry = canonicalArtifact(JSON.parse(backendRegistryValue), 'backend-registry', 'psc-backend-registry/1');
+  let wasmCanonicalSelection;
+  if (wasmCanonicalSelectionPath !== undefined) {
+    const bytes = await readObservedFileBytes(path.resolve(wasmCanonicalSelectionPath), 1048576);
+    wasmCanonicalSelection = captureWasmCanonicalSelection({
+      bytes, identity: artifactId(bytes, 'abi-policy', wasmCanonicalSelectionContract),
+    }).selection;
+  }
   const snapshot = await readCheckedSourceSnapshot(entryPath, sourceResourceLimits);
   let admissions;
   let typeScript;
@@ -144,7 +155,8 @@ export async function buildChecked({
       emit: !checkOnly,
       resourceLimits: seedResourceLimits,
       productRequest: selected.backend === 'typescript' ? undefined : {
-        target: selected.backend, representation: selected.javaScriptRepresentation, ...selected.selection },
+        target: selected.backend, representation: selected.javaScriptRepresentation, ...selected.selection,
+        ...(wasmCanonicalSelection ? { wasmCanonicalSelection } : {}) },
       certificationContext: {
         provider: checkedKernelIdentity(kernel),
         providerSecurity: selectedProviderSecurity,
@@ -181,7 +193,7 @@ export async function buildChecked({
       admissions = text;
       return checkAdmissions(text);
     }, identity: checkedKernelIdentity(kernel), kernelContract: kernelContractV1, providerSecurity: selectedProviderSecurity,
-      targets: [selected.backend], javaScriptRepresentation: selected.javaScriptRepresentation });
+      targets: [selected.backend], javaScriptRepresentation: selected.javaScriptRepresentation, wasmCanonicalSelection });
     try {
       const handle = await session.checkSources(kind, snapshot.sources);
       pscvCertificate = session.certificate(handle);
@@ -276,7 +288,7 @@ export async function buildChecked({
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
       hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi,
       sourceOrigins: selected.selection.metadata || selected.selection.sourceMap ? snapshot.sourceOrigins : undefined,
-      declarationOrigins, erasureCorrespondence, generatedPositions,
+      declarationOrigins, erasureCorrespondence, generatedPositions, wasmCanonical: directEmission?.wasmCanonical,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     if (selected.selection.declarations) {
       for (const key of ['declarations', 'sourceSignatures', 'binding']) {
@@ -295,6 +307,15 @@ export async function buildChecked({
       } else if (!directEmission?.declarationLineage ||
           artifactKey(observed.declarationLineage.identity) !== artifactKey(directEmission.declarationLineage))
         throw new Error('PSC2_CHECKED_SOURCE_MAP_BUILD_BINDING');
+    }
+    if (wasmCanonicalSelection) {
+      for (const key of ['selection', 'interface', 'binding']) {
+        const live = directEmission?.wasmCanonical?.[key], recorded = observed.wasmCanonical?.[key];
+        if (!live || !recorded || artifactKey(live.identity) !== artifactKey(recorded.identity) ||
+            !Buffer.from(live.bytes).equals(recorded.bytes)) throw new Error('PSC2_CHECKED_WASM_BUILD_BINDING');
+      }
+      if (artifactKey(observed.wasmCanonical.selection.identity) !== artifactKey(wasmCanonicalSelection.identity))
+        throw new Error('PSC2_CHECKED_WASM_BUILD_BINDING');
     }
     const evidence = bindObservedBuildContext(observed, { languageAuthority, backendRegistry, backendId: selected.backend,
       javaScriptRepresentation: selected.javaScriptRepresentation });
@@ -321,6 +342,8 @@ export async function buildChecked({
       receipt.jsAbiPlan = evidence.jsAbi.plan.identity;
       receipt.jsAbiPolicy = evidence.jsAbi.policy.identity;
     }
+    if (evidence.wasmCanonical) receipt.wasmCanonical = Object.fromEntries(
+      Object.entries(evidence.wasmCanonical).map(([key, record]) => [key, record.identity]));
     receipt.typeScriptToolInputs = evidence.typeScriptToolInputs;
     receipt.providerInputs = evidence.providerInputs;
     const archive = packObservedBuildArchive(evidence, archiveLimits);
@@ -334,7 +357,8 @@ export async function buildChecked({
       buildGraph: evidence.identity,
       buildArchive: archive.identity,
       runtimeInterface: evidence.runtimeInterface,
-      targetAdapters: evidence.jsAbi ? [evidence.jsAbi.policy.identity, evidence.jsAbi.plan.identity] : [],
+      targetAdapters: evidence.jsAbi ? [evidence.jsAbi.policy.identity, evidence.jsAbi.plan.identity] :
+        evidence.wasmCanonical ? Object.values(evidence.wasmCanonical).map(record => record.identity) : [],
       providerInputs: evidence.providerInputs ?? [],
       typeScriptToolInputs: evidence.typeScriptToolInputs,
       sourceResources: snapshot.resourceObservation,
@@ -350,6 +374,7 @@ export async function buildChecked({
       { suffix: '.artifact-bundle.json', record: evidence.artifactBundle },
       { suffix: '.claim-set.json', record: evidence.claimSet },
       ...(evidence.jsAbi ? [{ suffix: '.abi-policy.json', record: evidence.jsAbi.policy }] : []),
+      ...(evidence.wasmCanonical ? [{ suffix: '.wasm-export-selection.json', record: evidence.wasmCanonical.selection }] : []),
     ]);
     for (const file of outputFiles) await writeFile(path.join(staging, stem + file.suffix), file.bytes);
     for (const file of outputFiles) {
@@ -378,15 +403,15 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       options.archiveResourceLimits ??= {};
       options.archiveResourceLimits[flag === '--archive-max-bytes' ? 'maxArchiveBytes' : 'maxTotalBytes'] = Number(value);
     }
-    else if (['--out', '--compiler', '--seed', '--kernel', '--dual-check', '--security-profile', '--js-abi-policy', '--backend', '--products', '--js-representation'].includes(flag)) {
+    else if (['--out', '--compiler', '--seed', '--kernel', '--dual-check', '--security-profile', '--js-abi-policy', '--wasm-exports', '--backend', '--products', '--js-representation'].includes(flag)) {
       const value = args.shift();
       if (!value || value.startsWith('--')) throw new Error(`Missing value for ${flag}`);
-      options[{ '--out': 'outputPath', '--compiler': 'compilerPath', '--seed': 'seedPath', '--kernel': 'kernel', '--dual-check': 'dualCheck', '--security-profile': 'securityProfile', '--js-abi-policy': 'jsAbiPolicyPath', '--backend': 'backend', '--products': 'products', '--js-representation': 'javaScriptRepresentation' }[flag]] =
+      options[{ '--out': 'outputPath', '--compiler': 'compilerPath', '--seed': 'seedPath', '--kernel': 'kernel', '--dual-check': 'dualCheck', '--security-profile': 'securityProfile', '--js-abi-policy': 'jsAbiPolicyPath', '--wasm-exports': 'wasmCanonicalSelectionPath', '--backend': 'backend', '--products': 'products', '--js-representation': 'javaScriptRepresentation' }[flag]] =
         flag === '--js-representation' ? ({ closed: closedJsRepresentationProfile, uniform: uniformJsRepresentationProfile }[value] ?? value) : value;
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json] [--backend typescript|javascript|wasm] [--products executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--archive-max-bytes n] [--archive-max-total-bytes n]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json] [--wasm-exports selection.json] [--backend typescript|javascript|wasm] [--products executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--archive-max-bytes n] [--archive-max-total-bytes n]');
   }
   const receipt = await buildChecked(options);
   console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));

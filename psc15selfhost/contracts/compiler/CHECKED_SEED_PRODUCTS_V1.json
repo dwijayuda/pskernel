@@ -43,11 +43,11 @@
   "products": "Public API/erasure fields are transmitted only for metadata or declaration requests; origin/generated-position fields only for metadata/map requests. The portable staged producer may still compute them internally.",
   "authority": "live-parent-check-and-live-native-prepared-session; serialized records are descriptive only",
   "remaining": [
-    "Canonical Wasm ABI selection",
     "Rust checked build routing",
     "Complete transcript/input closure and isolated authority broker",
     "Global preservation, portable execution closure and extensive assurance"
   ],
   "globalPreservationProved": false,
-  "releasePromotion": false
+  "releasePromotion": false,
+  "canonicalSuccessor": "psc-checked-seed-products/2 provides explicit Canonical selection; version 1 never silently changes its private Wasm ABI."
 }

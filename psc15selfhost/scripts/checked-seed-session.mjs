@@ -1,3 +1,4 @@
+import { captureWasmCanonicalSelection, createWasmCanonicalProducts } from './wasm-canonical-artifact.mjs';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -17,9 +18,11 @@ import { decodePublicApi } from './public-api-artifact.mjs';
 import { createPscvCertification } from './certified-source.mjs';
 
 export const checkedSeedProductsProtocol = 'psc-checked-seed-products/1';
+export const checkedSeedCanonicalProtocol = 'psc-checked-seed-products/2';
 
 function selectSeedProducts(value) {
   const names = ['declarations', 'metadata', 'representation', 'sourceMap', 'target'];
+  if (value && Object.hasOwn(value, 'wasmCanonicalSelection')) names.push('wasmCanonicalSelection');
   if (!value || typeof value !== 'object' || Array.isArray(value) ||
       Reflect.ownKeys(value).length !== names.length || Reflect.ownKeys(value).some(key => !names.includes(key)))
     throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
@@ -34,8 +37,15 @@ function selectSeedProducts(value) {
       ['metadata', 'declarations', 'sourceMap'].some(key => typeof fields[key] !== 'boolean') ||
       (fields.target !== 'javascript' && (fields.representation !== closedJsRepresentationProfile ||
         fields.declarations || fields.sourceMap))) throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
-  return Object.freeze({ ...fields, wire: JSON.stringify([checkedSeedProductsProtocol, fields.target,
-    fields.representation, fields.metadata, fields.declarations, fields.sourceMap]) });
+  const canonical = Object.hasOwn(fields, 'wasmCanonicalSelection');
+  if (canonical && fields.target !== 'wasm') throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
+  const wasmPolicy = canonical ? captureWasmCanonicalSelection(fields.wasmCanonicalSelection) : undefined;
+  delete fields.wasmCanonicalSelection;
+  const protocol = canonical ? checkedSeedCanonicalProtocol : checkedSeedProductsProtocol;
+  const wire = JSON.stringify([protocol, fields.target, fields.representation,
+    fields.metadata, fields.declarations, fields.sourceMap, ...(wasmPolicy ? [wasmPolicy.wire] : [])]);
+  if (Buffer.byteLength(wire) > (canonical ? 2101248 : 4096)) throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
+  return Object.freeze({ ...fields, protocol, wire, wasmPolicy });
 }
 
 function seedDirectProduct(completed, selected, limits, observation, sources) {
@@ -44,11 +54,11 @@ function seedDirectProduct(completed, selected, limits, observation, sources) {
   const outputKey = selected.target === 'javascript' ? 'javaScript' : 'wasm';
   const stageKeys = ['runtimeIr', 'verifiedIr', uniform ? 'uniformSpecializedIr' : 'specializedIr',
     selected.target === 'javascript' ? 'jsIr' : 'wasmIr'];
-  const textKeys = [...stageKeys, ...(api ? ['publicApi', 'erasureCorrespondence'] : []),
+  const textKeys = [...stageKeys, ...(selected.wasmPolicy ? ['interfaceJson', 'bindingJson'] : []), ...(api ? ['publicApi', 'erasureCorrespondence'] : []),
     ...(metadata ? ['declarationOrigins', ...(selected.target === 'javascript' ? ['generatedPositions'] : [])] : [])];
   const keys = ['phase', 'protocol', 'target', 'representation', outputKey, ...textKeys].sort();
   if (!completed || Object.keys(completed).sort().join(',') !== keys.join(',') ||
-      completed.phase !== 'emitted' || completed.protocol !== checkedSeedProductsProtocol ||
+      completed.phase !== 'emitted' || completed.protocol !== selected.protocol ||
       completed.target !== selected.target || completed.representation !== selected.representation ||
       textKeys.some(key => typeof completed[key] !== 'string'))
     throw new Error('PSC2_CHECKED_SEED_PRODUCT_RESULT');
@@ -76,6 +86,11 @@ function seedDirectProduct(completed, selected, limits, observation, sources) {
   }
   if (metadata) decodeDeclarationOrigins(Buffer.from(completed.declarationOrigins), {
     sources, publicApi: Buffer.from(completed.publicApi), ...bound });
+  const wasmCanonical = selected.wasmPolicy ? createWasmCanonicalProducts({
+    selection: selected.wasmPolicy.selection, specializedIr: ir.specializedIr, targetIr: target.wasmIr,
+    binary: { bytes: payload, identity: artifactId(payload, 'wasm-binary', 'webassembly-core/1') },
+    interfaceJson: completed.interfaceJson, bindingJson: completed.bindingJson,
+  }, bound) : undefined;
   let directDeclarations, declarationRequest;
   if (selected.declarations) {
     const record = (text, domain, contract) => {
@@ -94,11 +109,12 @@ function seedDirectProduct(completed, selected, limits, observation, sources) {
       bindings: JSON.parse(directDeclarations.binding.bytes).bindings });
   }
   return { product: Object.freeze({ target: selected.target, payload, stages,
-    protocol: checkedSeedProductsProtocol, ...(selected.target === 'javascript' ? { javaScriptRepresentation: selected.representation } : {}),
+    protocol: selected.protocol, ...(selected.target === 'javascript' ? { javaScriptRepresentation: selected.representation } : {}),
     ...(api ? { publicApi: completed.publicApi, erasureCorrespondence: completed.erasureCorrespondence } : {}),
     ...(metadata ? { declarationOrigins: completed.declarationOrigins,
       ...(selected.target === 'javascript' ? { generatedPositions: completed.generatedPositions } : {}) } : {}),
     ...(directDeclarations ? { directDeclarations } : {}),
+    ...(wasmCanonical ? { wasmCanonical } : {}),
   }), declarationRequest };
 }
 
@@ -152,7 +168,7 @@ export async function runCheckedSeedSession({
   const stderr = [];
   try {
     await writeFile(sourceFile, snapshot, 'utf8');
-    child = spawn(path.resolve(binaryPath), [`--session-${selected ? 'products-' : ''}${sources === undefined ? '' : 'modules-'}${sourceKind}`, sourceFile], {
+    child = spawn(path.resolve(binaryPath), [`--session-${selected ? (selected.wasmPolicy ? 'products-v2-' : 'products-') : ''}${sources === undefined ? '' : 'modules-'}${sourceKind}`, sourceFile], {
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });
@@ -189,7 +205,7 @@ export async function runCheckedSeedSession({
       throw new Error('PSC2_CHECKED_SEED_SESSION_PREPARED_RESULT');
     }
 
-    if (selected && (prepared.protocol !== checkedSeedProductsProtocol ||
+    if (selected && (prepared.protocol !== selected.protocol ||
         Object.keys(prepared).sort().join(',') !== 'admissions,phase,protocol'))
       throw new Error('PSC2_CHECKED_SEED_PRODUCT_PROTOCOL');
 
@@ -232,7 +248,7 @@ export async function runCheckedSeedSession({
         child.stdin.end(captured.declarationRequest + '\n');
         const written = await nextFrame('declarations');
         if (!written || Object.keys(written).sort().join(',') !== 'declarations,phase,protocol' ||
-            written.phase !== 'declarations' || written.protocol !== checkedSeedProductsProtocol ||
+            written.phase !== 'declarations' || written.protocol !== selected.protocol ||
             typeof written.declarations !== 'string') throw new Error('PSC2_CHECKED_SEED_DECLARATION_RESULT');
         const writerBytes = Buffer.byteLength(written.declarations);
         if (writerBytes > Math.min(limits.generatedBytes, 67108864))
@@ -273,7 +289,7 @@ export async function runCheckedSeedSession({
         { sources: inputSources, publicApi: Buffer.from(completed.publicApi), maxBytes: limits.generatedBytes });
       if (completed.publicApi !== undefined) decodePublicApi(Buffer.from(completed.publicApi), { maxBytes: limits.generatedBytes });
     } else if (completed?.phase !== 'checked' || (selected &&
-        (completed.protocol !== checkedSeedProductsProtocol || Object.keys(completed).sort().join(',') !== 'phase,protocol'))) {
+        (completed.protocol !== selected.protocol || Object.keys(completed).sort().join(',') !== 'phase,protocol'))) {
       throw new Error('PSC2_CHECKED_SEED_SESSION_CHECK_RESULT');
     }
 
@@ -284,7 +300,7 @@ export async function runCheckedSeedSession({
     }
     return Object.freeze({
       admissions: prepared.admissions,
-      ...(selected ? { productProtocol: checkedSeedProductsProtocol } : {}),
+      ...(selected ? { productProtocol: selected.protocol } : {}),
       resourceObservation: Object.freeze({ contract: 'psc-checked-seed-resources/1',
         limits: Object.freeze({ ...limits, phaseTimeMs: timeoutMs }), observed: Object.freeze({ ...observation }),
         unobserved: Object.freeze(['compiler-internal-work', 'cpu-time', 'peak-memory', 'descendants', 'host-stack']) }),

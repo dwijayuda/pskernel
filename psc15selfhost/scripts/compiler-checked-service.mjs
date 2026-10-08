@@ -1,3 +1,4 @@
+import { captureWasmCanonicalSelection, createWasmCanonicalProducts } from './wasm-canonical-artifact.mjs';
 import { createHash } from 'node:crypto';
 import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
@@ -35,13 +36,14 @@ function byteList(value, limit) {
 /** Host composition root. A receipt can describe a capability but cannot mint one. */
 export function createCheckedCompilerService({
   compiler, checkAdmissions, identity, providerSecurity, kernelContract = kernelContractV1,
-  javaScriptRepresentation = closedJsRepresentationProfile,
+  javaScriptRepresentation = closedJsRepresentationProfile, wasmCanonicalSelection,
   targets = ['typescript'], assumptionPolicy = 'kernel-contract-default',
   resourcePolicy = 'checked-host-output/1', maxOutputBytes = 256 * 1024 * 1024,
 }) {
   if (!Number.isSafeInteger(maxOutputBytes) || maxOutputBytes < 0) throw new Error('PSC_CHECKED_OUTPUT_BUDGET');
+  const wasmPolicy = wasmCanonicalSelection === undefined ? undefined : captureWasmCanonicalSelection(wasmCanonicalSelection);
   const session = createKernelCheckedSession(compiler, checkAdmissions, identity, kernelContract, providerSecurity,
-    { targets, assumptionPolicy, resourcePolicy, javaScriptRepresentation });
+    { targets, assumptionPolicy, resourcePolicy, javaScriptRepresentation, wasmCanonicalRequest: wasmPolicy?.wire });
   const certified = createCertifiedSourceSession(session);
   const declarationProfile = javaScriptRepresentation === uniformJsRepresentationProfile ?
     directJsUniformDeclarationProfile : directJsDeclarationProfile;
@@ -96,7 +98,8 @@ export function createCheckedCompilerService({
     const payload = target === 'wasm' ? byteList(raw, maxOutputBytes) : raw;
     const bytes = typeof payload === 'string' ? Buffer.from(payload, 'utf8') : payload;
     if (bytes.byteLength > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
-    const productByteLength = bytes.byteLength + Buffer.byteLength(emission.generatedPositions ?? '') + Buffer.byteLength(emission.erasureCorrespondence ?? '') + (api?.record.bytes.byteLength ?? 0) +
+    const productByteLength = bytes.byteLength + Buffer.byteLength(emission.wasmCanonical?.interfaceJson ?? '') +
+        Buffer.byteLength(emission.wasmCanonical?.bindingJson ?? '') + (target === 'wasm' ? wasmPolicy?.selection.bytes.byteLength ?? 0 : 0) + Buffer.byteLength(emission.generatedPositions ?? '') + Buffer.byteLength(emission.erasureCorrespondence ?? '') + (api?.record.bytes.byteLength ?? 0) +
         (origins ? origins.graph.bytes.byteLength + Buffer.byteLength(origins.table) : 0) +
         Object.values(emission.stages ?? {}).reduce((sum, value) => sum + Buffer.byteLength(value), 0);
     if (productByteLength > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
@@ -124,6 +127,11 @@ export function createCheckedCompilerService({
       createSpecializationInstanceMap(stages.verifiedIr, stages.specializedIr, { maxBytes: maxOutputBytes }) : undefined;
     const specialization = specializationProduct?.result ?? (stages?.specializedIr ?
       verifySpecializationCorrespondence(stages.verifiedIr, stages.specializedIr, { maxBytes: maxOutputBytes }) : undefined);
+    const wasmCanonical = target === 'wasm' && wasmPolicy ? createWasmCanonicalProducts({
+      selection: wasmPolicy.selection, specializedIr: stages.specializedIr, targetIr: targetStages.wasmIr,
+      binary: { bytes, identity: artifactId(bytes, 'wasm-binary', 'webassembly-core/1') },
+      interfaceJson: emission.wasmCanonical?.interfaceJson, bindingJson: emission.wasmCanonical?.bindingJson,
+    }, { maxBytes: maxOutputBytes }) : undefined;
     let generatedPositionMap, generatedPositionProduct;
     if (emission.generatedPositions !== undefined) {
       if (target !== 'javascript' || !targetStages?.jsIr) throw new Error('PSC_CHECKED_GENERATED_POSITION_SUBJECT');
@@ -176,6 +184,7 @@ export function createCheckedCompilerService({
       pscvCert: certificate.identity,
       certifiedSource,
       ...(target === 'javascript' ? { javaScriptRepresentation } : {}),
+      ...(wasmCanonical ? { wasmCanonical } : {}),
       ...(uniformCorrespondence ? { uniformSpecializationCorrespondence: uniformCorrespondence } : {}),
       ...(specialization ? { specializationCorrespondence: specialization } : {}),
       ...(specializationProduct ? { specializationInstances: specializationProduct.map.identity } : {}),

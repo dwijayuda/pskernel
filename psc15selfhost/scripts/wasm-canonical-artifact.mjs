@@ -59,6 +59,39 @@ export function createPortableWasmCanonicalRequest(selectionArtifact){
   return wire;
 }
 
+/** Snapshot a host-selected policy once; never retain caller-mutable bytes. */
+export function captureWasmCanonicalSelection(input){
+  if(!input||typeof input!=='object')fail('SELECTION_RESOURCE');
+  const data=Object.getOwnPropertyDescriptor(input,'bytes'),id=Object.getOwnPropertyDescriptor(input,'identity');
+  if(!data||!id||!Object.hasOwn(data,'value')||!Object.hasOwn(id,'value')||
+      !(data.value instanceof Uint8Array)||data.value.byteLength>1048576)fail('SELECTION_RESOURCE');
+  const identity={},fields=['algorithm','schemaVersion','domain','contract','byteLength','digest'];
+  if(!id.value||typeof id.value!=='object'||Reflect.ownKeys(id.value).length!==fields.length||
+      Reflect.ownKeys(id.value).some(key=>!fields.includes(key)))fail('ARTIFACT');
+  for(const key of fields){
+    const field=Object.getOwnPropertyDescriptor(id.value,key);
+    if(!field||!Object.hasOwn(field,'value'))fail('ARTIFACT');
+    identity[key]=field.value;
+  }
+  const selection={bytes:Buffer.from(data.value),identity:Object.freeze(identity)};
+  return Object.freeze({selection,wire:createPortableWasmCanonicalRequest(selection)});
+}
+
+/** Both live generated and native transports check the same exact products. */
+export function createWasmCanonicalProducts({selection,specializedIr,targetIr,binary,interfaceJson,bindingJson},limits={}){
+  const maxBytes=limits.maxBytes??256*1024*1024;
+  if(!Number.isSafeInteger(maxBytes)||maxBytes<0)fail('RESOURCE_POLICY');
+  if(typeof interfaceJson!=='string'||typeof bindingJson!=='string'||
+      Buffer.byteLength(interfaceJson)+Buffer.byteLength(bindingJson)>maxBytes)fail('PRODUCT_RESOURCE');
+  const interfaceArtifact=artifact(Buffer.from(interfaceJson),'interface-ir',interfaceIrEncodingContract);
+  const binding=artifact(Buffer.from(bindingJson),'abi-plan',wasmCanonicalBindingContract);
+  const subject={selection,specializedIr,targetIr,binary,interfaceArtifact,binding};
+  verifyWasmCanonicalProjection(subject,limits);
+  const validation=verifyWasmCanonicalBinary(subject);
+  return Object.freeze({selection:{bytes:Buffer.from(selection.bytes),identity:Object.freeze({...selection.identity})},
+    interface:interfaceArtifact,binding,validation});
+}
+
 const fixed=Object.freeze({
   uint8:'u8',uint16:'u16',uint32:'u32',uint64:'u64',int8:'s8',int16:'s16',int32:'s32',int64:'s64',
   float:'f64',float32:'f32',bool:'bool',char:'char',

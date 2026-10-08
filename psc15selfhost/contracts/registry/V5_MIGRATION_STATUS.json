@@ -391,7 +391,7 @@
       ],
       "inheritedImplementationStatus": "partial",
       "assurance": "pending",
-      "disposition": "Keep InterfaceIR/WIT/Canonical ABI separate from PublicApiIR. Scalar export producer, bounded portable request, actual prepared-source driver and closed host adapter exist. Live checked routing, profile descriptors, broader adapters and independent WIT evidence remain pending."
+      "disposition": "Keep InterfaceIR/WIT/Canonical ABI separate from PublicApiIR. Scalar producer, bounded portable request, actual prepared-source driver and closed host adapter are connected through live generated/native checked selection and graph/descriptor/bundle/envelope publication. Cloud integration validation, broad adapters and independent WIT evidence remain pending."
     },
     {
       "id": "logical-interop",
@@ -1070,7 +1070,7 @@
       "backendKind": "directTargetIR",
       "role": "Core Wasm; private self-host ABI and Canonical ABI remain distinct",
       "descriptorStatus": "implemented",
-      "bundleStatus": "generated-and-native-private-wasm32-build-routing-implemented-canonical-routing-pending",
+      "bundleStatus": "generated-native-private-and-selected-canonical-build-routing-implemented-cloud-validation-pending",
       "preservation": "not-established-globally"
     },
     {
@@ -1125,7 +1125,7 @@
       "classifications": [
         "artifact-bundle"
       ],
-      "status": "typescript-and-generated-native-direct-js-wasm-routing-implemented-cloud-validation-and-rust-routing-pending",
+      "status": "typescript-generated-native-direct-js-private-canonical-wasm-routing-implemented-cloud-validation-and-rust-routing-pending",
       "requirement": "Common typed independently identified executable/public/debug/interface/toolchain/evidence products."
     },
     {
@@ -1638,6 +1638,13 @@
       "status": "experimental",
       "canonicalPath": "contracts/interface/WASM_CANONICAL_SCALAR_EXPORTS_V1.json",
       "classification": "interface-ir-interop"
+    },
+    {
+      "id": "psc-checked-seed-products/2",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V2.json",
+      "classification": "artifact-bundle"
     }
   ]
 }

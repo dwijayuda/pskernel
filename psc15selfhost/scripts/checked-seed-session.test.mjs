@@ -84,3 +84,17 @@ test('direct seed selection is copied as data and rejects unknown target/profile
     await assert.rejects(runCheckedSeedSession({ binaryPath: 'missing-binary', sourceKind: 'lean', source: '',
       emit: true, productRequest, checkAdmissions: () => { throw new Error('MUST_NOT_CHECK'); } }), /PRODUCT_SELECTION/);
 });
+
+test('Canonical native selection rejects wrong targets, missing artifacts and policy accessors before spawning',async()=>{
+  const good={target:'wasm',representation:'psc-js-closed-instances/1',metadata:false,declarations:false,sourceMap:false};
+  let accessed=false;
+  const accessor=Object.defineProperty({...good},'wasmCanonicalSelection',{enumerable:true,
+    get(){accessed=true;throw new Error('GETTER_MUST_NOT_RUN');}});
+  for(const productRequest of [{...good,wasmCanonicalSelection:null},
+    {...good,target:'javascript',wasmCanonicalSelection:{}},accessor]){
+    await assert.rejects(runCheckedSeedSession({binaryPath:'missing-binary',sourceKind:'lean',source:'',
+      emit:true,productRequest,checkAdmissions:()=>{throw new Error('MUST_NOT_CHECK');}}),
+      /PRODUCT_SELECTION|SELECTION_RESOURCE/);
+  }
+  assert.equal(accessed,false);
+});

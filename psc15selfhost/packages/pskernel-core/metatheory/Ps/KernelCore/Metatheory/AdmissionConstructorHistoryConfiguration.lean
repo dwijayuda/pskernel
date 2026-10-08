@@ -199,9 +199,11 @@ theorem psKernelAddSimpleConstructorsWithFuel_checked_header_history
                                             levels params numIndices headerSession
                                             nextWork (Nat.succ index) rest with
                                       | error error =>
+                                          simp only [nextWork, ctorInfo] at hTail
                                           simp only [hTail] at hRun
                                           cases hRun
                                       | ok tailResult =>
+                                          simp only [nextWork, ctorInfo] at hTail
                                           simp only [hTail] at hRun
                                           have hRest :
                                               PsKernelCheckedConstructorHeaderHistory

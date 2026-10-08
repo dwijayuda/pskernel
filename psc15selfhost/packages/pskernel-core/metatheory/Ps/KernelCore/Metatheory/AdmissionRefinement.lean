@@ -71,7 +71,7 @@ theorem psKernelEnvironmentAdd_success_refines_validated_extension
         cases hLookup :
             psKernelEnvironmentFind environment name with
         | none =>
-            exact hLookup
+            rfl
         | some declaration =>
             simp [hLookup] at hContains
       have hCanonicalNone :
@@ -95,4 +95,4 @@ theorem psKernelEnvironmentAdd_success_refines_validated_extension
             hContains, hDuplicates
           ] at hSuccess
       | false =>
-          exact ⟨hExtension, hCanonicalNone, hDuplicates⟩
+          exact ⟨hExtension, hCanonicalNone, rfl⟩

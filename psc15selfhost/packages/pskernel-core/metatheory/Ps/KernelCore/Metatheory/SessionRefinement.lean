@@ -240,3 +240,31 @@ theorem psKernelSessionInfer_success_preserves_context_core
           simp [hRun] at hSuccess
           rcases hSuccess with ⟨rfl, rfl⟩
           rfl
+
+
+/-
+A successful DefEq session call may update its checker state, but it cannot
+replace the session's environment, local context, or resource policy.
+Keeping this boundary explicit allows recursive constructor-parameter
+validation to transport DefEq semantics through successive session states.
+-/
+theorem psKernelSessionIsDefEq_success_preserves_context_core
+    (fuel : Nat)
+    (session nextSession : PsKernelCheckerSession)
+    (left right : PsKernelExpr)
+    (value : Bool)
+    (hSuccess :
+      psKernelSessionIsDefEq fuel session left right =
+        Except.ok (Prod.mk value nextSession)) :
+    nextSession.context = session.context := by
+  unfold psKernelSessionIsDefEq at hSuccess
+  cases hRun :
+      psKernelIsDefEq
+        fuel session.context session.state left right with
+  | error error =>
+      simp [hRun] at hSuccess
+  | ok compared =>
+      rcases compared with ⟨isEqual, nextState⟩
+      simp [hRun] at hSuccess
+      rcases hSuccess with ⟨rfl, rfl⟩
+      rfl

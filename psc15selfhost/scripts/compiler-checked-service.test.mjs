@@ -662,3 +662,29 @@ test('Canonical checked service has no private fallback and rejects mismatched p
   const boundedHandle=await bounded.service.check('lean','source');
   assert.throws(()=>bounded.service.emitExecutableArtifact(boundedHandle,'wasm'),/OUTPUT_RESOURCE_EXHAUSTED/);
 });
+
+test('Rust stages retain the exact generic validation input without claiming specialization or rustc acceptance', async () => {
+  const { service, compiler, emitted } = fixture();
+  const source = 'pub fn answer() -> u32 { 42 }';
+  let observed;
+  compiler.psCompilerRustStagesFromPrepared = prepared => {
+    observed = prepared; return ok({ rustSource: source, runtimeIr: emptyIr, verifiedIr: emptyIr });
+  };
+  const handle = await service.check('lean', 'actual input of this transport fixture');
+  const product = service.emitSelectedArtifact(handle, 'rust');
+  assert.equal(product.payload, source);
+  assert.equal(product.requestedProducts, 'target-source-only');
+  assert.ok(Object.isFrozen(observed));
+  assert.equal(emitted.length, 0);
+  assert.deepEqual(Object.keys(product.stages), ['runtimeIr', 'verifiedIr']);
+  assert.equal(product.specializationCorrespondence, undefined);
+  compiler.psCompilerRustStagesFromPrepared = () => ok({ rustSource: source, runtimeIr: emptyIr });
+  assert.throws(() => service.emitSelectedArtifact(handle, 'rust'), /STAGES_SHAPE/);
+  compiler.psCompilerRustStagesFromPrepared = () => ({ $ps$tag: 'error' });
+  assert.throws(() => service.emitSelectedArtifact(handle, 'rust'), /EMIT_STAGES_FAILED/);
+  compiler.psCompilerRustStagesFromPrepared = () => {
+    service.close(); return ok({ rustSource: source, runtimeIr: emptyIr, verifiedIr: emptyIr });
+  };
+  assert.throws(() => service.emitSelectedArtifact(handle, 'rust'), /SESSION_CLOSED/);
+  assert.equal(emitted.length, 0);
+});

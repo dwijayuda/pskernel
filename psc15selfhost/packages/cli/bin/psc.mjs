@@ -31,7 +31,7 @@ function usage() {
     "",
     "usage:",
     "  psc bootstrap",
-    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts|output.wasm> [--backend typescript|javascript|wasm] [--products executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--wasm-exports <selection.json>] [--compiler <compiler.js> | --seed <binary>] [--kernel <provider>] [--security-profile <profile>] [--archive-max-bytes <n>] [--archive-max-total-bytes <n>]",
+    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts|output.wasm|output.rs> [--backend typescript|javascript|wasm|rust] [--products source|executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--wasm-exports <selection.json>] [--compiler <compiler.js> | --seed <binary>] [--kernel <provider>] [--security-profile <profile>] [--archive-max-bytes <n>] [--archive-max-total-bytes <n>]",
     "  psc build-unchecked <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]  # bootstrap/internal",
     "  psc translate <input.lean|input.ps> --to <lean|ps> [--out <output>] [--compiler <compiler.js>]",
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",

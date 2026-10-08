@@ -409,3 +409,42 @@ test('portable source projection rejects ambiguous, dependent, higher-rank and e
 test('portable declaration writer rejects invalid bindings and enforces exact resource bounds', () => {
   assert.match(emitted('--declaration-writer-errors').toString('utf8'), /PSCV_PORTABLE_DECLARATIONS: PASS/);
 });
+
+test('actual generic Rust source binds observed validation/emission edges in the common bundle', async () => {
+  const staged = JSON.parse(emitted('--rust-stages'));
+  decodeErasureDeclarations(Buffer.from(staged.erasureCorrespondence),
+    { publicApi: Buffer.from(staged.publicApi), runtimeIr: Buffer.from(staged.runtimeIr) });
+  const snapshots = checkedIrStageArtifacts(staged);
+  assert.deepEqual(snapshots.runtimeIr.bytes, snapshots.verifiedIr.bytes);
+  assert.ok(decodeIrArtifact(snapshots.verifiedIr.bytes)[4].some(decl => decl[0] === 'identity' && decl[1].length === 1));
+  assert.match(staged.rustSource, /pub fn identity/);
+  const inputs = { sourceKind: 'lean', sources: ['actual native fixture; synthetic source acceptance and implementation metadata'],
+    admissions: '{"admissions":[],"format":"proofscript-checked-admissions","version":2}',
+    rustSource: staged.rustSource, irStages: staged, compilerBytes: Buffer.from('fixture compiler provenance'),
+    compilerKind: 'fixture', provider: { profile: 'fixture' }, providerSecurity: { profile: 'fixture' },
+    kernelContract: { id: 'fixture' }, hostSources: [], runtime: { implementation: 'fixture' } };
+  const observed = createCheckedBuildGraph(inputs);
+  const backendRegistry = canonicalArtifact(JSON.parse(await readFile(new URL('../contracts/backends/BACKEND_REGISTRY_V1.json', import.meta.url))),
+    'backend-registry', 'psc-backend-registry/1');
+  const languageAuthority = canonicalArtifact({ languageEdition: 'fixture' }, 'language-authority', 'psc-language-authority-snapshot/1');
+  const built = bindObservedBuildContext(observed, { backendRegistry, languageAuthority, backendId: 'rust' });
+  const definitions = built.graph.entries.filter(entry => entry.identity.domain === 'pass-definition').map(entry => entry.canonicalValue);
+  assert.deepEqual(definitions.map(item => item.passId), ['psc-prepare-and-check/1', 'psc-erase-checked-core/1',
+    'psc-validate-runtime-ir/1', 'psc-project-runtime-interface/1', 'psc-verified-ir-to-rust/1']);
+  assert.equal(built.executableArtifact.contract, 'psc-rust-source/2021');
+  assert.equal(JSON.parse(built.backendDescriptor.bytes).externalToolchainId, null);
+  const bundle = JSON.parse(built.artifactBundle.bytes);
+  assert.deepEqual(bundle.executableArtifacts.map(item => item.role), ['target-source']);
+  assert.equal(bundle.targetToolchainArtifacts.length, 0);
+  assert.ok(!built.graph.entries.some(entry => ['specialized-ir', 'native-output', 'rust-ir'].includes(entry.identity.domain)));
+  const archive = packObservedBuildArchive(built);
+  const replay = await verifyObservedBuildArchive(archive.bytes, { expectedGraphId: built.identity,
+    allowedAssumptions: [...new Set(definitions.flatMap(item => item.assumptionIds))] });
+  assert.equal(replay.kind, 'accepted', replay.reason);
+  assert.equal(replay.semanticClaimsVerified, false); assert.equal(replay.preservationVerified, false);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, irStages: undefined }), /RUST_STAGES_REQUIRED/);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, directWasm: new Uint8Array() }), /MIXED_BACKEND_PATHS/);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, typeScript: '' }), /MIXED_BACKEND_PATHS/);
+  assert.throws(() => createCheckedBuildGraph({ ...inputs, irStages: { ...staged, specializedIr: staged.verifiedIr } }),
+    /RUST_UNSELECTED_STAGES/);
+});

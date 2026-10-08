@@ -177,7 +177,7 @@ export function createCheckedCompilerService({
       throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
-      requestedProducts: declarationsRequested ? (includeMetadata ? 'executable-source-declarations-and-metadata' : 'executable-and-source-declarations') : includeMetadata ? 'executable-and-available-metadata' : 'executable-only',
+      requestedProducts: target === 'rust' ? (includeMetadata ? 'target-source-and-available-metadata' : 'target-source-only') : declarationsRequested ? (includeMetadata ? 'executable-source-declarations-and-metadata' : 'executable-and-source-declarations') : includeMetadata ? 'executable-and-available-metadata' : 'executable-only',
       artifact: Object.freeze({ algorithm: 'sha256', domain: 'target-bytes', schemaVersion: 1,
         digest: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength }),
       checkedCore: capability,

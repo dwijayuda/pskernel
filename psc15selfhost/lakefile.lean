@@ -158,7 +158,7 @@ lean_lib PsBackendRust where
 
 lean_lib PsDriverRust where
   srcDir := "packages/driver-rust/src"
-  roots := #[`Ps.DriverRust.Compiler, `Ps.DriverRust.Bootstrap]
+  roots := #[`Ps.DriverRust.Compiler, `Ps.DriverRust.Bootstrap, `Ps.DriverRust.Stages]
 
 lean_lib PsBackendWasm where
   srcDir := "packages/backend-wasm/src"

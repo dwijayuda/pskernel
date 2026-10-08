@@ -470,3 +470,30 @@ Performance regressions become observable without changing semantic code.
 6. module interface identity, not implementation timestamp, drives downstream invalidation.
 7. persistent artifact formats are canonical and versioned.
 8. resident runtime-object caches are optimization only and remain disposable.
+
+## 20. Observed Rust source route
+
+The checked builder accepts `--backend rust --products source --out module.rs`
+(or `metadata`) with a generated compiler exposing
+`psCompilerRustStagesFromPrepared`. One prepared source supplies the actual
+erasure, strict validation and source-emission snapshots. The existing Rust
+source backend preserves generic RuntimeIR; moving to SpecializedIR is an
+explicit migration obligation, not an invented pass in this graph.
+
+The source product uses `rust-source / psc-rust-source/2021`. Its descriptor,
+bundle, action/query identities, archive and evidence envelope follow the common
+publication path. The inherited bundle group `executableArtifacts` includes
+the `target-source` role, so its name does not mean that Rust was compiled.
+Only source bytes are published; compiler acceptance, native binary output,
+hermeticity and global preservation are not established. Native seed Rust
+emission currently rejects explicitly. Existing bootstrap Cargo tests remain
+separate observations.
+
+The subsequent native-toolchain step must bind source, Cargo manifest and lock,
+exact toolchain/target, dependencies, flags and observed environment. Cargo's
+[`--locked`, `--offline`, and `--frozen`](https://doc.rust-lang.org/cargo/commands/cargo-build.html)
+have distinct meanings: a lock prevents resolution changes; offline prohibits
+network but can change available resolution; frozen combines both. None alone
+proves a complete isolated input closure. A pinned version or successful
+[`rustc` invocation](https://doc.rust-lang.org/rustc/command-line-arguments.html)
+does not prove ProofScript semantic preservation.

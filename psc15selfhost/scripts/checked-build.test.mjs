@@ -314,10 +314,12 @@ for (const kind of ['lean','ps']) test(`actual ${kind} closed record passes owne
 
 test('build target and product combinations reject before source loading', async () => {
   assert.equal(selectCheckedBuildProducts().backend, 'typescript');
+  assert.equal(selectCheckedBuildProducts({ backend: 'rust' }).products, 'source');
   assert.equal(selectCheckedBuildProducts().products, 'metadata');
   assert.equal(selectCheckedBuildProducts({ backend: 'javascript' }).products, 'executable');
   for (const options of [
-    { backend: 'unknown' }, { backend: 'javascript', products: 'unknown' },
+    { backend: 'rust', products: 'executable' }, { backend: 'rust', products: 'all' },
+    { backend: 'javascript', products: 'source' }, { backend: 'unknown' }, { backend: 'javascript', products: 'unknown' },
     { backend: 'typescript', products: 'all' }, { backend: 'wasm', products: 'declarations' },
     { backend: 'wasm', javaScriptRepresentation: uniformJsRepresentationProfile },
     { backend: 'javascript', javaScriptRepresentation: 'unknown' },
@@ -360,6 +362,8 @@ function buildRoutingCompiler({ uniform, executableOnly, malformed = false }) {
     "export const " + (uniform ? "psCompilerUniformJavaScriptStagesFromPrepared" : "psCompilerJavaScriptStagesFromPrepared") + " = js;",
     "export const psCompilerJavaScriptDeclarationsFromPrepared = () => { declarations++; return ok(" +
       JSON.stringify('export {};\n') + "); };",
+    "export const psCompilerRustStagesFromPrepared = () => { emissions++; return ok({ rustSource: 'pub fn answer() -> u32 { 42 }', runtimeIr: ir, verifiedIr: ir, erasureCorrespondence: " +
+      JSON.stringify('["psc-erasure-declarations/1","declaration-inventory",[]]') + " }); };",
     "export const psCompilerWasm32Target = { wordSize: 'wasm32' };",
     "export const psCompilerWasmStagesFromPrepared = () => { emissions++; return ok({ runtimeIr: ir, verifiedIr: ir, specializedIr: ir, wasmIr: " +
       JSON.stringify('["psc-wasm-ir-json/1",[],[],[],[],[],[]]') +
@@ -539,3 +543,43 @@ for(const wordBits of [32,64])test('actual native Canonical Wasm '+wordBits+' se
       await rm(dir,{recursive:true,force:true});
     }
   });
+
+for (const products of ['source', 'metadata']) test('checked Rust ' + products + ' publishes source and shared evidence without invoking a target compiler',
+  { skip: !native }, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'psc-rust-source-routing-'));
+    const oldCli = process.env.PSC_TYPESCRIPT_CLI;
+    try {
+      process.env.PSC_TYPESCRIPT_CLI = path.join(dir, 'typescript-must-not-be-loaded');
+      const entryPath = path.join(dir, 'Empty.lean'), compilerPath = path.join(dir, 'fixture.mjs'), outputPath = path.join(dir, 'out.rs');
+      await writeFile(entryPath, '-- empty admissions; transport fixture only\n');
+      await writeFile(compilerPath, buildRoutingCompiler({ executableOnly: products === 'source' }));
+      const receipt = await buildChecked({ entryPath, compilerPath, outputPath, backend: 'rust', products, kernel: 'lean434' });
+      assert.equal(await readFile(outputPath, 'utf8'), 'pub fn answer() -> u32 { 42 }');
+      assert.equal(receipt.rustTarget.compilerInvoked, false); assert.equal(receipt.rustTarget.nativeBinaryProduced, false);
+      assert.equal(receipt.typeScriptSha256, undefined);
+      assert.deepEqual((await import(pathToFileURL(compilerPath).href)).counts(), { preparations: 1, emissions: 1, declarations: 0 });
+      const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json')));
+      assertPasses(graph, ['psc-verified-ir-to-rust/1', 'psc-validate-runtime-ir/1']);
+      assert.equal(passIds(graph).includes('typescript-to-es2022/1'), false);
+      assert.equal(graph.entries.some(entry => entry.identity.domain === 'native-output'), false);
+      const bundle = JSON.parse(await readFile(path.join(dir, 'out.artifact-bundle.json')));
+      assert.deepEqual(bundle.executableArtifacts.map(item => item.role), ['target-source']);
+      assert.equal(bundle.executableArtifacts[0].artifact.domain, 'rust-source');
+      assert.equal(Boolean(receipt.publicApi), products === 'metadata');
+      assert.equal(Boolean(receipt.erasureMap), products === 'metadata');
+      const archived = await verifyObservedBuildArchive(await readFile(path.join(dir, 'out.build-archive.json')),
+        { expectedGraphId: receipt.buildGraph, allowedAssumptions: allowedAssumptionsFromGraph(graph) });
+      assert.equal(archived.kind, 'accepted', archived.reason); assert.equal(archived.semanticClaimsVerified, false);
+    } finally {
+      if (oldCli === undefined) delete process.env.PSC_TYPESCRIPT_CLI; else process.env.PSC_TYPESCRIPT_CLI = oldCli;
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+test('Rust source route rejects incompatible policy and unavailable native emission before loading files', async () => {
+  for (const [options, pattern] of [
+    [{ seedPath: 'missing-seed' }, /RUST_NATIVE_TRANSPORT_UNAVAILABLE/],
+    [{ jsAbiPolicyPath: 'missing-policy' }, /JS_ABI_TARGET/],
+    [{ outputPath: 'out.js' }, /OUTPUT_KIND/],
+  ]) await assert.rejects(buildChecked({ entryPath: 'missing-source', outputPath: 'out.rs', backend: 'rust', ...options }), pattern);
+});

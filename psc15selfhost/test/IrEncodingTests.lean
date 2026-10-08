@@ -1,3 +1,4 @@
+import Ps.DriverRust.Compiler
 import Ps.CompilerIr.Decode
 import Ps.DriverJs.Declarations
 import Ps.CompilerIr.SourceSignatureEncode
@@ -339,6 +340,22 @@ def main (args : List String) : IO Unit := do
       ("javaScript", psJsonQuote staged.javaScript),
       ("generatedPositions", psJsonQuote staged.generatedPositions),
       ("closedJavaScript", psJsonQuote closed.javaScript)])
+  else if args == ["--rust-stages"] then
+    let source := "def identity (A : Type) (value : A) : A := value\ndef answer : Nat := identity Nat 42\n"
+    let .ok prepared := psCompilerPrepareSource .lean source
+      | throw (IO.userError "RUST_PREPARE_FAILED")
+    let .ok staged := psCompilerRustStagesFromPrepared prepared
+      | throw (IO.userError "RUST_STAGES_FAILED")
+    let .ok legacy := psCompilerRustFromPrepared prepared
+      | throw (IO.userError "RUST_LEGACY_FAILED")
+    if legacy != staged.rustSource || staged.runtimeIr != staged.verifiedIr then
+      throw (IO.userError "RUST_STAGES_CHANGED_OUTPUT")
+    let .ok api := psCompilerPublicApiFromPrepared prepared
+      | throw (IO.userError "RUST_PUBLIC_API_FAILED")
+    IO.println (psJsonObject [
+      ("rustSource", psJsonQuote staged.rustSource), ("publicApi", psJsonQuote api),
+      ("erasureCorrespondence", psJsonQuote staged.erasureCorrespondence),
+      ("runtimeIr", psJsonQuote staged.runtimeIr), ("verifiedIr", psJsonQuote staged.verifiedIr)])
   else if args == ["--wasm-stages"] then
     let source := "def forward (A : Type) (value : A) : A := value\ndef answer (value : UInt32) : UInt32 := forward UInt32 value\n"
     let .ok prepared := psCompilerPrepareSource .lean source

@@ -169,17 +169,18 @@ export function createKernelCheckedSession(
       }
       const stageApi = target === 'typescript' ? 'psCompilerTypeScriptStagesFromPrepared' :
         target === 'javascript' ? (uniformJavaScript ? 'psCompilerUniformJavaScriptStagesFromPrepared' : 'psCompilerJavaScriptStagesFromPrepared') :
-        target === 'wasm' ? (wasmCanonicalRequest === undefined ? 'psCompilerWasmStagesFromPrepared' : 'psCompilerWasmCanonicalStagesFromPrepared') : undefined;
+        target === 'wasm' ? (wasmCanonicalRequest === undefined ? 'psCompilerWasmStagesFromPrepared' : 'psCompilerWasmCanonicalStagesFromPrepared') :
+        target === 'rust' ? 'psCompilerRustStagesFromPrepared' : undefined;
       if (stageApi && stageApi in compiler) {
         if (typeof compiler[stageApi] !== 'function') throw new Error('PSC2_CHECKED_EMIT_STAGES_API_SHAPE');
         if (target === 'wasm' && wasmCanonicalRequest === undefined && !compiler.psCompilerWasm32Target) throw new Error('PSC2_CHECKED_WASM_TARGET_MISSING');
         const product = unwrapCompilerResult(target === 'wasm' ?
           compiler[stageApi](wasmCanonicalRequest ?? compiler.psCompilerWasm32Target, item.prepared) : compiler[stageApi](item.prepared), 'EMIT_STAGES');
-        const outputKey = target === 'typescript' ? 'typeScript' : target === 'wasm' ? 'wasm' : 'javaScript';
+        const outputKey = target === 'typescript' ? 'typeScript' : target === 'wasm' ? 'wasm' : target === 'rust' ? 'rustSource' : 'javaScript';
         if (!product || typeof product !== 'object') throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
         const specializationField = target === 'javascript' && uniformJavaScript ? 'uniformSpecializedIr' : 'specializedIr';
         const fields = [outputKey, 'runtimeIr', 'verifiedIr',
-          ...(target !== 'typescript' ? [specializationField] : []),
+          ...((target === 'javascript' || target === 'wasm') ? [specializationField] : []),
           ...(target === 'javascript' ? ['jsIr'] : []), ...(target === 'wasm' ? ['wasmIr'] : []),
           ...(includeErasureCorrespondence ? ['erasureCorrespondence'] : []),
           ...(includeMetadata ? ['generatedPositions'] : []),
@@ -196,7 +197,7 @@ export function createKernelCheckedSession(
         if (target !== 'wasm') freezeGraph(staged);
         if ((target === 'wasm' ? !staged?.[outputKey] || typeof staged[outputKey] !== 'object' : typeof staged?.[outputKey] !== 'string') ||
             typeof staged.runtimeIr !== 'string' || typeof staged.verifiedIr !== 'string' ||
-            (target !== 'typescript' && typeof staged[specializationField] !== 'string') ||
+            ((target === 'javascript' || target === 'wasm') && typeof staged[specializationField] !== 'string') ||
             (target === 'javascript' && typeof staged.jsIr !== 'string') ||
             (target === 'wasm' && typeof staged.wasmIr !== 'string')) {
           throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
@@ -218,7 +219,7 @@ export function createKernelCheckedSession(
           stages: Object.freeze({
             runtimeIr: staged.runtimeIr,
             verifiedIr: staged.verifiedIr,
-            ...(target !== 'typescript' ? { [specializationField]: staged[specializationField] } : {}),
+            ...((target === 'javascript' || target === 'wasm') ? { [specializationField]: staged[specializationField] } : {}),
             ...(target === 'javascript' ? { jsIr: staged.jsIr } : {}),
             ...(target === 'wasm' ? { wasmIr: staged.wasmIr } : {}),
           }) });

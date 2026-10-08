@@ -44,16 +44,18 @@ export const defaultCheckedCompiler = checkedCompilerPath();
  * cannot be inferred from an output suffix or silently replaced by another lane.
  */
 export function selectCheckedBuildProducts({
-  backend = 'typescript', products = backend === 'typescript' ? 'metadata' : 'executable',
+  backend = 'typescript', products = backend === 'typescript' ? 'metadata' : backend === 'rust' ? 'source' : 'executable',
   javaScriptRepresentation = closedJsRepresentationProfile,
 } = {}) {
-  if (!['typescript', 'javascript', 'wasm'].includes(backend)) throw new Error('PSC2_CHECKED_BACKEND');
-  if (!['executable', 'metadata', 'declarations', 'source-map', 'all'].includes(products)) throw new Error('PSC2_CHECKED_PRODUCTS');
+  if (!['typescript', 'javascript', 'wasm', 'rust'].includes(backend)) throw new Error('PSC2_CHECKED_BACKEND');
+  if (!['executable', 'metadata', 'declarations', 'source-map', 'all', 'source'].includes(products)) throw new Error('PSC2_CHECKED_PRODUCTS');
   if (![closedJsRepresentationProfile, uniformJsRepresentationProfile].includes(javaScriptRepresentation) ||
       (backend !== 'javascript' && javaScriptRepresentation !== closedJsRepresentationProfile))
     throw new Error('PSC2_CHECKED_JAVASCRIPT_REPRESENTATION');
   if ((backend === 'typescript' && products !== 'metadata') ||
-      (backend === 'wasm' && !['executable', 'metadata'].includes(products)))
+      (backend === 'wasm' && !['executable', 'metadata'].includes(products)) ||
+      (backend === 'rust' && !['source', 'metadata'].includes(products)) ||
+      (backend !== 'rust' && products === 'source'))
     throw new Error('PSC2_CHECKED_PRODUCT_TARGET');
   const selection = Object.freeze({ metadata: products === 'metadata' || products === 'all',
     declarations: products === 'declarations' || products === 'all', sourceMap: products === 'source-map' || products === 'all' });
@@ -89,11 +91,12 @@ export async function buildChecked({
     : undefined;
   if (dualCheck) checkedKernelDescriptor(dualCheck);
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
+  if (seedPath && selected.backend === 'rust' && !checkOnly) throw new Error('PSC2_CHECKED_RUST_NATIVE_TRANSPORT_UNAVAILABLE');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
-  if (jsAbiPolicyPath !== undefined && selected.backend === 'wasm') throw new Error('PSC2_CHECKED_JS_ABI_TARGET');
+  if (jsAbiPolicyPath !== undefined && !['typescript', 'javascript'].includes(selected.backend)) throw new Error('PSC2_CHECKED_JS_ABI_TARGET');
   if (wasmCanonicalSelectionPath !== undefined && selected.backend !== 'wasm') throw new Error('PSC2_CHECKED_WASM_EXPORT_TARGET');
   const output = checkOnly ? undefined : path.resolve(outputPath);
-  const extension = selected.backend === 'wasm' ? /\.wasm$/u : selected.backend === 'javascript' ? /\.js$/u : /\.(?:ts|js)$/u;
+  const extension = selected.backend === 'wasm' ? /\.wasm$/u : selected.backend === 'javascript' ? /\.js$/u : selected.backend === 'rust' ? /\.rs$/u : /\.(?:ts|js)$/u;
   if (output !== undefined && !extension.test(output)) throw new Error('PSC2_CHECKED_OUTPUT_KIND');
   const stem = output === undefined ? undefined : path.basename(output).replace(extension, '');
   const [languageAuthorityValue, backendRegistryValue] = await Promise.all([
@@ -112,7 +115,7 @@ export async function buildChecked({
   const snapshot = await readCheckedSourceSnapshot(entryPath, sourceResourceLimits);
   let admissions;
   let typeScript;
-  let directEmission;
+  let selectedEmission;
   let compilerIdentity;
   let compilerBytes;
   let irStages;
@@ -154,7 +157,7 @@ export async function buildChecked({
       checkAdmissions,
       emit: !checkOnly,
       resourceLimits: seedResourceLimits,
-      productRequest: selected.backend === 'typescript' ? undefined : {
+      productRequest: selected.backend === 'typescript' || (checkOnly && selected.backend === 'rust') ? undefined : {
         target: selected.backend, representation: selected.javaScriptRepresentation, ...selected.selection,
         ...(wasmCanonicalSelection ? { wasmCanonicalSelection } : {}) },
       certificationContext: {
@@ -171,8 +174,8 @@ export async function buildChecked({
     pscvCertificate = result.pscvCertificate;
     certifiedSourceArtifact = result.certifiedSourceArtifact;
     typeScript = result.typeScript;
-    directEmission = result.directProduct;
-    const captured = directEmission ?? result;
+    selectedEmission = result.directProduct;
+    const captured = selectedEmission ?? result;
     irStages = captured.stages;
     publicApi = captured.publicApi;
     declarationOrigins = captured.declarationOrigins;
@@ -202,7 +205,7 @@ export async function buildChecked({
         const emitted = selected.backend === 'typescript' ? session.emitArtifact(handle) :
           session.emitSelectedArtifact(handle, selected.backend, selected.selection);
         if (selected.backend === 'typescript') typeScript = emitted.payload;
-        else directEmission = emitted;
+        else selectedEmission = emitted;
         irStages = emitted.stages;
         publicApi = emitted.publicApi;
         declarationOrigins = emitted.declarationOrigins;
@@ -238,7 +241,7 @@ export async function buildChecked({
   };
   if (checkOnly) return receipt;
   if (selected.backend === 'typescript' && typeof typeScript !== 'string') throw new Error('PSC2_CHECKED_TS_RESULT');
-  if (selected.backend !== 'typescript' && !directEmission?.stages) throw new Error('PSC2_CHECKED_DIRECT_STAGES_REQUIRED');
+  if (selected.backend !== 'typescript' && !selectedEmission?.stages) throw new Error('PSC2_CHECKED_DIRECT_STAGES_REQUIRED');
 
   // Every backend uses the same graph-driven publication path. Only the
   // explicitly selected TypeScript lane invokes the pinned external compiler.
@@ -275,9 +278,12 @@ export async function buildChecked({
       receipt.javaScriptSha256 = digest(javaScript);
       backendProducts = { typeScript, javaScript, declarations, sourceMap, typeScriptCompilerBytes, typeScriptToolInputs };
     } else {
-      backendProducts = selected.backend === 'javascript' ? { directJavaScript: directEmission.payload } : { directWasm: directEmission.payload };
-      receipt[selected.backend === 'javascript' ? 'javaScriptSha256' : 'wasmSha256'] = digest(directEmission.payload);
-      if (directEmission.declarationProduction) receipt.declarationProduction = directEmission.declarationProduction;
+      backendProducts = selected.backend === 'javascript' ? { directJavaScript: selectedEmission.payload } :
+        selected.backend === 'rust' ? { rustSource: selectedEmission.payload } : { directWasm: selectedEmission.payload };
+      receipt[selected.backend === 'javascript' ? 'javaScriptSha256' : selected.backend === 'rust' ? 'rustSourceSha256' : 'wasmSha256'] = digest(selectedEmission.payload);
+      if (selected.backend === 'rust') receipt.rustTarget = { product: 'source', edition: '2021',
+        compilerInvoked: false, nativeBinaryProduced: false, globalPreservationProved: false };
+      if (selectedEmission.declarationProduction) receipt.declarationProduction = selectedEmission.declarationProduction;
     }
     const hostSources = await readCheckedBuildHostSources();
     const observed = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
@@ -288,11 +294,11 @@ export async function buildChecked({
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
       hostSources, pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, publicApi,
       sourceOrigins: selected.selection.metadata || selected.selection.sourceMap ? snapshot.sourceOrigins : undefined,
-      declarationOrigins, erasureCorrespondence, generatedPositions, wasmCanonical: directEmission?.wasmCanonical,
+      declarationOrigins, erasureCorrespondence, generatedPositions, wasmCanonical: selectedEmission?.wasmCanonical,
       runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     if (selected.selection.declarations) {
       for (const key of ['declarations', 'sourceSignatures', 'binding']) {
-        const live = directEmission?.directDeclarations?.[key], recorded = observed.directDeclarations?.[key];
+        const live = selectedEmission?.directDeclarations?.[key], recorded = observed.directDeclarations?.[key];
         if (!live || !recorded || artifactKey(live.identity) !== artifactKey(recorded.identity) ||
             !Buffer.from(live.bytes).equals(recorded.bytes)) throw new Error('PSC2_CHECKED_DECLARATION_BUILD_BINDING');
       }
@@ -302,15 +308,15 @@ export async function buildChecked({
       if (compilerIdentity.engine === 'native-seed') {
         // This transport returns captured native tables; the common graph is
         // their first full map materializer, over the same checked source.
-        if (directEmission?.protocol !== checkedSeedProductsProtocol)
+        if (selectedEmission?.protocol !== checkedSeedProductsProtocol)
           throw new Error('PSC2_CHECKED_SOURCE_MAP_BUILD_BINDING');
-      } else if (!directEmission?.declarationLineage ||
-          artifactKey(observed.declarationLineage.identity) !== artifactKey(directEmission.declarationLineage))
+      } else if (!selectedEmission?.declarationLineage ||
+          artifactKey(observed.declarationLineage.identity) !== artifactKey(selectedEmission.declarationLineage))
         throw new Error('PSC2_CHECKED_SOURCE_MAP_BUILD_BINDING');
     }
     if (wasmCanonicalSelection) {
       for (const key of ['selection', 'interface', 'binding']) {
-        const live = directEmission?.wasmCanonical?.[key], recorded = observed.wasmCanonical?.[key];
+        const live = selectedEmission?.wasmCanonical?.[key], recorded = observed.wasmCanonical?.[key];
         if (!live || !recorded || artifactKey(live.identity) !== artifactKey(recorded.identity) ||
             !Buffer.from(live.bytes).equals(recorded.bytes)) throw new Error('PSC2_CHECKED_WASM_BUILD_BINDING');
       }
@@ -411,7 +417,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json] [--wasm-exports selection.json] [--backend typescript|javascript|wasm] [--products executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--archive-max-bytes n] [--archive-max-total-bytes n]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json] [--wasm-exports selection.json] [--backend typescript|javascript|wasm|rust] [--products source|executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--archive-max-bytes n] [--archive-max-total-bytes n]');
   }
   const receipt = await buildChecked(options);
   console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));

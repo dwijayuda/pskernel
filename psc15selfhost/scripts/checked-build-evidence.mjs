@@ -45,7 +45,7 @@ export async function readCheckedBuildHostSources() {
  * The checked builder packages every listed byte snapshot in its build archive.
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
-  javaScript, directJavaScript, directWasm, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
+  javaScript, directJavaScript, directWasm, rustSource, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
   provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [], sourceResources, seedResources,
   pscvCertificate, certifiedSourceArtifact, jsAbiPolicy, wasmCanonical, publicApi, sourceOrigins, declarationOrigins, erasureCorrespondence, generatedPositions, declarationProfile, javaScriptRepresentation = closedJsRepresentationProfile,
   includeSpecializationInstances = true }) {
@@ -53,8 +53,12 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   const artifacts = new Map(), entries = [], executions = [];
   const directBackend = directJavaScript !== undefined ? 'javascript' : directWasm !== undefined ? 'wasm' : undefined;
   if ((directJavaScript !== undefined && directWasm !== undefined) ||
-      (directBackend && [typeScript, javaScript, declarations, sourceMap].some(value => value !== undefined)))
+      (directBackend && [typeScript, javaScript, declarations, sourceMap].some(value => value !== undefined)) ||
+      (rustSource !== undefined && [typeScript, javaScript, directJavaScript, directWasm, declarations, sourceMap, typeScriptCompilerBytes, typeScriptToolInputs].some(value => value !== undefined)))
     throw new Error('PSC_BUILD_GRAPH_MIXED_BACKEND_PATHS');
+  if (rustSource !== undefined && typeof rustSource !== 'string') throw new Error('PSC_BUILD_GRAPH_RUST_SOURCE');
+  if (rustSource !== undefined && (irStages?.specializedIr !== undefined || irStages?.uniformSpecializedIr !== undefined ||
+      irStages?.jsIr !== undefined || irStages?.wasmIr !== undefined)) throw new Error('PSC_BUILD_GRAPH_RUST_UNSELECTED_STAGES');
   if (directWasm !== undefined && !(directWasm instanceof Uint8Array)) throw new Error('PSC_BUILD_GRAPH_WASM_BYTES');
   if (wasmCanonical !== undefined && directBackend !== 'wasm') throw new Error('PSC_BUILD_GRAPH_CANONICAL_TARGET');
   if (![closedJsRepresentationProfile, uniformJsRepresentationProfile].includes(javaScriptRepresentation) ||
@@ -232,9 +236,9 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   const targetStages = checkedTargetIrStageArtifacts(irStages);
   let verifiedIr;
   let erasureMap;
-  if (erasureCorrespondence !== undefined && (!stages || !sourceApi || !certification || (typeScript === undefined && !directBackend)))
+  if (erasureCorrespondence !== undefined && (!stages || !sourceApi || !certification || (typeScript === undefined && rustSource === undefined && !directBackend)))
     throw new Error('PSC_BUILD_GRAPH_ERASURE_SUBJECT');
-  if (stages && (typeScript !== undefined || directBackend)) {
+  if (stages && (typeScript !== undefined || rustSource !== undefined || directBackend)) {
       const runtimeIr = add(stages.runtimeIr, { kind: 'archive-required', role: 'actual-erasure-output' });
       verifiedIr = add(stages.verifiedIr, { kind: 'archive-required', role: 'actual-validation-output' });
       if (!runtimeIr.bytes.equals(verifiedIr.bytes)) throw new Error('PSC_BUILD_GRAPH_VALIDATION_CHANGED_IR');
@@ -309,6 +313,18 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
           '--strict', '--declaration', '--sourceMap', '--noEmitOnError', '--skipLibCheck', '--pretty', 'false'] },
         toolInputs ? [...baseDependencies, toolInputs.identity] : baseDependencies, ['selected-typescript-package-closure']);
     }
+  }
+  if (rustSource !== undefined) {
+    if (!verifiedIr) throw new Error('PSC_BUILD_GRAPH_RUST_STAGES_REQUIRED');
+    const output = bytes(rustSource, 'rust-source', 'psc-rust-source/2021', { kind: 'output-file', suffix: '.rs' });
+    // executableArtifacts includes deployable target source in the registry.
+    // This identity does not assert that rustc accepted or executed the source.
+    executableArtifact = output.identity;
+    execute('psc-verified-ir-to-rust/1', verifiedIr, [output], implementation, 'psc-ir-rust-refinement/1',
+      { target: 'rust', observedStages: ['rust-source-emission'], edition: '2021',
+        genericRuntimeIrRetained: true, targetCompilationPerformed: false, globalPreservationProved: false,
+        unobservedInteriorStages: ['ownership-representation', 'rust-print'] },
+      baseDependencies, ['trusted-rust-source-emission']);
   }
   if (directBackend) {
     if (!verifiedIr || (uniformJavaScript ? irStages?.uniformSpecializedIr === undefined : !stages?.specializedIr))

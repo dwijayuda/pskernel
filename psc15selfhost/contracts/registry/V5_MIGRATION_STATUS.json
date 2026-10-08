@@ -325,7 +325,10 @@
       ],
       "inheritedImplementationStatus": "implementation-available-exact-js-wasm-target-ir-assurance-pending",
       "assurance": "pending",
-      "disposition": "Keep four first-class lanes, JsIR/WasmIR validation, emitters and runtime fixes. TS/Rust remain source backends. Register explicit descriptors and bundles; target acceptance is not preservation."
+      "disposition": "Keep four first-class lanes, JsIR/WasmIR validation, emitters and runtime fixes. TS/Rust remain source backends. Register explicit descriptors and bundles; target acceptance is not preservation. Rust generated checked source products now retain actual generic RuntimeIR validation/emission edges and use common artifact publication. Native seed routing, Cargo toolchain capture and specialized-input migration remain pending.",
+      "addedOwners": [
+        "packages/driver-rust/src/Ps/DriverRust/Stages.lean"
+      ]
     },
     {
       "id": "comparator",

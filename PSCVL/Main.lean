@@ -24,6 +24,8 @@ private def checkFile (path : String) : IO UInt32 := do
     IO.eprintln "PSCVL: source imports are unsupported; only the pinned PSCVL prelude is available"
     return 2
   initSearchPath (← findSysroot)
+  -- Matches the official Lean frontend's initialization sequence.
+  unsafe enableInitializersExecution
   let env ← importModules #[{ module := `PSCVL.Policy }] {} (trustLevel := 0) (loadExts := true)
   -- The gate is injected by the driver, not opt-in source syntax. Append it
   -- only after the user input has been completely parsed/elaborated.

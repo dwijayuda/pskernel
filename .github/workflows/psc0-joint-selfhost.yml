@@ -105,6 +105,10 @@ jobs:
         run: node scripts/checked-typescript-source-smoke.mjs
         env:
           PSC0_BUILD_TRACE: '1'
+      - name: Differentially check the actual generated JS kernel against native Core
+        run: node scripts/joint-selfhost.mjs verify-native-generated
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
       - name: Upload native-compiler kernel generation evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -112,6 +116,7 @@ jobs:
           name: psc0-native-kernel-generation
           path: |
             psc0/dist/joint-kernel/kernel-native-generation.json
+            psc0/dist/joint-kernel/checked-prelude.json
             psc0/dist/joint-kernel/native/kernel/index.checked.json
             psc0/dist/joint-kernel/native/kernel/index.admissions.json
             psc0/dist/joint-kernel/native/kernel/index.ts

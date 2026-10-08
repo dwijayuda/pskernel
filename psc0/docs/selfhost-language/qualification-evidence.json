@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-selfhost-language-qualification-evidence",
+  "repository": "dwijayuda/pskernel",
+  "historicalSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
+  "implementationBranch": "psc0/sh1-implementation-v1",
+  "updatedUtc": "2026-10-08T20:02:00Z",
+  "currentStatus": "Generated capability and bounded development checks passed; initial current-source C2/C3 qualification in progress.",
+  "checkpoints": {
+    "boundedDevelopment": {
+      "sourceRef": "9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
+      "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+      "moduleCount": 56,
+      "runId": 37834854232,
+      "jobId": 113509175107,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37834854232",
+      "conclusion": "success",
+      "evidence": "native-seeded-generated-compiler-candidate",
+      "nativeCompiler": {
+        "binarySha256": "83e764bd93df8220874e28918c3a4ea41105edd3c559fbb35e13cb8e8f7dc871",
+        "path": ".lake/build/bin/psc1",
+        "command": [
+          "build",
+          "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+          "--out",
+          "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/N1/index.js"
+        ],
+        "buildContext": "CI builds the current native target with lake build psc1; binary and workspace identities are recorded separately."
+      },
+      "artifacts": {
+        "javascriptSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "typescriptSha256": "b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1"
+      },
+      "toolchain": {
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+        "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "typescript": "Version 5.8.3"
+      },
+      "recipeSha256": "6e2d2c2cda9e1e21e878eb68f1f445e054b91fc7e0c9976d3cd6367c4867f2f2",
+      "checks": {
+        "rawSourceKinds": [
+          "lean",
+          "proofScript"
+        ],
+        "sourceKindAdmissionAndTypeScriptParity": true,
+        "capabilityBehavior": "pass",
+        "negativeCases": 7,
+        "preparationSession": "pass",
+        "frozenCachedDiagnostics": "pass",
+        "residentCli": "pass",
+        "wrongCompilerPin": "rejected-before-import",
+        "foundationCorrespondence": "skipped: raw current library bytes equal the preserved reference"
+      },
+      "timings": {
+        "nativeCandidateMs": 14590.443683,
+        "nativeBuildSeconds": 15,
+        "jobSeconds": 74,
+        "scope": "One Linux x64 CI run with restored native build caches; the bounded gate and full self-application perform different work."
+      },
+      "selectedSeedBootstrapProven": false,
+      "currentSourceFixedPointProven": false,
+      "kernelChecked": false,
+      "strictSh1Qualified": false,
+      "artifact": {
+        "id": 11575186771,
+        "name": "psc0-sh1-9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
+        "zipSha256": "ce9d131461a43693c93688ec7816b4a468b052fe313dbd65d60825e11aa6181f",
+        "expiresAt": "2026-11-07T19:50:55Z"
+      }
+    },
+    "initialSelfhost": {
+      "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "runId": 37831951758,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37831951758",
+      "status": "in_progress",
+      "nativeBuild": "pass",
+      "generatedCandidate": "pass",
+      "currentSourceC2C3": "pending",
+      "selectedProviderAcceptance": "pending",
+      "strictSh1Qualified": false
+    }
+  },
+  "acceptanceAxes": {
+    "compilerQualified": "Exact current-source C2/C3 products and generated capability/conformance evidence.",
+    "kernelChecked": "Actual selected-provider decisions for the exact canonical admission streams.",
+    "strictSh1": "Complete runtime IR obligations and enforcement; a diagnostic inventory does not grant this status."
+  }
+}

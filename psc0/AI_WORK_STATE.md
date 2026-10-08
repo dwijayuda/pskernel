@@ -113,3 +113,24 @@ Once A is qualified, pin its actual source/toolchain/product identities, restore
 implementation workflow branch filter, and apply the staged Foundation.List migration
 with its bounded behavior/public-type correspondence gate. Preserve A's historical
 source recovery path before allowing B to use the new authoring capability.
+
+## Bounded development result
+
+Commit9641928bcf7d5394f46e19a31a8ae3fd096d44b5 passed run37834854232 on its
+first execution. Job113509175107 took74seconds including a15second incremental
+native build. The native-candidate receipt reports14590.443683milliseconds for
+N1 generation and bounded capability/session/CLI checks. The raw closure has56
+modules and SHA2567e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a.
+N1 JavaScript SHA2569d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096.
+These are single cached Linux x64 development measurements, not a fixed-point or
+provider claim. The Foundation behavior matrix correctly skipped unchanged source.
+See docs/selfhost-language/qualification-evidence.json for this durable checkpoint.
+
+The next migration checkpoint is staged with additive dev:sh1/iterate:sh1 commands,
+the same verified-seed Foundation comparison moved ahead of expensive C1 generation,
+and a focused update of check-modular-preparation-source.mjs. That legacy guard
+still assumed the old worker spelling and accidentally scanned two structures after
+the new state type was added. Its replacement preserves prepared declarations-only
+ownership and all unchanged admission/provider-session boundaries; generated session
+correspondence already supplies the semantic evidence. Run it in B's early source
+checks. Portable compiler source and selected seed remain at A until full evidence.

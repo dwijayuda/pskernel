@@ -1,5 +1,6 @@
 import Ps.KernelCore.Metatheory.DefEqLazyContinuation
 import Ps.KernelCore.Metatheory.PrimitiveNatReduction
+import Ps.KernelCore.Metatheory.DefEqQuickConfiguration
 
 /-
 Reusable fuel-driven LazyDelta proof infrastructure.
@@ -552,15 +553,9 @@ theorem psKernelDefEqLazyReductionWithFuel_configuration_sound
       by_cases hZeroPair :
           psKernelExprIsNatZero left = true ∧
             psKernelExprIsNatZero right = true
-      · have hGuard :
-            (if psKernelExprIsNatZero left then
-               psKernelExprIsNatZero right
-             else
-               false) = true := by
-          simp [hZeroPair.1, hZeroPair.2]
-        simp [
+      · simp [
           psKernelDefEqLazyReductionWithFuel,
-          hGuard
+          hZeroPair.1, hZeroPair.2
         ] at hRun
         rcases hRun with ⟨rfl, rfl⟩
         exact
@@ -570,21 +565,33 @@ theorem psKernelDefEqLazyReductionWithFuel_configuration_sound
               context.environment context.localContext
               left right hZeroPair.1 hZeroPair.2
           ⟩
-      · have hGuard :
-            (if psKernelExprIsNatZero left then
-               psKernelExprIsNatZero right
-             else
-               false) = false := by
-          cases hLeftZero : psKernelExprIsNatZero left with
-          | false =>
-              rfl
-          | true =>
-              cases hRightZero : psKernelExprIsNatZero right with
-              | false =>
-                  rfl
-              | true =>
-                  exact False.elim
-                    (hZeroPair ⟨hLeftZero, hRightZero⟩)
+      · have hFastRun :
+            (match psKernelExprNatPred left with
+             | Option.some leftPred =>
+                 match psKernelExprNatPred right with
+                 | Option.some rightPred =>
+                     match defeq context state leftPred rightPred with
+                     | Except.error error =>
+                         Except.error error
+                     | Except.ok result =>
+                         Except.ok
+                           (Prod.mk
+                             (PsKernelDeltaResult.decided
+                               (Prod.fst result))
+                             (Prod.snd result))
+                 | Option.none =>
+                     psKernelDefEqLazyReductionAfterPred
+                       resume defeq whnf coreWhnf
+                       context state left right
+             | Option.none =>
+                 psKernelDefEqLazyReductionAfterPred
+                   resume defeq whnf coreWhnf
+                   context state left right) =
+              Except.ok (Prod.mk answer nextState) := by
+          simpa [
+            psKernelDefEqLazyReductionWithFuel,
+            hZeroPair, resume
+          ] using hRun
         cases hLeftPred : psKernelExprNatPred left with
         | none =>
             have hAfterRun :
@@ -592,10 +599,7 @@ theorem psKernelDefEqLazyReductionWithFuel_configuration_sound
                     resume defeq whnf coreWhnf
                     context state left right =
                   Except.ok (Prod.mk answer nextState) := by
-              simpa [
-                psKernelDefEqLazyReductionWithFuel,
-                hGuard, hLeftPred, resume
-              ] using hRun
+              simpa [hLeftPred] using hFastRun
             exact
               hAfter
                 context state nextState left right answer
@@ -608,10 +612,7 @@ theorem psKernelDefEqLazyReductionWithFuel_configuration_sound
                         resume defeq whnf coreWhnf
                         context state left right =
                       Except.ok (Prod.mk answer nextState) := by
-                  simpa [
-                    psKernelDefEqLazyReductionWithFuel,
-                    hGuard, hLeftPred, hRightPred, resume
-                  ] using hRun
+                  simpa [hLeftPred, hRightPred] using hFastRun
                 exact
                   hAfter
                     context state nextState left right answer
@@ -621,9 +622,8 @@ theorem psKernelDefEqLazyReductionWithFuel_configuration_sound
                     defeq context state leftPred rightPred with
                 | error error =>
                     simp [
-                      psKernelDefEqLazyReductionWithFuel,
-                      hGuard, hLeftPred, hRightPred, hEq
-                    ] at hRun
+                      hLeftPred, hRightPred, hEq
+                    ] at hFastRun
                 | ok eqRun =>
                     rcases eqRun with ⟨eqValue, eqState⟩
                     have hEqSound :=
@@ -632,10 +632,9 @@ theorem psKernelDefEqLazyReductionWithFuel_configuration_sound
                         leftPred rightPred eqValue
                         hConfig hEq
                     simp [
-                      psKernelDefEqLazyReductionWithFuel,
-                      hGuard, hLeftPred, hRightPred, hEq
-                    ] at hRun
-                    rcases hRun with ⟨rfl, rfl⟩
+                      hLeftPred, hRightPred, hEq
+                    ] at hFastRun
+                    rcases hFastRun with ⟨rfl, rfl⟩
                     refine ⟨hEqSound.1, ?_⟩
                     cases eqValue with
                     | false =>

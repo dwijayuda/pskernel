@@ -33,6 +33,7 @@ jobs:
         run: |
           set -euxo pipefail
           lake exe pscvl check examples/pass.ps
+          lake exe pscvl syntax-kinds examples/pass_ghost.ps
           lake exe pscvl check examples/pass_contract.ps
           lake exe pscvl check examples/pass_language.ps
           lake exe pscvl check examples/pass_lean_core.ps
@@ -67,3 +68,5 @@ jobs:
           ! lake exe pscvl check examples/fail_open_scoped.ps
           ! lake exe pscvl check examples/fail_ensures_only.ps
           ! lake exe pscvl check examples/fail_ghost_leak.ps
+          ! lake exe pscvl check examples/fail_unsafe_cast.ps
+          ! lake exe pscvl check examples/fail_direct_erased.ps

@@ -43,12 +43,35 @@ private def checkFile (path : String) : IO UInt32 := do
   IO.println "PSCVL: Lean elaboration and preliminary policy check passed (UNCERTIFIED)"
   return 0
 
+/-- Parse-only diagnostic: enumerate all Lean syntax kinds present in
+accepted PSCVL source, without invoking source elaborators. -/
+private def syntaxKinds (path : String) : IO UInt32 := do
+  unless path.endsWith ".ps" do
+    IO.eprintln "PSCVL expects a .ps source file"
+    return 2
+  let source ← IO.FS.readFile path
+  initSearchPath (← findSysroot)
+  unsafe enableInitializersExecution
+  let env ← importModules #[{ module := `PSCVL.Policy }] {} (trustLevel := 0) (loadExts := true)
+  let opts := ({} : Options)
+    |>.setBool `experimental.vcgen true
+    |>.setBool `experimental.intrinsic true
+  match auditSourceSyntax source path env opts with
+  | .ok kinds =>
+    for kind in kinds do
+      IO.println kind
+    return 0
+  | .error msg =>
+    IO.eprintln s!"PSCVL source-profile error: {msg}"
+    return 1
+
 def cli (args : List String) : IO UInt32 := do
   try
     match args with
     | ["check", path] => checkFile path
+    | ["syntax-kinds", path] => syntaxKinds path
     | _ =>
-      IO.eprintln "usage: lake exe pscvl check <source.ps>"
+      IO.eprintln "usage: lake exe pscvl {check|syntax-kinds} <source.ps>"
       IO.eprintln "No PSCV certified compilation or executable emission exists in this prototype."
       return 2
   catch e =>

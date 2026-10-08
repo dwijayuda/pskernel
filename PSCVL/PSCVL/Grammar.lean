@@ -68,6 +68,18 @@ private def allowedCommand (s : Syntax) : Bool :=
 
 /-- Reject known metaprogramming and proof escapes before the Lean elaborator
 runs. Ordinary strings and comments are syntax leaves, not command text. -/
+private def excludedName (name : Name) : Bool :=
+  let value := name.toString
+  (["sorry", "sorryAx", "unsafeCast", "unsafePerformIO",
+    "native_decide", "run_tac", "run_cmd", "erased",
+    "partial_fixpoint", "unsafe", "macro", "macro_rules",
+    "extern", "nativeDecide", "evalConst", "EIO", "BaseIO",
+    "IO"] : List String).any (fun banned =>
+      value == banned || value.endsWith ("." ++ banned))
+
+/-- An identifier is different from a keyword token in Lean's syntax tree.
+Apply the source exclusions to both; otherwise imported built-in primitives
+can bypass restrictions that checked only `Syntax.atom` keywords. -/
 private partial def forbiddenSyntax (s : Syntax) : Option String :=
   match s with
   | .node _ kind args =>
@@ -76,6 +88,9 @@ private partial def forbiddenSyntax (s : Syntax) : Option String :=
       some s!"untrusted metaprogramming syntax `{k}`"
     else
       args.toList.findSome? forbiddenSyntax
+  | .ident _ _ name _ =>
+    if excludedName name then some s!"forbidden PSCV identifier '{name}'"
+    else none
   | .atom _ value =>
     if (["run_tac", "native_decide", "sorry", "unsafe", "partial",
          "macro", "macro_rules", "elab", "initialize", "set_option",
@@ -88,11 +103,21 @@ private partial def forbiddenSyntax (s : Syntax) : Option String :=
 /-- Inspect a closed set of command kinds with Lean's actual parser. Do not
 elaborate anything before this check. Every source import is rejected as a
 top-level terminal command until a versioned dependency manifest exists. -/
-def validateSourceSyntax (source fileName : String) (env : Environment)
-    (opts : Options) : Except String Unit := Id.run do
+private partial def syntaxNodeKinds (s : Syntax) : Array String :=
+  match s with
+  | .node _ k args =>
+      args.foldl (fun names child => names ++ syntaxNodeKinds child) #[k.toString]
+  | _ => #[]
+
+/-- Return every distinct syntax-node kind encountered by the *accepted*
+fragment. This is a development aid to mechanize Appendix A compatibility
+rather than inferring allowed syntax from text or tests. No elaboration runs. -/
+def auditSourceSyntax (source fileName : String) (env : Environment)
+    (opts : Options) : Except String (Array String) := Id.run do
   let input := Parser.mkInputContext source fileName
   let mut parserState : Parser.ModuleParserState := {}
   let mut messages : MessageLog := {}
+  let mut encountered := #[]
   repeat
     let (stx, next, nextMessages) :=
       Parser.parseCommand input
@@ -101,7 +126,7 @@ def validateSourceSyntax (source fileName : String) (env : Environment)
     if nextMessages.hasErrors then
       return .error "Lean parser rejected source before PSCV elaboration"
     if stx.isOfKind ``Parser.Command.eoi then
-      return .ok ()
+      return .ok encountered
     if Parser.isTerminalCommand stx then
       return .error s!"PSCVL prohibits import/exit commands: {stx.getKind}"
     if next.pos == parserState.pos then
@@ -112,7 +137,15 @@ def validateSourceSyntax (source fileName : String) (env : Environment)
       return .error why
     if let some why := rejectAttributes stx then
       return .error why
+    for kind in syntaxNodeKinds stx do
+      unless encountered.contains kind do
+        encountered := encountered.push kind
     parserState := next
     messages := nextMessages
+
+def validateSourceSyntax (source fileName : String) (env : Environment)
+    (opts : Options) : Except String Unit := do
+  let _ ← auditSourceSyntax source fileName env opts
+  return ()
 
 end PSCVL

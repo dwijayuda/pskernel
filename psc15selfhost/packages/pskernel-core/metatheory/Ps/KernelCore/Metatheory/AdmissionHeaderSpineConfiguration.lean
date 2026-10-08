@@ -206,3 +206,136 @@ theorem psKernelOpenSimpleHeaderParamsWorker_configuration_refines
               result.session.context.localContext type step.2 result.result
               step.1.2 binders hStepSound.2.2.2
               (by simpa [hStepSound.2.1] using hSpine)
+
+
+theorem psKernelOpenSimpleHeaderIndicesWithFuel_configuration_refines
+    (fuel : Nat)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw) :
+    ∀ (session : PsKernelCheckerSession) (type : PsKernelExpr)
+      (revIndices : List PsKernelOpenBinder) (result : PsKernelOpenBindersResult),
+      PsKernelCheckerConfigurationSound session.context session.state ->
+      psKernelOpenSimpleHeaderIndicesWithFuel
+        fuel session type revIndices = Except.ok result ->
+      PsKernelCheckerConfigurationSound result.session.context result.session.state ∧
+      result.session.context.environment = session.context.environment ∧
+      session.context.localContext.nextIndex ≤ result.session.context.localContext.nextIndex ∧
+      ∃ binders : List PsKernelOpenBinder,
+        result.binders = psKernelReverseOpenBinders revIndices ++ binders ∧
+        PsKernelCheckedHeaderBinderSpine session.context.environment
+          session.context.localContext type binders
+          result.session.context.localContext result.result := by
+  induction fuel with
+  | zero =>
+      intro session type revIndices result hConfig hRun
+      simp [psKernelOpenSimpleHeaderIndicesWithFuel] at hRun
+  | succ remaining ih =>
+      intro session type revIndices result hConfig hRun
+      cases hWhnf : psKernelSessionWhnf remaining session type with
+      | error message =>
+          simp [psKernelOpenSimpleHeaderIndicesWithFuel, hWhnf] at hRun
+      | ok reduced =>
+          rcases reduced with ⟨reducedType, reducedSession⟩
+          cases reducedType with
+          | forallE userName domain body binderInfo =>
+              cases hCheck : psKernelSessionCheck remaining reducedSession domain with
+              | error message =>
+                  simp [psKernelOpenSimpleHeaderIndicesWithFuel, hWhnf, hCheck] at hRun
+              | ok domainType =>
+                  cases hSort : psKernelSessionEnsureSort
+                      remaining domainType.2 domainType.1 with
+                  | error message =>
+                      simp [psKernelOpenSimpleHeaderIndicesWithFuel,
+                        hWhnf, hCheck, hSort] at hRun
+                  | ok sorted =>
+                      let opened := psKernelSessionWithLocal sorted.2 userName
+                        (psKernelExprConsumeTypeAnnotations domain) binderInfo
+                      let binder := PsKernelOpenBinder.mk opened.1 userName
+                        (psKernelExprConsumeTypeAnnotations domain) binderInfo
+                      let openedBody := psKernelExprInstantiate1 body
+                        (PsKernelExpr.fvar opened.1)
+                      have hStepRun : psKernelOpenSimpleHeaderParamStep
+                          remaining session type =
+                            Except.ok ((opened.2, binder), openedBody) := by
+                        simp [psKernelOpenSimpleHeaderParamStep, hWhnf,
+                          hCheck, hSort, opened, binder, openedBody]
+                      have hStepSound :=
+                        psKernelOpenSimpleHeaderParamStep_configuration_refines
+                          remaining hNative hString session type
+                          ((opened.2, binder), openedBody) hConfig hStepRun
+                      have hTailRun : psKernelOpenSimpleHeaderIndicesWithFuel
+                          remaining opened.2 openedBody (binder :: revIndices) =
+                            Except.ok result := by
+                        simpa [psKernelOpenSimpleHeaderIndicesWithFuel,
+                          hWhnf, hCheck, hSort, opened, binder, openedBody] using hRun
+                      rcases ih opened.2 openedBody (binder :: revIndices) result
+                        hStepSound.1 hTailRun with
+                        ⟨hFinalConfig, hFinalEnv, hOrdinal, binders, hBinders, hSpine⟩
+                      refine ⟨hFinalConfig, Eq.trans hFinalEnv hStepSound.2.1,
+                        Nat.le_trans hStepSound.2.2.1 hOrdinal,
+                        binder :: binders, ?_, ?_⟩
+                      · exact Eq.trans hBinders
+                          (psKernelReverseOpenBinders_cons_append binder revIndices binders)
+                      · exact PsKernelCheckedHeaderBinderSpine.cons
+                          session.context.localContext opened.2.context.localContext
+                          result.session.context.localContext type openedBody result.result
+                          binder binders hStepSound.2.2.2
+                          (by simpa [hStepSound.2.1] using hSpine)
+          | _ =>
+              have hSound := psKernelSessionWhnf_concrete_refines_reduction
+                remaining hNative hString session reducedSession type _ hConfig hWhnf
+              have hContext := psKernelSessionWhnf_success_preserves_context_core
+                remaining session reducedSession type _ hWhnf
+              simp only [psKernelOpenSimpleHeaderIndicesWithFuel,
+                hWhnf, psKernelOpenBindersResult] at hRun
+              cases hRun
+              refine ⟨?_, congrArg PsKernelCheckerContext.environment hContext,
+                ?_, [], by simp, ?_⟩
+              · simpa [hContext] using hSound.2
+              · simp [hContext]
+              · simpa [hContext] using PsKernelCheckedHeaderBinderSpine.done
+                  session.context.localContext type _ hSound.1
+
+theorem psKernelOpenSimpleHeaderParams_configuration_refines
+    (fuel numParams : Nat)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (session : PsKernelCheckerSession)
+    (type : PsKernelExpr)
+    (result : PsKernelOpenBindersResult)
+    (hConfig : PsKernelCheckerConfigurationSound session.context session.state)
+    (hRun : psKernelOpenSimpleHeaderParams fuel session type numParams = Except.ok result) :
+    PsKernelCheckerConfigurationSound result.session.context result.session.state ∧
+    result.session.context.environment = session.context.environment ∧
+    PsKernelCheckedHeaderBinderSpine session.context.environment
+      session.context.localContext type result.binders
+      result.session.context.localContext result.result := by
+  rcases psKernelOpenSimpleHeaderParamsWorker_configuration_refines
+      numParams fuel hNative hString session type [] result hConfig
+      (by simpa [psKernelOpenSimpleHeaderParams] using hRun) with
+    ⟨hFinalConfig, hEnv, hOrdinal, binders, hBinders, hSpine⟩
+  have hBindersEq : result.binders = binders := by
+    simpa [psKernelReverseOpenBinders, psKernelReverseOpenBindersWorker] using hBinders
+  exact ⟨hFinalConfig, hEnv, by simpa [hBindersEq] using hSpine⟩
+
+theorem psKernelOpenSimpleHeaderIndices_configuration_refines
+    (fuel : Nat)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (session : PsKernelCheckerSession)
+    (type : PsKernelExpr)
+    (result : PsKernelOpenBindersResult)
+    (hConfig : PsKernelCheckerConfigurationSound session.context session.state)
+    (hRun : psKernelOpenSimpleHeaderIndices fuel session type = Except.ok result) :
+    PsKernelCheckerConfigurationSound result.session.context result.session.state ∧
+    result.session.context.environment = session.context.environment ∧
+    PsKernelCheckedHeaderBinderSpine session.context.environment
+      session.context.localContext type result.binders
+      result.session.context.localContext result.result := by
+  rcases psKernelOpenSimpleHeaderIndicesWithFuel_configuration_refines
+      (Nat.succ fuel) hNative hString session type [] result hConfig
+      (by simpa [psKernelOpenSimpleHeaderIndices] using hRun) with
+    ⟨hFinalConfig, hEnv, hOrdinal, binders, hBinders, hSpine⟩
+  have hBindersEq : result.binders = binders := by
+    simpa [psKernelReverseOpenBinders, psKernelReverseOpenBindersWorker] using hBinders
+  exact ⟨hFinalConfig, hEnv, by simpa [hBindersEq] using hSpine⟩

@@ -10,7 +10,16 @@
     "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
     "languageAuthority": "PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md",
     "kernelScope": "consume-contracts-and-evidence-only",
-    "execution": "github-cloud-only"
+    "execution": "github-cloud-only",
+    "compilerExecutionPolicy": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json",
+    "implementationScopeRevision": {
+      "date": "2026-10-08",
+      "basis": "Explicit user instruction: self-hosting is no longer a goal and PSC1 self-host implementation patterns are no longer constraints.",
+      "implementationProfile": "pscv-hosted-lean/1",
+      "selfHostingRequired": false,
+      "pscvLanguageSemantics": "unchanged-normative-target",
+      "assurance": "no-automatic-conformance-or-proof-upgrade"
+    }
   },
   "classificationVocabulary": [
     "semantic-compiler-spine",
@@ -47,7 +56,7 @@
     "No automatic implication from kernel acceptance, target acceptance, fixed point, provenance or hash integrity to executable preservation.",
     "Existing contract identities and exact evidence remain unchanged; target ownership is not physical relocation.",
     "No semantic package dependency on SAVEF, FactoryBench, archive policy or AI orchestration.",
-    "Portable compiler code retains PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1."
+    "Compiler implementation uses the pinned hosted Lean profile. PSC1 self-host patterns are historical optional checks; PSCV language semantics, exact evidence and authority boundaries remain mandatory."
   ],
   "statusDimensions": {
     "implementation": "Inherited workstream status and explicit next capability.",
@@ -504,7 +513,7 @@
       ],
       "inheritedImplementationStatus": "partial",
       "assurance": "pending",
-      "disposition": "Preserve exact TS/JS/Wasm/Rust closure checkpoints, bootstrap levels and promotion gates. Changed closures require fresh evidence; fixed points imply neither DDC nor preservation."
+      "disposition": "Preserve exact historical TS/JS/Wasm/Rust closure checkpoints and anti-conflation rules. Per the explicit 2026-10-08 user scope revision, self-hosting and fixed points are optional historical evidence, not compiler implementation goals or coding constraints. Any future selected fixed-point, reproducibility or DDC claim still requires its own fresh exact evidence; none is inferred from hosted compilation."
     },
     {
       "id": "indexing-layout",
@@ -1204,7 +1213,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "declarations-and-standalone-maps-cloud-validated-at-885988b2-explicit-linked-output-implemented-cloud-validation-pending-broader-signatures-pending",
+      "status": "closed-uniform-declarations-standalone-and-explicit-linked-maps-generated-native-routing-cloud-validated-at-93add6da-broader-signatures-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1214,7 +1223,7 @@
         "semantic-compiler-spine"
       ],
       "status": "planned",
-      "requirement": "Only low-risk physical refactoring after contract consumers and applicable self-host checks."
+      "requirement": "Expose logical ownership APIs before low-risk physical refactoring; native compilation, semantic boundaries and affected compiler consumers remain required."
     },
     {
       "order": 12,
@@ -1271,7 +1280,7 @@
     {
       "id": "selfhost-fixed-points",
       "inheritedStatus": "partial",
-      "disposition": "retain-until-exact-evidence-discharges",
+      "disposition": "historical-evidence-preserved-new-campaigns-optional-by-explicit-user-scope-revision",
       "source": "contracts/registry/V3_ASSURANCE_HANDOFF.json"
     },
     {
@@ -1730,6 +1739,20 @@
       "status": "current-host",
       "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json",
       "classification": "backend"
+    },
+    {
+      "id": "psc-compiler-execution-policy/1",
+      "kind": "compiler-execution-policy",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json",
+      "classification": "semantic-compiler-spine"
+    },
+    {
+      "id": "pscv-hosted-lean/1",
+      "kind": "compiler-implementation-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json",
+      "classification": "semantic-compiler-spine"
     }
   ],
   "implementationCloud": {
@@ -1765,6 +1788,16 @@
         "full-existing-main-compiler-selfhost-isolation-gates"
       ],
       "proofImplication": "none"
+    },
+    "linkedSourceMapCheckpoint": {
+      "commit": "93add6da4e501c57f9016c7c3666ea52c87a66e7",
+      "mainRun": 37718501374,
+      "conclusion": "success",
+      "scope": "Closed/uniform explicit linked output selection and exact receipt/bundle/archive behavior; no preservation theorem.",
+      "historicalOptionalFixedPointRuns": [
+        37718501397,
+        37718501361
+      ]
     }
   }
 }

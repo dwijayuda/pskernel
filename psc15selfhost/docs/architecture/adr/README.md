@@ -16,4 +16,6 @@ These ADRs record long-lived production-architecture decisions derived from the 
 - [0005 — Capability-sandbox third-party semantic plugins](0005-capability-sandboxed-plugins.md)
 - [0006 — Hermetic content-addressed production builds](0006-hermetic-content-addressed-builds.md)
 
+- [0007 — Hosted compiler implementation with PSCV source semantics](0007-hosted-compiler-with-pscv-semantics.md)
+
 When superseding an ADR, add a new ADR and link both directions. Do not silently rewrite historical decisions after implementation depends on them.

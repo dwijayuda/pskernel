@@ -3,8 +3,16 @@
 Master target architecture: THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md
 Preserved implementation/evidence origin: THE_PSCV_COMPILER_REFERENCE_VERSION_3.md
 Branch: pscv/v3-execution
+Active implementation profile: pscv-hosted-lean/1
+Self-hosting goal and PSC1 implementation-pattern constraints: removed by explicit user instruction on 2026-10-08.
 
 ## Active execution
+
+- **2026-10-08 hosted compiler scope revision:** the user explicitly removed self-hosting as a goal and PSC1 self-host patterns as compiler coding constraints, while retaining PSCV language semantics and V5 architecture. ADR 0007 and COMPILER_EXECUTION_POLICY_V1.json supersede earlier continuation instructions requiring those implementation restrictions. Work remains GitHub/cloud only and kernel implementation remains external. Historical V3/V5 text, profile checkers and exact fixed-point evidence are retained rather than relabeled as current conformance.
+
+- **Hosted execution implementation:** language-authority/config/TrustManifest now select pscv-hosted-lean/1 and independently pin the normative PSCV reference and existing Lean host. Default checks use native compilation and existing semantic/authority/artifact tests; PSC1 source/profile checks and compiler self-application are explicit manual options. Automatic Rust Cargo and backend semantics remain enabled. Added policy checks rejecting conformance upgrades, language-identity drift and lost mandatory validation. No compiler-source rewrite, semantic rejection relaxation, kernel/provider change or theorem claim is part of this checkpoint. Cloud validation pending.
+
+- **Inherited linked-map checkpoint reconciled:** current starting commit 93add6da4e501c57f9016c7c3666ea52c87a66e7 passed main cloud run 37718501374, JS/Wasm fixed-point run 37718501397, Rust run 37718501361 and provider parity 37718501351. The linked map implementation and receipt hash correction are retained. These exact historical runs are evidence, not a reason to keep self-hosting as an implementation constraint.
 
 - **2026-10-08 V5.1 explicit direct-JS source-map link checkpoint:** commit `1954a20ecaa5dedfda78fbb3b781d59b67340bdd` implements opt-in `--backend javascript --products linked` for closed/uniform profiles. Unlinked JS and source-declaration bytes remain exact archived input artifacts. Both independently reconstructible ECMA-426 standalone maps are required; a distinct typed pass appends unmapped `sourceMappingURL` comments to new linked .js/.d.ts artifacts, with exact source/map/recipe identities, V3 registry, uniform derivation/5, typed bundle, archive replay and production route. This does not establish expression origin accuracy, execution-preservation theorem, hermeticity, DDC or final release acceptance. Cloud CI run 37717732808 is in progress (not yet a green claim); focused new test registration remains a follow-up. Preserved all V1/V2 registry versions and kernel/provider workstream boundaries. Stop at linked-output stage; do not start another stage before reporting.
 

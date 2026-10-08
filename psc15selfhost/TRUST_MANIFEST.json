@@ -121,5 +121,8 @@
       "declared FFI implementations"
     ]
   },
-  "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"
+  "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md",
+  "implementationProfile": "pscv-hosted-lean/1",
+  "executionPolicy": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json",
+  "selfHostProfilesRole": "historical-optional-checks-not-active-implementation-constraints"
 }

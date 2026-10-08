@@ -651,6 +651,18 @@
       "kind": "backend-profile-derivation",
       "status": "current-host",
       "canonicalPath": "contracts/backends/BACKEND_PROFILE_SELECTION_V2.json"
+    },
+    {
+      "id": "psc-compiler-execution-policy/1",
+      "kind": "compiler-execution-policy",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json"
+    },
+    {
+      "id": "pscv-hosted-lean/1",
+      "kind": "compiler-implementation-profile",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json"
     }
   ],
   "legacyImplementationReference": "THE_PSCV_COMPILER_REFERENCE_VERSION_3.md"

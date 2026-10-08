@@ -1,12 +1,7 @@
-name: PSC15 direct self-host fixed points
+name: PSC15 historical direct self-host fixed points (manual)
 
 on:
-  pull_request:
-    branches:
-      - psc2/selfhost-lean-kernel
-    paths:
-      - "psc15selfhost/**"
-      - ".github/workflows/psc15-direct-selfhost.yml"
+  # Historical self-host evidence; no longer a default implementation gate.
   workflow_dispatch:
 
 permissions:

@@ -1,3 +1,4 @@
+import { validateCompilerExecutionPolicy } from './compiler-execution-policy.mjs';
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -55,9 +56,12 @@ const psconfig = JSON.parse(
   await readFile(path.join(root, "psconfig.json"), "utf8"),
 );
 
-// The current self-host compiler remains on the inherited PSC2/bootstrap
-// implementation closure until pscv-v1 conformance is actually implemented.
-// Do not make the target PSCV profile look current merely by changing config.
+const executionPolicy = JSON.parse(await readFile(path.join(root, 'contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json'), 'utf8'));
+validateCompilerExecutionPolicy(executionPolicy, { languageAuthority: authority, config: psconfig, toolchain: bootstrapToolchain });
+
+// Host implementation syntax is independent of accepted program semantics.
+// Keep the inherited compiler capability milestone until PSCV conformance is
+// implemented; choosing a hosted compiler is not a profile promotion.
 for (const [key, expected] of [
   ["languageEdition", authority.languageEdition],
   ["sourceProfile", authority.sourceProfile],
@@ -87,6 +91,8 @@ process.stdout.write(
   [
     "PSCV_LANGUAGE_AUTHORITY: PASS",
     `document=${authority.document}`,
+    `implementationProfile=${authority.implementationProfile}`,
+    "selfHostingRequired=false",
     `sha256=${actualSha}`,
     `edition=${authority.languageEdition}`,
     `baseProfile=${authority.requiredLanguageProfile}`,

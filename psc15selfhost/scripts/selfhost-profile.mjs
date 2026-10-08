@@ -147,7 +147,9 @@ export async function checkSelfhostProfile() {
       psconfig.standardLanguageProfile !== profile.standardLanguageProfile) {
     throw new Error('PSC2_SELFHOST_PROFILE_PSCONFIG_LANGUAGE_DRIFT');
   }
-  if (psconfig.implementationProfile !== profile.implementationProfile) {
+  // Explicit legacy checks still enforce the original profile, even when the
+  // active compiler implementation uses the hosted profile.
+  if ((psconfig.historicalSelfhostProfile ?? psconfig.implementationProfile) !== profile.implementationProfile) {
     throw new Error('PSC2_SELFHOST_PROFILE_IMPLEMENTATION_DRIFT');
   }
 

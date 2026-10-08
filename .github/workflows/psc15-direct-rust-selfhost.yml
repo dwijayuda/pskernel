@@ -1,4 +1,4 @@
-name: PSC15 direct Rust self-host
+name: PSC15 Rust backend and optional self-host
 
 on:
   pull_request:
@@ -8,6 +8,12 @@ on:
       - "psc15selfhost/**"
       - ".github/workflows/psc15-direct-rust-selfhost.yml"
   workflow_dispatch:
+    inputs:
+      legacy_selfhost:
+        description: 'Run historical Rust compiler self-application and fixed point'
+        type: boolean
+        default: false
+        required: false
 
 permissions:
   contents: read
@@ -49,6 +55,7 @@ jobs:
           test "$(cargo --version)" = "cargo 1.98.1 (797e8a9bc 2026-08-05)"
 
       - name: Enforce Rust portable self-host source profile
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         working-directory: psc15selfhost
         run: |
           npm run check:portable-selfhost-profile
@@ -79,11 +86,13 @@ jobs:
         run: npm run test:backend-rust-cargo
 
       - name: Analyze and compile direct Rust whole compiler
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         timeout-minutes: 20
         working-directory: psc15selfhost
         run: npm run test:direct-rust-whole-compiler
 
       - name: Prove native Rust whole-compiler fixed point
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.legacy_selfhost }}
         timeout-minutes: 40
         working-directory: psc15selfhost
         run: npm run test:direct-rust-selfhost

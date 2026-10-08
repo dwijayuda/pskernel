@@ -5,6 +5,11 @@ import { readCheckedBuildHostSources } from './checked-build-evidence.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const trust = JSON.parse(await readFile(path.join(root, "TRUST_MANIFEST.json"), "utf8"));
+const execution = JSON.parse(await readFile(path.join(root, "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json"), "utf8"));
+if (trust.implementationProfile !== execution.implementationProfile ||
+    trust.executionPolicy !== "contracts/compiler/COMPILER_EXECUTION_POLICY_V1.json" ||
+    trust.selfHostProfilesRole !== "historical-optional-checks-not-active-implementation-constraints")
+  throw new Error("PSC_TRUST_EXECUTION_POLICY_DRIFT");
 const selfHost = JSON.parse(await readFile(path.join(root, "selfhost-profile.json"), "utf8"));
 if (trust.schemaVersion !== 1 || trust.contract !== "psc-trust-manifest/1") throw new Error("PSC_TRUST_MANIFEST_SCHEMA");
 if (trust.masterPlan !== "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md") throw new Error("PSC_TRUST_MANIFEST_MASTER_PLAN");

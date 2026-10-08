@@ -1,0 +1,11 @@
+-- Appendix A.7 and Chapter 9 require this owned binder surface.
+function id {{α : Type}}(value : α) : α := { value }
+
+function equals [BEq Nat](a : Nat, b : Nat) : Bool := { a == b }
+
+@[pscv_export, pscv_type_spec]
+def root : Nat := id(42)
+
+theorem canonical_instance : equals(3, 3) = true := by {
+  rfl
+}

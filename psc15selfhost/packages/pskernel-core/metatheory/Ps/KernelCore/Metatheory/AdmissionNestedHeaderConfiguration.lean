@@ -1,5 +1,6 @@
 import Ps.KernelCore.Admission.Inductive.Nested.Admission
 import Ps.KernelCore.Metatheory.AdmissionInductiveHeaderConfiguration
+import Ps.KernelCore.Metatheory.AdmissionParameterConfiguration
 
 /-
 Every successful nested-inductive admission first checks the leading user
@@ -45,6 +46,7 @@ theorem psKernelAddSimpleNestedInductive_success_header_params_refines
         psKernelOpenSimpleHeaderParams
             fuel sortedSession first.type decl.numParams =
           Except.ok openedParams ∧
+        openedParams.binders.length = decl.numParams ∧
         PsKernelTypingJudgment
           environment psKernelLocalContextEmpty
           first.type inferredType ∧
@@ -131,8 +133,12 @@ theorem psKernelAddSimpleNestedInductive_success_header_params_refines
                           refine
                             ⟨first, rest, inferredType, level,
                              checkedSession, sortedSession, openedParams,
-                             rfl, ?_, hSort, hParams, ?_, ?_⟩
+                             rfl, ?_, hSort, hParams, ?_, ?_, ?_⟩
                           · simpa [session, safety] using hChecked
+                          · exact
+                              psKernelOpenSimpleHeaderParams_success_length
+                                fuel sortedSession first.type decl.numParams
+                                openedParams hParams
                           · simpa [
                               session, safety,
                               psKernelMkCheckerSession,
@@ -170,7 +176,7 @@ theorem psKernelAddSimpleNestedInductive_success_first_header_refines
   obtain
       ⟨first, rest, inferredType, level,
        checkedSession, sortedSession, openedParams,
-       hTypes, _, _, _, hTyped, hReduction⟩ :=
+       hTypes, _, _, _, _, hTyped, hReduction⟩ :=
     psKernelAddSimpleNestedInductive_success_header_params_refines
       fuel environment result decl maxRecDepth maxNatSize
       hIndex hNative hString hRun

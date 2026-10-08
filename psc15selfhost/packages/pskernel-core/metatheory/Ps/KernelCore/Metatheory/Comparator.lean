@@ -1,5 +1,4 @@
 import Ps.KernelCore.Core.Expr
-import Lean.Elab.Tactic.Omega
 
 /- Reusable symmetry algebra for the portable kernel comparators. -/
 
@@ -1793,50 +1792,3 @@ theorem psKernelLevelEquivalent_sound_of_string_law
           (psKernelLevelNormalize left)
           (psKernelLevelNormalize right)
           hNormalized
-
-
-/--
-A positive-fuel self-comparison succeeds if its cursor plus the remaining
-recursive budget reaches the byte size. Raw next advances at least one byte,
-so this lemma needs no additional cursor-validity or comparator trust premise.
--/
-theorem psKernelStringEqFromWithFuel_refl_budget
-    (remaining : Nat) (value : String) (pos : Nat)
-    (hBudget : value.utf8ByteSize ≤ pos + remaining) :
-    psKernelStringEqFromWithFuel (Nat.succ remaining)
-      value value pos pos = true := by
-  induction remaining generalizing pos with
-  | zero =>
-      have hEnd : String.Internal.atEnd value (String.Pos.Raw.mk pos) = true := by
-        simp only [String.Internal.atEnd, String.Pos.Raw.byteIdx]
-        have : value.utf8ByteSize ≤ pos := by simpa using hBudget
-        simp [this]
-      simp [psKernelStringEqFromWithFuel, hEnd]
-  | succ remaining ih =>
-      cases hEnd : String.Internal.atEnd value (String.Pos.Raw.mk pos) with
-      | true =>
-          simp [psKernelStringEqFromWithFuel, hEnd]
-      | false =>
-          have hAdvance :
-              pos < (String.Internal.next value
-                (String.Pos.Raw.mk pos)).byteIdx := by
-            simpa only [String.Internal.next, String.Pos.Raw.next,
-              String.Internal.get, String.Pos.Raw.get] using
-              String.Pos.Raw.byteIdx_lt_byteIdx_next
-                value (String.Pos.Raw.mk pos)
-          have hNextBudget :
-              value.utf8ByteSize ≤
-                (String.Internal.next value
-                  (String.Pos.Raw.mk pos)).byteIdx + remaining := by
-            omega
-          simpa [psKernelStringEqFromWithFuel, hEnd] using
-            ih (String.Internal.next value
-              (String.Pos.Raw.mk pos)).byteIdx hNextBudget
-
-/-- Discharges the previously conditional negative-occurrence premise. -/
-theorem psKernelStringEqReflexiveLaw_proved :
-    PsKernelStringEqReflexiveLaw := by
-  intro value
-  unfold psKernelStringEq
-  simpa using psKernelStringEqFromWithFuel_refl_budget
-    value.utf8ByteSize value 0 (by simp)

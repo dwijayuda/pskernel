@@ -234,3 +234,11 @@ Architectural blockers still remaining:
   API/session implementation-refinement; audit refresh; integration and gates.
 - Preserve non-transitive algorithmic DefEq. No sorry, axioms, hidden trust
   assumptions, acceptance weakening, or Arena host infrastructure leakage.
+
+## Verified LazyDelta Nat frontier — 2026-10-08
+- Proof run **#614** is green at `4383b3bf19c08de332741419fe257cc2dd448225`.
+- The independent full LazyDelta step dispatcher, optional Nat reducer, and `psKernelDefEqLazyReductionAfterPred_configuration_sound` are registered and compile together.
+- The eager-Nat computation is classified by the precise Boolean proposition for `eagerReduce` or absence of local fvars; no source semantics were changed.
+- Next proof boundary: the Nat-successor predecessor fast path, complete `psKernelDefEqLazyReductionWithFuel` induction, and concrete DefEq checker-knot composition. Retain exact non-transitive algorithmic DefEq rules.
+- The following checkpoint introduces a specific successor representation and predecessor congruence semantic rule; it is not yet independently green until its proof CI passes.
+

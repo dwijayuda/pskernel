@@ -216,6 +216,148 @@ theorem psKernelDefEqLazyReductionAfterPred_configuration_sound
                           hRightSound.1 hNativeRun
 
 
+
+/-
+A successful Nat-predecessor recognizer must originate from one of the two
+independently specified successor representations.  In particular a malformed
+multi-argument Nat.succ head is not accepted as a successor representation.
+-/
+theorem psKernelExprList_singleton_of_length_one
+    (args : List PsKernelExpr)
+    (value : PsKernelExpr)
+    (hLength :
+      Nat.beq (psKernelExprListLength args) 1 = true)
+    (hGet :
+      psKernelExprListGet args 0 = Option.some value) :
+    args = List.cons value List.nil := by
+  cases args with
+  | nil =>
+      simp [psKernelExprListLength] at hLength
+  | cons first rest =>
+      cases rest with
+      | nil =>
+          have hValue : first = value := by
+            simpa [psKernelExprListGet] using hGet
+          subst first
+          rfl
+      | cons second tail =>
+          simp [psKernelExprListLength] at hLength
+
+
+theorem psKernelExprNatPred_some_refines
+    (expr predecessor : PsKernelExpr)
+    (hSuccess :
+      psKernelExprNatPred expr = Option.some predecessor) :
+    PsKernelNatSuccessorRep expr predecessor := by
+  cases expr with
+  | lit literal =>
+      cases literal with
+      | nat value =>
+          cases value with
+          | zero =>
+              simp [psKernelExprNatPred] at hSuccess
+          | succ previous =>
+              have hPred :
+                  PsKernelExpr.lit (PsKernelLiteral.nat previous) =
+                    predecessor := by
+                simpa [psKernelExprNatPred] using hSuccess
+              subst predecessor
+              exact PsKernelNatSuccessorRep.literal previous
+      | str value =>
+          simp [psKernelExprNatPred] at hSuccess
+  | app fn arg =>
+      cases hHead :
+          psKernelExprGetAppFn (PsKernelExpr.app fn arg) with
+      | const name levels =>
+          cases levels with
+          | nil =>
+              cases hName :
+                  psKernelNameEq name psKernelNatSuccName with
+              | false =>
+                  simp [
+                    psKernelExprNatPred, hHead, hName
+                  ] at hSuccess
+              | true =>
+                  cases hArity :
+                      Nat.beq
+                        (psKernelExprGetAppNumArgs
+                          (PsKernelExpr.app fn arg))
+                        1 with
+                  | false =>
+                      simp [
+                        psKernelExprNatPred, hHead, hName, hArity
+                      ] at hSuccess
+                  | true =>
+                      have hArg :
+                          psKernelExprListGet
+                              (psKernelExprGetAppArgs
+                                (PsKernelExpr.app fn arg))
+                              0 =
+                            Option.some predecessor := by
+                        simpa [
+                          psKernelExprNatPred, hHead, hName, hArity
+                        ] using hSuccess
+                      have hArgs :=
+                        psKernelExprList_singleton_of_length_one
+                          (psKernelExprGetAppArgs
+                            (PsKernelExpr.app fn arg))
+                          predecessor
+                          hArity
+                          hArg
+                      exact
+                        PsKernelNatSuccessorRep.constructor
+                          (PsKernelExpr.app fn arg)
+                          predecessor name hHead hName hArgs
+          | cons level tail =>
+              simp [psKernelExprNatPred, hHead] at hSuccess
+      | bvar index =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | fvar name =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | mvar name =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | sort level =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | app head argument =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | lam name type body info =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | forallE name type body info =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | letE name type value body nondep =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | lit literal =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | mdata metadata body =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+      | proj typeName index body =>
+          simp [psKernelExprNatPred, hHead] at hSuccess
+  | bvar index =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+  | fvar name =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+  | mvar name =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+  | sort level =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+  | const name levels =>
+      simp [
+        psKernelExprNatPred, psKernelExprGetAppFn,
+        psKernelExprGetAppNumArgs, psKernelExprGetAppArgs,
+        psKernelExprListLength
+      ] at hSuccess
+  | lam name type body info =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+  | forallE name type body info =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+  | letE name type value body nondep =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+  | mdata metadata body =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+  | proj typeName index body =>
+      simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
+
+
 /-
 The fast zero shortcut does not equate arbitrary syntactic expressions.
 Its supported representations are exactly Nat literal zero or an uninstantiated

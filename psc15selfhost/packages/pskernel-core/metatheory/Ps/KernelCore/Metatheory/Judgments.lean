@@ -564,6 +564,32 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.proj rightName rightIndex right)
 
 
+/-
+Independent representation of a Nat successor recognized by the algorithmic
+DefEq predecessor shortcut.  It accepts either the canonical literal form or
+an unapplied-universe Nat.succ constructor with exactly one argument.  It never
+uses the executable psKernelExprNatPred recognizer as a semantic premise.
+-/
+inductive PsKernelNatSuccessorRep :
+    PsKernelExpr -> PsKernelExpr -> Prop
+  | literal (predecessor : Nat) :
+      PsKernelNatSuccessorRep
+        (PsKernelExpr.lit (PsKernelLiteral.nat (Nat.succ predecessor)))
+        (PsKernelExpr.lit (PsKernelLiteral.nat predecessor))
+  | constructor
+      (expr predecessor : PsKernelExpr)
+      (name : PsKernelName)
+      (hHead :
+        psKernelExprGetAppFn expr =
+          PsKernelExpr.const name List.nil)
+      (hName :
+        psKernelNameEq name psKernelNatSuccName = true)
+      (hArgs :
+        psKernelExprGetAppArgs expr =
+          List.cons predecessor List.nil) :
+      PsKernelNatSuccessorRep expr predecessor
+
+
 inductive PsKernelRecursorMajorNormalization :
     PsKernelExpr -> PsKernelExpr -> Prop
   | identity
@@ -1067,6 +1093,24 @@ inductive PsKernelDefEqJudgment
         localContext
         (PsKernelExpr.const name leftLevels)
         (PsKernelExpr.const name rightLevels)
+  | natSuccessorPred
+      {localContext : PsKernelLocalContext}
+      (left right leftPred rightPred : PsKernelExpr)
+      (hLeft :
+        PsKernelNatSuccessorRep left leftPred)
+      (hRight :
+        PsKernelNatSuccessorRep right rightPred)
+      (hPred :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          leftPred
+          rightPred) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
   | projection
       {localContext : PsKernelLocalContext}
       (typeName : PsKernelName)

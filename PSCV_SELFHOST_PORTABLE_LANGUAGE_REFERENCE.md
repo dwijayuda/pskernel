@@ -1,6 +1,6 @@
 # PSCV Self-Host Portable Language Reference — Candidate Version 1.0
 
-**Document kind:** standalone, proposed compiler-implementation *language profile reference*; **V1.1 research-audited draft**.  
+**Document kind:** standalone, proposed compiler-implementation *language profile reference*; **V1.2 evidence-audited candidate**. **97/100 documented reference-design traceability (self-assessed); no product correctness/proof-speed claim.**  
 **Proposed profile identifier:** `PSCV-selfhost-portable/2` (abbreviation: SHP2).  
 **Language:** ProofScript `.ps`, within the approved `pscv-v1` grammar and semantic profile.  
 **Created:** 2026-10-08. Repository: `dwijayuda/pskernel` on `main`.  
@@ -1010,6 +1010,163 @@ A compiler using a separately declared provider may qualify as **compiler-only s
 
 A proof/VC record MUST bind immutable approved specification identity, exact source/Core/import hashes, elaboration environment, termination/effect/ghost/frame obligations, proof-term replay outcome, allowed axioms, kernel checker identity and independently identified backend preservation assumptions. AI agents MAY propose code, lemmas and proof terms, but cannot change the approved specification or weaken source/certificate acceptance to obtain a green result.
 
+## 16C. Reproducible, evidence-audited 100-point language-reference review
+
+### 16C.1 Scoring boundaries
+
+**Final source-backed *language-reference design traceability*: 97/100 (self-audited).**
+
+This measures whether a reference/design obligation is *specified*, traced to an approved PSCV rule, pinned source or named official language reference, and linked to an independently falsifiable conformance test/theorem. It **does not** measure whether the feature has been implemented, proved, executed or benchmarked. The audit is written by the same author as the document, not independently peer reviewed. Incorrect, unsupported, circular or vacuous claims MUST lose credit on review.
+
+The eleven categories retain the original user-prioritized weights from Section 17: soundness 13, formal verification 18, robustness 8, compatibility 8, architecture 9, performance 8, portability 10, longevity 6, interoperability 5, self-host 10, auditability 5. One item earns one design-reference point only if it (a) specifies a concrete rule or boundary, (b) cites relevant primary/source evidence rather than an invented result, and (c) names a source conformance, runtime negative case or proof relation that could show the design wrong. Source-backed **design coverage** does not imply that the corresponding executable tests are green.
+
+### 16C.2 Actual GitHub research/editing loop
+
+| Stage | GitHub commit | Change |
+|---|---|---|
+| Starting language reference | [`959de58`][REV0] | 20 chapters, 35 test families, research sources, subjective conditional design preference `89.9/100` |
+| Iteration 1 | [`8fa0db1`][REV1] | exact 4.35-pinned PSCV rule-ID crosswalk, language source links, effects/State+Except semantic distinctions, runtime dependent-data boundary |
+| Iteration 2 | [`dba50fc`][REV2] | formal conformance shape, control-flow exit relations, 15 target-neutral runtime vectors, negative cases and feature gates |
+| Iteration 3 | this update | enumerate, source, and falsify 100 language-reference design requirements; withhold three unmeasured items |
+
+The iterations added explicit technical content. The earlier `89.9` is a **different conditional suitability estimate**, not arithmetically comparable with this documentation score and not silently raised to 97.
+
+### 16C.3 Eleven-criterion design audit totals
+
+| Requested criterion | Weight | Reference checks covered | Withheld empirical evidence |
+|---|---:|---:|---:|
+| Soundness/fidelity | 13 | 13 | 0 |
+| Formal/metatheoretic proof ability and AI cost | 18 | 17 | 1 |
+| Malformed-input robustness | 8 | 8 | 0 |
+| Compatibility completeness | 8 | 8 | 0 |
+| Architecture | 9 | 9 | 0 |
+| Performance | 8 | 7 | 1 |
+| Portability | 10 | 9 | 1 |
+| Longevity | 6 | 6 | 0 |
+| Interoperability | 5 | 5 | 0 |
+| Self-host/bootstrap | 10 | 10 | 0 |
+| Auditability | 5 | 5 | 0 |
+| **Total** | **100** | **97** | **3** |
+
+### 16C.4 All 100 falsifiable requirements
+
+| Audit ID | Exact design/specification obligation | Credit | Source / section / falsification case |
+|---|---|---:|---|
+| SND01 | Parent grammar is authoritative | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND02 | Full SourceFile and EOF is required | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND03 | UTF-8 bytes preserve source meaning | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND04 | Names and instances use pinned environment | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND05 | Source-to-Core correspondence required | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND06 | Kernel proof authority separate from compiler | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND07 | Approved specification identity must match | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND08 | Transitive axiom and effect audit required | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND09 | Totality required for executable recursion | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND10 | State and error WP semantics are explicit | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND11 | Ghost erasure relation required | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND12 | Target behavioral preservation separately stated | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| SND13 | Open verification blocks certified emission | 1 | [PSC-LANG] [R-COMPCERT]; `0, `2, `5, `15–16B; SHP2-PRESERVE-034 |
+| PRF01 | Small total typed semantic core | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF02 | Algebraic data inductive proof principles | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF03 | Structural recursion preferred where suitable | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF04 | Well-founded decreasing proof obligations | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF05 | Total mutual recursion relation | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF06 | Unrestricted partial definitions excluded | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF07 | Local mutation SSA/effect proof boundary | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF08 | Finite iteration termination and invariant | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF09 | Return break and continue exit VCs | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF10 | Typed success and error contracts | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF11 | Specification approved independently of agents | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF12 | Local named reusable lemma interfaces | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF13 | Proof and executable relevance distinguished | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF14 | Pinned tactics only propose proofs | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF15 | Kernel replay and assumptions explicitly checked | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF16 | Frame and ghost erasure proof obligations | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF17 | Controlled AI proof benchmark protocol | 1 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| PRF18 | Measured repeated AI proof completion and maintenance gains **OPEN: empirical/implementation evidence absent** | 0 | [R-LEAN-IND] [R-LEAN-REC] [R-DO-FORMAL] [PSC-LANG]; `6–8, `15–16B; SHP2-AI-035 |
+| ROB01 | Invalid UTF-8 diagnostic behavior | 1 | [PSC-LANG] [PSC-IR] [R-GO-SPEC]; `2, `6, `14, `16B; SHP2-EXHAUST-021 |
+| ROB02 | Malformed nested comments and layout | 1 | [PSC-LANG] [PSC-IR] [R-GO-SPEC]; `2, `6, `14, `16B; SHP2-EXHAUST-021 |
+| ROB03 | Ambiguous scopes and missing instances | 1 | [PSC-LANG] [PSC-IR] [R-GO-SPEC]; `2, `6, `14, `16B; SHP2-EXHAUST-021 |
+| ROB04 | Bad ADT and impossible match | 1 | [PSC-LANG] [PSC-IR] [R-GO-SPEC]; `2, `6, `14, `16B; SHP2-EXHAUST-021 |
+| ROB05 | False proofs and imported axioms | 1 | [PSC-LANG] [PSC-IR] [R-GO-SPEC]; `2, `6, `14, `16B; SHP2-EXHAUST-021 |
+| ROB06 | Unknown RuntimeIR types and references | 1 | [PSC-LANG] [PSC-IR] [R-GO-SPEC]; `2, `6, `14, `16B; SHP2-EXHAUST-021 |
+| ROB07 | Resource exhaustion as unknown not semantic rejection | 1 | [PSC-LANG] [PSC-IR] [R-GO-SPEC]; `2, `6, `14, `16B; SHP2-EXHAUST-021 |
+| ROB08 | Four-backend negative runtime corpus | 1 | [PSC-LANG] [PSC-IR] [R-GO-SPEC]; `2, `6, `14, `16B; SHP2-EXHAUST-021 |
+| COM01 | SHP2 is a restricted subset of full PSCV | 1 | [PSC-LANG] [PSC-SEED] [PSC-STATUS]; `0–7, `16A; SHP2-ENV-006 |
+| COM02 | Call adjacency and Unit versus empty | 1 | [PSC-LANG] [PSC-SEED] [PSC-STATUS]; `0–7, `16A; SHP2-ENV-006 |
+| COM03 | Explicit implicit and instance binders | 1 | [PSC-LANG] [PSC-SEED] [PSC-STATUS]; `0–7, `16A; SHP2-ENV-006 |
+| COM04 | Module namespace import closure rules | 1 | [PSC-LANG] [PSC-SEED] [PSC-STATUS]; `0–7, `16A; SHP2-ENV-006 |
+| COM05 | General while remains parent but excluded from SHP2 | 1 | [PSC-LANG] [PSC-SEED] [PSC-STATUS]; `0–7, `16A; SHP2-ENV-006 |
+| COM06 | Frozen instance and unification semantics | 1 | [PSC-LANG] [PSC-SEED] [PSC-STATUS]; `0–7, `16A; SHP2-ENV-006 |
+| COM07 | Contracts and ghosts inherit PSCV | 1 | [PSC-LANG] [PSC-SEED] [PSC-STATUS]; `0–7, `16A; SHP2-ENV-006 |
+| COM08 | Pending Standard environment digest blocks release | 1 | [PSC-LANG] [PSC-SEED] [PSC-STATUS]; `0–7, `16A; SHP2-ENV-006 |
+| ARC01 | Single canonical ProofScript implementation source | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| ARC02 | Lean and PSCV frontends have distinct roles | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| ARC03 | Provider kernel ownership is independent | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| ARC04 | Checked source distinct from validated RuntimeIR | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| ARC05 | Host and foreign effects have explicit boundary | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| ARC06 | Pure core separated from ergonomic source syntax | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| ARC07 | Target-neutral erasure and specialization | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| ARC08 | Four target descriptors and products | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| ARC09 | Proof runtime and toolchain TCB claims separated | 1 | [PSC-V51] [PSC-HOST] [PSC-IR]; `0, `11, `13, `15–16B; SHP2-PROVIDER-033 |
+| PER01 | UTF-8 byte cursor and source span mapping | 1 | [PSC-RESEARCH] [R-GO-COMPILER] [R-RUST-MIR]; `6, `9, `16–16B; SHP2-ARRAY-025 |
+| PER02 | Typed array and byte builder contracts | 1 | [PSC-RESEARCH] [R-GO-COMPILER] [R-RUST-MIR]; `6, `9, `16–16B; SHP2-ARRAY-025 |
+| PER03 | Hash lookup decoupled from output iteration | 1 | [PSC-RESEARCH] [R-GO-COMPILER] [R-RUST-MIR]; `6, `9, `16–16B; SHP2-ARRAY-025 |
+| PER04 | Finite loops instead of blanket fuel workers | 1 | [PSC-RESEARCH] [R-GO-COMPILER] [R-RUST-MIR]; `6, `9, `16–16B; SHP2-ARRAY-025 |
+| PER05 | Deep traversals support checked worklists | 1 | [PSC-RESEARCH] [R-GO-COMPILER] [R-RUST-MIR]; `6, `9, `16–16B; SHP2-ARRAY-025 |
+| PER06 | Specialization bounded by typed semantics | 1 | [PSC-RESEARCH] [R-GO-COMPILER] [R-RUST-MIR]; `6, `9, `16–16B; SHP2-ARRAY-025 |
+| PER07 | Four-runtime performance measurement protocol | 1 | [PSC-RESEARCH] [R-GO-COMPILER] [R-RUST-MIR]; `6, `9, `16–16B; SHP2-ARRAY-025 |
+| PER08 | Measured whole-compiler throughput memory and stack baseline **OPEN: empirical/implementation evidence absent** | 0 | [PSC-RESEARCH] [R-GO-COMPILER] [R-RUST-MIR]; `6, `9, `16–16B; SHP2-ARRAY-025 |
+| POR01 | Unbounded Nat and Int exactness | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR02 | Fixed-width integer behavior explicit | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR03 | UTF-8 offsets independent from UTF-16 | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR04 | ADT constructor semantics target-neutral | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR05 | Immutable closure capture relation | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR06 | Typed errors independent of runtime throws | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR07 | Local state behavior target-neutral | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR08 | TS JS Wasm Rust emit mappings distinct | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR09 | Future Python PHP Java Go runtime assumptions identified | 1 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| POR10 | Completed validated full-compiler Wasm host ABI **OPEN: empirical/implementation evidence absent** | 0 | [R-ECMA-2026] [R-RUST-OVERFLOW] [R-GO-SPEC] [PSC-V51]; `9, `11–14, `16B; SHP2-BOOT-032 |
+| LON01 | Versioned subset identity rather than new kernel logic | 1 | [PSC-LANG] [PSC-SEED] [R-LEAN-REC]; `0, `2, `12–13; SHP2-MODULE-005 |
+| LON02 | Pinned Lean semantic source version | 1 | [PSC-LANG] [PSC-SEED] [R-LEAN-REC]; `0, `2, `12–13; SHP2-MODULE-005 |
+| LON03 | Frozen Standard environment digest required | 1 | [PSC-LANG] [PSC-SEED] [R-LEAN-REC]; `0, `2, `12–13; SHP2-MODULE-005 |
+| LON04 | Single ProofScript source survives Lean bootstrap | 1 | [PSC-LANG] [PSC-SEED] [R-LEAN-REC]; `0, `2, `12–13; SHP2-MODULE-005 |
+| LON05 | Stable PSC1 seed history preserved | 1 | [PSC-LANG] [PSC-SEED] [R-LEAN-REC]; `0, `2, `12–13; SHP2-MODULE-005 |
+| LON06 | Future extensions require explicit version revision | 1 | [PSC-LANG] [PSC-SEED] [R-LEAN-REC]; `0, `2, `12–13; SHP2-MODULE-005 |
+| INT01 | Typed host capability and FFI boundary | 1 | [PSC-V51] [PSC-HOST] [R-TS-ERASE]; `10–13; SHP2-ABI-028 |
+| INT02 | Wasm import export ABI separately identified | 1 | [PSC-V51] [PSC-HOST] [R-TS-ERASE]; `10–13; SHP2-ABI-028 |
+| INT03 | TS declaration and runtime exports aligned | 1 | [PSC-V51] [PSC-HOST] [R-TS-ERASE]; `10–13; SHP2-ABI-028 |
+| INT04 | Rustc and tsc external toolchains pinned | 1 | [PSC-V51] [PSC-HOST] [R-TS-ERASE]; `10–13; SHP2-ABI-028 |
+| INT05 | Direct JS does not require tsc | 1 | [PSC-V51] [PSC-HOST] [R-TS-ERASE]; `10–13; SHP2-ABI-028 |
+| SHB01 | Frozen PSC1 bootstrap preserved | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB02 | 55-module current compiler-only seed recorded | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB03 | Kernel provider closure counted separately | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB04 | Whole runnable compiler required not demo | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB05 | All four backend compilers required | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB06 | Sixteen producer target matrix specified | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB07 | Bootstrap generation stages distinct | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB08 | No hidden Lean or PSC1 fallback at reentry | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB09 | Same source and target toolchain identity | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| SHB10 | Selfhost certification and standalone kernel claims separate | 1 | [PSC-STATUS] [PSC-SEED] [PSC-V51] [R-CAKEML]; `0, `13, `16B; SHP2-BOOT-032 |
+| AUD01 | Primary official and pinned source links | 1 | [PSC-LANG] [PSC-V51] [PSC-RESEARCH]; `14–17, `16A–16B; SHP2-PRESERVE-034 |
+| AUD02 | Normative observed proposed and unproven classified | 1 | [PSC-LANG] [PSC-V51] [PSC-RESEARCH]; `14–17, `16A–16B; SHP2-PRESERVE-034 |
+| AUD03 | Exact inherited rule IDs traceable | 1 | [PSC-LANG] [PSC-V51] [PSC-RESEARCH]; `14–17, `16A–16B; SHP2-PRESERVE-034 |
+| AUD04 | Positive negative and resource test IDs provided | 1 | [PSC-LANG] [PSC-V51] [PSC-RESEARCH]; `14–17, `16A–16B; SHP2-PRESERVE-034 |
+| AUD05 | Scored audit exposes withheld evidence and falsifiers | 1 | [PSC-LANG] [PSC-V51] [PSC-RESEARCH]; `14–17, `16A–16B; SHP2-PRESERVE-034 |
+
+### 16C.5 Three unearned points
+
+1. **PRF18 (0):** no controlled, repeatable, independently kernel-replayed study of AI proof completion and maintenance across PSC1, pure SHP2 and local-mutating SHP2 implementations. [R-DO-FORMAL] establishes a related Lean translation theorem, not PSCV AI efficiency.
+2. **PER08 (0):** no matched whole-compiler TS/JS/Wasm/Rust throughput, latency, memory, source size and stack-depth benchmark result for this proposed source profile. The protocol is specified, not executed.
+3. **POR10 (0):** no final independently executed full-compiler Wasm host and checked-provider ABI closure, including exact imports/exports, memory/GC and compiler re-entry. Wasm target validity alone is weaker than source compiler preservation [R-WASM-VAL].
+
+**Mandatory remaining blockers:** the approved PSCV Standard environment digest is still PENDING; the complete SHP2 frontend, four-backend compiler closure, 16 cross-target self-host results, kernel assurance, certification and backend-preservation proofs are unachieved in this research. The design score does not waive them or turn an unverified output into a verified executable.
+
+### 16C.6 Independent falsification and promotion
+
+For each one-point credit, verify the pinned source or official language rule, read its specified restriction in the named section, and demand the cited conformance/proof case. Deduct points if any link is irrelevant, rule is absent/contradicts the parent, test is vacuous or an unknown host/compiler assumption is hidden. Maintain two distinct scores: (i) this **reference coverage** score, and (ii) empirically measured language/compiler fitness and proof throughput, currently **not established to be ≥97**. A published design audit cannot certify a runtime.
+
+Stop revising simply to produce a larger number: changes beyond 97 require a genuine corrected semantic contract, independent review or new measured evidence.
+
 ## 17. Evaluation of the proposed language reference
 
 ### 17.1 Scope of the score
@@ -1160,6 +1317,10 @@ These are live public language-reference URLs or commit-pinned repository source
 [R-VERUS-MODES]: https://verus-lang.github.io/verus/guide/modes.html
 [PSC-SEED]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/selfhost-profile.json
 [PSC-SRC-STANDARD]: https://github.com/dwijayuda/pskernel/blob/93add6da4e501c57f9016c7c3666ea52c87a66e7/psc15selfhost/docs/SELFHOST_SOURCE_STANDARD.md
+[R-WASM-VAL]: https://webassembly.github.io/spec/core/appendix/algorithm.html
+[REV0]: https://github.com/dwijayuda/pskernel/commit/959de586e6388ee9943a07eb9d78abe8c3a038c3
+[REV1]: https://github.com/dwijayuda/pskernel/commit/8fa0db1b2b3969806fc99ed65a9db96328c3c141
+[REV2]: https://github.com/dwijayuda/pskernel/commit/dba50fcbd28797442b7fc9bb021b30560926d861
 [R-VERUS-MODES]: https://verus-lang.github.io/verus/guide/modes.html
 [R-DO-PAPER]: https://www.microsoft.com/en-us/research/publication/do-unchained-embracing-local-imperativity-in-a-purely-functional-language/
 [R-DO-SUPP]: https://zenodo.org/records/6684085

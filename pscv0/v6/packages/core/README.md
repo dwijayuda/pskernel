@@ -1,7 +1,7 @@
-# @proofscript/pscv-core
+# @proofscript/pscv-core — Lean 4 source package
 
-New, small composition skeleton. It has no old compiler dependencies.
+Implementation: [src/Pscv/Core/Model.lean](src/Pscv/Core/Model.lean). Compiler implementation is Lean, not JavaScript.
 
-createCompilerCore returns a profile-scoped plan, inspectSource returns source identity only, and checkCanonicalAdmissions delegates to an exact pinned native or Wasm Lean kernel package. build and verify reject because PSCV parsing, elaboration, proof closure, erasure, target IR validation and backend emission are not yet implemented here.
+P0 reuses official Lean Name/Expr/Declaration representation. CoreCandidate contains untrusted candidate declarations and source metadata; it is not CheckedCore, CertifiedSource, or permission to emit code.
 
-The final native compiler will be built with Lean and distributed without a mandatory Lean development toolchain or Node runtime. This npm JavaScript API is a preliminary orchestration and contract verification slice only; it is not an implementation of all PSCV language features.
+Built by Lake target PscvCore with Lean 4.35.0-rc3. This development npm package ships source modules only. Platform-specific compiled native releases come later. Full PSCV source semantics and frontend are not implemented yet.

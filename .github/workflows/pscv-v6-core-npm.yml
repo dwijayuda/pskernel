@@ -1,4 +1,4 @@
-name: PSCV V6 minimal npm core
+name: PSCV V6 Lean native packages
 
 on:
   pull_request:
@@ -17,25 +17,51 @@ permissions:
   contents: read
 
 jobs:
-  core-contracts:
+  lean-native:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35 RC3
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc3
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install only local npm workspaces, without lifecycle scripts
+      - name: Verify exact Lean semantic toolchain identity
+        working-directory: pscv0/v6
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "470d5ce1400764999581fd26d5d72b00d990b0f4"
+      - name: Install npm package manifests without lifecycle scripts
         working-directory: pscv0/v6
         run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Test no-false-authority and explicit extension policies
+      - name: Build compiler packages and native executable from Lean sources
+        working-directory: pscv0/v6
+        run: npm run build:native
+      - name: Execute actual Lean kernel proof-acceptance/rejection and extension checks
         working-directory: pscv0/v6
         run: npm test
-      - name: Inspect package tarball contents
+      - name: Inspect native CLI and explicit unsupported compilation mode
+        working-directory: pscv0/v6
+        run: |
+          set -euo pipefail
+          lake exe pscv_v6_dev --version
+          lake exe pscv_v6_dev capabilities
+          lake exe pscv_v6_dev kernel-empty-smoke
+          if lake exe pscv_v6_dev build src/Main.ps; then
+            echo "ERROR: incomplete compiler falsely accepted a build" >&2
+            exit 1
+          fi
+      - name: Inspect npm source package contents
         working-directory: pscv0/v6
         run: npm run pack:dry
 
-  pinned-lean-kernel-providers:
+  existing-lean-provider-oracles:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -43,21 +69,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install isolated V6 npm workspaces without lifecycle scripts
+      - name: Install only V6 npm package metadata
         working-directory: pscv0/v6
         run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Link only exact in-repository published-kernel package facades
+      - name: Link existing pinned official Lean provider npm facades
         working-directory: pscv0/v6
-        shell: bash
         run: |
           set -euo pipefail
           mkdir -p node_modules/@proofscript
           ln -sfn ../../../packages/pskernel-lean node_modules/@proofscript/pskernel-lean
           ln -sfn ../../../packages/pskernel-lean-wasm node_modules/@proofscript/pskernel-lean-wasm
-          test -f node_modules/@proofscript/pskernel-lean/LEAN_SOURCE_PIN.json
-          test -f node_modules/@proofscript/pskernel-lean-wasm/LEAN_SOURCE_PIN.json
-      - name: Real native and Wasm kernel admission acceptance/rejection
+      - name: Run independent provider checks, no PSCV certification claim
         working-directory: pscv0/v6
-        env:
-          PSCV_REAL_KERNELS: "1"
-        run: npm run test:real-kernels
+        run: npm run test:provider-oracles

@@ -1,14 +1,20 @@
 {
   "name": "@proofscript/pscv-core",
   "version": "0.0.1-dev",
-  "description": "Minimal authority-conscious PSCV compiler composition boundary",
-  "type": "module",
-  "files": ["index.mjs", "README.md"],
-  "exports": { ".": "./index.mjs" },
-  "dependencies": {
-    "@proofscript/pscv-kernel": "0.0.1-dev",
-    "@proofscript/pscv-extensions": "0.0.1-dev"
-  },
-  "engines": { "node": ">=22" },
-  "license": "UNLICENSED"
+  "private": true,
+  "description": "Lean 4 source package for semantic-core-model, PSCV V6",
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "proofscript": {
+    "implementationLanguage": "lean4",
+    "leanToolchain": "leanprover/lean4:v4.35.0-rc3",
+    "sourceRoots": [
+      "src"
+    ],
+    "role": "semantic-core-model",
+    "releasedNativeArtifact": false,
+    "verificationClaims": []
+  }
 }

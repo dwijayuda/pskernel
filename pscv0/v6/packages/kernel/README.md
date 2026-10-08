@@ -1,11 +1,5 @@
-# @proofscript/pscv-kernel
+# @proofscript/pscv-kernel — Lean 4 source package
 
-Pinned admission checker adapter, not a new kernel.
+Implementation: [src/Pscv/Kernel/Checker.lean](src/Pscv/Kernel/Checker.lean). Uses Lean 4.35.0-rc3 Lean.Environment.addDeclCore to check real candidate declarations. Its result is kernel-admission diagnostic data, not PSCV certification or proof of source fidelity.
 
-The checkWithLeanKernel API loads only @proofscript/pskernel-lean (native) or @proofscript/pskernel-lean-wasm (Wasm), both exact Lean 4.34.0 at commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b and protocol pskernel-lean/1.
-
-Native execution disallows the PSC_LEAN_KERNEL_PROVIDER_BIN override and checkout fallback. It uses the bundled provider with manifest hash verification. Wasm uses its bundled verified launcher. Provider identity and decision shape are checked again at the adapter boundary. No caller-selectable binary path, checker callback, or package specifier is exposed.
-
-This package only reports the Lean kernel admission outcome of supplied Core admissions. It does not prove that the admissions represent the user's PSCV program, or grant PSCV-CERT. The Node host and pinned provider npm packages remain in the preliminary TCB.
-
-A matching Lean 4.35 provider, formal semantic environment and source-fidelity checks are needed for V6 verified profiles.
+The separately packaged native/Wasm @proofscript/pskernel-lean@4.34.0 and @proofscript/pskernel-lean-wasm@4.34.0 remain independent exact-version oracles. They must not silently substitute for the normative Lean 4.35 checker. Runtime provider selection and session-bound authority require additional implementation.

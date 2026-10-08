@@ -1,14 +1,16 @@
 {
-  "name": "pscv-v6-clean-core-workspace",
+  "name": "pscv-v6-lean-workspace",
   "private": true,
   "version": "0.0.1-dev",
-  "type": "module",
-  "engines": { "node": ">=22" },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
+  "description": "Lean 4.35-rc3 native-first PSCV compiler workspace; npm is distribution",
   "scripts": {
-    "test": "node --test test/*.test.mjs",
-    "test:real-kernels": "node --test test/real-kernels.test.mjs",
-    "check": "npm run test && npm run pack:dry",
+    "build:native": "lake build PscvCore PscvExtensions PscvKernel pscv_v6_dev pscv_v6_native_tests",
+    "test:native": "lake exe pscv_v6_native_tests",
+    "test": "npm run test:native",
+    "test:provider-oracles": "node --test test/provider-oracles.test.mjs",
     "pack:dry": "npm pack --dry-run --workspace @proofscript/pscv-core && npm pack --dry-run --workspace @proofscript/pscv-kernel && npm pack --dry-run --workspace @proofscript/pscv-extensions && npm pack --dry-run --workspace @proofscript/pscv-cli"
   }
 }

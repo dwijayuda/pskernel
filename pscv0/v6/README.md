@@ -1,31 +1,39 @@
-# PSCV V6 — fresh kernel-first npm core
+# PSCV V6 — Lean-native compiler packages
 
-**Status:** P0 architecture and runnable npm package slice, not a complete or verified PSCV compiler.
+**Status:** Initial Lean-native implementation foundation. Not a conformant PSCV compiler, a PSCV-certified executable, or a publicly published npm suite.
 
-This folder is a new implementation. It does **not** import the old PSC2 compiler, self-host frontend, JS checked-service or old backend drivers. Their interfaces are not a V6 compatibility requirement. The only runtime reuse currently planned for the first checking capability is through the published npm APIs of the existing Lean 4.34 native and Wasm kernel packages.
+All compiler implementation and extension policy is written in **Lean 4**. A pinned Lean 4.35.0-rc3 compiler builds the native P0 tool. npm transports source modules and, later, per-platform prebuilt native tools. npm does not implement the compiler in JavaScript.
 
-Read [Core npm architecture](CORE_NPM_ARCHITECTURE.md), the [V6 reference](../THE_PSCV_COMPILER_REFERENCE_VERSION_6.md), and the [normative language reference](../PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md).
+## References
 
-## Package boundaries
+- [Lean-native reuse research and migration](LEAN_NATIVE_REUSE_RESEARCH.md): existing Lean code inventory, reuse plan, package design, version tradeoffs and soundness risks.
+- [V6 target compiler reference](../THE_PSCV_COMPILER_REFERENCE_VERSION_6.md).
+- [Normative PSCV language reference](../PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md): specifies .ps syntax and verified profiles. Lean is the implementation language, not the .ps grammar.
+- [Core architecture and security criteria](CORE_NPM_ARCHITECTURE.md).
 
-- [pscv-extensions](packages/extensions/README.md): extension metadata, explicit activation, deterministic fingerprinting; no execution or trusted semantic changes.
-- [pscv-kernel](packages/kernel/README.md): exact native/Wasm official Lean 4.34 provider selection, admission validation and kernel decision.
-- [pscv-core](packages/core/README.md): profile-scoped compiler composition skeleton, source identity and kernel admission check.
-- [pscv-cli](packages/cli/README.md): experimental Node development CLI, not the production standalone PSCV compiler.
+## Active Lean source packages
 
-## Develop
+| Candidate npm package | Source | P0 capability |
+|---|---|---|
+| @proofscript/pscv-core | packages/core/src/Pscv/Core | typed candidate Core model using Lean.Declaration |
+| @proofscript/pscv-extensions | packages/extensions/src/Pscv/Extensions | E0–E6 policy in Lean; no plugin code execution |
+| @proofscript/pscv-kernel | packages/kernel/src/Pscv/Kernel | Lean 4.35 build-host kernel admission |
+| @proofscript/pscv-cli | packages/cli/src | native development executable |
 
-From this directory:
+All four are **private development npm manifests** and ship Lean sources rather than handwritten compiler .mjs implementations. A future release will package compiled native executables and platform libraries. Node is optional for npm tooling, not necessary to run the native executable.
 
-    npm install --ignore-scripts --no-audit --no-fund
-    npm test
-    npm run pack:dry
-    node packages/cli/bin/psc-core.mjs capabilities
+### Native build
 
-Integration CI additionally exercises real native and Wasm Lean kernel providers from the existing package artifacts.
+From pscv0/v6 with the pinned Lean toolchain installed:
 
-## Claim discipline
+    lake build PscvCore PscvExtensions PscvKernel pscv_v6_dev pscv_v6_native_tests
+    lake exe pscv_v6_native_tests
+    lake exe pscv_v6_dev --version
 
-Source inspection only hashes bytes. Kernel admission acceptance is not proof of source-to-Core fidelity, PSCV proof closure, program correctness, or backend semantics. build() and verify() reject until real implementations exist. The current provider pin is Lean 4.34, whereas normative PSCV V6 targets Lean 4.35.0-rc3; the version mismatch blocks full PSCV certification claims.
+Tests check a real logical identity theorem and reject an incorrect proof body, and enforce extension restrictions. Separate CI calls existing native/Wasm pskernel-lean 4.34 npm packages as **independent oracles**; their identities are not silently treated as the 4.35-rc3 checker.
 
-These are npm-packable development artifacts. They have not been published to the registry, do not implement the full compiler, and are not a certified release.
+### Not implemented yet
+
+.ps frontend, source-to-Core fidelity, normative Standard manifest, .proof.ps/.proof.lean proof closure, PSCV-CERT, erasure, four backend packages, extension sandbox, release packaging, semantic preservation. The native development CLI rejects unsupported compilation.
+
+There is no requirement to keep old PSC1/self-host source restrictions. Reuse existing Lean code selectively when it materially reduces work and preserves explicit correctness boundaries.

@@ -1,5 +1,5 @@
-# @proofscript/pscv-cli
+# @proofscript/pscv-cli — Lean-native development CLI
 
-The development executable is deliberately named psc-core, **not** psc, to prevent confusing the current incomplete tool with a certified compiler.
+Implementation: [src/PscvDevMain.lean](src/PscvDevMain.lean), built into Lake native executable pscv_v6_dev. Commands: --version, capabilities, kernel-empty-smoke. Unsupported build/verification options exit nonzero.
 
-Commands: capabilities; inspect file.ps (hash, not parse); check-admissions file.json [native|wasm] (kernel admission only). No build or verify action is permitted. The final psc CLI will be a standalone Lean-built native executable with an optional npm launcher.
+This is a development compiler interface, not the final psc release. npm metadata packages Lean sources; platform-specific native binaries and optional thin launchers will follow. There is no authored JavaScript compiler CLI.

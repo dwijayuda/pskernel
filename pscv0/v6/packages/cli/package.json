@@ -1,11 +1,20 @@
 {
   "name": "@proofscript/pscv-cli",
   "version": "0.0.1-dev",
-  "description": "Development CLI for the new minimal PSCV core; not a complete PSCV compiler",
-  "type": "module",
-  "files": ["bin/psc-core.mjs", "README.md"],
-  "bin": { "psc-core": "./bin/psc-core.mjs" },
-  "dependencies": { "@proofscript/pscv-core": "0.0.1-dev" },
-  "engines": { "node": ">=22" },
-  "license": "UNLICENSED"
+  "private": true,
+  "description": "Lean 4 source package for native-compiler-entry, PSCV V6",
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "proofscript": {
+    "implementationLanguage": "lean4",
+    "leanToolchain": "leanprover/lean4:v4.35.0-rc3",
+    "sourceRoots": [
+      "src"
+    ],
+    "role": "native-compiler-entry",
+    "releasedNativeArtifact": false,
+    "verificationClaims": []
+  }
 }

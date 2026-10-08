@@ -214,3 +214,255 @@ The forms are drawn from [PSC-LANG] Chapters 8–10; this research did not run t
 
 **SHP2-ELAB-3:** failed inference, ambiguous name, unsolved metavariable, unknown import or unsynthesized class instance is a typed source failure. A Lean frontend may *propose* checked Core but must satisfy independent source-fidelity/registry checks before claiming PSCV conformance.
 
+
+## 6. Evaluation, recursion and algorithmic effects
+
+### 6.1 Expression/evaluation meaning
+
+**SHP2-EVAL-1:** evaluations and definitional equality obey the parent logical theory [PSC-LANG] Chapters 4 and 17. The compiler may optimize only under explicit observational equivalence. No backend chooses semantics by casting source terms to JS objects or native Rust/Go values.
+
+**SHP2-EVAL-2:** value evaluation order, short-circuiting and match alternative order are fixed by the approved source semantics, not whichever host backend would find convenient. An emitter MUST preserve the observable order of approved effects, error selection and deterministic output bytes; it MAY reorder computations proven observationally independent.
+
+**SHP2-BOOL-1:** only Boolean/decidable proposition conditionals admitted by `[elab.if]`. Reject numeric/string/object truthiness, JS optional chaining as logic, TS truthiness narrowing as dependent proof, and Go/Rust host implicit coercion.
+
+**SHP2-ERROR-1:** expected failures have declared algebraic types (e.g., `Except Error A` or a checked, registered result type). A host `throw`, Go `panic`, Rust `panic!` or Wasm trap is **not** a source-level error branch unless the backend's contract explicitly models it and proves equivalent handling.
+
+### 6.2 Structural recursion
+
+**SHP2-REC-1:** the parent's strict-structural-subterm relation [PSC-LANG] `[recursion.structural]` is authoritative. Every recursive cycle has an approved totality argument; `n - 1` by itself is not a syntactic structural subterm.
+
+**SHP2-REC-2:** a local `where` recursive helper obeys the same designated decreasing argument rule as a top-level function. Mutual recursion is accepted only when its joint recursive measure/elaboration closes under the parent grammar and kernel-checkable recursors.
+
+### 6.3 Well-founded recursion and algorithmic resources
+
+**SHP2-REC-3:** use parent `termination_by measure` and optional `decreasing_by proof` (see `[pscv.recursion.well-founded]`) for algorithms whose decreases are arithmetic/lexicographic rather than constructor-subterm relationships. Inferred termination may be used only when the kernel-checked decrease evidence and source-to-Core meaning can be exported and independently audited.
+
+**SHP2-REC-4:** a function with fuel/budget is mathematically total only relative to the actual returned failure/success type. At exhaustion, return `resourceExceeded` or `unknown` in the declared error model; **never invent a valid AST, treat a valid theorem as invalid, or issue a checked proof from exhausted search**. Distinguish provable semantic falsehood from operational inability to decide.
+
+**SHP2-REC-5:** deep recursive traversal is a portability concern even for mathematically total functions. Use a proven iterative worklist, trampoline or bounded recursion library where JS/Wasm stack behavior would otherwise diverge. Runtime out-of-memory/stack faults outside the modeled resource envelope are host assumptions, not proof of logical nontermination.
+
+### 6.4 Why general `partial` is excluded
+
+The official [Lean recursion reference][R-LEAN-REC] distinguishes kernel-safe termination from opaque `partial` and unsafe compiled implementations. These mechanisms are practical in Lean compiler internals, but they would prevent certifying the whole PSCV compiler's executable closure under `pscv-closed-v1`.
+
+SHP2 therefore permits more ergonomic finite loops and worklist libraries **instead of** importing unrestricted general recursion. The profile does not require each compiler function to be implemented as a handwritten primitive fuel worker if a total library combinator proves the same operation.
+
+## 7. Verified `do`, local mutation and finite loops
+
+### 7.1 Context and effects
+
+**SHP2-DO-1:** ordinary `do { ... }` follows the parent Appendix A `BasicDoTerm` or `PSCVDoTerm` grammar. In the compiler-source subset, the set of permitted effects must be a *frozen, registered* member of the parent `PSCV-VERIFY-v1` verified-effect families, initially:
+
+- pure/identity computation;
+- Reader-like readonly environment;
+- State-like explicit abstract local/compiler state;
+- typed Except-like errors;
+- explicitly registered combinations with an exact state-on-error policy.
+
+A `Monad` instance alone is not sufficient to prove any effect; WP laws and import assumptions are required.
+
+**SHP2-DO-2:** source local `let mut` and assignment are allowed *only inside the admitted `do` and its lexical descendants*; assignment targets must be in-scope mutable locals and cannot cross abstract runtime ownership boundaries. No general heap references, shared aliasable mutable object graphs or global mutable bindings are introduced by this syntax.
+
+### 7.2 Typed success and error policy
+
+The **proposed default compiler-state/error library contract** is:
+
+~~~text
+CompilerM Error State A  :=  State -> Except Error (A, State)
+
+successful run:
+  run m state0 = Except.ok(result, state1)
+
+failed run:
+  run m state0 = Except.error(error)
+  no successful state1 is published
+~~~
+
+This corresponds to a proposed `StateT State (Except Error)`-shaped abstract result, not the different `ExceptT Error (StateM State)`-shaped semantics where failure can still return state.
+
+**SHP2-ERROR-2:** the choice is **not** a claim that parent PSCV has already standardized this exact combined-monad law. It must be registered in the approved Standard environment and supplied with a correctly checked WP and runtime correspondence *before being permitted as an S1 effect*. Until then, source may use separately verified primitive State and Except models, with no unapproved implicit stack composition.
+
+An abstract failed state being discarded does not undo real network/file/FFI effects. Those belong to a separately modeled host capability, which cannot falsely acquire transactional semantics from a StateT API.
+
+**SHP2-ERROR-3:** `ensures result => P` and `errors err => Q` apply to the correct success/error branches under parent `[pscv.effect.error-post]`; a missing `errors` clause must follow the active approved default rather than making all failures vacuously successful.
+
+### 7.3 Local mutation desugaring
+
+SHP2 local mutation is **operational sugar**, not an additional primitive kernel type former:
+
+~~~text
+let mut total := init
+total := next(total, x)
+return total
+
+becomes a typed sequence of states:
+  total_0 = init
+  total_1 = next(total_0, x)
+  normal_exit(total_1)
+~~~
+
+This is an explanatory SSA/state relation, **not** a complete executable semantics for `do`. A conforming implementation must preserve scope, evaluation order, type dependency, early exit, error propagation and proofs under the parent `PSCV-VERIFY-v1` lowering.
+
+SHP2 source semantics cannot observe runtime object identity or raw mutable aliasing of a local. A target emitter may use JS/TS variables, Wasm locals or Rust mutable locals/owned buffers when that representation satisfies the abstract state relation.
+
+### 7.4 Finite `for`
+
+**SHP2-FOR-1:** an admitted `for pattern in collection` is total only when the collection has a **registered finite iterator contract**. The specified element order and cursor advancement must agree across four targets. The loop body and its observable state must be provable under the iterator's invariant/specification.
+
+**SHP2-FOR-2:** for mutable state, an explicit invariant or a registered iterator/library theorem must provide initialization, preservation and exit obligations. `break` and `continue` must discharge their own frame/invariant/exit VCs, as required by [PSC-LANG] `[pscv.loop.for]`.
+
+**SHP2-FOR-3:** an iterator that can grow indefinitely through its own loop mutations is not admitted as finite merely because its input initially had finite length. A decreasing well-founded measure is required over the actual admitted iteration semantics.
+
+**SHP2-FOR-4:** source iteration over hash maps with unspecified order cannot determine canonical compiler outputs. Stable traversal through sorted keys or preserved declaration/source order is required.
+
+### 7.5 General `while` remains a full PSCV feature, not initial SHP2
+
+Parent `pscv-v1` explicitly specifies `while` and requires a loop `invariant` and `decreasing` clause (`[pscv.loop.while]` and `[pscv.grammar.loop-clauses]`). The SHP2 language profile excludes general `while` in its initial closed compiler executable subset as an extra source restriction. Use finite `for` or certified total worklists; include general `while` in SHP2 only through a new **versioned source feature revision**, not through a runtime fallback.
+
+### 7.6 Authoritative PSCV source-shape illustration
+
+The following is the *parent reference's* source shape; `prefixSum` stands for a declared proof/model value and makes the snippet illustrative rather than ready to compile:
+
+~~~proofscript
+do {
+  let mut total := 0
+  for x in xs
+    invariant total = prefixSum
+  {
+    total := total + x
+  }
+  return total
+}
+~~~
+
+This is **not** a general JavaScript/Go statement block. It is verified monadic local state with a finite iterator and proof obligations. The example is not evidence that the current PSC1 source compiler or experimental Lean frontend supports all these forms.
+
+## 8. Specifications, contracts, theorem terms and ghost code
+
+### 8.1 Approved specifications
+
+**SHP2-CONTRACT-1:** [PSC-LANG] `[pscv.spec.coverage]` requires every exported executable declaration to be associated with an **approved** specification; a private helper may be transitively covered but remains subject to totality, effects and axiom closure. A theorem that proves `True` does not establish correctness when the approved requirement was stronger.
+
+**SHP2-CONTRACT-2:** source `given`, `requires`, frame `reads`/`modifies`, `ensures` and `errors` must follow Appendix A.18's exact grammar and clause ordering. A source compiler must reject interleaved clause order even when a generated Lean program could still elaborate.
+
+**SHP2-CONTRACT-3:** callee preconditions yield call-site VCs, checked callee postconditions may be used only with accepted proof/spec identity, and exceptional exits have independent obligations. Proof generation by automation/AI/tactics does not itself establish proof soundness.
+
+### 8.2 Proof and ghost relevance
+
+**SHP2-PROOF-1:** accepted proof terms/theorems use the parent `Prop` and pinned proof/tactic grammar. Lean automation such as `simp only`, `omega` and `grind` may be used only when admitted by the approved proof environment and with independently checked proof terms.
+
+**SHP2-PROOF-2:** `assert P` creates a proof obligation; it does not become a required runtime `assert` or a TypeScript/Rust thrown exception merely to make testing easier. Optional runtime instrumentation cannot count as proof.
+
+**SHP2-GHOST-1:** `ghost`/`ghost mut` state may guide specifications and invariants but cannot affect runtime-relevant return values, branch choice, errors, external calls or emitted bytes after erasure. A target that includes or branches on ghost state without an accepted noninterference relation MUST reject certified emission.
+
+**SHP2-PROOF-3:** `noncomputable` may occur in approved proof/spec reasoning according to the parent, but cannot be reachable from executable runtime data. An unchecked user axiom, even through an imported module or a renamed declaration, is not permitted in a closed certificate.
+
+### 8.3 Proof engineering for AI-assisted maintenance
+
+AI-generated proofs and source edits are **untrusted proposals**. In particular they may not change the approved specification ID, widen allowed assumptions, weaken the postcondition, add `sorry` or use unchecked native proof shortcuts to obtain a pass.
+
+Portable compiler modules SHOULD expose:
+- explicit function signatures and typed errors;
+- a one-paragraph semantic contract and approved spec ID;
+- a named structural/well-founded recursion measure or certified iterator invariant;
+- small lemmas about constructor cases, bounds, state transitions and preservation;
+- precise source spans and dependency identities for all VCs;
+- an explicit proof-only/executable relevance distinction;
+- no hidden environmental instance or coercion drift;
+- an independently checked proof/replay result distinct from test green and backend output.
+
+An AI proof benchmark must measure **kernel-replayed success and the cost to preserve the same approved theorem**, not merely code length, natural-language explanation quality or model confidence. The exact benchmark protocol appears in the evaluation section later in this document.
+
+## 9. Runtime values and target-neutral semantics
+
+### 9.1 Logical meaning versus target representation
+
+**SHP2-RT-1:** the meaning of each type and primitive is inherited from [PSC-LANG] Runtime Semantics and the exact pinned Standard environment. The profile may **restrict which runtime types compiler source uses** but must not silently redefine a type to match a target's convenient representation.
+
+**SHP2-RT-2:** target-specific representation decisions belong *below* the validated RuntimeIR boundary. A JS tagged record, Rust enum, Wasm GC object or future Go struct may implement the same source `inductive`; the target representation is not a source type-theory axiom.
+
+### 9.2 Integers, machine integers and floats
+
+**SHP2-NUM-1:** `Nat` and `Int` are exact mathematical values under the approved parent, not JS `Number`, Rust fixed `i64` or Go platform `int`. Use a correct arbitrary-precision representation when needed (JS/TS BigInt or exact library; Wasm exact integer runtime; Rust big-int library or corresponding checked representation), preserving source arithmetic, comparisons, conversions and exceptional/error cases.
+
+**SHP2-NUM-2:** fixed-width signed/unsigned types have explicit bit widths, wrap/overflow/conversion/shift/divide semantics as pinned by the parent. Do not inherit Rust compiler overflow-check settings, Go width of `int`, JS binary operators' implicit 32-bit coercion or Wasm i32/i64 truncation.
+
+**SHP2-NUM-3:** `USize` and `ISize` (where admitted) require explicit target profile and checked sizing/casts; indices and declaration IDs cannot silently narrow from exact `Nat` to target-native size. If a target width is unsupported, emit a typed target error.
+
+**SHP2-NUM-4:** Float/Float32 remain part of the general PSCV language where specified, but the initial *compiler implementation source* SHOULD avoid floating-point computation unless necessary and covered by exact NaN, infinity, signed-zero, rounding and serialization semantics. This is a use-site restriction, not a language feature removal.
+
+### 9.3 Strings, Unicode, source bytes
+
+**SHP2-UTF8-1:** compiler lexing/source spans/hash inputs operate on exact UTF-8 **bytes** and their specified decoding. No JS/TS UTF-16 length, Java UTF-16 code-unit index, Go decoded-rune byte replacement or PHP binary-string coercion may change source offsets.
+
+**SHP2-UTF8-2:** invalid byte streams MUST follow approved rejection/diagnostic rules. If the runtime host originally presents text as a higher-level string, the ingestion adapter must explicitly define encoding and report its trust assumptions. No silent invalid Unicode replacement for source input.
+
+**SHP2-UTF8-3:** `Char` values, string slicing, byte slicing, byte offsets, valid character boundaries and end-of-input checks use exact library contracts. The [Lean String reference][R-LEAN-STRING] demonstrates why byte positions matter, but any ProofScript-specific `String` operation still follows the parent registry.
+
+**SHP2-UTF8-4:** source maps, diagnostics, identifiers and serialized artifacts use deterministic positions/escaping/line-ending normalization. Do not make output depend on locale or operating-system text encoding.
+
+### 9.4 ADTs, records, closures and equality
+
+**SHP2-ADT-1:** constructors are disjoint, well-typed variants; matches are exhaustive; field extraction and record update follow source declaration identity. JS object property identity and Go/Rust pointer identity are not source equality unless explicitly defined by a registered primitive contract.
+
+**SHP2-ADT-2:** immutable closures capture source-level values. General observable mutable aliasing through an escaped capture is excluded in SHP2. Function specialization/lambda lifting may change runtime layout but not call behavior or closure environment semantics.
+
+**SHP2-EQ-1:** define equality for each admitted type through the approved Core/registered typeclass laws. No JS `==`/`===`, PHP loose equality, Go interface equality or Rust pointer equality is substituted merely by emitter convenience.
+
+### 9.5 Containers and deterministic output
+
+**SHP2-ARRAY-1:** indexing and updates use explicit bounds evidence or typed optional/error results. No automatic out-of-range `undefined`, Rust panic, Go panic or Wasm trap as a *successful* typed PSCV value.
+
+**SHP2-MAP-1:** hash maps can accelerate lookup but their iteration MUST NOT determine compiler output order unless an approved deterministic ordered-map/iteration contract explicitly specifies that order. Stable source-order lists or sorted keys are recommended for declarations and diagnostic output.
+
+**SHP2-BUILDER-1:** string/byte builders MUST have append-order, canonical encoding, snapshot immutability and resource-failure laws. Their implementation may use target-specific buffers internally but must preserve the same value on all targets. Building an entire string by repeated naive concatenation is not required merely because it is easier to prove a primitive list algorithm.
+
+### 9.6 Resource model
+
+**SHP2-RESOURCE-1:** mathematical totality of a function does not guarantee finite stack, heap or execution time on all runtimes. Resource budgets, host limits and uncaught fatal runtime exits are separately declared in the target profile.
+
+**SHP2-RESOURCE-2:** an exhausted parser/elaborator/checker must report failure/unknown with a typed reason when feasible, not fabricate a checked declaration or a semantically definitive false rejection. An unavoidable runtime OOM/trap is a declared external assumption rather than a verified source-level control path.
+
+**SHP2-RESOURCE-3:** portability acceptance exercises deep ASTs, large Nat values, long Unicode inputs, repeated append, map collision/order, Wasm memory growth and actual source re-entry, not only small unit tests.
+
+## 10. The standard self-host library contract
+
+### 10.1 Owned and versioned library interface
+
+The language profile MUST identify a **closed Standard environment** with exact type/instance/coercion/theorem identities. The table below specifies *capability families*, not claimed existing `import` names. Concrete module paths and hashes must be generated from the approved manifest rather than invented here.
+
+| Family | Required operations | Core laws and proof obligations |
+|---|---|---|
+| `List` | constructor, recursion, length, map/fold | structural induction, ordered traversal |
+| `Array` | empty, push, get, get?, set, size, fold | bounds, size, stable order, functional update |
+| `ByteArray` | append, slice, push, read | byte exactness, bounds, EOF/progress |
+| `String`/UTF-8 | decode/encode, next position, byte size | Unicode/byte-boundary correctness |
+| `Option` | some/none, bind/map | exact branch semantics |
+| `Except` | ok/error, bind/map | typed errors, no hidden host throw |
+| `State` and `Reader` | read/write, run, local scope | declared state/environment effects |
+| `State+Except` | combined monad, run, error policy | pinned WP, explicit transactional model |
+| finite iterator | next, done, breaks/continues | decrease, invariant, ordered visit |
+| deterministic map | lookup/insert/keys | equality/hash law, stable enumeration |
+| name/path registry | lookup, intern, qualified path | deterministic identity and collision handling |
+| text/byte builder | append, finish, freeze | observable immutability, amortized performance |
+| compiler diagnostics | source position, error code, spans | typed failure, canonical ordering |
+| target primitive/intrinsics | conversions, fixed-width ops, runtime calls | exact semantic correspondence per backend |
+
+### 10.2 Library inclusion policy
+
+**SHP2-LIB-1:** a source library operation is F1-admitted only if its exported signature, runtime/effect behavior, approved proof laws, transitive imports and TS/JS/Wasm/Rust lowering are all declared under the frozen feature manifest.
+
+**SHP2-LIB-2:** typeclasses, `BEq`/`Ord`/`Hashable`, iterators and syntactic sugar must be restricted to registered, lawfully modeled operations. A method spelling `map` alone does not guarantee source method registration or target implementation.
+
+**SHP2-LIB-3:** unsupported library versions MUST fail explicitly. No implicit reuse of a host JavaScript prototype, Go map, Rust standard-library method or tsc runtime helper may alter admitted source semantics.
+
+### 10.3 External/compiler-host interface
+
+The language used to implement the **pure compiler semantic core** may be fully closed and total; a useful command-line compiler necessarily interacts with host files, processes, environments and target toolchains.
+
+**SHP2-HOST-1:** isolate IO, filesystem, process execution, Wasm host imports, native Rust FFI and toolchain invocation behind a typed provider/host boundary. Such wrappers have separately named assumptions and product/capability identities, not a `pscv-closed-v1` proof of the external world.
+
+**SHP2-HOST-2:** the portable compiler source closure and the actual assembled runtime host closure must be separately enumerated. An external Lean parser/checker secretly called during a claimed *independent* self-host re-entry invalidates that claim.
+
+**SHP2-HOST-3:** exact toolchain versions, runtime ABI, memory ownership, import/export signatures, target profiles and failure modes must be recorded. This applies equally to TypeScript compilation with `tsc` and native Rust source compilation with `rustc`.
+

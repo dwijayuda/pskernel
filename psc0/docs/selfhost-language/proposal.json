@@ -1,0 +1,370 @@
+{
+  "formatVersion": 1,
+  "kind": "language-and-migration-proposal",
+  "id": "PSC0-SH/1",
+  "status": "proposed",
+  "activation": {
+    "selectedByPsconfig": false,
+    "enforcementInstalled": false,
+    "compilerImplementationChanged": false,
+    "firstQualifyingSeed": null
+  },
+  "repository": "dwijayuda/pskernel",
+  "baselineRef": "37f63c39d4a07189938046c64152bba25d789450",
+  "baselineEvidence": "baseline-evidence.json",
+  "authoring": {
+    "initialSourceKind": "lean",
+    "sourceMeaning": "PSC1-compatible syntax parsed by the portable PSC frontend",
+    "generatedCanonicalKind": "proofScript",
+    "initialSourceAuthority": "handwritten .lean",
+    "psAuthorityChange": "optional-after-parity",
+    "newPunctuationRequired": false
+  },
+  "target": {
+    "minimum": "original TypeScript -> JavaScript",
+    "typescriptBaseline": "5.8.3",
+    "allCopiedBackendsRequired": false
+  },
+  "packageScope": [
+    "backend-ts",
+    "bootstrap",
+    "bridge",
+    "compiler",
+    "compiler-ir",
+    "core",
+    "elab",
+    "environment",
+    "erasure",
+    "foundation",
+    "meta",
+    "syntax"
+  ],
+  "principle": "Compiler-owned normalization makes ordinary authoring source lower to a small stable core; a profile string is not capability evidence.",
+  "capabilities": [
+    {
+      "id": "source.existing-syntax",
+      "tier": "required",
+      "current": "implemented",
+      "proposal": "Preserve owned PSC .lean parser and old generated .ps spelling; explicit public signatures.",
+      "fixtures": [
+        "parser-printer-parity",
+        "declaration-signature-required"
+      ]
+    },
+    {
+      "id": "data.regular-algebraic",
+      "tier": "required",
+      "current": "implemented",
+      "proposal": "Non-indexed regular ADTs, immutable structures, List/Option/Except/Prod with closed runtime layout.",
+      "fixtures": [
+        "generic-list-record-constructor",
+        "record-field-layout"
+      ]
+    },
+    {
+      "id": "functions.rank1",
+      "tier": "required",
+      "current": "implemented-with-runtime-limits",
+      "proposal": "Top-level rank-1 generic functions; monomorphic runtime closures, captures, partial applications and function results.",
+      "fixtures": [
+        "captured-lambda",
+        "returned-function",
+        "reject-higher-rank-runtime",
+        "reject-polymorphic-recursion"
+      ]
+    },
+    {
+      "id": "recursion.structural",
+      "tier": "required",
+      "current": "implemented-in-direct-match-form",
+      "proposal": "Recognized child/predecessor of one structural major with unchanged fixed parameters.",
+      "fixtures": [
+        "direct-list-child",
+        "nat-predecessor",
+        "reject-original-major",
+        "reject-unrelated-child"
+      ]
+    },
+    {
+      "id": "recursion.varying-parameters",
+      "tier": "required-new",
+      "current": "not-implemented",
+      "proposal": "Typed generalization of nondependent varying value parameters into a function-valued motive; retain the existing low-level structural checker.",
+      "implementationAreas": [
+        "packages/elab/src/Ps/Elab/Declaration.lean",
+        "packages/elab/src/Ps/Elab/Context.lean",
+        "packages/elab/src/Ps/Elab/Term.lean",
+        "new isolated elab recursion planning module"
+      ],
+      "fixtures": [
+        "list-accumulator",
+        "nat-fuel-state",
+        "two-changing-parameters",
+        "simultaneous-swap",
+        "fixed-parameters-in-different-positions",
+        "function-valued-result",
+        "reject-dependent-generalization",
+        "reject-recursive-escape"
+      ]
+    },
+    {
+      "id": "control.explicit-error-state",
+      "tier": "required",
+      "current": "implemented",
+      "proposal": "Pure immutable state records and Except/Option values; preserve first-error and state-on-error policy; reuse foundation helpers.",
+      "fixtures": [
+        "except-first-error",
+        "state-on-error",
+        "short-circuit"
+      ]
+    },
+    {
+      "id": "runtime.baseline-scalars",
+      "tier": "required",
+      "current": "implemented-on-original-ts-lane",
+      "proposal": "Nat, Int, Bool, Char, String, Unit with original exact arithmetic and Unicode/UTF-8 semantics.",
+      "fixtures": [
+        "big-integer",
+        "nat-zero-divisors",
+        "unicode-scalar",
+        "utf8-position"
+      ]
+    },
+    {
+      "id": "runtime.closed-ir",
+      "tier": "required-new-before-strict-promotion",
+      "current": "raw-ir-no-independent-validator",
+      "proposal": "Report original IR first; enforce scope, arity, layouts, primitive signatures, runtime type closure and import closure once inventoried.",
+      "fixtures": [
+        "unbound-runtime-variable",
+        "type-parameter-scope",
+        "unknown-runtime-type",
+        "intrinsic-arity",
+        "constructor-layout",
+        "duplicate-match",
+        "nonexhaustive-match"
+      ]
+    },
+    {
+      "id": "source.declaration-wrappers",
+      "tier": "planned-extension",
+      "current": "root-match-discovery-only",
+      "proposal": "Use the same typed plan for supported equations, leading lets and aliases; preserve constraints, scope and structural provenance.",
+      "fixtures": [
+        "equation-match-correspondence",
+        "let-before-match",
+        "alias-provenance",
+        "type-ascription-not-dropped"
+      ]
+    },
+    {
+      "id": "inference.expected-lambda",
+      "tier": "planned-extension",
+      "current": "typed-lambda-binders-required",
+      "proposal": "Infer omitted binder type only from a known expected function domain; do not promise unrestricted inference or later-argument constraint propagation.",
+      "fixtures": [
+        "known-expected-domain",
+        "unknown-domain-requires-annotation",
+        "shadowing-capture"
+      ]
+    },
+    {
+      "id": "source.nested-patterns",
+      "tier": "planned-extension",
+      "current": "flat-pattern-ast",
+      "proposal": "Authoring pattern tree lowers to flat factored matches; first-clause/default/scope/exhaustiveness preserved.",
+      "fixtures": [
+        "same-outer-constructor-factor",
+        "nested-default-order",
+        "exhaustiveness",
+        "nested-child-provenance"
+      ]
+    },
+    {
+      "id": "effects.except-do",
+      "tier": "planned-extension",
+      "current": "custom-compilerBind-compilerPure-dsl-only",
+      "proposal": "Optional expected-type-directed Except-only sugar; keep old custom DSL behavior separate.",
+      "fixtures": [
+        "bind-return-parity",
+        "typed-bind",
+        "no-later-callback-after-error",
+        "native-generated-parity"
+      ]
+    },
+    {
+      "id": "runtime.total-array",
+      "tier": "optional-library",
+      "current": "ts-array-intrinsics-exist-no-direct-compiler-source-use",
+      "proposal": "Retain compatible support; prefer total indexing; document copy-on-update cost; no mutable-vector promise.",
+      "fixtures": [
+        "get-default",
+        "set-if-in-bounds",
+        "array-copy-semantics"
+      ]
+    },
+    {
+      "id": "runtime.extra-scalars",
+      "tier": "deferred",
+      "current": "partial-ts-emitter-support",
+      "proposal": "Fixed-width/floating/word-sized operations require explicit capability semantics and target conformance; no full language claim from an IR enum.",
+      "fixtures": [
+        "target-word-size-required",
+        "wrapping-integer",
+        "float32-rounding"
+      ]
+    },
+    {
+      "id": "targets.additional-backends",
+      "tier": "deferred-integration",
+      "current": "copied-packages-incompatible-with-original-ir",
+      "proposal": "Integrate one coherent target API at a time; preserve original TS-to-JS minimum lane.",
+      "fixtures": [
+        "target-runtime-contract",
+        "target-current-source-generations"
+      ]
+    }
+  ],
+  "excludedFromMinimum": [
+    "host Lean/Std implementation APIs",
+    "portable IO or FFI",
+    "unsafe definitions",
+    "general partial or well-founded recursion",
+    "arbitrary mutual/local recursion",
+    "source class/instance/deriving",
+    "arbitrary macros or elaborator extensions",
+    "general monad transformers",
+    "runtime dependent layouts",
+    "first-class polymorphic runtime values",
+    "runtime type reflection",
+    "mutable references"
+  ],
+  "evidenceStates": [
+    "proposed",
+    "implemented",
+    "generated-tested",
+    "seed-qualified"
+  ],
+  "mandatoryGates": [
+    "old-seed-builds-feature-implementation",
+    "focused-positive-and-negative-capabilities",
+    "raw-authoring-replay-by-generated-compilers",
+    "declared-current-generation-equality",
+    "runtime-representation-inventory-and-enforcement",
+    "actual-provider-acceptance-for-checked-claim",
+    "immutable-recoverable-seed"
+  ],
+  "stages": [
+    {
+      "id": "M0",
+      "name": "Recoverable baseline",
+      "dependsOn": []
+    },
+    {
+      "id": "M1",
+      "name": "Current-source development and preparation seam",
+      "dependsOn": [
+        "M0"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Typed changing-parameter recursion",
+      "dependsOn": [
+        "M0"
+      ]
+    },
+    {
+      "id": "M3",
+      "name": "Improved seed qualification",
+      "dependsOn": [
+        "M1",
+        "M2"
+      ]
+    },
+    {
+      "id": "M4",
+      "name": "Source-family migration",
+      "dependsOn": [
+        "M3"
+      ]
+    },
+    {
+      "id": "M5",
+      "name": "Bounded authoring conveniences",
+      "dependsOn": [
+        "M3"
+      ]
+    },
+    {
+      "id": "M6",
+      "name": "Portable IR enforcement",
+      "dependsOn": [
+        "M0"
+      ],
+      "mayOverlap": [
+        "M1",
+        "M2",
+        "M3",
+        "M4",
+        "M5"
+      ]
+    },
+    {
+      "id": "M7",
+      "name": "Optional .ps source authority",
+      "dependsOn": [
+        "M4",
+        "M5",
+        "M6"
+      ]
+    }
+  ],
+  "cacheContract": {
+    "minimumExecutingIdentity": "exact compiler implementation digest and import/session identity",
+    "parse": [
+      "source bytes",
+      "source kind",
+      "parser/options",
+      "source origin"
+    ],
+    "prepare": [
+      "parsed source",
+      "normalizer/elaborator",
+      "full incoming environment",
+      "prelude",
+      "ordered declaration accumulator and provenance",
+      "resolution context",
+      "resource limits"
+    ],
+    "invalidation": "First changed module through semantic suffix until complete state equality is established; import-only invalidation is insufficient.",
+    "emission": "Whole prepared closure until independent module emission is implemented.",
+    "provider": [
+      "exact ordered canonical admission bytes",
+      "starting prelude/environment",
+      "provider executable/runtime/toolchain closure",
+      "semantic options",
+      "resource policy"
+    ],
+    "authority": "Cache receipts do not create checked provider handles.",
+    "failures": "Missing/corrupt entries recompute; timeout/cancellation/exhaustion remain operational, not permanent semantic invalidity."
+  },
+  "concurrentWork": {
+    "branch": "psc0/native-core-selfhost-v1",
+    "observedRef": "b109be0075630dd17b791e3b0c5fcad016df53e8",
+    "policy": "Reuse accepted provider/fast-path work; do not duplicate or modify kernel/provider implementation in this language proposal."
+  },
+  "nonClaims": [
+    "New parser or normalizer implementation",
+    "Fresh compiler build or benchmark",
+    "New compiler fixed point",
+    "Native checked full-corpus success",
+    "Copied backend integration",
+    "Measured performance speedup"
+  ],
+  "documents": {
+    "analysis": "README.md",
+    "specification": "SPEC.md",
+    "migration": "MIGRATION.md"
+  }
+}

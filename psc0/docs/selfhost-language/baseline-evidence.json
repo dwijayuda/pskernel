@@ -1,0 +1,504 @@
+{
+  "formatVersion": 1,
+  "kind": "research-baseline-evidence",
+  "status": "static-source-inspection-not-a-new-build",
+  "repository": "dwijayuda/pskernel",
+  "ref": "37f63c39d4a07189938046c64152bba25d789450",
+  "psc0Tree": "02207b677c91471d6bb5cb3f6418995aed0d0102",
+  "historicalCompilerRef": "d4298a712d1e2ea6505185d311e9af10a698b2ca",
+  "historicalPath": "psc15selfhost",
+  "entry": "psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+  "scope": {
+    "modules": 55,
+    "importEdges": 127,
+    "sourceBytes": 950480,
+    "sourceLines": 25484,
+    "sourceLinesConvention": "Count non-phantom lines per file; terminal newline adds no empty line; includes comments and blank lines.",
+    "bootstrapPackageSourceFiles": 60,
+    "bootstrapPackageCount": 12
+  },
+  "packageTrees": {
+    "backend-ts": "8c653d4b37351b8ae3d0f3aeb3d56d0b71bf296b",
+    "bootstrap": "d44c6541cc3cd854a45c6075a860b0418e0d8079",
+    "bridge": "a23edbb4969b92b8129a888069f0812013c7a40c",
+    "compiler-ir": "76f476f77d905057d4074a8518863a93f5d6400a",
+    "compiler": "3fa3abc7fc1c3e6c9dcf54986aa5eea36efbf7e0",
+    "core": "6ed4b582de43d309ac10b77ab57ebdd9d0dfd0fe",
+    "elab": "1a27a5f209d0dddf17a555d23a9a16849618ebab",
+    "environment": "40043a8a49b5056585c4b9d15bda035385e56b2f",
+    "erasure": "b1921ffbea41f34a8790957190a65e67f0dbb1f9",
+    "foundation": "add691e33348b60339eb1b7c3b31b1df93a5151d",
+    "meta": "1ae59c68cc2555d9220fd56ce204c85fba14862d",
+    "syntax": "7a49723da023f0bbf7a23a664df6935d335aa56b"
+  },
+  "orderedModules": [
+    {
+      "order": 1,
+      "module": "Ps.Foundation.Source",
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Source.lean",
+      "blobSha": "1451dabae049d324b7aeb2d1b89b7bf56dea32fd",
+      "bytes": 148
+    },
+    {
+      "order": 2,
+      "module": "Ps.Syntax.Cursor",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "blobSha": "6543f69216532449bddb341495cada280d7f8943",
+      "bytes": 2806
+    },
+    {
+      "order": 3,
+      "module": "Ps.Syntax.Token",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Token.lean",
+      "blobSha": "5bc9895dbe7a9ba9157b00f6e184da6d16af738f",
+      "bytes": 959
+    },
+    {
+      "order": 4,
+      "module": "Ps.Syntax.Lexer",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Lexer.lean",
+      "blobSha": "1a0f9e4de803d568de8889c5cb696bbcca365945",
+      "bytes": 31044
+    },
+    {
+      "order": 5,
+      "module": "Ps.Syntax.Ast",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+      "blobSha": "4a9daaf4179ca7fa74e9183e542891ec110fd5d7",
+      "bytes": 3088
+    },
+    {
+      "order": 6,
+      "module": "Ps.Foundation.Name",
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+      "blobSha": "9c896076032762543b57d88c0010f90ad0a066d5",
+      "bytes": 3982
+    },
+    {
+      "order": 7,
+      "module": "Ps.Syntax.ParserState",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParserState.lean",
+      "blobSha": "e784c5836a37e522a21f67db0d52653d5ab12a57",
+      "bytes": 2516
+    },
+    {
+      "order": 8,
+      "module": "Ps.Syntax.ParseCommon",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+      "blobSha": "45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b",
+      "bytes": 22408
+    },
+    {
+      "order": 9,
+      "module": "Ps.Syntax.ParseLean",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "blobSha": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3",
+      "bytes": 103198
+    },
+    {
+      "order": 10,
+      "module": "Ps.Syntax.ParseProofScript",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "blobSha": "3fccc2a0704176e6a2b6d79b94d79f27fa0a6f02",
+      "bytes": 63464
+    },
+    {
+      "order": 11,
+      "module": "Ps.Syntax.PrintCommon",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+      "blobSha": "5d448af4935bdfe885c2d220173410034a70b320",
+      "bytes": 3358
+    },
+    {
+      "order": 12,
+      "module": "Ps.Syntax.PrintLean",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+      "blobSha": "7bc3c98cbba77e51b521d19492f3c1ec5bd2ef7c",
+      "bytes": 28825
+    },
+    {
+      "order": 13,
+      "module": "Ps.Syntax.PrintProofScript",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+      "blobSha": "f05a3cc2150ec7474fea6be9600545cf11d442c1",
+      "bytes": 29931
+    },
+    {
+      "order": 14,
+      "module": "Ps.Syntax.Translate",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Translate.lean",
+      "blobSha": "eafd7159b14a251fe11ffdbfb1e2482bcc773c9b",
+      "bytes": 2074
+    },
+    {
+      "order": 15,
+      "module": "Ps.Bridge.Json",
+      "path": "psc0/packages/bridge/src/Ps/Bridge/Json.lean",
+      "blobSha": "4ddfec62f2edd54be87091812dcb6add6304e3ed",
+      "bytes": 35343
+    },
+    {
+      "order": 16,
+      "module": "Ps.Core.Level",
+      "path": "psc0/packages/core/src/Ps/Core/Level.lean",
+      "blobSha": "2607a00d69cb0299de20aecb6b94a00adc7852a2",
+      "bytes": 286
+    },
+    {
+      "order": 17,
+      "module": "Ps.Core.Expr",
+      "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+      "blobSha": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+      "bytes": 753
+    },
+    {
+      "order": 18,
+      "module": "Ps.Core.Declaration",
+      "path": "psc0/packages/core/src/Ps/Core/Declaration.lean",
+      "blobSha": "c34c280b1c42f23138cfec79f4e448db17071952",
+      "bytes": 1349
+    },
+    {
+      "order": 19,
+      "module": "Ps.Core.Abstract",
+      "path": "psc0/packages/core/src/Ps/Core/Abstract.lean",
+      "blobSha": "8ac0f21d92538502ee14fc6932eb0f48fda48a85",
+      "bytes": 2618
+    },
+    {
+      "order": 20,
+      "module": "Ps.Core.Subst",
+      "path": "psc0/packages/core/src/Ps/Core/Subst.lean",
+      "blobSha": "c8439e444e38b642043f2d18561a77a2bdd420a2",
+      "bytes": 5297
+    },
+    {
+      "order": 21,
+      "module": "Ps.Core.Equality",
+      "path": "psc0/packages/core/src/Ps/Core/Equality.lean",
+      "blobSha": "0762bd4fee3540083eb7dab3aeb70dff8d02b6c4",
+      "bytes": 6468
+    },
+    {
+      "order": 22,
+      "module": "Ps.Foundation.List",
+      "path": "psc0/packages/foundation/src/Ps/Foundation/List.lean",
+      "blobSha": "faf906bd6e2f872887c87eb43c4ad90957da91fc",
+      "bytes": 2830
+    },
+    {
+      "order": 23,
+      "module": "Ps.Environment.Basic",
+      "path": "psc0/packages/environment/src/Ps/Environment/Basic.lean",
+      "blobSha": "533dd2008b773f820e7fdf87ee01d66d759576c5",
+      "bytes": 9098
+    },
+    {
+      "order": 24,
+      "module": "Ps.Bridge.CheckedAdmissions",
+      "path": "psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+      "blobSha": "35bc6d634f203eceb41666ddea9cfe8bcf204196",
+      "bytes": 45371
+    },
+    {
+      "order": 25,
+      "module": "Ps.Core.Builtin",
+      "path": "psc0/packages/core/src/Ps/Core/Builtin.lean",
+      "blobSha": "c64025ddc515c47a4d661076d779e0bccada5046",
+      "bytes": 4949
+    },
+    {
+      "order": 26,
+      "module": "Ps.Environment.Prelude",
+      "path": "psc0/packages/environment/src/Ps/Environment/Prelude.lean",
+      "blobSha": "d862ba8c806595fbf11237724089bd2282af9866",
+      "bytes": 24355
+    },
+    {
+      "order": 27,
+      "module": "Ps.Environment.SelfHostPrelude",
+      "path": "psc0/packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+      "blobSha": "b9127717d5685ae0de6e10251ba1d8d02b6e647d",
+      "bytes": 17298
+    },
+    {
+      "order": 28,
+      "module": "Ps.Environment.SelfHostProd",
+      "path": "psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+      "blobSha": "38485851a30f024d973392c6c8e1d86916e31466",
+      "bytes": 4407
+    },
+    {
+      "order": 29,
+      "module": "Ps.Environment.LocalContext",
+      "path": "psc0/packages/environment/src/Ps/Environment/LocalContext.lean",
+      "blobSha": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6",
+      "bytes": 2690
+    },
+    {
+      "order": 30,
+      "module": "Ps.Environment.Resolve",
+      "path": "psc0/packages/environment/src/Ps/Environment/Resolve.lean",
+      "blobSha": "4dcad8f12689b21d640fe192ff81191fe506fe10",
+      "bytes": 592
+    },
+    {
+      "order": 31,
+      "module": "Ps.Core.LevelSubst",
+      "path": "psc0/packages/core/src/Ps/Core/LevelSubst.lean",
+      "blobSha": "48f0d7b821fe0c09e14de126cbf4df40cba7559a",
+      "bytes": 3613
+    },
+    {
+      "order": 32,
+      "module": "Ps.Meta.LevelContext",
+      "path": "psc0/packages/meta/src/Ps/Meta/LevelContext.lean",
+      "blobSha": "4efa1fe2e98b7482d6c85ebb9bcfe596328c3956",
+      "bytes": 8693
+    },
+    {
+      "order": 33,
+      "module": "Ps.Meta.Context",
+      "path": "psc0/packages/meta/src/Ps/Meta/Context.lean",
+      "blobSha": "94f1920fc7e62bbe53f7e70d8d4466d78a0d5755",
+      "bytes": 9088
+    },
+    {
+      "order": 34,
+      "module": "Ps.Meta.Reduce",
+      "path": "psc0/packages/meta/src/Ps/Meta/Reduce.lean",
+      "blobSha": "1b81ba072e26eff9c3afbe58a945e8bf383c6f18",
+      "bytes": 6218
+    },
+    {
+      "order": 35,
+      "module": "Ps.Meta.Infer",
+      "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+      "blobSha": "25e0c00dfafb0268d6a204089a3eceb10d9bcb0f",
+      "bytes": 19248
+    },
+    {
+      "order": 36,
+      "module": "Ps.Environment.Instances",
+      "path": "psc0/packages/environment/src/Ps/Environment/Instances.lean",
+      "blobSha": "75b0d66c402b2807149cd2c832207a2d311c2db3",
+      "bytes": 1616
+    },
+    {
+      "order": 37,
+      "module": "Ps.Meta.Unify",
+      "path": "psc0/packages/meta/src/Ps/Meta/Unify.lean",
+      "blobSha": "9d2e7e01debd1299fc2e685ff4ecc4c593337ed5",
+      "bytes": 11089
+    },
+    {
+      "order": 38,
+      "module": "Ps.Meta.SynthInstance",
+      "path": "psc0/packages/meta/src/Ps/Meta/SynthInstance.lean",
+      "blobSha": "3d42e50aa274a988535f8f7969133df373474ae0",
+      "bytes": 12606
+    },
+    {
+      "order": 39,
+      "module": "Ps.Elab.Context",
+      "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+      "blobSha": "46ea642f67a14cc2668d288e2067455f64dd38d2",
+      "bytes": 2077
+    },
+    {
+      "order": 40,
+      "module": "Ps.Elab.Literal",
+      "path": "psc0/packages/elab/src/Ps/Elab/Literal.lean",
+      "blobSha": "a4f0ed94c712495b3d379374b5572a047c0c1919",
+      "bytes": 10474
+    },
+    {
+      "order": 41,
+      "module": "Ps.Elab.Term",
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blobSha": "566e0281c95eb7e47a35878c906ae4344f97eb0f",
+      "bytes": 98577
+    },
+    {
+      "order": 42,
+      "module": "Ps.Elab.Declaration",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "blobSha": "b513a8de646722d3338d6c23e3a7f397661fd825",
+      "bytes": 48311
+    },
+    {
+      "order": 43,
+      "module": "Ps.CompilerIr.Model",
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+      "bytes": 5378
+    },
+    {
+      "order": 44,
+      "module": "Ps.Erasure.Basic",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "blobSha": "fcb5aebdd6eedb32cccb1601704d2f9a1684fed5",
+      "bytes": 24562
+    },
+    {
+      "order": 45,
+      "module": "Ps.Erasure.Expr",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "blobSha": "ca98fb1343e8019467ddefa52fc9c3c5648a9bb7",
+      "bytes": 84643
+    },
+    {
+      "order": 46,
+      "module": "Ps.Erasure.Inductive",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "blobSha": "4098822ae5ca1a1c3d3d476be5b592daad7d2110",
+      "bytes": 17667
+    },
+    {
+      "order": 47,
+      "module": "Ps.Erasure.Structure",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "blobSha": "864cf3a59c51537aca59e0bb7691a66f0dce777c",
+      "bytes": 6762
+    },
+    {
+      "order": 48,
+      "module": "Ps.Erasure.StructureRecursor",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "blobSha": "66b20621288b76153fa78db6c923f0c7b0c5d9ab",
+      "bytes": 10006
+    },
+    {
+      "order": 49,
+      "module": "Ps.Erasure.Definition",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "blobSha": "77f63f76daf5fd0c569545df8835fb94b6d554c9",
+      "bytes": 19456
+    },
+    {
+      "order": 50,
+      "module": "Ps.Compiler.Api",
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "blobSha": "5d8ea30e09172ddc648d5c3ed267b6bd94ce1ecf",
+      "bytes": 8449
+    },
+    {
+      "order": 51,
+      "module": "Ps.BackendTs.Type",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "blobSha": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79",
+      "bytes": 4200
+    },
+    {
+      "order": 52,
+      "module": "Ps.BackendTs.Expr",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "blobSha": "cdbcc99a0505be43b3d1fc7400c34f7d6291a387",
+      "bytes": 34418
+    },
+    {
+      "order": 53,
+      "module": "Ps.BackendTs.Module",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blobSha": "983421858de66223283104e046d5483bbc76b770",
+      "bytes": 40236
+    },
+    {
+      "order": 54,
+      "module": "Ps.BackendTs.Compiler",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+      "blobSha": "486350e7bb42ce093ef022f6198795d90207ec68",
+      "bytes": 1346
+    },
+    {
+      "order": 55,
+      "module": "Ps.Bootstrap.SelfHost",
+      "path": "psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+      "blobSha": "c88f449644e3caf966c19f01e9534345bbb8c831",
+      "bytes": 242
+    }
+  ],
+  "outsideEntryClosure": [
+    "psc0/packages/bridge/src/Ps/Bridge/Codec.lean",
+    "psc0/packages/bridge/src/Ps/Bridge/Protocol.lean",
+    "psc0/packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+    "psc0/packages/compiler/src/Ps/Compiler.lean",
+    "psc0/packages/foundation/src/Ps/Foundation/Diagnostic.lean"
+  ],
+  "historicalReceipt": {
+    "path": "psc0/docs/continuity/COMPILER_FIXED_POINT_2026-10-03.md",
+    "declarations": 1916,
+    "sourceClosureSha256": "ee6dd22f1b74b97113cc1a5e36aadad3cceecb2b152653f2c0dc26dd07aa22f7",
+    "typescriptSha256": "fb173a348d1555d1ff224b9977f6fee68591b79f781a6b292c2572648415b033",
+    "javascriptSha256": "74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76",
+    "typescriptVersion": "5.8.3",
+    "claim": "historical-compiler-only-fixed-point",
+    "notClaimed": [
+      "new-reproduction",
+      "kernel-checked-current-fixed-point",
+      "new-backend-integration"
+    ]
+  },
+  "concurrentNativeWork": {
+    "branch": "psc0/native-core-selfhost-v1",
+    "observedRef": "b109be0075630dd17b791e3b0c5fcad016df53e8",
+    "observedRun": 37823400738,
+    "observedConclusion": "failure",
+    "interpretation": "full native corpus acceptance not established at this snapshot"
+  },
+  "limitations": [
+    "Package tree identities preserve sources, tests and manifests; they are not a host/provider/toolchain acceptance cache.",
+    "This file is evidence for the proposal, not a source lock wired into CI.",
+    "Static graph analysis does not establish that new copied backends build or accept this IR.",
+    "Historical equality cannot substitute for a current generated-compiler run."
+  ],
+  "sourceInventory": {
+    "method": "Lexically mask nested block comments, line comments, escaped strings and character literals; count line-anchored declarations and exact identifier tokens. This is static inventory, not parser acceptance.",
+    "declarations": {
+      "def": 1205,
+      "inductive": 47,
+      "structure": 100,
+      "partialDef": 0,
+      "theorem": 0,
+      "axiom": 0,
+      "unsafeDef": 0,
+      "noncomputableDef": 0
+    },
+    "directTypeTokenCounts": {
+      "Nat": 1164,
+      "Int": 9,
+      "Array": 0,
+      "ByteArray": 0,
+      "FloatArray": 0,
+      "UInt8": 0,
+      "UInt16": 0,
+      "UInt32": 0,
+      "UInt64": 0,
+      "USize": 0,
+      "Int8": 0,
+      "Int16": 0,
+      "Int32": 0,
+      "Int64": 0,
+      "ISize": 0,
+      "Float": 0,
+      "Float32": 0
+    },
+    "caveat": "Counts describe compiler implementation source. Names inside strings and generated target code are not prohibited source uses. Source declarations are not the historical elaborated declaration count."
+  },
+  "profileMetadata": {
+    "root": {
+      "implementationProfile": "PSC1",
+      "acceptedLanguageProfile": "PSC2-bootstrap",
+      "languageVersion": "0.7"
+    },
+    "originalCompilerPackagesSelectNamedStableOrPortableProfile": false,
+    "rootNamedProfileManifestsPresent": false,
+    "copiedPackagesWithPortableProfile": [
+      "backend-js",
+      "backend-rust",
+      "backend-wasm"
+    ],
+    "copiedProfile": "PSC1-portable-selfhost/1",
+    "copiedPackagesBootstrap": false
+  }
+}

@@ -112,7 +112,7 @@ The [Go language specification][R-GO-SPEC] documents type parameters, interfaces
 
 ### 1.6 Other verified-compiler lessons
 
-[CompCert][R-COMPCERT] motivates pass-specific semantic preservation rather than assuming source typechecking proves compiled executables. [CakeML][R-CAKEML] demonstrates verified compiler/bootstrapping methodology. [Dafny][R-DAFNY] and [Verus][R-VERUS] motivate explicit invariants, decreasing measures, proof/executable separation and controlled heap effects. These precedents do not prove the correctness of the future PSCV self-host compiler.
+[CompCert][R-COMPCERT] motivates pass-specific semantic preservation rather than assuming source typechecking proves compiled executables. [CakeML][R-CAKEML] demonstrates verified compiler/bootstrapping methodology. [Dafny][R-DAFNY] and [Verus][R-VERUS] motivate explicit invariants, decreasing measures, proof/executable separation and controlled heap effects. Verus explicitly separates spec, proof and exec modes [R-VERUS-MODES], whereas SHP2 retains the parent PSCV relevance rules. Ullrich and de Moura's peer-reviewed do Unchained study [R-DO-PAPER] and its Lean proof supplement [R-DO-SUPP] give formally studied translations for local mutation, early return and iteration. These precedents motivate the profile, but do not prove SHP2 implementation correctness or AI proof speed.
 
 ## 2. Lexical grammar: strict inherited PSCV parsing
 
@@ -736,7 +736,7 @@ A stage1 compiler compiling itself into stage2, then stage2 into stage3, with ca
 
 ## 16. AI-assisted proof ergonomics: executable evaluation protocol
 
-The language is intentionally designed for AI proof engineering, but a source language is not made easier to prove merely by adding syntax or removing code lines. Verification effort includes the elaborated Core theorem, effect VCs, induction/termination obligations, library lemmas, imported axioms, and post-edit proof maintenance.
+The language is intentionally designed for AI proof engineering, but a source language is not made easier to prove merely by adding syntax or removing code lines. Formal Lean do-notation translation research [R-DO-PAPER][R-DO-SUPP] is evidence of a possible proof-friendly desugaring strategy, not evidence that PSCV's currently unimplemented source lowering is already verified. Verification effort includes the elaborated Core theorem, effect VCs, induction/termination obligations, library lemmas, imported axioms, and post-edit proof maintenance.
 
 ### 16.1 Profile-level proof simplifications
 
@@ -910,6 +910,9 @@ These are live public language-reference URLs or commit-pinned repository source
 [R-CAKEML]: https://cakeml.org/index.html
 [R-DAFNY]: https://dafny.org/latest/DafnyRef/DafnyRef.html
 [R-VERUS]: https://verus-lang.github.io/verus/guide/
+[R-VERUS-MODES]: https://verus-lang.github.io/verus/guide/modes.html
+[R-DO-PAPER]: https://www.microsoft.com/en-us/research/publication/do-unchained-embracing-local-imperativity-in-a-purely-functional-language/
+[R-DO-SUPP]: https://zenodo.org/records/6684085
 
 ---
 

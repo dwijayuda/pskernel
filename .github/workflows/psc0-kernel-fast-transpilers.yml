@@ -1,0 +1,144 @@
+name: PSC0 kernel TypeScript 7 and fast transpiler experiment
+
+on:
+  push:
+    branches: ['psc0/kernel-fast-transpilers-v1']
+  pull_request:
+    paths:
+      - '.github/workflows/psc0-kernel-fast-transpilers.yml'
+      - 'psc0/scripts/kernel-transpiler-benchmark.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc0-transpiler-benchmark-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checked-kernel-source:
+    name: Native-kernel-checked TypeScript corpus
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: |
+            psc0/.lake/build
+            psc0/lean-checked/.lake/build
+          key: psc0-transpiler-native-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean', 'psc0/packages/pskernel-core/src/**/*.lean') }}
+          restore-keys: |
+            psc0-joint-native-${{ runner.os }}-
+            psc0-core-${{ runner.os }}-
+      - name: Validate historical compiler and 79-module kernel closure
+        run: |
+          node scripts/selfhost-baseline.mjs --assert-unchanged
+          node scripts/joint-kernel-closure.mjs --assert-full
+          node --check scripts/kernel-transpiler-benchmark.mjs
+      - name: Build native PSC0 seed and PSKernel Core checker
+        run: |
+          lake build psc_kernel_core_provider
+          (cd lean-checked && lake build psc2_lean_checked_seed)
+      - name: Generate TypeScript only AFTER native PSKernel checking
+        run: node scripts/checked-build.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean --seed lean-checked/.lake/build/bin/psc2_lean_checked_seed --kernel pskernel-core --typescript-only --out dist/transpiler-bench/source/index.ts
+        env:
+          PSC0_BUILD_TRACE: '1'
+      - name: Upload exact checked source and canonical admissions
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-kernel-checked-ts
+          path: |
+            psc0/dist/transpiler-bench/source/index.ts
+            psc0/dist/transpiler-bench/source/index.checked.json
+            psc0/dist/transpiler-bench/source/index.admissions.json
+          if-no-files-found: error
+          retention-days: 14
+
+  typescript-7:
+    name: TypeScript 7.0.2 native strict checker and JS emitter
+    needs: checked-kernel-source
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc0-kernel-checked-ts
+          path: psc0/dist/transpiler-bench/source
+      - name: Install stable TS7 in separate benchmark toolchain
+        run: npm install --prefix dist/transpiler-bench/toolchains/ts7 --no-save --no-package-lock --no-audit --no-fund typescript@7.0.2
+      - name: Run strict TS7 type checking and JavaScript emission
+        run: node scripts/kernel-transpiler-benchmark.mjs ts7 dist/transpiler-bench/source/index.ts dist/transpiler-bench/ts7
+      - name: Preserve TS7 diagnostics and runtime output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-ts7-kernel-benchmark
+          path: |
+            psc0/dist/transpiler-bench/reports/ts7.json
+            psc0/dist/transpiler-bench/ts7/compiler-usage.txt
+            psc0/dist/transpiler-bench/ts7/index.js
+            psc0/dist/transpiler-bench/ts7/index.d.ts
+          if-no-files-found: ignore
+          retention-days: 14
+
+  bun-esbuild:
+    name: Bun and esbuild after strict TS7 gate
+    needs: [checked-kernel-source, typescript-7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc0-kernel-checked-ts
+          path: psc0/dist/transpiler-bench/source
+      - name: Install fixed esbuild in isolated toolchain
+        run: npm install --prefix dist/transpiler-bench/toolchains/esbuild --no-save --no-package-lock --no-audit --no-fund esbuild@0.25.12
+      - name: Compare esbuild emitter and runtime semantics
+        run: node scripts/kernel-transpiler-benchmark.mjs esbuild dist/transpiler-bench/source/index.ts dist/transpiler-bench/esbuild
+      - name: Compare Bun emitter and runtime semantics
+        run: node scripts/kernel-transpiler-benchmark.mjs bun dist/transpiler-bench/source/index.ts dist/transpiler-bench/bun
+      - name: Preserve alternative-transpiler measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-esbuild-bun-kernel-benchmarks
+          path: |
+            psc0/dist/transpiler-bench/reports/esbuild.json
+            psc0/dist/transpiler-bench/reports/bun.json
+            psc0/dist/transpiler-bench/esbuild/compiler-usage.txt
+            psc0/dist/transpiler-bench/bun/compiler-usage.txt
+          if-no-files-found: ignore
+          retention-days: 14

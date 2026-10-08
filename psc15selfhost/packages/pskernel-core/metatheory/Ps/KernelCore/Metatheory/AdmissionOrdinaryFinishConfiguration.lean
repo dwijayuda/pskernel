@@ -663,11 +663,13 @@ theorem psKernelOrdinaryFinishAdmission_success_recursor_semantics
                   paramResult.binders prepared.ruleBinders prepared.motive
                   (psKernelLevelParamsToLevels decl.levelParams) ctorResult.shapes prepared.info.rules with
               | error message =>
-                  try simp only [hRules] at hRun
+                  simp only [ruleSession, work2] at hRules
+                  simp only [hRules] at hRun
                   cases hRun
               | ok checkedRules =>
                   cases checkedRules
-                  try simp only [hRules] at hRun
+                  simp only [ruleSession, work2] at hRules
+                  simp only [hRules] at hRun
                   have hPublication : result = work2 := (Except.ok.inj hRun).symm
                   subst result
                   refine ⟨elimOnlyAtZero, hElim, rfl, ⟨sorted.1, ?_⟩, ?_,

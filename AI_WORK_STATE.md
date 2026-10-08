@@ -659,3 +659,25 @@ Architectural blockers still remaining:
   flatten/rebase/restore publication; public Kernel/API/session family; semantic
   audit and integration reconciliation/final gates. Audit remains 44/9/19/7.
   Integration reverified unchanged at `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`.
+
+## Independent elimination policy checkpoint — 2026-10-08
+- Full proof and native conformance **#761 GREEN** at
+  `da63db6c9c1500771df106baec20d6ba8514dae2`,
+  run https://github.com/dwijayuda/pskernel/actions/runs/37852086515.
+- Constructor history now determines exact reverse publication order and
+  preserves Quot initialization. The elimination proof uses an independent
+  universe valuation semantics: structural zero normalization is always zero;
+  its negative case has a positive all-ones valuation; the nonzero predicate is
+  positive under every valuation. Structural expression membership and checked
+  constructor-field opening justify the actual large-elimination policy.
+- Proof failure #760 was missing valuation specialization and explicit maximum
+  bounds; no executable change, semantic rule weakening, or new premise.
+- Current candidates refine final metadata replacement from constructor history,
+  certify propositional singleton fieldless K targets, and compose mutual
+  per-type constructor semantic publication. Validate their latest CI before
+  calling these candidates green.
+- Full ordinary/mutual/nested environment well-formedness, recursor transaction
+  composition, Kernel/API/session family, audit and integration remain open.
+  Native reduction and positive StringEq soundness are named trusted laws;
+  StringEq reflexivity remains an explicit unresolved conditional obligation.
+  Audit remains 44/9/19/7.

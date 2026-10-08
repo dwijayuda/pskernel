@@ -340,6 +340,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionMutualOccurrenceConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualRecursiveArgumentConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualFieldConfiguration,
+    `Ps.KernelCore.Metatheory.AdmissionMutualConstructorSemanticHistoryConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionRecursiveArgumentConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionHeaderSpineConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionParameterConfiguration,

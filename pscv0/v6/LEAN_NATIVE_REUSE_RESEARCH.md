@@ -149,3 +149,23 @@ N6: npm source/library/extension distribution, isolated Lean-native extension ex
 N7: benchmark footprint/performance and pursue formal soundness/assurance. Self-host remains optional, not a blocking release gate.
 
 **Current stage honesty:** the first Lean-native P0 scaffold has candidate Core, extension policy and genuine native kernel checking. It does not yet parse .ps, compile PSCV programs, distribute production native binaries, establish semantic preservation or certify proofs. Do not market it as a finished PSCV compiler.
+
+## 11. Measured smallness and source-import boundary (2026-10-08)
+
+The initial native Lean-built CLI and kernel provider both linked almost 118.5 MB of Lean libraries; debugging-symbol removal left about 114.3 MB. The CI baseline using an almost-empty Lean program proved this is NOT an intrinsic minimum of Lean-native applications:
+
+| Exact experimental product | Native byte size | Stripping result |
+|---|---:|---:|
+| Minimal Lean executable (same pinned toolchain) | 4,401,136 | 4,141,752 debug-stripped; 2,800,952 all-stripped |
+| Earlier PSCV CLI importing Pscv.Core.Model which imports Lean.Declaration | 118,477,856 | 114,259,440 debug-stripped |
+| Separate Lean.Environment-based checker | 118,488,384 | 114,269,688 debug-stripped |
+
+Evidence: https://github.com/dwijayuda/pskernel/actions/runs/37759921812. This is a Linux x64 build comparison, not a comprehensive cross-platform performance claim. The controlling source-import factor is being investigated: `Lean.Declaration` and its initialization closure are currently in the lightweight CLI's transitive imports. Upstream Lean has a separate minimal initializer for leanchecker, explicitly valid only when Lean source is never elaborated: https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/initialize/init.cpp . Using that initializer in PSCV requires separate correctness and linkage testing; do not toggle it blindly.
+
+**New boundary choice:** lightweight compiler/profile/source contracts use Lean Init and ordinary Lean types, but do not import Lean.Environment/Lean.Declaration by default. The selected, separately packaged checker owns Lean.Declaration and `addDeclCore`; it receives bounded, canonical candidate Core data and issues checked evidence only after verifying exact subject/environment/assumption identities. There is no goal to define an alternative kernel theory. Keeping a syntax AST or transport representation independent of Lean.Declaration is not the same as trusting a second logical foundation.
+
+The corrective Lean-source commit initially tested at 516585c9a7daa2357cbc1ff3981457aa01eb4ea2 relocates CoreCandidate/KernelAdmissionReport from the default Pscv.Core.Model into Pscv.Kernel.Checker, and changes the small CLI's smoke test to a profile check. A fresh size measurement must confirm that the native CLI shrinks. This is an **engineering hypothesis under test**, not a reported improvement until CI confirms.
+
+Research-only old source compatibility has now also built the prior ProofScript parser (`Ps.Syntax.ParseProofScript` and its declared import roots) under Lean 4.35.0-rc3: https://github.com/dwijayuda/pskernel/actions/runs/37759640927 . This proves source compilation at that pin, not grammar completeness or semantic correctness of the old parser.
+
+**Packaging constraint:** npm source manifests may depend on Lean modules at build time; the published native CLI should contain only the necessary runtime closure and can ship the heavy checker as an optional or separately installed package. Default compiler architecture must make it possible to build/parse simple `.ps` files without loading a complete Lean proof frontend.

@@ -389,3 +389,24 @@ Architectural blockers still remaining:
   and final conformance gates. Audit remains A/B/C/D = 44/9/19/7.
 - Integration comparison is diverged (merge base `97e2ed3437e64a7041a9a6c3cceff2f852d83629`);
   do not blindly replace either branch or merge unrelated work.
+
+
+### Opaque string boundary and constructor semantic shape — 2026-10-09
+- Full gate #703 failed in the attempted StringEq reflexivity discharge:
+  `String.Internal.next` and `String.Internal.atEnd` are opaque extern
+  primitives in pinned Lean 4.34's Bootstrap module. The proved Raw cursor
+  advance theorem does not provide an equality bridge to these primitives.
+- The failed discharge and its unconditional wrappers were removed by
+  ordinary follow-up commits; history is preserved. Occurrence exclusion
+  remains explicitly conditional on `PsKernelStringEqReflexiveLaw`.
+  This is an unresolved obligation, not an adopted additional TCB law.
+- Constructor result guard lemmas are moved from the standalone proof
+  companion into the registered importable parameter metatheory. The
+  companion imports them and keeps its control-flow regressions.
+- Candidate semantic-shape theorem composes canonical datatype name and
+  universe equality, independent structural parameter-prefix evidence,
+  index arity, and structural recursive-name exclusion. Positive comparisons
+  use StringEq soundness, negative exclusion separately uses reflexivity.
+  Neither is silently inferred from the other.
+- Concrete configured recursor-rule validator remains a candidate pending
+  full proof validation; ordinary/mutual/nested full admission still open.

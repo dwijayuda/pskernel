@@ -1,4 +1,5 @@
 import Ps.KernelCore.Metatheory.Comparator
+import Ps.KernelCore.Metatheory.AdmissionConstructorParamsConfiguration
 import Ps.KernelCore.Admission.Inductive.Common.Occurrence
 import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
 
@@ -238,3 +239,48 @@ theorem psKernelValidateSimpleConstructorResult_success_indices_absent
           exact
             psKernelSimpleIndicesContainTarget_false_refines_absence
               hString target actualIndices hContains
+
+
+/--
+Accepted constructor results have the canonical datatype head, the declared
+universe list, a structurally matched parameter prefix, exactly the declared
+number of indices, and structural recursive-name exclusion in each index.
+
+Positive name/level equality uses StringEq soundness. Negative occurrence
+exclusion separately requires reflexivity; neither law implies the other.
+This result does not assert field positivity or transaction soundness.
+-/
+theorem psKernelValidateSimpleConstructorResult_semantic_shape
+    (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (result : PsKernelExpr)
+    (indices : List PsKernelExpr)
+    (hRun : psKernelValidateSimpleConstructorResult
+      target levels params numIndices result = Except.ok indices) :
+    psKernelExprGetAppFn result = PsKernelExpr.const target levels ∧
+      PsKernelConstructorResultParamPrefix
+        params (psKernelExprGetAppArgs result) indices ∧
+      psKernelExprListLength indices = numIndices ∧
+      (∀ expr : PsKernelExpr, List.Mem expr indices ->
+        PsKernelNoTargetConstantOccurrence target expr) := by
+  have hValid := psKernelValidateSimpleConstructorResult_success_refines
+    target levels params numIndices result indices hRun
+  rcases hValid.1 with
+    ⟨resultName, resultLevels, hHead, hName, hLevels, hParams, hLength⟩
+  have hNameEq := psKernelNameEq_sound_of_string_law
+    hString resultName target hName
+  have hLevelsEq := psKernelLevelListEq_sound_of_string_law
+    hString resultLevels levels hLevels
+  have hCanonical :
+      psKernelExprGetAppFn result = PsKernelExpr.const target levels := by
+    simpa [hNameEq, hLevelsEq] using hHead
+  exact ⟨hCanonical,
+    psKernelConsumeSimpleResultParams_success_refines_prefix
+      params (psKernelExprGetAppArgs result) indices hParams,
+    hLength,
+    psKernelValidateSimpleConstructorResult_success_indices_absent
+      hReflexive target levels params numIndices result indices hRun⟩

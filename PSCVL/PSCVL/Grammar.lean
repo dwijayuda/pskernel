@@ -27,6 +27,29 @@ private def allowedDeclarationKind (kind : String) : Bool :=
     "Lean.Parser.Command.instance"
   ] : List String).contains kind
 
+/-- Only the finite PSCV/Lean Standard and PSCVL bookkeeping attributes are
+admitted on declarations. Checking the elaborated declaration afterward is
+not sufficient: a registered Lean attribute may run user-visible code. -/
+private partial def attributeIdentifiers (s : Syntax) : List Name :=
+  match s with
+  | .ident _ _ val _ => [val]
+  | .node _ _ args => args.toList.flatMap attributeIdentifiers
+  | _ => []
+
+private def rejectAttributes (s : Syntax) : Option String := Id.run do
+  unless s.getKind.toString == "Lean.Parser.Command.declaration" do
+    return none
+  -- declaration[0] is declModifiers; its optional attribute block is field 1.
+  let attrs := s[0][1]
+  let permitted : List String := [
+    "simp", "instance", "default_instance", "priority",
+    "pscv_export", "pscv_type_spec"
+  ]
+  if let some bad := (attributeIdentifiers attrs).find? (fun id =>
+      !permitted.contains id.toString) then
+    return some s!"PSCVL rejects undeclared attribute '{bad}'"
+  return none
+
 private def allowedCommand (s : Syntax) : Bool :=
   let k := s.getKind.toString
   if k == "Lean.Parser.Command.declaration" then
@@ -56,7 +79,7 @@ private partial def forbiddenSyntax (s : Syntax) : Option String :=
     if (["run_tac", "native_decide", "sorry", "unsafe", "partial",
          "macro", "macro_rules", "elab", "initialize", "set_option",
          "syntax", "declare_syntax_cat", "implemented_by", "extern",
-         "run_cmd"] : List String).contains value then
+         "run_cmd", "deriving", "scoped", "assert!"] : List String).contains value then
       some s!"forbidden PSCV source token `{value}`"
     else none
   | _ => none
@@ -85,6 +108,8 @@ def validateSourceSyntax (source fileName : String) (env : Environment)
     unless allowedCommand stx do
       return .error s!"PSCVL closed command profile rejects: {stx.getKind}"
     if let some why := forbiddenSyntax stx then
+      return .error why
+    if let some why := rejectAttributes stx then
       return .error why
     parserState := next
     messages := nextMessages

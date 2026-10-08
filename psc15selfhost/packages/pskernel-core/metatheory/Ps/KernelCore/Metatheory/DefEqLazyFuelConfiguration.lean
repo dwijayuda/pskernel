@@ -341,11 +341,15 @@ theorem psKernelExprNatPred_some_refines
   | sort level =>
       simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
   | const name levels =>
-      simp [
-        psKernelExprNatPred, psKernelExprGetAppFn,
-        psKernelExprGetAppNumArgs, psKernelExprGetAppArgs,
-        psKernelExprListLength
-      ] at hSuccess
+      cases levels with
+      | nil =>
+          simp [
+            psKernelExprNatPred, psKernelExprGetAppFn,
+            psKernelExprGetAppNumArgs, psKernelExprGetAppArgs,
+            psKernelExprGetAppArgsWorker, psKernelExprListLength
+          ] at hSuccess
+      | cons level tail =>
+          simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
   | lam name type body info =>
       simp [psKernelExprNatPred, psKernelExprGetAppFn] at hSuccess
   | forallE name type body info =>

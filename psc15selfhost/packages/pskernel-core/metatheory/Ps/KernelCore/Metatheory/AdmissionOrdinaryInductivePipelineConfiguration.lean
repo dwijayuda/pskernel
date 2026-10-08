@@ -166,8 +166,13 @@ theorem psKernelAddSimpleInductive_success_constructor_pipeline
                                                     psKernelOrdinaryInitialInductiveInfo, safety, hCtors] at hRun
                                               | ok ctorResult =>
                                                   exact ⟨headerResult, sortResult, paramResult, indexResult,
-                                                    resultLevel, ctorResult, rfl, rfl, rfl,
-                                                    rfl, hShape, hCtors⟩
+                                                    resultLevel, ctorResult,
+                                                    (by first | exact hHeader | rfl),
+                                                    (by first | exact hSort | rfl),
+                                                    (by first | exact hParams | rfl),
+                                                    (by first | exact hIndices | rfl),
+                                                    (by first | exact hShape | rfl),
+                                                    (by first | exact hCtors | rfl)⟩
                                           | _ =>
                                               simp [psKernelAddSimpleInductive, hDuplicates, allNames, hUnique,
                                                 hFresh, hOccurrences, hClosed, hLevels, hHeader, hSort,

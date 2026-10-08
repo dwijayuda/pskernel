@@ -162,7 +162,7 @@ theorem psKernelAddSimpleInductive_success_name_guards
               have hAbsent :=
                 psKernelCheckFreshInductiveNames_refines_canonical
                   allNames environment hIndex hFresh
-              exact ⟨hDuplicates, hUnique, hAbsent⟩
+              exact ⟨rfl, rfl, hAbsent⟩
 
 
 theorem psKernelAddSimpleMutualInductive_success_name_guards
@@ -235,4 +235,4 @@ theorem psKernelAddSimpleMutualInductive_success_name_guards
                   have hAbsent :=
                     psKernelCheckFreshInductiveNames_refines_canonical
                       allNames environment hIndex hFresh
-                  exact ⟨hDuplicates, hMinTypes, hUnique, hAbsent⟩
+                  exact ⟨rfl, rfl, rfl, hAbsent⟩

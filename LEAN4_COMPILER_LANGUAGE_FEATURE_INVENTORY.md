@@ -100,7 +100,7 @@ A useful source-to-output decomposition is `.lean text → Parser Syntax → Ela
 | `prelude` | minimal import/prelude behavior | [CompilerM.lean:8](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CompilerM.lean#L8) | compiler | Pin standard environment |
 | `public import` | transitive compile-time interface imports | [CompilerM.lean:9](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CompilerM.lean#L9) | compiler | Explicit import closure |
 | `meta import` | compile-time/metaprogramming import mode | [Command.lean:11](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Parser/Command.lean#L11) | parser | Separate host-only Meta from portable runtime |
-| ordinary `import` | nonreexported source module imports | [Syntax.lean:9](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/lake/Lake/DSL/Syntax.lean#L9) | Lake | Source graph must be exact |
+| ordinary `import` | nonreexported source module imports | [Basic.lean:11](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/String/Basic.lean#L11) | Lake | Source graph must be exact |
 | `public section` | visibility-scoped section mode | [PassManager.lean:13](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PassManager.lean#L13) | compiler | Profile source visibility deterministically |
 | `namespace ...` | qualified names and scoped declarations | [Basic.lean:18](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Basic.lean#L18) | compiler | Admit under approved name semantics |
 | `open` / local namespace open | unqualified resolver/context | [EmitC.lean:98](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L98) | compiler | Registry/name resolution can differ from PSCV |
@@ -133,7 +133,7 @@ A useful source-to-output decomposition is `.lean text → Parser Syntax → Ela
 | `theorem` | kernel-checked proposition and proof | [PassManager.lean:44](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PassManager.lean#L44) | compiler | Proof-only/source verification |
 | `example` | local checked proposition/sample | [Basic.lean:653](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L653) | Init | Proof tests not runtime semantics |
 | `noncomputable` modifier | logical value without ordinary executable code | [Command.lean:95](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Parser/Command.lean#L95) | parser | Proof/spec-only in PSCV |
-| `axiom` declaration syntax | logical axiom declaration form | [Command.lean:506](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Parser/Command.lean#L506) | parser | Do not infer used by backend runtime; disallowed user axioms in PSCV |
+| `axiom` declaration syntax | logical axiom declaration form | [Command.lean:231](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Parser/Command.lean#L231) | parser | Do not infer used by backend runtime; disallowed user axioms in PSCV |
 | `protected theorem` | qualified theorem declaration scope | [Prelude.lean:873](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Prelude.lean#L873) | Init | Proof visibility and namespace semantics |
 | `builtin_initialize` | module environment/trace initializer | [Specialize.lean:30](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L30) | compiler | Metaprogramming/bootstrap side-effect boundary |
 | `register_builtin_option` | registered environment configuration option | [BEq.lean:22](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Deriving/BEq.lean#L22) | elaborator | Pin option registry |
@@ -142,8 +142,8 @@ A useful source-to-output decomposition is `.lean text → Parser Syntax → Ela
 
 | Lean feature | What actual source uses it for | Pinned code evidence | Component | PSCV portable implication |
 |---|---|---|---|---|
-| `Sort u` | universe polymorphism and sorts | [InferType.lean:30](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/InferType.lean#L30) | compiler | Underlying Lean dependent theory |
-| `Type u` | universe-polymorphic type argument | [InferType.lean:42](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/InferType.lean#L42) | compiler | Keep vs runtime specialization separate |
+| `Sort u` | universe polymorphism and sorts | [Prelude.lean:42](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Prelude.lean#L42) | compiler | Underlying Lean dependent theory |
+| `Type u` | universe-polymorphic type argument | [Basic.lean:37](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L37) | compiler | Keep vs runtime specialization separate |
 | implicit `{α}` binders | inferred type parameters | [Basic.lean:37](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L37) | Init | Exact PSCV binder behavior |
 | instance implicit `[ToString α]` | typeclass dictionary arguments | [EmitC.lean:148](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L148) | compiler | Closed deterministic instances |
 | dependent function `(x : α) → ...` | Pi type terms | [InferType.lean:30](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/InferType.lean#L30) | compiler | Proof-capable, potentially erased indices |
@@ -179,14 +179,14 @@ A useful source-to-output decomposition is `.lean text → Parser Syntax → Ela
 | leading-dot constructors `.some/.return/.code` | expected-type constructor inference | [Basic.lean:943](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Basic.lean#L943) | compiler | Exact constructor inference |
 | `Option` patterning | optional values/nonexistence | [CompilerM.lean:76](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CompilerM.lean#L76) | compiler | Typed absence, not JS undefined |
 | `Except` matching and errors | typed success/failure branches | [Except.lean:121](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Control/Except.lean#L121) | Init | No host throw interpreted as logical Except |
-| `\|>` pipelines | functional postfixed application composition | [BEq.lean:196](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Deriving/BEq.lean#L196) | elaborator | Unfold to ordinary typed applications |
+| `\|>` pipelines | functional postfixed application composition | [Specialize.lean:45](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L45) | elaborator | Unfold to ordinary typed applications |
 | `<\|` reverse application | readable nested function applications | [EmitC.lean:158](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L158) | compiler | Pure syntax sugar |
 | `←` monadic bind | read effect result in do | [VCGen.lean:40](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Tactic/Do/VCGen.lean#L40) | tactic | Exact monad and WP |
 | `match-syntax` quotations | pattern matching on syntax trees | [Macro.lean:19](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Macro.lean#L19) | elaborator | Metaprogramming/host-only in PSCV |
 | `try ... catch` | typed effectful exception handling | [EmitLLVM.lean:1254](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/EmitLLVM.lean#L1254) | compiler | Model effect and exit behavior |
 | `finally` | finalizer in structured exception scope | [TryCatch.lean:46](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/BuiltinDo/TryCatch.lean#L46) | elaborator | Host/effect boundary unless verified |
-| `s! string interpolation` | interpolated strings | [PassManager.lean:134](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PassManager.lean#L134) | compiler | Exact Unicode/formatting if admitted |
-| `m! message interpolation` | diagnostic message syntax | [SynthInstance.lean:55](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Meta/SynthInstance.lean#L55) | meta | Host tooling not guaranteed source core |
+| `s! string interpolation` | interpolated strings | [EmitC.lean:235](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L235) | compiler | Exact Unicode/formatting if admitted |
+| `m! message interpolation` | diagnostic message syntax | [SynthInstance.lean:263](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Meta/SynthInstance.lean#L263) | meta | Host tooling not guaranteed source core |
 
 ## 7. Iteration, local mutation, effects, and proof-friendly recursion
 
@@ -197,8 +197,8 @@ A useful source-to-output decomposition is `.lean text → Parser Syntax → Ela
 | `for x in values do` | finite collection iteration | [PassManager.lean:131](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PassManager.lean#L131) | compiler | Registered finite iterator and invariant |
 | `for h : i in range` | dependent/proof-carrying index iteration | [EmitC.lean:197](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L197) | compiler | Index/array proof semantics |
 | `while true do` | imperative repeated effectful loop | [EmitC.lean:404](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L404) | compiler | Full PSCV verified while; optional source subset |
-| `break` | loop control exit | [For.lean:238](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/BuiltinDo/For.lean#L238) | elaborator | Verify invariant on exit |
-| `continue` | loop next iteration | [For.lean:238](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/BuiltinDo/For.lean#L238) | elaborator | Verify decreasing/progress |
+| `break` | loop control exit | [VCGen.lean:372](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Tactic/Do/VCGen.lean#L372) | elaborator | Verify invariant on exit |
+| `continue` | loop next iteration | [VCGen.lean:376](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Elab/Tactic/Do/VCGen.lean#L376) | elaborator | Verify decreasing/progress |
 | `return` early exit | monadic return/continuation control | [EmitC.lean:197](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L197) | compiler | Correct postcondition for every path |
 | `unless condition do` | negated conditional statement | [Specialize.lean:393](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L393) | compiler | Equivalent Bool proof obligation |
 | `try ... catch err =>` | exception handler pattern | [EmitLLVM.lean:1257](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/EmitLLVM.lean#L1257) | compiler | Typed errors and target resource contract |
@@ -217,7 +217,7 @@ A useful source-to-output decomposition is `.lean text → Parser Syntax → Ela
 | `partial def` general recursion | logically opaque compiled recursion | [InferType.lean:121](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/InferType.lean#L121) | compiler | Forbidden in PSCV closed runtime |
 | `unsafe def` | native unsafe escape hatch | [Basic.lean:512](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Init/Data/Array/Basic.lean#L512) | Init | Not portable verified source |
 | `panic!` and `assert!` | runtime dynamic assertions/failures | [Specialize.lean:332](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean#L332) | compiler | Typed failure preferred in verified compiler |
-| `for ... in #[]` array workflows | mutable/readable collection traversal | [ToLCNF.lean:120](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ToLCNF.lean#L120) | compiler | Fast library contract and finiteness |
+| `for ... in #[]` array workflows | mutable/readable collection traversal | [EmitC.lean:197](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean#L197) | compiler | Fast library contract and finiteness |
 
 ## 8. Syntax extensions, parser definitions, quotations and elaborator APIs
 
@@ -467,3 +467,130 @@ The report should not be read as saying all Lean syntax is used by LCNF. For exa
 ---
 
 **Research status:** source-grounded inventory finished to feature-family level. The current document is a research/reference artifact only; no compiler/kernel implementation, language grammar, self-host acceptance or proof assurance was modified or certified by creating it.
+
+
+## 19. Complete audited compiler-source file list (117/117)
+
+Below is the **entire** pinned `src/Lean/Compiler` `.lean` directory tree visited in the lexical source scan. The table enumerates actual `.lean` files, not all imported library sources. Being listed means the file was retrieved for the approximate feature scan; it does not imply every quoted term/attribute within it was individually parsed and checked by a Lean AST classifier.
+
+| # | Compiler subarea | Pinned Lean source file |
+|---:|---|---|
+| 1 | Compiler frontend/attributes | [`BorrowedAnnotation.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/BorrowedAnnotation.lean) |
+| 2 | Compiler frontend/attributes | [`CSimpAttr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/CSimpAttr.lean) |
+| 3 | Compiler frontend/attributes | [`ClosedTermCache.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/ClosedTermCache.lean) |
+| 4 | Compiler frontend/attributes | [`ExportAttr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/ExportAttr.lean) |
+| 5 | Compiler frontend/attributes | [`ExternAttr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/ExternAttr.lean) |
+| 6 | Compiler frontend/attributes | [`FFI.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/FFI.lean) |
+| 7 | Compiler frontend/attributes | [`IR.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR.lean) |
+| 8 | IR backend | [`IR/Basic.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/Basic.lean) |
+| 9 | IR backend | [`IR/Checker.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/Checker.lean) |
+| 10 | IR backend | [`IR/CompilerM.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/CompilerM.lean) |
+| 11 | IR backend | [`IR/EmitLLVM.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/EmitLLVM.lean) |
+| 12 | IR backend | [`IR/EmitUtil.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/EmitUtil.lean) |
+| 13 | IR backend | [`IR/Format.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/Format.lean) |
+| 14 | IR backend | [`IR/LLVMBindings.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/LLVMBindings.lean) |
+| 15 | IR backend | [`IR/Meta.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/Meta.lean) |
+| 16 | IR backend | [`IR/NormIds.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/NormIds.lean) |
+| 17 | IR backend | [`IR/Sorry.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/Sorry.lean) |
+| 18 | IR backend | [`IR/ToIR.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/ToIR.lean) |
+| 19 | IR backend | [`IR/ToIRType.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/ToIRType.lean) |
+| 20 | IR backend | [`IR/UnboxResult.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/IR/UnboxResult.lean) |
+| 21 | Compiler frontend/attributes | [`ImplementedByAttr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/ImplementedByAttr.lean) |
+| 22 | Compiler frontend/attributes | [`InitAttr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/InitAttr.lean) |
+| 23 | Compiler frontend/attributes | [`InlineAttrs.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/InlineAttrs.lean) |
+| 24 | Compiler frontend/attributes | [`LCNF.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF.lean) |
+| 25 | LCNF backend | [`LCNF/AlphaEqv.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/AlphaEqv.lean) |
+| 26 | LCNF backend | [`LCNF/AuxDeclCache.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/AuxDeclCache.lean) |
+| 27 | LCNF backend | [`LCNF/BaseTypes.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/BaseTypes.lean) |
+| 28 | LCNF backend | [`LCNF/Basic.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Basic.lean) |
+| 29 | LCNF backend | [`LCNF/Bind.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Bind.lean) |
+| 30 | LCNF backend | [`LCNF/CSE.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CSE.lean) |
+| 31 | LCNF backend | [`LCNF/Check.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Check.lean) |
+| 32 | LCNF backend | [`LCNF/Closure.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Closure.lean) |
+| 33 | LCNF backend | [`LCNF/CoalesceRC.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CoalesceRC.lean) |
+| 34 | LCNF backend | [`LCNF/CompatibleTypes.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CompatibleTypes.lean) |
+| 35 | LCNF backend | [`LCNF/CompilerM.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/CompilerM.lean) |
+| 36 | LCNF backend | [`LCNF/ConfigOptions.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ConfigOptions.lean) |
+| 37 | LCNF backend | [`LCNF/DeclHash.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/DeclHash.lean) |
+| 38 | LCNF backend | [`LCNF/DependsOn.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/DependsOn.lean) |
+| 39 | LCNF backend | [`LCNF/ElimDead.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ElimDead.lean) |
+| 40 | LCNF backend | [`LCNF/ElimDeadBranches.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ElimDeadBranches.lean) |
+| 41 | LCNF backend | [`LCNF/EmitC.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitC.lean) |
+| 42 | LCNF backend | [`LCNF/EmitUtil.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/EmitUtil.lean) |
+| 43 | LCNF backend | [`LCNF/ExpandResetReuse.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ExpandResetReuse.lean) |
+| 44 | LCNF backend | [`LCNF/ExplicitBoxing.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ExplicitBoxing.lean) |
+| 45 | LCNF backend | [`LCNF/ExplicitRC.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ExplicitRC.lean) |
+| 46 | LCNF backend | [`LCNF/ExtractClosed.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ExtractClosed.lean) |
+| 47 | LCNF backend | [`LCNF/FVarUtil.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/FVarUtil.lean) |
+| 48 | LCNF backend | [`LCNF/FixedParams.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/FixedParams.lean) |
+| 49 | LCNF backend | [`LCNF/FloatLetIn.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/FloatLetIn.lean) |
+| 50 | LCNF backend | [`LCNF/InferBorrow.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/InferBorrow.lean) |
+| 51 | LCNF backend | [`LCNF/InferType.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/InferType.lean) |
+| 52 | LCNF backend | [`LCNF/Internalize.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Internalize.lean) |
+| 53 | LCNF backend | [`LCNF/Irrelevant.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Irrelevant.lean) |
+| 54 | LCNF backend | [`LCNF/JoinPoints.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/JoinPoints.lean) |
+| 55 | LCNF backend | [`LCNF/LCtx.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/LCtx.lean) |
+| 56 | LCNF backend | [`LCNF/LambdaLifting.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/LambdaLifting.lean) |
+| 57 | LCNF backend | [`LCNF/Level.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Level.lean) |
+| 58 | LCNF backend | [`LCNF/LiveVars.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/LiveVars.lean) |
+| 59 | LCNF backend | [`LCNF/Main.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Main.lean) |
+| 60 | LCNF backend | [`LCNF/MonadScope.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/MonadScope.lean) |
+| 61 | LCNF backend | [`LCNF/MonoTypes.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/MonoTypes.lean) |
+| 62 | LCNF backend | [`LCNF/OtherDecl.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/OtherDecl.lean) |
+| 63 | LCNF backend | [`LCNF/PassManager.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PassManager.lean) |
+| 64 | LCNF backend | [`LCNF/Passes.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Passes.lean) |
+| 65 | LCNF backend | [`LCNF/PhaseExt.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PhaseExt.lean) |
+| 66 | LCNF backend | [`LCNF/PrettyPrinter.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PrettyPrinter.lean) |
+| 67 | LCNF backend | [`LCNF/Probing.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Probing.lean) |
+| 68 | LCNF backend | [`LCNF/PropagateBorrow.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PropagateBorrow.lean) |
+| 69 | LCNF backend | [`LCNF/PublicDeclsExt.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PublicDeclsExt.lean) |
+| 70 | LCNF backend | [`LCNF/PullFunDecls.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PullFunDecls.lean) |
+| 71 | LCNF backend | [`LCNF/PullLetDecls.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PullLetDecls.lean) |
+| 72 | LCNF backend | [`LCNF/PushProj.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/PushProj.lean) |
+| 73 | LCNF backend | [`LCNF/ReduceArity.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ReduceArity.lean) |
+| 74 | LCNF backend | [`LCNF/ReduceJpArity.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ReduceJpArity.lean) |
+| 75 | LCNF backend | [`LCNF/Renaming.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Renaming.lean) |
+| 76 | LCNF backend | [`LCNF/ResetReuse.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ResetReuse.lean) |
+| 77 | LCNF backend | [`LCNF/ScopeM.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ScopeM.lean) |
+| 78 | LCNF backend | [`LCNF/Simp.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp.lean) |
+| 79 | LCNF backend | [`LCNF/Simp/Basic.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/Basic.lean) |
+| 80 | LCNF backend | [`LCNF/Simp/Config.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/Config.lean) |
+| 81 | LCNF backend | [`LCNF/Simp/ConstantFold.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/ConstantFold.lean) |
+| 82 | LCNF backend | [`LCNF/Simp/DefaultAlt.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/DefaultAlt.lean) |
+| 83 | LCNF backend | [`LCNF/Simp/DiscrM.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/DiscrM.lean) |
+| 84 | LCNF backend | [`LCNF/Simp/FunDeclInfo.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/FunDeclInfo.lean) |
+| 85 | LCNF backend | [`LCNF/Simp/InlineCandidate.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/InlineCandidate.lean) |
+| 86 | LCNF backend | [`LCNF/Simp/InlineProj.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/InlineProj.lean) |
+| 87 | LCNF backend | [`LCNF/Simp/JpCases.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/JpCases.lean) |
+| 88 | LCNF backend | [`LCNF/Simp/Main.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/Main.lean) |
+| 89 | LCNF backend | [`LCNF/Simp/SimpM.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/SimpM.lean) |
+| 90 | LCNF backend | [`LCNF/Simp/SimpValue.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/SimpValue.lean) |
+| 91 | LCNF backend | [`LCNF/Simp/Used.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Simp/Used.lean) |
+| 92 | LCNF backend | [`LCNF/SimpCase.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/SimpCase.lean) |
+| 93 | LCNF backend | [`LCNF/SimpleGroundExpr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/SimpleGroundExpr.lean) |
+| 94 | LCNF backend | [`LCNF/SpecInfo.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/SpecInfo.lean) |
+| 95 | LCNF backend | [`LCNF/Specialize.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Specialize.lean) |
+| 96 | LCNF backend | [`LCNF/SplitSCC.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/SplitSCC.lean) |
+| 97 | LCNF backend | [`LCNF/StructProjCases.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/StructProjCases.lean) |
+| 98 | LCNF backend | [`LCNF/ToDecl.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ToDecl.lean) |
+| 99 | LCNF backend | [`LCNF/ToExpr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ToExpr.lean) |
+| 100 | LCNF backend | [`LCNF/ToImpure.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ToImpure.lean) |
+| 101 | LCNF backend | [`LCNF/ToImpureType.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ToImpureType.lean) |
+| 102 | LCNF backend | [`LCNF/ToLCNF.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ToLCNF.lean) |
+| 103 | LCNF backend | [`LCNF/ToMono.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/ToMono.lean) |
+| 104 | LCNF backend | [`LCNF/Toposort.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Toposort.lean) |
+| 105 | LCNF backend | [`LCNF/Types.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Types.lean) |
+| 106 | LCNF backend | [`LCNF/Util.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Util.lean) |
+| 107 | LCNF backend | [`LCNF/Visibility.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/LCNF/Visibility.lean) |
+| 108 | Compiler frontend/attributes | [`Main.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/Main.lean) |
+| 109 | Compiler frontend/attributes | [`MetaAttr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/MetaAttr.lean) |
+| 110 | Compiler frontend/attributes | [`ModPkgExt.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/ModPkgExt.lean) |
+| 111 | Compiler frontend/attributes | [`NameDemangling.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/NameDemangling.lean) |
+| 112 | Compiler frontend/attributes | [`NameMangling.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/NameMangling.lean) |
+| 113 | Compiler frontend/attributes | [`NeverExtractAttr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/NeverExtractAttr.lean) |
+| 114 | Compiler frontend/attributes | [`NoncomputableAttr.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/NoncomputableAttr.lean) |
+| 115 | Compiler frontend/attributes | [`Old.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/Old.lean) |
+| 116 | Compiler frontend/attributes | [`Options.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/Options.lean) |
+| 117 | Compiler frontend/attributes | [`Specialize.lean`](https://github.com/leanprover/lean4/blob/470d5ce1400764999581fd26d5d72b00d990b0f4/src/Lean/Compiler/Specialize.lean) |
+
+**Coverage verification:** GitHub pinned tree `e05e77632a5a66719c5fd83bd6adbdb081d1a232` contained 117 `.lean` blobs; 117 were retrieved in consecutive source-audit batches with no reported failures. Files under `src/Init`, `src/Std`, `src/Lean/Elab`, `src/Lean/Meta`, `src/lake` and `src/Lean/Server` were sampled and cited separately; this document does not claim to have scanned every source of the Lean language itself.

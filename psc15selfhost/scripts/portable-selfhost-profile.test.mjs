@@ -299,7 +299,7 @@ test('portable entry roots minimally cover the backend-wasm package graph', asyn
   );
   assert.deepEqual(
     entries.map(sourcePath => path.basename(sourcePath)).sort(),
-    ['CanonicalExports.lean', 'Encode.lean', 'LiteralEvidence.lean', 'SelfHostAbi.lean'],
+    ['CanonicalRequest.lean', 'Encode.lean', 'LiteralEvidence.lean', 'SelfHostAbi.lean'],
   );
   const closure = await collectImportClosure(entries, true);
   for (const sourcePath of packages[0].roots) {

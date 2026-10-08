@@ -38,6 +38,35 @@ theorem PsKernelReductionStep.environment_weaken
   all_goals
     apply hExt.1 <;> assumption
 
+
+theorem psKernelEnvironmentIsNonRecStructure_environment_weaken
+    (older newer : PsKernelEnvironment)
+    (hExt : PsKernelEnvironmentSemanticExtends older newer)
+    (hOlderIndex : PsKernelEnvironmentIndexRefines older)
+    (hNewerIndex : PsKernelEnvironmentIndexRefines newer)
+    (name : PsKernelName)
+    (hNonRec : psKernelEnvironmentIsNonRecStructure older name = true) :
+    psKernelEnvironmentIsNonRecStructure newer name = true := by
+  cases hFind : psKernelEnvironmentFind older name with
+  | none =>
+      simp [psKernelEnvironmentIsNonRecStructure, hFind] at hNonRec
+  | some info =>
+      have hCanonical : psKernelFindConstantInList name older.constants = some info := by
+        calc
+          psKernelFindConstantInList name older.constants =
+              psKernelEnvironmentFind older name := by
+                simpa [psKernelEnvironmentFind] using (hOlderIndex name).symm
+          _ = some info := hFind
+      have hNewFind : psKernelEnvironmentFind newer name = some info := by
+        calc
+          psKernelEnvironmentFind newer name =
+              psKernelFindConstantInList name newer.constants := by
+                simpa [psKernelEnvironmentFind] using hNewerIndex name
+          _ = some info := hExt.1 name info hCanonical
+      simpa [psKernelEnvironmentIsNonRecStructure, hFind, hNewFind] using hNonRec
+
+#check PsKernelReductionClosure.rec
+
 /- Joint structural transport follows the semantic derivations themselves;
    no new semantic constructor or assumption is added to the judgments. -/
 mutual
@@ -45,6 +74,8 @@ mutual
 theorem PsKernelReductionClosure.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {left right : PsKernelExpr}
     (h : PsKernelReductionClosure sourceEnvironment localContext left right) :
@@ -54,66 +85,90 @@ theorem PsKernelReductionClosure.environment_weaken
     apply PsKernelReductionClosure.refl
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case contextWeaken =>
     apply PsKernelReductionClosure.contextWeaken
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case presentationSource =>
     apply PsKernelReductionClosure.presentationSource
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case cons =>
     apply PsKernelReductionClosure.cons
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply PsKernelReductionStep.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case trans =>
     apply PsKernelReductionClosure.trans
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case appFn =>
     apply PsKernelReductionClosure.appFn
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case appArg =>
     apply PsKernelReductionClosure.appArg
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case projectionMajor =>
     apply PsKernelReductionClosure.projectionMajor
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case quotLift =>
     apply PsKernelReductionClosure.quotLift
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.2; assumption)
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case quotInd =>
     apply PsKernelReductionClosure.quotInd
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.2; assumption)
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case recursorIota =>
     apply PsKernelReductionClosure.recursorIota
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.1; assumption)
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelDefEqJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {left right : PsKernelExpr}
     (h : PsKernelDefEqJudgment sourceEnvironment localContext left right) :
@@ -123,146 +178,202 @@ theorem PsKernelDefEqJudgment.environment_weaken
     apply PsKernelDefEqJudgment.refl
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case contextWeaken =>
     apply PsKernelDefEqJudgment.contextWeaken
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case symm =>
     apply PsKernelDefEqJudgment.symm
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case presentation =>
     apply PsKernelDefEqJudgment.presentation
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case structural =>
     apply PsKernelDefEqJudgment.structural
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case reduction =>
     apply PsKernelDefEqJudgment.reduction
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply PsKernelReductionStep.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
   case reductionClosure =>
     apply PsKernelDefEqJudgment.reductionClosure
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case sort =>
     apply PsKernelDefEqJudgment.sort
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case literal =>
     apply PsKernelDefEqJudgment.literal
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case app =>
     apply PsKernelDefEqJudgment.app
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case constLevels =>
     apply PsKernelDefEqJudgment.constLevels
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case natSuccessorPred =>
     apply PsKernelDefEqJudgment.natSuccessorPred
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case projection =>
     apply PsKernelDefEqJudgment.projection
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case reduceCompare =>
     apply PsKernelDefEqJudgment.reduceCompare
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case functionEtaLeft =>
     apply PsKernelDefEqJudgment.functionEtaLeft
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case functionEtaRight =>
     apply PsKernelDefEqJudgment.functionEtaRight
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case proofIrrelevanceAlgorithmic =>
     apply PsKernelDefEqJudgment.proofIrrelevanceAlgorithmic
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case unitLike =>
     apply PsKernelDefEqJudgment.unitLike
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.1; assumption)
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case structureEtaAlgorithmic =>
     apply PsKernelDefEqJudgment.structureEtaAlgorithmic
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.1; assumption)
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelStructureEtaCompareJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelStructureEtaCompareJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case lambdaSpine =>
     apply PsKernelDefEqJudgment.lambdaSpine
     all_goals first
       | assumption
-      | (apply PsKernelLambdaSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelLambdaSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case forallSpine =>
     apply PsKernelDefEqJudgment.forallSpine
     all_goals first
       | assumption
-      | (apply PsKernelForallSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelForallSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case recursorKConversion =>
     apply PsKernelDefEqJudgment.recursorKConversion
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.1; assumption)
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case recursorStructureEta =>
     apply PsKernelDefEqJudgment.recursorStructureEta
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.1; assumption)
   case proofIrrelevance =>
     apply PsKernelDefEqJudgment.proofIrrelevance
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case structureEta =>
     apply PsKernelDefEqJudgment.structureEta
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.1; assumption)
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case metadataLeft =>
     apply PsKernelDefEqJudgment.metadataLeft
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case metadataRight =>
     apply PsKernelDefEqJudgment.metadataRight
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelStructureEtaCompareJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {name : PsKernelName}
     {value : PsKernelExpr}
@@ -275,17 +386,23 @@ theorem PsKernelStructureEtaCompareJudgment.environment_weaken
     apply PsKernelStructureEtaCompareJudgment.done
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case step =>
     apply PsKernelStructureEtaCompareJudgment.step
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelStructureEtaCompareJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelStructureEtaCompareJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelBinderDomainJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {left right : PsKernelExpr}
     {args : List PsKernelExpr}
@@ -296,16 +413,22 @@ theorem PsKernelBinderDomainJudgment.environment_weaken
     apply PsKernelBinderDomainJudgment.structural
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case defeq =>
     apply PsKernelBinderDomainJudgment.defeq
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelLambdaSpineJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {left right : PsKernelExpr}
     {args : List PsKernelExpr}
@@ -316,24 +439,32 @@ theorem PsKernelLambdaSpineJudgment.environment_weaken
     apply PsKernelLambdaSpineJudgment.terminal
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case stepOpen =>
     apply PsKernelLambdaSpineJudgment.stepOpen
     all_goals first
       | assumption
-      | (apply PsKernelBinderDomainJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelLambdaSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelBinderDomainJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelLambdaSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case stepClosed =>
     apply PsKernelLambdaSpineJudgment.stepClosed
     all_goals first
       | assumption
-      | (apply PsKernelBinderDomainJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelLambdaSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelBinderDomainJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelLambdaSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelForallSpineJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {left right : PsKernelExpr}
     {args : List PsKernelExpr}
@@ -344,24 +475,32 @@ theorem PsKernelForallSpineJudgment.environment_weaken
     apply PsKernelForallSpineJudgment.terminal
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case stepOpen =>
     apply PsKernelForallSpineJudgment.stepOpen
     all_goals first
       | assumption
-      | (apply PsKernelBinderDomainJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelForallSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelBinderDomainJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelForallSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case stepClosed =>
     apply PsKernelForallSpineJudgment.stepClosed
     all_goals first
       | assumption
-      | (apply PsKernelBinderDomainJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelForallSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelBinderDomainJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelForallSpineJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelProjectionApplyParamsJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {args : List PsKernelExpr}
     {index count : Nat}
@@ -373,17 +512,23 @@ theorem PsKernelProjectionApplyParamsJudgment.environment_weaken
     apply PsKernelProjectionApplyParamsJudgment.done
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case step =>
     apply PsKernelProjectionApplyParamsJudgment.step
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelProjectionApplyParamsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelProjectionApplyParamsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelProjectionSkipFieldsJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {name : PsKernelName}
     {value : PsKernelExpr}
@@ -396,23 +541,31 @@ theorem PsKernelProjectionSkipFieldsJudgment.environment_weaken
     apply PsKernelProjectionSkipFieldsJudgment.done
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case stepClosed =>
     apply PsKernelProjectionSkipFieldsJudgment.stepClosed
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelProjectionSkipFieldsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelProjectionSkipFieldsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case stepDependent =>
     apply PsKernelProjectionSkipFieldsJudgment.stepDependent
     all_goals first
       | assumption
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelProjectionSkipFieldsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelProjectionSkipFieldsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelProjectionResultJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {name : PsKernelName}
     {index : Nat}
@@ -424,15 +577,19 @@ theorem PsKernelProjectionResultJudgment.environment_weaken
     apply PsKernelProjectionResultJudgment.intro
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.1; assumption)
-      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelProjectionApplyParamsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelProjectionSkipFieldsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply PsKernelReductionClosure.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelProjectionApplyParamsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelProjectionSkipFieldsJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 theorem PsKernelTypingJudgment.environment_weaken
     (sourceEnvironment targetEnvironment : PsKernelEnvironment)
     (hExt : PsKernelEnvironmentSemanticExtends sourceEnvironment targetEnvironment)
+    (hSourceIndex : PsKernelEnvironmentIndexRefines sourceEnvironment)
+    (hTargetIndex : PsKernelEnvironmentIndexRefines targetEnvironment)
     {localContext : PsKernelLocalContext}
     {expr type : PsKernelExpr}
     (h : PsKernelTypingJudgment sourceEnvironment localContext expr type) :
@@ -442,72 +599,100 @@ theorem PsKernelTypingJudgment.environment_weaken
     apply PsKernelTypingJudgment.presentation
     all_goals first
       | assumption
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case contextWeaken =>
     apply PsKernelTypingJudgment.contextWeaken
     all_goals first
       | assumption
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case convert =>
     apply PsKernelTypingJudgment.convert
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case sort =>
     apply PsKernelTypingJudgment.sort
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case natLiteral =>
     apply PsKernelTypingJudgment.natLiteral
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case stringLiteral =>
     apply PsKernelTypingJudgment.stringLiteral
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case fvar =>
     apply PsKernelTypingJudgment.fvar
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case const =>
     apply PsKernelTypingJudgment.const
     all_goals first
       | assumption
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
       | (apply hExt.1; assumption)
   case app =>
     apply PsKernelTypingJudgment.app
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case lam =>
     apply PsKernelTypingJudgment.lam
     all_goals first
       | assumption
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case forallE =>
     apply PsKernelTypingJudgment.forallE
     all_goals first
       | assumption
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case letE =>
     apply PsKernelTypingJudgment.letE
     all_goals first
       | assumption
-      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelDefEqJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case mdata =>
     apply PsKernelTypingJudgment.mdata
     all_goals first
       | assumption
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
   case proj =>
     apply PsKernelTypingJudgment.proj
     all_goals first
       | assumption
-      | (apply PsKernelProjectionResultJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
-      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt; assumption)
+      | (apply psKernelEnvironmentIsNonRecStructure_environment_weaken
+          sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelProjectionResultJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
+      | (apply PsKernelTypingJudgment.environment_weaken sourceEnvironment targetEnvironment hExt hSourceIndex hTargetIndex; assumption)
 termination_by structural h
 
 end
@@ -540,24 +725,26 @@ theorem PsKernelCheckerStateSemanticSound.environment_weaken
     (localContext : PsKernelLocalContext)
     (state : PsKernelCheckerState)
     (hExt : PsKernelEnvironmentSemanticExtends older newer)
+    (hOlderIndex : PsKernelEnvironmentIndexRefines older)
+    (hNewerIndex : PsKernelEnvironmentIndexRefines newer)
     (hState : PsKernelCheckerStateSemanticSound older localContext state) :
     PsKernelCheckerStateSemanticSound newer localContext state := by
   rcases hState with ⟨hInferOnly, hChecked, hCore, hWhnf, hUnfold, hSuccess⟩
   refine ⟨True.intro, ?_, ?_, ?_, ?_, ?_⟩
   · intro expr result hGet
-    exact PsKernelTypingJudgment.environment_weaken older newer hExt
+    exact PsKernelTypingJudgment.environment_weaken older newer hExt hOlderIndex hNewerIndex
       (hChecked expr result hGet)
   · intro expr result hGet
-    exact PsKernelReductionClosure.environment_weaken older newer hExt
+    exact PsKernelReductionClosure.environment_weaken older newer hExt hOlderIndex hNewerIndex
       (hCore expr result hGet)
   · intro expr result hGet
-    exact PsKernelReductionClosure.environment_weaken older newer hExt
+    exact PsKernelReductionClosure.environment_weaken older newer hExt hOlderIndex hNewerIndex
       (hWhnf expr result hGet)
   · intro expr result hGet
-    exact PsKernelReductionClosure.environment_weaken older newer hExt
+    exact PsKernelReductionClosure.environment_weaken older newer hExt hOlderIndex hNewerIndex
       (hUnfold expr result hGet)
   · intro left right hContains
-    exact PsKernelDefEqJudgment.environment_weaken older newer hExt
+    exact PsKernelDefEqJudgment.environment_weaken older newer hExt hOlderIndex hNewerIndex
       (hSuccess left right hContains)
 
 
@@ -582,4 +769,4 @@ theorem psKernelSessionWithEnvironment_configuration_preserves
   exact ⟨hIndex, hConfig.2.1,
     PsKernelCheckerStateSemanticSound.environment_weaken
       session.context.environment environment session.context.localContext
-      session.state hExt hConfig.2.2⟩
+      session.state hExt hConfig.1 hIndex hConfig.2.2⟩

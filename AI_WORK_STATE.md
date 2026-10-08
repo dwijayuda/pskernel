@@ -591,3 +591,25 @@ Architectural blockers still remaining:
   than an adopted additional TCB assumption. Full ordinary/mutual/nested
   transaction closure, recursor generation, public theorem family, audit and
   integration remain incomplete. Audit remains A/B/C/D=44/9/19/7.
+
+## Ordinary constructor publication checkpoint — 2026-10-08
+- Full proof and native conformance **#737 GREEN** at
+  `b666040fc9765cf94cb60d026002f6f7f39df426`.
+  The independent ordinary constructor history now ties every exact returned
+  shape and published metadata record to closed checked typing, raw parameter
+  and field typing, strict positivity, recursive records, result-index exclusion,
+  canonical freshness, and its actual progressive environment.
+  Successful construction also preserves semantic lookup extension and indexes.
+- Metadata replacement transport is proved relative to the original environment
+  where the replaced transaction name was absent. It does not certify unchanged
+  provisional metadata. This supports later retained-cache transport.
+- Current candidates compose header parameter/index spines and the constructor
+  loop from the existing root naming guards, preserve reserved recursor freshness,
+  and extend independent occurrence/index exclusion to all mutual family targets.
+  These candidates require their latest CI before being claimed green.
+- #740 failed only on a dependent membership case binder name; the correction
+  consumes the existing membership hypothesis without assuming additional evidence.
+- No production acceptance/source changes, new axioms, or sorry in this milestone.
+  StringEq reflexivity is still an unresolved explicit conditional obligation.
+  Full ordinary/mutual/nested publication and recursor generation, public/API
+  composition, semantic audit and integration remain open; audit=44/9/19/7.

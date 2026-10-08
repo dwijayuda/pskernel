@@ -334,6 +334,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionUniformOccurrenceConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionUniformPreflightConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionNoTargetOccurrenceConfiguration,
+    `Ps.KernelCore.Metatheory.AdmissionMutualOccurrenceConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionRecursiveArgumentConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionHeaderSpineConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionParameterConfiguration,

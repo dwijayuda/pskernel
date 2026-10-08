@@ -308,8 +308,8 @@ theorem psKernelNameListContains_false_excludes_equal
           | head =>
               have hSelf := psKernelNameEq_refl_of_string_law hReflexive needle
               simpa [hEqual, hSelf] using hHead
-          | tail hMember =>
-              exact ih hTail name hMember hEqual
+          | tail =>
+              exact ih hTail name (by assumption) hEqual
 
 /-- Metadata replacement for a disjoint transaction name preserves absence. -/
 theorem psKernelInductiveNamesAbsent_replace_disjoint

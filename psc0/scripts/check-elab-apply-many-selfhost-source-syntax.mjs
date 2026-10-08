@@ -10,7 +10,7 @@ const source = await readFile(
 );
 
 const workerMatch = source.match(
-  /def psExprApplyManyWorker([\s\S]*?)(?=\ndef psExprApplyMany)/,
+  /def psExprApplyManyWorker\b([\s\S]*?)(?=\ndef psExprApplyMany\b)/,
 );
 if (workerMatch === null) {
   throw new Error(
@@ -18,23 +18,30 @@ if (workerMatch === null) {
   );
 }
 
+// Accept the historical spelling and the qualified SH/1 explicit-parameter
+// spelling. Public type and behavior correspondence are checked by the helper
+// migration conformance gate; this guard only retains the source contract.
 const worker = workerMatch[0];
-const requiredWorker = [
-  /def psExprApplyManyWorker\s*\(arguments : List PsExpr\)\s*:\s*PsExpr -> PsExpr :=/,
-  /\| \[\] =>\s*fun \(fn : PsExpr\) =>\s*fn/,
-  /let smaller : PsExpr -> PsExpr :=\s*psExprApplyManyWorker rest;/,
-  /fun \(fn : PsExpr\) =>\s*smaller\s*\(PsExpr\.app fn argument\)/,
+const workerForms = [
+  [
+    /def psExprApplyManyWorker\s*\(arguments : List PsExpr\)\s*:\s*PsExpr -> PsExpr :=\s*match arguments with/,
+    /\| \[\] =>\s*fun \(fn : PsExpr\) =>\s*fn/,
+    /\| argument :: rest =>\s*let smaller : PsExpr -> PsExpr :=\s*psExprApplyManyWorker rest;\s*fun \(fn : PsExpr\) =>\s*smaller\s*\(PsExpr\.app fn argument\)/,
+  ],
+  [
+    /def psExprApplyManyWorker\s*\(arguments : List PsExpr\)\s*\(fn : PsExpr\)\s*:\s*PsExpr :=\s*match arguments with/,
+    /\| \[\] =>\s*fn/,
+    /\| argument :: rest =>\s*psExprApplyManyWorker rest\s*\(PsExpr\.app fn argument\)/,
+  ],
 ];
-for (const pattern of requiredWorker) {
-  if (!pattern.test(worker)) {
-    throw new Error(
-      `PSC2_ELAB_APPLY_MANY_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`,
-    );
-  }
+if (!workerForms.some((patterns) => patterns.every((pattern) => pattern.test(worker)))) {
+  throw new Error(
+    "PSC2_ELAB_APPLY_MANY_SELFHOST_SOURCE_SYNTAX_MISSING: supported structural worker",
+  );
 }
 
 const wrapperMatch = source.match(
-  /def psExprApplyMany([\s\S]*?)(?=\ndef psElabIf)/,
+  /def psExprApplyMany\b([\s\S]*?)(?=\ndef psElabIf\b)/,
 );
 if (wrapperMatch === null) {
   throw new Error(
@@ -45,15 +52,10 @@ if (wrapperMatch === null) {
 const wrapper = wrapperMatch[0];
 if (!/def psExprApplyMany\s*\(fn : PsExpr\)\s*\(arguments : List PsExpr\)\s*:\s*PsExpr :=\s*psExprApplyManyWorker arguments fn/.test(wrapper)) {
   throw new Error(
-    "PSC2_ELAB_APPLY_MANY_SELFHOST_SOURCE_SYNTAX_MISSING: invariant-safe wrapper",
-  );
-}
-if (/psExprApplyMany\s*\(PsExpr\.app fn argument\)\s+rest/.test(wrapper)) {
-  throw new Error(
-    "PSC2_ELAB_APPLY_MANY_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: recursive accumulator mutation",
+    "PSC2_ELAB_APPLY_MANY_SELFHOST_SOURCE_SYNTAX_MISSING: public wrapper argument order",
   );
 }
 
 process.stdout.write(
-  "PSC2_ELAB_APPLY_MANY_SELFHOST_SOURCE_SYNTAX: PASS (list-recursive worker with post-recursion accumulator)\n",
+  "PSC2_ELAB_APPLY_MANY_SELFHOST_SOURCE_SYNTAX: PASS (historical or qualified SH/1 worker; public wrapper order)\n",
 );

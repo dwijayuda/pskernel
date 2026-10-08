@@ -2,6 +2,32 @@
 
 Updated: 2026-10-08 UTC.
 
+## Active checkpoint: next three-helper source migration
+
+The qualified Foundation checkpoint below remains the previous completed milestone.
+This continuation migrates psExprApplyManyWorker, psExprAppViewAccWorker and
+psErasureAddUniqueStringWorker to ordinary explicit value parameters. Public
+worker/wrapper names, full types, argument ordering and algorithms are preserved.
+
+Only Term.lean and Erasure/Definition.lean change inside the portable compiler
+closure. The three spelling guards now accept the historical and qualified
+forms while preserving their wrapper/primitive checks and unrelated imports.
+A new bounded correspondence harness compiles preserved and current raw helper
+slices with actual Name/Level/Expr source, compares all seven public function
+types and checks application order, accumulator suffixes, typed partial
+application and exact unique-name exhaustion. It runs before expensive C1.
+A cheap behavior check also executes actual exported helpers in N1/C1/C2/C3.
+
+Cloud validation is pending for this new checkpoint. Ordinary development uses
+the existing native-candidate gate; the completed source-family milestone then
+receives selected-Q current-source C1/C2/C3 and exact provider acceptance.
+A remains the selected qualified seed. No strict runtime-profile claim is added.
+
+An isolated follow-on erasure change is being designed: preserve the current
+declaration's ordered generic arguments when reconstructing recursive calls.
+It is not part of this helper-migration code checkpoint. Keep kernel/provider
+implementation and metatheory unchanged.
+
 ## Completed checkpoint: qualified seed and first source migration
 
 Implementation branch: psc0/sh1-implementation-v1.

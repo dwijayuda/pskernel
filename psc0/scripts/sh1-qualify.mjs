@@ -19,6 +19,7 @@ import { resolveTypeScriptCli } from './typescript-cli.mjs';
 import { createGeneratedPreparationSession } from './generated-preparation-session.mjs';
 import { inventoryOriginalIr } from './original-ir-inventory.mjs';
 import { runFoundationConformance } from './sh1-foundation-conformance.mjs';
+import { runHelperConformance, runHelperRuntimeConformance } from './sh1-helper-conformance.mjs';
 import { runIterationConformance } from './sh1-iteration-conformance.mjs';
 import {
   compileTypeScript, runCommand, runSh1Capabilities, sha256, unwrap,
@@ -79,6 +80,9 @@ async function recipeIdentity() {
     'scripts/sh1-foundation-conformance.mjs',
     'test/fixtures/selfhost-sh1-foundation-reference.lean',
     'test/fixtures/selfhost-sh1-foundation-probe.lean',
+    'scripts/sh1-helper-conformance.mjs',
+    'test/fixtures/selfhost-sh1-helpers-reference.lean',
+    'test/fixtures/selfhost-sh1-helpers-probe.lean',
   ];
   const contents = [];
   for (const file of files) contents.push({ path: file, sha256: sha256(await readFile(path.join(root, file))) });
@@ -514,6 +518,7 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
   const compilerSha256 = sha256(await readFile(outputJs));
   const loaded = await loadCompiler(outputJs, { expectedSha256: compilerSha256 });
   const sourceRef = capture('git', ['rev-parse', 'HEAD']);
+  await runHelperRuntimeConformance({ ...loaded, outDir: directory });
   await sessionConformance(outputJs, outputJs, outDir, {
     oracle: {
       kind: 'current-native-generated-aggregate-implementation',
@@ -531,6 +536,10 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
   await runFoundationConformance({
     ...loaded, root, outDir: path.join(outDir, 'foundation'), tsc,
     executingCompiler: 'Current native-generated compiler consumes both raw library sources.',
+  });
+  await runHelperConformance({
+    ...loaded, root, outDir: path.join(outDir, 'helpers'), tsc,
+    executingCompiler: 'Current native-generated compiler consumes both raw helper source slices.',
   });
   assert.equal((await sourceClosure(root)).sha256, closure.sha256,
     'PSC0_SH1_SOURCE_CHANGED_DURING_RUN');
@@ -598,6 +607,11 @@ if (command === 'seed-identity') {
     executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',
     root, outDir: path.join(outDir, 'foundation'), tsc,
   });
+  await runHelperConformance({
+    ...libraryCompiler,
+    executingCompiler: 'Same verified selected authoring seed consumes both raw helper source slices.',
+    root, outDir: path.join(outDir, 'helpers'), tsc,
+  });
   const generation = await buildGeneration(authoring.compilerPath, closure, path.join(outDir, 'C1'), {
     expectedSha256: authoring.expectedSha256, authoringSeed: authoring.provenance,
   });
@@ -607,6 +621,7 @@ if (command === 'seed-identity') {
   const loaded = await loadCompiler(generation.outputJs, {
     expectedSha256: generation.receipt.artifacts.javascriptSha256,
   });
+  await runHelperRuntimeConformance({ ...loaded, outDir: path.join(outDir, 'C1') });
   const nativeArg = option(args, '--native', undefined);
   await runSh1Capabilities({
     ...loaded, root, outDir: path.join(outDir, 'C1/capabilities'), tsc,
@@ -647,6 +662,7 @@ if (command === 'seed-identity') {
     expectedSha256: second.receipt.artifacts.javascriptSha256,
   });
   await runSh1Capabilities({ ...secondCompiler, root, outDir: path.join(outDir, 'C2/capabilities'), tsc });
+  await runHelperRuntimeConformance({ ...secondCompiler, outDir: path.join(outDir, 'C2') });
   const third = await buildGeneration(second.outputJs, closure, path.join(outDir, 'C3'), {
     expectedSha256: second.receipt.artifacts.javascriptSha256,
   });
@@ -656,6 +672,7 @@ if (command === 'seed-identity') {
     expectedSha256: third.receipt.artifacts.javascriptSha256,
   });
   await runSh1Capabilities({ ...thirdCompiler, root, outDir: path.join(outDir, 'C3/capabilities'), tsc });
+  await runHelperRuntimeConformance({ ...thirdCompiler, outDir: path.join(outDir, 'C3') });
   assert.equal((await sourceClosure(root)).sha256, closure.sha256, 'PSC0_SH1_SOURCE_CHANGED_DURING_RUN');
   const receipt = {
     schemaVersion: 1,
@@ -673,6 +690,8 @@ if (command === 'seed-identity') {
     c2CompilerSha256: second.receipt.artifacts.javascriptSha256,
     c3CompilerSha256: third.receipt.artifacts.javascriptSha256,
     rawCapabilityKinds: ['lean', 'proofScript'],
+    helperSourceCorrespondence: 'helpers/receipt.json',
+    helperRuntimeGenerations: ['C1', 'C2', 'C3'],
     canonicalSourceContract: 'Existing surface printer; normalized worker representation is compared through canonical admissions.',
     runtimeIrStrictQualification: 'not-claimed',
     provider: { status: 'not-attempted', kernelChecked: false },

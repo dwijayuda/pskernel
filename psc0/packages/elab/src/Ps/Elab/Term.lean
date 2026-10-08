@@ -919,17 +919,12 @@ def psElabLet
                         expected
 
 def psExprApplyManyWorker
-    (arguments : List PsExpr) :
-    PsExpr -> PsExpr :=
+    (arguments : List PsExpr)
+    (fn : PsExpr) : PsExpr :=
   match arguments with
-  | [] =>
-      fun (fn : PsExpr) =>
-        fn
+  | [] => fn
   | argument :: rest =>
-      let smaller : PsExpr -> PsExpr :=
-        psExprApplyManyWorker rest;
-      fun (fn : PsExpr) =>
-        smaller (PsExpr.app fn argument)
+      psExprApplyManyWorker rest (PsExpr.app fn argument)
 
 def psExprApplyMany
     (fn : PsExpr)
@@ -1021,20 +1016,16 @@ structure PsExprAppView where
   args : List PsExpr
 
 def psExprAppViewAccWorker
-    (expr : PsExpr) :
-    List PsExpr -> PsExprAppView :=
+    (expr : PsExpr)
+    (args : List PsExpr) : PsExprAppView :=
   match expr with
   | .app fn argument =>
-      let smaller : List PsExpr -> PsExprAppView :=
-        psExprAppViewAccWorker fn;
-      fun (args : List PsExpr) =>
-        smaller (List.cons argument args)
+      psExprAppViewAccWorker fn (List.cons argument args)
   | _ =>
-      fun (args : List PsExpr) =>
-        {
-          head := expr
-          args := args
-        }
+      {
+        head := expr
+        args := args
+      }
 
 def psExprAppViewAcc
     (expr : PsExpr)

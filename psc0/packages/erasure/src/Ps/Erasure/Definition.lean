@@ -16,14 +16,17 @@ def psErasureStringInList (values : List String) : String -> Bool :=
       fun (target : String) =>
         if psStringEq value target then true else smaller target
 
-def psErasureAddUniqueStringWorker (used : List String) (attempts : Nat) : String -> String :=
+def psErasureAddUniqueStringWorker
+    (used : List String)
+    (attempts : Nat)
+    (base : String) : String :=
   match attempts with
-  | Nat.zero => fun (base : String) => String.Internal.append base "_overflow"
+  | Nat.zero => String.Internal.append base "_overflow"
   | Nat.succ remaining =>
-      let smaller : String -> String := psErasureAddUniqueStringWorker used remaining;
-      fun (base : String) =>
-        if psErasureStringInList used base then smaller (String.Internal.append base "_")
-        else base
+      if psErasureStringInList used base then
+        psErasureAddUniqueStringWorker used remaining
+          (String.Internal.append base "_")
+      else base
 
 def psErasureAddUniqueString (used : List String) (base : String) (attempts : Nat) : String :=
   psErasureAddUniqueStringWorker used attempts base

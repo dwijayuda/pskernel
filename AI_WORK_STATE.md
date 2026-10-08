@@ -330,3 +330,12 @@ Architectural blockers still remaining:
 - The current follow-up commit is consolidating authoritative environment-extension evidence into the registered mutual-admission metatheory; verify its CI before calling this extra composition green.
 - Mechanical inventory at this checkpoint: **79/79** canonical source modules have canonical `.proof.lean` companions; five additional standalone metatheory proof files exist. File pairing is not the same as semantic assurance completion.
 - **Still open:** ordinary, mutual and nested inductive admission/refinement and restoration; final public Kernel/API/session refinement composition; explicit TCB inventory and semantic audit refresh; integration reconciliation and final conformance gates. `PsKernelNativeReductionSoundLaw` and `PsKernelStringEqSoundLaw` remain named premises, never unconditional conclusions.
+
+
+## Inductive transaction index frontier — 2026-10-08 (latest)
+- Full PSKernel Core proof gate **#669** is green at `4ab0cc375818e1bde9085f512ee7c7890205bb72`: authoritative environment-index refinement is preserved by replacement when an existing canonical declaration is present. Root-bucket and collision-sensitive insertion evidence remains registered.
+- Full gate **#672** is green at `2d39870b62f5ade8871a4ef5a881b786b1281a98`: `psKernelAddSimpleConstructorsWithFuel_index_refines` proves that the complete successful ordinary constructor-admission loop preserves canonical index refinement, across its checked recursive insertions.
+- Full gate **#673** is green at `b4f43dd5ea961780f3926a8c2e1a3919902b18eb`: mutual inductive-header and generated-recursors list insertions preserve the same invariant for arbitrary public index-root representations.
+- Current candidate: structural index-preservation proofs for mutual constructors within one type and across the mutual type list. Verify its CI before treating the candidate as green.
+- These index theorems are prerequisites rather than complete inductive-admission certificates. Still open are validated constructor/header typing, positivity and recursor semantics, replacement-name provenance across the bundle, ordinary/mutual/nested transaction refinement, final Kernel/API/session refinement composition, semantic audit refresh and reconciliation with `psc2/selfhost-lean-kernel`.
+- Keep `PsKernelNativeReductionSoundLaw` and `PsKernelStringEqSoundLaw` as explicit conditional trusted premises. No `sorry`, axioms, general DefEq transitivity, or weakening of existing acceptance criteria.

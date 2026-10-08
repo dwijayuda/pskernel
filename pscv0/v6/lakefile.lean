@@ -31,7 +31,7 @@ lean_exe pscv_v6_native_tests where
 -- extracted under the current Lean 4.35 toolchain without preserving old APIs.
 lean_lib PscvReuseProbeFoundation where
   srcDir := "../packages/foundation/src"
-  roots := #[`Ps.Foundation.Name, `Ps.Foundation.List]
+  roots := #[`Ps.Foundation.Name, `Ps.Foundation.List, `Ps.Foundation.Source, `Ps.Foundation.Text, `Ps.Foundation.Diagnostic]
 
 lean_lib PscvReuseProbeRuntimeIr where
   srcDir := "../packages/compiler-ir/src"
@@ -45,3 +45,9 @@ lean_lib PscvReuseProbeInterfaceIr where
 lean_exe pscv_v6_reuse_smoke where
   srcDir := "test/lean"
   root := `ReuseBehavior
+
+-- Import only the old .ps parser source to test 4.35 build compatibility.
+-- This is NOT the extensible V6 parser and is not linked into pscv_v6_dev.
+lean_lib PscvReuseProbeSyntax where
+  srcDir := "../packages/syntax/src"
+  roots := #[`Ps.Syntax.ParseProofScript]

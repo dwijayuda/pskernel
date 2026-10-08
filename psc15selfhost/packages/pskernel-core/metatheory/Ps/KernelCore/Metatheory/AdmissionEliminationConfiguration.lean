@@ -353,3 +353,30 @@ theorem psKernelSimpleElimOnlyAtZero_false_semantic
                         psKernelSimpleCtorAllowsLargeElim_true_semantic fuel hNative hString
                           session params ctor.type hConfig hAllowed
                       exact Or.inr (Or.inr ⟨ctor, afterParams, rfl, hSpine, hFields⟩)
+
+/-- Lean's K target is a proposition with one constructor and no fields. -/
+def PsKernelSimpleKTargetPolicyValid
+    (resultLevel : PsKernelLevel)
+    (shapes : List PsKernelSimpleConstructorShape) : Prop :=
+  PsKernelAdmissionLevelAlwaysZero resultLevel ∧
+  ∃ shape : PsKernelSimpleConstructorShape,
+    shapes = [shape] ∧ shape.fields = []
+
+theorem psKernelSimpleKTarget_true_semantic
+    (resultLevel : PsKernelLevel)
+    (shapes : List PsKernelSimpleConstructorShape)
+    (hTarget : psKernelSimpleKTarget resultLevel shapes = true) :
+    PsKernelSimpleKTargetPolicyValid resultLevel shapes := by
+  cases hZero : psKernelLevelNormalizesToZero resultLevel with
+  | false => simp [psKernelSimpleKTarget, hZero] at hTarget
+  | true =>
+      refine ⟨psKernelLevelNormalizesToZero_true_semantic resultLevel hZero, ?_⟩
+      cases shapes with
+      | nil => simp [psKernelSimpleKTarget, hZero] at hTarget
+      | cons shape rest =>
+          cases rest with
+          | cons next tail => simp [psKernelSimpleKTarget, hZero] at hTarget
+          | nil =>
+              cases hFields : shape.fields with
+              | cons field tail => simp [psKernelSimpleKTarget, hZero, hFields] at hTarget
+              | nil => exact ⟨shape, rfl, hFields⟩

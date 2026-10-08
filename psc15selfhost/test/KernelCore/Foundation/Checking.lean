@@ -966,8 +966,9 @@ def psKernelCoreRecursorTests : Bool :=
             psKernelExprMapGet
               (Prod.snd portableResult).inferOnly
               portableMajor with
-         | Option.some _ => true
-         | Option.none => false)
+         -- Semantic caches must exclude fvar-bearing keys.
+         | Option.some _ => false
+         | Option.none => true)
   | _, _ =>
       false
 

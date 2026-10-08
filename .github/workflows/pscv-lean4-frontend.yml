@@ -34,6 +34,15 @@ jobs:
           "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.35.0-rc3
       - name: Test source preflight
         run: node --test psc15selfhost/lean4-frontend/test/policy.test.mjs
+      - name: Exercise native Lean 4.35 contract proof generation
+        working-directory: psc15selfhost/lean4-frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean test/LeanContractsPositive.lean
+          if lean test/LeanContractsNegative.lean; then
+            echo "ERROR: Lean accepted an unprovable intrinsic contract"; exit 1
+          fi
       - name: Build existing PSC2 native .ps-to-Lean translator
         working-directory: psc15selfhost
         shell: bash

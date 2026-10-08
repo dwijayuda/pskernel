@@ -93,6 +93,17 @@ typechecking alone proves an application's intended behavior.
 Lean's native compiler does not itself provide ProofScript's direct
 JavaScript/TypeScript/Rust/WebAssembly compiler backends.
 
+
+## Direct Lean intrinsic verification reference
+
+The separate test/LeanContractsPositive.lean fixture uses Lean 4.35.0-rc3's
+native requires/ensures contract elaboration and auto-generated specification
+theorem. The negative fixture demands an impossible postcondition and must
+fail. These tests exercise the pinned Lean verification machinery as a
+reference for later PSCV-VERIFY-v1 lowering. They do NOT mean the .ps source
+frontend supports contracts, verifies imported axiom closure, or issues
+PSCV-CERT-v1.
+
 ## Follow-on implementation slices
 
 1. Implement PSCV-owned frontend syntax with a closed grammar, AST and exact

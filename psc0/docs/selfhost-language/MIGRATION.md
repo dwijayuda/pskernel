@@ -1,14 +1,14 @@
 # PSC0-SH/1 implementation and migration plan
 
-Status: M0–M3 have an initial qualified implementation at `e91b9558d665879871b8bf0893915ae64b27c7fe`; Foundation.List is the bounded M4 source checkpoint now entering qualification. M5 remains optional follow-on authoring work, M6 has a diagnostic inventory, and M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The original baseline and scope are in [README.md](README.md), and language requirements are in [SPEC.md](SPEC.md).
+Status: M0–M3 have an initial qualified implementation at `e91b9558d665879871b8bf0893915ae64b27c7fe`; the first bounded M4 family, Foundation.List at `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`, passed its C2/C3 fixed point and exact provider acceptance on its first execution in run 37840481558. M5 remains optional follow-on authoring work, M6 has a diagnostic inventory, and M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The original baseline and scope are in [README.md](README.md), and language requirements are in [SPEC.md](SPEC.md).
 
 ## 1. Execute two coordinated tracks
 
 The language track owns source capability design, portable normalization, compiler preparation APIs, source migration and generated-compiler evidence. The existing native-provider track owns kernel conversion, provider resource handling and native checked acceptance. Reuse accepted work from that track; do not overwrite it or import an unverified provider merely to make a language milestone look complete.
 
-At inspected native commit `b109be0075630dd17b791e3b0c5fcad016df53e8`, bounded provider checks passed but the full compiler workflow failed on a reduction budget. Its 12-package baseline lock, scoped CI, explicit workspaces and Lake caching already address part of the iteration problem.[NATIVE], [RUN], [NATIVELOCK], [NATIVECHECK]
+Historical audit note: at native commit `b109be0075630dd17b791e3b0c5fcad016df53e8`, bounded provider checks passed but the full compiler workflow failed on a reduction budget. Its 12-package baseline lock, scoped CI, explicit workspaces and Lake caching already addressed part of the iteration problem.[NATIVE], [RUN], [NATIVELOCK], [NATIVECHECK]
 
-Language implementation and small generated fixtures can proceed while that issue is resolved. A failed full-corpus acceptance must continue to block a claim that the native checked self-host milestone has passed.
+Later evidence supersedes that pending status. The separately pinned provider at `963030dc2d154008fccc82e7c8ed29331f138799` accepted A's exact compiler and capability admission streams in [run 37831951758](https://github.com/dwijayuda/pskernel/actions/runs/37831951758). Each later source checkpoint obtains its own exact-stream decision. This branch consumes that provider without editing its implementation; compiler qualification and provider acceptance retain separate receipts.
 
 ## 2. Ordered implementation units
 
@@ -82,6 +82,8 @@ This stage breaks the bootstrap cycle: the compiler learns the feature while wri
 
 ### M4 — migrate source by feature family
 
+**Completed first family:** Foundation.List now uses ordinary parameters in reverseAcc, append, take and zip. The selected A seed consumed both preserved and migrated sources; all ten public types and 1,666 behavior observations per library passed. The migrated compiler then passed its own raw-source C2/C3 equality and exact provider acceptance. The complete receipts are indexed in [qualification-evidence.json](qualification-evidence.json). Further families remain small, independent migrations under the same A seed.
+
 **First family: simple total collection/index workers.** Start with a small sample of list traversal, reverse/append/take/zip wrappers and index scans. Reuse existing foundation helpers. Preserve public names/signatures and avoid an accompanying data-structure redesign.[LIST]
 
 **Second family: fuel and explicit state.** Migrate workers returning functions of context, indices, accumulators or result state. Preserve exhaustion behavior, first-error order and state-on-error policy.
@@ -124,7 +126,11 @@ Use actual remaining workaround counts to choose between items 2 and 3. A parser
 
 ### M6 — strengthen the portable runtime contract
 
-Add the small original-IR checker described in SPEC, initially reporting the old corpus. Close remaining runtime unknowns and explicit primitive/representation gaps before making stricter enforcement the default for promoted source.
+The report-only inventory is installed. B completed all three traversals with 244 call-expression typing obligations and 19 type-argument arity findings. No other category was recorded, and strict qualification remains false.
+
+The retained A report locates 19 calls with zero explicit generic arguments in generic recursive helpers. Source inspection identifies a shared omission: `PsErasureCurrentDefinition` stores only runtime parameters, and recursive-IH reconstruction in `psOpenMatchMinorHypotheses` passes an empty type-argument list. The report lacks callee/ancestry detail, so this is an established omission consistent with the findings rather than a proven one-to-one mapping for all nodes. [IMPLEMENTATION.md](IMPLEMENTATION.md) gives the trace and exact evidence scope.
+
+The smallest next erasure change is to preserve the current declaration's ordered generic arguments as type binders are opened, carry them through runtime/proof binders, and pass their scoped instantiation when reconstructing recursive calls. Do not collect every `scope.typeLocals` entry or whitelist the 19 names. Check the one-, two- and three-parameter cases at that planned checkpoint, then add callee-expression typing and scoped substitution for the separate 244 obligations. Runtime primitive typing, layouts and erasure/backend semantic correspondence must also be closed before strict enforcement is activated.
 
 Preserve the original TS path. Do not make the copied direct JS/Rust/Wasm backends prerequisites. Integrate a new target only after choosing a coherent IR interface, wiring its build/driver dependencies, and demonstrating the scalar/ADT/function contract and generated self-host evidence for that target.
 
@@ -171,13 +177,13 @@ The implemented ordinary route is `npm run dev:sh1`, which builds current native
 
 | Workflow | When | Work and claim |
 | --- | --- | --- |
-| Edit feedback | Every edit | Real parser/profile checks, changed preparation suffix, focused diagnostics; no fixed-point claim |
+| Resident edit feedback | Repeated requests within one compiler instance | Real parsing and elaboration, changed preparation suffix, focused diagnostics; no fixed-point claim |
 | Candidate build/test | Ordinary compiler edits | Build native PSC incrementally, emit N1 from raw current source, then execute the generated compiler's bounded capability/runtime/session cases; no selected-seed ancestry claim |
 | Current-source self-application | Feature or source-family milestone | Successive current-source generations and equality, with exact provenance |
 | Checked qualification | Seed promotion and relevant provider/semantic changes | Required admissions accepted by selected provider plus source/generation evidence |
 | Historical reproduction | Bootstrap changes or explicit recovery audit | Reproduce preserved old source/seed contract independently |
 
-On main today, `npm run build:psc` is the closest existing current-source build, and `npm run fixed-point` is the coarse full-chain route. The former is not candidate self-application; the latter is expensive to repeat per edit.[BUILD], [PKG]
+In the preserved baseline, `npm run build:psc` was the closest current-source build, and `npm run fixed-point` was the coarse full-chain route. The former does not establish candidate self-application; the latter is expensive to repeat per edit. The new ordinary route above adds focused generated-compiler feedback.[BUILD], [PKG]
 
 ### Cache identities and safe invalidation
 

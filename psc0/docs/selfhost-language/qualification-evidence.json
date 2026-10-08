@@ -4,8 +4,8 @@
   "repository": "dwijayuda/pskernel",
   "historicalSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
   "implementationBranch": "psc0/sh1-implementation-v1",
-  "updatedUtc": "2026-10-08T20:37:00Z",
-  "currentStatus": "Initial A compiler qualified and exact admissions accepted by the pinned provider; Foundation.List migration is entering its own full qualification.",
+  "updatedUtc": "2026-10-08T21:30:41Z",
+  "currentStatus": "Qualified A seed selected; Foundation.List migration B passed current-source C2/C3 and exact-stream provider acceptance. Strict runtime profile enforcement remains pending.",
   "checkpoints": {
     "boundedDevelopment": {
       "sourceRef": "9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
@@ -459,9 +459,17 @@
       }
     },
     "foundationMigration": {
-      "status": "source-and-seed-pin-staged-for-qualification",
-      "selectedSeedSourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
-      "selectedSeedCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+      "status": "compiler-qualified-and-selected-provider-accepted",
+      "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
+      "runId": 37840481558,
+      "compilerJobId": 113528289107,
+      "providerJobId": 113549202073,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37840481558",
+      "conclusion": "success",
+      "firstExecution": true,
+      "sourceClosureSha256": "4b0e8ed609bdf1c6b7063d2d763f39f0d1c8d33ca7be375fa46bcece018c85ae",
+      "moduleCount": 56,
+      "sourceBytes": 991890,
       "source": "packages/foundation/src/Ps/Foundation/List.lean",
       "functions": [
         "psListReverseAcc",
@@ -469,14 +477,757 @@
         "psListTake",
         "psListZip"
       ],
-      "publicTypes": "Preserved by design; bounded alpha-equality and behavior gate executes before C1 generation.",
-      "qualified": false,
-      "selectedSeedIdentitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9"
+      "sourceReductionFromABytes": 444,
+      "selectedSeed": {
+        "kind": "previous-qualified-authoring-seed",
+        "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+        "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+        "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "identitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+        "independentAlgorithm": false,
+        "priorQualification": {
+          "evidence": "compiler-qualified-current-source-fixed-point",
+          "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+          "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "runId": 37831951758,
+          "artifactName": "psc0-sh1-e91b9558d665879871b8bf0893915ae64b27c7fe",
+          "claim": "Compiler-qualified seed; selected-provider acceptance is a separate receipt."
+        }
+      },
+      "selectedSeedRecovery": {
+        "result": "ARTIFACT_HIT",
+        "identitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+        "retainedArtifactRunId": 37831951758,
+        "origin": "All four pinned A products and C2/C3 receipts verified before materializing the selected compiler.",
+        "activeSeedAfterQualification": "A remains selected in selfhost-seed.json; migrated B is not silently promoted."
+      },
+      "evidence": "compiler-qualified-current-source-fixed-point",
+      "equation": "Q is the pinned qualified compiler from A; C1=Q(B); C2=C1(B); C3=C2(B); compare C2 and C3 products",
+      "nativeBuild": "pass",
+      "earlySourceChecks": "pass, including updated modular-preparation ownership guard",
+      "foundationCorrespondence": {
+        "schemaVersion": 1,
+        "evidence": "bounded-foundation-source-correspondence",
+        "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "executingCompiler": "Same verified selected authoring seed consumes both raw library sources.",
+        "referenceSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
+        "referenceGitBlob": "faf906bd6e2f872887c87eb43c4ad90957da91fc",
+        "authoredProbeSha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819",
+        "publicTypes": {
+          "comparison": "psExprAlphaEq including binder kinds and parameter order",
+          "names": [
+            "psListLength",
+            "psListIsEmpty",
+            "psListAny",
+            "psListReverseAcc",
+            "psListReverse",
+            "psListAppend",
+            "psListMap",
+            "psListMapExcept",
+            "psListTake",
+            "psListZip"
+          ],
+          "result": "pass"
+        },
+        "behavior": "independent JS sequence expectations plus typed PSC partial-application probes",
+        "outputs": [
+          {
+            "source": "reference",
+            "sourceSha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9",
+            "admissionsSha256": "ff0209355636e1a8e2e8014eb015820cb6fe298790ffc603c3051d53d4736975",
+            "typescriptSha256": "9050ca8f291bab29ccef25fe147c138ebf7cac5fb81fe01c49c16c4b8d874c25",
+            "javascriptSha256": "9b75cc6e49ae39c55bea499fdc9884c3e6306c0ff2f0d3a2e3fb90101d17f646",
+            "coverage": {
+              "lists": 15,
+              "maxLength": 3,
+              "elementValues": [
+                "0",
+                "1"
+              ],
+              "counts": [
+                0,
+                8
+              ],
+              "observations": 1666
+            }
+          },
+          {
+            "source": "current",
+            "sourceSha256": "0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680",
+            "admissionsSha256": "93e87b6a4e9437851cba82742215f9030ad178f2d7bbd006c7dc56589738e213",
+            "typescriptSha256": "7c351a1f2015ae0e33a87c6faa27989570b94ac1889ef85aea1e3041647cc751",
+            "javascriptSha256": "176fbfee8815460846b30ba0bc80627b003e15ecdc7353de48da63ad21c5edf6",
+            "coverage": {
+              "lists": 15,
+              "maxLength": 3,
+              "elementValues": [
+                "0",
+                "1"
+              ],
+              "counts": [
+                0,
+                8
+              ],
+              "observations": 1666
+            }
+          }
+        ],
+        "kernelChecked": false,
+        "exhaustiveForAllInputs": false
+      },
+      "generatedCandidate": "pass",
+      "currentSourceC2C3": "pass",
+      "rawSourceEveryGeneration": true,
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "a115bb9328c7d7a2d2f354294e09cb4c658fe0a2b2b662e176b2420abd6305f4",
+        "normalizedCanonicalAdmissionsSha256": "117d89527f1a8dfad2a945203b64bc1087b3a35b55a12bf356f21a7b457b22d2",
+        "typescriptSha256": "d63adb13b3d17842409b39e4b9745af6c285de1290ad4b7bec33a909831992bf",
+        "javascriptSha256": "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d"
+      },
+      "executingCompilerDigests": [
+        "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
+        "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d"
+      ],
+      "generatedCompilerDigests": [
+        "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
+        "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
+        "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d"
+      ],
+      "c1AlsoEqualsC2C3": true,
+      "rawCapabilityKinds": [
+        "lean",
+        "proofScript"
+      ],
+      "capabilityBehavior": "pass in C1, C2 and C3",
+      "capabilitySourceKinds": [
+        {
+          "sourceKind": "lean",
+          "sourceSha256": "d302eff5addc953d147b95e952617e87e543ef60d1f016525945ab68df5ac9e0",
+          "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+          "typescriptSha256": "435d89f50f3c36504b7ef7fad0b823627784c86d14471203c9d3ebbd242b1211",
+          "javascriptSha256": "f5df92aab228efeedf51b2b2235300eb44577e931d7939c173bc57f45f1a25b5",
+          "generatedCompilerConsumedRawSource": true,
+          "behavior": "pass",
+          "nativePscBehavior": "pass",
+          "nativeTypeScriptSha256": "435d89f50f3c36504b7ef7fad0b823627784c86d14471203c9d3ebbd242b1211"
+        },
+        {
+          "sourceKind": "ps",
+          "sourceSha256": "ab29a5688567281d13a5699ed07f87580f1fc714cd544c1c66a2eeda305010b0",
+          "admissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+          "typescriptSha256": "435d89f50f3c36504b7ef7fad0b823627784c86d14471203c9d3ebbd242b1211",
+          "javascriptSha256": "f5df92aab228efeedf51b2b2235300eb44577e931d7939c173bc57f45f1a25b5",
+          "generatedCompilerConsumedRawSource": true,
+          "behavior": "pass",
+          "nativePscBehavior": "pass",
+          "nativeTypeScriptSha256": "435d89f50f3c36504b7ef7fad0b823627784c86d14471203c9d3ebbd242b1211"
+        }
+      ],
+      "negativeCases": [
+        {
+          "name": "narrowed-nested-induction-hypothesis",
+          "sourceSha256": "1c6fc4543d2650c3b18506c39107ec8cc1f3df1302da61fd1c8f73bb6ba907c3",
+          "diagnosticTags": [
+            "elaboration",
+            "structuralRecursionNotDecreasing"
+          ]
+        },
+        {
+          "name": "unsaturated-recursive-call",
+          "sourceSha256": "879565204119b005493e52868d63b0e0ba8c69624dfd8fbdb329af30d909364a",
+          "diagnosticTags": [
+            "elaboration",
+            "structuralRecursionArity"
+          ]
+        },
+        {
+          "name": "nondecreasing-major",
+          "sourceSha256": "fd8b66b959543f6e2f1be3958efff1db883c33dd04dbf6051df2290ceaa2b811",
+          "diagnosticTags": [
+            "elaboration",
+            "structuralRecursionNotDecreasing"
+          ]
+        },
+        {
+          "name": "unrelated-constructor-child",
+          "sourceSha256": "85eaeb42ac5a652b4dd6f49b2ef9a11d453ea7432f99fd5559c4bd964fa5131a",
+          "diagnosticTags": [
+            "elaboration",
+            "structuralRecursionNotDecreasing"
+          ]
+        },
+        {
+          "name": "escaping-self-reference",
+          "sourceSha256": "0675b11dbfc09380ff6449950e29b12f1563bccf0f8bafc5d003b44258860d82",
+          "diagnosticTags": [
+            "elaboration",
+            "structuralRecursionEscapingReference"
+          ]
+        },
+        {
+          "name": "major-dependent-parameter",
+          "sourceSha256": "aa9a3193d7db8334c703927ae0a19b060eed52acdfb0f6a6dc0d913819060542",
+          "diagnosticTags": [
+            "elaboration",
+            "structuralRecursionDependentParameter"
+          ]
+        },
+        {
+          "name": "explicit-historical-stable-mode",
+          "sourceSha256": "bee98d86b07b527f2bdbaca89f42d8286a1c64c41f7f4ffb541c437de83a8555",
+          "diagnosticTags": [
+            "structuralRecursionInvariantArgument"
+          ]
+        }
+      ],
+      "preparationSession": "pass: aggregate correspondence, warm/prefix/body edit/failure recovery/frozen parse diagnostics/source kinds/fresh instance",
+      "residentCli": "pass: cold/warm/atomic products/verified compiler pin",
+      "toolchain": {
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+        "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "typescript": "Version 5.8.3"
+      },
+      "generations": [
+        {
+          "name": "C1",
+          "timingsMs": {
+            "loadAndPrepare": 621461.298756,
+            "admissions": 90329.37314299995,
+            "canonicalSurface": 39439.926242000074,
+            "emit": 223545.420713,
+            "tscAndWrite": 9189.269016999984,
+            "total": 983965.2905049999
+          },
+          "preparation": {
+            "schemaVersion": 1,
+            "kind": "psc0-preparation-session",
+            "evidence": "admission-ready",
+            "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+            "sourceKind": "lean",
+            "closureSha256": "05346e940b83727e34be22dc405e21c22629e57e52c3d2db62d7b25f72b21b51",
+            "moduleCount": 56,
+            "cache": {
+              "prefixModules": 0,
+              "parseHits": 0,
+              "parseMisses": 56,
+              "parseEvictions": 0,
+              "parseUncachedModules": 0,
+              "preparedModules": 56,
+              "finishHit": false,
+              "retainedParsedEntries": 56,
+              "retainedParsedSourceBytes": 988419,
+              "retainedPrefixModules": 56,
+              "retainedPrefixSourceBytes": 988419,
+              "maxParsedEntries": 128,
+              "maxParsedSourceBytes": 8388608
+            },
+            "timingsMs": {
+              "input": 1.832883999999467,
+              "parse": 37332.633420999955,
+              "prepare": 492948.56580299983,
+              "finish": 90700.38625500002,
+              "freeze": 324.8399910000153,
+              "total": 621310.987329
+            },
+            "warmNoChange": {
+              "schemaVersion": 1,
+              "kind": "psc0-preparation-session",
+              "evidence": "admission-ready",
+              "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+              "sourceKind": "lean",
+              "closureSha256": "05346e940b83727e34be22dc405e21c22629e57e52c3d2db62d7b25f72b21b51",
+              "moduleCount": 56,
+              "cache": {
+                "prefixModules": 56,
+                "parseHits": 0,
+                "parseMisses": 0,
+                "parseEvictions": 0,
+                "parseUncachedModules": 0,
+                "preparedModules": 0,
+                "finishHit": true,
+                "retainedParsedEntries": 56,
+                "retainedParsedSourceBytes": 988419,
+                "retainedPrefixModules": 56,
+                "retainedPrefixSourceBytes": 988419,
+                "maxParsedEntries": 128,
+                "maxParsedSourceBytes": 8388608
+              },
+              "timingsMs": {
+                "input": 1.707609000033699,
+                "parse": 0,
+                "prepare": 0,
+                "finish": 0,
+                "freeze": 0,
+                "total": 1.7336680000880733
+              }
+            }
+          },
+          "originalIrInventory": {
+            "report": "original-ir-inventory.json",
+            "traversalComplete": true,
+            "findingCounts": {
+              "call-arity-needs-expression-typing": 244,
+              "call-type-arity": 19
+            },
+            "strictSh1Qualified": false
+          }
+        },
+        {
+          "name": "C2",
+          "timingsMs": {
+            "loadAndPrepare": 606484.5573580001,
+            "admissions": 90257.52072399994,
+            "canonicalSurface": 39643.70197599998,
+            "emit": 223388.81650800002,
+            "tscAndWrite": 9155.590214000084,
+            "total": 968930.187822
+          },
+          "preparation": {
+            "schemaVersion": 1,
+            "kind": "psc0-preparation-session",
+            "evidence": "admission-ready",
+            "compilerSha256": "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
+            "sourceKind": "lean",
+            "closureSha256": "05346e940b83727e34be22dc405e21c22629e57e52c3d2db62d7b25f72b21b51",
+            "moduleCount": 56,
+            "cache": {
+              "prefixModules": 0,
+              "parseHits": 0,
+              "parseMisses": 56,
+              "parseEvictions": 0,
+              "parseUncachedModules": 0,
+              "preparedModules": 56,
+              "finishHit": false,
+              "retainedParsedEntries": 56,
+              "retainedParsedSourceBytes": 988419,
+              "retainedPrefixModules": 56,
+              "retainedPrefixSourceBytes": 988419,
+              "maxParsedEntries": 128,
+              "maxParsedSourceBytes": 8388608
+            },
+            "timingsMs": {
+              "input": 1.7523939999999811,
+              "parse": 36010.636709000086,
+              "prepare": 478454.09762000013,
+              "finish": 91491.57697099994,
+              "freeze": 343.0897039999254,
+              "total": 606304.634
+            },
+            "warmNoChange": {
+              "schemaVersion": 1,
+              "kind": "psc0-preparation-session",
+              "evidence": "admission-ready",
+              "compilerSha256": "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
+              "sourceKind": "lean",
+              "closureSha256": "05346e940b83727e34be22dc405e21c22629e57e52c3d2db62d7b25f72b21b51",
+              "moduleCount": 56,
+              "cache": {
+                "prefixModules": 56,
+                "parseHits": 0,
+                "parseMisses": 0,
+                "parseEvictions": 0,
+                "parseUncachedModules": 0,
+                "preparedModules": 0,
+                "finishHit": true,
+                "retainedParsedEntries": 56,
+                "retainedParsedSourceBytes": 988419,
+                "retainedPrefixModules": 56,
+                "retainedPrefixSourceBytes": 988419,
+                "maxParsedEntries": 128,
+                "maxParsedSourceBytes": 8388608
+              },
+              "timingsMs": {
+                "input": 1.7008970000315458,
+                "parse": 0,
+                "prepare": 0,
+                "finish": 0,
+                "freeze": 0,
+                "total": 1.7262750000227243
+              }
+            }
+          },
+          "originalIrInventory": {
+            "report": "original-ir-inventory.json",
+            "traversalComplete": true,
+            "findingCounts": {
+              "call-arity-needs-expression-typing": 244,
+              "call-type-arity": 19
+            },
+            "strictSh1Qualified": false
+          }
+        },
+        {
+          "name": "C3",
+          "timingsMs": {
+            "loadAndPrepare": 614586.897021,
+            "admissions": 91352.87175599998,
+            "canonicalSurface": 40790.67856599996,
+            "emit": 228294.6295390001,
+            "tscAndWrite": 9108.956102999859,
+            "total": 984134.0340469999
+          },
+          "preparation": {
+            "schemaVersion": 1,
+            "kind": "psc0-preparation-session",
+            "evidence": "admission-ready",
+            "compilerSha256": "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
+            "sourceKind": "lean",
+            "closureSha256": "05346e940b83727e34be22dc405e21c22629e57e52c3d2db62d7b25f72b21b51",
+            "moduleCount": 56,
+            "cache": {
+              "prefixModules": 0,
+              "parseHits": 0,
+              "parseMisses": 56,
+              "parseEvictions": 0,
+              "parseUncachedModules": 0,
+              "preparedModules": 56,
+              "finishHit": false,
+              "retainedParsedEntries": 56,
+              "retainedParsedSourceBytes": 988419,
+              "retainedPrefixModules": 56,
+              "retainedPrefixSourceBytes": 988419,
+              "maxParsedEntries": 128,
+              "maxParsedSourceBytes": 8388608
+            },
+            "timingsMs": {
+              "input": 1.687011000001803,
+              "parse": 36366.83673200011,
+              "prepare": 487900.3405900011,
+              "finish": 89825.85498600011,
+              "freeze": 337.7105019998271,
+              "total": 614434.379694
+            },
+            "warmNoChange": {
+              "schemaVersion": 1,
+              "kind": "psc0-preparation-session",
+              "evidence": "admission-ready",
+              "compilerSha256": "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
+              "sourceKind": "lean",
+              "closureSha256": "05346e940b83727e34be22dc405e21c22629e57e52c3d2db62d7b25f72b21b51",
+              "moduleCount": 56,
+              "cache": {
+                "prefixModules": 56,
+                "parseHits": 0,
+                "parseMisses": 0,
+                "parseEvictions": 0,
+                "parseUncachedModules": 0,
+                "preparedModules": 0,
+                "finishHit": true,
+                "retainedParsedEntries": 56,
+                "retainedParsedSourceBytes": 988419,
+                "retainedPrefixModules": 56,
+                "retainedPrefixSourceBytes": 988419,
+                "maxParsedEntries": 128,
+                "maxParsedSourceBytes": 8388608
+              },
+              "timingsMs": {
+                "input": 1.7082719998434186,
+                "parse": 0,
+                "prepare": 0,
+                "finish": 0,
+                "freeze": 0,
+                "total": 1.7313859998248518
+              }
+            }
+          },
+          "originalIrInventory": {
+            "report": "original-ir-inventory.json",
+            "traversalComplete": true,
+            "findingCounts": {
+              "call-arity-needs-expression-typing": 244,
+              "call-type-arity": 19
+            },
+            "strictSh1Qualified": false
+          }
+        }
+      ],
+      "selectedProviderAcceptance": "pass",
+      "providerAcceptance": {
+        "schemaVersion": 1,
+        "evidence": "selected-provider-acceptance-for-qualified-compiler-admissions",
+        "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
+        "sourceClosureSha256": "4b0e8ed609bdf1c6b7063d2d763f39f0d1c8d33ca7be375fa46bcece018c85ae",
+        "compilerSha256": "7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d",
+        "provider": {
+          "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+          "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+          "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+          "metadata": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "status": "ready"
+          },
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "node": "v22.23.3",
+          "command": [
+            "psc_kernel_core_provider",
+            "--check"
+          ],
+          "resourcePolicy": "Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.",
+          "timeoutMs": 60000
+        },
+        "streams": [
+          {
+            "canonicalAdmissionsSha256": "117d89527f1a8dfad2a945203b64bc1087b3a35b55a12bf356f21a7b457b22d2",
+            "artifacts": [
+              "C2 compiler source",
+              "C3 compiler source"
+            ],
+            "durationMs": 1170.4473590000002,
+            "result": {
+              "protocol": "pskernel-core/1",
+              "provider": "pskernel-core-native",
+              "leanVersion": "4.34.0",
+              "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+              "profile": "lean4.34-core",
+              "accepted": true
+            }
+          },
+          {
+            "canonicalAdmissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "artifacts": [
+              "C2 raw lean capability source",
+              "C2 raw ps capability source",
+              "C3 raw lean capability source",
+              "C3 raw ps capability source"
+            ],
+            "durationMs": 7.917913000000226,
+            "result": {
+              "protocol": "pskernel-core/1",
+              "provider": "pskernel-core-native",
+              "leanVersion": "4.34.0",
+              "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+              "profile": "lean4.34-core",
+              "accepted": true
+            }
+          }
+        ],
+        "accepted": true,
+        "emissionWasGatedByThisCheck": false,
+        "qualificationBoundary": "Compiler-only artifacts were generated first; promotion may use this additional exact-stream provider acceptance."
+      },
+      "qualified": true,
+      "strictSh1Qualified": false,
+      "artifactsRetained": [
+        {
+          "id": 11580430368,
+          "name": "psc0-sh1-kernel-70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
+          "zipSha256": "5bff5413a84eef2b4dbfa72a96750599bf3172d54c600732b3580caf5399bba8",
+          "expiresAt": "2026-11-07T21:26:42Z"
+        },
+        {
+          "id": 11579922991,
+          "name": "psc0-sh1-70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
+          "zipSha256": "306d7df322375b8113932caa7bd2a30d36a8caaad25b46599398b70a42a315ca",
+          "expiresAt": "2026-11-07T21:25:16Z"
+        }
+      ],
+      "preservedReceipts": {
+        "qualification": "docs/selfhost-language/foundation-qualification.json",
+        "correspondence": "docs/selfhost-language/foundation-correspondence.json",
+        "provider": "docs/selfhost-language/foundation-provider.json",
+        "qualificationSha256": "74ad43c73a2ce395b26272d2600c2b0fd35cdf9cae5c361f890dedd047a4954d",
+        "correspondenceSha256": "d95b5a69b77c7514fe32f9a241771e470cdbd97f752f97cbf44830173c97d552",
+        "providerSha256": "e22533d8f778d284eac3fb5402cd048e01660aaa82ff2774ff9cfbb0a1fd7dab"
+      }
     }
   },
   "acceptanceAxes": {
     "compilerQualified": "Exact current-source C2/C3 products and generated capability/conformance evidence.",
     "kernelChecked": "Actual selected-provider decisions for the exact canonical admission streams.",
     "strictSh1": "Complete runtime IR obligations and enforcement; a diagnostic inventory does not grant this status."
+  },
+  "retainedInitialIrTypeArguments": {
+    "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "reportSource": "A C3 inventory read from its retained artifact by B run 37840481558",
+    "traversalComplete": true,
+    "omittedFindingDetails": 0,
+    "findingCounts": {
+      "call-arity-needs-expression-typing": 245,
+      "call-type-arity": 19
+    },
+    "typeArgumentFindings": [
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psLexListLength/expression[199]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psParseListLength/expression[2254]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psParseListReverseAcc/expression[2271]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psParseListAppend/expression[2293]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psListLength/expression[15197]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psListAny/expression[15208]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psListReverseAcc/expression[15229]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psListAppend/expression[15251]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psListMap/expression[15260]",
+        "detail": {
+          "expected": 2,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psListMapExcept/expression[15278]",
+        "detail": {
+          "expected": 3,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psListTake/expression[15305]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psListZip/expression[15333]",
+        "detail": {
+          "expected": 2,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psCheckedNestedConcat/expression[17616]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psElabListLength/expression[25985]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psErasureIndexBucket/expression[34190]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psErasureIndexSet/expression[34252]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psErasureIndexFindInBucket/expression[34287]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psErasureIndexPrepend/expression[34339]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      },
+      {
+        "code": "call-type-arity",
+        "at": "declaration:psTsTailMap/expression[47403]",
+        "detail": {
+          "expected": 2,
+          "actual": 0
+        }
+      }
+    ],
+    "strictSh1Qualified": false,
+    "classification": {
+      "zeroExplicitArguments": 19,
+      "expectedArityDistribution": {
+        "1": 15,
+        "2": 3,
+        "3": 1
+      },
+      "enclosingDeclarations": "Generic structurally recursive helpers.",
+      "concreteOmission": {
+        "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
+        "currentDefinition": "packages/erasure/src/Ps/Erasure/Basic.lean: PsErasureCurrentDefinition stores only name and runtimeParameters.",
+        "definitionOpening": "packages/erasure/src/Ps/Erasure/Definition.lean: type binders do not extend currentDefinition; runtime binders append only runtime names.",
+        "recursiveReconstruction": "packages/erasure/src/Ps/Erasure/Expr.lean: psOpenMatchMinorHypotheses passes List.nil typeArguments to psEraseFinishApplication for the reconstructed current-definition call."
+      },
+      "limit": "The inventory records enclosing declarations and expression ordinals, not callee identity or ancestry; the shared omission is consistent with all 19 records but a one-to-one mapping is not established. B counts do not establish identical B locations.",
+      "currentBFindings": {
+        "call-arity-needs-expression-typing": 244,
+        "call-type-arity": 19
+      },
+      "strictSh1Qualified": false
+    }
   }
 }

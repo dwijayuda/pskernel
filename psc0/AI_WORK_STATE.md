@@ -2,53 +2,75 @@
 
 Updated: 2026-10-08 UTC.
 
-## Current checkpoint: qualified seed and first source migration
+## Completed checkpoint: qualified seed and first source migration
 
-Initial implementation A (e91b9558d665879871b8bf0893915ae64b27c7fe) passed
-run 37831951758. Its C1, C2 and C3 canonical surface, canonical admissions,
-TypeScript and JavaScript products all agree. The generated compiler digest is
+Implementation branch: psc0/sh1-implementation-v1.
+Qualified portable source B: 70d6010ddccbdd6b4939f2fb3c088bfe4e607de0.
+Run 37840481558 passed on its first execution for this migration: compiler job
+113528289107 and provider job 113549202073 both completed successfully.
+
+B contains 56 raw source modules / 991,890 bytes. Its raw closure SHA256 is
+4b0e8ed609bdf1c6b7063d2d763f39f0d1c8d33ca7be375fa46bcece018c85ae.
+C1, C2 and C3 agree on canonical surface, canonical admissions, TypeScript and
+JavaScript. The generated compiler SHA256 is
+7a095596679cf53de213deb354610de22e29146e5d3265f07dc1720ea920836d.
+
+Foundation.List now uses ordinary explicit parameters in reverseAcc, append,
+take and zip. The verified A seed consumed both the preserved reference and
+current raw source before C1. All ten public types and 1,666 observations per
+implementation passed, including typed partial applications and generic zip.
+Raw .lean/.ps capabilities and all seven refusal cases passed in C1/C2/C3.
+Preparation/session/CLI conformance and the corrected ownership guard passed.
+
+The unchanged provider at 963030dc2d154008fccc82e7c8ed29331f138799 accepted
+B's compiler admissions and the deduplicated raw capability stream. Its binary
+SHA256 remains 88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec.
+Artifact generation preceded this separate provider check; no checked-emission
+claim is inferred. Strict runtime SH/1 enforcement remains pending.
+
+The selected authoring compiler Q remains the qualified A compiler from
+e91b9558d665879871b8bf0893915ae64b27c7fe, with JS SHA256
 9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096.
-The separately pinned provider at 963030dc2d154008fccc82e7c8ed29331f138799
-accepted both distinct exact admission streams from this qualification.
+B verified all four products from A's retained artifact and materialized the
+content-addressed qualified seed cache. Preserve S0 -> A -> B recovery;
+do not silently claim the historical S0 can compile migrated B.
 
-This checkpoint fast-forwards the implementation branch through the successful
-host-tooling checkpoint 9641928bcf7d5394f46e19a31a8ae3fd096d44b5 and its
-evidence child 8e9ed135249705e16234e2cdaa80b5dbb9a57774. It installs the
-actual A source/toolchain/product pin in selfhost-seed.json, preserves the
-original qualification and provider receipts, and restores the workflow branch
-filter to psc0/sh1-implementation-v1.
+Ordinary edits use npm run dev:sh1. The first native development gate at
+9641928bcf7d5394f46e19a31a8ae3fd096d44b5 passed in run 37834854232:
+14.590 seconds for the bounded gate and about 74 seconds for the whole job
+with restored build caches. Its TS/JS exactly match the independently qualified
+A compiler. Full self-application is a separate promotion workload.
 
-Foundation.List is the only portable source family changed in this checkpoint:
-reverseAcc, append, take and zip now expose ordinary explicit value parameters.
-Public names, full Pi types, binder kinds and argument order are preserved.
-The selected qualified seed checks public-type alpha-equality and the bounded
-behavior/partial-application matrix before expensive C1 generation. This
-migrated source B has not yet earned its own C2/C3 or provider result.
+B's full generation totals were 983.965s, 968.930s and 984.134s. Warm unchanged
+in-memory preparation reused all 56 modules with zero parse/prepare/finish work
+in about 1.73 ms. These warm numbers exclude source reads and optional emission;
+the generated compiler's cold preparation still takes about 10 minutes.
 
-Normal pushes use the native candidate gate; [sh1-qualify] requests the
-selected-seed C1/C2/C3 promotion milestone. dev:sh1 and iterate:sh1 are
-additive package commands. Preserve the immutable S0 -> A -> B recovery path:
-historical S0 rebuilds A, while verified A accepts B's new authoring forms.
-A remains the selected seed until a later capability requires an explicit
-parent-seed recovery plan.
+The remaining IR inventory is diagnostic: B has 244 call-expression typing
+obligations and 19 type-argument arity findings, with no other recorded categories.
+Retained A details show 19 generic helper calls with zero explicit type arguments.
+Source review identifies an omission in recursive-IH reconstruction: the current
+definition tracks runtime names only and reconstruction supplies List.nil type
+arguments. The report lacks node ancestry, so a one-to-one mapping is not claimed.
+The next M6 slice should preserve ordered current-declaration generic arguments,
+then add callee-expression typing/scoped substitution. No whitelist or checker
+weakening was introduced, and no extra implementation/test cycle was started.
 
-The early modular-preparation source guard now checks the actual pure prefix
-API and independently delimits its two structures, while preserving every
-unchanged checked-session boundary. The workflow also prints retained A IR
-type-argument findings when available; that read-only report is not a gate.
+All exact receipts and provenance are indexed in
+docs/selfhost-language/qualification-evidence.json. Original A and B qualification,
+provider and List-correspondence receipts are preserved beside it. This final
+checkpoint updates only documentation/evidence after the qualified B source.
 
-Strict PSC0-SH/1 runtime enforcement is still pending. A's complete diagnostic
-IR traversal reports 245 calls needing expression typing and 19 type-argument
-arity findings, with no other recorded categories. Current capability, provider
-acceptance and strict-runtime claims remain separate.
-
-Next: finish B's one full cloud qualification, record its exact receipts and
-public-type/behavior correspondence, and publish the final migration guidance.
-No kernel/provider implementation changes, local execution or extra full runs.
+Follow-on source families, in order: psExprApplyManyWorker,
+psErasureAddUniqueStringWorker, psExprAppViewAccWorker. Keep public types and
+exhaustion/ordering behavior; use focused native comparisons before the next
+planned source-family qualification. Further source migration, optional syntax
+conveniences, strict M6 enforcement and optional .ps authority are documented
+future work, not completed claims.
 
 Earlier checkpoint notes below retain their original execution-time status.
 
-## Active objective
+## Scope of this work
 
 Implement the accepted self-host authoring and iteration plan from research commit
 80d04e7ab0e9214ffecf093a6272865f0eaca096. Start with ordinary structural recursion

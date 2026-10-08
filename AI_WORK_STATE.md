@@ -358,3 +358,34 @@ Architectural blockers still remaining:
 - Next composition: strengthen result-index exclusion for accepted constructor results, close field/recursive-argument polarity and positive-occurrence semantics using independent judgments, then prove complete ordinary/mutual/nested constructor and recursor transaction refinement.
 - Preserve the two existing checker TCB laws (`PsKernelNativeReductionSoundLaw` and `PsKernelStringEqSoundLaw`). The additional reflexivity requirement is a specific open inductive-admission proof obligation, not a newly accepted unconditional trust boundary.
 - The final public Kernel/API/session implementation-refinement theorem family, sound inductive-environment extension, criteria-based audit refresh, reconciliation with `psc2/selfhost-lean-kernel`, and final proof/conformance gates remain open. No production source was modified during this constructor-history or occurrence-refinement checkpoint.
+
+
+## Constructor result and comparator closure — 2026-10-09
+
+- Live heads verified at start: proof `75afe536f025aa9d37c788f4094273e500fd5c13`,
+  integration `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`.
+  Full proof gates #697 and #698 independently confirmed green.
+- Full gate **#699 GREEN** at `fabf24e25ab291edf75abace2a98b58958fc6ba2`:
+  result-parameter consumption yields an independent structural prefix
+  judgment and exact parameter/index suffix length. Raw parameter-spine
+  refinement from #698 remains registered.
+- Candidate head `b0103c9b690b8f50815132d22d862a64421574d3`, full gate #703
+  in progress: byte-fuel induction discharges StringEq reflexivity using
+  Lean 4.34's raw cursor strict-advance theorem; structural occurrence and
+  accepted constructor-index exclusion consume this proof without a new
+  trust premise. Do not call these candidate theorems green before #703.
+- The same candidate composes recursor-rule validation through concrete
+  checked-session typing and DefEq, preserving configuration between each
+  rule. It replaces unrestricted session-soundness assumptions with an
+  explicit sound initial configuration and the existing native/StringEq
+  soundness laws. This proves rule-validator semantics, not completeness
+  of generated recursor metadata or full inductive admission.
+- No production source changes, no new axioms or sorry, and no unrestricted
+  DefEq transitivity. The existing native-reduction and StringEq soundness
+  laws remain explicit conditional TCB boundaries.
+- Remaining: field-spine and recursive-argument positivity/configuration
+  closure; complete ordinary/mutual/nested environment transaction semantics;
+  final Kernel/API/session theorem family; audit; integration reconciliation
+  and final conformance gates. Audit remains A/B/C/D = 44/9/19/7.
+- Integration comparison is diverged (merge base `97e2ed3437e64a7041a9a6c3cceff2f852d83629`);
+  do not blindly replace either branch or merge unrelated work.

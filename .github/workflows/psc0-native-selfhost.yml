@@ -113,4 +113,5 @@ jobs:
           ${{ steps.scope.outputs.portable != 'true' &&
               steps.scope.outputs.checker != 'true' &&
               !(github.event_name == 'workflow_dispatch' && inputs.full == true) }}
-        run: echo "PSC0_CHECKED_FIXED_POINT: SKIPPED (no compiler/kernel semantic change)"
+        run: |
+          echo "PSC0_CHECKED_FIXED_POINT: SKIPPED (no compiler/kernel semantic change)"

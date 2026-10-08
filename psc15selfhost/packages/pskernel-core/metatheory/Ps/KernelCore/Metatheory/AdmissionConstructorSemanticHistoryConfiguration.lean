@@ -208,13 +208,13 @@ theorem psKernelAddSimpleConstructorsWithFuel_checked_semantic_history
                                       have hStepExt : PsKernelEnvironmentSemanticExtends work nextWork :=
                                         psKernelEnvironmentAddUnchecked_fresh_semantic_extends
                                           work (PsKernelConstantInfo.ctorInfo ctorInfo) hString
-                                          (by simpa [ctorInfo, psKernelConstantInfoName] using hFresh.1)
+                                          (by simpa [ctorInfo, psKernelConstantInfoName, psKernelConstantInfoBase] using hFresh.1)
                                       have hNextNames : PsKernelInductiveNamesAbsent nextWork
                                           (psKernelSimpleCtorNames rest) :=
                                         psKernelInductiveNamesAbsent_add_disjoint
                                           work (PsKernelConstantInfo.ctorInfo ctorInfo)
                                           (psKernelSimpleCtorNames rest) hFresh.2
-                                          (by simpa [ctorInfo, psKernelConstantInfoName] using hUniqueTail.1)
+                                          (by simpa [ctorInfo, psKernelConstantInfoName, psKernelConstantInfoBase] using hUniqueTail.1)
                                       cases hTail :
                                           psKernelAddSimpleConstructorsWithFuel
                                             remaining decl safety resultLevel

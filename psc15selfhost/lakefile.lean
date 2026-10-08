@@ -353,6 +353,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.DefEqKnotLazyConfiguration,
     `Ps.KernelCore.Metatheory.DefEqKnotProjectionConfiguration,
     `Ps.KernelCore.Metatheory.DefEqKnotFullWhnfConfiguration,
+    `Ps.KernelCore.Metatheory.DefEqKnotFinalConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionConfiguration,
     `Ps.KernelCore.Metatheory.CheckedProjectionConfiguration,
     `Ps.KernelCore.Metatheory.ProjectionSemantics,

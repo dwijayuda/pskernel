@@ -1,0 +1,29 @@
+{
+  "name": "@proofscript/pscv-kernel-lean-linux-x64-gnu",
+  "version": "0.0.1-dev",
+  "private": true,
+  "description": "Experimental Lean 4.35 pinned kernel-checker host, separate from V6 compiler CLI",
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "libc": [
+    "glibc"
+  ],
+  "bin": {
+    "pscv-v6-kernel-dev": "./bin/pscv-v6-kernel-dev"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LEAN_PIN.txt"
+  ],
+  "proofscript": {
+    "implementationLanguage": "lean4",
+    "semanticVersion": "4.35.0-rc3",
+    "checkedProfile": "admissions-only",
+    "pscvCertified": false
+  }
+}

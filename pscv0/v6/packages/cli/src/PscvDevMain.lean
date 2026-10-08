@@ -1,25 +1,25 @@
-import Pscv.Kernel.Checker
+import Pscv.Core.Model
 import Pscv.Extensions.Policy
 
-/-! Native Lean-built development tool. Not the completed PSCV compiler. -/
+/-!
+Small native development CLI. Deliberately DOES NOT import the Lean kernel
+checker/Environment: a selected checker belongs in an isolated provider tool.
+No user source parsing or PSCV-CERT is implemented in this development CLI.
+-/
 def main (args : List String) : IO UInt32 := do
   match args with
   | ["--version"] =>
       IO.println "pscv-v6-dev 0.0.1 (Lean 4.35.0-rc3 build host)"
       return 0
   | ["capabilities"] =>
-      IO.println "P0: native Lean-built Core models, extension policy, kernel candidate checking"
-      IO.println "NOT AVAILABLE: .ps parsing, elaboration, PSCV-CERT, .proof.lean, target backends"
+      IO.println "P0: native Lean-written Core models and declarative extension policy"
+      IO.println "Kernel checking lives in a separate native provider executable"
+      IO.println "NOT AVAILABLE: .ps parser, elaborator, PSCV-CERT, .proof.lean, backends"
       return 0
-  | ["kernel-empty-smoke"] =>
+  | ["core-smoke"] =>
       let candidate : Pscv.CoreCandidate := {sourceId := "internal-smoke", declarations := #[]}
-      match ← Pscv.Kernel.checkCandidate candidate with
-      | .ok report =>
-          IO.println s!"Kernel accepted {report.checkedDeclarations} declarations (not PSCV-certified)"
-          return 0
-      | .error error =>
-          IO.eprintln error
-          return 1
+      IO.println s!"Candidate declarations: {candidate.declarations.size}; NOT checked or certified"
+      return 0
   | _ =>
-      IO.eprintln "PSCV_V6_COMPILATION_NOT_IMPLEMENTED: only --version, capabilities, kernel-empty-smoke"
+      IO.eprintln "PSCV_V6_COMPILATION_NOT_IMPLEMENTED: only --version, capabilities, core-smoke"
       return 2

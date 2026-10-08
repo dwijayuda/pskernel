@@ -7,7 +7,7 @@
   ],
   "description": "Lean 4.35-rc3 native-first PSCV compiler workspace; npm is distribution",
   "scripts": {
-    "build:native": "lake build PscvCore PscvExtensions PscvKernel pscv_v6_dev pscv_v6_native_tests",
+    "build:native": "lake build PscvCore PscvExtensions PscvKernel pscv_v6_dev pscv_v6_kernel_dev pscv_v6_native_tests",
     "test:native": "lake exe pscv_v6_native_tests",
     "test": "npm run test:native",
     "test:provider-oracles": "node --test test/provider-oracles.test.mjs",

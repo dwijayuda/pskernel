@@ -57,7 +57,8 @@ jobs:
           set -euo pipefail
           lake exe pscv_v6_dev --version
           lake exe pscv_v6_dev capabilities
-          lake exe pscv_v6_dev kernel-empty-smoke
+          lake exe pscv_v6_dev core-smoke
+          lake exe pscv_v6_kernel_dev kernel-empty-smoke
           if lake exe pscv_v6_dev build src/Main.ps; then
             echo "ERROR: incomplete compiler falsely accepted a build" >&2
             exit 1
@@ -72,14 +73,24 @@ jobs:
           mkdir -p release/npm/linux-x64/bin
           cp "$binary" release/npm/linux-x64/bin/pscv-v6-dev
           chmod 755 release/npm/linux-x64/bin/pscv-v6-dev
-          echo "Native executable bytes (unstripped): $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
+          echo "Core executable bytes (unstripped): $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
           strip --strip-debug release/npm/linux-x64/bin/pscv-v6-dev
-          echo "Native executable bytes (debug stripped): $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
+          echo "Core executable bytes (debug stripped): $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
           sha256sum release/npm/linux-x64/bin/pscv-v6-dev
           ldd release/npm/linux-x64/bin/pscv-v6-dev || true
           env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/linux-x64/bin/pscv-v6-dev" --version
-          env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/linux-x64/bin/pscv-v6-dev" kernel-empty-smoke
+          env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/linux-x64/bin/pscv-v6-dev" core-smoke
           (cd release/npm/linux-x64 && npm pack --ignore-scripts --pack-destination "$GITHUB_WORKSPACE")
+          kernel=".lake/build/bin/pscv_v6_kernel_dev"
+          test -x "$kernel"
+          mkdir -p release/npm/kernel-linux-x64/bin
+          cp "$kernel" release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev
+          chmod 755 release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev
+          echo "Kernel executable bytes (unstripped): $(wc -c < release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev)"
+          strip --strip-debug release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev
+          echo "Kernel executable bytes (debug stripped): $(wc -c < release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev)"
+          env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/kernel-linux-x64/bin/pscv-v6-kernel-dev" kernel-empty-smoke
+          (cd release/npm/kernel-linux-x64 && npm pack --ignore-scripts --pack-destination "$GITHUB_WORKSPACE")
       - uses: actions/upload-artifact@v4
         with:
           name: pscv-v6-native-linux-x64-development-npm

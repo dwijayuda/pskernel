@@ -51,3 +51,8 @@ lean_exe pscv_v6_reuse_smoke where
 lean_lib PscvReuseProbeSyntax where
   srcDir := "../packages/syntax/src"
   roots := #[`Ps.Syntax.ParseProofScript]
+
+-- Independent kernel host: not linked into the small native compiler CLI.
+lean_exe pscv_v6_kernel_dev where
+  srcDir := "packages/kernel/src"
+  root := `PscvKernelMain

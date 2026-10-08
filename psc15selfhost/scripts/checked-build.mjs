@@ -350,6 +350,13 @@ export async function buildChecked({
       Object.entries(evidence.directDeclarationMap).map(([key, record]) => [key, record.identity]));
     if (evidence.directMapLinks) receipt.directMapLinks = Object.fromEntries(
       Object.entries(evidence.directMapLinks).map(([key, record]) => [key, record.identity]));
+    if (selected.linking) {
+      if (!evidence.directMapLinks?.linkedJavaScript || !evidence.directMapLinks?.linkedDeclarations)
+        throw new Error('PSC2_CHECKED_MAP_LINK_BUILD_BINDING');
+      receipt.unlinkedJavaScriptSha256 = receipt.javaScriptSha256;
+      receipt.javaScriptSha256 = digest(evidence.directMapLinks.linkedJavaScript.bytes);
+      receipt.linkedDeclarationsSha256 = digest(evidence.directMapLinks.linkedDeclarations.bytes);
+    }
     if (evidence.directSourceMap) receipt.directSourceMap = {
       sourceMap: evidence.directSourceMap.sourceMap.identity, recipe: evidence.directSourceMap.recipe.identity };
     if (evidence.jsAbi) {

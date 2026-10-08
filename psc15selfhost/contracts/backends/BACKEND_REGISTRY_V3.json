@@ -118,7 +118,8 @@
       "unsupportedCapabilities": [
         "generic-and-dependent-source-declarations",
         "expression-source-maps",
-        "global-preservation"
+        "global-preservation",
+        "automatic-source-map-linking"
       ],
       "products": {
         "executableArtifacts": [

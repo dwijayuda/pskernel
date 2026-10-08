@@ -466,3 +466,270 @@ The language used to implement the **pure compiler semantic core** may be fully 
 
 **SHP2-HOST-3:** exact toolchain versions, runtime ABI, memory ownership, import/export signatures, target profiles and failure modes must be recorded. This applies equally to TypeScript compilation with `tsc` and native Rust source compilation with `rustc`.
 
+
+## 11. Backend-specific semantic obligations
+
+### 11.1 One frontend meaning, four independent target representations
+
+**SHP2-BE-1:** TS/JS/Wasm/Rust backends do **not** own SHP2 language definitions. All four compile the same checked, target-neutral runtime meaning and MUST preserve semantic effects, result/error values, numeric/text precision, constructor identity, evaluation order, function calls and declared host capabilities.
+
+The canonical compiler pipeline from [PSC-V51] remains:
+
+~~~text
+Source + frozen SemanticProfile
+        -> parse / resolve / elaborate
+        -> CheckedCore
+        -> PSCV-certified-source policy gate (when requesting verified output)
+        -> erasure
+        -> RuntimeIR -> ValidatedRuntimeIR
+        -> Specialization
+        -> target-IR / target generation
+        -> independently checked target product and evidence bundle
+~~~
+
+Where current implementation exposes legacy `PsVerifiedIr*` names, do not confuse raw `PsErasedIrModule` or `PsValidatedIrModule` with logically certified source. Target validation is necessary but not a kernel theorem about compiler correctness.
+
+### 11.2 Detailed four-target mapping
+
+| Source semantic property | TypeScript source | Direct JavaScript | Direct WebAssembly | Rust source |
+|---|---|---|---|---|
+| `Nat/Int` | bigint/exact library, checked wrapper declarations | BigInt/exact library | arbitrary-precision runtime and declared memory model | exact integer library or proved specialization |
+| fixed-width ints | explicit widths/checked ops, typed declarations | explicit widths/checked ops | i32/i64 plus conversion rules | u8…u64/i8…i64 with explicit arithmetic policy |
+| bytes/UTF-8 | Uint8Array/bytes and typed byte positions | Uint8Array/bytes | fixed byte representation, import/export ABI | byte buffers and validated UTF-8 |
+| ADTs | discriminated typed union + runtime tag | checked tag/payload shapes | variant encoding with typed constructors | enums/structs |
+| records | typed product/object records | defined product/object representation | layout/indirections chosen per ABI | structs/immutable transforms |
+| immutable closures | type-erased JS closure/env mapping | closure/env mapping | closure conversion and call tables | closure env or specializing code |
+| local mutable `do` | generated TS locals/effect model | generated JS locals/effect model | locals/state machine | local `mut` or abstract state transitions |
+| `Except` and state | tagged result, no implicit host `throw` | tagged result, no implicit host `throw` | explicit discriminant/ABI status | `Result`-like representation, no unmodeled panic |
+| arrays/maps | checked library with stable iteration | checked library with stable iteration | explicit allocation, bounds/GC/RC | checked collections, deterministic enumeration |
+| generic functions | type annotations + explicit specialization | specialization or dynamic shape with validation | monomorphization or owned runtime dispatch | monomorphization/generic emission |
+| callable compiler | pinned `tsc` then JS runtime | executable from direct JS backend only | validated binary and explicit host adapter | pinned `rustc`/linker and native CLI |
+| verification | source proof checked by kernel, NOT tsc | source proof checked by kernel, NOT JS engine | source proof checked by kernel, NOT Wasm validator | source proof checked by kernel, NOT rustc |
+| preservation | checked source->TS->JS relation | checked source->JsIR->JS relation | checked source->WasmIR->binary/ABI relation | checked source->Rust->toolchain relation |
+
+**SHP2-BE-2:** a JavaScript or TypeScript target emitter MUST NOT use IEEE-754 `Number` as an implementation of arbitrary `Nat` or `Int`. `BigInt` is a representation option but does not automatically implement every pinned `Int` division/remainder or conversion rule without verification.
+
+**SHP2-BE-3:** generated TS public signatures, declarations and source maps MUST derive from checked source/public API meaning, not infer a generic type by reverse engineering one specialized emitted function. Type erasure does not remove the need for runtime guards enforcing source value invariants.
+
+**SHP2-BE-4:** Wasm emission must pin the core feature set, Wasm32/Wasm64 target if relevant, heap/GC or linear memory model, host imports/exports, allocator, signedness, trap handling, recursion and full compiler input/output API. Core Wasm validation is not source-to-Wasm semantic preservation.
+
+**SHP2-BE-5:** Rust emission MUST pin the target triple, compiler version, dependent crate/runtime versions, signed/unsigned arithmetic, panic/abort and FFI assumptions. The emitter MAY use Rust's borrow checker and efficient ownership internally without introducing Rust source lifetimes into ProofScript.
+
+**SHP2-BE-6:** if any backend lacks a representation or correspondence for a source value or intrinsic, it MUST fail the requested target emission with a precise unsupported-capability error. It MUST NOT substitute an unchecked foreign library, `undefined`, unchecked cast, arbitrary `panic!` or a nonterminating fallback.
+
+### 11.3 Example of a source-level Nat contract and target implementations
+
+The following is a source-level numerical example:
+
+~~~proofscript
+function twice(x: Nat): Nat := {
+  x + x
+}
+~~~
+
+Its abstract meaning is `twice : Nat -> Nat`, `twice(x) = x + x` with exact unbounded Nat arithmetic. **Illustrative** target approaches, not generated code or currently tested PSCV emitters:
+
+~~~text
+Lean semantic reference:
+  def twice (x : Nat) : Nat := x + x
+
+TS/JS:
+  use bigint or exact integer library and a checked nonnegative Nat wrapper.
+  bigint addition alone does not enforce Nat domain constraints.
+
+Rust:
+  use an owned or borrowed arbitrary-precision unsigned integer runtime
+  (or a validated proof-bounded fixed-width specialization).
+
+Wasm:
+  use the registered arbitrary-precision integer representation;
+  i64 alone cannot implement unbounded Nat.
+
+Future Go:
+  use an explicit checked Nat wrapper over math/big rather than host int.
+~~~
+
+The library implementations must agree on inputs including 0, values near 2^53, very large values, boundaries and conversion errors. A short numeric example is not evidence that the entire compiler self-hosts.
+
+## 12. Future backend portability: Python, PHP, Java, Go
+
+A new mainstream backend requires a **BackendDescriptor**, an exact runtime semantic correspondence, actual target compilation/execution and a conformance corpus. It is not permitted to reinterpret any F0/S1 feature by using the target language's default semantics.
+
+| Potential target | Useful runtime feature | Nonportable defaults that need adapters |
+|---|---|---|
+| Python | arbitrary-precision ints, productive data/AST code | dynamic types, truthiness, exceptions, string scalar indexing, hash/equality |
+| PHP | byte-oriented strings and easy distribution | int range, implicit coercions, dynamic arrays, error/exceptions |
+| Java | JVM portability, enums/classes, `BigInteger` | UTF-16 strings, fixed-width primitive overflow, heap reference identity |
+| Go | explicit byte slices, `math/big`, simple loops | platform `int`, map iteration unspecified, `rune` replacement on invalid UTF-8, panic/`nil` |
+| Other (C#, Swift, Kotlin, C, etc.) | platform-specific performance/distribution | runtime memory, FFI, effects and numeric representation |
+
+**SHP2-FUTURE-1:** the core source language's mathematical integers, Unicode/bytes, ADTs, immutable closures, typed errors and deterministic iteration must be implementable in every future backend through a runtime shim if necessary. This is a *language design constraint*, not a claim those backends already exist.
+
+**SHP2-FUTURE-2:** portable first-class proof/effect semantics are source checked; no Python type annotations, TypeScript type erasure, Go interfaces, Rust traits or Java generics can serve as the proof kernel. A future target compiler is a separate operational dependency with its own TCB/evidence entry.
+
+**SHP2-FUTURE-3:** source-language features whose only plausible implementation depends on JS object identity, Rust lifetimes, WASM GC object identity or Go pointer mutability SHOULD be excluded from initial SHP2, despite target-local optimizations possibly using those internals.
+
+## 13. Compiler-only self-hosting and kernel independence
+
+### 13.1 Source closure versus compiler runtime
+
+The surveyed [current status][PSC-STATUS] records a **compiler-only 55-module bootstrap** with no kernel package in that generated source closure; checked compiler production is mediated by a host checked-session interface [PSC-HOST]. This is an important ownership distinction.
+
+**SHP2-BOOT-1:** a compiler called `fully self-hosted` must have a complete, frozen, transparently recorded source and **operational dependency closure**. A compiler that internally invokes a prebuilt Lean frontend to parse/elaborate/check new source during re-entry does not count as an independent PSCV self-host compiler.
+
+**SHP2-BOOT-2:** a full distributed PSCV toolchain MAY keep a separately installed checker/provider if the evidence reports this dependency accurately. **Compiler-only self-hosting** and **standalone PSCV with independently owned PSKernel** are different milestones; the latter requires separate kernel-source/binary/provider proof and bootstrap evidence.
+
+**SHP2-BOOT-3:** preserved `PSC1-selfhost-stable/1` remains the seed and rollback until a new compiler reproduces the required semantics, complete source closure and target artifacts. Do not bulk rewrite the stable compiler first or rely on tests that patch one source syntax case at a time.
+
+### 13.2 Mandatory 4×4 complete compiler re-entry
+
+Let `C[t]` be the *running whole compiler executable* built from the same pinned canonical `.ps` source closure for target `t`. The following is **the acceptance matrix**, not present-day achieved status:
+
+| Executing full compiler | Emit TS | Emit direct JS | Emit direct Wasm | Emit Rust |
+|---|---|---|---|---|
+| C[TypeScript] | MUST | MUST | MUST | MUST |
+| C[JavaScript] | MUST | MUST | MUST | MUST |
+| C[Wasm] | MUST | MUST | MUST | MUST |
+| C[Rust] | MUST | MUST | MUST | MUST |
+
+**SHP2-BOOT-4:** for each cell, actually run the compiler, ingest full source through the declared host adapter, parse/elaborate/check using the named kernel provider, erase/validate/specialize the program, generate and validate the selected backend artifact, and record exact source, environment, provider and toolchain identities. A target-specific closure may include a declared host shell and an independent provider, but not an undeclared compiler seed.
+
+**SHP2-BOOT-5:** stage0/1/2/3 fixed-point evidence is a different axis from the four-target dimension. Compare byte identities only for the same target, pinned toolchain and identical serialization/environment; compare **semantic behavior and independently checked intermediate identities** across different targets. TS source, JS text, Rust source and Wasm binary cannot meaningfully have identical bytes.
+
+### 13.3 Lean-first → PSCV-owned migration gates
+
+| Stage | Goal | Portable language effect | Acceptance |
+|---|---|---|---|
+| M0 | freeze PSC1 stable seed | none | old profile/fixed-point evidence preserved |
+| M1 | freeze SHP2 grammar subset + environment | closed syntax, exact feature list | source-rule-to-test matrix agreed |
+| M2 | implement typed errors, ADTs and runtime primitives | F0 data semantics | differential proofs/tests of runtime values |
+| M3 | implement `do`, local mutation, finite `for` | F0 effect+control semantics | VCs/typing/target runtime agreement |
+| M4 | Lean-host source/Core bridge | two frontend comparison path | faithful pinned elaboration + checked proof terms |
+| M5 | native PSCV frontend parity | no source rewrite for second compiler | checked Core semantics correspondence |
+| M6 | four-backend whole compiler | no backend-sensitive source conditionals | runnable complete TS/JS/Wasm/Rust compiler |
+| M7 | 16-path independent re-entry | same canonical source | all cells, staging and host/dependency evidence |
+| M8 | verification and preservation evidence | approved contracts, proofs, erasure | `PSCV-CERT` and separate backend claims |
+| M9 | standalone PSKernel distribution | independent checker closure | owned kernel/provider/runtime evidence |
+
+The profile upgrade does not force a new compiler implementation into the existing main compiler branch. It should be executed on an isolated branch and integrated only after preserving old checkpoints and passing source/semantic closure gates.
+
+## 14. Machine-checkable conformance and negative-test catalog
+
+The following test IDs are **proposed normative acceptance IDs**, not currently implemented test files. Each family must include success and rejection cases, a recorded rule mapping, and a target-by-target semantic result.
+
+### 14.1 Source and elaboration
+
+| Test ID family | Positive requirement | Negative requirement |
+|---|---|---|
+| SHP2-LEX-001 | valid nested comments, Unicode, exact byte spans | invalid UTF-8, newline in invalid string, unclosed comment |
+| SHP2-LAYOUT-002 | only allowed newline layout for do/where | illegal ASI/semicolon separator |
+| SHP2-CALL-003 | adjacent parenthesized calls and optional trailing commas | wrong adjacency and `f()`/`f(())` confusion |
+| SHP2-BIND-004 | explicit/implicit/strict/instance binders | unexpected default and missing explicit arguments |
+| SHP2-MODULE-005 | header imports, namespace, private/public identity | import after declarations, ambiguous opened names |
+| SHP2-ENV-006 | frozen instances, numerals, coercions | unregistered instance or changed priority/order |
+| SHP2-MATCH-007 | exhaustive typed ADT matches | impossible constructor or missing branch |
+| SHP2-STRUCT-008 | typed record construction and update | missing/duplicate/wrong-type field |
+| SHP2-GENERIC-009 | supported type arguments and calls | unground or unspecializable generic value |
+| SHP2-TYPE-010 | dependent binder, indexed inductive, proof fields | invalid universes/indices or proof-as-runtime branch |
+
+### 14.2 Totality, state, proofs and erasure
+
+| Test ID family | Positive requirement | Negative requirement |
+|---|---|---|
+| SHP2-REC-011 | strict structural recursion | same-size/non-subterm call accepted in error |
+| SHP2-WF-012 | valid measure/decreasing proof | unproved decreasing or `partial` |
+| SHP2-MUT-013 | scoped `let mut` and immutable observation | escaped mutable alias or invalid assignment target |
+| SHP2-FOR-014 | finite iterator, invariant, correct break/continue | nonfinite cursor or bypassed exit VC |
+| SHP2-RETURN-015 | early return obeys postcondition | forgotten postcondition on early branch |
+| SHP2-STATE-016 | exact State+Except success/rollback model | error branch leaks state or unregistered WP |
+| SHP2-ERROR-017 | typed success/error contracts | implicit host throw counted as accepted `Except` |
+| SHP2-CONTRACT-018 | approved independent requires/ensures | false/missing/vacuous contract or dropped call precondition |
+| SHP2-TRUST-019 | exact kernel-checked allowed proof closure | user axiom, imported axiom, proof hole or runtime noncomputable |
+| SHP2-GHOST-020 | verified erase-only ghost behavior | ghost influences return/emitted bytes/side effects |
+| SHP2-EXHAUST-021 | typed incomplete/resource error | budget exhaustion returns fabricated success or false checking conclusion |
+
+### 14.3 Four-backend semantic and self-host matrix
+
+| Test ID family | Target and behavior |
+|---|---|
+| SHP2-NAT-022 | huge Nat/Int, sign, 2^53 boundary, division/rem semantics across TS/JS/Wasm/Rust |
+| SHP2-WIDTH-023 | all admitted UInt/Int widths, overflow, signedness, conversions, 32/64 target sizes |
+| SHP2-UTF8-024 | invalid byte sequences, multibyte scalar offsets, deep slicing and source spans |
+| SHP2-ARRAY-025 | bounds, append, immutability and empty/large arrays |
+| SHP2-MAP-026 | collision/order, deterministic declaration serialization, repeated hashes |
+| SHP2-CLOSURE-027 | closures, generic specialization, lifetime-safe target representations |
+| SHP2-ABI-028 | actual Wasm engine, memory/GC/ref profile, signed imports/exports and host capabilities |
+| SHP2-TS-029 | pinned tsc, typed public declarations and JS output behavior |
+| SHP2-JS-030 | independent JsIR/direct JS output without mandatory tsc |
+| SHP2-RUST-031 | pinned rustc/target triple and emitted native compiler behavior |
+| SHP2-BOOT-032 | *every* cell in 4×4 compiler-to-target matrix, same canonical import closure |
+| SHP2-PROVIDER-033 | actual checked-session and independently named kernel provider dependency |
+| SHP2-PRESERVE-034 | each backend's preservation theorem/checker assumptions separated from typecheck |
+| SHP2-AI-035 | held-out proof-maintenance experiment with kernel replay and no specification edits |
+
+For each case record: exact source, expected semantic outcome, target, compiler/toolchain hashes, Standard environment digest, imported axiom/host assumptions, proof/VC status and actual observed execution. Reject ungrounded `pass` tags or a simulated/emulated target that was not really run.
+
+## 15. Research-to-implementation proof obligations
+
+The following relations are **verification targets**, not theorems already present in the repository.
+
+### 15.1 Source elaboration fidelity
+
+~~~text
+AcceptedSHP2(S, Env)
+AND ElaborateLean(S, Env) = C_Lean
+AND LeanKernelChecks(C_Lean)
+=> SourceSemantics(S, Env) ~ CoreSemantics(C_Lean, Env)
+~~~
+
+The implication requires a source-fidelity theorem or independent checker for the concrete lowering. A Lean source policy scanner, Lean type checker alone, or handwritten `.ps`→`.lean` printer is insufficient for proving the relation.
+
+### 15.2 Two independent frontends
+
+~~~text
+LeanFrontend(S)    -> CheckedLeanCore
+PSCVFrontend(S)    -> CheckedPscvCore
+
+Required:
+  Correspond(CheckedLeanCore, CheckedPscvCore, pinnedSemanticProfile)
+  ∧ KnownAssumptions(LeanProvider, PSKernelProvider)
+~~~
+
+Double acceptance provides differential evidence; it is not automatically a proof of equivalence or of kernel soundness.
+
+### 15.3 Core to runtime and targets
+
+~~~text
+CheckedCore(C)
+∧ ApprovedSpec(C) ∧ AxiomAndEffectClosure(C)
+∧ TotalityAndVCClosure(C) ∧ GhostErasureSafe(C)
+∧ EraseAndValidate(C) = R
+=> RuntimeCorrespondence(C, R)
+
+ValidatedRuntimeIR(R) ∧ Compile(t, R) = Program_t
+∧ TargetValid(t, Program_t)
+∧ TargetCorrespondence(t, R, Program_t)
+=> AllowedObservations(R) encompass Observations(Program_t)
+~~~
+
+CompCert's pass-preservation architecture [R-COMPCERT] provides a model for these distinct claims, but is not a theorem about PSCV.
+
+### 15.4 Explicit weakest-precondition/state obligations
+
+~~~text
+For every admitted state/exception program:
+  Correct initiation of local state;
+  Registered effect transformer and proof of its laws;
+  Every normal and error return establishes respective postcondition;
+  Every early Return/Break/Continue exit satisfies frame and invariant;
+  Every loop iteration maintains invariant and decreases required measure;
+  All ghost data erased without observable effect;
+  Every imported proof theorem kernel checked with approved assumptions.
+~~~
+
+Use module-local theorem/property IDs to prevent AI-generated speculative proof search from silently altering the statement being proved.
+
+### 15.5 Compiler self-host is a separate theorem/evidence family
+
+A stage1 compiler compiling itself into stage2, then stage2 into stage3, with canonical identity stability shows bootstrap reproducibility under fixed inputs; it **does not by itself imply source-to-target semantics preservation or program correctness**. Preserve the Claim Lattice from [PSC-V51].
+

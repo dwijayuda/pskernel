@@ -46,7 +46,7 @@ if (engine === 'ts7' && versionText !== 'Version 7.0.2') {
   throw Error('PSC0_BENCH_TS7_VERSION_MISMATCH: ' + versionText);
 }
 const args = engine === 'ts7'
-  ? [src, '--target', 'ES2022', '--module', 'ES2022',
+  ? [src, '--ignoreConfig', '--target', 'ES2022', '--module', 'ES2022',
     '--moduleResolution', 'bundler', '--strict', '--declaration',
     '--sourceMap', '--noEmitOnError', '--skipLibCheck', '--pretty', 'false',
     '--rootDir', path.dirname(src), '--outDir', out,

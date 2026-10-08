@@ -68,3 +68,17 @@ must preserve topological declaration order, canonical admissions, runtime
 exports, and independent strict checking.
 
 No proof, metatheory, or native kernel semantics are edited by this experiment.
+
+## TS7 CLI and source-artifact replay (2026-10-09)
+
+The first TS7 invocation, using the saved native-kernel checked 4,229,736-byte
+source, terminated in 0.04 seconds with TS5112 because TypeScript 7 requires
+`--ignoreConfig` for an explicit .ts input when a nearby tsconfig.json exists.
+This is an experimental invocation error, not a TS7 performance measurement.
+
+Use the same archived `psc0-kernel-checked-ts` GitHub Actions artifact
+from run 37850559156 as a pinned, immutable test corpus for a one-time
+fast retry. The replay must re-verify its source/admissions digests and
+non-executable source receipt before testing TS7, esbuild or Bun.
+The reusable compiler path remains exactly as before; do not confuse the
+archived source receipt with permission to emit or trust a new kernel.

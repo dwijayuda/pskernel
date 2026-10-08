@@ -1,0 +1,94 @@
+name: PSC0 TypeScript 7 fast replay of checked kernel source
+
+on:
+  push:
+    branches: ['psc0/kernel-fast-transpilers-v1']
+    paths:
+      - '.github/workflows/psc0-kernel-transpiler-replay.yml'
+      - 'psc0/scripts/kernel-transpiler-benchmark.mjs'
+      - '.github/workflows/psc0-kernel-fast-transpilers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  typescript-7:
+    name: TS7.0.2 strict compiler on archived native-checked TS
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc0-kernel-checked-ts
+          repository: ${{ github.repository }}
+          run-id: 37850559156
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: psc0/dist/transpiler-bench/source
+      - name: Install stable TypeScript 7 in isolated toolchain
+        run: npm install --prefix dist/transpiler-bench/toolchains/ts7 --no-save --no-package-lock --no-audit --no-fund typescript@7.0.2
+      - name: Strict TypeScript 7 check/JS emit with explicitly ignored project config
+        run: node scripts/kernel-transpiler-benchmark.mjs ts7 dist/transpiler-bench/source/index.ts dist/transpiler-bench/ts7
+      - name: Preserve strict checker diagnostics and compiler output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-ts7-checked-corpus-replay
+          path: |
+            psc0/dist/transpiler-bench/reports/ts7.json
+            psc0/dist/transpiler-bench/ts7/compiler-usage.txt
+            psc0/dist/transpiler-bench/ts7/index.js
+            psc0/dist/transpiler-bench/ts7/index.d.ts
+          if-no-files-found: ignore
+          retention-days: 14
+
+  alternative-emitters:
+    name: Compare Bun and esbuild without claiming type safety
+    needs: typescript-7
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc0-kernel-checked-ts
+          repository: ${{ github.repository }}
+          run-id: 37850559156
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: psc0/dist/transpiler-bench/source
+      - name: Install current esbuild in independent toolchain
+        run: npm install --prefix dist/transpiler-bench/toolchains/esbuild --no-save --no-package-lock --no-audit --no-fund esbuild@0.28.2
+      - name: Benchmark esbuild transpilation and JS runtime
+        run: node scripts/kernel-transpiler-benchmark.mjs esbuild dist/transpiler-bench/source/index.ts dist/transpiler-bench/esbuild
+      - name: Benchmark Bun transpilation and JS runtime
+        run: node scripts/kernel-transpiler-benchmark.mjs bun dist/transpiler-bench/source/index.ts dist/transpiler-bench/bun
+      - name: Archive experimental performance and runtime results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-bun-esbuild-checked-corpus-replay
+          path: |
+            psc0/dist/transpiler-bench/reports/esbuild.json
+            psc0/dist/transpiler-bench/reports/bun.json
+            psc0/dist/transpiler-bench/esbuild/compiler-usage.txt
+            psc0/dist/transpiler-bench/bun/compiler-usage.txt
+          if-no-files-found: ignore
+          retention-days: 14

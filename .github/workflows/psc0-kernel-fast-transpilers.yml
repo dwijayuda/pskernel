@@ -125,7 +125,7 @@ jobs:
           name: psc0-kernel-checked-ts
           path: psc0/dist/transpiler-bench/source
       - name: Install fixed esbuild in isolated toolchain
-        run: npm install --prefix dist/transpiler-bench/toolchains/esbuild --no-save --no-package-lock --no-audit --no-fund esbuild@0.25.12
+        run: npm install --prefix dist/transpiler-bench/toolchains/esbuild --no-save --no-package-lock --no-audit --no-fund esbuild@0.28.2
       - name: Compare esbuild emitter and runtime semantics
         run: node scripts/kernel-transpiler-benchmark.mjs esbuild dist/transpiler-bench/source/index.ts dist/transpiler-bench/esbuild
       - name: Compare Bun emitter and runtime semantics

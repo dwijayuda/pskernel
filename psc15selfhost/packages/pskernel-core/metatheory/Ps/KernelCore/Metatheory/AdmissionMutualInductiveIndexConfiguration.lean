@@ -93,3 +93,31 @@ theorem psKernelAddMutualInductiveInfos_refines_extension
         List.reverse_cons,
         List.append_assoc
       ] using hTail
+
+
+theorem psKernelAddMutualRecursorInfos_refines_extension
+    (infos : List PsKernelRecursorInfo)
+    (environment : PsKernelEnvironment) :
+    PsKernelEnvironmentExtendsBy
+      environment
+      (psKernelAddMutualRecursorInfos infos environment)
+      (List.reverse
+        (List.map
+          (fun info : PsKernelRecursorInfo =>
+            PsKernelConstantInfo.recInfo info)
+          infos)) := by
+  induction infos generalizing environment with
+  | nil =>
+      exact psKernelEnvironmentExtendsBy_refl environment
+  | cons info rest ih =>
+      have hTail :=
+        ih (psKernelEnvironmentAddUnchecked
+          environment (PsKernelConstantInfo.recInfo info))
+      simpa [
+        psKernelAddMutualRecursorInfos,
+        PsKernelEnvironmentExtendsBy,
+        psKernelEnvironmentAddUnchecked,
+        List.map,
+        List.reverse_cons,
+        List.append_assoc
+      ] using hTail

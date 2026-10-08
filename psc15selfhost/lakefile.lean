@@ -321,6 +321,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SubstitutionRefinement,
     `Ps.KernelCore.Metatheory.Admission,
     `Ps.KernelCore.Metatheory.AdmissionRefinement,
+    `Ps.KernelCore.Metatheory.AdmissionIndexConfiguration,
     `Ps.KernelCore.Metatheory.SessionRefinement,
     `Ps.KernelCore.Metatheory.Delta,
     `Ps.KernelCore.Metatheory.ReductionCongruence,

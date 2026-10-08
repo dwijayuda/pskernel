@@ -519,3 +519,22 @@ Architectural blockers still remaining:
   generation metadata, ordinary/mutual/nested well-formed semantic environment
   transactions, final Kernel/API/session theorem family, criteria-based audit,
   integration reconciliation, final proof/conformance gates.
+
+## Scope handoff and ordinal history checkpoint — 2026-10-09
+- Full proof and native foundation conformance **#713 and #714 GREEN**:
+  shared ordinary/mutual analysis-scope cache restoration and its negative
+  conformance witness are validated. Full gate **#715 GREEN** at
+  `2edfda6a68d14aa6ab6fe097ee8383dbb5e6c771` validates the independent
+  lookup-preserving local ordinal-history relation and raw field-spine rule.
+- Current candidate strengthens recursive-argument configuration induction
+  with monotone local allocation history; the public configuration interface
+  is preserved as a projection. Scope restoration yields identical active
+  declarations plus the proved monotone ordinal handoff.
+- This is missing invariant/semantic alignment, not a production correction:
+  ordinal history consumes no expression or binder and permits no change to
+  lookup-visible declarations. Verify the candidate's full CI.
+- Next: raw field typing/universe/positivity and actual recursive metadata
+  composition, then ordinary/mutual/nested admission transactions and final
+  public refinement. StringEq reflexivity remains explicit and unresolved.
+- Audit remains A/B/C/D = 44/9/19/7; integration head remains
+  `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`. No final completion claim.

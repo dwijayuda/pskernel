@@ -7,7 +7,7 @@ returned local context. Function arguments may extend that context; this
 theorem does not incorrectly restore the original scope or infer a typing
 certificate from infer-only.
 -/
-theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_preserves
+theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_history_preserves
     (fuel : Nat)
     (hNative : PsKernelNativeReductionSoundLaw)
     (hString : PsKernelStringEqSoundLaw) :
@@ -25,7 +25,9 @@ theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_preserves
           Except.ok result ->
       PsKernelCheckerConfigurationSound
         result.session.context result.session.state ∧
-      result.session.context.environment = session.context.environment := by
+      result.session.context.environment = session.context.environment ∧
+      session.context.localContext.nextIndex ≤
+        result.session.context.localContext.nextIndex := by
   induction fuel with
   | zero =>
       intro session target levels params numIndices type revArgs result
@@ -65,7 +67,8 @@ theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_preserves
                       hWhnf, hApp, hContains] using hRun
                   cases hResult
                   exact ⟨hReducedConfig, congrArg
-                    PsKernelCheckerContext.environment hReducedContext⟩
+                    PsKernelCheckerContext.environment hReducedContext,
+                    by simp [hReducedContext]⟩
           | none =>
               simp only [psKernelAnalyzeSimpleRecursiveArgumentWithFuel,
                 hWhnf, hApp] at hRun
@@ -164,7 +167,17 @@ theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_preserves
                                       psKernelCheckerContextWithLocalContext,
                                       hSortContext, hCheckContext,
                                       hDomainContext, hReducedContext]
-                                  exact ⟨hRest.1, Eq.trans hRest.2 hOpenedEnvironment⟩
+                                  have hOpenedOrdinal :
+                                      session.context.localContext.nextIndex ≤
+                                        opened.2.context.localContext.nextIndex := by
+                                    simp [opened, psKernelSessionWithLocal,
+                                      psKernelCheckerContextWithLocalContext,
+                                      psKernelLocalContextAddLocal,
+                                      hSortContext, hCheckContext,
+                                      hDomainContext, hReducedContext]
+                                  exact ⟨hRest.1,
+                                    Eq.trans hRest.2.1 hOpenedEnvironment,
+                                    Nat.le_trans hOpenedOrdinal hRest.2.2⟩
               | _ =>
                   cases hContains :
                       (if psKernelExprContainsConst target type then true
@@ -180,8 +193,44 @@ theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_preserves
                         simpa [hShape, hContains] using hRun
                       cases hResult
                       exact ⟨hReducedConfig, congrArg
-                        PsKernelCheckerContext.environment hReducedContext⟩
+                        PsKernelCheckerContext.environment hReducedContext,
+                        by simp [hReducedContext]⟩
 
+
+
+/-- Public configuration contract, retaining its original interface. -/
+theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_preserves
+    (fuel : Nat)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (session : PsKernelCheckerSession)
+    (target : PsKernelName)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (type : PsKernelExpr)
+    (revArgs : List PsKernelOpenBinder)
+    (result : PsKernelRecursiveArgumentResult)
+    (hConfig : PsKernelCheckerConfigurationSound session.context session.state)
+    (hRun : psKernelAnalyzeSimpleRecursiveArgumentWithFuel
+      fuel session target levels params numIndices type revArgs =
+        Except.ok result) :
+    PsKernelCheckerConfigurationSound
+      result.session.context result.session.state ∧
+    result.session.context.environment = session.context.environment := by
+  have h := psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_history_preserves
+    fuel hNative hString session target levels params numIndices type revArgs
+    result hConfig hRun
+  exact ⟨h.1, h.2.1⟩
+
+/-- Scope restoration exposes a lookup-preserving, monotone ordinal handoff. -/
+theorem psKernelSessionRestoreLocalScope_ordinal_history
+    (parent child : PsKernelCheckerSession)
+    (hOrdinal : parent.context.localContext.nextIndex ≤
+      child.context.localContext.nextIndex) :
+    PsKernelLocalContextOrdinalHistoryExtends parent.context.localContext
+      (psKernelSessionRestoreLocalScope parent child).context.localContext := by
+  exact ⟨rfl, hOrdinal⟩
 
 /--
 Independent ordinary strict-positive recursive-argument grammar, modulo

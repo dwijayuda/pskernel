@@ -1,0 +1,22 @@
+{
+  "name": "@proofscript/psc2-bootstrap",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "portable": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "psc2-selfhost-composition"
+  },
+  "dependencies": {
+    "@proofscript/compiler-next": "0.0.0-dev",
+    "@proofscript/backend-ts-next": "0.0.0-dev"
+  }
+}

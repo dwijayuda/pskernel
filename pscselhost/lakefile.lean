@@ -1,0 +1,257 @@
+import Lake
+open Lake DSL
+
+package proofscriptSelfhost
+
+lean_lib PsFoundation where
+  srcDir := "packages/foundation/src"
+  roots := #[
+    `Ps.Foundation.List,
+    `Ps.Foundation.Name,
+    `Ps.Foundation.Source,
+    `Ps.Foundation.Diagnostic
+  ]
+
+lean_lib PsSyntax where
+  srcDir := "packages/syntax/src"
+  roots := #[
+    `Ps.Syntax.Token,
+    `Ps.Syntax.Cursor,
+    `Ps.Syntax.Lexer,
+    `Ps.Syntax.Ast,
+    `Ps.Syntax.ParserState,
+    `Ps.Syntax.ParseCommon,
+    `Ps.Syntax.ParseLean,
+    `Ps.Syntax.ParseProofScript,
+    `Ps.Syntax.PrintCommon,
+    `Ps.Syntax.PrintLean,
+    `Ps.Syntax.PrintProofScript,
+    `Ps.Syntax.Translate
+  ]
+
+lean_lib PsCore where
+  srcDir := "packages/core/src"
+  roots := #[
+    `Ps.Core.Level,
+    `Ps.Core.Expr,
+    `Ps.Core.Abstract,
+    `Ps.Core.Builtin,
+    `Ps.Core.LevelSubst,
+    `Ps.Core.Equality,
+    `Ps.Core.Subst,
+    `Ps.Core.Declaration
+  ]
+
+lean_lib PsEnvironment where
+  srcDir := "packages/environment/src"
+  roots := #[
+    `Ps.Environment.Basic,
+    `Ps.Environment.LocalContext,
+    `Ps.Environment.Instances,
+    `Ps.Environment.Resolve,
+    `Ps.Environment.Prelude,
+    `Ps.Environment.SelfHostPrelude,
+    `Ps.Environment.SelfHostProd
+  ]
+
+lean_lib PsBridge where
+  srcDir := "packages/bridge/src"
+  roots := #[
+    `Ps.Bridge.Json,
+    `Ps.Bridge.CheckedAdmissions,
+    `Ps.Bridge.Codec,
+    `Ps.Bridge.Protocol
+  ]
+
+lean_lib PsCompilerIr where
+  srcDir := "packages/compiler-ir/src"
+  roots := #[
+    `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Specialize
+  ]
+
+lean_lib PsErasure where
+  srcDir := "packages/erasure/src"
+  roots := #[
+    `Ps.Erasure.Basic,
+    `Ps.Erasure.Inductive,
+    `Ps.Erasure.Structure,
+    `Ps.Erasure.StructureRecursor,
+    `Ps.Erasure.Expr,
+    `Ps.Erasure.Definition
+  ]
+
+lean_lib PsCompiler where
+  srcDir := "packages/compiler/src"
+  roots := #[
+    `Ps.Compiler,
+    `Ps.Compiler.Api
+  ]
+
+lean_lib PsBackendTs where
+  srcDir := "packages/backend-ts/src"
+  roots := #[
+    `Ps.BackendTs.Type,
+    `Ps.BackendTs.Expr,
+    `Ps.BackendTs.Module,
+    `Ps.BackendTs.Compiler
+  ]
+
+lean_lib PsBootstrap where
+  srcDir := "packages/bootstrap/src"
+  roots := #[`Ps.Bootstrap.SelfHost]
+
+lean_lib PsBackendRust where
+  srcDir := "packages/backend-rust/src"
+  roots := #[
+    `Ps.BackendRust.Identifier,
+    `Ps.BackendRust.Type,
+    `Ps.BackendRust.Expr,
+    `Ps.BackendRust.ValueRefs,
+    `Ps.BackendRust.Runtime,
+    `Ps.BackendRust.Module,
+    `Ps.BackendRust.Coverage,
+    `Ps.BackendRust.Compiler
+  ]
+
+lean_lib PsBackendWasm where
+  srcDir := "packages/backend-wasm/src"
+  roots := #[
+    `Ps.BackendWasm.Model,
+    `Ps.BackendWasm.Type,
+    `Ps.BackendWasm.LowerInt,
+    `Ps.BackendWasm.LowerFloat,
+    `Ps.BackendWasm.RuntimeNat,
+    `Ps.BackendWasm.RuntimeInt,
+    `Ps.BackendWasm.Binary,
+    `Ps.BackendWasm.Lower
+  ]
+
+lean_lib PsHost where
+  srcDir := "host/src"
+  roots := #[
+    `Ps.Host.TypeScriptCompiler,
+    `Ps.Host.ProjectCompiler,
+    `Ps.Host.CompilerDriver
+  ]
+
+lean_lib PsProject where
+  srcDir := "packages/project/src"
+  roots := #[`Ps.Project.ModuleGraph]
+
+lean_lib PsMeta where
+  srcDir := "packages/meta/src"
+  roots := #[
+    `Ps.Meta.LevelContext,
+    `Ps.Meta.Context,
+    `Ps.Meta.Reduce,
+    `Ps.Meta.Unify,
+    `Ps.Meta.SynthInstance,
+    `Ps.Meta.Infer
+  ]
+
+lean_lib PsElab where
+  srcDir := "packages/elab/src"
+  roots := #[
+    `Ps.Elab.Context,
+    `Ps.Elab.Literal,
+    `Ps.Elab.Term,
+    `Ps.Elab.Declaration
+  ]
+
+lean_lib PsKernelOwned where
+  srcDir := "packages/pskernel-core/src"
+  roots := #[
+    `Ps.Kernel.Data, `Ps.Kernel.Structural, `Ps.Kernel.Natural,
+    `Ps.Kernel.Expr, `Ps.Kernel.Binding, `Ps.Kernel.Order,
+    `Ps.Kernel.Universe, `Ps.Kernel.LevelCheck, `Ps.Kernel.LevelInstantiate, `Ps.Kernel.ExprInstantiate, `Ps.Kernel.BuiltinNat, `Ps.Kernel.BuiltinText, `Ps.Kernel.Environment,
+    `Ps.Kernel.Reduction, `Ps.Kernel.Conversion, `Ps.Kernel.TypeCheck,
+    `Ps.Kernel.Admission, `Ps.Kernel.UnitInductive, `Ps.Kernel.NatInductive, `Ps.Kernel.RecordInductive,
+    `Ps.Kernel.EnumInductive, `Ps.Kernel.SumInductive, `Ps.Kernel.AlgebraicData, `Ps.Kernel.AlgebraicReduction, `Ps.Kernel.AlgebraicHeader, `Ps.Kernel.Closing, `Ps.Kernel.Occurrence, `Ps.Kernel.ExpressionEquality, `Ps.Kernel.Positivity, `Ps.Kernel.AlgebraicConstructor, `Ps.Kernel.Parameters, `Ps.Kernel.AlgebraicMinor, `Ps.Kernel.AlgebraicRecursor, `Ps.Kernel.AlgebraicAdmission, `Ps.Kernel.Bootstrap, `Ps.Kernel.JointAdmission, `Ps.Kernel.Bootstrap
+  ]
+
+lean_lib PSC1KernelReferenceFoundations where
+  srcDir := "packages/pskernel"
+  roots := #[
+    `PSC1Kernel.Name,
+    `PSC1Kernel.Level,
+    `PSC1Kernel.Expr
+  ]
+
+@[default_target]
+lean_exe psc1 where
+  srcDir := "packages/cli/src"
+  root := `Main
+
+lean_exe psc1_tests where
+  srcDir := "test"
+  root := `BootstrapTests
+
+lean_exe psc1_translation_tests where
+  srcDir := "test"
+  root := `TranslationTests
+
+lean_exe psc1_bridge_tests where
+  srcDir := "test"
+  root := `BridgeTests
+
+lean_exe psc1_backend_ts_tests where
+  srcDir := "test"
+  root := `BackendTsTests
+
+lean_exe psc1_backend_wasm_tests where
+  srcDir := "test"
+  root := `BackendWasmTests
+
+lean_exe psc1_ir_specialize_tests where
+  srcDir := "test"
+  root := `IrSpecializeTests
+
+lean_exe psc1_backend_rust_tests where
+  srcDir := "test"
+  root := `BackendRustTests
+
+lean_exe psc1_backend_rust_let_function_result_tests where
+  srcDir := "test"
+  root := `BackendRustLetFunctionResultTests
+
+lean_exe psc1_backend_rust_let_function_result_fixture where
+  srcDir := "test"
+  root := `BackendRustLetFunctionResultFixture
+
+lean_exe psc1_backend_rust_fixture where
+  srcDir := "test"
+  root := `BackendRustFixture
+
+lean_exe psc1_backend_rust_source_tests where
+  srcDir := "test"
+  root := `BackendRustSourceTests
+
+lean_exe psc1_backend_diff_fixture where
+  srcDir := "test"
+  root := `BackendDifferentialFixture
+
+lean_exe psc1_backend_wasm_binary_smoke where
+  srcDir := "test"
+  root := `WasmBinarySmoke
+
+lean_exe psc1_erasure_tests where
+  srcDir := "test"
+  root := `ErasureTests
+
+lean_exe psc2_minimal_selfhost_tests where
+  srcDir := "test"
+  root := `MinimalSelfHostTests
+
+lean_exe psc2_prod_match_selfhost_tests where
+  srcDir := "test"
+  root := `ProdMatchSelfHostTests
+
+-- Host-only diagnostics; this executable is not a portable bootstrap module.
+lean_exe psc2_joint_closure_inventory where
+  srcDir := "scripts"
+  root := `JointClosureInventory
+
+lean_exe psc2_selfhost_replay_audit where
+  srcDir := "scripts"
+  root := `SelfhostReplayAudit

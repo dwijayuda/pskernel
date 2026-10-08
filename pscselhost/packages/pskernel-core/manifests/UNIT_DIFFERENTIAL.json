@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "scope": "Zero-term-parameter singleton unit inductives and derived recursors; not general inductive completeness",
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+  "harnessSha256": "8e1ce4839f0099990b163f4d258acd66c6efa0850e5a6e116c853c2f8f4fd402",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "cases": 109,
+  "matched": 109,
+  "accepted": 51,
+  "rejected": 58,
+  "recordsPath": "dist/evidence/unit-differential-records.json",
+  "recordsSha256": "fe7fed065d66a6cbca75dfadfe3111fac59ef52c05f7bc959c366432c21fdcfd"
+}

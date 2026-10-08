@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "package": "@proofscript/pskernel-core",
+  "version": "0.1.0-checker.14",
+  "status": "experimental-term-checker",
+  "canCheckProofs": false,
+  "authoritative": false,
+  "selfHosted": false,
+  "fullLeanCompatibilityVerified": false,
+  "targetLeanVersion": "4.34.0",
+  "targetLeanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "implemented": [
+    "owned-expressions",
+    "exact-binary-arithmetic",
+    "binding-lift-instantiate-abstract",
+    "variable-scope-traversal",
+    "bounded-level-normalization",
+    "bounded-normalize-compare",
+    "shared-budget-beta-zeta-transparent-delta-reduction",
+    "conservative-alpha-normal-form-conversion",
+    "dependent-Pi-lambda-application-let-typing",
+    "closed-monomorphic-sequential-definition-admission",
+    "bounded-simultaneous-universe-instantiation",
+    "bounded-expression-universe-instantiation",
+    "closed-polymorphic-sequential-definition-admission",
+    "scope-and-arity-checked-universe-instantiation",
+    "polymorphic-transparent-delta-reduction",
+    "internal-opaque-constant-typing-and-conversion-without-declaration-admission",
+    "zero-term-parameter-unit-inductives-with-derived-recursor-and-iota",
+    "fresh-mixed-definition-and-unit-admission",
+    "monomorphic-zero-successor-inductives-with-derived-dependent-recursor-and-iota",
+    "generated-bootstrap-Nat-checked-from-empty-environment",
+    "natural-literal-typing-after-checked-Nat-admission",
+    "bounded-natural-literal-constructor-conversion-and-recursor-reduction",
+    "closed-monomorphic-nonrecursive-record-constructor-field-admission",
+    "source-derived-record-field-metadata-and-dependent-eliminator-typing",
+    "validated-closed-record-projection-typing-and-reduction",
+    "bounded-closed-record-iota-and-neutral-projection-conversion",
+    "monomorphic-nullary-enumerations-with-checked-dependent-recursor-and-iota",
+    "closed-monomorphic-nonrecursive-sums-with-checked-dependent-recursor-and-iota",
+    "fixed-intrinsic-String-Type-without-user-axiom-ingress",
+    "source-owned-bounded-UTF8-scalar-validation",
+    "checked-string-literal-typing-and-byte-exact-conversion",
+    "uniform-Type0-type-parameter-algebraic-admission",
+    "checked-covariant-parameter-and-direct-recursion-profile",
+    "derived-dependent-algebraic-eliminators-and-charged-recursive-iota"
+  ],
+  "boundedEvidence": [
+    "BUILD.json",
+    "ORACLE.json",
+    "SEMANTIC_ORACLE.json",
+    "LEVEL_DIFFERENTIAL.json",
+    "CHECKER_ORACLE.json",
+    "CHECKER_DIFFERENTIAL.json",
+    "POLYMORPHIC_DIFFERENTIAL.json",
+    "UNIT_DIFFERENTIAL.json",
+    "NAT_DIFFERENTIAL.json",
+    "LITERAL_DIFFERENTIAL.json",
+    "RECORD_DIFFERENTIAL.json",
+    "RECORD_ELIMINATION_DIFFERENTIAL.json",
+    "ENUM_DIFFERENTIAL.json",
+    "SUM_DIFFERENTIAL.json",
+    "TEXT_DIFFERENTIAL.json",
+    "ALGEBRAIC_DIFFERENTIAL.json"
+  ],
+  "releaseGates": {
+    "term-checking": {
+      "status": "partial",
+      "evidence": "CHECKER_DIFFERENTIAL.json; CHECKER_ORACLE.json; fragment only"
+    },
+    "conversion": {
+      "status": "partial",
+      "evidence": "CHECKER_DIFFERENTIAL.json; CHECKER_ORACLE.json; fragment only"
+    },
+    "inductive-admission": {
+      "status": "partial",
+      "evidence": "UNIT_DIFFERENTIAL.json; NAT_DIFFERENTIAL.json; RECORD_DIFFERENTIAL.json; bounded fragments only; ENUM_DIFFERENTIAL.json; enumerations only; SUM_DIFFERENTIAL.json; closed nonrecursive payload sums only; ALGEBRAIC_DIFFERENTIAL.json; Type0 type parameters and direct recursion only, one retained reference-boundary discrepancy"
+    },
+    "quotient-admission": {
+      "status": "pending",
+      "evidence": null
+    },
+    "primitive-validation": {
+      "status": "partial",
+      "evidence": "LITERAL_DIFFERENTIAL.json; TEXT_DIFFERENTIAL.json; checked Nat and fixed intrinsic String only; no String operations"
+    },
+    "axiom-policy": {
+      "status": "pending",
+      "evidence": null
+    },
+    "bounded-input-validation": {
+      "status": "pending",
+      "evidence": null
+    },
+    "checked-module-integration": {
+      "status": "pending",
+      "evidence": null
+    },
+    "compiler-kernel-closure": {
+      "status": "pending",
+      "evidence": null
+    },
+    "generated-kernel-fixed-point": {
+      "status": "pending",
+      "evidence": null
+    },
+    "promised-library-replay": {
+      "status": "pending",
+      "evidence": null
+    },
+    "full-workspace-ci": {
+      "status": "pending",
+      "evidence": null
+    },
+    "license-and-attribution": {
+      "status": "pending",
+      "evidence": null
+    },
+    "release-provenance": {
+      "status": "pending",
+      "evidence": null
+    }
+  },
+  "explicitlyUnsupported": [
+    "proof-irrelevance-conversion",
+    "function-and-structure-eta",
+    "general-mutual-indexed-universe-polymorphic-and-nested-recursive-inductive-admission",
+    "quotient-admission",
+    "String-constructors-operations-and-general-projection-typing",
+    "remaining-prelude-and-primitive-validation",
+    "axiom-and-opaque-declaration-admission",
+    "hostile-input-decoder",
+    "public-CheckedModule",
+    "dependent-indexed-and-general-recursive-record-fields-and-parameterized-projections"
+  ]
+}

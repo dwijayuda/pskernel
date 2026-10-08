@@ -1,0 +1,168 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
+import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import {
+  bootstrapManifestSchemaVersion,
+  canonicalGeneratedPaths,
+  computeBootstrapWorkspaceClosureSha256,
+  assertBootstrapManifestShape,
+} from "./bootstrap-manifest.mjs";
+
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const selfhostRoot = path.resolve(scriptDir, "..");
+
+function usage(entry, outDir) {
+  return [
+    "usage:",
+    "  node scripts/bootstrap-project.mjs [entry.lean] [out-workspace]",
+    "",
+    "default:",
+    `  entry: ${entry}`,
+    `  out:   ${outDir}`,
+  ].join("\n");
+}
+
+function moduleSourcePath(moduleName) {
+  const parts = moduleName.split(".");
+  if (parts[0] === "ProofScript") {
+    return path.join(selfhostRoot, "stdlib", ...parts) + ".lean";
+  }
+  if (parts[0] === "Ps" && parts.length >= 2) {
+    const packageName = packageBySection.get(parts[1]);
+    if (!packageName) {
+      throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_PACKAGE: ${moduleName}`);
+    }
+    return path.join(
+      selfhostRoot,
+      "packages",
+      packageName,
+      "src",
+      ...parts,
+    ) + ".lean";
+  }
+  throw new Error(`PSC2_BOOTSTRAP_UNKNOWN_IMPORT: ${moduleName}`);
+}
+
+async function collectProject(entryPath) {
+  const visited = new Set();
+  const ordered = [];
+
+  async function visit(sourcePath) {
+    const absolute = path.resolve(sourcePath);
+    if (visited.has(absolute)) return;
+    visited.add(absolute);
+
+    if (!existsSync(absolute)) {
+      throw new Error(`PSC2_BOOTSTRAP_SOURCE_MISSING: ${absolute}`);
+    }
+
+    const source = await readFile(absolute, "utf8");
+    for (const moduleName of parseImports(source)) {
+      await visit(moduleSourcePath(moduleName));
+    }
+    ordered.push(absolute);
+  }
+
+  await visit(entryPath);
+  return ordered;
+}
+
+function translatedRelativePath(sourcePath) {
+  const relative = path.relative(selfhostRoot, sourcePath);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`PSC2_BOOTSTRAP_SOURCE_OUTSIDE_WORKSPACE: ${sourcePath}`);
+  }
+  return relative.replace(/\.lean$/u, ".ps");
+}
+
+function translateFile(sourcePath, outputPath) {
+  const relativeSource = path.relative(selfhostRoot, sourcePath);
+  const relativeOutput = path.relative(selfhostRoot, outputPath);
+  const result = spawnSync(
+    "lake",
+    [
+      "exe",
+      "psc1",
+      "translate",
+      relativeSource,
+      "--to",
+      "ps",
+      "--out",
+      relativeOutput,
+    ],
+    {
+      cwd: selfhostRoot,
+      encoding: "utf8",
+      stdio: "pipe",
+    },
+  );
+  if (result.status !== 0) {
+    throw new Error(
+      [
+        `PSC2_BOOTSTRAP_TRANSLATE_FAILED: ${relativeSource}`,
+        result.stdout,
+        result.stderr,
+      ].filter(Boolean).join("\n"),
+    );
+  }
+}
+
+const psconfig = JSON.parse(
+  await readFile(path.join(selfhostRoot, "psconfig.json"), "utf8"),
+);
+const configuredOutDir = psconfig.compilerOptions?.outDir ?? "dist";
+const defaultWorkspace = path.join(configuredOutDir, "bootstrap", "workspace");
+const entryArg = process.argv[2] ?? psconfig.entry;
+const outArg = process.argv[3] ?? defaultWorkspace;
+if (!entryArg) {
+  throw new Error(usage("<missing psconfig.entry>", defaultWorkspace));
+}
+const entryPath = path.resolve(selfhostRoot, entryArg);
+const outWorkspace = path.resolve(selfhostRoot, outArg);
+
+const sources = await collectProject(entryPath);
+const generated = [];
+
+for (const sourcePath of sources) {
+  const relative = translatedRelativePath(sourcePath);
+  const outputPath = path.join(outWorkspace, relative);
+  await mkdir(path.dirname(outputPath), { recursive: true });
+  translateFile(sourcePath, outputPath);
+  generated.push(relative.replaceAll(path.sep, "/"));
+}
+
+const entryRelative = translatedRelativePath(entryPath).replaceAll(path.sep, "/");
+const canonicalGenerated = canonicalGeneratedPaths(generated);
+const closureSha256 = await computeBootstrapWorkspaceClosureSha256(
+  outWorkspace,
+  entryRelative,
+  canonicalGenerated,
+);
+const manifest = {
+  schemaVersion: bootstrapManifestSchemaVersion,
+  generation: "bootstrap",
+  entry: entryRelative,
+  sourceCount: canonicalGenerated.length,
+  generated: canonicalGenerated,
+  closureSha256,
+};
+assertBootstrapManifestShape(manifest, "bootstrap");
+
+await mkdir(outWorkspace, { recursive: true });
+await writeFile(
+  path.join(outWorkspace, ".proofscript-bootstrap.json"),
+  JSON.stringify(manifest, null, 2) + "\n",
+  "utf8",
+);
+
+process.stdout.write(
+  [
+    `PSC2_BOOTSTRAP_PS_WORKSPACE: ${path.relative(selfhostRoot, outWorkspace)}`,
+    `PSC2_BOOTSTRAP_PS_ENTRY: ${path.join(path.relative(selfhostRoot, outWorkspace), entryRelative)}`,
+    `PSC2_BOOTSTRAP_PS_SOURCES: ${canonicalGenerated.length}`,
+    `PSC2_BOOTSTRAP_PS_CLOSURE_SHA256: ${closureSha256}`,
+  ].join("\n") + "\n",
+);

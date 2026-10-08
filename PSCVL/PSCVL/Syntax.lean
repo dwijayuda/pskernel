@@ -148,40 +148,16 @@ macro_rules
     `(def $f:ident $binders* : $result:term
         requires $pre:term := $body:term)
 
-/-- Ghost state is lowered to Lean 4.35's intrinsic erased-state do element.
-Its proof-time value may be used in assertions and invariants. The compiler
-must still separately discharge erasure/noninterference for certified emission. -/
+/-- Ghost state is reduced to the pinned intrinsic erased-state grammar.
+This bounded alias retains its proof-only scope; no executable artifacts
+are emitted until a checked erasure gate exists. -/
 syntax (name := pscvGhost) "ghost " ident ":=" term : doElem
-syntax (name := pscvGhostTyped) "ghost " ident ":" term ":=" term : doElem
 syntax (name := pscvGhostMut) "ghost " "mut " ident ":=" term : doElem
-syntax (name := pscvGhostMutTyped) "ghost " "mut " ident ":" term ":=" term : doElem
 
 macro_rules
   | `(doElem| ghost $name:ident := $value:term) =>
       `(doElem| erased $name:ident := $value:term)
-  | `(doElem| ghost $name:ident : $type:term := $value:term) =>
-      `(doElem| erased $name:ident : $type:term := $value:term)
   | `(doElem| ghost mut $name:ident := $value:term) =>
       `(doElem| erased mut $name:ident := $value:term)
-  | `(doElem| ghost mut $name:ident : $type:term := $value:term) =>
-      `(doElem| erased mut $name:ident : $type:term := $value:term)
-
-/-- One explicit proof-only 'given' binder under the pinned Lean WP intrinsic
-contract macro. The binder is absent from the executable parameter telescope. -/
-syntax (name := pscvFunctionGiven)
-  "function " ident "(" pscvBinder,* ")" ":" term
-  "given" "(" ident ":" term ")" "requires" term
-  "ensures" ident "=>" term ":=" term : command
-
-macro_rules
-  | `(function $f:ident ($[$bs:pscvBinder],*) : $result:term
-      given ($ghost:ident : $gt:term)
-      requires $pre:term
-      ensures $out:ident => $post:term := $body:term) => do
-    let binders ← explicitLeanBinders bs
-    `(def $f:ident $binders* : $result:term
-       given ($ghost:ident : $gt:term)
-       requires $pre:term
-       ensures $out:ident => $post:term := $body:term)
 
 end PSCVL

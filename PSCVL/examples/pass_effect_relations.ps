@@ -16,7 +16,8 @@ theorem state_rel :
     PSCVL.Effect.stateRel (pure 5 : StateM Nat Nat)
       (fun s => s = 2) (fun before value after => value = 5 ∧ after = before) := by
   intro old _
-  simp [PSCVL.Effect.stateRel]
+  change (5 : Nat) = 5 ∧ old = old
+  exact ⟨rfl, rfl⟩
 
 theorem frame_rel :
     PSCVL.Effect.preserves (pure 4 : StateM Nat Nat) (fun n => n) := by

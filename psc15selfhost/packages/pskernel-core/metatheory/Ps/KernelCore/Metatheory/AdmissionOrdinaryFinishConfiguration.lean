@@ -662,10 +662,12 @@ theorem psKernelOrdinaryFinishAdmission_success_recursor_semantics
               cases hRules : psKernelValidateSimpleRecursorRules fuel ruleSession
                   paramResult.binders prepared.ruleBinders prepared.motive
                   (psKernelLevelParamsToLevels decl.levelParams) ctorResult.shapes prepared.info.rules with
-              | error message => simp only [hRules] at hRun; cases hRun
+              | error message =>
+                  try simp only [hRules] at hRun
+                  cases hRun
               | ok checkedRules =>
                   cases checkedRules
-                  simp only [hRules] at hRun
+                  try simp only [hRules] at hRun
                   have hPublication : result = work2 := (Except.ok.inj hRun).symm
                   subst result
                   refine ⟨elimOnlyAtZero, hElim, rfl, ⟨sorted.1, ?_⟩, ?_,

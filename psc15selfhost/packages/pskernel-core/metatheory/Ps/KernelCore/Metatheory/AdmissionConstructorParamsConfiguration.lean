@@ -1,5 +1,6 @@
 import Ps.KernelCore.Metatheory.AdmissionInductiveHeaderConfiguration
 import Ps.KernelCore.Metatheory.Inductive
+import Ps.KernelCore.Metatheory.ExprEq
 import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
 
 /-
@@ -145,3 +146,74 @@ theorem psKernelOpenSimpleConstructorParams_raw_spine_refines
       (Nat.succ fuel) session params type result
       hConfig hNative hString
       (by simpa [psKernelOpenSimpleConstructorParams] using hRun)
+
+/--
+Independent result-parameter prefix evidence. Each accepted argument has
+structural expression equality to the corresponding canonical parameter fvar;
+the unconsumed suffix is exactly the returned index list.
+-/
+inductive PsKernelConstructorResultParamPrefix :
+    List PsKernelOpenBinder -> List PsKernelExpr ->
+    List PsKernelExpr -> Prop
+  | nil (indices : List PsKernelExpr) :
+      PsKernelConstructorResultParamPrefix [] indices indices
+  | cons (param : PsKernelOpenBinder)
+      (params : List PsKernelOpenBinder)
+      (arg : PsKernelExpr) (args indices : List PsKernelExpr)
+      (hArg : PsKernelStructuralExprEq
+        arg (PsKernelExpr.fvar param.internalName))
+      (hTail : PsKernelConstructorResultParamPrefix params args indices) :
+      PsKernelConstructorResultParamPrefix
+        (param :: params) (arg :: args) indices
+
+theorem psKernelConsumeSimpleResultParams_success_refines_prefix
+    (params : List PsKernelOpenBinder) :
+    ∀ (args indices : List PsKernelExpr),
+      psKernelConsumeSimpleResultParams params args = some indices ->
+      PsKernelConstructorResultParamPrefix params args indices := by
+  induction params with
+  | nil =>
+      intro args indices hRun
+      simp only [psKernelConsumeSimpleResultParams] at hRun
+      cases hRun
+      exact PsKernelConstructorResultParamPrefix.nil args
+  | cons param params ih =>
+      intro args indices hRun
+      cases args with
+      | nil =>
+          simp [psKernelConsumeSimpleResultParams] at hRun
+      | cons arg args =>
+          cases hEq :
+              psKernelExprEq arg (PsKernelExpr.fvar param.internalName) with
+          | false =>
+              simp [psKernelConsumeSimpleResultParams, hEq] at hRun
+          | true =>
+              have hTail :
+                  psKernelConsumeSimpleResultParams params args =
+                    some indices := by
+                simpa [psKernelConsumeSimpleResultParams, hEq] using hRun
+              exact PsKernelConstructorResultParamPrefix.cons
+                param params arg args indices
+                (psKernelExprEq_true_refines_structural
+                  arg (PsKernelExpr.fvar param.internalName) hEq)
+                (ih args indices hTail)
+
+theorem PsKernelConstructorResultParamPrefix.length
+    (params : List PsKernelOpenBinder)
+    (args indices : List PsKernelExpr)
+    (hPrefix : PsKernelConstructorResultParamPrefix params args indices) :
+    args.length = params.length + indices.length := by
+  induction hPrefix with
+  | nil indices => simp
+  | cons param params arg args indices hArg hTail ih =>
+      simpa [Nat.succ_add] using congrArg Nat.succ ih
+
+theorem psKernelConsumeSimpleResultParams_success_length
+    (params : List PsKernelOpenBinder)
+    (args indices : List PsKernelExpr)
+    (hRun :
+      psKernelConsumeSimpleResultParams params args = some indices) :
+    args.length = params.length + indices.length :=
+  PsKernelConstructorResultParamPrefix.length params args indices
+    (psKernelConsumeSimpleResultParams_success_refines_prefix
+      params args indices hRun)

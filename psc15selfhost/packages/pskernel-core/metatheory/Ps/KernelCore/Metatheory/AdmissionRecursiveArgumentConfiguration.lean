@@ -582,6 +582,16 @@ Independent typed and positive ordinary field history. The accumulated
 recursive-field records are derived from the independently justified
 recursive-argument classification, in the same order as their field binders.
 -/
+def psKernelRecursiveFieldHistoryPush
+    (field : PsKernelOpenBinder)
+    (revRecursive : List PsKernelSimpleRecursiveField)
+    (info : Option (List PsKernelOpenBinder × List PsKernelExpr)) :
+    List PsKernelSimpleRecursiveField :=
+  match info with
+  | none => revRecursive
+  | some recursive =>
+      PsKernelSimpleRecursiveField.mk field recursive.1 recursive.2 :: revRecursive
+
 inductive PsKernelOrdinaryConstructorFieldsValid
     (environment : PsKernelEnvironment)
     (target : PsKernelName)
@@ -629,13 +639,10 @@ inductive PsKernelOrdinaryConstructorFieldsValid
         (psKernelExprInstantiate1 body (PsKernelExpr.fvar fresh))
         (PsKernelOpenBinder.mk fresh userName
           (psKernelExprConsumeTypeAnnotations domain) binderInfo :: revFields)
-        (match info with
-         | none => revRecursive
-         | some recursive =>
-             PsKernelSimpleRecursiveField.mk
-               (PsKernelOpenBinder.mk fresh userName
-                 (psKernelExprConsumeTypeAnnotations domain) binderInfo)
-               recursive.1 recursive.2 :: revRecursive)
+        (psKernelRecursiveFieldHistoryPush
+          (PsKernelOpenBinder.mk fresh userName
+            (psKernelExprConsumeTypeAnnotations domain) binderInfo)
+          revRecursive info)
         finalContext fields recursiveFields residual) :
       PsKernelOrdinaryConstructorFieldsValid environment target levels params
         numIndices resultLevel localContext
@@ -772,11 +779,8 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                               hOpenedConfig hAnalysisRun
                           let child := psKernelSessionRestoreLocalScope
                             opened.2 analysis.session
-                          let nextRecursive := match analysis.recursiveInfo with
-                            | none => revRecursive
-                            | some info =>
-                                PsKernelSimpleRecursiveField.mk field info.1 info.2 ::
-                                  revRecursive
+                          let nextRecursive := psKernelRecursiveFieldHistoryPush
+                            field revRecursive analysis.recursiveInfo
                           have hChildConfig : PsKernelCheckerConfigurationSound
                               child.context child.state :=
                             psKernelSessionRestoreLocalScope_preserves_configuration
@@ -790,7 +794,8 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                             cases hInfo : analysis.recursiveInfo <;>
                               simpa [psKernelOpenSimpleConstructorFieldsWithFuel,
                                 hCheck, hSort, hAllowed, opened, field,
-                                hAnalysis, child, nextRecursive, hInfo] using hRun
+                                hAnalysis, child, nextRecursive,
+                                psKernelRecursiveFieldHistoryPush, hInfo] using hRun
                           rcases ih child target levels params numIndices resultLevel
                             (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
                             (field :: revFields) nextRecursive result hChildConfig hTailRun
@@ -862,10 +867,8 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
                               (by simpa [opened, psKernelSessionWithLocal,
                                 psKernelCheckerContextWithLocalContext,
                                 hSortContext, hCheckContext] using hScopeHistory)
-                              (by
-                                cases hInfo : analysis.recursiveInfo <;>
-                                  simpa [hChildEnv, field, nextRecursive, hInfo]
-                                    using hFinalHistory hReflexive)
+                              (by simpa [hChildEnv, field, nextRecursive]
+                                using hFinalHistory hReflexive)
       | _ =>
           simp only [psKernelOpenSimpleConstructorFieldsWithFuel] at hRun
           cases hRun

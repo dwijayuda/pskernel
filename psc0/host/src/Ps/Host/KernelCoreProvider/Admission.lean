@@ -12,10 +12,20 @@ def admissionError (error : PsKernelError) (index : Nat) : PsKernelCoreProviderE
     message := kernelErrorMessage error
     declarationIndex := some index }
 
+/- PSC0's 55-source compiler closure includes deeply nested inductive
+   admissions. The general small-request kernel policy (fuel=4096) is
+   intentionally not increased globally. This host-only policy bounds one
+   full compiler admission by a fixed larger *semantic checking* budget.
+   Resource exhaustion still rejects; no provider fallback or unchecked
+   declaration insertion is permitted. The host process has a separate
+   wall-clock limit. -/
+def compilerSelfHostResourcePolicy : PsKernelResourcePolicy :=
+  { psKernelResourcePolicyDefault with fuel := 131072 }
+
 -- Every request starts with a freshly checked prelude. A failed transaction
 -- exposes neither a session nor a partial environment to the host.
 def checkCanonicalAdmissions (source : String)
-    (resources : PsKernelResourcePolicy := psKernelResourcePolicyDefault) :
+    (resources : PsKernelResourcePolicy := compilerSelfHostResourcePolicy) :
     Except PsKernelCoreProviderError PsKernelKernelSession := do
   let declarations ← decodeCanonicalAdmissions source
   let prelude ← buildCorePreludeSession

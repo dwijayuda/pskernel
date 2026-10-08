@@ -31,10 +31,12 @@ function fixture(uniform = false, original = false) {
     ['constant', 'definition', name('answer'), [], constant('Nat')],
   ]]));
   const nat = ['primitive', 'nat'], parameter = uniform ? ['typeParameter', 'A'] : nat;
+  const seven = ['literal', ['natural', '7']];
+  const runtimeCall = ['call', ['var', 'g'], uniform ? [nat] : [], [seven]];
   const runtime = ['psc-runtime-ir-json/1', [], [], [], [
     ['g', uniform ? ['A'] : [], [['x', parameter]], parameter, ['var', 'x']],
-    ['answer', [], [], nat, ['call', ['var', 'g'], uniform ? [nat] : [], [['literal', ['natural', '7']]]]],
-  ];
+    ['answer', [], [], nat, runtimeCall],
+  ]];
   const subjects = { publicApi,
     erasureTable: record(['psc-erasure-declarations/1', 'declaration-inventory', [
       [name('forward'), ['runtime', 'g']], [name('answer'), ['runtime', 'answer']],
@@ -44,7 +46,8 @@ function fixture(uniform = false, original = false) {
       'psc-uniform-specialized-ir/1', uniformJsRepresentationProfile, runtime])) } :
       { specializedIr: record(runtime, 'specialized-ir') }),
     jsIr: record(['psc-js-ir-json/1', [], [
-      ['g', ['x'], ['var', 'x']], ['answer', [], ['call', ['var', 'g'], [['literal', ['natural', '7']]]]],
+      ['g', ['x'], ['var', 'x']],
+      ['answer', [], ['call', ['var', 'g'], [seven]]],
     ]], 'js-ir', 'psc-js-ir-json/1'),
     javaScript: raw('export function g(x) { return x; }\nexport const answer = g(7n);\n',
       'javascript-output', 'psc-direct-javascript/es2022'),

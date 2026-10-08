@@ -555,3 +555,214 @@ theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_semantic_refines
                       exact PsKernelOrdinaryRecursiveArgumentSafe.nonrecursive
                         session.context.localContext type reduced revArgs
                         hReducedSound.1 hBoth.1 hBoth.2
+
+
+theorem psKernelReverseOpenBindersWorker_eq_reverse_append
+    (values : List PsKernelOpenBinder) :
+    ∀ (acc : List PsKernelOpenBinder),
+      psKernelReverseOpenBindersWorker values acc = values.reverse ++ acc := by
+  induction values with
+  | nil => intro acc; rfl
+  | cons head tail ih =>
+      intro acc
+      simp [psKernelReverseOpenBindersWorker, ih,
+        List.reverse_cons, List.append_assoc]
+
+theorem psKernelReverseOpenBinders_cons_append
+    (field : PsKernelOpenBinder) (revFields fields : List PsKernelOpenBinder) :
+    psKernelReverseOpenBinders (field :: revFields) ++ fields =
+      psKernelReverseOpenBinders revFields ++ (field :: fields) := by
+  simp [psKernelReverseOpenBinders,
+    psKernelReverseOpenBindersWorker_eq_reverse_append,
+    List.reverse_cons, List.append_assoc]
+
+/--
+Raw field-spine typing and exact residual refinement. Recursive analysis may
+allocate temporary function arguments; its monotone ordinal history is kept,
+while the parent's semantic caches and active declarations are restored.
+-/
+theorem psKernelOpenSimpleConstructorFieldsWithFuel_raw_spine_refines
+    (fuel : Nat)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw) :
+    ∀ (session : PsKernelCheckerSession)
+      (target : PsKernelName)
+      (levels : List PsKernelLevel)
+      (params : List PsKernelOpenBinder)
+      (numIndices : Nat)
+      (resultLevel : PsKernelLevel)
+      (type : PsKernelExpr)
+      (revFields : List PsKernelOpenBinder)
+      (revRecursive : List PsKernelSimpleRecursiveField)
+      (result : PsKernelOpenFieldsResult),
+      PsKernelCheckerConfigurationSound session.context session.state ->
+      psKernelOpenSimpleConstructorFieldsWithFuel fuel session target levels
+        params numIndices resultLevel type revFields revRecursive =
+          Except.ok result ->
+      ∃ fields : List PsKernelOpenBinder,
+        result.fields = psKernelReverseOpenBinders revFields ++ fields ∧
+        PsKernelRawConstructorFieldSpineValid session.context.environment
+          resultLevel session.context.localContext type
+          result.session.context.localContext fields result.result ∧
+        PsKernelCheckerConfigurationSound
+          result.session.context result.session.state ∧
+        result.session.context.environment = session.context.environment := by
+  induction fuel with
+  | zero =>
+      intro session target levels params numIndices resultLevel type revFields
+        revRecursive result hConfig hRun
+      simp [psKernelOpenSimpleConstructorFieldsWithFuel] at hRun
+  | succ remaining ih =>
+      intro session target levels params numIndices resultLevel type revFields
+        revRecursive result hConfig hRun
+      cases type with
+      | forallE userName domain body binderInfo =>
+          cases hCheck : psKernelSessionCheck remaining session domain with
+          | error message =>
+              simp [psKernelOpenSimpleConstructorFieldsWithFuel, hCheck] at hRun
+          | ok domainType =>
+              cases hSort : psKernelSessionEnsureSort
+                  remaining domainType.2 domainType.1 with
+              | error message =>
+                  simp [psKernelOpenSimpleConstructorFieldsWithFuel,
+                    hCheck, hSort] at hRun
+              | ok fieldSort =>
+                  cases hUniverse :
+                      (if psKernelLevelLe fieldSort.1 resultLevel then true
+                       else psKernelLevelNormalizesToZero resultLevel) with
+                  | false =>
+                      simp [psKernelOpenSimpleConstructorFieldsWithFuel,
+                        hCheck, hSort, hUniverse] at hRun
+                  | true =>
+                      let opened := psKernelSessionWithLocal fieldSort.2
+                        userName (psKernelExprConsumeTypeAnnotations domain)
+                        binderInfo
+                      let field := PsKernelOpenBinder.mk opened.1 userName
+                        (psKernelExprConsumeTypeAnnotations domain) binderInfo
+                      cases hAnalysis : psKernelAnalyzeSimpleRecursiveArgument
+                          remaining opened.2 target levels params numIndices domain with
+                      | error message =>
+                          simp [psKernelOpenSimpleConstructorFieldsWithFuel,
+                            hCheck, hSort, hUniverse, opened, hAnalysis] at hRun
+                      | ok analysis =>
+                          have hCheckSound :=
+                            psKernelSessionCheck_concrete_refines_typing
+                              remaining hNative hString session domainType.2
+                              domain domainType.1 hConfig hCheck
+                          have hCheckContext :=
+                            psKernelSessionCheck_success_preserves_context_core
+                              remaining session domainType.2 domain domainType.1 hCheck
+                          have hCheckConfig : PsKernelCheckerConfigurationSound
+                              domainType.2.context domainType.2.state := by
+                            simpa [hCheckContext] using hCheckSound.2
+                          have hSortSound :=
+                            psKernelSessionEnsureSort_concrete_refines_reduction
+                              remaining hNative hString domainType.2 fieldSort.2
+                              domainType.1 fieldSort.1 hCheckConfig hSort
+                          have hSortContext :=
+                            psKernelSessionEnsureSort_success_preserves_context_core
+                              remaining domainType.2 fieldSort.2
+                              domainType.1 fieldSort.1 hSort
+                          have hSortConfig : PsKernelCheckerConfigurationSound
+                              fieldSort.2.context fieldSort.2.state := by
+                            simpa [hSortContext] using hSortSound.2
+                          have hOpenedConfig : PsKernelCheckerConfigurationSound
+                              opened.2.context opened.2.state :=
+                            psKernelSessionWithLocal_preserves_configuration
+                              fieldSort.2 userName
+                              (psKernelExprConsumeTypeAnnotations domain)
+                              binderInfo hString hSortConfig
+                          have hAnalysisRun :
+                              psKernelAnalyzeSimpleRecursiveArgumentWithFuel
+                                (Nat.succ remaining) opened.2 target levels params
+                                numIndices domain [] = Except.ok analysis := by
+                            simpa [psKernelAnalyzeSimpleRecursiveArgument] using hAnalysis
+                          have hHistory :=
+                            psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_history_preserves
+                              (Nat.succ remaining) hNative hString opened.2
+                              target levels params numIndices domain [] analysis
+                              hOpenedConfig hAnalysisRun
+                          let child := psKernelSessionRestoreLocalScope
+                            opened.2 analysis.session
+                          let nextRecursive := match analysis.recursiveInfo with
+                            | none => revRecursive
+                            | some info =>
+                                PsKernelSimpleRecursiveField.mk field info.1 info.2 ::
+                                  revRecursive
+                          have hChildConfig : PsKernelCheckerConfigurationSound
+                              child.context child.state :=
+                            psKernelSessionRestoreLocalScope_preserves_configuration
+                              opened.2 analysis.session hOpenedConfig
+                          have hTailRun :
+                              psKernelOpenSimpleConstructorFieldsWithFuel
+                                remaining child target levels params numIndices
+                                resultLevel
+                                (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
+                                (field :: revFields) nextRecursive = Except.ok result := by
+                            simpa [psKernelOpenSimpleConstructorFieldsWithFuel,
+                              hCheck, hSort, hUniverse, opened, field,
+                              hAnalysis, child, nextRecursive] using hRun
+                          rcases ih child target levels params numIndices resultLevel
+                            (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
+                            (field :: revFields) nextRecursive result hChildConfig hTailRun
+                            with ⟨fields, hFields, hSpine, hFinalConfig, hFinalEnv⟩
+                          have hChildEnv :
+                              child.context.environment = session.context.environment := by
+                            simp [child, psKernelSessionRestoreLocalScope,
+                              opened, psKernelSessionWithLocal,
+                              psKernelCheckerContextWithLocalContext,
+                              hSortContext, hCheckContext]
+                          have hScopeHistory :
+                              PsKernelLocalContextOrdinalHistoryExtends
+                                opened.2.context.localContext child.context.localContext :=
+                            psKernelSessionRestoreLocalScope_ordinal_history
+                              opened.2 analysis.session hHistory.2.2
+                          have hRest : PsKernelRawConstructorFieldSpineValid
+                              session.context.environment resultLevel
+                              opened.2.context.localContext
+                              (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
+                              result.session.context.localContext fields result.result := by
+                            apply PsKernelRawConstructorFieldSpineValid.ordinalHistory
+                              opened.2.context.localContext child.context.localContext
+                              result.session.context.localContext
+                              (psKernelExprInstantiate1 body (PsKernelExpr.fvar opened.1))
+                              result.result fields hScopeHistory
+                            simpa [hChildEnv] using hSpine
+                          have hDomain : PsKernelTypingJudgment
+                              session.context.environment session.context.localContext
+                              domain (PsKernelExpr.sort fieldSort.1) := by
+                            apply PsKernelTypingJudgment.convert
+                              domain domainType.1 (PsKernelExpr.sort fieldSort.1)
+                            · exact hCheckSound.1
+                            · apply PsKernelDefEqJudgment.reductionClosure
+                              simpa [hCheckContext] using hSortSound.1
+                          have hFresh := psKernelSessionWithLocal_fresh_absent
+                            fieldSort.2 userName
+                            (psKernelExprConsumeTypeAnnotations domain)
+                            binderInfo hString hSortConfig
+                          have hFreshOriginal : psKernelLocalContextFind
+                              session.context.localContext opened.1 = none := by
+                            simpa [opened, hSortContext, hCheckContext] using hFresh
+                          have hAllowed :
+                              psKernelLevelLe fieldSort.1 resultLevel = true ∨
+                                psKernelLevelNormalizesToZero resultLevel = true := by
+                            cases hLe : psKernelLevelLe fieldSort.1 resultLevel with
+                            | true => exact Or.inl hLe
+                            | false => exact Or.inr (by simpa [hLe] using hUniverse)
+                          refine ⟨field :: fields, ?_, ?_, hFinalConfig,
+                            Eq.trans hFinalEnv hChildEnv⟩
+                          · exact Eq.trans hFields
+                              (psKernelReverseOpenBinders_cons_append field revFields fields)
+                          · apply PsKernelRawConstructorFieldSpineValid.cons
+                              session.context.localContext result.session.context.localContext
+                              opened.1 userName domain body result.result binderInfo
+                              fieldSort.1 fields hFreshOriginal hDomain hAllowed
+                            simpa [opened, psKernelSessionWithLocal,
+                              psKernelCheckerContextWithLocalContext,
+                              hSortContext, hCheckContext] using hRest
+      | _ =>
+          simp only [psKernelOpenSimpleConstructorFieldsWithFuel] at hRun
+          cases hRun
+          exact ⟨[], by simp,
+            PsKernelRawConstructorFieldSpineValid.done _ _ (by rfl),
+            hConfig, rfl⟩

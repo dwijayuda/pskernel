@@ -169,3 +169,126 @@ theorem psKernelSimpleMutualIndicesContainTarget_false_refines_absence
                 hReflexive targets target hMember head hHead
           | tail =>
               exact ih hTail expr (by assumption)
+
+
+/-- The selected mutual family ordinal denotes an actual, canonically named shape. -/
+theorem psKernelSimpleMutualTargetIndexWorker_refines
+    (hString : PsKernelStringEqSoundLaw)
+    (shapes : List PsKernelSimpleMutualTypeShape) :
+    ∀ (name : PsKernelName) (start target : Nat),
+      psKernelSimpleMutualTargetIndexWorker name shapes start = some target ->
+      ∃ (offset : Nat) (shape : PsKernelSimpleMutualTypeShape),
+        target = start + offset ∧
+        psKernelMutualTypeShapeListGet shapes offset = some shape ∧
+        name = shape.decl.name := by
+  induction shapes with
+  | nil =>
+      intro name start target hRun
+      simp [psKernelSimpleMutualTargetIndexWorker] at hRun
+  | cons head tail ih =>
+      intro name start target hRun
+      cases hName : psKernelNameEq name head.decl.name with
+      | true =>
+          simp [psKernelSimpleMutualTargetIndexWorker, hName] at hRun
+          cases hRun
+          exact ⟨0, head, by simp, rfl,
+            psKernelNameEq_sound_of_string_law hString name head.decl.name hName⟩
+      | false =>
+          have hTail : psKernelSimpleMutualTargetIndexWorker name tail
+              (Nat.succ start) = some target := by
+            simpa [psKernelSimpleMutualTargetIndexWorker, hName] using hRun
+          obtain ⟨offset, shape, hTarget, hShape, hCanonical⟩ :=
+            ih name (Nat.succ start) target hTail
+          refine ⟨Nat.succ offset, shape, ?_, ?_, hCanonical⟩
+          · omega
+          · simpa [psKernelMutualTypeShapeListGet] using hShape
+
+theorem psKernelSimpleMutualTargetIndex_refines
+    (hString : PsKernelStringEqSoundLaw)
+    (name : PsKernelName) (shapes : List PsKernelSimpleMutualTypeShape)
+    (target : Nat)
+    (hRun : psKernelSimpleMutualTargetIndex name shapes = some target) :
+    ∃ shape : PsKernelSimpleMutualTypeShape,
+      psKernelMutualTypeShapeListGet shapes target = some shape ∧
+      name = shape.decl.name := by
+  obtain ⟨offset, shape, hTarget, hShape, hCanonical⟩ :=
+    psKernelSimpleMutualTargetIndexWorker_refines hString shapes name 0 target hRun
+  have hOffset : target = offset := by simpa using hTarget
+  exact ⟨shape, by simpa [hOffset] using hShape, hCanonical⟩
+
+/-- Independent canonical mutual application shape with family-wide index exclusion. -/
+def PsKernelMutualConstructorApplicationValid
+    (targets : List PsKernelName) (shapes : List PsKernelSimpleMutualTypeShape)
+    (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+    (expr : PsKernelExpr) (info : PsKernelSimpleMutualAppInfo) : Prop :=
+  ∃ shape : PsKernelSimpleMutualTypeShape,
+    psKernelMutualTypeShapeListGet shapes info.target = some shape ∧
+    psKernelExprGetAppFn expr = PsKernelExpr.const shape.decl.name levels ∧
+    PsKernelConstructorResultParamPrefix params (psKernelExprGetAppArgs expr) info.indices ∧
+    psKernelExprListLength info.indices = psKernelOpenBinderListLength shape.indices ∧
+    (∀ target : PsKernelName, List.Mem target targets ->
+      ∀ index : PsKernelExpr, List.Mem index info.indices ->
+        PsKernelNoTargetConstantOccurrence target index)
+
+
+theorem psKernelSimpleMutualAppInfo_semantic_shape
+    (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    (targets : List PsKernelName) (shapes : List PsKernelSimpleMutualTypeShape)
+    (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+    (expr : PsKernelExpr) (info : PsKernelSimpleMutualAppInfo)
+    (hRun : psKernelSimpleMutualAppInfo targets shapes levels params expr = some info) :
+    PsKernelMutualConstructorApplicationValid targets shapes levels params expr info := by
+  cases hFn : psKernelExprGetAppFn expr with
+  | const name foundLevels =>
+      cases hLevels : psKernelLevelListEq foundLevels levels with
+      | false =>
+          simp [psKernelSimpleMutualAppInfo, hFn, hLevels] at hRun
+      | true =>
+          cases hTarget : psKernelSimpleMutualTargetIndex name shapes with
+          | none =>
+              simp [psKernelSimpleMutualAppInfo, hFn, hLevels, hTarget] at hRun
+          | some target =>
+              cases hShape : psKernelMutualTypeShapeListGet shapes target with
+              | none =>
+                  simp [psKernelSimpleMutualAppInfo, hFn, hLevels, hTarget, hShape] at hRun
+              | some shape =>
+                  cases hParams : psKernelConsumeSimpleResultParams params
+                      (psKernelExprGetAppArgs expr) with
+                  | none =>
+                      simp [psKernelSimpleMutualAppInfo, hFn, hLevels, hTarget,
+                        hShape, hParams] at hRun
+                  | some indices =>
+                      cases hLength : Nat.beq (psKernelExprListLength indices)
+                          (psKernelOpenBinderListLength shape.indices) with
+                      | false =>
+                          simp [psKernelSimpleMutualAppInfo, hFn, hLevels, hTarget,
+                            hShape, hParams, hLength] at hRun
+                      | true =>
+                          cases hExcluded : psKernelSimpleMutualIndicesContainTarget
+                              targets indices with
+                          | true =>
+                              simp [psKernelSimpleMutualAppInfo, hFn, hLevels, hTarget,
+                                hShape, hParams, hLength, hExcluded] at hRun
+                          | false =>
+                              have hInfo : PsKernelSimpleMutualAppInfo.mk target indices = info := by
+                                simpa [psKernelSimpleMutualAppInfo, hFn, hLevels, hTarget,
+                                  hShape, hParams, hLength, hExcluded] using hRun
+                              cases hInfo
+                              obtain ⟨selected, hSelected, hCanonical⟩ :=
+                                psKernelSimpleMutualTargetIndex_refines hString name shapes target hTarget
+                              have hShapeEq : selected = shape := Option.some.inj
+                                (Eq.trans hSelected.symm hShape)
+                              subst selected
+                              have hLevelsEq := psKernelLevelListEq_sound_of_string_law
+                                hString foundLevels levels hLevels
+                              refine ⟨shape, hShape, ?_,
+                                psKernelConsumeSimpleResultParams_success_refines_prefix
+                                  params (psKernelExprGetAppArgs expr) indices hParams,
+                                by simpa using hLength, ?_⟩
+                              · simpa [hCanonical, hLevelsEq] using hFn
+                              · intro member hMember index hIndex
+                                exact psKernelSimpleMutualIndicesContainTarget_false_refines_absence
+                                  hReflexive targets member hMember indices hExcluded index hIndex
+  | _ =>
+      simp [psKernelSimpleMutualAppInfo, hFn] at hRun

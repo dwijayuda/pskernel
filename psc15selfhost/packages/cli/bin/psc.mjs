@@ -27,7 +27,7 @@ function option(args, name) {
 
 function usage() {
   return [
-    "ProofScript self-host CLI",
+    "PSCV compiler CLI",
     "",
     "usage:",
     "  psc bootstrap",
@@ -42,7 +42,8 @@ function usage() {
     "  psc fixed-point",
     "",
     "defaults:",
-    `  compiler: ${defaultCompiler}`,
+    "  build: native checked compiler (prepare with npm run build:hosted)",
+    `  legacy translation/selfhost compiler: ${defaultCompiler}`,
     `  workspace: ${defaultWorkspace}`,
     `  next generation: ${defaultGeneration}`,
   ].join("\n");

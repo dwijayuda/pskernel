@@ -1798,6 +1798,18 @@
         37718501397,
         37718501361
       ]
+    },
+    "hostedPolicyCheckpoint": {
+      "commit": "4c965eee7843163f24cb51b52651f7e4a64e8009",
+      "mainRun": 37763975497,
+      "mainJob": 113266957441,
+      "conclusion": "success",
+      "rustRun": 37763975306,
+      "rustJob": 113266956747,
+      "rustConclusion": "success",
+      "scope": "Hosted execution policy and unchanged mandatory compiler semantic, backend, production, archive and isolation gates. Historical PSC1/self-application checks were explicitly skipped.",
+      "proofImplication": "none",
+      "subsequentDefaultBuildRouting": "implementation-added-cloud-validation-pending"
     }
   }
 }

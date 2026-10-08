@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
-import { buildChecked, defaultCheckedSeed, selectCheckedBuildProducts } from './checked-build.mjs';
+import { buildChecked, defaultCheckedSeed, selectCheckedBuildProducts, selectCheckedCompiler } from './checked-build.mjs';
 import { closedJsRepresentationProfile, uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
@@ -17,6 +17,27 @@ import { verifyObservedBuildArchive } from './observed-build-archive.mjs';
 
 const seed = process.env.PSC2_CHECKED_SEED_BIN ?? defaultCheckedSeed;
 const native = existsSync(seed);
+const defaultNative = existsSync(defaultCheckedSeed);
+
+test('hosted compiler selection is native by default and preserves explicit implementations', () => {
+  const selection = selectCheckedCompiler();
+  assert.deepEqual(selection, { engine: 'native-seed', path: defaultCheckedSeed });
+  assert.equal(Object.isFrozen(selection), true);
+  assert.deepEqual(selectCheckedCompiler({ compilerPath: './compiler.mjs' }),
+    { engine: 'generated-js', path: path.resolve('compiler.mjs') });
+  assert.deepEqual(selectCheckedCompiler({ seedPath: './compiler-native' }),
+    { engine: 'native-seed', path: path.resolve('compiler-native') });
+  for (const value of ['', null, false, 0, {}]) {
+    assert.throws(() => selectCheckedCompiler({ compilerPath: value }), /COMPILER_PATH/);
+    assert.throws(() => selectCheckedCompiler({ seedPath: value }), /COMPILER_PATH/);
+  }
+  assert.throws(() => selectCheckedCompiler({ compilerPath: 'a', seedPath: 'b' }), /SELECT_ONE_COMPILER/);
+});
+
+test('ambiguous compiler implementations reject before source reading', async () => {
+  await assert.rejects(buildChecked({ entryPath: '/does-not-exist', checkOnly: true,
+    compilerPath: 'generated.mjs', seedPath: 'native' }), /SELECT_ONE_COMPILER/);
+});
 
 function passDefinitions(graph) {
   return graph.entries
@@ -157,14 +178,14 @@ for (const [kind, source] of [
   ['lean', 'def answer : Nat := 42\n'],
   ['ps', 'const answer: Nat := { 42 }\n'],
 ]) {
-  test(`real ${kind} frontend -> WASM Lean kernel -> tsc -> executed JavaScript`, { skip: !native }, async () => {
+  test(`real ${kind} frontend -> WASM Lean kernel -> tsc -> executed JavaScript (${kind === 'lean' ? 'default' : 'explicit'} compiler)`, { skip: kind === 'lean' ? !defaultNative : !native }, async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'psc2-checked-real-'));
     try {
       await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
       const entryPath = path.join(dir, 'Main.' + kind);
       await writeFile(entryPath, source);
       const outputPath = path.join(dir, 'out.js');
-      const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+      const receipt = await buildChecked({ entryPath, outputPath, ...(kind === 'lean' ? {} : { seedPath: seed }) });
       const module = await import(pathToFileURL(outputPath).href);
       assert.equal(module.answer, 42n);
       assert.equal(receipt.provider.profile, 'lean4.34-core');
@@ -470,7 +491,7 @@ for (const [backend, representation, source, linked = false] of [
   ['javascript', uniformJsRepresentationProfile, 'def identity (A : Type) (value : A) : A := value\n', true],
   ['wasm', closedJsRepresentationProfile, 'def identity (value : Nat) : Nat := value\n'],
 ]) test(`actual native source -> checked ${backend}/${representation}${linked ? '/linked' : ''} -> shared published bundle`,
-  { skip: !native }, async () => {
+  { skip: linked ? !native : !defaultNative }, async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'psc-native-direct-products-'));
     const previousCli = process.env.PSC_TYPESCRIPT_CLI;
     try {
@@ -478,7 +499,7 @@ for (const [backend, representation, source, linked = false] of [
       await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
       const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, backend === 'wasm' ? 'out.wasm' : 'out.js');
       await writeFile(entryPath, source);
-      const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'lean434',
+      const receipt = await buildChecked({ entryPath, outputPath, ...(linked ? { seedPath: seed } : {}), kernel: 'lean434',
         backend, archiveResourceLimits: nativeArchiveLimits, javaScriptRepresentation: representation, products: backend === 'wasm' ? 'executable' : linked ? 'linked' : 'all' });
       assert.equal(receipt.compiler.engine, 'native-seed');
       assert.equal(receipt.archiveResourceLimits.maxTotalBytes, nativeArchiveLimits.maxTotalBytes);

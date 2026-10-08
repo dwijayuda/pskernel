@@ -38,7 +38,23 @@ export function checkedCompilerPath(kernel = defaultCheckedKernel) {
   checkedKernelDescriptor(kernel);
   return path.join(root, 'dist/checked', kernel, 'bootstrap/packages/compiler/index.js');
 }
+// Historical generated compiler location, retained for explicit --compiler use.
 export const defaultCheckedCompiler = checkedCompilerPath();
+
+/** Choose the implementation independently of the kernel provider and backend.
+ * A missing native compiler fails; it never selects generated or unchecked code.
+ */
+export function selectCheckedCompiler({ compilerPath, seedPath } = {}) {
+  if (compilerPath !== undefined && seedPath !== undefined)
+    throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
+  for (const value of [compilerPath, seedPath]) {
+    if (value !== undefined && (typeof value !== 'string' || value.length === 0))
+      throw new Error('PSC2_CHECKED_COMPILER_PATH');
+  }
+  return Object.freeze(compilerPath !== undefined
+    ? { engine: 'generated-js', path: path.resolve(compilerPath) }
+    : { engine: 'native-seed', path: path.resolve(seedPath ?? defaultCheckedSeed) });
+}
 
 /** Select before loading source/compiler bytes. Backend and product requests
  * cannot be inferred from an output suffix or silently replaced by another lane.
@@ -92,7 +108,7 @@ export async function buildChecked({
     ? assertProviderSecurity(dualCheck, securityProfile)
     : undefined;
   if (dualCheck) checkedKernelDescriptor(dualCheck);
-  if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
+  const selectedCompiler = selectCheckedCompiler({ compilerPath, seedPath });
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
   if (jsAbiPolicyPath !== undefined && !['typescript', 'javascript'].includes(selected.backend)) throw new Error('PSC2_CHECKED_JS_ABI_TARGET');
   if (wasmCanonicalSelectionPath !== undefined && selected.backend !== 'wasm') throw new Error('PSC2_CHECKED_WASM_EXPORT_TARGET');
@@ -146,8 +162,8 @@ export async function buildChecked({
     return checked.result;
   };
 
-  if (seedPath) {
-    const binary = path.resolve(seedPath);
+  if (selectedCompiler.engine === 'native-seed') {
+    const binary = selectedCompiler.path;
     compilerBytes = await readFile(binary);
     compilerIdentity = { engine: 'native-seed', sha256: digest(compilerBytes) };
     const result = await runCheckedSeedSession({
@@ -185,7 +201,7 @@ export async function buildChecked({
     seedResources = result.resourceObservation;
     seedProductProtocol = result.productProtocol;
   } else {
-    const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
+    const file = selectedCompiler.path;
     compilerBytes = await readFile(file);
     compilerIdentity = { engine: 'generated-js', sha256: digest(compilerBytes) };
     const compiler = await import(pathToFileURL(file).href);
@@ -432,7 +448,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json] [--wasm-exports selection.json] [--backend typescript|javascript|wasm|rust] [--products source|executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--archive-max-bytes n] [--archive-max-total-bytes n]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json] [--wasm-exports selection.json] [--backend typescript|javascript|wasm|rust] [--products source|executable|metadata|declarations|source-map|declaration-map|linked|all] [--js-representation closed|uniform] [--archive-max-bytes n] [--archive-max-total-bytes n]');
   }
   const receipt = await buildChecked(options);
   console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));

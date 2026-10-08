@@ -239,11 +239,11 @@ jobs:
         working-directory: psc15selfhost
         run: npm run check:portable-selfhost-contract
 
-      - name: Build checked Lean provider integration
+      - name: Build hosted compiler and checked provider integration
         working-directory: psc15selfhost/lean-checked
         run: |
+          npm --prefix .. run build:psc
           lake build \
-            psc2_lean_checked_seed \
             psc2_lean_kernel_provider \
             psc2_lean_kernel_provider_tests
 

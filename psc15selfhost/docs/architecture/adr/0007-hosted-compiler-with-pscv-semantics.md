@@ -30,6 +30,15 @@ Historical specifications, profiles, scripts and evidence keep their original
 meaning and exact identities. No historical success is silently applied to a
 changed closure.
 
+Normal `npm run build`, `build:auto` and `build:psc` select
+`build:hosted`: Lake builds the native CLI and checked compiler under the pinned
+host. `psc build` and `buildChecked()` default to that native checked compiler.
+Explicit `--seed` and `--compiler` retain their separate implementations; a missing
+native executable fails without falling back to generated or unchecked code.
+Kernel selection remains independent. Historical generated compiler builds remain
+available as `build:psc:legacy-selfhost`, `build:auto:legacy-selfhost` and the
+explicit Lean replay command.
+
 `npm run check` selects the hosted checks. Legacy checks remain explicitly
 available through `check:legacy-selfhost`, `check:legacy-compiler-sources` and
 the existing self-host commands. The main cloud workflow's manual

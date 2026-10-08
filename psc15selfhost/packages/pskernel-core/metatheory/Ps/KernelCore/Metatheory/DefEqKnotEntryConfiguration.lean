@@ -71,7 +71,7 @@ theorem psKernelIsDefEqWithFuel_succ_configuration_sound_of_miss
       · have hDifferent :
             psKernelExprEq left right = false := by
           cases hBool : psKernelExprEq left right with
-          | false => exact hBool
+          | false => rfl
           | true => exact False.elim (hSame hBool)
         by_cases hCached :
             psKernelExprPairSetContains
@@ -96,7 +96,7 @@ theorem psKernelIsDefEqWithFuel_succ_configuration_sound_of_miss
             cases hBool :
                 psKernelExprPairSetContains
                   state.success left right with
-            | false => exact hBool
+            | false => rfl
             | true => exact False.elim (hCached hBool)
           have hNextConfig :=
             psKernelCheckerContextEnterRecDepth_preserves_configuration

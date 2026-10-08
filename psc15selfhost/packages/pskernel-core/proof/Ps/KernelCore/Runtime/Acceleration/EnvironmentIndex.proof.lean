@@ -273,23 +273,19 @@ theorem psKernelEnvironmentIndexFind_insert_has_head
           (psKernelConstantInfoName info)
           (psKernelEnvironmentIndexFindWorker
             16
-            (PsKernelEnvironmentIndex.bucket constants)
+            (psKernelEnvironmentIndexBuild
+              (psKernelEnvironmentIndexRemoveName
+                (psKernelConstantInfoName info)
+                constants))
             (psKernelEnvironmentNameHash
               (psKernelConstantInfoName info))),
         ?_⟩
       simpa [psKernelEnvironmentIndexInsert] using
-        psKernelEnvironmentIndexFind_setWorker_same_name
-          (PsKernelEnvironmentIndex.bucket constants)
-          (psKernelConstantInfoName info)
-          (List.cons
-            info
-            (psKernelEnvironmentIndexRemoveName
-              (psKernelConstantInfoName info)
-              (psKernelEnvironmentIndexFindWorker
-                16
-                (PsKernelEnvironmentIndex.bucket constants)
-                (psKernelEnvironmentNameHash
-                  (psKernelConstantInfoName info)))))
+        psKernelEnvironmentIndexFind_build_cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            (psKernelConstantInfoName info)
+            constants)
   | branch left right =>
       refine ⟨
         psKernelEnvironmentIndexRemoveName
@@ -627,3 +623,65 @@ theorem psKernelEnvironmentIndexBuild_refines_authoritative
                 query
             ]
             exact ih query
+
+
+/-
+Regression for the public root-bucket index representation.  A root bucket
+is readable by psKernelEnvironmentIndexFind, so insertion must retain all
+existing authoritative name lookups, including for differently-named
+declarations.  Previously the positive-fuel worker discarded this bucket.
+-/
+theorem psKernelEnvironmentIndexInsert_bucket_refines_authoritative
+    (constants : List PsKernelConstantInfo)
+    (info : PsKernelConstantInfo)
+    (query : PsKernelName) :
+    psKernelFindConstantInList
+        query
+        (psKernelEnvironmentIndexFind
+          (psKernelEnvironmentIndexInsert
+            (PsKernelEnvironmentIndex.bucket constants)
+            info)
+          query) =
+      psKernelFindConstantInList
+        query
+        (List.cons info constants) := by
+  have hBuild :=
+    psKernelEnvironmentIndexBuild_refines_authoritative
+      (List.cons
+        info
+        (psKernelEnvironmentIndexRemoveName
+          (psKernelConstantInfoName info)
+          constants))
+      query
+  calc
+    psKernelFindConstantInList
+        query
+        (psKernelEnvironmentIndexFind
+          (psKernelEnvironmentIndexInsert
+            (PsKernelEnvironmentIndex.bucket constants)
+            info)
+          query) =
+      psKernelFindConstantInList
+        query
+        (List.cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            (psKernelConstantInfoName info)
+            constants)) := by
+          simpa [psKernelEnvironmentIndexInsert] using hBuild
+    _ = psKernelFindConstantInList
+          query
+          (List.cons info constants) := by
+      cases hSame :
+          psKernelNameEq
+            (psKernelConstantInfoName info)
+            query with
+      | true =>
+          simp [psKernelFindConstantInList, hSame]
+      | false =>
+          simpa [psKernelFindConstantInList, hSame] using
+            psKernelEnvironmentIndexRemoveName_find_other
+              constants
+              (psKernelConstantInfoName info)
+              query
+              hSame

@@ -62,6 +62,26 @@ jobs:
             echo "ERROR: incomplete compiler falsely accepted a build" >&2
             exit 1
           fi
+      - name: Stage native Linux npm package and check minimal runtime path
+        working-directory: pscv0/v6
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary=".lake/build/bin/pscv_v6_dev"
+          test -x "$binary"
+          mkdir -p release/npm/linux-x64/bin
+          cp "$binary" release/npm/linux-x64/bin/pscv-v6-dev
+          chmod 755 release/npm/linux-x64/bin/pscv-v6-dev
+          echo "Native executable bytes: $(wc -c < release/npm/linux-x64/bin/pscv-v6-dev)"
+          sha256sum release/npm/linux-x64/bin/pscv-v6-dev
+          ldd release/npm/linux-x64/bin/pscv-v6-dev || true
+          env -i PATH=/usr/bin:/bin "$(pwd)/release/npm/linux-x64/bin/pscv-v6-dev" --version
+          (cd release/npm/linux-x64 && npm pack --ignore-scripts --pack-destination "$GITHUB_WORKSPACE")
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pscv-v6-native-linux-x64-development-npm
+          path: "*.tgz"
+          if-no-files-found: error
       - name: Inspect npm source package contents
         working-directory: pscv0/v6
         run: npm run pack:dry

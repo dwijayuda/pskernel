@@ -39,5 +39,18 @@
     "hostile-host isolation and full resource accounting",
     "linked-module IR invariant replay and validator soundness"
   ],
-  "releaseAccepted": false
+  "releaseAccepted": false,
+  "producerResourcePolicy": {
+    "api": "buildChecked({ archiveResourceLimits })",
+    "cli": [
+      "--archive-max-bytes <canonical nonnegative decimal>",
+      "--archive-max-total-bytes <canonical nonnegative decimal>"
+    ],
+    "defaults": "Existing limits are unchanged; no automatic growth from observed input sizes or compiler/provider choice.",
+    "snapshot": "Only own integer data properties are accepted and frozen before source/compiler loading.",
+    "record": "The receipt records selected producer limits descriptively; an archive verifier always applies its independently selected consumer limits.",
+    "preflight": "Count and aggregate/per-artifact byte checks precede any base64 conversion. Exact canonical archive byte size is preflighted from the empty-data skeleton plus base64 lengths.",
+    "exhaustion": "Typed resource, observed, limit and responsible ArtifactId where applicable; no captured input is omitted and no partial receipt is published.",
+    "nativeIntegration": "The cloud two-native-binary integration explicitly selects 320 MiB aggregate and 448 MiB encoded archive bounds, retaining the 128 MiB per-artifact default. This is resource policy, not weakened semantic or self-host acceptance."
+  }
 }

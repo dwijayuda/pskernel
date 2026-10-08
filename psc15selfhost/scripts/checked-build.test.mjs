@@ -431,6 +431,10 @@ test('a malformed direct stage does not publish executable or receipt files', { 
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
+// Independent producer/consumer budget for two separately captured native
+// compiler/provider binaries. Per-artifact and count bounds remain defaults.
+const nativeArchiveLimits = Object.freeze({ maxTotalBytes: 320 * 1024 * 1024, maxArchiveBytes: 448 * 1024 * 1024 });
+
 for (const [backend, representation, source] of [
   ['javascript', closedJsRepresentationProfile, 'def answer : Nat := 42\n'],
   ['javascript', uniformJsRepresentationProfile, 'def identity (A : Type) (value : A) : A := value\n'],
@@ -445,13 +449,14 @@ for (const [backend, representation, source] of [
       const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, backend === 'wasm' ? 'out.wasm' : 'out.js');
       await writeFile(entryPath, source);
       const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'lean434',
-        backend, javaScriptRepresentation: representation, products: backend === 'wasm' ? 'executable' : 'all' });
+        backend, archiveResourceLimits: nativeArchiveLimits, javaScriptRepresentation: representation, products: backend === 'wasm' ? 'executable' : 'all' });
       assert.equal(receipt.compiler.engine, 'native-seed');
+      assert.equal(receipt.archiveResourceLimits.maxTotalBytes, nativeArchiveLimits.maxTotalBytes);
       assert.equal(receipt.typeScriptToolInputs, undefined);
       assert.equal(receipt.seedResources.observed.frames, backend === 'wasm' ? 2 : 3);
       const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json')));
       const replay = await verifyObservedBuildArchive(await readFile(path.join(dir, 'out.build-archive.json')),
-        { expectedGraphId: receipt.buildGraph, allowedAssumptions: allowedAssumptionsFromGraph(graph) });
+        { expectedGraphId: receipt.buildGraph, allowedAssumptions: allowedAssumptionsFromGraph(graph), resourceLimits: nativeArchiveLimits });
       assert.equal(replay.kind, 'accepted', replay.reason); assert.equal(replay.semanticClaimsVerified, false);
       if (backend === 'wasm') assert.equal(WebAssembly.validate(await readFile(outputPath)), true);
       else {
@@ -469,3 +474,9 @@ for (const [backend, representation, source] of [
       await rm(dir, { recursive: true, force: true });
     }
   });
+
+test('invalid archive policy rejects before loading source or executing a compiler', async () => {
+  for (const archiveResourceLimits of [null, [], { maxTotalBytes: -1 }, { maxTotalBytes: Infinity }, { unknown: 1 }])
+    await assert.rejects(buildChecked({ entryPath: 'missing-source', outputPath: 'out.js',
+      backend: 'javascript', archiveResourceLimits }), /PSC_BUILD_ARCHIVE_LIMIT_POLICY/);
+});

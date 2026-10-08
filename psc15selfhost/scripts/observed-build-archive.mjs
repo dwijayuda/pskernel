@@ -23,11 +23,23 @@ const contract = 'psc-observed-build-archive/1';
 const defaults = Object.freeze({ maxArchiveBytes: 256 * 1024 * 1024, maxArtifactBytes: 128 * 1024 * 1024,
   maxTotalBytes: 192 * 1024 * 1024, maxArtifacts: 4096, maxGraphBytes: 16 * 1024 * 1024 });
 const fail = code => { throw new Error('PSC_BUILD_ARCHIVE_' + code); };
-function limits(values = {}) {
-  if (Object.keys(values).some(key => !Object.hasOwn(defaults, key))) fail('LIMIT_POLICY');
-  const bound = { ...defaults, ...values };
-  if (Object.values(bound).some(value => !Number.isSafeInteger(value) || value < 0)) fail('LIMIT_POLICY');
-  return bound;
+export function observedBuildArchiveLimits(values = {}) {
+  if (!values || typeof values !== 'object' || Array.isArray(values)) fail('LIMIT_POLICY');
+  const bound = { ...defaults };
+  for (const key of Reflect.ownKeys(values)) {
+    const field = Object.getOwnPropertyDescriptor(values, key);
+    if (!Object.hasOwn(defaults, key) || !field || !Object.hasOwn(field, 'value') ||
+        !Number.isSafeInteger(field.value) || field.value < 0) fail('LIMIT_POLICY');
+    bound[key] = field.value;
+  }
+  return Object.freeze(bound);
+}
+function exhausted(resource, limit, observed, artifact) {
+  throw Object.assign(new Error('PSC_BUILD_ARCHIVE_RESOURCE_EXHAUSTED: ' +
+    resource + ' observed=' + observed + ' limit=' + limit), {
+    kind: 'resourceExhausted', resource, limit, observed,
+    ...(artifact ? { artifact } : {}),
+  });
 }
 function exact(value, fields) {
   if (!value || typeof value !== 'object' || Array.isArray(value) ||
@@ -86,23 +98,34 @@ function graphValue(bytes, bound) {
  * This is data packaging, never a claim that hidden tool inputs were discovered.
  */
 export function packObservedBuildArchive(build, resourceLimits) {
-  const bound = limits(resourceLimits);
+  const bound = observedBuildArchiveLimits(resourceLimits);
   if (!(build.bytes instanceof Uint8Array) || build.bytes.byteLength > bound.maxGraphBytes) fail('RESOURCE_EXHAUSTED');
   verifyArtifact(build.bytes, build.identity);
   if (build.identity.domain !== 'build-graph' || build.identity.contract !== 'psc-observed-build-graph/1') fail('GRAPH_ID');
-  const graph = graphValue(build.bytes, bound), items = new Map(); let total = 0;
+  const graph = graphValue(build.bytes, bound), inputs = new Map(); let total = 0;
+  // Budget the entire exact snapshot before allocating any base64 payloads.
   for (const id of [build.identity, ...graph.entries.map(entry => entry.identity)]) {
     const key = identityKey(id), input = key === artifactKey(build.identity) ? build.bytes : build.artifacts.get(key);
-    if (items.has(key)) fail('DUPLICATE_GRAPH_ENTRY');
+    if (inputs.has(key)) fail('DUPLICATE_GRAPH_ENTRY');
     if (!(input instanceof Uint8Array)) fail('MISSING_ARTIFACT');
-    if (input.byteLength > bound.maxArtifactBytes || total + input.byteLength > bound.maxTotalBytes) fail('RESOURCE_EXHAUSTED');
-    const bytes = Buffer.from(input); verifyArtifact(bytes, id); total += bytes.length;
-    items.set(key, { identity: id, data: bytes.toString('base64') });
+    if (input.byteLength > bound.maxArtifactBytes)
+      exhausted('maxArtifactBytes', bound.maxArtifactBytes, input.byteLength, id);
+    if (input.byteLength > bound.maxTotalBytes - total)
+      exhausted('maxTotalBytes', bound.maxTotalBytes, total + input.byteLength, id);
+    verifyArtifact(input, id); total += input.byteLength;
+    inputs.set(key, { identity: id, bytes: input });
   }
-  if (items.size > bound.maxArtifacts) fail('RESOURCE_EXHAUSTED');
+  if (inputs.size > bound.maxArtifacts) exhausted('maxArtifacts', bound.maxArtifacts, inputs.size);
+  const ordered = [...inputs].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([, item]) => item);
+  const skeleton = { contract, graphId: build.identity,
+    artifacts: ordered.map(item => ({ identity: item.identity, data: '' })) };
+  const encodedBytes = canonicalBytes(skeleton, { maxBytes: bound.maxArchiveBytes }).byteLength +
+    ordered.reduce((sum, item) => sum + Math.ceil(item.bytes.byteLength / 3) * 4, 0);
+  if (encodedBytes > bound.maxArchiveBytes)
+    exhausted('maxArchiveBytes', bound.maxArchiveBytes, encodedBytes);
   const bytes = canonicalBytes({ contract, graphId: build.identity,
-    artifacts: [...items].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([, item]) => item) },
-  { maxBytes: bound.maxArchiveBytes });
+    artifacts: ordered.map(item => ({ identity: item.identity, data: Buffer.from(item.bytes).toString('base64') })) },
+    { maxBytes: bound.maxArchiveBytes });
   return { bytes, identity: artifactId(bytes, 'observed-build-archive', contract) };
 }
 
@@ -113,7 +136,7 @@ export function packObservedBuildArchive(build, resourceLimits) {
  */
 export async function verifyObservedBuildArchive(input, { expectedGraphId, allowedAssumptions, resourceLimits, irValidation, irLinkValidation } = {}) {
   try {
-    const bound = limits(resourceLimits), expectedKey = identityKey(expectedGraphId);
+    const bound = observedBuildArchiveLimits(resourceLimits), expectedKey = identityKey(expectedGraphId);
     if (!Array.isArray(allowedAssumptions) || allowedAssumptions.some(id => typeof id !== 'string' || !id) ||
         new Set(allowedAssumptions).size !== allowedAssumptions.length) fail('ASSUMPTION_POLICY');
     if (!(input instanceof Uint8Array) || input.byteLength > bound.maxArchiveBytes) fail('RESOURCE_EXHAUSTED');
@@ -397,6 +420,7 @@ export async function verifyObservedBuildArchive(input, { expectedGraphId, allow
       preservationVerified: false, authority: 'audit-record-only', releaseAccepted: false };
   } catch (error) {
     return { kind: error.kind === 'resourceExhausted' || /EXHAUSTED/u.test(error.message) ? 'resourceExhausted' : 'rejectedInvalid',
-      reason: error.message, authority: 'audit-record-only', releaseAccepted: false };
+      reason: error.message, ...(error.resource ? { resource: error.resource, limit: error.limit, observed: error.observed } : {}),
+      authority: 'audit-record-only', releaseAccepted: false };
   }
 }

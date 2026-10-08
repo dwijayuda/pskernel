@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { artifactKey, canonicalArtifact, canonicalBytes } from './artifact-evidence.mjs';
 import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
-import { packObservedBuildArchive, verifyObservedBuildArchive } from './observed-build-archive.mjs';
+import { packObservedBuildArchive, verifyObservedBuildArchive, observedBuildArchiveLimits } from './observed-build-archive.mjs';
 
 function fixture() {
   const built = createCheckedBuildGraph({ sourceKind: 'lean', sources: ['def seven : Nat := 7'],
@@ -77,4 +77,34 @@ test('independently pinned graphs still reject missing structured dependency ref
   archive.artifacts.sort((a, b) => artifactKey(a.identity).localeCompare(artifactKey(b.identity)));
   const result = await verifyObservedBuildArchive(canonicalBytes(archive), { ...f.policy, expectedGraphId: newGraph.identity });
   assert.match(result.reason, /ACTION_ID/);
+});
+
+test('archive resource policy is explicit data and preflight retains exact historical bytes', async () => {
+  const { built, policy } = fixture();
+  const defaults = observedBuildArchiveLimits();
+  assert.equal(defaults.maxTotalBytes, 192 * 1024 * 1024);
+  assert.equal(defaults.maxArtifactBytes, 128 * 1024 * 1024);
+  assert.equal(defaults.maxArchiveBytes, 256 * 1024 * 1024);
+  let accessed = false;
+  const getter = Object.defineProperty({}, 'maxTotalBytes', { enumerable: true, get() { accessed = true; return 1; } });
+  for (const invalid of [null, [], getter, { unknown: 1 }, { maxTotalBytes: -1 }, { maxArtifacts: 1.5 }, { [Symbol()]: 1 }])
+    assert.throws(() => observedBuildArchiveLimits(invalid), /LIMIT_POLICY/);
+  assert.equal(accessed, false);
+  const ids = [built.identity, ...built.graph.entries.map(entry => entry.identity)];
+  const total = ids.reduce((sum, id) => sum + id.byteLength, 0);
+  const archive = packObservedBuildArchive(built, { maxTotalBytes: total });
+  const expected = canonicalBytes({ contract: 'psc-observed-build-archive/1', graphId: built.identity,
+    artifacts: ids.map(identity => ({ identity, data: (artifactKey(identity) === artifactKey(built.identity) ?
+      built.bytes : built.artifacts.get(artifactKey(identity))).toString('base64') }))
+      .sort((a, b) => artifactKey(a.identity) < artifactKey(b.identity) ? -1 : 1) });
+  assert.deepEqual(archive.bytes, expected);
+  assert.throws(() => packObservedBuildArchive(built, { maxTotalBytes: total - 1 }),
+    error => error.kind === 'resourceExhausted' && error.resource === 'maxTotalBytes' &&
+      error.limit === total - 1 && error.observed === total && !!error.artifact);
+  assert.throws(() => packObservedBuildArchive(built, { maxArchiveBytes: archive.bytes.length - 1 }),
+    error => error.kind === 'resourceExhausted' && error.resource === 'maxArchiveBytes' &&
+      error.observed === archive.bytes.length);
+  assert.deepEqual(packObservedBuildArchive(built, { maxArchiveBytes: archive.bytes.length }).bytes, archive.bytes);
+  assert.equal((await verifyObservedBuildArchive(archive.bytes, { ...policy, resourceLimits: { maxTotalBytes: total - 1 } })).kind,
+    'resourceExhausted');
 });

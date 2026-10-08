@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
 import { createCheckedCompilerService } from './compiler-checked-service.mjs';
 import { createCheckedBuildGraph, readCheckedBuildHostSources } from './checked-build-evidence.mjs';
-import { packObservedBuildArchive } from './observed-build-archive.mjs';
+import { packObservedBuildArchive, observedBuildArchiveLimits } from './observed-build-archive.mjs';
 import { createEvidenceEnvelope } from './evidence-envelope.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkAdmissionsWithDual } from './checked-kernel-dual.mjs';
@@ -71,12 +71,14 @@ export async function buildChecked({
   securityProfile = defaultProviderSecurityProfile,
   sourceResourceLimits,
   seedResourceLimits,
+  archiveResourceLimits,
   jsAbiPolicyPath,
   backend,
   products,
   javaScriptRepresentation,
 }) {
   const selected = selectCheckedBuildProducts({ backend, products, javaScriptRepresentation });
+  const archiveLimits = observedBuildArchiveLimits(archiveResourceLimits);
   const kernelDescriptor = checkedKernelDescriptor(kernel);
   const selectedProviderSecurity = assertProviderSecurity(kernel, securityProfile);
   const secondaryProviderSecurity = dualCheck
@@ -321,7 +323,8 @@ export async function buildChecked({
     }
     receipt.typeScriptToolInputs = evidence.typeScriptToolInputs;
     receipt.providerInputs = evidence.providerInputs;
-    const archive = packObservedBuildArchive(evidence);
+    const archive = packObservedBuildArchive(evidence, archiveLimits);
+    receipt.archiveResourceLimits = archiveLimits;
     receipt.buildArchive = archive.identity;
     if (!evidence.executableArtifact) throw new Error('PSC2_CHECKED_EXECUTABLE_ARTIFACT_MISSING');
     const envelope = createEvidenceEnvelope({
@@ -368,6 +371,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   while (args.length) {
     const flag = args.shift();
     if (flag === '--check') options.checkOnly = true;
+    else if (flag === '--archive-max-bytes' || flag === '--archive-max-total-bytes') {
+      const value = args.shift();
+      if (!/^(?:0|[1-9][0-9]*)(?![\s\S])/u.test(value ?? '') || !Number.isSafeInteger(Number(value)))
+        throw new Error('PSC_BUILD_ARCHIVE_LIMIT_POLICY');
+      options.archiveResourceLimits ??= {};
+      options.archiveResourceLimits[flag === '--archive-max-bytes' ? 'maxArchiveBytes' : 'maxTotalBytes'] = Number(value);
+    }
     else if (['--out', '--compiler', '--seed', '--kernel', '--dual-check', '--security-profile', '--js-abi-policy', '--backend', '--products', '--js-representation'].includes(flag)) {
       const value = args.shift();
       if (!value || value.startsWith('--')) throw new Error(`Missing value for ${flag}`);
@@ -376,7 +386,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json] [--backend typescript|javascript|wasm] [--products executable|metadata|declarations|source-map|all] [--js-representation closed|uniform]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core|pskernel-core.old3] [--dual-check pskernel-core|lean434|lean434-wasm] [--security-profile development-v1|compatibility-v1|paranoid-v1] [--js-abi-policy policy.json] [--backend typescript|javascript|wasm] [--products executable|metadata|declarations|source-map|all] [--js-representation closed|uniform] [--archive-max-bytes n] [--archive-max-total-bytes n]');
   }
   const receipt = await buildChecked(options);
   console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));

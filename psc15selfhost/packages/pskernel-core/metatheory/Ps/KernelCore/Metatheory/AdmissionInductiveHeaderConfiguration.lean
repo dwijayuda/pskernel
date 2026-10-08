@@ -179,3 +179,53 @@ theorem psKernelAddSimpleInductive_success_header_refines
                                       psKernelMkCheckerSession,
                                       psKernelCheckerContextEmpty
                                     ] using hReduced.1
+
+
+/-
+Reusable checked-header pipeline for the ordinary, mutual, and nested
+admission workers.  The intermediate checker session preserves its context
+while its state evolves; the Sort-reduction contract must be transported
+through that equality before it is composed with checked typing.
+-/
+theorem psKernelCheckedHeaderSort_configuration_refines
+    (fuel : Nat)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (session checkedSession finalSession : PsKernelCheckerSession)
+    (expr inferredType : PsKernelExpr)
+    (level : PsKernelLevel)
+    (hInitial :
+      PsKernelCheckerConfigurationSound
+        session.context session.state)
+    (hChecked :
+      psKernelSessionCheck fuel session expr =
+        Except.ok (Prod.mk inferredType checkedSession))
+    (hSort :
+      psKernelSessionEnsureSort fuel checkedSession inferredType =
+        Except.ok (Prod.mk level finalSession)) :
+    PsKernelTypingJudgment
+        session.context.environment session.context.localContext
+        expr inferredType ∧
+      PsKernelReductionClosure
+        session.context.environment session.context.localContext
+        inferredType (PsKernelExpr.sort level) ∧
+      PsKernelCheckerConfigurationSound
+        session.context finalSession.state := by
+  have hCheckedSound :=
+    psKernelSessionCheck_concrete_refines_typing
+      fuel hNative hString session checkedSession
+      expr inferredType hInitial hChecked
+  have hContext :=
+    psKernelSessionCheck_success_preserves_context_core
+      fuel session checkedSession expr inferredType hChecked
+  have hNextConfig :
+      PsKernelCheckerConfigurationSound
+        checkedSession.context checkedSession.state := by
+    simpa [hContext] using hCheckedSound.2
+  have hSortSound :=
+    psKernelSessionEnsureSort_concrete_refines_reduction
+      fuel hNative hString checkedSession finalSession
+      inferredType level hNextConfig hSort
+  refine ⟨hCheckedSound.1, ?_, ?_⟩
+  · simpa [hContext] using hSortSound.1
+  · simpa [hContext] using hSortSound.2

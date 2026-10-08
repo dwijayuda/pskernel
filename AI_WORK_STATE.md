@@ -339,3 +339,10 @@ Architectural blockers still remaining:
 - Current candidate: structural index-preservation proofs for mutual constructors within one type and across the mutual type list. Verify its CI before treating the candidate as green.
 - These index theorems are prerequisites rather than complete inductive-admission certificates. Still open are validated constructor/header typing, positivity and recursor semantics, replacement-name provenance across the bundle, ordinary/mutual/nested transaction refinement, final Kernel/API/session refinement composition, semantic audit refresh and reconciliation with `psc2/selfhost-lean-kernel`.
 - Keep `PsKernelNativeReductionSoundLaw` and `PsKernelStringEqSoundLaw` as explicit conditional trusted premises. No `sorry`, axioms, general DefEq transitivity, or weakening of existing acceptance criteria.
+
+## Checked inductive-header checkpoint — 2026-10-08
+- Full proof gates **#674**, **#675**, **#676** and **#678** are green. The mutual constructor-per-type and mutual-type traversal preserve authoritative index refinement; mutual header and recursor insertion folds additionally expose exact reversed declaration-history extensions.
+- Run **#678** at `b70516e9e9a2e1c9f4b1398b14e8891bac5a7848` proves `psKernelAddSimpleInductive_success_header_refines`: successful ordinary admission includes a genuinely checked type header in the original environment and reduction of its inferred type to a Sort, rather than an infer-only typing assumption.
+- Current candidate composes a reusable checked-header/Sort pipeline and the first nested-inductive header refinement. It is not green until its proof CI passes.
+- Still open: full constructor/positivity/recursor semantic refinement, replacement-name provenance and successful final bundle publication for ordinary/mutual/nested inductives, public declaration-API composition, audit reclassification, integration reconciliation and final conformance.
+- Native reduction and StringEq remain explicitly named trusted laws, with no weakening of DefEq or checker invariants.

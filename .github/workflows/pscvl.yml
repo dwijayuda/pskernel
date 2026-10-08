@@ -33,6 +33,7 @@ jobs:
         run: |
           set -euxo pipefail
           lake exe pscvl check examples/normative/pass_minimal.ps
+          lake exe pscvl check examples/normative/pass_strict_binders.ps
           expect_normative_error() {
             local input="$1" expected="$2"
             local output rc

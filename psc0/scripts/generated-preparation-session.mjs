@@ -42,11 +42,20 @@ function diagnosticJson(value) {
   });
 }
 
-function unwrapExcept(value, stage, sourcePath) {
+function unwrapExcept(value, stage, sourcePath, timingsMs) {
   if (value !== null && typeof value === "object") {
     for (const symbol of Object.getOwnPropertySymbols(value)) {
-      if (value[symbol] === "ok") return value.value;
-      if (value[symbol] === "error") {
+      const descriptor = Object.getOwnPropertyDescriptor(value, symbol);
+      if (!Object.hasOwn(descriptor, "value")) {
+        throw new Error("PSC0_PREPARATION_ACCESSOR_FORBIDDEN");
+      }
+      if (descriptor.value === "ok") return value.value;
+      if (descriptor.value === "error") {
+        // Cached parse failures cross the same ownership boundary as successes.
+        // Freeze before diagnostics inspect the graph or a caller can mutate it.
+        const freezeStarted = performance.now();
+        try { freezeCompilerData(value); }
+        finally { timingsMs.freeze += performance.now() - freezeStarted; }
         const error = new Error(
           "PSC0_PREPARATION_" + stage.toUpperCase() + "_FAILED" +
           (sourcePath ? ": " + sourcePath : "") + ": " + diagnosticJson(value.error),
@@ -236,18 +245,18 @@ export function createGeneratedPreparationSession(
           }
         }
         timingsMs.parse += performance.now() - parseStarted;
-        const syntaxModule = unwrapExcept(parsedSource.result, "parse", item.path);
+        const syntaxModule = unwrapExcept(parsedSource.result, "parse", item.path, timingsMs);
         const prepareStarted = performance.now();
         const result = compiler.psCompilerPreparationStepParsed(states[index], syntaxModule);
         timingsMs.prepare += performance.now() - prepareStarted;
-        states.push(unwrapExcept(result, "elaborate", item.path));
+        states.push(unwrapExcept(result, "elaborate", item.path, timingsMs));
         completed = index + 1;
         stats.preparedModules += 1;
       }
       const finishStarted = performance.now();
       const result = compiler.psCompilerPreparationFinish(states[inputs.length]);
       timingsMs.finish += performance.now() - finishStarted;
-      const prepared = unwrapExcept(result, "finish");
+      const prepared = unwrapExcept(result, "finish", undefined, timingsMs);
       const freezeStarted = performance.now();
       freezeCompilerData(prepared);
       timingsMs.freeze += performance.now() - freezeStarted;

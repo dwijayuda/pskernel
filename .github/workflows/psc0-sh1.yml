@@ -2,7 +2,7 @@ name: PSC0 SH1 language qualification
 
 on:
   push:
-    branches: ['psc0/sh1-implementation-v1']
+    branches: ['psc0/sh1-development-gate-v1']
     paths:
       - 'psc0/packages/bootstrap/**'
       - 'psc0/packages/foundation/**'
@@ -25,6 +25,7 @@ on:
       - 'psc0/lake-manifest.json'
       - 'psc0/lean-toolchain'
       - 'psc0/psconfig.json'
+      - 'psc0/selfhost-seed.json'
       - 'psc0/package.json'
       - '.github/workflows/psc0-sh1.yml'
   workflow_dispatch:
@@ -36,6 +37,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: psc0-sh1-${{ github.ref }}
@@ -47,21 +49,36 @@ jobs:
     timeout-minutes: 90
     outputs:
       qualified: ${{ steps.qualify.outcome == 'success' }}
+      node-version: ${{ steps.seed-selection.outputs.node-version }}
     defaults:
       run:
         working-directory: psc0
     steps:
       - uses: actions/checkout@v4
-      - name: Preserve an immutable historical source checkout
-        uses: actions/checkout@v4
+      - name: Select the historical or pinned qualified authoring seed
+        id: seed-selection
+        uses: actions/github-script@v7
+        env:
+          PSC0_SH1_FULL_QUALIFICATION: ${{ (github.event_name == 'workflow_dispatch' && inputs.full) || contains(github.event.head_commit.message, '[sh1-qualify]') }}
         with:
-          ref: 37f63c39d4a07189938046c64152bba25d789450
-          path: historical-source
-          sparse-checkout: psc0
+          script: |
+            const seeds = await import(process.env.GITHUB_WORKSPACE + '/psc0/scripts/sh1-seed-manifest.mjs');
+            const selected = await seeds.readSelectedSeed();
+            for (const [name, value] of Object.entries({
+              mode: selected.mode,
+              'full-qualification': process.env.PSC0_SH1_FULL_QUALIFICATION === 'true',
+              'node-version': selected.nodeVersion,
+              'source-ref': selected.sourceRef,
+              'compiler-path': selected.compilerPath,
+              'cache-key': selected.cacheKey,
+              'cache-directory': selected.cacheDirectory,
+              'artifact-run-id': selected.artifactRunId,
+              'artifact-name': selected.artifactName,
+            })) core.setOutput(name, value);
       - uses: actions/setup-node@v4
         id: node
         with:
-          node-version: '22'
+          node-version: ${{ steps.seed-selection.outputs.node-version }}
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: psc0
@@ -82,37 +99,97 @@ jobs:
           node --check scripts/sh1-check-admissions.mjs
           node --check scripts/generated-preparation-session.mjs
           node --check scripts/original-ir-inventory.mjs
+          node --check scripts/sh1-source-snapshot.mjs
+          node --check scripts/sh1-seed-manifest.mjs
+          node --check scripts/sh1-iterate.mjs
+          node --check scripts/sh1-iteration-conformance.mjs
+          node --check scripts/sh1-foundation-conformance.mjs
           node check-psc1-source.mjs
           node scripts/bootstrap-root-minimality-tests.mjs
+      - name: Restore the selected qualified compiler bytes
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
+        uses: actions/cache/restore@v4
+        id: qualified-cache
+        with:
+          path: psc0/${{ steps.seed-selection.outputs.cache-directory }}
+          key: ${{ steps.seed-selection.outputs.cache-key }}
+      - name: Verify the restored seed before deciding whether recovery is needed
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
+        id: seed-cache-check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const seeds = await import(process.env.GITHUB_WORKSPACE + '/psc0/scripts/sh1-seed-manifest.mjs');
+            const selected = await seeds.readSelectedSeed();
+            const valid = selected.mode === 'qualified' && await seeds.verifyQualifiedSeedCache(
+              process.env.GITHUB_WORKSPACE + '/psc0/' + selected.cacheDirectory, selected.manifest);
+            core.setOutput('qualified-valid', valid);
+            core.setOutput('needs-historical', !valid);
+      - name: Preserve an immutable historical source checkout when recovery needs it
+        if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: 37f63c39d4a07189938046c64152bba25d789450
+          path: historical-source
+          sparse-checkout: psc0
       - name: Restore historical native build
+        if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' }}
         id: historical-lake
         uses: actions/cache/restore@v4
         with:
           path: historical-source/psc0/.lake/build
           key: psc0-sh1-historical-lake-v1-${{ runner.os }}-${{ runner.arch }}-37f63c39d4a07189938046c64152bba25d789450
       - name: Identify the pinned recovery recipe and toolchain
+        if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' }}
         id: seed-identity
         run: node scripts/sh1-qualify.mjs seed-identity --source ../historical-source/psc0
       - name: Restore exact historical seed
+        if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' }}
         id: seed-cache
         uses: actions/cache/restore@v4
         with:
           path: psc0/.selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
           key: psc0-sh1-seed-v1-${{ steps.seed-identity.outputs.identity }}
       - name: Verify seed digests or recover once from the preserved source
+        if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' }}
         run: node scripts/sh1-qualify.mjs recover-seed --source ../historical-source/psc0 --out .selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
       - name: Retain historical native outputs before testing changed source
-        if: ${{ steps.historical-lake.outputs.cache-hit != 'true' }}
+        if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' && steps.historical-lake.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
         with:
           path: historical-source/psc0/.lake/build
           key: ${{ steps.historical-lake.outputs.cache-primary-key }}
       - name: Retain verified seed before testing changed source
-        if: ${{ steps.seed-cache.outputs.cache-hit != 'true' }}
+        if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' && steps.seed-cache.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
         with:
           path: psc0/.selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
           key: ${{ steps.seed-cache.outputs.cache-primary-key }}
+      - name: Retrieve the immutable qualification artifact if it is still retained
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' && steps.seed-cache-check.outputs.qualified-valid != 'true' && steps.seed-selection.outputs.artifact-run-id != '' }}
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.seed-selection.outputs.artifact-name }}
+          run-id: ${{ steps.seed-selection.outputs.artifact-run-id }}
+          github-token: ${{ github.token }}
+          path: qualified-artifact
+      - name: Read the recoverable qualified source revision on a cache miss
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' && steps.seed-cache-check.outputs.qualified-valid != 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.seed-selection.outputs.source-ref }}
+          path: qualified-source
+          sparse-checkout: psc0
+      - name: Verify or recover the selected qualified authoring seed
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
+        run: node scripts/sh1-qualify.mjs recover-qualified-seed --source ../qualified-source/psc0 --artifact ../qualified-artifact/dist/sh1 --out dist/sh1-seed-recovery
+      - name: Retain the verified qualified authoring seed
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' && steps.qualified-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: psc0/${{ steps.seed-selection.outputs.cache-directory }}
+          key: ${{ steps.seed-selection.outputs.cache-key }}
       - name: Restore incremental current compiler build
         id: current-lake
         uses: actions/cache/restore@v4
@@ -124,12 +201,22 @@ jobs:
       - name: Build current native compiler
         id: native
         run: lake build psc1
-      - name: Build and execute the generated current compiler
-        run: node scripts/sh1-qualify.mjs candidate --seed .selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450/index.js --out dist/sh1 --native .lake/build/bin/psc1
+      - name: Run the fast native-seeded generated compiler gate on ordinary pushes
+        if: ${{ steps.seed-selection.outputs.full-qualification != 'true' }}
+        run: node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1
+      - name: Build the selected-seed candidate before full qualification
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
+        run: node scripts/sh1-qualify.mjs candidate --seed ${{ steps.seed-selection.outputs.compiler-path }} --out dist/sh1 --native .lake/build/bin/psc1
       - name: Qualify exact current-source C2/C3 at a promotion checkpoint
         id: qualify
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full) || contains(github.event.head_commit.message, '[sh1-qualify]') }}
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
         run: node scripts/sh1-qualify.mjs fixed-point --out dist/sh1
+      - name: Retain the newly qualified seed without activating a source migration
+        if: ${{ steps.qualify.outputs.promoted-seed-cache-key != '' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.qualify.outputs.promoted-seed-cache-directory }}
+          key: ${{ steps.qualify.outputs.promoted-seed-cache-key }}
       - name: Retain incremental native outputs
         if: ${{ always() && steps.native.outcome != 'skipped' && steps.current-lake.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
@@ -143,7 +230,8 @@ jobs:
           name: psc0-sh1-${{ github.sha }}
           path: |
             psc0/dist/sh1
-            psc0/.selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
+            psc0/.selfhost-seeds
+            psc0/dist/sh1-seed-recovery
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 30
@@ -163,7 +251,7 @@ jobs:
           sparse-checkout: psc0
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ needs.compiler.outputs.node-version }}
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: provider-source/psc0

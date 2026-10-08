@@ -87,3 +87,29 @@ The new recursion module, context and term changes compiled natively. The wrappe
 used two Lean4.34 reserved words as local names (`meta` and `public`); rename them
 to metaContext and publicDeclaration together. No semantic acceptance rule changed.
 Candidate and full qualification remain pending; reuse the cached seed/build outputs.
+
+## Development gate validation checkpoint
+
+Run37831951758 at e91b9558d665879871b8bf0893915ae64b27c7fe has passed native
+compilation and the generated C1 candidate, including raw capability and session
+conformance. Current-source C2/C3 and subsequent provider decisions remain pending.
+The implementation branch is held at that immutable revision while qualification runs.
+
+A separate psc0/sh1-development-gate-v1 checkpoint adds host-only iteration/recovery
+tooling for one bounded native-candidate validation. Portable compiler source remains
+identical to e91b9558. No active selfhost-seed.json or Foundation source migration is
+included. The temporary workflow branch filter and ref-scoped concurrency preserve
+the running full qualification.
+
+Ordinary pushes build the current native PSC frontend and use it to emit N1, then
+execute raw capabilities, preparation sessions and a two-module resident CLI smoke.
+This evidence is native-seeded development execution, not selected-seed ancestry or
+a self-host fixed point. Full qualification retains selected-seed C1/C2/C3 and the
+independent provider job. The frozen diagnostic ownership case shares the existing
+session conformance boundary. Historical recovery verifies complete provenance and
+all four seed products; a malformed cache reconstructs rather than becoming selected.
+
+Once A is qualified, pin its actual source/toolchain/product identities, restore the
+implementation workflow branch filter, and apply the staged Foundation.List migration
+with its bounded behavior/public-type correspondence gate. Preserve A's historical
+source recovery path before allowing B to use the new authoring capability.

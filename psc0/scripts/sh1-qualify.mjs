@@ -5,10 +5,21 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
-import { packageBySection, parseImports } from './workspace-layout.mjs';
+import {
+  bootstrapEntryRelative as entryRelative,
+  readBootstrapClosure as sourceClosure,
+  stripBootstrapImports as stripImports,
+  loadGeneratedCompiler as loadCompiler,
+} from './sh1-source-snapshot.mjs';
+import {
+  readSelectedSeed, qualifiedSeedIdentity, validateQualifiedSeedManifest,
+  makeQualifiedSeedManifest, verifyQualifiedSeedCache, materializeQualifiedSeed,
+} from './sh1-seed-manifest.mjs';
 import { resolveTypeScriptCli } from './typescript-cli.mjs';
 import { createGeneratedPreparationSession } from './generated-preparation-session.mjs';
 import { inventoryOriginalIr } from './original-ir-inventory.mjs';
+import { runFoundationConformance } from './sh1-foundation-conformance.mjs';
+import { runIterationConformance } from './sh1-iteration-conformance.mjs';
 import {
   compileTypeScript, runCommand, runSh1Capabilities, sha256, unwrap,
 } from './sh1-capabilities.mjs';
@@ -16,7 +27,6 @@ import {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const historicalRef = '37f63c39d4a07189938046c64152bba25d789450';
 const historicalTree = '02207b677c91471d6bb5cb3f6418995aed0d0102';
-const entryRelative = 'packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean';
 const historicalRecipe = Object.freeze({
   id: 'psc0-native-recovery/1',
   build: ['lake', 'build', 'psc1'],
@@ -24,12 +34,7 @@ const historicalRecipe = Object.freeze({
   artifacts: ['index.ts', 'index.js', 'index.d.ts', 'index.js.map'],
   leanGitHash: '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
 });
-const allowedPackages = new Set([
-  'bootstrap', 'foundation', 'syntax', 'core', 'environment', 'meta', 'elab',
-  'bridge', 'compiler-ir', 'erasure', 'compiler', 'backend-ts',
-]);
 const tsc = resolveTypeScriptCli();
-let importSequence = 0;
 
 function capture(command, args, cwd = root) {
   return runCommand(command, args, {
@@ -43,63 +48,6 @@ assert.equal(capture(process.execPath, [tsc, '--version']), 'Version 5.8.3',
 async function writeJson(file, value) {
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, JSON.stringify(value, null, 2) + '\n');
-}
-
-function stripImports(source) {
-  return source.split(/\r?\n/u)
-    .filter((line) => !/^\s*import\s+[A-Za-z0-9_.]+\s*;?\s*$/u.test(line))
-    .join('\n').trim();
-}
-
-async function sourceClosure(workspace) {
-  const ordered = [];
-  const complete = new Set();
-  const active = new Set();
-  async function visit(relative) {
-    if (complete.has(relative)) return;
-    assert(!active.has(relative), 'PSC0_SH1_IMPORT_CYCLE: ' + relative);
-    assert(!relative.startsWith('..') && !path.isAbsolute(relative), 'PSC0_SH1_SOURCE_OUTSIDE_ROOT');
-    active.add(relative);
-    const source = await readFile(path.join(workspace, relative), 'utf8');
-    for (const moduleName of parseImports(source)) {
-      const parts = moduleName.split('.');
-      const packageName = parts[0] === 'Ps' ? packageBySection.get(parts[1]) : undefined;
-      assert(allowedPackages.has(packageName), 'PSC0_SH1_CLOSURE_PACKAGE: ' + moduleName);
-      await visit(path.posix.join('packages', packageName, 'src', ...parts) + '.lean');
-    }
-    active.delete(relative);
-    complete.add(relative);
-    ordered.push({ path: relative, source, sha256: sha256(source) });
-  }
-  await visit(entryRelative);
-  const manifest = ordered.map(({ path: sourcePath, sha256: digest }) => ({
-    path: sourcePath, sha256: digest,
-  }));
-  return {
-    ordered,
-    manifest,
-    sha256: sha256(JSON.stringify(manifest)),
-    moduleCount: ordered.length,
-    bytes: ordered.reduce((count, item) => count + Buffer.byteLength(item.source), 0),
-  };
-}
-
-async function loadCompiler(file) {
-  const bytes = await readFile(file);
-  const compilerSha256 = sha256(bytes);
-  // Generated compiler bundles are standalone. Import precisely the bytes hashed,
-  // with an independent namespace per load; never transfer their tagged objects.
-  const sequence = ++importSequence;
-  const diagnosticTrailer = '\n//# sourceURL=psc0-sh1-' + compilerSha256 + '-' + sequence + '.mjs\n';
-  const exactBody = Buffer.concat([bytes, Buffer.from(diagnosticTrailer)]);
-  const compiler = await import('data:text/javascript;base64,' + exactBody.toString('base64'));
-  // The only loader addition is the recorded diagnostic sourceURL comment above.
-  for (const name of [
-    'PsCompilerSourceKind', 'List', 'psCompilerPrepareSource', 'psCompilerPrepareSources',
-    'psCompilerAdmissionsFromPrepared', 'psCompilerTypeScriptFromPrepared',
-    'psCompilerTranslateSource',
-  ]) assert(name in compiler, 'PSC0_SH1_COMPILER_EXPORT: ' + name);
-  return { compiler, compilerSha256 };
 }
 
 function list(compiler, values) {
@@ -126,6 +74,11 @@ async function recipeIdentity() {
     'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs',
     'scripts/typescript-cli.mjs', 'scripts/workspace-layout.mjs',
     'scripts/generated-preparation-session.mjs', 'scripts/original-ir-inventory.mjs',
+    'scripts/sh1-source-snapshot.mjs', 'scripts/sh1-seed-manifest.mjs',
+    'scripts/sh1-iterate.mjs', 'scripts/sh1-iteration-conformance.mjs',
+    'scripts/sh1-foundation-conformance.mjs',
+    'test/fixtures/selfhost-sh1-foundation-reference.lean',
+    'test/fixtures/selfhost-sh1-foundation-probe.lean',
   ];
   const contents = [];
   for (const file of files) contents.push({ path: file, sha256: sha256(await readFile(path.join(root, file))) });
@@ -163,18 +116,28 @@ async function historicalIdentity(sourceRoot) {
   return { closure, identity, identitySha256: sha256(JSON.stringify(identity)) };
 }
 
+async function verifyHistoricalSeedReceipt(directory, { closure, identity, identitySha256 }) {
+  const receipt = JSON.parse(await readFile(path.join(directory, 'seed.json'), 'utf8'));
+  assert.equal(receipt.identitySha256, identitySha256, 'PSC0_SH1_HISTORICAL_CACHE_IDENTITY');
+  assert.deepEqual(receipt.identity, identity, 'PSC0_SH1_HISTORICAL_CACHE_PROVENANCE');
+  assert.deepEqual(receipt.modules, closure.manifest, 'PSC0_SH1_HISTORICAL_CACHE_MODULES');
+  assert.equal(receipt.evidence, 'native-recovery-seed-from-preserved-55-module-source');
+  assert.deepEqual(Object.keys(receipt.artifacts).sort(), [...historicalRecipe.artifacts].sort(),
+    'PSC0_SH1_HISTORICAL_CACHE_PRODUCTS');
+  for (const name of historicalRecipe.artifacts) {
+    assert.equal(sha256(await readFile(path.join(directory, name))), receipt.artifacts[name],
+      'PSC0_SH1_HISTORICAL_CACHE_DIGEST: ' + name);
+  }
+  return receipt;
+}
+
 async function recoverSeed(sourceRoot, outDir) {
   const { closure, identity, identitySha256 } = await historicalIdentity(sourceRoot);
   const receiptPath = path.join(outDir, 'seed.json');
   let cached = false;
   if (existsSync(receiptPath)) {
     try {
-      const receipt = JSON.parse(await readFile(receiptPath, 'utf8'));
-      assert.equal(receipt.identitySha256, identitySha256);
-      for (const [name, expected] of Object.entries(receipt.artifacts)) {
-        assert.equal(sha256(await readFile(path.join(outDir, name))), expected);
-      }
-      assert('index.js' in receipt.artifacts && 'index.ts' in receipt.artifacts);
+      await verifyHistoricalSeedReceipt(outDir, { closure, identity, identitySha256 });
       cached = true;
     } catch {
       process.stdout.write('PSC0_SH1_SEED_CACHE: RECOMPUTE (identity or artifact mismatch)\n');
@@ -209,9 +172,49 @@ async function recoverSeed(sourceRoot, outDir) {
   }) + '\n');
 }
 
-async function buildGeneration(compilerPath, closure, outDir) {
+async function selectedAuthoringSeed(compilerOverride) {
+  const selected = await readSelectedSeed();
+  const compilerPath = path.resolve(root, compilerOverride ?? selected.compilerPath);
+  let expectedSha256;
+  let identitySha256;
+  let sourceClosureSha256;
+  if (selected.mode === 'qualified') {
+    assert.deepEqual(await toolchainIdentity(), selected.manifest.toolchain,
+      'PSC0_SH1_SELECTED_SEED_TOOLCHAIN');
+    expectedSha256 = selected.manifest.expectedArtifacts.javascriptSha256;
+    identitySha256 = selected.identitySha256;
+    sourceClosureSha256 = selected.manifest.sourceClosureSha256;
+  } else {
+    // An explicit --seed override must still be the verified historical seed.
+    // Its claimed ancestry cannot be inferred from the supplied filename.
+    const historical = await historicalIdentity(path.resolve(root, '../historical-source/psc0'));
+    const directory = path.dirname(path.resolve(root, selected.compilerPath));
+    const receipt = await verifyHistoricalSeedReceipt(directory, historical);
+    expectedSha256 = receipt.artifacts['index.js'];
+    identitySha256 = historical.identitySha256;
+    sourceClosureSha256 = historical.closure.sha256;
+  }
+  assert.equal(sha256(await readFile(compilerPath)), expectedSha256,
+    'PSC0_SH1_SELECTED_SEED_DIGEST');
+  return {
+    compilerPath, expectedSha256, mode: selected.mode,
+    provenance: {
+      kind: selected.mode === 'qualified' ? 'previous-qualified-authoring-seed' : 'historical-aggregate-implementation',
+      sourceRef: selected.sourceRef,
+      sourceClosureSha256,
+      compilerSha256: expectedSha256,
+      identitySha256,
+      independentAlgorithm: selected.mode === 'historical',
+      priorQualification: selected.manifest?.qualification ?? null,
+    },
+  };
+}
+
+async function buildGeneration(compilerPath, closure, outDir, {
+  workspace = root, expectedSha256, authoringSeed,
+} = {}) {
   const start = performance.now();
-  const loaded = await loadCompiler(compilerPath);
+  const loaded = await loadCompiler(compilerPath, { expectedSha256 });
   const { compiler, compilerSha256 } = loaded;
   const inputs = closure.ordered.map(({ path: sourcePath, source }) => ({
     path: sourcePath, source: stripImports(source),
@@ -260,7 +263,8 @@ async function buildGeneration(compilerPath, closure, outDir) {
   const receipt = {
     schemaVersion: 1,
     executingCompilerSha256: compilerSha256,
-    sourceRef: capture('git', ['rev-parse', 'HEAD']),
+    ...(authoringSeed ? { authoringSeed } : {}),
+    sourceRef: capture('git', ['rev-parse', 'HEAD'], workspace),
     sourceClosureSha256: closure.sha256,
     moduleCount: closure.moduleCount,
     sourceBytes: closure.bytes,
@@ -298,9 +302,11 @@ async function buildGeneration(compilerPath, closure, outDir) {
   return { ...loaded, outputJs, receipt };
 }
 
-async function sessionConformance(seedPath, candidatePath, outDir) {
-  const seed = await loadCompiler(seedPath);
-  const candidate = await loadCompiler(candidatePath);
+async function sessionConformance(seedPath, candidatePath, outDir, {
+  oracle, candidateSha256,
+}) {
+  const seed = await loadCompiler(seedPath, { expectedSha256: oracle.compilerSha256 });
+  const candidate = await loadCompiler(candidatePath, { expectedSha256: candidateSha256 });
   const session = createGeneratedPreparationSession(candidate.compiler, {
     compilerSha256: candidate.compilerSha256,
   });
@@ -316,10 +322,10 @@ async function sessionConformance(seedPath, candidatePath, outDir) {
   for (let index = 0; index < sourceSets.length; index++) {
     const sources = sourceSets[index];
     const oldPrepared = unwrap(seed.compiler.psCompilerPrepareSources(seed.compiler.PsCompilerSourceKind.lean,
-      list(seed.compiler, sources.map((item) => item.source))), 'SESSION_OLD_ORACLE');
+      list(seed.compiler, sources.map((item) => item.source))), 'SESSION_REFERENCE_ORACLE');
     const result = session.prepare('lean', sources);
     assert.equal(admissionText(candidate.compiler, result.prepared), admissionText(seed.compiler, oldPrepared),
-      'PSC0_SH1_SESSION_OLD_SEED_CORRESPONDENCE');
+      'PSC0_SH1_SESSION_AGGREGATE_CORRESPONDENCE');
     assert.equal(result.receipt.cache.prefixModules, index === 2 ? 1 : 0);
     assert.equal(result.receipt.cache.preparedModules, index === 2 ? 1 : 2);
     receipts.push(result.receipt);
@@ -347,7 +353,7 @@ async function sessionConformance(seedPath, candidatePath, outDir) {
   assert.equal(switched.receipt.cache.prefixModules, 0);
   assert.equal(switched.receipt.cache.preparedModules, 2);
   receipts.push(switched.receipt);
-  const independent = await loadCompiler(candidatePath);
+  const independent = await loadCompiler(candidatePath, { expectedSha256: candidateSha256 });
   const independentSession = createGeneratedPreparationSession(independent.compiler, {
     compilerSha256: independent.compilerSha256,
   });
@@ -355,25 +361,203 @@ async function sessionConformance(seedPath, candidatePath, outDir) {
   assert.equal(fresh.receipt.cache.prefixModules, 0);
   assert.equal(fresh.receipt.cache.preparedModules, 2);
   receipts.push(fresh.receipt);
-  const oracle = unwrap(seed.compiler.psCompilerPrepareSources(seed.compiler.PsCompilerSourceKind.lean,
+  const oraclePrepared = unwrap(seed.compiler.psCompilerPrepareSources(seed.compiler.PsCompilerSourceKind.lean,
     list(seed.compiler, sourceSets[0].map((item) => item.source))), 'SESSION_FRESH_ORACLE');
-  assert.equal(admissionText(independent.compiler, fresh.prepared), admissionText(seed.compiler, oracle));
+  assert.equal(admissionText(independent.compiler, fresh.prepared), admissionText(seed.compiler, oraclePrepared));
   const byteBound = 48;
   const bounded = createGeneratedPreparationSession(candidate.compiler, {
     compilerSha256: candidate.compilerSha256, maxParsedSourceBytes: byteBound,
   });
   const boundedResult = bounded.prepare('lean', sourceSets[0]);
   assert(boundedResult.receipt.cache.retainedParsedSourceBytes <= byteBound);
-  assert.equal(admissionText(candidate.compiler, boundedResult.prepared), admissionText(seed.compiler, oracle));
+  assert.equal(admissionText(candidate.compiler, boundedResult.prepared), admissionText(seed.compiler, oraclePrepared));
   receipts.push(boundedResult.receipt);
+  const invalid = [sourceSets[0][0], {
+    path: 'session/invalid.lean', source: 'def sh1Invalid : Nat := (\n',
+  }];
+  const errorSession = createGeneratedPreparationSession(candidate.compiler, {
+    compilerSha256: candidate.compilerSha256,
+  });
+  let firstError;
+  assert.throws(() => errorSession.prepare('lean', invalid), (error) => {
+    firstError = error;
+    assert.equal(error.stage, 'parse');
+    const tag = Object.getOwnPropertySymbols(error.compilerError)
+      .find((symbol) => typeof error.compilerError[symbol] === 'string');
+    assert(tag, 'PSC0_SH1_PARSE_ERROR_TAG');
+    assert.throws(() => { error.compilerError[tag] = 'changed'; }, TypeError);
+    return true;
+  });
+  assert.throws(() => errorSession.prepare('lean', invalid), (error) => {
+    assert.equal(error.message, firstError.message);
+    assert.equal(error.preparationReceipt.cache.parseHits, 1);
+    assert.equal(error.preparationReceipt.cache.parseMisses, 0);
+    receipts.push(firstError.preparationReceipt, error.preparationReceipt);
+    return true;
+  });
   await writeJson(path.join(outDir, 'session-conformance.json'), {
     schemaVersion: 1,
-    evidence: 'old-seed-admission-correspondence-and-incremental-state-transitions',
+    evidence: 'aggregate-admission-correspondence-and-incremental-state-transitions',
+    oracle,
     seedCompilerSha256: seed.compilerSha256,
     candidateCompilerSha256: candidate.compilerSha256,
     receipts,
   });
-  process.stdout.write('PSC0_SH1_SESSION_CONFORMANCE: PASS (old-seed oracle; warm, prefix, body edit, failure recovery, source kind, fresh instance)\n');
+  process.stdout.write('PSC0_SH1_SESSION_CONFORMANCE: PASS (recorded aggregate oracle; warm, prefix, body edit, failure recovery, frozen parse errors, source kind, fresh instance)\n');
+}
+
+
+async function recoverQualifiedSeed({ sourceRoot, bootstrapCompiler, artifactDirectory, outDir }) {
+  const selected = await readSelectedSeed();
+  assert.equal(selected.mode, 'qualified', 'PSC0_SH1_QUALIFIED_PIN_REQUIRED');
+  const manifest = validateQualifiedSeedManifest(selected.manifest);
+  assert.deepEqual(await toolchainIdentity(), manifest.toolchain, 'PSC0_SH1_QUALIFIED_TOOLCHAIN');
+  const cacheDirectory = path.join(root, selected.cacheDirectory);
+  if (await verifyQualifiedSeedCache(cacheDirectory, manifest)) {
+    process.stdout.write('PSC0_SH1_QUALIFIED_SEED: CACHE_HIT ' + selected.identitySha256 + '\n');
+    return;
+  }
+  if (artifactDirectory && existsSync(path.join(artifactDirectory, 'qualification.json'))) {
+    try {
+      const qualification = JSON.parse(await readFile(path.join(artifactDirectory, 'qualification.json')));
+      assert.equal(qualification.evidence, 'compiler-qualified-current-source-fixed-point');
+      assert.equal(qualification.sourceRef, manifest.sourceRef);
+      assert.equal(qualification.sourceClosureSha256, manifest.sourceClosureSha256);
+      assert.deepEqual(qualification.artifacts, manifest.expectedArtifacts);
+      assert.equal(qualification.c2CompilerSha256, manifest.expectedArtifacts.javascriptSha256);
+      assert.equal(qualification.c3CompilerSha256, manifest.expectedArtifacts.javascriptSha256);
+      for (const name of ['C2', 'C3']) {
+        const receipt = JSON.parse(await readFile(path.join(artifactDirectory, name, 'receipt.json')));
+        assert.equal(receipt.sourceRef, manifest.sourceRef);
+        assert.equal(receipt.sourceClosureSha256, manifest.sourceClosureSha256);
+        assert.deepEqual(receipt.toolchain, manifest.toolchain);
+        assert.deepEqual(receipt.artifacts, manifest.expectedArtifacts);
+      }
+      await materializeQualifiedSeed({
+        generationDirectory: path.join(artifactDirectory, 'C3'), cacheDirectory, manifest,
+        origin: 'Hash-verified immutable qualification artifact, generation C3.',
+      });
+      process.stdout.write('PSC0_SH1_QUALIFIED_SEED: ARTIFACT_HIT ' + selected.identitySha256 + '\n');
+      return;
+    } catch (error) {
+      process.stdout.write('PSC0_SH1_QUALIFIED_ARTIFACT: RECOMPUTE (' + String(error.message).slice(0, 512) + ')\n');
+    }
+  }
+  assert.equal(capture('git', ['rev-parse', 'HEAD'], sourceRoot), manifest.sourceRef,
+    'PSC0_SH1_QUALIFIED_SOURCE_REF');
+  assert.equal(capture('git', ['status', '--porcelain', '--untracked-files=no', '--', '.'], sourceRoot), '',
+    'PSC0_SH1_QUALIFIED_SOURCE_MODIFIED');
+  const closure = await sourceClosure(sourceRoot);
+  assert.equal(closure.sha256, manifest.sourceClosureSha256, 'PSC0_SH1_QUALIFIED_SOURCE_CLOSURE');
+  assert.equal(sha256(await readFile(bootstrapCompiler)), manifest.bootstrap.compilerSha256,
+    'PSC0_SH1_QUALIFIED_BOOTSTRAP_DIGEST');
+  const first = await buildGeneration(bootstrapCompiler, closure, path.join(outDir, 'C1'), {
+    workspace: sourceRoot, expectedSha256: manifest.bootstrap.compilerSha256,
+  });
+  const second = await buildGeneration(first.outputJs, closure, path.join(outDir, 'C2'), {
+    workspace: sourceRoot, expectedSha256: first.receipt.artifacts.javascriptSha256,
+  });
+  assert.deepEqual(second.receipt.artifacts, manifest.expectedArtifacts,
+    'PSC0_SH1_QUALIFIED_RECOVERY_PRODUCTS');
+  assert.equal((await sourceClosure(sourceRoot)).sha256, manifest.sourceClosureSha256,
+    'PSC0_SH1_QUALIFIED_SOURCE_CHANGED_DURING_RECOVERY');
+  await materializeQualifiedSeed({
+    generationDirectory: path.join(outDir, 'C2'), cacheDirectory, manifest,
+    origin: 'Rebuilt from pinned raw A through historical S0(A) then C1(A), with exact product comparison.',
+  });
+  process.stdout.write('PSC0_SH1_QUALIFIED_SEED: RECOVERED ' + selected.identitySha256 + '\n');
+}
+
+async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, outDir) {
+  const selected = await readSelectedSeed();
+  if (selected.mode === 'qualified') {
+    // The initial authoring seed A remains sufficient while B uses its language.
+    // Do not silently claim S0 can rebuild migrated B or discard A's recovery path.
+    await writeJson(path.join(outDir, 'seed-selection.json'), {
+      status: 'existing-qualified-authoring-seed-retained',
+      sourceRef: selected.sourceRef,
+      compilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,
+      futurePromotion: 'A later language capability promotion needs an explicit parent-seed recovery plan.',
+    });
+    return;
+  }
+  const manifest = makeQualifiedSeedManifest({
+    qualification, firstReceipt, secondReceipt, runId: process.env.GITHUB_RUN_ID,
+  });
+  const identity = qualifiedSeedIdentity(manifest);
+  const relativeDirectory = '.selfhost-seeds/qualified/' + identity;
+  await materializeQualifiedSeed({
+    generationDirectory: path.join(outDir, 'C2'),
+    cacheDirectory: path.join(root, relativeDirectory),
+    manifest,
+    origin: 'Fresh C2/C3 current-source qualification; root seed selection remains unchanged.',
+  });
+  await writeJson(path.join(outDir, 'seed-promotion.json'), manifest);
+  if (process.env.GITHUB_OUTPUT) {
+    await appendFile(process.env.GITHUB_OUTPUT,
+      'promoted-seed-cache-key=psc0-sh1-qualified-v1-' + identity + '\n' +
+      'promoted-seed-cache-directory=psc0/' + relativeDirectory + '\n');
+  }
+  process.stdout.write('PSC0_SH1_SEED_PROMOTION: ' + JSON.stringify(manifest) + '\n');
+}
+
+async function nativeCandidate(nativeCompiler, closure, outDir) {
+  const start = performance.now();
+  const directory = path.join(outDir, 'N1');
+  await mkdir(directory, { recursive: true });
+  const nativeCompilerSha256 = sha256(await readFile(nativeCompiler));
+  const nativeCommand = ['build', entryRelative, '--out', path.join(directory, 'index.js')];
+  runCommand(nativeCompiler, nativeCommand, { cwd: root });
+  assert.equal(sha256(await readFile(nativeCompiler)), nativeCompilerSha256,
+    'PSC0_SH1_NATIVE_BINARY_CHANGED');
+  const outputJs = path.join(directory, 'index.js');
+  const compilerSha256 = sha256(await readFile(outputJs));
+  const loaded = await loadCompiler(outputJs, { expectedSha256: compilerSha256 });
+  const sourceRef = capture('git', ['rev-parse', 'HEAD']);
+  await sessionConformance(outputJs, outputJs, outDir, {
+    oracle: {
+      kind: 'current-native-generated-aggregate-implementation',
+      sourceRef, sourceClosureSha256: closure.sha256, compilerSha256,
+      independentAlgorithm: false, priorQualification: null,
+    },
+    candidateSha256: compilerSha256,
+  });
+  await runSh1Capabilities({
+    ...loaded, root, outDir: path.join(directory, 'capabilities'), tsc, nativeCompiler,
+  });
+  await runIterationConformance({
+    ...loaded, compilerPath: outputJs, root, outDir: path.join(outDir, 'iteration'),
+  });
+  await runFoundationConformance({
+    ...loaded, root, outDir: path.join(outDir, 'foundation'), tsc,
+    executingCompiler: 'Current native-generated compiler consumes both raw library sources.',
+  });
+  assert.equal((await sourceClosure(root)).sha256, closure.sha256,
+    'PSC0_SH1_SOURCE_CHANGED_DURING_RUN');
+  const receipt = {
+    schemaVersion: 1,
+    evidence: 'native-seeded-generated-compiler-candidate',
+    sourceRef, sourceClosureSha256: closure.sha256,
+    sourceKind: 'raw-authoritative-lean', moduleCount: closure.moduleCount,
+    nativeCompiler: {
+      binarySha256: nativeCompilerSha256,
+      path: path.relative(root, nativeCompiler),
+      command: nativeCommand,
+      buildContext: 'CI builds the current native target with lake build psc1; binary and workspace identities are recorded separately.',
+    },
+    artifacts: {
+      javascriptSha256: compilerSha256,
+      typescriptSha256: sha256(await readFile(path.join(directory, 'index.ts'))),
+    },
+    recipe: await recipeIdentity(), toolchain: await toolchainIdentity(),
+    candidateClaim: 'Native PSC frontend consumes raw current compiler source; generated current compiler executes the raw language and iteration corpus.',
+    selectedSeedBootstrapProven: false, currentSourceFixedPointProven: false,
+    provider: { status: 'not-attempted', kernelChecked: false },
+    timingsMs: { total: performance.now() - start },
+  };
+  await writeJson(path.join(directory, 'receipt.json'), receipt);
+  await writeJson(path.join(directory, 'source-closure.json'), closure.manifest);
+  process.stdout.write('PSC0_SH1_NATIVE_CANDIDATE: ' + JSON.stringify(receipt) + '\n');
 }
 
 function option(args, name, fallback) {
@@ -393,24 +577,52 @@ if (command === 'seed-identity') {
 } else if (command === 'recover-seed') {
   const sourceRoot = path.resolve(root, option(args, '--source', '../historical-source/psc0'));
   await recoverSeed(sourceRoot, outDir);
+} else if (command === 'recover-qualified-seed') {
+  await recoverQualifiedSeed({
+    sourceRoot: path.resolve(root, option(args, '--source', '../qualified-source/psc0')),
+    bootstrapCompiler: path.resolve(root, option(args, '--bootstrap', '.selfhost-seeds/' + historicalRef + '/index.js')),
+    artifactDirectory: path.resolve(root, option(args, '--artifact', '../qualified-artifact/dist/sh1')),
+    outDir,
+  });
+} else if (command === 'native-candidate') {
+  const nativeCompiler = path.resolve(root, option(args, '--native', '.lake/build/bin/psc1'));
+  await nativeCandidate(nativeCompiler, await sourceClosure(root), outDir);
 } else if (command === 'candidate') {
-  const seedPath = path.resolve(root, option(args, '--seed',
-    '.selfhost-seeds/' + historicalRef + '/index.js'));
+  const authoring = await selectedAuthoringSeed(option(args, '--seed', undefined));
   const closure = await sourceClosure(root);
-  const generation = await buildGeneration(seedPath, closure, path.join(outDir, 'C1'));
-  await sessionConformance(seedPath, generation.outputJs, outDir);
-  const loaded = await loadCompiler(generation.outputJs);
+  const generation = await buildGeneration(authoring.compilerPath, closure, path.join(outDir, 'C1'), {
+    expectedSha256: authoring.expectedSha256, authoringSeed: authoring.provenance,
+  });
+  await sessionConformance(authoring.compilerPath, generation.outputJs, outDir, {
+    oracle: authoring.provenance, candidateSha256: generation.receipt.artifacts.javascriptSha256,
+  });
+  const loaded = await loadCompiler(generation.outputJs, {
+    expectedSha256: generation.receipt.artifacts.javascriptSha256,
+  });
   const nativeArg = option(args, '--native', undefined);
   await runSh1Capabilities({
     ...loaded, root, outDir: path.join(outDir, 'C1/capabilities'), tsc,
     nativeCompiler: nativeArg ? path.resolve(root, nativeArg) : undefined,
   });
+  await runIterationConformance({
+    ...loaded, compilerPath: generation.outputJs, root, outDir: path.join(outDir, 'iteration'),
+  });
+  await runFoundationConformance({
+    compiler: generation.compiler, compilerSha256: generation.compilerSha256,
+    executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',
+    root, outDir: path.join(outDir, 'foundation'), tsc,
+  });
   assert.equal((await sourceClosure(root)).sha256, closure.sha256, 'PSC0_SH1_SOURCE_CHANGED_DURING_RUN');
-  process.stdout.write('PSC0_SH1_CANDIDATE: PASS (current raw source and generated capability execution)\n');
+  process.stdout.write('PSC0_SH1_CANDIDATE: PASS (verified selected seed, current raw source and generated capability execution)\n');
 } else if (command === 'fixed-point') {
+  const authoring = await selectedAuthoringSeed();
   const closure = await sourceClosure(root);
   const firstDir = path.join(outDir, 'C1');
   const firstReceipt = JSON.parse(await readFile(path.join(firstDir, 'receipt.json')));
+  assert.equal(firstReceipt.evidence, 'candidate-build', 'PSC0_SH1_CANDIDATE_KIND');
+  assert.equal(firstReceipt.sourceRef, capture('git', ['rev-parse', 'HEAD']));
+  assert.equal(firstReceipt.executingCompilerSha256, authoring.expectedSha256);
+  assert.deepEqual(firstReceipt.authoringSeed, authoring.provenance, 'PSC0_SH1_CANDIDATE_SEED_PROVENANCE');
   assert.equal(firstReceipt.sourceClosureSha256, closure.sha256, 'PSC0_SH1_STALE_CANDIDATE_SOURCE');
   assert.equal(firstReceipt.artifacts.javascriptSha256, sha256(await readFile(path.join(firstDir, 'index.js'))),
     'PSC0_SH1_CANDIDATE_DIGEST');
@@ -425,13 +637,21 @@ if (command === 'seed-identity') {
       'test/fixtures/selfhost-sh1-accumulators.' + capability.sourceKind))));
     assert.equal(capability.behavior, 'pass');
   }
-  const second = await buildGeneration(path.join(firstDir, 'index.js'), closure, path.join(outDir, 'C2'));
-  const secondCompiler = await loadCompiler(second.outputJs);
+  const second = await buildGeneration(path.join(firstDir, 'index.js'), closure, path.join(outDir, 'C2'), {
+    expectedSha256: firstReceipt.artifacts.javascriptSha256,
+  });
+  const secondCompiler = await loadCompiler(second.outputJs, {
+    expectedSha256: second.receipt.artifacts.javascriptSha256,
+  });
   await runSh1Capabilities({ ...secondCompiler, root, outDir: path.join(outDir, 'C2/capabilities'), tsc });
-  const third = await buildGeneration(second.outputJs, closure, path.join(outDir, 'C3'));
+  const third = await buildGeneration(second.outputJs, closure, path.join(outDir, 'C3'), {
+    expectedSha256: second.receipt.artifacts.javascriptSha256,
+  });
   assert.deepEqual(second.receipt.artifacts, third.receipt.artifacts,
     'PSC0_SH1_C2_C3_ARTIFACT_MISMATCH');
-  const thirdCompiler = await loadCompiler(third.outputJs);
+  const thirdCompiler = await loadCompiler(third.outputJs, {
+    expectedSha256: third.receipt.artifacts.javascriptSha256,
+  });
   await runSh1Capabilities({ ...thirdCompiler, root, outDir: path.join(outDir, 'C3/capabilities'), tsc });
   assert.equal((await sourceClosure(root)).sha256, closure.sha256, 'PSC0_SH1_SOURCE_CHANGED_DURING_RUN');
   const receipt = {
@@ -440,7 +660,10 @@ if (command === 'seed-identity') {
     sourceClosureSha256: closure.sha256,
     moduleCount: closure.moduleCount,
     evidence: 'compiler-qualified-current-source-fixed-point',
-    equation: 'C1=S0(A); C2=C1(A); C3=C2(A); compare C2 and C3 products',
+    equation: authoring.mode === 'historical'
+      ? 'C1=S0(A); C2=C1(A); C3=C2(A); compare C2 and C3 products'
+      : 'Q is the pinned qualified compiler from A; C1=Q(B); C2=C1(B); C3=C2(B); compare C2 and C3 products',
+    authoringSeed: authoring.provenance,
     rawAuthoringSourceConsumedEveryGeneration: true,
     artifacts: second.receipt.artifacts,
     c1CompilerSha256: firstReceipt.artifacts.javascriptSha256,
@@ -452,7 +675,8 @@ if (command === 'seed-identity') {
     provider: { status: 'not-attempted', kernelChecked: false },
   };
   await writeJson(path.join(outDir, 'qualification.json'), receipt);
+  await retainPromotableSeed(receipt, firstReceipt, second.receipt, outDir);
   process.stdout.write('PSC0_SH1_FIXED_POINT: ' + JSON.stringify(receipt) + '\n');
 } else {
-  throw new Error('usage: node scripts/sh1-qualify.mjs seed-identity|recover-seed|candidate|fixed-point [--out directory] [--source historical-psc0] [--seed compiler.js] [--native native-psc1]');
+  throw new Error('usage: node scripts/sh1-qualify.mjs seed-identity|recover-seed|recover-qualified-seed|native-candidate|candidate|fixed-point [--out directory] [--source historical-psc0] [--seed compiler.js] [--native native-psc1]');
 }

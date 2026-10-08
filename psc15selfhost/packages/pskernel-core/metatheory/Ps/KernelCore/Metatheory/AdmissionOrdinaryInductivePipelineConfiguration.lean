@@ -167,7 +167,7 @@ theorem psKernelAddSimpleInductive_success_constructor_pipeline
                                               | ok ctorResult =>
                                                   exact ⟨headerResult, sortResult, paramResult, indexResult,
                                                     resultLevel, ctorResult, rfl, rfl, rfl,
-                                                    rfl, rfl, rfl⟩
+                                                    rfl, rfl, hCtors⟩
                                           | _ =>
                                               simp [psKernelAddSimpleInductive, hDuplicates, allNames, hUnique,
                                                 hFresh, hOccurrences, hClosed, hLevels, hHeader, hSort,

@@ -515,3 +515,59 @@ theorem psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel_configuration_histo
                               cases hResult
                               exact ⟨hReducedConfig,
                                 congrArg PsKernelCheckerContext.environment hContext, by simp [hContext]⟩
+
+
+/-- Independent relationship between family names and opened header shapes. -/
+def PsKernelMutualFamilyNamesAligned
+    (targets : List PsKernelName) (shapes : List PsKernelSimpleMutualTypeShape) : Prop :=
+  targets = shapes.map (fun shape => shape.decl.name)
+
+theorem psKernelMutualTypeShapeListGet_mem
+    (shapes : List PsKernelSimpleMutualTypeShape) :
+    ∀ (index : Nat) (shape : PsKernelSimpleMutualTypeShape),
+      psKernelMutualTypeShapeListGet shapes index = some shape ->
+      List.Mem shape shapes := by
+  induction shapes with
+  | nil =>
+      intro index shape hRun
+      simp [psKernelMutualTypeShapeListGet] at hRun
+  | cons head tail ih =>
+      intro index shape hRun
+      cases index with
+      | zero =>
+          simp [psKernelMutualTypeShapeListGet] at hRun
+          cases hRun
+          exact List.Mem.head tail
+      | succ remaining =>
+          exact List.Mem.tail head
+            (ih remaining shape (by simpa [psKernelMutualTypeShapeListGet] using hRun))
+
+theorem psKernelMutualShapeNames_mem
+    (shapes : List PsKernelSimpleMutualTypeShape) :
+    ∀ shape : PsKernelSimpleMutualTypeShape, List.Mem shape shapes ->
+      List.Mem shape.decl.name (shapes.map (fun shape => shape.decl.name)) := by
+  induction shapes with
+  | nil =>
+      intro shape hMember
+      cases hMember
+  | cons head tail ih =>
+      intro shape hMember
+      cases hMember with
+      | head => exact List.Mem.head _
+      | tail => exact List.Mem.tail _ (ih shape (by assumption))
+
+theorem PsKernelMutualConstructorApplicationValid.selected_family_member
+    {targets : List PsKernelName} {shapes : List PsKernelSimpleMutualTypeShape}
+    {levels : List PsKernelLevel} {params : List PsKernelOpenBinder}
+    {expr : PsKernelExpr} {info : PsKernelSimpleMutualAppInfo}
+    (hAligned : PsKernelMutualFamilyNamesAligned targets shapes)
+    (hValid : PsKernelMutualConstructorApplicationValid targets shapes levels params expr info) :
+    ∃ shape : PsKernelSimpleMutualTypeShape,
+      psKernelMutualTypeShapeListGet shapes info.target = some shape ∧
+      List.Mem shape.decl.name targets ∧
+      psKernelExprGetAppFn expr = PsKernelExpr.const shape.decl.name levels := by
+  obtain ⟨shape, hShape, hHead, hPrefix, hLength, hExcluded⟩ := hValid
+  have hMember := psKernelMutualTypeShapeListGet_mem shapes info.target shape hShape
+  have hName := psKernelMutualShapeNames_mem shapes shape hMember
+  have hTargets : targets = shapes.map (fun shape => shape.decl.name) := hAligned
+  exact ⟨shape, hShape, by simpa [hTargets] using hName, hHead⟩

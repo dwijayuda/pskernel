@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.AdmissionRecursiveArgumentConfiguration
 import Ps.KernelCore.Metatheory.AdmissionMutualOccurrenceConfiguration
 
 /--

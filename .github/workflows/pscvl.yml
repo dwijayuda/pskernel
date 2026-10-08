@@ -37,8 +37,6 @@ jobs:
           lake exe pscvl check examples/normative/pass_minimal.ps
           lake exe pscvl check examples/normative/pass_strict_binders.ps
           lake exe pscvl check examples/normative/pass_named_call.ps
-          expect_normative_error examples/normative/fail_named_order.ps "positional call arguments must precede"
-          expect_normative_error examples/normative/fail_named_duplicate.ps "supplied twice"
           expect_normative_error() {
             local input="$1" expected="$2"
             local output rc
@@ -53,6 +51,8 @@ jobs:
           expect_normative_error examples/normative/fail_unbraced_proof.ps "requires braced by"
           expect_normative_error examples/normative/fail_unbraced_do.ps "requires braced do"
           expect_normative_error examples/normative/fail_bad_attribute.ps "undeclared attribute"
+          expect_normative_error examples/normative/fail_named_order.ps "positional call arguments must precede"
+          expect_normative_error examples/normative/fail_named_duplicate.ps "supplied twice"
           expect_normative_error examples/normative/fail_equations.ps "equation-declaration bodies"
           lake exe pscvl check-preview examples/pass.ps
           lake exe pscvl syntax-kinds examples/pass_ghost.ps

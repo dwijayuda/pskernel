@@ -5,8 +5,102 @@ import { spawn } from 'node:child_process';
 import { checkedSeedLimits, checkedSeedFrames, checkedSeedExhausted, checkSeedBytes } from './checked-seed-protocol.mjs';
 import { decodeErasureDeclarations } from './erasure-declarations.mjs';
 import { decodeDeclarationOrigins } from './declaration-origins.mjs';
+import { artifactId } from './artifact-evidence.mjs';
+import { checkedIrStageArtifacts, decodeIrArtifact } from './ir-artifact.mjs';
+import { checkedTargetIrStageArtifacts, decodeJsIrArtifact, assertJsDeclarationInventory } from './target-ir-artifact.mjs';
+import { verifySpecializationCorrespondence } from './specialization-correspondence.mjs';
+import { closedJsRepresentationProfile, uniformJsRepresentationProfile, uniformSpecializationArtifact,
+  verifyUniformSpecialization } from './uniform-specialization.mjs';
+import { createDirectJsDeclarations, createPortableJsDeclarationRequest,
+  directJsDeclarationProfile, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 import { decodePublicApi } from './public-api-artifact.mjs';
 import { createPscvCertification } from './certified-source.mjs';
+
+export const checkedSeedProductsProtocol = 'psc-checked-seed-products/1';
+
+function selectSeedProducts(value) {
+  const names = ['declarations', 'metadata', 'representation', 'sourceMap', 'target'];
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      Reflect.ownKeys(value).length !== names.length || Reflect.ownKeys(value).some(key => !names.includes(key)))
+    throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
+  const fields = {};
+  for (const key of names) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !Object.hasOwn(descriptor, 'value')) throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
+    fields[key] = descriptor.value;
+  }
+  if (!['javascript', 'wasm'].includes(fields.target) ||
+      ![closedJsRepresentationProfile, uniformJsRepresentationProfile].includes(fields.representation) ||
+      ['metadata', 'declarations', 'sourceMap'].some(key => typeof fields[key] !== 'boolean') ||
+      (fields.target !== 'javascript' && (fields.representation !== closedJsRepresentationProfile ||
+        fields.declarations || fields.sourceMap))) throw new Error('PSC2_CHECKED_SEED_PRODUCT_SELECTION');
+  return Object.freeze({ ...fields, wire: JSON.stringify([checkedSeedProductsProtocol, fields.target,
+    fields.representation, fields.metadata, fields.declarations, fields.sourceMap]) });
+}
+
+function seedDirectProduct(completed, selected, limits, observation, sources) {
+  const uniform = selected.representation === uniformJsRepresentationProfile;
+  const metadata = selected.metadata || selected.sourceMap, api = metadata || selected.declarations;
+  const outputKey = selected.target === 'javascript' ? 'javaScript' : 'wasm';
+  const stageKeys = ['runtimeIr', 'verifiedIr', uniform ? 'uniformSpecializedIr' : 'specializedIr',
+    selected.target === 'javascript' ? 'jsIr' : 'wasmIr'];
+  const textKeys = [...stageKeys, ...(api ? ['publicApi', 'erasureCorrespondence'] : []),
+    ...(metadata ? ['declarationOrigins', ...(selected.target === 'javascript' ? ['generatedPositions'] : [])] : [])];
+  const keys = ['phase', 'protocol', 'target', 'representation', outputKey, ...textKeys].sort();
+  if (!completed || Object.keys(completed).sort().join(',') !== keys.join(',') ||
+      completed.phase !== 'emitted' || completed.protocol !== checkedSeedProductsProtocol ||
+      completed.target !== selected.target || completed.representation !== selected.representation ||
+      textKeys.some(key => typeof completed[key] !== 'string'))
+    throw new Error('PSC2_CHECKED_SEED_PRODUCT_RESULT');
+  if (selected.target === 'javascript' ? typeof completed.javaScript !== 'string' :
+      !Array.isArray(completed.wasm) || completed.wasm.some(byte => !Number.isInteger(byte) || byte < 0 || byte > 255))
+    throw new Error('PSC2_CHECKED_SEED_PRODUCT_BYTES');
+  observation.generatedBytes = textKeys.reduce((sum, key) => sum + Buffer.byteLength(completed[key]), 0) +
+    (selected.target === 'javascript' ? Buffer.byteLength(completed.javaScript) : completed.wasm.length);
+  if (observation.generatedBytes > limits.generatedBytes)
+    throw checkedSeedExhausted('generatedBytes', limits.generatedBytes, observation.generatedBytes);
+  const payload = selected.target === 'javascript' ? completed.javaScript : Uint8Array.from(completed.wasm);
+  const stages = Object.freeze(Object.fromEntries(stageKeys.map(key => [key, completed[key]])));
+  const bound = { maxBytes: limits.generatedBytes };
+  const ir = checkedIrStageArtifacts(stages, bound), target = checkedTargetIrStageArtifacts(stages, bound);
+  if (!ir.runtimeIr.bytes.equals(ir.verifiedIr.bytes)) throw new Error('PSC2_CHECKED_SEED_VALIDATION_CHANGED_IR');
+  const selectedIr = uniform ? uniformSpecializationArtifact(stages.uniformSpecializedIr, bound) : ir.specializedIr;
+  if (uniform) {
+    verifyUniformSpecialization(ir.verifiedIr, selectedIr, bound);
+    assertJsDeclarationInventory(decodeIrArtifact(ir.verifiedIr.bytes, bound), decodeJsIrArtifact(target.jsIr.bytes, bound));
+  } else verifySpecializationCorrespondence(ir.verifiedIr, selectedIr, bound);
+  if (api) {
+    decodePublicApi(Buffer.from(completed.publicApi), bound);
+    decodeErasureDeclarations(Buffer.from(completed.erasureCorrespondence), {
+      publicApi: Buffer.from(completed.publicApi), runtimeIr: ir.runtimeIr.bytes, ...bound });
+  }
+  if (metadata) decodeDeclarationOrigins(Buffer.from(completed.declarationOrigins), {
+    sources, publicApi: Buffer.from(completed.publicApi), ...bound });
+  let directDeclarations, declarationRequest;
+  if (selected.declarations) {
+    const record = (text, domain, contract) => {
+      const bytes = Buffer.from(text); return { bytes, identity: artifactId(bytes, domain, contract) };
+    };
+    const profile = uniform ? directJsUniformDeclarationProfile : directJsDeclarationProfile;
+    directDeclarations = createDirectJsDeclarations({ profile, maxBytes: limits.generatedBytes,
+      maxTotalBytes: limits.generatedBytes, subjects: {
+        publicApi: record(completed.publicApi, 'public-api', 'psc-public-api-ir/1'),
+        erasureTable: record(completed.erasureCorrespondence, 'erasure-table', 'psc-erasure-declarations/1'),
+        runtimeIr: ir.runtimeIr, verifiedIr: ir.verifiedIr,
+        ...(uniform ? { uniformSpecializedIr: selectedIr } : { specializedIr: selectedIr }),
+        jsIr: target.jsIr, javaScript: record(payload, 'javascript-output', 'psc-direct-javascript/es2022'),
+      } });
+    declarationRequest = createPortableJsDeclarationRequest({ profile, maxBytes: limits.generatedBytes,
+      bindings: JSON.parse(directDeclarations.binding.bytes).bindings });
+  }
+  return { product: Object.freeze({ target: selected.target, payload, stages,
+    protocol: checkedSeedProductsProtocol, ...(selected.target === 'javascript' ? { javaScriptRepresentation: selected.representation } : {}),
+    ...(api ? { publicApi: completed.publicApi, erasureCorrespondence: completed.erasureCorrespondence } : {}),
+    ...(metadata ? { declarationOrigins: completed.declarationOrigins,
+      ...(selected.target === 'javascript' ? { generatedPositions: completed.generatedPositions } : {}) } : {}),
+    ...(directDeclarations ? { directDeclarations } : {}),
+  }), declarationRequest };
+}
 
 function withTimeout(promise, timeoutMs, child, label) {
   let timer;
@@ -29,8 +123,12 @@ export async function runCheckedSeedSession({
   timeoutMs = 300000,
   resourceLimits,
   certificationContext,
+  productRequest,
 }) {
   const limits = checkedSeedLimits(resourceLimits);
+  const selected = productRequest === undefined ? undefined : selectSeedProducts(productRequest);
+  if (selected && certificationContext && (certificationContext.targets?.length !== 1 ||
+      certificationContext.targets[0] !== selected.target)) throw new Error('PSC2_CHECKED_SEED_PRODUCT_CERT_TARGET');
   if (!['lean', 'ps'].includes(sourceKind)) throw new Error('PSC2_CHECKED_SEED_SOURCE_KIND');
   if (typeof source !== 'string') throw new TypeError('Expected immutable source text');
   if (sources !== undefined && !Array.isArray(sources)) throw new Error('PSC2_CHECKED_SEED_SOURCE_PARTITION');
@@ -54,7 +152,7 @@ export async function runCheckedSeedSession({
   const stderr = [];
   try {
     await writeFile(sourceFile, snapshot, 'utf8');
-    child = spawn(path.resolve(binaryPath), [`--session-${sources === undefined ? '' : 'modules-'}${sourceKind}`, sourceFile], {
+    child = spawn(path.resolve(binaryPath), [`--session-${selected ? 'products-' : ''}${sources === undefined ? '' : 'modules-'}${sourceKind}`, sourceFile], {
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });
@@ -78,7 +176,7 @@ export async function runCheckedSeedSession({
     closed = new Promise(resolve => {
       child.once('close', (code, signal) => { didClose = true; resolve({ code, signal }); });
     });
-    const iterator = checkedSeedFrames(child.stdout, limits, observation);
+    const iterator = checkedSeedFrames(child.stdout, limits, observation, selected?.declarations && emit ? 3 : 2);
     const phase = (promise, label) => withTimeout(Promise.race([promise, failure]), timeoutMs, child, label);
     async function nextFrame(label) {
       const next = await phase(iterator.next(), label);
@@ -90,6 +188,10 @@ export async function runCheckedSeedSession({
     if (prepared?.phase !== 'prepared' || typeof prepared.admissions !== 'string') {
       throw new Error('PSC2_CHECKED_SEED_SESSION_PREPARED_RESULT');
     }
+
+    if (selected && (prepared.protocol !== checkedSeedProductsProtocol ||
+        Object.keys(prepared).sort().join(',') !== 'admissions,phase,protocol'))
+      throw new Error('PSC2_CHECKED_SEED_PRODUCT_PROTOCOL');
 
     observation.admissionsBytes = checkSeedBytes(prepared.admissions, 'admissionsBytes', limits);
     const kernelResult = await phase(Promise.resolve().then(() => checkAdmissions(prepared.admissions)), 'kernel-check');
@@ -118,9 +220,34 @@ export async function runCheckedSeedSession({
       });
     }
 
-    child.stdin.end(emit ? 'emit\n' : 'checked\n');
+    const command = emit ? (selected?.wire ?? 'emit') : 'checked';
+    if (selected?.declarations && emit) child.stdin.write(command + '\n');
+    else child.stdin.end(command + '\n');
     const completed = await nextFrame(emit ? 'emitted' : 'checked');
-    if (emit) {
+    let directProduct;
+    if (emit && selected) {
+      const captured = seedDirectProduct(completed, selected, limits, observation, inputSources);
+      directProduct = captured.product;
+      if (captured.declarationRequest !== undefined) {
+        child.stdin.end(captured.declarationRequest + '\n');
+        const written = await nextFrame('declarations');
+        if (!written || Object.keys(written).sort().join(',') !== 'declarations,phase,protocol' ||
+            written.phase !== 'declarations' || written.protocol !== checkedSeedProductsProtocol ||
+            typeof written.declarations !== 'string') throw new Error('PSC2_CHECKED_SEED_DECLARATION_RESULT');
+        const writerBytes = Buffer.byteLength(written.declarations);
+        if (writerBytes > Math.min(limits.generatedBytes, 67108864))
+          throw new Error('PSC2_CHECKED_DECLARATIONS_OUTPUT_RESOURCE');
+        observation.generatedBytes += writerBytes;
+        if (observation.generatedBytes > limits.generatedBytes)
+          throw checkedSeedExhausted('generatedBytes', limits.generatedBytes, observation.generatedBytes);
+        if (!Buffer.from(written.declarations).equals(directProduct.directDeclarations.declarations.bytes))
+          throw new Error('PSC_CHECKED_DECLARATION_PRODUCER_MISMATCH');
+        directProduct = Object.freeze({ ...directProduct, declarationProduction: Object.freeze({
+          producer: 'portable-source-signature-writer/1', hostBytesCompared: true,
+          globalPreservationProved: false, authority: 'descriptive-product-only',
+        }) });
+      }
+    } else if (emit) {
       if (completed?.phase !== 'emitted' || typeof completed.typescript !== 'string') {
         throw new Error('PSC2_CHECKED_SEED_SESSION_EMIT_RESULT');
       }
@@ -145,7 +272,8 @@ export async function runCheckedSeedSession({
       if (completed.declarationOrigins !== undefined) decodeDeclarationOrigins(Buffer.from(completed.declarationOrigins),
         { sources: inputSources, publicApi: Buffer.from(completed.publicApi), maxBytes: limits.generatedBytes });
       if (completed.publicApi !== undefined) decodePublicApi(Buffer.from(completed.publicApi), { maxBytes: limits.generatedBytes });
-    } else if (completed?.phase !== 'checked') {
+    } else if (completed?.phase !== 'checked' || (selected &&
+        (completed.protocol !== checkedSeedProductsProtocol || Object.keys(completed).sort().join(',') !== 'phase,protocol'))) {
       throw new Error('PSC2_CHECKED_SEED_SESSION_CHECK_RESULT');
     }
 
@@ -156,14 +284,16 @@ export async function runCheckedSeedSession({
     }
     return Object.freeze({
       admissions: prepared.admissions,
+      ...(selected ? { productProtocol: checkedSeedProductsProtocol } : {}),
       resourceObservation: Object.freeze({ contract: 'psc-checked-seed-resources/1',
         limits: Object.freeze({ ...limits, phaseTimeMs: timeoutMs }), observed: Object.freeze({ ...observation }),
         unobserved: Object.freeze(['compiler-internal-work', 'cpu-time', 'peak-memory', 'descendants', 'host-stack']) }),
-      ...(emit ? { typeScript: completed.typescript } : {}),
+      ...(emit && !selected ? { typeScript: completed.typescript } : {}),
+      ...(directProduct ? { directProduct } : {}),
       ...(emit && completed.publicApi !== undefined ? { publicApi: completed.publicApi } : {}),
       ...(emit && completed.erasureCorrespondence !== undefined ? { erasureCorrespondence: completed.erasureCorrespondence } : {}),
       ...(emit && completed.declarationOrigins !== undefined ? { declarationOrigins: completed.declarationOrigins } : {}),
-      ...(emit && completed.runtimeIr !== undefined
+      ...(emit && !selected && completed.runtimeIr !== undefined
         ? { stages: Object.freeze({ runtimeIr: completed.runtimeIr, verifiedIr: completed.verifiedIr }) } : {}),
       ...(certification ? {
         pscvCertificate: certification.certificate,

@@ -13,7 +13,7 @@ lean_lib PsKernelLean where
 
 lean_lib PsLeanChecked where
   srcDir := "../host/src"
-  roots := #[`Ps.Host.LeanChecked]
+  roots := #[`Ps.Host.LeanChecked, `Ps.Host.CheckedSeedProducts]
 
 @[default_target]
 lean_exe psc2_lean_checked_seed where

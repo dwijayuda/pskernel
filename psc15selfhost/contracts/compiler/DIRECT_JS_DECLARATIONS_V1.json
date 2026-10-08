@@ -48,7 +48,7 @@
     "Generic runtime exports under the current closed specializer",
     "Dependent value types, proposition erasure inference, higher-rank generics",
     "Named type aliases, structures/inductives and type-level computation",
-    "Declaration position maps and direct CLI product selection",
+    "Declaration position maps",
     "Runtime refinements, independently proved source projection or executable preservation",
     "Generic constants that would require inventing a callable factory"
   ],
@@ -84,7 +84,7 @@
     "resourcePolicy": "Positive caller-selected writer steps and output bytes; default 1000000 steps and 64 MiB. Each selected source projection separately uses its 400000-step/128-depth limit. Identifier scanning is bounded by its output-sized byte length. Projection resource units are not writer steps.",
     "authority": "Candidate bytes only: caller must validate complete source/runtime/export correspondence and uniqueness; no standalone inventory or type-preservation authority.",
     "status": "portable-producer-live-checked-service-routing-and-independent-host-byte-check-implemented",
-    "validation": "Actual native closed/generic/higher-order/Array byte comparisons and pinned TypeScript consumer passed at fba48e8; that run later failed only because the success-marker host assertion received a Buffer rather than text. Corrected the assertion. New live routing, same-prepared-object, missing/failing API, byte mismatch, resource and revocation checks await cloud validation."
+    "validation": "Actual native closed/uniform signature/writer byte comparisons and pinned TypeScript consumption passed through step 15 at 48bf311. Its full portable source checks passed, but TypeScript emission of the newly reached driver closure failed and is under typed diagnosis. Native direct-product transport and full portable execution still await cloud checks; no completed self-hosting claim."
   },
   "livePortableRouting": {
     "requestContract": "psc-ts-declaration-request/1",
@@ -94,6 +94,7 @@
     "selection": "Only explicitly requested declarations call this entry. The immutable checked-session JS representation policy determines its declaration profile; absent/failing/malformed API rejects the requested product without a fallback.",
     "flow": "Independent host factory checks exact source/runtime/export subjects, supplies its ordered binding requests, then compares portable bytes exactly before publication. The same frozen admitted prepared module is used; no re-preparation or second executable emission.",
     "limits": "Canonical four-item JSON array [contract, declarationProfile, decimal-string outputByteLimit, [decimal-string sourceIndex, exportName][]]. Input <=1 MiB, nesting <=3 and <=4098 arrays before parsing, at most 4096 requests, source indices <=1000000, output limit 1..64 MiB, writer steps <=1000000. Host checks request and output budgets and fresh liveness.",
-    "authority": "Descriptive product only. Exact byte agreement is not source/runtime semantic preservation or declaration target acceptance."
+    "authority": "Descriptive product only. Exact byte agreement is not source/runtime semantic preservation or declaration target acceptance.",
+    "nativeTransport": "psc-checked-seed-products/1 keeps prepared source alive while the host derives exact bindings, then compares the native portable writer's bytes. Both host transports share createPortableJsDeclarationRequest in scripts/js-declarations.mjs."
   }
 }

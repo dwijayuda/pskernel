@@ -319,9 +319,8 @@ test('build target and product combinations reject before source loading', async
     { backend: 'typescript', products: 'all' }, { backend: 'wasm', products: 'declarations' },
     { backend: 'wasm', javaScriptRepresentation: uniformJsRepresentationProfile },
     { backend: 'javascript', javaScriptRepresentation: 'unknown' },
-    { backend: 'javascript', seedPath: 'missing-seed' },
   ]) await assert.rejects(buildChecked({ entryPath: 'missing-source', outputPath: 'out.js', ...options }),
-    /PSC2_CHECKED_(BACKEND|PRODUCTS|PRODUCT_TARGET|JAVASCRIPT_REPRESENTATION|SEED_TARGET_UNSUPPORTED)/);
+    /PSC2_CHECKED_(BACKEND|PRODUCTS|PRODUCT_TARGET|JAVASCRIPT_REPRESENTATION)/);
   await assert.rejects(buildChecked({ entryPath: 'missing-source', outputPath: 'out.ts', backend: 'javascript' }),
     /PSC2_CHECKED_OUTPUT_KIND/);
 });
@@ -431,3 +430,42 @@ test('a malformed direct stage does not publish executable or receipt files', { 
     assert.equal(existsSync(path.dirname(outputPath)), false);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
+
+for (const [backend, representation, source] of [
+  ['javascript', closedJsRepresentationProfile, 'def answer : Nat := 42\n'],
+  ['javascript', uniformJsRepresentationProfile, 'def identity (A : Type) (value : A) : A := value\n'],
+  ['wasm', closedJsRepresentationProfile, 'def identity (value : Nat) : Nat := value\n'],
+]) test(`actual native source -> checked ${backend}/${representation} -> shared published bundle`,
+  { skip: !native }, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'psc-native-direct-products-'));
+    const previousCli = process.env.PSC_TYPESCRIPT_CLI;
+    try {
+      process.env.PSC_TYPESCRIPT_CLI = path.join(dir, 'typescript-must-not-be-loaded');
+      await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
+      const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, backend === 'wasm' ? 'out.wasm' : 'out.js');
+      await writeFile(entryPath, source);
+      const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'lean434',
+        backend, javaScriptRepresentation: representation, products: backend === 'wasm' ? 'executable' : 'all' });
+      assert.equal(receipt.compiler.engine, 'native-seed');
+      assert.equal(receipt.typeScriptToolInputs, undefined);
+      assert.equal(receipt.seedResources.observed.frames, backend === 'wasm' ? 2 : 3);
+      const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json')));
+      const replay = await verifyObservedBuildArchive(await readFile(path.join(dir, 'out.build-archive.json')),
+        { expectedGraphId: receipt.buildGraph, allowedAssumptions: allowedAssumptionsFromGraph(graph) });
+      assert.equal(replay.kind, 'accepted', replay.reason); assert.equal(replay.semanticClaimsVerified, false);
+      if (backend === 'wasm') assert.equal(WebAssembly.validate(await readFile(outputPath)), true);
+      else {
+        const module = await import(pathToFileURL(outputPath).href);
+        if (representation === uniformJsRepresentationProfile) assert.equal(module.identity(42n), 42n);
+        else assert.equal(module.answer, 42n);
+        assert.equal(receipt.declarationProduction.hostBytesCompared, true);
+        assert.equal(JSON.parse(await readFile(path.join(dir, 'out.js.map'))).version, 3);
+        assert.match(await readFile(path.join(dir, 'out.d.ts'), 'utf8'),
+          representation === uniformJsRepresentationProfile ? /<T0>/ : /bigint/);
+      }
+    } finally {
+      if (previousCli === undefined) delete process.env.PSC_TYPESCRIPT_CLI;
+      else process.env.PSC_TYPESCRIPT_CLI = previousCli;
+      await rm(dir, { recursive: true, force: true });
+    }
+  });

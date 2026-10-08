@@ -1060,7 +1060,7 @@
       "backendKind": "directTargetIR",
       "role": "long-term JS/npm lane; selected closed/uniform declarations and declaration-granularity maps",
       "descriptorStatus": "implemented",
-      "bundleStatus": "generated-checked-build-routing-implemented-native-routing-pending",
+      "bundleStatus": "generated-and-native-checked-build-routing-implemented-cloud-validation-pending",
       "preservation": "not-established-globally"
     },
     {
@@ -1068,7 +1068,7 @@
       "backendKind": "directTargetIR",
       "role": "Core Wasm; private self-host ABI and Canonical ABI remain distinct",
       "descriptorStatus": "implemented",
-      "bundleStatus": "generated-private-wasm32-checked-build-routing-implemented-canonical-and-native-routing-pending",
+      "bundleStatus": "generated-and-native-private-wasm32-build-routing-implemented-canonical-routing-pending",
       "preservation": "not-established-globally"
     },
     {
@@ -1123,7 +1123,7 @@
       "classifications": [
         "artifact-bundle"
       ],
-      "status": "typescript-and-generated-direct-js-wasm-checked-build-routing-implemented-native-direct-and-rust-routing-pending",
+      "status": "typescript-and-generated-native-direct-js-wasm-routing-implemented-cloud-validation-and-rust-routing-pending",
       "requirement": "Common typed independently identified executable/public/debug/interface/toolchain/evidence products."
     },
     {
@@ -1194,7 +1194,7 @@
         "origin-source-maps",
         "artifact-bundle"
       ],
-      "status": "closed-and-uniform-portable-declarations-host-source-maps-and-explicit-generated-build-routing-implemented-native-routing-and-finer-origins-pending",
+      "status": "closed-uniform-declarations-maps-generated-native-build-routing-implemented-portable-emission-diagnosis-and-finer-origins-pending",
       "requirement": "Produce .d.ts and ECMA-426 .js.map, optionally .d.ts.map, without tsc; retain TS parity oracle."
     },
     {
@@ -1622,6 +1622,13 @@
       "status": "current-host",
       "canonicalPath": "contracts/compiler/JS_UNIFORM_DECLARATION_LINEAGE_V1.json",
       "classification": "compiler-pass"
+    },
+    {
+      "id": "psc-checked-seed-products/1",
+      "kind": "native-product-transport",
+      "status": "current-host",
+      "canonicalPath": "contracts/compiler/CHECKED_SEED_PRODUCTS_V1.json",
+      "classification": "artifact-bundle"
     }
   ]
 }

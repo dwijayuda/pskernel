@@ -74,3 +74,13 @@ test('native session bounds stderr from a process that rejects the protocol argu
     emit: false, resourceLimits: { stderrBytes: 0 }, checkAdmissions: () => { throw new Error('must not check'); } }),
     error => error.kind === 'resourceExhausted' && error.resource === 'stderrBytes');
 });
+
+test('direct seed selection is copied as data and rejects unknown target/profile/flags before spawning', async () => {
+  const good = { target: 'javascript', representation: 'psc-js-closed-instances/1',
+    metadata: false, declarations: false, sourceMap: false };
+  for (const productRequest of [null, { ...good, target: 'unknown' }, { ...good, metadata: 1 },
+    { ...good, unknown: true }, { ...good, target: 'wasm', declarations: true },
+    Object.defineProperty({ ...good }, 'metadata', { get() { throw new Error('GETTER_MUST_NOT_RUN'); } })])
+    await assert.rejects(runCheckedSeedSession({ binaryPath: 'missing-binary', sourceKind: 'lean', source: '',
+      emit: true, productRequest, checkAdmissions: () => { throw new Error('MUST_NOT_CHECK'); } }), /PRODUCT_SELECTION/);
+});

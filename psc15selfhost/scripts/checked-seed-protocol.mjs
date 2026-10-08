@@ -25,9 +25,11 @@ export function checkSeedBytes(value, resource, limits) {
 }
 
 /** Bounded byte framing before decoding/parsing; no readline accumulation.
- * At most the protocol's prepared and completed frames are permitted.
+ * Legacy sessions permit two frames. An explicitly selected direct declaration
+ * session permits one additional writer response; no unbounded frame mode.
  */
-export async function* checkedSeedFrames(stream, limits, observation) {
+export async function* checkedSeedFrames(stream, limits, observation, maxFrames = 2) {
+  if (maxFrames !== 2 && maxFrames !== 3) throw new Error('PSC2_CHECKED_SEED_FRAME_POLICY');
   let parts = [], size = 0;
   function append(chunk) {
     size += chunk.length;
@@ -36,7 +38,7 @@ export async function* checkedSeedFrames(stream, limits, observation) {
   }
   function decode() {
     observation.frames++;
-    if (observation.frames > 2) throw new Error('PSC2_CHECKED_SEED_SESSION_EXTRA_FRAME');
+    if (observation.frames > maxFrames) throw new Error('PSC2_CHECKED_SEED_SESSION_EXTRA_FRAME');
     let bytes = Buffer.concat(parts, size);
     observation.largestFrameBytes = Math.max(observation.largestFrameBytes, size);
     parts = []; size = 0;

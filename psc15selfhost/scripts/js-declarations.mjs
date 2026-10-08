@@ -38,6 +38,23 @@ function subjectIds(subjects, profile) {
 }
 const same = (a, b) => artifactKey(a) === artifactKey(b);
 
+/** Shared bounded wire request for the portable writer in either live host
+ * transport. Bindings must first come from exact source/runtime/export checks.
+ */
+export function createPortableJsDeclarationRequest({ profile, bindings, maxBytes }) {
+  if (![directJsDeclarationProfile, directJsUniformDeclarationProfile].includes(profile)) fail('PROFILE');
+  if (!Array.isArray(bindings) || bindings.length > 4096 ||
+      !Number.isSafeInteger(maxBytes) || maxBytes <= 0) throw new Error('PSC2_CHECKED_DECLARATION_REQUEST_RESOURCE');
+  const requests = bindings.map(binding => {
+    if (!Number.isSafeInteger(binding?.sourceIndex) || binding.sourceIndex < 0 || binding.sourceIndex > 1000000 ||
+        typeof binding.exportName !== 'string') throw new Error('PSC2_CHECKED_DECLARATION_REQUEST_SHAPE');
+    return [String(binding.sourceIndex), binding.exportName];
+  });
+  const request = JSON.stringify(['psc-ts-declaration-request/1', profile, String(Math.min(maxBytes, 67108864)), requests]);
+  if (Buffer.byteLength(request) > Math.min(maxBytes, 1048576)) throw new Error('PSC2_CHECKED_DECLARATION_REQUEST_RESOURCE');
+  return request;
+}
+
 /** Source signatures determine declaration types. Actual erasure/specialization
  * and JsIR inventories only bind names/calling conventions and reject drift.
  * No source type is recovered from a specialized instance or printed JS.

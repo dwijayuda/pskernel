@@ -19,7 +19,7 @@ import {
   checkedKernelDescriptor,
   defaultCheckedKernel,
 } from './checked-kernel-provider.mjs';
-import { runCheckedSeedSession } from './checked-seed-session.mjs';
+import { runCheckedSeedSession, checkedSeedProductsProtocol } from './checked-seed-session.mjs';
 import { pinnedTypeScriptVersionText, resolveTypeScriptCli } from './typescript-cli.mjs';
 import { captureTypeScriptToolInputs, verifyTypeScriptToolInputs } from './typescript-tool-inputs.mjs';
 import { captureCheckedProviderInputs, verifyCheckedProviderInputs } from './checked-provider-inputs.mjs';
@@ -43,7 +43,7 @@ export const defaultCheckedCompiler = checkedCompilerPath();
  */
 export function selectCheckedBuildProducts({
   backend = 'typescript', products = backend === 'typescript' ? 'metadata' : 'executable',
-  javaScriptRepresentation = closedJsRepresentationProfile, seedPath,
+  javaScriptRepresentation = closedJsRepresentationProfile,
 } = {}) {
   if (!['typescript', 'javascript', 'wasm'].includes(backend)) throw new Error('PSC2_CHECKED_BACKEND');
   if (!['executable', 'metadata', 'declarations', 'source-map', 'all'].includes(products)) throw new Error('PSC2_CHECKED_PRODUCTS');
@@ -53,7 +53,6 @@ export function selectCheckedBuildProducts({
   if ((backend === 'typescript' && products !== 'metadata') ||
       (backend === 'wasm' && !['executable', 'metadata'].includes(products)))
     throw new Error('PSC2_CHECKED_PRODUCT_TARGET');
-  if (seedPath && backend !== 'typescript') throw new Error('PSC2_CHECKED_SEED_TARGET_UNSUPPORTED');
   const selection = Object.freeze({ metadata: products === 'metadata' || products === 'all',
     declarations: products === 'declarations' || products === 'all', sourceMap: products === 'source-map' || products === 'all' });
   return Object.freeze({ backend, products, javaScriptRepresentation, selection,
@@ -77,7 +76,7 @@ export async function buildChecked({
   products,
   javaScriptRepresentation,
 }) {
-  const selected = selectCheckedBuildProducts({ backend, products, javaScriptRepresentation, seedPath });
+  const selected = selectCheckedBuildProducts({ backend, products, javaScriptRepresentation });
   const kernelDescriptor = checkedKernelDescriptor(kernel);
   const selectedProviderSecurity = assertProviderSecurity(kernel, securityProfile);
   const secondaryProviderSecurity = dualCheck
@@ -109,6 +108,7 @@ export async function buildChecked({
   let erasureCorrespondence;
   let generatedPositions;
   let seedResources;
+  let seedProductProtocol;
   let parity;
   let providerToolInputs = [];
   let pscvCertificate;
@@ -141,13 +141,15 @@ export async function buildChecked({
       checkAdmissions,
       emit: !checkOnly,
       resourceLimits: seedResourceLimits,
+      productRequest: selected.backend === 'typescript' ? undefined : {
+        target: selected.backend, representation: selected.javaScriptRepresentation, ...selected.selection },
       certificationContext: {
         provider: checkedKernelIdentity(kernel),
         providerSecurity: selectedProviderSecurity,
         kernelContract: kernelContractV1,
         assumptionPolicy: 'kernel-contract-default',
         resourcePolicy: 'checked-native-seed-session/1',
-        targets: ['typescript'],
+        targets: [selected.backend],
         executionBoundary: 'native-seed-checked-session',
       },
     });
@@ -155,11 +157,15 @@ export async function buildChecked({
     pscvCertificate = result.pscvCertificate;
     certifiedSourceArtifact = result.certifiedSourceArtifact;
     typeScript = result.typeScript;
-    irStages = result.stages;
-    publicApi = result.publicApi;
-    declarationOrigins = result.declarationOrigins;
-    erasureCorrespondence = result.erasureCorrespondence;
+    directEmission = result.directProduct;
+    const captured = directEmission ?? result;
+    irStages = captured.stages;
+    publicApi = captured.publicApi;
+    declarationOrigins = captured.declarationOrigins;
+    erasureCorrespondence = captured.erasureCorrespondence;
+    generatedPositions = captured.generatedPositions;
     seedResources = result.resourceObservation;
+    seedProductProtocol = result.productProtocol;
   } else {
     const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
     compilerBytes = await readFile(file);
@@ -209,6 +215,7 @@ export async function buildChecked({
     sourceCount: snapshot.ordered.length,
     sourceResources: snapshot.resourceObservation,
     ...(seedResources ? { seedResources } : {}),
+    ...(seedProductProtocol ? { seedProductProtocol } : {}),
     canonicalAdmissionsSha256: digest(admissions),
     providerInputObservations: providerToolInputs.map(item => item.details),
     ...(parity ? { dualCheck: parity } : {}),
@@ -276,9 +283,17 @@ export async function buildChecked({
             !Buffer.from(live.bytes).equals(recorded.bytes)) throw new Error('PSC2_CHECKED_DECLARATION_BUILD_BINDING');
       }
     }
-    if (selected.selection.sourceMap && (!observed.directSourceMap || !directEmission?.declarationLineage ||
-        artifactKey(observed.declarationLineage.identity) !== artifactKey(directEmission.declarationLineage)))
-      throw new Error('PSC2_CHECKED_SOURCE_MAP_BUILD_BINDING');
+    if (selected.selection.sourceMap) {
+      if (!observed.directSourceMap) throw new Error('PSC2_CHECKED_SOURCE_MAP_BUILD_BINDING');
+      if (compilerIdentity.engine === 'native-seed') {
+        // This transport returns captured native tables; the common graph is
+        // their first full map materializer, over the same checked source.
+        if (directEmission?.protocol !== checkedSeedProductsProtocol)
+          throw new Error('PSC2_CHECKED_SOURCE_MAP_BUILD_BINDING');
+      } else if (!directEmission?.declarationLineage ||
+          artifactKey(observed.declarationLineage.identity) !== artifactKey(directEmission.declarationLineage))
+        throw new Error('PSC2_CHECKED_SOURCE_MAP_BUILD_BINDING');
+    }
     const evidence = bindObservedBuildContext(observed, { languageAuthority, backendRegistry, backendId: selected.backend,
       javaScriptRepresentation: selected.javaScriptRepresentation });
     receipt.profileEnvironment = evidence.profileEnvironment.identity;

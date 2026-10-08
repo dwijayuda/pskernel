@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { createPortableJsDeclarationRequest, directJsDeclarationProfile, directJsUniformDeclarationProfile } from './js-declarations.mjs';
 
 import { closedJsRepresentationProfile, uniformJsRepresentationProfile } from './uniform-specialization.mjs';
 import { leanCheckedIdentity } from './checked-kernel-identity.mjs';
@@ -246,18 +247,9 @@ export function createKernelCheckedSession(
   function javaScriptDeclarations(handle, bindings, maxBytes) {
     const item = checkedItem(handle);
     if (!targets.includes('javascript')) throw new Error('PSC2_CHECKED_TARGET_FORBIDDEN');
-    if (!Array.isArray(bindings) || bindings.length > 4096 ||
-        !Number.isSafeInteger(maxBytes) || maxBytes <= 0) throw new Error('PSC2_CHECKED_DECLARATION_REQUEST_RESOURCE');
-    const requests = bindings.map(binding => {
-      if (!Number.isSafeInteger(binding?.sourceIndex) || binding.sourceIndex < 0 || binding.sourceIndex > 1000000 ||
-          typeof binding.exportName !== 'string') throw new Error('PSC2_CHECKED_DECLARATION_REQUEST_SHAPE');
-      return [String(binding.sourceIndex), binding.exportName];
+    const request = createPortableJsDeclarationRequest({
+      profile: uniformJavaScript ? directJsUniformDeclarationProfile : directJsDeclarationProfile, bindings, maxBytes,
     });
-    const selectedProfile = uniformJavaScript ? 'psc-direct-js-declarations-uniform-structural/1' :
-      'psc-direct-js-declarations-closed-structural/1';
-    const request = JSON.stringify(['psc-ts-declaration-request/1', selectedProfile,
-      String(Math.min(maxBytes, 67108864)), requests]);
-    if (Buffer.byteLength(request) > Math.min(maxBytes, 1048576)) throw new Error('PSC2_CHECKED_DECLARATION_REQUEST_RESOURCE');
     if (admissionsFrom(compiler, item.prepared) !== item.admissions) throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
     if (typeof compiler.psCompilerJavaScriptDeclarationsFromPrepared !== 'function')
       throw new Error('PSC2_CHECKED_DECLARATIONS_API_REQUIRED');

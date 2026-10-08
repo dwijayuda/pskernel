@@ -174,7 +174,7 @@ theorem psKernelAddSimpleInductive_success_full_pipeline
                                                         ctorResult = Except.ok result := by
                                                     simp only [safety, psKernelOrdinaryInitialInductiveInfo,
                                                       Nat.succ_eq_add_one] at hCtors
-                                                    simpa [psKernelAddSimpleInductive, hDuplicates,
+                                                    simpa only [psKernelAddSimpleInductive, hDuplicates,
                                                       allNames, hUnique, hFresh, hOccurrences, hClosed,
                                                       hLevels, hHeader, hSort, hParams, hIndices, hShape,
                                                       psKernelOrdinaryInitialInductiveInfo, safety, hCtors,

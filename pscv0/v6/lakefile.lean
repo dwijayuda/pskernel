@@ -50,7 +50,15 @@ lean_exe pscv_v6_reuse_smoke where
 -- This is NOT the extensible V6 parser and is not linked into pscv_v6_dev.
 lean_lib PscvReuseProbeSyntax where
   srcDir := "../packages/syntax/src"
-  roots := #[`Ps.Syntax.ParseProofScript]
+  roots := #[
+    `Ps.Syntax.Token,
+    `Ps.Syntax.Cursor,
+    `Ps.Syntax.Lexer,
+    `Ps.Syntax.Ast,
+    `Ps.Syntax.ParserState,
+    `Ps.Syntax.ParseCommon,
+    `Ps.Syntax.ParseProofScript
+  ]
 
 -- Independent kernel host: not linked into the small native compiler CLI.
 lean_exe pscv_v6_kernel_dev where

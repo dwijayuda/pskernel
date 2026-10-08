@@ -490,3 +490,32 @@ Architectural blockers still remaining:
   extension and transaction publication, final public theorem family, audit
   refresh, integration reconciliation, and final gates remain incomplete.
   Audit remains 44/9/19/7.
+
+
+## Verified ordinary positivity; analysis scope cache correction candidate
+- **#712 fully GREEN** at `873de1dac57b84a4b39bc2bb9d88f216fea479bc`:
+  independent ordinary strict-positive recursive-argument grammar and full
+  fuel refinement, with typed Sort-valued function domains, fresh locals,
+  canonical recursive heads/parameters/universes/arity, and structural domain
+  and index exclusion. Native foundation conformance also passed.
+- This theorem remains explicitly conditional on StringEq reflexivity;
+  native reduction and StringEq positive soundness remain the existing named
+  TCB laws. No unproved runtime bridge was added.
+- Candidate `cefc81cc3b8aa14891dda17fa4a67a3d8a37a7af` corrects the shared
+  ordinary/mutual analysis-scope exit: restored parent local declarations must
+  not publish the analysis scope's semantic caches. A common helper retains
+  analysis local ordinal history and monotone checker freshness while using
+  the existing `psKernelCheckerStateExitLocalScope` cache restoration.
+- Added independent configuration preservation for this helper, requiring
+  only the sound parent configuration. Added a native negative conformance
+  regression contrasting historical, cold-parent, and corrected handoffs
+  on closed DefEq keys whose equality depends on a temporary local in a
+  deliberately malformed raw environment. This does not claim that the raw
+  environment was admitted as a well-formed global environment.
+- Verify the new full proof/native gate before marking this source correction
+  and its operational witness green. The same scope handoff was reviewed and
+  corrected in both ordinary and mutual field workers.
+- Still incomplete: full field-spine/field-history composition, recursor
+  generation metadata, ordinary/mutual/nested well-formed semantic environment
+  transactions, final Kernel/API/session theorem family, criteria-based audit,
+  integration reconciliation, final proof/conformance gates.

@@ -24,7 +24,8 @@ history and monotone global freshness, but restore the parent's semantic
 caches rather than publishing entries learned with temporary local binders.
 -/
 def psKernelSessionRestoreLocalScope
-    (parent child : PsKernelCheckerSession) : PsKernelCheckerSession :=
+    (parent : PsKernelCheckerSession)
+    (child : PsKernelCheckerSession) : PsKernelCheckerSession :=
   let continuationLocal := PsKernelLocalContext.mk
     parent.context.localContext.decls child.context.localContext.nextIndex;
   PsKernelCheckerSession.mk

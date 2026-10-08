@@ -1,5 +1,5 @@
 import Ps.KernelCore.Core.Expr
-import Init.Omega
+import Lean.Elab.Tactic.Omega
 
 /- Reusable symmetry algebra for the portable kernel comparators. -/
 

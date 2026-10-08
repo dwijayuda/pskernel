@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "contract": "psc-direct-js-declaration-map/1",
   "masterPlan": "THE_PSCV_COMPILER_REFERENCE_VERSION_5.1.md",
-  "status": "source-writer-position-map-and-common-build-archive-routing-implemented-cloud-validation-pending",
+  "status": "source-writer-position-map-and-common-build-archive-routing-cloud-validated-at-885988b2",
   "owner": "scripts/js-declaration-map.mjs",
   "format": "ECMA-426 version 3",
   "profiles": [
@@ -61,5 +61,22 @@
     "https://raw.githubusercontent.com/microsoft/TypeScript/v5.9.3/src/compiler/emitter.ts",
     "https://tc39.es/ecma426/"
   ],
-  "referenceReviewed": "2026-10-08"
+  "referenceReviewed": "2026-10-08",
+  "cloudValidation": {
+    "commit": "885988b2e82fe7bad45e115ddec5c35f04c81cf0",
+    "mainRun": 37714593700,
+    "mainJob": 113108071900,
+    "conclusion": "success",
+    "parityRun": 37714593365,
+    "parityJob": 113108069909,
+    "parityConclusion": "success",
+    "scope": [
+      "closed-and-uniform-prepared-and-original-source-map-reconstruction",
+      "utf16-bom-crlf-import-gap-and-mutation-boundaries",
+      "generated-selection-and-actual-native-closed-uniform-publication",
+      "portable-declaration-byte-comparison-and-offline-archive-replay",
+      "full-existing-main-compiler-selfhost-isolation-gates"
+    ],
+    "proofImplication": "none"
+  }
 }

@@ -55,8 +55,8 @@
       "typescriptToJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
       "directJavaScript": "synchronous primitive external imports production-bound through psc-js-scalar-abi-plan/1",
       "rust": "external imports fail closed with externalImportUnsupported; native adapter implementation remains pending",
-      "coreWasm": "External imports fail closed with unsupportedModuleFeature. An explicit scalar export path derives InterfaceIR from revalidated SpecializedIR, checks actual target signatures, validates WasmIR and emits selected closed exports; production evidence integration and aggregate conversion remain pending. Independent scalar-interface projection and exact target/binary signature relations are recorded in build graphs and replayed offline; checked driver/CLI selection routing remains pending.",
-      "componentModel": "Portable InterfaceIR/WIT, synchronous layout/signature planning, memory/core-value codecs, signature-checked closed-core export binding, and compiler-selected scalar exports exist. Imports/callbacks, resource/async lifetimes, component binaries, production EvidenceEnvelope integration and global preservation remain pending."
+      "coreWasm": "External imports fail closed with unsupportedModuleFeature. The explicit scalar export path derives InterfaceIR from revalidated SpecializedIR, checks actual target signatures, validates WasmIR and emits selected closed exports. Generated/native checked driver and CLI selection publish exact policy/interface/binding/target/binary artifacts through the common graph, bundle, EvidenceEnvelope and archive. Actual memory32/memory64 native publication and independent signature replay passed cloud CI; aggregate/resource/async adapters and body preservation remain pending.",
+      "componentModel": "Portable InterfaceIR/WIT, synchronous layout/signature planning, memory/core-value codecs, signature-checked closed-core export binding and compiler-selected scalar exports exist. The closed scalar Core Wasm route is production-bound to the EvidenceEnvelope and archive. Component binaries, imports/callbacks, aggregate/resource/async adapters and lifetimes, independent WIT checking and global preservation remain pending."
     }
   },
   "policy": {
@@ -80,6 +80,13 @@
     },
     "scope": "Implemented executable checks, not a proof of validator soundness or completed global preservation. Full self-host fixed points remain pending.",
     "jsScalarProductionBinding": "scripts/js-abi-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs + EvidenceEnvelope targetAdapters",
-    "wasmCanonicalScalarProjection": "scripts/wasm-canonical-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs; source/target/binary signatures only, no body-preservation claim"
+    "wasmCanonicalScalarProjection": "scripts/wasm-canonical-artifact.mjs + checked-build-evidence.mjs + observed-build-archive.mjs; source/target/binary signatures only, no body-preservation claim",
+    "wasmCanonicalProductionCloud": {
+      "commit": "a47b047eb324db0df711b73d47b1f6211c126418",
+      "runId": 37711862947,
+      "jobId": 113099636619,
+      "conclusion": "success",
+      "scope": "Actual native Canonical scalar memory32/memory64 checked build publication and archive replay; no body-preservation or general Component Model claim."
+    }
   }
 }

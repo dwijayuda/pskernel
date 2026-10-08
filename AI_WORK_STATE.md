@@ -282,3 +282,42 @@ Architectural blockers still remaining:
 - Preserve current audit A=44, B=9, C=19, D=7 (79 pairs) until criteria-based
   reclassification. Reconcile integration only with explicit cross-branch
   review; no Arena infrastructure or host workarounds in this proof branch.
+
+
+## Verified ordinary declaration admission — 2026-10-08
+- Full PSKernel Core proof gate **#649** is green at
+  \`bd41e74cf6c1b9a5b07602e276fdbde5a25b0919\`.
+- Registered concrete checked admission proofs:
+  \`psKernelAddAxiom_configuration_refines\`;
+  \`psKernelAddDefinition_nonunsafe_configuration_refines\` for safe and
+  partial definitions;
+  \`psKernelAddOpaque_configuration_refines\`; and
+  \`psKernelAddTheorem_configuration_refines\`.
+  These preserve the exact executable validation order, distinguish the
+  checked proof/body from infer-only operations, and establish typing,
+  algorithmic DefEq, Sort reduction, and authoritative extension evidence.
+- \`psKernelSessionIsProp_true_configuration_refines\` provides the exact
+  inferred-type-to-Sort normalization witness, not an invented infer-only
+  typing certificate. The theorem-admission proof consumes it alongside a
+  separately checked declaration header.
+- \`psKernelEnvironmentAdd_success_refines_validated_extension\` establishes
+  that successful insertion preserves the declared extension boundary,
+  rejected an already-present authoritative declaration name, and rejected
+  duplicate universe parameters (assuming the input index refines the
+  authoritative environment).
+- \`SessionRefinement.lean\` now contains checked/WHNF/infer-only context
+  preservation lemmas required for composing independently checked sessions.
+- **Still open:** concrete unsafe recursive definition admission and mutual
+  work-environment soundness need an index-update preservation theorem.
+  A conditional unsafe transaction refinement theorem has been drafted and
+  registered in the next checkpoint, but its work-index premise remains an
+  explicit separate proof obligation. Do not claim it is discharged by a green
+  conditional theorem.
+- **Still open:** ordinary/mutual/nested inductive transaction refinement,
+  final Kernel/API/session implementation-refinement theorem family,
+  criteria-based semantic audit refresh, integration reconciliation, and
+  final proof/conformance gates. The last audited A/B/C/D counts remain
+  44/9/19/7 until a new evidence-based audit.
+- TCB boundaries \`PsKernelNativeReductionSoundLaw\` and
+  \`PsKernelStringEqSoundLaw\` remain explicit. Do not replace these with
+  unconditional soundness claims.

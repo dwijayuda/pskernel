@@ -311,3 +311,79 @@ theorem psKernelOpenSimpleMutualConstructorFieldsWithFuel_raw_spine_refines
       fuel hNative hString session targets shapes levels params resultLevel type
       revFields revRecursive result hConfig hRun
   exact ⟨fields, hFields, hSpine, hFinalConfig, hEnv⟩
+
+
+/--
+Independent mutual constructor shape under the caller's owner/header ordinal
+invariant. Checked closed-header typing and family-name alignment remain
+separate transaction components.
+-/
+def PsKernelMutualConstructorOpenShapeValid
+    (environment : PsKernelEnvironment) (localContext : PsKernelLocalContext)
+    (targets : List PsKernelName) (shapes : List PsKernelSimpleMutualTypeShape)
+    (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+    (resultLevel : PsKernelLevel) (typeShape : PsKernelSimpleMutualTypeShape)
+    (type : PsKernelExpr) (fields : List PsKernelOpenBinder)
+    (recursiveFields : List PsKernelSimpleMutualRecursiveField)
+    (indices : List PsKernelExpr) : Prop :=
+  ∃ (afterParams residual : PsKernelExpr) (finalContext : PsKernelLocalContext),
+    PsKernelRawConstructorParamSpineValid environment localContext params type afterParams ∧
+    PsKernelRawConstructorFieldSpineValid environment resultLevel localContext afterParams
+      finalContext fields residual ∧
+    PsKernelMutualConstructorFieldsValid environment targets shapes levels params resultLevel
+      localContext afterParams [] [] finalContext fields recursiveFields residual ∧
+    psKernelExprGetAppFn residual = PsKernelExpr.const typeShape.decl.name levels ∧
+    PsKernelConstructorResultParamPrefix params (psKernelExprGetAppArgs residual) indices ∧
+    psKernelExprListLength indices = psKernelOpenBinderListLength typeShape.indices ∧
+    (∀ target : PsKernelName, List.Mem target targets ->
+      ∀ index : PsKernelExpr, List.Mem index indices ->
+        PsKernelNoTargetConstantOccurrence target index)
+
+theorem psKernelOpenSimpleMutualConstructor_shape_refines
+    (fuel : Nat) (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    (session : PsKernelCheckerSession)
+    (targets : List PsKernelName) (shapes : List PsKernelSimpleMutualTypeShape)
+    (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+    (resultLevel : PsKernelLevel) (typeShape : PsKernelSimpleMutualTypeShape)
+    (owner : Nat) (type : PsKernelExpr)
+    (afterParams : PsKernelExprSessionResult) (opened : PsKernelMutualOpenFieldsResult)
+    (info : PsKernelSimpleMutualAppInfo)
+    (hConfig : PsKernelCheckerConfigurationSound session.context session.state)
+    (hOwnerShape : psKernelMutualTypeShapeListGet shapes owner = some typeShape)
+    (hParams : psKernelOpenSimpleConstructorParams fuel session params type = Except.ok afterParams)
+    (hFields : psKernelOpenSimpleMutualConstructorFields fuel afterParams.session targets
+      shapes levels params resultLevel afterParams.result = Except.ok opened)
+    (hResult : psKernelSimpleMutualAppInfo targets shapes levels params opened.result = some info)
+    (hOwner : Nat.beq info.target owner = true) :
+    PsKernelMutualConstructorOpenShapeValid session.context.environment session.context.localContext
+      targets shapes levels params resultLevel typeShape type opened.fields opened.recursiveFields info.indices ∧
+    PsKernelCheckerConfigurationSound opened.session.context opened.session.state ∧
+    opened.session.context.environment = session.context.environment := by
+  have hParamSound := psKernelOpenSimpleConstructorParams_raw_spine_refines
+    fuel session params type afterParams hConfig hNative hString hParams
+  have hParamConfig : PsKernelCheckerConfigurationSound
+      afterParams.session.context afterParams.session.state := by
+    simpa [hParamSound.2.1] using hParamSound.2.2
+  obtain ⟨fields, hFieldsEq, hSpine, hFinalConfig, hFinalEnv, hPositive⟩ :=
+    psKernelOpenSimpleMutualConstructorFieldsWithFuel_raw_positive_spine_refines
+      (Nat.succ fuel) hNative hString afterParams.session targets shapes levels params
+      resultLevel afterParams.result [] [] opened hParamConfig
+      (by simpa [psKernelOpenSimpleMutualConstructorFields] using hFields)
+  have hFieldsCanonical : opened.fields = fields := by
+    simpa [psKernelReverseOpenBinders, psKernelReverseOpenBindersWorker] using hFieldsEq
+  obtain ⟨selected, hSelected, hHead, hPrefix, hLength, hExcluded⟩ :=
+    psKernelSimpleMutualAppInfo_semantic_shape hString hReflexive
+      targets shapes levels params opened.result info hResult
+  have hOwnerEq : info.target = owner := by simpa using hOwner
+  have hSelectedEq : selected = typeShape := Option.some.inj
+    (Eq.trans hSelected.symm (by simpa [hOwnerEq] using hOwnerShape))
+  subst selected
+  refine ⟨?_, hFinalConfig, ?_⟩
+  · refine ⟨afterParams.result, opened.result, opened.session.context.localContext,
+      hParamSound.1, ?_, ?_, hHead, hPrefix, hLength, hExcluded⟩
+    · simpa [hParamSound.2.1, hFieldsCanonical] using hSpine
+    · simpa [hParamSound.2.1] using hPositive hReflexive
+  · exact Eq.trans hFinalEnv
+      (congrArg PsKernelCheckerContext.environment hParamSound.2.1)

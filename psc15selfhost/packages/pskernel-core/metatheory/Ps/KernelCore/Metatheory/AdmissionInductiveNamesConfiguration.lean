@@ -339,3 +339,50 @@ theorem psKernelInductiveNamesAbsent_replace_disjoint
       rw [psKernelReplaceEnvironmentConstant_preserves_other_lookup
         hString replacement name hHead environment.constants]
       exact hName
+
+/-- Split executable negative membership across a canonical concatenation. -/
+theorem psKernelNameListContains_append_false
+    (needle : PsKernelName) (left right : List PsKernelName) :
+    psKernelNameListContains needle (left ++ right) = false ↔
+      psKernelNameListContains needle left = false ∧
+      psKernelNameListContains needle right = false := by
+  induction left with
+  | nil => simp [psKernelNameListContains]
+  | cons head tail ih =>
+      cases hEqual : psKernelNameEq needle head with
+      | true => simp [psKernelNameListContains, hEqual]
+      | false => simpa [psKernelNameListContains, hEqual] using ih
+
+theorem PsKernelInductiveNamesAbsent.append_split
+    (environment : PsKernelEnvironment) (left right : List PsKernelName)
+    (hAbsent : PsKernelInductiveNamesAbsent environment (left ++ right)) :
+    PsKernelInductiveNamesAbsent environment left ∧
+      PsKernelInductiveNamesAbsent environment right := by
+  induction left with
+  | nil => exact ⟨PsKernelInductiveNamesAbsent.nil, hAbsent⟩
+  | cons head tail ih =>
+      cases hAbsent with
+      | cons _ _ hHead hTail =>
+          obtain ⟨hLeft, hRight⟩ := ih hTail
+          exact ⟨PsKernelInductiveNamesAbsent.cons head tail hHead hLeft, hRight⟩
+
+/-- Global name uniqueness supplies each subfamily and cross-family exclusion. -/
+theorem psKernelNameHasDuplicates_append_false_refines
+    (left right : List PsKernelName)
+    (hUnique : psKernelNameHasDuplicates (left ++ right) = false) :
+    psKernelNameHasDuplicates left = false ∧
+    psKernelNameHasDuplicates right = false ∧
+    ∀ name : PsKernelName, List.Mem name left ->
+      psKernelNameListContains name right = false := by
+  induction left with
+  | nil => exact ⟨rfl, hUnique, fun name hMem => by cases hMem⟩
+  | cons head tail ih =>
+      have hCons := psKernelNameHasDuplicates_cons_false_refines head (tail ++ right) hUnique
+      have hHead := (psKernelNameListContains_append_false head tail right).1 hCons.1
+      obtain ⟨hLeft, hRight, hDisjoint⟩ := ih hCons.2
+      refine ⟨?_, hRight, ?_⟩
+      · simpa [psKernelNameHasDuplicates, hHead.1] using hLeft
+      · intro name hMem
+        cases hMem with
+        | head => exact hHead.2
+        | tail => exact hDisjoint name (by assumption)

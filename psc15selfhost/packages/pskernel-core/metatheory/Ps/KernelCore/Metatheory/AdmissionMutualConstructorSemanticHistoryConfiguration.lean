@@ -288,3 +288,161 @@ theorem psKernelAddSimpleMutualConstructorsForTypeWorker_semantic_history
                                               psKernelCheckerContextEmpty] using hTyped.1
                                           · simpa [hCheckedContext, initial, psKernelMkCheckerSession,
                                               psKernelCheckerContextEmpty] using hSorted.1
+
+theorem PsKernelCheckedMutualConstructorHistory.preserves_absent_names
+    {targets : List PsKernelName} {typeShapes : List PsKernelSimpleMutualTypeShape}
+    {levels : List PsKernelLevel} {params : List PsKernelOpenBinder}
+    {resultLevel : PsKernelLevel} {typeShape : PsKernelSimpleMutualTypeShape}
+    {owner : Nat} {levelParams : List PsKernelName} {safety : PsKernelDefinitionSafety}
+    {headerLocal : PsKernelLocalContext} {work finalEnvironment : PsKernelEnvironment}
+    {index : Nat} {ctors : List PsKernelSimpleConstructorDecl}
+    {shapes : List PsKernelSimpleMutualConstructorShape}
+    (hHistory : PsKernelCheckedMutualConstructorHistory targets typeShapes levels params
+      resultLevel typeShape owner levelParams safety headerLocal work index ctors shapes finalEnvironment) :
+    ∀ names : List PsKernelName,
+      PsKernelInductiveNamesAbsent work names ->
+      (∀ name : PsKernelName, List.Mem name (psKernelSimpleCtorNames ctors) ->
+        psKernelNameListContains name names = false) ->
+      PsKernelInductiveNamesAbsent finalEnvironment names := by
+  induction hHistory with
+  | done => intro names hAbsent hDisjoint; exact hAbsent
+  | step work index ctor rest tailShapes finalEnvironment inferredType level
+      fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
+      intro names hAbsent hDisjoint
+      apply ih names
+      · apply psKernelInductiveNamesAbsent_add_disjoint _ _ names hAbsent
+        exact hDisjoint ctor.name (by
+          simpa [psKernelSimpleCtorNames] using (List.Mem.head (psKernelSimpleCtorNames rest)))
+      · intro name hMem
+        apply hDisjoint name
+        simpa [psKernelSimpleCtorNames] using (List.Mem.tail ctor.name hMem)
+
+/-- The remaining type traversal denotes the corresponding family suffix. -/
+def PsKernelMutualTypeShapeSuffix
+    (allShapes : List PsKernelSimpleMutualTypeShape) (owner : Nat)
+    (remaining : List PsKernelSimpleMutualTypeShape) : Prop :=
+  ∀ offset : Nat, ∀ shape : PsKernelSimpleMutualTypeShape,
+    psKernelMutualTypeShapeListGet remaining offset = some shape ->
+      psKernelMutualTypeShapeListGet allShapes (owner + offset) = some shape
+
+theorem PsKernelMutualTypeShapeSuffix.root
+    (shapes : List PsKernelSimpleMutualTypeShape) :
+    PsKernelMutualTypeShapeSuffix shapes 0 shapes := by
+  intro offset shape hGet
+  simpa using hGet
+
+theorem PsKernelMutualTypeShapeSuffix.head
+    {allShapes : List PsKernelSimpleMutualTypeShape} {owner : Nat}
+    {shape : PsKernelSimpleMutualTypeShape} {rest : List PsKernelSimpleMutualTypeShape}
+    (hSuffix : PsKernelMutualTypeShapeSuffix allShapes owner (shape :: rest)) :
+    psKernelMutualTypeShapeListGet allShapes owner = some shape := by
+  simpa using hSuffix 0 shape rfl
+
+theorem PsKernelMutualTypeShapeSuffix.tail
+    {allShapes : List PsKernelSimpleMutualTypeShape} {owner : Nat}
+    {shape : PsKernelSimpleMutualTypeShape} {rest : List PsKernelSimpleMutualTypeShape}
+    (hSuffix : PsKernelMutualTypeShapeSuffix allShapes owner (shape :: rest)) :
+    PsKernelMutualTypeShapeSuffix allShapes (Nat.succ owner) rest := by
+  intro offset selected hGet
+  have hSelected := hSuffix (Nat.succ offset) selected
+    (by simpa [psKernelMutualTypeShapeListGet] using hGet)
+  have hIndex : owner + Nat.succ offset = Nat.succ owner + offset := by omega
+  simpa [hIndex] using hSelected
+
+def psKernelMutualShapeConstructorNames
+    (types : List PsKernelSimpleMutualTypeShape) : List PsKernelName :=
+  match types with
+  | [] => []
+  | shape :: rest => psKernelSimpleCtorNames shape.decl.ctors ++
+      psKernelMutualShapeConstructorNames rest
+
+/-- Full ordered constructor publication across all mutual owners. -/
+inductive PsKernelCheckedMutualFamilyConstructorHistory
+    (targets : List PsKernelName) (allShapes : List PsKernelSimpleMutualTypeShape)
+    (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+    (resultLevel : PsKernelLevel) (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety) (headerLocal : PsKernelLocalContext) :
+    PsKernelEnvironment -> Nat -> List PsKernelSimpleMutualTypeShape ->
+    List PsKernelSimpleMutualConstructorShape -> PsKernelEnvironment -> Prop where
+  | done (work : PsKernelEnvironment) (owner : Nat) :
+      PsKernelCheckedMutualFamilyConstructorHistory targets allShapes levels params
+        resultLevel levelParams safety headerLocal work owner [] [] work
+  | step (work ownEnvironment finalEnvironment : PsKernelEnvironment) (owner : Nat)
+      (shape : PsKernelSimpleMutualTypeShape) (rest : List PsKernelSimpleMutualTypeShape)
+      (ownShapes tailShapes : List PsKernelSimpleMutualConstructorShape)
+      (hOwner : psKernelMutualTypeShapeListGet allShapes owner = some shape)
+      (hOwn : PsKernelCheckedMutualConstructorHistory targets allShapes levels params
+        resultLevel shape owner levelParams safety headerLocal work 0 shape.decl.ctors ownShapes ownEnvironment)
+      (hTail : PsKernelCheckedMutualFamilyConstructorHistory targets allShapes levels params
+        resultLevel levelParams safety headerLocal ownEnvironment (Nat.succ owner) rest tailShapes finalEnvironment) :
+      PsKernelCheckedMutualFamilyConstructorHistory targets allShapes levels params
+        resultLevel levelParams safety headerLocal work owner (shape :: rest)
+        (psKernelMutualConstructorShapeListAppend ownShapes tailShapes) finalEnvironment
+
+theorem psKernelAddSimpleMutualTypesWorker_semantic_history
+    (types : List PsKernelSimpleMutualTypeShape) :
+    ∀ (fuel : Nat) (safety : PsKernelDefinitionSafety) (resultLevel : PsKernelLevel)
+      (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+      (typeNames : List PsKernelName) (allShapes : List PsKernelSimpleMutualTypeShape)
+      (headerSession : PsKernelCheckerSession) (work : PsKernelEnvironment)
+      (owner : Nat) (result : PsKernelAddMutualConstructorsResult),
+      PsKernelEnvironmentIndexRefines work ->
+      PsKernelCheckerConfigurationSound headerSession.context headerSession.state ->
+      PsKernelEnvironmentSemanticExtends headerSession.context.environment work ->
+      PsKernelInductiveNamesAbsent work (psKernelMutualShapeConstructorNames types) ->
+      psKernelNameHasDuplicates (psKernelMutualShapeConstructorNames types) = false ->
+      PsKernelMutualTypeShapeSuffix allShapes owner types ->
+      PsKernelStringEqReflexiveLaw -> PsKernelNativeReductionSoundLaw -> PsKernelStringEqSoundLaw ->
+      psKernelAddSimpleMutualTypesWorker types fuel safety resultLevel levels params
+        typeNames allShapes headerSession work owner = Except.ok result ->
+      PsKernelCheckedMutualFamilyConstructorHistory typeNames allShapes levels params resultLevel
+        headerSession.context.levelParams safety headerSession.context.localContext
+        work owner types result.shapes result.environment ∧
+      PsKernelEnvironmentSemanticExtends work result.environment ∧
+      PsKernelEnvironmentIndexRefines result.environment := by
+  induction types with
+  | nil =>
+      intro fuel safety resultLevel levels params typeNames allShapes headerSession work owner
+        result hIndex hHeaderConfig hEnvExt hNames hUnique hSuffix hReflexive hNative hString hRun
+      simp [psKernelAddSimpleMutualTypesWorker] at hRun
+      cases hRun
+      exact ⟨PsKernelCheckedMutualFamilyConstructorHistory.done work owner,
+        PsKernelEnvironmentSemanticExtends.refl work, hIndex⟩
+  | cons typeShape rest ih =>
+      intro fuel safety resultLevel levels params typeNames allShapes headerSession work owner
+        result hIndex hHeaderConfig hEnvExt hNames hUnique hSuffix hReflexive hNative hString hRun
+      have hNamesSplit := PsKernelInductiveNamesAbsent.append_split work
+        (psKernelSimpleCtorNames typeShape.decl.ctors) (psKernelMutualShapeConstructorNames rest) hNames
+      have hUniqueSplit := psKernelNameHasDuplicates_append_false_refines
+        (psKernelSimpleCtorNames typeShape.decl.ctors) (psKernelMutualShapeConstructorNames rest) hUnique
+      simp only [psKernelAddSimpleMutualTypesWorker] at hRun
+      cases hOwn : psKernelAddSimpleMutualConstructorsForTypeWorker
+          typeShape.decl.ctors fuel safety resultLevel levels params typeNames allShapes
+          typeShape owner headerSession work 0 with
+      | error message => simp only [hOwn] at hRun; cases hRun
+      | ok ownResult =>
+          simp only [hOwn] at hRun
+          obtain ⟨hOwnHistory, hOwnExt, hOwnIndex⟩ :=
+            psKernelAddSimpleMutualConstructorsForTypeWorker_semantic_history
+              typeShape.decl.ctors fuel safety resultLevel levels params typeNames allShapes
+              typeShape owner headerSession work 0 ownResult hIndex hHeaderConfig hEnvExt
+              hNamesSplit.1 hUniqueSplit.1 hSuffix.head hReflexive hNative hString hOwn
+          have hRemainingNames := hOwnHistory.preserves_absent_names
+            (psKernelMutualShapeConstructorNames rest) hNamesSplit.2 hUniqueSplit.2.2
+          cases hRest : psKernelAddSimpleMutualTypesWorker rest fuel safety resultLevel
+              levels params typeNames allShapes headerSession ownResult.environment (Nat.succ owner) with
+          | error message => simp only [hRest] at hRun; cases hRun
+          | ok tailResult =>
+              simp only [hRest] at hRun
+              obtain ⟨hTailHistory, hTailExt, hFinalIndex⟩ :=
+                ih fuel safety resultLevel levels params typeNames allShapes headerSession
+                  ownResult.environment (Nat.succ owner) tailResult hOwnIndex hHeaderConfig
+                  (PsKernelEnvironmentSemanticExtends.trans headerSession.context.environment
+                    work ownResult.environment hEnvExt hOwnExt)
+                  hRemainingNames hUniqueSplit.2.1 hSuffix.tail hReflexive hNative hString hRest
+              cases hRun
+              exact ⟨PsKernelCheckedMutualFamilyConstructorHistory.step work
+                ownResult.environment tailResult.environment owner typeShape rest
+                ownResult.shapes tailResult.shapes hSuffix.head hOwnHistory hTailHistory,
+                PsKernelEnvironmentSemanticExtends.trans work ownResult.environment
+                  tailResult.environment hOwnExt hTailExt, hFinalIndex⟩

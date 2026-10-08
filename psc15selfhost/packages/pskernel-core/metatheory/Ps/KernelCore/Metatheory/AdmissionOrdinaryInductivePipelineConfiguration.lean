@@ -158,14 +158,16 @@ theorem psKernelAddSimpleInductive_success_constructor_pipeline
                                                       (psKernelOrdinaryInitialInductiveInfo decl indexResult.binders)))
                                                   0 decl.ctors with
                                               | error message =>
+                                                  simp only [safety, psKernelOrdinaryInitialInductiveInfo,
+                                                    Nat.succ_eq_add_one] at hCtors
                                                   simp [psKernelAddSimpleInductive, hDuplicates,
                                                     allNames, hUnique, hFresh, hOccurrences, hClosed,
                                                     hLevels, hHeader, hSort, hParams, hIndices, hShape,
                                                     psKernelOrdinaryInitialInductiveInfo, safety, hCtors] at hRun
                                               | ok ctorResult =>
                                                   exact ⟨headerResult, sortResult, paramResult, indexResult,
-                                                    resultLevel, ctorResult, hHeader, hSort, hParams,
-                                                    hIndices, hShape, hCtors⟩
+                                                    resultLevel, ctorResult, rfl, rfl, rfl,
+                                                    rfl, rfl, rfl⟩
                                           | _ =>
                                               simp [psKernelAddSimpleInductive, hDuplicates, allNames, hUnique,
                                                 hFresh, hOccurrences, hClosed, hLevels, hHeader, hSort,

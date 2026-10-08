@@ -25,3 +25,18 @@ lean_exe pscv_v6_dev where
 lean_exe pscv_v6_native_tests where
   srcDir := "test/lean"
   root := `NativeSmoke
+
+-- Research-only source compatibility probes. These roots are not linked into
+-- the V6 core or CLI. They test whether selected old Lean algorithms can be
+-- extracted under the current Lean 4.35 toolchain without preserving old APIs.
+lean_lib PscvReuseProbeFoundation where
+  srcDir := "../packages/foundation/src"
+  roots := #[`Ps.Foundation.Name, `Ps.Foundation.List]
+
+lean_lib PscvReuseProbeRuntimeIr where
+  srcDir := "../packages/compiler-ir/src"
+  roots := #[`Ps.CompilerIr.Model]
+
+lean_lib PscvReuseProbeInterfaceIr where
+  srcDir := "../packages/interface-ir/src"
+  roots := #[`Ps.InterfaceIr.Model, `Ps.InterfaceIr.Validate]

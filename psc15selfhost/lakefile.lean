@@ -345,6 +345,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.AdmissionNestedHeaderConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionNestedNoAuxConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualHeaderConfiguration,
+    `Ps.KernelCore.Metatheory.AdmissionMutualHeaderSpineConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualInductiveIndexConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualConstructorConfiguration,
     `Ps.KernelCore.Metatheory.AdmissionMutualConfiguration,

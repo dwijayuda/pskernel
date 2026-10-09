@@ -59,24 +59,29 @@ theorem psKernelValidateSimpleMutualRulesWorker_independent_typing
   | cons shape rest ih =>
       cases hOwner : Nat.beq shape.owner owner with
       | false =>
+          have hOwnerProp : shape.owner ≠ owner := by
+            intro hEqual
+            subst owner
+            simp at hOwner
           have hTailRun : psKernelValidateSimpleMutualRulesWorker rest fuel session levels
               params motives minors ruleBinders owner rules = Except.ok finalSession := by
-            simpa [psKernelValidateSimpleMutualRulesWorker, hOwner] using hRun
+            simpa [psKernelValidateSimpleMutualRulesWorker, hOwner, hOwnerProp] using hRun
           obtain ⟨hTail, hContext, hFinal⟩ := ih session rules hConfig hTailRun
           exact ⟨PsKernelMutualRecursorRulesTyped.skip shape rest rules
-            (by simpa using hOwner) hTail, hContext, hFinal⟩
+            hOwnerProp hTail, hContext, hFinal⟩
       | true =>
+          have hOwnerProp : shape.owner = owner := Nat.eq_of_beq_eq_true hOwner
           cases rules with
-          | nil => simp [psKernelValidateSimpleMutualRulesWorker, hOwner] at hRun
+          | nil => simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hOwnerProp] at hRun
           | cons rule tail =>
               cases hCheck : psKernelSessionCheck fuel session rule.rhs with
               | error message =>
-                  simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hCheck] at hRun
+                  simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hOwnerProp, hCheck] at hRun
               | ok checked =>
                   rcases checked with ⟨gotType, checkedSession⟩
                   cases hMotive : psKernelMutualOpenBinderListGet motives owner with
                   | none =>
-                      simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hCheck,
+                      simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hOwnerProp, hCheck,
                         psKernelSimpleMutualMotiveApp, hMotive] at hRun
                   | some motive =>
                       let expectedType := psKernelCloseOpenBinders
@@ -85,13 +90,13 @@ theorem psKernelValidateSimpleMutualRulesWorker_independent_typing
                           shape.resultIndices (psKernelSimpleMutualCtorApp levels params shape))
                       cases hCompare : psKernelSessionIsDefEq fuel checkedSession gotType expectedType with
                       | error message =>
-                          simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hCheck,
+                          simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hOwnerProp, hCheck,
                             psKernelSimpleMutualMotiveApp, hMotive, expectedType, hCompare] at hRun
                       | ok compared =>
                           rcases compared with ⟨equal, equalSession⟩
                           cases equal with
                           | false =>
-                              simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hCheck,
+                              simp [psKernelValidateSimpleMutualRulesWorker, hOwner, hOwnerProp, hCheck,
                                 psKernelSimpleMutualMotiveApp, hMotive, expectedType, hCompare] at hRun
                           | true =>
                               have hTyped := psKernelSessionCheck_concrete_refines_typing
@@ -111,12 +116,12 @@ theorem psKernelValidateSimpleMutualRulesWorker_independent_typing
                                 simpa [hEqualContext] using hEqual.2
                               have hTailRun : psKernelValidateSimpleMutualRulesWorker rest fuel equalSession
                                   levels params motives minors ruleBinders owner tail = Except.ok finalSession := by
-                                simpa [psKernelValidateSimpleMutualRulesWorker, hOwner, hCheck,
+                                simpa [psKernelValidateSimpleMutualRulesWorker, hOwner, hOwnerProp, hCheck,
                                   psKernelSimpleMutualMotiveApp, hMotive, expectedType, hCompare] using hRun
                               obtain ⟨hTail, hFinalContext, hFinalConfig⟩ :=
                                 ih equalSession tail hEqualConfig hTailRun
                               refine ⟨PsKernelMutualRecursorRulesTyped.cons shape rest rule tail
-                                motive (by simpa using hOwner) hMotive ?_ ?_, ?_, hFinalConfig⟩
+                                motive hOwnerProp hMotive ?_ ?_, ?_, hFinalConfig⟩
                               · apply PsKernelTypingJudgment.convert rule.rhs gotType expectedType hTyped.1
                                 simpa [hCheckedContext] using hEqual.1
                               · simpa [hEqualContext, hCheckedContext] using hTail

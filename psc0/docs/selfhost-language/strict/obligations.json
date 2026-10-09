@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-09 17:28:40 UTC",
+  "updatedAtUtc": "2026-10-09T17:37:00Z",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -445,12 +445,13 @@
     "generalRulesDischarged": 0
   },
   "cloudExecution": {
-    "status": "first-attempt-refused-correction-awaiting-qualification",
-    "failedSourceRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
-    "runId": 37964798240,
-    "compilerJobId": 113936354535,
+    "status": "second-attempt-refused-expected-type-correction-awaiting-qualification",
+    "failedSourceRef": "ce3c4f55f99fd11c7a61d5449e67bc49d58658db",
+    "runId": 37966777236,
+    "compilerJobId": 113942981936,
     "providerSeparate": true,
-    "selectedSeed": "R"
+    "selectedSeed": "R",
+    "attempts": 2
   },
   "sourceBoundaryCorrection": "source-boundary-correction.json",
   "qualificationAttempts": "qualification-attempts.json",
@@ -471,5 +472,6 @@
     "document": "PRIMITIVE_IDENTITY.md",
     "status": "source-reviewed-candidate-awaiting-qualification",
     "semanticPreservationProven": false
-  }
+  },
+  "sourceExpectedTypeCorrection": "source-expected-type-correction.json"
 }

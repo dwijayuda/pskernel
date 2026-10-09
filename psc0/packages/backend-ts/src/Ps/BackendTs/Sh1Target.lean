@@ -407,7 +407,7 @@ def psSh1TargetStep
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
-          let hasParameters := match item.parameters with
+          let hasParameters : Bool := match item.parameters with
             | List.nil => false
             | List.cons _ _ => true;
           let scope := PsSh1TargetScope.mk item.name "body" earlier

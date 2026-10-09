@@ -1779,7 +1779,7 @@
     }
   },
   "strictEnforcementCheckpoint": {
-    "status": "first-source-attempt-refused-reviewed-correction-awaiting-cloud-qualification",
+    "status": "second-source-attempt-refused-reviewed-expected-type-correction-awaiting-cloud-qualification",
     "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
     "branch": "psc0/strict-sh1-v1",
     "implementationManifest": "strict/implementation-checkpoint.json",
@@ -1816,13 +1816,15 @@
     "sourceAuthority": ".lean",
     "cloudExecution": {
       "status": "failed-before-N1-emission",
-      "sourceRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
-      "runId": 37964798240,
-      "compilerJobId": 113936354535,
-      "providerStatus": "skipped"
+      "sourceRef": "ce3c4f55f99fd11c7a61d5449e67bc49d58658db",
+      "runId": 37966777236,
+      "compilerJobId": 113942981936,
+      "providerStatus": "skipped",
+      "attempts": 2
     },
     "initialImplementationRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
     "sourceBoundaryCorrection": "strict/source-boundary-correction.json",
-    "qualificationAttempts": "strict/qualification-attempts.json"
+    "qualificationAttempts": "strict/qualification-attempts.json",
+    "sourceExpectedTypeCorrection": "strict/source-expected-type-correction.json"
   }
 }

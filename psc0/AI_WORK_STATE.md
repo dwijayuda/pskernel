@@ -1,6 +1,6 @@
 # PSC0 AI work state — active strict SH/1 milestone
 
-Updated: 2026-10-09 17:28:40 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
+Updated: 2026-10-09 17:37:00 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
 
 ## Read this first
 
@@ -11,6 +11,31 @@ At 2026-10-09 16:30:26 UTC, main was independently read back at **ed5d00aca0743b
 This active section and [strict/PLAN.md](docs/selfhost-language/strict/PLAN.md) supersede the archived instructions below that say “main remains untouched,” “do not merge main,” “the task is complete,” or “no work is outstanding.” Those instructions described the previous completed scope. They do not prohibit the merge and strict implementation now explicitly authorized by the user. The archived evidence and limits remain true for their exact revisions.
 
 **Continue the work; do not restart the earlier research, repeat the completed baseline qualifications, or claim that merging enables unrestricted PSC1.** Main contains the practical language improvement, F worker migrations, new-only ps-0.9-r3 grammar and TypeScript 7 migration. The complete strict source/runtime/semantic contract still has distinct obligations.
+
+## Latest executable checkpoint and immediate continuation
+
+The first implementation commit is cf35b6b2a3328a065721ef48cf633a44e6122362. Its first corrected source checkpoint is ce3c4f55f99fd11c7a61d5449e67bc49d58658db, parent cf35. Neither source is qualified and neither is merged to main. The selected seed remains R.
+
+Two exact-source attempts are retained in [qualification-attempts.json](docs/selfhost-language/strict/qualification-attempts.json):
+
+1. cf35, run 37964798240, job 113936354535: the owned parser refused a leading-dot constructor term in Ps.BackendTs.Sh1Target. Native build and the preceding gates passed. The class correction qualified 116 constructor terms while preserving all 58 supported shorthand patterns. It also reserved the actual 43 intrinsic symbol names and the separate fixed String.Pos.Raw type identity, and corrected source fixture grammar. Source conformance is 2 accepted / 33 refused / 2 host carrier refusals.
+2. ce3c, run 37966777236, job 113942981936: the module now parsed, but the owned elaborator refused matchExpectedType. Native build and preceding gates again passed. Inspection of psElabLet and psElabMatch in actual Term.lean blob ff7896a864a291ffbf1eb3aa70d6004ac86d1112 identifies the unannotated match-valued initializer of hasParameters in psSh1TargetStep. The follow-up changes exactly one binding to `let hasParameters : Bool := match item.parameters with`. All 30 target definitions, 41 matches and 21 lets were reviewed for that class; the other 40 matches inherit declared/branch result types. Root independently checked the actual expected-type control flow and exact one-line correction.
+
+Both failures occur at the bounded native development gate, before native atomic emission, new strict source/target/runtime conformance and C1/C2/C3 generation. The provider jobs were skipped. Do not claim that either run exercised the new runtime reference. The second decoded job log has 253714 characters and SHA-256 0c0b3eec6e86d86a27ca17bcc1b3f81c76a64ff0a542f7a32df4013f6c5ee154. Its exact artifact is 11633887132, digest 1ff5d7436936b87407658f26994eb90bf42ef12469b45f6a4766e24753f6cd20.
+
+This follow-up commit is a reviewed source correction awaiting its own exact-source cloud result. Discover its actual commit and Actions run from the branch; do not infer a pass from the commit marker. Do not mix the separate origin/Nat drafts into this qualification. On failure, retain the exact attempt and diagnose the demonstrated class before changing code or gates. On success, read the complete receipts and separate provider result, bind their actual bytes/hashes, and integrate only the qualified milestone under a fresh expected-head lease. Strict SH/1 and semantic qualification remain false until the still-open mandatory obligations are discharged.
+
+### Next origin-retention slice (unattached, not in this source checkpoint)
+
+The reviewed three-file manifest b65d43687f3eecae05749078d5c26b96f7f065bd contains Recursion.lean c403bd879e439b7b6e88303df430890352a14115, Declaration.lean a388d013dbf6c9270ffa91997512f672da6aabff, and new strict/ORIGIN_RETENTION.md 124c5155e445bf2f1800b8a32a47b4504bf64020. These record actual source-local indices/spans, actual output batch member indices/names/roles, and the successful normalization plan plus already-constructed worker syntax. Independent review found no requested source correction. They contain no per-origin environment/context snapshots, do not repeat elaboration, and do not prove expression-level source-to-Core or Core-to-IR correspondence.
+
+Migration_inventory now owns the dependent Compiler.Api companions and existing declaration-worker source-guard relocation. Approved new APIs are PsCompilerPreparationOutput(prepared, environment, admissions), psCompilerPrepareElaboratedWithOutput, psCompilerPreparationFinishWithOutput, and PsCompilerPreparationStepWithOriginsResult(state, origins) returned by psCompilerPreparationStepParsedWithOrigins. The origin step preserves PsElabOriginError; old public APIs preserve results/errors by projection. Retain one actual final preparation environment and one canonical admission encoding with the existing single appended newline. Arbitrary externally supplied prepared-result APIs must still validate and reconstruct their environment. Root owns Compiler.Sh1, BackendTs.Sh1, host/receipt integration and qualification. No cache protocol or algorithm change is authorized by this optimization.
+
+The existing check-elab-declarations-selfhost-source-syntax.mjs guard must inspect the actual richer recursive worker while retaining old signature/projection and forbidden-form checks; do not disable or weaken it.
+
+Grammar_adoption_audit separately owns a source-reviewed Nat demand repair candidate in Erasure/Expr.lean, base 28e14f991df68c4a7d49f09120a42c85c919d6a8. A computed Nat match major is currently duplicated by the zero test and predecessor expression. Proposed repair evaluates it once through a fresh IR let, reserves its output name in the existing freshness index before erasing branches, and preserves original variable/literal output and all Core-local acceptance rules. This draft still needs final review and qualification. Its callback demand probes are finite host observations, not new source-language effects or a general theorem.
+
+These current assignments supersede older agent ownership notes below. Finish and qualify a coherent slice before optional language expansion, mass refactoring, seed promotion or source-authority changes.
 
 ## Persistent decisions and execution rules
 

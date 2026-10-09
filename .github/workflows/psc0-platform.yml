@@ -1,0 +1,297 @@
+name: PSC0 platform preview qualification
+
+on:
+  push:
+    branches: ['psc0/platform-v1']
+    paths:
+      - 'psc0/bin/**'
+      - 'psc0/release/**'
+      - 'psc0/scripts/**'
+      - 'psc0/packages/**'
+      - 'psc0/examples/platform/**'
+      - 'psc0/examples/extensions/**'
+      - 'psc0/selfhost-seed.json'
+      - '.github/workflows/psc0-platform.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc0-platform-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Check host/session/publication and release policy before native build
+        run: |
+          node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-source-snapshot.test.mjs scripts/psc-cli.test.mjs scripts/assemble-release.test.mjs scripts/platform-release-smoke.test.mjs scripts/project-init.test.mjs scripts/command-extensions.test.mjs
+          node scripts/check-modular-preparation-source.mjs
+          node --check scripts/platform-release-smoke.mjs
+          node --check scripts/platform-integration.test.mjs
+      - name: Obtain the existing qualified F compiler artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37947341800
+          name: psc0-sh1-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d
+          path: qualified-f
+      - name: Authenticate exact F bytes and the unchanged portable source closure
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { createHash } from 'node:crypto';
+          import { appendFile, copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+          import path from 'node:path';
+          import { readBootstrapClosure } from './scripts/sh1-source-snapshot.mjs';
+          const release = JSON.parse(await readFile('release/release.json', 'utf8'));
+          const closure = await readBootstrapClosure(process.cwd());
+          assert.equal(closure.sha256, release.compiler.sourceClosureSha256);
+          assert.equal(closure.moduleCount, 61);
+          const expected = release.compiler.sha256;
+          let candidate;
+          async function find(directory) {
+            for (const item of await readdir(directory, { withFileTypes: true })) {
+              const file = path.join(directory, item.name);
+              if (item.isDirectory()) await find(file);
+              else if (!candidate && item.isFile() && file.endsWith('.js')) {
+                const bytes = await readFile(file);
+                if (createHash('sha256').update(bytes).digest('hex') === expected) candidate = file;
+              }
+            }
+          }
+          await find(path.resolve('../qualified-f'));
+          assert(candidate, 'PSC0_PLATFORM_F_ARTIFACT_MISSING');
+          const directory = path.resolve('dist/platform');
+          await mkdir(directory, { recursive: true });
+          const compiler = path.join(directory, 'compiler.js');
+          await copyFile(candidate, compiler);
+          await appendFile(process.env.GITHUB_ENV, 'PSC0_PLATFORM_COMPILER=' + compiler + '\n');
+          await writeFile(path.join(directory, 'compiler-input.json'), JSON.stringify({
+            sourceRef: release.compiler.sourceRef, compilerSha256: expected,
+            artifactRunId: 37947341800, artifactId: 11627040677,
+            sourceClosureSha256: closure.sha256, moduleCount: closure.moduleCount,
+            selectedSeedChanged: false, compilerRebuiltByThisRun: false,
+          }, null, 2) + '\n');
+          NODE
+      - name: Obtain the separately qualified Windows native payload
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37993071033
+          name: psc0-windows-provider-candidate-fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3
+          path: qualified-windows
+      - name: Authenticate the entire Windows payload before assembly
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { createHash } from 'node:crypto';
+          import { appendFile, copyFile, readFile, readdir } from 'node:fs/promises';
+          import path from 'node:path';
+          const release = JSON.parse(await readFile('release/release.json', 'utf8'));
+          const expected = release.kernel.artifacts['win32-x64'];
+          const directory = path.resolve('../qualified-windows/payload');
+          const files = [{ name: 'psc_kernel_core_provider.exe', sha256: expected.sha256 }, ...expected.dependencies];
+          assert.deepEqual((await readdir(directory)).sort(), files.map(file => file.name).sort());
+          for (const file of files) {
+            assert.equal(createHash('sha256').update(await readFile(path.join(directory, file.name))).digest('hex'),
+              file.sha256, file.name + ' Windows payload pin');
+          }
+          const input = JSON.parse(await readFile('../qualified-windows/probe-manifest.json', 'utf8'));
+          assert.equal(input.sourceRef, release.kernel.sourceRef);
+          assert.equal(input.sourceTree, '38c8c55bd2b214753e56c58c15c4901c32c01b86');
+          assert.equal(input.sourceTreePath, 'psc0');
+          assert.equal(input.repositoryTree, '80927150cbd6a5518762b4cc56e51ea24df8f374');
+          await appendFile(process.env.GITHUB_ENV,
+            'PSC0_PLATFORM_WINDOWS_KERNEL=' + path.join(directory, 'psc_kernel_core_provider.exe') + '\n');
+          await copyFile('../qualified-windows/probe-manifest.json', 'dist/platform/windows-provider-input.json');
+          NODE
+      - name: Read the pinned compiler-admission provider source
+        uses: actions/checkout@v4
+        with:
+          ref: 963030dc2d154008fccc82e7c8ed29331f138799
+          path: provider-source
+          sparse-checkout: psc0
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: provider-source/psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Restore exact provider source build cache
+        id: provider-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: provider-source/psc0/.lake/build
+          key: psc0-sh1-provider-v1-${{ runner.os }}-${{ runner.arch }}-963030dc2d154008fccc82e7c8ed29331f138799
+      - name: Build the unchanged provider target
+        working-directory: provider-source/psc0
+        run: lake build psc_kernel_core_provider
+      - name: Authenticate provider executable before integration
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { createHash } from 'node:crypto';
+          import { appendFile, readFile, writeFile } from 'node:fs/promises';
+          import path from 'node:path';
+          const release = JSON.parse(await readFile('release/release.json', 'utf8'));
+          const binary = path.resolve('../provider-source/psc0/.lake/build/bin/psc_kernel_core_provider');
+          const actual = createHash('sha256').update(await readFile(binary)).digest('hex');
+          assert.equal(actual, release.kernel.artifacts['linux-x64'].sha256, 'PSC0_PLATFORM_PROVIDER_PIN');
+          await appendFile(process.env.GITHUB_ENV, 'PSC0_TEST_KERNEL_CORE_PROVIDER_BIN=' + binary + '\n');
+          await writeFile('dist/platform/provider-input.json', JSON.stringify({
+            sourceRef: release.kernel.sourceRef, binarySha256: actual,
+            leanVersion: '4.34.0', algorithmChanged: false,
+          }, null, 2) + '\n');
+          NODE
+      - name: Retain provider build cache
+        if: ${{ steps.provider-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: provider-source/psc0/.lake/build
+          key: ${{ steps.provider-cache.outputs.cache-primary-key }}
+      - name: Install exact TypeScript 7 for source-host integration
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-platform-typescript" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { appendFile, copyFile, readFile } from 'node:fs/promises';
+          import { createRequire } from 'node:module';
+          import path from 'node:path';
+          const require = createRequire(import.meta.url);
+          const prefix = path.join(process.env.RUNNER_TEMP, 'psc0-platform-typescript');
+          const file = require.resolve('typescript/package.json', { paths: [prefix] });
+          const metadata = JSON.parse(await readFile(file, 'utf8'));
+          assert.equal(metadata.version, '7.0.2');
+          const launcher = path.resolve(path.dirname(file), metadata.bin.tsc);
+          await appendFile(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=7.0.2\n');
+          await copyFile(path.join(prefix, 'package-lock.json'), 'dist/platform/typescript-package-lock.json');
+          NODE
+      - name: Exercise real native admission and checked generated emission
+        run: node --test scripts/checked-kernel-core.test.mjs scripts/platform-integration.test.mjs
+      - name: Assemble the exact-artifact npm preview
+        run: node scripts/assemble-release.mjs --compiler "$PSC0_PLATFORM_COMPILER" --kernel-linux "$PSC0_TEST_KERNEL_CORE_PROVIDER_BIN" --kernel-windows "$PSC0_PLATFORM_WINDOWS_KERNEL" --out dist/npm/proofscript
+      - name: Pack the preview and retain the standalone clean-job smoke script
+        run: |
+          npm pack --ignore-scripts --json --pack-destination "$GITHUB_WORKSPACE/psc0/dist/platform" ./dist/npm/proofscript > dist/platform/npm-pack.json
+          npm pack --ignore-scripts --json --pack-destination "$GITHUB_WORKSPACE/psc0/dist/platform" ./packages/psdev > dist/platform/psdev-npm-pack.json
+          npm pack --ignore-scripts --json --pack-destination "$GITHUB_WORKSPACE/psc0/dist/platform" ./examples/extensions/pshello > dist/platform/pshello-npm-pack.json
+          cp scripts/platform-release-smoke.mjs dist/platform/platform-release-smoke.mjs
+      - name: Retain the candidate tarball and exact input evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofscript-preview-candidate-${{ github.sha }}
+          path: |
+            psc0/dist/platform
+            psc0/dist/npm/proofscript/release.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  windows-source:
+    needs: qualify
+    runs-on: windows-2022
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc0
+    steps:
+      - name: Preserve canonical source bytes before checkout
+        working-directory: ${{ github.workspace }}
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26.7.0'
+      - name: Check Windows host/session/publication and release policy
+        run: |
+          node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-source-snapshot.test.mjs scripts/psc-cli.test.mjs scripts/assemble-release.test.mjs scripts/platform-release-smoke.test.mjs scripts/project-init.test.mjs scripts/command-extensions.test.mjs
+          node scripts/check-modular-preparation-source.mjs
+      - uses: actions/download-artifact@v4
+        with:
+          name: proofscript-preview-candidate-${{ github.sha }}
+          path: candidate
+      - name: Install the candidate inputs without any Lean toolchain
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-source-inputs" --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/candidate/platform/proofscript-0.1.0-preview.2.tgz"
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { appendFile, readFile } from 'node:fs/promises';
+          import { createRequire } from 'node:module';
+          import path from 'node:path';
+          import { releaseRuntimePaths } from './scripts/release-manifest.mjs';
+          const installed = path.join(process.env.RUNNER_TEMP, 'psc0-source-inputs/node_modules/proofscript');
+          const runtime = releaseRuntimePaths(installed);
+          const require = createRequire(path.join(installed, 'bin/psc.mjs'));
+          const metadataFile = require.resolve('typescript/package.json');
+          const metadata = JSON.parse(await readFile(metadataFile, 'utf8'));
+          assert.equal(metadata.version, '7.0.2');
+          const launcher = path.resolve(path.dirname(metadataFile), metadata.bin.tsc);
+          await appendFile(process.env.GITHUB_ENV,
+            'PSC0_PLATFORM_COMPILER=' + runtime.compilerPath + '\n' +
+            'PSC0_TEST_KERNEL_CORE_PROVIDER_BIN=' + runtime.nativeBinaryPath + '\n' +
+            'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=7.0.2\n');
+          NODE
+      - name: Exercise the actual Windows provider and generated compiler
+        run: node --test scripts/checked-kernel-core.test.mjs scripts/platform-integration.test.mjs
+
+  installed:
+    needs: qualify
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+        node: ['22.23.3', '26.7.0']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      PSC0_SMOKE_EXPECT_NPM: ${{ matrix.node == '26.7.0' && '12.0.2' || '10.9.9' }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install the exact npm version used by this consumer qualification
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-smoke-npm" --ignore-scripts --no-audit --no-fund "npm@$PSC0_SMOKE_EXPECT_NPM"
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { appendFile, readFile } from 'node:fs/promises';
+          import path from 'node:path';
+          const root = path.join(process.env.RUNNER_TEMP, 'psc0-smoke-npm/node_modules/npm');
+          const metadata = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
+          assert.equal(metadata.version, process.env.PSC0_SMOKE_EXPECT_NPM);
+          await appendFile(process.env.GITHUB_ENV,
+            'PSC0_SMOKE_NPM_CLI=' + path.join(root, 'bin/npm-cli.js') + '\n');
+          NODE
+      - name: Read the exact candidate from this run without checking out source
+        uses: actions/download-artifact@v4
+        with:
+          name: proofscript-preview-candidate-${{ github.sha }}
+          path: candidate
+      - name: Qualify installed init, examples, checked builds and isolated command packages
+        run: node candidate/platform/platform-release-smoke.mjs candidate/platform/proofscript-0.1.0-preview.2.tgz installed-evidence candidate/platform/psdev-0.1.0-preview.2.tgz candidate/platform/psc-demo-pshello-0.1.0-preview.2.tgz
+      - name: Retain installed-package and native dependency evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofscript-preview-installed-${{ matrix.os }}-node${{ matrix.node }}-${{ github.sha }}
+          path: installed-evidence
+          if-no-files-found: warn
+          retention-days: 30

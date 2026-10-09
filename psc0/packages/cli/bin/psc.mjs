@@ -31,7 +31,8 @@ function usage() {
     "",
     "usage:",
     "  psc bootstrap",
-    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]",
+    "  psc check <entry.lean|entry.ps> [--compiler <compiler.js>] [--kernel-binary <absolute-path>]",
+    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>] [--kernel-binary <absolute-path>]",
     "  psc translate <input.lean|input.ps> --to <lean|ps> [--out <output>] [--compiler <compiler.js>]",
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",
     "  psc emit-ps <input.lean|input.ps> [--out <output.ps>] [--compiler <compiler.js>]",
@@ -68,19 +69,20 @@ if (!command || command === "--help" || command === "-h") {
   run(npm, ["run", "verify:selfhost"]);
 } else if (command === "fixed-point") {
   run(npm, ["run", "fixed-point"]);
-} else if (command === "build") {
+} else if (command === "build" || command === "check") {
   const entry = args[1];
   const output = option(args, "--out");
   const compiler = option(args, "--compiler") ?? defaultCompiler;
-
-  if (!entry || !output) throw new Error(usage());
-
-  run(node, [
-    "scripts/compile-with-generated.mjs",
-    compiler,
-    entry,
-    output,
-  ]);
+  const kernelBinary = option(args, "--kernel-binary");
+  if (!entry || command === "build" && !output) throw new Error(usage());
+  const checkedArgs = [
+    "scripts/checked-build.mjs", path.resolve(process.cwd(), entry),
+    "--compiler", path.resolve(selfhostRoot, compiler),
+  ];
+  if (command === "check") checkedArgs.push("--check");
+  else checkedArgs.push("--out", path.resolve(process.cwd(), output));
+  if (kernelBinary) checkedArgs.push("--kernel-binary", path.resolve(process.cwd(), kernelBinary));
+  run(node, checkedArgs);
 } else if (command === "project" && args[1] === "emit") {
   const entry = args[2];
   const target = option(args, "--to");

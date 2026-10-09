@@ -1,0 +1,13 @@
+{
+  "name": "@psc-demo/pshello",
+  "version": "0.1.0-preview.2",
+  "private": true,
+  "description": "Independently named command example isolated one-shot checked-build command demo",
+  "license": "UNLICENSED",
+  "files": [
+    "command.wasm",
+    "command.wat",
+    "proofscript-extension.json",
+    "README.md"
+  ]
+}

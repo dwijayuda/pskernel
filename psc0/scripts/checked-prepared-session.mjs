@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { ownedCheckedIdentity } from './checked-kernel-identity.mjs';
+import { coreCheckedIdentity } from './checked-kernel-identity.mjs';
 export { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 const hash = text => createHash('sha256').update(text, 'utf8').digest('hex');
 
@@ -36,6 +36,38 @@ function freezeGraph(root) {
   return root;
 }
 
+function checkedRuntimeIrOptions(compiler) {
+  const defaults = compiler.psIrCheckDefaultOptions;
+  if (defaults === null || typeof defaults !== 'object') {
+    throw new Error('PSC2_CHECKED_IR_OPTIONS_DEFAULTS');
+  }
+  freezeGraph(defaults);
+  const fields = ['maxSteps', 'maxTypeSteps', 'maxFindings'];
+  const limits = {};
+  for (const field of fields) {
+    const value = defaults[field];
+    if (typeof value !== 'bigint' || value < 0n || value > BigInt(Number.MAX_SAFE_INTEGER)) {
+      throw new Error('PSC2_CHECKED_IR_OPTIONS_DEFAULTS: ' + field);
+    }
+    limits[field] = Number(value);
+  }
+  // Construct the options with this compiler instance's public factory. A host
+  // record or a serialized accepted flag cannot substitute for the checked API.
+  const options = compiler.psIrCheckOptionsWithLimits(
+    defaults.maxSteps, defaults.maxTypeSteps, defaults.maxFindings,
+  );
+  if (options === null || typeof options !== 'object') {
+    throw new Error('PSC2_CHECKED_IR_OPTIONS_RESULT');
+  }
+  freezeGraph(options);
+  for (const field of fields) {
+    if (options[field] !== defaults[field]) {
+      throw new Error('PSC2_CHECKED_IR_OPTIONS_RESULT: ' + field);
+    }
+  }
+  return Object.freeze({ options, limits: Object.freeze(limits) });
+}
+
 function admissionsFrom(compiler, prepared) {
   const source = unwrapCompilerResult(compiler.psCompilerAdmissionsFromPrepared(prepared), 'ADMISSIONS');
   if (typeof source !== 'string') throw new Error('PSC2_CHECKED_ADMISSIONS_RESULT_SHAPE');
@@ -49,14 +81,15 @@ function admissionsFrom(compiler, prepared) {
  * exercise orchestration only. This does not sandbox malicious compiler/host JS
  * and does not claim a portable, universally unforgeable CheckedCore type.
  */
-export function createCheckedPreparedSession(compiler, checkAdmissions, expectedIdentity = ownedCheckedIdentity) {
+export function createCheckedPreparedSession(compiler, checkAdmissions, expectedIdentity = coreCheckedIdentity) {
   const identity = Object.freeze({ ...expectedIdentity });
   if (!identity.protocol || !identity.provider || !identity.profile) throw new Error('PSC2_CHECKED_IDENTITY_REQUIRED');
   for (const name of ['psCompilerPrepareSource', 'psCompilerAdmissionsFromPrepared',
-    'psCompilerTypeScriptFromPrepared']) {
+    'psCompilerCheckedTypeScriptFromPrepared', 'psIrCheckOptionsWithLimits']) {
     if (typeof compiler?.[name] !== 'function') throw new Error(`PSC2_CHECKED_API_MISSING: ${name}`);
   }
   if (typeof checkAdmissions !== 'function') throw new TypeError('Expected kernel checker');
+  const irPolicy = checkedRuntimeIrOptions(compiler);
   const modules = new WeakMap();
   async function checkPrepared(prepared, source) {
       if (prepared === null || typeof prepared !== 'object') throw new Error('PSC2_CHECKED_PREPARE_RESULT_SHAPE');
@@ -74,6 +107,38 @@ export function createCheckedPreparedSession(compiler, checkAdmissions, expected
       });
       modules.set(handle, { prepared, admissions });
       return handle;
+  }
+  function emitChecked(handle) {
+    const item = handle !== null && typeof handle === 'object' ? modules.get(handle) : undefined;
+    if (!item) throw new Error('PSC2_CHECKED_UNCHECKED_MODULE');
+    if (admissionsFrom(compiler, item.prepared) !== item.admissions) {
+      throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
+    }
+    // The existing portable entry owns erasure, complete original-IR typing and
+    // emission of that same IR. It returns no output if the checker refuses.
+    // There is no raw-emitter fallback and no second erasure/checking pass here.
+    const output = unwrapCompilerResult(
+      compiler.psCompilerCheckedTypeScriptFromPrepared(irPolicy.options, item.prepared), 'EMIT',
+    );
+    if (typeof output !== 'string') throw new Error('PSC2_CHECKED_EMIT_RESULT_SHAPE');
+    // Audit evidence follows only from this successful checked call. The API
+    // does not return detailed counts; do not invent an independent IR report.
+    // This record is not a transferable admission or emission capability.
+    const validation = Object.freeze({
+      schemaVersion: 1,
+      kind: 'psc0-runtime-ir-checked-emission',
+      emitter: 'psCompilerCheckedTypeScriptFromPrepared',
+      sourceSha256: handle.sourceSha256,
+      canonicalAdmissionsSha256: handle.canonicalAdmissionsSha256,
+      typeScriptSha256: hash(output),
+      runtimeIrTypingAccepted: true,
+      traversalComplete: true,
+      sameOriginalIrCheckedBeforeEmission: true,
+      options: irPolicy.limits,
+      strictSh1Qualified: false,
+      semanticContractQualified: false,
+    });
+    return Object.freeze({ typeScript: output, validation });
   }
   return Object.freeze({
     async check(sourceKind, source) {
@@ -96,14 +161,8 @@ export function createCheckedPreparedSession(compiler, checkAdmissions, expected
       return checkPrepared(prepared, source);
     },
     emit(handle) {
-      const item = handle !== null && typeof handle === 'object' ? modules.get(handle) : undefined;
-      if (!item) throw new Error('PSC2_CHECKED_UNCHECKED_MODULE');
-      if (admissionsFrom(compiler, item.prepared) !== item.admissions) {
-        throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
-      }
-      const output = unwrapCompilerResult(compiler.psCompilerTypeScriptFromPrepared(item.prepared), 'EMIT');
-      if (typeof output !== 'string') throw new Error('PSC2_CHECKED_EMIT_RESULT_SHAPE');
-      return output;
+      return emitChecked(handle).typeScript;
     },
+    emitChecked,
   });
 }

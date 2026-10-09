@@ -1,6 +1,6 @@
 # PSC0 Architecture Plan
 
-**Status:** researched architectural direction and migration plan; implementation is pending.
+**Status:** accepted architectural direction; the first protected-host and npm-preview implementation milestone is recorded in [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md). The full package, extension, module, and formal-assurance migration remains incremental.
 
 **Decision update:** 10 October 2026, Asia/Jakarta.
 
@@ -11,6 +11,12 @@
 **Distribution/user-experience follow-up:** 10 October 2026, Asia/Jakarta. The npm product name comes from the user; scoped names and CLI examples are proposed. Package-manager observations use the cited npm v12 documentation, not a newly executed installation.
 
 **Incremental-tooling follow-up:** 10 October 2026, Asia/Jakarta. The TS emitter, runtime identities, erased type representations, preparation state, and IR module shape were inspected at `3fbf7f778ab20aaeaafe87ae07b04c00ab2d29f7`. The default-package, neighboring-TS, watch, and editor workflows below are proposals, not demonstrated current functionality or a new qualification run.
+
+**Implementation follow-up:** 10 October 2026, Asia/Jakarta. [Draft PR90](https://github.com/dwijayuda/pskernel/pull/90) implements the initial protected compilation/publication route and an installable Linux/Windows x64 preview. The preview1 correction at `3fd25db1bbd8d508252682fd0efe5a948a5ea5fd` passed [all six qualification jobs](https://github.com/dwijayuda/pskernel/actions/runs/37993872945), including fresh Windows installation with Node26.7.0/npm12.0.2. One tarball contains the unchanged F compiler and separately authenticated native providers. Consumer Node22/26 support leaves the Node22/Lean4.34/TS7 bootstrap recipe and selected seed unchanged. The research observations below retain their original evidence cuts; [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) records the exact new package, platform/test limits and remaining proposals. No plugin execution or full compiler proof is inferred from this portability correction.
+
+**Onboarding and command-extension follow-up:** 10 October 2026, Asia/Jakarta. The next bounded milestone adds `psc init`, project entry/output defaults, shipped source/TypeScript/refusal examples, and a separately installed `psdev` command demo. Its initial operation is `psc dev --once`; full watch still follows T1 module/export and ABI work. The command guest uses a deliberately restricted V8 WebAssembly profile and the same checked host/publication path. Source e5c4a561 passed [all six jobs in run 37998655835](https://github.com/dwijayuda/pskernel/actions/runs/37998655835), including both independent command-package identities and the user's Windows/Node26 environment. Exact qualification is recorded in [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md); the dated research and full roadmap below are not retroactively claimed complete.
+
+**Wasm Core follow-up:** 10 October 2026, Asia/Jakarta. The requested direction is a qualified `pskernel-core-wasm` default with an explicit optional `pskernel-core-native` runtime, sharing one semantic Core. [The dedicated Wasm provider plan](docs/platform/wasm-core-provider-plan.md) records the inspected source seam, reusable build work, isolation limits, packaging, proof obligations and W0–W3 promotion gates. This is a researched recommendation; preview2 still uses its qualified native artifacts. The existing Lean-C++ Wasm checker and the tiny command guests are different implementations/profiles.
 
 **Canonical plan format:** this Markdown file. It supersedes the earlier PDF draft for future plan revisions.
 
@@ -333,6 +339,8 @@ Names below follow the user's selected ps-prefixed basename convention. The user
 | Module / proposed package | Owns | Dependency rule |
 | --- | --- | --- |
 | pskernel-core | Kernel terms and declarations, admission, conversion, authoritative environments, kernel proof sources | No frontend, plugin loader, CLI, backend, or PSCV dependency |
+| pskernel-core-wasm | Proposed required Wasm execution artifact and minimal adapter for the same selected Core | Release-authenticated provider; no ordinary plugin authority; default only after qualification |
+| pskernel-core-native | Proposed optional native execution artifact for the same source/profile/capabilities | Explicit runtime selection; no semantic fallback or automatic native evaluator |
 | pscore | Canonical data contracts and bridge, fixed RuntimeIR, invariants, erasure, explicit semantic pass contracts | Pure internal modules; no host IO or backend imports |
 | psfrontend | Default bounded .ps/.lean parsing, names, macros, elaboration, meta state | Produces Core proposals through public data contracts |
 | psc, distributed through proofscript | Trusted supervisor, CLI, policy, kernel service, resolver, extension runner, receipts, publication | Owns capabilities and decisions; does not import external package code |
@@ -347,6 +355,14 @@ Names below follow the user's selected ps-prefixed basename convention. The user
 Here, core distribution means the required compiler product: psc, pscore, psfrontend, pskernel-core, and psbackend-ts with their declared runtime/toolchain dependencies. Thus `npm install -g proofscript` should provide all five components without five manual installs. They can be bundled modules or actual required npm dependencies; this plan does not assume ownership or separate publication of every unscoped name. It does not mean putting TypeScript lowering or TypeScript-specific concepts inside pscore or the logical kernel. The source compiler remains written in its supported .lean/.ps profile.
 
 Publish the supervisor and kernel at clear consumer boundaries. The compiler-core, frontend, and TS backend can initially be subpackages or subpaths under a shared version if separate publication would add only coordination work. Proof sources, docs, archives, and historical seeds remain in the repository without automatically entering release tarballs.
+
+### Wasm-first Core execution
+
+For the latest requested direction, retain `pskernel-core` as the one logical/source component and make its qualified Wasm artifact the required default. Offer the native artifact as an explicit runtime option. Bundling versus separate npm publication can remain an incremental packaging choice; these two execution packages do not create two semantic kernels or expand the compiler's source import closure.
+
+The proposed `--kernel-runtime wasm|native` selects a release-approved artifact before admission. It never enables the acceptance-affecting native-reduction capability, falls back after a rejection/timeout, or accepts an arbitrary third-party checker. The supervisor owns identity reporting and exact request/artifact binding. Use a release-owned Node provider process with a qualified minimal Wasm import/adapter boundary first; do not infer isolation from a generic Emscripten launcher or Node WASI.
+
+Source-level kernel proofs can be shared when their assumptions match. Lean/C/runtime-to-Wasm refinement and engine correctness remain explicit substantial obligations or assumptions; Wasm validation and differential tests do not discharge them. Formal assurance remains a later gate. The complete sequence and measurable release gates are in [wasm-core-provider-plan.md](docs/platform/wasm-core-provider-plan.md). Current native receipts and fixed-point evidence remain accurately labeled.
 
 Use one development-only compiler assurance workspace at `psc0/proofs/`, organized by package. This is a source/build boundary, not another mandatory npm package or compiler plugin framework. Its pinned Lean toolchain and optional proof libraries are installed by the assurance workflow only. Keep the kernel's canonical assurance library under its existing ownership and reuse its results at an explicit source/profile boundary; do not create a second kernel proof copy. Section 16 specifies the layout.
 
@@ -686,6 +702,12 @@ Only the supervisor's controlled release configuration can identify a component 
 Use constrained Wasm guests in a pinned engine such as Wasmtime, preferably in a dedicated runner process. Grant no ambient filesystem, network, process spawning, native libraries, terminal, or broad WASI by default. Bound memory, execution fuel/time, message size, recursion in decoders, and output volume. Batch environment queries to control IPC overhead. An engine is a dependency and part of the security TCB; it is not a theorem of perfect isolation. [E08]
 
 Budgets must also cover work induced in the host: queries, admission, kernel conversion, certificate validation, and approved services. Guest fuel alone does not bound those costs. Checking jobs that cannot be interrupted safely in-process should run in bounded workers; timeout or termination yields no acceptance result.
+
+**Narrow first command profile.** The initial `psc-command/1` slice uses V8 WebAssembly already included with the supported Node runtime, with a fixed trusted worker adapter. It admits one bounded `(i32) -> i32` function, no imports, memory, tables, globals, starts or calls, and accepts only a request for one host-selected checked build. It introduces no additional npm engine dependency. This is a smaller first profile than the general Wasmtime-based guest destination; a richer payload/data ABI still requires a separate engine/resource-policy decision and qualification. The WebAssembly JavaScript interface grants access through explicit imports, which this profile excludes. [E30]
+
+The worker provides termination on a parent wall deadline; it is not an OS sandbox or deterministic fuel meter. Node's worker heap limits do not bound all external allocations and cannot guarantee process-wide availability. The profile therefore excludes guest heap allocation and bounds its bytes, locals and control nesting as well. Node/V8, the small decoder and trusted adapter remain security assumptions; this does not constitute a mechanized isolation proof. [E31] [E32]
+
+The guest cannot provide source/output paths, admissions, certificates or receipt fields. An opaque host-owned completed request supplies the actual extension record; the ordinary checked build establishes every existing admission, IR, target and publication condition. Rechecking the captured project/lock/package/descriptor/module identity before publication binds provenance without making every command guest part of the compiler proof. Installation and explicit activation remain distinct, and an independently named npm package uses the same boundary. Read [the command SDK](docs/platform/command-extension-sdk.md) for the implemented shape and its limits.
 
 Node vm explicitly is not a security mechanism; Node’s permission model does not promise confinement against malicious code. Worker threads, Object.freeze, package manifests, and ordinary subprocesses therefore cannot satisfy this requirement alone. Do not ship an automatic unsandboxed fallback. [E09] [E10]
 
@@ -1329,3 +1351,7 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 [E27]: https://www.typescriptlang.org/tsconfig/noEmitOnError.html
 [E28]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
 [E29]: https://code.visualstudio.com/api/extension-guides/workspace-trust
+
+[E30]: https://www.w3.org/TR/wasm-js-api-1/
+[E31]: https://nodejs.org/download/release/v22.23.3/docs/api/worker_threads.html
+[E32]: https://webassembly.org/docs/security/

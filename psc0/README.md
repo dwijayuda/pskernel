@@ -1,5 +1,19 @@
 # PSC0 compiler and self-host implementation
 
+## Installable platform preview
+
+**Preview2 is qualified** on Linux and Windows x64 with Node22.23.3/npm10.9.9 and Node26.7.0/npm12.0.2. It adds `psc init`, project entry/output defaults, `psc examples`, and a separately installed **psdev** one-shot command extension. An independently named **@psc-demo/pshello** package uses the same confined command interface.
+
+Download the three tarballs from the [preview2 candidate artifact](https://github.com/dwijayuda/pskernel/actions/runs/37998655835/artifacts/11648008841). Windows PowerShell qualification uses `psc.cmd`. See [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) for exact installation, activation, results and remaining scope, and [release/README.md](release/README.md) for the consumer guide.
+
+The protected public launcher is `bin/psc.mjs`; the repository bootstrap CLI remains `packages/cli/bin/psc.mjs`. `psc check` performs native PSKernel Core admission. `psc build` additionally validates the same original RuntimeIR and generated TypeScript with TS7.0.2 before owned publication. A `dev --once` request goes through that same path and records its actual extension identity in the saved receipt.
+
+The first [command extension SDK](docs/platform/command-extension-sdk.md) runs a tightly restricted no-import Wasm guest. Installation alone does not activate it. Full watch, module/export and checked ABI work, general language plugins, PSCV and LSP remain later milestones. Unsupported requests are refused explicitly.
+
+The [accepted architecture plan](PSC0_ARCHITECTURE_PLAN.md) and [active continuation state](AI_WORK_STATE.md) record these boundaries. The 61-module compiler closure, selected seed, native-provider algorithms and bootstrap toolchain are unchanged. This candidate is not yet published to npm.
+
+## Compiler lineage
+
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
 
 This directory began as the preserved 2026-10-03 compiler-only bootstrap snapshot, copied from
@@ -59,13 +73,17 @@ provider evidence requirements. Completed results and pending work are recorded 
 
 The native Lean provider source remains in `packages/pskernel-lean/`
 because the `lean-checked/` seed imports its admission implementation.
-The WASM provider remains the default host-side checked provider.
+The protected checked host now defaults to the exact native PSKernel Core
+provider pinned at source `963030dc2d154008fccc82e7c8ed29331f138799`, using
+Lean 4.34.0 and the canonical compiler-admission protocol. Explicit development
+Lean native/WASM alternatives retain their own descriptors. The public npm
+launcher has no provider-selection override.
 
 `legacy/packages/project` is retained as a *regression-only* Lake
 module import for `test/BootstrapTests.lean`. It is not imported by the
 compiler fixed-point root. The experimental owned-kernel provider is
-optional and is loaded through the host-side adapter when explicitly
-selected; it is not a bootstrap source dependency.
+retained for historical/development comparison; it is not the protected
+`pskernel-core` selector, a public npm choice, or a bootstrap source dependency.
 
 ## Important limits
 

@@ -166,7 +166,7 @@ theorem psKernelWhnfCore_let_refines_zeta
         cheapProj =
       psKernelWhnfCoreFinish
         (PsKernelExpr.letE name type value body nondep)
-        cheapProj
+        (Bool.or cheapRec cheapProj)
         result
         nextState ∧
     PsKernelReductionClosure

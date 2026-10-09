@@ -44,7 +44,7 @@ jobs:
           if p.exists():
               source = p.read_text()
               for name in ["psKernelExprEq", "psKernelExprHasLooseAt", "psKernelExprNodeCount"]:
-                  match = re.search(r"LEAN_EXPORT [^\n]+ l_" + name + r"\([^\n]*\) \{", source)
+                  match = re.search(r"LEAN_EXPORT [^\n]+ l_" + name + r"\([^;]*?\)\s*\{", source)
                   print("COMPILED_FUNCTION", name)
                   if match:
                       print("\n".join(source[match.start():].splitlines()[:70]))

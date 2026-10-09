@@ -2224,8 +2224,50 @@ theorem psKernelWhnfCountLambdasWithFuel_refines_relation_of_bound
                             argCount - nextCount < remaining := by
                         rcases hFuel with hSize | hArgs
                         · left
-                          simp only [psKernelExprNodeCount] at hSize ⊢
-                          omega
+                          have hOuterLe :
+                              psKernelExprNodeCount
+                                  (PsKernelExpr.lam
+                                    name
+                                    type
+                                    (PsKernelExpr.lam
+                                      bodyName
+                                      bodyType
+                                      bodyBody
+                                      bodyInfo)
+                                    binderInfo) ≤
+                                remaining :=
+                            Nat.le_of_lt_succ hSize
+                          have hBodyLt :
+                              psKernelExprNodeCount
+                                  (PsKernelExpr.lam
+                                    bodyName
+                                    bodyType
+                                    bodyBody
+                                    bodyInfo) <
+                                psKernelExprNodeCount
+                                  (PsKernelExpr.lam
+                                    name
+                                    type
+                                    (PsKernelExpr.lam
+                                      bodyName
+                                      bodyType
+                                      bodyBody
+                                      bodyInfo)
+                                    binderInfo) := by
+                            simp [psKernelExprNodeCount]
+                            omega
+                          have hBodyFuel :
+                              psKernelExprNodeCount
+                                  (PsKernelExpr.lam
+                                    bodyName
+                                    bodyType
+                                    bodyBody
+                                    bodyInfo) <
+                                remaining :=
+                            Nat.lt_of_lt_of_le
+                              hBodyLt
+                              hOuterLe
+                          exact hBodyFuel
                         · right
                           have hNextLt : nextCount < argCount :=
                             psKernelNatLt_lt_of_true _ _ hNext

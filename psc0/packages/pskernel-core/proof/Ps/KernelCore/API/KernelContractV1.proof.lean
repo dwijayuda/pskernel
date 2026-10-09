@@ -5,10 +5,10 @@ theorem psKernelTargetIdentityV1_contract :
   rfl
 
 theorem psKernelTargetIdentityV1_version :
-    psKernelTargetIdentityV1.leanVersion = "4.34.0" := by
+    psKernelTargetIdentityV1.leanVersion = "4.35.0-rc4" := by
   rfl
 
 theorem psKernelTargetIdentityV1_commit :
     psKernelTargetIdentityV1.leanCommit =
-      "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b" := by
+      "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364" := by
   rfl

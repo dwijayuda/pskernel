@@ -14,7 +14,7 @@
     ],
     "outDir": "dist",
     "role": "owned-kernel-core",
-    "authoritative": true,
+    "authoritative": false,
     "implementationProfile": "PSC0-current-bounded-selfhost",
     "profileReference": "../../docs/selfhost-language/CURRENT.md",
     "leanTarget": "4.35.0-rc4",

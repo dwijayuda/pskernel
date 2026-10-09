@@ -91,3 +91,23 @@ theorem psKernelMutualPostReplacementRecursor_semantic_refines
     PsKernelEnvironmentSemanticExtends.trans original work1
       (psKernelAddMutualRecursorInfos infos work1)
       hExt hPublished.2.1⟩
+
+/--
+Generated recursor publication cannot modify runtime capabilities or
+quotient-initialization state. This structural invariant complements the
+independent recursor typing and authoritative-lookup preservation certificate.
+-/
+theorem psKernelAddMutualRecursorInfos_preserves_runtime_quot
+    (infos : List PsKernelRecursorInfo) :
+    ∀ environment : PsKernelEnvironment,
+      (psKernelAddMutualRecursorInfos infos environment).runtime =
+        environment.runtime ∧
+      (psKernelAddMutualRecursorInfos infos environment).quotInitialized =
+        environment.quotInitialized := by
+  induction infos with
+  | nil => intro environment; exact ⟨rfl, rfl⟩
+  | cons info rest ih =>
+      intro environment
+      have hTail := ih (psKernelEnvironmentAddUnchecked environment
+        (PsKernelConstantInfo.recInfo info))
+      simpa [psKernelAddMutualRecursorInfos, psKernelEnvironmentAddUnchecked] using hTail

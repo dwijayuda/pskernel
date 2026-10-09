@@ -16,7 +16,7 @@ function parsedFixtures(entries) {
   } };
 }
 async function fixture(fn) {
-  const dir = await mkdtemp(path.join(tmpdir(), 'checked-snapshot-'));
+  const dir = await mkdtemp(path.join(tmpdir(), 'checked snapshot λ '));
   try { await fn(dir); } finally { await rm(dir, { recursive: true, force: true }); }
 }
 test('standalone source snapshot does not reread changed files', () => fixture(async dir => {
@@ -54,11 +54,15 @@ test('cycles rejected', () => fixture(async dir => {
   await writeFile(path.join(dir, 'Lib.lean'), 'import Main\n');
   await assert.rejects(readCheckedSourceSnapshot(path.join(dir, 'Main.lean')), /IMPORT_CYCLE/);
 }));
-test('symlink dependency escape rejected', () => fixture(async dir => {
+test('linked directory dependency escape rejected', () => fixture(async dir => {
   const project = path.join(dir, 'project'); await mkdir(project);
-  await writeFile(path.join(project, 'Main.lean'), 'import Lib\n');
-  await writeFile(path.join(dir, 'outside.lean'), 'def wrong : Nat := 0');
-  await symlink(path.join(dir, 'outside.lean'), path.join(project, 'Lib.lean'));
+  const outside = path.join(dir, 'outside'); await mkdir(outside);
+  await writeFile(path.join(project, 'Main.lean'), 'import Linked.Lib\n');
+  await writeFile(path.join(outside, 'Lib.lean'), 'def wrong : Nat := 0');
+  // A directory junction needs no file-symlink privilege on Windows and still
+  // resolves to a dependency outside the real workspace boundary.
+  await symlink(outside, path.join(project, 'Linked'),
+    process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(readCheckedSourceSnapshot(path.join(project, 'Main.lean')), /SOURCE_ESCAPE/);
 }));
 test('generated manifest is verified by the same production resolver', () => fixture(async dir => {
@@ -97,3 +101,34 @@ test('PS import cycles retain their dependency error', () => fixture(async dir =
   await assert.rejects(readCheckedSourceSnapshot(path.join(dir, 'Main.ps'),
     parsedFixtures([[main, ['Lib']], [lib, ['Main']]])), /IMPORT_CYCLE/);
 }));
+
+test('source snapshots preserve raw bytes across native path spellings', () => fixture(async dir => {
+  const entry = path.join(dir, 'Main.ps');
+  const source = '\uFEFFdef answer : Nat := 42\r\n';
+  await writeFile(entry, source);
+  const parser = parsedFixtures([[source, []]]);
+  const expected = await readCheckedSourceSnapshot(entry, parser);
+  const aliases = [dir + path.sep + 'unused' + path.sep + '..' + path.sep + 'Main.ps'];
+  if (process.platform === 'win32') {
+    aliases.push(entry.split(path.sep).join('/'));
+    aliases.push(entry.replace(/^[A-Za-z]:/u, drive => drive[0] === drive[0].toUpperCase()
+      ? drive.toLowerCase() : drive.toUpperCase()));
+  }
+  for (const alias of aliases) {
+    const actual = await readCheckedSourceSnapshot(alias, parser);
+    assert.deepEqual(actual.sources, [source], alias);
+    assert.equal(actual.closureSha256, expected.closureSha256, alias);
+    assert.equal(actual.ordered.length, 1, alias);
+  }
+}));
+
+if (process.platform === 'win32') {
+  test('Windows source filename casing cannot hide an import cycle', () => fixture(async dir => {
+    const entry = path.join(dir, 'Main.ps'), lib = path.join(dir, 'Lib.ps');
+    const mainSource = 'import lib\n', libSource = 'import MAIN\n';
+    await writeFile(entry, mainSource);
+    await writeFile(lib, libSource);
+    await assert.rejects(readCheckedSourceSnapshot(entry,
+      parsedFixtures([[mainSource, ['lib']], [libSource, ['MAIN']]])), /IMPORT_CYCLE/);
+  }));
+}

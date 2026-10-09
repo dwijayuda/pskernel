@@ -5,6 +5,31 @@ import { createHash, randomUUID } from 'node:crypto';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const absent = error => error?.code === 'ENOENT';
 
+// Validate native Windows pathname interpretation before either target staging
+// or publication writes. A colon names an NTFS stream; DOS device basenames and
+// trailing spaces/dots can alias other objects even with an added extension.
+export function checkedOutputPath(outputPath) {
+  const output = path.resolve(outputPath);
+  if (process.platform !== 'win32') return output;
+  const fail = () => { throw new Error('PSC0_OUTPUT_WINDOWS_PATH: ' + output); };
+  let normal = output;
+  if (normal.startsWith('\\\\.\\')) fail();
+  if (normal.startsWith('\\\\?\\')) {
+    const extended = normal.slice(4);
+    if (/^[A-Za-z]:\\/u.test(extended)) normal = extended;
+    else if (/^UNC\\/iu.test(extended)) normal = '\\\\' + extended.slice(4);
+    else fail(); // Other extended namespaces are not ordinary filesystem roots.
+  }
+  // Exclude the drive or complete UNC server/share root from component rules.
+  for (const component of normal.slice(path.parse(normal).root.length).split(path.sep)) {
+    const base = component.split('.')[0].replace(/ +$/u, '');
+    if (/[<>:"|?*\u0000-\u001f]/u.test(component) || /[ .]$/u.test(component) ||
+        /^(?:CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³])$/iu.test(base) ||
+        /^(?:CONIN\$|CONOUT\$)$/iu.test(component)) fail();
+  }
+  return output;
+}
+
 async function regularBytes(file) {
   let status;
   try { status = await lstat(file); } catch (error) { if (absent(error)) return undefined; throw error; }
@@ -32,7 +57,7 @@ function ownedNames(receipt, owner) {
  * that independent filesystem consumers observe several renames atomically.
  */
 export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts, receipt, beforeCommit }) {
-  const output = path.resolve(outputPath);
+  const output = checkedOutputPath(outputPath);
   const directory = path.dirname(output);
   const stem = path.basename(output).replace(/\.(?:ts|js)$/u, '');
   if (!/\.(?:ts|js)$/u.test(output) || !stem) throw new Error('PSC0_OUTPUT_KIND');

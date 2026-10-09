@@ -1,15 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtemp, writeFile, readFile, readdir, rm, symlink, chmod } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, symlink, chmod } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { publishCheckedArtifacts } from './checked-artifact-publication.mjs';
+import { checkedOutputPath, publishCheckedArtifacts } from './checked-artifact-publication.mjs';
 
 // Orchestration fixtures only: these strings/receipts are not compiler proofs.
 async function fixture(fn) {
-  const directory = await mkdtemp(path.join(tmpdir(), 'psc0-publication-'));
+  const directory = await mkdtemp(path.join(tmpdir(), 'psc0 publication λ '));
   const entryPath = path.join(directory, 'Main.ps');
   await writeFile(entryPath, 'source');
   const publish = (artifacts, options = {}) => publishCheckedArtifacts({
@@ -118,11 +118,16 @@ test('a first-generation partial failure leaves no new output or completion rece
 }));
 test('output names cannot escape the selected stem and symbolic links are refused', () => fixture(async ({ directory, publish }) => {
   await assert.rejects(publish({ 'answer.ts': 'safe', '../other.ts': 'bad' }), /OUTPUT_ARTIFACT_NAME/);
-  const outside = path.join(directory, 'user.ts');
-  await writeFile(outside, 'user');
-  await symlink(outside, path.join(directory, 'answer.ts'));
+  const outside = path.join(directory, 'user');
+  await mkdir(outside);
+  const userFile = path.join(outside, 'user.ts');
+  await writeFile(userFile, 'user');
+  // Windows junctions exercise the reparse-point boundary without requiring
+  // elevated file-symlink privileges; POSIX retains the regular-file symlink.
+  await symlink(process.platform === 'win32' ? outside : userFile,
+    path.join(directory, 'answer.ts'), process.platform === 'win32' ? 'junction' : 'file');
   await assert.rejects(publish({ 'answer.ts': 'generated' }), /OUTPUT_NOT_REGULAR/);
-  assert.equal(await readFile(outside, 'utf8'), 'user');
+  assert.equal(await readFile(userFile, 'utf8'), 'user');
 }));
 
 test('invalidation observed after artifact writes restores the previous completed set', () => fixture(async ({ directory, publish }) => {
@@ -209,7 +214,8 @@ test('a receipt created after artifact writes is preserved and never overwritten
 }));
 
 test('cleanup failure is disclosed after commitment without rolling back valid outputs', {
-  skip: process.platform === 'win32' || process.getuid?.() === 0,
+  skip: process.platform === 'win32' ? 'Unix directory write permissions do not model Windows ACLs'
+    : process.getuid?.() === 0 ? 'root bypasses the Unix directory permission fixture' : false,
 }, () => fixture(async ({ directory, publish }) => {
   const lock = path.join(directory, '.psc-output-lock');
   const warnings = [];
@@ -239,3 +245,71 @@ test('cleanup failure is disclosed after commitment without rolling back valid o
     if (existsSync(lock)) await chmod(lock, 0o700);
   }
 }));
+
+test('ordinary output paths retain spaces, Unicode, and native path normalization', () => fixture(async ({ directory, entryPath, publish }) => {
+  const outputPath = path.join(directory, 'nested space λ', 'answer.ts');
+  const receipt = await publish({ 'answer.ts': 'unicode path' }, { outputPath });
+  assert.equal(checkedOutputPath(outputPath), path.resolve(outputPath));
+  assert.equal(receipt.outputOwner, '../Main.ps');
+  assert.equal(await readFile(outputPath, 'utf8'), 'unicode path');
+  assert.equal(await readFile(entryPath, 'utf8'), 'source');
+}));
+
+// These cases require native Windows pathname and case-insensitive filesystem
+// semantics. They are additional Windows gates; no shared publication test is skipped.
+if (process.platform === 'win32') {
+  test('Windows output validation permits drive, UNC, and extended filesystem roots', () => {
+    for (const output of [
+      'C:\\Project Folder\\λ\\answer.ts',
+      'c:/Project Folder/λ/answer.ts',
+      '\\\\server\\Build Share\\λ\\answer.ts',
+      '\\\\?\\C:\\Project Folder\\λ\\answer.ts',
+      '\\\\?\\UNC\\server\\Build Share\\λ\\answer.ts',
+    ]) assert.equal(checkedOutputPath(output), path.resolve(output), output);
+  });
+  test('Windows device aliases, streams, and ambiguous components fail before filesystem writes', () => fixture(async ({ directory, entryPath, publish }) => {
+    const { buildChecked } = await import('./checked-build.mjs');
+    const child = path.join(directory, 'must-not-be-created');
+    const invalid = [
+      ...['NUL.ts', 'con.data.js', 'AuX.ts', 'COM1.ts', 'lpt9.ts', 'COM¹.ts',
+        'LPT².extra.js', 'stream:answer.ts', 'name|part.ts', 'tab\tname.ts']
+        .map(name => path.join(child, name)),
+      path.join(child, 'trailing.', 'answer.ts'),
+      path.join(child, 'trailing ', 'answer.ts'),
+      path.join(child, 'NUL', 'answer.ts'),
+      path.join(child, 'CONOUT$', 'answer.ts'),
+      '\\\\.\\C:\\answer.ts',
+      '\\\\?\\GLOBALROOT\\Device\\HarddiskVolume1\\answer.ts',
+    ];
+    for (const outputPath of invalid) {
+      assert.throws(() => checkedOutputPath(outputPath), /PSC0_OUTPUT_WINDOWS_PATH/, outputPath);
+      await assert.rejects(publish({ [path.basename(outputPath)]: 'refused' }, { outputPath }),
+        /PSC0_OUTPUT_WINDOWS_PATH/, outputPath);
+      // A missing compiler makes validation order observable: these paths must
+      // fail before compiler loading or target-staging writes can happen.
+      await assert.rejects(buildChecked({ entryPath, outputPath,
+        compilerPath: path.join(directory, 'missing-compiler.js') }),
+        /PSC0_OUTPUT_WINDOWS_PATH/, outputPath);
+    }
+    assert.equal(existsSync(child), false);
+    assert.deepEqual(await readdir(directory), ['Main.ps']);
+  }));
+  test('Windows directory-case and drive-case aliases cannot acquire a second publication lease', () => fixture(async ({ directory, publish }) => {
+    const outputDirectory = path.join(directory, 'Owned Output');
+    let release, entered;
+    const ready = new Promise(resolve => { entered = resolve; });
+    const held = new Promise(resolve => { release = resolve; });
+    const first = publish({ 'answer.ts': 'first' }, {
+      outputPath: path.join(outputDirectory, 'answer.ts'),
+      beforeCommit: async () => { entered(); await held; },
+    });
+    await ready;
+    try {
+      const alias = path.join(directory, 'owned output', 'answer.ts')
+        .replace(/^[A-Z]:/u, drive => drive.toLowerCase());
+      await assert.rejects(publish({ 'answer.ts': 'second' }, { outputPath: alias }), /OUTPUT_BUSY/);
+    } finally { release(); }
+    await first;
+    assert.equal(await readFile(path.join(outputDirectory, 'answer.ts'), 'utf8'), 'first');
+  }));
+}

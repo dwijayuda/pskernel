@@ -10,7 +10,7 @@ import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkAdmissionsWithKernel, checkedKernelDescriptor, defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import { loadGeneratedCompiler } from './sh1-source-snapshot.mjs';
 import { expectedTypeScriptVersion, resolveTypeScriptCli, typeScriptProfileArgs } from './typescript-cli.mjs';
-import { publishCheckedArtifacts } from './checked-artifact-publication.mjs';
+import { checkedOutputPath, publishCheckedArtifacts } from './checked-artifact-publication.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -47,6 +47,7 @@ export async function buildChecked({
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
   if (!checkOnly && !/\.(?:ts|js)$/u.test(outputPath)) throw new Error('PSC2_CHECKED_OUTPUT_KIND');
+  const output = checkOnly ? undefined : checkedOutputPath(outputPath);
   // The historical native seed protocol attests admissions only. Its raw emit
   // response cannot satisfy the protected same-original-IR emission contract.
   if (seedPath && !checkOnly) throw new Error('PSC0_NATIVE_SEED_EMISSION_UNQUALIFIED');
@@ -126,7 +127,6 @@ export async function buildChecked({
     return Object.freeze(receipt);
   }
   if (typeof typeScript !== 'string') throw new Error('PSC2_CHECKED_TS_RESULT');
-  const output = path.resolve(outputPath);
   const stem = path.basename(output).replace(/\.(?:ts|js)$/u, '');
   const expectedVersion = expectedTypeScriptVersion();
   const tsc = resolveTypeScriptCli();

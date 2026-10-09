@@ -1,10 +1,11 @@
-import Std.Data.HashMap
+import Lean.Data.PersistentHashMap
 import Init.Util
 
 /-!
 Native sharing support. Keys are hints only: every entry carries the equation
-it proves, and a hit validates both the input and the binder cursor. The table
-is private to one operation. No equality decision is inferred from a hash.
+it proves, and a hit validates both the input and the binder cursor. Each table
+fixes its specification. Substitution tables are operation-local; structural hash
+metadata can persist across queries. No equality decision is inferred from a hash.
 
 These safe Lean primitives require separate PSC0 backend qualification.
 -/
@@ -16,8 +17,11 @@ structure Entry (α β : Type) (spec : α → Nat → β) where
   value : β
   valid : value = spec node cursor
 
+/-- The checker retains parent cache states across recursive calls. A persistent
+hash trie copies a bounded-width path when aliased; an array-backed mutable map
+can copy its complete bucket array on every insertion in those retained states. -/
 abbrev Memo (α β : Type) (spec : α → Nat → β) :=
-  Std.HashMap Nat (Entry α β spec)
+  Lean.PersistentHashMap Nat (Entry α β spec)
 
 abbrev Result {α β : Type} (spec : α → Nat → β) (node : α) (cursor : Nat) :=
   { value : β // value = spec node cursor } × Memo α β spec
@@ -43,7 +47,7 @@ theorem value_eq {α β : Type} {spec : α → Nat → β} {node : α} {cursor :
       let updated := if cacheResult result.1 then
         next.insert key ⟨node, cursor, result.1, result.2⟩ else next
       Squash.mk (result, updated)
-  match memo[key]? with
+  match memo.find? key with
   | none => miss ()
   | some entry =>
     if hc : entry.cursor = cursor then

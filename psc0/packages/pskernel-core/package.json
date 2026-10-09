@@ -24,7 +24,7 @@
       "withPtrAddr",
       "withPtrEqDecEq",
       "Squash",
-      "Std.HashMap",
+      "Lean.PersistentHashMap",
       "proof-directed compiler simplification"
     ]
   },

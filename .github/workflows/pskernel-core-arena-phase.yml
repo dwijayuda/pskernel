@@ -1,0 +1,76 @@
+name: PSKernel Core Arena theorem stage diagnostics
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-phase-profile-v1
+    paths:
+      - ".github/workflows/pskernel-core-arena-phase.yml"
+      - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
+      - "psc15selfhost/lakefile.lean"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  theorem-phases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Compile canonical kernel and host-only profiler
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build psc_kernel_core_arena
+          .lake/build/bin/psc_kernel_core_arena --version
+      - name: Materialize exact pinned UTF8 theorem export
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cat > arena/tests/pskernel-phase-utf8.lean <<'EOF'
+          import Init
+          EOF
+          cat > arena/tests/pskernel-phase-utf8.yaml <<'EOF'
+          description: Host-only phase profile of pinned 407876 theorem.
+          leanfile: tests/pskernel-phase-utf8.lean
+          export-decls:
+            - _private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec
+          outcome: accept
+          EOF
+          cd arena
+          uv run lka.py build-test pskernel-phase-utf8 --cache
+          wc -l -c _build/tests/pskernel-phase-utf8.ndjson
+      - name: Report phases without issuing an Arena admission receipt
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -f 'PHASE_TOTAL_WALL_S=%e PHASE_PEAK_RSS_KB=%M PHASE_PROCESS_EXIT=%x' \
+            timeout 360 psc15selfhost/.lake/build/bin/psc_kernel_core_arena --phase-theorem \
+              '_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec' \
+            < arena/_build/tests/pskernel-phase-utf8.ndjson 2>&1 | tee "$RUNNER_TEMP/pskernel-phase-utf8.log"
+          status=${PIPESTATUS[0]}
+          echo "PHASE_DIAGNOSTIC_EXIT=$status"
+          if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then exit "$status"; fi
+          echo "PHASE_ONLY_NOT_A_FULL_ARENA_ACCEPTANCE=1"
+      - name: Upload diagnostic stage log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-profile-${{ github.run_id }}
+          path: ${{ runner.temp }}/pskernel-phase-utf8.log
+          if-no-files-found: ignore

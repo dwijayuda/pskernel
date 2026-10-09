@@ -5,6 +5,7 @@ on:
     branches:
       - pscv/prove-pskernel-core-v1
       - pscv/pskernel-core-arena-optimized-v3
+      - pscv/pskernel-core-arena-phase-profile-v1
     paths:
       - "psc15selfhost/packages/pskernel-core/**"
       - "psc15selfhost/test/KernelCore/**"

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { ownedCheckedIdentity } from './checked-kernel-identity.mjs';
+import { coreCheckedIdentity } from './checked-kernel-identity.mjs';
 export { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 const hash = text => createHash('sha256').update(text, 'utf8').digest('hex');
 
@@ -81,7 +81,7 @@ function admissionsFrom(compiler, prepared) {
  * exercise orchestration only. This does not sandbox malicious compiler/host JS
  * and does not claim a portable, universally unforgeable CheckedCore type.
  */
-export function createCheckedPreparedSession(compiler, checkAdmissions, expectedIdentity = ownedCheckedIdentity) {
+export function createCheckedPreparedSession(compiler, checkAdmissions, expectedIdentity = coreCheckedIdentity) {
   const identity = Object.freeze({ ...expectedIdentity });
   if (!identity.protocol || !identity.provider || !identity.profile) throw new Error('PSC2_CHECKED_IDENTITY_REQUIRED');
   for (const name of ['psCompilerPrepareSource', 'psCompilerAdmissionsFromPrepared',

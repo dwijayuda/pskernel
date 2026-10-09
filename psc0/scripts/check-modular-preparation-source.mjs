@@ -74,5 +74,7 @@ assert(!api.includes('prepared.canonicalAdmissions'), 'admissions must come from
 const session = await readFile(new URL('./checked-prepared-session.mjs', import.meta.url), 'utf8');
 assert(session.indexOf('freezeGraph(prepared);') < session.indexOf('const admissions = admissionsFrom(compiler, prepared);'));
 assert(session.includes('admissionsFrom(compiler, item.prepared) !== item.admissions'));
-assert(session.includes('compiler.psCompilerTypeScriptFromPrepared(item.prepared)'));
-console.log('PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, combined admission and unchanged kernel gate)');
+assert(session.includes('compiler.psCompilerCheckedTypeScriptFromPrepared(irPolicy.options, item.prepared)'));
+assert(!session.includes('psCompilerTypeScriptFromPrepared'),
+  'protected prepared sessions must not retain a raw TypeScript emission fallback');
+console.log('PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, combined admission and checked IR emission)');

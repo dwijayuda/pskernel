@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
 import { createCheckedPreparedSession, leanCheckedIdentity } from './checked-prepared-session.mjs';
+import { coreCheckedIdentity } from './checked-kernel-identity.mjs';
 
 const tag = Symbol('Except');
 const ok = value => ({ [tag]: 'ok', value });
@@ -259,4 +260,25 @@ test('validation-returning emission retains private handle and admission readbac
   compiler.psCompilerAdmissionsFromPrepared = () => ok('changed');
   assert.throws(() => session.emitChecked(handle), /CHECKED_PAYLOAD_CHANGED/);
   assert.ok(!calls.includes('checked-emit'));
+});
+
+test('the default prepared session requires the active PSKernel Core identity', async () => {
+  const { compiler } = fixture();
+  const session = createCheckedPreparedSession(compiler, () => ({
+    ...coreCheckedIdentity, accepted: true,
+  }));
+  const handle = await session.check('lean', '42');
+  assert.deepEqual(handle.provider, coreCheckedIdentity);
+  assert.equal(handle.provider.protocol, 'pskernel-core/1');
+  assert.equal(handle.provider.provider, 'pskernel-core-native');
+  assert.equal(handle.provider.profile, 'lean4.34-core');
+  assert.equal(session.emitChecked(handle).validation.runtimeIrTypingAccepted, true);
+});
+
+test('the default prepared session cannot accept the legacy owned provider', async () => {
+  const { compiler } = fixture();
+  const session = createCheckedPreparedSession(compiler, () => ({
+    ...coreCheckedIdentity, provider: 'psc-generated-owned', accepted: true,
+  }));
+  await assert.rejects(session.check('lean', '42'), /PROVIDER_IDENTITY: provider/);
 });

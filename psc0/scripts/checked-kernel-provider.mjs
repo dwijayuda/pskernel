@@ -1,20 +1,32 @@
-import { existsSync } from 'node:fs';
+import { accessSync, constants, existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkedKernelIdentity, ownedCheckedIdentity } from './checked-kernel-identity.mjs';
+import { checkedKernelIdentity, coreCheckedIdentity } from './checked-kernel-identity.mjs';
+import { checkCoreAdmissions, defaultCoreProviderBinary } from './checked-kernel-core.mjs';
+import { assertCanonicalAdmissionsEnvelope, kernelContractV1 } from './kernel-contract.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
+const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 
-export const defaultCheckedKernel = 'lean434-wasm';
-export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'pskernel-core', 'lean434']);
+export const defaultCheckedKernel = 'pskernel-core';
+export const checkedKernelSelectors = Object.freeze(['pskernel-core', 'lean434-wasm', 'lean434']);
 
+// This pin identifies the unchanged PR84 provider independently of the local
+// kernel source. PR89's Lean 4.35 Arena replay binary has a different protocol.
 const descriptors = Object.freeze({
   'pskernel-core': Object.freeze({
     selector: 'pskernel-core', package: '@proofscript/pskernel-core',
-    execution: 'psc-generated-js', version: ownedCheckedIdentity.version,
-    generatedKernelSha256: ownedCheckedIdentity.generatedKernelSha256,
-    sourceManifestSha256: ownedCheckedIdentity.sourceManifestSha256,
+    execution: 'native', ...coreCheckedIdentity,
+    sourceCommit: '963030dc2d154008fccc82e7c8ed29331f138799',
+    sourceTree: '38c8c55bd2b214753e56c58c15c4901c32c01b86',
+    expectedBinarySha256: '88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec',
+    platform: 'linux', architecture: 'x64',
+    verificationRun: 37925722635,
+    kernelContract: kernelContractV1.id,
+    contractSha256: kernelContractV1.sha256,
+    resourcePolicy: Object.freeze({ fuel: 131072, maxTimeoutMs: 60000 }),
   }),
   'lean434-wasm': Object.freeze({
     selector: 'lean434-wasm',
@@ -33,15 +45,16 @@ const descriptors = Object.freeze({
 });
 
 export function checkedKernelDescriptor(selector = defaultCheckedKernel) {
-  const descriptor = descriptors[selector];
-  if (!descriptor) throw new Error(`PSC2_CHECKED_KERNEL_UNSUPPORTED: ${selector}`);
-  return descriptor;
+  if (!Object.hasOwn(descriptors, selector)) {
+    throw new Error('PSC2_CHECKED_KERNEL_UNSUPPORTED: ' + selector);
+  }
+  return descriptors[selector];
 }
 
 function assertSemanticIdentity(result, selector) {
   for (const [field, expected] of Object.entries(checkedKernelIdentity(selector))) {
     if (result?.[field] !== expected) {
-      throw new Error(`PSC2_CHECKED_PROVIDER_IDENTITY: ${field}`);
+      throw new Error('PSC2_CHECKED_PROVIDER_IDENTITY: ' + field);
     }
   }
   if (typeof result?.accepted !== 'boolean') {
@@ -49,21 +62,58 @@ function assertSemanticIdentity(result, selector) {
   }
 }
 
+function bindCoreBinary(configuredPath) {
+  if (typeof configuredPath !== 'string' || !path.isAbsolute(configuredPath)) {
+    throw new Error('PSC0_KERNEL_CORE_PATH: require an absolute supervisor or release path');
+  }
+  const expected = descriptors['pskernel-core'];
+  if (process.platform !== expected.platform || process.arch !== expected.architecture) {
+    throw new Error('PSC0_KERNEL_CORE_PLATFORM: qualified native artifact is linux/x64');
+  }
+  let binaryPath;
+  let binarySha256;
+  try {
+    binaryPath = realpathSync(configuredPath);
+    if (!statSync(binaryPath).isFile()) throw new Error('Provider must be a regular file');
+    accessSync(binaryPath, constants.R_OK | constants.X_OK);
+    binarySha256 = hash(readFileSync(binaryPath));
+  } catch (cause) {
+    throw new Error('PSC0_KERNEL_CORE_ARTIFACT_UNAVAILABLE', { cause });
+  }
+  if (binarySha256 !== expected.expectedBinarySha256) {
+    throw new Error('PSC0_KERNEL_CORE_ARTIFACT_MISMATCH: ' + binarySha256);
+  }
+  return Object.freeze({ binaryPath, binarySha256 });
+}
+
+/**
+ * Host-only provider selection. The supervisor/release supplies nativeBinaryPath;
+ * project and extension messages must never supply options or provider code.
+ * Keep the executable and its installation outside extension-writable paths.
+ */
 export async function checkAdmissionsWithKernel(
   admissions,
   selector = defaultCheckedKernel,
   options = {},
 ) {
   if (typeof admissions !== 'string') throw new TypeError('Expected canonical admissions text');
-  const descriptor = checkedKernelDescriptor(selector);
+  let descriptor = checkedKernelDescriptor(selector);
   const timeoutMs = options.timeoutMs ?? 60000;
   let result;
 
   if (selector === 'pskernel-core') {
-    const provider = await import('./checked-owned-kernel.mjs');
-    result = await provider.checkOwnedAdmissions(admissions, {
-      timeoutMs,
-      ...(options.maxSteps !== undefined ? { maxSteps: options.maxSteps } : {}),
+    assertCanonicalAdmissionsEnvelope(admissions);
+    // Passing the path explicitly prevents the unchanged historical transport
+    // from consulting PSC_KERNEL_CORE_PROVIDER_BIN or searching project paths.
+    const binding = bindCoreBinary(options.nativeBinaryPath ?? defaultCoreProviderBinary);
+    result = checkCoreAdmissions(admissions, { binaryPath: binding.binaryPath, timeoutMs });
+    // A changed or unavailable artifact cannot yield a retained checked receipt.
+    const after = bindCoreBinary(binding.binaryPath);
+    if (after.binaryPath !== binding.binaryPath || after.binarySha256 !== binding.binarySha256) {
+      throw new Error('PSC0_KERNEL_CORE_ARTIFACT_CHANGED');
+    }
+    descriptor = Object.freeze({
+      ...descriptor, ...binding, canonicalAdmissionsSha256: hash(Buffer.from(admissions, 'utf8')),
     });
   } else if (selector === 'lean434-wasm') {
     const provider = await import('../packages/pskernel-lean-wasm/index.mjs');
@@ -90,5 +140,5 @@ export async function checkAdmissionsWithKernel(
   }
 
   assertSemanticIdentity(result, selector);
-  return Object.freeze({ result, descriptor });
+  return Object.freeze({ result: Object.freeze(result), descriptor });
 }

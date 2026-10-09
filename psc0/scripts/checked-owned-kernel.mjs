@@ -1,5 +1,5 @@
 import { Worker } from 'node:worker_threads';
-import { ownedCheckedIdentity } from './checked-kernel-identity.mjs';
+import { ownedCheckedIdentity } from './checked-owned-kernel-identity.mjs';
 
 // Host transport and resource limits only. All semantic transitions run the
 // generated owned kernel in a disposable worker with a fresh environment.

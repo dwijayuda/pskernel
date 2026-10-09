@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "psc0-sh1-finite-worker-migration-candidate",
-  "status": "prepared-reviewed-not-applied-to-branch",
+  "status": "applied-qualification-pending",
   "repository": "dwijayuda/pskernel",
   "inspectedBaseRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
   "sourceGrammar": {
@@ -12,7 +12,14 @@
   },
   "prerequisite": {
     "kind": "qualified-provider-accepted-cold-recoverable-selected-successor",
-    "satisfiedAtPreparation": false
+    "satisfiedAtPreparation": false,
+    "satisfiedAtApplication": true,
+    "selectedSeed": "R",
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "manifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+    "selectionCommitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6"
   },
   "scope": {
     "workers": 12,
@@ -440,7 +447,7 @@
   },
   "performanceClaim": null,
   "preparedHostCompletion": {
-    "status": "prepared-reviewed-not-applied-to-branch",
+    "status": "applied-qualification-pending",
     "sourceGrammarBoundary": "Require the current grammar for reusable prepare('proofScript') before any cache hit or compiler operation; bind the grammar in its closure hash and receipt.",
     "leanPreparation": "Existing serialization, receipt shape and cache behavior preserved.",
     "files": [
@@ -469,8 +476,8 @@
   },
   "preparedCurrentGuide": {
     "path": "psc0/docs/selfhost-language/CURRENT.md",
-    "sha": "8d92bd838fa81eeb2cb88e93964262fdf945f539",
-    "status": "unattached-draft-live-evidence-pending"
+    "sha": "90a482894c01111f62349b8455ca86756806c7be",
+    "status": "applied-current-R-evidence-and-F-qualification-pending"
   },
   "preparedRReceiptCollection": {
     "workflow": ".github/workflows/psc0-sh1-seed-evidence.yml",
@@ -480,7 +487,19 @@
     "runId": 37925722635,
     "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
     "launchPrerequisite": "All three R2 jobs must succeed",
-    "launched": false,
-    "selectionPerformed": false
+    "launched": true,
+    "selectionPerformed": true,
+    "collectorRunId": 37938411520,
+    "collectorCommitSha": "4b8c3277fcbf53ba3b42d30cdf2e84505c75e6e9",
+    "selectionCommitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
+    "actualFilesAuthenticated": 18,
+    "providerReceiptSha256": "1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77",
+    "coldReceiptSha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d"
+  },
+  "sourceRef": null,
+  "application": {
+    "parentCommit": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
+    "branch": "psc0/sh1-projection-grammar-v1",
+    "sourceRefMeaning": "The exact executable source is the commit that applies this candidate; its immutable SHA is recorded with the qualification run."
   }
 }

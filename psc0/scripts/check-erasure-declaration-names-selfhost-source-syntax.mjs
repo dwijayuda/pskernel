@@ -16,19 +16,19 @@ if (match === null) {
 
 const block = match[0];
 const required = [
-  /\(declarations : List PsDeclaration\) :\s*PsErasureNameState -> PsErasureNameState :=\s*match declarations with/,
-  /\| List\.nil =>\s*fun \(state : PsErasureNameState\) => state/,
-  /let smaller : PsErasureNameState -> PsErasureNameState :=\s*psBuildErasureDeclarationNamesWorker rest;/,
+  /\(declarations : List PsDeclaration\)\s*\(state : PsErasureNameState\) : PsErasureNameState :=\s*match declarations with/,
+  /\| List\.nil =>\s*state/,
+  /\| List\.cons declaration rest =>\s*let sourceName : Option PsName :=/,
   /let sourceName : Option PsName :=\s*match declaration with/,
   /\| PsDeclaration\.definitionDecl name _ _ _ => Option\.some name/,
   /\| PsDeclaration\.partialDecl name _ _ _ => Option\.some name/,
   /\| PsDeclaration\.theoremDecl name _ _ _ => Option\.some name/,
   /\| PsDeclaration\.inductiveDecl info => Option\.some info\.name/,
   /\| _ => Option\.none;\s*match sourceName with/,
-  /\| Option\.none => smaller state/,
+  /\| Option\.none => psBuildErasureDeclarationNamesWorker rest state/,
   /psErasureSafeIdentifier \(psNameToString name\) "decl";/,
   /psErasureAddUniqueString state\.used raw 4096;/,
-  /smaller\s*\(PsErasureNameState\.mk\s*\(List\.cons candidate state\.used\)\s*\(List\.cons \(Prod\.mk name candidate\) state\.entriesRev\)\)/,
+  /psBuildErasureDeclarationNamesWorker\s+rest\s*\(PsErasureNameState\.mk\s*\(List\.cons candidate state\.used\)\s*\(List\.cons \(Prod\.mk name candidate\) state\.entriesRev\)\)/,
   /def psBuildErasureDeclarationNames\s*\(declarations : List PsDeclaration\)\s*\(state : PsErasureNameState\) : PsErasureNameState :=\s*psBuildErasureDeclarationNamesWorker declarations state/,
 ];
 for (const pattern of required) {

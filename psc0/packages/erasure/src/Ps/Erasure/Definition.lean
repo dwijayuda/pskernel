@@ -36,33 +36,31 @@ structure PsErasureNameState where
   entriesRev : List (PsName × String)
 
 def psBuildErasureDeclarationNamesWorker
-    (declarations : List PsDeclaration) :
-    PsErasureNameState -> PsErasureNameState :=
+    (declarations : List PsDeclaration)
+    (state : PsErasureNameState) : PsErasureNameState :=
   match declarations with
   | List.nil =>
-      fun (state : PsErasureNameState) => state
+      state
   | List.cons declaration rest =>
-      let smaller : PsErasureNameState -> PsErasureNameState :=
-        psBuildErasureDeclarationNamesWorker rest;
-      fun (state : PsErasureNameState) =>
-        let sourceName : Option PsName :=
-          match declaration with
-          | PsDeclaration.definitionDecl name _ _ _ => Option.some name
-          | PsDeclaration.partialDecl name _ _ _ => Option.some name
-          | PsDeclaration.theoremDecl name _ _ _ => Option.some name
-          | PsDeclaration.inductiveDecl info => Option.some info.name
-          | _ => Option.none;
-        match sourceName with
-        | Option.none => smaller state
-        | Option.some name =>
-            let raw :=
-              psErasureSafeIdentifier (psNameToString name) "decl";
-            let candidate :=
-              psErasureAddUniqueString state.used raw 4096;
-            smaller
-              (PsErasureNameState.mk
-                (List.cons candidate state.used)
-                (List.cons (Prod.mk name candidate) state.entriesRev))
+      let sourceName : Option PsName :=
+        match declaration with
+        | PsDeclaration.definitionDecl name _ _ _ => Option.some name
+        | PsDeclaration.partialDecl name _ _ _ => Option.some name
+        | PsDeclaration.theoremDecl name _ _ _ => Option.some name
+        | PsDeclaration.inductiveDecl info => Option.some info.name
+        | _ => Option.none;
+      match sourceName with
+      | Option.none => psBuildErasureDeclarationNamesWorker rest state
+      | Option.some name =>
+          let raw :=
+            psErasureSafeIdentifier (psNameToString name) "decl";
+          let candidate :=
+            psErasureAddUniqueString state.used raw 4096;
+          psBuildErasureDeclarationNamesWorker
+            rest
+            (PsErasureNameState.mk
+              (List.cons candidate state.used)
+              (List.cons (Prod.mk name candidate) state.entriesRev))
 
 def psBuildErasureDeclarationNames
     (declarations : List PsDeclaration)
@@ -402,37 +400,36 @@ def psErasureReverseIrDeclarationsAcc
 def psEraseDefinitionsLoopWorker
     (environment : PsEnvironment)
     (scope : PsErasureScope)
-    (declarations : List PsDeclaration) :
-    List PsVerifiedIrDeclaration ->
+    (declarations : List PsDeclaration)
+    (declarationsRev : List PsVerifiedIrDeclaration) :
     Except PsErasureError (List PsVerifiedIrDeclaration) :=
   match declarations with
   | List.nil =>
-      fun (declarationsRev : List PsVerifiedIrDeclaration) =>
-        Except.ok (psErasureReverseIrDeclarationsAcc declarationsRev List.nil)
+      Except.ok (psErasureReverseIrDeclarationsAcc declarationsRev List.nil)
   | List.cons declaration rest =>
-      let smaller :
-          List PsVerifiedIrDeclaration ->
-          Except PsErasureError (List PsVerifiedIrDeclaration) :=
-        psEraseDefinitionsLoopWorker environment scope rest;
-      fun (declarationsRev : List PsVerifiedIrDeclaration) =>
-        match declaration with
-        | PsDeclaration.definitionDecl name _ type value =>
-            match psEraseDefinition environment scope name type value with
-            | Except.error error => Except.error error
-            | Except.ok result =>
-                match result with
-                | Option.none => smaller declarationsRev
-                | Option.some lowered =>
-                    smaller (List.cons lowered declarationsRev)
-        | PsDeclaration.partialDecl name _ type value =>
-            match psEraseDefinition environment scope name type value with
-            | Except.error error => Except.error error
-            | Except.ok result =>
-                match result with
-                | Option.none => smaller declarationsRev
-                | Option.some lowered =>
-                    smaller (List.cons lowered declarationsRev)
-        | _ => smaller declarationsRev
+      match declaration with
+      | PsDeclaration.definitionDecl name _ type value =>
+          match psEraseDefinition environment scope name type value with
+          | Except.error error => Except.error error
+          | Except.ok result =>
+              match result with
+              | Option.none =>
+                  psEraseDefinitionsLoopWorker environment scope rest declarationsRev
+              | Option.some lowered =>
+                  psEraseDefinitionsLoopWorker environment scope rest
+                    (List.cons lowered declarationsRev)
+      | PsDeclaration.partialDecl name _ type value =>
+          match psEraseDefinition environment scope name type value with
+          | Except.error error => Except.error error
+          | Except.ok result =>
+              match result with
+              | Option.none =>
+                  psEraseDefinitionsLoopWorker environment scope rest declarationsRev
+              | Option.some lowered =>
+                  psEraseDefinitionsLoopWorker environment scope rest
+                    (List.cons lowered declarationsRev)
+      | _ =>
+          psEraseDefinitionsLoopWorker environment scope rest declarationsRev
 
 def psEraseDefinitionsLoop
     (environment : PsEnvironment)

@@ -30,8 +30,10 @@ import { runFoundationConformance } from './sh1-foundation-conformance.mjs';
 import { runHelperConformance, runHelperRuntimeConformance } from './sh1-helper-conformance.mjs';
 import { runGenericErasureConformance } from './sh1-generic-erasure-conformance.mjs';
 import { runIterationConformance } from './sh1-iteration-conformance.mjs';
+import { runMigrationWorkerConformance } from './sh1-migration-worker-conformance.mjs';
+import { runMigrationWorkerAbi } from './sh1-migration-worker-abi.mjs';
 import {
-  compileTypeScript, runCommand, runSh1Capabilities, sha256, unwrap,
+  compileTypeScript, runCommand, runSh1Capabilities, sha256, unwrap, valueTag,
 } from './sh1-capabilities.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -100,6 +102,8 @@ async function recipeIdentity() {
     'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs',
     'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-projection-conformance.mjs',
     'scripts/sh1-successor-seed.mjs', 'psconfig.json',
+    'scripts/sh1-fresh-name-conformance.mjs', 'scripts/sh1-migration-worker-conformance.mjs',
+    'scripts/sh1-migration-worker-abi.mjs',
     'test/fixtures/selfhost-sh1-accumulators.lean', 'test/fixtures/selfhost-sh1-accumulators.ps',
     'scripts/proofscript-source.mjs', 'scripts/checked-source-snapshot.mjs',
     'scripts/selfhost-source-workspace.mjs', 'scripts/LeanCheckedSeed.lean',
@@ -286,43 +290,27 @@ async function recoverSeed(sourceRoot, outDir) {
 
 async function selectedAuthoringSeed(compilerOverride) {
   const selected = await readSelectedSeed();
+  assert.equal(selected.mode, 'qualified', 'PSC0_SH1_MIGRATION_QUALIFIED_SEED_REQUIRED');
+  assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed',
+    'PSC0_SH1_MIGRATION_PROJECTION_SUCCESSOR_REQUIRED');
+  // The dispatch reader requires both authentic cold-recovery and provider
+  // evidence. Immutable S0/A reconstruction still uses its separate commands.
+  await verifySeedExecutionRuntime(selected.manifest.toolchain, selected.recoveryTypeScriptVersion);
   const compilerPath = path.resolve(root, compilerOverride ?? selected.compilerPath);
-  let expectedSha256;
-  let identitySha256;
-  let sourceClosureSha256;
-  let producerToolchain;
-  if (selected.mode === 'qualified') {
-    await verifySeedExecutionRuntime(selected.manifest.toolchain, selected.recoveryTypeScriptVersion);
-    expectedSha256 = selected.manifest.expectedArtifacts.javascriptSha256;
-    identitySha256 = selected.identitySha256;
-    sourceClosureSha256 = selected.manifest.sourceClosureSha256;
-    producerToolchain = selected.manifest.toolchain;
-  } else {
-    // An explicit --seed override must still be the verified historical seed.
-    // Its claimed ancestry cannot be inferred from the supplied filename.
-    const directory = path.dirname(path.resolve(root, selected.compilerPath));
-    const recordedReceipt = JSON.parse(await readFile(path.join(directory, 'seed.json'), 'utf8'));
-    producerToolchain = recordedReceipt.identity?.toolchain;
-    assert(producerToolchain, 'PSC0_SH1_HISTORICAL_PRODUCER_TOOLCHAIN_REQUIRED');
-    const historical = await historicalIdentity(path.resolve(root, '../historical-source/psc0'), producerToolchain);
-    const receipt = await verifyHistoricalSeedReceipt(directory, historical);
-    expectedSha256 = receipt.artifacts['index.js'];
-    identitySha256 = historical.identitySha256;
-    sourceClosureSha256 = historical.closure.sha256;
-  }
+  const expectedSha256 = selected.manifest.expectedArtifacts.javascriptSha256;
   assert.equal(sha256(await readFile(compilerPath)), expectedSha256,
     'PSC0_SH1_SELECTED_SEED_DIGEST');
   return {
     compilerPath, expectedSha256, mode: selected.mode,
     provenance: {
-      kind: selected.mode === 'qualified' ? 'previous-qualified-authoring-seed' : 'historical-aggregate-implementation',
+      kind: 'previous-qualified-authoring-seed',
       sourceRef: selected.sourceRef,
-      sourceClosureSha256,
+      sourceClosureSha256: selected.manifest.sourceClosureSha256,
       compilerSha256: expectedSha256,
-      identitySha256,
-      independentAlgorithm: selected.mode === 'historical',
-      priorQualification: selected.manifest?.qualification ?? null,
-      producerToolchain,
+      identitySha256: selected.identitySha256,
+      independentAlgorithm: false,
+      priorQualification: selected.manifest.qualification,
+      producerToolchain: selected.manifest.toolchain,
       executionRuntime: executionRuntime(await toolchainIdentity()),
     },
   };
@@ -369,6 +357,10 @@ async function buildGeneration(compilerPath, closure, outDir, {
   const canonicalText = JSON.stringify(canonical, null, 2) + '\n';
   const canonicalDone = performance.now();
   const ir = unwrap(compiler.psCompilerVerifiedIrFromPrepared(prepared), 'ERASE');
+  // Observe the existing current-source objects before their original-IR check.
+  // Historical TS5 reconstruction retains its exact established boundary.
+  const migrationWorkerAbi = historicalCommands.has(command) ? undefined
+    : runMigrationWorkerAbi(compiler, prepared, ir, valueTag);
   const irInventory = inventoryOriginalIr(compiler, ir, {
     compilerSha256, legacyBoundary: legacyIrBoundary,
   });
@@ -415,6 +407,7 @@ async function buildGeneration(compilerPath, closure, outDir, {
       javascriptSha256: sha256(javascript),
     },
     preparation,
+    ...(migrationWorkerAbi ? { migrationWorkerAbi } : {}),
     originalIrInventory: {
       report: 'original-ir-inventory.json',
       traversalComplete: irInventory.traversalComplete,
@@ -852,8 +845,8 @@ async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, 
     return;
   }
   if (selected.mode === 'qualified') {
-    // The initial authoring seed A remains sufficient while B uses its language.
-    // Do not silently claim S0 can rebuild migrated B or discard A's recovery path.
+    // The selected recoverable successor remains sufficient for this migration.
+    // Further promotion requires its own explicit and qualified recovery path.
     await writeJson(path.join(outDir, 'seed-selection.json'), {
       status: 'existing-qualified-authoring-seed-retained',
       sourceRef: selected.sourceRef,
@@ -1024,6 +1017,16 @@ if (command === 'seed-identity') {
   const libraryCompiler = await loadCompiler(authoring.compilerPath, {
     expectedSha256: authoring.expectedSha256,
   });
+  const referenceWorkerReport = runMigrationWorkerConformance(libraryCompiler.compiler, valueTag);
+  const referenceWorkerReceipt = {
+    schemaVersion: 1,
+    evidence: 'selected-successor-migration-worker-reference',
+    sourceRef: authoring.provenance.sourceRef,
+    compilerSha256: libraryCompiler.compilerSha256,
+    seedIdentitySha256: authoring.provenance.identitySha256,
+    report: referenceWorkerReport,
+  };
+  await writeJson(path.join(outDir, 'worker-migration-reference.json'), referenceWorkerReceipt);
   await runFoundationConformance({
     ...libraryCompiler,
     executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',
@@ -1057,10 +1060,29 @@ if (command === 'seed-identity') {
     nativeCompiler: option(args, '--native', undefined),
   });
   const nativeArg = option(args, '--native', undefined);
-  await runSh1Capabilities({
+  const candidateCapabilities = await runSh1Capabilities({
     ...loaded, root, outDir: path.join(outDir, 'C1/capabilities'), tsc,
     nativeCompiler: nativeArg ? path.resolve(root, nativeArg) : undefined,
   });
+  assert.deepEqual(candidateCapabilities.workerMigration, referenceWorkerReport,
+    'PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE');
+  const migrationCorrespondence = {
+    schemaVersion: 1,
+    evidence: 'finite-migration-worker-R-F-correspondence',
+    beforeSourceRef: authoring.provenance.sourceRef,
+    beforeCompilerSha256: libraryCompiler.compilerSha256,
+    afterSourceRef: generation.receipt.sourceRef,
+    afterCompilerSha256: loaded.compilerSha256,
+    casesPerCompiler: referenceWorkerReport.cases,
+    observationSha256: referenceWorkerReport.observationSha256,
+    referenceReport: 'worker-migration-reference.json',
+    referenceReportSha256: sha256(await readFile(path.join(outDir, 'worker-migration-reference.json'))),
+    candidateReport: 'C1/capabilities/receipt.json',
+    candidateReportSha256: sha256(await readFile(path.join(outDir, 'C1/capabilities/receipt.json'))),
+    passed: true,
+  };
+  await writeJson(path.join(outDir, 'worker-migration-correspondence.json'), migrationCorrespondence);
+  process.stdout.write('PSC0_SH1_MIGRATION_CORRESPONDENCE: ' + JSON.stringify(migrationCorrespondence) + '\n');
   await runIterationConformance({
     ...loaded, compilerPath: generation.outputJs, root, outDir: path.join(outDir, 'iteration'),
   });
@@ -1090,6 +1112,25 @@ if (command === 'seed-identity') {
   assert.equal(capabilityReceipt.grammar.evidence, 'generated-compiler-source-grammar-api');
   assert.equal(capabilityReceipt.grammar.compilerSha256, firstReceipt.artifacts.javascriptSha256);
   assert.deepEqual(capabilityReceipt.grammar.sourceGrammar, sh1GrammarProfile);
+  assert.equal(firstReceipt.migrationWorkerAbi.workerCount, 12, 'PSC0_SH1_C1_WORKER_ABI');
+  const migrationReferencePath = path.join(outDir, 'worker-migration-reference.json');
+  const migrationReference = JSON.parse(await readFile(migrationReferencePath, 'utf8'));
+  const migrationCorrespondencePath = path.join(outDir, 'worker-migration-correspondence.json');
+  const migrationCorrespondence = JSON.parse(await readFile(migrationCorrespondencePath, 'utf8'));
+  assert.equal(migrationReference.evidence, 'selected-successor-migration-worker-reference');
+  assert.equal(migrationReference.sourceRef, authoring.provenance.sourceRef);
+  assert.equal(migrationReference.compilerSha256, authoring.expectedSha256);
+  assert.equal(migrationReference.seedIdentitySha256, authoring.provenance.identitySha256);
+  assert.equal(migrationCorrespondence.evidence, 'finite-migration-worker-R-F-correspondence');
+  assert.equal(migrationCorrespondence.passed, true);
+  assert.equal(migrationCorrespondence.beforeCompilerSha256, authoring.expectedSha256);
+  assert.equal(migrationCorrespondence.afterCompilerSha256, firstReceipt.artifacts.javascriptSha256);
+  assert.equal(migrationCorrespondence.afterSourceRef, firstReceipt.sourceRef);
+  assert.equal(migrationCorrespondence.referenceReportSha256, sha256(await readFile(migrationReferencePath)));
+  assert.equal(migrationCorrespondence.candidateReportSha256,
+    sha256(await readFile(path.join(firstDir, 'capabilities/receipt.json'))));
+  assert.equal(migrationReference.report.cases, 87);
+  assert.deepEqual(capabilityReceipt.workerMigration, migrationReference.report);
   const nativeGrammarFile = path.join(outDir, 'development/N1/grammar-closure.json');
   const nativeGrammar = JSON.parse(await readFile(nativeGrammarFile, 'utf8'));
   const nativeReceipt = JSON.parse(await readFile(path.join(outDir, 'development/N1/receipt.json'), 'utf8'));
@@ -1119,7 +1160,13 @@ if (command === 'seed-identity') {
   await runIrCheckerConformance({
     ...secondCompiler, compilerPath: second.outputJs, root, outDir: path.join(outDir, 'C2/ir-checker'), tsc,
   });
-  await runSh1Capabilities({ ...secondCompiler, root, outDir: path.join(outDir, 'C2/capabilities'), tsc });
+  assert.deepEqual(second.receipt.migrationWorkerAbi, firstReceipt.migrationWorkerAbi,
+    'PSC0_SH1_C2_WORKER_PUBLIC_TYPES_AND_IR_SIGNATURES');
+  const secondCapabilities = await runSh1Capabilities({
+    ...secondCompiler, root, outDir: path.join(outDir, 'C2/capabilities'), tsc,
+  });
+  assert.deepEqual(secondCapabilities.workerMigration, migrationReference.report,
+    'PSC0_SH1_C2_WORKER_REFERENCE_CORRESPONDENCE');
   await runHelperRuntimeConformance({ ...secondCompiler, outDir: path.join(outDir, 'C2') });
   await runGenericErasureConformance({
     ...secondCompiler, root, outDir: path.join(outDir, 'C2/generic-erasure'), tsc,
@@ -1140,7 +1187,13 @@ if (command === 'seed-identity') {
   await runIrCheckerConformance({
     ...thirdCompiler, compilerPath: third.outputJs, root, outDir: path.join(outDir, 'C3/ir-checker'), tsc,
   });
-  await runSh1Capabilities({ ...thirdCompiler, root, outDir: path.join(outDir, 'C3/capabilities'), tsc });
+  assert.deepEqual(third.receipt.migrationWorkerAbi, firstReceipt.migrationWorkerAbi,
+    'PSC0_SH1_C3_WORKER_PUBLIC_TYPES_AND_IR_SIGNATURES');
+  const thirdCapabilities = await runSh1Capabilities({
+    ...thirdCompiler, root, outDir: path.join(outDir, 'C3/capabilities'), tsc,
+  });
+  assert.deepEqual(thirdCapabilities.workerMigration, migrationReference.report,
+    'PSC0_SH1_C3_WORKER_REFERENCE_CORRESPONDENCE');
   await runHelperRuntimeConformance({ ...thirdCompiler, outDir: path.join(outDir, 'C3') });
   await runGenericErasureConformance({
     ...thirdCompiler, root, outDir: path.join(outDir, 'C3/generic-erasure'), tsc,
@@ -1176,6 +1229,18 @@ if (command === 'seed-identity') {
       reportSha256: sha256(await readFile(nativeGrammarFile)),
       compilerSha256: nativeGrammar.compilerSha256,
       moduleCount: nativeGrammar.moduleCount,
+    },
+    workerMigration: {
+      workers: 12, families: { F1: 4, F2: 8 }, removedTypedIdentityAliases: 3,
+      runtimeGenerations: ['C1', 'C2', 'C3'], casesPerCompiler: migrationReference.report.cases,
+      observationSha256: migrationReference.report.observationSha256,
+      completePublicTypeAndOriginalIrBuilds: ['C1', 'C2', 'C3'],
+      abiObservationSha256: firstReceipt.migrationWorkerAbi.observationSha256,
+      referenceSourceRef: authoring.provenance.sourceRef,
+      referenceCompilerSha256: authoring.expectedSha256,
+      correspondence: 'worker-migration-correspondence.json',
+      correspondenceSha256: sha256(await readFile(migrationCorrespondencePath)),
+      fullBaselineClosurePreparedAgain: false,
     },
     portableIrCheckerGenerations: ['C1', 'C2', 'C3'],
     originalIrCheckedBuilds: ['C2', 'C3'],

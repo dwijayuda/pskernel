@@ -1,6 +1,6 @@
 # New-only ProofScript grammar transition
 
-Status: implementation and migration design; qualification of the new grammar is pending.
+Status: the bounded new-only grammar and projection implementation passed full R2 compiler qualification, independent provider acceptance and verified cold recovery. [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) explicitly selects the exact R successor. F's source/runtime qualification remains pending.
 
 - Decision date: 2026-10-09.
 - User decision: use the new `.ps` syntax only; do not maintain a current backward-compatible `.ps` parser.
@@ -20,11 +20,13 @@ The resulting claim is a bounded new-syntax implementation. It is not full `ps-s
 
 The attachment itself is a normative design release candidate. Its header leaves Standard/verification manifest regeneration and implementation conformance pending; Appendix K.4 requires the regenerated manifest, final digest and conformance evidence before final PSCV compiler claims (reference 3–28, 8117–8148). A new parser cannot supply those semantic and verification obligations.
 
-The current lane therefore retains Lean 4.34.0, Node 22.23.3 and current-product TypeScript 7.0.2. Historical S0/A recovery retains TypeScript 5.8.3. Selected authoring seed A is not automatically promoted, and strict SH/1 and PSCV remain inactive.[SH1][TS7] Source grammar identity and its qualification evidence must be recorded separately from those semantic/toolchain identities.
+The current lane therefore retains Lean 4.34.0, Node 22.23.3 and current-product TypeScript 7.0.2. Historical S0/A recovery retains TypeScript 5.8.3. A remains the immutable historical parent; [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) explicitly selects R. Strict SH/1 and PSCV remain inactive.[SH1][TS7] Source grammar identity and its qualification evidence must be recorded separately from those semantic/toolchain identities.
 
 ## Evidence and implementation ownership
 
-The audit directly inspected the supplied reference and immutable GitHub source. A read-only EBNF-name scan identified the reference-integrity issues below. The implementation drafts were prepared through Git data without local repository checkout, build or tests. This document does not claim that draft code has passed a compiler, generated-compiler execution or fixed-point qualification.
+The initial audit directly inspected the supplied reference and immutable GitHub source. A read-only EBNF-name scan identified the reference-integrity issues below. Drafts were prepared through Git data without local repository checkout, build or tests. Subsequent qualification ran in GitHub Actions against the exact committed implementation.
+
+R2 source `fe2560aba0f347b1caf8d000d371464642d44f23` passed [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635), compiler job `113804052074`, and provider job `113827136830`. N1 round-tripped all 61 modules through the new PS grammar; C2/C3 matched on all four required products. Native original-IR checking accepted 56,391 expressions with zero findings. The provider accepted four distinct admission streams covering eight C2/C3 artifact roles. The [qualification index](qualification-evidence.json) and [complete compiler/provider logged evidence](grammar-migration-compiler-evidence.json) preserve the exact scope and identities. The separate [cold-recovery receipt](grammar-migration-cold-recovery.json), SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`, and [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) now satisfy R's recovery/selection requirements. They do not establish F qualification.
 
 The coordinated implementation owns:
 

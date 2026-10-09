@@ -1,12 +1,12 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 13:41:00 UTC.
+Updated: 2026-10-09 13:44:00 UTC.
 
-## Active continuation: R selected; finite F source migration prepared
+## Active continuation: F source applied under selected R; qualification pending
 
 The user requests the new supplied `.ps` syntax only, with no active legacy grammar mode. Work remains on `psc0/sh1-projection-grammar-v1`, descended from qualified integration `5e3a991088aaa735c8f324c4e70a7a3dee4cd69a`. The canonical implementation branch remains at that previous completed checkpoint until F qualifies. Main is untouched.
 
-**R is now explicitly selected after all evidence gates passed. F source is still prepared and unapplied in this selection commit.** Handwritten `.lean` remains authoritative; current `.ps` parsing, printing and owned source consumers use bounded new-only `ps-0.9-r3`. Strict SH/1, full Standard/PSCV and unrestricted PSC1 are not claimed.
+**R is explicitly selected after all evidence gates passed. This source commit applies the finite F migration; its own compiler/runtime/provider qualification is pending.** Handwritten `.lean` remains authoritative; current `.ps` parsing, printing and owned source consumers use bounded new-only `ps-0.9-r3`. Strict SH/1, full Standard/PSCV and unrestricted PSC1 are not claimed.
 
 ### Earned R evidence
 
@@ -41,15 +41,15 @@ Shared exact-name / first-segment / longest proper local-prefix resolution repai
 
 The first R attempt (`48723fe676a0d9ae3fa819bd314199fe0ca2e926`, run 37925016499) failed the native build on two direct blockers: reserved local `postfix` and a Term reference to an unimported list helper. R2 renamed the local and used direct list pattern matching, then ran all three native suites without suppressing later diagnostics. [The original failure evidence](docs/selfhost-language/grammar-migration-attempt-1.json) is preserved. No gate was weakened.
 
-### Next authorized work: apply and qualify F
+### Current F source checkpoint and next qualification
 
-The prepared finite candidate contains 12 worker rewrites in nine source files, three typed projection-alias removals in one additional source file, and seven corresponding source-guard updates. Public types, parameter order, fuel behavior, reversal/error ordering and fresh-name limits are preserved. All bytes outside the 14 named definitions were restored exactly. See [the candidate ledger](docs/selfhost-language/worker-migration-candidate.json).
+The applied finite candidate contains 12 worker rewrites in nine source files, three typed projection-alias removals in one additional source file, and seven corresponding source-guard updates. Public types, parameter order, fuel behavior, reversal/error ordering and fresh-name limits are preserved. All bytes outside the 14 named definitions were restored exactly. See [the candidate ledger](docs/selfhost-language/worker-migration-candidate.json).
 
 F adds 87 independent worker behavior observations (51 fresh-name / 36 collection-worker cases), paired R/F execution and public Core/ordered-IR ABI comparisons. The ABI hook reuses the already prepared declarations and original IR; it does not prepare the full baseline closure again. A small isolated signature/typed-partial probe and existing partial-application gate cover representation-sensitive behavior.
 
-F also closes the reusable PS preparation-session boundary: assert the exact grammar before preparation/cache reuse and bind it in PS session identity/receipts. Three focused host-boundary tests plus the existing real generated PS session exercise that change. The provider receipt logger exposes exact read-back bytes and their digest so F evidence needs no second collector. These F changes have not run yet.
+The applied F host patch closes the reusable PS preparation-session boundary: assert the exact grammar before preparation/cache reuse and bind it in PS session identity/receipts. Three focused host-boundary tests plus the existing real generated PS session exercise that change. The provider receipt logger exposes exact read-back bytes and their digest so F evidence needs no second collector. These F changes have not run yet.
 
-Apply the prepared F files only on this selected-R descendant, then run one `[sh1-qualify]` source checkpoint. It must pass native/N1 gates, the paired R/F cases and ABI checks, C1/C2/C3 original-IR/fixed-point checks, and independent provider acceptance. **F keeps selected R and does not request another successor promotion or cold-recovery cycle.** After success, preserve actual receipts, finish the current guide/ledgers and normally fast-forward `psc0/sh1-implementation-v1` using a fresh lease.
+The prepared F files are applied on the selected-R descendant and this `[sh1-qualify]` source commit requests one coherent qualification. It must pass native/N1 gates, the paired R/F cases and ABI checks, C1/C2/C3 original-IR/fixed-point checks, and independent provider acceptance. **F keeps selected R and does not request another successor promotion or cold-recovery cycle.** After success, preserve actual receipts, finish the current guide/ledgers and normally fast-forward `psc0/sh1-implementation-v1` using a fresh lease.
 
 Current pins remain Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2. Immutable S0/A recovery retains its original revisions and exact TypeScript 5.8.3. The separate root TypeScript compiler-API workspace remains on 5.8.3.
 

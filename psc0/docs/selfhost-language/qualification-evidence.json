@@ -4,8 +4,8 @@
   "repository": "dwijayuda/pskernel",
   "historicalSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
   "implementationBranch": "psc0/sh1-implementation-v1",
-  "updatedUtc": "2026-10-09 13:41:00 UTC",
-  "currentStatus": "The bounded new-only ps-0.9-r3 grammar/projection R2 is compiler-qualified, independently provider-accepted, cold-recoverable, and explicitly selected as authoring seed R after exact artifact receipt-byte authentication. The finite F source migration remains prepared but unapplied. Canonical integration is still at the prior qualified TS7 checkpoint. Strict SH/1 and full Standard/PSCV conformance remain false.",
+  "updatedUtc": "2026-10-09 13:44:00 UTC",
+  "currentStatus": "R2 is compiler-qualified, independently provider-accepted, cold-recoverable, authenticated and explicitly selected. The finite F source migration is now applied under selected R and awaits its own coherent compiler/behavior/ABI/provider qualification. Canonical integration remains at the previous completed TS7 checkpoint; strict SH/1 and full Standard/PSCV conformance remain false.",
   "checkpoints": {
     "boundedDevelopment": {
       "sourceRef": "9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
@@ -3629,8 +3629,48 @@
         "selectionReference": "seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/selection.json",
         "collectorRunId": 37938411520,
         "collectorRunConclusion": "success",
-        "copiedJsonFiles": 18
+        "copiedJsonFiles": 18,
+        "selectionCommitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6"
       }
+    },
+    "finiteWorkerMigration": {
+      "status": "applied-qualification-pending",
+      "sourceRef": null,
+      "sourceRefMeaning": "The exact executable source is the commit that introduces these candidate files; the completed run will supply its immutable SHA.",
+      "applicationParentCommit": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
+      "scope": {
+        "workers": 12,
+        "workerSourceFiles": 9,
+        "typedProjectionAliasesRemoved": 3,
+        "additionalAliasSourceFiles": 1,
+        "sourceGuardFiles": 7
+      },
+      "selectedAuthoringSeed": {
+        "name": "R",
+        "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+        "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+        "manifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+        "selectionCommitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6"
+      },
+      "requiredBehaviorCases": 87,
+      "requiredAbiWorkers": 12,
+      "compilerQualified": false,
+      "providerAccepted": false,
+      "behaviorCorrespondence": null,
+      "publicTypeAndIrAbi": null,
+      "run": null,
+      "hostCompletion": {
+        "proofScriptSessionBoundary": "applied; focused and actual generated compiler execution pending",
+        "focusedHostCases": 3,
+        "providerReceiptByteLogging": "applied; execution pending"
+      },
+      "selectedSeedChangedByF": false,
+      "successorPromotionRequested": false,
+      "coldRecoveryRequiredForF": false,
+      "strictSh1Qualified": false,
+      "fullStandardConformance": false,
+      "fullPscvConformance": false
     }
   },
   "acceptanceAxes": {
@@ -3983,13 +4023,15 @@
   ],
   "activeContinuation": {
     "branch": "psc0/sh1-projection-grammar-v1",
-    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
-    "stage": "R fully qualified, recovered, authenticated, and explicitly selected; F prepared",
+    "sourceRef": null,
+    "stage": "F source applied; compiler/runtime/ABI/provider qualification pending",
     "canonicalBranchIntegrated": false,
     "selectedSeed": "R",
     "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
     "selectedSeedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
-    "workerMigrationApplied": false,
-    "workerMigrationQualified": false
+    "workerMigrationApplied": true,
+    "workerMigrationQualified": false,
+    "qualifiedRSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "selectionCommitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6"
   }
 }

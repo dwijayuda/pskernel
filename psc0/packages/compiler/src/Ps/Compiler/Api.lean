@@ -152,18 +152,16 @@ def psCompilerPreparationFinish
   psCompilerPrepareElaborated (psCompilerPreparationElaborated state)
 
 def psCompilerPreparationSourcesWorker
-    (sources : List String) :
-    PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState :=
+    (sources : List String)
+    (state : PsCompilerPreparationState) :
+    Except PsCompilerError PsCompilerPreparationState :=
   match sources with
   | List.nil =>
-      fun (state : PsCompilerPreparationState) => Except.ok state
+      Except.ok state
   | List.cons source rest =>
-      let smaller : PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState :=
-        psCompilerPreparationSourcesWorker rest;
-      fun (state : PsCompilerPreparationState) =>
-        match psCompilerPreparationStep state source with
-        | Except.error error => Except.error error
-        | Except.ok next => smaller next
+      match psCompilerPreparationStep state source with
+      | Except.error error => Except.error error
+      | Except.ok next => psCompilerPreparationSourcesWorker rest next
 
 def psCompilerElaborateSourcesWorker
     (sourceKind : PsCompilerSourceKind) (sources : List String) :

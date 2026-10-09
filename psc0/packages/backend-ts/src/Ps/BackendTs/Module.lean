@@ -11,17 +11,18 @@ def psTsAppendLines (left : List String) : List String -> List String :=
       let smaller : List String -> List String := psTsAppendLines rest;
       fun (right : List String) => List.cons value (smaller right)
 
-def psTsFreshInternalWorker (used : List String) (namePrefix : String) (attempts : Nat) :
-    Nat -> PsTsFreshNameResult :=
+def psTsFreshInternalWorker
+    (used : List String) (namePrefix : String)
+    (attempts : Nat) (index : Nat) : PsTsFreshNameResult :=
   match attempts with
-  | Nat.zero => fun (index : Nat) => PsTsFreshNameResult.mk (String.Internal.append namePrefix "overflow") (Nat.succ index)
+  | Nat.zero =>
+      PsTsFreshNameResult.mk (String.Internal.append namePrefix "overflow") (Nat.succ index)
   | Nat.succ remaining =>
-      let smaller : Nat -> PsTsFreshNameResult := psTsFreshInternalWorker used namePrefix remaining;
-      fun (index : Nat) =>
-        let candidate := String.Internal.append namePrefix (psNatToString index);
-        let sameName : String -> Bool := fun (name : String) => psStringEq name candidate;
-        if psListAny sameName used then smaller (Nat.succ index)
-        else PsTsFreshNameResult.mk candidate (Nat.succ index)
+      let candidate := String.Internal.append namePrefix (psNatToString index);
+      let sameName : String -> Bool := fun (name : String) => psStringEq name candidate;
+      if psListAny sameName used then
+        psTsFreshInternalWorker used namePrefix remaining (Nat.succ index)
+      else PsTsFreshNameResult.mk candidate (Nat.succ index)
 
 def psTsFreshInternalWithFuel (used : List String) (namePrefix : String) (index attempts : Nat) : PsTsFreshNameResult :=
   psTsFreshInternalWorker used namePrefix attempts index
@@ -34,14 +35,18 @@ structure PsTsSymbolMapState where
   nextIndex : Nat
   entriesRev : List (String × String)
 
-def psTsBuildSymbolMap (namePrefix : String) (names : List String) : PsTsSymbolMapState -> PsTsSymbolMapState :=
+def psTsBuildSymbolMap
+    (namePrefix : String)
+    (names : List String)
+    (state : PsTsSymbolMapState) : PsTsSymbolMapState :=
   match names with
-  | List.nil => fun (state : PsTsSymbolMapState) => state
+  | List.nil => state
   | List.cons name rest =>
-      let smaller : PsTsSymbolMapState -> PsTsSymbolMapState := psTsBuildSymbolMap namePrefix rest;
-      fun (state : PsTsSymbolMapState) =>
-        let fresh := psTsFreshInternal state.used namePrefix state.nextIndex;
-        smaller (PsTsSymbolMapState.mk (List.cons fresh.name state.used) fresh.nextIndex
+      let fresh := psTsFreshInternal state.used namePrefix state.nextIndex;
+      psTsBuildSymbolMap namePrefix rest
+        (PsTsSymbolMapState.mk
+          (List.cons fresh.name state.used)
+          fresh.nextIndex
           (List.cons (Prod.mk name fresh.name) state.entriesRev))
 
 def psTsStructureName (value : PsVerifiedIrStructure) : String := value.name

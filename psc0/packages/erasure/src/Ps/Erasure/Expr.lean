@@ -1352,17 +1352,18 @@ def psErasureIrUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Boo
 
 
 def psErasureEtaNameWithFuel
-    (body : PsVerifiedIrExpr) (used : List PsVerifiedIrParameter) (fuel : Nat) : Nat -> Except PsErasureError String :=
+    (body : PsVerifiedIrExpr) (used : List PsVerifiedIrParameter)
+    (fuel : Nat) (index : Nat) : Except PsErasureError String :=
   match fuel with
-  | Nat.zero => fun (_index : Nat) => Except.error PsErasureError.fuelExhausted
+  | Nat.zero => Except.error PsErasureError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : Nat -> Except PsErasureError String := psErasureEtaNameWithFuel body used remaining;
-      fun (index : Nat) =>
-        let candidate := String.Internal.append "__ps_eta_" (psNatToString index);
-        let sameName : PsVerifiedIrParameter -> Bool := fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name candidate;
-        if psListAny sameName used then smaller (Nat.succ index)
-        else if psErasureIrUsesNameWithFuel 4096 body candidate then smaller (Nat.succ index)
-        else Except.ok candidate
+      let candidate := String.Internal.append "__ps_eta_" (psNatToString index);
+      let sameName : PsVerifiedIrParameter -> Bool := fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name candidate;
+      if psListAny sameName used then
+        psErasureEtaNameWithFuel body used remaining (Nat.succ index)
+      else if psErasureIrUsesNameWithFuel 4096 body candidate then
+        psErasureEtaNameWithFuel body used remaining (Nat.succ index)
+      else Except.ok candidate
 
 def psErasureEtaParameters
     (body : PsVerifiedIrExpr) (types : List PsVerifiedIrType) :

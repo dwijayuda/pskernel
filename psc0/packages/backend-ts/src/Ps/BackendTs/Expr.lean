@@ -50,14 +50,15 @@ def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :
         | .matchE _ _ scrutinee alternatives =>
             if smaller scrutinee name then true else psListAny alternativeUses alternatives
 
-def psTsFreshMatchTempWorker (expr : PsVerifiedIrExpr) (attempts : Nat) : Nat -> String :=
+def psTsFreshMatchTempWorker
+    (expr : PsVerifiedIrExpr) (attempts : Nat) (index : Nat) : String :=
   match attempts with
-  | Nat.zero => fun (_index : Nat) => "__ps$match$overflow"
+  | Nat.zero => "__ps$match$overflow"
   | Nat.succ remaining =>
-      let smaller : Nat -> String := psTsFreshMatchTempWorker expr remaining;
-      fun (index : Nat) =>
-        let candidate := String.Internal.append "__ps$match$" (psNatToString index);
-        if psTsExprUsesNameWithFuel 4096 expr candidate then smaller (Nat.succ index) else candidate
+      let candidate := String.Internal.append "__ps$match$" (psNatToString index);
+      if psTsExprUsesNameWithFuel 4096 expr candidate then
+        psTsFreshMatchTempWorker expr remaining (Nat.succ index)
+      else candidate
 
 def psTsFreshMatchTempLoop (expr : PsVerifiedIrExpr) (index attempts : Nat) : String :=
   psTsFreshMatchTempWorker expr attempts index

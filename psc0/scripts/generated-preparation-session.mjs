@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { performance } from "node:perf_hooks";
+import { assertProofScriptGrammar } from "./proofscript-source.mjs";
+import { sh1GrammarProfile } from "./sh1-grammar-conformance.mjs";
 
 const hash = (text) => createHash("sha256").update(text, "utf8").digest("hex");
 
@@ -132,6 +134,10 @@ export function createGeneratedPreparationSession(
     if (kind !== "lean" && kind !== "proofScript") {
       throw new Error("PSC0_PREPARATION_SOURCE_KIND: " + kind);
     }
+    // Check before any cached result or compiler operation can admit PS source.
+    // Lean preparation remains available to immutable historical compilers.
+    const sourceGrammar = kind === "proofScript" ? sh1GrammarProfile : undefined;
+    if (sourceGrammar) assertProofScriptGrammar(compiler);
     if (!Array.isArray(orderedSources)) {
       throw new Error("PSC0_PREPARATION_ORDERED_SOURCES_REQUIRED");
     }
@@ -149,6 +155,7 @@ export function createGeneratedPreparationSession(
     });
     const closureSha256 = hash(JSON.stringify({
       sourceKind: kind,
+      ...(sourceGrammar ? { sourceGrammar } : {}),
       modules: inputs.map(({ path, sha256 }) => ({ path, sha256 })),
     }));
     const sourceKind = compiler.PsCompilerSourceKind[kind];
@@ -175,6 +182,7 @@ export function createGeneratedPreparationSession(
       evidence: "admission-ready",
       compilerSha256,
       sourceKind: kind,
+      ...(sourceGrammar ? { sourceGrammar } : {}),
       closureSha256,
       moduleCount: inputs.length,
       cache: Object.freeze({

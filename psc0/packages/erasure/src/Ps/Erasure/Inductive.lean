@@ -365,20 +365,23 @@ structure PsPreparedInductivesResult where
   ir : List PsVerifiedIrInductive
 
 def psPrepareRuntimeInductives
-    (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) :
-    PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult :=
+    (environment : PsEnvironment)
+    (declarations : List PsDeclaration)
+    (inputs : List PsDeclaration)
+    (scope : PsErasureScope)
+    (irRev : List PsVerifiedIrInductive) :
+    Except PsErasureError PsPreparedInductivesResult :=
   match inputs with
   | List.nil =>
-      fun (scope : PsErasureScope) (irRev : List PsVerifiedIrInductive) =>
-        Except.ok (PsPreparedInductivesResult.mk scope (psListReverse irRev))
+      Except.ok (PsPreparedInductivesResult.mk scope (psListReverse irRev))
   | List.cons declaration rest =>
-    let smaller : PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult :=
-      psPrepareRuntimeInductives environment declarations rest;
-    fun (scope : PsErasureScope) (irRev : List PsVerifiedIrInductive) =>
       match declaration with
       | .inductiveDecl info =>
           if info.isStructure then
-            smaller
+            psPrepareRuntimeInductives
+              environment
+              declarations
+              rest
               scope
               irRev
           else
@@ -390,10 +393,16 @@ def psPrepareRuntimeInductives
                   info with
             | Except.error error => Except.error error
             | Except.ok prepared =>
-                smaller
+                psPrepareRuntimeInductives
+                  environment
+                  declarations
+                  rest
                   prepared.scope
                   (List.cons prepared.ir irRev)
       | _ =>
-          smaller
+          psPrepareRuntimeInductives
+            environment
+            declarations
+            rest
             scope
             irRev

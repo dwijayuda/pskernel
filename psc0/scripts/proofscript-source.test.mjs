@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -7,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertProofScriptGrammar, readProofScriptImports, readProofScriptImportsWithSeed, readProofScriptSource } from './proofscript-source.mjs';
 import { sh1GrammarProfile } from './sh1-grammar-conformance.mjs';
+import { createGeneratedPreparationSession } from './generated-preparation-session.mjs';
 
 const grammarIdentity = Object.freeze({
   psProofScriptGrammarEdition: sh1GrammarProfile.edition,
@@ -65,6 +67,87 @@ test('current PS host refuses historical and mismatched compiler grammar identit
       /SOURCE_GRAMMAR_COMPILER_MISMATCH/);
     assert.equal(parses, 0);
   }
+});
+
+
+// These doubles check the host session boundary and receipt contract. They do
+// not implement or claim to validate PS syntax; actual parser tests follow.
+function preparationCompiler(identity = {}) {
+  const calls = { start: 0, parse: 0, step: 0, finish: 0 };
+  const compiler = Object.freeze({
+    ...identity,
+    PsCompilerSourceKind: Object.freeze({ lean: 'lean', proofScript: 'proofScript' }),
+    psCompilerPreparationStart(kind) {
+      calls.start++; return { kind, modules: [] };
+    },
+    psCompilerParseSource(kind, source) {
+      calls.parse++; return ok({ kind, source });
+    },
+    psCompilerPreparationStepParsed(state, module) {
+      calls.step++; return ok({ kind: state.kind, modules: [...state.modules, module] });
+    },
+    psCompilerPreparationFinish(state) {
+      calls.finish++; return ok({ kind: state.kind, modules: state.modules });
+    },
+  });
+  return { compiler, calls };
+}
+const sessionHash = value => createHash('sha256').update(value, 'utf8').digest('hex');
+const sessionCompilerSha256 = '8'.repeat(64);
+test('reusable PS preparation rejects old and mismatched grammars before compiler operations', () => {
+  for (const identity of [
+    {},
+    { ...grammarIdentity, psProofScriptGrammarEdition: 'historical' },
+    { ...grammarIdentity, psProofScriptGrammarMode: 'compatibility' },
+    { ...grammarIdentity, psProofScriptGrammarReferenceSha256: '0'.repeat(64) },
+  ]) {
+    const { compiler, calls } = preparationCompiler(identity);
+    const session = createGeneratedPreparationSession(compiler, { compilerSha256: sessionCompilerSha256 });
+    for (const sources of [[], [{ path: 'answer.ps', source: 'def answer : Nat := 42\n' }]]) {
+      assert.throws(() => session.prepare('proofScript', sources), /SOURCE_GRAMMAR_COMPILER_MISMATCH/);
+    }
+    assert.deepEqual(calls, { start: 0, parse: 0, step: 0, finish: 0 });
+  }
+});
+test('reusable current PS preparation binds grammar in cold and warm receipts', () => {
+  const { compiler, calls } = preparationCompiler(grammarIdentity);
+  const session = createGeneratedPreparationSession(compiler, { compilerSha256: sessionCompilerSha256 });
+  const sources = [{ path: 'answer.ps', source: 'def answer : Nat := 42\n' }];
+  const cold = session.prepare('proofScript', sources);
+  const warm = session.prepare('proofScript', sources);
+  const expectedClosureSha256 = sessionHash(JSON.stringify({
+    sourceKind: 'proofScript',
+    sourceGrammar: sh1GrammarProfile,
+    modules: sources.map(({ path, source }) => ({ path, sha256: sessionHash(source) })),
+  }));
+  for (const result of [cold, warm]) {
+    assert.equal(result.receipt.compilerSha256, sessionCompilerSha256);
+    assert.deepEqual(result.receipt.sourceGrammar, sh1GrammarProfile);
+    assert(Object.isFrozen(result.receipt.sourceGrammar));
+    assert.equal(result.receipt.closureSha256, expectedClosureSha256);
+  }
+  assert.equal(warm.prepared, cold.prepared);
+  assert.equal(warm.receipt.cache.finishHit, true);
+  assert.deepEqual(calls, { start: 1, parse: 1, step: 1, finish: 1 });
+});
+test('reusable historical Lean preparation retains its receipt and warm state after PS refusal', () => {
+  const { compiler, calls } = preparationCompiler();
+  const session = createGeneratedPreparationSession(compiler, { compilerSha256: sessionCompilerSha256 });
+  const sources = [{ path: 'answer.lean', source: 'def answer : Nat := 42\n' }];
+  const cold = session.prepare('lean', sources);
+  assert.throws(() => session.prepare('proofScript', []), /SOURCE_GRAMMAR_COMPILER_MISMATCH/);
+  const warm = session.prepare('lean', sources);
+  const expectedClosureSha256 = sessionHash(JSON.stringify({
+    sourceKind: 'lean',
+    modules: sources.map(({ path, source }) => ({ path, sha256: sessionHash(source) })),
+  }));
+  for (const result of [cold, warm]) {
+    assert.equal(Object.hasOwn(result.receipt, 'sourceGrammar'), false);
+    assert.equal(result.receipt.closureSha256, expectedClosureSha256);
+  }
+  assert.equal(warm.prepared, cold.prepared);
+  assert.equal(warm.receipt.cache.finishHit, true);
+  assert.deepEqual(calls, { start: 1, parse: 1, step: 1, finish: 1 });
 });
 
 const binary = process.env.PSC2_CHECKED_SEED_BIN ?? fileURLToPath(new URL(

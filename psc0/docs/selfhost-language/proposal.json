@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "kind": "language-contract-and-migration-ledger",
   "id": "PSC0-SH/1",
-  "status": "bounded-recursion-source-families-recursive-generic-erasure-and-ts5-ts7-runtime-ir-typing-compiler-qualified; strict-runtime-enforcement-pending; new-only-ps-0.9-r3-and-parameter-projection-checkpoint-implemented-qualification-pending",
+  "status": "bounded-recursion-source-families-recursive-generic-erasure-and-ts5-ts7-runtime-ir-typing-compiler-qualified; strict-runtime-enforcement-pending; R2-new-only-ps-0.9-r3-and-parameter-projection-compiler-qualified-provider-accepted-cold-recovered-explicitly-selected; F-practical-v1-implemented-candidate-qualification-pending",
   "activation": {
     "selectedByPsconfig": false,
     "enforcementInstalled": false,
@@ -22,7 +22,7 @@
   "baselineEvidence": "baseline-evidence.json",
   "authoring": {
     "initialSourceKind": "lean",
-    "sourceMeaning": "Handwritten PSC1-compatible .lean parsed by the portable Lean frontend and kept consumable by selected A; current .ps uses the independently versioned new-only source grammar.",
+    "sourceMeaning": "Handwritten PSC1-compatible .lean parsed by the portable Lean frontend. R's immutable implementation remains A-consumable. F's required authoring seed is the qualified, cold-recovered, explicitly selected R compiler. Current .ps uses its independently versioned new-only grammar.",
     "generatedCanonicalKind": "proofScript",
     "initialSourceAuthority": "handwritten .lean",
     "psAuthorityChange": "optional-after-parity",
@@ -36,15 +36,16 @@
       {
         "id": "typed-callback-local",
         "form": "In authored compiler .lean, bind a typed lambda to an explicitly typed local, then pass the local by name.",
-        "scope": "Selected-A and Lean-frontend source constraint. Current .ps accepts grouped typed callbacks; omitted domains and general expected-type inference remain unsupported."
+        "scope": "Existing bounded Lean-frontend source constraint, retained by F. Current .ps accepts grouped typed callbacks; omitted domains and general expected-type inference remain unsupported."
       },
       {
         "id": "normalized-parameter-projection-alias",
-        "form": "Inside the existing root-match branch, bind the original record parameter to a typed local and project the local.",
-        "scope": "Selected A retains the qualified normalizer's projection gap. Keep these compiler-source aliases until the branch repair is qualified and a recoverable successor is explicitly selected."
+        "form": "F removes the three scoped CompilerIr/Check.lean aliases and projects options/state directly while preserving root structural matches.",
+        "scope": "Requires a qualified, recoverable, explicitly selected projection-capable R successor; the typed alias remains the historical A workaround, not the current F requirement.",
+        "status": "historical-A-workaround; F-candidate-removal-qualification-pending"
       }
     ],
-    "punctuationScope": "Current proofScript inputs and canonical output migrate to ps-0.9-r3; authoritative compiler .lean remains in the selected-A-consumable source form.",
+    "punctuationScope": "Current proofScript inputs and canonical output use ps-0.9-r3. F keeps .lean authoritative and does not change the grammar; its authored projection forms require the qualified selected R seed.",
     "generatedCanonicalGrammar": {
       "edition": "ps-0.9-r3",
       "mode": "new-only",
@@ -82,8 +83,8 @@
     {
       "id": "source.existing-syntax",
       "tier": "required",
-      "current": "lean-authoring-preserved; new-only-proofscript-edition-implemented-qualification-pending",
-      "proposal": "Retain the owned Lean frontend for selected-A-consumable compiler source; use only the current ps-0.9-r3 bounded syntax in current proofScript parsing and canonical printing, with explicit public signatures.",
+      "current": "lean-authoring-preserved; new-only-proofscript-edition-compiler-qualified-at-R2",
+      "proposal": "Retain the owned Lean frontend for portable compiler source, with immutable R source A-consumable and F authored under explicitly selected R. Use only the current ps-0.9-r3 bounded syntax for current proofScript parsing and canonical printing, with explicit public signatures.",
       "fixtures": [
         "parser-printer-parity",
         "declaration-signature-required"
@@ -233,13 +234,13 @@
       ],
       "currentLimitation": {
         "id": "parameter-projection-prefix-renaming",
-        "status": "selected-A-gap; branch-repair-implemented-qualification-pending",
+        "status": "historical-selected-A-gap; R2-repair-compiler-qualified-provider-accepted-cold-recovered-explicitly-selected",
         "affectedWhen": "Changing-parameter normalization renames original parameters, including fixed record parameters.",
         "cause": "Dotted references rooted at those parameters survive while their binders receive hygienic internal names.",
-        "compatibilityForm": "Use a typed branch-local alias of the original record parameter and project the alias.",
+        "compatibilityForm": "Historical A workaround: use a typed branch-local alias of the original record parameter and project the alias.",
         "implementationReference": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
         "plannedRepair": {
-          "status": "implemented-in-current-checkpoint; qualification-and-successor-selection-pending",
+          "status": "implemented-and-compiler-qualified-at-R2; provider-accepted; cold-recovery-verified; exact-R-successor-explicitly-selected",
           "acceptance": [
             "Preserve exact local/global qualified-name priority and the existing first-segment path, including a selected field chain whose typing fails.",
             "Resolve the complete multi-segment hygienic base and chained field suffixes with no global-prefix expansion or magic-name exemption.",
@@ -276,8 +277,11 @@
             ],
             "exactIdentityRule": "These helpers remain exact-only; state.field cannot inherit the identity of state.",
             "parserBoundary": "Raw binders have one segment; the longer local-prefix path handles complete multi-segment hygienic names."
-          }
-        }
+          },
+          "qualifyingSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+          "evidence": "sourceGrammarCheckpoint"
+        },
+        "consumerCheckpoint": "F removes only three named aliases after the R qualification/recovery/selection prerequisite; its implementation and qualification are recorded separately."
       }
     },
     {
@@ -362,7 +366,7 @@
       },
       "nextBoundedWork": [
         "Retain the separately earned TS5 and current-TS7 native/generated/runtime/compiler/provider checkpoints without relabeling historical inventories.",
-        "Qualify the paired new-only ps-0.9-r3 grammar and two-file parameter-projection checkpoint using source consumable by selected A; remove compiler-source projection aliases only after separate explicit qualified successor selection.",
+        "R2's paired new-only ps-0.9-r3 grammar and parameter-projection repair are compiler-qualified, provider-accepted, cold-recovered and explicitly selected. Apply and qualify the coherent F candidate using that authenticated seed; retain F's own source/runtime/provider evidence boundary.",
         "Keep checked emission of the exact inspected IR, pre-emission refusal of malformed/incomplete input, and bounded development gates as regression contracts for future source milestones.",
         "Close the remaining enabled primitive/value, bounds/text-position, layout and erasure/backend correspondence requirements before strict SH/1 promotion.",
         "Keep optional scalar, import ABI and empty-layout/match refusals explicit until the applicable capability is specified and qualified."
@@ -583,7 +587,7 @@
       "dependsOn": [
         "M3"
       ],
-      "status": "Foundation.List-and-three-helper-families-compiler-qualified-and-provider-accepted; further-migrations-scoped"
+      "status": "Foundation.List-and-three-helper-families-compiler-qualified-and-provider-accepted; F-practical-v1-implemented-candidate-qualification-pending"
     },
     {
       "id": "M5",
@@ -591,8 +595,8 @@
       "dependsOn": [
         "M3"
       ],
-      "status": "new-only-source-grammar-and-projection-checkpoint-implemented-qualification-pending; broader-conveniences-planned",
-      "nextBoundedCandidate": "Qualify the current ps-0.9-r3 parser/printer/fixture/provenance transition and parameter-projection repair atomically; select a qualified successor before removing compiler-source aliases."
+      "status": "R2-new-only-source-grammar-and-projection-compiler-qualified-provider-accepted-cold-recovered-explicitly-selected; broader-conveniences-planned",
+      "nextBoundedCandidate": "Use explicitly selected R for the coherent F candidate; F's twelve workers and three alias removals require their own source/runtime qualification. R evidence does not qualify F."
     },
     {
       "id": "M6",
@@ -684,7 +688,8 @@
     "Kernel implementation or metatheory changes on this branch",
     "Full Standard or PSCV language/reference conformance",
     "Lean 4.35/provider/profile migration from source grammar adoption",
-    "New successor selection or completed qualification for the current grammar checkpoint"
+    "New successor selection or completed qualification for the current grammar checkpoint",
+    "Completed F qualification, provider acceptance, or seed selection from candidate implementation/static review alone"
   ],
   "documents": {
     "analysis": "README.md",
@@ -693,7 +698,10 @@
     "implementation": "IMPLEMENTATION.md",
     "evidence": "qualification-evidence.json",
     "runtimeIrPlan": "RUNTIME_IR_PLAN.md",
-    "sourceGrammarAdoption": "PS_GRAMMAR_ADOPTION.md"
+    "sourceGrammarAdoption": "PS_GRAMMAR_ADOPTION.md",
+    "practicalBacklog": "migration-backlog.json",
+    "currentGuide": "CURRENT.md",
+    "practicalBacklogGuide": "MIGRATION_BACKLOG.md"
   },
   "qualification": {
     "compilerQualified": {
@@ -764,7 +772,15 @@
     "inventoryMeaning": "A generation receipt describes IR produced by its executing compiler. Preserve historical E inventories separately. A pinned pre-checker Q may produce C1's legacy report while the new C1 executable exercises M6; later current-source reports require the portable checker. Legacy inventory never grants runtime IR typing acceptance.",
     "definitionsApplyTo": "The historical initial A qualification before selecting Q; afterSeedPromotion defines later current-source checkpoints.",
     "toolchainMeaning": "Compare C2/C3 within one exact current profile. TS7 current qualification and TS5 historical seed recovery have separate CLI/option identities; neither cross-version JS equality nor inherited TS5 acceptance is assumed.",
-    "sourceGrammarMeaning": "Current .ps products carry the ps-0.9-r3 identity. Historical selected-A products retain their producer's grammar at the old-seed boundary. New current C2/C3 canonical source hashes must match the N1 captured-closure correspondence artifact; old/new canonical bytes are not assumed equal."
+    "sourceGrammarMeaning": "Current .ps products carry the ps-0.9-r3 identity. Historical selected-A products retain their producer's grammar at the old-seed boundary. New current C2/C3 canonical source hashes must match the N1 captured-closure correspondence artifact; old/new canonical bytes are not assumed equal.",
+    "afterProjectionSeedPromotion": [
+      "R is the exact qualified, recoverable, explicitly selected projection-capable compiler.",
+      "C1 = R(F)",
+      "C2 = C1(F)",
+      "C3 = C2(F)",
+      "All executions read the same exact raw F source; compare the four declared C2/C3 products within the current pinned profile."
+    ],
+    "migrationAbiMeaning": "F's synchronous ABI hook reads the existing prepared declarations and exact IR before original-IR checking/emission. It prepares only an isolated signature/typed-partial module, not another full baseline closure; no probe declaration enters the authoritative compiler."
   },
   "firstSourceMigration": {
     "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
@@ -794,6 +810,137 @@
       "evidence": "docs/selfhost-language/qualification-evidence.json",
       "sourceClosureSha256": "03c493835b44507fbe692f065f953f9c8252a44edcdf7e62932c3608831d0903",
       "compilerSha256": "fb7708698c333c1985ae82c0eb5b061c8738f41feffc12f3fddccb1c74fc6855"
+    },
+    {
+      "id": "F",
+      "name": "practical-v1 ordinary worker parameters",
+      "status": "implemented-candidate-qualification-pending",
+      "reviewedAgainstSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "sourceRef": null,
+      "authoringSeed": {
+        "prerequisite": "Qualified, source-recoverable, explicitly selected projection-capable R successor",
+        "selectedManifest": "psc0/selfhost-seed.json",
+        "selectedSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+        "selectionReceipt": {
+          "commitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
+          "manifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+          "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225"
+        },
+        "requirementOnly": false,
+        "evidenceScope": "R authoring prerequisite only; F sourceRef, runtime/ABI/provider results and qualification remain pending."
+      },
+      "scope": {
+        "ordinaryParameterWorkers": 12,
+        "families": {
+          "F1": 4,
+          "F2": 8
+        },
+        "typedProjectionAliasesRemoved": 3,
+        "guardFilesUpdated": 7,
+        "functions": [
+          "psErasureLocalNameWithFuel",
+          "psErasureEtaNameWithFuel",
+          "psTsFreshMatchTempWorker",
+          "psTsFreshInternalWorker",
+          "psCompilerPreparationSourcesWorker",
+          "psAddDeclarationListWorker",
+          "psElabDeclarationsWorker",
+          "psBuildErasureDeclarationNamesWorker",
+          "psEraseDefinitionsLoopWorker",
+          "psPrepareRuntimeStructures",
+          "psPrepareRuntimeInductives",
+          "psTsBuildSymbolMap"
+        ],
+        "wholeLocatorInventoryMigrated": false
+      },
+      "contracts": {
+        "completePublicTypes": "preserved; actual prepared Core types compared with independent isolated signatures",
+        "publicArgumentOrder": "preserved",
+        "expectedOrderedRuntimeArities": {
+          "psErasureLocalNameWithFuel": 4,
+          "psErasureEtaNameWithFuel": 4,
+          "psTsFreshMatchTempWorker": 3,
+          "psTsFreshInternalWorker": 4,
+          "psCompilerPreparationSourcesWorker": 2,
+          "psAddDeclarationListWorker": 2,
+          "psElabDeclarationsWorker": 3,
+          "psBuildErasureDeclarationNamesWorker": 2,
+          "psEraseDefinitionsLoopWorker": 4,
+          "psPrepareRuntimeStructures": 5,
+          "psPrepareRuntimeInductives": 5,
+          "psTsBuildSymbolMap": 3
+        },
+        "runtimeParameterDisplayNamesCompared": false,
+        "zeroFuelAndScanPolicies": "retain each worker's existing policy and limits",
+        "stateAndErrorBehavior": "preserve collision/lookup order, accumulator reversal, first errors, wrappers and scope updates",
+        "sourceGrammar": {
+          "edition": "ps-0.9-r3",
+          "mode": "new-only",
+          "support": "bounded-selfhost-subset",
+          "changedByF": false
+        },
+        "authoritativeCompilerSource": ".lean"
+      },
+      "gates": {
+        "behavior": {
+          "script": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+          "api": "runMigrationWorkerConformance(compiler, valueTag)",
+          "cases": 87,
+          "families": {
+            "F1": 51,
+            "F2": 36
+          },
+          "plan": "Authenticate selected R and F compiler identities, construct owner-local values, assert independent expectations, then compare JSON observations.",
+          "result": null
+        },
+        "abi": {
+          "script": "psc0/scripts/sh1-migration-worker-abi.mjs",
+          "api": "runMigrationWorkerAbi(compiler, prepared, ir, valueTag)",
+          "workers": 12,
+          "usesExistingPreparedAndIr": true,
+          "fullBaselinePreparationRepeated": false,
+          "isolatedSignatureModule": true,
+          "typedGenericPartialWrappers": 12,
+          "probeMergedIntoAuthoritativeClosure": false,
+          "probeRuntimeExecuted": false,
+          "runtimePartialApplicationEvidence": "existing-SH1-runtime-capability-gate",
+          "result": null
+        },
+        "promotion": "One coherent current-source F qualification, checked original IR, C2/C3 canonical-source/admissions/TS/JS equality, and separate exact-stream provider acceptance."
+      },
+      "evidence": {
+        "implementationReview": "draft/static review only",
+        "compilerQualification": null,
+        "providerAcceptance": null,
+        "behaviorCorrespondence": null,
+        "publicTypeAndIrAbi": null,
+        "sourceRecoveryAndSeedSelection": null
+      },
+      "compilerQualified": false,
+      "selectedProviderAccepted": false,
+      "strictSh1Qualified": false,
+      "fullPscvConformance": false,
+      "unrestrictedPsc1": false,
+      "measuredRuntimeSpeedup": false,
+      "hostCompletion": {
+        "proofScriptPreparation": {
+          "script": "psc0/scripts/generated-preparation-session.mjs",
+          "requiresCurrentGrammarBeforePreparationAndCache": true,
+          "sourceGrammarInClosureHashAndReceipt": true,
+          "leanContractPreserved": true,
+          "focusedHostCases": 3,
+          "focusedHostCasesExecuted": false,
+          "realCompilerEvidence": "Existing q sessionConformance proofScript request; pending F execution"
+        },
+        "providerReceipt": {
+          "script": "psc0/scripts/sh1-check-admissions.mjs",
+          "exactFileContentLogged": true,
+          "hashSource": "Read-back receipt Buffer bytes",
+          "acceptanceGatesChanged": false,
+          "result": null
+        }
+      }
     }
   ],
   "recursiveGenericErasureRepair": {
@@ -1123,7 +1270,7 @@
     "evidence": "docs/selfhost-language/qualification-evidence.json"
   },
   "sourceGrammarCheckpoint": {
-    "status": "implemented-qualification-pending",
+    "status": "compiler-qualified-provider-accepted; cold-recovery-verified; exact-R-successor-explicitly-selected",
     "reviewedBaseRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
     "sourceGrammar": {
       "edition": "ps-0.9-r3",
@@ -1137,11 +1284,75 @@
     "currentLegacyParserMode": false,
     "authoritativeCompilerSource": ".lean",
     "historicalRecovery": "Immutable S0/A revisions, source grammars, TypeScript 5.8.3 profiles and products remain recoverable.",
-    "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "selectedAuthoringSeedRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
     "providerLeanVersion": "4.34.0",
     "providerOrMetatheoryChanged": false,
-    "newQualificationReceipt": null,
-    "successorSelected": false,
-    "documentation": "PS_GRAMMAR_ADOPTION.md"
+    "newQualificationReceipt": {
+      "runId": 37925722635,
+      "jobId": 113804052074,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635/job/113804052074",
+      "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+      "moduleCount": 61,
+      "currentC2C3EqualProducts": [
+        "canonicalSource",
+        "admissions",
+        "typeScript",
+        "javaScript"
+      ],
+      "n1NewGrammarRoundTripModules": 61,
+      "nativeOriginalIr": {
+        "expressions": 56391,
+        "steps": 725484,
+        "findings": 0
+      },
+      "retainedReceipt": {
+        "path": "docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/qualification.json",
+        "sha256": "b3e9a277a7ce5ee9e0bccc449c9ca20a06766cd94cabd34fe4d722c6425e6fac"
+      }
+    },
+    "successorSelected": true,
+    "documentation": "PS_GRAMMAR_ADOPTION.md",
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "compilerQualified": true,
+    "selectedProviderAccepted": true,
+    "providerAcceptance": {
+      "runId": 37925722635,
+      "jobId": 113827136830,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635/job/113827136830",
+      "accepted": true,
+      "distinctStreams": 4,
+      "roles": 8,
+      "providerImplementationChanged": false,
+      "retainedReceipt": {
+        "path": "docs/selfhost-language/grammar-migration-provider.json",
+        "sha256": "1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77",
+        "providerSourceRef": "963030dc2d154008fccc82e7c8ed29331f138799"
+      }
+    },
+    "coldRecovery": {
+      "status": "passed",
+      "runId": 37925722635,
+      "jobId": 113827137018,
+      "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+      "receipt": {
+        "path": "docs/selfhost-language/grammar-migration-cold-recovery.json",
+        "sha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d"
+      }
+    },
+    "successorSelection": {
+      "status": "selected",
+      "manifest": "psc0/selfhost-seed.json",
+      "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+      "receipt": {
+        "commitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
+        "commitUrl": "https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6",
+        "manifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694"
+      }
+    }
   }
 }

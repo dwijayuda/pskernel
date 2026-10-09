@@ -1,20 +1,73 @@
 # PSC0-SH/1 implementation and migration plan
 
-Status: M0–M3 have a qualified implementation and selected authoring seed A at `e91b9558d665879871b8bf0893915ae64b27c7fe`. Foundation.List (B, `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and exact provider acceptance on its first execution. M5 remains bounded follow-on authoring work. The bounded M6 runtime typing checkpoint is compiler-qualified on TS5 and on the current TS7 profile, with separate exact-stream provider acceptance for each. Complete strict runtime enforcement remains separate. M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The historical baseline is in [README.md](README.md), language requirements are in [SPEC.md](SPEC.md), and the installed M6 scope, separately earned TS5/TS7 qualification and remaining requirements are in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md).
+Historical milestones: M0–M3 have a qualified implementation and selected authoring seed A at `e91b9558d665879871b8bf0893915ae64b27c7fe`. Foundation.List (B, `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and exact provider acceptance on its first execution. M5 remains bounded follow-on authoring work. The bounded M6 runtime typing checkpoint is compiler-qualified on TS5 and on the current TS7 profile, with separate exact-stream provider acceptance for each. Complete strict runtime enforcement remains separate. M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The historical baseline is in [README.md](README.md), language requirements are in [SPEC.md](SPEC.md), and the installed M6 scope, separately earned TS5/TS7 qualification and remaining requirements are in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md).
 
-## Current checkpoint: new-only source grammar, qualification pending
+## Current F checkpoint: implemented candidate, qualification pending
+
+F is the finite practical-v1 migration in
+[migration-backlog.json](migration-backlog.json), prepared against R2 source
+`fe2560aba0f347b1caf8d000d371464642d44f23`. R2 has now passed its own compiler
+qualification and independent provider check in [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635).
+R cold recovery is verified, and [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) explicitly selects
+that successor. F had not been applied at the original R2 evidence point and
+retains its own pending qualification. Exact R records do not supply F runtime
+or fixed-point evidence.
+
+The candidate replaces twelve handwritten returned-function workers with ordinary
+parameters: four fresh-name workers and eight state/accumulator workers. It also
+removes three typed parameter-projection aliases from `CompilerIr/Check.lean`.
+Complete public types, parameter order, fuel/exhaustion policies, lookup/collision
+order, accumulator reversal, first errors and wrappers remain the contract.
+Seven associated shape guards are updated without relaxing their unrelated checks.
+The current `.ps` edition stays new-only `ps-0.9-r3`; `.lean` remains authoritative.
+
+Use this finite integration sequence:
+
+1. R2 compiler qualification, provider acceptance, cold source recovery and
+   explicit successor selection are complete. Authenticate that selected R
+   compiler before using it for F; do not substitute an unpinned bundle.
+2. Apply the reviewed F1/F2 changes and three alias removals as one coherent
+   candidate. Preserve the exact change manifests and family boundaries for
+   review and rollback; do not expand to the deferred locator inventory.
+3. Run the 87 explicit API cases against authenticated R and F compilers, each
+   owning its values. Compare only JSON-safe observations after each compiler
+   satisfies the independent expectations.
+4. Read the existing generation's prepared declarations and exact IR in the ABI
+   hook. Compare all twelve full Core types and ordered runtime signatures.
+   Elaborate the small isolated signature/typed-partial module; do not prepare
+   the full R closure again or add probe declarations to the compiler. Existing
+   runtime partial-application gates cover lowering separately.
+5. Run one coherent F promotion chain with checked original IR, current C2/C3
+   canonical-source/admissions/TS/JS equality and separate exact-stream provider
+   acceptance. Reuse generated products; do not repeat full qualification per
+   worker. Keep actual compiler, source, toolchain and receipt identities.
+6. Mark practical-v1 complete only after the pending F evidence is recorded.
+   Unrestricted PSC1, strict SH/1, full PSCV and a measured compiler speedup remain
+   outside this source migration.
+
+The implementation/API map is in
+[IMPLEMENTATION.md](IMPLEMENTATION.md#f-checkpoint-ordinary-worker-parameters).
+
+## Prerequisite R: new-only grammar and parameter projections
 
 The current `.ps` source and canonical printer move atomically to `ps-0.9-r3`,
 mode `new-only`, support `bounded-selfhost-subset`. The user explicitly chose the
 new edition without a current legacy grammar mode.
 [PS_GRAMMAR_ADOPTION.md](PS_GRAMMAR_ADOPTION.md) pins the supplied reference,
 records errata, and defines the enabled syntax and refusal boundaries. The
-compiler's handwritten `.lean` authority, selected A and immutable historical
-S0/A recovery are separate decisions; they remain in place for this checkpoint.
-The grammar implementation and paired projection repair have qualification
-pending. No earlier compiler or provider receipt qualifies these new sources.
+compiler's handwritten `.lean` authority and immutable historical S0/A recovery
+remain in place. The current authoring seed is the explicitly selected R
+successor, whose separate manifest preserves the immutable A parent.
+The grammar implementation and paired projection repair earned their own R2
+compiler/provider results; no earlier receipt was reused as that evidence.
+[IMPLEMENTATION.md](IMPLEMENTATION.md#r2-compiler-and-provider-evidence) records
+its 61-module closure, four-product equality and exact jobs. Cold recovery is
+verified by [its receipt](grammar-migration-cold-recovery.json), SHA-256
+`2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`, and [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) records explicit selection.
 
-The efficient migration unit is one coherent checkpoint:
+The R implementation/compiler/provider/recovery/selection requirements below
+have their own completed evidence. F's source/runtime qualification remains
+pending:
 
 1. Pin the reference and finite support scope before changing accepted syntax.
    Keep omitted annotations, defaults, named arguments, tuples, generic do and
@@ -167,11 +220,11 @@ Choose additional source families from measured remaining authoring cost. Do not
 
 ### M5 — add conveniences in measured priority order
 
-The current checkpoint applies the new-only `.ps` edition described above and
-pairs it with the bounded projection repair. This grammar transition is separate
-from the broader inference/semantic conveniences below.
+R supplies the new-only `.ps` edition and bounded projection repair. F consumes
+that capability under its selected-seed prerequisite; it does not add another
+grammar transition. Broader inference/semantic conveniences remain separate.
 
-1. Repair parameter projections in the existing recursion normalizer, under the bounded contract below.
+1. Completed in R2: repair parameter projections in the existing recursion normalizer under the bounded contract below. Cold recovery and explicit selection are recorded; F must still qualify its own use of that capability.
 2. Common equation/lambda-wrapped declaration and harmless-let normalization.
 3. Expected-type lambda domains with explicit fallback diagnostics.
 4. Nested constructor patterns lowered to flat decision trees.
@@ -183,9 +236,9 @@ Use actual remaining workaround counts to choose between the broader inference a
 
 ### Follow-on repair — parameter projections in recursion normalization
 
-M6 remains consumable by selected A by using three current source idioms: typed local callbacks passed by name, explicit result types on match-valued let initializers, and typed branch-local aliases before projecting original record parameters in generalized recursion. [SPEC.md](SPEC.md#current-authoring-forms) describes the exact restrictions. Qualification of M6 does not remove them.
+The historical M6 source remains consumable by A by using three source idioms: typed local callbacks passed by name, explicit result types on match-valued let initializers, and typed branch-local aliases before projecting original record parameters in generalized recursion. [SPEC.md](SPEC.md#current-authoring-forms) describes the exact restrictions. Qualification of M6 does not remove them.
 
-The current bounded normalizer repair implements the source-backed design with **qualification pending**. The implementation touches two Lean files: add a shared resolver returning an untyped resolved base and field suffix in `Elab/Term.lean`, then thread immutable `PsEnvironment` through the recursion walk/normalizer in `Elab/Recursion.lean`. The pre-repair qualified lookup and rewriting paths are visible in [Term.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Term.lean#L306-L366) and [Recursion.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Recursion.lean#L281-L305).
+R2 implements and compiler-qualifies the bounded normalizer repair, with independent provider acceptance. Cold source recovery is verified and [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) records explicit successor selection; F retains its own qualification. The implementation touches two Lean files: add a shared resolver returning an untyped resolved base and field suffix in `Elab/Term.lean`, then thread immutable `PsEnvironment` through the recursion walk/normalizer in `Elab/Recursion.lean`. The pre-repair qualified lookup and rewriting paths are visible in [Term.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Term.lean#L306-L366) and [Recursion.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Recursion.lean#L281-L305).
 
 The resolver must use this order:
 
@@ -194,14 +247,14 @@ The resolver must use this order:
 3. Only if that first-segment base is absent, try the longest proper multi-segment **local** prefix and retain the remaining field suffix. Do not expand global prefixes or exempt a magic internal-name spelling.
 4. Type the selected base and field chain once. A field-typing failure is final; it must not cause lookup to retry a different prefix.
 
-Raw binders are currently single-segment in both [Lean syntax](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean#L528-L546) and [common binder parsing](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean#L565-L581). The additional local-prefix path is needed for complete hygienic names such as `$psc0SH.0`; merely changing the printed prefix leaves the current first-segment resolver unable to find that binding.
+Raw binders are currently single-segment in both [Lean syntax](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean#L528-L546) and [common binder parsing](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean#L565-L581). The additional local-prefix path is needed for complete hygienic names such as `$psc0SH.0`; merely changing the printed prefix left the pre-R first-segment resolver unable to find that binding.
 
 Its acceptance contract is:
 
 1. Keep `psElabRecursionLocalId` and `psElabSyntaxLocalId` exact-only. A projected value such as `state.field` must not acquire the identity of an unchanged whole parameter or a known constructor child. Use projection-base resolution only in the rewriting/type-elaboration path that needs it.
 2. Rewrite according to resolved binder identity and lexical scope. Preserve let, lambda and match-pattern shadowing, including exact qualified-name collisions; cover both fixed record parameters and generalized record state.
 3. Preserve public binder order/kinds, the root structural match, child provenance, simultaneous recursive arguments and existing dependent/recursive-escape refusals. Do not weaken the stable recursive-call guard or invent structure getter declarations absent from the PSC environment.
-4. Keep implementation source compilable by selected A using supported forms. Exercise ordinary raw source with direct projections under the repaired native and generated compilers; pre-normalized worker input or an external source rewrite is insufficient.
+4. Keep R's implementation source compilable by selected A using supported forms. Exercise ordinary raw source with direct projections under the repaired native and generated compilers; pre-normalized worker input or an external source rewrite is insufficient.
 5. Use one focused family for direct/chained state and fixed-parameter projections, exact-name and prefix collisions, first-segment selection whose field typing fails, and let/lambda/pattern shadowing. Include refusals proving that projected values cannot masquerade as whole recursion arguments. Check runtime results and original-IR types, and review the entire affected reference class before one candidate gate.
 6. Require exact-current-source C2/C3 equality and independent selected-provider decisions. Only a separate, explicit seed-selection checkpoint can permit compiler source to depend on the newly accepted form and remove compatibility aliases.
 
@@ -233,8 +286,8 @@ The TS5 baseline and the separate current TS7 checkpoint have completed the foll
 1. Require successful raw PSC preparation of the complete current closure, then the bounded native/N1 checker and language fixtures. Preserve full typed rejection diagnostics and input identities before changing source again.
 2. Require accepted, complete current-source portable reports where the executing compiler contains M6, plus the focused positive/negative, simultaneous-substitution, exhaustion, carrier and checked-emission cases. A capped diagnostic list must not conceal the total failed-obligation count.
 3. Establish exact-current-source C2/C3 product equality within the selected toolchain profile. The old selected Q boundary remains explicitly legacy; the new C1 executable must exercise the installed checker. Obtain separate provider acceptance for the exact required admission streams.
-4. Record the installed typing API, runtime evidence, compiler fixed point and provider decision as separate claims. Integrate the earned checkpoint without changing selected authoring seed A or activating strict SH/1; do not repeat completed full qualification for ordinary edits covered by the bounded development gate.
-5. Implement and qualify the bounded two-file projection repair above as the next language slice. Keep the implementation consumable by A and retain compiler-source aliases until a separate explicit selection of a qualified seed. Preserve public types, error/exhaustion behavior and supported optimization paths; choose later source families from measured authoring cost.
+4. Record the installed typing API, runtime evidence, compiler fixed point and provider decision as separate claims. The historical M6 integrations retained then-selected A and did not activate strict SH/1. R's later explicit selection has separate recovery/evidence records. Do not repeat completed full qualification for ordinary edits covered by the bounded development gate.
+5. R's bounded projection/new-grammar implementation is qualified, cold-recovered and explicitly selected, with immutable A-consumable source preserved. F's implemented candidate uses that seed for the three scoped aliases and twelve handwritten state adapters; qualify F's coherent source separately. Preserve public types, error/exhaustion behavior and supported optimization paths.
 
 Strict enforcement still requires the applicable primitive/value, scalar/bounds/text-position, layout and erasure/backend correspondence obligations. External imports and optional scalar capabilities remain refused until their own contracts are qualified. The tested let-initializer scope correction is one bounded backend repair, not a general preservation proof. Neither an accepted typing report nor provider acceptance alone activates strict SH/1.
 
@@ -249,6 +302,11 @@ Consider this only after the generated PSC compiler can parse ordinary authored 
 Require qualification of every enabled capability used by the authoritative source; completion of every optional M5 convenience is not required. Do one controlled extension/authority migration with source correspondence checks. Do not simultaneously rename declarations, switch punctuation, change runtime representations and replace the provider. Keeping `.lean` as the authoring spelling is a valid outcome if it gives the best workflow; self-hosting depends on which compiler consumes it, not the filename extension.
 
 ## 3. Correct generation and promotion procedure
+
+The current pending F sequence uses authenticated selected R: `C1 = R(F)`,
+`C2 = C1(F)`, `C3 = C2(F)`, all reading the same exact raw F source. Its evidence
+remains pending. The initial S0/A construction below is the historical parent
+procedure, not a claim that S0 or A can consume F.
 
 Let A be the exact source tree containing the improved compiler, written in the old subset. Let S0 be the pinned old compiler.
 
@@ -349,6 +407,11 @@ Run full performance comparisons at milestones, not every keystroke. Set time bu
 Stop promotion, not all development, when required evidence fails. Preserve diagnostics and the failing corpus; fix the concrete issue or leave the associated claim pending. Do not respond by widening allowlists, replacing a semantic gate with a textual marker, or treating a larger fuel setting as proof of correctness.
 
 ## 7. Completion criteria
+
+F's practical-v1 completion is limited to the twelve named workers, three alias
+removals and their required evidence in the frozen backlog. Candidate source
+edits alone do not complete that milestone, and practical-v1 completion does not
+activate the full strict language/runtime contract below.
 
 SH/1 is successfully adopted when the chosen compiler source families use ordinary structural recursion without handwritten state-currying adapters, the generated compiler consumes that authored source itself, capability-based checks replace the relevant spelling guards, current-generation artifacts meet their declared equality contracts, and the advertised provider qualification has actually passed.
 

@@ -104,16 +104,16 @@ structure PsPreparedStructuresResult where
   ir : List PsVerifiedIrStructure
 
 def psPrepareRuntimeStructures
-    (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) :
-    PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult :=
+    (environment : PsEnvironment)
+    (declarations : List PsDeclaration)
+    (inputs : List PsDeclaration)
+    (scope : PsErasureScope)
+    (structuresRev : List PsVerifiedIrStructure) :
+    Except PsErasureError PsPreparedStructuresResult :=
   match inputs with
   | List.nil =>
-      fun (scope : PsErasureScope) (structuresRev : List PsVerifiedIrStructure) =>
-        Except.ok (PsPreparedStructuresResult.mk scope (psListReverse structuresRev))
+      Except.ok (PsPreparedStructuresResult.mk scope (psListReverse structuresRev))
   | List.cons declaration rest =>
-    let smaller : PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult :=
-      psPrepareRuntimeStructures environment declarations rest;
-    fun (scope : PsErasureScope) (structuresRev : List PsVerifiedIrStructure) =>
       match declaration with
       | .inductiveDecl info =>
           if info.isStructure then
@@ -125,14 +125,23 @@ def psPrepareRuntimeStructures
                   info with
             | Except.error error => Except.error error
             | Except.ok prepared =>
-                smaller
+                psPrepareRuntimeStructures
+                  environment
+                  declarations
+                  rest
                   prepared.scope
                   (List.cons prepared.ir structuresRev)
           else
-            smaller
+            psPrepareRuntimeStructures
+              environment
+              declarations
+              rest
               scope
               structuresRev
       | _ =>
-          smaller
+          psPrepareRuntimeStructures
+            environment
+            declarations
+            rest
             scope
             structuresRev

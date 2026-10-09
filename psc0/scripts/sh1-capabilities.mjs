@@ -8,6 +8,7 @@ import { expectedTypeScriptVersion, typeScriptProfileArgs } from './typescript-c
 import { runProjectionResolutionConformance } from './sh1-projection-conformance.mjs';
 import { runSh1GrammarConformance } from './sh1-grammar-conformance.mjs';
 import { readProofScriptSource } from './proofscript-source.mjs';
+import { runMigrationWorkerConformance } from './sh1-migration-worker-conformance.mjs';
 
 export function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -224,6 +225,7 @@ export async function runSh1Capabilities({
 }) {
   const projectionResolution = runProjectionResolutionConformance(compiler, valueTag);
   const grammar = runSh1GrammarConformance({ compiler, compilerSha256 });
+  const workerMigration = runMigrationWorkerConformance(compiler, valueTag);
   const results = [];
   for (const extension of ['lean', 'ps']) {
     const fixture = path.join(root, 'test/fixtures/selfhost-sh1-accumulators.' + extension);
@@ -304,6 +306,7 @@ export async function runSh1Capabilities({
     negativeCases: rejected,
     projectionResolution,
     grammar,
+    workerMigration,
     independentExpectedBehavior: [
       'Nat accumulation', 'simultaneous state swapping', 'state before structural major',
       'function results', 'erased stable proof binder', 'generic List at Nat and String',

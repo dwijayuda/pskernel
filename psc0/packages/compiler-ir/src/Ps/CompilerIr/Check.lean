@@ -336,7 +336,6 @@ def psIrCheckMatchBindings (options : PsIrCheckOptions) (module : PsVerifiedIrMo
   match bindings with
   | List.nil => state
   | List.cons binding rest =>
-      let limits : PsIrCheckOptions := options;
       let location := psIrCheckAt scope (String.Internal.append "binding:" binding.name);
       let annotated := psIrCheckAnnotation options module state location binding.type;
       let fieldUnique :=
@@ -351,7 +350,7 @@ def psIrCheckMatchBindings (options : PsIrCheckOptions) (module : PsVerifiedIrMo
         | Option.none =>
             psIrCheckFinding options nameUnique location "unresolved-match-field" binding.field Option.none Option.none
         | Option.some field =>
-            match psIrCheckSubstitute limits.maxTypeSteps substitutions field.type with
+            match psIrCheckSubstitute options.maxTypeSteps substitutions field.type with
             | Except.error issue => psIrCheckRecordIssue options nameUnique location issue
             | Except.ok expected => psIrCheckCompare options nameUnique location expected binding.type;
       psIrCheckMatchBindings options module rest fields substitutions scope
@@ -813,8 +812,7 @@ def psIrCheckRun (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
     (fuel : Nat) (state : PsIrCheckState) : PsIrCheckState :=
   match fuel with
   | Nat.zero =>
-      let currentState : PsIrCheckState := state;
-      if psListIsEmpty currentState.tasks then state
+      if psListIsEmpty state.tasks then state
       else
         let failed := psIrCheckFinding options state
           (psIrCheckScopeRoot "module" List.nil List.nil)
@@ -822,12 +820,11 @@ def psIrCheckRun (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
         PsIrCheckState.mk List.nil failed.values failed.visitedSteps failed.expressionCount
           failed.findingCount failed.findingsRev false
   | Nat.succ remaining =>
-      let currentState : PsIrCheckState := state;
-      match currentState.tasks with
+      match state.tasks with
       | List.nil => state
       | List.cons task tasks =>
-          let next := PsIrCheckState.mk tasks currentState.values (Nat.succ currentState.visitedSteps)
-            currentState.expressionCount currentState.findingCount currentState.findingsRev currentState.traversalComplete;
+          let next := PsIrCheckState.mk tasks state.values (Nat.succ state.visitedSteps)
+            state.expressionCount state.findingCount state.findingsRev state.traversalComplete;
           psIrCheckRun options module remaining (psIrCheckStep options module task next)
 
 def psIrCheckSizedModule (options : PsIrCheckOptions) (module : PsVerifiedIrModule)

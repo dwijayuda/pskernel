@@ -1,6 +1,6 @@
-# PSC0 — preserved first PSC2 compiler-only self-host fixed point
+# PSC0 compiler and self-host implementation
 
-This is the 2026-10-03 compiler-only bootstrap snapshot, copied from
+This directory began as the preserved 2026-10-03 compiler-only bootstrap snapshot, copied from
 `psc2/selfhost-lean-kernel` at GitHub commit
 `d4298a712d1e2ea6505185d311e9af10a698b2ca`.
 
@@ -15,22 +15,30 @@ receipt.
 ## Current compiler authoring and `.ps` grammar
 
 The current compiler uses the bounded PSC authoring capabilities described in
-[the self-host language guide](docs/selfhost-language/README.md). Handwritten
-`.lean` remains authoritative and the selected recoverable authoring seed remains
-A. Current compiler emission uses TypeScript 7.0.2; historical S0/A recovery keeps
+[the current authoring guide](docs/selfhost-language/CURRENT.md). Handwritten
+`.lean` remains authoritative. The qualified, cold-recovered R compiler is the
+explicitly selected authoring seed, recorded by [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6).
+Current compiler emission uses TypeScript 7.0.2; historical S0/A recovery retains
 its separately pinned TypeScript 5.8.3 toolchain.
 
 This branch installs the **new-only `ps-0.9-r3` bounded self-host subset** for
-current `.ps` input and canonical output, with qualification pending. The lexer,
-parser, printer, active fixtures and source provenance migrate together.
+current `.ps` input and canonical output. Source
+`fe2560aba0f347b1caf8d000d371464642d44f23` passed full compiler qualification and
+independent provider acceptance in
+[run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635).
+[Cold successor recovery](docs/selfhost-language/grammar-migration-cold-recovery.json)
+is verified, with receipt SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`, and R is explicitly
+selected. The lexer, parser, printer, active fixtures and source provenance
+migrate together. The finite F source migration retains its own pending
+qualification.
 [PS_GRAMMAR_ADOPTION.md](docs/selfhost-language/PS_GRAMMAR_ADOPTION.md) records the
 pinned reference, enabled forms, explicit exclusions and qualification gates.
 Current `.ps` does not have a legacy grammar mode. Immutable historical source
 and artifacts keep their original recovery rules.
 
-The edition change does not activate full Standard/PSCV or strict SH/1, select a
-new authoring seed, or migrate the Lean 4.34 provider. Completed compiler/provider
-results and pending current-source work are distinguished in
+The edition change does not activate full Standard/PSCV or strict SH/1 or migrate
+the Lean 4.34 provider. Seed selection has separate authenticated recovery and
+provider evidence requirements. Completed results and pending work are recorded in
 [IMPLEMENTATION.md](docs/selfhost-language/IMPLEMENTATION.md).
 
 ## Active self-host layout

@@ -163,6 +163,9 @@ jobs:
           node --check scripts/sh1-source-snapshot.mjs
           node --check scripts/sh1-seed-manifest.mjs
           node --check scripts/sh1-grammar-conformance.mjs
+          node --check scripts/sh1-fresh-name-conformance.mjs
+          node --check scripts/sh1-migration-worker-conformance.mjs
+          node --check scripts/sh1-migration-worker-abi.mjs
           node --check scripts/sh1-projection-conformance.mjs
           node --check scripts/sh1-successor-seed.mjs
           node --check scripts/sh1-successor-seed.test.mjs

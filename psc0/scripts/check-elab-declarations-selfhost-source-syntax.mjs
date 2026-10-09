@@ -19,12 +19,12 @@ if (match === null) {
 
 const block = match[0];
 const required = [
-  /def psElabDeclarationsWorker\s*\(sources : List PsSyntaxDeclaration\)\s*:\s*PsEnvironment ->\s*List PsDeclaration ->\s*Except PsElabError PsElabModuleResult :=\s*match sources with/,
-  /\| List\.nil =>\s*fun \(environment : PsEnvironment\) =>\s*fun \(declarationsRev : List PsDeclaration\) =>/,
+  /def psElabDeclarationsWorker\s*\(sources : List PsSyntaxDeclaration\)\s*\(environment : PsEnvironment\)\s*\(declarationsRev : List PsDeclaration\) :\s*Except PsElabError PsElabModuleResult :=\s*match sources with/,
+  /\| List\.nil =>\s*Except\.ok\s*\(PsElabModuleResult\.mk/,
   /PsElabModuleResult\.mk\s+environment\s+\(psElabReverseDeclarations declarationsRev\)/,
   /\| List\.cons source rest =>/,
-  /psElabDeclarationsWorker rest;/,
-  /smaller\s+nextEnvironment\s+\(psPrependBatchReverse\s+result\.declarations\s+declarationsRev\)/,
+  /match psElabDeclarationBatch environment source with\s*\| Except\.error error => Except\.error error\s*\| Except\.ok result =>\s*match\s+psAddDeclarationList\s+environment\s+result\.declarations with\s*\| Except\.error error => Except\.error error/,
+  /\| Except\.ok nextEnvironment =>\s*psElabDeclarationsWorker\s+rest\s+nextEnvironment\s+\(psPrependBatchReverse\s+result\.declarations\s+declarationsRev\)/,
   /def psElabDeclarations\s*\(environment : PsEnvironment\)\s*\(sources : List PsSyntaxDeclaration\)\s*\(declarationsRev : List PsDeclaration\)[\s\S]*?psElabDeclarationsWorker\s+sources\s+environment\s+declarationsRev/,
 ];
 for (const pattern of required) {
@@ -50,7 +50,7 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_DECLARATIONS_SELFHOST_SOURCE_SYNTAX: PASS (source-list-recursive worker; environment/accumulator applied post-recursion; explicit module result; local declaration reverse)\n",
+  "PSC2_ELAB_DECLARATIONS_SELFHOST_SOURCE_SYNTAX: PASS (source-list-recursive worker; ordinary environment/accumulator parameters; explicit module result; local declaration reverse)\n",
 );
 
 await import("./check-erasure-add-unique-string-selfhost-source-syntax.mjs");

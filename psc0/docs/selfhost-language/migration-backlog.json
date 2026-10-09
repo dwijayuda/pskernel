@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "kind": "psc0-practical-selfhost-migration-backlog",
   "id": "practical-authoring-v1",
-  "status": "frozen-scope-planned-not-implemented",
+  "status": "frozen-scope-implemented-candidate-qualification-pending",
   "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
   "qualifiedCompilerSourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
   "sourceClosureSha256": "1dbe0be4f97ad51c2898b86546590d4331b463dd080976ba4cb2c72f0e7c59a0",
   "scopeDecision": "Twelve named workers, not every function-valued declaration. This finite scope completes the chosen practical v1 migration; it does not assert whole-repository adapter removal or strict SH/1.",
-  "currentSyntaxDirection": "The user requests atomic current .ps parser/printer/fixture/tooling adoption of the uploaded new grammar, with no active legacy .ps grammar compatibility lane. That coordinated grammar change is a sibling implementation unit, not permission to claim all PSCV capabilities or change Lean/provider pins.",
+  "currentSyntaxDirection": "R2 implemented and compiler-qualified the uploaded new-only ps-0.9-r3 bounded grammar with paired projection repair and independent provider acceptance. Cold recovery is verified and the exact R successor is explicitly selected. F preserves that grammar and retains its own qualification; no current legacy PS mode, full PSCV claim or Lean/provider pin change is added.",
   "coverage": {
     "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
     "entry": "psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
@@ -340,9 +340,10 @@
     "node": "22.23.3",
     "currentTypescript": "7.0.2",
     "historicalS0ATypeScript": "5.8.3",
-    "selectedSeed": "A until explicit qualified successor selection",
+    "selectedSeed": "F uses the explicitly selected, qualified, cold-recovered R source fe2560aba0f347b1caf8d000d371464642d44f23, compiler SHA-256 70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061, seed identity 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225. F qualification remains pending.",
     "strictSh1Qualified": false,
-    "profileActivation": false
+    "profileActivation": false,
+    "noKernelProviderDefeqCacheMetatheoryChangesScope": "The portable worker and alias rewrites do not change those implementations. F separately adds current-grammar provenance to the reusable host PS preparation cache/receipt; its Lean path and cache algorithm remain unchanged."
   },
   "targets": [
     {
@@ -372,7 +373,7 @@
         "collision chain, nonzero starting index",
         "unchanged wrapper fuel and reserved-name handling"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
       "line": 357,
       "blobSha": "c41474cdbd008999368dfaf368be988e9982042b",
@@ -412,7 +413,7 @@
         "collision in used list, in body, and in both",
         "exact first fresh suffix; conservative exhausted body scan"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
       "line": 1354,
       "blobSha": "0d5e687086dec44e8157a15757bc29350f6f447c",
@@ -455,7 +456,7 @@
         "first free name and several collisions",
         "nonzero index and conservative scan exhaustion"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
       "line": 53,
       "blobSha": "a3b2cf9febff4a31a3ad6c7646f4ff2e252932ea",
@@ -500,7 +501,7 @@
         "duplicates, collision chains, nonzero starting index",
         "exact returned name and nextIndex"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
       "line": 14,
       "blobSha": "35485a2cf9e4f07249ee689f0c35b581b305e324",
@@ -542,7 +543,7 @@
         "success order and failure in first/middle source",
         "existing cold/warm and parsed-step correspondence"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
       "line": 154,
       "blobSha": "7f8270f1ba66c786390ef8d7cb54558e28203fba",
@@ -584,7 +585,7 @@
         "ordered insertions",
         "duplicate against initial environment and earlier input"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
       "line": 654,
       "blobSha": "dd668b05e34231747b48af3e29468b0fc99607d2",
@@ -627,7 +628,7 @@
         "multiple batches and dependency on earlier declaration",
         "elaboration failure, duplicate failure, exact first error"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
       "line": 1446,
       "blobSha": "dd668b05e34231747b48af3e29468b0fc99607d2",
@@ -670,7 +671,7 @@
         "empty/nonempty initial used and entriesRev",
         "sanitization collisions and exact ordered output"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
       "line": 38,
       "blobSha": "d288a83320f509fd229139303e06aadcdb7ab39d",
@@ -715,7 +716,7 @@
         "ordinary, partial, erased and skipped declarations",
         "first error and exact emitted declaration order"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
       "line": 402,
       "blobSha": "d288a83320f509fd229139303e06aadcdb7ab39d",
@@ -761,7 +762,7 @@
         "scope dependencies between successive structures",
         "first malformed structure; skip ordinary inductives"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
       "line": 106,
       "blobSha": "864cf3a59c51537aca59e0bb7691a66f0dce777c",
@@ -807,7 +808,7 @@
         "scope dependencies between successive inductives",
         "first invalid inductive and exact output order"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
       "line": 367,
       "blobSha": "4098822ae5ca1a1c3d3d476be5b592daad7d2110",
@@ -852,7 +853,7 @@
         "duplicate source names and used-name collisions",
         "exact name/index/map order for both callers"
       ],
-      "status": "planned-not-migrated",
+      "status": "implemented-candidate-qualification-pending",
       "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
       "line": 37,
       "blobSha": "35485a2cf9e4f07249ee689f0c35b581b305e324",
@@ -893,34 +894,41 @@
   "guardFiles": [
     {
       "path": "psc0/scripts/check-replay-emission-source.mjs",
-      "blobSha": "c5ef93aba675efe82c7702f91ebc205b897335a6"
+      "blobSha": "c5ef93aba675efe82c7702f91ebc205b897335a6",
+      "candidateStatus": "updated-in-candidate-qualification-pending"
     },
     {
       "path": "psc0/scripts/check-backend-ts-replay-source.mjs",
-      "blobSha": "511660c15bb4a0c7eea6a33121ad35c870c0d39e"
+      "blobSha": "511660c15bb4a0c7eea6a33121ad35c870c0d39e",
+      "candidateStatus": "updated-in-candidate-qualification-pending"
     },
     {
       "path": "psc0/scripts/check-modular-preparation-source.mjs",
-      "blobSha": "7ed26f6dd903c74cb0794d9393a11a28977795e3"
+      "blobSha": "7ed26f6dd903c74cb0794d9393a11a28977795e3",
+      "candidateStatus": "updated-in-candidate-qualification-pending"
     },
     {
       "path": "psc0/scripts/check-elab-declarations-selfhost-source-syntax.mjs",
-      "blobSha": "14beb0855b02afc2efa465483931ee654b36432b"
+      "blobSha": "14beb0855b02afc2efa465483931ee654b36432b",
+      "candidateStatus": "updated-in-candidate-qualification-pending"
     },
     {
       "path": "psc0/scripts/check-erasure-declaration-names-selfhost-source-syntax.mjs",
-      "blobSha": "ae8ee243fa1c4dee77787f00c276f4e10d30d4f2"
+      "blobSha": "ae8ee243fa1c4dee77787f00c276f4e10d30d4f2",
+      "candidateStatus": "updated-in-candidate-qualification-pending"
     },
     {
       "path": "psc0/scripts/check-erasure-definitions-loop-selfhost-source-syntax.mjs",
-      "blobSha": "de68947fb59c877e27fa75277c9ccf485e55d751"
+      "blobSha": "de68947fb59c877e27fa75277c9ccf485e55d751",
+      "candidateStatus": "updated-in-candidate-qualification-pending"
     },
     {
       "path": "psc0/scripts/check-erasure-replay-workers.mjs",
-      "blobSha": "e947be4a26c4d877b5586b7b80ec3b5b5b55c4e0"
+      "blobSha": "e947be4a26c4d877b5586b7b80ec3b5b5b55c4e0",
+      "candidateStatus": "updated-in-candidate-qualification-pending"
     }
   ],
-  "guardPolicy": "Replace only obsolete curried-shape requirements with the selected ordinary-parameter capability/correspondence evidence; preserve unrelated source/library restrictions, ownership checks, first-error sequencing, primitive dispatch/arity and emitted invocation/record guards. Seven directly associated guard files were found by full script reads.",
+  "guardPolicy": "Replace only obsolete curried-shape requirements with the selected ordinary-parameter capability/correspondence evidence; preserve unrelated source/library restrictions, ownership checks, first-error sequencing, primitive dispatch/arity and emitted invocation/record guards. Seven directly associated guard files were found by full script reads. The F candidate updates these seven guards together with the source and finite behavior/ABI gates; candidate status does not mark those gates passed.",
   "postSeedAliasCleanup": {
     "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
     "blobSha": "b27f87943d042496ec0732c309afc4f770ed6fc4",
@@ -941,7 +949,9 @@
         "alias": "currentState : PsIrCheckState := state"
       }
     ],
-    "condition": "Only after a qualified projection-capable successor is explicitly selected; preserve match structure and typing/resource behavior."
+    "condition": "F promotion requires a qualified, source-recoverable, explicitly selected projection-capable R successor; preserve match structure and typing/resource behavior. The listed alias sites/line numbers remain the original inventory.",
+    "status": "implemented-candidate-qualification-pending",
+    "candidateRemovedCount": 3
   },
   "retainedNonTargets": [
     {
@@ -997,17 +1007,42 @@
     "currentV1ManifestPath": "psc0/selfhost-seed.json",
     "currentValidator": "psc0/scripts/sh1-seed-manifest.mjs",
     "v1MustRemainExact": "Schema1 requires historical S0 bootstrap, TypeScript5.8.3, the original descriptor and recovery recipe. Do not broaden those checks or recompute A identities under TS7.",
-    "requiredSuccessor": "Add a separate versioned manifest/recovery contract binding the exact parent A manifest/identity/compiler digest, new source revision/closure, C2/C3 four products, producer TS7.0.2, runtime tuple, capability descriptor and recovery recipe.",
+    "requiredSuccessor": "Implemented and qualified in R2: the separate versioned successor contract binds immutable parent A, R source/closure, all converged products and the pinned toolchain/recovery recipe. Cold recovery is verified and the exact R manifest is explicitly selected; F consumes that authenticated successor.",
     "sequence": [
-      "Keep the projection/new-grammar implementation's .lean source within A's accepted authoring capability; do not remove the three aliases yet.",
-      "Qualify that exact current raw source through C1 = Q(R), where Q is the selected compiler from A, C2 = C1(R), C3 = C2(R), with current new .ps fixture grammar exercised by the newly generated compilers. Require all four C2/C3 products, same-IR typing, relevant runtime tests and separate exact-stream provider decisions.",
-      "Implement a versioned successor reader/identity/cache/artifact/recovery route with an immutable parent edge to the existing A manifest. Keep old S0/A identities and TS5 replay dispatch unchanged.",
+      "R2's projection/new-grammar implementation remains in A-consumable .lean and retains the three aliases. The F consumer checkpoint uses the R successor only after recovery and selection.",
+      "R2 completed C1 = Q(R), C2 = C1(R), C3 = C2(R), with Q from A, all four C2/C3 products equal and independent provider acceptance. Newly generated compilers exercised the new PS fixtures and N1 covered the complete 61-module canonical round trip.",
+      "R2 implements a versioned successor reader/identity/cache/artifact/recovery route with an immutable parent edge to A. Historical S0/A identities and TS5 replay dispatch remain unchanged.",
       "Recover A through its existing TS5 path; execute its JS under the pinned Node runtime to compile R; compile R's emitted TypeScript with the exact TS7 CLI/profile; run the first generated compiler on raw R and compare every converged pinned product.",
-      "Use the producing qualification's reconstruction receipts if they exercise that same source-recovery implementation with cache/artifact bypass and final pinned-product verification; otherwise a distinct artifact-free recovery verification remains required before selection. Do not label artifact replay a cold source recovery.",
-      "Only after the exact successor identity, recovery evidence and capability/provider receipts are reviewable, select the successor via an ordinary leased manifest commit. Selection is explicit and does not activate strict SH/1.",
+      "Separate cold source recovery has verified the pinned R product identity; the receipt at docs/selfhost-language/grammar-migration-cold-recovery.json has SHA-256 2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d. This is distinct from artifact replay and from F qualification.",
+      "Selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6 explicitly selects manifest SHA-256 7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694, seed identity 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225, for the qualified and cold-recovered R compiler. Strict SH/1 remains inactive.",
       "Then migrate the two projection-dependent workers and remove the three compatibility aliases. Both old and new .ps implementations are not kept active; historical source refs remain immutable recovery material."
     ],
-    "noRuntimeClaim": "Producer toolchain identity and runtime execution identity are separate; importing A's exact JS does not imply rebuilding it with TS7."
+    "noRuntimeClaim": "Producer toolchain identity and runtime execution identity are separate; importing A's exact JS does not imply rebuilding it with TS7.",
+    "status": "R2-compiler-qualified-provider-accepted-cold-recovered-explicitly-selected",
+    "sequenceMeaning": "R's implementation, compiler/provider qualification, cold recovery and explicit selection are complete under their separate records. F's source, behavior/ABI, fixed-point and provider qualification remain pending and are not inherited from R.",
+    "successorReader": "psc0/scripts/sh1-successor-seed.mjs",
+    "baselinePathMeaning": "currentV1ManifestPath/currentValidator and the original recovery design refer to the immutable A/schema-1 boundary; R2 adds separate successor dispatch.",
+    "currentEvidence": {
+      "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "runId": 37925722635,
+      "compilerJobId": 113804052074,
+      "providerJobId": 113827136830,
+      "compilerQualified": true,
+      "providerAccepted": true,
+      "coldRecoveryStatus": "passed",
+      "coldRecoveryJobId": 113827137018,
+      "successorSelected": true,
+      "selectedSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "selectedCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+      "selectedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+      "selectionCommitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
+      "coldReceipt": {
+        "path": "docs/selfhost-language/grammar-migration-cold-recovery.json",
+        "sha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d"
+      },
+      "details": "proposal.json#sourceGrammarCheckpoint"
+    }
   },
   "projectionCallerAudit": {
     "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
@@ -1043,9 +1078,9 @@
   },
   "qualificationPlan": [
     "Review all twelve conversions and all seven guard updates before the first candidate gate; preserve names, complete types and binder order, algorithms, fuel policies, first-error behavior and wrapper APIs.",
-    "Preserve raw before sources at the immutable base. Compile before/after slices under the selected generated compiler, compare complete public types and bounded independent behavior cases, and exercise public partial applications.",
+    "Preserve the exact original headers/snippets at the immutable base. Execute the 87-case API corpus once per authenticated selected R and F compiler, using each compiler's own values. In buildGeneration, compare actual prepared Core types and exact ordered IR signatures against independent signatures. Elaborate only the isolated typed-partial/signature module; reuse existing runtime partial-application gates and do not prepare the full R closure again.",
     "Use one native development gate to catch grammar/type/IR issues before the expensive generation sequence. Do not launch full C1/C2/C3 after each helper.",
-    "Keep two source commits for rollback and two family-specific correspondence receipts. If both families are reviewed together, one combined exact-source full qualification can cover their shared final source; report that joint source honestly. Separate full checkpoints only when an intervening promotion or concrete risk requires them.",
+    "Retain exact F1/F2 change manifests and family-specific observation sections for review and rollback. Qualify their coherent combined final F source once; do not repeat a full checkpoint per worker or family without an intervening promotion or concrete unresolved risk.",
     "Run current raw-source generation with the selected seed, same-IR checker and established runtime/iteration conformance; require C2/C3 equality of canonical source, admissions, TS and JS and separately accepted exact provider streams.",
     "Review generated loopification and the existing shadowing/tail/evaluation fixtures; source readability alone is not evidence of a runtime speedup.",
     "Stop at the finite adoption criteria. Additional locator cleanup or optional language features require a new scoped objective."
@@ -2338,10 +2373,10 @@
     ]
   },
   "nonClaims": [
-    "No implementation, seed selection, migration or test was performed by this inventory.",
+    "The original 5e3 inventory was read-only. Added F implementation statuses describe a candidate; they do not record F execution, qualification or provider acceptance. R2's separate compiler/provider/cold-recovery/explicit-selection evidence is recorded under seedSuccessorPlan.currentEvidence.",
     "The 241 locator count is not an adapter count or an amount of mandatory remaining work.",
     "The 226 deferred locators have not all received full conversion-safety review.",
-    "No local files, checkouts, builds, tests or shell were used."
+    "No local repository files, checkouts, builds, tests or shell were used for the inventory or documentation update; cited R2 execution occurred in the separate cloud qualification jobs."
   ],
   "declarationBinderOrderAudit": {
     "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
@@ -2376,5 +2411,32 @@
       "hasWildcardRethrow": true
     },
     "outsideScope": "Native host files outside the raw61module closure, including known HostProjectCompiler renderers, require the owning integration audit."
+  },
+  "baselineInventoryMeaning": "sourceRef, qualifiedCompilerSourceRef, sourceClosureSha256, coverage, target line/blob/sourceUrl/oldHeader/currentType/partialRecursiveBindings/callers, locator ledger and source audits describe the immutable 5e3 inventory. Target currentType is the preserved complete baseline interface, not the candidate's authored header. Candidate status below does not rewrite those historical measurements or claim execution.",
+  "candidateImplementation": {
+    "id": "F",
+    "status": "implemented-candidate-qualification-pending",
+    "reviewedAgainstSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "sourceRef": null,
+    "scope": {
+      "ordinaryParameterWorkers": 12,
+      "typedProjectionAliasesRemoved": 3,
+      "guardFilesUpdated": 7
+    },
+    "detailLedger": {
+      "document": "proposal.json",
+      "section": "additionalSourceMigrations",
+      "id": "F"
+    },
+    "authoringSeedPrerequisite": "Qualified, source-recoverable, explicitly selected projection-capable R successor",
+    "authoringSeedIdentity": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "behaviorCases": {
+      "total": 87,
+      "F1": 51,
+      "F2": 36
+    },
+    "abi": "Read actual existing prepared Core declarations and exact IR; compare all twelve complete types and ordered runtime signatures using only an isolated signature/typed-partial module.",
+    "grammar": "Unchanged new-only ps-0.9-r3 bounded selfhost subset; .lean remains authoritative.",
+    "qualificationReceipts": null
   }
 }

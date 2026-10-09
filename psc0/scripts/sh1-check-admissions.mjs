@@ -115,4 +115,14 @@ try {
 } finally {
   await writeFile(receiptPath, JSON.stringify(receipt, null, 2) + '\n');
   process.stdout.write('PSC0_SH1_PROVIDER_ADMISSIONS: ' + JSON.stringify(receipt) + '\n');
+  const receiptBytes = await readFile(receiptPath);
+  const receiptContent = receiptBytes.toString('utf8');
+  assert(receiptBytes.equals(Buffer.from(receiptContent, 'utf8')),
+    'PSC0_SH1_PROVIDER_RECEIPT_UTF8_BYTES');
+  process.stdout.write('PSC0_SH1_PROVIDER_ADMISSIONS_FILE: ' + JSON.stringify({
+    path: 'kernel-admissions.json',
+    sha256: sha256(receiptBytes),
+    bytes: receiptBytes.length,
+    content: receiptContent,
+  }) + '\n');
 }

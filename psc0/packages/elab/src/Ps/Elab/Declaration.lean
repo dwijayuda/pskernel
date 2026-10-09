@@ -652,28 +652,24 @@ def psEnvironmentAddOwnedBootstrapDeclaration
     psEnvironmentAdd environment declaration
 
 def psAddDeclarationListWorker
-    (declarations : List PsDeclaration) :
-    PsEnvironment -> Except PsElabError PsEnvironment :=
+    (declarations : List PsDeclaration)
+    (environment : PsEnvironment) :
+    Except PsElabError PsEnvironment :=
   match declarations with
   | List.nil =>
-      fun (environment : PsEnvironment) =>
-        Except.ok environment
+      Except.ok environment
   | List.cons declaration rest =>
-      let smaller :
-          PsEnvironment -> Except PsElabError PsEnvironment :=
-        psAddDeclarationListWorker rest;
-      fun (environment : PsEnvironment) =>
-        let name := psDeclarationName declaration;
-        let nextResult :=
-          psEnvironmentAddOwnedBootstrapDeclaration
-            environment
-            declaration;
-        match nextResult with
-        | none =>
-            Except.error
-              (PsElabError.duplicateDeclaration name)
-        | some next =>
-            smaller next
+      let name := psDeclarationName declaration;
+      let nextResult :=
+        psEnvironmentAddOwnedBootstrapDeclaration
+          environment
+          declaration;
+      match nextResult with
+      | none =>
+          Except.error
+            (PsElabError.duplicateDeclaration name)
+      | some next =>
+          psAddDeclarationListWorker rest next
 
 def psAddDeclarationList
     (environment : PsEnvironment)
@@ -1444,40 +1440,32 @@ def psPrependBatchReverse
     declarationsRev
 
 def psElabDeclarationsWorker
-    (sources : List PsSyntaxDeclaration) :
-    PsEnvironment ->
-    List PsDeclaration ->
+    (sources : List PsSyntaxDeclaration)
+    (environment : PsEnvironment)
+    (declarationsRev : List PsDeclaration) :
     Except PsElabError PsElabModuleResult :=
   match sources with
   | List.nil =>
-      fun (environment : PsEnvironment) =>
-        fun (declarationsRev : List PsDeclaration) =>
-          Except.ok
-            (PsElabModuleResult.mk
-              environment
-              (psElabReverseDeclarations declarationsRev))
+      Except.ok
+        (PsElabModuleResult.mk
+          environment
+          (psElabReverseDeclarations declarationsRev))
   | List.cons source rest =>
-      let smaller :
-          PsEnvironment ->
-          List PsDeclaration ->
-          Except PsElabError PsElabModuleResult :=
-        psElabDeclarationsWorker rest;
-      fun (environment : PsEnvironment) =>
-        fun (declarationsRev : List PsDeclaration) =>
-          match psElabDeclarationBatch environment source with
+      match psElabDeclarationBatch environment source with
+      | Except.error error => Except.error error
+      | Except.ok result =>
+          match
+              psAddDeclarationList
+                environment
+                result.declarations with
           | Except.error error => Except.error error
-          | Except.ok result =>
-              match
-                  psAddDeclarationList
-                    environment
-                    result.declarations with
-              | Except.error error => Except.error error
-              | Except.ok nextEnvironment =>
-                  smaller
-                    nextEnvironment
-                    (psPrependBatchReverse
-                      result.declarations
-                      declarationsRev)
+          | Except.ok nextEnvironment =>
+              psElabDeclarationsWorker
+                rest
+                nextEnvironment
+                (psPrependBatchReverse
+                  result.declarations
+                  declarationsRev)
 
 def psElabDeclarations
     (environment : PsEnvironment)

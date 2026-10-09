@@ -1,14 +1,23 @@
 # PSC0 self-host language: findings and decisions
 
-Status: historical research baseline with a qualified bounded authoring
-implementation, updated 2026-10-09. A remains the selected authoring seed.
+Start with [CURRENT.md](CURRENT.md) for the current source forms, daily commands,
+qualification boundary and remaining limits. This file retains the research
+baseline and its evidence.
+
+Status, updated 2026-10-09: R2's new-only grammar and parameter-projection repair
+are **compiler-qualified and independently provider-accepted**. Cold source
+recovery is verified, and the exact R successor is explicitly selected by
+[selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6).
+The finite F source migration remains an **implemented candidate with
+qualification pending**. Its required authoring seed is now the authenticated R
+compiler; R evidence does not qualify F.
 Foundation.List B, helper migration H and recursive generic-erasure repair E
 retain their original qualification receipts. The M6 portable runtime IR checker
 and current TypeScript 7.0.2 integration are now separately qualified, including
 their exact-stream provider checks. Full strict SH/1 and profile activation
 remain separate unfinished contracts.
 
-The last completed qualified integration source is
+The earlier completed TypeScript 7 integration source is
 `99786185f77edf952f11989d4c9bc44028f22f11`
 ([run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506)).
 Its portable M6 implementation was independently qualified under TypeScript
@@ -34,7 +43,7 @@ Baseline: `dwijayuda/pskernel@37f63c39d4a07189938046c64152bba25d789450`, specifi
 
 ## Decision
 
-Keep **PSC0-SH/1** as the bounded authoring capability contract, implemented by the portable PSC compiler with handwritten PSC1-compatible `.lean` still authoritative. The current `.ps` frontend and canonical printer move together to the **new-only `ps-0.9-r3` bounded self-host subset**. Current `.ps` source must use that edition; there is no legacy parser mode. Historical S0/A source, toolchains and artifacts remain recoverable at their immutable revisions. Ordinary structural recursion with supported changing state is already qualified; the new grammar and parameter-projection checkpoint has separate qualification pending.
+Keep **PSC0-SH/1** as the bounded authoring capability contract, implemented by the portable PSC compiler with handwritten PSC1-compatible `.lean` still authoritative. The current `.ps` frontend and canonical printer move together to the **new-only `ps-0.9-r3` bounded self-host subset**. Current `.ps` source must use that edition; there is no legacy parser mode. Historical S0/A source, toolchains and artifacts remain recoverable at their immutable revisions. Ordinary structural recursion with supported changing state is already qualified. Grammar/projection checkpoint R and source migration F each require their own exact-source evidence; F does not select or qualify its prerequisite seed.
 
 This is a bounded PSC implementation language, not a second general-purpose compiler project. The current handwritten worker/closure encodings should become compiler implementation details. The practical bottlenecks are frontend recognition and bootstrap discipline; the names of the profiles do not themselves solve either problem.
 
@@ -46,7 +55,17 @@ The source grammar change follows the user's explicit new-version-only decision.
 
 The checkpoint replaces semicolon sequences with newline sequences, uses a single typed comma group in declaration and constructor headers, retains native typed lambda binder sequences, and preserves adjacent call groups separately from whitespace applications. It supports annotated parameterless `const` and positive-arity `function` aliases. `f()` remains an explicit empty call in the syntax tree and is refused during elaboration until completion semantics are implemented; `f(())` passes Unit. General `do`, omitted required annotations, defaults, named arguments, tuples and unsupported source constructs fail closed. The canonical printer and active fixtures change in the same checkpoint.
 
-This is an implemented branch change with **qualification pending**. The bounded API corpus, full captured-closure canonical round trip, raw-source behavior, current C2/C3 equality and separate exact-stream provider results must identify the new source grammar. It does not establish full Standard or PSCV conformance, select a new seed, activate strict SH/1, or upgrade the Lean 4.34.0 provider. The authored compiler keeps the forms consumable by selected A until a qualified successor is explicitly selected.
+R2 source `fe2560aba0f347b1caf8d000d371464642d44f23` passed compiler qualification in [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635) and separate exact-stream provider acceptance. Its 61-module captured closure passed the new-PS canonical round trip, and all four declared C2/C3 products agree. [IMPLEMENTATION.md](IMPLEMENTATION.md#r2-compiler-and-provider-evidence) records the exact source/closure and jobs. Cold recovery is verified by [its exact receipt](grammar-migration-cold-recovery.json), SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`. R is the selected authoring seed at [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6); F retains its own pending source/runtime qualification. Neither checkpoint establishes full Standard or PSCV conformance, activates strict SH/1, or upgrades the Lean 4.34.0 provider.
+
+## F checkpoint: finite worker migration
+
+F implements the twelve workers frozen in [migration-backlog.json](migration-backlog.json): four fresh-name workers and eight preparation, elaboration, erasure and symbol-map workers now use ordinary state parameters instead of handwritten returned-function adapters. It also removes exactly three typed projection aliases in `CompilerIr/Check.lean`, using the projection behavior supplied by R. The compiler remains authored in `.lean`; current `.ps` keeps the same new-only `ps-0.9-r3` grammar.
+
+Complete public types and argument order are preserved. The candidate retains each worker's distinct fuel-exhaustion policy, collision order, accumulator reversal, first-error behavior and wrappers. Seven related source guards change their obsolete spelling requirements while keeping their other checks. This finite migration does not include the remaining locator inventory.
+
+Qualification is **pending**. The shared API gate has 87 explicit behavior cases: 51 for F1 and 36 for F2. A separate ABI hook reads the already prepared declarations and exact IR, compares full public Core types and ordered runtime signatures, and elaborates a small isolated signature/typed-partial module. It does not rebuild the baseline closure or add probe declarations to the compiler. Existing runtime partial-application checks remain separate.
+
+Use the authenticated selected R compiler for one coherent F qualification. Record paired R/F behavior, the ABI observations, current C2/C3 products, checked original IR and exact provider decisions before calling F qualified. [IMPLEMENTATION.md](IMPLEMENTATION.md#f-checkpoint-ordinary-worker-parameters) and [MIGRATION.md](MIGRATION.md#current-f-checkpoint-implemented-candidate-qualification-pending) describe the integration. No unrestricted PSC1, strict SH/1, full PSCV or measured runtime-speedup claim follows from these source rewrites.
 
 ## 1. Correct the premise for the historical baseline
 
@@ -138,19 +157,19 @@ The correct first target remains the original TS-to-JS lane. Cross-backend confo
 
 ## 3. Why iteration is expensive
 
-### Current commands are coarser than the desired workflow
+### Historical baseline commands were coarser than the desired workflow
 
 `build:psc` really does read the current handwritten entry, emit a `.ps` workspace, emit a Lean replay, then compile the generated workspace. It is more useful than blindly reusing an old dist tree. It does **not** run the resulting candidate compiler on its own current source or prove equality between candidate generations.[BUILD]
 
 `selfhost-generation.mjs` also unconditionally emits Lean replay. The top-level `fixed-point` script starts with the full bootstrap chain, and nested scripts repeat source/closure checks. `compare-selfhost.mjs` compares the two paths supplied to it; the configured compiler comparison is TS equality, not a general all-artifact proof.[GEN], [PKG], [COMPARE]
 
-There is no current-source resident compiler/session cache or start/step/finish preparation API on main PSC0. The driver requires aggregate `psCompilerPrepareSources` and imports a compiler for an invocation. `build:auto` only checks whether the expected generated JS file exists; it does not authenticate its source provenance. `clean` deletes dist. An immutable, recoverable seed must live outside mutable dist or be fetched by digest.[DRIVER], [AUTO], [CLEAN]
+At the pinned research baseline there was no resident compiler/session cache or start/step/finish preparation API. Its driver required aggregate `psCompilerPrepareSources` and imported a compiler for each invocation. The baseline `build:auto` only checked whether the expected generated JS file existed; it did not authenticate source provenance. `clean` deleted dist.[DRIVER], [AUTO], [CLEAN] The current implementation now has authenticated resident preparation and the bounded native development route described in [CURRENT.md](CURRENT.md). Recoverable seed identity remains independent of mutable dist output.
 
 ### Module invalidation requires more than import edges
 
 The compiler prepares an ordered list of sources with a shared environment and a reverse declaration accumulator. A changed early declaration can affect later elaboration, reduction, resolution or generated names. Rebuilding only direct reverse importers is not automatically safe.[API]
 
-An initial incremental implementation should cache parsing per source and resume preparation from the first changed module. It should invalidate the semantic suffix until equality of the complete incoming state is established. That state includes environment, declaration accumulator/provenance, prelude, source kind, compiler implementation identity and relevant limits. Dependency-driven finer invalidation can follow once actual semantic dependencies are recorded.
+The initial incremental design called for caching parsing per source and resuming preparation from the first changed module; the current resident implementation supplies that conservative boundary. It should invalidate the semantic suffix until equality of the complete incoming state is established. That state includes environment, declaration accumulator/provenance, prelude, source kind, compiler implementation identity and relevant limits. Dependency-driven finer invalidation can follow once actual semantic dependencies are recorded.
 
 ### Native checking is a separate performance workstream
 

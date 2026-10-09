@@ -12,19 +12,19 @@ const block = match[0];
 for (const pattern of [
   /\(declarations : List PsVerifiedIrDeclaration\) :\s*List PsVerifiedIrDeclaration -> List PsVerifiedIrDeclaration :=\s*match declarations with/,
   /psErasureReverseIrDeclarationsAcc rest;\s*fun \(acc : List PsVerifiedIrDeclaration\) =>\s*smaller \(List\.cons declaration acc\)/,
-  /def psEraseDefinitionsLoopWorker\s*\(environment : PsEnvironment\)\s*\(scope : PsErasureScope\)\s*\(declarations : List PsDeclaration\) :\s*List PsVerifiedIrDeclaration ->\s*Except PsErasureError \(List PsVerifiedIrDeclaration\) :=\s*match declarations with/,
+  /def psEraseDefinitionsLoopWorker\s*\(environment : PsEnvironment\)\s*\(scope : PsErasureScope\)\s*\(declarations : List PsDeclaration\)\s*\(declarationsRev : List PsVerifiedIrDeclaration\) :\s*Except PsErasureError \(List PsVerifiedIrDeclaration\) :=\s*match declarations with/,
   /Except\.ok \(psErasureReverseIrDeclarationsAcc declarationsRev List\.nil\)/,
-  /psEraseDefinitionsLoopWorker environment scope rest;/,
+  /\| List\.cons declaration rest =>\s*match declaration with/,
   /\| PsDeclaration\.definitionDecl name _ type value =>/,
   /\| PsDeclaration\.partialDecl name _ type value =>/,
-  /\| _ => smaller declarationsRev/,
+  /\| _ =>\s*psEraseDefinitionsLoopWorker environment scope rest declarationsRev/,
   /def psEraseDefinitionsLoop\s*\(environment : PsEnvironment\)\s*\(scope : PsErasureScope\)\s*\(declarations : List PsDeclaration\)\s*\(declarationsRev : List PsVerifiedIrDeclaration\)[\s\S]*?psEraseDefinitionsLoopWorker environment scope declarations declarationsRev/,
 ]) {
   if (!pattern.test(block)) throw new Error(`PSC2_ERASURE_DEFINITIONS_LOOP_MISSING: ${pattern}`);
 }
 for (const pattern of [
   /\| Except\.error error => Except\.error error/g,
-  /\| Except\.ok result =>\s*match result with\s*\| Option\.none => smaller declarationsRev\s*\| Option\.some lowered =>\s*smaller \(List\.cons lowered declarationsRev\)/g,
+  /\| Except\.ok result =>\s*match result with\s*\| Option\.none =>\s*psEraseDefinitionsLoopWorker environment scope rest declarationsRev\s*\| Option\.some lowered =>\s*psEraseDefinitionsLoopWorker environment scope rest\s*\(List\.cons lowered declarationsRev\)/g,
 ]) {
   if ([...block.matchAll(pattern)].length !== 2) {
     throw new Error(`PSC2_ERASURE_DEFINITIONS_LOOP_MISSING: both definition branches: ${pattern}`);

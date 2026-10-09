@@ -354,14 +354,16 @@ def psErasureLocalNameUsed (scope : PsErasureScope) (candidate : String) : Bool 
     | Option.some _ => true
     | Option.none => false
 
-def psErasureLocalNameWithFuel (scope : PsErasureScope) (base : String) (fuel : Nat) : Nat -> String :=
+def psErasureLocalNameWithFuel
+    (scope : PsErasureScope) (base : String) (fuel : Nat) (index : Nat) : String :=
   match fuel with
-  | Nat.zero => fun (index : Nat) => String.Internal.append base (String.Internal.append "$" (psNatToString index))
+  | Nat.zero =>
+      String.Internal.append base (String.Internal.append "$" (psNatToString index))
   | Nat.succ remaining =>
-      let smaller : Nat -> String := psErasureLocalNameWithFuel scope base remaining;
-      fun (index : Nat) =>
-        let candidate := String.Internal.append base (String.Internal.append "$" (psNatToString index));
-        if psErasureLocalNameUsed scope candidate then smaller (Nat.succ index) else candidate
+      let candidate := String.Internal.append base (String.Internal.append "$" (psNatToString index));
+      if psErasureLocalNameUsed scope candidate then
+        psErasureLocalNameWithFuel scope base remaining (Nat.succ index)
+      else candidate
 
 def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Nat) : String :=
   let sanitized := psErasureSafeIdentifier raw fallback;

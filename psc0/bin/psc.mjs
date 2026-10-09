@@ -57,7 +57,7 @@ async function nearestPackage(start) {
 
 function configuredPath(value, kind) {
   return typeof value === 'string' && value.length > 0 && value.length <= 4096 &&
-    !/[\u0000-\u001f\\]/u.test(value) &&
+    !/[\u0000-\u001f\\:]/u.test(value) &&
     !path.posix.isAbsolute(value) && !path.win32.isAbsolute(value) &&
     !value.split('/').some(part => part === '..' || part === '') &&
     (kind === 'entry' ? /\.(?:ps|lean)$/u : /\.(?:ts|js)$/u).test(value);

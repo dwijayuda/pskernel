@@ -9,6 +9,7 @@ on:
       - 'psc0/scripts/**'
       - 'psc0/packages/**'
       - 'psc0/examples/platform/**'
+      - 'psc0/examples/extensions/**'
       - 'psc0/selfhost-seed.json'
       - '.github/workflows/psc0-platform.yml'
   workflow_dispatch:

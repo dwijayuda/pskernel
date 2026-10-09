@@ -44,7 +44,9 @@ export const releaseExampleFiles = Object.freeze([
   "examples/platform/existing-typescript/src/Main.ps",
   "examples/platform/existing-typescript/src/consumer.ts",
   "examples/platform/rejected-source/Main.ps",
-  "examples/platform/rejected-source/README.md"
+  "examples/platform/rejected-source/README.md",
+  "examples/platform/checked-nat/README.md",
+  "examples/platform/existing-typescript/README.md"
 ]);
 
 async function absent(file) {

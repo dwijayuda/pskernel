@@ -237,8 +237,8 @@ test('project defaults resolve from the selected root and explicit entry gets it
 test('project path settings cannot escape or silently select unsupported source/output kinds', async t => {
   for (const config of [
     { entry: '../Outside.ps' }, { entry: '/outside/Main.ps' },
-    { entry: 'C:/outside/Main.ps' }, { entry: 'src/Main.ts' },
-    { entry: 'src/Main.ps', out: '../Outside.ts' },
+    { entry: 'C:/outside/Main.ps' }, { entry: 'D:Outside.ps' }, { entry: 'src/Main.ts' },
+    { entry: 'src/Main.ps', out: '../Outside.ts' }, { entry: 'src/Main.ps', out: 'D:Other.ts' },
     { entry: 'src/Main.ps', out: 'dist/Main.wasm' },
     { entry: 'src\\Main.ps' },
   ]) {

@@ -4,7 +4,6 @@
     "outDir": "dist",
     "rootDir": ".",
     "types": [],
-    "baseUrl": ".",
     "paths": {
       "lean-ts-kernel": [
         "../../dist/src/index.d.ts"

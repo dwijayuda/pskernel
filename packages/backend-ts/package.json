@@ -22,10 +22,13 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build --silent && node dist/test/index.test.js"
+    "test": "npm run build --silent && node dist/test/index.test.js && node dist/test/typescript-compiler.test.js"
   },
   "dependencies": {
-    "typescript": "5.8.3",
+    "typescript": "7.0.2",
     "@proofscript/compiler-ir": "file:../compiler-ir"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3"
   }
 }

@@ -1,0 +1,46 @@
+name: Root TypeScript 7 qualification
+
+on:
+  push:
+    branches: ['psc0/typescript-7-only-v1']
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig*.json'
+      - 'packages/**'
+      - 'selfhost/host/src/Ps/Host/TypeScriptCompiler.lean'
+      - 'selfhost/scripts/compile-with-generated.mjs'
+      - 'scripts/root-typescript7-qualify.mjs'
+      - '.github/workflows/root-typescript7-qualify.yml'
+      - 'docs/TYPESCRIPT7.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: root-typescript7-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[root-ts7-qualify]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Resolve the exact lock and run the root compiler gates once
+        run: node scripts/root-typescript7-qualify.mjs
+      - name: Preserve exact lock, receipts, and gate output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: root-typescript7-${{ github.sha }}
+          path: dist/typescript7-root
+          if-no-files-found: error
+          retention-days: 30

@@ -38,6 +38,6 @@
     "test": "npm run build --silent && node dist/test/syntax.test.js && node dist/test/v061-conformance.test.js"
   },
   "devDependencies": {
-    "typescript": "5.8.3"
+    "typescript": "7.0.2"
   }
 }

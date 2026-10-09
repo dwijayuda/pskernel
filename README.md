@@ -24,6 +24,8 @@ See `docs/CONFORMANCE.md` and `PROGRESS.json` for exact counts and remaining gat
 
 ## Quick start
 
+Future development uses **TypeScript 7.0.2** throughout the root workspace and PSC0. The root compiler uses the installed TS7 CLI; it does not require a TypeScript5/6 API package. See [the current toolchain and adapter contract](docs/TYPESCRIPT7.md).
+
 ```bash
 npm install
 npm test

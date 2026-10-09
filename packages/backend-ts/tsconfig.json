@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "types": [],
-    "baseUrl": ".",
+    "types": [
+      "node"
+    ],
     "paths": {
       "@proofscript/compiler-ir": [
         "../compiler-ir/dist/src/index.d.ts"

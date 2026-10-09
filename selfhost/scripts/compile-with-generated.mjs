@@ -196,11 +196,19 @@ async function flattenProject(compiler, entryPath) {
 
 function compileTypeScript(typeScriptPath) {
   const npx = process.platform === "win32" ? "npx.cmd" : "npx";
+  const version = spawnSync(npx, ["--no-install", "tsc", "--version"], {
+    cwd: selfhostRoot, encoding: "utf8", stdio: "pipe",
+  });
+  if (version.error || version.status !== 0 ||
+      version.stdout.trim() !== "Version 7.0.2" || version.stderr.trim() !== "") {
+    throw new Error("PSC1_SELFHOST_TSC_VERSION: expected TypeScript 7.0.2");
+  }
   const result = spawnSync(
     npx,
     [
       "--no-install",
       "tsc",
+      "--ignoreConfig",
       typeScriptPath,
       "--target",
       "ES2022",

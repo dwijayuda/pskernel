@@ -39,19 +39,27 @@ def psTypeScriptVersion : IO String := do
       (IO.userError
         ("PSC1_TSC_VERSION_FAILED:\n" ++ output.stderr))
   let raw := output.stdout.trimAscii.toString
-  if raw.startsWith "Version " then
-    pure (raw.drop 8).toString
-  else
-    pure raw
+  let version :=
+    if raw.startsWith "Version " then
+      (raw.drop 8).toString
+    else
+      raw
+  if version != "7.0.2" then
+    throw
+      (IO.userError
+        ("PSC1_TSC_VERSION_MISMATCH: expected 7.0.2, received " ++ version))
+  pure version
 
 def psCompileTypeScriptFile
     (typeScriptPath : String) :
     IO PsTypeScriptCompileResult := do
+  let version ← psTypeScriptVersion
   let output ← IO.Process.output {
     cmd := psTscExecutable
     args := #[
       "--no-install",
       "tsc",
+      "--ignoreConfig",
       typeScriptPath,
       "--target", "ES2022",
       "--module", "ES2022",
@@ -85,7 +93,6 @@ def psCompileTypeScriptFile
     throw (IO.userError "PSC1_TS_COMPILE_MISSING_DECLARATION")
   if !(← System.FilePath.pathExists sourceMapPath) then
     throw (IO.userError "PSC1_TS_COMPILE_MISSING_SOURCE_MAP")
-  let version ← psTypeScriptVersion
   pure {
     typeScriptPath := typeScriptPath
     javascriptPath := javascriptPath

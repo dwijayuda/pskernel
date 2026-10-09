@@ -42,3 +42,13 @@ the default adapter requires the exact 4.35.0-rc4 metadata identity.
 The preserved LEAN_4_34 documents and M3/M4 receipts describe historical
 checkpoints. They do not certify this migration. Current research, changes,
 and outstanding evidence are recorded in [RESEARCH_AND_MIGRATION.md](RESEARCH_AND_MIGRATION.md).
+
+## Current stage result
+
+[Run 37979868377](https://github.com/dwijayuda/pskernel/actions/runs/37979868377)
+at `05542332ab589314917cd67a7eb7b74e80557770` passes the build, metatheory,
+84 companion proofs, foundations, Nat-dispatch regressions, 141 tutorial
+verdicts and fresh 4.35 Prelude/UTF8 checks. Historical bugs yield 17 correct
+rejections and one known decline. Full Init still times out; Std exhausts a
+reduction bound at `Std.Sat.AIG.mkXorCached`; Mathlib is therefore not run.
+See [the exact evidence](MIGRATION_EVIDENCE.json). The next stage is deferred.

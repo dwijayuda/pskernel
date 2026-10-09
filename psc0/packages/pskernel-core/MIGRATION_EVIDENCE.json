@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "stage": "PSC0 migration, Lean 4.35 target, Nat dispatch repair",
+  "candidateCommit": "05542332ab589314917cd67a7eb7b74e80557770",
+  "sourceProvenance": {
+    "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
+    "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
+    "psc0Base": "e356162ddf1d0780337b2f510925455c70fb658d"
+  },
+  "target": {
+    "version": "4.35.0-rc4",
+    "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+  },
+  "workflowRun": 37979868377,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37979868377",
+  "nativeBinarySha256": "f7faafb345aba02950e1aaf6e6c0e6495ad613de0fad2253125457eef5e93c21",
+  "checks": {
+    "build": "passed",
+    "foundations": "passed",
+    "natDispatchRegressions": "passed",
+    "metatheoryBuild": "passed",
+    "companionProofs": {
+      "status": "passed",
+      "files": 84
+    },
+    "tutorial": {
+      "status": "passed",
+      "cases": 141,
+      "correct": 141,
+      "declined": 0
+    },
+    "bugs": {
+      "status": "known-decline-remains",
+      "cases": 18,
+      "correctRejections": 17,
+      "accepted": 0,
+      "declined": [
+        "bugs/rec-missing-ih"
+      ]
+    },
+    "fresh435": {
+      "status": "passed",
+      "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+      "prelude": {
+        "records": 65406,
+        "declarations": 1840,
+        "constants": 2121,
+        "wallSeconds": 0.68,
+        "maxRssKiB": 71976
+      },
+      "utf8": {
+        "records": 159345,
+        "declarations": 2146,
+        "constants": 2353,
+        "wallSeconds": 9.29,
+        "maxRssKiB": 84336
+      }
+    },
+    "init": {
+      "status": "timeout",
+      "arenaCorrectness": "error",
+      "wallSeconds": 500.08234429359436,
+      "lastProgress": {
+        "records": 1099999,
+        "declarations": 9330
+      },
+      "jobId": 113988156376
+    },
+    "std": {
+      "status": "resource-exhaustion",
+      "arenaStatus": "declined",
+      "wallSeconds": 396.22881841659546,
+      "record": 1227585,
+      "declaration": "Std.Sat.AIG.mkXorCached",
+      "diagnostic": "kernel reduction budget exhausted",
+      "jobId": 113988156164
+    },
+    "mathlib": {
+      "status": "not-run",
+      "reason": "Init and Std prerequisite gates failed",
+      "jobId": 113991896616
+    }
+  },
+  "claims": {
+    "completeArenaConformance": false,
+    "jointSelfhostQualified": false,
+    "endToEndConsistencyProved": false,
+    "defaultProviderPromoted": false,
+    "compilerSeedChanged": false
+  },
+  "nextStage": [
+    "isolate Std.Sat.AIG.mkXorCached reduction fuel origin",
+    "proved expression metadata",
+    "sharing-aware substitution",
+    "context-scoped cache refinement",
+    "remaining decline diagnosis",
+    "joint generated compiler/kernel qualification"
+  ],
+  "status": "stage-checkpoint-with-open-corpus-failures"
+}

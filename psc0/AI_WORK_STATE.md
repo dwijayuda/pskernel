@@ -1,83 +1,283 @@
-# PSC0 SH/1 implementation work state
+# PSC0 AI work state — continuation authority
 
-Updated: 2026-10-09 14:51:06 UTC.
+Updated: 2026-10-09 15:37:15 UTC. Times in this file are UTC; the user's timezone is Asia/Jakarta (UTC+07:00).
 
-## Active continuation: finite migration and TypeScript 7-only development
+## Read this first
 
-The user requires the new supplied `.ps` grammar only, without active backward compatibility, and now explicitly retires TypeScript 5 from future development. Current PSC0 compilation must use exactly TypeScript 7.0.2. Historical source revisions and evidence remain immutable facts; they do not define a supported current compiler fallback.
+This is the current handoff for the ongoing dwijayuda/pskernel work. The user explicitly requested a detailed committed AI_WORK_STATE.md so a new chat can finish the work without drifting. Continue the authorized implementation; do not restart the research or ask the user to authorize work already accepted.
 
-Work remains on `psc0/sh1-projection-grammar-v1`, descended from qualified integration `5e3a991088aaa735c8f324c4e70a7a3dee4cd69a`. The canonical implementation branch remains at that previous completed checkpoint until the finite migration qualifies. Main is untouched.
+**Current result:** the practical new-only PSC0 grammar and twelve-worker migration are implemented. Selected R is fully qualified. The new TypeScript 7-only native recovery is independently cold-proven. Current F has passed the selected-R C1 candidate gate and is running C2/C3; its final provider gate is still pending. The separate repository-root TypeScript 7 migration is fully qualified: all seven commands passed, including builds, the complete package tests, package integration and repository boundary checks. Root independently authenticated its exact five-file evidence and all 11 adapter obligations.
 
-**R is qualified and explicitly selected. The twelve-worker F source is applied, and attempt 2 passed all 87 behavior cases on both authenticated R and current-native F with identical reports. Full F qualification remains pending: its new isolated ABI test source used unsupported `axiom` syntax and failed before C1 emission.** This checkpoint replaces that probe with supported declarations and moves the complete probe before N1. It also removes active PSC0 TypeScript 5 compilation and recovery routes; the replacement native TypeScript 7 recovery requires an independent cold proof.
+**Do not mark the whole task complete from this snapshot.** Finish the exact active F run below, authenticate its final evidence, retain all three scopes of proof, reconcile the current guides, and integrate the qualified descendants. Do not repeat successful root or native cold qualification.
 
-Handwritten `.lean` remains authoritative. Current `.ps` parsing, printing and owned source consumers use bounded new-only `ps-0.9-r3`. Strict SH/1, full Standard/PSCV and unrestricted PSC1 are not claimed.
+Everything at and below the later heading "Historical completed M6 and TypeScript 7 result" is archival. Some historical subsections contain words such as "Current", "next" or "selected"; those describe their old checkpoints, not today's active instructions. This active section takes precedence.
 
-### Earned R evidence
+## User intent and persistent decisions
 
-Qualified source `fe2560aba0f347b1caf8d000d371464642d44f23`, [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635), attempt 1, completed successfully. Compiler job `113804052074`, independent provider job `113827136830`, and cold recovery job `113827137018` all passed. The successful source has 61 modules and 1,113,918 raw source bytes.
+- Research why self-hosting is constrained, implement a suitable finite language subset and source migration, and make iteration faster and more effective.
+- Create/use working branches for changes. Continue autonomously on already authorized work. Main remains untouched.
+- Use the supplied new .ps grammar only. Do not keep an active old-grammar fallback or add backward compatibility.
+- Retire TypeScript 5 from future development. Current PSC0 compilation, recovery, root workspace compilation and remaining compiler launchers must require TypeScript 7.0.2; do not install TS5/TS6 API fallbacks.
+- Preserve immutable historical source revisions, original producer-version facts, seed identities and receipts. Historical 5.8.3 text is not permission to execute that compiler in today's workflow.
+- Avoid a repeated guess/test/fix loop. Diagnose a demonstrated class, review related obligations together, use cheap preflight, and run the full qualification only at a coherent semantic checkpoint.
+- Keep this file accurate after concrete milestones and before a handoff.
 
-- Source closure: `f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226`.
-- C1/C2/C3 JavaScript: `70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061`.
-- Selected R identity: `47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225`.
-- Selected manifest actual file SHA-256: `7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694`.
-- Provider receipt actual file SHA-256: `1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77`.
-- Cold receipt actual file SHA-256: `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`.
+### Execution and scope boundaries
 
-Native suites passed 75 core, 10 translation and 16 erasure cases. N1 checked complete Lean-to-new-PS-to-Lean correspondence for all 61 modules and 904,355 PS bytes. Its full original-IR checker accepted 56,391 expressions and 725,484 visited steps with zero findings. C2/C3 accepted the complete original IR with zero findings before emitting that same IR and matched all four required products. Their full expression/step counts are not inferred from the native counts.
+This continuation uses GitHub connector/MCP reads and writes, with actual builds/tests only in GitHub Actions. Do not clone, build, test or execute repository code locally; do not switch to a local shell, browser or DesktopCommander workflow. Pure in-memory text/JSON transformations and evidence hashing are permitted. Git-backed deliverables remain in the repository.
 
-Per-generation capability gates passed 21 projection API cases, 39 projection and 34 grammar behavior observations per raw Lean/PS fixture, plus the complete bounded grammar positive/refusal suite. C1 preserves the explicitly historical A boundary for its first canonical product. That immutable historical artifact is not a current legacy parser mode.
+Use fresh branch-head leases for every update, preserve concurrent work and ancestry, and never force-push. Do not change provider/kernel/metatheory/definitional-equality/cache algorithms. The exporter correction below changes a TypeScript declaration only, not process behavior. Do not weaken gates, select F as a seed, merge main, or claim strict SH/1, unrestricted PSC1, full Standard or PSCV.
 
-The unchanged Lean 4.34.0 provider accepted four distinct exact admission streams covering eight C2/C3 roles. This is post-emission acceptance; it does not claim this provider invocation gated emission.
+Pins: Lean 4.34.0, Node 22.23.3, TypeScript 7.0.2. Continue useful work while Actions runs; communicate meaningful progress to the user.
 
-Cold recovery independently rebuilt two new raw-source generations from pinned A into fresh output/cache directories. The pinned same-revision recovery runner matched all first/final products, checked the final original IR before emission, authenticated the parent/cache and recorded success. Its measured elapsed time was 2,728,786.866427 ms, about 45m29s. The job finished at 13:37:09 UTC.
+## Branches, exact sources and qualification runs
 
-The separate [receipt collector](https://github.com/dwijayuda/pskernel/actions/runs/37938411520) authenticated the successful run, jobs, immutable artifact IDs and 18 exact retained JSON files. Those original file bytes are committed verbatim. The collector did not activate the seed; this later explicit selection commit writes its authenticated proposed manifest. The [selection record](docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/selection.json) maps every retained file to its exact digest and Git blob. Archive digests are not receipt-file digests.
+Read the live refs before doing further writes. This checkpoint is written on the root retirement branch after the source commit below; a documentation descendant is not a new compiler qualification.
 
-R compiler/provider logs and all 34 complete logged records remain in `docs/selfhost-language/grammar-migration-compiler-evidence.json` and `evidence-logs/`. The cold log and its three-record evidence bundle are retained alongside them. Exact artifact receipts, ancestry, qualification and grammar evidence are under `docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/`.
+| Branch or evidence | Exact identity at this checkpoint | Meaning |
+| --- | --- | --- |
+| psc0/typescript-7-only-v1 | source 9d150afbec1feda8c97058aa56aa5ab92347d96d; tree c97468df9855bb7379b49e0771ed5e373e39c8b2 | Combined descendant containing F/PSC0 retirement plus root TS7 changes |
+| psc0/sh1-projection-grammar-v1 | fcd875c8f38db4b0524090bd10c7c2fd5024053d; tree 0bda17a81be9f790fa12a5fc38bd32d36f38f6ae | Pinned source of active F qualification and successful native cold recovery |
+| psc0/sh1-implementation-v1 | last confirmed 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a | Canonical integration remains at the earlier completed checkpoint; re-read before fast-forward |
+| psc0/typescript-7-v1 | last confirmed 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a | Earlier TS7 integration alias; re-read before fast-forward |
+| main | last confirmed 37f63c39d4a07189938046c64152bba25d789450 | Unchanged by this work |
+| Selected R source | fe2560aba0f347b1caf8d000d371464642d44f23 | Fully qualified, explicitly selected authoring compiler |
 
-### Implemented grammar and compiler repair
+### Active F qualification — do not relaunch
 
-The adopted reference has SHA-256 `4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71` (401,569 bytes / 8,546 lines). It is a design RC with pending Standard environment and implementation conformance. The implementation adopts the documented bounded grammar, not the entire reference.
+- [Run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800), source fcd875c8f38db4b0524090bd10c7c2fd5024053d.
+- Compiler job 113876931430.
+- Latest observed steps: installed TS7/source/seed gates passed; native build and 75/10/16 suites passed; source/import/session and CLI gates passed; authenticated R 87-case plus supported ABI probe passed; bounded N1 development passed; **selected-R C1 passed**; C2/C3 fixed-point step 25 is in progress.
+- Steps 26–28/provider completion are not yet final. Step 26 should be skipped because F must not be promoted to a new selected seed.
+- Expected final compiler gates: steps 3,6,7,8,9,11,14,17,18,19,20,21,22,23,24,25,28 succeed. The retired successor-recovery job must be absent.
+- Do not push executable changes to this branch while its run is active. Its concurrency policy can cancel an active qualification.
+- C1 step success is earned; do not invent complete generation receipts, current C2/C3 hashes, provider acceptance or runtime speedups before reading the final evidence.
 
-The parser/printer now own newline sequences, one comma-oriented explicit declaration/constructor binder group, strict record commas, grouped call terms and adjacent postfix calls. Empty invocation stays an empty argument list and unsupported completion is refused; `f(())` remains one Unit argument. PS whitespace/BOM positions have a dedicated lexical entry. Current raw PS imports are parsed before host processing. Unsupported broader syntax remains explicit refusals.
+### Completed root TypeScript 7 qualification
 
-Shared exact-name / first-segment / longest proper local-prefix resolution repairs recursive record-parameter projections. Structural identity predicates remain exact-only, and recursion substitutes only the selected parameter base with scope/shadowing respected. No type-error fallback or name exception is added.
+- [Run 37951869293](https://github.com/dwijayuda/pskernel/actions/runs/37951869293), source 9d150afbec1feda8c97058aa56aa5ab92347d96d.
+- Root job 113892421469, workflow ID 379741182, attempt 1.
+- Completed successfully: all seven required commands exited zero. The receipt spans 2026-10-09T15:27:57.441Z through 15:28:22.403Z; the job completed at 15:28:26 UTC. Root and projection_repair independently authenticated the full primary log, actual completed API objects, all five original receipt files, all 21 package bindings, the unchanged exact lock (lockGenerated=false), and the 11-obligation adapter record.
+- Dedicated workflow: .github/workflows/root-typescript7-qualify.yml.
+- The passing ordered commands are npm ci; root build; test:packages; conformance build; lean4export build; package integration; check:packages. Their recorded command times total 24,845 ms. This is a run measurement, not a TS5/TS7 benchmark.
+- This root gate does not qualify PSC0, run Lean corpus/oracle tests, change provider acceptance, or promote a seed.
+- The workflow is branch/path plus [root-ts7-qualify] gated. Do not add the marker to evidence/documentation-only commits or rerun after sufficient proof.
 
-The first R attempt (`48723fe676a0d9ae3fa819bd314199fe0ca2e926`, run 37925016499) failed the native build on two direct blockers: reserved local `postfix` and a Term reference to an unimported list helper. R2 renamed the local and used direct list pattern matching, then ran all three native suites without suppressing later diagnostics. [The original failure evidence](docs/selfhost-language/grammar-migration-attempt-1.json) is preserved. No gate was weakened.
+## Why the subset was needed and what actually changed
 
-### Finite worker migration: earned evidence and corrected probe
+The original root configuration did not actively select PSC1-selfhost-stable/1 or PSC1-portable-selfhost/1 as the compiler source contract. The practical restrictions came from the owned parser, elaborator, structural recursion normalizer, prelude, erasure and backend coverage. Acceptance by host Lean or a broader language/profile label did not prove that the generated compiler could consume and rebuild that source.
 
-The production migration at `9ee0b1fd38dd1456a187d4675f9027440a989f2d` changes twelve bounded workers in nine Lean source files and removes three projection aliases in a tenth file. Seven existing source guards were aligned with ordinary changing parameters. Public types, parameter order, fuel and zero cases, reversal/order rules and collision limits remain the required contract.
+The old recursion normalization required non-decreasing arguments to stay unchanged. Source used returned-function state adapters to work around that implementation boundary. The implemented bounded normalization supports ordinary changing parameters around accepted structural Nat/List/regular-inductive descent and preserves the public function types. Shared exact-name / first-segment / longest proper local-prefix resolution fixes recursive record-parameter projections without changing structural identity checks or adding error fallbacks.
 
-Attempt 1 ([run 37939061854](https://github.com/dwijayuda/pskernel/actions/runs/37939061854)) stopped during a new host fixture's first nonexistent structure-constructor call. The coherent correction at `f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f` replaced all 48 invalid calls across 20 structure types using existing neutral factories, same-compiler template copies and explicitly labelled non-IR host fixture records. It retained all 87 independent expectations and added an authenticated R reference preflight. The [attempt 1 evidence](docs/selfhost-language/worker-migration-attempt-1.json) and [fixture audit](docs/selfhost-language/worker-migration-fixture-repair.json) remain retained.
+This is a finite practical authoring subset, not unrestricted Lean/PSC1. Do not broaden it by changing a profile string. Current .ps parser/printer/import/session handling is new-only ps-0.9-r3; the 61-module handwritten .lean closure remains authoritative. Switching all handwritten compiler authority to .ps is not part of the completed claim.
 
-Attempt 2 ([run 37941485695](https://github.com/dwijayuda/pskernel/actions/runs/37941485695), compiler job `113856701970`) passed that reference preflight and the current native development gate. Both complete 87-case reports have observation SHA-256 `697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be`. Native suites passed 75 core, 10 translation and 16 erasure cases; focused source/snapshot/session tests passed 27/27 and actual PS import/build cases 4/4. The complete native original IR was accepted with 56,602 expressions, 728,064 visited steps and zero findings. All 61 modules round-tripped through the new PS grammar, producing 902,538 PS bytes.
+### New-only .ps contract
 
-The current F source closure is `6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7`. Attempt 2 native JS is `5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15`; native TS is `0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a`. These are completed native results, not selected-seed bootstrap or fixed-point proof.
+Grammar identity:
 
-C1 then stopped at `PSC0_SH1_MIGRATION_ABI_ISOLATED_SIGNATURE_PROBE: leanFrontend`. The owned Lean declaration dispatcher does not accept `axiom`. The corrected isolated source uses nineteen one-constructor monomorphic inductives and the same twelve explicitly annotated partial-application wrappers. Each reference signature is the first explicit worker binder's complete Core type. All twelve specifications, original partial splits, current prepared-Core checks and ordered original-IR comparisons remain unchanged. The exact probe source is retained before execution; nested diagnostics are retained on failure. The independent static review verified all nine guarded edits and the early workflow replacement.
+    {"edition":"ps-0.9-r3","mode":"new-only","support":"bounded-selfhost-subset","referenceSha256":"4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71","fullStandardConformance":false,"fullPscvConformance":false}
 
-[The complete attempt 2 evidence](docs/selfhost-language/worker-migration-attempt-2.json), [primary log](docs/selfhost-language/evidence-logs/worker-migration-attempt-2.log) and [ABI correction audit](docs/selfhost-language/worker-migration-abi-repair.json) distinguish these completed checks from the missing C1/C2/C3 ABI, paired behavior, fixed point and provider results. No gate has been waived.
+The supplied reference is 401,569 bytes / 8,546 lines and is a design RC with broader Standard/environment conformance pending. Implemented forms include newline-oriented sequences, one explicit comma-separated declaration/constructor binder group, strict record commas, bar cases, grouped/adjacent/native-gap calls and typed lambdas. f(()) remains one Unit argument; empty f() is not silently rewritten to Unit and unsupported completion is refused.
 
-### TypeScript 5 retirement
+PS lexical boundaries preserve raw UTF-8 positions and LF/CRLF handling, allow a leading BOM only, and reject tabs, lone CR and later BOMs outside the documented literal/comment boundaries. Host decoding is fatal for invalid UTF-8. There is no active legacy PS parser/semicolon mode. Historical Lean/seed source remains at immutable historical refs.
 
-The current JS locator and native Lean host accept only 7.0.2 and retain exact installed-launcher verification. Positional compilation always supplies `--ignoreConfig`. Existing installation, native launcher, runtime replay and erasure-index gates are updated for one compiler version; invalid-version refusal is checked without installing TypeScript 5.
+### Finite F production migration
 
-The qualification workflow installs only the pinned TypeScript 7 package. The obsolete full-compiler TypeScript 5/7 comparison is removed. Current qualification rejects all four old reconstruction commands before TypeScript launcher resolution. The existing selected R manifest and identity remain unchanged.
+Production edits first landed at 9ee0b1fd38dd1456a187d4675f9027440a989f2d and remain unchanged through fcd and the root branch. F changes twelve workers in nine Lean files and removes three projection aliases in a tenth; seven existing source guards were aligned. Public types, parameter order, fuel/zero behavior, reversal/order rules and collision limit 4096 are preserved requirements.
 
-The additional `selfhost-seed-recovery.json` policy authenticates `scripts/sh1-native-seed-recovery.mjs` and its dependencies. Its intended route builds pinned R with Lean 4.34.0, checks and emits the same original IR, compiles with TypeScript 7.0.2, obtains native canonical admissions and translates the ordered 61-module surface. It must compare all four exact final artifact hashes before materializing the existing selected cache identity. A separate clean checkout/cache run is required before claiming this route qualified. No generated compiler or historical parent compiler is needed by that route.
+The ten production source files are in the following psc0/packages packages. Read the actual source or candidate ledger for exact declaration locations before editing.
 
-The separate repository-root TypeScript backend still requires migration from the TypeScript 5 programmatic API to the TypeScript 7 CLI, with its own workspace dependencies and targeted existing gates. That work is separate and pending; PSC0 evidence must not imply root-workspace completion.
+| Package | Source file |
+| --- | --- |
+| backend-ts | Expr.lean |
+| backend-ts | Module.lean |
+| compiler | Api.lean |
+| elab | Declaration.lean |
+| erasure | Basic.lean |
+| erasure | Definition.lean |
+| erasure | Expr.lean |
+| erasure | Inductive.lean |
+| erasure | Structure.lean |
+| compiler-ir | Check.lean |
 
-### Remaining completion gates
+The twelve worker names, in ABI-probe order, are psErasureLocalNameWithFuel, psErasureEtaNameWithFuel, psTsFreshMatchTempWorker, psTsFreshInternalWorker, psCompilerPreparationSourcesWorker, psAddDeclarationListWorker, psElabDeclarationsWorker, psBuildErasureDeclarationNamesWorker, psEraseDefinitionsLoopWorker, psPrepareRuntimeStructures, psPrepareRuntimeInductives and psTsBuildSymbolMap. The three removed identity aliases are one limits := options in psIrCheckMatchBindings and two currentState := state aliases in psIrCheckRun.
 
-1. Run the authenticated R 87-case behavior and supported twelve-signature probe before N1.
-2. Qualify exact current source through native development, selected-R C1, C2/C3 four-product equality, full current Core/IR ABI, paired behavior and unchanged independent provider acceptance.
-3. Independently cold-prove the native TypeScript 7 selected-R recovery route and retain its exact receipt.
-4. Complete and validate the separate root-workspace TypeScript 7 CLI adapter and dependency migration.
-5. Retain actual successful evidence, reconcile current guides and fast-forward the canonical implementation branch with a fresh lease. Do not change main.
+The twelve signature arities in probe order are [4,4,3,4,2,2,3,2,4,5,5,3]; original partial splits are [3+1,3+1,2+1,3+1,1+1,1+1,1+2,1+1,3+1,3+2,3+2,2+1]. The migration is F1=4 workers plus F2=8 workers, with 44 direct cases + 7 wrapper cases + 36 state cases = 87 unique behavior cases per compiler.
 
-Use meaningful early checks to reject a whole demonstrated failure class before another long qualification. Do not retry individual expectations or weaken gates. Finite F keeps R selected and does not request a new seed promotion. Daily native/session iteration is not full fixed-point/provider qualification. TypeScript emission timings are only a small final pipeline component; no F whole-pipeline speedup is claimed.
+The complete original inventory has 241 locators; 226 remain explicitly deferred. Not every function-valued result is a workaround. Do not perform a wholesale rewrite or silently mark those deferred entries done.
+
+### Earlier F failures are preserved, not hidden
+
+1. Run 37939061854 at 9ee failed a new host fixture's nonexistent structure-constructor call. f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f corrected all 48 invalid calls across 20 structure types with existing neutral factories, same-compiler template copies and three explicit non-IR host records. All independent expectations were retained.
+2. Run 37941485695, compiler job 113856701970, at f62 passed the complete R and N1 87-case reports. Their observation SHA-256 is 697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be. Native original IR accepted 56,602 expressions / 728,064 visited steps / zero findings; all 61 modules round-tripped with 902,538 PS bytes. It then failed before C1 emission because the isolated ABI fixture used unsupported axiom declarations.
+3. fcd replaces that fixture with 19 one-constructor monomorphic inductives and the same 12 explicitly typed partial wrappers. The complete first explicit binder type supplies each reference signature. The early supported probe passed; full actual prepared Core/IR ABI checks remain in every C generation. No current compiler source behavior was changed by these fixture repairs.
+
+Attempt-2 F closure: 6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7. Its N1 JavaScript is 5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15 and TS is 0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a. Those are the recorded attempt-2 native results, not substituted final F proof.
+
+Existing files in docs/selfhost-language retain worker-migration-attempt-1.json, worker-migration-fixture-repair.json, worker-migration-attempt-2.json, worker-migration-abi-repair.json and their primary logs. The candidate ledger and qualification-evidence.json still need their final successful F update.
+
+## Selected R and proven TypeScript 7-only native recovery
+
+R source fe2560aba0f347b1caf8d000d371464642d44f23 qualified in [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635). Compiler job 113804052074, independent provider job 113827136830 and original parent-based cold job 113827137018 passed. Explicit selection is commit e65606397fb679d7cb96f4f0e92700a6cf0944a6. The later collector run 37938411520 retained 18 exact receipt files.
+
+- R source closure: f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226.
+- R selected identity: 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225.
+- Selected manifest actual file SHA-256: 7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694.
+- Selected manifest Git blob: 44a05964c49000478c282afc013c84fca8c2de65.
+- Current selection does not depend on promoting F.
+
+| Exact selected R product | SHA-256 |
+| --- | --- |
+| Canonical PS source JSON | 985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07 |
+| Canonical admissions | 200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0 |
+| TypeScript | 38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935 |
+| JavaScript | 70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061 |
+
+### New cold proof — already successful
+
+[Run 37947341899](https://github.com/dwijayuda/pskernel/actions/runs/37947341899), job 113876930974, source fcd, passed at 14:54:23 UTC. It used no restored compiler artifact, seed cache or native build cache. All 75 recorded commands, including 61 native PS translations, succeeded. All four products above matched, and the tracked raw source, closure and selected manifest remained unchanged.
+
+The native recipe is native-lean-original-ir-four-products-ts7/1. Its original IR check accepted 56,391 expressions / 725,484 visited steps / zero findings, then emitted that same IR. No generated compiler, historical A/S0 compiler, or TypeScript 5 was executed. The exact selected-R seed identity is preserved; this is a new recovery recipe, not a re-identification of the seed.
+
+- Recipe SHA-256: 4ed186c2604bcfaee756881686e70f14569720d72fcd799d9997d2d92217b82a.
+- Policy SHA-256: 0cf0480524ba713e0bcdbeb3cfa3d345e37508743ee5e169b83ba8ee0de160fc.
+- Runner scripts/sh1-native-seed-recovery.mjs blob: 4e2fe462ba5c8160ff5c08f70ce52152173b0d6f.
+- selfhost-seed-recovery.json blob: fd75854159544e431497bc7dee8482bea727b5e4.
+- Independent workflow .github/workflows/psc0-sh1-ts7-recovery.yml blob: 4512b46247642f2ab6043a5d81ba8d2a62fd703f.
+- Exact receipt SHA-256: 0d5606c25e634082da39d80ffa5974b3c390d2765ded71bcf1abaf442b7e3919, 64,164 bytes; blob c495ddf6e7d5075e204e4b0c5957c8c0d3d6a24b.
+- Full decoded log SHA-256: 6f47360b88446d7a06f12561772e8d9e317b1f3bfb6d34d610791436f99b3957; blob d5ae70f7459ad82ba2aa3a23043e374921fb2316.
+- Artifact ID 11624048503, ZIP digest 967adc94a58d02e4e166e24601252f177a372dc5e6fd50ba01a7125cec9dfae5. Archive bytes were not downloaded by the reviewers.
+
+Recorded recovery work was 86.497 seconds; the whole job was 158 seconds. The old parent-based recipe recorded 2,728.787 seconds in a separate run. This is not a controlled benchmark or a measured PSC parsing/self-compilation speedup.
+
+Root and grammar_adoption_audit independently checked the actual completed run/jobs, complete log, 75-command receipt, all four hashes, source/manifest invariance and policy pins. The cold receipts are prepared as immutable blobs but still need the final repository retention paths:
+
+- docs/selfhost-language/typescript7-native-recovery.json.
+- docs/selfhost-language/typescript7-native-recovery-evidence.json.
+- docs/selfhost-language/evidence-logs/typescript7-native-recovery.log.
+- API metadata under docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/.
+
+Current PSC0 rejects seed-identity, recover-seed, recover-qualified-seed and recover-successor-seed before resolving TypeScript. Cache misses use the pinned native runner. Do not restore the old TS5 dispatch or repeat the retired full-source TS5/TS7 comparison.
+
+The independent provider remains source 963030dc2d154008fccc82e7c8ed29331f138799, tree 38c8c55bd2b214753e56c58c15c4901c32c01b86, binary 88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec. Lean commit is 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b; fuel 131072 and timeout 60000. Its acceptance is a separate post-emission gate.
+
+## Root workspace TypeScript 5 retirement
+
+The root workspace is distinct from psc0. TypeScript 7.0 has no old programmatic compiler API, so changing version strings alone was insufficient. The implementation replaces the one API importer in packages/backend-ts/src/typescript-compiler.ts with an exact installed-7.0.2 CLI adapter. Microsoft primary reference: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/.
+
+All 21 root/package TypeScript pins are now 7.0.2. Ten unsupported baseUrl fields were removed without changing paths or output layouts; existing rootDir/outDir preserve dist/src exports. Root/backend Node types are explicit at 22.15.3. Two remaining selfhost launchers require 7.0.2 before compilation and use --ignoreConfig.
+
+### Root source commits and bounded corrections
+
+| Source | Change and actual evidence |
+| --- | --- |
+| a02f03b97bb3385b66ad670dabf7f13d334fc79f | 40-file initial root migration. Run 37949490366/job 113884245962 passed lock resolution, clean TS7 install/profile and root build, then the new map-footer test required a trailing newline that the adapter already makes optional. |
+| 3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab | Committed exact npm lock and changed only that footer assertion to accept EOF/LF/CRLF after the same URI. Run 37950075083/job 113886266262 passed complete package tests and all 11 adapter obligations plus conformance build; the additional lean4export build exposed an existing inaccurate stdin type. |
+| 5d3cbc82cb8759b909d1a957d6a22d542509d8c5 | Type-only ChildProcessByStdio<null,Readable,Readable> declaration matching the unchanged ignored-stdin/piped-output spawn. Run 37950522687/job 113887806499 passed all builds, package tests, 11 adapter obligations and package integration; final package-map check found a pre-existing source-language metadata mismatch. |
+| 9d150afbec1feda8c97058aa56aa5ab92347d96d | Aligns the compiler map with its existing mixed-source manifest and paired files; replaces the stale Compiler API note; strengthens exact nonempty language matching across all 20 outer packages. Full root run 37951869293 passed all seven command phases and all eleven adapter obligations; no additional source correction is needed. |
+
+No adapter implementation changed after the initial reviewed CLI replacement. The footer correction changes one test formatting assumption; the exporter correction changes types only; the map correction preserves actual paired-source inventory and every other boundary rule. No native bootstrap target is qualified by the root gate.
+
+Before the latest root run, independent static review read all 178 TS files in the exact twelve source-shape scopes, all ten editor inputs, all 20 package manifests, the complete package tree and all remaining architecture obligations. No further violations were found: maximum TS 300 lines / 201 characters; editor modules 228 lines / 88 characters. This was source review, not a substitute for the actual gate.
+
+### Adapter contract
+
+compileTypeScript remains synchronous and preserves its result fields. It verifies installed package metadata and actual launcher version, creates an exclusive unique sibling source in the logical source directory, emits into a private temporary directory, selects root JS/declaration/map products, restores logical diagnostic/map names, and removes private files in finally. Original logical source and existing output products are not overwritten.
+
+It supports ordinary .ts input names in an existing writable parent directory. The real project CLI creates that directory before calling it. Relative TS imports and package exports are covered. Original-basename self references, unsupported source kinds, malformed maps and basename-dependent emitted output are explicit refusals. This is not a general arbitrary virtual-filesystem compiler host. No TypeScript 5/6 API fallback is permitted.
+
+Key current blobs: adapter 1f178560ba824e58538235e93d348a7c97ab54e9; contract test b57719346e08faec054bb1287fc1c36459d79cd7; root gate runner 1dc573166836765fc7b8d0fa4714b5d1d29ae609; workflow 348ab35eaf3210b5a96ac53c08d7c5b201c29c1e; exporter type correction b9b86b7f10584756fda519221e47895ce526038f.
+
+### Exact root lock
+
+package-lock.json is the actual 21,592-byte npm-generated file from the initial cloud run. SHA-256: 69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1. Git blob: 19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb.
+
+It was resolved with --package-lock-only --ignore-scripts before any installation, then installed with npm ci and rehashed. Every one of the 21 source/lock/profile manifest bindings was independently checked. The exact file has remained identical in subsequent runs. Do not fabricate, reserialize or invent registry metadata/integrity.
+
+The root runner logs exact JSON file content in PS_ROOT_TS7_EVIDENCE_FILE or ordered MANIFEST/CHUNK records. Concatenate decoded content with no separators and verify actual UTF-8 byte count/SHA. The adapter's PS_ROOT_TYPESCRIPT7_CONTRACT is a compact stdout record, not a standalone receipt file. Preserve that distinction.
+
+The successful root result has been independently authenticated and is retained as immutable blobs pending final repository paths. Failed attempts remain failed; their earlier completed phases do not imply whole-run qualification.
+
+| Successful root proof | Exact identity |
+| --- | --- |
+| Evidence index blob | 87dc087ead86d551a6b2e48f0594dd858e7b1b83 |
+| Complete primary log blob | f59f0590c714205f93826c9512c1c0c438a41418 |
+| Primary log SHA-256 / UTF-8 bytes | 5836caa0146f2002bec6954ce285ab7789e7ac1758ede4da80248448cdc79e86 / 84,888 |
+| Full API + exact manifest sources + inheritance proof blob | 45b848ea37dacd4f9aba554b8d90fd794c7cfdb6 |
+| Complete authenticated report blob | 83977c047ba4a382d0512ec9294ba1bbcf30d29e |
+| Original qualification.json blob | 31ec99a5260603659e38ad24c33028c510b46e93 |
+| Original qualification SHA-256 / bytes | a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a / 3,485 |
+| Original installed-profile.json blob | 68ab7c2309f8722988d71d05f05743693f794851 |
+| Original installed TypeScript metadata blob | f4242a69df961fcaf5210ac08ace176ced18c6a4 |
+| Original uploaded evidence-index.json blob | c77c051646afea76427cb175cb14f85c80b0a8cd |
+| Artifact ID / size | 11626670229 / 13,228 bytes |
+| Artifact archive SHA-256 | a424a5c9bacbc31caf51160c471266401d0d4c520b87bce7cb3100c60d552cf6 |
+
+Final root paths: docs/selfhost-language/root-typescript7-qualification.json for the exact receipt; root-typescript7-evidence.json for provenance; evidence-logs/root-typescript7-qualification.log for the full log; and seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/ for other original files and API. projection_repair is preparing this final path-to-blob manifest and the root docs/TYPESCRIPT7.md status update without executable/ref changes.
+
+## Exact remaining work and integration order
+
+1. Re-read the live refs and the active F run. The root TS7 run and independent native cold recovery are already successful and authenticated. Do not resume an earlier failed source or launch duplicate runs.
+2. Finish F: authenticate the complete compiler log, run and job identities; N1/C1/C2/C3 raw-source and four-product equality; original-IR checks before emission; full actual Core/IR ABI for all twelve workers; all 87 R/F behavior observations; bounded grammar/projection/generic/session evidence; exact single TS7 installed profile. Preserve strict/unrestricted flags as false.
+3. Finish F's independent provider job: authenticate its exact file envelope and compact object, unchanged provider identity, and all eight required C2/C3 roles (compiler, raw Lean, raw PS, recursive-generic). Match each role to the actual generation admission hash. Provider acceptance is post-emission; cold native recovery is separate.
+4. Retain the already-proven root run 37951869293 evidence at the stated repository paths and reconcile root docs/TYPESCRIPT7.md. Root independently checked all exact source/run/job/file/command/lock/profile/contract bindings. Preserve the three actual failed attempts and their precise corrections; no further root qualification is needed for docs-only retention.
+5. Retain the already-proven native cold files at the paths above. Its exact receipt/log/API blobs are listed below.
+6. Instantiate the ten-file F documentation template only after actual compiler/provider proof. Apply the disjoint TS7 retirement post-pass and update TYPESCRIPT7.md, qualification-evidence.json, worker-migration-candidate.json and this file. Preserve selected R, all historical hashes, all 226 deferred locators and the historical AI tail.
+7. Prefer final documentation/evidence work on the root retirement branch, which already descends from fcd and includes both scopes. Once all required gates are proven and executable source remains exactly the qualified source per scope, fast-forward the F working branch and canonical implementation/TS7 branches to the combined descendant with fresh leases. Verify ancestry and file identities; do not discard either scope or force-push.
+8. Report actual changed files, branch/commit/run identities, proofs, remaining finite language limits and daily iteration commands. Main stays unchanged. Stop optional testing after sufficient proof.
+
+If a gate fails, retain its actual log/receipt and diagnose the whole demonstrated class before changing code. Do not reinterpret a failed phase as a pass, remove a check, or retry a long pipeline merely to collect information that can be reviewed from the source.
+
+## Recoverable prepared artifacts and evidence
+
+The in-memory functions store unexpectedly reset around 15:23 UTC. All committed source and Actions runs remained intact. Do not assume a prior store/load key still exists. Use this file, fresh GitHub reads and the immutable blobs below. Fetch a blob with the GitHub connector's fetch_blob(repository_full_name, blob_sha), or the GitHub git/blobs API; no local checkout is needed.
+
+| Git blob | Purpose |
+| --- | --- |
+| c423053bd360ed4db193c450f52aec8fe9e24a1c | Initial 40-file guarded root TS7 migration bundle, exact old/new blobs |
+| e712fce4a08e4bc9723a91523a2de54502f21957 | Root metadata correction, complete remaining-boundary static audit and authenticated attempt-3 failure facts |
+| fe3478ead5638f8647e67a5ef2a2f2de4e2eb896 | Pure-data root evidence reader with separate failed-file extraction and strict passing qualification |
+| 6f1278311cdaa160a0cb076d431c728a98ebcadf | Newly rebuilt pure-data F evidence toolkit factory: parseFWorkflowLog, reviewFCompilerEvidence, reviewFProviderEvidence; source reviewed but not yet used on completed F evidence at this checkpoint |
+| 947971df08c812200f9f71138d6ce4a7c4741a0e | Guarded ten-file final F documentation template: 16 applied-source + 92 qualification operations |
+| 697e9a1f4e635c446a237b1bb268955a003a04da | Pure-data F documentation instantiator; requires actual qualified F input, does no IO/execution |
+| 9b719316fd4297bab7e73cfd8b1bdd7bf6999cd3 | Post-instantiation TS7 retirement pass: 19 guarded JSON operations + 5 backlog text replacements; protects seven immutable locator/audit regions |
+| 310c41f7a9b4d7a4052d9ab3c5a81795bd606ab3 | Independently reviewed cold-native recovery retention manifest; suggested paths must be mapped to the final paths above |
+| c495ddf6e7d5075e204e4b0c5957c8c0d3d6a24b | Exact successful native cold receipt |
+| d5ae70f7459ad82ba2aa3a23043e374921fb2316 | Complete decoded native cold job log |
+| fbe7b5b822e931f984c011076780baaeca07f89d | Exact completed native cold run API response |
+| 4e8ce6d40000a47991f38ed0bd025ad6cabf36a1 | Exact completed native cold jobs API response |
+| f22f733ac640308e605c320bf10bb3901929222d | Actual native cold artifact metadata serialization |
+
+The ten F template bases are unchanged through root source 9d: selfhost-language README bbbf7a07c2b7be0731bf845f957457f9377a486b; IMPLEMENTATION 457792e29a18393434c86aef43a4ea0eeab4a024; MIGRATION 18bf1fb8317964cda2352bb7e98828863ccce6c1; SPEC d5e550809b60552050169bcc52c01175f4a33827; proposal.json f73489ab63ebd474276f2aac4aa7ef2298b833f3; migration-backlog.json 615b76512ef894fac42b94b730fd424c11338f14; MIGRATION_BACKLOG 7c1ad6a0dcf253bfd395866ad772a09fee88a642; CURRENT 90a482894c01111f62349b8455ca86756806c7be; psc0/README ef15e197cdcf10b9ed6d8cbc3028551f16090e89; PS_GRAMMAR_ADOPTION e3c072536d021f4172afb8736a716bd9c6255d0e. Re-read and guard their blobs before applying anything.
+
+Root also prepared nine literal TS7 policy replacements across psc0/README and the selfhost-language README, CURRENT, IMPLEMENTATION, MIGRATION and PS_GRAMMAR_ADOPTION guides. Those in-memory strings were lost in the reset; reconstruct the narrowly scoped replacements from the actual current paragraphs. Replace current/future TS5 execution instructions with the proven TS7-only native route, and route historical comparisons to TYPESCRIPT7_CHECKPOINT.md. Do not rewrite old producer facts. Current TYPESCRIPT7.md blob is 7462e111a12b2f73adc8359469deec644d0dfc2f; its archived original guide is preserved separately.
+
+The final F document instantiator needs exact template text; ten {path,blobSha,content} bases; parameters fQualifyingSourceRef, fRunId, fCompilerJobId, fProviderJobId, fModuleCount, fSourceClosureSha256, fCompilerSha256, fQualificationDocTarget, fQualificationReceiptSha256, fProviderDocTarget, fProviderReceiptSha256; seven actual evidence objects (compilerQualification, providerAcceptance, behaviorCorrespondence, publicTypeAndIrAbi, hostProofScriptPreparation, providerReceiptLogging, qualificationReceipts); and explicit authenticated qualificationEvidence. Run/job IDs in that input are strings. Never fill these with planned values.
+
+Pure evidence readers inspect authenticated external results; they do not execute compiler code or create proof. Ordinary compact log JSON can be retained as a new document with its own hash, but cannot be labelled original artifact bytes. Native cold receipt reconstruction is exact because its complete logged object reserializes to the runner's separately recorded original file digest. Provider and root envelopes retain actual read-back file contents.
+
+### Parallel owners at this checkpoint
+
+- Root: integration, final docs, this committed checkpoint, and independent review of primary evidence.
+- projection_repair: completed successful root run 37951869293 evidence authentication; preparing final root documentation and exact retained file/provenance paths, including the three failed attempts. No executable/ref changes or retries.
+- grammar_adoption_audit: rebuilding and persisting a pure-data F evidence reader from actual fcd source contracts after the store reset; cannot invent missing records or F success.
+- migration_inventory: completed independent adapter, root runner/evidence-reader, 178-file source-shape and ten-input editor reviews; now reviewing final F template and TS7 post-pass composition, plus precise worker source mapping and the nine guide retirement edits.
+
+Agent state is not durable authority. If a new chat cannot access these agents, continue from the committed code, this file and the exact external evidence. Do not repeat completed static audits or successful cold recovery merely because the old chat's memory is unavailable.
+
+## Daily development after this checkpoint closes
+
+From psc0, the supported short cycle is:
+
+    npm install
+    npm run check:typescript-profile
+    npm run dev:sh1
+    PSC0_ITERATION_SHA256="$(node -p "require('./dist/sh1/N1/receipt.json').artifacts.javascriptSha256")"
+    npm run iterate:sh1 -- --compiler dist/sh1/N1/index.js --compiler-sha256 "$PSC0_ITERATION_SHA256" --loop
+
+These are developer commands, not permission to execute repository code locally in this cloud-only session. The resident loop accepts prepare/Enter, emit, reset and quit. It retains preparation state and invalidates the changed module and dependent suffix. Restart when the compiler changes. emit produces TypeScript; it does not replace fixed-point/provider qualification. Use full qualification for coherent semantic/toolchain/recovery checkpoints, not for every small edit.
+
+Root development uses the committed TS7 lock with npm ci and the documented package commands in docs/TYPESCRIPT7.md. The active root API is the TS7 CLI adapter. Historical TS5/TS7 measurements remain historical; no whole-pipeline or worker speedup is claimed without a suitable measured comparison.
 
 ## Historical completed M6 and TypeScript 7 result
 

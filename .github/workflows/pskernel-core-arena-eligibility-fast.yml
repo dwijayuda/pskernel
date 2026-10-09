@@ -1,0 +1,87 @@
+name: PSKernel Core allocation-free eligibility comparison
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-eligibility-fast-v1
+    paths:
+      - ".github/workflows/pskernel-core-arena-eligibility-fast.yml"
+      - "psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  same-runner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Materialize immutable baseline and exact Init prefixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin 132d817071cd62c23a70c15984d6c73e14d6e856
+          git worktree add --detach ../arena-reference 132d817071cd62c23a70c15984d6c73e14d6e856
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          (cd arena && uv run lka.py build-test init --cache)
+          for n in 200000 380000; do
+            head -n "$n" arena/_build/tests/init.ndjson > "$RUNNER_TEMP/prefix-$n.ndjson"
+          done
+          cat > arena/tests/eligibility-utf8.lean <<'EOF'
+          import Init
+          EOF
+          cat > arena/tests/eligibility-utf8.yaml <<'EOF'
+          description: UTF8 theorem for measuring eligibility without altering the kernel.
+          leanfile: tests/eligibility-utf8.lean
+          export-decls:
+            - _private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec
+          outcome: accept
+          EOF
+          (cd arena && uv run lka.py build-test eligibility-utf8 --cache)
+      - name: Build baseline and candidate, validate regression and pinned Prelude
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd ../arena-reference/psc15selfhost && lake build psc_kernel_core_arena)
+          (cd psc15selfhost && lake build psc_kernel_core_arena psc1_kernel_core_foundation_tests psc_kernel_core_arena_level_tests)
+          (cd psc15selfhost && lake exe psc1_kernel_core_foundation_tests && lake exe psc_kernel_core_arena_level_tests)
+          (cd psc15selfhost && .lake/build/bin/psc_kernel_core_arena < ../oracle/fixtures/lean434-init-prelude.ndjson)
+      - name: A/B strict exact-input acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$GITHUB_WORKSPACE/../arena-reference/psc15selfhost/.lake/build/bin/psc_kernel_core_arena"
+          NEW="$GITHUB_WORKSPACE/psc15selfhost/.lake/build/bin/psc_kernel_core_arena"
+          measure () {
+            label="$1"; cmd="$2"; count="$3"
+            /usr/bin/time -f "PERFORMANCE label=$label count=$count wall_s=%e peak_kb=%M exit=%x" timeout 270 "$cmd" < "$RUNNER_TEMP/prefix-$count.ndjson"
+          }
+          for n in 200000 380000; do
+            measure baseline-1 "$BASE" "$n"
+            measure candidate-1 "$NEW" "$n"
+            measure candidate-2 "$NEW" "$n"
+            measure baseline-2 "$BASE" "$n"
+          done
+      - name: Isolated UTF8 theorem diagnostic only
+        shell: bash
+        run: |
+          set +e
+          /usr/bin/time -f 'FAST_UTF8_WALL_S=%e FAST_UTF8_PEAK_KB=%M FAST_UTF8_EXIT=%x' timeout 240 \
+            psc15selfhost/.lake/build/bin/psc_kernel_core_arena \
+            < arena/_build/tests/eligibility-utf8.ndjson
+          code=$?
+          echo "FAST_UTF8_RESULT=$code (124 is timeout, NOT acceptance)"
+          if [ "$code" -eq 0 ]; then echo "FAST_UTF8_ACCEPTED=1"; fi
+          if [ "$code" -ne 0 ] && [ "$code" -ne 124 ]; then exit "$code"; fi
+          exit 0

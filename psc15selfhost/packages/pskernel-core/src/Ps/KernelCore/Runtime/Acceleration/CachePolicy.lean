@@ -26,41 +26,94 @@ across the whole expression tree, not independently per branch.
 def psKernelSemanticCacheNodeBudget : Nat :=
   256
 
-def psKernelSemanticCacheRemaining :
+def psKernelSemanticCacheRemainingReference :
     PsKernelExpr -> Nat -> Option Nat
   | _expr, Nat.zero =>
       Option.none
   | PsKernelExpr.fvar _, Nat.succ _ =>
       Option.none
   | PsKernelExpr.app fn arg, Nat.succ remaining =>
-      match psKernelSemanticCacheRemaining fn remaining with
+      match psKernelSemanticCacheRemainingReference fn remaining with
       | Option.none => Option.none
       | Option.some next =>
-          psKernelSemanticCacheRemaining arg next
+          psKernelSemanticCacheRemainingReference arg next
   | PsKernelExpr.lam _ type body _, Nat.succ remaining =>
-      match psKernelSemanticCacheRemaining type remaining with
+      match psKernelSemanticCacheRemainingReference type remaining with
       | Option.none => Option.none
       | Option.some next =>
-          psKernelSemanticCacheRemaining body next
+          psKernelSemanticCacheRemainingReference body next
   | PsKernelExpr.forallE _ type body _, Nat.succ remaining =>
-      match psKernelSemanticCacheRemaining type remaining with
+      match psKernelSemanticCacheRemainingReference type remaining with
       | Option.none => Option.none
       | Option.some next =>
-          psKernelSemanticCacheRemaining body next
+          psKernelSemanticCacheRemainingReference body next
   | PsKernelExpr.letE _ type value body _, Nat.succ remaining =>
-      match psKernelSemanticCacheRemaining type remaining with
+      match psKernelSemanticCacheRemainingReference type remaining with
       | Option.none => Option.none
       | Option.some afterType =>
-          match psKernelSemanticCacheRemaining value afterType with
+          match psKernelSemanticCacheRemainingReference value afterType with
           | Option.none => Option.none
           | Option.some afterValue =>
-              psKernelSemanticCacheRemaining body afterValue
+              psKernelSemanticCacheRemainingReference body afterValue
   | PsKernelExpr.mdata _ body, Nat.succ remaining =>
-      psKernelSemanticCacheRemaining body remaining
+      psKernelSemanticCacheRemainingReference body remaining
   | PsKernelExpr.proj _ _ body, Nat.succ remaining =>
-      psKernelSemanticCacheRemaining body remaining
+      psKernelSemanticCacheRemainingReference body remaining
   | _expr, Nat.succ remaining =>
       Option.some remaining
+
+/- Semantics-preserving no-per-node-Option acceleration.
+   Encoding: 0 = failure, succ remaining = successful remaining budget.
+   Reference above is retained as a specification for proof/differential tests. -/
+def psKernelSemanticCacheRemainingFast :
+    PsKernelExpr -> Nat -> Nat
+  | _expr, Nat.zero =>
+      0
+  | PsKernelExpr.fvar _, Nat.succ _ =>
+      0
+  | PsKernelExpr.app fn arg, Nat.succ remaining =>
+      let next := psKernelSemanticCacheRemainingFast fn remaining
+      if Nat.beq next 0 then
+        0
+      else
+        psKernelSemanticCacheRemainingFast arg (Nat.pred next)
+  | PsKernelExpr.lam _ type body _, Nat.succ remaining =>
+      let next := psKernelSemanticCacheRemainingFast type remaining
+      if Nat.beq next 0 then
+        0
+      else
+        psKernelSemanticCacheRemainingFast body (Nat.pred next)
+  | PsKernelExpr.forallE _ type body _, Nat.succ remaining =>
+      let next := psKernelSemanticCacheRemainingFast type remaining
+      if Nat.beq next 0 then
+        0
+      else
+        psKernelSemanticCacheRemainingFast body (Nat.pred next)
+  | PsKernelExpr.letE _ type value body _, Nat.succ remaining =>
+      let nextType := psKernelSemanticCacheRemainingFast type remaining
+      if Nat.beq nextType 0 then
+        0
+      else
+        let nextValue := psKernelSemanticCacheRemainingFast value (Nat.pred nextType)
+        if Nat.beq nextValue 0 then
+          0
+        else
+          psKernelSemanticCacheRemainingFast body (Nat.pred nextValue)
+  | PsKernelExpr.mdata _ body, Nat.succ remaining =>
+      psKernelSemanticCacheRemainingFast body remaining
+  | PsKernelExpr.proj _ _ body, Nat.succ remaining =>
+      psKernelSemanticCacheRemainingFast body remaining
+  | _expr, Nat.succ remaining =>
+      Nat.succ remaining
+
+def psKernelSemanticCacheRemaining
+    (expr : PsKernelExpr)
+    (budget : Nat) : Option Nat :=
+  let encoded := psKernelSemanticCacheRemainingFast expr budget
+  if Nat.beq encoded 0 then
+    Option.none
+  else
+    Option.some (Nat.pred encoded)
 
 def psKernelSemanticCacheEligible
     (expr : PsKernelExpr) :

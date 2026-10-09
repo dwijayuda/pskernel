@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.BootstrapStringObligations
 import Ps.KernelCore.Metatheory.AdmissionConstructorSemanticHistoryConfiguration
 import Ps.KernelCore.Metatheory.AdmissionMutualConstructorConfiguration
 import Ps.KernelCore.Metatheory.AdmissionMutualFieldConfiguration
@@ -552,3 +553,36 @@ theorem PsKernelCheckedMutualFamilyConstructorHistory.exact_extension
           psKernelSimpleCtorNames shape.decl.ctors ++ psKernelMutualShapeConstructorNames rest
         rw [List.map_append, hTailNames]
         exact congrArg (fun names => names ++ psKernelMutualShapeConstructorNames rest) hOwnExt.2.2
+
+/--
+Actual-source mutual-family constructor refinement. The nested worker theorem
+retains an explicit comparator interface for reuse, but the executable source
+discharges that interface from the checked specified cursor operations.
+No reflexivity assumption, new axiom, or independent typing shortcut enters
+the family-level constructor certificate.
+-/
+theorem psKernelAddSimpleMutualTypesWorker_concrete_semantic_history
+    (types : List PsKernelSimpleMutualTypeShape)
+    (fuel : Nat) (safety : PsKernelDefinitionSafety) (resultLevel : PsKernelLevel)
+    (levels : List PsKernelLevel) (params : List PsKernelOpenBinder)
+    (typeNames : List PsKernelName) (allShapes : List PsKernelSimpleMutualTypeShape)
+    (headerSession : PsKernelCheckerSession) (work : PsKernelEnvironment)
+    (owner : Nat) (result : PsKernelAddMutualConstructorsResult)
+    (hIndex : PsKernelEnvironmentIndexRefines work)
+    (hHeaderConfig : PsKernelCheckerConfigurationSound headerSession.context headerSession.state)
+    (hEnvExt : PsKernelEnvironmentSemanticExtends headerSession.context.environment work)
+    (hNames : PsKernelInductiveNamesAbsent work (psKernelMutualShapeConstructorNames types))
+    (hUnique : psKernelNameHasDuplicates (psKernelMutualShapeConstructorNames types) = false)
+    (hSuffix : PsKernelMutualTypeShapeSuffix allShapes owner types)
+    (hNative : PsKernelNativeReductionSoundLaw) (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelAddSimpleMutualTypesWorker types fuel safety resultLevel levels params
+      typeNames allShapes headerSession work owner = Except.ok result) :
+    PsKernelCheckedMutualFamilyConstructorHistory typeNames allShapes levels params resultLevel
+      headerSession.context.levelParams safety headerSession.context.localContext
+      work owner types result.shapes result.environment ∧
+    PsKernelEnvironmentSemanticExtends work result.environment ∧
+    PsKernelEnvironmentIndexRefines result.environment :=
+  psKernelAddSimpleMutualTypesWorker_semantic_history types fuel safety resultLevel
+    levels params typeNames allShapes headerSession work owner result
+    hIndex hHeaderConfig hEnvExt hNames hUnique hSuffix
+    psKernelStringEq_reflexive hNative hString hRun

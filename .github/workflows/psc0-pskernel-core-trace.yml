@@ -1,0 +1,68 @@
+name: PSC0 kernel reduction trace
+on:
+  push:
+    branches: [psc0/pskernel-core-lean435-arena-v1]
+    paths: [".github/workflows/psc0-pskernel-core-trace.yml"]
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ad13026571931c0151b7ae53f468cd5363bef391
+      - name: Install pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Add temporary diagnostic tracing and build
+        working-directory: psc0/packages/pskernel-core
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          Path("src/Ps/KernelCore/DebugTrace.lean").write_text("import Ps.KernelCore.Core.Substitution.ListOps\n\ndef psKernelTraceName : PsKernelName → String\n  | .anonymous => \"\"\n  | .str p s => psKernelTraceName p ++ \".\" ++ s\n  | .num p n => psKernelTraceName p ++ \".\" ++ toString n\n\ndef psKernelTraceHead (e : PsKernelExpr) : String :=\n  match psKernelExprGetAppFn e with\n  | .const n _ => psKernelTraceName n\n  | .fvar n => \"fvar\" ++ psKernelTraceName n\n  | .bvar n => \"bvar\" ++ toString n\n  | .lit (.nat n) => toString n\n  | .lit (.str _) => \"string\"\n  | .sort _ => \"sort\"\n  | .lam _ _ _ _ => \"lambda\"\n  | .forallE _ _ _ _ => \"forall\"\n  | .proj n i _ => \"proj\" ++ psKernelTraceName n ++ \".\" ++ toString i\n  | .letE _ _ _ _ _ => \"let\"\n  | .mdata _ _ => \"mdata\"\n  | _ => \"other\"\n\ndef psKernelTraceSummary (e : PsKernelExpr) : String :=\n  String.intercalate \" \" (psKernelTraceHead e ::\n    (psKernelExprGetAppArgs e).map psKernelTraceHead)\n")
+          p = Path("src/Ps/KernelCore/Checker/Reduction/Whnf.lean")
+          s = "import Ps.KernelCore.DebugTrace\n" + p.read_text()
+          target = "  match\n      psKernelReduceNative"
+          replacement = '  dbg_trace ("WHNF depth=" ++ toString context.recDepth ++ " " ++ psKernelTraceSummary core)\n' + target
+          assert s.count(target) == 1
+          p.write_text(s.replace(target, replacement))
+          p = Path("src/Ps/KernelCore/Checker/DefEq/DeltaStep.lean")
+          s = "import Ps.KernelCore.DebugTrace\n" + p.read_text()
+          target = "  let leftDefinition :="
+          replacement = '  dbg_trace ("DELTA " ++ psKernelTraceSummary left ++ " == " ++ psKernelTraceSummary right)\n' + target
+          assert s.count(target) == 1
+          p.write_text(s.replace(target, replacement))
+          PY
+          lake build psc_kernel_core_arena
+      - name: Trace focused export for 12 seconds
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean4export.git exporter
+          git -C exporter checkout 05d43a2bc773b40ecfdebb32294192a5ef756951
+          cd exporter
+          lake build
+          lake env .lake/build/bin/lean4export Init -- Int64.toBitVec_div > int64.ndjson
+          ulimit -s 65536
+          set +e
+          timeout 12 ../psc0/packages/pskernel-core/.lake/build/bin/psc_kernel_core_arena --profile < int64.ndjson > trace.stdout 2> trace.log
+          code=$?
+          set -e
+          echo "DIAGNOSTIC_ONLY_EXIT=$code"
+          echo "RECENT_DECLARATIONS"
+          grep 'arena-profile enter' trace.log | tail -n 6
+          echo "RECENT_DEFEQ"
+          grep 'DELTA' trace.log | tail -n 60
+          echo "RECENT_REDUCTIONS"
+          tail -n 160 trace.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: int64-reduction-trace
+          path: exporter/trace.*

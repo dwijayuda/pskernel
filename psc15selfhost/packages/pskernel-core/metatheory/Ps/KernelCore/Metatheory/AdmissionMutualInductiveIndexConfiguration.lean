@@ -311,3 +311,49 @@ theorem psKernelPreparedMutualHeaders_semantic_refines
       (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) environment⟩
   · simpa only [hNames] using hAbsent
   · simpa only [hNames] using hUnique
+
+/--
+Every metadata name produced by the provisional mutual-header builder comes
+from an actual checked source shape. This transfers the transaction's global
+reserved-name exclusion to the exact generated metadata list.
+-/
+theorem psKernelMakeSimpleMutualBaseInfos_name_member
+    (typeNames : List PsKernelName)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (info : PsKernelInductiveInfo)
+    (hMember : List.Mem info (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes)) :
+    List.Mem info.base.name
+      (shapes.map (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name)) := by
+  have hMapped : List.Mem info.base.name
+      ((psKernelMakeSimpleMutualBaseInfos typeNames decl shapes).map
+        (fun entry : PsKernelInductiveInfo => entry.base.name)) :=
+    List.mem_map_of_mem hMember
+  simpa only [psKernelMakeSimpleMutualBaseInfos_name_provenance] using hMapped
+
+/--
+Provisional publication preserves the complete reserved-name family if its
+source-header names are disjoint from those reservations. The premise is the
+executable negative-membership invariant that the global name guard proves.
+-/
+theorem psKernelPreparedMutualHeaders_preserves_reserved_names
+    (typeNames : List PsKernelName)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (environment : PsKernelEnvironment)
+    (reserved : List PsKernelName)
+    (hAbsent : PsKernelInductiveNamesAbsent environment reserved)
+    (hDisjoint : ∀ name : PsKernelName,
+      List.Mem name (shapes.map
+        (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name)) ->
+      psKernelNameListContains name reserved = false) :
+    PsKernelInductiveNamesAbsent
+      (psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) environment)
+      reserved := by
+  apply psKernelAddMutualInductiveInfos_preserves_absent_names
+    (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes)
+    environment reserved hAbsent
+  intro info hMember
+  exact hDisjoint info.base.name
+    (psKernelMakeSimpleMutualBaseInfos_name_member typeNames decl shapes info hMember)

@@ -25,10 +25,17 @@ theorem psKernelSemanticCacheEligible_app_with_fvar_right
           fn
           (PsKernelExpr.fvar name)) =
       false := by
-  simp [
-    psKernelSemanticCacheEligible,
-    psKernelExprHasFVar
-  ]
+  have hFVar : ∀ fuel : Nat,
+      psKernelSemanticCacheRemaining (PsKernelExpr.fvar name) fuel = none := by
+    intro fuel
+    cases fuel <;> rfl
+  cases hFn : psKernelSemanticCacheRemaining fn 255 with
+  | none =>
+      simp [psKernelSemanticCacheEligible, psKernelSemanticCacheNodeBudget,
+        psKernelSemanticCacheRemaining, hFn, hFVar]
+  | some remaining =>
+      simp [psKernelSemanticCacheEligible, psKernelSemanticCacheNodeBudget,
+        psKernelSemanticCacheRemaining, hFn, hFVar]
 
 theorem psKernelSemanticPairCacheEligible_left_fvar
     (name : PsKernelName)
@@ -51,8 +58,7 @@ theorem psKernelSemanticPairCacheEligible_right_fvar
     simp [
       psKernelSemanticPairCacheEligible,
       hLeft,
-      psKernelSemanticCacheEligible,
-      psKernelExprHasFVar
+      psKernelSemanticCacheEligible_fvar
     ]
 
 theorem psKernelInferCacheEligible_literal

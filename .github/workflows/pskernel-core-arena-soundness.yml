@@ -7,7 +7,7 @@ on:
     paths:
       - ".github/workflows/pskernel-core-arena-soundness.yml"
       - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
-      - "psc15selfhost/packages/pskernel-core/**"
+      - "psc15selfhost/packages/pskernel-core/src/**"
       - "psc15selfhost/packages/pskernel/PSC1Kernel/Replay*.lean"
       - "psc15selfhost/lakefile.lean"
   workflow_dispatch:

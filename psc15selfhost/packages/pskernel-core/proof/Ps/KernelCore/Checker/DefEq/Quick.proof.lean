@@ -90,5 +90,6 @@ theorem psKernelDefEqQuick_fvar_ignores_success_cache
     hEq,
     psKernelSemanticPairCacheEligible,
     psKernelSemanticCacheEligible,
-    psKernelExprHasFVar
+    psKernelSemanticCacheRemaining,
+    psKernelSemanticCacheNodeBudget
   ]

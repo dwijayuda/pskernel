@@ -7,7 +7,7 @@ on:
     paths:
       - ".github/workflows/pskernel-core-arena-optimized-full.yml"
       - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
-      - "psc15selfhost/packages/pskernel-core/**"
+      - "psc15selfhost/packages/pskernel-core/src/**"
       - "psc15selfhost/packages/pskernel/PSC1Kernel/Replay*.lean"
       - "psc15selfhost/lakefile.lean"
   workflow_dispatch:
@@ -127,6 +127,100 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: arena-optimized-${{ matrix.test }}-${{ github.run_id }}
+          path: |
+            arena/_results
+            arena/_out
+          if-no-files-found: ignore
+
+  mathlib:
+    needs: corpus
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PSKERNEL_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Re-check full proof tree before large-corpus acceptance
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:pskernel-core-proofs
+      - name: Clone pinned upstream Arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+      - name: Register canonical proof-synced PSKernel
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > checkers/pskernel-core.yaml <<EOF
+          description: PSKernel Core verified candidate; kernel semantics owned by canonical proof source.
+          url: https://github.com/dwijayuda/pskernel
+          ref: pscv/pskernel-core-arena-optimized-v3
+          rev: $PSKERNEL_SHA
+          build: |
+            cd psc15selfhost
+            lake build psc_kernel_core_arena
+          run: |
+            ulimit -s 65536
+            psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "\$IN"
+          EOF
+      - name: Build upstream full Mathlib corpus
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test mathlib --cache
+      - name: Build canonical PSKernel checker
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-checker pskernel-core
+      - name: Run upstream Mathlib acceptance
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py run --checker pskernel-core --test mathlib
+          python3 - <<'PY'
+          import glob,json,sys
+          rows=[json.load(open(p,encoding='utf-8')) for p in glob.glob('_results/pskernel-core_*.json')]
+          rows=[r for r in rows if r.get('test') == 'mathlib']
+          for r in rows:
+              print('MATHLIB_RESULT',r.get('status'),r.get('correctness'),r.get('wall_time'),r.get('max_rss'))
+          if len(rows)!=1 or rows[0].get('correctness')!='correct':sys.exit(1)
+          PY
+      - name: Report Mathlib exact verdict and errors
+        if: always()
+        working-directory: arena
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob,json
+          for p in glob.glob('_results/pskernel-core_*.json'):
+              r=json.load(open(p,encoding='utf-8'))
+              print('MATHLIB_RESULT',r.get('test'),r.get('status'),r.get('correctness'),r.get('exit_code'),r.get('wall_time'),r.get('max_rss'))
+              print('MATHLIB_STDERR_TAIL',(r.get('stderr') or '')[-6000:])
+          PY
+      - name: Preserve Mathlib evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-optimized-mathlib-${{ github.run_id }}
           path: |
             arena/_results
             arena/_out

@@ -1,83 +1,27 @@
-# PSKernel GitHub-first development workflow
+# PSKernel Core GitHub workflow for PSC0
 
-GitHub is the canonical source of truth for this PSKernel topic branch.
+Repository: `dwijayuda/pskernel`.
+Current development branch: `psc0/pskernel-core-lean435-arena-v1`.
+PSC0 base: `psc0/architecture-plan-v1` at
+`e356162ddf1d0780337b2f510925455c70fb658d`.
+Kernel location: `psc0/packages/pskernel-core`.
 
-Repository:
+Read the live remote head before work and before every branch update. Use
+expected-head leases and preserve published branches. Keep coherent changes in
+GitHub and run builds/tests in cloud CI. The user's current instruction excludes
+local checkouts, builds, tests and repository files for this work.
 
-```text
-dwijayuda/pskernel
-```
+Use the current PSC0 authoring guide linked in README. Historical PSC1 profiles,
+4.34 receipts and old topic branches are provenance, not current constraints or
+evidence for this migration. Keep fail-closed checking and one semantic source;
+never patch generated JavaScript or use a fallback checker after failure.
 
-Kernel topic branch:
+The 4.35 workflow checks the toolchain identity, kernel build, main metatheory,
+all 84 companion proofs, foundations, dispatch regressions, historical Arena
+verdict coverage and fresh 4.35 exports. Source portability and joint generated
+compiler/kernel qualification remain separately reported until established.
+Do not silently promote a compiler seed or default provider.
 
-```text
-psc2/psc1kernel-selfhost-portable
-```
-
-Integration branch:
-
-```text
-psc2/selfhost-lean-kernel
-```
-
-The repository-wide policy is maintained on the integration branch in
-`psc15selfhost/docs/architecture/GITHUB_CLOUD_WORKFLOW.md`.
-
-## Rules
-
-1. Start every task by reading the current GitHub branch head.
-2. Read/edit source through GitHub/cloud tooling; do not rely on a developer
-   workstation as persistent state.
-3. Re-read the target branch before every update.
-4. Never force-push over newer remote work.
-5. Push coherent checkpoints frequently.
-6. Preserve published branches/history.
-7. Use local execution only as an optional accelerator/diagnostic cache.
-8. Local build/debug artifacts are never semantic authority.
-9. Portable kernel changes must keep the fast authoritative gates green:
-   source profile, PSC1 check, Lean build, compatibility/conformance,
-   frozen-reference differential, and canonical `.ps` recheck.
-10. Generated compiler/kernel fixed-point reproduction is manual/optional for
-    this branch unless an explicit bootstrap/release task requests it.
-
-## Noncanonical local state
-
-Do not use these as development inputs unless a particular artifact is
-deliberately promoted into the repository:
-
-```text
-psc15selfhost/.lake/
-psc15selfhost/lake-manifest.json
-psc15selfhost/.continuation/
-temporary debug scripts
-temporary generated source snapshots
-benchmark scratch files
-```
-
-Existing local files are not deleted by this policy.
-
-## Preserved workstation state
-
-The workstation-to-GitHub migration was completed on 2026-10-04. Substantive
-local-only states were preserved on `archive/local-*-20261004` branches
-instead of being merged into newer heads.
-
-The integration branch records the full archive inventory in
-`psc15selfhost/docs/continuity/GITHUB_FIRST_MIGRATION_2026-10-04.md`.
-
-Archive branches are recovery references, not merge queues. Compare individual
-changes against the latest GitHub head before reusing them.
-
-## Kernel development priority
-
-Current kernel work remains:
-
-```text
-semantic compatibility
-  > readability/explainability
-  > measured native performance
-  > convenience
-```
-
-For performance/readability work, prefer small GitHub commits that each close
-one invariant and let the portable CI establish semantic safety.
+Record exact source commits, binary identity, workload versions, complete
+coverage and every failure/decline/timeout. A doc-only evidence commit may cite
+an earlier tested code commit explicitly; do not describe it as a fresh run.

@@ -153,7 +153,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          uv run lka.py build-test 'bugs' --cache
+          uv run lka.py build-test 'bugs/*' --cache
           uv run lka.py build-checker pskernel-435
           uv run lka.py run --checker pskernel-435 --test 'bugs/*'
           python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py 'bugs'

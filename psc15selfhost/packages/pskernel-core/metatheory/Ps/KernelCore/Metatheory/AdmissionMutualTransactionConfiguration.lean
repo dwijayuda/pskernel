@@ -33,14 +33,23 @@ theorem psKernelAddSimpleMutualInductive_success_replacement_semantic_refines
             (psKernelSimpleMutualNames decl.types) decl shapes)
           (psKernelSimpleMutualHasRecursiveFields ctorResult.shapes)
           (psKernelSimpleMutualHasReflexiveFields ctorResult.shapes)
-          ctorResult.environment) := by
+          ctorResult.environment) ∧
+      PsKernelInductiveNamesAbsent
+        (psKernelReplaceMutualInductiveInfos
+          (psKernelMakeSimpleMutualBaseInfos
+            (psKernelSimpleMutualNames decl.types) decl shapes)
+          (psKernelSimpleMutualHasRecursiveFields ctorResult.shapes)
+          (psKernelSimpleMutualHasReflexiveFields ctorResult.shapes)
+          ctorResult.environment)
+        (shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+          psKernelSimpleRecName shape.decl.name)) := by
   obtain ⟨shapes, headerSession, params, resultLevel, ctorResult, added,
     hShapeDecls, hHeaderConfig, hHeaderEnv, hPrepared, hCtorRun,
     hHistory, hSemantic, hCtorIndex, hReserved, hAdded, hQuot, hNames⟩ :=
     psKernelAddSimpleMutualInductive_success_constructor_stage_refines
       fuel environment result decl maxRecDepth maxNatSize
       hIndex hNative hString hRun
-  obtain ⟨hTypeAbsent, _, _, _, _, _, _, _⟩ :=
+  obtain ⟨hTypeAbsent, _, _, _, _, _, hTypeRecCross, _⟩ :=
     psKernelAddSimpleMutualInductive_success_partitioned_name_guards
       fuel environment result decl maxRecDepth maxNatSize hIndex hRun
   have hShapeNames :=
@@ -67,5 +76,43 @@ theorem psKernelAddSimpleMutualInductive_success_replacement_semantic_refines
       (psKernelSimpleMutualHasReflexiveFields ctorResult.shapes)
       hOriginalAbsent hString psKernelStringEq_reflexive
       hWork0Semantic hCtorSemantic hCtorIndex
+  have hRecNames : shapes.map
+      (fun shape : PsKernelSimpleMutualTypeShape =>
+        psKernelSimpleRecName shape.decl.name) =
+      psKernelSimpleMutualRecNames decl.types := by
+    rw [psKernelMutualShapeRecursorNames_source, hShapeDecls]
+  have hDisjoint : ∀ info : PsKernelInductiveInfo,
+      List.Mem info
+        (psKernelMakeSimpleMutualBaseInfos
+          (psKernelSimpleMutualNames decl.types) decl shapes) ->
+      ∀ recName : PsKernelName,
+        List.Mem recName (shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+          psKernelSimpleRecName shape.decl.name)) ->
+        recName ≠ info.base.name := by
+    intro info hInfo recName hRec
+    have hInfoName : List.Mem info.base.name
+        (psKernelSimpleMutualNames decl.types) := by
+      have hMember := psKernelMakeSimpleMutualBaseInfos_name_member
+        (psKernelSimpleMutualNames decl.types) decl shapes info hInfo
+      simpa only [hShapeNames] using hMember
+    have hNotRec : psKernelNameListContains info.base.name
+        (psKernelSimpleMutualRecNames decl.types) = false :=
+      ((psKernelNameListContains_append_false info.base.name
+        (psKernelSimpleMutualRecNames decl.types)
+        (psKernelSimpleMutualCtorNames decl.types)).1
+        (hTypeRecCross info.base.name hInfoName)).1
+    exact (psKernelNameListContains_false_excludes_equal
+      psKernelStringEq_reflexive info.base.name
+        (psKernelSimpleMutualRecNames decl.types) hNotRec)
+      recName (by simpa only [hRecNames] using hRec)
+  have hRecAbsentAfter :=
+    psKernelReplaceMutualInductiveInfos_preserves_absent_names
+      (psKernelMakeSimpleMutualBaseInfos
+        (psKernelSimpleMutualNames decl.types) decl shapes)
+      (psKernelSimpleMutualHasRecursiveFields ctorResult.shapes)
+      (psKernelSimpleMutualHasReflexiveFields ctorResult.shapes)
+      hString (shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+        psKernelSimpleRecName shape.decl.name))
+      ctorResult.environment hReserved hDisjoint
   exact ⟨shapes, ctorResult, hShapeDecls,
-    hReplacedSemantic, hReplacedIndex⟩
+    hReplacedSemantic, hReplacedIndex, hRecAbsentAfter⟩

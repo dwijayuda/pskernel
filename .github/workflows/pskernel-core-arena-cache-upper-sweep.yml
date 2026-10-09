@@ -1,0 +1,77 @@
+name: PSKernel Core hot theorem cache-size upper sweep
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-cache-upper-sweep-v1
+    paths:
+      - ".github/workflows/pskernel-core-arena-cache-upper-sweep.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-same-runner-cache-sizes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4 and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build exact pinned UTF8 theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cat > arena/tests/pskernel-utf8-upper.lean <<'EOF'
+          import Init
+          EOF
+          cat > arena/tests/pskernel-utf8-upper.yaml <<'EOF'
+          description: Focused theorem budget experiment. Never a replacement for official Init acceptance.
+          leanfile: tests/pskernel-utf8-upper.lean
+          export-decls:
+            - _private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec
+          outcome: accept
+          EOF
+          (cd arena && uv run lka.py build-test pskernel-utf8-upper --cache)
+          wc -l -c arena/_build/tests/pskernel-utf8-upper.ndjson
+      - name: Repeated same-runner 256 to 8192 node upper cache study
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE="psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean"
+          INPUT="arena/_build/tests/pskernel-utf8-upper.ndjson"
+          for budget in 256 1024 4096 8192 512 2048; do
+            echo "CACHE_CAP_BEGIN budget=$budget"
+            python3 - "$SOURCE" "$budget" <<'PY'
+          from pathlib import Path
+          import re,sys
+          path=Path(sys.argv[1])
+          old=path.read_text(encoding="utf-8")
+          new,counts=re.subn(r"(def psKernelSemanticCacheNodeBudget : Nat :=\n)  \d+",
+                             lambda m:m.group(1)+"  "+sys.argv[2],old,count=1)
+          if counts!=1:raise SystemExit("missing exact cache budget definition")
+          path.write_text(new,encoding="utf-8")
+          PY
+            (cd psc15selfhost && lake build psc_kernel_core_arena)
+            set +e
+            /usr/bin/time -f "CACHE_CAP_MEASURE budget=$budget wall_s=%e peak_rss_kb=%M exit=%x" \
+              timeout 135 psc15selfhost/.lake/build/bin/psc_kernel_core_arena \
+                < "$INPUT"
+            status=$?
+            set -e
+            echo "CACHE_CAP_VERDICT budget=$budget status=$status"
+            if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then
+              echo "Non-timeout checker result: investigate (not an accepted optimization)"
+              exit "$status"
+            fi
+          done
+          echo "ALL_CACHE_CAP_RUNS_ARE_DIAGNOSTIC_NOT_FULL_ARENA_ACCEPTANCE=1"

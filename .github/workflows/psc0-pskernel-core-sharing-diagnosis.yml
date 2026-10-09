@@ -24,16 +24,16 @@ jobs:
         with:
           name: pskernel-435-binary
           path: kernel
-          run-id: 37997784610
+          run-id: 37998880424
           github-token: ${{ github.token }}
       - name: Sample full Init traversal for 180 seconds
         shell: bash
         run: |
           set -euo pipefail
-          echo "BINARY_SOURCE_SHA=de1ad1993286d642575cf35b4842b6633501a634"
+          echo "BINARY_SOURCE_SHA=7154935f67b614129d9d547d88c0b28213e56034"
           chmod +x kernel/psc_kernel_core_arena
           sha256sum kernel/psc_kernel_core_arena
-          echo "0ebf115bc270cb30003afd887e0bfab7b7174f5240374c07555e45a49b3a15c9  kernel/psc_kernel_core_arena" | sha256sum -c -
+          echo "00928128c24c916877ff03c6255589bee708c19c7d25aea43d52e15677f8fd46  kernel/psc_kernel_core_arena" | sha256sum -c -
           git clone https://github.com/leanprover/lean-kernel-arena.git arena
           git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
           cd arena
@@ -98,14 +98,14 @@ jobs:
         with:
           name: pskernel-435-binary
           path: candidate
-          run-id: 37997784610
+          run-id: 37998880424
           github-token: ${{ github.token }}
       - name: Compare exact binaries on the same pinned prefix and runner
         shell: bash
         run: |
           set -euo pipefail
           echo "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f  baseline/psc_kernel_core_arena" | sha256sum -c -
-          echo "0ebf115bc270cb30003afd887e0bfab7b7174f5240374c07555e45a49b3a15c9  candidate/psc_kernel_core_arena" | sha256sum -c -
+          echo "00928128c24c916877ff03c6255589bee708c19c7d25aea43d52e15677f8fd46  candidate/psc_kernel_core_arena" | sha256sum -c -
           chmod +x baseline/psc_kernel_core_arena candidate/psc_kernel_core_arena
           git clone https://github.com/leanprover/lean-kernel-arena.git arena
           git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc

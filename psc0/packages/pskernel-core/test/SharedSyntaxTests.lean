@@ -34,6 +34,10 @@ def main : IO Unit := do
   let subst := [PsKernelExpr.fvar n, PsKernelExpr.bvar 4]
   for e in examples do
     for d in [0, 1, 2, 5] do
+      for index in [0, 1, 3] do
+        ensure (psKernelExprHasLooseBVarAtCoreShared e index d ==
+          PsKernelSharing.fold (PsKernelSharing.bvarAtAlgebra index) e d)
+          "specific bound-variable cursor"
       ensure (psKernelExprHasLooseAtShared e d ==
         PsKernelSharing.fold PsKernelSharing.looseAlgebra e d) "loose-variable fold"
       ensure (psKernelExprInstantiateAtChangedShared e 1 subst d ==
@@ -68,6 +72,11 @@ def main : IO Unit := do
   ensure (!psKernelExprHasLooseBVar closed) "shared closed-variable query"
   ensure (!psKernelExprHasFVar closed) "shared free-variable query"
   let openDag := dag depth (.bvar 1)
+  ensure (!psKernelExprHasLooseBVarAt openDag 0) "absent specific variable in shared DAG"
+  ensure (psKernelExprHasLooseBVarAt openDag 1) "present specific variable in shared DAG"
+  let scopedDag := PsKernelExpr.lam n (.sort .zero) openDag .default
+  ensure (psKernelExprHasLooseBVarAt scopedDag 0) "specific variable shifts beneath binder"
+  ensure (!psKernelExprHasLooseBVarAt scopedDag 1) "specific variable honors binder depth"
   let result := psKernelExprInstantiateAt openDag 0 subst 0
   ensure (psKernelExprNodeCount result == 2 ^ (depth + 1) - 1) "shared substitution result"
   ensure (psKernelExprHasLooseAt result 4) "shared substitution leaf"

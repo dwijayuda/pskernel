@@ -299,3 +299,39 @@ def psKernelExprInstantiateLevelParamsShared (e : PsKernelExpr)
   funext e params levels
   simp [psKernelExprInstantiateLevelParamsShared, PsKernelSharing.run_eq,
     PsKernelSharing.level_fold]
+
+namespace PsKernelSharing
+
+/-- The queried index is fixed for one memo; the varying binder depth is its cursor. -/
+@[inline, instance_reducible] def bvarAtAlgebra (index : Nat) : Algebra Bool :=
+  { looseAlgebra with
+    atom := fun e depth => match e with
+      | .bvar value => Nat.beq value (index + depth)
+      | _ => false }
+
+theorem bvarAt_fold (e : PsKernelExpr) (index depth : Nat) :
+    fold (bvarAtAlgebra index) e depth =
+      psKernelExprHasLooseBVarAtCore e index depth := by
+  induction e generalizing depth <;>
+    simp_all [Algebra.atom, Algebra.unary, Algebra.binary, Algebra.ternary,
+      fold, bvarAtAlgebra, looseAlgebra, psKernelExprHasLooseBVarAtCore]
+
+end PsKernelSharing
+
+def psKernelExprHasLooseBVarAtCoreShared (e : PsKernelExpr) (index depth : Nat) : Bool :=
+  if PsKernelSharing.small e then psKernelExprHasLooseBVarAtCore e index depth
+  else PsKernelSharing.run (PsKernelSharing.bvarAtAlgebra index) e depth
+
+@[csimp] theorem psKernelExprHasLooseBVarAtCore_shared_eq :
+    psKernelExprHasLooseBVarAtCore = psKernelExprHasLooseBVarAtCoreShared := by
+  funext e index depth
+  simp [psKernelExprHasLooseBVarAtCoreShared, PsKernelSharing.run_eq,
+    PsKernelSharing.bvarAt_fold]
+
+def psKernelExprHasLooseBVarAtShared (e : PsKernelExpr) (index : Nat) : Bool :=
+  psKernelExprHasLooseBVarAtCoreShared e index 0
+
+@[csimp] theorem psKernelExprHasLooseBVarAt_shared_eq :
+    psKernelExprHasLooseBVarAt = psKernelExprHasLooseBVarAtShared := by
+  funext e index
+  exact congrFun (congrFun (congrFun psKernelExprHasLooseBVarAtCore_shared_eq e) index) 0

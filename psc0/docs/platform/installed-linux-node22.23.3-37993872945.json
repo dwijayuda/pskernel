@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 2,
+  "kind": "proofscript-installed-package-qualification",
+  "sourceRef": "3fd25db1bbd8d508252682fd0efe5a948a5ea5fd",
+  "runId": "37993872945",
+  "tarballSha256": "77b0d6c596c8b77af99b4676ce998d58d713b5596762eef928ed284018449ba0",
+  "tarballBytes": 3625076,
+  "releaseIdentity": {
+    "version": "0.1.0-preview.1",
+    "platforms": [
+      {
+        "os": "linux",
+        "arch": "x64"
+      },
+      {
+        "os": "win32",
+        "arch": "x64"
+      }
+    ],
+    "compiler": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+      "sha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15"
+    },
+    "kernel": {
+      "selector": "pskernel-core",
+      "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+      "artifacts": {
+        "linux-x64": {
+          "sha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+          "dependencies": []
+        },
+        "win32-x64": {
+          "sha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+          "dependencies": []
+        }
+      }
+    },
+    "selectedPlatform": "linux-x64",
+    "typescriptVersion": "7.0.2"
+  },
+  "providerRuntime": {
+    "kind": "linux-elf",
+    "linkedLibraries": [
+      "linux-vdso.so.1 (0x00007f49bc7a1000)",
+      "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f49bbe00000)",
+      "/lib64/ld-linux-x86-64.so.2 (0x00007f49bc7a3000)",
+      "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f49bc78a000)",
+      "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f49bc785000)",
+      "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f49bc780000)",
+      "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f49bc697000)"
+    ],
+    "interpreter": "/lib64/ld-linux-x86-64.so.2",
+    "requiredGlibcVersions": [
+      "GLIBC_2.10",
+      "GLIBC_2.12",
+      "GLIBC_2.14",
+      "GLIBC_2.16",
+      "GLIBC_2.17",
+      "GLIBC_2.2.5",
+      "GLIBC_2.3",
+      "GLIBC_2.3.2",
+      "GLIBC_2.3.3",
+      "GLIBC_2.3.4",
+      "GLIBC_2.4",
+      "GLIBC_2.6",
+      "GLIBC_2.7",
+      "GLIBC_2.9"
+    ]
+  },
+  "npmRuntime": {
+    "cliPath": "/home/runner/work/_temp/psc0-smoke-npm/node_modules/npm/bin/npm-cli.js",
+    "version": "10.9.9",
+    "nodeVersion": "v22.23.3"
+  },
+  "shellRuntime": null,
+  "nodeOnlyExecutionPath": true,
+  "nodeVersion": "v22.23.3",
+  "platform": "linux",
+  "architecture": "x64",
+  "operatingSystemRelease": "6.17.0-1022-azure",
+  "runnerImage": "ubuntu24",
+  "runnerImageVersion": "20261004.327.1",
+  "observations": [
+    "fresh global tarball install without lifecycle scripts",
+    "installed executable and version",
+    "supervisor extension disclosure",
+    "packaged compiler and native Core admission",
+    "neighboring TypeScript publication from the installed package",
+    "existing TypeScript project typechecks generated neighbor",
+    "existing TypeScript project executes generated neighbor",
+    "valid rebuild replaces owned TypeScript and receipt",
+    "existing TypeScript project typechecks rebuilt neighbor",
+    "existing TypeScript project executes rebuilt neighbor",
+    "invalid source cannot replace the previous completed output",
+    "requested PSCV is explicitly refused",
+    "packaged provider linked-library inspection",
+    "packaged provider ELF interpreter inspection",
+    "packaged provider ABI version inspection"
+  ],
+  "passed": true,
+  "leanToolchainRequired": false,
+  "sourceCheckoutRequired": false,
+  "semanticPreservationProved": false,
+  "pscvVerified": false,
+  "strictSh1Qualified": false,
+  "selectedSeedChanged": false,
+  "npmPublished": false
+}

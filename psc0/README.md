@@ -2,6 +2,8 @@
 
 ## Installable platform preview
 
+Preview1 is qualified on Linux and Windows x64 with Node22.23.3/npm10.9.9 and Node26.7.0/npm12.0.2. On Windows PowerShell, the tested command is `psc.cmd`. Download the new `proofscript-0.1.0-preview.1.tgz` from the [candidate artifact](https://github.com/dwijayuda/pskernel/actions/runs/37993872945/artifacts/11646426537); preview0 was Linux-only. The compiler bootstrap toolchain and selected seed are unchanged.
+
 The protected `proofscript` npm preview exposes `psc check`, `psc build`,
 version information and extension disclosure. Its public launcher is
 `bin/psc.mjs`; the repository-only bootstrap CLI remains in

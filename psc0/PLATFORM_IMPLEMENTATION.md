@@ -8,52 +8,71 @@
 
 ## Qualified result
 
-The exact executable/package source is [48be48c0fd91407ca531692be2a3bd8bc24b058b](https://github.com/dwijayuda/pskernel/commit/48be48c0fd91407ca531692be2a3bd8bc24b058b), tree `0cbeb41c6016295be2247ee27c16d074d7b46810`.
+The exact executable/package source is [3fd25db1bbd8d508252682fd0efe5a948a5ea5fd](https://github.com/dwijayuda/pskernel/commit/3fd25db1bbd8d508252682fd0efe5a948a5ea5fd), tree `7c606d0b6910fdd04250a5d1c7a58aa800f47d43`.
 
-[Run 37990210503](https://github.com/dwijayuda/pskernel/actions/runs/37990210503) passed both jobs on attempt 1 and completed at **2026-10-09 20:57:03 UTC**.
+[Run 37993872945](https://github.com/dwijayuda/pskernel/actions/runs/37993872945), attempt 1, passed **all six jobs**. GitHub recorded the completed successful run at **2026-10-09 21:32:52 UTC**.
 
-| Gate | Observed result |
-| --- | --- |
-| Prepared sessions, output publication, public CLI and release assembly | 61 tests passed; 0 failed; 0 skipped |
-| Actual native provider and generated-compiler integration | 16 tests passed; 0 failed; 0 skipped |
-| Source/preparation boundary guard | Passed |
-| Portable compiler source closure | Exact qualified hash; 61 modules |
-| Native provider executable | Exact qualified SHA-256 |
-| Fresh global npm installation | Passed, with lifecycle scripts disabled |
-| Installed compiler in an unrelated project | Passed without source checkout or Lean installation |
-| Installed execution with only Node on PATH | Passed |
-| Existing TS project imports generated neighboring TS | Typechecking and JavaScript execution passed |
-| Invalid rebuild and requested PSCV profile | Refused; prior completed output preserved |
-| Provider ELF and linked-library inspection | Passed in the same sanitized environment as compiler execution |
+| Source qualification | Host/session/publication/CLI/assembly/smoke-harness tests | Actual native-provider and compiler integration |
+| --- | --- | --- |
+| Ubuntu 24.04 x64, Node 22.23.3 | 84 passed; 0 failed; 0 skipped | 17 passed; 0 failed; 0 skipped |
+| Windows Server 2022 x64, Node 26.7.0 | 87 passed; 0 failed; 1 skipped | 14 passed; 0 failed; 3 skipped |
 
-The installed smoke has **12 explicit observations**, all passed. Its runtime was Ubuntu **24.04.5**, image **ubuntu24/20261004.327.1**, Node **22.23.3**, npm **10.9.9**, Linux x64. Other systems have not been qualified by this milestone.
+The Windows host skip is the existing Unix directory-permission cleanup fixture; Unix permission bits do not model Windows ACLs. The three transport skips use POSIX shebang executables. The actual pinned Windows provider and compiler integration are mandatory and passed. Windows-specific device/stream rejection, path casing, spaces/Unicode, linked-source escape, source-byte preservation, publication and rollback cases ran.
 
-The exact logged result and Actions metadata are retained in:
+Both source jobs also passed the preparation boundary guard. The exact F compiler bytes and all **61 raw source modules** still match the existing qualified closure.
 
-- [qualification-2026-10-09.json](docs/platform/qualification-2026-10-09.json)
-- [installed-package-qualification.json](docs/platform/installed-package-qualification.json)
+| Fresh installed-package qualification | npm | Observations | Result |
+| --- | --- | --- | --- |
+| Windows x64, Node 26.7.0 | 12.0.2 | 13 | Passed |
+| Windows x64, Node 22.23.3 | 10.9.9 | 13 | Passed |
+| Linux x64, Node 26.7.0 | 12.0.2 | 15 | Passed |
+| Linux x64, Node 22.23.3 | 10.9.9 | 15 | Passed |
 
-The two preceding platform runs also passed. The final run adds the clarified packaged documentation and inspects the provider under the same sanitized environment as actual execution. None of these platform runs rebuilds or claims a new compiler fixed point.
+All four jobs installed **the same tarball** globally with lifecycle scripts disabled. They checked and compiled source, imported the neighboring generated TypeScript into an existing TS project, executed the result, replaced a valid build from `42` to `43`, and preserved the completed output when a later build was rejected. Requested PSCV failed explicitly.
+
+The installed jobs performed no source checkout or Lean installation. Runtime PATH contained only a dedicated Node executable. Windows used npm's actual **`psc.cmd`** through PowerShell **7.6.6**; bare `psc` can resolve `psc.ps1` and depends on the user's shell policy. The tested Windows image was **win22/20261004.326.1**, Windows Server 2022 **10.0.20348**. The tested Linux image was **ubuntu24/20261004.327.1**, Ubuntu 24.04. This is not qualification of every Windows version, Linux distribution, filesystem or shell policy.
+
+The exact results and artifact metadata are retained in:
+
+- [windows-preview-qualification-2026-10-09.json](docs/platform/windows-preview-qualification-2026-10-09.json)
+- [Windows Node26/npm12 installed result](docs/platform/installed-win32-node26.7.0-37993872945.json)
+- [Windows Node22 installed result](docs/platform/installed-win32-node22.23.3-37993872945.json)
+- [Linux Node26 installed result](docs/platform/installed-linux-node26.7.0-37993872945.json)
+- [Linux Node22 installed result](docs/platform/installed-linux-node22.23.3-37993872945.json)
+
+The earlier Linux-only preview0 qualified at `48be48c0fd91407ca531692be2a3bd8bc24b058b` in [run 37990210503](https://github.com/dwijayuda/pskernel/actions/runs/37990210503). Its [original qualification](docs/platform/qualification-2026-10-09.json) and [installed result](docs/platform/installed-package-qualification.json) remain unchanged historical evidence. Preview1 fixes the Windows installation limitation; it does not replace or re-prove the compiler fixed point.
 
 ## Try the tested npm preview
 
-Download the [candidate artifact](https://github.com/dwijayuda/pskernel/actions/runs/37990210503/artifacts/11644293016). After extracting it, the package is `platform/proofscript-0.1.0-preview.0.tgz`.
+Download the [preview1 candidate artifact](https://github.com/dwijayuda/pskernel/actions/runs/37993872945/artifacts/11646426537). After extracting it, the package is `platform/proofscript-0.1.0-preview.1.tgz`.
+
+In Windows PowerShell, from the extracted candidate directory:
+
+```powershell
+npm install --global --ignore-scripts ".\platform\proofscript-0.1.0-preview.1.tgz"
+psc.cmd version --json
+psc.cmd extensions --json
+```
+
+Use this new archive with Node 26.7.0/npm 12.0.2 or Node 22.23.3/npm 10.9.9. The old preview0 archive remains Linux-only; overriding its npm platform guard cannot supply a Windows executable.
+
+On Linux:
 
 ```sh
-npm install --global --ignore-scripts ./platform/proofscript-0.1.0-preview.0.tgz
-psc --version
+npm install --global --ignore-scripts ./platform/proofscript-0.1.0-preview.1.tgz
+psc version --json
 psc extensions --json
 ```
 
-The tarball is **1,890,798 bytes**, approximately 1.89 MB. This excludes the separately installed TypeScript dependency and is not an installed-footprint measurement. Its SHA-256 is:
+The tarball is **3,625,076 bytes**, approximately **3.63 MB**, excluding separately installed npm dependencies. Its SHA-256, independently reported by all four installed jobs, is:
 
 ```text
-f44034b3624f67660e252df919f0188991613ac7069e47805355e2760374f12c
+77b0d6c596c8b77af99b4676ce998d58d713b5596762eef928ed284018449ba0
 ```
 
-The [installed evidence artifact](https://github.com/dwijayuda/pskernel/actions/runs/37990210503/artifacts/11645305653) contains the full build receipt and ELF/library reports. These Actions artifacts currently expire on **8 November 2026**. The committed evidence preserves their identities; it is not a permanent copy of their executable bytes.
+The [Windows Node26 installed evidence artifact](https://github.com/dwijayuda/pskernel/actions/runs/37993872945/artifacts/11646800613) contains the complete checked-build receipt and native import report. All five artifacts from this run expire on **8 November 2026**. The committed JSON preserves evidence and identities, not a permanent copy of executable archives.
 
-The command `npm install --global proofscript` will select the package currently in the registry. This preview has **not** been published there. Use the exact tarball above to test this implementation.
+`npm install --global proofscript` selects the package currently in the registry. This preview has **not** been published there. Use the exact tarball above.
 
 ### Existing TypeScript project example
 
@@ -63,12 +82,14 @@ Create `src/Main.ps` using the supported bounded grammar:
 def answer : Nat := 42
 ```
 
-From that project's directory:
+From that project's directory on Windows:
 
-```sh
-psc check src/Main.ps
-psc build src/Main.ps --out src/Main.ts --json
+```powershell
+psc.cmd check .\src\Main.ps
+psc.cmd build .\src\Main.ps --out .\src\Main.ts --json
 ```
+
+On Linux, use `psc` with the same arguments. The commands below use that spelling.
 
 The second command creates `src/Main.ts` and `src/Main.checked.json`. It publishes no neighboring JavaScript or declaration file for a requested `.ts` output. Existing handwritten TypeScript can import the generated module:
 
@@ -111,11 +132,17 @@ The immutable session has no raw-emitter fallback. A native seed's old admission
 
 The protected `pskernel-core` selector points to the qualified **native Core 4.34** provider at source `963030dc2d154008fccc82e7c8ed29331f138799`. Its binary is checked before execution and again before the decision is retained. The descriptor records the canonical input digest and actual executable identity.
 
-The unchanged provider transport and contract code were reused. The old generated-owned provider is retained for historical/development comparisons, not silently selected under the protected Core name. The separate 4.35 Arena lane has a different protocol and remains independent.
+The provider implementation and contract are unchanged. The transport now runs the native child from the release-owned provider directory, and the host selects a platform-specific fixed executable hash. The Windows artifact is a PE32+ x64 executable; the Linux artifact remains the existing ELF x64 executable. The old generated-owned provider is retained for historical/development comparisons, not silently selected under the protected Core name. The separate 4.35 Arena lane has a different protocol and remains independent.
+
+The Windows provider source was cold-built and exercised separately in [run 37993071033](https://github.com/dwijayuda/pskernel/actions/runs/37993071033). Its executable SHA-256 is `8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2`. The package does not carry Lean, MinGW or Visual C++ redistributable DLLs. The twelve observed Windows OS imports remain platform assumptions; the PE inventory is not a proof about arbitrary dynamic library loading.
+
+Provider source metadata now explicitly distinguishes repository tree `80927150cbd6a5518762b4cc56e51ea24df8f374` from its `psc0` subtree `38c8c55bd2b214753e56c58c15c4901c32c01b86`. The latter was the historical `sourceTree` field; `sourceTreePath: "psc0"` now makes that scope explicit.
 
 ### Output ownership and completion are explicit
 
 [checked-artifact-publication.mjs](scripts/checked-artifact-publication.mjs) rejects existing unowned output and manually edited generated output. An output-directory lease coordinates cooperating publishers, including different stems whose sidecars overlap.
+
+Windows output paths are checked before compiler loading and target staging, and again at publication. Device basenames, alternate data streams, ambiguous trailing-dot/space components and non-filesystem namespaces are refused. Ordinary spaces, Unicode and native path casing remain supported. UNC/extended-root syntax tests do not claim network-share filesystem qualification.
 
 Private staging and a journal precede visible changes. The publisher checks the source eligibility callback before publication and again before receipt commitment. It then rechecks its lease, receipt absence, all candidate artifact bytes and retirement of obsolete owned files. The new receipt rename is the commit point.
 
@@ -125,9 +152,9 @@ This is a completion protocol for cooperating consumers. It does not make multip
 
 ### The release stays small and explicit
 
-[assemble-release.mjs](scripts/assemble-release.mjs) copies an explicit **17-file maintained host closure**, the exact generated compiler, the exact native provider, and release metadata. It excludes tests, proofs, the legacy trees, optional provider packages and the Lean development toolchain. The grammar profile constant is separated from the large conformance test it previously imported.
+[assemble-release.mjs](scripts/assemble-release.mjs) copies an explicit **17-file maintained host closure**, the exact generated compiler, both exact native providers, and release metadata. It excludes tests, proofs, the legacy trees, optional provider packages and the Lean development toolchain. The grammar profile constant is separated from the large conformance test it previously imported.
 
-The release has one exact TypeScript runtime dependency and no package lifecycle scripts. Five independently published npm packages are not created in this first slice. The future `pskernel-core`, `pscore`, `psfrontend`, `psc`, and `psbackend-ts` boundaries remain the accepted target; their compiler functionality currently ships as a bundled runtime plus the host.
+The one package contains both small native artifacts instead of introducing a platform-package loader. Its release profile refuses additional native DLL declarations because neither qualified provider needs bundled DLLs. The release has one exact TypeScript runtime dependency and no package lifecycle scripts. Five independently published npm packages are not created in this first slice. The future `pskernel-core`, `pscore`, `psfrontend`, `psc`, and `psbackend-ts` boundaries remain the accepted target; their compiler functionality currently ships as a bundled runtime plus the host.
 
 The host continues the existing Node `.mjs` implementation style. The portable compiler remains the existing supported Lean/ProofScript implementation. This milestone does not rename its twelve source groups or claim that the compiler has been rewritten in TypeScript.
 
@@ -161,9 +188,11 @@ All 61 raw compiler source modules still produce the qualified source-closure id
 
 The selected authoring seed R remains `fe2560aba0f347b1caf8d000d371464642d44f23`. Its manifest, active TS7 recovery policy and historical evidence are unchanged. No provider algorithm, kernel metatheory, compiler algorithm or source-language profile is changed by this milestone.
 
+Consumer support for Node 26 is separate from bootstrap qualification. The compiler reproduction recipe remains Node 22.23.3, Lean 4.34.0 and TypeScript 7.0.2. The Node26 installed checks do not claim a Node26 compiler fixed point.
+
 The new host and release tooling sit outside the portable compiler closure. A future source/module reorganization must deliberately requalify its changed closure. A joint generated compiler/kernel fixed point is still separate.
 
-The preview assembly job currently obtains F from its retained Actions artifact and rebuilds the pinned native provider as necessary. Before a durable public release, preserve/recover the exact release inputs through a nonexpiring release/seed channel and exercise the declared clean recovery route. The existing R recovery evidence is preserved; it is not an assertion that the new preview workflow can survive expiration of every external artifact.
+The preview assembly job obtains F and the Windows provider from their retained exact Actions artifacts; it obtains the existing Linux provider through its pinned-source build/cache and authenticates its unchanged bytes. The Windows PE records its ordinary link timestamp (`1791581097`), so a later ordinary build is not claimed to reproduce the same executable hash. A deterministic native link recipe remains a separate qualification task; the existing exact Windows payload must be retained in the meantime. Before a durable public release, preserve/recover the exact release inputs through a nonexpiring release/seed channel and exercise the declared clean recovery route. The existing R recovery evidence is preserved; it is not an assertion that the new preview workflow can survive expiration of every external artifact.
 
 ## Later proof work
 
@@ -189,6 +218,6 @@ The architecture plan already defines this layout and a direct-file runner patte
 4. **Complete T1 before watch/LSP.** Add the accepted export map, neighboring facades and checked ABI, then test cross-file datatype identity, initialization and calls. Follow with `psdev` invalidation/cancellation/recovery and coordinated downstream builds. LSP/editor snapshots remain separate from publishable checked builds.
 5. **Formal assurance in parallel when useful.** Develop independently scoped proofs without making full proof completion a closing gate for the implementation milestones.
 
-At the qualified checkpoint, the operational diff from the architecture base is **33 files, 2,739 added lines and 421 deleted lines**, including tests, workflow, metadata and documentation. The compiler's portable Lean sources have zero changes. These are measured diff counts, not a claim about TCB size or the total remaining plan cost.
+The earlier preview0 operational diff from the architecture base was **33 files, 2,739 added lines and 421 deleted lines**. The qualified preview1 correction from documented head `158a5d9` to `3fd25db` changes **25 files, 1,986 added lines and 287 deleted lines**, including the native probe recipe, tests, workflow, metadata and retained evidence. The compiler's portable Lean sources have zero changes. These are measured diff counts, not a claim about TCB size or the total remaining plan cost.
 
-The next documentation/evidence-only commit records this result and does not change the qualified runtime package. Do not repeat completed compiler fixed-point work for those documentation changes or treat this preview as completion of the whole architecture.
+The containing documentation/evidence-only follow-up records this result and does not change the qualified runtime package. Do not repeat completed compiler fixed-point work for those documentation changes or treat this preview as completion of the whole architecture.

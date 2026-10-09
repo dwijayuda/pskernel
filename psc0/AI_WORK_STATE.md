@@ -1,18 +1,70 @@
-# Windows x64 preview correction — qualification in progress
+# PSC0 platform — Windows and Node26 correction complete
 
-Updated: 2026-10-09 21:30 UTC. This active correction supersedes the Linux-only support description in the checkpoint below; its qualification is not yet complete.
+Updated: 2026-10-09 21:38:25 UTC. This section is the active continuation and supersedes the earlier Linux-only preview checkpoint below.
 
-The user tried preview0 on Windows x64 with Node 26.7.0/npm 12.0.2. That tarball correctly refused installation because it contained only a Linux native provider and declared Node 22. The authorized correction prepares proofscript 0.1.0-preview.1 as one package containing separately authenticated Linux and Windows x64 providers, with the unchanged F compiler. Consumer Node 22 and 26 support is separate from the unchanged Node22/Lean4.34/TS7 bootstrap recipe.
+## Current result
 
-The exact Windows native build and fresh native smoke passed in run37993071033 at fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3. Windows executable SHA256: 8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2; 5,509,120 bytes. It imports only the twelve recorded Windows OS DLLs and requires no additional bundled DLL. Its PE link timestamp prevents claiming byte-identical reconstruction from a later ordinary build; reuse the retained exact artifact. Candidate artifact11646570443 expires 8 November. Source commit963030dc2d154008fccc82e7c8ed29331f138799 is unchanged. Its repository root tree is80927150cbd6a5518762b4cc56e51ea24df8f374; the historical sourceTree38c8c55bd2b214753e56c58c15c4901c32c01b86 refers specifically to the psc0 subtree. New metadata scopes this explicitly.
+The user's Windows x64 / Node26.7.0 / npm12.0.2 installation failure is addressed by **proofscript 0.1.0-preview.1**. One tarball contains the unchanged F compiler and separate authenticated Linux x64 and Windows x64 native Core providers. The implementation remains on `psc0/platform-v1`, [draft PR90](https://github.com/dwijayuda/pskernel/pull/90); main was re-read at `ed5d00aca0743bde583b45fe7756dd494ac3960f` and was not changed. Nothing was published to npm.
 
-The platform workflow must now qualify the integrated host, one assembled tarball, Windows source integration and all four fresh install combinations: Ubuntu24.04/Windows Server2022 x64 × Node22.23.3/npm10.9.9 or Node26.7.0/npm12.0.2. Windows user-flow tests exercise npm's psc.cmd from PowerShell with a Node-only PATH, no source checkout and no Lean installation. Do not call preview1 package-qualified until those jobs pass. No success result is inferred from the native-only probe.
+Exact qualified source: `3fd25db1bbd8d508252682fd0efe5a948a5ea5fd`, tree `7c606d0b6910fdd04250a5d1c7a58aa800f47d43`. [Run37993872945](https://github.com/dwijayuda/pskernel/actions/runs/37993872945), attempt1, passed all six jobs; final successful run update 2026-10-09 21:32:52 UTC.
 
-Runtime changes are confined to host selection, release assembly/paths, and early Windows output-path validation. The compiler closure, selected R seed, proof status, kernel algorithms and separate Lean4.35 work remain unchanged. External extensions remain unsupported. No main merge or npm publication is authorized as an incidental action. Continue using GitHub connector reads/writes, non-force expected-head updates and Actions-only execution.
+| Qualification | Passed | Failed | Skipped |
+| --- | --- | --- | --- |
+| Linux22 host/session/publication/source/CLI/assembly/smoke harness | 84 | 0 | 0 |
+| Linux22 real provider/compiler integration | 17 | 0 | 0 |
+| Windows26 host/session/publication/source/CLI/assembly/smoke harness | 87 | 0 | 1 |
+| Windows26 real provider/compiler integration | 14 | 0 | 3 |
+
+The one Windows host skip is the existing Unix directory-permission cleanup fixture. The three Windows transport skips use POSIX shebang executables. Actual Windows native-provider and generated-compiler tests are mandatory and passed; no gate was weakened or failure waived.
+
+Four fresh installed jobs also passed: Windows22/npm10.9.9 and Windows26/npm12.0.2 each passed13 observations; Linux22/npm10.9.9 and Linux26/npm12.0.2 each passed15. Every job installed the same tarball globally with `--ignore-scripts`, with no source checkout or Lean installation. Actual execution used a Node-only PATH. Windows tested npm's `psc.cmd` from PowerShell7.6.6; bare `psc` may select `psc.ps1` and depends on local shell policy.
+
+The workflow checked admission, neighboring TypeScript publication, existing TS project import/typechecking/execution, a successful changed rebuild from42 to43, rejected-rebuild preservation and explicit PSCV refusal. Windows image: win22/20261004.326.1, Windows Server2022 10.0.20348 x64. Linux image: ubuntu24/20261004.327.1, Ubuntu24.04 x64. Do not claim every Windows release, Linux distribution, filesystem or shell has been qualified.
+
+## Package and evidence
+
+- Candidate artifact [11646426537](https://github.com/dwijayuda/pskernel/actions/runs/37993872945/artifacts/11646426537).
+- Tarball within the extracted artifact: `platform/proofscript-0.1.0-preview.1.tgz`.
+- Tarball size: **3,625,076 bytes**, excluding separately installed npm dependencies.
+- SHA256: `77b0d6c596c8b77af99b4676ce998d58d713b5596762eef928ed284018449ba0`.
+- Windows26 installed evidence artifact11646800613; Windows22 artifact11646216847; Linux22 artifact11645973348; Linux26 artifact11645898259.
+- All five platform artifacts expire on **8 November 2026**. The committed JSON retains identities and evidence, not executable archives.
+- Exact retained results: `docs/platform/windows-preview-qualification-2026-10-09.json` and four `installed-*-37993872945.json` files.
+- Read [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) for copyable PowerShell/Linux instructions and bounded claims.
+
+The old preview0 tarball remains Linux-only. Removing its npm OS restriction or using force cannot provide the missing Windows executable. Use preview1. The registry name is still `proofscript`, command `psc`; ordinary registry installation does not select this unpublished candidate.
+
+## Preserved source and new native artifact
+
+- F compiler source `fcd875c8f38db4b0524090bd10c7c2fd5024053d`; qualification run37947341800 remains applicable.
+- Its **61-module raw source closure** remains `6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7`.
+- F JavaScript remains `5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15`.
+- Selected authoring seed R remains `fe2560aba0f347b1caf8d000d371464642d44f23`; seed manifest and recovery recipe are unchanged.
+- **Bootstrap stays Node22.23.3 / Lean4.34.0 / TS7.0.2.** Consumer Node26 support does not claim a new Node26 bootstrap fixed point. No TS5/TS6 fallback.
+- Native Core source remains `963030dc2d154008fccc82e7c8ed29331f138799`. Its repository tree is `80927150cbd6a5518762b4cc56e51ea24df8f374`; `38c8c55bd2b214753e56c58c15c4901c32c01b86` is specifically its `psc0` subtree. Metadata now records `sourceTreePath: "psc0"`.
+- Linux provider SHA256 remains `88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec`.
+- Windows provider SHA256 is `8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2`; 5,509,120 bytes, PE32+/AMD64. Exact native build/protocol qualification: run37993071033 at `fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3`, candidate artifact11646570443. Seven fresh native observations passed before package integration.
+- Both providers need no bundled non-system DLLs. Windows imports twelve recorded OS DLLs; OS/runtime libraries remain assumptions. No Lean installation is required by the tested package.
+- The Windows PE includes link timestamp1791581097. An ordinary later rebuild is not byte-reproducible under this recipe; retain/use the exact artifact. A deterministic native build recipe must earn its own qualification. Do not patch the timestamp or invent a replacement hash.
+- Separate Lean4.35 Arena work has a different protocol and is not substituted.
+
+## Implementation and remaining scope
+
+The corrected host selects the native byte pin only from actual platform/architecture, checks it before and after admission, runs the native child from its own directory, and validates Windows output aliases before target staging. One release contains both payloads with the same 17-file maintained host import closure; no platform-package loader or DLL framework was introduced. The correction from158a5d9 to3fd25db changes25 files,1986 added lines and287 deleted lines, mostly qualification/tests/metadata. No portable compiler or kernel algorithm changed.
+
+This completes the Windows portability correction to the first protected-host/installable-preview milestone. It does **not** complete architecture phases0–4. External extension execution remains unsupported and disclosed as an empty set. The final ps-prefixed source/package split, library imports, full T1 export map/ABI, watch/LSP and isolated extension runner remain subsequent milestones in the accepted Markdown plan.
+
+Formal assurance remains a **later gate**, with `proofs/**/*.proof.lean` and a proof-only full-Lean environment outside bootstrap. No compiler semantic-preservation theorem, logical-consistency theorem, PSCV verification, strict SH/1 result or joint compiler/kernel fixed point is claimed here.
+
+## Execution rules for continuation
+
+All repository source reads/writes remain through GitHub connector/MCP, with actual builds/tests only in GitHub Actions. No local checkout, source execution, shell builds/tests, browser or DesktopCommander. Pure in-memory text/JSON transforms and evidence hashing are allowed. Git-backed deliverables remain in the repository.
+
+Use fresh head leases and non-force updates, preserve concurrent history, and do not change kernel/provider/metatheory/definitional-equality/cache algorithms. Do not promote F as seed, change bootstrap pins, weaken acceptance, merge main or publish npm as an incidental continuation. The containing follow-up is documentation/evidence only; do not repeat the completed qualification or compiler fixed-point runs for it.
 
 ---
 
-# PSC0 platform — active continuation
+# Previous Linux-only preview checkpoint
 
 Updated: 2026-10-09 21:02 UTC. This section supersedes the historical handoff below for the newly authorized platform implementation.
 

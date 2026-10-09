@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "proofscript-windows-linux-preview-qualification",
+  "sourceRef": "3fd25db1bbd8d508252682fd0efe5a948a5ea5fd",
+  "sourceTree": "7c606d0b6910fdd04250a5d1c7a58aa800f47d43",
+  "branch": "psc0/platform-v1",
+  "pullRequest": 90,
+  "previousCheckpoint": "158a5d930c825991154ee0b7198bed9ceb0f6ac4",
+  "run": {
+    "id": 37993872945,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/37993872945",
+    "attempt": 1,
+    "conclusion": "success",
+    "startedAt": "2026-10-09T21:30:34Z",
+    "completedAt": "2026-10-09T21:32:52Z"
+  },
+  "package": {
+    "name": "proofscript",
+    "version": "0.1.0-preview.1",
+    "tarball": "platform/proofscript-0.1.0-preview.1.tgz",
+    "sha256": "77b0d6c596c8b77af99b4676ce998d58d713b5596762eef928ed284018449ba0",
+    "bytes": 3625076,
+    "bytesExcludeNpmDependencies": true,
+    "engines": ">=22.23.3 <23 || >=26.7.0 <27",
+    "platforms": [
+      {
+        "os": "linux",
+        "arch": "x64"
+      },
+      {
+        "os": "win32",
+        "arch": "x64"
+      }
+    ],
+    "candidateArtifactId": 11646426537
+  },
+  "sourceGates": [
+    {
+      "jobId": 114034753509,
+      "platform": "linux-x64",
+      "node": "22.23.3",
+      "host": {
+        "tests": 84,
+        "passed": 84,
+        "failed": 0,
+        "skipped": 0
+      },
+      "nativeIntegration": {
+        "tests": 17,
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sourcePreparationGuardPassed": true
+    },
+    {
+      "jobId": 114035188640,
+      "platform": "win32-x64",
+      "node": "26.7.0",
+      "host": {
+        "tests": 88,
+        "passed": 87,
+        "failed": 0,
+        "skipped": 1
+      },
+      "nativeIntegration": {
+        "tests": 17,
+        "passed": 14,
+        "failed": 0,
+        "skipped": 3
+      },
+      "sourcePreparationGuardPassed": true,
+      "skipReasons": [
+        "One Unix directory-permission cleanup fixture does not model Windows ACLs.",
+        "Three existing POSIX shebang transport fixtures are not Windows executables. Actual pinned-provider and compiler-integration tests run and pass."
+      ]
+    }
+  ],
+  "installedGates": [
+    {
+      "jobId": 114035188789,
+      "evidenceFile": "installed-win32-node26.7.0-37993872945.json",
+      "platform": "win32",
+      "architecture": "x64",
+      "node": "v26.7.0",
+      "npm": "12.0.2",
+      "osRelease": "10.0.20348",
+      "runnerImage": "win22",
+      "runnerImageVersion": "20261004.326.1",
+      "shell": {
+        "executable": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "version": "7.6.6",
+        "route": "npm psc.cmd via PowerShell"
+      },
+      "passed": true,
+      "observations": 13,
+      "nodeOnlyExecutionPath": true
+    },
+    {
+      "jobId": 114035188800,
+      "evidenceFile": "installed-linux-node22.23.3-37993872945.json",
+      "platform": "linux",
+      "architecture": "x64",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "osRelease": "6.17.0-1022-azure",
+      "runnerImage": "ubuntu24",
+      "runnerImageVersion": "20261004.327.1",
+      "shell": null,
+      "passed": true,
+      "observations": 15,
+      "nodeOnlyExecutionPath": true
+    },
+    {
+      "jobId": 114035188843,
+      "evidenceFile": "installed-win32-node22.23.3-37993872945.json",
+      "platform": "win32",
+      "architecture": "x64",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "osRelease": "10.0.20348",
+      "runnerImage": "win22",
+      "runnerImageVersion": "20261004.326.1",
+      "shell": {
+        "executable": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "version": "7.6.6",
+        "route": "npm psc.cmd via PowerShell"
+      },
+      "passed": true,
+      "observations": 13,
+      "nodeOnlyExecutionPath": true
+    },
+    {
+      "jobId": 114035189129,
+      "evidenceFile": "installed-linux-node26.7.0-37993872945.json",
+      "platform": "linux",
+      "architecture": "x64",
+      "node": "v26.7.0",
+      "npm": "12.0.2",
+      "osRelease": "6.17.0-1022-azure",
+      "runnerImage": "ubuntu24",
+      "runnerImageVersion": "20261004.327.1",
+      "shell": null,
+      "passed": true,
+      "observations": 15,
+      "nodeOnlyExecutionPath": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11646800613,
+      "name": "proofscript-preview-installed-windows-2022-node26.7.0-3fd25db1bbd8d508252682fd0efe5a948a5ea5fd",
+      "size_in_bytes": 4817,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11646800613",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11646800613/zip",
+      "expired": false,
+      "created_at": "2026-10-09T21:32:34Z",
+      "expires_at": "2026-11-08T21:32:33Z",
+      "updated_at": "2026-10-09T21:32:34Z",
+      "digest": "sha256:e12798ddbe082346bf006409678e83dce5837a0fa1d60c796d9124d5b80fd99e",
+      "workflow_run": {
+        "id": 37993872945,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "3fd25db1bbd8d508252682fd0efe5a948a5ea5fd"
+      }
+    },
+    {
+      "id": 11646426537,
+      "name": "proofscript-preview-candidate-3fd25db1bbd8d508252682fd0efe5a948a5ea5fd",
+      "size_in_bytes": 3836070,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11646426537",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11646426537/zip",
+      "expired": false,
+      "created_at": "2026-10-09T21:31:43Z",
+      "expires_at": "2026-11-08T21:31:42Z",
+      "updated_at": "2026-10-09T21:31:43Z",
+      "digest": "sha256:619444510380448772ac04b6ad8314b2763d9c89f289504876b68e90cd81d505",
+      "workflow_run": {
+        "id": 37993872945,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "3fd25db1bbd8d508252682fd0efe5a948a5ea5fd"
+      }
+    },
+    {
+      "id": 11646216847,
+      "name": "proofscript-preview-installed-windows-2022-node22.23.3-3fd25db1bbd8d508252682fd0efe5a948a5ea5fd",
+      "size_in_bytes": 4819,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11646216847",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11646216847/zip",
+      "expired": false,
+      "created_at": "2026-10-09T21:32:40Z",
+      "expires_at": "2026-11-08T21:32:39Z",
+      "updated_at": "2026-10-09T21:32:40Z",
+      "digest": "sha256:0683f3d013f1ef2785d39a3acfb92194143a9fd1f44a9e17e635d2bc4d4e7ca2",
+      "workflow_run": {
+        "id": 37993872945,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "3fd25db1bbd8d508252682fd0efe5a948a5ea5fd"
+      }
+    },
+    {
+      "id": 11645973348,
+      "name": "proofscript-preview-installed-ubuntu-24.04-node22.23.3-3fd25db1bbd8d508252682fd0efe5a948a5ea5fd",
+      "size_in_bytes": 6163,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11645973348",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11645973348/zip",
+      "expired": false,
+      "created_at": "2026-10-09T21:32:05Z",
+      "expires_at": "2026-11-08T21:32:04Z",
+      "updated_at": "2026-10-09T21:32:05Z",
+      "digest": "sha256:557af88e8056f923563135036fdd595505d42ce614a4162e809a1513a60a629c",
+      "workflow_run": {
+        "id": 37993872945,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "3fd25db1bbd8d508252682fd0efe5a948a5ea5fd"
+      }
+    },
+    {
+      "id": 11645898259,
+      "name": "proofscript-preview-installed-ubuntu-24.04-node26.7.0-3fd25db1bbd8d508252682fd0efe5a948a5ea5fd",
+      "size_in_bytes": 6162,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11645898259",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11645898259/zip",
+      "expired": false,
+      "created_at": "2026-10-09T21:32:06Z",
+      "expires_at": "2026-11-08T21:32:05Z",
+      "updated_at": "2026-10-09T21:32:06Z",
+      "digest": "sha256:2089b345fe14ba43aa092e289f3f59e76e47de9057cc0aa3106003a2d8627d1a",
+      "workflow_run": {
+        "id": 37993872945,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "3fd25db1bbd8d508252682fd0efe5a948a5ea5fd"
+      }
+    }
+  ],
+  "compiler": {
+    "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+    "sha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+    "moduleCount": 61,
+    "qualificationRun": 37947341800,
+    "rebuiltByThisChange": false,
+    "selectedSeed": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "selectedSeedChanged": false
+  },
+  "kernel": {
+    "selector": "pskernel-core",
+    "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "artifacts": {
+      "linux-x64": {
+        "sha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+        "dependencies": []
+      },
+      "win32-x64": {
+        "sha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+        "dependencies": []
+      }
+    },
+    "sourceTreePath": "psc0",
+    "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+    "repositoryTree": "80927150cbd6a5518762b4cc56e51ea24df8f374",
+    "nativeWindowsProbe": {
+      "runId": 37993071033,
+      "sourceRef": "fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3",
+      "candidateArtifactId": 11646570443,
+      "cleanArtifactId": 11645294846,
+      "observationsPassed": 7,
+      "peCoffTimestamp": 1791581097,
+      "ordinaryRebuildByteIdentityClaimed": false
+    }
+  },
+  "measuredDiffFromPreviousCheckpoint": {
+    "files": 25,
+    "additions": 1986,
+    "deletions": 287
+  },
+  "mainObserved": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+  "mainChanged": false,
+  "npmPublished": false,
+  "limits": [
+    "Windows qualification is Windows Server2022 x64 image win22/20261004.326.1. Other Windows versions and filesystem types were not separately exercised.",
+    "Windows command qualification uses npm psc.cmd from PowerShell7.6.6, not every psc.ps1 execution policy.",
+    "Installed npm dependencies are fetched normally; artifact size excludes those dependencies.",
+    "No Lean installation/source checkout is required by the tested installed package. Windows system DLLs and Linux system libraries remain platform assumptions.",
+    "Windows native PE includes a link timestamp; current executable must be retained as an exact artifact until a deterministic replacement recipe earns its own qualification.",
+    "Actions executable artifacts expire on2026-11-08. These JSON files retain evidence and identities, not executable archives.",
+    "Consumer Node26 tests do not claim a new Node26 compiler bootstrap fixed point. Existing Node22/Lean4.34/TS7 bootstrap evidence and selected seed remain unchanged.",
+    "No semantic-preservation, logical-consistency, PSCV or strict SH/1 proof was added. Formal assurance remains a later gate.",
+    "External extension execution, watch/LSP and the full architecture/module split remain future milestones."
+  ]
+}

@@ -149,48 +149,36 @@ def psKernelExprEq
               false
         | _ => false
   | PsKernelExpr.app leftFn leftArg =>
-      let fnEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftFn;
-      let argEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftArg;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.app rightFn rightArg =>
-            if fnEq rightFn then argEq rightArg else false
+            if psKernelExprEq leftFn rightFn then
+              psKernelExprEq leftArg rightArg
+            else false
         | _ => false
   | PsKernelExpr.lam _ leftType leftBody _ =>
-      let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftType;
-      let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.lam _ rightType rightBody _ =>
-            if typeEq rightType then bodyEq rightBody else false
+            if psKernelExprEq leftType rightType then
+              psKernelExprEq leftBody rightBody
+            else false
         | _ => false
   | PsKernelExpr.forallE _ leftType leftBody _ =>
-      let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftType;
-      let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.forallE _ rightType rightBody _ =>
-            if typeEq rightType then bodyEq rightBody else false
+            if psKernelExprEq leftType rightType then
+              psKernelExprEq leftBody rightBody
+            else false
         | _ => false
   | PsKernelExpr.letE _ leftType leftValue leftBody leftNondep =>
-      let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftType;
-      let valueEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftValue;
-      let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.letE _ rightType rightValue rightBody rightNondep =>
-            if typeEq rightType then
-              if valueEq rightValue then
-                if bodyEq rightBody then
+            if psKernelExprEq leftType rightType then
+              if psKernelExprEq leftValue rightValue then
+                if psKernelExprEq leftBody rightBody then
                   psKernelBoolEq leftNondep rightNondep
                 else false
               else false
@@ -203,24 +191,20 @@ def psKernelExprEq
             psKernelLiteralEq leftValue rightValue
         | _ => false
   | PsKernelExpr.mdata leftMetadata leftExpr =>
-      let exprEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftExpr;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.mdata rightMetadata rightExpr =>
             if Nat.beq leftMetadata rightMetadata then
-              exprEq rightExpr
+              psKernelExprEq leftExpr rightExpr
             else false
         | _ => false
   | PsKernelExpr.proj leftName leftIndex leftExpr =>
-      let exprEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftExpr;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.proj rightName rightIndex rightExpr =>
             if psKernelNameEq leftName rightName then
               if Nat.beq leftIndex rightIndex then
-                exprEq rightExpr
+                psKernelExprEq leftExpr rightExpr
               else false
             else false
         | _ => false

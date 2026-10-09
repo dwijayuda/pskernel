@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { assertProofScriptGrammar, readProofScriptSource } from "./proofscript-source.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -76,7 +77,11 @@ const inputKind = inputPath.endsWith(".lean")
     ? sourceKind(compiler, "ps")
     : (() => { throw new Error(`PSC1_TRANSLATE_SOURCE_KIND: ${inputPath}`); })();
 const targetKind = sourceKind(compiler, targetText);
-const source = await readFile(inputPath, "utf8");
+if (inputPath.endsWith(".ps") || targetKind === compiler.PsCompilerSourceKind.proofScript) {
+  assertProofScriptGrammar(compiler);
+}
+const source = inputPath.endsWith(".ps")
+  ? await readProofScriptSource(inputPath) : await readFile(inputPath, "utf8");
 const translated = unwrapExcept(
   compiler.psCompilerTranslateSource(inputKind, targetKind, source),
 );

@@ -7,6 +7,7 @@ inductive PsLexError where
   | newlineInString (span : PsSourceSpan)
   | unterminatedCharacter (span : PsSourceSpan)
   | fuelExhausted
+  | invalidSource (reason : String) (span : PsSourceSpan)
 
 structure PsLexRead where
   cursor : PsLexCursor
@@ -945,3 +946,141 @@ def psLex (source : String) : Except PsLexError (List PsToken) :=
   let cursor := psLexCursorFromString source;
   let bound := Nat.succ (String.utf8ByteSize source);
   psLexAllWorker bound bound cursor
+
+def psLexProofScriptWhitespaceError
+    (reason : String)
+    (position : PsSourcePos)
+    (char : Char) : Except PsLexError PsLexCursor :=
+  Except.error
+    (PsLexError.invalidSource
+      reason
+      (psLexSpan position (psLexAdvanceChar position char)))
+
+def psLexSkipProofScriptTriviaWithFuel
+    (fuel : Nat) :
+    List Char ->
+    PsSourcePos ->
+    Except PsLexError PsLexCursor :=
+  match fuel with
+  | 0 =>
+      fun (remaining : List Char) (position : PsSourcePos) =>
+        match remaining with
+        | [] => Except.ok { remaining := [], position := position }
+        | _ => Except.error PsLexError.fuelExhausted
+  | remainingFuel + 1 =>
+      let smaller :
+          List Char ->
+          PsSourcePos ->
+          Except PsLexError PsLexCursor :=
+        psLexSkipProofScriptTriviaWithFuel remainingFuel;
+      fun (remaining : List Char) (position : PsSourcePos) =>
+        match remaining with
+        | [] => Except.ok { remaining := [], position := position }
+        | first :: rest =>
+            if psLexCharEq first ' ' then
+              smaller rest (psLexAdvanceChar position first)
+            else if psLexCharEq first '\n' then
+              smaller rest (psLexAdvanceChar position first)
+            else if psLexCharEq first '\t' then
+              psLexProofScriptWhitespaceError
+                "horizontal tab outside a literal or comment" position first
+            else if psLexCharEq first '\r' then
+              match rest with
+              | second :: tail =>
+                  if psLexCharEq second '\n' then
+                    smaller tail (psLexAdvanceTwo position first second)
+                  else
+                    psLexProofScriptWhitespaceError
+                      "lone carriage return outside a literal or comment" position first
+              | [] =>
+                  psLexProofScriptWhitespaceError
+                    "lone carriage return outside a literal or comment" position first
+            else if Nat.beq (Char.toNat first) 65279 then
+              psLexProofScriptWhitespaceError
+                "byte order mark is only allowed once at the start of a source file"
+                position first
+            else
+              match rest with
+              | second :: tail =>
+                  if psLexPairEq first second '-' '-' then
+                    let afterPrefix := psLexAdvanceTwo position first second;
+                    let cursor := psLexSkipLineComment tail afterPrefix;
+                    smaller cursor.remaining cursor.position
+                  else if psLexPairEq first second '/' '-' then
+                    let afterPrefix := psLexAdvanceTwo position first second;
+                    match psLexSkipBlockComment 1 tail position afterPrefix with
+                    | Except.error error => Except.error error
+                    | Except.ok cursor =>
+                        smaller cursor.remaining cursor.position
+                  else
+                    Except.ok { remaining := remaining, position := position }
+              | [] =>
+                  Except.ok { remaining := remaining, position := position }
+
+def psLexAllProofScriptWorker
+    (inputBound : Nat)
+    (fuel : Nat) :
+    PsLexCursor -> Except PsLexError (List PsToken) :=
+  match fuel with
+  | 0 =>
+      fun (cursor : PsLexCursor) =>
+        if psLexCursorDone cursor then
+          let position := cursor.position;
+          let token : PsToken := {
+            kind := PsTokenKind.endOfInput
+            text := ""
+            span := psLexSpan position position
+          };
+          Except.ok
+            (List.cons token List.nil)
+        else
+          Except.error PsLexError.fuelExhausted
+  | remainingFuel + 1 =>
+      let smaller :
+          PsLexCursor ->
+          Except PsLexError (List PsToken) :=
+        psLexAllProofScriptWorker inputBound remainingFuel;
+      fun (cursor : PsLexCursor) =>
+        match psLexSkipProofScriptTriviaWithFuel inputBound cursor.remaining cursor.position with
+        | Except.error error => Except.error error
+        | Except.ok ready =>
+            if psLexCursorDone ready then
+              let position := ready.position;
+              let token : PsToken := {
+                kind := PsTokenKind.endOfInput
+                text := ""
+                span := psLexSpan position position
+              };
+              Except.ok
+                (List.cons token List.nil)
+            else
+              match psLexReadToken ready with
+              | Except.error error => Except.error error
+              | Except.ok pair =>
+                  let token : PsToken := pair.fst;
+                  let next : PsLexCursor := pair.snd;
+                  match smaller next with
+                  | Except.error error => Except.error error
+                  | Except.ok rest =>
+                      Except.ok (List.cons token rest)
+
+
+def psLexProofScript (source : String) : Except PsLexError (List PsToken) :=
+  let original := psLexCursorFromString source;
+  let cursor : PsLexCursor :=
+    match original.remaining with
+    | first :: rest =>
+        if Nat.beq (Char.toNat first) 65279 then
+          {
+            remaining := rest
+            position := {
+              byteOffset := 3
+              line := 1
+              column := 1
+            }
+          }
+        else
+          original
+    | [] => original;
+  let bound := Nat.succ (String.utf8ByteSize source);
+  psLexAllProofScriptWorker bound bound cursor

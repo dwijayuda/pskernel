@@ -12,8 +12,10 @@ TypeScript 7.0.2 integration. The exact qualifying source checkpoints are:
 The portable M6 source is the same in both checkpoints. The TypeScript integration
 changes current host/CLI selection and qualification tooling; historical S0/A
 recovery remains pinned to 5.8.3. A remains the selected authoring seed.
-The canonical integration branch is `psc0/sh1-implementation-v1`; documentation
-descendants preserve the exact qualifying source references above.
+The earlier qualified integration branch is `psc0/sh1-implementation-v1`;
+its documentation descendants preserve the exact qualifying source references
+above. The current new-only source grammar and parameter-projection checkpoint
+has qualification pending and does not inherit those earlier results.
 
 The installed checker verifies its bounded runtime type contract before emitting
 the same IR. Strict SH/1 remains false because the remaining primitive/value,
@@ -25,7 +27,63 @@ A/B/H/E records are indexed in [qualification-evidence.json](qualification-evide
 [TYPESCRIPT7.md](TYPESCRIPT7.md) records the exact compiler profiles, recovery
 proof and measured TypeScript phase.
 
-## Implemented capability
+## Current new-only source grammar checkpoint
+
+The current `.ps` parser, printer, active fixtures and host source identity move
+together to edition `ps-0.9-r3`, mode `new-only`, support
+`bounded-selfhost-subset`. [PS_GRAMMAR_ADOPTION.md](PS_GRAMMAR_ADOPTION.md)
+records the exact supplied reference SHA-256, finite enabled grammar and
+unsupported forms. This checkpoint is implemented in the branch with
+**qualification pending**; full Standard/PSCV conformance and strict SH/1 remain
+unearned, Lean remains 4.34.0, and A remains the selected authoring seed.
+
+The implementation paths are:
+
+| Path/API | Responsibility |
+| --- | --- |
+| `Ps/Syntax/Lexer.lean`, `psLexProofScript` | `.ps`-specific whitespace/BOM/CRLF policy with original UTF-8 byte offsets; the separate Lean lexer route is preserved |
+| `Ps/Syntax/ParseProofScript.lean` | Newline sequences, typed declaration/constructor comma groups, typed lambda groups, distinct adjacent/native calls, and explicit refusal of unsupported syntax |
+| `Ps/Syntax/PrintProofScript.lean` | One current canonical grammar; preserve binder order and call nesting; refuse a binder order it cannot express |
+| `Ps/Elab/Term.lean` | Refuse unsupported explicit empty-call completion with `emptyCallUnsupported`; `f(())` remains an ordinary Unit argument |
+| `scripts/sh1-grammar-conformance.mjs` | Synchronous generated-compiler API observations and a separate full captured-closure canonical round trip |
+
+For example, the current generated spelling of the qualified recursion form is:
+
+```text
+def reverseInto {alpha : Type}(items : List alpha, out : List alpha) : List alpha :=
+  match items with {
+    | List.nil => out
+    | List.cons item tail => reverseInto tail (List.cons item out)
+  }
+```
+
+Typed callbacks can be grouped directly in `.ps`, such as
+`use((fun (x : Nat) => x))`. Commands, local let sequences and structure fields
+use newlines; record values and adjacent argument groups use commas. Annotated
+parameterless `const` and positive-arity `function` aliases canonicalize to
+`def`. Current `.ps` has no legacy parser mode. General `do`, omitted required
+annotations, defaults, named arguments and tuples are explicitly outside the
+subset. `f()` preserves an empty argument list through parsing and printing and
+is refused during elaboration; it is never rewritten to `f(())` or erased from
+`f() x`.
+
+The small API gate runs for N1/C1/C2/C3. It checks independently authored
+application trees, supported PS-to-PS printer round trips, nearest unsupported
+forms, exact lexical positions and empty-call elaboration refusals. The separate
+N1 closure function reuses the captured raw source manifest and compares every
+module's canonical Lean text with Lean-to-new-PS-to-Lean translation, then checks
+PS idempotence. Its canonical surface artifact digest binds the same already
+translated strings to the C2/C3 product comparison; the full closure is not
+reparsed at every stage. Raw-source execution, checked original IR, C2/C3 product
+equality and separate exact-stream provider acceptance retain their own gates.
+
+Handwritten compiler `.lean` remains authoritative and consumable by selected A.
+Changing the `.ps` exchange grammar does not require immediately rewriting that
+closure into `.ps` or removing the aliases that A still needs. Historical
+S0/A source, canonical products and recovery toolchains retain their original
+immutable identities; current products carry the new grammar identity.
+
+## Implemented recursion capability
 
 The portable declaration-batch elaborator first uses the existing stable path.
 Only `structuralRecursionInvariantArgument` invokes the new typed normalization
@@ -83,7 +141,10 @@ operations. Existing aggregate public functions delegate to the same seam.
 `scripts/generated-preparation-session.mjs` retains an exact-source prefix
 inside one compiler instance. Any changed module invalidates the entire later
 preparation suffix, including body-only changes whose exported names and types
-are unchanged. Parsed syntax has a separate LRU. Failures retain only the
+are unchanged. Parsed syntax has a separate LRU. Source grammar edition, mode,
+support scope and reference digest are part of current source provenance;
+cache reuse must bind those to the exact executing parser/compiler identity.
+Failures retain only the
 successfully prepared prefix, so repaired input cannot reuse a failed suffix.
 
 Returned preparation data is deeply frozen before the caller can observe it.
@@ -310,8 +371,9 @@ the same implementation. Cold/warm reuse, body edits, suffix invalidation,
 failure repair, source kinds, fresh instances, frozen data/diagnostics and cache
 eviction are checked without repeating a full compiler closure for each case.
 
-The existing surface printer remains syntax-only. Its result is **canonical
-surface source**. The lowered worker representation is compared through
+The current new-only `.ps` surface printer remains syntax-only. Its result is
+**canonical surface source**, identified by the source grammar and executing
+compiler. The lowered worker representation is compared through
 **canonical admissions**. Printing stability is one product comparison;
 generated execution of raw authoring forms and actual provider decisions
 supply their separate evidence.
@@ -321,6 +383,7 @@ supply their separate evidence.
 | Axis | Required evidence |
 | --- | --- |
 | Compiler-qualified capability | Current-source C2/C3 products, raw capability execution and conformance receipts |
+| Bounded source grammar | New-only parser/printer/API observations and captured-closure canonical correspondence, bound to exact current generation products |
 | Bounded runtime IR typing | Complete portable compositional check of the exact IR supplied to checked emission |
 | Kernel-checked products | Actual acceptance of exact canonical admissions by the separately pinned provider |
 | Strict SH/1 runtime qualification | Complete mandatory runtime and semantic obligations plus strict profile enforcement; bounded typing alone is insufficient |
@@ -656,8 +719,10 @@ The supported authoring subset now includes qualified ordinary structural
 recursion with changing nondependent value parameters, as used by Foundation.List
 and the three migrated compiler helpers. Its grammar and inference remain bounded.
 
-Use explicitly typed local callbacks when passing a typed lambda as an argument.
-Give match-valued let initializers an explicit result type. In changing-parameter
+Use explicitly typed local callbacks in authored compiler `.lean` while it must
+remain consumable by selected A. Current `.ps` accepts grouped typed callbacks;
+it does not infer omitted lambda domains. Give match-valued let initializers an
+explicit result type. In changing-parameter
 normalization, project original record parameters through typed branch-local
 aliases until the separate projection-normalizer repair is qualified and a seed
 that supports its authored form is explicitly selected.
@@ -679,10 +744,13 @@ defines that repair's scope.
 5. Completed: implement and qualify the bounded portable runtime IR checker,
    same-IR checked emission and old-scope let correction under both the TS5
    baseline and current TS7 profile.
-6. Recommended next language slice: implement the demonstrated parameter-projection
-   repair. Keep its implementation A-compatible and qualify the newly supported
-   authored form. A separate explicit seed selection must precede replacing
-   compatibility aliases or migrating compiler source to that form.
+6. Current checkpoint, qualification pending: install the demonstrated
+   parameter-projection repair and the new-only `ps-0.9-r3` lexer/parser/printer
+   with migrated active fixtures and source provenance. Keep compiler `.lean`
+   consumable by A, then run the finite grammar/projection gates and one exact
+   source promotion chain. A separate explicit qualified successor selection
+   must precede removing A-required projection aliases or changing compiler
+   source authority.
 7. Routine iteration: use the native development gate and suitable resident
    preparation reuse. Reserve full fixed-point/provider work for semantic
    promotion checkpoints.

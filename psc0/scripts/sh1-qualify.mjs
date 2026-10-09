@@ -13,9 +13,15 @@ import {
   loadGeneratedCompiler as loadCompiler,
 } from './sh1-source-snapshot.mjs';
 import {
-  readSelectedSeed, qualifiedSeedIdentity, validateQualifiedSeedManifest,
+  qualifiedSeedIdentity, validateQualifiedSeedManifest,
   makeQualifiedSeedManifest, verifyQualifiedSeedCache, materializeQualifiedSeed,
 } from './sh1-seed-manifest.mjs';
+import {
+  readSelectedAuthoringSeed as readSelectedSeed, successorSeedSelection,
+  validateSuccessorSeedManifest, makeSuccessorSeedManifest, successorSeedIdentity,
+  verifySuccessorSeedCache, materializeSuccessorSeed,
+} from './sh1-successor-seed.mjs';
+import { runSh1GrammarClosureRoundTrip, sh1GrammarProfile } from './sh1-grammar-conformance.mjs';
 import { resolveTypeScriptCli, expectedTypeScriptVersion, typeScriptProfileArgs } from './typescript-cli.mjs';
 import { createGeneratedPreparationSession } from './generated-preparation-session.mjs';
 import { inventoryOriginalIr } from './original-ir-inventory.mjs';
@@ -49,6 +55,12 @@ const typescriptProfile = Object.freeze({
   purpose: historicalCommands.has(command) ? 'historical-seed-recovery' : 'current-emission',
   arguments: typeScriptProfileArgs([], typescriptVersion),
 });
+
+if (!historicalCommands.has(command)) {
+  const config = JSON.parse(await readFile(path.join(root, 'psconfig.json'), 'utf8'));
+  assert.equal(config.languageVersion, '0.9-r3', 'PSC0_SH1_GRAMMAR_VERSION');
+  assert.deepEqual(config.sourceGrammar, sh1GrammarProfile, 'PSC0_SH1_GRAMMAR_PROFILE');
+}
 
 function capture(command, args, cwd = root) {
   return runCommand(command, args, {
@@ -86,6 +98,11 @@ async function toolchainIdentity() {
 async function recipeIdentity() {
   const files = [
     'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs',
+    'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-projection-conformance.mjs',
+    'scripts/sh1-successor-seed.mjs', 'psconfig.json',
+    'test/fixtures/selfhost-sh1-accumulators.lean', 'test/fixtures/selfhost-sh1-accumulators.ps',
+    'scripts/proofscript-source.mjs', 'scripts/checked-source-snapshot.mjs',
+    'scripts/selfhost-source-workspace.mjs', 'scripts/LeanCheckedSeed.lean',
     'scripts/typescript-cli.mjs', 'scripts/check-typescript-profile.mjs', 'scripts/workspace-layout.mjs',
     'scripts/generated-preparation-session.mjs', 'scripts/original-ir-inventory.mjs',
     'scripts/original-ir-carrier.mjs', 'scripts/sh1-ir-checker-conformance.mjs',
@@ -111,8 +128,9 @@ function executionRuntime(toolchain) {
   return runtime;
 }
 
-async function verifySeedExecutionRuntime(producerToolchain) {
-  assert.equal(producerToolchain?.typescript, 'Version 5.8.3',
+async function verifySeedExecutionRuntime(producerToolchain, producerVersion = '5.8.3') {
+  assert(['5.8.3', '7.0.2'].includes(producerVersion), 'PSC0_SH1_SEED_PRODUCER_PROFILE');
+  assert.equal(producerToolchain?.typescript, 'Version ' + producerVersion,
     'PSC0_SH1_SEED_PRODUCER_TYPESCRIPT_PIN');
   assert.deepEqual(executionRuntime(await toolchainIdentity()), executionRuntime(producerToolchain),
     'PSC0_SH1_SELECTED_SEED_EXECUTION_RUNTIME');
@@ -274,7 +292,7 @@ async function selectedAuthoringSeed(compilerOverride) {
   let sourceClosureSha256;
   let producerToolchain;
   if (selected.mode === 'qualified') {
-    await verifySeedExecutionRuntime(selected.manifest.toolchain);
+    await verifySeedExecutionRuntime(selected.manifest.toolchain, selected.recoveryTypeScriptVersion);
     expectedSha256 = selected.manifest.expectedArtifacts.javascriptSha256;
     identitySha256 = selected.identitySha256;
     sourceClosureSha256 = selected.manifest.sourceClosureSha256;
@@ -379,7 +397,14 @@ async function buildGeneration(compilerPath, closure, outDir, {
     moduleCount: closure.moduleCount,
     sourceBytes: closure.bytes,
     sourceKind: 'raw-authoritative-lean',
-    language: { implementation: 'PSC1', candidateCapability: 'PSC0-SH/1 structural state generalization' },
+    language: {
+      implementation: 'PSC1',
+      candidateCapability: 'PSC0-SH/1 structural state generalization and parameter projections',
+      canonicalSourceGrammar: typeof compiler.psLexProofScript === 'function'
+        ? sh1GrammarProfile
+        : { mode: 'immutable-authoring-seed-output',
+          executingSourceRef: legacyIrBoundary?.executingSourceRef ?? authoringSeed?.sourceRef ?? null },
+    },
     recipe: await recipeIdentity(),
     toolchain: await toolchainIdentity(),
     typescriptProfile,
@@ -462,8 +487,8 @@ async function sessionConformance(seedPath, candidatePath, outDir, {
   assert.equal(repaired.receipt.cache.preparedModules, 1);
   receipts.push(repaired.receipt);
   const proofScript = [
-    { path: 'session/base.ps', source: 'def sh1Base : Nat := 12;\n' },
-    { path: 'session/use.ps', source: 'def sh1Result : Nat := Nat.add(sh1Base, 8);\n' },
+    { path: 'session/base.ps', source: 'def sh1Base : Nat := 12\n' },
+    { path: 'session/use.ps', source: 'def sh1Result : Nat := Nat.add(sh1Base, 8)\n' },
   ];
   const switched = session.prepare('proofScript', proofScript);
   assert.equal(switched.receipt.cache.prefixModules, 0);
@@ -585,8 +610,10 @@ async function verifySelectedSeedTypeScript(directory, manifest, outDir) {
   }
 }
 
-async function recoverQualifiedSeed({ sourceRoot, bootstrapCompiler, artifactDirectory, outDir }) {
-  const selected = await readSelectedSeed();
+async function recoverQualifiedSeed({ sourceRoot, bootstrapCompiler, artifactDirectory, outDir, manifestPath }) {
+  // An explicit parent descriptor must exist and remain a v1 TS5 recovery.
+  if (manifestPath) validateQualifiedSeedManifest(JSON.parse(await readFile(manifestPath, 'utf8')));
+  const selected = await readSelectedSeed(manifestPath);
   assert.equal(selected.mode, 'qualified', 'PSC0_SH1_QUALIFIED_PIN_REQUIRED');
   const manifest = validateQualifiedSeedManifest(selected.manifest);
   assert.deepEqual(await toolchainIdentity(), manifest.toolchain, 'PSC0_SH1_QUALIFIED_TOOLCHAIN');
@@ -662,8 +689,168 @@ async function recoverQualifiedSeed({ sourceRoot, bootstrapCompiler, artifactDir
   process.stdout.write('PSC0_SH1_QUALIFIED_SEED: RECOVERED ' + selected.identitySha256 + '\n');
 }
 
-async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, outDir) {
+async function recoverSuccessorSeed({
+  manifestPath, parentCompiler, cacheDirectory: cacheOverride, artifactDirectory, outDir, cold,
+}) {
+  assert.equal(typescriptVersion, '7.0.2', 'PSC0_SH1_SUCCESSOR_RECOVERY_TYPESCRIPT_PIN');
+  assert(manifestPath, 'PSC0_SH1_SUCCESSOR_MANIFEST_REQUIRED');
+  const manifest = validateSuccessorSeedManifest(JSON.parse(await readFile(manifestPath, 'utf8')));
+  const selected = successorSeedSelection(manifest);
+  const cacheDirectory = path.resolve(root, cacheOverride ?? selected.cacheDirectory);
+  const parent = manifest.parent.manifest;
+  const parentPath = path.resolve(root, parentCompiler ?? selected.parent.compilerPath);
+  // The runner belongs to the same immutable revision as the source it rebuilds.
+  // A later checkout may invoke this file, but may not substitute its own recipe.
+  assert.equal(capture('git', ['rev-parse', 'HEAD']), manifest.recovery.runnerSourceRef,
+    'PSC0_SH1_SUCCESSOR_RUNNER_REF');
+  assert.equal(capture('git', ['status', '--porcelain', '--untracked-files=no', '--', '.']), '',
+    'PSC0_SH1_SUCCESSOR_SOURCE_MODIFIED');
+  assert.deepEqual(await recipeIdentity(), manifest.recovery.runnerRecipe,
+    'PSC0_SH1_SUCCESSOR_RUNNER_RECIPE');
+  assert.deepEqual(await toolchainIdentity(), manifest.toolchain, 'PSC0_SH1_SUCCESSOR_TOOLCHAIN');
+  const closure = await sourceClosure(root);
+  assert.equal(closure.sha256, manifest.sourceClosureSha256, 'PSC0_SH1_SUCCESSOR_SOURCE_CLOSURE');
+  if (cold) {
+    assert(!existsSync(outDir), 'PSC0_SH1_SUCCESSOR_COLD_OUTPUT_MUST_BE_NEW');
+    assert(!existsSync(cacheDirectory), 'PSC0_SH1_SUCCESSOR_COLD_CACHE_MUST_BE_ABSENT');
+  }
+  const start = performance.now();
+  const receipt = {
+    schemaVersion: 1,
+    evidence: cold ? 'qualified-successor-cold-recovery' : 'qualified-successor-recovery',
+    sourceRef: manifest.sourceRef,
+    sourceClosureSha256: manifest.sourceClosureSha256,
+    parentIdentitySha256: manifest.parent.identitySha256,
+    parentCompilerSha256: parent.expectedArtifacts.javascriptSha256,
+    compilerSha256: manifest.expectedArtifacts.javascriptSha256,
+    successorIdentitySha256: selected.identitySha256,
+    runnerSourceRef: manifest.recovery.runnerSourceRef,
+    runnerRecipeSha256: manifest.recovery.runnerRecipe.sha256,
+    toolchain: await toolchainIdentity(),
+    expectedFirstGenerationArtifacts: manifest.expectedFirstGenerationArtifacts,
+    expectedArtifacts: manifest.expectedArtifacts,
+    coldSuccessorRecovery: Boolean(cold),
+    passed: false,
+    selectedSeedChanged: false,
+    strictSh1Qualified: false,
+    fullPscvConformance: false,
+  };
+  try {
+    if (!cold && await verifySuccessorSeedCache(cacheDirectory, manifest)) {
+      receipt.method = 'verified-successor-cache';
+      receipt.passed = true;
+      return;
+    }
+    if (!cold && artifactDirectory &&
+        existsSync(path.join(artifactDirectory, 'qualification.json'))) {
+      let restored = false;
+      try {
+        const qualified = JSON.parse(await readFile(path.join(artifactDirectory, 'qualification.json'), 'utf8'));
+        assert.equal(qualified.evidence, 'compiler-qualified-current-source-fixed-point');
+        assert.equal(qualified.sourceRef, manifest.sourceRef);
+        assert.equal(qualified.sourceClosureSha256, manifest.sourceClosureSha256);
+        assert.deepEqual(qualified.artifacts, manifest.expectedArtifacts);
+        assert.equal(qualified.c1CompilerSha256, manifest.expectedFirstGenerationArtifacts.javascriptSha256);
+        assert.equal(qualified.c2CompilerSha256, manifest.expectedArtifacts.javascriptSha256);
+        assert.equal(qualified.c3CompilerSha256, manifest.expectedArtifacts.javascriptSha256);
+        await materializeSuccessorSeed({
+          generationDirectory: path.join(artifactDirectory, 'C3'), cacheDirectory, manifest,
+          origin: 'Hash-verified immutable successor qualification artifact, generation C3.',
+        });
+        restored = true;
+      } catch (error) {
+        process.stdout.write('PSC0_SH1_SUCCESSOR_ARTIFACT: RECOMPUTE (' +
+          String(error.message).slice(0, 512) + ')\n');
+      }
+      if (restored) {
+        receipt.method = 'verified-successor-qualification-artifact';
+        receipt.passed = true;
+        return;
+      }
+    }
+    await verifySeedExecutionRuntime(parent.toolchain, '5.8.3');
+    assert(await verifyQualifiedSeedCache(path.dirname(parentPath), parent),
+      'PSC0_SH1_SUCCESSOR_PARENT_CACHE_INTEGRITY');
+    assert.equal(sha256(await readFile(parentPath)), parent.expectedArtifacts.javascriptSha256,
+      'PSC0_SH1_SUCCESSOR_PARENT_EXECUTABLE');
+    const first = await buildGeneration(parentPath, closure, path.join(outDir, 'C1'), {
+      expectedSha256: parent.expectedArtifacts.javascriptSha256,
+      legacyIrBoundary: {
+        kind: 'selected-authoring-seed', executingSourceRef: parent.sourceRef,
+        executingCompilerSha256: parent.expectedArtifacts.javascriptSha256,
+        reason: 'The exact embedded v1 parent produces the first successor generation from raw source.',
+      },
+    });
+    assert.deepEqual(first.receipt.artifacts, manifest.expectedFirstGenerationArtifacts,
+      'PSC0_SH1_SUCCESSOR_FIRST_PRODUCTS');
+    const second = await buildGeneration(first.outputJs, closure, path.join(outDir, 'C2'), {
+      expectedSha256: first.receipt.artifacts.javascriptSha256,
+    });
+    assert.deepEqual(second.receipt.artifacts, manifest.expectedArtifacts,
+      'PSC0_SH1_SUCCESSOR_FINAL_PRODUCTS');
+    assert.equal(second.receipt.originalIrInventory.traversalComplete, true);
+    assert.equal(second.receipt.originalIrInventory.runtimeIrTypingAccepted, true);
+    assert.equal(second.receipt.originalIrInventory.sameOriginalIrCheckedBeforeEmission, true);
+    assert.equal((await sourceClosure(root)).sha256, manifest.sourceClosureSha256,
+      'PSC0_SH1_SUCCESSOR_SOURCE_CHANGED_DURING_RECOVERY');
+    assert.deepEqual(await recipeIdentity(), manifest.recovery.runnerRecipe,
+      'PSC0_SH1_SUCCESSOR_RECIPE_CHANGED_DURING_RECOVERY');
+    await materializeSuccessorSeed({
+      generationDirectory: path.join(outDir, 'C2'), cacheDirectory, manifest,
+      origin: 'Rebuilt through the pinned v1 parent and first successor generation under TypeScript 7; all four products compared.',
+    });
+    receipt.method = 'pinned-parent-two-new-raw-source-generations';
+    receipt.actualFirstGenerationArtifacts = first.receipt.artifacts;
+    receipt.actualArtifacts = second.receipt.artifacts;
+    receipt.originalIrCheckedBeforeEmission = true;
+    receipt.parentCacheVerified = true;
+    receipt.passed = true;
+  } catch (error) {
+    receipt.error = { name: error.name, message: error.message };
+    throw error;
+  } finally {
+    receipt.elapsedMs = performance.now() - start;
+    await writeJson(path.join(outDir, 'receipt.json'), receipt);
+    const receiptSha256 = sha256(await readFile(path.join(outDir, 'receipt.json')));
+    process.stdout.write('PSC0_SH1_SUCCESSOR_RECOVERY: ' +
+      JSON.stringify({ ...receipt, receiptSha256 }) + '\n');
+  }
+}
+
+async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, thirdReceipt, outDir) {
   const selected = await readSelectedSeed();
+  if (selected.mode === 'qualified' && selected.manifest.kind === 'psc0-qualified-source-seed' &&
+      typescriptVersion === '7.0.2') {
+    const manifest = makeSuccessorSeedManifest({
+      qualification, firstReceipt, secondReceipt, thirdReceipt,
+      parentManifest: selected.manifest, runId: process.env.GITHUB_RUN_ID,
+      syntaxReferenceSha256: sh1GrammarProfile.referenceSha256,
+    });
+    const successor = successorSeedSelection(manifest);
+    await materializeSuccessorSeed({
+      generationDirectory: path.join(outDir, 'C2'),
+      cacheDirectory: path.join(root, successor.cacheDirectory), manifest,
+      origin: 'Fresh compiler-qualified successor candidate; A stays selected until cold recovery and provider acceptance.',
+    });
+    await writeJson(path.join(outDir, 'seed-promotion.json'), manifest);
+    await writeJson(path.join(outDir, 'seed-selection.json'), {
+      status: 'successor-candidate-retained-not-selected',
+      selectedSourceRef: selected.sourceRef,
+      selectedCompilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,
+      candidateSourceRef: manifest.sourceRef,
+      candidateCompilerSha256: manifest.expectedArtifacts.javascriptSha256,
+      candidateIdentitySha256: successor.identitySha256,
+      remaining: ['cold-successor-recovery', 'exact-stream-provider-acceptance', 'explicit-selected-manifest-update'],
+    });
+    if (process.env.GITHUB_OUTPUT) {
+      await appendFile(process.env.GITHUB_OUTPUT,
+        'successor-candidate=true\n' +
+        'promoted-seed-cache-key=' + successor.cacheKey + '\n' +
+        'promoted-seed-cache-directory=psc0/' + successor.cacheDirectory + '\n');
+    }
+    process.stdout.write('PSC0_SH1_SEED_PROMOTION: ' + JSON.stringify(manifest) + '\n');
+    return;
+  }
   if (selected.mode === 'qualified') {
     // The initial authoring seed A remains sufficient while B uses its language.
     // Do not silently claim S0 can rebuild migrated B or discard A's recovery path.
@@ -721,6 +908,12 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
     root, outDir: path.join(directory, 'ir-checker-native'),
   });
   const loaded = await loadCompiler(outputJs, { expectedSha256: compilerSha256 });
+  const grammarClosure = runSh1GrammarClosureRoundTrip({ ...loaded, closure });
+  await writeJson(path.join(directory, 'grammar-closure.json'), grammarClosure);
+  process.stdout.write('PSC0_SH1_GRAMMAR_CLOSURE: ' + JSON.stringify({
+    compilerSha256, closureSha256: closure.sha256, moduleCount: grammarClosure.moduleCount,
+    proofScriptBytes: grammarClosure.proofScriptBytes, comparison: grammarClosure.comparison,
+  }) + '\n');
   const irConformance = await runIrCheckerConformance({
     ...loaded, compilerPath: outputJs, root, outDir: path.join(directory, 'ir-checker'), tsc,
   });
@@ -770,6 +963,12 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
     recipe: await recipeIdentity(), toolchain: await toolchainIdentity(), typescriptProfile,
     candidateClaim: 'Native PSC frontend consumes raw current compiler source; generated current compiler executes the raw language and iteration corpus.',
     selectedSeedBootstrapProven: false, currentSourceFixedPointProven: false,
+    sourceGrammar: sh1GrammarProfile,
+    canonicalSourceCorrespondence: {
+      report: 'grammar-closure.json',
+      reportSha256: sha256(await readFile(path.join(directory, 'grammar-closure.json'))),
+      moduleCount: grammarClosure.moduleCount,
+    },
     runtimeIrTyping: {
       nativeCurrentSource: { report: 'ir-checker-native/receipt.json', ...nativeIr.fullCompilerIr },
       generatedConformance: { report: 'ir-checker/receipt.json', compilerSha256: irConformance.compilerSha256,
@@ -806,6 +1005,15 @@ if (command === 'seed-identity') {
     bootstrapCompiler: path.resolve(root, option(args, '--bootstrap', '.selfhost-seeds/' + historicalRef + '/index.js')),
     artifactDirectory: path.resolve(root, option(args, '--artifact', '../qualified-artifact/dist/sh1')),
     outDir,
+    manifestPath: option(args, '--manifest', undefined),
+  });
+} else if (command === 'recover-successor-seed') {
+  await recoverSuccessorSeed({
+    manifestPath: option(args, '--manifest', undefined),
+    parentCompiler: option(args, '--parent', undefined),
+    cacheDirectory: option(args, '--cache-directory', undefined),
+    artifactDirectory: option(args, '--artifact', undefined),
+    outDir, cold: args.includes('--cold'),
   });
 } else if (command === 'native-candidate') {
   const nativeCompiler = path.resolve(root, option(args, '--native', '.lake/build/bin/psc1'));
@@ -879,6 +1087,18 @@ if (command === 'seed-identity') {
   const capabilityReceipt = JSON.parse(await readFile(path.join(firstDir, 'capabilities/receipt.json')));
   assert.equal(capabilityReceipt.compilerSha256, firstReceipt.artifacts.javascriptSha256);
   assert.deepEqual(capabilityReceipt.sourceKinds.map((item) => item.sourceKind).sort(), ['lean', 'ps']);
+  assert.equal(capabilityReceipt.grammar.evidence, 'generated-compiler-source-grammar-api');
+  assert.equal(capabilityReceipt.grammar.compilerSha256, firstReceipt.artifacts.javascriptSha256);
+  assert.deepEqual(capabilityReceipt.grammar.sourceGrammar, sh1GrammarProfile);
+  const nativeGrammarFile = path.join(outDir, 'development/N1/grammar-closure.json');
+  const nativeGrammar = JSON.parse(await readFile(nativeGrammarFile, 'utf8'));
+  const nativeReceipt = JSON.parse(await readFile(path.join(outDir, 'development/N1/receipt.json'), 'utf8'));
+  assert.equal(nativeReceipt.sourceRef, capture('git', ['rev-parse', 'HEAD']));
+  assert.equal(nativeGrammar.compilerSha256, nativeReceipt.artifacts.javascriptSha256);
+  assert.equal(nativeGrammar.closureSha256, closure.sha256);
+  assert.equal(nativeGrammar.moduleCount, closure.moduleCount);
+  assert.deepEqual(nativeGrammar.sourceGrammar, sh1GrammarProfile);
+  assert.equal(nativeReceipt.canonicalSourceCorrespondence.reportSha256, sha256(await readFile(nativeGrammarFile)));
   for (const capability of capabilityReceipt.sourceKinds) {
     assert(['lean', 'ps'].includes(capability.sourceKind));
     assert.equal(capability.sourceSha256, sha256(await readFile(path.join(root,
@@ -891,6 +1111,8 @@ if (command === 'seed-identity') {
   const secondCompiler = await loadCompiler(second.outputJs, {
     expectedSha256: second.receipt.artifacts.javascriptSha256,
   });
+  assert.equal(second.receipt.artifacts.canonicalSurfaceSourceSha256,
+    nativeGrammar.canonicalSurfaceSourceSha256, 'PSC0_SH1_C2_SURFACE_MATCHES_ROUND_TRIPPED_SOURCE');
   assert.equal(second.receipt.originalIrInventory.runtimeIrTypingAccepted, true,
     'PSC0_SH1_C2_PORTABLE_IR_CHECK_REQUIRED');
   assert.equal(second.receipt.originalIrInventory.sameOriginalIrCheckedBeforeEmission, true);
@@ -907,6 +1129,8 @@ if (command === 'seed-identity') {
   });
   assert.deepEqual(second.receipt.artifacts, third.receipt.artifacts,
     'PSC0_SH1_C2_C3_ARTIFACT_MISMATCH');
+  assert.equal(third.receipt.artifacts.canonicalSurfaceSourceSha256,
+    nativeGrammar.canonicalSurfaceSourceSha256, 'PSC0_SH1_C3_SURFACE_MATCHES_ROUND_TRIPPED_SOURCE');
   const thirdCompiler = await loadCompiler(third.outputJs, {
     expectedSha256: third.receipt.artifacts.javascriptSha256,
   });
@@ -943,7 +1167,16 @@ if (command === 'seed-identity') {
     helperSourceCorrespondence: 'helpers/receipt.json',
     helperRuntimeGenerations: ['C1', 'C2', 'C3'],
     recursiveGenericErasureGenerations: ['C1', 'C2', 'C3'],
-    canonicalSourceContract: 'Existing surface printer; normalized worker representation is compared through canonical admissions.',
+    sourceGrammar: sh1GrammarProfile,
+    grammarGenerations: ['C1', 'C2', 'C3'],
+    projectionResolutionGenerations: ['C1', 'C2', 'C3'],
+    canonicalSourceContract: 'C2/C3 emit and consume the bounded new-only ps-0.9-r3 grammar. The pinned parent may emit its historical canonical form as the C1 build artifact; it is not a current parser mode.',
+    nativeCanonicalSourceCorrespondence: {
+      report: 'development/N1/grammar-closure.json',
+      reportSha256: sha256(await readFile(nativeGrammarFile)),
+      compilerSha256: nativeGrammar.compilerSha256,
+      moduleCount: nativeGrammar.moduleCount,
+    },
     portableIrCheckerGenerations: ['C1', 'C2', 'C3'],
     originalIrCheckedBuilds: ['C2', 'C3'],
     originalIrChecking: 'C1 checks the exact current-source IR emitted as C2; C2 checks the exact IR emitted as C3.',
@@ -953,8 +1186,8 @@ if (command === 'seed-identity') {
     provider: { status: 'not-attempted', kernelChecked: false },
   };
   await writeJson(path.join(outDir, 'qualification.json'), receipt);
-  await retainPromotableSeed(receipt, firstReceipt, second.receipt, outDir);
+  await retainPromotableSeed(receipt, firstReceipt, second.receipt, third.receipt, outDir);
   process.stdout.write('PSC0_SH1_FIXED_POINT: ' + JSON.stringify(receipt) + '\n');
 } else {
-  throw new Error('usage: node scripts/sh1-qualify.mjs seed-identity|recover-seed|recover-qualified-seed|native-candidate|candidate|fixed-point [--out directory] [--source historical-psc0] [--seed compiler.js] [--native native-psc1]');
+  throw new Error('usage: node scripts/sh1-qualify.mjs seed-identity|recover-seed|recover-qualified-seed|recover-successor-seed|native-candidate|candidate|fixed-point [--out directory] [--source historical-psc0] [--seed compiler.js] [--native native-psc1]');
 }

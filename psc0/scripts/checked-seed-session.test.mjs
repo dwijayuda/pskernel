@@ -9,7 +9,7 @@ const binaryPath = fileURLToPath(new URL('../lean-checked/.lake/build/bin/psc2_l
   (process.platform === 'win32' ? '.exe' : ''), import.meta.url));
 const available = existsSync(binaryPath);
 for (const sourceKind of ['lean', 'ps']) {
-  const end = sourceKind === 'lean' ? '\n' : ';\n';
+  const end = '\n';
   const sources = ['def first : Nat := 7' + end, 'def second : Nat := first' + end];
   const source = sources.join('\n\n') + '\n';
   test(`real ${sourceKind} module session emits only after the explicit Wasm check`, { skip: !available }, async () => {

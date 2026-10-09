@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "kind": "language-contract-and-migration-ledger",
   "id": "PSC0-SH/1",
-  "status": "bounded-recursion-source-families-recursive-generic-erasure-and-ts5-ts7-runtime-ir-typing-compiler-qualified; strict-runtime-enforcement-pending",
+  "status": "bounded-recursion-source-families-recursive-generic-erasure-and-ts5-ts7-runtime-ir-typing-compiler-qualified; strict-runtime-enforcement-pending; new-only-ps-0.9-r3-and-parameter-projection-checkpoint-implemented-qualification-pending",
   "activation": {
     "selectedByPsconfig": false,
     "enforcementInstalled": false,
@@ -13,19 +13,20 @@
       "runId": 37831951758
     },
     "qualifiedSeedManifest": "selfhost-seed.json",
-    "enforcementMeaning": "Complete strict profile enforcement remains pending. M6 installs a bounded original-IR typing API and checked emission entry; compiler qualification, runtime typing, provider acceptance and profile activation retain separate evidence.",
-    "runtimeIrTypingApiPresent": true
+    "enforcementMeaning": "Complete strict profile enforcement remains pending. M6 installs a bounded original-IR typing API and checked emission entry; compiler qualification, runtime typing, provider acceptance and profile activation retain separate evidence. Current ps-0.9-r3 syntax selection does not activate strict SH/1 or full Standard/PSCV conformance.",
+    "runtimeIrTypingApiPresent": true,
+    "selectedByPsconfigMeaning": "This flag describes strict PSC0-SH/1 activation. The current sourceGrammar edition is selected independently."
   },
   "repository": "dwijayuda/pskernel",
   "baselineRef": "37f63c39d4a07189938046c64152bba25d789450",
   "baselineEvidence": "baseline-evidence.json",
   "authoring": {
     "initialSourceKind": "lean",
-    "sourceMeaning": "PSC1-compatible syntax parsed by the portable PSC frontend",
+    "sourceMeaning": "Handwritten PSC1-compatible .lean parsed by the portable Lean frontend and kept consumable by selected A; current .ps uses the independently versioned new-only source grammar.",
     "generatedCanonicalKind": "proofScript",
     "initialSourceAuthority": "handwritten .lean",
     "psAuthorityChange": "optional-after-parity",
-    "newPunctuationRequired": false,
+    "newPunctuationRequired": true,
     "currentConstraints": [
       {
         "id": "match-let-expected-type",
@@ -34,15 +35,24 @@
       },
       {
         "id": "typed-callback-local",
-        "form": "Bind a typed lambda to an explicitly typed local, then pass the local name as the callback argument.",
-        "scope": "The pinned parser does not accept inline parenthesized lambdas in ordinary argument positions."
+        "form": "In authored compiler .lean, bind a typed lambda to an explicitly typed local, then pass the local by name.",
+        "scope": "Selected-A and Lean-frontend source constraint. Current .ps accepts grouped typed callbacks; omitted domains and general expected-type inference remain unsupported."
       },
       {
         "id": "normalized-parameter-projection-alias",
         "form": "Inside the existing root-match branch, bind the original record parameter to a typed local and project the local.",
-        "scope": "Applies to original fixed or varying parameters when changing-parameter normalization renames their binders."
+        "scope": "Selected A retains the qualified normalizer's projection gap. Keep these compiler-source aliases until the branch repair is qualified and a recoverable successor is explicitly selected."
       }
-    ]
+    ],
+    "punctuationScope": "Current proofScript inputs and canonical output migrate to ps-0.9-r3; authoritative compiler .lean remains in the selected-A-consumable source form.",
+    "generatedCanonicalGrammar": {
+      "edition": "ps-0.9-r3",
+      "mode": "new-only",
+      "support": "bounded-selfhost-subset",
+      "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+      "fullStandardConformance": false,
+      "fullPscvConformance": false
+    }
   },
   "target": {
     "minimum": "original TypeScript -> JavaScript",
@@ -72,13 +82,82 @@
     {
       "id": "source.existing-syntax",
       "tier": "required",
-      "current": "implemented",
-      "proposal": "Preserve owned PSC .lean parser and old generated .ps spelling; explicit public signatures.",
+      "current": "lean-authoring-preserved; new-only-proofscript-edition-implemented-qualification-pending",
+      "proposal": "Retain the owned Lean frontend for selected-A-consumable compiler source; use only the current ps-0.9-r3 bounded syntax in current proofScript parsing and canonical printing, with explicit public signatures.",
       "fixtures": [
         "parser-printer-parity",
         "declaration-signature-required"
       ],
       "baseline": "implemented"
+    },
+    {
+      "id": "source.ps-0.9-r3",
+      "tier": "required-current-source-grammar",
+      "current": "implemented-qualification-pending",
+      "baseline": "historical-semicolon-and-empty-call-to-Unit-parser",
+      "proposal": "One new-only current .ps lexer/parser/printer and atomic active-source/tooling migration to the bounded supplied-reference subset; no current legacy grammar mode.",
+      "sourceGrammar": {
+        "edition": "ps-0.9-r3",
+        "mode": "new-only",
+        "support": "bounded-selfhost-subset",
+        "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+        "fullStandardConformance": false,
+        "fullPscvConformance": false
+      },
+      "implementationAreas": [
+        "packages/syntax/src/Ps/Syntax/Lexer.lean",
+        "packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+        "packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+        "packages/elab/src/Ps/Elab/Term.lean"
+      ],
+      "fixtures": [
+        "scripts/sh1-grammar-conformance.mjs",
+        "test/fixtures/selfhost-sh1-accumulators.ps"
+      ],
+      "supported": [
+        "newline commands and local-let/structure-field sequences",
+        "non-explicit declaration prefix followed by one nonempty typed comma parameter group",
+        "constructor headers using the same explicit group ownership",
+        "native typed lambda binder sequences and grouped typed callbacks",
+        "distinct adjacent call groups, native whitespace argument chains and grouped callees",
+        "comma record values, braced single-term definitions and existing flat matches",
+        "annotated parameterless const and positive-arity function aliases",
+        "leading BOM and CRLF with original UTF-8 byte offsets"
+      ],
+      "refused": [
+        "legacy semicolon separators and repeated explicit declaration groups",
+        "tabs or lone CR outside comments/literals; repeated or nonleading BOM",
+        "unconsumed source and unsupported source commands",
+        "omitted required annotations, empty declaration parameter groups and untyped lambdas",
+        "default parameters, named arguments, tuples and generic do",
+        "arbitrary result projections and unsupported dependent/contract syntax"
+      ],
+      "emptyCall": {
+        "syntax": "An explicit empty .app argument list is preserved through parsing and printing, including beneath another application.",
+        "unit": "f(()) supplies Unit; f() is never rewritten to Unit.",
+        "elaboration": "emptyCallUnsupported until a separate completion/default capability has real metadata and semantics."
+      },
+      "qualification": {
+        "status": "pending",
+        "fullClosureRoundTrip": "N1 only; supplied raw closure manifest; canonical Lean correspondence and new PS idempotence",
+        "canonicalArtifactBinding": "Hash N1's already translated canonical source artifact and require exact C2/C3 surface product equality.",
+        "checkedOriginalIrRequired": true,
+        "currentC2C3Required": true,
+        "separateExactStreamProviderRequired": true,
+        "compilerQualified": false,
+        "fullStandardConformance": false,
+        "fullPscvConformance": false,
+        "strictSh1Qualified": false,
+        "successorSelected": false,
+        "requiredSmallApiGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "rawSourceExecutionRequired": true
+      },
+      "evidenceDocument": "PS_GRAMMAR_ADOPTION.md"
     },
     {
       "id": "data.regular-algebraic",
@@ -154,13 +233,13 @@
       ],
       "currentLimitation": {
         "id": "parameter-projection-prefix-renaming",
-        "status": "source-proven-normalizer-gap",
+        "status": "selected-A-gap; branch-repair-implemented-qualification-pending",
         "affectedWhen": "Changing-parameter normalization renames original parameters, including fixed record parameters.",
         "cause": "Dotted references rooted at those parameters survive while their binders receive hygienic internal names.",
         "compatibilityForm": "Use a typed branch-local alias of the original record parameter and project the alias.",
         "implementationReference": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
         "plannedRepair": {
-          "status": "design-complete-implementation-and-qualification-pending",
+          "status": "implemented-in-current-checkpoint; qualification-and-successor-selection-pending",
           "acceptance": [
             "Preserve exact local/global qualified-name priority and the existing first-segment path, including a selected field chain whose typing fails.",
             "Resolve the complete multi-segment hygienic base and chained field suffixes with no global-prefix expansion or magic-name exemption.",
@@ -283,7 +362,7 @@
       },
       "nextBoundedWork": [
         "Retain the separately earned TS5 and current-TS7 native/generated/runtime/compiler/provider checkpoints without relabeling historical inventories.",
-        "Implement and qualify the planned two-file parameter-projection repair using source consumable by selected A; remove compatibility aliases only after separate explicit qualified seed selection.",
+        "Qualify the paired new-only ps-0.9-r3 grammar and two-file parameter-projection checkpoint using source consumable by selected A; remove compiler-source projection aliases only after separate explicit qualified successor selection.",
         "Keep checked emission of the exact inspected IR, pre-emission refusal of malformed/incomplete input, and bounded development gates as regression contracts for future source milestones.",
         "Close the remaining enabled primitive/value, bounds/text-position, layout and erasure/backend correspondence requirements before strict SH/1 promotion.",
         "Keep optional scalar, import ABI and empty-layout/match refusals explicit until the applicable capability is specified and qualified."
@@ -368,7 +447,8 @@
         "alias-provenance",
         "type-ascription-not-dropped"
       ],
-      "baseline": "root-match-discovery-only"
+      "baseline": "root-match-discovery-only",
+      "currentSourceGrammar": "ps-0.9-r3 supports a declaration's single-term brace wrapper as syntax; general leading-let/equation normalization remains a separate semantic extension."
     },
     {
       "id": "inference.expected-lambda",
@@ -380,7 +460,8 @@
         "unknown-domain-requires-annotation",
         "shadowing-capture"
       ],
-      "baseline": "typed-lambda-binders-required"
+      "baseline": "typed-lambda-binders-required",
+      "currentSourceGrammar": "Grouped typed lambda/callback syntax is supported in current .ps; it does not enable omitted binder-domain inference."
     },
     {
       "id": "source.nested-patterns",
@@ -398,8 +479,8 @@
     {
       "id": "effects.except-do",
       "tier": "planned-extension",
-      "current": "custom-compilerBind-compilerPure-dsl-only",
-      "proposal": "Optional expected-type-directed Except-only sugar; keep old custom DSL behavior separate.",
+      "current": "new-only-proofscript-do-explicitly-refused",
+      "proposal": "Optional future expected-type-directed Except-only sugar with independently qualified meaning. Current .ps keeps explicit typed helper calls; it never reinterprets the historical compilerBind/compilerPure DSL as generic do.",
       "fixtures": [
         "bind-return-parity",
         "typed-bind",
@@ -510,8 +591,8 @@
       "dependsOn": [
         "M3"
       ],
-      "status": "planned-extensions",
-      "nextBoundedCandidate": "Parameter-projection hygiene in changing-parameter normalization; acceptance is recorded in recursion.varying-parameters.currentLimitation."
+      "status": "new-only-source-grammar-and-projection-checkpoint-implemented-qualification-pending; broader-conveniences-planned",
+      "nextBoundedCandidate": "Qualify the current ps-0.9-r3 parser/printer/fixture/provenance transition and parameter-projection repair atomically; select a qualified successor before removing compiler-source aliases."
     },
     {
       "id": "M6",
@@ -536,7 +617,8 @@
         "M6"
       ],
       "additionalGate": "All enabled capabilities used by authored .ps source are qualified; unrelated optional M5 conveniences are not prerequisites.",
-      "status": "optional-not-started"
+      "status": "optional-not-started",
+      "sourceGrammarTransition": "Current new-only .ps grammar is independent of moving handwritten compiler source authority from .lean to .ps."
     }
   ],
   "cacheContract": {
@@ -547,6 +629,7 @@
     "parse": [
       "source bytes",
       "source kind",
+      "source grammar edition/mode/support/reference digest",
       "parser/options",
       "source origin"
     ],
@@ -598,7 +681,10 @@
     "Copied backend integration",
     "Conformance on every platform or target",
     "A measured speedup of the generated compiler itself",
-    "Kernel implementation or metatheory changes on this branch"
+    "Kernel implementation or metatheory changes on this branch",
+    "Full Standard or PSCV language/reference conformance",
+    "Lean 4.35/provider/profile migration from source grammar adoption",
+    "New successor selection or completed qualification for the current grammar checkpoint"
   ],
   "documents": {
     "analysis": "README.md",
@@ -606,7 +692,8 @@
     "migration": "MIGRATION.md",
     "implementation": "IMPLEMENTATION.md",
     "evidence": "qualification-evidence.json",
-    "runtimeIrPlan": "RUNTIME_IR_PLAN.md"
+    "runtimeIrPlan": "RUNTIME_IR_PLAN.md",
+    "sourceGrammarAdoption": "PS_GRAMMAR_ADOPTION.md"
   },
   "qualification": {
     "compilerQualified": {
@@ -676,7 +763,8 @@
     "currentSourceMeaning": "After selecting Q from A, the B symbol in the executable equation denotes each exact current authored source checkpoint, including H, E and the bounded M6 runtime-typing implementation.",
     "inventoryMeaning": "A generation receipt describes IR produced by its executing compiler. Preserve historical E inventories separately. A pinned pre-checker Q may produce C1's legacy report while the new C1 executable exercises M6; later current-source reports require the portable checker. Legacy inventory never grants runtime IR typing acceptance.",
     "definitionsApplyTo": "The historical initial A qualification before selecting Q; afterSeedPromotion defines later current-source checkpoints.",
-    "toolchainMeaning": "Compare C2/C3 within one exact current profile. TS7 current qualification and TS5 historical seed recovery have separate CLI/option identities; neither cross-version JS equality nor inherited TS5 acceptance is assumed."
+    "toolchainMeaning": "Compare C2/C3 within one exact current profile. TS7 current qualification and TS5 historical seed recovery have separate CLI/option identities; neither cross-version JS equality nor inherited TS5 acceptance is assumed.",
+    "sourceGrammarMeaning": "Current .ps products carry the ps-0.9-r3 identity. Historical selected-A products retain their producer's grammar at the old-seed boundary. New current C2/C3 canonical source hashes must match the N1 captured-closure correspondence artifact; old/new canonical bytes are not assumed equal."
   },
   "firstSourceMigration": {
     "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
@@ -1033,5 +1121,27 @@
       "new-authoring-seed-selection"
     ],
     "evidence": "docs/selfhost-language/qualification-evidence.json"
+  },
+  "sourceGrammarCheckpoint": {
+    "status": "implemented-qualification-pending",
+    "reviewedBaseRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+    "sourceGrammar": {
+      "edition": "ps-0.9-r3",
+      "mode": "new-only",
+      "support": "bounded-selfhost-subset",
+      "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+      "fullStandardConformance": false,
+      "fullPscvConformance": false
+    },
+    "languageVersion": "0.9-r3",
+    "currentLegacyParserMode": false,
+    "authoritativeCompilerSource": ".lean",
+    "historicalRecovery": "Immutable S0/A revisions, source grammars, TypeScript 5.8.3 profiles and products remain recoverable.",
+    "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "providerLeanVersion": "4.34.0",
+    "providerOrMetatheoryChanged": false,
+    "newQualificationReceipt": null,
+    "successorSelected": false,
+    "documentation": "PS_GRAMMAR_ADOPTION.md"
   }
 }

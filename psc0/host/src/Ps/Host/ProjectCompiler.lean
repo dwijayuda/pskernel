@@ -227,6 +227,8 @@ def psHostLexErrorText : PsLexError -> String
       psHostSourcePosText span.start ++ ": newline in string"
   | .unterminatedCharacter span =>
       psHostSourcePosText span.start ++ ": unterminated character"
+  | .invalidSource reason span =>
+      psHostSourcePosText span.start ++ ": " ++ reason
   | .fuelExhausted => "lexer fuel exhausted"
 
 def psHostInferErrorText : PsInferError -> String
@@ -259,6 +261,7 @@ def psHostElabErrorText : PsElabError -> String
   | .typeMismatch => "typeMismatch"
   | .implicitApplicationUnsupported =>
       "implicitApplicationUnsupported"
+  | .emptyCallUnsupported => "emptyCallUnsupported: optional argument completion is outside the current source capability"
   | .unsupportedTerm => "unsupportedTerm"
   | .matchExpectedType => "matchExpectedType"
   | .matchScrutineeUnsupported => "matchScrutineeUnsupported"

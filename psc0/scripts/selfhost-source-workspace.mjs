@@ -1,7 +1,8 @@
 import { existsSync, lstatSync } from "node:fs";
 import { readFile, realpath } from "node:fs/promises";
 import path from "node:path";
-import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { packageBySection } from "./workspace-layout.mjs";
+import { readProofScriptSource } from "./proofscript-source.mjs";
 import { assertBootstrapManifestShape, computeBootstrapClosureSha256 } from "./bootstrap-manifest.mjs";
 
 const generationManifests = [
@@ -52,7 +53,7 @@ function generatedModulePath(root, moduleName) {
 // Return a validated, immutable-in-memory snapshot of exactly the declared PS
 // closure, in dependency order. Hash the bytes actually consumed, not a second
 // filesystem read. Ordinary (non-generation) projects keep their existing policy.
-export async function readGeneratedSourceClosure(entryPath, workspaceRoot = findSourceWorkspaceRoot(entryPath)) {
+export async function readGeneratedSourceClosure(entryPath, workspaceRoot = findSourceWorkspaceRoot(entryPath), readProofScriptImports) {
   const root = path.resolve(workspaceRoot);
   const candidates = generationManifests.filter(([name]) => present(path.join(root, name)));
   if (candidates.length === 0) return undefined;
@@ -91,9 +92,12 @@ export async function readGeneratedSourceClosure(entryPath, workspaceRoot = find
       throw new Error(`PSC2_SELFHOST_SOURCE_MISSING: ${relative}`, { cause: error });
     }
     assertInside(realRoot, resolved);
-    const source = await readFile(resolved, "utf8");
+    const source = await readProofScriptSource(resolved);
     visiting.add(relative);
-    for (const moduleName of parseImports(source)) await visit(generatedModulePath(root, moduleName));
+    if (typeof readProofScriptImports !== "function") throw new Error("PSC2_SOURCE_PARSER_REQUIRED");
+    for (const moduleName of await readProofScriptImports(source, absolute)) {
+      await visit(generatedModulePath(root, moduleName));
+    }
     visiting.delete(relative);
     consumed.set(relative, source);
     ordered.push(Object.freeze({ path: absolute, source }));

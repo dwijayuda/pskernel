@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { inspect } from "node:util";
+import { assertProofScriptGrammar, readProofScriptSource } from "./proofscript-source.mjs";
 import {
   bootstrapManifestSchemaVersion,
   canonicalGeneratedPaths,
@@ -74,6 +75,8 @@ if (
   throw new Error("PSC1_SELFHOST_REEMIT_COMPILER_API_MISSING");
 }
 
+assertProofScriptGrammar(compiler);
+
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 const expectedGeneration =
   manifestName === ".proofscript-bootstrap.json"
@@ -96,7 +99,7 @@ const psKind = compiler.PsCompilerSourceKind.proofScript;
 for (const relativePath of generated) {
   const inputPath = path.join(inputWorkspace, relativePath);
   const outputPath = path.join(outputWorkspace, relativePath);
-  const source = await readFile(inputPath, "utf8");
+  const source = await readProofScriptSource(inputPath);
   const canonical = unwrapExcept(
     compiler.psCompilerTranslateSource(psKind, psKind, source),
     relativePath,

@@ -4,6 +4,7 @@ inductive PsSourcePrintError where
   | fuelExhausted
   | unsupportedApplication
   | emptyName
+  | unsupportedSourceForm (message : String)
 
 def psPrintCommonConcat2
     (left right : String) : String :=

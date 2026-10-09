@@ -158,7 +158,7 @@ if (projectionReferenceMatch === null) {
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionReference block");
 }
 const projectionReference = projectionReferenceMatch[0];
-if (!/let baseTerm : PsExpr :=\s*match resolved with\s*\| \.local id => PsExpr\.fvar id\s*\| \.global name => PsExpr\.constE name \[\];/.test(projectionReference)) {
+if (!/let baseTerm : PsExpr :=\s*match Prod\.fst selected with\s*\| PsResolvedName\.local id => PsExpr\.fvar id\s*\| PsResolvedName\.global name => PsExpr\.constE name List\.nil;/.test(projectionReference)) {
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionReference typed baseTerm match");
 }
 if (/let baseTerm :=\s*match resolved with/.test(projectionReference)) {

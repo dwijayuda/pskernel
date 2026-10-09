@@ -7,9 +7,31 @@ This is the 2026-10-03 compiler-only bootstrap snapshot, copied from
 The first fixed-point record is in
 `docs/continuity/COMPILER_FIXED_POINT_2026-10-03.md`.
 The self-host source entry remains
-`packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean`, and its 55-module
-bootstrap closure remains within the 12 package groups listed in
-`scripts/bootstrap-closure-contract.mjs`.
+`packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean`. The preserved October 3
+closure contained 55 modules in 12 package groups; later qualified checkpoints
+record their own exact closure manifests rather than changing that historical
+receipt.
+
+## Current compiler authoring and `.ps` grammar
+
+The current compiler uses the bounded PSC authoring capabilities described in
+[the self-host language guide](docs/selfhost-language/README.md). Handwritten
+`.lean` remains authoritative and the selected recoverable authoring seed remains
+A. Current compiler emission uses TypeScript 7.0.2; historical S0/A recovery keeps
+its separately pinned TypeScript 5.8.3 toolchain.
+
+This branch installs the **new-only `ps-0.9-r3` bounded self-host subset** for
+current `.ps` input and canonical output, with qualification pending. The lexer,
+parser, printer, active fixtures and source provenance migrate together.
+[PS_GRAMMAR_ADOPTION.md](docs/selfhost-language/PS_GRAMMAR_ADOPTION.md) records the
+pinned reference, enabled forms, explicit exclusions and qualification gates.
+Current `.ps` does not have a legacy grammar mode. Immutable historical source
+and artifacts keep their original recovery rules.
+
+The edition change does not activate full Standard/PSCV or strict SH/1, select a
+new authoring seed, or migrate the Lean 4.34 provider. Completed compiler/provider
+results and pending current-source work are distinguished in
+[IMPLEMENTATION.md](docs/selfhost-language/IMPLEMENTATION.md).
 
 ## Active self-host layout
 

@@ -6,7 +6,7 @@ const worker = source.slice(source.indexOf('def psParseProofScriptBinderTypeWith
 const markers = [
   'psParseProofScriptBinderTypeWithFuel remaining;',
   'if psTokenCursorAtBinderStart cursor then',
-  'psParseProofScriptNestedBinderType smaller cursor',
+  'psParseProofScriptNestedBinderType smaller (Nat.succ remaining) cursor',
   'psParseProofScriptApplicationWithFuel smaller (Nat.succ remaining) cursor',
   'psParseProofScriptArrowTail smaller domain',
   'Except.error PsParseError.fuelExhausted',

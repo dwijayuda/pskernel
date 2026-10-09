@@ -5,6 +5,9 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { expectedTypeScriptVersion, typeScriptProfileArgs } from './typescript-cli.mjs';
+import { runProjectionResolutionConformance } from './sh1-projection-conformance.mjs';
+import { runSh1GrammarConformance } from './sh1-grammar-conformance.mjs';
+import { readProofScriptSource } from './proofscript-source.mjs';
 
 export function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -99,6 +102,57 @@ function assertBehavior(runtime, label) {
   assert.equal(reversedWords.tail.head, 'first', label + ': generic text tail');
 }
 
+
+function assertProjectionBehavior(runtime, label) {
+  const state = runtime.sh1ProjectionStateValue(7n, 3n);
+  const other = runtime.sh1ProjectionStateValue(29n, 5n);
+  const box = runtime.sh1ProjectionBoxValue(state);
+  let observations = 0;
+  const equal = (actual, expected, purpose) => {
+    assert.equal(actual, expected, label + ': ' + purpose);
+    observations += 1;
+  };
+  for (const fuel of [0n, 1n, 2n, 31n, 20000n]) {
+    const accumulated = 7n + 3n * fuel;
+    equal(runtime.sh1ProjectionAcc(fuel, state), accumulated, 'changing record state');
+    equal(runtime.sh1ProjectionFixed(state, fuel, 17n), 17n + accumulated, 'fixed record option');
+    equal(runtime.sh1ProjectionNested(fuel, box, 17n), 17n + accumulated, 'nested field suffix');
+    equal(runtime.sh1ProjectionBefore(state, fuel), accumulated, 'record state before major');
+    equal(runtime.sh1ProjectionLambda(fuel, state), accumulated, 'lambda binder shadows record');
+    equal(runtime.sh1ProjectionLet(fuel, state), accumulated, 'let initializer old scope and body new scope');
+    equal(runtime.sh1ProjectionSwap(fuel, state, other), fuel % 2n === 0n ? 7n : 29n,
+      'simultaneous record swap');
+  }
+  equal(runtime.sh1ProjectionPartial(state), 19n, 'public partial application');
+  for (const values of [[], [state], [state, other]]) {
+    const input = values.reduceRight((tail, head) => runtime.List.cons(head, tail), runtime.List.nil());
+    const expected = values.length === 0 ? 7n : values.at(-1).count + values.at(-1).step;
+    equal(runtime.sh1ProjectionPattern(input, state), expected, 'pattern binder shadows record');
+  }
+  return { observations, behavior: 'pass', maximumFuel: '20000' };
+}
+
+function assertGrammarBehavior(runtime, label) {
+  let observations = 0;
+  const equal = (actual, expected, purpose) => {
+    assert.equal(actual, expected, label + ': ' + purpose);
+    observations += 1;
+  };
+  equal(runtime.sh1GrammarConstant, 23n, 'annotated const');
+  equal(runtime.sh1GrammarUnitCall, 19n, 'explicit Unit call');
+  for (const value of [0n, 1n, 17n, 9007199254740993n]) {
+    equal(runtime.sh1GrammarAdd(value, 2n), value + 2n, 'function comma header');
+    equal(runtime.sh1GrammarIncrement(value), value + 1n, 'function-valued const');
+    equal(runtime.sh1GrammarCallback(value), value + 3n, 'typed callback argument');
+    equal(runtime.sh1GrammarGrouped(value), value + 5n, 'grouped lambda callee');
+    equal(runtime.sh1GrammarChain(value), value + 7n, 'grouped repeated call');
+    equal(runtime.sh1GrammarNative(value), value + 11n, 'native application continuation');
+    equal(runtime.sh1GrammarRecord(value), value + 13n, 'record comma and trailing comma');
+    equal(runtime.sh1GrammarNestedLet(value), value + 19n, 'nested let initializer boundary');
+  }
+  return { observations, behavior: 'pass', edition: 'ps-0.9-r3', mode: 'new-only' };
+}
+
 const negativeCases = [
   {
     name: 'narrowed-nested-induction-hypothesis',
@@ -168,10 +222,13 @@ function diagnosticTags(value) {
 export async function runSh1Capabilities({
   compiler, compilerSha256, root, outDir, tsc, nativeCompiler,
 }) {
+  const projectionResolution = runProjectionResolutionConformance(compiler, valueTag);
+  const grammar = runSh1GrammarConformance({ compiler, compilerSha256 });
   const results = [];
   for (const extension of ['lean', 'ps']) {
     const fixture = path.join(root, 'test/fixtures/selfhost-sh1-accumulators.' + extension);
-    const source = await readFile(fixture, 'utf8');
+    const source = extension === 'ps'
+      ? await readProofScriptSource(fixture) : await readFile(fixture, 'utf8');
     const kind = extension === 'lean'
       ? compiler.PsCompilerSourceKind.lean : compiler.PsCompilerSourceKind.proofScript;
     const prepared = unwrap(compiler.psCompilerPrepareSource(kind, source), 'CAPABILITY_PREPARE_' + extension);
@@ -180,6 +237,8 @@ export async function runSh1Capabilities({
     const generatedJs = await compileTypeScript(generatedTs, path.join(outDir, extension, 'generated'), tsc, root);
     const runtime = await import(pathToFileURL(generatedJs).href);
     assertBehavior(runtime, 'generated ' + extension);
+    const projectionBehavior = assertProjectionBehavior(runtime, 'generated ' + extension);
+    const grammarBehavior = assertGrammarBehavior(runtime, 'generated ' + extension);
     const result = {
       sourceKind: extension,
       sourceSha256: sha256(source),
@@ -188,6 +247,8 @@ export async function runSh1Capabilities({
       javascriptSha256: sha256(await readFile(generatedJs)),
       generatedCompilerConsumedRawSource: true,
       behavior: 'pass',
+      projectionBehavior,
+      grammarBehavior,
     };
     if (nativeCompiler) {
       const native = runCommand(nativeCompiler, ['typescript', fixture], {
@@ -196,7 +257,10 @@ export async function runSh1Capabilities({
       });
       const nativeJs = await compileTypeScript(native.stdout,
         path.join(outDir, extension, 'native'), tsc, root);
-      assertBehavior(await import(pathToFileURL(nativeJs).href), 'native PSC ' + extension);
+      const nativeRuntime = await import(pathToFileURL(nativeJs).href);
+      assertBehavior(nativeRuntime, 'native PSC ' + extension);
+      result.nativeProjectionBehavior = assertProjectionBehavior(nativeRuntime, 'native PSC ' + extension);
+      result.nativeGrammarBehavior = assertGrammarBehavior(nativeRuntime, 'native PSC ' + extension);
       result.nativePscBehavior = 'pass';
       result.nativeTypeScriptSha256 = sha256(native.stdout);
     }
@@ -238,10 +302,14 @@ export async function runSh1Capabilities({
     evidence: 'raw-source-generated-execution',
     sourceKinds: results,
     negativeCases: rejected,
+    projectionResolution,
+    grammar,
     independentExpectedBehavior: [
       'Nat accumulation', 'simultaneous state swapping', 'state before structural major',
       'function results', 'erased stable proof binder', 'generic List at Nat and String',
       'public partial application', 'existing worker correspondence',
+      'record projections through changing, fixed, shadowed, and nested local bases',
+      'new-only grammar aliases, typed callbacks, grouped callees, layout, records, and explicit Unit',
     ],
     provider: { status: 'not-attempted', kernelChecked: false },
   };

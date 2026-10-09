@@ -2,7 +2,7 @@ name: PSC0 SH1 language qualification
 
 on:
   push:
-    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1']
+    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1', 'psc0/sh1-projection-grammar-v1']
     paths:
       - 'psc0/packages/bootstrap/**'
       - 'psc0/packages/foundation/**'
@@ -18,6 +18,7 @@ on:
       - 'psc0/packages/backend-ts/**'
       - 'psc0/packages/cli/**'
       - 'psc0/host/**'
+      - 'psc0/lean-checked/**'
       - 'psc0/test/**'
       - 'psc0/scripts/**'
       - 'psc0/check-psc1-source.mjs'
@@ -49,21 +50,32 @@ jobs:
     timeout-minutes: 90
     outputs:
       qualified: ${{ steps.qualify.outcome == 'success' }}
+      successor-candidate: ${{ steps.qualify.outputs.successor-candidate }}
       node-version: ${{ steps.seed-selection.outputs.node-version }}
     defaults:
       run:
         working-directory: psc0
     steps:
       - uses: actions/checkout@v4
-      - name: Select the historical or pinned qualified authoring seed
+      - name: Select the historical, v1, or qualified successor authoring seed
         id: seed-selection
         uses: actions/github-script@v7
         env:
           PSC0_SH1_FULL_QUALIFICATION: ${{ (github.event_name == 'workflow_dispatch' && inputs.full) || contains(github.event.head_commit.message, '[sh1-qualify]') }}
         with:
           script: |
-            const seeds = await import(process.env.GITHUB_WORKSPACE + '/psc0/scripts/sh1-seed-manifest.mjs');
-            const selected = await seeds.readSelectedSeed();
+            const { mkdir, writeFile } = await import('node:fs/promises');
+            const path = await import('node:path');
+            const root = process.env.GITHUB_WORKSPACE + '/psc0';
+            const seeds = await import(root + '/scripts/sh1-successor-seed.mjs');
+            const selected = await seeds.readSelectedAuthoringSeed();
+            const legacy = selected.parent ?? (selected.mode === 'qualified' ? selected : null);
+            let legacyManifestPath = '';
+            if (legacy) {
+              legacyManifestPath = path.join(root, 'dist/sh1-seed-selection/parent-v1.json');
+              await mkdir(path.dirname(legacyManifestPath), { recursive: true });
+              await writeFile(legacyManifestPath, JSON.stringify(legacy.manifest, null, 2) + '\n');
+            }
             for (const [name, value] of Object.entries({
               mode: selected.mode,
               'full-qualification': process.env.PSC0_SH1_FULL_QUALIFICATION === 'true',
@@ -74,6 +86,15 @@ jobs:
               'cache-directory': selected.cacheDirectory,
               'artifact-run-id': selected.artifactRunId,
               'artifact-name': selected.artifactName,
+              'recovery-typescript-version': selected.recoveryTypeScriptVersion,
+              'has-parent': Boolean(selected.parent),
+              'legacy-source-ref': legacy?.sourceRef ?? '',
+              'legacy-compiler-path': legacy?.compilerPath ?? '',
+              'legacy-cache-key': legacy?.cacheKey ?? '',
+              'legacy-cache-directory': legacy?.cacheDirectory ?? '',
+              'legacy-artifact-run-id': legacy?.artifactRunId ?? '',
+              'legacy-artifact-name': legacy?.artifactName ?? '',
+              'legacy-manifest-path': legacyManifestPath,
             })) core.setOutput(name, value);
       - uses: actions/setup-node@v4
         id: node
@@ -141,6 +162,33 @@ jobs:
           node --check scripts/sh1-ir-checker-conformance.mjs
           node --check scripts/sh1-source-snapshot.mjs
           node --check scripts/sh1-seed-manifest.mjs
+          node --check scripts/sh1-grammar-conformance.mjs
+          node --check scripts/sh1-projection-conformance.mjs
+          node --check scripts/sh1-successor-seed.mjs
+          node --check scripts/sh1-successor-seed.test.mjs
+          node --check scripts/proofscript-source.mjs
+          node --check scripts/proofscript-source.test.mjs
+          node --check scripts/checked-source-snapshot.mjs
+          node --check scripts/checked-source-snapshot.test.mjs
+          node --check scripts/checked-seed-session.test.mjs
+          node --check scripts/checked-build.mjs
+          node --check scripts/checked-build.test.mjs
+          node --check scripts/checked-algebraic-build.test.mjs
+          node --check scripts/checked-enum-build.test.mjs
+          node --check scripts/checked-projection-build.test.mjs
+          node --check scripts/checked-sum-build.test.mjs
+          node --check scripts/checked-text-build.test.mjs
+          node --check scripts/selfhost-source-workspace.mjs
+          node --check scripts/selfhost-source-isolation-tests.mjs
+          node --check scripts/native-workspace-isolation.test.mjs
+          node --check scripts/compile-with-generated.mjs
+          node --check scripts/emit-project-with-generated.mjs
+          node --check scripts/reemit-project-with-generated.mjs
+          node --check scripts/translate-with-generated.mjs
+          node --check scripts/check-elab-term-selfhost-source-syntax.mjs
+          node --check scripts/check-proofscript-binder-replay-source.mjs
+          node scripts/check-elab-term-selfhost-source-syntax.mjs
+          node scripts/check-proofscript-binder-replay-source.mjs
           node --check scripts/sh1-iterate.mjs
           node --check scripts/sh1-iteration-conformance.mjs
           node --check scripts/sh1-foundation-conformance.mjs
@@ -149,6 +197,8 @@ jobs:
           node check-psc1-source.mjs
           node scripts/bootstrap-root-minimality-tests.mjs
           node scripts/check-modular-preparation-source.mjs
+      - name: Verify successor seed descriptor and cache contracts
+        run: node --test scripts/sh1-successor-seed.test.mjs
       - name: Restore the selected qualified compiler bytes
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
         uses: actions/cache/restore@v4
@@ -156,18 +206,44 @@ jobs:
         with:
           path: psc0/${{ steps.seed-selection.outputs.cache-directory }}
           key: ${{ steps.seed-selection.outputs.cache-key }}
-      - name: Verify the restored seed before deciding whether recovery is needed
+      - name: Verify the restored selected compiler bytes
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
-        id: seed-cache-check
+        id: selected-cache-check
         uses: actions/github-script@v7
         with:
           script: |
-            const seeds = await import(process.env.GITHUB_WORKSPACE + '/psc0/scripts/sh1-seed-manifest.mjs');
-            const selected = await seeds.readSelectedSeed();
-            const valid = selected.mode === 'qualified' && await seeds.verifyQualifiedSeedCache(
-              process.env.GITHUB_WORKSPACE + '/psc0/' + selected.cacheDirectory, selected.manifest);
+            const root = process.env.GITHUB_WORKSPACE + '/psc0';
+            const seeds = await import(root + '/scripts/sh1-successor-seed.mjs');
+            const selected = await seeds.readSelectedAuthoringSeed();
+            const valid = selected.mode === 'qualified' && await seeds.verifyAuthoringSeedCache(
+              root + '/' + selected.cacheDirectory, selected.manifest);
             core.setOutput('qualified-valid', valid);
-            core.setOutput('needs-historical', !valid);
+      - name: Restore the immutable v1 parent when a successor cache misses
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.has-parent == 'true' && steps.selected-cache-check.outputs.qualified-valid != 'true' }}
+        id: parent-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: psc0/${{ steps.seed-selection.outputs.legacy-cache-directory }}
+          key: ${{ steps.seed-selection.outputs.legacy-cache-key }}
+      - name: Route only the recovery edges whose exact cache is missing
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
+        id: seed-cache-check
+        uses: actions/github-script@v7
+        env:
+          PSC0_SELECTED_SEED_VALID: ${{ steps.selected-cache-check.outputs.qualified-valid }}
+        with:
+          script: |
+            const root = process.env.GITHUB_WORKSPACE + '/psc0';
+            const seeds = await import(root + '/scripts/sh1-successor-seed.mjs');
+            const selected = await seeds.readSelectedAuthoringSeed();
+            const selectedValid = process.env.PSC0_SELECTED_SEED_VALID === 'true';
+            const legacy = selected.parent ?? (selected.mode === 'qualified' ? selected : null);
+            const legacyValid = legacy && await seeds.verifyAuthoringSeedCache(
+              root + '/' + legacy.cacheDirectory, legacy.manifest);
+            core.setOutput('qualified-valid', selectedValid);
+            core.setOutput('needs-historical', !selectedValid && !legacyValid);
+            core.setOutput('needs-qualified-recovery', !selectedValid && Boolean(legacy) && !legacyValid);
+            core.setOutput('needs-successor-recovery', !selectedValid && Boolean(selected.parent));
       - name: Preserve an immutable historical source checkout when recovery needs it
         if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' }}
         uses: actions/checkout@v4
@@ -216,29 +292,90 @@ jobs:
         with:
           path: psc0/.selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
           key: ${{ steps.seed-cache.outputs.cache-primary-key }}
-      - name: Retrieve the immutable qualification artifact if it is still retained
-        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' && steps.seed-cache-check.outputs.qualified-valid != 'true' && steps.seed-selection.outputs.artifact-run-id != '' }}
+      - name: Retrieve the immutable v1 parent artifact if it is still retained
+        if: ${{ steps.seed-cache-check.outputs.needs-qualified-recovery == 'true' && steps.seed-selection.outputs.legacy-artifact-run-id != '' }}
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.seed-selection.outputs.legacy-artifact-name }}
+          run-id: ${{ steps.seed-selection.outputs.legacy-artifact-run-id }}
+          github-token: ${{ github.token }}
+          path: qualified-artifact
+      - name: Read the immutable v1 source only when its bytes need recovery
+        if: ${{ steps.seed-cache-check.outputs.needs-qualified-recovery == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.seed-selection.outputs.legacy-source-ref }}
+          path: qualified-source
+          sparse-checkout: psc0
+      - name: Verify or recover the v1 seed with its original TypeScript replay
+        env:
+          PSC0_TSC: ${{ steps.typescript.outputs.historical-cli }}
+          PSC0_TYPESCRIPT_VERSION: '5.8.3'
+          PATH: ${{ steps.typescript.outputs.historical-path }}
+          PSC0_V1_MANIFEST: ${{ steps.seed-selection.outputs.legacy-manifest-path }}
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' && (steps.seed-selection.outputs.recovery-typescript-version == '5.8.3' || steps.seed-cache-check.outputs.needs-successor-recovery == 'true') }}
+        run: node scripts/sh1-qualify.mjs recover-qualified-seed --manifest "$PSC0_V1_MANIFEST" --source ../qualified-source/psc0 --artifact ../qualified-artifact/dist/sh1 --out dist/sh1-seed-recovery
+      - name: Retain recovered immutable parent bytes before successor recovery
+        if: ${{ steps.seed-selection.outputs.has-parent == 'true' && steps.seed-cache-check.outputs.needs-qualified-recovery == 'true' && steps.parent-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: psc0/${{ steps.seed-selection.outputs.legacy-cache-directory }}
+          key: ${{ steps.seed-selection.outputs.legacy-cache-key }}
+      - name: Read the selected successor's pinned recovery runner and source
+        if: ${{ steps.seed-cache-check.outputs.needs-successor-recovery == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.seed-selection.outputs.source-ref }}
+          path: successor-source
+          sparse-checkout: psc0
+      - name: Retrieve the selected successor artifact when retained
+        if: ${{ steps.seed-cache-check.outputs.needs-successor-recovery == 'true' && steps.seed-selection.outputs.artifact-run-id != '' }}
         continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: ${{ steps.seed-selection.outputs.artifact-name }}
           run-id: ${{ steps.seed-selection.outputs.artifact-run-id }}
           github-token: ${{ github.token }}
-          path: qualified-artifact
-      - name: Read the recoverable qualified source revision on a cache miss
-        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' && steps.seed-cache-check.outputs.qualified-valid != 'true' }}
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.seed-selection.outputs.source-ref }}
-          path: qualified-source
-          sparse-checkout: psc0
-      - name: Verify or recover the selected qualified authoring seed
+          path: successor-artifact
+      - name: Recover a missing successor with its own pinned runner under TypeScript 7
+        if: ${{ steps.seed-cache-check.outputs.needs-successor-recovery == 'true' }}
+        working-directory: successor-source/psc0
         env:
-          PSC0_TSC: ${{ steps.typescript.outputs.historical-cli }}
-          PSC0_TYPESCRIPT_VERSION: '5.8.3'
-          PATH: ${{ steps.typescript.outputs.historical-path }}
+          PSC0_TSC: ${{ steps.typescript.outputs.current-cli }}
+          PSC0_TYPESCRIPT_VERSION: '7.0.2'
+          PSC0_PARENT_COMPILER: ${{ github.workspace }}/psc0/${{ steps.seed-selection.outputs.legacy-compiler-path }}
+          PSC0_SUCCESSOR_CACHE: ${{ github.workspace }}/psc0/${{ steps.seed-selection.outputs.cache-directory }}
+        run: |
+          node scripts/sh1-qualify.mjs recover-successor-seed \
+            --manifest "$GITHUB_WORKSPACE/psc0/selfhost-seed.json" \
+            --parent "$PSC0_PARENT_COMPILER" \
+            --cache-directory "$PSC0_SUCCESSOR_CACHE" \
+            --artifact "$GITHUB_WORKSPACE/successor-artifact/dist/sh1" \
+            --out "$GITHUB_WORKSPACE/psc0/dist/sh1-successor-seed-recovery"
+      - name: Verify selected authoring cache and execution runtime before current generation
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
-        run: node scripts/sh1-qualify.mjs recover-qualified-seed --source ../qualified-source/psc0 --artifact ../qualified-artifact/dist/sh1 --out dist/sh1-seed-recovery
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import path from 'node:path';
+          import { spawnSync } from 'node:child_process';
+          import { readSelectedAuthoringSeed, verifyAuthoringSeedCache } from './scripts/sh1-successor-seed.mjs';
+          const selected = await readSelectedAuthoringSeed();
+          assert(await verifyAuthoringSeedCache(path.resolve(selected.cacheDirectory), selected.manifest),
+            'PSC0_SH1_SELECTED_CACHE_REQUIRED');
+          const capture = args => {
+            const result = spawnSync('lean', args, { encoding: 'utf8' });
+            assert.equal(result.status, 0, result.stderr);
+            return result.stdout.trim();
+          };
+          const { typescript, ...expectedRuntime } = selected.manifest.toolchain;
+          assert.equal(typescript, 'Version ' + selected.recoveryTypeScriptVersion);
+          assert.deepEqual({
+            node: process.version, platform: process.platform, architecture: process.arch,
+            lean: capture(['--version']), leanGitHash: capture(['--githash']),
+          }, expectedRuntime, 'PSC0_SH1_SELECTED_EXECUTION_RUNTIME');
+          NODE
       - name: Report retained seed IR type-argument findings
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
         run: |
@@ -287,7 +424,23 @@ jobs:
             psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
       - name: Build current native compiler
         id: native
-        run: lake build psc1 psc1_ir_check_tests
+        run: lake build psc1 psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests
+      - name: Run native parser, translation, and erasure regression targets
+        run: |
+          lake exe psc1_tests
+          lake exe psc1_translation_tests
+          lake exe psc1_erasure_tests
+      - name: Build the actual native checked seed for source and import tests
+        working-directory: psc0/lean-checked
+        run: lake build psc2_lean_checked_seed
+      - name: Verify new grammar source loading, imports, and native workspace boundaries
+        run: |
+          test -x lean-checked/.lake/build/bin/psc2_lean_checked_seed
+          npm run --workspace @proofscript/pskernel-lean-wasm verify:prebuilt
+          node --test scripts/proofscript-source.test.mjs scripts/checked-source-snapshot.test.mjs scripts/checked-seed-session.test.mjs
+          node --test --test-name-pattern='^actual PS build (rejects|resolves|prepares)' scripts/checked-build.test.mjs
+          node scripts/selfhost-source-isolation-tests.mjs
+          node scripts/native-workspace-isolation.test.mjs
       - name: Verify native and generated TypeScript CLI boundaries
         run: |
           node scripts/selfhost-replay-runtime.test.mjs
@@ -326,7 +479,157 @@ jobs:
             psc0/dist/sh1
             psc0/.selfhost-seeds
             psc0/dist/sh1-seed-recovery
+            psc0/dist/sh1-successor-seed-recovery
+            psc0/dist/sh1-seed-selection
             psc0/dist/typescript-profile
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 30
+
+  successor-recovery:
+    needs: compiler
+    if: ${{ needs.compiler.outputs.qualified == 'true' && needs.compiler.outputs.successor-candidate == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      recovered: ${{ steps.recovery-receipt.outputs.recovered }}
+      receipt-sha256: ${{ steps.recovery-receipt.outputs.receipt-sha256 }}
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - name: Read the exact qualified successor revision and its recovery runner
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.compiler.outputs.node-version }}
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Install the pinned TypeScript 7 recovery compiler in isolation
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { appendFileSync, copyFileSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
+          import path from 'node:path';
+          import { createRequire } from 'node:module';
+          import { spawnSync } from 'node:child_process';
+          const require = createRequire(import.meta.url);
+          const prefix = path.join(process.env.RUNNER_TEMP, 'psc0-typescript-7.0.2');
+          const manifestPath = require.resolve('typescript/package.json', { paths: [prefix] });
+          const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+          assert.equal(manifest.name, 'typescript');
+          assert.equal(manifest.version, '7.0.2');
+          const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;
+          assert.equal(typeof bin, 'string', 'PSC0_TYPESCRIPT_BIN_METADATA');
+          const launcher = realpathSync(path.resolve(path.dirname(manifestPath), bin));
+          const result = spawnSync(process.execPath, [launcher, '--version'], { encoding: 'utf8' });
+          assert.equal(result.status, 0, result.stderr);
+          assert.equal(result.stdout.trim(), 'Version 7.0.2');
+          appendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=7.0.2\n');
+          const directory = path.resolve('dist/typescript-profile/successor-cold');
+          mkdirSync(directory, { recursive: true });
+          copyFileSync(path.join(prefix, 'package-lock.json'), path.join(directory, 'package-lock.json'));
+          copyFileSync(manifestPath, path.join(directory, 'package.json'));
+          NODE
+      - name: Read the candidate descriptor and its immutable parent bytes from this run
+        uses: actions/download-artifact@v4
+        with:
+          name: psc0-sh1-ts7.0.2-${{ github.sha }}
+          path: recovery-input
+      - name: Select the provisional successor without activating it
+        id: successor-selection
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const assert = (await import('node:assert/strict')).default;
+            const { readFile } = await import('node:fs/promises');
+            const { existsSync } = await import('node:fs');
+            const path = await import('node:path');
+            const workspace = process.env.GITHUB_WORKSPACE;
+            const { successorSeedSelection, verifyAuthoringSeedCache } = await import(
+              workspace + '/psc0/scripts/sh1-successor-seed.mjs');
+            const manifestPath = path.join(workspace, 'recovery-input/dist/sh1/seed-promotion.json');
+            const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+            const selected = successorSeedSelection(manifest);
+            assert.equal(selected.sourceRef, context.sha, 'PSC0_SH1_COLD_SOURCE_REF');
+            assert.equal(String(manifest.qualification.runId), process.env.GITHUB_RUN_ID,
+              'PSC0_SH1_COLD_QUALIFICATION_RUN');
+            const parentPath = path.join(workspace, 'recovery-input', selected.parent.compilerPath);
+            assert(await verifyAuthoringSeedCache(path.dirname(parentPath), selected.parent.manifest),
+              'PSC0_SH1_COLD_PARENT_CACHE_REQUIRED');
+            const cachePath = path.join(workspace, 'psc0', selected.cacheDirectory);
+            const outputPath = path.join(workspace, 'psc0/dist/sh1-successor-cold');
+            assert(!existsSync(cachePath), 'PSC0_SH1_COLD_CACHE_MUST_BE_ABSENT');
+            assert(!existsSync(outputPath), 'PSC0_SH1_COLD_OUTPUT_MUST_BE_ABSENT');
+            for (const [name, value] of Object.entries({
+              'manifest-path': manifestPath, 'parent-compiler-path': parentPath,
+              'cache-path': cachePath, 'cache-directory': selected.cacheDirectory,
+              'cache-key': selected.cacheKey, 'output-path': outputPath,
+            })) core.setOutput(name, value);
+      - name: Rebuild the successor from its parent into fresh output and cache directories
+        id: cold-recovery
+        env:
+          PSC0_SUCCESSOR_MANIFEST: ${{ steps.successor-selection.outputs.manifest-path }}
+          PSC0_PARENT_COMPILER: ${{ steps.successor-selection.outputs.parent-compiler-path }}
+          PSC0_SUCCESSOR_CACHE: ${{ steps.successor-selection.outputs.cache-path }}
+          PSC0_RECOVERY_OUTPUT: ${{ steps.successor-selection.outputs.output-path }}
+        run: |
+          node scripts/sh1-qualify.mjs recover-successor-seed \
+            --manifest "$PSC0_SUCCESSOR_MANIFEST" \
+            --parent "$PSC0_PARENT_COMPILER" \
+            --cache-directory "$PSC0_SUCCESSOR_CACHE" \
+            --out "$PSC0_RECOVERY_OUTPUT" --cold
+      - name: Authenticate the cold recovery receipt and the rebuilt successor bytes
+        id: recovery-receipt
+        uses: actions/github-script@v7
+        env:
+          PSC0_SUCCESSOR_MANIFEST: ${{ steps.successor-selection.outputs.manifest-path }}
+          PSC0_SUCCESSOR_CACHE: ${{ steps.successor-selection.outputs.cache-path }}
+          PSC0_RECOVERY_OUTPUT: ${{ steps.successor-selection.outputs.output-path }}
+        with:
+          script: |
+            const assert = (await import('node:assert/strict')).default;
+            const { readFile, copyFile } = await import('node:fs/promises');
+            const { createHash } = await import('node:crypto');
+            const path = await import('node:path');
+            const { successorSeedSelection, verifyAuthoringSeedCache } = await import(
+              process.env.GITHUB_WORKSPACE + '/psc0/scripts/sh1-successor-seed.mjs');
+            const manifest = JSON.parse(await readFile(process.env.PSC0_SUCCESSOR_MANIFEST, 'utf8'));
+            const selected = successorSeedSelection(manifest);
+            const bytes = await readFile(path.join(process.env.PSC0_RECOVERY_OUTPUT, 'receipt.json'));
+            const receipt = JSON.parse(bytes.toString('utf8'));
+            assert.equal(receipt.evidence, 'qualified-successor-cold-recovery');
+            assert.equal(receipt.passed, true);
+            assert.equal(receipt.coldSuccessorRecovery, true);
+            assert.equal(receipt.selectedSeedChanged, false);
+            assert.equal(receipt.sourceRef, selected.sourceRef);
+            assert.equal(receipt.successorIdentitySha256, selected.identitySha256);
+            assert.deepEqual(receipt.actualFirstGenerationArtifacts, manifest.expectedFirstGenerationArtifacts);
+            assert.deepEqual(receipt.actualArtifacts, manifest.expectedArtifacts);
+            assert(await verifyAuthoringSeedCache(process.env.PSC0_SUCCESSOR_CACHE, manifest),
+              'PSC0_SH1_COLD_RECOVERED_CACHE_REQUIRED');
+            await copyFile(process.env.PSC0_SUCCESSOR_MANIFEST,
+              path.join(process.env.PSC0_RECOVERY_OUTPUT, 'seed-promotion.json'));
+            core.setOutput('receipt-sha256', createHash('sha256').update(bytes).digest('hex'));
+            core.setOutput('recovered', true);
+      - name: Retain the independent recovery receipt, exact products, and rebuilt cache
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-sh1-successor-recovery-ts7.0.2-${{ github.sha }}
+          path: |
+            psc0/dist/sh1-successor-cold
+            psc0/.selfhost-seeds/successors
+            psc0/dist/typescript-profile/successor-cold
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 30

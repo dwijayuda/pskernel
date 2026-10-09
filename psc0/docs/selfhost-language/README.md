@@ -8,7 +8,7 @@ and current TypeScript 7.0.2 integration are now separately qualified, including
 their exact-stream provider checks. Full strict SH/1 and profile activation
 remain separate unfinished contracts.
 
-The current qualified integration source is
+The last completed qualified integration source is
 `99786185f77edf952f11989d4c9bc44028f22f11`
 ([run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506)).
 Its portable M6 implementation was independently qualified under TypeScript
@@ -34,15 +34,23 @@ Baseline: `dwijayuda/pskernel@37f63c39d4a07189938046c64152bba25d789450`, specifi
 
 ## Decision
 
-Adopt one versioned authoring contract, **PSC0-SH/1**, implemented by the portable PSC compiler and initially written in the existing PSC1-compatible `.lean` syntax. Keep the old canonical `.ps` representation and the historical seed reproducible while later capabilities are implemented and qualified. Ordinary structural recursion with supported changing state is already normalized by the portable compiler. Add further conveniences only after their complete path through parsing, lowering, elaboration, admission, erasure and generated execution is demonstrated.
+Keep **PSC0-SH/1** as the bounded authoring capability contract, implemented by the portable PSC compiler with handwritten PSC1-compatible `.lean` still authoritative. The current `.ps` frontend and canonical printer move together to the **new-only `ps-0.9-r3` bounded self-host subset**. Current `.ps` source must use that edition; there is no legacy parser mode. Historical S0/A source, toolchains and artifacts remain recoverable at their immutable revisions. Ordinary structural recursion with supported changing state is already qualified; the new grammar and parameter-projection checkpoint has separate qualification pending.
 
 This is a bounded PSC implementation language, not a second general-purpose compiler project. The current handwritten worker/closure encodings should become compiler implementation details. The practical bottlenecks are frontend recognition and bootstrap discipline; the names of the profiles do not themselves solve either problem.
 
 Read [SPEC.md](SPEC.md) for the language contract and remaining obligations, [MIGRATION.md](MIGRATION.md) for completed milestones and the development workflow, [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) for the installed checker and remaining strict contracts, [proposal.json](proposal.json) for the capability ledger, and [baseline-evidence.json](baseline-evidence.json) for the immutable source inventory.
 
-## 1. Correct the premise for this directory
+## Current source grammar checkpoint
 
-PSC0's root configuration and original 12-package compiler closure do **not** select `PSC1-selfhost-stable/1` or `PSC1-portable-selfhost/1`. Its root has neither corresponding profile manifest. Its configuration says implementation `PSC1`, accepted language `PSC2-bootstrap`, version `0.7`, with `Ps.Bootstrap.SelfHost` as entry.[CFG]
+The source grammar change follows the user's explicit new-version-only decision. [PS_GRAMMAR_ADOPTION.md](PS_GRAMMAR_ADOPTION.md) pins the supplied reference by SHA-256, records its internal errata and maps the implemented subset to the reference. The current configuration records `languageVersion: 0.9-r3` and a `sourceGrammar` identity with edition `ps-0.9-r3`, mode `new-only`, support `bounded-selfhost-subset` and the supplied reference digest.
+
+The checkpoint replaces semicolon sequences with newline sequences, uses a single typed comma group in declaration and constructor headers, retains native typed lambda binder sequences, and preserves adjacent call groups separately from whitespace applications. It supports annotated parameterless `const` and positive-arity `function` aliases. `f()` remains an explicit empty call in the syntax tree and is refused during elaboration until completion semantics are implemented; `f(())` passes Unit. General `do`, omitted required annotations, defaults, named arguments, tuples and unsupported source constructs fail closed. The canonical printer and active fixtures change in the same checkpoint.
+
+This is an implemented branch change with **qualification pending**. The bounded API corpus, full captured-closure canonical round trip, raw-source behavior, current C2/C3 equality and separate exact-stream provider results must identify the new source grammar. It does not establish full Standard or PSCV conformance, select a new seed, activate strict SH/1, or upgrade the Lean 4.34.0 provider. The authored compiler keeps the forms consumable by selected A until a qualified successor is explicitly selected.
+
+## 1. Correct the premise for the historical baseline
+
+At the pinned research baseline, PSC0's root configuration and original 12-package compiler closure did **not** select `PSC1-selfhost-stable/1` or `PSC1-portable-selfhost/1`. Its root had neither corresponding profile manifest. That historical configuration said implementation `PSC1`, accepted language `PSC2-bootstrap`, version `0.7`, with `Ps.Bootstrap.SelfHost` as entry.[CFG] Those are historical configuration facts; the current source grammar identity is described above.
 
 There is an important exception in the same directory: the copied JS, Rust and Wasm package manifests explicitly declare `PSC1-portable-selfhost/1`, while marking themselves `bootstrap:false`. These metadata came with the later packages; they are not evidence that the old PSC0 compiler implements that profile or includes those packages in its fixed point.[MANJS], [MANRS], [MANWASM] This mixture of an older compiler and newer copied packages makes the profile labels particularly confusing.
 
@@ -90,7 +98,7 @@ The closure's declaration inventory contains **1,205 ordinary defs, 47 inductive
 
 The syntax AST has definitions, partial definitions, theorems, inductives and structures. It has typed lambda binders and flat constructor patterns. It has no general source declaration for classes or instances, no arbitrary macro expansion system, and no recursive pattern tree. The presence of instance synthesis modules does not create source syntax that the parser lacks.[AST]
 
-PSC0's `.ps` parser uses `def`, `partial def`, `theorem`, `inductive` and `structure`; definitions require a final semicolon. Its call parser distinguishes adjacent `f(` and even rewrites empty `f()` to application to Unit. A later `function`/brace-oriented PSC syntax must not be pasted into this codebase and described as an already accepted language.[PP], [PARSECALL]
+The historical `.ps` parser used `def`, `partial def`, `theorem`, `inductive` and `structure`; definitions required a final semicolon. It distinguished adjacent `f(` and rewrote empty `f()` to application to Unit.[PP], [PARSECALL] The new-only source grammar replaces these historical rules through owned lexer/parser/printer changes and migrated fixtures. Its bounded acceptance and refusal contract is in [PS_GRAMMAR_ADOPTION.md](PS_GRAMMAR_ADOPTION.md); the supplied reference alone grants no implementation or semantic capability.
 
 This is an implementation boundary, not a fundamental requirement that a self-hosted language be awkward. An ergonomic surface can compile into a much smaller core.
 

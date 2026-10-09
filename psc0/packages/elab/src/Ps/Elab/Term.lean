@@ -19,6 +19,7 @@ inductive PsElabError where
   | infer (error : PsInferError)
   | typeMismatch
   | implicitApplicationUnsupported
+  | emptyCallUnsupported
   | unsupportedTerm
   | matchExpectedType
   | matchScrutineeUnsupported
@@ -311,68 +312,91 @@ def psElabProjectionChain
     Except PsElabError PsElabTermResult :=
   psElabProjectionChainWorker fields context current
 
+-- Resolve only the base of a projection. The recursive descent considers
+-- longer proper local prefixes first; the final segment always remains a field.
+def psElabLocalProjectionBaseWorker
+    (localContext : PsLocalContext)
+    (fields : List String) :
+    PsName -> Option (Prod PsResolvedName (List String)) :=
+  match fields with
+  | List.nil =>
+      fun (_base : PsName) => Option.none
+  | List.cons field rest =>
+      let smaller : PsName -> Option (Prod PsResolvedName (List String)) :=
+        psElabLocalProjectionBaseWorker localContext rest;
+      fun (base : PsName) =>
+        match smaller (psNameAppendStr base field) with
+        | Option.some selected => Option.some selected
+        | Option.none =>
+            match psLocalFindUser localContext base with
+            | Option.none => Option.none
+            | Option.some declaration =>
+                Option.some (Prod.mk
+                  (PsResolvedName.local (psLocalDeclId declaration))
+                  (List.cons field rest))
+
+-- Share name selection between elaboration and hygienic recursion rewriting.
+-- Exact complete names precede the established first-segment projection base.
+-- Only an absent first segment permits a longer LOCAL base; a selected base
+-- never falls back to another name after a field or type error.
+def psElabResolveReferenceBase
+    (localContext : PsLocalContext)
+    (environment : PsEnvironment)
+    (sourceName : PsSyntaxName) :
+    Option (Prod PsResolvedName (List String)) :=
+  match psSyntaxNameToName sourceName with
+  | Option.none => Option.none
+  | Option.some name =>
+      match psResolveName localContext environment name with
+      | Option.some resolved => Option.some (Prod.mk resolved List.nil)
+      | Option.none =>
+          match sourceName.segments with
+          | List.nil => Option.none
+          | List.cons first tail =>
+              match tail with
+              | List.nil => Option.none
+              | List.cons second rest =>
+                  let base := psNameAppendStr PsName.anonymous first;
+                  match psResolveName localContext environment base with
+                  | Option.some resolved => Option.some (Prod.mk resolved tail)
+                  | Option.none =>
+                      psElabLocalProjectionBaseWorker
+                        localContext rest (psNameAppendStr base second)
+
 def psElabProjectionReference
     (context : PsElabContext)
     (sourceName : PsSyntaxName)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  match sourceName.segments with
-  | List.nil =>
-      match psSyntaxNameToName sourceName with
-      | none => Except.error PsElabError.emptyName
-      | some name => Except.error (PsElabError.unknownName name)
-  | List.cons base tail =>
-      match tail with
-      | List.nil =>
-          match psSyntaxNameToName sourceName with
-          | none => Except.error PsElabError.emptyName
-          | some name => Except.error (PsElabError.unknownName name)
-      | List.cons field rest =>
-          let baseName :=
-            psNameAppendStr PsName.anonymous base;
-          match
-              psResolveName
-                context.localContext
-                context.environment
-                baseName with
-          | none => Except.error (PsElabError.unknownName baseName)
-          | some resolved =>
-              let baseTerm : PsExpr :=
-                match resolved with
-                | .local id => PsExpr.fvar id
-                | .global name => PsExpr.constE name [];
-              match psElabResolvedTerm context baseTerm Option.none with
+  match psElabResolveReferenceBase
+      context.localContext context.environment sourceName with
+  | Option.none =>
+      match sourceName.segments with
+      | List.nil => Except.error PsElabError.emptyName
+      | List.cons first _ =>
+          Except.error
+            (PsElabError.unknownName (psNameAppendStr PsName.anonymous first))
+  | Option.some selected =>
+      let baseTerm : PsExpr :=
+        match Prod.fst selected with
+        | PsResolvedName.local id => PsExpr.fvar id
+        | PsResolvedName.global name => PsExpr.constE name List.nil;
+      match Prod.snd selected with
+      | List.nil => psElabResolvedTerm context baseTerm expected
+      | List.cons _ _ =>
+          match psElabResolvedTerm context baseTerm Option.none with
+          | Except.error error => Except.error error
+          | Except.ok baseResult =>
+              match psElabProjectionChain context baseResult (Prod.snd selected) with
               | Except.error error => Except.error error
-              | Except.ok baseResult =>
-                  match
-                      psElabProjectionChain
-                        context
-                        baseResult
-                        (List.cons field rest) with
-                  | Except.error error => Except.error error
-                  | Except.ok projected =>
-                      psElabFinalizeExpected projected expected
+              | Except.ok projected => psElabFinalizeExpected projected expected
 
 def psElabNamedReference
     (context : PsElabContext)
     (sourceName : PsSyntaxName)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  match psSyntaxNameToName sourceName with
-  | none => Except.error PsElabError.emptyName
-  | some name =>
-      match psResolveName context.localContext context.environment name with
-      | none =>
-          psElabProjectionReference context sourceName expected
-      | some resolved =>
-          match resolved with
-          | .local id =>
-              psElabResolvedTerm context (PsExpr.fvar id) expected
-          | .global globalName =>
-              psElabResolvedTerm
-                context
-                (PsExpr.constE globalName [])
-                expected
+  psElabProjectionReference context sourceName expected
 
 def psElabReference
     (context : PsElabContext)
@@ -2982,28 +3006,34 @@ def psElabTermWithFuel
                   alternatives
                   expected
             | .app fn args _ =>
-                match
-                    psTryElabStructuralSelfCall
-                      context
-                      fn
-                      args
-                      expected with
-                | Except.error error => Except.error error
-                | Except.ok selfCall =>
-                    match selfCall with
-                    | Option.some result => Except.ok result
-                    | Option.none =>
-                        match smaller context fn Option.none with
-                        | Except.error error => Except.error error
-                        | Except.ok elaboratedFn =>
-                            match psElabApplyArgs
-                                smaller
-                                elaboratedFn
-                                args
-                                [] with
-                            | Except.error error => Except.error error
-                            | Except.ok application =>
-                                psElabFinishApplication application expected
+                -- R3 empty calls request argument completion. This bounded
+                -- profile has no optional/default parameter metadata yet.
+                -- Keep [] distinct from an explicit Unit argument and fail closed.
+                if psListIsEmpty args then
+                  Except.error PsElabError.emptyCallUnsupported
+                else
+                  match
+                      psTryElabStructuralSelfCall
+                        context
+                        fn
+                        args
+                        expected with
+                  | Except.error error => Except.error error
+                  | Except.ok selfCall =>
+                      match selfCall with
+                      | Option.some result => Except.ok result
+                      | Option.none =>
+                          match smaller context fn Option.none with
+                          | Except.error error => Except.error error
+                          | Except.ok elaboratedFn =>
+                              match psElabApplyArgs
+                                  smaller
+                                  elaboratedFn
+                                  args
+                                  [] with
+                              | Except.error error => Except.error error
+                              | Except.ok application =>
+                                  psElabFinishApplication application expected
 
 def psElabTerm
     (context : PsElabContext)

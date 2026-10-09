@@ -1,6 +1,6 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 11:01:56 UTC.
+Updated: 2026-10-09 11:39:00 UTC.
 
 ## Active continuation: new-only R3 source grammar and projection repair
 
@@ -19,7 +19,7 @@ pending implementation conformance. This work adopts a bounded set of its owned
 base grammar rules; it does not claim full PSC2 Standard or PSCV conformance or
 repin the Lean/provider workstream.
 
-Implementation in progress:
+Implementation assembled for the coherent qualification checkpoint:
 
 - Shared exact-name / first-segment / longest proper local-prefix resolution
   repairs recursive record-parameter projections. Structural identity predicates
@@ -39,7 +39,24 @@ Implementation in progress:
   is not relabeled as Standard monadic or verified do.
 
 No new grammar/compiler qualification has completed for this continuation.
-Draft blobs and this planning checkpoint are not a success receipt. Current
+This code checkpoint is a qualification candidate, not a success receipt.
+
+The planned early gates cover migrated native parser/printer/elaboration tests,
+fatal UTF-8 and actual-AST import loading, and successor descriptor integrity.
+N1 checks 40 small grammar round trips plus explicit refusals and the complete
+61-module Lean-to-new-PS-to-Lean correspondence. The exact N1 canonical surface
+digest is reused as the required C2/C3 surface digest, avoiding a repeated full
+round-trip pass. Each current generated compiler also executes the raw capability
+fixtures, including 39 projection and 34 new-grammar behavior observations.
+
+A distinct TS7 successor descriptor and same-revision recovery runner are included.
+They preserve the complete unchanged v1 A descriptor and compare the separate
+first-generation and final products of A(raw successor source) and C1(raw source).
+Only a fresh two-generation recovery may earn the cold-recovery receipt. Seed
+selection requires both that receipt and actual independent provider acceptance;
+compiler qualification alone never changes the selected manifest. The remaining
+12 worker migrations are prepared separately and are not part of this source
+checkpoint. Current
 Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2 pins remain; historical S0/A recovery
 uses immutable old revisions and exact TypeScript 5.8.3. That recovery is not an
 active old-PS parser in the new compiler. A remains selected until a separately
@@ -50,7 +67,7 @@ The remaining practical source migration is now finite:
 alias removals** and the final adoption evidence. See
 [the backlog](docs/selfhost-language/MIGRATION_BACKLOG.md) and
 [its machine-readable inventory](docs/selfhost-language/migration-backlog.json).
-All 1,500 declaration headers in the current 61-module closure were inspected;
+All 1,500 declaration headers in the audited 5e3 baseline's 61-module closure were inspected;
 none has a non-explicit binder after an explicit binder, so the new declaration
 grammar does not require reordering the current compiler's public telescopes.
 

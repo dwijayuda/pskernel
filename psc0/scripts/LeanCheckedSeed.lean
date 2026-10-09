@@ -62,6 +62,19 @@ def psCheckedSeedTests : IO Unit := do
       !psCheckedNestedDirect (psRootName "Family") (PsExpr.app self self))
   IO.println "PSC2_LEAN_CHECKED_NATIVE: PASS"
 
+-- Parse current PS before dependency discovery. The native host shares the
+-- compiler parser and returns only import names; kernel/provider behavior and
+-- the prepared-session protocol below are unchanged.
+def psCheckedSeedSourceImports : IO Unit := do
+  let source ← (← IO.getStdin).readToEnd
+  let .ok sourceModule := psParseProofScriptSource source
+    | throw (IO.userError "PSC2_SOURCE_PARSE_FAILED")
+  let names ← sourceModule.imports.mapM fun sourceImport => do
+    let .ok name := psPrintSyntaxName sourceImport.moduleName
+      | throw (IO.userError "PSC2_SOURCE_IMPORT_NAME_FAILED")
+    pure (Lean.Json.str name)
+  IO.println (Lean.Json.arr names.toArray).compress
+
 def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do
   let source ← (← IO.getStdin).readToEnd
   let .ok prepared := psCompilerPrepareSource kind source
@@ -148,6 +161,7 @@ def psCheckedSeedDiagnoseAdmissions (sourcePath : String) : IO Unit := do
 def main (args : List String) : IO Unit := do
   match args with
   | ["--test"] => psCheckedSeedTests
+  | ["--source-imports-ps"] => psCheckedSeedSourceImports
   | ["--diagnose-admissions", sourcePath] => psCheckedSeedDiagnoseAdmissions sourcePath
   | ["--check-lean"] => psCheckedSeedRun false .lean
   | ["--check-ps"] => psCheckedSeedRun false .proofScript
@@ -157,4 +171,4 @@ def main (args : List String) : IO Unit := do
   | ["--session-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath
   | ["--session-modules-lean", sourcePath] => psCheckedSeedModulesSession .lean sourcePath
   | ["--session-modules-ps", sourcePath] => psCheckedSeedModulesSession .proofScript sourcePath
-  | _ => throw (IO.userError "usage: psc2_lean_checked_seed --test|--check-lean|--check-ps|--emit-lean|--emit-ps|--session-lean <file>|--session-ps <file>")
+  | _ => throw (IO.userError "usage: psc2_lean_checked_seed --test|--source-imports-ps|--check-lean|--check-ps|--emit-lean|--emit-ps|--session-lean <file>|--session-ps <file>")

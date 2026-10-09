@@ -95,7 +95,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes ow
   try {
     await writeFile(path.join(dir,'package.json'),'{"type":"module"}');
     const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');
-    await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':'def answer: Nat := 42;\n');
+    await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':"def answer: Nat := 42\n");
     const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
     assert.equal((await import(pathToFileURL(outputPath).href)).answer,42n);
     assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
@@ -104,7 +104,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes ow
 
 for (const [kind, source] of [
   ['lean', 'def answer : Nat := 42\n'],
-  ['ps', 'def answer: Nat := 42;\n'],
+  ['ps', "def answer: Nat := 42\n"],
 ]) {
   test(`real ${kind} frontend -> WASM Lean kernel -> tsc -> executed JavaScript`, { skip: !native }, async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'psc2-checked-real-'));
@@ -172,7 +172,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} closed record passes owne
     const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');
     const source=kind==='lean'
       ? 'structure OwnedPair where\n  left : Nat\n  right : Nat\ndef pair : OwnedPair := OwnedPair.mk 7 11\n'
-      : 'structure OwnedPair where { left : Nat; right : Nat; };\ndef pair : OwnedPair := OwnedPair.mk(7, 11);\n';
+      : "structure OwnedPair where { left : Nat\n right : Nat\n }\ndef pair : OwnedPair := OwnedPair.mk(7, 11)\n";
     await writeFile(entryPath,source);
     const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
     const result=(await import(pathToFileURL(outputPath).href)).pair;
@@ -180,3 +180,36 @@ for (const kind of ['lean','ps']) test(`actual ${kind} closed record passes owne
     assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
   } finally {await rm(dir,{recursive:true,force:true});}
 });
+
+for (const [label, source] of [
+  ['semicolon import', 'import Missing;\ndef answer : Nat := 42\n'],
+  ['tab in import', 'import\tMissing\ndef answer : Nat := 42\n'],
+]) test('actual PS build rejects ' + label + ' before dependency lookup', { skip: !native }, async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'psc2-ps-import-invalid-'));
+  try {
+    const entryPath = path.join(dir, 'Main.ps');
+    await writeFile(entryPath, source);
+    await assert.rejects(buildChecked({ entryPath, seedPath: seed, checkOnly: true }), /SOURCE_PARSE_FAILED/);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+test('actual PS build resolves a commented unused import and cannot ignore a missing file',
+  { skip: !native }, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'psc2-ps-import-missing-'));
+    try {
+      const entryPath = path.join(dir, 'Main.ps');
+      await writeFile(entryPath, 'import /- a real dependency -/ Missing\ndef answer : Nat := 42\n');
+      await assert.rejects(buildChecked({ entryPath, seedPath: seed, checkOnly: true }), /ENOENT/);
+    } finally { await rm(dir, { recursive: true, force: true }); }
+  });
+test('actual PS build prepares complete imported modules in dependency order',
+  { skip: !native }, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'psc2-ps-import-raw-'));
+    try {
+      const entryPath = path.join(dir, 'Main.ps');
+      await writeFile(entryPath, 'import /- retained in parser input -/ Lib\ndef answer : Nat := marker\n');
+      await writeFile(path.join(dir, 'Lib.ps'), 'def marker : Nat := 42\n');
+      const receipt = await buildChecked({ entryPath, seedPath: seed, kernel: 'lean434-wasm', checkOnly: true });
+      assert.equal(receipt.sourceCount, 2);
+      assert.equal(receipt.kernel.selector, 'lean434-wasm');
+    } finally { await rm(dir, { recursive: true, force: true }); }
+  });

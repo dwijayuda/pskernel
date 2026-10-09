@@ -11,11 +11,11 @@ def psTranslationLeanFixture : String :=
 def psTranslationProofScriptFixture : String :=
   "import Demo.Core\n\n" ++
   "inductive Choice where {\n" ++
-  "  | left;\n" ++
-  "  | right;\n" ++
-  "};\n\n" ++
-  "def choose (x : Choice) : Nat := " ++
-  "match x with { | Choice.left => 1; | Choice.right => 2 };"
+  "  | left\n\n" ++
+  "  | right\n\n" ++
+  "}\n\n\n" ++
+  "def choose(x : Choice) : Nat := " ++
+  "match x with { | Choice.left => 1\n | Choice.right => 2 }\n"
 
 def psTestLeanProofScriptLeanRoundTrip : Bool :=
   match
@@ -54,9 +54,9 @@ def psTranslationStructureLeanFixture : String :=
 
 def psTranslationStructureProofScriptFixture : String :=
   "structure User where {\n" ++
-  "  age : Nat;\n" ++
-  "};\n\n" ++
-  "def ageOf (u : User) : Nat := u.age;"
+  "  age : Nat\n\n" ++
+  "}\n\n\n" ++
+  "def ageOf(u : User) : Nat := u.age\n"
 
 def psTestStructureTranslationRoundTrip : Bool :=
   match
@@ -78,7 +78,7 @@ def psTestPartialDefinitionTranslationRoundTrip : Bool :=
   let leanSource :=
     "partial def loop (n : Nat) : Nat := loop n"
   let proofScriptSource :=
-    "partial def loop(n : Nat) : Nat := loop(n);"
+    "partial def loop(n : Nat) : Nat := loop(n)\n"
   match
       psTranslateLeanToProofScript leanSource,
       psTranslateProofScriptToLean proofScriptSource with
@@ -127,11 +127,11 @@ def psTestHigherOrderBinderTranslation : Bool :=
 
 def psTestProofScriptNestedBinderTypes : Bool :=
   let sources := [
-    "def twice (f : ((_: Nat) -> Nat) -> Nat) : Nat := 0;",
-    "def named (f : (x : Nat) -> Nat) : Nat := 0;",
-    "def nested (f : List((_: Nat) -> Nat)) : Nat := 0;",
-    "def implicitType (f : {x : Nat} -> Nat) : Nat := 0;",
-    "def grouped (f : (Nat -> Nat)) : Nat := 0;"]
+    "def twice(f : ((_: Nat) -> Nat) -> Nat) : Nat := 0\n",
+    "def named(f : (x : Nat) -> Nat) : Nat := 0\n",
+    "def nested(f : List((_: Nat) -> Nat)) : Nat := 0\n",
+    "def implicitType(f : {x : Nat} -> Nat) : Nat := 0\n",
+    "def grouped(f : (Nat -> Nat)) : Nat := 0\n"]
   sources.all fun source =>
     match psCanonicalizeProofScriptSource source with
     | .error _ => false
@@ -140,7 +140,50 @@ def psTestProofScriptNestedBinderTypes : Bool :=
         | .error _ => false
         | .ok again => again == canonical
 
+def psTestProofScriptDoUnsupported : Bool :=
+  match psParseProofScriptSource
+      "def unsupported(state : Nat) : Nat := do { return state }\n" with
+  | Except.error _ => true
+  | Except.ok _ => false
+
+def psTestExplicitCompilerEffectCallsTranslation : Bool :=
+  let leanSource :=
+    "def effectDo (state : Nat) : Nat := do\n" ++
+    "  let next : Nat <- compilerPure state;\n" ++
+    "  return next"
+  let proofScriptSource :=
+    "def effectDo(state : Nat) : Nat := " ++
+    "compilerBind(compilerPure(state), (fun (next : Nat) => compilerPure(next)))\n"
+  match psTranslateLeanToProofScript leanSource,
+      psCanonicalizeProofScriptSource proofScriptSource with
+  | Except.ok generated, Except.ok explicitCalls =>
+      generated == explicitCalls
+        && match psTranslateProofScriptToLean explicitCalls,
+            psCanonicalizeLeanSource leanSource with
+           | Except.ok actual, Except.ok expected => actual == expected
+           | _, _ => false
+  | _, _ => false
+
+def psTestExplicitUnitCallTranslation : Bool :=
+  let source := "def unitId(x : Unit) : Unit := x\ndef value : Unit := unitId(())\n"
+  match psCanonicalizeProofScriptSource source with
+  | Except.error _ => false
+  | Except.ok canonical =>
+      canonical.contains "unitId(())"
+        && match psCanonicalizeProofScriptSource canonical with
+           | Except.ok again => again == canonical
+           | Except.error _ => false
+
 def main : IO Unit := do
+  if psTestProofScriptDoUnsupported then
+    IO.println "PSC1_TRANSLATION_PASS: unsupported ProofScript do rejected"
+  else throw (IO.userError "PSC1_TRANSLATION_FAIL: unsupported ProofScript do rejected")
+  if psTestExplicitCompilerEffectCallsTranslation then
+    IO.println "PSC1_TRANSLATION_PASS: explicit compiler effect calls preserve translation"
+  else throw (IO.userError "PSC1_TRANSLATION_FAIL: explicit compiler effect calls preserve translation")
+  if psTestExplicitUnitCallTranslation then
+    IO.println "PSC1_TRANSLATION_PASS: explicit Unit argument survives canonical printing"
+  else throw (IO.userError "PSC1_TRANSLATION_FAIL: explicit Unit argument survives canonical printing")
   if psTestProofScriptNestedBinderTypes then
     IO.println "PSC1_TRANSLATION_PASS: grouped and dependent ProofScript binder types"
   else throw (IO.userError "PSC1_TRANSLATION_FAIL: grouped and dependent ProofScript binder types")

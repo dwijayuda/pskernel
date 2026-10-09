@@ -2,6 +2,52 @@
 
 Status: M0–M3 have a qualified implementation and selected authoring seed A at `e91b9558d665879871b8bf0893915ae64b27c7fe`. Foundation.List (B, `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and exact provider acceptance on its first execution. M5 remains bounded follow-on authoring work. The bounded M6 runtime typing checkpoint is compiler-qualified on TS5 and on the current TS7 profile, with separate exact-stream provider acceptance for each. Complete strict runtime enforcement remains separate. M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The historical baseline is in [README.md](README.md), language requirements are in [SPEC.md](SPEC.md), and the installed M6 scope, separately earned TS5/TS7 qualification and remaining requirements are in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md).
 
+## Current checkpoint: new-only source grammar, qualification pending
+
+The current `.ps` source and canonical printer move atomically to `ps-0.9-r3`,
+mode `new-only`, support `bounded-selfhost-subset`. The user explicitly chose the
+new edition without a current legacy grammar mode.
+[PS_GRAMMAR_ADOPTION.md](PS_GRAMMAR_ADOPTION.md) pins the supplied reference,
+records errata, and defines the enabled syntax and refusal boundaries. The
+compiler's handwritten `.lean` authority, selected A and immutable historical
+S0/A recovery are separate decisions; they remain in place for this checkpoint.
+The grammar implementation and paired projection repair have qualification
+pending. No earlier compiler or provider receipt qualifies these new sources.
+
+The efficient migration unit is one coherent checkpoint:
+
+1. Pin the reference and finite support scope before changing accepted syntax.
+   Keep omitted annotations, defaults, named arguments, tuples, generic do and
+   unsupported semantic extensions explicitly refused.
+2. Implement the lexer/parser/printer and shared projection repair using `.lean`
+   forms that selected A can consume. Migrate active `.ps` fixtures, canonical
+   expectations, scripts and grammar provenance in the same tree. Current
+   outputs use the new edition; old outputs remain only in immutable historical
+   source/artifact recovery.
+3. Review application/group ownership, binder order, newline boundaries and
+   empty-call meaning as complete families. Run the generated compiler's finite
+   grammar and projection corpus once in the native candidate gate before the
+   expensive qualification chain. A failure blocks qualification; fix the cause
+   without weakening cases, limits or the source contract.
+4. At N1, round-trip the captured raw compiler closure through Lean-to-new-PS-to-Lean
+   and require canonical correspondence and PS idempotence. Reuse those translated
+   strings to hash the exact canonical source artifact. Require later C2/C3
+   canonical source products to equal that hash instead of redoing the full
+   closure round trip in every generation.
+5. Keep current raw `.lean` as the generation input, then require current C2/C3
+   deterministic product equality, the small grammar gate on N1/C1/C2/C3, raw
+   `.ps` capability behavior and checked original-IR evidence. Reuse each emitted
+   product in its downstream checks.
+6. Obtain separate selected-provider decisions for the exact required admissions.
+   Record grammar edition/mode/support/reference digest with compiler, closure,
+   prelude, options and toolchain identities. Full Standard/PSCV, strict SH/1 and
+   a Lean 4.35 provider are not claimed by this checkpoint.
+7. After successful evidence, select a qualified recoverable successor explicitly
+   before removing aliases needed by A or making compiler `.lean` depend on the
+   repaired authoring form. Moving the handwritten closure to `.ps` remains the
+   separate source-authority milestone; the new current `.ps` grammar does not
+   depend on that move.
+
 ## 1. Execute two coordinated tracks
 
 The language track owns source capability design, portable normalization, compiler preparation APIs, source migration and generated-compiler evidence. The existing native-provider track owns kernel conversion, provider resource handling and native checked acceptance. Reuse accepted work from that track; do not overwrite it or import an unverified provider merely to make a language milestone look complete.
@@ -121,6 +167,10 @@ Choose additional source families from measured remaining authoring cost. Do not
 
 ### M5 — add conveniences in measured priority order
 
+The current checkpoint applies the new-only `.ps` edition described above and
+pairs it with the bounded projection repair. This grammar transition is separate
+from the broader inference/semantic conveniences below.
+
 1. Repair parameter projections in the existing recursion normalizer, under the bounded contract below.
 2. Common equation/lambda-wrapped declaration and harmless-let normalization.
 3. Expected-type lambda domains with explicit fallback diagnostics.
@@ -135,7 +185,7 @@ Use actual remaining workaround counts to choose between the broader inference a
 
 M6 remains consumable by selected A by using three current source idioms: typed local callbacks passed by name, explicit result types on match-valued let initializers, and typed branch-local aliases before projecting original record parameters in generalized recursion. [SPEC.md](SPEC.md#current-authoring-forms) describes the exact restrictions. Qualification of M6 does not remove them.
 
-The next bounded normalizer repair has a source-backed design; it is **planned, not implemented**. The implementation touches two Lean files: add a shared resolver returning an untyped resolved base and field suffix in `Elab/Term.lean`, then thread immutable `PsEnvironment` through the recursion walk/normalizer in `Elab/Recursion.lean`. The current lookup and rewriting paths are visible in [Term.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Term.lean#L306-L366) and [Recursion.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Recursion.lean#L281-L305).
+The current bounded normalizer repair implements the source-backed design with **qualification pending**. The implementation touches two Lean files: add a shared resolver returning an untyped resolved base and field suffix in `Elab/Term.lean`, then thread immutable `PsEnvironment` through the recursion walk/normalizer in `Elab/Recursion.lean`. The pre-repair qualified lookup and rewriting paths are visible in [Term.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Term.lean#L306-L366) and [Recursion.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Recursion.lean#L281-L305).
 
 The resolver must use this order:
 
@@ -220,8 +270,8 @@ Required receipt fields:
 
 - Exact source closure and module order, including the new module count.
 - Parent and executing compiler digests.
-- Language/capability set and normalizer identity.
-- Canonical source and ordered admissions digests.
+- Language/capability set and normalizer identity; current `.ps` grammar edition, new-only mode, enabled support scope and supplied reference SHA-256.
+- Canonical source and ordered admissions digests, plus the N1 closure correspondence artifact digest used for current C2/C3 canonical source comparison.
 - Generated TS/JS digests and runtime/toolchain options.
 - Prelude/environment identity.
 - Provider executable/runtime/options/resource policy and actual result.
@@ -247,7 +297,7 @@ In the preserved baseline, `npm run build:psc` was the closest current-source bu
 
 | Cache/result | Minimum identity and invalidation |
 | --- | --- |
-| Parsed source | Exact bytes, source kind/path where relevant, executing parser implementation, options and diagnostic origins |
+| Parsed source | Exact bytes, source kind/path, grammar edition/mode/support/reference digest, executing parser implementation, options and diagnostic origins |
 | Normalized/prepared module | Parsed input, executing normalizer/elaborator, full incoming environment/prelude, ordered declaration accumulator/provenance, resolution configuration and limits |
 | In-memory state | Exact compiler import/session; do not share symbol-tagged values across independently imported generated modules |
 | Emitted TS bundle | Entire prepared closure, runtime/prelude, emitter/options/target identity; retain aggregate emission initially |

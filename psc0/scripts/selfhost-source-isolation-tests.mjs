@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { computeBootstrapWorkspaceClosureSha256 } from "./bootstrap-manifest.mjs";
+import { sh1GrammarProfile } from "./sh1-grammar-conformance.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const entry = "packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps";
@@ -27,7 +28,7 @@ async function scenario(label, configure = async () => {}, expectedError) {
     }
     await mkdir(path.join(parent, "stdlib"), { recursive: true });
     await put(path.join(parent, dependency.replace(/\.ps$/u, ".lean")), "def WRONG_PARENT : Nat := 0\n");
-    await put(path.join(workspace, entry), "import Ps.Foundation.Probe;\ndef entryMarker : Nat := 1\n");
+    await put(path.join(workspace, entry), "import Ps.Foundation.Probe\ndef entryMarker : Nat := 1\n");
     await put(path.join(workspace, dependency), "def GENERATED_DEP : Nat := 42\n");
     const manifest = {
       schemaVersion: 2, generation: "bootstrap", entry,
@@ -46,10 +47,30 @@ async function scenario(label, configure = async () => {}, expectedError) {
     // production host still invokes the real, pinned TypeScript compiler.
     await put(compiler, `import { writeFileSync } from "node:fs";
 export const PsCompilerSourceKind = { lean: "lean", proofScript: "ps" };
+export const psProofScriptGrammarEdition = ${JSON.stringify(sh1GrammarProfile.edition)};
+export const psProofScriptGrammarMode = ${JSON.stringify(sh1GrammarProfile.mode)};
+export const psProofScriptGrammarReferenceSha256 = ${JSON.stringify(sh1GrammarProfile.referenceSha256)};
 let translations = 0;
 const ok = value => ({ [Symbol.for("psc2-test-tag")]: "ok", value });
 export function psCompilerTranslateSource(_from, _to, source) { translations++; return ok(source); }
-export const List = { nil: () => ({}), cons: (head, tail) => ({ head, tail }) };
+export const List = {
+  nil: () => ({ [Symbol.for("psc2-test-tag")]: "nil" }),
+  cons: (head, tail) => ({ [Symbol.for("psc2-test-tag")]: "cons", head, tail }),
+};
+// Fixed AST responses isolate file selection; this double is not a PS parser.
+const fixtureImports = new Map(${JSON.stringify([
+  ["import Ps.Foundation.Probe\ndef entryMarker : Nat := 1\n", ["Ps.Foundation.Probe"]],
+  ["def GENERATED_DEP : Nat := 42\n", []],
+  ["def GENERATED_DEP : Nat := 43\n", []],
+  ["import Ps.Bootstrap.SelfHost\ndef GENERATED_DEP : Nat := 42\n", ["Ps.Bootstrap.SelfHost"]],
+])});
+export function psParseProofScriptSource(source) {
+  if (!fixtureImports.has(source)) throw new Error("unexpected parser-double source");
+  const imports = fixtureImports.get(source).reduceRight(
+    (tail, text) => List.cons({ moduleName: { text } }, tail), List.nil());
+  return ok({ imports });
+}
+export function psPrintSyntaxName(name) { return ok(name.text); }
 export function psCompilerPrepareSources(kind, sources) {
   const chunks = [];
   for (let value = sources; 'head' in value; value = value.tail) chunks.push(value.head);
@@ -78,6 +99,9 @@ export function psCompilerTypeScriptFromPrepared(_prepared) {
       assert.equal(consumed.kind, "ps");
       assert.equal(consumed.translations, 0, "generated compilation must not translate a handwritten fallback");
       assert.equal(consumed.chunks.length, 2, "module boundaries must survive compilation");
+      assert.deepEqual(consumed.chunks, ["def GENERATED_DEP : Nat := 42\n",
+        "import Ps.Foundation.Probe\ndef entryMarker : Nat := 1\n"],
+        "exact raw PS modules, including imports, must reach preparation");
       assert.match(consumed.source, /GENERATED_DEP/u);
       assert.doesNotMatch(consumed.source, /WRONG_PARENT|STALE_LEAN/u);
       assert.ok(consumed.source.indexOf("GENERATED_DEP") < consumed.source.indexOf("entryMarker"));
@@ -151,7 +175,7 @@ await scenario("symlink cannot escape generated root", async ({ directory, works
   }
 }, /SOURCE_OUTSIDE_WORKSPACE/u);
 await scenario("cyclic source imports", async ({ workspace, put, saveManifest }) => {
-  await put(path.join(workspace, dependency), "import Ps.Bootstrap.SelfHost;\ndef GENERATED_DEP : Nat := 42\n");
+  await put(path.join(workspace, dependency), "import Ps.Bootstrap.SelfHost\ndef GENERATED_DEP : Nat := 42\n");
   await saveManifest();
 }, /IMPORT_CYCLE/u);
 await scenario("selfhost generation manifest accepted", async ({ workspace, put, manifest }) => {

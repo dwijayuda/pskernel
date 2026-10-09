@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
+import { readProofScriptImports, readProofScriptImportsWithSeed } from './proofscript-source.mjs';
 import { createCheckedPreparedSession } from './checked-prepared-session.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import {
@@ -35,18 +36,29 @@ export async function buildChecked({
   const kernelDescriptor = checkedKernelDescriptor(kernel);
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
-  const snapshot = await readCheckedSourceSnapshot(entryPath);
+  let compiler;
+  let compilerIdentity;
+  let binary;
+  let parseImports;
+  if (seedPath) {
+    binary = path.resolve(seedPath);
+    compilerIdentity = { engine: 'native-seed', sha256: digest(await readFile(binary)) };
+    parseImports = (source, file) => readProofScriptImportsWithSeed(binary, source, file);
+  } else {
+    const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
+    compilerIdentity = { engine: 'generated-js', sha256: digest(await readFile(file)) };
+    compiler = await import(pathToFileURL(file).href);
+    parseImports = (source, sourcePath) => readProofScriptImports(compiler, source, sourcePath);
+  }
+  const snapshot = await readCheckedSourceSnapshot(entryPath, { readProofScriptImports: parseImports });
   let admissions;
   let typeScript;
-  let compilerIdentity;
   const checkAdmissions = async text => {
     const checked = await checkAdmissionsWithKernel(text, kernel);
     return checked.result;
   };
 
   if (seedPath) {
-    const binary = path.resolve(seedPath);
-    compilerIdentity = { engine: 'native-seed', sha256: digest(await readFile(binary)) };
     const result = await runCheckedSeedSession({
       binaryPath: binary,
       sourceKind: snapshot.kind,
@@ -58,9 +70,6 @@ export async function buildChecked({
     admissions = result.admissions;
     typeScript = result.typeScript;
   } else {
-    const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
-    compilerIdentity = { engine: 'generated-js', sha256: digest(await readFile(file)) };
-    const compiler = await import(pathToFileURL(file).href);
     const kind = snapshot.kind === 'ps'
       ? compiler.PsCompilerSourceKind?.proofScript
       : compiler.PsCompilerSourceKind?.lean;

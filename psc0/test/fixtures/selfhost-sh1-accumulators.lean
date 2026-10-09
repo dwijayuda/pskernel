@@ -52,3 +52,116 @@ def sh1OuterHypothesis (fuel : Nat) (state : Nat) : Nat :=
       match state with
       | Nat.zero => sh1OuterHypothesis remaining 1
       | Nat.succ ignored => sh1OuterHypothesis remaining (Nat.succ state)
+
+-- Direct record parameters exercise the shared projection/name resolver.
+structure Sh1ProjectionState where
+  count : Nat
+  step : Nat
+
+structure Sh1ProjectionBox where
+  state : Sh1ProjectionState
+
+def sh1ProjectionStateValue (count : Nat) (step : Nat) : Sh1ProjectionState :=
+  Sh1ProjectionState.mk count step
+
+def sh1ProjectionBoxValue (state : Sh1ProjectionState) : Sh1ProjectionBox :=
+  Sh1ProjectionBox.mk state
+
+def sh1ProjectionAcc (fuel : Nat) (state : Sh1ProjectionState) : Nat :=
+  match fuel with
+  | Nat.zero => state.count
+  | Nat.succ remaining =>
+      sh1ProjectionAcc remaining
+        (Sh1ProjectionState.mk (Nat.add state.count state.step) state.step)
+
+def sh1ProjectionFixed
+    (options : Sh1ProjectionState) (fuel : Nat) (total : Nat) : Nat :=
+  match fuel with
+  | Nat.zero => Nat.add total options.count
+  | Nat.succ remaining =>
+      sh1ProjectionFixed options remaining (Nat.add total options.step)
+
+def sh1ProjectionNested
+    (fuel : Nat) (box : Sh1ProjectionBox) (total : Nat) : Nat :=
+  match fuel with
+  | Nat.zero => Nat.add total box.state.count
+  | Nat.succ remaining =>
+      sh1ProjectionNested remaining box (Nat.add total box.state.step)
+
+def sh1ProjectionBefore (state : Sh1ProjectionState) (fuel : Nat) : Nat :=
+  match fuel with
+  | Nat.zero => state.count
+  | Nat.succ remaining =>
+      sh1ProjectionBefore
+        (Sh1ProjectionState.mk (Nat.add state.count state.step) state.step)
+        remaining
+
+def sh1ProjectionLambda (fuel : Nat) (state : Sh1ProjectionState) : Nat :=
+  match fuel with
+  | Nat.zero => state.count
+  | Nat.succ remaining =>
+      let readStep : Sh1ProjectionState -> Nat :=
+        fun (state : Sh1ProjectionState) => state.step;
+      sh1ProjectionLambda remaining
+        (Sh1ProjectionState.mk (Nat.add state.count (readStep state)) state.step)
+
+def sh1ProjectionLet (fuel : Nat) (state : Sh1ProjectionState) : Nat :=
+  match fuel with
+  | Nat.zero => state.count
+  | Nat.succ remaining =>
+      let state : Sh1ProjectionState :=
+        Sh1ProjectionState.mk (Nat.add state.count state.step) state.step;
+      sh1ProjectionLet remaining state
+
+def sh1ProjectionPattern
+    (items : List Sh1ProjectionState) (state : Sh1ProjectionState) : Nat :=
+  match items with
+  | List.nil => state.count
+  | List.cons state rest =>
+      sh1ProjectionPattern rest
+        (Sh1ProjectionState.mk (Nat.add state.count state.step) state.step)
+
+def sh1ProjectionSwap
+    (fuel : Nat) (left : Sh1ProjectionState) (right : Sh1ProjectionState) : Nat :=
+  match fuel with
+  | Nat.zero => left.count
+  | Nat.succ remaining => sh1ProjectionSwap remaining right left
+
+def sh1ProjectionPartial : Sh1ProjectionState -> Nat := sh1ProjectionAcc 4
+
+-- Reference behavior for the bounded new ProofScript grammar.
+def sh1GrammarConstant : Nat := 23
+
+def sh1GrammarAdd (left : Nat) (right : Nat) : Nat :=
+  Nat.add left right
+
+def sh1GrammarIncrement : Nat -> Nat :=
+  fun (value : Nat) => Nat.succ value
+
+def sh1GrammarApply (transform : Nat -> Nat) (value : Nat) : Nat :=
+  transform value
+
+def sh1GrammarCallback (value : Nat) : Nat :=
+  let callback : Nat -> Nat := fun (current : Nat) => Nat.add current 3;
+  sh1GrammarApply callback value
+
+def sh1GrammarGrouped (value : Nat) : Nat :=
+  Nat.add value 5
+
+def sh1GrammarChain (value : Nat) : Nat :=
+  sh1GrammarAdd 7 value
+
+def sh1GrammarNative (value : Nat) : Nat :=
+  Nat.add value 11
+
+def sh1GrammarRecord (value : Nat) : Nat :=
+  let state : Sh1ProjectionState := { count := value, step := 13 };
+  Nat.add state.count state.step
+
+def sh1GrammarNestedLet (value : Nat) : Nat :=
+  let result : Nat := (let inner : Nat := Nat.succ value; Nat.succ inner);
+  Nat.add result 17
+
+def sh1GrammarUnit (value : Unit) : Nat := 19
+
+def sh1GrammarUnitCall : Nat := sh1GrammarUnit ()

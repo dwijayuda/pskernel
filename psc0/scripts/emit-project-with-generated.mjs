@@ -3,6 +3,8 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { assertProofScriptGrammar, readProofScriptImports, readProofScriptSource } from "./proofscript-source.mjs";
+import { sh1GrammarProfile } from "./sh1-grammar-conformance.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -159,6 +161,8 @@ if (
   throw new Error("PSC2_PROJECT_COMPILER_API_MISSING");
 }
 
+if (sourceExtension === ".ps" || targetExtension === ".ps") assertProofScriptGrammar(compiler);
+
 const workspaceRoot = findWorkspaceRoot(entryPath);
 const sourceKind = compilerKind(compiler, sourceExtension);
 const targetKind = compilerKind(compiler, targetExtension);
@@ -170,8 +174,11 @@ async function visit(sourcePath) {
   if (visited.has(absolute)) return;
   visited.add(absolute);
 
-  const source = await readFile(absolute, "utf8");
-  for (const moduleName of parseImports(source)) {
+  const source = absolute.endsWith(".ps")
+    ? await readProofScriptSource(absolute) : await readFile(absolute, "utf8");
+  const imports = absolute.endsWith(".ps")
+    ? readProofScriptImports(compiler, source, absolute) : parseImports(source);
+  for (const moduleName of imports) {
     await visit(
       resolveModuleSource(
         workspaceRoot,
@@ -275,7 +282,8 @@ function generatedLakefile(generatedFiles) {
 async function writeGeneratedProjectMetadata() {
   if (targetExtension === ".ps") {
     const generatedConfig = {
-      languageVersion: "0.7",
+      languageVersion: "0.9-r3",
+      sourceGrammar: sh1GrammarProfile,
       implementationProfile: "PSC1",
       acceptedLanguageProfile: "PSC2-bootstrap",
       entry: entryRelative,

@@ -52,7 +52,7 @@ def psTestDualSourceLeanNativeIdentity : Bool :=
       psCompileLeanSourceToTypeScript
         "def idNat (x : Nat) : Nat := x",
       psCompileProofScriptSourceToTypeScript
-        "def idNat(x : Nat) : Nat := x;" with
+        "def idNat(x : Nat) : Nat := x\n" with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       let expected :=
         "// generated from pskernel-admitted ProofScript checked core\n" ++
@@ -67,7 +67,7 @@ def psTestDualSourceLeanNativeGenericIdentity : Bool :=
       psCompileLeanSourceToTypeScript
         "def identity (α : Type) (x : α) : α := x",
       psCompileProofScriptSourceToTypeScript
-        "def identity(α : Type)(x : α) : α := x;" with
+        "def identity(α : Type, x : α) : α := x\n" with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       let expected :=
         "// generated from pskernel-admitted ProofScript checked core\n" ++
@@ -84,7 +84,7 @@ def psTestDualSourceLeanNativeLet : Bool :=
       psCompileLeanSourceToTypeScript
         "def one : Nat := let x : Nat := 1; x",
       psCompileProofScriptSourceToTypeScript
-        "def one : Nat := let x : Nat := 1; x;" with
+        "def one : Nat := let x : Nat := 1\n x\n" with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
@@ -96,7 +96,7 @@ def psTestDualSourceLeanNativeIf : Bool :=
       psCompileLeanSourceToTypeScript
         "def choose (b : Bool) : Nat := if b then 1 else 2",
       psCompileProofScriptSourceToTypeScript
-        "def choose(b : Bool) : Nat := if (b) { 1 } else { 2 };" with
+        "def choose(b : Bool) : Nat := if (b) { 1 } else { 2 }\n" with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
@@ -110,10 +110,10 @@ def psTestDualSourceLeanNativeMaybeMatch : Bool :=
     "def getOrZero (m : Maybe Nat) : Nat := " ++
     "match m with | Maybe.none => 0 | Maybe.some value => value"
   let proofScriptSource :=
-    "inductive Maybe(α : Type) where { | none; | some(value : α); }; " ++
-    "def present : Maybe(Nat) := Maybe.some(1); " ++
+    "inductive Maybe(α : Type) where { | none\n | some(value : α)\n }\n " ++
+    "def present : Maybe(Nat) := Maybe.some(1)\n " ++
     "def getOrZero(m : Maybe(Nat)) : Nat := " ++
-    "match m with { | Maybe.none => 0; | Maybe.some value => value; };"
+    "match m with { | Maybe.none => 0\n | Maybe.some value => value\n }\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -136,9 +136,9 @@ def psTestDualSourceLeanNativeStructureProjection : Bool :=
     "def user : User := User.mk 33\n" ++
     "def ageOf (u : User) : Nat := u.age"
   let proofScriptSource :=
-    "structure User where { age : Nat; }; " ++
-    "def user : User := User.mk(33); " ++
-    "def ageOf(u : User) : Nat := u.age;"
+    "structure User where { age : Nat\n }\n " ++
+    "def user : User := User.mk(33)\n " ++
+    "def ageOf(u : User) : Nat := u.age\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -158,9 +158,9 @@ def psTestDualSourceLeanNativeStructuralRecursion : Bool :=
     "def lengthR (xs : ListR Nat) : Nat := " ++
     "match xs with | ListR.nil => 0 | ListR.cons head tail => lengthR tail"
   let proofScriptSource :=
-    "inductive ListR(α : Type) where { | nil; | cons(head : α)(tail : ListR(α)); }; " ++
+    "inductive ListR(α : Type) where { | nil\n | cons(head : α, tail : ListR(α))\n }\n " ++
     "def lengthR(xs : ListR(Nat)) : Nat := " ++
-    "match xs with { | ListR.nil => 0; | ListR.cons head tail => lengthR(tail); };"
+    "match xs with { | ListR.nil => 0\n | ListR.cons head tail => lengthR(tail)\n }\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -177,9 +177,9 @@ def psTestDualSourceLeanNativeInt : Bool :=
     "def intCalc (x : Int) : Int := " ++
     "Int.sub (Int.add x (Int.ofNat 2)) (Int.neg (Int.ofNat 3))"
   let proofScriptSource :=
-    "def intOne : Int := 1; " ++
+    "def intOne : Int := 1\n " ++
     "def intCalc(x : Int) : Int := " ++
-    "Int.sub(Int.add(x, Int.ofNat(2)), Int.neg(Int.ofNat(3)));"
+    "Int.sub(Int.add(x, Int.ofNat(2)), Int.neg(Int.ofNat(3)))\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -199,10 +199,10 @@ def psTestDualSourceLeanNativeArrayBasics : Bool :=
     "let ys : Array Nat := Array.setIfInBounds xs 0 10; " ++
     "Array.getD ys 1 99"
   let proofScriptSource :=
-    "def arrayDemo(a : Nat)(b : Nat) : Nat := " ++
-    "let xs : Array(Nat) := Array.push(Array.push(Array.emptyWithCapacity(2), a), b); " ++
-    "let ys : Array(Nat) := Array.setIfInBounds(xs, 0, 10); " ++
-    "Array.getD(ys, 1, 99);"
+    "def arrayDemo(a : Nat, b : Nat) : Nat := " ++
+    "let xs : Array(Nat) := Array.push(Array.push(Array.emptyWithCapacity(2), a), b)\n " ++
+    "let ys : Array(Nat) := Array.setIfInBounds(xs, 0, 10)\n " ++
+    "Array.getD(ys, 1, 99)\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -219,8 +219,8 @@ def psTestDualSourceLeanNativeArrayMap : Bool :=
     "def arrayIdOnly (x : Nat) : Nat := x\n" ++
     "def arrayMapDemo (xs : Array Nat) : Array Nat := Array.map arrayIdOnly xs"
   let proofScriptSource :=
-    "def arrayIdOnly(x : Nat) : Nat := x; " ++
-    "def arrayMapDemo(xs : Array(Nat)) : Array(Nat) := Array.map(arrayIdOnly, xs);"
+    "def arrayIdOnly(x : Nat) : Nat := x\n " ++
+    "def arrayMapDemo(xs : Array(Nat)) : Array(Nat) := Array.map(arrayIdOnly, xs)\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -235,9 +235,9 @@ def psTestDualSourceLeanNativeArrayFoldl : Bool :=
     "def arrayFoldOnly (xs : Array Nat) : Nat := " ++
     "Array.foldl arrayKeepLeftOnly 0 xs 0 (Array.size xs)"
   let proofScriptSource :=
-    "def arrayKeepLeftOnly(acc : Nat)(x : Nat) : Nat := acc; " ++
+    "def arrayKeepLeftOnly(acc : Nat, x : Nat) : Nat := acc\n " ++
     "def arrayFoldOnly(xs : Array(Nat)) : Nat := " ++
-    "Array.foldl(arrayKeepLeftOnly, 0, xs, 0, Array.size(xs));"
+    "Array.foldl(arrayKeepLeftOnly, 0, xs, 0, Array.size(xs))\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -255,12 +255,12 @@ def psTestDualSourceLeanNativeArrayHigherOrder : Bool :=
     "let ys : Array Nat := Array.map arrayId xs; " ++
     "Array.foldl arrayKeepLeft 0 ys 0 (Array.size ys)"
   let proofScriptSource :=
-    "def arrayId(x : Nat) : Nat := x; " ++
-    "def arrayKeepLeft(acc : Nat)(x : Nat) : Nat := acc; " ++
-    "def arrayFoldDemo(a : Nat)(b : Nat) : Nat := " ++
-    "let xs : Array(Nat) := Array.push(Array.push(Array.emptyWithCapacity(2), a), b); " ++
-    "let ys : Array(Nat) := Array.map(arrayId, xs); " ++
-    "Array.foldl(arrayKeepLeft, 0, ys, 0, Array.size(ys));"
+    "def arrayId(x : Nat) : Nat := x\n " ++
+    "def arrayKeepLeft(acc : Nat, x : Nat) : Nat := acc\n " ++
+    "def arrayFoldDemo(a : Nat, b : Nat) : Nat := " ++
+    "let xs : Array(Nat) := Array.push(Array.push(Array.emptyWithCapacity(2), a), b)\n " ++
+    "let ys : Array(Nat) := Array.map(arrayId, xs)\n " ++
+    "Array.foldl(arrayKeepLeft, 0, ys, 0, Array.size(ys))\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -275,8 +275,8 @@ def psTestDualSourceLeanNativePartialApplication : Bool :=
     "def addPair (a : Nat) (b : Nat) : Nat := Nat.add a b\n" ++
     "def addOne : Nat -> Nat := addPair 1"
   let proofScriptSource :=
-    "def addPair(a : Nat)(b : Nat) : Nat := Nat.add(a, b); " ++
-    "def addOne : Nat -> Nat := addPair(1);"
+    "def addPair(a : Nat, b : Nat) : Nat := Nat.add(a, b)\n " ++
+    "def addOne : Nat -> Nat := addPair(1)\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -293,10 +293,10 @@ def psTestDualSourceLeanNativeTextPrimitives : Bool :=
     "def nextPos (s : String) (p : Nat) : Nat := String.Internal.next s p\n" ++
     "def textBytes (s : String) : Nat := String.utf8ByteSize s"
   let proofScriptSource :=
-    "def pushBang(s : String) : String := String.push(s, '!'); " ++
-    "def firstChar(s : String) : Char := String.Internal.get(s, 0); " ++
-    "def nextPos(s : String)(p : Nat) : Nat := String.Internal.next(s, p); " ++
-    "def textBytes(s : String) : Nat := String.utf8ByteSize(s);"
+    "def pushBang(s : String) : String := String.push(s, '!')\n " ++
+    "def firstChar(s : String) : Char := String.Internal.get(s, 0)\n " ++
+    "def nextPos(s : String, p : Nat) : Nat := String.Internal.next(s, p)\n " ++
+    "def textBytes(s : String) : Nat := String.utf8ByteSize(s)\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -323,12 +323,12 @@ def psTestDualSourceLeanNativeStringRawPositionBridge : Bool :=
     "(String.Internal.next s (String.Pos.Raw.mk p))"
   let proofScriptSource :=
     "def rawPositionRoundTrip(p : Nat) : Nat := " ++
-    "String.Pos.Raw.byteIdx(String.Pos.Raw.mk(p)); " ++
-    "def rawCharAt(s : String)(p : Nat) : Char := " ++
-    "String.Internal.get(s, String.Pos.Raw.mk(p)); " ++
-    "def rawNext(s : String)(p : Nat) : Nat := " ++
+    "String.Pos.Raw.byteIdx(String.Pos.Raw.mk(p))\n " ++
+    "def rawCharAt(s : String, p : Nat) : Char := " ++
+    "String.Internal.get(s, String.Pos.Raw.mk(p))\n " ++
+    "def rawNext(s : String, p : Nat) : Nat := " ++
     "String.Pos.Raw.byteIdx(" ++
-    "String.Internal.next(s, String.Pos.Raw.mk(p)));"
+    "String.Internal.next(s, String.Pos.Raw.mk(p)))\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with
@@ -346,7 +346,7 @@ def psTestDualSourceLeanNativePartialDefinition : Bool :=
   let leanSource :=
     "partial def loop (n : Nat) : Nat := loop n"
   let proofScriptSource :=
-    "partial def loop(n : Nat) : Nat := loop(n);"
+    "partial def loop(n : Nat) : Nat := loop(n)\n"
   match
       psCompileLeanSourceToTypeScript leanSource,
       psCompileProofScriptSourceToTypeScript proofScriptSource with

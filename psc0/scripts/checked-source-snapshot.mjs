@@ -2,6 +2,7 @@ import { readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { packageBySection, parseImports } from './workspace-layout.mjs';
+import { readProofScriptSource } from './proofscript-source.mjs';
 import { findSourceWorkspaceRoot, readGeneratedSourceClosure } from './selfhost-source-workspace.mjs';
 
 const stripImports = source => source.split(/\r?\n/u)
@@ -12,7 +13,7 @@ function inside(root, file) {
     throw new Error(`PSC2_CHECKED_SOURCE_ESCAPE: ${file}`);
   }
 }
-export async function readCheckedSourceSnapshot(entryPath) {
+export async function readCheckedSourceSnapshot(entryPath, { readProofScriptImports } = {}) {
   const entry = path.resolve(entryPath);
   const extension = path.extname(entry);
   if (!['.lean', '.ps'].includes(extension)) throw new Error('PSC2_CHECKED_SOURCE_KIND');
@@ -22,7 +23,10 @@ export async function readCheckedSourceSnapshot(entryPath) {
     if (!String(error.message).startsWith('PSC2_SELFHOST_WORKSPACE_NOT_FOUND:')) throw error;
     root = path.dirname(entry); // A standalone project cannot fall back to a parent source tree.
   }
-  const generated = await readGeneratedSourceClosure(entry, root);
+  if (extension === '.ps' && typeof readProofScriptImports !== 'function') {
+    throw new Error('PSC2_SOURCE_PARSER_REQUIRED');
+  }
+  const generated = await readGeneratedSourceClosure(entry, root, readProofScriptImports);
   let ordered;
   if (generated) ordered = generated.ordered;
   else {
@@ -33,8 +37,12 @@ export async function readCheckedSourceSnapshot(entryPath) {
       const actual = await realpath(file); inside(realRoot, actual);
       if (active.has(file)) throw new Error(`PSC2_CHECKED_IMPORT_CYCLE: ${file}`);
       if (visited.has(file)) return;
-      const source = await readFile(actual, 'utf8'); active.add(file);
-      for (const moduleName of parseImports(source)) {
+      const source = extension === '.ps'
+        ? await readProofScriptSource(actual) : await readFile(actual, 'utf8');
+      active.add(file);
+      const imports = extension === '.ps'
+        ? await readProofScriptImports(source, file) : parseImports(source);
+      for (const moduleName of imports) {
         if (!/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*$/u.test(moduleName)) {
           throw new Error('PSC2_CHECKED_IMPORT_NAME');
         }
@@ -60,7 +68,9 @@ export async function readCheckedSourceSnapshot(entryPath) {
   const closureSha256 = generated?.closureSha256 ?? createHash('sha256')
     .update(JSON.stringify({ entry: path.relative(root, entry).split(path.sep).join('/'), files }))
     .digest('hex');
-  const sources = Object.freeze(ordered.map(item => stripImports(item.source)).filter(Boolean));
+  const sources = Object.freeze(extension === '.ps'
+    ? ordered.map(item => item.source)
+    : ordered.map(item => stripImports(item.source)).filter(Boolean));
   return Object.freeze({ root, entry, kind: extension === '.ps' ? 'ps' : 'lean',
     ordered, closureSha256, sources, source: sources.join('\n\n') + '\n' });
 }

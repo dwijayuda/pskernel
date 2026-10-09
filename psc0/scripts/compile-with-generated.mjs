@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { readProofScriptImports, readProofScriptSource } from "./proofscript-source.mjs";
 import { findSourceWorkspaceRoot, readGeneratedSourceClosure } from "./selfhost-source-workspace.mjs";
 import { expectedTypeScriptVersion, resolveTypeScriptCli, typeScriptProfileArgs } from "./typescript-cli.mjs";
 
@@ -111,7 +112,8 @@ function sourceKind(compiler, sourcePath) {
 
 async function flattenProject(compiler, entryPath) {
   const workspaceRoot = findSourceWorkspaceRoot(entryPath);
-  const generated = await readGeneratedSourceClosure(entryPath, workspaceRoot);
+  const parsedImports = (source, file) => readProofScriptImports(compiler, source, file);
+  const generated = await readGeneratedSourceClosure(entryPath, workspaceRoot, parsedImports);
   const targetKind = sourceKind(compiler, entryPath);
   const visited = new Set();
   const ordered = [];
@@ -125,8 +127,10 @@ async function flattenProject(compiler, entryPath) {
       throw new Error(`PSC2_SELFHOST_SOURCE_MISSING: ${absolute}`);
     }
 
-    const source = await readFile(absolute, "utf8");
-    for (const moduleName of parseImports(source)) {
+    const source = absolute.endsWith(".ps")
+      ? await readProofScriptSource(absolute) : await readFile(absolute, "utf8");
+    const imports = absolute.endsWith(".ps") ? parsedImports(source, absolute) : parseImports(source);
+    for (const moduleName of imports) {
       await visit(resolveModuleSource(workspaceRoot, moduleName));
     }
     ordered.push({ path: absolute, source });
@@ -149,8 +153,9 @@ async function flattenProject(compiler, entryPath) {
             ),
             "translate",
           );
-    const body = stripImports(normalized);
-    if (body.length > 0) chunks.push(body);
+    // PS keeps exact raw bytes, including imports and leading whitespace.
+    const body = entryPath.endsWith(".ps") ? normalized : stripImports(normalized);
+    if (entryPath.endsWith(".ps") || body.length > 0) chunks.push(body);
   }
 
   return {

@@ -179,6 +179,7 @@ def psIrNativePrintErrorText (error : PsSourcePrintError) : String :=
   | .fuelExhausted => "printer: fuel exhausted"
   | .unsupportedApplication => "printer: unsupported application"
   | .emptyName => "printer: empty name"
+  | .unsupportedSourceForm message => "printer: unsupported source form: " ++ message
 
 def psIrNativeTranslationErrorText (error : PsTranslationError) : String :=
   match error with

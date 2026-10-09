@@ -1,0 +1,1082 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-r3-fixture-tooling-migration-review",
+  "repository": "dwijayuda/pskernel",
+  "baseCommit": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+  "status": "unattached-reviewed-draft-blobs-not-built-or-qualified",
+  "edits": [
+    {
+      "path": "psc0/scripts/check-elab-term-selfhost-source-syntax.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "3e88ac6c8046655cfca4d9ae12f21d014f836de7",
+      "sha": "5306449ce8dbc35874531fd70c2145d3990fe62f"
+    },
+    {
+      "path": "psc0/scripts/check-proofscript-binder-replay-source.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "17b13f0d004e5bba50189777e202bd3765b8b298",
+      "sha": "13eaf55233c997509dd3afb3ac8a7aa0afb9027d"
+    },
+    {
+      "path": "psc0/scripts/checked-algebraic-build.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "367016e64facdd73348dbcd2989798b3239a1a18",
+      "sha": "9ea0507279739f5dd7c287f103871073c923ac4c",
+      "bytes": 3194,
+      "literalChanges": 2
+    },
+    {
+      "path": "psc0/scripts/checked-build.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "4ffb0f2325e59744e9484f871735aaaf66535e0d",
+      "sha": "4ce6e464fa24aa9a15f50d410abff7f25404f188"
+    },
+    {
+      "path": "psc0/scripts/checked-build.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "fed17c24b4f9543a71285653917a7126857243a2",
+      "sha": "a2d7014e5c9cf5f2569f94a8590f42e232cfc2da"
+    },
+    {
+      "path": "psc0/scripts/checked-enum-build.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "f7c91593a9e5abc219c9c8741f23f3259787fc49",
+      "sha": "7596792cc441db094d9d4980c3186bb3219cd39c",
+      "bytes": 2388,
+      "literalChanges": 1
+    },
+    {
+      "path": "psc0/scripts/checked-projection-build.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "7c3392dbd13d4f1edcdc771ddb8dcd7c5f1f74df",
+      "sha": "18230081924ae8e839b4849896f4f006529ba38b",
+      "bytes": 2475,
+      "literalChanges": 1
+    },
+    {
+      "path": "psc0/scripts/checked-seed-session.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "d8c6d0a2c0cb33322c7c4d14fb5d7c6c548f2514",
+      "sha": "50d2985c41d5ee677943427998628fa3b515dccd"
+    },
+    {
+      "path": "psc0/scripts/checked-source-snapshot.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "273567a056c7bd903817b1f47e08faf1e8a29615",
+      "sha": "ce11c780ed74dd6a08ef8ae24ba77c6004bea9f8"
+    },
+    {
+      "path": "psc0/scripts/checked-source-snapshot.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "d68c965b1fad9b58b4eb5d9a949bec763dc51516",
+      "sha": "19d86f6b56685a03cfce7e952046a14537c967c9"
+    },
+    {
+      "path": "psc0/scripts/checked-sum-build.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "80522e323b36ddbf00743a3a395c2fb95e4cfd81",
+      "sha": "6c8b8c5e7c83bc0be284e17683f877423d4f973e",
+      "bytes": 2574,
+      "literalChanges": 1
+    },
+    {
+      "path": "psc0/scripts/checked-text-build.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "418446b0f3029e2e6bfe61aa50298beb414c058c",
+      "sha": "8ffab31ac76c2b0bcfa88a45dc9178604e0411bb",
+      "bytes": 3567,
+      "literalChanges": 1
+    },
+    {
+      "path": "psc0/scripts/compile-with-generated.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "074a0d99bc3300329832537d89a963e869df30cc",
+      "sha": "6d39b75d8c2daeea90e7a568d8d61fd551f58706"
+    },
+    {
+      "path": "psc0/scripts/emit-project-with-generated.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "97759ff31e3837ab0a928352cd844dcf81d86986",
+      "sha": "474a3d8e4134829a603163131bcd32e635d4c053"
+    },
+    {
+      "path": "psc0/scripts/LeanCheckedSeed.lean",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "fe13b2e1eb52181b145463a950670b2121c8a11c",
+      "sha": "99964ae5d3720c18b5bd2dd896ce95d54e4a594e"
+    },
+    {
+      "path": "psc0/scripts/native-workspace-isolation.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "08606583d81b97b6855122ce7700d2f8d0c53f8e",
+      "sha": "f68dc7f0bd2045cbd4479c68fea56df9afb5df8d",
+      "bytes": 2374,
+      "literalChanges": 4
+    },
+    {
+      "path": "psc0/scripts/proofscript-source.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": null,
+      "sha": "411b5dc5851a04d3fe9308515b7c4c756d95d4cd"
+    },
+    {
+      "path": "psc0/scripts/proofscript-source.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": null,
+      "sha": "f7639bbe56608665c48a2baca5b2a8cf9e1600fe"
+    },
+    {
+      "path": "psc0/scripts/reemit-project-with-generated.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "eb36603dd3b4c9d2296322f78f92b4555da38319",
+      "sha": "5f318c7633d41e8a717079e129b018035a65042a"
+    },
+    {
+      "path": "psc0/scripts/selfhost-source-isolation-tests.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "8528003c896ac1a585e56f84485394d5ee2a0814",
+      "sha": "db10f0babfe926327060d7e8c38fa18a872ceb91"
+    },
+    {
+      "path": "psc0/scripts/selfhost-source-workspace.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "16ef9cb67d0e9dfd1601af03772736ba4e6510d0",
+      "sha": "f7c0449eb0463ffea519b040620df0b3632f44d5"
+    },
+    {
+      "path": "psc0/scripts/translate-with-generated.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "4ba36593e82f2da0b76b8db7fa5bfa1203e1c3b9",
+      "sha": "459f6bcb03747ea5aaae8361f8701c68efdcc4ce"
+    },
+    {
+      "path": "psc0/test/BootstrapTests.lean",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "6ebab050850d5a86422a3a7b4c00c2e339af5035",
+      "sha": "fa476bb5b6ad84454b7a747bb8a41b1190735a18",
+      "bytes": 97727,
+      "literalChanges": 31
+    },
+    {
+      "path": "psc0/test/ErasureTests.lean",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "9031748f154d7d82d94461619c5b2d5d982a84a0",
+      "sha": "f090c97eaaebb28899cb8b72e19532e0a9e6524f",
+      "bytes": 18302,
+      "literalChanges": 40
+    },
+    {
+      "path": "psc0/test/TranslationTests.lean",
+      "mode": "100644",
+      "type": "blob",
+      "oldSha": "cd7f3219b328211195c90327dd91c7085c04818d",
+      "sha": "81075a3fa540386bb3be22dd33675661f1ec05dd",
+      "bytes": 8770,
+      "literalChanges": 14
+    }
+  ],
+  "coverage": {
+    "existingScriptFiles": 189,
+    "existingRootTestFiles": 9,
+    "referencedFixtureFiles": 14,
+    "compilerSourceClosure": 61,
+    "nativeHostFiles": 4,
+    "languageAndScope": "Current PS syntax literal contents and canonical-output assertions; host import discovery/UTF-8/raw-source boundaries; native checked-seed parser-only adapter. Provider/kernel implementations excluded."
+  },
+  "behavior": {
+    "rawPS": "Six current PS file-entry consumers share fatal UTF-8 decoding with ignoreBOM:true; source modules retain raw imports and leading bytes.",
+    "imports": "Four current JavaScript resolver modules obtain imports through the selected compiler parser AST. The checked-build coordinator supplies generated or native actual-parser adapters. Generated cons/nil constructor tags are mandatory; malformed import tails cannot become an empty dependency list.",
+    "nativeBootstrap": "LeanCheckedSeed --source-imports-ps reads stdin using the existing fatal native UTF-8 reader, parses with psParseProofScriptSource, prints PsSyntaxName module names as JSON, and performs no admission/emission work.",
+    "nativeGrammarFixtures": "One comma explicit declaration/constructor group, semicolon-free commands/matches/fields/lets, prefix-only implicit declarations, explicit Unit f(()), preserved empty f() AST with elaboration rejection, spaced application acceptance.",
+    "effects": "Lean do desugaring tests retained; new PS do explicitly rejected; explicit compilerBind/Pure calls retain the same translation semantics.",
+    "publicSemantics": "Existing kernel gates, provider selection, admission encoding, prepared-session integrity, realpath boundaries, generated manifest identity/hash validation, module ordering and cycle checks retained.",
+    "historical": "No historical seed/recovery blob, receipt, profile identity, or pinned Lean fixture changed; old PS inputs must be paired with their frozen compiler revision, not a new-parser compatibility fallback.",
+    "compilerGrammarIdentity": "Current generated PS source readers and PS-producing translate/reemit/emit commands require the exact edition, new-only mode, and reference digest exported by the generated compiler. Module namespaces are checked once without a parser replay; historical A raw-Lean recovery does not pass through these host PS helpers.",
+    "generatedProjectMetadata": "PS project emission writes languageVersion 0.9-r3 plus the shared bounded sh1GrammarProfile, after requiring the compiler's matching grammar identity. Existing implementationProfile PSC1 and acceptedLanguageProfile PSC2-bootstrap are preserved."
+  },
+  "evidence": {
+    "nativeLiteralEdits": 85,
+    "javascriptLiteralEditsBeforeLoader": 15,
+    "additionalDynamicSeparatorEdit": "checked-seed-session.test.mjs",
+    "bootstrapRegisteredTestCount": {
+      "before": 70,
+      "after": 75
+    },
+    "translationAddedRegisteredTests": 3,
+    "reviewedOnly": "In-memory syntax parse of edited JavaScript with imports removed and async function wrapper; no repository code executed. Lean/test/runtime/CI qualification is pending parent integration.",
+    "enumRendererSweep": {
+      "hostTreeSha": "2b23150b27ba4d6ce626765ba3384aff34c8ebc0",
+      "hostTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "psc0/host/src/Ps/Host/CompilerDriver.lean",
+          "sha": "1549569bf74a55c194a3361e7a011aa866fcd4b8"
+        },
+        {
+          "path": "psc0/host/src/Ps/Host/LeanChecked.lean",
+          "sha": "b6998e8dd5210848873cb083a206ae7d6aa46b39"
+        },
+        {
+          "path": "psc0/host/src/Ps/Host/ProjectCompiler.lean",
+          "sha": "17c34d06ef955f8a227eefbfddca848096816fce"
+        },
+        {
+          "path": "psc0/host/src/Ps/Host/TypeScriptCompiler.lean",
+          "sha": "babdd2d634540358c6f18d410b04bec5a2d03f6b"
+        },
+        {
+          "path": "psc0/scripts/JointClosureInventory.lean",
+          "sha": "e72e6d12b3463f5e4b137642fe174df4f1859059"
+        },
+        {
+          "path": "psc0/scripts/LeanCheckedSeed.lean",
+          "sha": "fe13b2e1eb52181b145463a950670b2121c8a11c"
+        },
+        {
+          "path": "psc0/scripts/SelfhostReplayAudit.lean",
+          "sha": "5d7bf2e1df15f47c4531272ea61b5c2db1332beb"
+        }
+      ],
+      "result": "Only Host/ProjectCompiler PsLexError/PsElabError exhaustive renderers need parent-owned edits; no additional PsSourcePrintError renderer in host/src or scripts/*.lean. test/IrCheckerTests.psIrNativePrintErrorText is also parent-owned."
+    },
+    "guardReview": {
+      "termBlob": "9ac9e1bd45f257c9a1f86e4b23072c952c985c0b",
+      "recursionBlob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+      "result": "One typed projection-base textual marker updated to Prod.fst selected plus explicit PsResolvedName constructors and List.nil; existing typed PsExpr and Option source restrictions retained. TermWithFuel wrapper keeps all existing required patterns. No script in scope directly asserts the Recursion worker/rename function source spellings."
+    },
+    "compilerGrammarIdentity": {
+      "requiredExports": [
+        "psProofScriptGrammarEdition",
+        "psProofScriptGrammarMode",
+        "psProofScriptGrammarReferenceSha256"
+      ],
+      "negativeCases": [
+        "missing historical identity",
+        "mismatched edition",
+        "mismatched mode",
+        "mismatched reference digest"
+      ],
+      "parseCalledForRejectedCompiler": false,
+      "fixedParserDoublesUpdated": [
+        "scripts/proofscript-source.test.mjs",
+        "scripts/selfhost-source-isolation-tests.mjs"
+      ],
+      "metadataScan": "All 189 direct scripts and 9 root Lean tests scanned. No languageVersion 0.7 assertion or psconfig unknown-key allowlist; only the current generated-project metadata producer needed the new grammar marker."
+    }
+  },
+  "rootOwned": [
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "sha": "8fc169a3ac9a3400e8ec1c4be8896e25b92c9e8a"
+    },
+    {
+      "path": "psc0/scripts/sh1-capabilities.mjs",
+      "sha": "c5455b0af6536a56c37895a8ec74e3d7f8937c3f"
+    },
+    {
+      "path": "psc0/test/IrCheckerTests.lean",
+      "sha": "a77b0fe86484f1d9444c791fd9c2057a7404e083"
+    }
+  ],
+  "untouchedExistingFiles": [
+    {
+      "path": "psc0/scripts/bootstrap-closure-contract.mjs",
+      "sha": "fcd205d16735446545aaa6bbf5b35584c0c21454"
+    },
+    {
+      "path": "psc0/scripts/check-bootstrap-closure.mjs",
+      "sha": "13eb4b6f32de70123fd613b099e5bdcedf790787"
+    },
+    {
+      "path": "psc0/scripts/check-elab-app-view-selfhost-source-syntax.mjs",
+      "sha": "8c98439bb7bb58c07cd1c29ae6c65d9019928895"
+    },
+    {
+      "path": "psc0/scripts/check-elab-apply-args-next-pending-selfhost-source-syntax.mjs",
+      "sha": "8e45c31b8461e4b368fc4dace6f6b323aa963bd1"
+    },
+    {
+      "path": "psc0/scripts/check-elab-apply-args-option-selfhost-source-syntax.mjs",
+      "sha": "7f5321e27741e2f8b1309a6fb17aa522ad0c6d41"
+    },
+    {
+      "path": "psc0/scripts/check-elab-apply-args-recursion-selfhost-source-syntax.mjs",
+      "sha": "6c04bcecb7a80edc7ab19f151827c1788abc6927"
+    },
+    {
+      "path": "psc0/scripts/check-elab-apply-many-selfhost-source-syntax.mjs",
+      "sha": "d438b095e1b99799ef841b2d9abb05a52da51eab"
+    },
+    {
+      "path": "psc0/scripts/check-elab-binder-arguments-selfhost-source-syntax.mjs",
+      "sha": "7473594307407fe2bc1332aaa4e0468cc11c4235"
+    },
+    {
+      "path": "psc0/scripts/check-elab-close-implicit-binders-selfhost-source-syntax.mjs",
+      "sha": "f7096a54fabf26b50d008f9ac1e9cc65a9cdc8db"
+    },
+    {
+      "path": "psc0/scripts/check-elab-close-match-fields-selfhost-source-syntax.mjs",
+      "sha": "77fa82b420f15e4515d3357770eaddd846826ea4"
+    },
+    {
+      "path": "psc0/scripts/check-elab-context-selfhost-source-syntax.mjs",
+      "sha": "673648c748b0d0d3d0671c5215f97157259194ee"
+    },
+    {
+      "path": "psc0/scripts/check-elab-declaration-batch-selfhost-source-syntax.mjs",
+      "sha": "f1b8da34b64d0b36bf173454c160d3ad72926d71"
+    },
+    {
+      "path": "psc0/scripts/check-elab-declaration-structural-recursion-selfhost-source-syntax.mjs",
+      "sha": "bdd477e240891b056900411e7e2f2c8b040a6585"
+    },
+    {
+      "path": "psc0/scripts/check-elab-declarations-selfhost-source-syntax.mjs",
+      "sha": "14beb0855b02afc2efa465483931ee654b36432b"
+    },
+    {
+      "path": "psc0/scripts/check-elab-drop-forall-option-selfhost-source-syntax.mjs",
+      "sha": "aa5eda1f81b4e405f2e5da3a1de130ee5428ab4b"
+    },
+    {
+      "path": "psc0/scripts/check-elab-fill-wildcard-selfhost-source-syntax.mjs",
+      "sha": "0116f5e8fc192df35956e35179223c194b0ecfcd"
+    },
+    {
+      "path": "psc0/scripts/check-elab-forall-selfhost-source-syntax.mjs",
+      "sha": "6a5d401f8b8c7863aedbf5ea34239e6d354763ad"
+    },
+    {
+      "path": "psc0/scripts/check-elab-has-const-selfhost-source-syntax.mjs",
+      "sha": "455d3f244a5722e762ee726636d0fe5631ab1119"
+    },
+    {
+      "path": "psc0/scripts/check-elab-if-selfhost-source-syntax.mjs",
+      "sha": "8e014dcb6e6915a2d6309373e3fcfb26d38e8f34"
+    },
+    {
+      "path": "psc0/scripts/check-elab-inductive-constructor-names-selfhost-source-syntax.mjs",
+      "sha": "60da42ad533dba2c2f29ee159604101d9b287572"
+    },
+    {
+      "path": "psc0/scripts/check-elab-inductive-constructors-selfhost-source-syntax.mjs",
+      "sha": "37358adeced278323521b5dd2478e65ecaee76c3"
+    },
+    {
+      "path": "psc0/scripts/check-elab-inductive-declaration-selfhost-source-syntax.mjs",
+      "sha": "bb21e643647bb341177fb6a8df3a32e33cdf11df"
+    },
+    {
+      "path": "psc0/scripts/check-elab-lambda-expected-selfhost-source-syntax.mjs",
+      "sha": "a7919cd81e1b65b2761d8c23a797c4506766d7df"
+    },
+    {
+      "path": "psc0/scripts/check-elab-lambda-selfhost-source-syntax.mjs",
+      "sha": "1a5d0da09c79689770856ed1a61fdefd58088324"
+    },
+    {
+      "path": "psc0/scripts/check-elab-let-selfhost-source-syntax.mjs",
+      "sha": "7c5b3a81f019b633633767d858a6a583317902c4"
+    },
+    {
+      "path": "psc0/scripts/check-elab-literal-selfhost-source-syntax.mjs",
+      "sha": "753091172a473a3d1c0ca60051339f5e8ef35149"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-alternative-find-selfhost-source-syntax.mjs",
+      "sha": "c7192b1dc1a436b363ca39746030d84ae4c57d76"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-apply-parameters-selfhost-source-syntax.mjs",
+      "sha": "1e14336aa10e86c4c6975e4c4467021e5295777e"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-constructor-minor-selfhost-source-syntax.mjs",
+      "sha": "07bc91c2d9229601c1253696114fe0965de7a0aa"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-fields-selfhost-source-syntax.mjs",
+      "sha": "3c46e59723e8c9a18541e5bc6a80fe7bff05547c"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-list-append-selfhost-source-syntax.mjs",
+      "sha": "93d1fd3e36bf148072239a35b0d325532b4c00cf"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-minor-selfhost-source-syntax.mjs",
+      "sha": "1e0ca45f3d5195ffa5c0b04f7944487dfd439d4f"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-minors-selfhost-source-syntax.mjs",
+      "sha": "f7c0c3f9db060513aa2ffecb5419735b84b6d982"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-name-list-selfhost-source-syntax.mjs",
+      "sha": "30fe526550d5946a34cd10df250cea98db62c13a"
+    },
+    {
+      "path": "psc0/scripts/check-elab-match-selfhost-source-syntax.mjs",
+      "sha": "fbf097507238924f9af8bdeab0a9ee1dce8d6b38"
+    },
+    {
+      "path": "psc0/scripts/check-elab-partial-declaration-selfhost-source-syntax.mjs",
+      "sha": "deab938c37474e439bfd95e4bb3f6701a61e10e9"
+    },
+    {
+      "path": "psc0/scripts/check-elab-prepare-match-selfhost-source-syntax.mjs",
+      "sha": "2180fcd26acf6a855d7114d294e2fa88934c8eeb"
+    },
+    {
+      "path": "psc0/scripts/check-elab-prepend-batch-reverse-selfhost-source-syntax.mjs",
+      "sha": "db214ec6b1fc7d000a5683bbbf2d3d6eb6618869"
+    },
+    {
+      "path": "psc0/scripts/check-elab-record-candidates-selfhost-source-syntax.mjs",
+      "sha": "2c578fbdf74e025cf32cac39447efcbb4b660ae2"
+    },
+    {
+      "path": "psc0/scripts/check-elab-recursor-minor-binders-selfhost-source-syntax.mjs",
+      "sha": "da45428ad1eb23373081c7eefc3a47e5a438936f"
+    },
+    {
+      "path": "psc0/scripts/check-elab-solve-pending-recursion-selfhost-source-syntax.mjs",
+      "sha": "7468f8dafad900163a4f8cf253fd9e88339bfdf2"
+    },
+    {
+      "path": "psc0/scripts/check-elab-structural-recursion-source-selfhost-source-syntax.mjs",
+      "sha": "52905742a45273468465fd60c6d79eb8927db949"
+    },
+    {
+      "path": "psc0/scripts/check-elab-structure-declaration-selfhost-source-syntax.mjs",
+      "sha": "2186de2b0de2fbd8e41e1fdd930fa0192b855224"
+    },
+    {
+      "path": "psc0/scripts/check-elab-syntax-local-id-selfhost-source-syntax.mjs",
+      "sha": "672e2cd7c66a7ea423943f8c9b0434adf43f4fa9"
+    },
+    {
+      "path": "psc0/scripts/check-elab-syntax-name-duplicates-selfhost-source-syntax.mjs",
+      "sha": "a37b557f1d96ad11607f20f9d77d03c2aad8a83f"
+    },
+    {
+      "path": "psc0/scripts/check-elab-take-forall-names-selfhost-source-syntax.mjs",
+      "sha": "6945b4960318819facd2dee644c32f0160ef5169"
+    },
+    {
+      "path": "psc0/scripts/check-elab-term-with-fuel-selfhost-source-syntax.mjs",
+      "sha": "79864a8e2971e1ea724ca626c2f9911fc4e5f479"
+    },
+    {
+      "path": "psc0/scripts/check-elab-try-structural-self-call-selfhost-source-syntax.mjs",
+      "sha": "88c6440925a1af631231e7827a0b62322112c175"
+    },
+    {
+      "path": "psc0/scripts/check-elab-validate-structural-call-selfhost-source-syntax.mjs",
+      "sha": "8f2fa8b8702700bc6214d46a1323cf5fe6a1d880"
+    },
+    {
+      "path": "psc0/scripts/check-elab-wildcard-binder-names-selfhost-source-syntax.mjs",
+      "sha": "5cd255309682549c440022d163490699b8eee893"
+    },
+    {
+      "path": "psc0/scripts/check-elab-wrap-recursive-hypotheses-selfhost-source-syntax.mjs",
+      "sha": "0e42ae8f28b1e4ce639c17e709af654f28b15e26"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-add-unique-string-selfhost-source-syntax.mjs",
+      "sha": "a4d95a6b545b6836436b153f1d386dc31bd202a1"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-application-arguments-cons-selfhost-source-syntax.mjs",
+      "sha": "5db02b099e09fae05747f19f70ee5f269b2beb17"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-condition-sequencing-selfhost-source-syntax.mjs",
+      "sha": "f43a3046bf1fdd96d058d0ce87f02f1e3bce7da2"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-core-module-sequencing-selfhost-source-syntax.mjs",
+      "sha": "b26c2e0bc0ab919f7ad02d92571a648c0c449b63"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-declaration-names-selfhost-source-syntax.mjs",
+      "sha": "ae8ee243fa1c4dee77787f00c276f4e10d30d4f2"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-definition-selfhost-source-syntax.mjs",
+      "sha": "ed44d55dc1d8b3116e329dd03dc46ace3818db2b"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-definitions-loop-selfhost-source-syntax.mjs",
+      "sha": "de68947fb59c877e27fa75277c9ccf485e55d751"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-expr-operators-selfhost-source-syntax.mjs",
+      "sha": "4845c3264cb64105c8abb990da37be5cd1294313"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-finish-application-append-selfhost-source-syntax.mjs",
+      "sha": "7b429a4c096ba19e6d7d674cc6106658c9d6da10"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-finish-application-cons-selfhost-source-syntax.mjs",
+      "sha": "ae3afc656c5a8185ce6622f0441af4280f361802"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-finish-application-sequencing-selfhost-source-syntax.mjs",
+      "sha": "a8c352d39fbfccc3b477e7d693407cf9513c8a8f"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-inductive-parameters-selfhost-source-syntax.mjs",
+      "sha": "5acb740d32a109cb2842c58e52022712da9dc745"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-ite-argument-index-selfhost-source-syntax.mjs",
+      "sha": "717e9021dbb139834f3ed32203f810cd78ad8381"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-ite-equality-selfhost-source-syntax.mjs",
+      "sha": "5bc3dd12d24050ab3ec27a93e163efd0b2c61820"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-open-definition-selfhost-source-syntax.mjs",
+      "sha": "fe40983856572bb46200d276dc7845f8b1bc26c2"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-primitive-application-conjunction-selfhost-source-syntax.mjs",
+      "sha": "1548ae5b7e3970d86109cd08d42007dcb004c49f"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-primitive-application-disjunction-selfhost-source-syntax.mjs",
+      "sha": "4618dbcda693f1ba0566e63968aef2ae534227ca"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-primitive-application-equality-selfhost-source-syntax.mjs",
+      "sha": "8d47e3ace5accf388dd928cde6e1b98e6f8d2392"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-primitive-application-sequencing-selfhost-source-syntax.mjs",
+      "sha": "2ac96c7a88104fc1f14564ba34b1cf1f3cae77b3"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-selected-arguments-cons-selfhost-source-syntax.mjs",
+      "sha": "cb5e2b2b01de79e7a0401587efed8f679f61fd9a"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-selected-arguments-index-selfhost-source-syntax.mjs",
+      "sha": "b831e2bb32c8d674282b14245f6a5f7a6a5bb40f"
+    },
+    {
+      "path": "psc0/scripts/check-infer-selfhost-source-syntax.mjs",
+      "sha": "3d887722f58c234c8c23a15f9625eaabb1586d09"
+    },
+    {
+      "path": "psc0/scripts/check-instances-selfhost-source-syntax.mjs",
+      "sha": "dfea0f612f867d29e513f39cd7b8b9270cc70c8e"
+    },
+    {
+      "path": "psc0/scripts/check-selfhost-source-syntax.mjs",
+      "sha": "7643c5bbc6f863e0cdd4d9f8ac29344ff1382543"
+    },
+    {
+      "path": "psc0/scripts/check-synth-instance-selfhost-source-syntax.mjs",
+      "sha": "14c35518de52374986f0547f7adc38bc4a9d99af"
+    },
+    {
+      "path": "psc0/scripts/check-unify-selfhost-source-syntax.mjs",
+      "sha": "32b59a633bc0edcbddd94330c8975f69a32f4231"
+    },
+    {
+      "path": "psc0/scripts/check-admission-height-index-source.mjs",
+      "sha": "08656dbbff61cac000dfd0d276ac2316098094f3"
+    },
+    {
+      "path": "psc0/scripts/check-backend-ts-replay-source.mjs",
+      "sha": "511660c15bb4a0c7eea6a33121ad35c870c0d39e"
+    },
+    {
+      "path": "psc0/scripts/check-count-fold-source.mjs",
+      "sha": "c2541bfc723776fe79b65a03b0ea6e012fb3df4f"
+    },
+    {
+      "path": "psc0/scripts/check-environment-index-source.mjs",
+      "sha": "365b73924f9c111c2ccdfb9cd3a6c9bcab0bbfd5"
+    },
+    {
+      "path": "psc0/scripts/check-eta-inline-source.mjs",
+      "sha": "8cb886b2c51d8d04753911a558ced022b1769f90"
+    },
+    {
+      "path": "psc0/scripts/check-function-result-erasure-source.mjs",
+      "sha": "deba42bc88ab7b14bd552b1d2e22f3c2c23b78cb"
+    },
+    {
+      "path": "psc0/scripts/check-json-tail-conversion-source.mjs",
+      "sha": "69aa2fb50795c2df98363818780a410651cb5050"
+    },
+    {
+      "path": "psc0/scripts/check-lexer-input-bound-source.mjs",
+      "sha": "9fbabd388a7c23a56e1c48e8730834f00c894b61"
+    },
+    {
+      "path": "psc0/scripts/check-meta-instantiation-stop-source.mjs",
+      "sha": "abc8b8e8873951125ac464074e915af560e4daf0"
+    },
+    {
+      "path": "psc0/scripts/check-modular-preparation-source.mjs",
+      "sha": "7ed26f6dd903c74cb0794d9393a11a28977795e3"
+    },
+    {
+      "path": "psc0/scripts/check-nat-recursor-erasure-source.mjs",
+      "sha": "0e39ad2702c59d20e28659446fcfd05d43449da3"
+    },
+    {
+      "path": "psc0/scripts/check-native-replay-host-source.mjs",
+      "sha": "29c0405aad7459b5c06151487bfc19de9e292871"
+    },
+    {
+      "path": "psc0/scripts/check-nested-admission-source.mjs",
+      "sha": "14a1834d09f9793cdbf5dedbeb37aa6627299624"
+    },
+    {
+      "path": "psc0/scripts/check-owned-kernel-default-source.mjs",
+      "sha": "992c88076e579ec496c4aec5081028cd3759a432"
+    },
+    {
+      "path": "psc0/scripts/check-replay-emission-source.mjs",
+      "sha": "c5ef93aba675efe82c7702f91ebc205b897335a6"
+    },
+    {
+      "path": "psc0/scripts/check-selfhost-foundation-source.mjs",
+      "sha": "4416ec1cfe83790a6f591fdda95df1aa3e1091a5"
+    },
+    {
+      "path": "psc0/scripts/check-selfhost-prod-source.mjs",
+      "sha": "0be5a250ce64c58e423a8ee079ca75e998559da7"
+    },
+    {
+      "path": "psc0/scripts/check-selfhost-totality-source.mjs",
+      "sha": "75d8fe87c0aaeb1d96c02be88d4c6efae1b62e50"
+    },
+    {
+      "path": "psc0/scripts/check-stack-safe-ts-source.mjs",
+      "sha": "ec7cc63f5b71626bb3b058be4ab5b42f74c07544"
+    },
+    {
+      "path": "psc0/scripts/check-tail-loop-source.mjs",
+      "sha": "e9f5be53dd34c3e15bbbab3b4179324a4b4e8d6b"
+    },
+    {
+      "path": "psc0/scripts/workspace-layout.mjs",
+      "sha": "eb7c2c07f147a812f9998904a60123b3719e5539"
+    },
+    {
+      "path": "psc0/scripts/sh1-source-snapshot.mjs",
+      "sha": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+    },
+    {
+      "path": "psc0/scripts/sh1-seed-manifest.mjs",
+      "sha": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
+    },
+    {
+      "path": "psc0/scripts/JointClosureInventory.lean",
+      "sha": "e72e6d12b3463f5e4b137642fe174df4f1859059"
+    },
+    {
+      "path": "psc0/scripts/SelfhostReplayAudit.lean",
+      "sha": "5d7bf2e1df15f47c4531272ea61b5c2db1332beb"
+    },
+    {
+      "path": "psc0/scripts/bootstrap-closure-contract-tests.mjs",
+      "sha": "b8c5780c542d6bc19764fe820dd3ccf2d188058a"
+    },
+    {
+      "path": "psc0/scripts/bootstrap-manifest-tests.mjs",
+      "sha": "8d96be0f54e995bf0275613b3a1ac023a6c15517"
+    },
+    {
+      "path": "psc0/scripts/bootstrap-manifest.mjs",
+      "sha": "ceb965192e6ba70046d7fe7769c9917063a4fb4e"
+    },
+    {
+      "path": "psc0/scripts/bootstrap-project.mjs",
+      "sha": "734db05bccdd777f3cb1fa95aa9904e36caa9926"
+    },
+    {
+      "path": "psc0/scripts/bootstrap-root-minimality-tests.mjs",
+      "sha": "225d201a1ec0fd275a067e70f32e51daecd95dfb"
+    },
+    {
+      "path": "psc0/scripts/build-auto.mjs",
+      "sha": "0a2d934abe5d9ed2e1452737814b11b2d27637ba"
+    },
+    {
+      "path": "psc0/scripts/build-current.mjs",
+      "sha": "764180cb61b89770047ddab11608273c1d540f81"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-basic-source-syntax.mjs",
+      "sha": "0d04e8c057fd6eed52468fd8ff6fbeb9dfc02930"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-expression-flat-matches.mjs",
+      "sha": "47363073ae12cb77e6c3c2d14359ef1c73f9c846"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-match-alternatives-source-syntax.mjs",
+      "sha": "e3275c99f1c91a71fdd5dac588a8fa60c068f217"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-match-minor-sequencing-source-syntax.mjs",
+      "sha": "b4a17f52d76a327a4f75a1119cd8a44a55760b26"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-open-match-hypotheses-source-syntax.mjs",
+      "sha": "cc86c07973eaa16ae06b8b47490ae0a9f0a7d93a"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-open-match-minor-fields-source-syntax.mjs",
+      "sha": "8e3b283d833354d73aefbbe287d8e820ce903feb"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-recursive-call-arguments-source-syntax.mjs",
+      "sha": "331dd6275fce7348223444f896fee9d55fcb4f31"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-replay-workers.mjs",
+      "sha": "e947be4a26c4d877b5586b7b80ec3b5b5b55c4e0"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-runtime-aggregate-source-syntax.mjs",
+      "sha": "c619bd40e7dda6cda3ad0bec38481781aa3517e0"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-runtime-recursor-source-syntax.mjs",
+      "sha": "a06ef23b47acf65b6f5dd074375be0b49d99a195"
+    },
+    {
+      "path": "psc0/scripts/check-ir-neutrality.mjs",
+      "sha": "5b1eb09ef67c5533430187edc6442f88e9ab0627"
+    },
+    {
+      "path": "psc0/scripts/check-layout-drift.mjs",
+      "sha": "42a6e05e645ff16757fcb3f2fa2997e3835bd641"
+    },
+    {
+      "path": "psc0/scripts/check-prelude-declaration-parity.mjs",
+      "sha": "2a4e231fb358e4675dc98fb7076ae65cfe891650"
+    },
+    {
+      "path": "psc0/scripts/check-selfhost-foundation.mjs",
+      "sha": "16f74978cc872878970ac93a9dd271af86c99c82"
+    },
+    {
+      "path": "psc0/scripts/check-selfhost-project-prelude.mjs",
+      "sha": "93f1ceb2618381c0d2248b3b423fdbd1cb835052"
+    },
+    {
+      "path": "psc0/scripts/check-semantic-boundaries.mjs",
+      "sha": "d0de7d57b0aa4b8f60be92447bd20c40125bcbd5"
+    },
+    {
+      "path": "psc0/scripts/check-structure-recursor-normalization.mjs",
+      "sha": "705e6a078b862644579782be39367efbd02389fc"
+    },
+    {
+      "path": "psc0/scripts/check-typescript-profile.mjs",
+      "sha": "74a208d54f69cd50feadb140b6a11cbe4d150ed0"
+    },
+    {
+      "path": "psc0/scripts/check-workspace.mjs",
+      "sha": "95a9f8e50424bd3dab52c42cec503da2a37d6475"
+    },
+    {
+      "path": "psc0/scripts/checked-erasure-name-index.test.mjs",
+      "sha": "b052ade8e67dbe4531abbf8b1971a443de650169"
+    },
+    {
+      "path": "psc0/scripts/checked-joint-inventory.test.mjs",
+      "sha": "40c3828570e2a18945c74bc52f4d2edb313d32e3"
+    },
+    {
+      "path": "psc0/scripts/checked-kernel-identity.mjs",
+      "sha": "ca5eaec2614aeae75eba9dcd0d55b341206ef0be"
+    },
+    {
+      "path": "psc0/scripts/checked-kernel-provider.mjs",
+      "sha": "78631e05e72f4a27c7447af16e2dccbccb085831"
+    },
+    {
+      "path": "psc0/scripts/checked-kernel-provider.test.mjs",
+      "sha": "f145df7eb6845522975fe36c61bb3ff180c54d29"
+    },
+    {
+      "path": "psc0/scripts/checked-owned-kernel-worker.mjs",
+      "sha": "b50f1c641936f801aec16dcaa48d288b3f53f080"
+    },
+    {
+      "path": "psc0/scripts/checked-owned-kernel.mjs",
+      "sha": "d904517a6a2a48dac8be8c5c6ab2bfb56cc711e5"
+    },
+    {
+      "path": "psc0/scripts/checked-prepared-session.mjs",
+      "sha": "83ba92db02c6e289e59f2d1a32011d581fbe2993"
+    },
+    {
+      "path": "psc0/scripts/checked-prepared-session.test.mjs",
+      "sha": "70f50956bced5f987a0304d414bc6a115018dfac"
+    },
+    {
+      "path": "psc0/scripts/checked-provider-adapter.test.mjs",
+      "sha": "efd3dd82be0555d850f51511a716f57f5820c938"
+    },
+    {
+      "path": "psc0/scripts/checked-seed-session.mjs",
+      "sha": "7964b675f1d78fdb8e1bef4e032e44deb58fe6fd"
+    },
+    {
+      "path": "psc0/scripts/checked-selfhost-preflight.test.mjs",
+      "sha": "83a0bf3b4450da2023456539661000e28f22b96c"
+    },
+    {
+      "path": "psc0/scripts/checked-selfhost.mjs",
+      "sha": "30dfb91f9d0395ae229c44ac73197343f6e8d7a7"
+    },
+    {
+      "path": "psc0/scripts/checked-source-profile-opaque.test.mjs",
+      "sha": "7ae7bf67f36fef1f3704aa785af6e3a6b37915ce"
+    },
+    {
+      "path": "psc0/scripts/checked-wasm-provider-hardening.test.mjs",
+      "sha": "3e88979733ac0861ac761be39a89195d0d491bee"
+    },
+    {
+      "path": "psc0/scripts/clean.mjs",
+      "sha": "b052556965a4b5d2ca0d4ec532f767737dbc9022"
+    },
+    {
+      "path": "psc0/scripts/compare-selfhost.mjs",
+      "sha": "154a5044425fc66468c38e4b7c7cb2209f081960"
+    },
+    {
+      "path": "psc0/scripts/compare-source-workspaces.mjs",
+      "sha": "ec8e59783b7c3138b7f3f8a2c10aaa673cbb806b"
+    },
+    {
+      "path": "psc0/scripts/fixed-point-command-tests.mjs",
+      "sha": "90667d0c678fe04fad5be097ae39de971f6786a4"
+    },
+    {
+      "path": "psc0/scripts/generated-preparation-session.mjs",
+      "sha": "ff8e9e97043d164b0ac5e26b03ac0159af8d3280"
+    },
+    {
+      "path": "psc0/scripts/native-typescript-cli.test.mjs",
+      "sha": "50652f18d5c2ec1fdca0c6753ed0ed04ab9a8d53"
+    },
+    {
+      "path": "psc0/scripts/original-ir-carrier.mjs",
+      "sha": "c1548dbbcbb189a86646431cdfac77a003fd5d85"
+    },
+    {
+      "path": "psc0/scripts/original-ir-inventory.mjs",
+      "sha": "cd4dd0c4e9d6709d7de1652382b9cee7a8b39c25"
+    },
+    {
+      "path": "psc0/scripts/reference-docs-audit.mjs",
+      "sha": "03226ec117e76fc19f16771d8749c00fd85ecc1c"
+    },
+    {
+      "path": "psc0/scripts/selfhost-generation.mjs",
+      "sha": "d59063200c07ea10fe09df1d19079ba47c6ba002"
+    },
+    {
+      "path": "psc0/scripts/selfhost-replay-audit.mjs",
+      "sha": "1d64ca0113e6ce5f00de039bf515508c6b398978"
+    },
+    {
+      "path": "psc0/scripts/selfhost-replay-runtime.test.mjs",
+      "sha": "6c06c38905c26313d5eb1bc55aef4c2e021bfa8e"
+    },
+    {
+      "path": "psc0/scripts/semantic-boundaries.mjs",
+      "sha": "cf3506d152f6350b2bfcdfc1fd21072b7657d5ec"
+    },
+    {
+      "path": "psc0/scripts/semantic-boundary-tests.mjs",
+      "sha": "f33a93adf13f52cb07d73c7315e3cc6775921199"
+    },
+    {
+      "path": "psc0/scripts/sh1-check-admissions.mjs",
+      "sha": "0ec7ef9941d59c0c9f00d2cc1a5514b262e4d03e"
+    },
+    {
+      "path": "psc0/scripts/sh1-foundation-conformance.mjs",
+      "sha": "5b8e6d571629551436dcf0403035e15a5bb8115b"
+    },
+    {
+      "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+      "sha": "91a18f1cd26eeec36d720a8acbca6a79a3a9b1ab"
+    },
+    {
+      "path": "psc0/scripts/sh1-helper-conformance.mjs",
+      "sha": "dccef2f8dcf0845c2d047996a3a98eaa6929f65c"
+    },
+    {
+      "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+      "sha": "b3b71e56f701478dfd12a373b94c75469e74161e"
+    },
+    {
+      "path": "psc0/scripts/sh1-iterate.mjs",
+      "sha": "185d0fa4b65529e56bb560e6a22a7af9519dd887"
+    },
+    {
+      "path": "psc0/scripts/sh1-iteration-conformance.mjs",
+      "sha": "ef7ceca2ee8fdaf6cbc16dddce7c988d7090a4fa"
+    },
+    {
+      "path": "psc0/scripts/source-profile-opaque.mjs",
+      "sha": "b062c3b1475c8b4510f020b39908a7731c3cd4e8"
+    },
+    {
+      "path": "psc0/scripts/summarize-joint-inventory.mjs",
+      "sha": "f29dbbe29d13ee53cf7a386a58d967dcbcd4e04e"
+    },
+    {
+      "path": "psc0/scripts/typescript-cli.mjs",
+      "sha": "f9cda7f8d3d819407f8e4ebcc427ab3b3d84d9f6"
+    },
+    {
+      "path": "psc0/test/BackendTsTests.lean",
+      "sha": "f2184571aa9ef01d82d36285486a7377517a13b3"
+    },
+    {
+      "path": "psc0/test/BridgeTests.lean",
+      "sha": "e5d99c4af4ecf0b0aa35f52a85fe4442a266711c"
+    },
+    {
+      "path": "psc0/test/IrSpecializeTests.lean",
+      "sha": "31973e62846c531a1551635aba1933af4ba3e2b7"
+    },
+    {
+      "path": "psc0/test/MinimalSelfHostTests.lean",
+      "sha": "166dfb747af4832666b5a153d259f5e77a3662d9"
+    },
+    {
+      "path": "psc0/test/ProdMatchSelfHostTests.lean",
+      "sha": "9b0372aec7b7876b7d68aea624d55820db0a004a"
+    }
+  ],
+  "untouchedOrRootOwnedRawFixtures": [
+    {
+      "path": "psc0/test/fixtures/checked-nested-recursor.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-count-fold.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-function-results.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-int-repr.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-nat-recursion.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-accumulators.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-accumulators.ps",
+      "disposition": "root-owned-new-grammar-and-projection-migration"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-foundation-probe.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-foundation-reference.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-helpers-probe.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-helpers-reference.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-tail-loop.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-text-position.lean",
+      "disposition": "unchanged-no-active-PS-literal-edit-in-this-assignment"
+    }
+  ],
+  "readme": {
+    "path": "psc0/README.md",
+    "sha": "b8a322cc468ca096696d9c994e7cbeca8a51ec95",
+    "disposition": "unchanged; no PS code snippets"
+  },
+  "validationNeeded": {
+    "build": "Build psc2_lean_checked_seed in psc0/lean-checked, with the new syntax/frontend/compiler sources in place.",
+    "nativeBinary": "PSC2_CHECKED_SEED_BIN, or psc0/lean-checked/.lake/build/bin/psc2_lean_checked_seed[.exe]. Real native tests skip if absent; the qualification workflow must require the built binary.",
+    "commands": [
+      "lake exe psc1_tests",
+      "lake exe psc1_translation_tests",
+      "lake exe psc1_erasure_tests",
+      "npm run --workspace @proofscript/pskernel-lean-wasm verify:prebuilt",
+      "node --test scripts/proofscript-source.test.mjs scripts/checked-source-snapshot.test.mjs scripts/checked-seed-session.test.mjs",
+      "node --test --test-name-pattern='^actual PS build (rejects|resolves|prepares)' scripts/checked-build.test.mjs",
+      "node scripts/selfhost-source-isolation-tests.mjs",
+      "node scripts/native-workspace-isolation.test.mjs",
+      "node scripts/check-proofscript-binder-replay-source.mjs",
+      "node scripts/check-elab-term-selfhost-source-syntax.mjs",
+      "node scripts/check-modular-preparation-source.mjs",
+      "node scripts/check-native-replay-host-source.mjs"
+    ],
+    "generated": "Parent-owned new grammar/printer/structural-recursion admission and canonicalization qualification remains required.",
+    "checkedBuildScope": "Only the four newly added parser/import cases; unrelated pre-existing checked-build tests assume an owned default while the current default is lean434-wasm. No provider code or existing test intent changed. The new positive import-order case selects lean434-wasm explicitly, sharing the pinned bundled provider already exercised by checked-seed-session.test.mjs.",
+    "nativeBuildDirectory": "psc0/lean-checked",
+    "nativeBuildCommand": "lake build psc2_lean_checked_seed",
+    "toolchain": "leanprover/lean4:v4.34.0 from psc0/lean-toolchain; lean-checked has no overriding lean-toolchain file.",
+    "provider": "Use existing bundled packages/pskernel-lean-wasm/wasm/pskernel-lean.cjs and .wasm verified by PREBUILT_WASM_MANIFEST.json. No provider rebuild or provider binary target is required for these focused gates."
+  }
+}

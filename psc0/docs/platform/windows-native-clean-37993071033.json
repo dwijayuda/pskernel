@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "kind": "psc0-windows-native-provider-clean-runner",
+  "candidateManifestSha256": "f34c2d3022bcd137ab4d17d852ea5e5b4babc326664d562532145cf2be6745f3",
+  "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+  "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+  "sourceTreePath": "psc0",
+  "repositoryTree": "80927150cbd6a5518762b4cc56e51ea24df8f374",
+  "executableSha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+  "payloadFiles": [
+    {
+      "name": "psc_kernel_core_provider.exe",
+      "sha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+      "bytes": 5509120
+    }
+  ],
+  "identity": {
+    "protocol": "pskernel-core/1",
+    "provider": "pskernel-core-native",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core"
+  },
+  "runner": {
+    "platform": "win32",
+    "architecture": "x64",
+    "osRelease": "10.0.20348",
+    "osVersion": "Windows Server 2022 Datacenter",
+    "node": "v22.23.3",
+    "imageOS": "win22",
+    "imageVersion": "20261004.326.1",
+    "runId": "37993071033",
+    "runAttempt": "1",
+    "workflowCommit": "fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3"
+  },
+  "executionPath": "C:\\Windows\\System32",
+  "executionCwd": "D:\\a\\pskernel\\pskernel\\candidate\\payload",
+  "leanInstalledByThisJob": false,
+  "sourceCheckedOutByThisJob": false,
+  "observations": [
+    {
+      "label": "native identity",
+      "args": [
+        "--version"
+      ],
+      "inputSha256": null,
+      "response": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "ready"
+      },
+      "stdoutSha256": "0164e4dd557169b18635b71e123313ebc2fb2f5d2ddb2becbef1f885118a8593",
+      "stderr": "",
+      "elapsedMs": 52
+    },
+    {
+      "label": "native health",
+      "args": [
+        "--health"
+      ],
+      "inputSha256": null,
+      "response": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "status": "ready"
+      },
+      "stdoutSha256": "0164e4dd557169b18635b71e123313ebc2fb2f5d2ddb2becbef1f885118a8593",
+      "stderr": "",
+      "elapsedMs": 37
+    },
+    {
+      "label": "fresh prelude and empty admissions",
+      "args": [
+        "--check"
+      ],
+      "inputSha256": "ad6f50df18921b4731ba6f0a8bde042368708d0b6c9200ac5857b016226bb708",
+      "response": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      },
+      "stdoutSha256": "6d79b464630f69d57d83cb8e21b553d09e28f3d5a813865974a3873942ab03ce",
+      "stderr": "",
+      "elapsedMs": 44
+    },
+    {
+      "label": "valid Nat definition",
+      "args": [
+        "--check"
+      ],
+      "inputSha256": "1587d07faa27f8c8312fd6420b413b4cf2fedcf89e4923f457af087449e7a06f",
+      "response": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      },
+      "stdoutSha256": "6d79b464630f69d57d83cb8e21b553d09e28f3d5a813865974a3873942ab03ce",
+      "stderr": "",
+      "elapsedMs": 42
+    },
+    {
+      "label": "ill-typed definition rejected",
+      "args": [
+        "--check"
+      ],
+      "inputSha256": "278bc0f601e4b1bc1378d3393aa2f7016ce6629cc4316b7c510f1f5248bc0f1b",
+      "response": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": false,
+        "errorKind": "kernel-rejection",
+        "declarationIndex": 0,
+        "message": "definition type mismatch"
+      },
+      "stdoutSha256": "ad37968c21007d1418f8976917797b01e7cc492184457590ef2edfa545673706",
+      "stderr": "",
+      "elapsedMs": 40
+    },
+    {
+      "label": "wrong canonical protocol rejected",
+      "args": [
+        "--check"
+      ],
+      "inputSha256": "72cef5bbcf769f63bf5d0eb7da1d49f3c7793ba29e491d12712e367e8226c195",
+      "response": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": false,
+        "errorKind": "protocol-version",
+        "message": "expected canonical admissions version 2"
+      },
+      "stdoutSha256": "8703ea04ca9668e6af12ae25eac7ab8bca60d3a6479827997b55453e9d08228f",
+      "stderr": "",
+      "elapsedMs": 42
+    },
+    {
+      "label": "fresh acceptance after rejection",
+      "args": [
+        "--check"
+      ],
+      "inputSha256": "ad6f50df18921b4731ba6f0a8bde042368708d0b6c9200ac5857b016226bb708",
+      "response": {
+        "protocol": "pskernel-core/1",
+        "provider": "pskernel-core-native",
+        "leanVersion": "4.34.0",
+        "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "profile": "lean4.34-core",
+        "accepted": true
+      },
+      "stdoutSha256": "6d79b464630f69d57d83cb8e21b553d09e28f3d5a813865974a3873942ab03ce",
+      "stderr": "",
+      "elapsedMs": 40
+    }
+  ],
+  "allObservationsPassed": true,
+  "releaseQualified": false,
+  "limits": [
+    "Static and delay-import closure plus exercised protocol paths; no theorem about arbitrary dynamic loading.",
+    "Windows Server 2022 x64 runner evidence; no universal Windows-version compatibility claim.",
+    "Candidate byte authentication and native smoke only; final package and Node-version tests are separate.",
+    "No compiler, bootstrap, metatheory, or logical-consistency proof is added."
+  ]
+}

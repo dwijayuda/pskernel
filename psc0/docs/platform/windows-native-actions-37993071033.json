@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "kind": "psc0-windows-native-provider-actions-evidence",
+  "evidenceMethod": "Manifest and clean-runner JSON extracted from completed Actions job stdout through the GitHub connector. Extracted manifest bytes match the SHA-256 checked by the clean job. Run, jobs and artifacts independently read through GitHub Actions APIs.",
+  "runtimeSourceChanged": false,
+  "releaseQualified": false,
+  "compilerRebuilt": false,
+  "run": {
+    "id": 37993071033,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/37993071033",
+    "event": "push",
+    "headSha": "fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3",
+    "branch": "psc0/platform-windows-probe",
+    "status": "completed",
+    "conclusion": "success",
+    "runAttempt": 1,
+    "startedAt": "2026-10-09T21:22:35Z",
+    "updatedAt": "2026-10-09T21:25:23Z"
+  },
+  "jobs": [
+    {
+      "id": 114031971746,
+      "name": "build-candidate",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37993071033/job/114031971746"
+    },
+    {
+      "id": 114032848470,
+      "name": "fresh-native-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37993071033/job/114032848470"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11646570443,
+      "name": "psc0-windows-provider-candidate-fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3",
+      "sizeInBytes": 1783403,
+      "sha256": "2cd39d15e2e28037cf418326b9241695c1b68dac90922a2e9c011e9504d83965",
+      "createdAt": "2026-10-09T21:25:00Z",
+      "expiresAt": "2026-11-08T21:24:59Z",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37993071033/artifacts/11646570443"
+    },
+    {
+      "id": 11645294846,
+      "name": "psc0-windows-provider-clean-fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3",
+      "sizeInBytes": 1840,
+      "sha256": "f4b3adaf7d1629e7b2467730094dd0f430c7daeb261d77089d2629eca94eafe7",
+      "createdAt": "2026-10-09T21:25:20Z",
+      "expiresAt": "2026-11-08T21:25:19Z",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37993071033/artifacts/11645294846"
+    }
+  ],
+  "retainedLoggedDocuments": [
+    {
+      "path": "windows-native-candidate-37993071033.json",
+      "sha256": "f34c2d3022bcd137ab4d17d852ea5e5b4babc326664d562532145cf2be6745f3",
+      "jobId": 114031971746
+    },
+    {
+      "path": "windows-native-clean-37993071033.json",
+      "sha256": "05471552e7ef7300e5b8e57259c7853fbc430d8251e8128f027724498f621c6f",
+      "jobId": 114032848470
+    }
+  ],
+  "exactNativeArtifact": {
+    "pathInCandidate": "payload/psc_kernel_core_provider.exe",
+    "sha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+    "bytes": 5509120,
+    "nonSystemDlls": [],
+    "coffTimeDateStamp": 1791581097,
+    "coffTimestampUtc": "2026-10-09T21:24:57Z"
+  },
+  "priorProbeFailure": {
+    "runId": 37992777549,
+    "workflowCommit": "f1e287762d396a17bafa48c21f0fe6dc991a1de0",
+    "stage": "source identity assertion before Lake build",
+    "cause": "The probe initially compared HEAD root tree to the known psc0 subtree. Corrected commit fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3 enforces both exact scopes. No provider or compiler failure was waived."
+  },
+  "limits": [
+    "The retained files are evidence metadata, not a permanent copy of executable artifact bytes.",
+    "PE timestamp is the observed link time. No repeat-build byte identity is claimed; final qualification must authenticate the retained candidate bytes.",
+    "Static and delay-import inventory found only Windows OS DLLs. This is not a proof of all possible dynamic loads.",
+    "Native smoke is seven successful observations on Windows Server 2022 x64. Full npm package and Node-version qualification is a separate gate."
+  ]
+}

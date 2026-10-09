@@ -55,14 +55,15 @@ theorem psKernelAddSimpleMutualInductive_success_minors_stage
   checked source family before decomposing the remaining successful path.
   This avoids silently changing the family on only one side of a guard.
   -/
-  rw [hTypes] at hRun hMinTypes hUnique
+  unfold psKernelAddSimpleMutualInductive at hRun
+  simp only [hTypes] at hRun hMinTypes hUnique
   let allNames : List PsKernelName :=
     psKernelMutualNameListAppend
       (psKernelSimpleMutualNames (first :: remaining))
       (psKernelMutualNameListAppend
         (psKernelSimpleMutualRecNames (first :: remaining))
         (psKernelSimpleMutualCtorNames (first :: remaining)))
-  simp only [psKernelAddSimpleMutualInductive, hDuplicate, hMinTypes, hUnique] at hRun
+  simp only [hDuplicate, hMinTypes, hUnique] at hRun
   cases hFresh : psKernelCheckFreshInductiveNames allNames environment with
   | error message =>
       simp only [hFresh] at hRun

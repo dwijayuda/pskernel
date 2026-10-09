@@ -15,13 +15,62 @@ recursor-rule validation. Infer-only application, lambda and forall results
 remain memoized because whole-expression inference results are commonly reused.
 -/
 
+/--
+Maximum structural key size worth memoizing in the portable checker caches.
+
+Cache entries are an acceleration only. Declining to memoize a larger closed
+term cannot change kernel acceptance, while it prevents cache eligibility and
+hashing from repeatedly traversing giant proof terms. The budget is consumed
+across the whole expression tree, not independently per branch.
+-/
+def psKernelSemanticCacheNodeBudget : Nat :=
+  256
+
+def psKernelSemanticCacheRemaining :
+    PsKernelExpr -> Nat -> Option Nat
+  | _expr, Nat.zero =>
+      Option.none
+  | PsKernelExpr.fvar _, Nat.succ _ =>
+      Option.none
+  | PsKernelExpr.app fn arg, Nat.succ remaining =>
+      match psKernelSemanticCacheRemaining fn remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelSemanticCacheRemaining arg next
+  | PsKernelExpr.lam _ type body _, Nat.succ remaining =>
+      match psKernelSemanticCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelSemanticCacheRemaining body next
+  | PsKernelExpr.forallE _ type body _, Nat.succ remaining =>
+      match psKernelSemanticCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelSemanticCacheRemaining body next
+  | PsKernelExpr.letE _ type value body _, Nat.succ remaining =>
+      match psKernelSemanticCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some afterType =>
+          match psKernelSemanticCacheRemaining value afterType with
+          | Option.none => Option.none
+          | Option.some afterValue =>
+              psKernelSemanticCacheRemaining body afterValue
+  | PsKernelExpr.mdata _ body, Nat.succ remaining =>
+      psKernelSemanticCacheRemaining body remaining
+  | PsKernelExpr.proj _ _ body, Nat.succ remaining =>
+      psKernelSemanticCacheRemaining body remaining
+  | _expr, Nat.succ remaining =>
+      Option.some remaining
+
 def psKernelSemanticCacheEligible
     (expr : PsKernelExpr) :
     Bool :=
-  if psKernelExprHasFVar expr then
-    false
-  else
-    true
+  match
+      psKernelSemanticCacheRemaining
+        expr
+        psKernelSemanticCacheNodeBudget with
+  | Option.some _ => true
+  | Option.none => false
 
 def psKernelSemanticPairCacheEligible
     (left right : PsKernelExpr) :

@@ -3,7 +3,7 @@ name: PSKernel Core Arena readiness
 on:
   push:
     branches:
-      - pscv/pskernel-core-arena-synced-v2
+      - pscv/pskernel-core-arena-optimized-v3
     paths:
       - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
       - "psc15selfhost/packages/pskernel-core/**"
@@ -130,7 +130,7 @@ jobs:
             Lean4Export 3.1.0 and routes all semantic decisions through the
             canonical KernelContract-v1 PSKernel Core implementation.
           url: https://github.com/dwijayuda/pskernel
-          ref: pscv/pskernel-core-arena-synced-v2
+          ref: pscv/pskernel-core-arena-optimized-v3
           rev: $PSKERNEL_SHA
           build: |
             cd psc15selfhost

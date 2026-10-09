@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - pscv/prove-pskernel-core-v1
+      - pscv/pskernel-core-arena-optimized-v3
     paths:
       - "psc15selfhost/packages/pskernel-core/**"
       - "psc15selfhost/test/KernelCore/**"

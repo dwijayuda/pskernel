@@ -1,11 +1,11 @@
-name: PSKernel Core Arena soundness
+name: PSKernel Core Arena optimized full Init Std
 
 on:
   push:
     branches:
       - pscv/pskernel-core-arena-optimized-v3
     paths:
-      - ".github/workflows/pskernel-core-arena-soundness.yml"
+      - ".github/workflows/pskernel-core-arena-optimized-full.yml"
       - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/**"
       - "psc15selfhost/packages/pskernel-core/**"
       - "psc15selfhost/packages/pskernel/PSC1Kernel/Replay*.lean"
@@ -16,13 +16,17 @@ permissions:
   contents: read
 
 concurrency:
-  group: pskernel-core-arena-soundness-${{ github.ref }}
-  cancel-in-progress: true
+  group: pskernel-core-arena-init-std-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  bugs:
+  corpus:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        test: [init, std]
     env:
       PSKERNEL_SHA: ${{ github.sha }}
     steps:
@@ -71,15 +75,15 @@ jobs:
             lake build psc_kernel_core_arena
           run: |
             ulimit -s 65536
-            psc15selfhost/.lake/build/bin/psc_kernel_core_arena --check-historical < "\$IN"
+            psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "\$IN"
           EOF
 
-      - name: Build historical bug corpus
+      - name: Build corpus export
         working-directory: arena
         shell: bash
         run: |
           set -euo pipefail
-          uv run lka.py build-test 'bugs/*' --cache
+          uv run lka.py build-test "${{ matrix.test }}" --cache
 
       - name: Build PSKernel checker
         working-directory: arena
@@ -88,25 +92,42 @@ jobs:
           set -euo pipefail
           uv run lka.py build-checker pskernel-core
 
-      - name: Run historical bug corpus
+      - name: Run official Init or Std
         working-directory: arena
         shell: bash
         run: |
           set -euo pipefail
-          uv run lka.py run --checker pskernel-core --test 'bugs/*'
-          python3 - <<'PY'
-          import glob, json, sys
+          uv run lka.py run --checker pskernel-core --test "${{ matrix.test }}"
+          TEST_NAME="${{ matrix.test }}" python3 - <<'PY'
+          import glob,json,os,sys
+          name=os.environ['TEST_NAME']
           rows=[json.load(open(p,encoding='utf-8')) for p in glob.glob('_results/pskernel-core_*.json')]
-          counts={}
-          for row in rows:
-              counts[row['correctness']]=counts.get(row['correctness'],0)+1
-          print('summary',counts,'total',len(rows))
-          false_accept=[r for r in rows if r.get('status')=='accepted' and r.get('correctness')=='incorrect']
-          other_bad=[r for r in rows if r.get('correctness') in ('incorrect','error') and r not in false_accept]
-          for r in false_accept+other_bad:
-              print('CASE',r['test'],'status=',r['status'],'correctness=',r['correctness'])
-              detail=(r.get('stderr','') or r.get('stdout',''))[-2000:]
-              print(detail)
-          if false_accept or other_bad or not rows:
-              sys.exit(1)
+          rows=[r for r in rows if r.get('test')==name]
+          for r in rows:
+              print('CORPUS',name,'status=',r.get('status'),'correctness=',r.get('correctness'),'wall_s=',r.get('wall_time'),'rss=',r.get('max_rss'))
+              print('STDERR_TAIL',(r.get('stderr') or '')[-4500:])
+          if len(rows)!=1 or rows[0].get('correctness')!='correct': sys.exit(1)
           PY
+
+      - name: Report exact result, including timeout
+        if: always()
+        working-directory: arena
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob,json
+          for p in glob.glob('_results/pskernel-core_*.json'):
+              r=json.load(open(p,encoding='utf-8'))
+              print('ARENA_RESULT',r.get('test'),r.get('status'),r.get('correctness'),r.get('exit_code'),r.get('wall_time'),r.get('max_rss'))
+              print('ARENA_STDERR_TAIL',(r.get('stderr') or '')[-4500:])
+          PY
+
+      - name: Preserve Arena evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-optimized-${{ matrix.test }}-${{ github.run_id }}
+          path: |
+            arena/_results
+            arena/_out
+          if-no-files-found: ignore

@@ -1,4 +1,4 @@
-name: PSC0 kernel reduction trace
+name: PSC0 kernel scoped-cache experiment
 on:
   push:
     branches: [psc0/pskernel-core-lean435-arena-v1]
@@ -7,6 +7,10 @@ permissions:
   contents: read
 jobs:
   trace:
+    strategy:
+      fail-fast: false
+      matrix:
+        budget: [256, 4096]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -18,31 +22,26 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Add temporary diagnostic tracing and build
+      - name: Build temporary open-term cache experiment
         working-directory: psc0/packages/pskernel-core
         shell: bash
+        env:
+          CACHE_BUDGET: ${{ matrix.budget }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          helper = "import Ps.KernelCore.Core.Substitution.ListOps\n\ndef psKernelTraceName : PsKernelName → String\n  | .anonymous => \"\"\n  | .str p s => psKernelTraceName p ++ \".\" ++ s\n  | .num p n => psKernelTraceName p ++ \".\" ++ toString n\n\ndef psKernelTraceHead (e : PsKernelExpr) : String :=\n  match psKernelExprGetAppFn e with\n  | .const n _ => psKernelTraceName n\n  | .fvar n => \"fvar\" ++ psKernelTraceName n\n  | .bvar n => \"bvar\" ++ toString n\n  | .lit (.nat n) => toString n\n  | .lit (.str _) => \"string\"\n  | .sort _ => \"sort\"\n  | .lam _ _ _ _ => \"lambda\"\n  | .forallE _ _ _ _ => \"forall\"\n  | .proj n i _ => \"proj\" ++ psKernelTraceName n ++ \".\" ++ toString i\n  | .letE _ _ _ _ _ => \"let\"\n  | .mdata _ _ => \"mdata\"\n  | _ => \"other\"\n\ndef psKernelTraceSummary (e : PsKernelExpr) : String :=\n  String.intercalate \" \" (psKernelTraceHead e ::\n    (psKernelExprGetAppArgs e).map psKernelTraceHead)\n"
-          p = Path("src/Ps/KernelCore/Core/Expr.lean")
-          p.write_text(p.read_text() + "\n" + helper.split("\n", 1)[1])
-          p = Path("src/Ps/KernelCore/Checker/Reduction/Whnf.lean")
+          import os
+          p = Path("src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean")
           s = p.read_text()
-          target = "  match\n      psKernelReduceNative"
-          replacement = '  dbg_trace ("WHNF depth=" ++ toString context.recDepth ++ " " ++ psKernelTraceSummary core)\n' + target
-          assert s.count(target) == 1
-          p.write_text(s.replace(target, replacement))
-          p = Path("src/Ps/KernelCore/Checker/DefEq/DeltaStep.lean")
-          s = p.read_text()
-          target = "  let leftDefinition :="
-          replacement = '  dbg_trace ("DELTA " ++ psKernelTraceSummary left ++ " == " ++ psKernelTraceSummary right)\n' + target
-          assert s.count(target) == 1
-          p.write_text(s.replace(target, replacement))
+          old = "  | PsKernelExpr.fvar _, Nat.succ _ =>\n      Option.none\n"
+          assert s.count(old) == 1
+          s = s.replace(old, "")
+          s = s.replace("  256\n", "  " + os.environ["CACHE_BUDGET"] + "\n")
+          p.write_text(s)
           PY
           lake build psc_kernel_core_arena
-      - name: Trace focused export for 12 seconds
+      - name: Measure focused Int64 closure for 60 seconds
         shell: bash
         run: |
           set -euo pipefail
@@ -53,18 +52,16 @@ jobs:
           lake env .lake/build/bin/lean4export Init -- Int64.toBitVec_div > int64.ndjson
           ulimit -s 65536
           set +e
-          timeout 12 ../psc0/packages/pskernel-core/.lake/build/bin/psc_kernel_core_arena --profile < int64.ndjson > trace.stdout 2> trace.log
+          /usr/bin/time -v timeout 60 ../psc0/packages/pskernel-core/.lake/build/bin/psc_kernel_core_arena --profile < int64.ndjson > trace.stdout 2> trace.log
           code=$?
           set -e
           echo "DIAGNOSTIC_ONLY_EXIT=$code"
           echo "RECENT_DECLARATIONS"
           grep 'arena-profile enter' trace.log | tail -n 6
-          echo "RECENT_DEFEQ"
-          grep 'DELTA' trace.log | tail -n 60
-          echo "RECENT_REDUCTIONS"
-          tail -n 160 trace.log
+          tail -n 24 trace.log
+          cat trace.stdout
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: int64-reduction-trace
+          name: int64-open-cache-${{ matrix.budget }}
           path: exporter/trace.*

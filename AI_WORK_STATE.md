@@ -1,5 +1,28 @@
 # AI Work State
 
+## Mutual recursor and bounded search checkpoint — 2026-10-09
+- Full proof and native conformance **#779 GREEN** at
+  `a0942db7318df227340a2ad784482b94216ee881`,
+  https://github.com/dwijayuda/pskernel/actions/runs/37903458196.
+- New independent mutual recursor rule typing accounts for owner filtering,
+  selected motives, actual checked RHS inference plus one DefEq conversion,
+  exact rule exhaustion, preserved checker context and sound final state.
+- Full mutual recursor validation now yields an independent ordered history
+  of Sort-typed recursor headers and owner-filtered typed rules.
+- The bounded candidate search counting argument is proved: under explicit
+  finite candidate distinctness and existing positive StringEq soundness,
+  the search returns before the unchecked fuel boundary. Syntactic freshness
+  additionally requires explicit comparator reflexivity.
+- These finite distinctness/reflexivity inputs remain conditional obligations,
+  not newly adopted TCB laws. Production source and acceptance are unchanged.
+- Pinned Lean's checked decimal round trip was found; decimal injectivity,
+  reduction of reflexivity to cursor progress/end detection, and mutual rule
+  metadata proofs are submitted in `5aa2b053df57854e98b8addbad5b3cc3c5a76023`
+  and await their own CI outcome. No validation claim is made for them yet.
+- Audit counts remain **50/6/17/6**, pending evidence review.
+- Full mutual/nested transaction closure, final API/session composition,
+  primitive bridges, integration reconciliation and final audit remain open.
+
 ## Primitive bridge investigation — 2026-10-09
 - Reverified proof frontier `ff178a4c2a3f1b52543bd7ec7b0195c2aff311a9`.
 - Latest full proof/native conformance remains **#776 GREEN**, run

@@ -420,15 +420,15 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
   have hCheck := psKernelSessionCheck_concrete_refines_typing
     fuel hNative hString initial checked.2 first.type checked.1
     hInitial hChecked
+  have hCheckedContext :=
+    psKernelSessionCheck_success_preserves_context_core
+      fuel initial checked.2 first.type checked.1 hChecked
   have hCheckConfig : PsKernelCheckerConfigurationSound
       checked.2.context checked.2.state := by
     simpa [hCheckedContext] using hCheck.2
   have hSortSound := psKernelSessionEnsureSort_concrete_refines_reduction
     fuel hNative hString checked.2 sorted.2 checked.1 sorted.1
     hCheckConfig hSort
-  have hCheckedContext :=
-    psKernelSessionCheck_success_preserves_context_core
-      fuel initial checked.2 first.type checked.1 hChecked
   have hSortedContext :=
     psKernelSessionEnsureSort_success_preserves_context_core
       fuel checked.2 sorted.2 checked.1 sorted.1 hSort

@@ -1,14 +1,17 @@
 # AI Work State
 
-## Migration validation follow-up — 2026-10-09
-- #788 passed the complete 84-file proof gate, native foundation conformance
-  (including Unicode, candidate collisions and legacy-hash comparisons), and
-  TypeScript package tests.
-- The added portable Lean gate found an expression-constructor spelling error
-  in the new prelude aliases. The correct portable constructor is PsExpr.constE;
-  the aliases remain ordinary definition declarations, with no new axioms.
-- Full workflow #788 therefore failed and is not reported as fully green.
-  The correction and subsequent composition proofs require a fresh full run.
+## Mutual header and publication closure — 2026-10-09
+- Live proof head was reverified as ffdea2f3743bd805696fa51a08bf62dd435a912e.
+- #791 is validating mutual publication-history/index refinements; the previous
+  #789 failure was the stale PsExpr.const alias spelling and is superseded by
+  the constE correction.
+- Added a reusable successful mutual-admission header-pipeline projection:
+  first checked/sorted header, parameter/index spine results, normalized result
+  sort, and checked remaining-header shapes. This is the bridge needed to
+  compose constructor and recursor histories into a full mutual transaction.
+- Full mutual and nested transactions, final API/session theorem family,
+  semantic audit and integration reconciliation remain open; no completion
+  claim is made.
 
 ## Continuation handoff and composition submission — 2026-10-09
 - A copyable new-chat handoff prompt was provided at the user's request.

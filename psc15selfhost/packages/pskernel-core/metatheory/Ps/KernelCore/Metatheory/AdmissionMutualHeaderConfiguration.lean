@@ -394,7 +394,7 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
       (tailShapes : List PsKernelSimpleMutualTypeShape),
       decl.types = first :: remaining ∧
       PsKernelTypingJudgment environment psKernelLocalContextEmpty
-        first.type (PsKernelExpr.sort resultLevel) ∧
+        first.type (PsKernelExpr.sort sorted.1) ∧
       PsKernelCheckerConfigurationSound
         paramResult.session.context paramResult.session.state ∧
       PsKernelCheckerConfigurationSound
@@ -421,23 +421,26 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
     fuel hNative hString initial checked.2 first.type checked.1
     hInitial hChecked
   have hCheckConfig : PsKernelCheckerConfigurationSound
-      checked.2.context checked.2.state :=
-    hCheck.2
+      checked.2.context checked.2.state := by
+    simpa [hCheckedContext] using hCheck.2
   have hSortSound := psKernelSessionEnsureSort_concrete_refines_reduction
-    fuel hNative hString checked.2 sorted.2 checked.1 resultLevel
+    fuel hNative hString checked.2 sorted.2 checked.1 sorted.1
     hCheckConfig hSort
   have hCheckedContext :=
     psKernelSessionCheck_success_preserves_context_core
       fuel initial checked.2 first.type checked.1 hChecked
   have hSortedContext :=
     psKernelSessionEnsureSort_success_preserves_context_core
-      fuel checked.2 sorted.2 checked.1 resultLevel hSort
+      fuel checked.2 sorted.2 checked.1 sorted.1 hSort
   have hSortedEnv : sorted.2.context.environment = environment := by
     rw [hSortedContext, hCheckedContext]
     simp [initial, psKernelMkCheckerSession, psKernelCheckerContextEmpty]
+  have hSortedConfig : PsKernelCheckerConfigurationSound
+      sorted.2.context sorted.2.state := by
+    simpa [hSortedContext] using hSortSound.2
   have hParamsConfig := psKernelOpenSimpleHeaderParams_configuration_refines
     fuel decl.numParams hNative hString sorted.2 first.type paramResult
-    hSortSound.2 hParams
+    hSortedConfig hParams
   have hParamEnv : paramResult.session.context.environment = environment := by
     exact hParamsConfig.2.1.trans hSortedEnv
   have hIndicesConfig := psKernelOpenSimpleHeaderIndices_configuration_refines
@@ -454,9 +457,9 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
       hNative hString hTail
   have hHeaderTyping :
       PsKernelTypingJudgment environment psKernelLocalContextEmpty
-        first.type (PsKernelExpr.sort resultLevel) := by
-    apply PsKernelTypingJudgment.convert first.type hCheck.1
-      (PsKernelExpr.sort resultLevel)
+        first.type (PsKernelExpr.sort sorted.1) := by
+    apply PsKernelTypingJudgment.convert first.type checked.1
+      (PsKernelExpr.sort sorted.1)
     · simpa [initial, psKernelMkCheckerSession, psKernelCheckerContextEmpty]
         using hCheck.1
     · apply PsKernelDefEqJudgment.reductionClosure

@@ -523,46 +523,55 @@ def psIrCheckIntrinsicSignature
   | .stringExtract => psIrCheckSignatureNoTypes typeArguments [string, nat, nat] string
   | .stringEq => psIrCheckSignatureNoTypes typeArguments [string, string] bool
   | .arrayEmptyWithCapacity =>
-      psIrCheckSignatureOneType typeArguments
-        (fun (element : PsVerifiedIrType) =>
-          PsIrCheckSignature.mk [nat] (psIrCheckArrayType element))
+      let build : PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) =>
+          PsIrCheckSignature.mk [nat] (psIrCheckArrayType element);
+      psIrCheckSignatureOneType typeArguments build
   | .arraySize =>
-      psIrCheckSignatureOneType typeArguments
-        (fun (element : PsVerifiedIrType) =>
-          PsIrCheckSignature.mk [psIrCheckArrayType element] nat)
+      let build : PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) =>
+          PsIrCheckSignature.mk [psIrCheckArrayType element] nat;
+      psIrCheckSignatureOneType typeArguments build
   | .arrayPush =>
-      psIrCheckSignatureOneType typeArguments
-        (fun (element : PsVerifiedIrType) =>
+      let build : PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) =>
           PsIrCheckSignature.mk [psIrCheckArrayType element, element]
-            (psIrCheckArrayType element))
+            (psIrCheckArrayType element);
+      psIrCheckSignatureOneType typeArguments build
   | .arrayGet =>
-      psIrCheckSignatureOneType typeArguments
-        (fun (element : PsVerifiedIrType) =>
-          PsIrCheckSignature.mk [psIrCheckArrayType element, nat] element)
+      let build : PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) =>
+          PsIrCheckSignature.mk [psIrCheckArrayType element, nat] element;
+      psIrCheckSignatureOneType typeArguments build
   | .arrayGetD =>
-      psIrCheckSignatureOneType typeArguments
-        (fun (element : PsVerifiedIrType) =>
-          PsIrCheckSignature.mk [psIrCheckArrayType element, nat, element] element)
+      let build : PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) =>
+          PsIrCheckSignature.mk [psIrCheckArrayType element, nat, element] element;
+      psIrCheckSignatureOneType typeArguments build
   | .arraySet =>
-      psIrCheckSignatureOneType typeArguments
-        (fun (element : PsVerifiedIrType) =>
+      let build : PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) =>
           PsIrCheckSignature.mk [psIrCheckArrayType element, nat, element]
-            (psIrCheckArrayType element))
+            (psIrCheckArrayType element);
+      psIrCheckSignatureOneType typeArguments build
   | .arraySetIfInBounds =>
-      psIrCheckSignatureOneType typeArguments
-        (fun (element : PsVerifiedIrType) =>
+      let build : PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) =>
           PsIrCheckSignature.mk [psIrCheckArrayType element, nat, element]
-            (psIrCheckArrayType element))
+            (psIrCheckArrayType element);
+      psIrCheckSignatureOneType typeArguments build
   | .arrayMap =>
-      psIrCheckSignatureTwoTypes typeArguments
-        (fun (element result : PsVerifiedIrType) =>
+      let build : PsVerifiedIrType -> PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) (result : PsVerifiedIrType) =>
           PsIrCheckSignature.mk
             [PsVerifiedIrType.function [element] result, psIrCheckArrayType element]
-            (psIrCheckArrayType result))
+            (psIrCheckArrayType result);
+      psIrCheckSignatureTwoTypes typeArguments build
   | .arrayFoldl =>
-      psIrCheckSignatureTwoTypes typeArguments
-        (fun (element accumulator : PsVerifiedIrType) =>
+      let build : PsVerifiedIrType -> PsVerifiedIrType -> PsIrCheckSignature :=
+        fun (element : PsVerifiedIrType) (accumulator : PsVerifiedIrType) =>
           PsIrCheckSignature.mk
             [PsVerifiedIrType.function [accumulator, element] accumulator,
               accumulator, psIrCheckArrayType element, nat, nat]
-            accumulator)
+            accumulator;
+      psIrCheckSignatureTwoTypes typeArguments build

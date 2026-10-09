@@ -157,22 +157,26 @@ def psIrCheckFindConstructor (constructors : List PsVerifiedIrConstructor) (name
       else psIrCheckFindConstructor rest name
 
 def psIrCheckTypeParameterNames (parameters : List PsVerifiedIrTypeParameter) : List String :=
-  psListMap (fun (parameter : PsVerifiedIrTypeParameter) => parameter.name) parameters
+  let parameterName : PsVerifiedIrTypeParameter -> String :=
+    fun (parameter : PsVerifiedIrTypeParameter) => parameter.name;
+  psListMap parameterName parameters
 
 def psIrCheckParameterTypes (parameters : List PsVerifiedIrParameter) : List PsVerifiedIrType :=
-  psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.type) parameters
+  let parameterType : PsVerifiedIrParameter -> PsVerifiedIrType :=
+    fun (parameter : PsVerifiedIrParameter) => parameter.type;
+  psListMap parameterType parameters
 
 def psIrCheckStructureParameters (fields : List PsVerifiedIrStructureField) :
     List PsVerifiedIrParameter :=
-  psListMap
-    (fun (field : PsVerifiedIrStructureField) => PsVerifiedIrParameter.mk field.name field.type)
-    fields
+  let fieldParameter : PsVerifiedIrStructureField -> PsVerifiedIrParameter :=
+    fun (field : PsVerifiedIrStructureField) => PsVerifiedIrParameter.mk field.name field.type;
+  psListMap fieldParameter fields
 
 def psIrCheckConstructorParameters (fields : List PsVerifiedIrConstructorField) :
     List PsVerifiedIrParameter :=
-  psListMap
-    (fun (field : PsVerifiedIrConstructorField) => PsVerifiedIrParameter.mk field.name field.type)
-    fields
+  let fieldParameter : PsVerifiedIrConstructorField -> PsVerifiedIrParameter :=
+    fun (field : PsVerifiedIrConstructorField) => PsVerifiedIrParameter.mk field.name field.type;
+  psListMap fieldParameter fields
 
 def psIrCheckNamedArity (module : PsVerifiedIrModule) (name : String) : Option Nat :=
   if psStringEq name "Array" then Option.some 1
@@ -499,9 +503,9 @@ def psIrCheckMatch (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
     (alternatives : List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr))
     (_expected : Option PsVerifiedIrType) : PsIrCheckState :=
   let annotated := psIrCheckTypeArguments options module typeArguments scope 0 state;
-  let names := psListMap
-    (fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) => alternative.fst)
-    alternatives;
+  let alternativeName : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> String :=
+    fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) => alternative.fst;
+  let names := psListMap alternativeName alternatives;
   let unique := psIrCheckNames options names scope "duplicate-match-alternative" List.nil annotated;
   let nonempty :=
     if psListIsEmpty alternatives then
@@ -611,9 +615,9 @@ def psIrCheckAlternative (options : PsIrCheckOptions) (module : PsVerifiedIrModu
         Prod.mk state (psIrCheckConstructorParameters ctorInfo.fields);
   let checked := psIrCheckMatchBindings options module bindings fields.snd
     plan.substitutions scope List.nil List.nil fields.fst;
-  let parameters := psListMap
-    (fun (binding : PsVerifiedIrMatchBinding) => PsVerifiedIrParameter.mk binding.name binding.type)
-    bindings;
+  let bindingParameter : PsVerifiedIrMatchBinding -> PsVerifiedIrParameter :=
+    fun (binding : PsVerifiedIrMatchBinding) => PsVerifiedIrParameter.mk binding.name binding.type;
+  let parameters := psListMap bindingParameter bindings;
   let bodyScope := PsIrCheckScope.mk scope.owner
     (String.Internal.append scope.path "/body") scope.typeScope
     (psListAppend parameters scope.bindings);
@@ -825,8 +829,9 @@ def psIrCheckRun (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
 
 def psIrCheckSizedModule (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
     (inputNodes : Nat) : PsIrCheckReport :=
-  let importedNames := psListMap
-    (fun (entry : PsVerifiedIrExternalImport) => entry.localName) module.imports;
+  let importName : PsVerifiedIrExternalImport -> String :=
+    fun (entry : PsVerifiedIrExternalImport) => entry.localName;
+  let importedNames := psListMap importName module.imports;
   let initial := PsIrCheckState.mk
     [PsIrCheckTask.imports module.imports List.nil,
      PsIrCheckTask.structures module.structures module.inductives ["Array"],

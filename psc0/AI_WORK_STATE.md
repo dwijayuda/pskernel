@@ -31,6 +31,24 @@ preservation claim is inferred from runtime type acceptance. Resource counters
 distinguish input-shape, dispatcher and individual type-operation budgets; finding
 counts count failed checking obligations, with first error within a type operation.
 
+### First cloud execution and complete source-form repair
+
+Implementation checkpoint `7f6d7474864cb06b534f119f528afa4bc6a3c3db`
+ran in [37902919310](https://github.com/dwijayuda/pskernel/actions/runs/37902919310).
+The native Lean build passed all 133 jobs. The first native-candidate PSC parse
+then stopped at Check.lean:160:29 on a parenthesized typed lambda argument.
+No new checker conformance, full-source IR acceptance, C1/C2/C3 or provider
+qualification was earned in that run. Its logged 245-plus-19 inventory belongs
+to the retained A seed artifact, not to the current M6 source.
+
+A grammar audit identified the whole class: seven callbacks in Check.lean and
+nine in CheckTypes.lean. All are now explicitly typed local let initializers
+passed by name, preserving their bodies and signatures. This uses the existing
+full-term let-RHS parser; it adds no parser capability or typing exception.
+The development command also builds `psc1_ir_check_tests`, matching CI.
+The coherent follow-up is pending qualification. Attempt evidence is retained in
+[runtime-ir-checker-execution.json](docs/selfhost-language/runtime-ir-checker-execution.json).
+
 ## Current source and qualification checkpoints
 
 The current qualified portable source is the recursive generic-argument repair E,

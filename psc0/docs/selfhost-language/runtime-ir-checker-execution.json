@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-runtime-ir-checker-execution",
+  "updatedAt": "2026-10-09T08:14:53Z",
+  "branch": "psc0/sh1-ir-checker-v1",
+  "status": "implemented-source-form-repair-pending-qualification",
+  "baseQualifiedSourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+  "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+  "strictSh1": false,
+  "selectedSeedChanged": false,
+  "providerImplementationChanged": false,
+  "attempts": [
+    {
+      "sourceRef": "7f6d7474864cb06b534f119f528afa4bc6a3c3db",
+      "runId": 37902919310,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37902919310",
+      "compilerJobId": 113729433528,
+      "result": "failure",
+      "phase": "native-candidate-psc-parse",
+      "passed": [
+        "host JavaScript syntax",
+        "bootstrap source restrictions and ownership guards",
+        "authenticated S0/Q recovery",
+        "native Lean build: 133 jobs"
+      ],
+      "diagnostic": "PSC1_PROJECT_PARSE_FAILED: packages/compiler-ir/src/Ps/CompilerIr/Check.lean:160:29: expected ')', got ':'",
+      "notRun": [
+        "native checker conformance",
+        "native exact-source original IR checker",
+        "N1 generated checker conformance",
+        "Q to C1",
+        "C2/C3 qualification",
+        "pinned provider acceptance"
+      ],
+      "artifact": {
+        "id": 11603680792,
+        "sizeBytes": 914506,
+        "sha256": "3a02383047f4729a168b89b4cb989120817f9290fcdf26f69dcc145cb6d1295d"
+      },
+      "inventoryProvenance": "The logged 245 expression-typing and 19 type-argument arity findings are from the retained A seed artifact; they do not describe M6 source.",
+      "resolution": {
+        "cause": "Ordinary parenthesized application arguments do not dispatch the full-term lambda parser.",
+        "scope": {
+          "checkCallbacks": 7,
+          "checkTypesCallbacks": 9
+        },
+        "change": "Use explicitly typed local let RHS callbacks, passed to the helpers by name.",
+        "signatureAndSemanticsChanged": false,
+        "parserChanged": false,
+        "followupQualification": "pending"
+      }
+    }
+  ],
+  "claimBoundaries": [
+    "Runtime IR typing, generated compiler fixed-point qualification, pinned Core-provider acceptance and full strict SH/1 are separate.",
+    "The selected authoring seed remains A.",
+    "No current M6 generated compiler or runtime IR acceptance claim is earned by the first attempt."
+  ]
+}

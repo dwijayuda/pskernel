@@ -4,8 +4,8 @@
   "repository": "dwijayuda/pskernel",
   "historicalSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
   "implementationBranch": "psc0/sh1-implementation-v1",
-  "updatedUtc": "2026-10-09T10:28:22Z",
-  "currentStatus": "A remains the selected qualified authoring seed. Foundation.List B, three-helper migration H, recursive generic-erasure E, bounded runtime IR typing M6 under TypeScript 5.8.3, and current PSC0 TypeScript 7.0.2 are compiler-qualified and separately selected-provider accepted. Strict SH/1 and profile activation remain false.",
+  "updatedUtc": "2026-10-09 12:55:25 UTC",
+  "currentStatus": "The bounded new-only ps-0.9-r3 grammar and projection source R2 is compiler-qualified and independently selected-provider accepted. Cold successor recovery is running; A remains selected and the prepared finite F worker migration has not been applied. Historical B/H/E/M6/TypeScript7 qualification is retained. Strict SH/1 and full Standard/PSCV conformance remain false.",
   "checkpoints": {
     "boundedDevelopment": {
       "sourceRef": "9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
@@ -3327,6 +3327,285 @@
         },
         "interpretation": "Canonical source, normalized admissions and TypeScript agree across these separately qualified checkpoints; JavaScript differs. Qualification requires C2/C3 equality within each profile."
       }
+    },
+    "newOnlyGrammarProjection": {
+      "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "branch": "psc0/sh1-projection-grammar-v1",
+      "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+      "moduleCount": 61,
+      "sourceBytes": 1113918,
+      "sourceGrammar": {
+        "edition": "ps-0.9-r3",
+        "mode": "new-only",
+        "support": "bounded-selfhost-subset",
+        "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+        "fullStandardConformance": false,
+        "fullPscvConformance": false
+      },
+      "run": {
+        "id": 37925722635,
+        "attempt": 1,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635",
+        "compilerJob": 113804052074,
+        "compilerConclusion": "success",
+        "compilerCompletedUtc": "2026-10-09T12:50:43Z",
+        "providerJob": 113827136830,
+        "providerConclusion": "success",
+        "providerCompletedUtc": "2026-10-09T12:52:11Z",
+        "coldJob": 113827137018,
+        "coldConclusion": null
+      },
+      "evidence": "compiler-qualified-current-source-fixed-point",
+      "compilerQualified": true,
+      "providerAccepted": true,
+      "coldRecoveryPassed": false,
+      "successorSelected": false,
+      "candidateIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+      "candidateJavaScriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "nativeOriginalIr": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 725484,
+        "expressionCount": 56391,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "strictSh1Qualified": false,
+        "reportPath": "dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      },
+      "nativeSourceCorrespondence": {
+        "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+        "closureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+        "moduleCount": 61,
+        "proofScriptBytes": 904355,
+        "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent"
+      },
+      "nativeRegressionSuites": {
+        "core": 75,
+        "translation": 10,
+        "erasure": 16
+      },
+      "grammarApiCounts": {
+        "applicationBoundaries": 18,
+        "supportedSyntax": 22,
+        "canonicalRoundTrips": 40,
+        "parseRefusals": 35,
+        "lexicalPositionCases": 2,
+        "lexicalRefusals": 5,
+        "emptyCallRefusals": 3,
+        "printerRefusals": 1
+      },
+      "grammarApiGenerations": [
+        "N1",
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "rawFixtureObservations": {
+        "projectionPerSourceKind": 39,
+        "newGrammarPerSourceKind": 34,
+        "sourceKinds": [
+          "lean",
+          "ps"
+        ]
+      },
+      "projectionApiCases": 21,
+      "products": {
+        "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+        "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+        "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+        "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+      },
+      "firstGenerationProducts": {
+        "canonicalSurfaceSourceSha256": "a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2",
+        "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+        "typescriptSha256": "6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954",
+        "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+      },
+      "currentGenerationIr": [
+        {
+          "generation": "C2",
+          "report": "original-ir-inventory.json",
+          "traversalComplete": true,
+          "findingCounts": {},
+          "findingCount": 0,
+          "findingCountsCoverage": "all-findings",
+          "portableChecker": {
+            "status": "accepted",
+            "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+            "options": {
+              "maxSteps": 5000000,
+              "maxTypeSteps": 65536,
+              "maxFindings": 1000
+            }
+          },
+          "runtimeIrTypingAccepted": true,
+          "sameOriginalIrCheckedBeforeEmission": true,
+          "strictSh1Qualified": false,
+          "expressionCount": null,
+          "visitedSteps": null,
+          "countScope": "Full expression and visited-step counts are not present in the logged generation summary."
+        },
+        {
+          "generation": "C3",
+          "report": "original-ir-inventory.json",
+          "traversalComplete": true,
+          "findingCounts": {},
+          "findingCount": 0,
+          "findingCountsCoverage": "all-findings",
+          "portableChecker": {
+            "status": "accepted",
+            "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+            "options": {
+              "maxSteps": 5000000,
+              "maxTypeSteps": 65536,
+              "maxFindings": 1000
+            }
+          },
+          "runtimeIrTypingAccepted": true,
+          "sameOriginalIrCheckedBeforeEmission": true,
+          "strictSh1Qualified": false,
+          "expressionCount": null,
+          "visitedSteps": null,
+          "countScope": "Full expression and visited-step counts are not present in the logged generation summary."
+        }
+      ],
+      "originalIrBoundary": {
+        "report": "original-ir-inventory.json",
+        "traversalComplete": true,
+        "findingCounts": {
+          "call-arity-needs-expression-typing": 262,
+          "call-type-arity": 19
+        },
+        "findingCount": null,
+        "findingCountsCoverage": "legacy-inventory",
+        "portableChecker": {
+          "status": "unavailable-at-explicit-seed-boundary",
+          "boundary": {
+            "kind": "selected-authoring-seed",
+            "executingSourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+            "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+            "reason": "The explicitly pinned pre-checker Q may produce C1; current C1/C2/C3 checker consumers remain mandatory."
+          }
+        },
+        "runtimeIrTypingAccepted": false,
+        "sameOriginalIrCheckedBeforeEmission": false,
+        "strictSh1Qualified": false
+      },
+      "canonicalSourceContract": "C2/C3 emit and consume the bounded new-only ps-0.9-r3 grammar. The pinned parent may emit its historical canonical form as the C1 build artifact; it is not a current parser mode.",
+      "provider": {
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+        "accepted": true,
+        "emissionWasGatedByThisCheck": false,
+        "distinctStreams": 4,
+        "streams": [
+          {
+            "sha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+            "artifacts": [
+              "C2 compiler source",
+              "C3 compiler source"
+            ],
+            "accepted": true
+          },
+          {
+            "sha256": "372371596fba560eca5ba52d29e20d91780d5c3321e4353a7a4c1a009167e10f",
+            "artifacts": [
+              "C2 raw lean capability source",
+              "C3 raw lean capability source"
+            ],
+            "accepted": true
+          },
+          {
+            "sha256": "bb84332515024d4145b7cedb636fb6095d3cbe20a4fc3043dc37905f7574a900",
+            "artifacts": [
+              "C2 raw ps capability source",
+              "C3 raw ps capability source"
+            ],
+            "accepted": true
+          },
+          {
+            "sha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+            "artifacts": [
+              "C2 raw recursive-generic fixture source",
+              "C3 raw recursive-generic fixture source"
+            ],
+            "accepted": true
+          }
+        ]
+      },
+      "timings": {
+        "scope": "One observed run, not a controlled benchmark.",
+        "n1InternalTotalMs": 291078.72825700004,
+        "generations": [
+          {
+            "generation": "C1",
+            "loadAndPrepare": 675252.480201,
+            "admissions": 104268.94442199997,
+            "canonicalSurface": 44201.93878600001,
+            "emit": 258312.066354,
+            "tscAndWrite": 3289.997376000043,
+            "total": 1085325.429543
+          },
+          {
+            "generation": "C2",
+            "loadAndPrepare": 665101.9169419999,
+            "admissions": 102782.10882700002,
+            "canonicalSurface": 43959.933782999986,
+            "emit": 333493.2186789999,
+            "tscAndWrite": 3281.352582000196,
+            "total": 1148618.5315790002
+          },
+          {
+            "generation": "C3",
+            "loadAndPrepare": 698966.014034,
+            "admissions": 113074.94499600003,
+            "canonicalSurface": 45282.051597999875,
+            "emit": 339873.16518500005,
+            "tscAndWrite": 3304.2846570000984,
+            "total": 1200500.461399
+          }
+        ],
+        "sameCompleteTypeScriptSource": {
+          "mode": "same-source-comparison",
+          "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/full-compiler/report.json",
+          "sourceSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+          "timings": [
+            {
+              "phase": "compile-historical",
+              "version": "5.8.3",
+              "elapsedMs": 8391.102236
+            },
+            {
+              "phase": "compile-current",
+              "version": "7.0.2",
+              "elapsedMs": 2649.8136120000017
+            }
+          ]
+        }
+      },
+      "completeLoggedEvidence": {
+        "reference": "grammar-migration-compiler-evidence.json",
+        "gitBlobSha": "2cb07e0da4513ac3e67791dafd4f59403b3a8a3f",
+        "compilerJsonRecords": 33,
+        "providerJsonRecords": 1,
+        "compilerFullLogBlob": "3906e3a16673e71fb0fc6279ebb1d639a8552192",
+        "providerFullLogBlob": "0102aea32c2250db6d6907bbb52d6989d4123318",
+        "scope": "Complete logged evidence; the selected manifest still requires the actual provider and cold receipt file bytes.",
+        "compilerFullLogReference": "evidence-logs/grammar-r2-compiler.log",
+        "providerFullLogReference": "evidence-logs/grammar-r2-provider.log"
+      },
+      "strictSh1Qualified": false,
+      "fullStandardConformance": false,
+      "fullPscvConformance": false,
+      "remaining": [
+        "Finish independent cold recovery.",
+        "Authenticate original receipt-file bytes with the evidence collector.",
+        "Explicitly select proven R.",
+        "Apply and qualify the prepared finite F worker and host completion."
+      ]
     }
   },
   "acceptanceAxes": {
@@ -3638,5 +3917,14 @@
       ],
       "remainingPlan": "RUNTIME_IR_PLAN.md"
     }
-  ]
+  ],
+  "activeContinuation": {
+    "branch": "psc0/sh1-projection-grammar-v1",
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "stage": "R compiler/provider passed; cold recovery running",
+    "canonicalBranchIntegrated": false,
+    "selectedSeed": "A",
+    "workerMigrationApplied": false,
+    "workerMigrationQualified": false
+  }
 }

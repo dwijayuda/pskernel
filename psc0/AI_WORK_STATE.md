@@ -1,6 +1,6 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 12:18:08 UTC.
+Updated: 2026-10-09 12:55:25 UTC.
 
 ## Active continuation: new-only R3 source grammar and projection repair
 
@@ -38,8 +38,9 @@ Implementation assembled for the coherent qualification checkpoint:
   refusals. In particular the old compilerBind/compilerPure-specific do sugar
   is not relabeled as Standard monadic or verified do.
 
-No new grammar/compiler qualification has completed for this continuation.
-This code checkpoint is a qualification candidate, not a success receipt.
+The R2 compiler qualification and independent selected-provider acceptance have
+completed successfully. Cold successor recovery is still running, so the selected
+manifest remains A and the F worker source remains unapplied.
 
 The first cloud attempt at `48723fe676a0d9ae3fa819bd314199fe0ca2e926`
 ([run 37925016499](https://github.com/dwijayuda/pskernel/actions/runs/37925016499))
@@ -56,12 +57,41 @@ See [the exact first-attempt evidence](docs/selfhost-language/grammar-migration-
 The coherent correction is `fe2560aba0f347b1caf8d000d371464642d44f23`
 ([run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635)).
 Its native build, all three native suites, actual checked-seed build, focused
-source/import tests and CLI boundaries passed. N1 passed the full-closure new
-PS correspondence and generated capability gates; the same-complete-compiler
-TypeScript comparison also passed. C1 passed at 12:10:58 UTC after an 18m36s
-selected-seed candidate step. C2/C3 qualification is running; independent provider
-acceptance and cold successor recovery remain pending. No full compiler
-qualification or new seed selection is claimed from the completed N1 gate.
+source/import tests and CLI boundaries passed. The native suites recorded
+75 core, 10 translation and 16 erasure passes. N1 passed full new-PS correspondence
+for all 61 modules (904,355 PS bytes) and generated capability gates. Its complete
+native original-IR check accepted 56,391 expressions and 725,484 visited steps,
+with zero findings.
+
+Compiler job `113804052074` completed successfully at 12:50:43 UTC. C1, C2 and
+C3 generated the same JavaScript SHA-256,
+`70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061`.
+C2/C3 agree on all four required products. The original IR used for C2 and C3
+emission was completely checked and accepted, with zero findings. C1 preserves
+the explicit pre-checker A boundary; its historical canonical surface and
+different TypeScript source are not a current legacy grammar mode. The raw
+61-module source closure is
+`f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226`.
+
+Independent provider job `113827136830` passed at 12:52:11 UTC. It accepted four
+distinct exact admission streams across eight C2/C3 artifact roles, under the
+unchanged Lean 4.34.0 provider. This is post-emission admission acceptance, not
+a claim that this provider invocation gated emission.
+
+Cold job `113827137018` began its fresh two-generation rebuild from A at
+12:51:35 UTC and remains running. Neither cold recovery nor successor selection
+is claimed from the completed compiler/provider jobs. The complete 33 compiler
+and one provider logged JSON records are preserved in
+[the R2 compiler/provider evidence bundle](docs/selfhost-language/grammar-migration-compiler-evidence.json).
+Its logged provider object is not substituted for the original receipt file:
+the separate collector must retrieve and hash the actual artifact bytes before
+selection.
+
+The same emitted TypeScript source compiled with TS 5.8.3 in 8,391.102236 ms
+and TS 7.0.2 in 2,649.813612 ms in this run. These are single-pair direct compiler
+timings. Generated C1/C2/C3 builds took 1,085.325 / 1,148.619 / 1,200.500 seconds;
+preparation and emission dominate, so the direct TS timing is not a whole-pipeline
+speedup claim.
 
 All 12 worker rewrites, three alias removals and seven source-guard updates are
 prepared and independently reviewed, with no active source application yet.
@@ -111,7 +141,11 @@ All 1,500 declaration headers in the audited 5e3 baseline's 61-module closure we
 none has a non-explicit binder after an explicit binder, so the new declaration
 grammar does not require reordering the current compiler's public telescopes.
 
-## Last completed M6 and TypeScript 7 result
+## Historical completed M6 and TypeScript 7 result
+
+This section preserves the completed checkpoint before the active R/F continuation.
+Its selected-seed, integration and next-step descriptions are historical; the
+active status above is authoritative for this continuation.
 
 The bounded portable runtime IR checker, same-IR checked emission and scoped-let
 backend correction are qualified under TypeScript 5.8.3 at

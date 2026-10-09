@@ -680,20 +680,26 @@ constructor and recursor preconditions as one checked source-level witness.
 This intentionally does not assert completion of constructor checking,
 recursor validation, or the final mutual publication transaction.
 -/
-theorem psKernelAddSimpleMutualInductive_success_prepared_constructor_inputs
+/--
+The actual global admission preflight derives the complete provisional
+constructor-input certificate for *any* checked shape list that preserves
+source declaration order. This makes source-name invariants independent of
+index-opening implementation details and allows the later executable pipeline
+to reuse its exact (not merely existential) shape witnesses.
+-/
+theorem psKernelPreparedMutualConstructorInputs_for_source_shapes
     (fuel : Nat) (environment result : PsKernelEnvironment)
     (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (hShapeDecls : shapes.map PsKernelSimpleMutualTypeShape.decl = decl.types)
     (hIndex : PsKernelEnvironmentIndexRefines environment)
     (hNative : PsKernelNativeReductionSoundLaw)
     (hString : PsKernelStringEqSoundLaw)
-    (hRun : psKernelAddSimpleMutualInductive
-      fuel environment decl maxRecDepth maxNatSize = Except.ok result) :
-    ∃ shapes : List PsKernelSimpleMutualTypeShape,
-      PsKernelPreparedMutualConstructorInputsValid environment decl shapes := by
-  obtain ⟨shapes, hShapeDecls, hReserved⟩ :=
-    psKernelAddSimpleMutualInductive_success_reserved_names_after_headers
-      fuel environment result decl maxRecDepth maxNatSize hIndex hNative hString hRun
-  obtain ⟨hTypesAbsent, _, _, hTypesUnique, hRecUnique, hCtorUnique, _, _⟩ :=
+    (hRun : psKernelAddSimpleMutualInductive fuel environment decl
+      maxRecDepth maxNatSize = Except.ok result) :
+    PsKernelPreparedMutualConstructorInputsValid environment decl shapes := by
+  obtain ⟨hTypesAbsent, _, _, hTypesUnique, hRecUnique, hCtorUnique,
+    hTypesDisjoint, _⟩ :=
     psKernelAddSimpleMutualInductive_success_partitioned_name_guards
       fuel environment result decl maxRecDepth maxNatSize hIndex hRun
   have hShapeNames :=
@@ -705,36 +711,74 @@ theorem psKernelAddSimpleMutualInductive_success_prepared_constructor_inputs
   have hRecNames : shapes.map
       (fun shape : PsKernelSimpleMutualTypeShape => psKernelSimpleRecName shape.decl.name) =
       psKernelSimpleMutualRecNames decl.types := by
-    calc
-      _ = psKernelSimpleMutualRecNames
-            (shapes.map PsKernelSimpleMutualTypeShape.decl) :=
-              psKernelMutualShapeRecursorNames_source shapes
-      _ = psKernelSimpleMutualRecNames decl.types :=
-        congrArg psKernelSimpleMutualRecNames hShapeDecls
+    rw [psKernelMutualShapeRecursorNames_source, hShapeDecls]
   have hCtorNames : psKernelMutualShapeConstructorNames shapes =
       psKernelSimpleMutualCtorNames decl.types := by
-    calc
-      _ = psKernelSimpleMutualCtorNames
-            (shapes.map PsKernelSimpleMutualTypeShape.decl) :=
-              psKernelMutualShapeConstructorNames_source shapes
-      _ = psKernelSimpleMutualCtorNames decl.types :=
-        congrArg psKernelSimpleMutualCtorNames hShapeDecls
+    rw [psKernelMutualShapeConstructorNames_source, hShapeDecls]
+  obtain ⟨_, _, _, hAllAbsent⟩ :=
+    psKernelAddSimpleMutualInductive_success_name_guards
+      fuel environment result decl maxRecDepth maxNatSize hIndex hRun
+  have hOriginalReserved : PsKernelInductiveNamesAbsent environment
+      (psKernelSimpleMutualRecNames decl.types ++
+        psKernelSimpleMutualCtorNames decl.types) := by
+    have hAll : PsKernelInductiveNamesAbsent environment
+        (psKernelSimpleMutualNames decl.types ++
+          (psKernelSimpleMutualRecNames decl.types ++
+            psKernelSimpleMutualCtorNames decl.types)) := by
+      simpa only [psKernelMutualNameListAppend_eq_append] using hAllAbsent
+    exact (PsKernelInductiveNamesAbsent.append_split environment
+      (psKernelSimpleMutualNames decl.types)
+      (psKernelSimpleMutualRecNames decl.types ++
+        psKernelSimpleMutualCtorNames decl.types) hAll).2
   let work0 := psKernelAddMutualInductiveInfos
     (psKernelMakeSimpleMutualBaseInfos
       (psKernelSimpleMutualNames decl.types) decl shapes) environment
-  have hReservedSplit := PsKernelInductiveNamesAbsent.append_split work0
+  have hReserved := psKernelPreparedMutualHeaders_preserves_reserved_names
+    (psKernelSimpleMutualNames decl.types) decl shapes environment
+    (psKernelSimpleMutualRecNames decl.types ++
+      psKernelSimpleMutualCtorNames decl.types)
+    hOriginalReserved (by
+      intro name hMember
+      apply hTypesDisjoint name
+      simpa only [hShapeNames] using hMember)
+  have hSplit := PsKernelInductiveNamesAbsent.append_split work0
     (psKernelSimpleMutualRecNames decl.types)
     (psKernelSimpleMutualCtorNames decl.types) hReserved
-  have hHeadersTyped :=
+  have hTyped :=
     psKernelAddSimpleMutualInductive_success_all_headers_sort_typed
       fuel environment result decl maxRecDepth maxNatSize hIndex hNative hString hRun
-  refine ⟨shapes, ?_⟩
   dsimp only [PsKernelPreparedMutualConstructorInputsValid]
-  refine ⟨hShapeDecls, hPrepared.1, hPrepared.2.1, ?_, ?_, ?_, ?_, hHeadersTyped⟩
-  · simpa only [hCtorNames] using hReservedSplit.2
+  refine ⟨hShapeDecls, hPrepared.1, hPrepared.2.1, ?_, ?_, ?_, ?_, hTyped⟩
+  · simpa only [hCtorNames] using hSplit.2
   · simpa only [hCtorNames] using hCtorUnique
-  · simpa only [hRecNames] using hReservedSplit.1
+  · simpa only [hRecNames] using hSplit.1
   · simpa only [hRecNames] using hRecUnique
+
+theorem psKernelAddSimpleMutualInductive_success_prepared_constructor_inputs
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelAddSimpleMutualInductive
+      fuel environment decl maxRecDepth maxNatSize = Except.ok result) :
+    ∃ shapes : List PsKernelSimpleMutualTypeShape,
+      PsKernelPreparedMutualConstructorInputsValid environment decl shapes := by
+  obtain ⟨first, remaining, paramResult, indexResult, headerLevel, resultLevel,
+    tailShapes, hTypes, hFirstTyping, hParamConfig, hIndexConfig, hParamEnv,
+    hIndexEnv, hHistory⟩ :=
+    psKernelAddSimpleMutualInductive_success_header_semantics
+      fuel environment result decl maxRecDepth maxNatSize
+      hIndex hNative hString hRun
+  let shapes : List PsKernelSimpleMutualTypeShape :=
+    PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
+  have hShapeDecls : shapes.map PsKernelSimpleMutualTypeShape.decl = decl.types := by
+    rw [hTypes]
+    simpa [shapes] using congrArg (List.cons first) hHistory.shape_provenance
+  exact ⟨shapes, psKernelPreparedMutualConstructorInputs_for_source_shapes
+    fuel environment result decl maxRecDepth maxNatSize shapes hShapeDecls
+    hIndex hNative hString hRun⟩
+
 
 /--
 Composition boundary for the executable mutual-constructor family worker.

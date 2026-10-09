@@ -221,3 +221,136 @@ theorem psKernelValidateMutualRecursorInfosWorker_independent_typing
                         psKernelCheckerContextEmpty] using hReduced.1
                   · simpa [hSortContext, hContext, session, psKernelMkCheckerSession,
                       psKernelCheckerContextEmpty] using hRuleTyped.1
+
+/-- Rule names and field arities follow constructor order, filtered by owner. -/
+inductive PsKernelMutualRecursorRuleMetadataMatches (owner : Nat) :
+    List PsKernelSimpleMutualConstructorShape -> List PsKernelRecursorRule -> Prop where
+  | nil : PsKernelMutualRecursorRuleMetadataMatches owner [] []
+  | skip (shape : PsKernelSimpleMutualConstructorShape)
+      (rest : List PsKernelSimpleMutualConstructorShape) (rules : List PsKernelRecursorRule)
+      (hOther : shape.owner ≠ owner)
+      (hTail : PsKernelMutualRecursorRuleMetadataMatches owner rest rules) :
+      PsKernelMutualRecursorRuleMetadataMatches owner (shape :: rest) rules
+  | cons (shape : PsKernelSimpleMutualConstructorShape)
+      (rest : List PsKernelSimpleMutualConstructorShape)
+      (rule : PsKernelRecursorRule) (rules : List PsKernelRecursorRule)
+      (hOwner : shape.owner = owner)
+      (hCtor : rule.ctor = shape.ctor.name)
+      (hFields : rule.nFields = psKernelOpenBinderListLength shape.fields)
+      (hTail : PsKernelMutualRecursorRuleMetadataMatches owner rest rules) :
+      PsKernelMutualRecursorRuleMetadataMatches owner (shape :: rest) (rule :: rules)
+
+theorem psKernelMakeSimpleMutualRulesWorker_metadata
+    (shapes : List PsKernelSimpleMutualConstructorShape)
+    (recLevelParams : List PsKernelName) (typeShapes : List PsKernelSimpleMutualTypeShape)
+    (params motives minors ruleBinders : List PsKernelOpenBinder)
+    (owner minorIndex : Nat) (rules : List PsKernelRecursorRule)
+    (hRun : psKernelMakeSimpleMutualRulesWorker shapes recLevelParams typeShapes
+      params motives minors ruleBinders owner minorIndex = Except.ok rules) :
+    PsKernelMutualRecursorRuleMetadataMatches owner shapes rules := by
+  induction shapes generalizing minorIndex rules with
+  | nil =>
+      simp [psKernelMakeSimpleMutualRulesWorker] at hRun
+      cases hRun
+      exact PsKernelMutualRecursorRuleMetadataMatches.nil
+  | cons shape rest ih =>
+      simp only [psKernelMakeSimpleMutualRulesWorker] at hRun
+      cases hOwner : Nat.beq shape.owner owner with
+      | false =>
+          simp only [hOwner] at hRun
+          have hOther : shape.owner ≠ owner := by
+            intro hEqual
+            subst owner
+            simp at hOwner
+          exact PsKernelMutualRecursorRuleMetadataMatches.skip shape rest rules hOther
+            (ih (Nat.succ minorIndex) rules hRun)
+      | true =>
+          simp only [hOwner] at hRun
+          cases hMinor : psKernelMutualOpenBinderListGet minors minorIndex with
+          | none => simp only [hMinor] at hRun; cases hRun
+          | some minor =>
+              simp only [hMinor] at hRun
+              cases hCalls : psKernelMakeSimpleMutualRecursiveCalls recLevelParams typeShapes
+                  params motives minors shape with
+              | error message => simp only [hCalls] at hRun; cases hRun
+              | ok calls =>
+                  simp only [hCalls] at hRun
+                  cases hTail : psKernelMakeSimpleMutualRulesWorker rest recLevelParams typeShapes
+                      params motives minors ruleBinders owner (Nat.succ minorIndex) with
+                  | error message => simp only [hTail] at hRun; cases hRun
+                  | ok tail =>
+                      simp only [hTail] at hRun
+                      cases hRun
+                      exact PsKernelMutualRecursorRuleMetadataMatches.cons shape rest _ tail
+                        (Nat.eq_of_beq_eq_true hOwner) rfl rfl
+                        (ih (Nat.succ minorIndex) tail hTail)
+
+/--
+Generated recursor metadata names its datatype, carries the declared universe
+parameters, and has constructor-provenant rules for the corresponding owner.
+The independent typing certificate is intentionally separate from generation.
+-/
+inductive PsKernelMutualRecursorInfosMetadataMatches
+    (recLevelParams typeNames : List PsKernelName)
+    (params motives minors : List PsKernelOpenBinder)
+    (ctorShapes : List PsKernelSimpleMutualConstructorShape) (isUnsafe : Bool) :
+    Nat -> List PsKernelSimpleMutualTypeShape -> List PsKernelRecursorInfo -> Prop where
+  | nil (owner : Nat) :
+      PsKernelMutualRecursorInfosMetadataMatches recLevelParams typeNames params motives minors
+        ctorShapes isUnsafe owner [] []
+  | cons (owner : Nat) (shape : PsKernelSimpleMutualTypeShape)
+      (rest : List PsKernelSimpleMutualTypeShape)
+      (info : PsKernelRecursorInfo) (infos : List PsKernelRecursorInfo)
+      (hName : info.base.name = psKernelSimpleRecName shape.decl.name)
+      (hLevels : info.base.levelParams = recLevelParams)
+      (hAll : info.all = typeNames)
+      (hParams : info.numParams = psKernelOpenBinderListLength params)
+      (hIndices : info.numIndices = psKernelOpenBinderListLength shape.indices)
+      (hMotives : info.numMotives = psKernelOpenBinderListLength motives)
+      (hMinors : info.numMinors = psKernelOpenBinderListLength minors)
+      (hK : info.k = false) (hUnsafe : info.isUnsafe = isUnsafe)
+      (hRules : PsKernelMutualRecursorRuleMetadataMatches owner ctorShapes info.rules)
+      (hTail : PsKernelMutualRecursorInfosMetadataMatches recLevelParams typeNames params motives
+        minors ctorShapes isUnsafe (Nat.succ owner) rest infos) :
+      PsKernelMutualRecursorInfosMetadataMatches recLevelParams typeNames params motives minors
+        ctorShapes isUnsafe owner (shape :: rest) (info :: infos)
+
+theorem psKernelBuildSimpleMutualRecInfosFromConstructorsWorker_metadata
+    (shapes allShapes : List PsKernelSimpleMutualTypeShape)
+    (recLevelParams typeNames : List PsKernelName) (levels : List PsKernelLevel)
+    (params motives minors ruleBinders : List PsKernelOpenBinder)
+    (ctorShapes : List PsKernelSimpleMutualConstructorShape) (owner : Nat)
+    (isUnsafe : Bool) (infos : List PsKernelRecursorInfo)
+    (hRun : psKernelBuildSimpleMutualRecInfosFromConstructorsWorker shapes allShapes
+      recLevelParams typeNames levels params motives minors ruleBinders ctorShapes owner
+      isUnsafe = Except.ok infos) :
+    PsKernelMutualRecursorInfosMetadataMatches recLevelParams typeNames params motives minors
+      ctorShapes isUnsafe owner shapes infos := by
+  induction shapes generalizing owner infos with
+  | nil =>
+      simp [psKernelBuildSimpleMutualRecInfosFromConstructorsWorker] at hRun
+      cases hRun
+      exact PsKernelMutualRecursorInfosMetadataMatches.nil owner
+  | cons shape rest ih =>
+      simp only [psKernelBuildSimpleMutualRecInfosFromConstructorsWorker] at hRun
+      cases hMotive : psKernelMutualOpenBinderListGet motives owner with
+      | none => simp only [hMotive] at hRun; cases hRun
+      | some motive =>
+          simp only [hMotive] at hRun
+          cases hRules : psKernelMakeSimpleMutualRules recLevelParams allShapes params
+              motives minors ruleBinders owner ctorShapes with
+          | error message => simp only [hRules] at hRun; cases hRun
+          | ok rules =>
+              simp only [hRules] at hRun
+              cases hTail : psKernelBuildSimpleMutualRecInfosFromConstructorsWorker rest allShapes
+                  recLevelParams typeNames levels params motives minors ruleBinders ctorShapes
+                  (Nat.succ owner) isUnsafe with
+              | error message => simp only [hTail] at hRun; cases hRun
+              | ok tail =>
+                  simp only [hTail] at hRun
+                  cases hRun
+                  exact PsKernelMutualRecursorInfosMetadataMatches.cons owner shape rest _ tail
+                    rfl rfl rfl rfl rfl rfl rfl rfl rfl
+                    (psKernelMakeSimpleMutualRulesWorker_metadata ctorShapes recLevelParams
+                      allShapes params motives minors ruleBinders owner 0 rules hRules)
+                    (ih (Nat.succ owner) tail hTail)

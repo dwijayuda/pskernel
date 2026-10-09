@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "kind": "psc0-runtime-ir-checker-execution",
-  "updatedAt": "2026-10-09T08:28:56Z",
+  "updatedAt": "2026-10-09T08:41:54Z",
   "branch": "psc0/sh1-ir-checker-v1",
-  "status": "implemented-recursive-projection-compatibility-repair-pending-qualification",
+  "status": "native-runtime-ir-accepted-generated-emission-scope-repair-pending",
   "baseQualifiedSourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
   "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
   "strictSh1": false,
@@ -141,6 +141,89 @@
         "normalizerChanged": false,
         "selectedSeedChanged": false,
         "generalNormalizerRepair": "Separate language capability: preserve qualified-name resolution priority and shadowing, and support projections whose hygienic base names have multiple segments.",
+        "followupQualification": "raw preparation and native checker passed; generated positive fixture exposed let-emission scope defect",
+        "followupSourceRef": "af820270f9dc4fdcf76600733fa4773c14f3df5f"
+      }
+    },
+    {
+      "sourceRef": "af820270f9dc4fdcf76600733fa4773c14f3df5f",
+      "runId": 37905284246,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37905284246",
+      "compilerJobId": 113737160426,
+      "result": "failure",
+      "phase": "generated-positive-fixture-typescript-compilation",
+      "passed": [
+        "host syntax and source restrictions",
+        "authenticated selected A seed",
+        "native Lean build: 133 jobs",
+        "complete raw PSC source build",
+        "eight native checker cases",
+        "native complete current-source IR acceptance",
+        "same checked native IR emission equals N1 TypeScript",
+        "generated positive fixture checker acceptance and complete traversal",
+        "generated positive checked/raw TypeScript equality"
+      ],
+      "nativeEvidenceReceipt": "runtime-ir-checker-first-native.json",
+      "nativeRuntimeIrTyping": {
+        "sourceClosureSha256": "cab802359ef476568979cb0b063e1a3f6f8b7e1f364b8ddfd98cb3255d132544",
+        "moduleCount": 61,
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 707366,
+        "expressionCount": 54843,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "strictSh1Qualified": false,
+        "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      },
+      "generatedPartialEvidence": {
+        "classification": "Established by reached compileTypeScript call after the harness's acceptance/parity assertions.",
+        "acceptedFixture": true,
+        "traversalComplete": true,
+        "checkedEmissionSucceeded": true,
+        "rawCheckedTypeScriptEqual": true,
+        "typeScriptCompilationPassed": false,
+        "behaviorObservationsExecuted": false,
+        "negativeCasesExecuted": false
+      },
+      "diagnostic": "accepted/index.ts(102,134): TS2448/TS2454: Block-scoped variable 'value' used before its declaration/assignment.",
+      "notRun": [
+        "generated behavior assertions",
+        "36 generated rejection cases",
+        "generated resource/carrier/prepared-entry cases",
+        "Q to C1",
+        "C2/C3 qualification",
+        "pinned provider acceptance"
+      ],
+      "artifact": {
+        "id": 11604616011,
+        "sizeBytes": 1340213,
+        "sha256": "f858054046f59f38ca5abf83aeada0380788a44356491978449050afb41a90b4"
+      },
+      "timingScope": {
+        "nativeBuildCompletedUtc": "2026-10-09T08:30:30.2316533Z",
+        "nativeGateStartedUtc": "2026-10-09T08:30:30.2699424Z",
+        "nativeEvidenceLoggedUtc": "2026-10-09T08:32:03.3038206Z",
+        "typeScriptFailureUtc": "2026-10-09T08:32:04.2736258Z",
+        "nativeChildStdoutBuffered": true
+      },
+      "resolution": {
+        "cause": "The emitter places a const binding around its initializer, so a legal outer-scope IR reference with the same name resolves to the new JavaScript binding's temporal dead zone.",
+        "scope": [
+          "ordinary generator let statement emission",
+          "nested shadowing in optimized tail-worker let emission"
+        ],
+        "change": "Conservatively detect initializer name use; use a parameterized generator invocation with the initializer argument outside its binding scope. Decline affected tail optimization and use the generator path. Preserve the existing block form otherwise.",
+        "checkerRulesWeakened": false,
+        "fixtureRemoved": false,
+        "additionalConformance": [
+          "yielding wrapped-call initializer",
+          "initializer closure capturing outer binding",
+          "nested let shadowing in deep tail recursion"
+        ],
         "followupQualification": "pending"
       }
     }
@@ -148,6 +231,13 @@
   "claimBoundaries": [
     "Runtime IR typing, generated compiler fixed-point qualification, pinned Core-provider acceptance and full strict SH/1 are separate.",
     "The selected authoring seed remains A.",
-    "None of the first three source-compatibility attempts reached the current M6 generated checker or runtime IR acceptance gates."
-  ]
+    "The af820 checkpoint's complete native IR report accepts 54,843 expressions with zero findings; complete generated conformance and self-host qualification were not earned before its positive-fixture emission failure."
+  ],
+  "requestedTypeScriptUpgrade": {
+    "version": "7.0.2",
+    "status": "authorized-compatibility-audit",
+    "scope": "psc0 current CLI toolchain",
+    "historicalSeedToolchain": "5.8.3 remains pinned for S0/A recovery",
+    "rootWorkspace": "Retain its compiler API dependency; this upgrade is scoped to psc0."
+  }
 }

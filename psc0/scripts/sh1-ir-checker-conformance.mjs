@@ -91,6 +91,17 @@ function fixtureModel(c) {
     declaration('fromZeroLambda', nat, call(lambda([], nat, natural(42)), [])),
     declaration('shadowOldScope', nat, E.letE('value', nat,
       intrinsic('natAdd', [variable('value'), natural(1)]), variable('value')), [['value', nat]]),
+    declaration('shadowWrappedCall', nat, E.letE('value', nat,
+      call('functionValue', [variable('value')]), variable('value')), [['value', nat]]),
+    declaration('shadowClosure', nat, E.letE('value', fnNat,
+      lambda([['delta', nat]], nat, intrinsic('natAdd', [variable('value'), variable('delta')])),
+      call('value', [natural(2)])), [['value', nat]]),
+    declaration('shadowNestedTail', nat,
+      E.ifE(intrinsic('natEq', [variable('fuel'), natural(0)]), variable('accumulator'),
+        E.letE('value', nat, intrinsic('natAdd', [variable('accumulator'), natural(1)]),
+          E.letE('value', nat, intrinsic('natAdd', [variable('value'), natural(1)]),
+            call('shadowNestedTail', [intrinsic('natSub', [variable('fuel'), natural(1)]), variable('value')])))),
+      [['fuel', nat], ['accumulator', nat]]),
     declaration('fromSwap', nat, call('swapCaller', [natural(42), text('swap')], [nat, string])),
     declaration('fromNestedGeneric', string, projection('Box',
       call('mapBox', [lambda([['value', nat]], string, text('mapped')),
@@ -179,11 +190,26 @@ function assertBehavior(runtime) {
   ]) { assert.equal(runtime[name], expected, 'PSC0_SH1_IR_RUNTIME: ' + name); observations++; }
   for (let input = 0n; input < 8n; input++) {
     assert.equal(runtime.shadowOldScope(input), input + 1n, 'PSC0_SH1_IR_SHADOW_SCOPE');
+    assert.equal(runtime.shadowWrappedCall(input), input + 1n, 'PSC0_SH1_IR_SHADOW_WRAPPED_CALL');
+    assert.equal(runtime.shadowClosure(input), input + 2n, 'PSC0_SH1_IR_SHADOW_CLOSURE');
     assert.equal(runtime.mutualEven(input), input % 2n === 0n, 'PSC0_SH1_IR_MUTUAL_EVEN');
     assert.equal(runtime.mutualOdd(input), input % 2n === 1n, 'PSC0_SH1_IR_MUTUAL_ODD');
-    observations += 3;
+    observations += 5;
   }
-  return { status: 'pass', observations, exhaustiveForAllInputs: false };
+  const tailFuels = [0n, 1n, 2n, 31n, 20000n];
+  for (const fuel of tailFuels) {
+    assert.equal(runtime.shadowNestedTail(fuel, 7n), 7n + 2n * fuel, 'PSC0_SH1_IR_SHADOW_NESTED_TAIL');
+    observations++;
+  }
+  return {
+    status: 'pass', observations, exhaustiveForAllInputs: false,
+    letScopeCases: [
+      { name: 'shadowOldScope', observations: 8 },
+      { name: 'shadowWrappedCall', observations: 8 },
+      { name: 'shadowClosure', observations: 8 },
+      { name: 'shadowNestedTail', observations: tailFuels.length },
+    ],
+  };
 }
 
 function assertRejected(report, label, code) {

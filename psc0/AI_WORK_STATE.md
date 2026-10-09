@@ -25,8 +25,9 @@ no independent expression typing rules.
 
 Validation is architecture-first: independent source reviews, a native exact-source
 IR gate and focused native/generated conformance matrix, followed by the planned
-C1/C2/C3 and pinned-provider checkpoint. Results are pending; implementation is
-not qualification. No strict profile is activated and no provider or lowering
+C1/C2/C3 and pinned-provider checkpoint. The first complete native runtime IR
+check passed at af820 below; full generated and compiler qualification remains
+pending. No strict profile is activated and no provider or lowering
 preservation claim is inferred from runtime type acceptance. Resource counters
 distinguish input-shape, dispatcher and individual type-operation budgets; finding
 counts count failed checking obligations, with first error within a type operation.
@@ -75,6 +76,34 @@ frontend installs type, constructor and recursor declarations, and handles
 field syntax directly. Qualification of the alias repair remains pending.
 Attempt evidence is retained in
 [runtime-ir-checker-execution.json](docs/selfhost-language/runtime-ir-checker-execution.json).
+
+### First complete native IR acceptance and generated emission finding
+
+Checkpoint `af820270f9dc4fdcf76600733fa4773c14f3df5f` in
+[run 37905284246](https://github.com/dwijayuda/pskernel/actions/runs/37905284246)
+passed raw PSC preparation, all 133 native build jobs and eight native checker
+cases. The complete current compiler IR was accepted with 61 modules, 54,843
+expressions, 707,366 visited steps and zero findings. The exact checked native
+emission matched N1 TypeScript byte for byte. Preserve its exact receipt at
+[the first native acceptance](docs/selfhost-language/runtime-ir-checker-first-native.json).
+
+The generated compiler also accepted the positive IR fixture and produced equal
+raw/checked TypeScript, but TypeScript compilation exposed a valid let-shadowing
+case: the initializer was emitted inside the new const binding's JavaScript
+scope. The checker correctly uses the outer IR scope. The coherent backend repair
+uses a parameterized generator only when the existing conservative initializer
+name scan detects possible capture; ordinary const blocks remain unchanged.
+The tail optimizer declines the same case, retaining the corrected generator
+path. Focused coverage includes a yielding initializer, an initializer closure
+capturing the outer value, and nested shadowing through deep recursion.
+No checker rule is weakened and the original fixture remains intact. Full
+generated conformance, C1/C2/C3 and provider qualification remain pending.
+
+The user also authorized a possible TypeScript 7.0.2 upgrade. Audit and staging
+are separate from the running 5.8.3 baseline. Keep historical S0/A recovery on its
+recorded 5.8.3 toolchain; scope current CLI changes to psc0, because the repository's
+separate root workspace uses the JavaScript compiler API. Record both toolchain
+identities and measure the TypeScript phase before claiming an iteration speedup.
 
 ## Current source and qualification checkpoints
 

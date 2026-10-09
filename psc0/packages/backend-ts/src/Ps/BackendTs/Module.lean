@@ -573,7 +573,8 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
                   else Option.none
             else Option.none
         | PsVerifiedIrExpr.letE name type value body =>
-            if psTsTailBindingSafe declaration aliases name then
+            if psTsExprUsesNameWithFuel 4096 value name then Option.none
+            else if psTsTailBindingSafe declaration aliases name then
               match psTsTailAliasValue declaration.name name value with
               | Option.some alias =>
                   let capturedAlias : PsVerifiedIrExpr -> Bool := fun (argument : PsVerifiedIrExpr) =>

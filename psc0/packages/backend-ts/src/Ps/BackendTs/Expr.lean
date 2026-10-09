@@ -502,7 +502,12 @@ def psTsEmitLetStatements
               match psTsEmitLetStatements emit body with
               | Except.error error => Except.error error
               | Except.ok printedBody =>
-                  Except.ok (psTsJoin "" ["{ const ", name, ": ", printedType, " = ", printedValue, "; ", printedBody, " }"])
+                  if psTsExprUsesNameWithFuel 4096 value name then
+                    Except.ok
+                      (psTsJoin "" ["return yield* (function*(", name, ": ", printedType,
+                        ") { ", printedBody, " })(", printedValue, ");"])
+                  else
+                    Except.ok (psTsJoin "" ["{ const ", name, ": ", printedType, " = ", printedValue, "; ", printedBody, " }"])
   | _ =>
       match emit expr with
       | Except.error error => Except.error error

@@ -4,12 +4,25 @@ Status: active implementation from ed5d00aca0743bde583b45fe7756dd494ac3960f; not
 
 ## Latest execution boundary
 
-The enclosing source commit over **5a44bbb054d41a7534a0714bdd3f3d3b0ec467a2**
-integrates the independently reviewed 43-code-file
-[canonical function and recursion batch](reviewed-candidates/canonical-recursion-batch.json).
-It requests one complete **[sh1-qualify]** workflow. Discover the actual enclosing
-source SHA and run head before attributing any result. No additional native-only
-checkpoint or isolated cold run is requested.
+The43-file source batch **656ed78db6a2c26feced9374cd7b251c062a42df** failed
+native compilation in run **38001282875** / compiler job **114059689529**.
+Lean rejected a new local named `variable`; N1/C1/C2/C3 and provider did not run.
+The exact log and failure summary are retained in the attempt ledger.
+
+The enclosing source commit over656ed78 performs only the independently
+reviewed [native local-name repair](reviewed-candidates/native-keyword-local-repair.json):
+six closed let scopes in Basic and Expr,17 identifier occurrences, no behavior
+or gate change. The bounded audit included all new semantic/helper names and
+APIs and found the additional downstream `variable`/`prefix` cases before retry.
+It requests one full **[sh1-qualify]** run. Discover the actual enclosing head
+and Actions run before attributing results; no native-only or cold rerun.
+
+The complete [cross-family interface review](CROSS_FAMILY_INTERFACE_REVIEW.md)
+is independently CLEAR. It reconciles all ten COMMON interfaces, cofinal
+application schedules, shared residuals, finite administrative progress,
+source-derived identities and the exact native-empty/identifier boundaries.
+All33 row dispositions and strict flags remain open/false pending the final
+current-source evidence and explicit activation decision.
 
 The last compiler source **fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504** passed
 native development run **37988707250** / compiler job **114017088870**, including

@@ -323,12 +323,12 @@ def psErasureEntryInfoWithFuel
                   psErasureEntryInfoWithFuel environment remaining;
                 let kind := psErasureClassifyBinder environment context domain;
                 let pushed := psLocalPushBinding context name domain binder;
-                let variable := PsExpr.fvar pushed.id;
+                let openedParameter := PsExpr.fvar pushed.id;
                 -- Only the value's lambda spine is inspected. Replacing bound
                 -- variables by fresh free variables cannot create or remove a lambda,
                 -- so do not traverse the entire value body again for metadata.
                 match smaller pushed.context
-                    (psExprInstantiate1 typeBody variable)
+                    (psExprInstantiate1 typeBody openedParameter)
                     valueBody with
                 | Except.error error => Except.error error
                 | Except.ok tail =>

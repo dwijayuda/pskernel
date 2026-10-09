@@ -485,11 +485,11 @@ def psEraseKnownEntryApplication
     (headType : PsExpr) (arguments : List PsExpr) :
     Except PsErasureError PsVerifiedIrExpr :=
   let count := psListLength entry.binders;
-  let prefix := psListTake count arguments;
+  let suppliedPrefix := psListTake count arguments;
   let suffix := psErasureDropPrefix PsExpr count arguments;
   let remainingBinders :=
-    psErasureDropPrefix PsErasedBinderKind (psListLength prefix) entry.binders;
-  match psEraseApplicationArguments erase environment scope headType prefix
+    psErasureDropPrefix PsErasedBinderKind (psListLength suppliedPrefix) entry.binders;
+  match psEraseApplicationArguments erase environment scope headType suppliedPrefix
       (PsErasureAppliedArguments.mk List.nil List.nil List.nil headType) with
   | Except.error error => Except.error error
   | Except.ok applied =>
@@ -2116,12 +2116,12 @@ def psEraseCompleteSpecialWithFuel
                                     (List.cons (Prod.mk pushed.id capturedValue)
                                       captured.scope.runtimeExpressions)
                                     captured.scope.currentDefinition;
-                                  let variable := PsExpr.fvar pushed.id;
+                                  let openedArgument := PsExpr.fvar pushed.id;
                                   psEraseCompleteSpecialWithFuel eraseAt environment
                                     remaining restCount rest
                                     (PsErasureSpecialCompletion.mk nextScope
-                                      (PsExpr.app state.term variable)
-                                      (psExprInstantiate1 body variable)
+                                      (PsExpr.app state.term openedArgument)
+                                      (psExprInstantiate1 body openedArgument)
                                       state.parametersRev captured.bindingsRev)
                   | _ =>
                       psEraseCompleteSpecialWithFuel eraseAt environment
@@ -2144,12 +2144,12 @@ def psEraseCompleteSpecialWithFuel
                         state.scope.runtimeRecursors state.scope.runtimeStructures
                         state.scope.runtimeStructureConstructors state.scope.runtimeExpressions
                         state.scope.currentDefinition;
-                      let variable := PsExpr.fvar pushed.id;
+                      let openedArgument := PsExpr.fvar pushed.id;
                       psEraseCompleteSpecialWithFuel eraseAt environment
                         remaining restCount List.nil
                         (PsErasureSpecialCompletion.mk nextScope
-                          (PsExpr.app state.term variable)
-                          (psExprInstantiate1 body variable)
+                          (PsExpr.app state.term openedArgument)
+                          (psExprInstantiate1 body openedArgument)
                           state.parametersRev state.bindingsRev)
                   | PsErasedBinderKind.runtime =>
                       match psEraseRuntimeType environment state.scope domain with
@@ -2170,12 +2170,12 @@ def psEraseCompleteSpecialWithFuel
                               state.scope.runtimeRecursors state.scope.runtimeStructures
                               state.scope.runtimeStructureConstructors state.scope.runtimeExpressions
                               state.scope.currentDefinition;
-                            let variable := PsExpr.fvar pushed.id;
+                            let openedArgument := PsExpr.fvar pushed.id;
                             psEraseCompleteSpecialWithFuel eraseAt environment
                               remaining restCount List.nil
                               (PsErasureSpecialCompletion.mk nextScope
-                                (PsExpr.app state.term variable)
-                                (psExprInstantiate1 body variable)
+                                (PsExpr.app state.term openedArgument)
+                                (psExprInstantiate1 body openedArgument)
                                 (List.cons
                                   (PsVerifiedIrParameter.mk parameterName parameterType)
                                   state.parametersRev)
@@ -2198,12 +2198,12 @@ def psEraseSpecialBoundary
             | Except.error _ => Except.error PsErasureError.unsupportedApplication
             | Except.ok headType =>
                 if Nat.ble entry.arity supplied then
-                  let prefix := psListTake entry.arity view.args;
+                  let suppliedPrefix := psListTake entry.arity view.args;
                   let suffix := psErasureDropPrefix PsExpr entry.arity view.args;
-                  match psErasureApplyCoreType environment scope headType prefix with
+                  match psErasureApplyCoreType environment scope headType suppliedPrefix with
                   | Except.error error => Except.error error
                   | Except.ok resultType =>
-                      match eraseAt scope (psErasureApplyCoreArguments view.head prefix) with
+                      match eraseAt scope (psErasureApplyCoreArguments view.head suppliedPrefix) with
                       | Except.error error => Except.error error
                       | Except.ok lowered =>
                           match psEraseCanonicalArguments (eraseAt scope)

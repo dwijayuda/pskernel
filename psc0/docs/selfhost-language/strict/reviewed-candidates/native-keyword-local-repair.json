@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-native-keyword-local-repair",
+  "status": "independently-reviewed-alpha-correction-integrated-by-enclosing-commit",
+  "repository": "dwijayuda/pskernel",
+  "expectedParent": "656ed78db6a2c26feced9374cd7b251c062a42df",
+  "expectedRootTree": "5227495f64cea79d3d55e811b55f4b8f06ba270a",
+  "priorSourceInventory": {
+    "path": "reviewed-candidates/canonical-recursion-batch.json",
+    "blob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
+    "sourceCommit": "656ed78db6a2c26feced9374cd7b251c062a42df",
+    "codeFiles": 43
+  },
+  "observedFailure": {
+    "runId": 38001282875,
+    "compilerJobId": 114059689529,
+    "failedStep": 18,
+    "evidence": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/native-build-failure.json",
+    "evidenceBlob": "1d49d362273bed341efe25e205f0d37fb86436cc",
+    "logBlob": "c9ad38a7d8d333f547ca4202fe4e261aa38faf05",
+    "observedKeyword": "variable",
+    "module": "Ps.Erasure.Basic",
+    "line": 326,
+    "nativeCompilerBuilt": false,
+    "generationsStarted": false,
+    "provider": "skipped"
+  },
+  "files": [
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "baseBlob": "7de707103e0b88e6a5ab206ee242d72a131ca3b7",
+      "baseSha256": "71149b463305b007021b8d73f43fe4960f3712029d784a86b5d6bcfb861c6ecc",
+      "baseBytes": 29658,
+      "candidateSha256": "3cfcea753582afd703f7f48c6c247f708fe2d197dedffcd708eb128d7f177c5d",
+      "candidateBytes": 29672,
+      "edits": [
+        {
+          "id": "native-local-binder",
+          "old": "                let variable := PsExpr.fvar pushed.id;",
+          "new": "                let openedParameter := PsExpr.fvar pushed.id;"
+        },
+        {
+          "id": "native-local-reference",
+          "old": "                    (psExprInstantiate1 typeBody variable)",
+          "new": "                    (psExprInstantiate1 typeBody openedParameter)"
+        }
+      ],
+      "candidateBlob": "0132390f1ddb3133c9c14737b558e9b55bee33c9"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "baseBlob": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+      "baseSha256": "7da07e96681a91651b3d651c55cfb8af9ee431d27b0930987fd44642bd3ffeb6",
+      "baseBytes": 137310,
+      "candidateSha256": "10306c15e992fd75d4762a6ff4c017cda56dde72e0382a18d5c646f40be9f419",
+      "candidateBytes": 137412,
+      "edits": [
+        {
+          "id": "supplied-special-runtime-argument",
+          "old": "                                  let variable := PsExpr.fvar pushed.id;\n                                  psEraseCompleteSpecialWithFuel eraseAt environment\n                                    remaining restCount rest\n                                    (PsErasureSpecialCompletion.mk nextScope\n                                      (PsExpr.app state.term variable)\n                                      (psExprInstantiate1 body variable)\n                                      state.parametersRev captured.bindingsRev)",
+          "new": "                                  let openedArgument := PsExpr.fvar pushed.id;\n                                  psEraseCompleteSpecialWithFuel eraseAt environment\n                                    remaining restCount rest\n                                    (PsErasureSpecialCompletion.mk nextScope\n                                      (PsExpr.app state.term openedArgument)\n                                      (psExprInstantiate1 body openedArgument)\n                                      state.parametersRev captured.bindingsRev)"
+        },
+        {
+          "id": "missing-special-proof-argument",
+          "old": "                      let variable := PsExpr.fvar pushed.id;\n                      psEraseCompleteSpecialWithFuel eraseAt environment\n                        remaining restCount List.nil\n                        (PsErasureSpecialCompletion.mk nextScope\n                          (PsExpr.app state.term variable)\n                          (psExprInstantiate1 body variable)\n                          state.parametersRev state.bindingsRev)",
+          "new": "                      let openedArgument := PsExpr.fvar pushed.id;\n                      psEraseCompleteSpecialWithFuel eraseAt environment\n                        remaining restCount List.nil\n                        (PsErasureSpecialCompletion.mk nextScope\n                          (PsExpr.app state.term openedArgument)\n                          (psExprInstantiate1 body openedArgument)\n                          state.parametersRev state.bindingsRev)"
+        },
+        {
+          "id": "missing-special-runtime-argument",
+          "old": "                            let variable := PsExpr.fvar pushed.id;\n                            psEraseCompleteSpecialWithFuel eraseAt environment\n                              remaining restCount List.nil\n                              (PsErasureSpecialCompletion.mk nextScope\n                                (PsExpr.app state.term variable)\n                                (psExprInstantiate1 body variable)\n                                (List.cons\n                                  (PsVerifiedIrParameter.mk parameterName parameterType)\n                                  state.parametersRev)\n                                state.bindingsRev)",
+          "new": "                            let openedArgument := PsExpr.fvar pushed.id;\n                            psEraseCompleteSpecialWithFuel eraseAt environment\n                              remaining restCount List.nil\n                              (PsErasureSpecialCompletion.mk nextScope\n                                (PsExpr.app state.term openedArgument)\n                                (psExprInstantiate1 body openedArgument)\n                                (List.cons\n                                  (PsVerifiedIrParameter.mk parameterName parameterType)\n                                  state.parametersRev)\n                                state.bindingsRev)"
+        },
+        {
+          "id": "known-entry-prefix-local",
+          "old": "  let prefix := psListTake count arguments;\n  let suffix := psErasureDropPrefix PsExpr count arguments;\n  let remainingBinders :=\n    psErasureDropPrefix PsErasedBinderKind (psListLength prefix) entry.binders;\n  match psEraseApplicationArguments erase environment scope headType prefix",
+          "new": "  let suppliedPrefix := psListTake count arguments;\n  let suffix := psErasureDropPrefix PsExpr count arguments;\n  let remainingBinders :=\n    psErasureDropPrefix PsErasedBinderKind (psListLength suppliedPrefix) entry.binders;\n  match psEraseApplicationArguments erase environment scope headType suppliedPrefix"
+        },
+        {
+          "id": "special-entry-prefix-local",
+          "old": "                  let prefix := psListTake entry.arity view.args;\n                  let suffix := psErasureDropPrefix PsExpr entry.arity view.args;\n                  match psErasureApplyCoreType environment scope headType prefix with\n                  | Except.error error => Except.error error\n                  | Except.ok resultType =>\n                      match eraseAt scope (psErasureApplyCoreArguments view.head prefix) with",
+          "new": "                  let suppliedPrefix := psListTake entry.arity view.args;\n                  let suffix := psErasureDropPrefix PsExpr entry.arity view.args;\n                  match psErasureApplyCoreType environment scope headType suppliedPrefix with\n                  | Except.error error => Except.error error\n                  | Except.ok resultType =>\n                      match eraseAt scope (psErasureApplyCoreArguments view.head suppliedPrefix) with"
+        }
+      ],
+      "candidateBlob": "e3ed96f9cf9329882b204da83b3f2925a70e5c73"
+    }
+  ],
+  "changes": {
+    "files": 2,
+    "guards": 7,
+    "renamedBindings": 6,
+    "identifierTokenReplacements": 17,
+    "observedClass": "One Basic local named variable is rejected by native Lean.",
+    "additionalSourceAuditClass": "Three Expr locals named variable and two Expr locals named prefix use the same reserved-native-token mechanism. Expr was downstream of the failed Basic build; these additional refusals are source-audit findings, not logged execution.",
+    "basicLocal": "variable -> openedParameter",
+    "expressionLocals": [
+      "variable -> openedArgument",
+      "prefix -> suppliedPrefix"
+    ]
+  },
+  "argument": {
+    "method": "Capture-avoiding alpha renaming of six closed local let scopes.",
+    "freshness": "openedParameter is absent from the complete Basic base. openedArgument and suppliedPrefix are absent from the complete Expr base.",
+    "bindingAssociation": "Every renamed occurrence is a use of its immediately enclosing affected let. The unique exact guards include each initializer, intervening control and all uses. No free occurrence, string, public binder, declaration header, field name, Core ID or output-name policy is changed.",
+    "semantics": "Initializers, case order, function arguments, Core construction and returned records are byte-identical after restoring the renamed identifiers. The correction changes only source spelling to meet the pinned native lexer; it changes no compiler algorithm or source-language capability.",
+    "proofTransport": "The completed canonical/ER/source arguments for Basic7de707 and Expr7498 remain applicable under the explicit local alpha correspondence. Final integrated identity is the current two-file overlay, not a reuse of the failed source's execution.",
+    "crossFamilyReview": {
+      "path": "CROSS_FAMILY_INTERFACE_REVIEW.md",
+      "blob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "manifestBlob": "74d3b5f93f631efb3135728842afdfd6b3ccb3c4",
+      "rootReview": "CLEAR complete ten-interface map, shared lower-index expression/runner induction, cofinal event refinements, progress, closed native-empty boundary and actual-source association. The local renamings above transport its Basic/Expr source inputs."
+    }
+  },
+  "review": {
+    "root": "CLEAR full forward/reverse unique guards, SHA256, UTF-8 sizes, immutable readbacks and local alpha/freshness argument",
+    "independent": "CLEAR: complete bounded native reserved-binder and helper-API/readiness audit; exact alpha reconstruction, hashes, byte counts and immutable candidate readback",
+    "audit": {
+      "scope": [
+        "new canonical Basic/Definition/Expr helpers",
+        "root Context/Term/Declaration producer changes",
+        "recursive-record lowering"
+      ],
+      "findings": [
+        "Only the repaired variable and prefix local-binding keyword classes were found.",
+        "New helper declaration order, public imported inference/abstraction functions and IR/scope/entry constructor fields agree.",
+        "Already completed native Context/Term/Declaration module builds are present in the retained failed log."
+      ],
+      "source": "Pinned Lean293d5d0c0c3f3dded4688b3ccd6a33939ac5102b Parser Basic/Term/Term.Basic/Command/Syntax/Extra/Do token and identifier definitions; actual PSC0 producer sources."
+    }
+  },
+  "verification": {
+    "codeExecuted": false,
+    "testsExecuted": false,
+    "sourceGuards": 7,
+    "allExistingGatesAndFixturesUnchanged": true,
+    "additionalCompilerInvocations": 0,
+    "exactFullQualificationRequired": true
+  },
+  "qualification": {
+    "trigger": "[sh1-qualify]",
+    "nativeOnlyCheckpoint": false,
+    "coldRecoveryRerun": false,
+    "sourceRef": "Discover enclosing repair commit before attributing its run",
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  }
+}

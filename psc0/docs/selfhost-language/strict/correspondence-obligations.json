@@ -2235,12 +2235,14 @@
     }
   },
   "currentQualificationRequest": {
-    "status": "enclosing-source-commit-requests-one-full-qualification-awaiting-run-discovery",
-    "expectedParent": "5a44bbb054d41a7534a0714bdd3f3d3b0ec467a2",
-    "priorCompilerSource": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
-    "manifest": "reviewed-candidates/canonical-recursion-batch.json",
-    "manifestBlob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
-    "sourceFiles": 43,
+    "status": "enclosing-alpha-repair-commit-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "656ed78db6a2c26feced9374cd7b251c062a42df",
+    "priorCompilerSource": "656ed78db6a2c26feced9374cd7b251c062a42df",
+    "priorAttemptRunId": 38001282875,
+    "manifest": "reviewed-candidates/native-keyword-local-repair.json",
+    "manifestBlob": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
+    "sourceFiles": 2,
+    "cumulativeReviewedSourceFiles": 43,
     "trigger": "[sh1-qualify]",
     "repeatColdRecovery": false,
     "repeatNativeOnlyCheckpoint": false,
@@ -2298,7 +2300,7 @@
       "semanticContractQualified": false
     }
   },
-  "updatedAtUtc": "2026-10-09T22:46:59Z",
+  "updatedAtUtc": "2026-10-09T22:59:59Z",
   "reviewedRecursiveStructureCorrection": {
     "status": "reviewed-source-and-compile-only-evidence-integrated-by-enclosing-commit",
     "sourceManifest": "reviewed-candidates/recursive-structure-erasure.json",
@@ -2326,5 +2328,41 @@
     "executionEvidenceForThisSource": false,
     "strictSh1Qualified": false,
     "semanticContractQualified": false
+  },
+  "reviewedNativeKeywordRepair": {
+    "status": "reviewed-closed-local-alpha-renaming-integrated-by-enclosing-commit",
+    "manifest": "reviewed-candidates/native-keyword-local-repair.json",
+    "manifestBlob": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
+    "files": 2,
+    "binders": 6,
+    "identifierOccurrences": 17,
+    "sourceBehaviorChanged": false,
+    "grammarChanged": false,
+    "originalAssertionsUnchanged": true,
+    "previousFailureEvidence": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/native-build-failure.json",
+    "previousFailureEvidenceBlob": "1d49d362273bed341efe25e205f0d37fb86436cc"
+  },
+  "reviewedCrossFamilyComposition": {
+    "document": "CROSS_FAMILY_INTERFACE_REVIEW.md",
+    "blob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+    "sha256": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+    "manifest": "reviewed-candidates/cross-family-interface-review.json",
+    "manifestBlob": "74d3b5f93f631efb3135728842afdfd6b3ccb3c4",
+    "status": "bounded-independent-ten-interface-review-and-root-composition-CLEAR",
+    "sourceAnchor": "656ed78db6a2c26feced9374cd7b251c062a42df",
+    "alphaTransportManifest": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
+    "interfaces": 10,
+    "rowsClosed": 0,
+    "qualificationPending": true,
+    "formalPreservationProven": false
+  },
+  "latestExecution": {
+    "sourceRef": "656ed78db6a2c26feced9374cd7b251c062a42df",
+    "runId": 38001282875,
+    "status": "native-build-failure-before-generations",
+    "failedStep": 18,
+    "evidence": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/native-build-failure.json",
+    "evidenceBlob": "1d49d362273bed341efe25e205f0d37fb86436cc",
+    "providerStatus": "skipped"
   }
 }

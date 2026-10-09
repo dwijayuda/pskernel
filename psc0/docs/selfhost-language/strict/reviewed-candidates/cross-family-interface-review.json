@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-cross-family-interface-review",
+  "status": "unattached-reviewed-document-with-bounded-clear",
+  "repository": "dwijayuda/pskernel",
+  "expectedParent": "656ed78db6a2c26feced9374cd7b251c062a42df",
+  "sourceInventory": "397916addb1eec8b8b46aac742e1b4aee67387e0",
+  "verdict": {
+    "result": "BOUNDED_CLEAR",
+    "scope": "Cross-family joins among COMMON40e, Nd7cc, ER71f5, EV7e904, TSbc723 and GROUP51ed over the actual source-owned, typed, canonical-value domain.",
+    "reasoning": "The document maps all ten O-* interfaces and separately derives shared lower-index function/machine composition, residual threading, per-slot entry refinement, all-index cofinal observations, finite progress and the exact native-empty/source-name boundaries.",
+    "limits": "Not a completed qualification, mechanized theorem, new raw-parser semantic guarantee, or permission to change obligation flags. Ordinary reference/platform inputs remain explicit. The current source-build execution blocker is handled separately by root."
+  },
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/strict/CROSS_FAMILY_INTERFACE_REVIEW.md",
+      "operation": "create",
+      "expectedAbsent": true,
+      "absenceGuard": {
+        "path": "psc0/docs/selfhost-language/strict/CROSS_FAMILY_INTERFACE_REVIEW.md",
+        "absentAt": "656ed78db6a2c26feced9374cd7b251c062a42df",
+        "directoryEntryCount": 32,
+        "verifiedAbsent": true
+      },
+      "baseBlob": null,
+      "baseSha256": null,
+      "baseBytes": 0,
+      "candidateBlob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "candidateSha256": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+      "candidateBytes": 27461,
+      "candidateCharacters": 27284,
+      "editCount": 1,
+      "edits": [
+        {
+          "id": "create-cross-family-interface-review",
+          "operation": "create",
+          "old": null,
+          "new": "# Cross-family review of the shared strict SH/1 interfaces\n\n## Verdict and exact scope\n\n**Bounded CLEAR for the cross-family semantic interfaces described below.** The six final argument packets supply compatible local premises at the actual producer and consumer boundaries examined. This is a reasoned source/proof review, not a qualification result, a mechanized theorem, or a Boolean shortcut for discharging the ledger.\n\nThe review reads COMMON, N, ER, EV, TS and GROUP at their exact identities in §8. Its integrated source anchor is 656ed78db6a2c26feced9374cd7b251c062a42df. ER binds the final canonical and recursion producers, including Basic 7de707, Definition 4c9d387, Expr 7498d68, StructureRecursor 57e76a1 and the Context 9a6 / Term f611 / Declaration d191 frontend. The source inventory is 397916addb1eec8b8b46aac742e1b4aee67387e0. Earlier source statements inside COMMON, N, EV, TS or GROUP are not silently relabeled current; §6 identifies the relevant changes. [SOURCE, INVENTORY, ER, GROUP]\n\nThe comparison has the declared supported, typed, source-owned domain: PSC1-compatible authoritative .lean and the corresponding generated new-only ps-0.9-r3 source; supported type assignments and canonical immutable values; related generated functions; and the explicit primitive/proof/platform/resource boundary. General open Core/IR function observations remain available under their related-function hypotheses. The narrower native-empty corollary requires closed source-origin computable inputs. Arbitrary foreign callbacks, mutable/proxy objects, cyclic foreign data, source-visible handlers and physical resource-cost equality are not added. [SPEC, COMMON §§1–3, ER §§1,10.6]\n\nThe root owns qualification and final row disposition. In particular, the integrated source's native-build execution blocker must be resolved and evidenced separately; this interface review neither conceals nor repairs it. All 33 administrative rows and all strict/general/formal qualification flags remain open/false. No source, workflow, ref, capability or obligation flag is changed here.\n\n## 1. How the ten COMMON interfaces are supplied\n\nCOMMON §6 originally names ten open interfaces. The following map identifies the actual supplied rule arguments and the joins checked here. The argument is not that an exported name proves itself: §§2–5 examine the shared induction, progress, names and domain conditions that make these joins valid.\n\n| COMMON interface | Actual supplying arguments | Cross-family conclusion and retained proof input |\n| --- | --- | --- |\n| **O-SUB — typed opening/closing** | ER §2's exact Core lift/instantiate/abstract equations and fresh-frame argument; ER §§5.1,5.4's positive inference and checked annotation derivations; ER §2.3 and GROUP U-SUBST for simultaneous runtime-type substitution | A typed replacement extends the actual related environment, rather than a guessed printed-name environment. The 4096 completeness premise is attached to the same stored inductive and structure fields admitted by the target depth bound. Valid Core/meta/level assignments and ordinary typed substitution are reference-semantic inputs; no general inference or unification completeness premise is introduced. |\n| **O-GHOST — classification and independence** | ER TYPE-CARRIER and GHOST-READ, §§5–6; actual special-head slots and canonical type-only Unit transport; enabled primitive/proof laws consumed by EV §4 | A positive classifier result has its stated meaning. A false/default result is not assumed runtime: the recursively accepted carrier and complete actual IR/layout checks supply that interpretation. Ordinary proof/type reads cannot escape to runtime. Bounds operations retain their pre-erasure proof/domain premise, and constructor proof/type fields remain explicitly refused. |\n| **O-SCOPE — strengthened reachable invariant** | ER §§2–3,12: INDEX, FRESH, EXEC-SCOPE and EMITTED-OCCURRENCE; TS-NAMES and TS §6.3 | Every actual executable, auxiliary-label and reservation path has the appropriate mode-specific clause. Ordinary locals are related values; IH substitutions are related computations. New Nat/record-major reservations, captures, physical Unit names and field/IH opening preserve that distinction. The implicit-owner initializer and printed-self premises are occurrence-sensitive, not a false all-name disjointness claim. |\n| **O-LAYOUT — regular-data interpretation** | ER STRUCTURE-MAP, DATA-MAP and STRUCTURE-REC, §§8–11; EV §§9–12; TS-LAYOUT | Actual family/constructor identities and stored source/projection indices provide one consistent layout association from Core through IR to brands/tags/properties. Generic field substitution uses the same actual types. Empty inductives have no value clause; zero-field records have a real constructor clause. Direct recursive structures use their full field/IH path and remain required compilation inputs even when they have no finite inhabitants. |\n| **O-NORMALIZE — worker/public correspondence** | N §§2–7; ER's actual source origin, typed substitution, classification, root producer and layout lemmas; the reserved-sort resolution in §5 below | The actual plan preserves identities, the legal fixed/state telescope and old-environment simultaneous state values. Readiness and the worker equation apply to the actual generated root recursor; the public wrapper retains its original telescope. N's ordinary-reference alpha lemma is completed only on the exact valid identifier boundary proved below. Its failed/unchanged cases remain their actual cases. |\n| **O-CORE-DEMAND — source/Core operational meaning** | N's ordinary syntax and worker/readiness cases; GROUP §§6.1–6.4 for independent ordinary closures; ER §§6,10–11 for designated primitive, conditional and generated recursor demand | Ordinary strict function application is not imposed on a designated eliminator merely because Core represents it with apps. Generated recursors evaluate the major once, select the minor and bind nonmemoizing delayed IH computations. Actual root provenance and constructor refinement justify self-call reconstruction. The pinned native nonempty case and closed-source empty corollary have distinct, explicit domains. |\n| **O-GROUP — application and eta alignment** | GROUP U-SUBST, ENTRY-PREFIX/CALL, LAMBDA-ADMIN, GHOST-UNIT, SPECIAL-BOUNDARY, FOLD-BRIDGE and ENTRY-PI; ER §7; TS-ETA | Current function values are canonical unary values; known flat entries come only from actual aligned immediate Core lambda prefixes. The old arbitrary computed result-arrow exposure is absent from the active producer. Completion captures preserve each supplied operand boundary. Backend eta remains a separate proof about one fixed original-IR group and its recognizer. |\n| **O-IR-JS — expressions and generated machine** | EV's eleven exhaustive constructor cases and map/fold induction; TS-TEMPLATES/RUNNER/LAYOUT and the explicit runtime-law boundary | The expression and runner proofs form one index/syntax induction. Registered, direct optimized and reentrant callback routes use the same argument/result/capture relation and return the same residual. Strict and selected primitive demands are kept separate; the 45 operation laws are not replaced by finite native examples. |\n| **O-OPT — eta/count/tail success** | TS §§6–8: TS-ETA, TS-COUNT and TS-TAIL; ER occurrence provenance and the complete target judgments | Successful recognition has independently supplied identity, capture, namespace and purity premises. Count has finite stored-child descent. A tail alias transition accounts for both the alias call and self call, including the intermediate cutoff. Eta's removed invocation retains its logical event. Failed recognition is covered by the separately related fallback. |\n| **O-INIT/HOST — initialization and trusted boundary** | ER MODULE-IDENTITY; TS-NAMES/LAYOUT/INIT/HOST, §§2–3,9–10; EV initialized-global and eager-body rules | Ordered emitted prefixes initialize support, layout symbols, earlier values and required registrations before use. Positive-arity self calls use lower-index behavior; nongeneric zero-arity bodies are eager values. The synthetic Unit route remains a positive physical-arity generic entry. TypeScript 7.0.2 / Node 22.23.3 and ordinary built-in semantics remain the declared trusted boundary, with exact successful compilation/evidence required separately. |\n\nNo row in this map requires a new serialized source/Core/IR certificate merely because a mathematical association is used. The actual origins, metadata and reachable transitions construct that association. Conversely, an arbitrary typed-target IR value is not substituted for the source-owned path: the implicit-owner and shadowed-self countermodels in TS §11.3 show why the stronger producer facts matter.\n\n## 2. The function, expression and machine induction is compatible\n\nCOMMON's function clause at index 0 is structural: it records callable form, actual identity and capture edges, not equal future results. At index n+1, semantic behavior and captured environments are required only at smaller indices. E is pointwise V; the relevant function edge strictly decreases that index. Finite data edges use finite structural recursion. C observes independently specified computations; it is not defined by assuming the compiler preserves them. [COMMON §1.3]\n\nThis matters at the EV/TS mutual call boundary. EV does not assume all registered functions correct and then pass that assertion to TS. A lambda constructs its actual capture association; a call obtains its callee and argument values, spends one semantic application event, and uses the lower-index body statement. TS-RUNNER then preserves that specific body's continuation relation through request, push/direct entry, return and permitted abort. Its ordinary generator-body case uses the same expression theorem at the already decreased index. Non-call expression and statement cases decrease through finite syntax; eager initialization additionally decreases the declaration prefix. [EV §§1,5–6,13; TS §§1,5,9,11]\n\nThe residual is part of each observation. If an initializer or operand returns at r, the next component starts at r, and earlier values/environments weaken to r. A map/fold callback spends from that current remainder and returns its residue to the helper; nested runner entry carries it back to the suspended outer continuation. No initial budget is copied into each operand, callback, worker or reentrant runner.\n\nThe index 0 higher-order counterexample is avoided: observing a body g(Unit) with no remaining application allowance stops before invoking g. A merely structural V^0 function cannot license a later exact Bool result. Both final EV and TS formulations use COMMON's corrected residual-result rule, including the possibility of a terminal non-call result at V^0. [COMMON §1.3; EV §1.1; TS §§1.1,5.3]\n\nOrdinary source Except.error is related data. A compiler refusal is a compiler result; a declared abort abandons the continuation; defensive malformed/bounds/empty throws and diagnostic foreign probes do not redefine the source effect alphabet. The runner's lack of catch/finally and generator.throw is consistent with that abort-only domain. No packet imports a handler semantics that the others fail to implement. [COMMON §2.3; ER §6; EV §§1.3,4.4; TS §§4.2,5.1]\n\n## 3. Cofinal composition and progress\n\nThe source/N, Core/IR and IR/JavaScript projections have different event schedules. N counts original source groups and recursive occurrences while identifying actual worker/readiness controls. GROUP refines a known flat call or partial capture sequence after each supplied Core operand, before the next operand is demanded. IJ counts original-IR calls, including an inserted completion/entry/bridge call that CI may identify as control. Equality of their finite index numbers is neither required nor generally true. [N §§6–7; GROUP §§6.3–6.4; ER §13.2]\n\nA direct or partial entry does not postpone all Core prefix events until after all supplied operands. The residual-entry view records each already returned operand and immediate beta boundary; eliding a variable/literal capture does not remove that boundary. On final completion, the internal flat-entry transfer reaches the actual declaration body already identified by ENTRY-PREFIX. Its control can be administrative in CI; the body is still compared at the inherited lower index. No opaque global-function hypothesis is silently invoked a second time to bypass its charge.\n\nFor composition, take a finite observation and expand its identified origin/entry controls into the corresponding finite common-IR prefix. Choose budgets that cover that prefix and leave the desired result index. All-index related starting value families supply those budgets; downward closure supplies the smaller residuals. Reverse composition follows the corresponding finite-prefix map. A single finite-index input relation would not suffice for this argument. Neither same-n transitivity nor a constant conversion ratio between counts is claimed. [GROUP §6.4; ER §13.2]\n\nThe finite-prefix mapping also has concrete progress measures:\n\n- N's actual state-lambda readiness contains no original branch/body/callback work. Under the delayed generated-recursor rule, obtaining its closure requires finite selection and binding; the earlier eager-readiness argument was already finite by strict structural-child descent.\n- ER's major capture, constructor/field setup and record projections traverse finite syntax/metadata or existing immutable values. Binding an IH does not force its body; an actual use returns to the recursive/body simulation.\n- GROUP's completion and entry setup consumes finite prefix/capture slots. Unit/fold control has a fixed finite setup; authored callback stages remain observed.\n- EV's non-call syntax work is structurally finite. Primitive string/array loops have finite represented-input/range measures; callback invocation is an application boundary.\n- TS scheduling either handles finite administration, pops a completed frame or reaches a logical application. Count decreases a proper stored-data subvalue. Every continuing direct tail edge consumes one original call, and every alias edge consumes two. Successful terminal branches return rather than silently beginning another loop iteration.\n\nThus no listed local implementation path can hide an infinite execution solely as unmatched administration. An infinite demanded body/callback computation remains in its independent computation relation. Resource exhaustion, physical stack use and unequal allocation are outside the successful-resource comparison; finiteness is not a practical time or heap bound. [TS §§5.4,7.2–7.3,8.3–8.5; EV §§4.4,13; GROUP §6.4]\n\n## 4. Native empty-data boundary and recursive structures\n\nER §10.6 keeps two distinct claims. The general Core/IR computation rule demands an empty match's major and constructs no result from a nonexistent constructor. The pinned native ToLCNF empty-case path can omit that discriminator, so a theorem for arbitrary open divergent or aborting Empty producers would be unjustified.\n\nCLOSED-EMPTY instead uses the domain already in COMMON §1.1. The source has no accepted partial/axiom/opaque/foreign escape, source arguments are canonical generated values/functions, and the valid ordered Core environment has positive finite data. ER defines source computability independently of emitted preservation and proves closure through typed functions, finite primitives, actual structural recursion, and N's state-worker construction. A reached typed Empty major would then terminate in a computable Empty value, which has no constructor clause. Such a point is unreachable in that closed domain. [ER §10.6; SOURCE-GATE; COMMON §§1.1–1.2]\n\nThis does not assert that the type Empty→A has no functions. Such functions can exist without an Empty argument. It does exclude treating an arbitrary divergent or throwing host Unit→Empty callback as a closed generated source value. Diagnostic host demand probes retain their separate purpose.\n\nThe same unreachability reasoning cannot excuse compilation coverage. ER §11's new recursive-record route compiles accepted functions over direct recursive structures, with exact parameter-plus-three saturation, full fields then IHs, one major record capture, and ordered projections. Used root/outer IHs retain §10's demand relation. Their lack of finite inputs does not justify discarding their IH lambdas or refusing the declaration. This route preserves the existing record representation and does not introduce a cyclic foreign value into the relation. [ER §§10–11; STRUCTURE-REVIEW]\n\n## 5. Reserved-sort alpha leaf: exact valid-source resolution\n\nN §3.1 explicitly proves ordinary named-reference selection; it does not assert that one-segment Prop/Type is resolved as a local by Term. Term f611 lines 451–475 recognizes those two sort spellings before ordinary lookup. The normalizer's generalized reference walk in Recursion 8b1 lines 286–305 instead uses the ordinary base resolver after its self check. The distinction must be accounted for.\n\nThe pinned native grammar excludes an unquoted single-segment Prop or Type binder/declaration name:\n\n1. Native Parser/Term.lean registers Type and Prop as builtin term symbols, lines 136–145.\n2. Parser/Basic.lean gives an equal-length registered keyword priority as an atom, lines 934–964. identFn requires identKind, lines 1298–1306.\n3. Parser/Term/Basic.lean defines binderIdent as ident or the hole and uses it in explicit/implicit binders, lines 178 and 206–218. Parser/Command.lean's declId also requires ident, lines 124–127.\n4. Native escaped identifiers do not create a counterexample in the current owned authoring intersection: the owned lexer has no quoted-identifier path and rejects the escape delimiters « and » (code points 171 and 187), which are outside its identifier and symbol forms. [NT, NB, NTB, NC, LX]\n\nSPEC keeps PSC1-compatible .lean authoritative; the corresponding generated .ps retains its actual binder names. Therefore an original parameter/current declaration in this valid source-owned domain cannot have either exact unquoted sort identity. On a reserved one-segment reference, the normalizer cannot select an original parameter/current self with that name. An absent/global result stays textually unchanged; any unrelated dummy shadow is outside the original parameter-ID set. This completes the reserved-sort case separately from the ordinary alpha cases. The internal generated names likewise use their documented non-sort construction. [SPEC scope and §§1–2; N §§3–4]\n\n**Do not misstate this as a portable admission guard.** The owned lexer labels Prop/Type identifiers; its binder parser and Sh1 binder worklist do not themselves refuse those names. A source-inspected owned-parser example with a runtime parameter named Type, a varying recursive state, and a branch let t : Type := Nat predicts a normalized-worker expected-sort refusal after the sort token is renamed. No native-valid mandatory witness or successfully admitted wrong-result witness was established. The native-invalid example neither blocks this declared valid-source proof nor proves correctness for all extra raw-parser inputs. No broader parser/native syntax equivalence is claimed. [LX, PC, SOURCE-GATE, TERM, REC]\n\nThis boundary is an existing authoring premise with exact parser support, not a newly invented whitelist or a corpus-only claim. If a future source capability admits escaped/reserved binder names, the normalizer needs the corresponding reserved-reference rule and a fresh proof; this review does not pre-authorize that extension.\n\n## 6. Current producer association and historical clauses\n\nThe final packets have different historical source anchors. Their mathematical interfaces compose only with the following explicit association.\n\nGROUP's Expr f1ecc entry/capture/Unit/fold argument is retained by the additive Expr 7498 recursive-structure correction. ER §11 and its exact source review supply that new path. The paired StructureRecursor 57e passes recursive structures through instead of stripping only their fields. The grouping theorem is not being used to justify dropping an IH.\n\nN's original descendant-collection description is read through the final frontend producer: new IH permission is consumed at the actual root; valid installed outer-child mappings survive nested control, and unproved new nested descendant aliases refuse. ER's final-meta major-constructor refinement establishes the actual source/Core recurrence. N's legal telescope, state readiness and wrapper proof use this strengthened actual association, rather than an arbitrary nested recurrence. [N §§5–7; ER §§10.2–10.5; PRODUCER]\n\nCOMMON and TS retain historical discussions of computed result-arrow eta and runtime nested-lambda flattening. Those are not active final producer calls. GROUP proves the replacement: canonical unary values, actual immediate aligned known entries, eager supplied captures and no delay of a computed returned-function body. The still-defined historical helper is not an active proof obligation solely because its source text exists. Backend eta is active and keeps its own successful-recognizer proof. [GROUP §§4–9; ER §§7,12]\n\nThe physical Unit adapter applies only to logical type-positive/runtime-zero generic definition entries. It does not change a Core binder or current-definition logical parameter list, does not convert a monomorphic eager value to a thunk, and does not change zero-field constructors. Its positive physical IR arity is exactly the existing TS-INIT case. This removes a potential mismatch with TS's unchanged refusal of arbitrary generic zero-runtime-parameter IR values. [ER §7; GROUP §7; TS §9]\n\n## 7. What this CLEAR authorizes as proof input\n\nThe review supports consuming the stated local arguments together at their exact, reconciled source boundary. It found no additional unresolved production premise at those joins beyond the established source/canonical-value domain and the separately declared reference/platform inputs.\n\nOrdinary typed Core, valid substitution/instantiation, related environments, child/lower-index induction and the standard primitive/host laws are legitimate theorem premises. The actual name maps, constructor associations, root-IH identity, entry metadata, call/progress alignment and emitted initialization order are supplied by source cases; they are not hidden inside those ordinary premises.\n\nThe review does not close the ledger, establish successful native/compiler generations, prove the TypeScript compiler or JavaScript engine, upgrade the provider, or waive an actual required conformance case. A future source correction must be associated with these exact rules before their review status is reused. Root retains both the final cross-row disposition and the independent exact-source qualification obligations.\n\nReview method: GitHub MCP reads and pure in-memory text/JSON/hash comparisons only. No compiler, tests, shell, browser, local files, source mutation, ref change or workflow was executed by this review.\n\n## 8. Immutable review inputs\n\n| Key | Artifact | Git blob or commit |\n| --- | --- | --- |\n| COMMON | Shared relation | 40e540b325186ee514ff3af9e39a22126d29a167 |\n| N | Normalization arguments | d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a |\n| ER | Erasure arguments | 71f5f50f4586fcf11b74f02b7904b775f56cd4de |\n| EV | General expression arguments | 7e90465301005a395a871a0563b19c164dcda750 |\n| TS | Backend/machine/optimizer arguments | bc72390c69e0c92cd7dce56092a65731748c96ec |\n| GROUP | Canonical entries and finite placement | 51ed0bfa988a690c425ce59e0c35e4c1bb074e98 |\n| SPEC | Normative current source/runtime boundary | 61f0f36ffe7880144f60845084e8be6a61b91eed |\n| SOURCE | Integrated source checkpoint | 656ed78db6a2c26feced9374cd7b251c062a42df |\n| INVENTORY | Actual integrated source inventory | 397916addb1eec8b8b46aac742e1b4aee67387e0 |\n| PRODUCER | Frontend root/refinement review | 895081aaa285af545c635e7211c51508c81acb93 |\n| STRUCTURE-REVIEW | Recursive-structure final review | 62a0075aa7eafef61ebc6f9d4af68f743bff8492 |\n| TERM | Owned final Term source | f611218a3623bb413f94c9550b7d98ab7b406e9a |\n| REC | Owned final normalization source | 8b1c409244b9669224fc3caff796aea69eac1401 |\n| LX | Owned final lexer | 598b8d75d0d1bf1b6ea7ec05a62814343e33599a |\n| PC | Owned ParseCommon | 45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b |\n| SOURCE-GATE | Owned Sh1 source checker | a947a4058e3d91a02d4f8120a3d86556100c8555 |\n| NT | Native Parser/Term.lean | 4e41c86c77bfafe75e6e4310e2ce41e508998d1e |\n| NB | Native Parser/Basic.lean | 0e13517664821baa68e244468a5c5b03d16a6586 |\n| NTB | Native Parser/Term/Basic.lean | f08650b1760f1dceff189043691cd5b4162b0445 |\n| NC | Native Parser/Command.lean | 0b4083ac78f7a04ae6f6f29cb02c529ff76ed9e8 |\n\nThe four native parser blobs were read from leanprover/lean4 at 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b. Native nonempty/empty-case semantics retain ER's separately pinned ToLCNF source; no native execution is inferred from reading these files.\n\n[COMMON]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/40e540b325186ee514ff3af9e39a22126d29a167\n[N]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a\n[ER]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/71f5f50f4586fcf11b74f02b7904b775f56cd4de\n[EV]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/7e90465301005a395a871a0563b19c164dcda750\n[TS]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/bc72390c69e0c92cd7dce56092a65731748c96ec\n[GROUP]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/51ed0bfa988a690c425ce59e0c35e4c1bb074e98\n[SPEC]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/61f0f36ffe7880144f60845084e8be6a61b91eed\n[SOURCE]: https://github.com/dwijayuda/pskernel/commit/656ed78db6a2c26feced9374cd7b251c062a42df\n[INVENTORY]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/397916addb1eec8b8b46aac742e1b4aee67387e0\n[PRODUCER]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/895081aaa285af545c635e7211c51508c81acb93\n[STRUCTURE-REVIEW]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/62a0075aa7eafef61ebc6f9d4af68f743bff8492\n[TERM]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/f611218a3623bb413f94c9550b7d98ab7b406e9a\n[REC]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/8b1c409244b9669224fc3caff796aea69eac1401\n[LX]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/598b8d75d0d1bf1b6ea7ec05a62814343e33599a\n[PC]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b\n[SOURCE-GATE]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/a947a4058e3d91a02d4f8120a3d86556100c8555\n[NT]: https://api.github.com/repos/leanprover/lean4/git/blobs/4e41c86c77bfafe75e6e4310e2ce41e508998d1e\n[NB]: https://api.github.com/repos/leanprover/lean4/git/blobs/0e13517664821baa68e244468a5c5b03d16a6586\n[NTB]: https://api.github.com/repos/leanprover/lean4/git/blobs/f08650b1760f1dceff189043691cd5b4162b0445\n[NC]: https://api.github.com/repos/leanprover/lean4/git/blobs/0b4083ac78f7a04ae6f6f29cb02c529ff76ed9e8\n"
+        }
+      ],
+      "forwardGuard": "Require destination absent, then create exactly the candidate text/blob.",
+      "reverseGuard": "Require exact complete candidate text/blob/hash, then remove only this newly created file. Refuse reversal after any divergent edit.",
+      "exactForwardReconstruction": true,
+      "exactReverseReconstruction": true,
+      "immutableReadbackExact": true
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "O-SUB",
+      "suppliedBy": [
+        "ER2",
+        "ER5.1",
+        "ER5.4",
+        "GROUP U-SUBST"
+      ],
+      "ordinaryInput": "Typed Core and valid meta/level assignments; ordinary semantic substitution."
+    },
+    {
+      "id": "O-GHOST",
+      "suppliedBy": [
+        "ER TYPE-CARRIER",
+        "ER GHOST-READ",
+        "ER special slots/Unit",
+        "EV4 primitive domain"
+      ],
+      "ordinaryInput": "Declared proof/bounds and primitive laws; actual accepted carrier."
+    },
+    {
+      "id": "O-SCOPE",
+      "suppliedBy": [
+        "ER INDEX/FRESH/EXEC-SCOPE/EMITTED-OCCURRENCE",
+        "TS-NAMES",
+        "TS6.3"
+      ],
+      "ordinaryInput": "Related starting environment and actual root world."
+    },
+    {
+      "id": "O-LAYOUT",
+      "suppliedBy": [
+        "ER STRUCTURE-MAP/DATA-MAP/STRUCTURE-REC",
+        "EV9-12",
+        "TS-LAYOUT"
+      ],
+      "ordinaryInput": "Canonical positive data, supported closed type assignment."
+    },
+    {
+      "id": "O-NORMALIZE",
+      "suppliedBy": [
+        "N2-7",
+        "ER source/root/substitution/type/layout lemmas",
+        "Review5 reserved-sort case"
+      ],
+      "ordinaryInput": "Native-compatible valid source identifier boundary and related fixed/state inputs."
+    },
+    {
+      "id": "O-CORE-DEMAND",
+      "suppliedBy": [
+        "N ordinary syntax/readiness",
+        "GROUP6 ordinary closures",
+        "ER6/10/11 operation/generated-recursor/native cases"
+      ],
+      "ordinaryInput": "Independent typed source/Core and primitive semantics; narrower closed computability only for native empty."
+    },
+    {
+      "id": "O-GROUP",
+      "suppliedBy": [
+        "GROUP ENTRY-PI and other exports",
+        "ER7",
+        "TS-ETA"
+      ],
+      "ordinaryInput": "Actual metadata/body identities and related operand/capture values."
+    },
+    {
+      "id": "O-IR-JS",
+      "suppliedBy": [
+        "EV eleven cases/map/fold",
+        "TS-TEMPLATES/RUNNER/LAYOUT"
+      ],
+      "ordinaryInput": "Same shared V/E/C relation and declared ordinary host semantics."
+    },
+    {
+      "id": "O-OPT",
+      "suppliedBy": [
+        "TS-ETA/COUNT/TAIL",
+        "ER occurrence provenance"
+      ],
+      "ordinaryInput": "Exact recognizer success, actual admitted target, canonical values/primitive laws."
+    },
+    {
+      "id": "O-INIT/HOST",
+      "suppliedBy": [
+        "ER MODULE-IDENTITY",
+        "TS-NAMES/LAYOUT/INIT/HOST"
+      ],
+      "ordinaryInput": "Trusted pinned TypeScript/Node/built-ins and successful actual configured compilation evidence."
+    }
+  ],
+  "inputDigests": [
+    {
+      "key": "COMMON",
+      "blob": "40e540b325186ee514ff3af9e39a22126d29a167",
+      "sha256": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+      "characters": 76304
+    },
+    {
+      "key": "N",
+      "blob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+      "sha256": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+      "characters": 61162
+    },
+    {
+      "key": "ER",
+      "blob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+      "sha256": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+      "characters": 128741
+    },
+    {
+      "key": "EV",
+      "blob": "7e90465301005a395a871a0563b19c164dcda750",
+      "sha256": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+      "characters": 52755
+    },
+    {
+      "key": "TS",
+      "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+      "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+      "characters": 88025
+    },
+    {
+      "key": "GROUP",
+      "blob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+      "sha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+      "characters": 48631
+    }
+  ],
+  "sourcePinChecks": [
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "sha": "7de707103e0b88e6a5ab206ee242d72a131ca3b7",
+      "count": 1,
+      "matched": true
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "sha": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "count": 1,
+      "matched": true
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "sha": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+      "count": 1,
+      "matched": true
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "sha": "57e76a17858b3f4333a44ed880326ac33695351e",
+      "count": 1,
+      "matched": true
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+      "sha": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+      "count": 1,
+      "matched": true
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "sha": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+      "count": 1,
+      "matched": true
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "sha": "d191857ece760f307359d576dca2cef906dea8ec",
+      "count": 1,
+      "matched": true
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "sha": "8b1c409244b9669224fc3caff796aea69eac1401",
+      "count": 1,
+      "matched": true
+    }
+  ],
+  "sourceOverlays": {
+    "canonicalAndFinitePlacement": "Retained by final Basic7de/Definition4c9/Expr7498 and the actual source inventory.",
+    "recursiveStructure": "ER11 and62a0075aa7eafef61ebc6f9d4af68f743bff8492 associate additive E7498/SR57e with GROUP's earlier Exprf1ecc proof.",
+    "rootProducer": "895081aaa285af545c635e7211c51508c81acb93 and ER10 associate final one-shot root/refinement with N's worker proof.",
+    "historicalEta": "Computed result-arrow exposure and runtime lambda flattening are not active final producer calls; the active replacement is GROUP's actual-prefix/canonical-unary rule. Backend eta retains its separate recognizer proof."
+  },
+  "reservedSortBoundary": {
+    "nativeCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "nativeTerm": "4e41c86c77bfafe75e6e4310e2ce41e508998d1e",
+    "nativeBasic": "0e13517664821baa68e244468a5c5b03d16a6586",
+    "nativeTermBasic": "f08650b1760f1dceff189043691cd5b4162b0445",
+    "nativeCommand": "0b4083ac78f7a04ae6f6f29cb02c529ff76ed9e8",
+    "ownedLexer": "598b8d75d0d1bf1b6ea7ec05a62814343e33599a",
+    "ownedParseCommon": "45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b",
+    "actualTerm": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+    "actualNormalizer": "8b1c409244b9669224fc3caff796aea69eac1401",
+    "conclusion": "Native-valid unquoted source binders/declarations cannot have exact single-segment Prop/Type; owned quoted-identifier escape is unavailable. Those reserved references cannot select an original parameter/current self and be renamed. N's ordinary-reference lemma remains explicitly scoped.",
+    "portableGuardExists": false,
+    "rawOwnedParserOveracceptanceAcknowledged": true,
+    "counterexampleStatus": "Source-inspected native-invalid binder example predicts normalized-worker refusal only. No native-valid mandatory or successfully admitted wrong-result witness established.",
+    "capabilityOrSourceChange": false
+  },
+  "keyQualifications": {
+    "cofinal": "All-index related starting families and cofinal finite-prefix transport. No same-index transitivity or fixed conversion ratio.",
+    "residuals": "One residual per relation; callback/reentry returns the remainder. Cut off before a zero-budget invocation.",
+    "progress": "N readiness, GROUP finite slots, ER finite major/field/IH setup, EV syntax/primitive measures and TS runner/count/tail transitions supply local no-unmatched-infinite-stuttering cases.",
+    "empty": "General open Core/IR major demand retained. Native CLOSED-EMPTY only for the already-declared closed source/generated-function computability domain; not arbitrary partial/throwing host closures.",
+    "recursiveStructureCoverage": "Uninhabitation does not waive compilation of accepted structure/function declarations.",
+    "resources": "Successful representable allocation and declared platform behavior only; no time, allocation, heap, stack or resource-failure equivalence."
+  },
+  "verification": {
+    "sourceReads": "GitHub MCP only; exact six final argument readbacks plus bounded actual portable/native source reads.",
+    "sourceInventoryExactCandidateMatches": true,
+    "documentReadbackExact": true,
+    "documentSha256": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+    "documentBytes": 27461,
+    "pureTransformsOnly": true,
+    "localFiles": false,
+    "shell": false,
+    "browser": false,
+    "compilerExecution": false,
+    "testExecution": false,
+    "workflowRequested": false,
+    "sourceMutation": false,
+    "refMutation": false,
+    "obligationFlagMutation": false
+  },
+  "qualification": {
+    "strictClosed": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "generalPreservationProven": false,
+    "formalPreservationProven": false,
+    "rowsClosed": 0,
+    "administrativeOpenRows": 33,
+    "providerPromoted": false,
+    "executionStatus": "No success inferred. Root is separately handling the current source native-build blocker and exact qualification evidence.",
+    "finalDispositionOwner": "root"
+  }
+}

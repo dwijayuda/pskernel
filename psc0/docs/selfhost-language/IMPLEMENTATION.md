@@ -41,11 +41,24 @@ proof and measured TypeScript phase.
 ## Current strict SH/1 source integration
 
 The practical migration is merged in main at `ed5d00aca0743bde583b45fe7756dd494ac3960f`.
-The enclosing strict-branch source commit integrates the reviewed canonical
-function-value representation, finite worker-binding placement and structural
-recursion correspondence correction. Its [exact 43-code-file manifest](strict/reviewed-candidates/canonical-recursion-batch.json)
-binds the unchanged branch bases and every final candidate. This is a request
-for one complete qualification, not a claim that the run has passed.
+The reviewed43-code-file batch was integrated at `656ed78db6a2c26feced9374cd7b251c062a42df`.
+Its [run38001282875](https://github.com/dwijayuda/pskernel/actions/runs/38001282875)
+stopped at the native compiler build because a new local used Lean's reserved
+word `variable`; no N1/C1/C2/C3 generation or provider check ran.
+
+The enclosing repair commit applies a reviewed two-file local alpha rename:
+four `variable` bindings and two `prefix` bindings become fresh non-keyword
+names. The downstream Expr cases were found by one bounded native-binder and
+helper-API audit before retrying. The [exact repair manifest](strict/reviewed-candidates/native-keyword-local-repair.json)
+composes with the [43-file source inventory](strict/reviewed-candidates/canonical-recursion-batch.json).
+Compiler algorithms, public source constructs and all existing assertions are
+unchanged by these six local renamings. Full qualification is requested again
+for this exact repaired source; the failed attempt remains in the ledger.
+
+The [cross-family review](strict/CROSS_FAMILY_INTERFACE_REVIEW.md) now supplies
+a bounded independent CLEAR for all ten shared semantic interfaces. Its source
+inputs transport through the explicit alpha repair. Administrative row closure
+and strict activation still require the exact current-source qualification.
 
 Function values use nested unary runtime arrows throughout generic arguments,
 returned values, record/data fields and arrays. Actual named declaration entries

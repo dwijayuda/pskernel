@@ -1136,6 +1136,112 @@
       "scopeOfFailure": "The complete N1 grammar/capability gate did not finish. Successful partial checks are exact-source finite evidence only; current C1/C2/C3 and provider qualification were not reached.",
       "strictSh1Qualified": false,
       "semanticContractQualified": false
+    },
+    {
+      "attempt": 8,
+      "sourceRef": "656ed78db6a2c26feced9374cd7b251c062a42df",
+      "runId": 38001282875,
+      "workflowId": 378853677,
+      "compilerJobId": 114059689529,
+      "providerJobId": 114060007620,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38001282875",
+      "status": "failure",
+      "failedStep": {
+        "number": 18,
+        "name": "Build current native compiler",
+        "timestamp": "2026-10-09T22:50:37.6658137Z",
+        "exitCode": 1,
+        "error": "native Lean reserved-keyword local binder variable",
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "line": 326,
+        "diagnostics": [
+          {
+            "timestamp": "2026-10-09T22:50:37.6658137Z",
+            "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+            "line": 326,
+            "column": 19,
+            "message": "unexpected token 'variable'; expected '(', ':=', 'rec', '|' or term"
+          },
+          {
+            "timestamp": "2026-10-09T22:50:37.6659537Z",
+            "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+            "line": 326,
+            "column": 28,
+            "message": "unexpected token ':='; expected '(', '[', '{' or '⦃'"
+          },
+          {
+            "timestamp": "2026-10-09T22:50:37.6660462Z",
+            "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+            "line": 331,
+            "column": 57,
+            "message": "unexpected token ')'; expected '(', '[', '{' or '⦃'"
+          }
+        ]
+      },
+      "nativeCompilerBuilt": false,
+      "sourceReplay": "not-started",
+      "currentGenerationCandidate": "not-started",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/native-build-failure.json",
+        "blob": "1d49d362273bed341efe25e205f0d37fb86436cc",
+        "sha256": "c8372f7a6d8d17d8f47c132ec6d9e4a717d73c68d4702ca05e298a29ffd8944f"
+      },
+      "log": {
+        "path": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/job.log",
+        "blob": "c9ad38a7d8d333f547ca4202fe4e261aa38faf05",
+        "sha256": "6c87ac80d11390d49d41c6cbf52232ac832df158efa754168e6f561cf9a2e69f",
+        "bytes": 82321
+      },
+      "artifacts": [
+        {
+          "id": 11649037453,
+          "name": "psc0-sh1-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df",
+          "sizeBytes": 447714,
+          "digest": "sha256:ded80948cd3fe16db7408eb900a39bef44fb2153cbe88ab700a5bab1ed2cf3e9",
+          "expired": false,
+          "sourceCommit": "656ed78db6a2c26feced9374cd7b251c062a42df",
+          "runId": 38001282875
+        }
+      ],
+      "resourcePreflight": {
+        "evidence": "generated-qualification-resource-preflight",
+        "command": "workflow-preflight",
+        "policy": "psc0-sh1-generated-qualification-resources/1",
+        "passed": true,
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "oldSpaceMiB": 8192,
+        "minimumAvailableBytes": 12884901888,
+        "observedHeapLimitBytes": 8640266240,
+        "inheritedHeapOverride": false,
+        "physicalTotalBytes": 16766414848,
+        "effectiveAvailableBytes": 15279034368,
+        "semanticContractQualified": false
+      },
+      "typescriptProfile": {
+        "mode": "installed-profile-contract",
+        "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+        "timings": [
+          {
+            "phase": "positional-source-with-unrelated-config",
+            "version": "7.0.2",
+            "elapsedMs": 50.80332099999998
+          }
+        ]
+      },
+      "coldRecovery": {
+        "runId": 38001282913,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "Native compiler parse failure before any N1/C1/C2/C3 or provider qualification. The complete semantic fixtures and source replay did not run.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
     }
   ],
   "selectedSeedChanged": false,
@@ -1143,63 +1249,20 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "expectedParent": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
-    "parserCorrection": {
-      "manifest": "reviewed-candidates/nomatch-application-entry.json",
-      "manifestBlob": "aa62fec9ef76acc69f289d168b2b23b21dc07d93",
-      "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
-      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
-      "baseBlob": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
-      "sourceBlob": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
-      "sourceSha256": "7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8",
-      "status": "integrated-at-fc961-and-native-development-passed-full-qualification-still-pending",
-      "review": "Root exact forward/reverse reconstruction; all 75 existing definition headers unchanged; independent bounded source-class review CLEAR.",
-      "acceptanceScope": "The shared nomatch primary preserves full-term scrutinees through grouped/list application paths. It intentionally closes existing grouped/list primary forms under nesting, including non-nomatch counterparts; other full-control family restrictions and public fuel defaults remain.",
-      "fixturesAndInvocationCountsUnchanged": true,
-      "coldRecipeChanged": false,
-      "newColdRunRequired": false,
-      "strictSh1Qualified": false,
-      "semanticContractQualified": false,
-      "nativeCheckpointRunId": 37988707250
-    },
-    "request": "Complete and independently review the canonical unary function-value correction, exact declaration entry activation, host ABI adjustments and additive generic class fixture; then one coherent full qualification. This documentation-only checkpoint requests no execution.",
-    "runId": null,
-    "actualRunDiscoveryRequired": true,
-    "coldRerunRequired": false,
-    "triggeredByThisCheckpoint": false,
-    "erasureClassFinding": {
-      "status": "source-proven-mandatory-coverage-gap-not-executed",
-      "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
-      "leanSource": "def groupId {alpha : Type} (value : alpha) : alpha := value\ndef groupUse (f : Nat -> Nat) : Nat := groupId f 0\n",
-      "inference": "Supported typed binder and implicit generic application produce closed Core (((groupId (Nat -> Nat)) f) 0), with no unresolved metas.",
-      "erasure": "The whole-spine runtime operands [f,0] target the generic identity's one-runtime-parameter IR scheme. Existing exact call-arity checking refuses. A typed-let intermediate is also incorrectly eta-expanded by Finish after it sees the instantiated arrow result.",
-      "classScope": [
-        "Runtime saturation boundaries before and after generic result substitution",
-        "Adjacent concrete arrow flattening versus nested substituted function groups",
-        "Function-valued generic parameter/layout/result representation and necessary adapters",
-        "Ordinary partial capture, result eta and backend eta"
-      ],
-      "next": "Complete coherent class correction and independent source review before one next full qualification.",
-      "contractAndCheckerMustNotBeWeakened": true,
-      "newColdRunRequired": false,
-      "chosenArchitecture": {
-        "valueType": "canonical unary function at every runtime Pi, including generic/named/container positions",
-        "knownEntry": "flat actual aligned original forall/lambda prefix, with cached original slot classification before type substitution",
-        "computedResult": "retain returned closure boundary; remove arbitrary result-arrow eta exposure",
-        "typeOnlyGenericEntry": "fresh ignored Unit physical parameter with Unit activation argument; logical runtime arity stays zero; preserve current exact IR checker and generic-value refusal",
-        "arrayFoldl": "capture once and bridge canonical callback to the unchanged flat binary intrinsic callback",
-        "coldRecipeChanged": false
-      },
-      "sourceCandidate": {
-        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
-        "baseBlob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
-        "candidateBlob": "ac62e1da317a18300b8669bf68f9b6414159156e",
-        "manifestBlob": "7dc9946a6904395e77d33957c2f10fbfa94b63d8",
-        "status": "unattached; four-edit bounded peer review CLEAR; companion Expr/Definition integration required; not executed"
-      }
-    },
-    "expectedParentMeaning": "Last verified branch head before the enclosing documentation checkpoint; discover its actual descendant head before any ref update.",
-    "compilerSourceAtLastNativePass": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504"
+    "status": "enclosing-alpha-repair-commit-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "656ed78db6a2c26feced9374cd7b251c062a42df",
+    "priorCompilerSource": "656ed78db6a2c26feced9374cd7b251c062a42df",
+    "priorAttemptRunId": 38001282875,
+    "manifest": "reviewed-candidates/native-keyword-local-repair.json",
+    "manifestBlob": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
+    "sourceFiles": 2,
+    "cumulativeReviewedSourceFiles": 43,
+    "trigger": "[sh1-qualify]",
+    "repeatColdRecovery": false,
+    "repeatNativeOnlyCheckpoint": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
   },
   "nativeCheckpoints": [
     {

@@ -675,12 +675,6 @@ def PsKernelPreparedMutualConstructorInputsValid
         typeDecl.type (PsKernelExpr.sort level))
 
 /--
-The concrete admission function provides all provisional work-environment
-constructor and recursor preconditions as one checked source-level witness.
-This intentionally does not assert completion of constructor checking,
-recursor validation, or the final mutual publication transaction.
--/
-/--
 The actual global admission preflight derives the complete provisional
 constructor-input certificate for *any* checked shape list that preserves
 source declaration order. This makes source-name invariants independent of

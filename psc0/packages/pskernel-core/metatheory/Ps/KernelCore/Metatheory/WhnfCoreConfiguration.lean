@@ -443,7 +443,7 @@ theorem psKernelWhnfCoreWithFuel_configuration_sound_contract
                           have hFinish :
                               psKernelWhnfCoreFinish
                                   original
-                                  cheapProj
+                                  (Bool.or cheapRec cheapProj)
                                   candidate
                                   candidateState =
                                 Except.ok
@@ -465,7 +465,7 @@ theorem psKernelWhnfCoreWithFuel_configuration_sound_contract
                               original
                               candidate
                               result
-                              cheapProj
+                              (Bool.or cheapRec cheapProj)
                               hRest.2
                               hReduction
                               hFinish
@@ -535,7 +535,7 @@ theorem psKernelWhnfCoreWithFuel_configuration_sound_contract
                       have hFinish :
                           psKernelWhnfCoreFinish
                               original
-                              cheapProj
+                              (Bool.or cheapRec cheapProj)
                               candidate
                               candidateState =
                             Except.ok
@@ -556,7 +556,7 @@ theorem psKernelWhnfCoreWithFuel_configuration_sound_contract
                           original
                           candidate
                           result
-                          cheapProj
+                          (Bool.or cheapRec cheapProj)
                           hRest.2
                           hReduction
                           hFinish

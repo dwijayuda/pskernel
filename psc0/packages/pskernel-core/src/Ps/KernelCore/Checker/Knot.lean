@@ -4,9 +4,10 @@ import Ps.KernelCore.Checker.DefEq.FullShape
 /-
 Single owner of cross-component checker recursion.
 
-The existing curried fuel workers are preserved verbatim: recursor callbacks use
-remaining fuel; the defeq continuation uses its own remaining fuel; the projection
-shortcut retains its expression-derived budget. Exhaustion still rejects.
+Recursor callbacks and the defeq continuation use their remaining fuel. The
+projection shortcut receives the caller's remaining reduction fuel as well:
+expression size does not bound the length of definition unfolding. Exhaustion
+still returns a resource error.
 The inference-only and fully checked entry points remain distinct.
 -/
 

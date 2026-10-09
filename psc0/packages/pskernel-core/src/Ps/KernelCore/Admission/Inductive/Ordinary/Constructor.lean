@@ -231,6 +231,26 @@ def psKernelSimpleIndicesContainTarget
           target
           rest
 
+-- After WHNF, a recursive occurrence beneath a stuck recursor is not a
+-- nested inductive family. Lean's positivity check rejects this shape.
+-- Keep the unsupported result for other shapes handled by nested admission.
+def psKernelSimpleRecursiveOccurrenceDiagnostic
+    (environment : PsKernelEnvironment)
+    (target : PsKernelName)
+    (reduced : PsKernelExpr) : String :=
+  if psKernelExprContainsConst target reduced then
+    match psKernelExprGetAppFn reduced with
+    | PsKernelExpr.const name _ =>
+        match psKernelEnvironmentFind environment name with
+        | Option.some (PsKernelConstantInfo.recInfo _) =>
+            "recursive argument contains the datatype under a stuck recursor"
+        | _ =>
+            "simple inductive admission does not yet support nested recursive occurrences"
+    | _ =>
+        "simple inductive admission does not yet support nested recursive occurrences"
+  else
+    "simple inductive admission does not yet support nested recursive occurrences"
+
 def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
     (fuel : Nat) :
     PsKernelCheckerSession ->
@@ -375,7 +395,10 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
                             target
                             reduced then
                       Except.error
-                        "simple inductive admission does not yet support nested recursive occurrences"
+                        (psKernelSimpleRecursiveOccurrenceDiagnostic
+                          session.context.environment
+                          target
+                          reduced)
                     else
                       Except.ok
                         (PsKernelRecursiveArgumentResult.mk

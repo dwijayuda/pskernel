@@ -106,7 +106,7 @@ theorem psKernelWhnfCoreWithFuel_let_zeta
         cheapProj =
       psKernelWhnfCoreFinish
         (PsKernelExpr.letE name type value body nondep)
-        cheapProj
+        (Bool.or cheapRec cheapProj)
         result
         nextState := by
   cases hEligible :

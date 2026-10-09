@@ -74,7 +74,7 @@ def psKernelWhnfCoreAppNonLambdaTailRun
     | Except.ok reduced =>
         psKernelWhnfCoreFinish
           original
-          cheapProj
+          (Bool.or cheapRec cheapProj)
           (Prod.fst reduced)
           (Prod.snd reduced)
 
@@ -279,7 +279,7 @@ theorem psKernelWhnfCoreAppNonLambdaTail_configuration_refines
           have hFinish :
               psKernelWhnfCoreFinish
                   original
-                  cheapProj
+                  (Bool.or cheapRec cheapProj)
                   reduced
                   reducedState =
                 Except.ok
@@ -297,7 +297,7 @@ theorem psKernelWhnfCoreAppNonLambdaTail_configuration_refines
               original
               reduced
               result
-              cheapProj
+              (Bool.or cheapRec cheapProj)
               hReduceSemantic.2
               hCombined
               hFinish
@@ -372,7 +372,7 @@ def psKernelWhnfCoreAppLambdaTailRun
       | Except.ok reduced =>
           psKernelWhnfCoreFinish
             original
-            cheapProj
+            (Bool.or cheapRec cheapProj)
             (Prod.fst reduced)
             (Prod.snd reduced)
   | _ =>
@@ -562,7 +562,7 @@ theorem psKernelWhnfCoreAppLambdaTail_configuration_refines
               have hFinish :
                   psKernelWhnfCoreFinish
                       original
-                      cheapProj
+                      (Bool.or cheapRec cheapProj)
                       reduced
                       reducedState =
                     Except.ok
@@ -583,7 +583,7 @@ theorem psKernelWhnfCoreAppLambdaTail_configuration_refines
                   original
                   reduced
                   result
-                  cheapProj
+                  (Bool.or cheapRec cheapProj)
                   hReduceSemantic.2
                   hCombined
                   hFinish
@@ -699,7 +699,7 @@ def psKernelWhnfCoreAppTailRun
           | Except.ok reduced =>
               psKernelWhnfCoreFinish
                 original
-                cheapProj
+                (Bool.or cheapRec cheapProj)
                 (Prod.fst reduced)
                 (Prod.snd reduced)
       | _ =>
@@ -750,7 +750,7 @@ def psKernelWhnfCoreAppTailRun
         | Except.ok reduced =>
             psKernelWhnfCoreFinish
               original
-              cheapProj
+              (Bool.or cheapRec cheapProj)
               (Prod.fst reduced)
               (Prod.snd reduced)
 

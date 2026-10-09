@@ -93,3 +93,17 @@ theorem psKernelOpenSimpleConstructorFieldsWithFuel_zero
   rfl
 
 
+
+theorem psKernelSimpleRecursiveOccurrenceDiagnostic_stuck_recursor
+    (environment : PsKernelEnvironment)
+    (target name : PsKernelName)
+    (reduced : PsKernelExpr)
+    (levels : List PsKernelLevel)
+    (info : PsKernelRecursorInfo)
+    (hContains : psKernelExprContainsConst target reduced = true)
+    (hHead : psKernelExprGetAppFn reduced = PsKernelExpr.const name levels)
+    (hRecursor : psKernelEnvironmentFind environment name =
+      Option.some (PsKernelConstantInfo.recInfo info)) :
+    psKernelSimpleRecursiveOccurrenceDiagnostic environment target reduced =
+      "recursive argument contains the datatype under a stuck recursor" := by
+  simp [psKernelSimpleRecursiveOccurrenceDiagnostic, hContains, hHead, hRecursor]

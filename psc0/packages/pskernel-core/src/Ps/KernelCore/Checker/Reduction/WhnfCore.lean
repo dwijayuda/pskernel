@@ -274,7 +274,7 @@ def psKernelWhnfCoreWithFuel
                         | Except.ok result =>
                             psKernelWhnfCoreFinish
                               expr
-                              cheapProj
+                              (Bool.or cheapRec cheapProj)
                               (Prod.fst result)
                               (Prod.snd result)
                     | PsKernelExpr.proj typeName index structValue =>
@@ -342,7 +342,7 @@ def psKernelWhnfCoreWithFuel
                                 | Option.none =>
                                     psKernelWhnfCoreFinish
                                       expr
-                                      cheapProj
+                                      (Bool.or cheapRec cheapProj)
                                       expr
                                       state2
                                 | Option.some value =>
@@ -360,7 +360,7 @@ def psKernelWhnfCoreWithFuel
                                     | Except.ok result =>
                                         psKernelWhnfCoreFinish
                                           expr
-                                          cheapProj
+                                          (Bool.or cheapRec cheapProj)
                                           (Prod.fst result)
                                           (Prod.snd result)
                     | PsKernelExpr.app _ _ =>
@@ -426,7 +426,7 @@ def psKernelWhnfCoreWithFuel
                                     | Except.ok result =>
                                         psKernelWhnfCoreFinish
                                           expr
-                                          cheapProj
+                                          (Bool.or cheapRec cheapProj)
                                           (Prod.fst result)
                                           (Prod.snd result)
                                 | _ =>
@@ -479,7 +479,7 @@ def psKernelWhnfCoreWithFuel
                                   | Except.ok result =>
                                       psKernelWhnfCoreFinish
                                         expr
-                                        cheapProj
+                                        (Bool.or cheapRec cheapProj)
                                         (Prod.fst result)
                                         (Prod.snd result)
                     | _ =>

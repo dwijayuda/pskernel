@@ -269,3 +269,7 @@ lean_exe pskernel_nat_dispatch_tests where
 lean_exe pskernel_projection_fuel_tests where
   srcDir := "test"
   root := `ProjectionFuelTests
+
+lean_exe pskernel_cache_mode_tests where
+  srcDir := "test"
+  root := `CacheModeTests

@@ -253,7 +253,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                | Option.none =>
                    psKernelWhnfCoreFinish
                      original
-                     cheapProj
+                     (Bool.or cheapRec cheapProj)
                      original
                      (Prod.snd secondResult)
                | Option.some value =>
@@ -272,7 +272,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                    | Except.ok reduced =>
                        psKernelWhnfCoreFinish
                          original
-                         cheapProj
+                         (Bool.or cheapRec cheapProj)
                          (Prod.fst reduced)
                          (Prod.snd reduced)) =
             Except.ok (Prod.mk result nextState) := by
@@ -303,7 +303,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                | Option.none =>
                    psKernelWhnfCoreFinish
                      original
-                     cheapProj
+                     (Bool.or cheapRec cheapProj)
                      original
                      (Prod.snd secondResult)
                | Option.some value =>
@@ -322,7 +322,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                    | Except.ok reduced =>
                        psKernelWhnfCoreFinish
                          original
-                         cheapProj
+                         (Bool.or cheapRec cheapProj)
                          (Prod.fst reduced)
                          (Prod.snd reduced)) =
             Except.ok (Prod.mk result nextState) at hMain
@@ -456,7 +456,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
               have hFinish :
                   psKernelWhnfCoreFinish
                       original
-                      cheapProj
+                      (Bool.or cheapRec cheapProj)
                       original
                       state2 =
                     Except.ok
@@ -470,7 +470,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                   original
                   original
                   result
-                  cheapProj
+                  (Bool.or cheapRec cheapProj)
                   hExpandedSemantic.2
                   (PsKernelReductionClosure.refl original)
                   hFinish
@@ -569,7 +569,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                   have hFinish :
                       psKernelWhnfCoreFinish
                           original
-                          cheapProj
+                          (Bool.or cheapRec cheapProj)
                           reduced
                           state3 =
                         Except.ok
@@ -583,7 +583,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                       original
                       reduced
                       result
-                      cheapProj
+                      (Bool.or cheapRec cheapProj)
                       hReduceSemantic.2
                       hCombined
                       hFinish

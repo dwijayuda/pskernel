@@ -8,11 +8,14 @@
 
 **Proof-organization follow-up:** the proof layout, imports, and runner were inspected at `pscv/prove-pskernel-core-v1` commit `85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62`. This supplements the dated audit with organizational evidence; it does not requalify the newer branch's theorem set or CI.
 
+**Distribution/user-experience follow-up:** 10 October 2026, Asia/Jakarta. The npm product name comes from the user; scoped names and CLI examples are proposed. Package-manager observations use the cited npm v12 documentation, not a newly executed installation.
+
 **Canonical plan format:** this Markdown file. It supersedes the earlier PDF draft for future plan revisions.
 
 ## Decisions confirmed by the user
 
-- Use ps-prefixed package basenames: `pscore`, `psfrontend`, `psc`, `psbackend-ts`, with `pskernel-core` retained for the kernel.
+- Use ps-prefixed internal module/package basenames: `pscore`, `psfrontend`, `psc`, `psbackend-ts`, with `pskernel-core` retained for the kernel.
+- Use the user-owned npm package name `proofscript` for the installable compiler product and expose the executable as `psc`. Additional official scoped package names remain conditional on control of the chosen npm scope.
 - Keep `psbackend-ts` in the required compiler distribution and self-host source closure. Use the pinned TypeScript 7 toolchain to produce executable JavaScript.
 - Keep compiler implementation in the supported `.lean`/`.ps` source profile. Keep `pscore` backend-neutral and the logical kernel independent of backend code.
 - Make `psbackend-js`, `psbackend-wasm`, `psbackend-rust`, and other backends optional extensions. Replacing the required TS backend is not a goal of this plan.
@@ -321,24 +324,121 @@ There is a still smaller intermediate milestone: a protected compiler release wi
 
 ## 10. Proposed modules and npm packages
 
-Names below follow the user's selected ps-prefixed basename convention. Actual npm name/scope availability remains a publishing check. Use one coordinated release train initially. A logical boundary does not automatically deserve an independent npm package.
+Names below follow the user's selected ps-prefixed basename convention. The user reports owning the unscoped npm package `proofscript`; use it for the compiler product. Additional npm names and scope control remain publishing checks. Use one coordinated release train initially. A logical boundary does not automatically deserve an independent npm package.
 
 | Module / proposed package | Owns | Dependency rule |
 | --- | --- | --- |
 | pskernel-core | Kernel terms and declarations, admission, conversion, authoritative environments, kernel proof sources | No frontend, plugin loader, CLI, backend, or PSCV dependency |
 | pscore | Canonical data contracts and bridge, fixed RuntimeIR, invariants, erasure, explicit semantic pass contracts | Pure internal modules; no host IO or backend imports |
 | psfrontend | Default bounded .ps/.lean parsing, names, macros, elaboration, meta state | Produces Core proposals through public data contracts |
-| psc | Trusted supervisor, CLI, policy, kernel service, resolver, extension runner, receipts, publication | Owns capabilities and decisions; does not import external package code |
+| psc, distributed through proofscript | Trusted supervisor, CLI, policy, kernel service, resolver, extension runner, receipts, publication | Owns capabilities and decisions; does not import external package code |
 | psbackend-ts | Required reference backend for the core distribution and self-hosting; TS7 runtime adapters | Consumes pipeline data; cannot publish; target-specific code stays outside pscore |
 | pscv | Optional approved VCG/coverage implementation and obligation schema | Activation and final coverage decision stay in supervisor |
 | Optional psbackend-js, psbackend-wasm, psbackend-rust, Lean adapter | Target-specific or compatibility functionality | Outside the required compiler/self-host closure; individually qualified |
-| psc/sdk or development-only SDK package | Typed clients, schemas, fixture runner, examples | Convenience only; no authority or general service registry |
+| proofscript/sdk or development-only SDK package | Typed clients, schemas, fixture runner, examples | Convenience only; no authority or general service registry |
 
 Here, core distribution means the required compiler product: psc, pscore, psfrontend, pskernel-core, and psbackend-ts with their declared runtime/toolchain dependencies. It does not mean putting TypeScript lowering or TypeScript-specific concepts inside pscore or the logical kernel. The source compiler remains written in its supported .lean/.ps profile.
 
 Publish the supervisor and kernel at clear consumer boundaries. The compiler-core, frontend, and TS backend can initially be subpackages or subpaths under a shared version if separate publication would add only coordination work. Proof sources, docs, archives, and historical seeds remain in the repository without automatically entering release tarballs.
 
 Use one development-only compiler assurance workspace at `psc0/proofs/`, organized by package. This is a source/build boundary, not another mandatory npm package or compiler plugin framework. Its pinned Lean toolchain and optional proof libraries are installed by the assurance workflow only. Keep the kernel's canonical assurance library under its existing ownership and reuse its results at an explicit source/profile boundary; do not create a second kernel proof copy. Section 16 specifies the layout.
+
+
+### The installed product: proofscript provides psc
+
+The target quick-start is `npm install -g proofscript`, followed by the `psc` command. npm supports this through a package `bin` mapping; the package and command names need not match. `psc` can remain the internal supervisor module name without requiring another public CLI wrapper package. [E16]
+
+`proofscript` should provide the supported default language profile, protected admission/checking, the required TS backend and declared TS7 toolchain path, ordinary project/library resolution, and the extension host. Distribute ready-to-run artifacts for qualified platforms. Ordinary compiler use should not require a Lean development installation, compiler metaproofs, or building PSC from its repository. State supported platforms and any required host runtime precisely.
+
+| Consumer-facing name | Purpose |
+| --- | --- |
+| `proofscript` | Main compiler distribution; installs `psc` and can expose `proofscript/sdk` as an API subpath |
+| `pskernel-core`, `pscore`, `psfrontend`, `psbackend-ts` | Source/module boundaries; publish separately only where independent consumption helps |
+| `@proofscript/psbackend-rust` | Proposed optional official Rust extension, if the project controls `@proofscript` |
+| `@someone/psbackend-rust` | Illustrative third-party backend using the same extension contract |
+| `@someone/psmath` | Illustrative ordinary ProofScript library |
+
+The npm scoped spelling is `@proofscript/psbackend-rust`. npm scopes belong to users or organizations; owning the unscoped package `proofscript` does not establish ownership of `@proofscript`. Use a controlled scope, and identify the actual resolved package origin. A name inside a package's manifest or an npm alias does not establish official provenance. [E17]
+
+Optional extensions are independently installed project dependencies. Do not list every optional backend in the main product's default dependency closure. Most users should install one compiler product, then only the additional packages their project needs. Third-party publishers may use their own scoped or unscoped names; the `ps...` convention is useful naming guidance, not an authorization rule.
+
+### User journey: global convenience and reproducible projects
+
+All `psc` commands and configuration examples in this subsection describe the proposed product experience. They are not claims that the current published npm package already implements them.
+
+For a quick trial:
+
+```sh
+npm install -g proofscript
+psc --version
+psc check main.ps
+psc build main.ps
+```
+
+The ordinary default build uses the supported bounded language and the required TS-to-JS route. A successful check reports the admission/checking scope actually performed; it does not imply full PSCV verification or unrestricted Lean support.
+
+For a project, install an exact local compiler version and commit the npm lockfile. A thin proposed `psc init my-app` can create a source file, project configuration, and build script, after which the user runs `npm install --ignore-scripts` and `npm run build`. This scaffold needs no template/plugin framework.
+
+The project build script should invoke its installed `proofscript` launcher by its documented package path. A proposed generated script is `node ./node_modules/proofscript/bin/psc.mjs build`; the launcher path becomes a supported product contract. The public `psc` bin remains available for direct use. This avoids selecting a compiler through a conflicting third-party `psc` bin link. Do not automatically require/import a project-local compiler from the global supervisor or silently change compiler identity.
+
+TypeScript likewise recommends per-project installation for reproducibility while supporting a global command for convenience. npm scripts normally expose local dependency executables through `node_modules/.bin`; the explicit launcher path avoids a conflicting `psc` link, but `node` inside an npm script still resolves through that modified PATH. Keep `npm run build` as the development convenience. Controlled CI uses `npm ci --ignore-scripts`, then invokes the documented launcher with the CI-provisioned pinned absolute Node executable and sanitized execution environment. It must not resolve either executable through third-party dependency bins. A workspace with a different package layout configures its exact launcher location. [E18] [E19] [E20]
+
+Resolve enabled extensions from the selected project root and its installed dependency graph, including declared npm workspaces/hoisting, even when the user intentionally invokes a compatible global compiler. Report the actual compiler identity and check compatibility. Do not search arbitrary ancestor/global plugin directories, auto-download packages during a build, or silently select a second compiler to satisfy an extension.
+
+A project's lockfile and the published global product are different boundaries. npm excludes `package-lock.json` from package tarballs; the inspected npm v12 documentation also says dependency shrinkwrap files are ignored. Assemble a minimal release-controlled runtime closure, using bundling where needed to prevent floating shipped dependencies. Keep exact component/toolchain identities in the release receipt and qualify the advertised installation path on supported platforms. [E16] [E21]
+
+### User journey: add an optional backend
+
+Assuming control of the illustrated official scope, install the extension in the project:
+
+```sh
+npm install --save-dev --save-exact --ignore-scripts @proofscript/psbackend-rust
+```
+
+Then enable its particular operation in the root project's `package.json`. The proposed data-only configuration is:
+
+```json
+{
+  "proofscript": {
+    "extensions": [
+      {
+        "package": "@proofscript/psbackend-rust",
+        "enable": ["backend:rust"]
+      }
+    ]
+  }
+}
+```
+
+This is an addition to the existing `package.json`, not a replacement for its dependencies or scripts. One root `proofscript.extensions` configuration is sufficient initially; do not introduce several competing configuration files or a second package lockfile.
+
+With the generated project build script:
+
+```sh
+npm run build -- --target rust
+```
+
+The compiler resolves the locked package, reads its descriptor as data, checks its protocol and selected operation, records its actual artifact identity, and executes it through the qualified isolated runner when the operation is used. Only the supervisor validates and publishes the result. Uninstalling an enabled package or selecting an unavailable/incompatible target gives an actionable error; the compiler does not fetch or substitute another backend.
+
+For this story, the initial Rust operation emits Rust source. Building a native executable additionally requires the declared Rust toolchain and runtime dependencies; that should be an explicit later tool-service integration. Installing an emitter does not grant it arbitrary process execution or make `rustc` part of the mandatory TS self-host closure. Any later tool service must itself preserve isolation and protected publication; Cargo build scripts, procedural macros, and additional foreign dependencies cannot enter as undeclared host execution.
+
+A build using an optional backend records its preservation evidence or explicitly allowed backend/runtime assumptions. An ordinary profile can allow a selected backend as trusted implementation; a profile requiring verified execution must refuse missing preservation evidence. Official ownership, isolation, and successful target typechecking do not establish source-to-target semantic preservation.
+
+A proposed `psc extensions` command lists configured entries and compatibility from data without executing their code. Each actual build reports the extensions used, including externally loaded official packages. For example, it can show `Extensions used: @proofscript/psbackend-rust@<locked-version> (backend:rust)`, while the receipt retains full digests and assurance details. A TS-only build should not instantiate an unused Rust backend merely because it is installed.
+
+### User journey: third-party extensions and libraries
+
+A third-party extension uses the same installation and activation workflow, for example `@someone/pstactic-arithmetic` with an explicitly enabled tactic operation. There is no requirement to apply for inclusion in a global list before a conforming isolated extension can be used. Names shown here are illustrative, not verified npm package recommendations.
+
+An ordinary library is simpler:
+
+```sh
+npm install --save-exact --ignore-scripts @someone/psmath
+```
+
+Its supported source modules or accepted data artifacts are then available through the language's normal import mechanism. Use declared source/module exports and language-profile compatibility, not executable npm `main` hooks. A pure library does not need an extension activation entry. Its declarations, proofs, assumptions, and dependencies still pass the applicable compiler/kernel/artifact checks.
+
+A package may provide both library exports and executable compiler operations. Importing its ordinary library exports does not activate its optional tactics, native initializers, or backend. If an imported module requires a missing extension, report which package/operation is needed and require project configuration to enable it. Section 12 defines this behavior independently of filenames or publisher labels.
 
 ### Dependency direction
 
@@ -434,6 +534,53 @@ Freeze builtin syntax and primitive identities within a profile. New syntax may 
 
 Offer a narrow SDK with schemas, a fixture runner, canonical test inputs, and three complete example packages. A new macro or tactic should not require editing the kernel, a generic registry framework, and several regex guards. Compatibility is a small explicit protocol/profile matrix, not a growing web of per-package implicit assumptions.
 
+
+### Ecosystem policy: open participation with project-controlled execution
+
+Recommend an open third-party ecosystem with a small supported official distribution and an optional curated compatibility catalog. A project's enabled-extension list authorizes compilation-time use. A project or organization may deliberately restrict that list to official or approved versions, but a central catalog is not required for every user or every build.
+
+| Policy | Benefit | Cost or limit | Recommendation |
+| --- | --- | --- | --- |
+| Official organization only | Small initial support matrix and clear ownership | Restricts community/company-specific extensions; ownership still does not prove soundness or isolation | Reasonable initial support scope, not a permanent protocol restriction |
+| Central approval list for all extensions | Centralized review and discoverability | Review bottleneck, catalog maintenance and availability dependency; approved versions still need confinement/checks | Optional curated catalog or organization policy |
+| Open extensions with explicit project activation | Broad ecosystem and local experimentation while preserving fixed boundaries | Requires a documented SDK, compatibility checks, and a qualified runner | Recommended architecture |
+
+A curated entry may identify maintainer, tested compiler/protocol versions, support status, and demonstrated evidence. Those are separate fields: `official` must not imply `verified`, and `community` must not imply `unchecked`. Derive any official badge from authenticated resolved origin and a release-controlled identity record; do not accept a package's self-description or apparent install path.
+
+The first release can ship and support a few official examples while making the interface available to compatible third-party packages. Do not build an online plugin marketplace, package manager, publisher-approval service, or auto-updating catalog dependency into the trusted compiler. ESLint provides a useful precedent for explicit configured plugins, including local unpublished ones; PSC should use data-only configuration and isolated execution for its stronger boundary. [E22]
+
+### Library content and compiler execution are different capabilities
+
+Classify behavior, not extensions such as `.ps`, `.lean`, or a manifest's claim to be a library.
+
+| Package content | Admission/use path | Execution authority |
+| --- | --- | --- |
+| Functions, types, theorem statements, proof terms, supported source modules | Normal imports and checked declaration/artifact pipeline | No automatic compiler extension grant |
+| Supported declarative notation or checked rewrite data | Fixed frontend/checker machinery; selected language environment recorded | No arbitrary callbacks; validate and bound the data |
+| Executable parser, macro, elaborator, tactic, optimizer, command, or backend | Explicit enabled operation through the isolated extension protocol | Only the fixed operation and explicitly granted host services |
+| Foreign JS/native/Wasm runtime dependency | Explicit runtime/FFI dependency path | Program runtime behavior; separate from compiler authority |
+| Kernel provider, native evaluator, axiom policy, final receipt/publication operation | Protected distribution/profile selection | Never an ordinary extension grant |
+
+An ordinary library may still introduce logical assumptions, effects, or foreign calls. Apply the selected assumption and PSCV coverage policy to the imported closure. Typechecking ordinary library code does not establish arbitrary application contracts. Do not require every ordinary library to carry complete functional-correctness proofs for ordinary compilation; require the proofs/evidence promised by the selected profile.
+
+A supported Lean source import is not permission to load an arbitrary native Lean module, initializer, or `.olean` environment into the supervisor. Imported artifacts are untrusted data until admitted by the specified acceptance route. Heavy Lean tactics remain possible through the separately qualified authoring/compatibility route; being first-party does not create a same-process exception.
+
+Ordinary source/runtime dependencies belong in build provenance. The mandatory extension summary identifies executable compiler extensions actually used; it must not mislabel pure imported libraries as privileged plugins or omit executable hooks merely because their package calls itself a library.
+
+### Activation, dependency closure, and compatibility
+
+Installation alone does not authorize compiler execution. Use the root project's data-only configuration, npm's existing lockfile, and the fixed operation contracts. Resolve package identity and bytes through the selected installed dependency graph without evaluating package entry modules. Do not discover plugins by package-name prefixes, by scanning all of `node_modules`, or by executing imported configuration.
+
+The illustrative `enable: ["backend:rust"]` grant permits that operation only. It does not authorize new tactic/command handlers, filesystem/network/process services, kernel mutation, or reporting changes. Record grants in the project configuration; changed or additional grants require an explicit configuration change. Repeated builds use those grants without interactive permission prompts. Lockfile updates change artifact identities and must be reflected in receipts and any affected assurance claims.
+
+If organization/host restrictions are configured, effective grants are the intersection of those restrictions, project activation, and the fixed protocol. Packages cannot widen them. Ordinary users do not need a separate organization policy layer.
+
+A bundled helper remains inside its parent's isolated artifact and capability limits. A separately executing extension dependency must be explicitly present in the resolved project activation set; a parent or library dependency declaration is not authorization. Dynamic resource access goes through bounded host services with actual resource identities recorded. Guests cannot independently load another host-side plugin, fetch new code, or start a process.
+
+Treat compatibility as explicit protocol, Core schema, runtime ABI, source-profile, and operation support. Reject unsupported combinations and ambiguous registrations. A new package may extend documented syntax/operations; it cannot shadow protected CLI commands, replace the kernel, reinterpret a fixed primitive, or add an unvalidated trusted IR instruction.
+
+Extension packages should carry their prepared isolated payload and data descriptor. Their implementation may use any toolchain producing the supported payload; they need not all be formally verified or self-hosted. A plain npm JavaScript callback does not meet the strict isolation contract. Additional native/full-Lean compatibility modes need their own qualified boundary rather than an automatic fallback.
+
 ### Adopting mature extension functionality
 
 Yes: extensions are a useful place to develop and evaluate functionality before deciding whether it belongs in the standard product. Keep three kinds of adoption distinct.
@@ -478,7 +625,9 @@ The host can attest which modules it loaded. It cannot infer every source librar
 
 npm distributes packages; it does not make their code trustworthy. Controlled ingestion must use a lockfile/integrity identities and an explicit no-lifecycle-script policy for extension packages. Keep extensions out of the supervisor’s JS module-resolution graph and sanitize inherited execution hooks. Package provenance can establish an origin claim, not safety or semantic correctness.
 
-Current npm configuration documents ignore-scripts, including the fact that explicitly requested npm run scripts still execute. Pin the intended ingestion behavior rather than relying on changing defaults. Prebuilt runner artifacts should not require executing an extension’s install script. This needs a narrow resolver and controlled runner, not a new package manager. [E11]
+Use the documented no-script install path for extensions and ordinary third-party dependencies. npm lifecycle execution precedes the PSC sandbox; compiler isolation cannot retroactively protect arbitrary installation-time code. The inspected npm configuration documents that `ignore-scripts` also disables root npm extensions, while an explicitly requested `npm run` command still executes its intended script. Pin supported npm behavior instead of relying on changing defaults. Prebuilt extension/runner artifacts should not require executing an extension's install script. This needs a narrow resolver and controlled runner, not a new package manager. [E11]
+
+Disabling lifecycle scripts does not authenticate a launcher or eliminate executable-name collisions. The supported controlled CI build invokes the known `proofscript` launcher path with a pinned absolute Node executable and verifies release/component identities, rather than trusting `psc` or `node` entries found through dependency bin links. Keep the supervisor's own implementation dependencies release-controlled and outside project-selected extension resolution. The guarantee still assumes the authentic launcher, package manager, runtime, and OS; arbitrary replacement of that installation lies outside extension confinement.
 
 For native Lean/JS compatibility, add an explicitly selected qualified OS-sandbox mode later. State supported platforms precisely; Linux-only support is preferable to a claim of untested cross-platform parity. Failure to establish the requested isolation mode must stop that extension.
 
@@ -723,9 +872,9 @@ These are planning envelopes, not measured implementation requirements or delive
 | --- | --- | --- |
 | 0. Freeze and reconcile | Record R/F/main identities; resolve provider naming; select canonical kernel source and proof checkpoint; repair current qualification blockers | One unambiguous source/artifact/profile mapping; preserved recovery baseline |
 | 1. Own the transaction | Unify default build, kernel admission, IR/target checks, owned preparation, exact output publication; rename weak APIs | Every production entry has the same non-bypassable gate |
-| 2. One isolated extension slice | Data-only descriptors, constrained Wasm runner, limits, actual-load reporting, three complete examples | External code cannot obtain admission, provider, reporting, or final-output authority |
+| 2. One isolated extension slice | Data-only descriptors and root project activation, constrained Wasm runner, limits, actual-load reporting, three complete examples | Official and independently named extensions use the same boundary; external code cannot obtain admission, provider, reporting, or final-output authority |
 | 3. Stabilize contracts | Primitive identities, canonical bridge, narrow SDK, deterministic syntax dispatch; only supported rewrite certificates | Supported extension changes require no trusted-core source changes |
-| 4. Package and requalify | Minimal npm tarballs, coordinated versions, clean-install tests, cold recovery and complete new C1/C2/C3 checkpoint | Installable checked compiler and isolated examples without a repository checkout |
+| 4. Package and requalify | proofscript package and psc bin, minimal release-controlled tarball, project-local workflow, library imports, clean-install tests, cold recovery and complete new C1/C2/C3 checkpoint | Global quick-start and locked project builds work; isolated examples and ordinary libraries are usable without a repository checkout |
 | 5. Later formal assurance | Reuse kernel admission/model work; develop bridge/erasure/pass pilots, architecture refinement, PSCV and reference-backend proofs | Independently scoped claims promoted only when their exact obligations are discharged; not required to close phases 0–4 |
 | 6. Optional backend ecosystem | Reuse/evaluate direct JS, Wasm, Rust and other backends through extension contracts | Individually qualified optional targets; TS7 remains the required reference/self-host path |
 
@@ -750,7 +899,7 @@ Broader extension ergonomics and capability coverage could reach 9–18k total n
 
 Potential deletion of 2–5k current lines is plausible but not a commitment. Historical receipts, source restrictions, and recovery evidence should usually remain in Git even when absent from release packages. The credible first objective is fewer maintained authority paths and less shipped duplication.
 
-These estimates exclude complete mechanized proofs, a new Wasm compiler, full Lean compatibility, a portable native-worker sandbox, a broad language server, and external runtime binary/dependency size. The approximately 80.9k existing assurance lines already demonstrate why proof work deserves its own budget.
+These estimates exclude complete mechanized proofs, a new Wasm compiler, full Lean compatibility, a portable native-worker sandbox, a broad language server, an online plugin marketplace/approval service, and external runtime binary/dependency size. The approximately 80.9k existing assurance lines already demonstrate why proof work deserves its own budget.
 
 
 ## 19. Acceptance criteria
@@ -771,6 +920,10 @@ Apply the implementation gates to the protected platform and the selected build 
 | Self-hosting | Preserve selected R; qualify exact source closure and C2/C3 equality for the declared products; cold recovery uses only declared inputs/toolchains |
 | Proof/runtime separation | Runtime imports and self-host inventories exclude compiler assurance modules and proof-only dependencies; a proof-only edit preserves production closure/output identities for fixed production inputs |
 | Formal claims — later assurance gate | The promised theorem set checks at the referenced source; exported axiom dependencies and quantified semantic assumptions are audited; no claim is promoted by test coverage or companion-file counts alone |
+| npm product and project workflow | On qualified platforms, global installation of proofscript exposes psc; exact local installation plus committed lockfile reproduces the selected compiler/extension versions; controlled CI requires no extension lifecycle execution and cannot be redirected by dependency bins named psc or node |
+| Open extension activation | An independently named conforming extension works without a central allowlist; an installed but disabled extension never executes; new transitive operations/grants and conflicting registrations are refused |
+| Ordinary libraries | A supported third-party source/proof library imports without plugin approval; its assumptions are checked, and embedded executable hooks cannot activate through a normal import |
+| Backend claim scope | Installing/selecting Rust adds only its permitted target operation; unsupported toolchains fail clearly and missing preservation evidence cannot satisfy a stronger verified profile |
 | Cost and usability | Clean npm install runs checked builds and examples; no optional backend enters the mandatory closure; compare latency, memory, tarball size and dependencies to a measured baseline |
 
 Run failure-injection tests at each transaction boundary, including backend crash, receipt write failure, malformed guest responses, timeout, and a changed byte buffer after validation. Test actual denied operations; a manifest saying “sandboxed” is not a test.
@@ -781,7 +934,7 @@ For extension ergonomics, require the example macro, tactic, and command to be i
 
 ### Definition of the first successful release
 
-A clean npm installation builds the declared bounded language through one checked publication transaction, selects an unambiguous kernel artifact, reports actual extension identities, runs constrained external examples without privileged access, and reproduces its selected compiler closure. It states the remaining source-fidelity, semantic-preservation, model, runtime, and bootstrap assumptions precisely.
+A clean npm installation of `proofscript` exposes `psc`, builds the declared bounded language through one checked publication transaction, selects an unambiguous kernel artifact, reports actual extension identities, imports supported ordinary libraries, runs explicitly activated official and third-party examples without privileged access, and reproduces its selected compiler closure. It states the remaining source-fidelity, semantic-preservation, model, runtime, and bootstrap assumptions precisely.
 
 This is a complete architectural implementation milestone even while the later proof program remains unfinished. The obligation inventory can contain planned or in-progress proofs, and ordinary npm/self-host qualification does not need to execute that proof program. It must not be marketed as a fully verified compiler simply because its kernel accepts proof terms or its compiler reaches a fixed point.
 
@@ -808,6 +961,8 @@ This is a complete architectural implementation milestone even while the later p
 
 - No whole-compiler rewrite as the default migration strategy.
 - No arbitrary same-process third-party JavaScript execution.
+- Open third-party participation through documented isolated interfaces; an official catalog is optional and never replaces kernel/validator checks.
+- One user-facing `proofscript` product and `psc` command, with explicit project extension activation and ordinary library imports.
 - No general compiler framework, extensible trusted IR, or universal equivalence validator.
 - No mandatory full-Lean frontend or four-backend bootstrap.
 - No verification claim inferred from a filename, type wrapper, manifest, hash fixed point, or finite suite.
@@ -918,6 +1073,13 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 - **[E13] - Harrison: Towards self-verification of HOL Light.** Relative model assumptions; not a model of PSC0's exact logic.
 - **[E14] - MetaRocq.** Separable checker, erasure, and compilation proof boundaries.
 - **[E15] - Verifying a VC generator and compiler for a Dafny subset.** Shared program semantics across VCG and verified compilation; bounded subset.
+- **[E16] - npm package.json.** Package/bin name mapping, local binaries, and published-file behavior.
+- **[E17] - npm scopes.** Scoped package spelling and user/organization namespace ownership.
+- **[E18] - TypeScript installation guidance.** Global convenience and per-project reproducibility.
+- **[E19] - npm run.** Local dependency executables and script invocation behavior.
+- **[E20] - npm ci.** Locked project installation and manifest/lockfile consistency.
+- **[E21] - npm package-lock.json.** Project lockfile semantics and npm v12 shrinkwrap behavior.
+- **[E22] - ESLint plugin configuration.** Explicit extension configuration, including local unpublished plugins.
 
 [R01]: https://github.com/dwijayuda/pskernel/blob/ed5d00aca0743bde583b45fe7756dd494ac3960f/psc0/AI_WORK_STATE.md
 [R02]: https://github.com/dwijayuda/pskernel/blob/ed5d00aca0743bde583b45fe7756dd494ac3960f/psc0/docs/selfhost-language/worker-migration-qualification.json
@@ -984,3 +1146,11 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 [R38]: https://github.com/dwijayuda/pskernel/blob/85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62/psc15selfhost/scripts/check-pskernel-core-proofs.mjs
 [R39]: https://github.com/dwijayuda/pskernel/blob/85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62/psc15selfhost/packages/pskernel-core/proof/Ps/KernelCore/API/Kernel.proof.lean
 [R40]: https://github.com/dwijayuda/pskernel/blob/85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62/psc15selfhost/packages/pskernel-core/package.json
+
+[E16]: https://docs.npmjs.com/cli/v12/configuring-npm/package-json/
+[E17]: https://docs.npmjs.com/cli/v12/using-npm/scope/
+[E18]: https://www.typescriptlang.org/download/
+[E19]: https://docs.npmjs.com/cli/v12/commands/npm-run/
+[E20]: https://docs.npmjs.com/cli/v12/commands/npm-ci/
+[E21]: https://docs.npmjs.com/cli/v12/configuring-npm/package-lock-json/
+[E22]: https://eslint.org/docs/latest/use/configure/plugins

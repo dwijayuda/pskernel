@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Substitution.Abstract
+import Ps.KernelCore.Runtime.Acceleration.Cache
 
 private instance : BEq PsKernelExpr := ⟨fun a b => decide (a = b)⟩
 
@@ -19,6 +20,13 @@ private def examples : List PsKernelExpr :=
     shared, .app shared (.lam n (.sort .zero) shared .default),
     .forallE n shared shared .implicit, .letE n shared shared shared false,
     .mdata 99 shared, .proj n 0 shared ]
+
+private def expectedDagHash (depth : Nat) (leafHash : Nat) : Nat :=
+  match depth with
+  | 0 => leafHash
+  | n + 1 =>
+      let h := expectedDagHash n leafHash
+      psKernelCacheMix (psKernelCacheMix 26 h) h
 
 def main : IO Unit := do
   let n := PsKernelName.str .anonymous "x"
@@ -85,4 +93,23 @@ def main : IO Unit := do
   let substituted := psKernelExprInstantiate1 underBinder closed
   let expected := PsKernelExpr.lam n (.sort .zero) (dag depth closed) .default
   ensure (psKernelExprEq substituted expected) "closed argument shared beneath binder"
+  let (closedHash, hashMemo) := PsKernelSharing.hashCached closed (Squash.mk {})
+  ensure (closedHash == expectedDagHash depth (psKernelExprHash (.sort .zero)))
+    "DAG hash preserves the existing structural hash"
+  let (openHash, hashMemo) := PsKernelSharing.hashCached openDag hashMemo
+  ensure (openHash == expectedDagHash depth (psKernelExprHash (.bvar 1)))
+    "persistent hash memo handles a different input"
+  ensure ((PsKernelSharing.hashCached closed hashMemo).1 == closedHash)
+    "persistent hash query is repeatable"
+  let mut map := psKernelExprMapEmpty
+  let mut pairs := psKernelExprPairSetEmpty
+  for i in List.range 10 do
+    map := psKernelExprMapInsert map (.bvar i) (.bvar (i + 1))
+    pairs := psKernelExprPairSetInsert pairs (.bvar i) (.bvar (i + 1))
+  map := psKernelExprMapInsert map closed (.bvar 77)
+  pairs := psKernelExprPairSetInsert pairs closed openDag
+  ensure (psKernelExprMapGet map closed == some (.bvar 77)) "persistent hash map hit"
+  ensure (psKernelExprMapGet map levelResult == some (.bvar 77)) "structurally equal map key"
+  ensure (psKernelExprPairSetContains pairs openDag closed) "symmetric persistent pair hash"
+  ensure (!psKernelExprPairSetContains pairs closed (.bvar 999)) "pair hash miss"
   IO.println "PSKERNEL_SHARED_SYNTAX: PASS cursors=4 variants=14 DAG-depth=32"

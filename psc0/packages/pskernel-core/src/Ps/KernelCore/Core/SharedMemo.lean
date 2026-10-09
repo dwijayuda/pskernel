@@ -60,4 +60,19 @@ theorem value_eq {α β : Type} {spec : α → Nat → β} {node : α} {cursor :
   withPtrAddr node (fun address => probe (address, cursor) node cursor memo descend)
     (fun _ _ => Subsingleton.elim _ _)
 
+
+/-- Retain the memo for later calls without exposing any hint-dependent state
+logically. The value is exact and the memo component is a subsingleton. -/
+def valueAndMemo {α β : Type} {spec : α → Nat → β} {node : α} {cursor : Nat}
+    (result : Squash (Result spec node cursor)) :
+    β × Squash (Memo α β spec) :=
+  Quotient.lift (fun p => (p.1.1, Squash.mk p.2))
+    (fun p q _ => Prod.ext (p.1.2.trans q.1.2.symm) (Subsingleton.elim _ _)) result
+
+theorem valueAndMemo_eq {α β : Type} {spec : α → Nat → β} {node : α} {cursor : Nat}
+    (result : Squash (Result spec node cursor)) :
+    (valueAndMemo result).1 = spec node cursor := by
+  induction result using Quotient.ind with
+  | _ p => exact p.1.2
+
 end PsKernelSharing

@@ -226,6 +226,46 @@ def psKernelExprHash
           index)
         (psKernelExprHash body)
 
+
+namespace PsKernelSharing
+
+@[inline, instance_reducible]
+def hashAlgebra : Algebra Nat where
+  atom := fun e _ => psKernelExprHash e
+  unary := fun e _ b => match e with
+    | .mdata md _ => psKernelCacheMix (psKernelCacheMix 31 md) b
+    | .proj n i _ => psKernelCacheMix
+        (psKernelCacheMix (psKernelCacheMix 32 (psKernelCacheNameHash n)) i) b
+    | _ => psKernelExprHash e
+  binary := fun e _ l r => match e with
+    | .app .. => psKernelCacheMix (psKernelCacheMix 26 l) r
+    | .lam .. => psKernelCacheMix (psKernelCacheMix 27 l) r
+    | .forallE .. => psKernelCacheMix (psKernelCacheMix 28 l) r
+    | _ => psKernelExprHash e
+  ternary := fun e _ t v b => match e with
+    | .letE _ _ _ _ nd => psKernelCacheMix
+        (psKernelCacheMix (psKernelCacheMix (psKernelCacheMix 29 t) v) b)
+        (if nd then 1 else 0)
+    | _ => psKernelExprHash e
+
+theorem hash_fold (e : PsKernelExpr) (cursor : Nat) :
+    fold hashAlgebra e cursor = psKernelExprHash e := by
+  induction e generalizing cursor <;>
+    simp_all [fold, hashAlgebra, psKernelExprHash]
+
+abbrev HashMemo := Squash (Memo PsKernelExpr Nat (fold hashAlgebra))
+
+def hashCached (e : PsKernelExpr) (memo : HashMemo) : Nat × HashMemo :=
+  valueAndMemo (Squash.lift memo fun m =>
+    step e 0 m (fun _ => walk hashAlgebra e 0 m))
+
+theorem hashCached_eq (e : PsKernelExpr) (memo : HashMemo) :
+    (hashCached e memo).1 = psKernelExprHash e := by
+  unfold hashCached
+  rw [valueAndMemo_eq, hash_fold]
+
+end PsKernelSharing
+
 inductive PsKernelExprMapIndex where
   | empty
   | bucket
@@ -343,6 +383,7 @@ structure PsKernelExprMap where
   small :
     List (Prod PsKernelExpr PsKernelExpr)
   index : Option PsKernelExprMapIndex
+  hashMemo : PsKernelSharing.HashMemo := Squash.mk {}
 
 def psKernelExprMapEmpty :
     PsKernelExprMap :=
@@ -619,6 +660,7 @@ structure PsKernelExprPairSet where
   small :
     List (Prod PsKernelExpr PsKernelExpr)
   index : Option PsKernelExprPairSetIndex
+  hashMemo : PsKernelSharing.HashMemo := Squash.mk {}
 
 def psKernelExprPairSetEmpty :
     PsKernelExprPairSet :=
@@ -763,3 +805,93 @@ def psKernelExprPairSetInsert
                   (Prod.mk left right)
                   bucket))
         }
+
+
+/-- Hash hints persist with a semantic cache, but carry no logical information.
+All four equations below preserve the entire result, including failed lookups. -/
+def psKernelExprMapGetShared (cache : PsKernelExprMap) (expr : PsKernelExpr) :
+    Option PsKernelExpr :=
+  match cache.index with
+  | none => psKernelExprMapGetIn expr cache.small
+  | some index =>
+      psKernelExprMapGetIn expr (psKernelExprMapIndexBucket 16 index
+        (PsKernelSharing.hashCached expr cache.hashMemo).1)
+
+@[csimp] theorem psKernelExprMapGet_shared_eq :
+    psKernelExprMapGet = psKernelExprMapGetShared := by
+  funext cache expr
+  simp only [psKernelExprMapGet, psKernelExprMapGetShared,
+    PsKernelSharing.hashCached_eq]
+
+def psKernelExprMapInsertShared (cache : PsKernelExprMap)
+    (expr value : PsKernelExpr) : PsKernelExprMap :=
+  match cache.index with
+  | none => psKernelExprMapInsert cache expr value
+  | some index =>
+      let (hash, memo) := PsKernelSharing.hashCached expr cache.hashMemo
+      let bucket := psKernelExprMapIndexBucket 16 index hash
+      { small := [], index := some (psKernelExprMapIndexSet 16 index hash
+          (psKernelExprMapInsertIn expr value bucket)), hashMemo := memo }
+
+@[csimp] theorem psKernelExprMapInsert_shared_eq :
+    psKernelExprMapInsert = psKernelExprMapInsertShared := by
+  funext cache expr value
+  cases h : cache.index with
+  | none => simp [psKernelExprMapInsertShared, h]
+  | some index =>
+      simp only [psKernelExprMapInsertShared, psKernelExprMapInsert, h,
+        PsKernelSharing.hashCached_eq]
+      congr 1
+      exact Subsingleton.elim _ _
+
+namespace PsKernelSharing
+
+def pairHashCached (left right : PsKernelExpr) (memo : HashMemo) : Nat × HashMemo :=
+  let (lh, memo) := hashCached left memo
+  let (rh, memo) := hashCached right memo
+  (Nat.mod (Nat.add lh rh) psKernelCacheHashModulus, memo)
+
+theorem pairHashCached_eq (left right : PsKernelExpr) (memo : HashMemo) :
+    (pairHashCached left right memo).1 = psKernelExprPairHash left right := by
+  simp [pairHashCached, hashCached_eq, psKernelExprPairHash]
+
+end PsKernelSharing
+
+def psKernelExprPairSetContainsShared (set : PsKernelExprPairSet)
+    (left right : PsKernelExpr) : Bool :=
+  match set.index with
+  | none => psKernelExprPairSetContainsIn left right set.small
+  | some index =>
+      psKernelExprPairSetContainsIn left right
+        (psKernelExprPairSetIndexBucket 16 index
+          (PsKernelSharing.pairHashCached left right set.hashMemo).1)
+
+@[csimp] theorem psKernelExprPairSetContains_shared_eq :
+    psKernelExprPairSetContains = psKernelExprPairSetContainsShared := by
+  funext set left right
+  simp only [psKernelExprPairSetContains, psKernelExprPairSetContainsShared,
+    PsKernelSharing.pairHashCached_eq]
+
+def psKernelExprPairSetInsertShared (set : PsKernelExprPairSet)
+    (left right : PsKernelExpr) : PsKernelExprPairSet :=
+  match set.index with
+  | none => psKernelExprPairSetInsert set left right
+  | some index =>
+      let (hash, memo) := PsKernelSharing.pairHashCached left right set.hashMemo
+      let bucket := psKernelExprPairSetIndexBucket 16 index hash
+      if psKernelExprPairSetContainsIn left right bucket then set
+      else { small := [], index := some (psKernelExprPairSetIndexSet 16 index hash
+          ((left, right) :: bucket)), hashMemo := memo }
+
+@[csimp] theorem psKernelExprPairSetInsert_shared_eq :
+    psKernelExprPairSetInsert = psKernelExprPairSetInsertShared := by
+  funext set left right
+  cases h : set.index with
+  | none => simp [psKernelExprPairSetInsertShared, h]
+  | some index =>
+      simp only [psKernelExprPairSetInsertShared, psKernelExprPairSetInsert, h,
+        PsKernelSharing.pairHashCached_eq]
+      split
+      · rfl
+      · congr 1
+        exact Subsingleton.elim _ _

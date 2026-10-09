@@ -11,6 +11,15 @@ private def dag (depth : Nat) (leaf : PsKernelExpr) : PsKernelExpr :=
   | 0 => leaf
   | n + 1 => let child := dag n leaf; .app child child
 
+/-- Reuse the same node at different binder depths. Context-free metadata
+must not multiply its work by the number of binder paths. -/
+private def binderDag (depth : Nat) (leaf : PsKernelExpr) : PsKernelExpr :=
+  match depth with
+  | 0 => leaf
+  | n + 1 =>
+      let child := binderDag n leaf
+      .app child (.lam .anonymous (.sort .zero) child .default)
+
 private def examples : List PsKernelExpr :=
   let n := PsKernelName.str .anonymous "x"
   let p := PsKernelName.str .anonymous "u"
@@ -67,6 +76,10 @@ def main : IO Unit := do
       Squash.mk (⟨false, rfl⟩, collisionMemo)))
   ensure (!missCursor) "hash collision must validate the cursor"
   let depth := 32
+  let mixedDepth := binderDag depth (.sort .zero)
+  ensure (psKernelExprNodeCount mixedDepth == 4 * 2 ^ depth - 3)
+    "context-free count across shared binder depths"
+  ensure (!psKernelExprHasFVar mixedDepth) "context-free free-variable query across binders"
   let closed := dag depth (.sort .zero)
   ensure (psKernelExprNodeCount closed == 2 ^ (depth + 1) - 1) "shared node count"
   ensure (!psKernelExprHasLooseBVar closed) "shared closed-variable query"

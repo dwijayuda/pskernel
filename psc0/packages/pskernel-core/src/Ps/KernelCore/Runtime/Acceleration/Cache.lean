@@ -231,6 +231,7 @@ namespace PsKernelSharing
 
 @[inline, instance_reducible]
 def hashAlgebra : Algebra Nat where
+  nextCursor := fun d => d
   atom := fun e _ => psKernelExprHash e
   unary := fun e _ b => match e with
     | .mdata md _ => psKernelCacheMix (psKernelCacheMix 31 md) b
@@ -251,7 +252,7 @@ def hashAlgebra : Algebra Nat where
 theorem hash_fold (e : PsKernelExpr) (cursor : Nat) :
     fold hashAlgebra e cursor = psKernelExprHash e := by
   induction e generalizing cursor <;>
-    simp_all [Algebra.atom, Algebra.unary, Algebra.binary, Algebra.ternary,
+    simp_all [Algebra.nextCursor, Algebra.atom, Algebra.unary, Algebra.binary, Algebra.ternary,
       fold, hashAlgebra, psKernelExprHash]
 
 abbrev HashMemo := Squash (Memo PsKernelExpr Nat (fold hashAlgebra))

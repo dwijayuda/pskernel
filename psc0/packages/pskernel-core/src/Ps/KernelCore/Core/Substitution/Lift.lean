@@ -302,11 +302,11 @@ theorem lift_fold (e : PsKernelExpr) (start amount : Nat) :
     fold (liftAlgebra amount) e start = psKernelExprLiftLooseBVarsChanged e start amount := by
   by_cases h : amount = 0
   · subst amount
-    induction e generalizing start <;> simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+    induction e generalizing start <;> simp_all [PsKernelSharing.Algebra.nextCursor, PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
       PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
       PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
       PsKernelSharing.rebuildTernary, liftAlgebra, psKernelExprLiftLooseBVarsChanged, lift_zero]
-  · induction e generalizing start <;> simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+  · induction e generalizing start <;> simp_all [PsKernelSharing.Algebra.nextCursor, PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
       PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
       PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
       PsKernelSharing.rebuildTernary, liftAlgebra, psKernelExprLiftLooseBVarsChanged, h]

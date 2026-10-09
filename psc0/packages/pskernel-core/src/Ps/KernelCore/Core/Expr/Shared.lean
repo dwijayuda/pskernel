@@ -18,6 +18,9 @@ namespace PsKernelSharing
 /-- An operation dictionary. Class specialization lets the native compiler erase
 callback dispatch while retaining one proof of the traversal. -/
 class Algebra (β : Type) where
+  /-- Only binding-sensitive operations advance the cursor. Context-free folds
+  keep it fixed so one shared node has one memo entry across binder paths. -/
+  nextCursor : Nat → Nat := Nat.succ
   atom : PsKernelExpr → Nat → β
   unary : PsKernelExpr → Nat → β → β
   binary : PsKernelExpr → Nat → β → β → β
@@ -33,9 +36,9 @@ class Algebra (β : Type) where
   match e with
   | .app f x => a.binary e cursor (fold a f cursor) (fold a x cursor)
   | .lam _ t b _ | .forallE _ t b _ =>
-      a.binary e cursor (fold a t cursor) (fold a b (cursor + 1))
+      a.binary e cursor (fold a t cursor) (fold a b (a.nextCursor cursor))
   | .letE _ t v b _ =>
-      a.ternary e cursor (fold a t cursor) (fold a v cursor) (fold a b (cursor + 1))
+      a.ternary e cursor (fold a t cursor) (fold a v cursor) (fold a b (a.nextCursor cursor))
   | .mdata _ b | .proj _ _ b => a.unary e cursor (fold a b cursor)
   | _ => a.atom e cursor
 
@@ -76,33 +79,33 @@ def small (e : PsKernelExpr) : Bool := smallWithFuel 3 e
       match a.binaryStop e cursor tr.1 with
       | some cut =>
           Squash.mk (⟨cut.1, by
-            simpa [h, fold, tr.2] using cut.2 (fold a b (cursor + 1))⟩, m)
+            simpa [h, fold, tr.2] using cut.2 (fold a b (a.nextCursor cursor))⟩, m)
       | none =>
-          Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
+          Squash.lift (walk a b (a.nextCursor cursor) m) fun (br, m) =>
           Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [h, fold, tr.2, br.2]⟩, m)
     | .forallE n t b bi =>
       Squash.lift (walk a t cursor memo) fun (tr, m) =>
       match a.binaryStop e cursor tr.1 with
       | some cut =>
           Squash.mk (⟨cut.1, by
-            simpa [h, fold, tr.2] using cut.2 (fold a b (cursor + 1))⟩, m)
+            simpa [h, fold, tr.2] using cut.2 (fold a b (a.nextCursor cursor))⟩, m)
       | none =>
-          Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
+          Squash.lift (walk a b (a.nextCursor cursor) m) fun (br, m) =>
           Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [h, fold, tr.2, br.2]⟩, m)
     | .letE n t v b nd =>
       Squash.lift (walk a t cursor memo) fun (tr, m) =>
       match a.ternaryStop1 e cursor tr.1 with
       | some cut =>
           Squash.mk (⟨cut.1, by
-            simpa [h, fold, tr.2] using cut.2 (fold a v cursor) (fold a b (cursor + 1))⟩, m)
+            simpa [h, fold, tr.2] using cut.2 (fold a v cursor) (fold a b (a.nextCursor cursor))⟩, m)
       | none =>
           Squash.lift (walk a v cursor m) fun (vr, m) =>
           match a.ternaryStop2 e cursor tr.1 vr.1 with
           | some cut =>
               Squash.mk (⟨cut.1, by
-                simpa [h, fold, tr.2, vr.2] using cut.2 (fold a b (cursor + 1))⟩, m)
+                simpa [h, fold, tr.2, vr.2] using cut.2 (fold a b (a.nextCursor cursor))⟩, m)
           | none =>
-              Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
+              Squash.lift (walk a b (a.nextCursor cursor) m) fun (br, m) =>
               Squash.mk (⟨a.ternary e cursor tr.1 vr.1 br.1,
                 by simp [h, fold, tr.2, vr.2, br.2]⟩, m)
     | .mdata md b =>
@@ -128,6 +131,7 @@ theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
   · exact value_eq _
 
 @[inline, instance_reducible] def countAlgebra : Algebra Nat where
+  nextCursor := fun d => d
   atom := fun _ _ => 1
   unary := fun _ _ n => Nat.succ n
   binary := fun _ _ l r => Nat.succ (l + r)
@@ -149,6 +153,7 @@ theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
     if h : v = true then some ⟨true, by intro b; cases t <;> simp [h]⟩ else none
 
 @[inline, instance_reducible] def fvarAlgebra : Algebra Bool where
+  nextCursor := fun d => d
   atom := fun e _ => match e with
     | .fvar _ => true
     | _ => false
@@ -165,17 +170,17 @@ theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
 
 theorem count_fold (e : PsKernelExpr) (d : Nat) :
     fold countAlgebra e d = psKernelExprNodeCount e := by
-  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.nextCursor, PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
       PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, fold, countAlgebra, psKernelExprNodeCount]
 
 theorem loose_fold (e : PsKernelExpr) (d : Nat) :
     fold looseAlgebra e d = psKernelExprHasLooseAt e d := by
-  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.nextCursor, PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
       PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, fold, looseAlgebra, psKernelExprHasLooseAt]
 
 theorem fvar_fold (e : PsKernelExpr) (d : Nat) :
     fold fvarAlgebra e d = psKernelExprHasFVar e := by
-  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.nextCursor, PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
       PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, fold, fvarAlgebra, psKernelExprHasFVar]
 
 end PsKernelSharing
@@ -263,6 +268,7 @@ end PsKernelSharing
 namespace PsKernelSharing
 
 @[inline, instance_reducible] def levelAlgebra (params : List PsKernelName) (levels : List PsKernelLevel) : Algebra PsKernelExpr where
+  nextCursor := fun d => d
   atom := fun e _ => match e with
     | .sort u => .sort (psKernelLevelInstantiateParams u params levels)
     | .const n us => .const n (psKernelInstantiateLevelList us params levels)
@@ -284,7 +290,7 @@ theorem level_fold (e : PsKernelExpr) (d : Nat)
     (params : List PsKernelName) (levels : List PsKernelLevel) :
     fold (levelAlgebra params levels) e d = psKernelExprInstantiateLevelParams e params levels := by
   induction e generalizing d <;>
-    simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+    simp_all [PsKernelSharing.Algebra.nextCursor, PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
       PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, fold, levelAlgebra, psKernelExprInstantiateLevelParams]
 
 end PsKernelSharing
@@ -313,7 +319,7 @@ theorem bvarAt_fold (e : PsKernelExpr) (index depth : Nat) :
     fold (bvarAtAlgebra index) e depth =
       psKernelExprHasLooseBVarAtCore e index depth := by
   induction e generalizing depth <;>
-    simp_all [Algebra.atom, Algebra.unary, Algebra.binary, Algebra.ternary,
+    simp_all [Algebra.nextCursor, Algebra.atom, Algebra.unary, Algebra.binary, Algebra.ternary,
       fold, bvarAtAlgebra, looseAlgebra, psKernelExprHasLooseBVarAtCore]
 
 end PsKernelSharing

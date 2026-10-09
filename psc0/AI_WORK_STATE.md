@@ -1,550 +1,250 @@
-# PSC0 AI work state — active strict SH/1 milestone
+# PSC0 AI work state — strict SH/1 work in progress
 
-Updated: 2026-10-09 18:13:00 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
+Updated: 2026-10-09 18:55 UTC. Evidence times are UTC. Jakarta is UTC+07:00.
 
 ## Read this first
 
-The user authorized the merge and the next strict SH/1 milestone with “ok do it” after the recommendation to merge the qualified checkpoint, finish the enabled strict contract, and defer wholesale refactoring and optional language expansion. The qualified checkpoint has now been merged. **Strict SH/1 implementation is active work, not yet qualified.**
+The user authorized merging the qualified practical checkpoint and continuing the mandatory strict SH/1 work. The practical checkpoint is already merged. Continue the strict branch; do not restart the earlier research or repeat completed baseline qualifications. Merging practical improvements does not enable unrestricted PSC1, and neither typing nor finite execution alone activates strict SH/1.
 
-At 2026-10-09 16:30:26 UTC, main was independently read back at **ed5d00aca0743bde583b45fe7756dd494ac3960f** following an ordinary non-force fast-forward from 37f63c39d4a07189938046c64152bba25d789450. The comparison was ahead 40 / behind 0 with main as merge base. The exact qualified history and source tree were preserved. A new work branch, **psc0/strict-sh1-v1**, was created at ed5d00aca0743bde583b45fe7756dd494ac3960f and read back at 16:32:13 UTC. No strict source changes or new qualifications had been committed at this initial planning checkpoint.
+This current section supersedes stale assignments, pending-run descriptions and completed-scope instructions in the archived work states. The previous complete active state is retained at [history/AI_WORK_STATE_2026-10-09_18-13.md](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-09_18-13.md), exact blob dfa4b108a4a4982e0b7f78357b7de835324edc5e. Its evidence remains true for the revisions it describes. The historical M6/TypeScript 7 section below is preserved byte-for-byte.
 
-This active section and [strict/PLAN.md](docs/selfhost-language/strict/PLAN.md) supersede the archived instructions below that say “main remains untouched,” “do not merge main,” “the task is complete,” or “no work is outstanding.” Those instructions described the previous completed scope. They do not prohibit the merge and strict implementation now explicitly authorized by the user. The archived evidence and limits remain true for their exact revisions.
+## 1. Actual refs and current cloud execution
 
-**Continue the work; do not restart the earlier research, repeat the completed baseline qualifications, or claim that merging enables unrestricted PSC1.** Main contains the practical language improvement, F worker migrations, new-only ps-0.9-r3 grammar and TypeScript 7 migration. The complete strict source/runtime/semantic contract still has distinct obligations.
+- Main was merged by non-force fast-forward at 16:30:26 UTC: 37f63c39d4a07189938046c64152bba25d789450 to **ed5d00aca0743bde583b45fe7756dd494ac3960f**. The exact comparison was ahead 40 / behind 0 with main as merge base. Main's latest readback in this work was ed5d at 18:07 UTC. Do not repeat the completed merge.
+- Work branch: **psc0/strict-sh1-v1**.
+- Current executable source head: **05f37fc04e52bfaed70389291a0fcdeda819f71f**, parent d6b7044258efaa272dcf396ce08b0c10496edcd2, root tree 3ec74ea68131a309f9d3c0b621df057ae42aa643.
+- Exact Actions run: [37971952859](https://github.com/dwijayuda/pskernel/actions/runs/37971952859), compiler job 113960540944, workflow 378853677.
+- At 18:54 UTC, native development step 23 and selected-seed candidate step 24 had PASSED. Step 25, exact current-source C2/C3 qualification, was still in progress. No final compiler or provider success is claimed.
+- A docs-only checkpoint containing this work state, the exact prior archive and conditional review documents may follow 05f. Discover its actual branch head. The reviewed workflow path filter excludes docs and AI_WORK_STATE.md, so this checkpoint does not change the executable inputs or cancel the running qualification.
+- The branch is not merged to main and is not selected as an authoring seed.
+- New origin/evaluation/ingress changes described below are **unattached reviewed candidates**, not part of this running source. Preserve that separation until the current run completes.
 
-## Current checkpoint: runtime comparison correction
+Running job logs were unavailable through the connector while the job was active. Read jobs/run status, then fetch completed job logs and artifacts. Do not rerun the workflow speculatively or cancel it to mix in newer source.
 
-Updated evidence: 2026-10-09 18:13 UTC. This section supersedes earlier pending-run and assignment notes below.
+## 2. Persistent user decisions and execution rules
 
-Main was freshly read at ed5d00aca0743bde583b45fe7756dd494ac3960f at 18:07 UTC. The strict branch was d6b7044258efaa272dcf396ce08b0c10496edcd2. Main contains the previously qualified practical language/new-only grammar/TS7 checkpoint; none of the strict implementation candidates is merged or selected as a seed.
+1. Use GitHub MCP/connector for repository reads/writes. Execute repository code, builds and tests only in GitHub Actions. No local files, clone, shell, browser, DesktopCommander, local compilers or test execution. Pure in-memory text/JSON transformations and evidence hashing are allowed.
+2. Root alone creates commits or changes refs. Agents may create unattached immutable blobs and guarded manifests. Verify exact base blobs and fresh heads, preserve ancestry/concurrent work, and use expected-head leases with force:false.
+3. Keep Lean 4.34.0, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b; Node 22.23.3; TypeScript 7.0.2. TS5/TS6 are retired from current development/recovery. Historical producer metadata does not authorize running an old compiler.
+4. Keep current .ps grammar **ps-0.9-r3/new-only/bounded-selfhost-subset**. No old grammar compatibility switch.
+5. Keep handwritten PSC1-compatible .lean as authoring authority, parsed by PSC0's own frontend. No authority switch to generated .ps.
+6. Keep selected R and its authenticated manifest/recovery policy. Do not promote F or any strict candidate merely because compilation or conformance passes.
+7. No kernel, provider, definitional-equality, cache-algorithm or existing metatheory changes. The frozen provider remains an independent exact-stream admission consumer.
+8. Complete existing mandatory language/runtime obligations first. Defer bulk refactoring, optional scalars/backends, general do, omitted lambda domains, nested patterns, source-authority changes and seed promotion.
+9. Preserve explicit resource refusals, truthful spans/origins, immutable source state, first errors, exact function groups and public source calling contracts.
+10. Review related implementation classes before one coherent cloud qualification. Avoid a speculative repeated test/fix loop. Extend existing small fixtures and reuse existing source/reference calls where possible.
+11. Keep strictSh1Qualified and semanticContractQualified false until every required obligation has an explicit defensible disposition and its required evidence. Provider acceptance, original-IR typing, finite observations and compiler fixed points are different claims.
 
-The third exact-source run, [37967710379](https://github.com/dwijayuda/pskernel/actions/runs/37967710379), source d6b704, compiler job 113946142567, advanced beyond the earlier source-form failures:
+## 3. Current implemented boundary and the running correction
 
-- Native atomic source compilation accepted all 64 modules, 1,178,731 source bytes and 149 imports.
-- The exact original IR passed complete checking: 60,937 expressions, 777,667 visited steps, zero findings. The target traversal accepted 1,572,007 visits.
-- Generated N1 source conformance passed 2 acceptances, 33 refusals and 2 host carrier refusals. Target conformance passed 9 acceptances and 20 refusals.
-- The pinned native Lean reference produced all 186 runtime observations. The generated runtime fixture then failed TypeScript 7 compilation with eleven TS2367 disjoint-literal comparison diagnostics. Runtime observation comparison, C1/C2/C3 qualification and the provider job were not reached.
+The strict branch already contains the atomic raw-source path:
 
-The exact decoded log SHA-256 is a29f53b59ad41bb4621ea63d0711333e5e7dbf86777d90905dbbcebafeecef6e (334689 characters). Artifact 11634467384 has digest 09c421c7b7899bee5001ef2fd0b5bc42735478bb0ccc30743d18d8c323fa2118. The native source receipt is retained at strict/attempts/d6b7044258efaa272dcf396ce08b0c10496edcd2/native-source.json under docs/selfhost-language. Its exact JSON-plus-newline bytes independently match the native IR evidence hash 4002227af1aa5667d75006cb72407cead865195e16583d8be47b00eff906ccbf.
+ordered named sources -> real parser -> bounded exhaustive source policy -> one preparation -> actual original IR -> complete typing -> target admission -> emission of that same IR.
 
-This follow-up contains the reviewed correction: six BackendTs/Expr comparison templates widen operands to their checked TypeScript primitive types (bigint, boolean or string). Each expression still occurs once, in the same order, with no runtime conversion. The unchanged 45-operation/186-reference-observation fixture remains intact. Six additional installed Nat.beq examples enter through raw Lean and new-only PS, require identical TS/admission bytes, and execute one additional small TS7 compilation. The binder authenticates both raw sources, both actual source receipts and the shared TS/JS/admission files for each N1/C1/C2/C3 compiler. It does not execute or recheck them.
+The source-owned API accepts no externally supplied prepared/IR/report authority token. Actual parsed modules, prepared data, original IR and reports are retained. Source conformance is 2 accepted / 33 refused / 2 Unicode carrier refusals. Target conformance is 9 accepted / 20 refused. Target admission protects actual emitted identifiers, private names, globals, parameter groups and conservative initialization order; it does not prove source erasure.
 
-Reviewed immutable inputs: emitter 9628e3c9def09c487abb5b8859a79c7be735acf9; runtime gate 8838155fb80ef28f7bf5c3916c207c6c94451634; root evidence binder 8c8a781012871b1f0f748ed46921287efab8e046. Agent manifest cba72f5f9a5730d263bf229034c6cd29cac47e4f retains exact reversible edits and independent reviews. The committed runtime-comparison-correction.json adds this integration and failed-run context. Discover the resulting source commit and its Actions run from the branch. The follow-up is not qualified merely because it is committed.
+The enabled runtime contract has six primitive types, Array, 45 operations and 186 native reference observations, plus eight bounds refusals, nine operand observations, five malformed-carrier cases and two text-position families. Array bounds checks preserve evaluation order and check bigint indices before Number conversion. They do not recover erased proof provenance.
 
-### Separate reviewed origin and Nat drafts: continue after the immediate checkpoint
+The running 05f correction widens six comparison templates to their already checked primitive TypeScript types: Nat equality/inequality, Int equality, Bool equality/inequality and String equality. It adds no runtime conversion or extra operand evaluation. Six raw Nat.beq declarations enter through both Lean and current PS; their TS and admissions must agree, then one shared tiny TS7 compile executes fixed expected Bool results.
 
-Keep these out of the immediate runtime comparison qualification. The reviewed origin module metadata and owned-environment reuse integration are now available as:
+Exact current correction blobs:
 
-| File group | Candidate blobs |
+| File | Blob |
 | --- | --- |
-| Elab recursion/declarations | c403bd879e439b7b6e88303df430890352a14115 / a388d013dbf6c9270ffa91997512f672da6aabff |
-| Compiler.Api and its existing source guards | f31d88f0172122d4cf62d62f35f372fe89581c18 / 3957a932618c1b61ffc45d9d8924b32c90c7b5e4 / 495012a236a1bb3a5626a826e22a4ff1dab99efc |
-| Compiler.Sh1 / BackendTs.Sh1 | a947a4058e3d91a02d4f8120a3d86556100c8555 / 1026e3a9d1f89432d9a94d9cd098900f6e4d8b53 |
-| Initial host observation draft, still being completed | ea946c3f3d1331316544bb0c412a2e6ede7324e7 |
-| Origin design | 124c5155e445bf2f1800b8a32a47b4504bf64020; manifest b65d43687f3eecae05749078d5c26b96f7f065bd |
-| Independently reviewed Nat major demand repair | Erasure/Expr 3153b38e9a85e00932cac7cad59440dede218899 against 28e14f991df68c4a7d49f09120a42c85c919d6a8 |
+| BackendTs/Expr.lean | 9628e3c9def09c487abb5b8859a79c7be735acf9 |
+| sh1-strict-runtime-conformance.mjs | 8838155fb80ef28f7bf5c3916c207c6c94451634 |
+| sh1-strict-evidence.mjs | 8c8a781012871b1f0f748ed46921287efab8e046 |
+| strict/runtime-comparison-correction.json | b080891c021aa58909b8d318e4bbdc3eefd85d7d |
 
-Origins associate actual source declarations, successful normalization plans, worker syntax and actual ordered Core members. The source-owned path retains one actual final environment and canonical admission encoding: three admission encodings become one, and the redundant environment rebuild is removed. Arbitrary externally supplied prepared APIs retain validation/reconstruction. This is not a cache protocol change or a transferable authority token.
+The six equality observations are equal, disjoint, reversed, zero, a value above 2^53 and a computed addition. The binder reads actual raw-source files, both atomic receipts and shared TS/JS/admission products for N1/C1/C2/C3; it does not execute or recheck them.
 
-The current origin_host_native agent owns completing/reviewing sh1-strict-source.mjs, native StrictSourceCompile.lean serialization/error attribution and small sh1-capabilities.mjs assertions that reuse the existing positive/negative calls. Root owns the evidence binder, qualification integration and docs. The current runtime_comparison_finish agent audits general runtime laws; its regression_review peer prepares the separate Nat demand regression. Reassign by scope if these agents are no longer available.
+Other entry points remain scoped: sh1-iterate.mjs still uses the admission-ready cached prefix/raw emitter route with strict=false. Adding the strict atomic API does not silently change every compiler entry point or cache protocol.
 
-Nat repair binds a computed major once in IR and reserves only its emitted output name before erasing minors. It preserves original variable/literal and non-Nat output. No Core fvar is invented. The new explicit freshness refusal may occur earlier for inconsistent fabricated name-index/count inputs; preserve the error-order claim only for consistent compiler-owned scopes. Callback demand examples are host probes, not a new admitted effect/FFI feature.
+## 4. Retained attempts before the running source
 
-All strict/general semantic flags remain false. Finish actual origin/normalization/erasure/backend obligations; do not infer them from typing, a finite runtime pass, provider acceptance or fixed-point equality. Continue with exact source review and coherent cloud gates. Preserve R, new-only grammar, TS7 and all frozen kernel/provider/defeq/cache/metatheory boundaries.
+See [qualification-attempts.json](docs/selfhost-language/strict/qualification-attempts.json) for exact records.
 
-## Latest executable checkpoint and immediate continuation
-
-The first implementation commit is cf35b6b2a3328a065721ef48cf633a44e6122362. Its first corrected source checkpoint is ce3c4f55f99fd11c7a61d5449e67bc49d58658db, parent cf35. Neither source is qualified and neither is merged to main. The selected seed remains R.
-
-Two exact-source attempts are retained in [qualification-attempts.json](docs/selfhost-language/strict/qualification-attempts.json):
-
-1. cf35, run 37964798240, job 113936354535: the owned parser refused a leading-dot constructor term in Ps.BackendTs.Sh1Target. Native build and the preceding gates passed. The class correction qualified 116 constructor terms while preserving all 58 supported shorthand patterns. It also reserved the actual 43 intrinsic symbol names and the separate fixed String.Pos.Raw type identity, and corrected source fixture grammar. Source conformance is 2 accepted / 33 refused / 2 host carrier refusals.
-2. ce3c, run 37966777236, job 113942981936: the module now parsed, but the owned elaborator refused matchExpectedType. Native build and preceding gates again passed. Inspection of psElabLet and psElabMatch in actual Term.lean blob ff7896a864a291ffbf1eb3aa70d6004ac86d1112 identifies the unannotated match-valued initializer of hasParameters in psSh1TargetStep. The follow-up changes exactly one binding to `let hasParameters : Bool := match item.parameters with`. All 30 target definitions, 41 matches and 21 lets were reviewed for that class; the other 40 matches inherit declared/branch result types. Root independently checked the actual expected-type control flow and exact one-line correction.
-
-Both failures occur at the bounded native development gate, before native atomic emission, new strict source/target/runtime conformance and C1/C2/C3 generation. The provider jobs were skipped. Do not claim that either run exercised the new runtime reference. The second decoded job log has 253714 characters and SHA-256 0c0b3eec6e86d86a27ca17bcc1b3f81c76a64ff0a542f7a32df4013f6c5ee154. Its exact artifact is 11633887132, digest 1ff5d7436936b87407658f26994eb90bf42ef12469b45f6a4766e24753f6cd20.
-
-This follow-up commit is a reviewed source correction awaiting its own exact-source cloud result. Discover its actual commit and Actions run from the branch; do not infer a pass from the commit marker. Do not mix the separate origin/Nat drafts into this qualification. On failure, retain the exact attempt and diagnose the demonstrated class before changing code or gates. On success, read the complete receipts and separate provider result, bind their actual bytes/hashes, and integrate only the qualified milestone under a fresh expected-head lease. Strict SH/1 and semantic qualification remain false until the still-open mandatory obligations are discharged.
-
-### Next origin-retention slice (unattached, not in this source checkpoint)
-
-The reviewed three-file manifest b65d43687f3eecae05749078d5c26b96f7f065bd contains Recursion.lean c403bd879e439b7b6e88303df430890352a14115, Declaration.lean a388d013dbf6c9270ffa91997512f672da6aabff, and new strict/ORIGIN_RETENTION.md 124c5155e445bf2f1800b8a32a47b4504bf64020. These record actual source-local indices/spans, actual output batch member indices/names/roles, and the successful normalization plan plus already-constructed worker syntax. Independent review found no requested source correction. They contain no per-origin environment/context snapshots, do not repeat elaboration, and do not prove expression-level source-to-Core or Core-to-IR correspondence.
-
-Migration_inventory now owns the dependent Compiler.Api companions and existing declaration-worker source-guard relocation. Approved new APIs are PsCompilerPreparationOutput(prepared, environment, admissions), psCompilerPrepareElaboratedWithOutput, psCompilerPreparationFinishWithOutput, and PsCompilerPreparationStepWithOriginsResult(state, origins) returned by psCompilerPreparationStepParsedWithOrigins. The origin step preserves PsElabOriginError; old public APIs preserve results/errors by projection. Retain one actual final preparation environment and one canonical admission encoding with the existing single appended newline. Arbitrary externally supplied prepared-result APIs must still validate and reconstruct their environment. Root owns Compiler.Sh1, BackendTs.Sh1, host/receipt integration and qualification. No cache protocol or algorithm change is authorized by this optimization.
-
-The existing check-elab-declarations-selfhost-source-syntax.mjs guard must inspect the actual richer recursive worker while retaining old signature/projection and forbidden-form checks; do not disable or weaken it.
-
-Grammar_adoption_audit separately owns a source-reviewed Nat demand repair candidate in Erasure/Expr.lean, base 28e14f991df68c4a7d49f09120a42c85c919d6a8. A computed Nat match major is currently duplicated by the zero test and predecessor expression. Proposed repair evaluates it once through a fresh IR let, reserves its output name in the existing freshness index before erasing branches, and preserves original variable/literal output and all Core-local acceptance rules. This draft still needs final review and qualification. Its callback demand probes are finite host observations, not new source-language effects or a general theorem.
-
-These current assignments supersede older agent ownership notes below. Finish and qualify a coherent slice before optional language expansion, mass refactoring, seed promotion or source-authority changes.
-
-## Persistent decisions and execution rules
-
-- Use GitHub connector/MCP for repository reads and writes. Run repository code, builds and tests only in GitHub Actions. No local clone, files, shell, test/build execution, browser or DesktopCommander. Pure in-memory text/JSON transformations and evidence hashing are permitted.
-- Work on psc0/strict-sh1-v1. Root owns commits and branch updates. Delegate independent research or nonoverlapping draft blobs; agents must not move refs.
-- Read fresh heads, check exact base blobs and preserve ancestry/concurrent work. Use expected-head leases and force:false. The earlier main merge is complete; do not repeat it.
-- Keep Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2. TS5/TS6 and old current .ps syntax are retired. Immutable producer metadata and historic receipts are evidence, not execution permissions.
-- Keep selected R and its manifest/recovery policy unchanged. Do not select F or any strict candidate as a seed merely because compilation or conformance passes.
-- No kernel, provider, defeq, cache-algorithm or existing metatheory changes. The frozen provider is an independent admission consumer.
-- Keep handwritten .lean authoritative. Current .ps is ps-0.9-r3/new-only/bounded-selfhost-subset, not full Standard or PSCV.
-- Implement the existing mandatory language/runtime contract first. No bulk rewrite of the 226 historical source locators, additional scalar families, general do, omitted lambda types, nested patterns, new backends or source-authority switch.
-- Preserve explicit fuel/resource refusals, source spans, public signatures, recursion provenance, first errors, immutable state and exact function groups.
-- Review related obligations before running cloud gates. Do not use a speculative test/fix loop. Use a coherent native preflight and then one exact-source full qualification when its dependencies are ready.
-- Keep strictSh1Qualified false until every enabled mandatory obligation has an explicit defensible disposition and its required evidence. Type checking, provider acceptance, fixed-point equality and finite examples have different meanings.
-
-## Verified baseline to preserve
-
-The completed publication is ed5d00aca0743bde583b45fe7756dd494ac3960f, root tree ef2eca27b3b73788e0d80ed353094628c3b60b7a, PSC0 tree 8f65344a97c043e8b0f6ed206552c7958653468c. Its parent is 4c2cfec187ec0b48d1dfbc091066b9f1dd763215. The active strict branch starts from this exact tree.
-
-| Scope | Exact source and successful cloud evidence | Meaning |
+| Source / run | Actual result | Reviewed class correction |
 | --- | --- | --- |
-| Qualified F compiler and runtime | fcd875c8f38db4b0524090bd10c7c2fd5024053d; run 37947341800; compiler job 113876931430; provider job 113896228512 | 87 R/F behavior cases; 12 public Core/IR signatures; native/current IR accepted complete with zero findings; C2/C3 all four products equal; native TS/JS parity; new-only grammar and separate provider acceptance |
-| Selected R native TS7-only recovery | Same runner source fcd875c8f38db4b0524090bd10c7c2fd5024053d; run 37947341899; job 113876930974 | Cold recovery of all four exact R products without TS5, generated-parent execution, restored native/seed caches or downloaded compiler artifacts |
-| Repository-root TS7 migration | 9d150afbec1feda8c97058aa56aa5ab92347d96d; run 37951869293; job 113892421469 | Seven commands and eleven adapter obligations passed; all 21 current pins use 7.0.2; root scope is separate from older optional bootstrap/targets |
-| Main integration | 37f63c39d4a07189938046c64152bba25d789450 → ed5d00aca0743bde583b45fe7756dd494ac3960f at 16:30:26 UTC | Authorized normal fast-forward, ahead 40 / behind 0, no source or history rewrite |
+| cf35b6b2a3328a065721ef48cf633a44e6122362 / 37964798240 | Native build/prior gates passed; owned parser refused leading-dot constructor terms in Sh1Target before N1 emission | Qualified 116 constructor terms, preserving 58 shorthand patterns |
+| ce3c4f55f99fd11c7a61d5449e67bc49d58658db / 37966777236 | Module parsed; owned elaborator refused matchExpectedType | Added Bool annotation to the sole inference-only match initializer; audited all 41 matches |
+| d6b7044258efaa272dcf396ce08b0c10496edcd2 / 37967710379 | N1 raw-source/IR/target and source/target gates passed; native 186 observations produced; TS7 runtime fixture failed 11 TS2367 comparisons | Current six-template primitive widening plus raw-source equality fixture |
 
-Selected R source: fe2560aba0f347b1caf8d000d371464642d44f23. Selected seed identity: 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225. Selected manifest blob: 44a05964c49000478c282afc013c84fca8c2de65; SHA-256 7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694. Recovery policy blob: fd75854159544e431497bc7dee8482bea727b5e4. Do not alter these as a side effect of strict work.
+The third attempt accepted 64 modules, 1,178,731 source bytes and 149 imports. Its original IR had 60,937 expressions, 777,667 visits, zero findings and complete traversal; target traversal accepted 1,572,007 visits. Runtime comparison, C1/C2/C3 and provider were not reached in that attempt.
 
-Frozen provider source: 963030dc2d154008fccc82e7c8ed29331f138799; binary SHA-256 88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec; Lean commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b. Its separate draft PR #84 diverges from the merged baseline by 14 provider-lane commits versus 40 checkpoint-lane commits. Do not blindly merge or reimplement that lane.
+Exact third-attempt log SHA-256: a29f53b59ad41bb4621ea63d0711333e5e7dbf86777d90905dbbcebafeecef6e, 334689 characters. Artifact 11634467384 digest: 09c421c7b7899bee5001ef2fd0b5bc42735478bb0ccc30743d18d8c323fa2118. The actual native source receipt is retained at strict/attempts/d6b7044258efaa272dcf396ce08b0c10496edcd2/native-source.json; blob b2cc2580e82b9f43c2f96f70cd6abc2a3741624f, exact SHA-256 4002227af1aa5667d75006cb72407cead865195e16583d8be47b00eff906ccbf. It was reconstructed from the actual JSON marker plus writer newline and independently matched the native IR receipt's file hash.
 
-The old 61-module count belongs to R/F receipts. New portable strict modules naturally change the current closure count; discover it from actual imports rather than hard-coding 61.
+## 5. Next reviewed origin and preparation-reuse slice
 
-## Current implementation assignments and decisions
+These changes are not in 05f. Exact committed bases must be checked before integration.
 
-### Portable source boundary
-
-Agent projection_repair owns new Compiler/Sh1.lean and BackendTs/Sh1.lean, extends BackendTs/Checked.lean, and adds its import to BackendTs/Compiler.lean. Root owns host and qualification integration.
-
-The route is atomic: raw ordered named modules → the real lexer/parser → source/import/capability validation → existing ordered preparation → original IR → accepted complete portable checker report → emission of that same IR. Reuse the resulting prepared object, IR and report; do not prepare the full compiler again merely to collect evidence.
-
-Validate nonempty unique module names, the twelve allowed compiler namespaces, and dependencies present earlier in the supplied raw bundle before existing preparation discards imports. Check declaration/term forms through an explicit bounded AST traversal. Reuse current elaboration and structural-recursion validation, rather than introducing a second type engine.
-
-The Lean parser immediately lowers do to synthetic compilerPure/compilerBind calls. Its source-policy check must distinguish those expansions from ordinary helper calls by the retained do token byte position and synthetic reference span. Do not ban an ordinary identifier, field or explicit helper call by spelling alone. Current .ps already refuses do.
-
-The checked-emission extension should return the exact report with the emitted text. An accepted Boolean or arbitrary caller-supplied prepared object is not strict source provenance. R lacks the new source API; R builds C1 through the qualified bootstrap route, and current N1/C1/C2/C3 must execute their new APIs.
-
-### Enabled runtime contract
-
-Agent grammar_adoption_audit owns original-ir-carrier.mjs, only the arrayGet/arraySet cases of BackendTs/Expr.lean, and new strict runtime contract/reference/conformance files. Root owns package/workflow/qualifier integration.
-
-The enabled runtime has six primitive types, arity-one Array and 45 intrinsic operations. Optional fixed-width, floating and word-sized operations stay refused.
-
-Two concrete gaps are being repaired:
-1. A JavaScript primitive string may contain lone UTF-16 surrogates although Lean String represents valid Unicode scalar sequences. Reject malformed strings at carrier boundaries, including names, without normalization. Bound the additional scan explicitly.
-2. Proof-required arrayGet/arraySet currently reach raw JavaScript indexing. Invalid indices must refuse explicitly before conversion; arguments must still evaluate once in source order; in-bounds Unit elements remain legal. This defensive check does not recover an erased bounds proof.
-
-Pinned Lean 4.34.0 raw String.Pos behavior is the reference for String get/next/extract. Existing string-cache algorithms are not being changed. Bool.and/or demand order and emitter ordering require source-grounded review; do not silently make short-circuit operations eager.
-
-Native/generated finite operation conformance is regression evidence. It is not a general source/IR/JS preservation theorem.
-
-### Correspondence and assurance
-
-Agent migration_inventory owns strict/CORRESPONDENCE.md, correspondence-obligations.json and the new BackendTs/Sh1Target.lean portable name/initializer admission module. The target check must run after IR typing and before emission, with explicit bounded traversal and refusal on exhaustion. Root owns the overall ledger and assurance status.
-
-The remaining mandatory families include normalization and source origins, binder/proof/type erasure, record/constructor layouts, generic/application groups, capture/let scope, initialization order, target names/freshness, generator/trampoline calls, eta simplification, count loops and tail loops. Record the exact assurance method for each: executable admission, per-compilation relation check, rule-level preservation argument, finite conformance, or actual formal lemma.
-
-Existing sibling proofs establish only narrow cursor/omission/reflexivity examples; the sibling erasure contract explicitly leaves global preservation unproved. Do not treat those as compiler-wide evidence. Ps.Meta.Reduce is not a complete runtime semantics oracle and must remain unchanged.
-
-Static code review also identified that arbitrary typed IR can refer to a later eager global constant and can contain names beyond the emitter's valid/fresh-name domain. These are boundary obligations, not claims of an executed defect in the qualified compiler closure. Prefer source-owned provenance and a finite portable admission rule over broad backend rewriting.
-
-## Current qualification status and reviewed correction
-
-The first source attempt **cf35b6b2a3328a065721ef48cf633a44e6122362** ran in [Actions run 37964798240](https://github.com/dwijayuda/pskernel/actions/runs/37964798240), compiler job 113936354535. The job failed at native strict full-source preparation; provider job 113938374217 was skipped. [strict/qualification-attempts.json](docs/selfhost-language/strict/qualification-attempts.json) retains the exact refusal, successful earlier steps, artifact identity and decoded primary-log hash. Do not erase or relabel that attempt.
-
-The native Lean build, native regression targets, host/source/import checks and authenticated R behavior/ABI preflight passed. The owned source frontend then refused Ps.BackendTs.Sh1Target at 283:14: expected 'term', got '.'. N1 generation and current source/target/runtime conformance did not complete, and C1/C2/C3 qualification was not reached.
-
-The correction has two source changes and two host-gate changes:
-
-- Sh1Target.lean qualifies all 116 unsupported constructor expressions (98 task and 18 name-role constructors). All 58 supported shorthand patterns and every other byte, argument, task order, policy, diagnostic and budget are preserved. Root and the target owner independently reconstructed the exact reversible edit.
-- Compiler/Sh1.lean reserves all 43 exact operation/adapter names recognized before ordinary erasure dispatch. Thirty-eight already have prelude duplicate protection; Bool.and, Bool.or, Bool.not, Array.getInternal and Array.set were absent and could acquire intrinsic meaning despite an unrelated authored body. The separate absent String.Pos.Raw type identity is also reserved because runtime type erasure maps it to Nat by name. This does not install those absent operations or enable optional scalars.
-- The source gate now has 33 portable/compiler refusals: the original 21, six Lean reserved-name refusals and six current PS dotted-declaration grammar refusals. Lean name-policy errors retain the exact name span. PS allows only a simple declared name and therefore refuses the dotted names earlier as source-compiler; do not claim it exercised the name policy.
-- The positive PS structure fixture now uses the required where-brace form. The evidence binder requires the actual 33-case source receipts. Two positive bundles and two host carrier refusals remain separate.
-
-The concise source identity argument is [strict/PRIMITIVE_IDENTITY.md](docs/selfhost-language/strict/PRIMITIVE_IDENTITY.md). The exact corrective path/blob manifest is [strict/source-boundary-correction.json](docs/selfhost-language/strict/source-boundary-correction.json). The original implementation-checkpoint.json remains a pinned inventory of the first cf35 candidate.
-
-The strict branch has no successful current-source qualification yet. The next correction commit must receive one coordinated native/current fixed-point/provider run. Source review is not a substitute for that run. Keep strictSh1Qualified, semanticContractQualified and candidate/provider qualification false until their respective actual evidence exists.
-
-### Next origin slice — unattached, do not confuse with the correction
-
-A separate origin-retention candidate is being prepared for after this checkpoint qualifies. Its proposed APIs retain actual source-batch/member ordinals, Core names, source spans, compact recursion plans and actual normalized worker syntax at the existing construction sites. Errors retain their original PsElabError plus a truthful declaration/planning/worker/wrapper/insertion phase. No origin is inferred from a printed worker name and no environment/context snapshot is retained per origin.
-
-Proposed companion APIs are psElabDeclarationBatchWithOrigins and psElabModuleWithOrigins. Root will compose them into the source-owned preparation result, retaining the actual final environment and one successful canonical-admission encoding for reuse. Arbitrary Prepared APIs must keep validating/rebuilding as before. The existing preparation cache protocol and algorithms stay unchanged.
-
-The candidate Recursion/Declaration blobs and review are not part of this source correction. They need their own coherent integration and evidence, including the existing declaration-worker source guard following the richer fold. Retention can close a scoped declaration/normalized-syntax origin obligation; it cannot discharge binding substitution, erased proof independence or general preservation.
-
-## Integrated strict implementation checkpoint
-
-Updated: 2026-10-09 17:12:15 UTC. The first integrated source checkpoint, cf35b6b2a3328a065721ef48cf633a44e6122362, follows planning commit bcf27b6595fb1a7ac03f2ea5c1b1cf2e3f748dff. The inventory below describes that original candidate; the correction and actual failed run are recorded above. Its exact changed-path/blob inventory is [strict/implementation-checkpoint.json](docs/selfhost-language/strict/implementation-checkpoint.json). At the time the original source checkpoint was written, no strict candidate execution had occurred. Its later actual failure is recorded above; none of the intended assertions below is a pass.
-
-| Part | Implemented candidate | Required cloud evidence |
+| File | Expected committed base | Reviewed candidate |
 | --- | --- | --- |
-| Portable source | Compiler/Sh1.lean checks the actual ordered raw bundle, imports, all five declarations and thirteen term forms, do origins and explicit budgets | Current full closure and two Lean/PS positive source bundles; twenty-one portable refusals and two malformed UTF-16 ingress refusals per current executing compiler |
-| Atomic backend | BackendTs/Sh1.lean owns source preparation, one erasure, one original-IR check, target admission and emission of that same IR | Native executable and C1→C2/C2→C3 retain the exact objects and reports; no second full preparation to collect evidence |
-| Target policy | BackendTs/Sh1Target.lean checks binding/property names, actual private helpers, generic/constructor capture and conservative initialization order, with explicit work/depth refusals | T01–T29: nine accepted and twenty refused cases; only deep target stress is explicitly not IR-typed first |
-| Runtime | Canonical UTF-16 carrier rejection; only arrayGet/arraySet production templates changed, with bounds checked before Number conversion and unchanged operand order | Forty-five operations, 186 independent pinned Lean observations, eight defensive bounds refusals, nine evaluation-order probes, five malformed-carrier refusals and two text-position families |
-| Host integration | StrictSourceCompile.lean plus strict source/target/runtime scripts; sh1-qualify.mjs uses the atomic API for current generation and preserves the exact selected-R-only bootstrap exception | One coordinated native preflight then C1/C2/C3 qualification at the same source, plus separate frozen-provider receipt |
-| Evidence | sh1-strict-evidence.mjs reads and hashes the actual reference/conformance/atomic receipt bytes and emitted compiler products | All N1/C1/C2/C3 receipt identities and claims must validate before the final source/target/finite-runtime checkpoint is recorded |
-| Semantic inventory | CORRESPONDENCE.md and correspondence-obligations.json enumerate nine erasure, four normalization, eleven expression and nine target/runtime rules | All 33 general preservation obligations remain open; inventory and finite conformance do not discharge them |
+| packages/elab/src/Ps/Elab/Recursion.lean | bba4a42a13c29ed5b41761e883e8da0b81a34192 | c403bd879e439b7b6e88303df430890352a14115 |
+| packages/elab/src/Ps/Elab/Declaration.lean | 8a8005a2ae0aa6564e075e3b224b432295c6bf05 | a388d013dbf6c9270ffa91997512f672da6aabff |
+| packages/compiler/src/Ps/Compiler/Api.lean | 13614bc6eb279c93d4cbcbd8815b671beae38199 | f31d88f0172122d4cf62d62f35f372fe89581c18 |
+| scripts/check-elab-declarations-selfhost-source-syntax.mjs | 68d229c41684f40011b9687217c41730f2d8806b | 3957a932618c1b61ffc45d9d8924b32c90c7b5e4 |
+| scripts/check-modular-preparation-source.mjs | e1b31140b366c90c5a4443502723644051e332a3 | 495012a236a1bb3a5626a826e22a4ff1dab99efc |
+| packages/compiler/src/Ps/Compiler/Sh1.lean | 9aaa3a72bbfe03ed3fc4918527e2ca200537d61f | a947a4058e3d91a02d4f8120a3d86556100c8555 |
+| packages/backend-ts/src/Ps/BackendTs/Sh1.lean | 63be15cf691cd4689e566ccd1bcab771215e7700 | 1026e3a9d1f89432d9a94d9cd098900f6e4d8b53 |
+| scripts/StrictSourceCompile.lean | 6f3b14e0110548f530a2ec6139105efbeb2e203d | c741759094060bcccdbeb67d24bfb30dfe864b0e |
+| scripts/sh1-capabilities.mjs | dd23adb72d33c0df14a88ec846ab6c705d5813b2 | 8d87080352509dc936614d560aa68ded14fc36e8 |
+| strict/ORIGIN_RETENTION.md under docs/selfhost-language | absent | 124c5155e445bf2f1800b8a32a47b4504bf64020 |
 
-The source module identity is a structured List String bundle key. Equality does not normalize dots or slashes. The host maps actual package source paths to canonical segment lists and hashes each raw source; the portable API is not a general filesystem resolver.
+The host is now superseded by the final ingress candidate in section 6. Do not use older ea946/9fd/37d/cf1 drafts.
 
-The runtime reference imports pinned Lean directly, uses bounded allocation capacity 17, and reads String.Pos.Raw.byteIdx. It runs once; subsequent current compilers reuse its authenticated observations. Runtime fixtures use one checked-emission call and its returned report, then one TS7 compilation per executing compiler. The evidence binder only reads existing files; it does not re-run a compiler or type check.
+Elab origin manifest: b65d43687f3eecae05749078d5c26b96f7f065bd. Final origin host/native/capability review manifest: 6dc338dd19c2a14c088a4a7e9f06fd3246cfdfd6, whose host d01714cc is then extended by the ingress manifest below.
 
-Native full compilation runs psc1_sh1_compile. The existing psc1 remains a separate capability reference. Native original-IR conformance reuses the full compiler report and runs psc1_ir_check_tests with no arguments for its small fixtures only. The selected historical R lacks new APIs and is allowed only at its exact authenticated R→C1 boundary. Current C1/C2/C3 have no API-absence fallback.
+Key API facts:
 
-A qualified checkpoint would establish the source boundary, target admission and listed finite runtime observations for its exact revision. It would not establish source→Core→IR→JS general preservation, strict SH/1 activation, a new authoring seed, or a handwritten .ps source migration.
+- PsElabBatchOrigin retains actual source index/name/span, actual ordered Core member names/indices/roles, and optional actual successful normalization plan plus already constructed worker binders/type/value.
+- Seven roles: sourceDeclaration, inductiveType, structureType, constructor, recursor, normalizedWorker, publicWrapper.
+- Five diagnostic phases: stableDeclaration, normalizationPlanning, normalizedWorker, publicWrapper, declarationInsertion.
+- A normalized batch is actual worker then public wrapper. A structure batch is actual type/constructor/recursor; no invented projection declarations.
+- generalizedIds may contain duplicates, because the real scanner concatenates changed-argument identities across recursive calls. Preserve their order.
+- Core name components preserve string versus arbitrary Nat numeric components; do not stringify ambiguous display names or convert numeric components through Number.
+- PsCompilerPreparationOutput contains prepared/environment/admissions. The source-owned path retains the actual final environment and the one canonical admission encoding.
+- Three admission encodings become one; one redundant environment reconstruction becomes zero. Raw externally supplied prepared APIs retain validation/reconstruction. This is not a cache change or transferable authority token.
+- Existing public preparation APIs preserve their signatures/results/errors by projection. Existing syntax guards inspect the actual richer worker and retain old signature/projection/forbidden-form checks.
 
-### Concrete next actions after this source commit
+The host observes retained objects only after the same atomic emission. Origin receipts cover prepared source Core members, excluding runtime prelude and admission auxiliaries. Never equate that Core count with the total original-IR declaration count.
 
-1. Observe the source commit's single PSC0 SH1 workflow. The [sh1-qualify] commit marker selects native preflight and full qualification in one run; native failure stops downstream generation.
-2. Record the exact source/run/job identities and genuine failure or success. If a demonstrated defect exists, fix its cause after source review; retain the failed evidence. Do not weaken checks or repeat already sufficient qualification for unrelated edits.
-3. On success, retain actual source/target/runtime evidence bindings, native/C2 product parity, C2/C3 all four products, existing raw grammar and worker ABI/behavior gates, and independent exact-stream provider decisions. Keep selected R unchanged.
-4. Continue the dependency-ordered correspondence work: retain genuine normalization/binder/layout witnesses, define one value/environment/evaluation relation, then discharge the enabled rules and optimization side conditions. No general row is closed by the finite pass.
-5. Resolve the concrete Nat-major double-demand obligation and the mandatory regular-data/empty-layout scope explicitly. Current refusal and absence from the compiler corpus are not semantic proofs.
-6. Update this active handoff after each real milestone. Merge only a qualified source checkpoint with its honest limited claims; keep strictSh1Qualified and semanticContractQualified false until the complete mandatory ledger is defensibly closed.
+The two existing capability source calls each assert 35 source declarations, 55 Core declarations and 16 normalization plans, plus exact positions, structure batches and duplicate generalized state IDs. Six existing elaboration refusals now check owner/module/index/phase/span. Review corrected four final-token span expectations: the actual parser span ends before the closing parenthesis in those application fixtures. No extra preparation was added.
 
-## Archive boundary — completed pre-strict checkpoint
+## 6. Final reviewed host input/option snapshot repair
 
-The rest of this file preserves the completed checkpoint and its historical evidence. Its old “current” statements and permissions are archival and subordinate to the active section above. The historical tail beginning “Historical completed M6 and TypeScript 7 result” is retained byte-for-byte: 25,024 UTF-8 bytes, SHA-256 5ec35639aec88f3c12b2b0000771fa7511f0798feb73ee12b111da24cad5c619.
+The same ingress review established two concrete source-derived gaps:
 
-# Archived PSC0 AI work state — qualified baseline
+- Direct option records reached portable Nat/budget operations before host validation.
+- Repeated source/name reads could bind receipt source A to emitted source B. A getter returning the 26-byte literal-7 definition for manifest reads and the same-length literal-9 definition for portable input could retain the same names/spans/byte counts. This is a source-derived counterexample, not an executed miscompile claim.
 
-Updated: 2026-10-09 16:02:49 UTC. All evidence times in this file are UTC. The prior session recorded Asia/Jakarta (UTC+07:00) for user-facing time conversions.
+Final independently reviewed manifest: **4020771505138199353795f9709fb79c065e09f0**.
 
-## Read this first
-
-This is the completed handoff for the authorized dwijayuda/pskernel implementation, qualification and migration work. The user explicitly requested this detailed committed AI_WORK_STATE.md so a new chat can resume from verified facts without drifting. The bounded task is complete. Future chats should read this active section and the current developer guide, preserve the decisions below, and act on the user's next requested change. Do not restart completed research, repeat successful qualifications or treat archived TODOs as current work.
-
-**Current result: all requested source qualification scopes have passed.** F has completed C1/C2/C3, all four fixed-point products, native/final TS and JS parity, the complete 87-case R/F behavior correspondence, all twelve public Core/IR signatures, new-only grammar/runtime gates and separate exact-stream provider acceptance. The TypeScript 7-only native recovery of selected R is independently cold-proven. The separate repository-root TypeScript 7 migration passed all seven commands and all eleven adapter obligations. TypeScript 5 is retired from current development and recovery; immutable old producer metadata stays historical.
-
-**Publication and branch integration are complete.** Commit 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 retains the authenticated evidence, eleven reconciled PSC0 guides, current ledgers and detailed handoff. At 2026-10-09 16:02:49 UTC, all four authorized working/canonical branches were independently read back at that commit after ordinary non-force fast-forwards. This containing documentation-only closeout records those actual writes and preserves every qualified executable and selected-R identity. No source qualification, compiler repair, test, retry, additional research or seed promotion is outstanding. Live branch heads can later advance; re-read them before any future write.
-
-Everything at and below the later heading "Historical completed M6 and TypeScript 7 result" is archival. Some historical subsections contain words such as "Current", "next" or "selected"; those describe their old checkpoints, not today's active instructions. This active section takes precedence.
-
-## User intent and persistent decisions
-
-- Research why self-hosting is constrained, implement a suitable finite language subset and source migration, and make iteration faster and more effective.
-- Create/use working branches for changes. Continue autonomously on already authorized work. Main remains untouched.
-- Use the supplied new .ps grammar only. Do not keep an active old-grammar fallback or add backward compatibility.
-- Retire TypeScript 5 from future development. Current PSC0 compilation, recovery, root workspace compilation and remaining compiler launchers must require TypeScript 7.0.2; do not install TS5/TS6 API fallbacks.
-- Preserve immutable historical source revisions, original producer-version facts, seed identities and receipts. Historical 5.8.3 text is not permission to execute that compiler in today's workflow.
-- Avoid a repeated guess/test/fix loop. Diagnose a demonstrated class, review related obligations together, use cheap preflight, and run the full qualification only at a coherent semantic checkpoint.
-- Keep this file accurate after concrete milestones and before a handoff.
-
-### Execution and scope boundaries
-
-This continuation uses GitHub connector/MCP reads and writes, with actual builds/tests only in GitHub Actions. Do not clone, build, test or execute repository code locally; do not switch to a local shell, browser or DesktopCommander workflow. Pure in-memory text/JSON transformations and evidence hashing are permitted. Git-backed deliverables remain in the repository.
-
-Use fresh branch-head leases for every update, preserve concurrent work and ancestry, and never force-push. Do not change provider/kernel/metatheory/definitional-equality/cache algorithms. The exporter correction below changes a TypeScript declaration only, not process behavior. Do not weaken gates, select F as a seed, merge main, or claim strict SH/1, unrestricted PSC1, full Standard or PSCV.
-
-Pins: Lean 4.34.0, Node 22.23.3, TypeScript 7.0.2. Continue useful work while Actions runs; communicate meaningful progress to the user.
-
-## Branches, exact sources and qualification runs
-
-Read live refs before any future write. The following is the verified publication boundary at 2026-10-09 16:02:49 UTC, not an assertion about an unseen later HEAD. Publication 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 has parent 8d922c3f47f59a8d7285bfdf998791f042b483b9 and tree 2935b38a17157fc214e4a0ec09d99a91469ef522. The parent is the committed handoff checkpoint following qualified root source 9d150afbec1feda8c97058aa56aa5ab92347d96d. The documentation-only closeout containing this file is a descendant of the publication; source qualifications remain pinned to their original commits below.
-
-| Branch or evidence | Verified publication identity | Meaning |
+| File | Expected committed base | Final candidate |
 | --- | --- | --- |
-| psc0/typescript-7-only-v1 | 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 | Combined qualified PSC0/root result and retained evidence; integration complete |
-| psc0/sh1-projection-grammar-v1 | 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 | Fast-forwarded from qualified F source fcd875c8f38db4b0524090bd10c7c2fd5024053d |
-| psc0/sh1-implementation-v1 | 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 | Canonical branch integrated by normal fast-forward from 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a |
-| psc0/typescript-7-v1 | 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 | Earlier TS7 alias integrated by normal fast-forward from the same 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a |
-| main | 37f63c39d4a07189938046c64152bba25d789450 | Re-read unchanged; never updated by this work |
-| Qualified F/PSC0 source | fcd875c8f38db4b0524090bd10c7c2fd5024053d; tree 0bda17a81be9f790fa12a5fc38bd32d36f38f6ae | Immutable source for successful compiler/provider and native cold runs |
-| Qualified root TS7 source | 9d150afbec1feda8c97058aa56aa5ab92347d96d; tree c97468df9855bb7379b49e0771ed5e373e39c8b2 | Immutable source for successful root package/adapter run |
-| Selected R source | fe2560aba0f347b1caf8d000d371464642d44f23 | Fully qualified, explicitly selected authoring compiler; not replaced by F |
+| scripts/sh1-strict-source.mjs | 6fb4e25238d99ad6e408726831454e2b14235092 | 77a85340d94313b7bfebb604ec9f61c53c28c544 |
+| scripts/sh1-strict-source-conformance.mjs | 7e70f4ec75a156c87dc5f1023c451f77b132bc39 | ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f |
 
-### Completed F qualification — no relaunch or repair remains
+The host snapshots all eight option primitives before source traversal and constructs owned option records. Five source limits and IR maxSteps/maxFindings retain their nonnegative safe-integer bigint contract. IR maxTypeSteps remains a nonnegative bigint with no new MAX_SAFE limit. Valid zero budgets remain valid carriers with their existing portable exhaustion diagnostics.
 
-[Run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800), workflow 378853677, attempt 1, completed successfully at source fcd875c8f38db4b0524090bd10c7c2fd5024053d on psc0/sh1-projection-grammar-v1.
+Inputs, fixed lengths, name segments and source strings are captured once into private plain records; every later manifest, portable input, parsed-module comparison and origin readback uses those captures. Existing carrier byte/module limits remain. No arbitrary new declaration-name/origin caps are added.
 
-- Compiler job 113876931430 ran from 14:51:45 to 15:36:17 UTC and succeeded. Required steps 3,6,7,8,9,11,14,17,18,19,20,21,22,23,24,25,28 succeeded; step 26 was skipped, so no F seed was selected.
-- Provider job 113896228512 ran from 15:36:21 to 15:37:18 UTC and succeeded. All eight exact C2/C3 admission roles were accepted, grouped into four distinct streams derived from the actual hashes, using the unchanged provider binary.
-- The run's final conclusion is success; it was last updated at 15:37:19 UTC. No retired successor-recovery job ran. Native cold recovery is the separate successful run listed below.
-- The recorded 75/10/16 native suites passed. The host source/import/session file recorded 27 passing tests, zero failures and zero skips, including the three reusable PS/Lean boundary cases at compiler-log lines 1971, 1977 and 1983. Both N1 and C1 SESSION_CONFORMANCE markers passed.
-- Native and generated checks exercised the current grammar, structural state parameters, exact projections, generic erasure, helper/runtime behavior and refusal boundaries. All 87 worker observations and all 12 complete public Core/ordered-IR signatures were retained, not reduced to summary hashes.
+The gate keeps 2 accepted / 33 refused / 2 Unicode refusals. It adds ingressSnapshots with 14 malformed-option spies, one intercepted mutation/snapshot probe, and captured-source assertions on the same two positive calls. All new spy probes do zero real compiler preparations/checks. The snapshot retains all zero budgets and IR maxTypeSteps 9007199254740992, verifies eight single option reads and one read of each input/name/source component, then stops at the atomic spy.
 
-Exact F source closure: 6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7, 61 raw authoritative Lean modules. The common N1/C1/C2/C3 recipe SHA-256 is 90a5fc6131e151a7ed24c8a1e5f2d424c8b14e7eda813b34b5b301f37623a0b1. Its ordered source-file recipe is in every complete generation receipt; sh1-qualify.mjs at this source is blob 0cbc8354046ce71a17efc588180864fabcbf5dba.
+## 7. Final reviewed evaluation corrections and shared fixture
 
-| Exact final F product | SHA-256 |
+### Nat major
+
+Reviewed candidate Erasure/Expr 3153b38e9a85e00932cac7cad59440dede218899 against 28e14f991df68c4a7d49f09120a42c85c919d6a8 binds a computed Nat major once before zero-test/predecessor use. Variable/literal and non-Nat paths retain their prior output. Fresh names reserve only the output-name index; no fabricated Core fvar is inserted. The explicit freshness refusal can occur earlier only for inconsistent fabricated name-index/count inputs.
+
+### Two enabled intrinsic templates
+
+BackendTs/Expr candidate dfd58154826c892d18b97b84303abbce6a622d7b against current 9628e3c9 changes exactly two templates:
+
+- stringAtEnd evaluates source text before position through outer IIFE arguments, then calls the existing UTF-8 helper.
+- arrayEmptyWithCapacity evaluates its capacity expression as an outer argument, so a computed call's yield remains in the surrounding generator context.
+
+All other 43 enabled templates, current six comparison fixes, runtime helpers and cache algorithms remain unchanged. Final manifest 3ded7f9ab8fd5904f5922da4da7fa27d12128517 (SHA-256 2c9dd01314e2bf198044aa1563818de8c56f1649e325e7c55ada789d55d55fe8) supersedes bc95032e and binds the unchanged 45-operation audit to the final candidate and documentation.
+
+### Partial-application demand
+
+Source review found that psEraseFinishApplicationWithFuelWorker placed already supplied callee/operand computations inside the new completion lambda. Saving and using that lambda could recompute them. Final independently reviewed candidate **3e11222a620cd044c9a5d48243c9b33421b5d5dc**, SHA-256 102e91e3ab8fc7f98e765f7e2e9859e35593605c240598c9183e59acd1325508, extends the Nat correction and supersedes 0476a750. It reconstructs a computed monomorphic callee's retained function type from ordered supplied runtime domains, completion parameter types and final result, omitting erased proof/type binders. This avoids the complete original proof-bearing Core telescope producing unknown. Direct generic variable calls skip unnecessary capture annotation. The exact four refinement edits are preserved in manifest 35ab1d9ef8faca77d919af2e8c4a52f270710add. Independent source review is CLEAR; no execution is claimed.
+
+The candidate retains supplied Core runtime-domain types, captures computed callees/operands in ordered typed IR lets outside the closure, preserves direct generic variable calls/type arguments, omits proof/type operands, and uses existing protected output names for captures and eta parameters. General source applications use a typed companion. The old low-level untyped helper fails closed for computed partial operands lacking type metadata.
+
+Complete source callsite review found only the recursive-hypothesis source route still using the old helper, with var callee and var arguments. External replay-audit cases likewise use value-only inputs. PsErasureAppliedArguments and its four record constructions occur only in Expr. The corresponding source-sequencing guard candidate is 852240e14ed49ce01b1f835133492fd117db4327; it protects the new freshness/name step and all nine sequencing semicolons.
+
+### Shared finite fixture
+
+Final guarded combined manifest **6bb5580da3073cb5bb0636bb876702918d69aae5**, SHA-256 1539b6f0dde7a1ccbee57ae1e97517d5a55b77ed492610a2c24a05a789f5cbad, composes all Nat/runtime/partial edits against the equality-corrected committed bases and independently verifies forward/reverse transformations. It supersedes manifest0728, gate4651 and the earlier 7/18/11 fixture. Final SOURCE_EVALUATION.md is **917d49b4028edcf8ec8d3ee71e057c45c4692fc0**, SHA-256 8297885a6aa5f6d53edfdd27bcdb6e5f636372f651c463b04d645f8dc8f07f6e.
+
+Final gate **2b25f896d25689b6a432ad0d8a60d23aec47063c**, SHA-256 07e740195ccf6051bb3ec4afd1784645a3369ec08be843a676efc26612ba9216, has **12 source declarations (11 definitions and one function-valued structure), 24 native pure values and 21 host traces**. It retains two raw compilations, one shared TS7 compile and one small native reference for the entire qualification, reused across N1/C1/C2/C3. The earlier 18 value and 11 probe rows are unchanged prefixes. The final delta from 8cd875 is only precise wording: pure immutable host records are not privately branded canonical source record carriers. All five pins and counts are independently verified against binder602; the frozen fixture must remain unchanged during the separate empty-data slice.
+
+Five exported pins: Lean aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e; PS 2a9ffece8b7dbbec066e0f540c074d6d88b9bf6aecdd6974c70ca1fa119f07f2; native wrapper75486abeb314702a573b84c473e8fc8c4659b29ae8793f0ee7f89539e4c4a131; values9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f; host probes76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91.
+
+Diagnostic callback/accessor traces remain outside canonical immutable source values; they add no source effects or FFI. Native reference values use ordinary pure functions/immutable records.
+
+## 8. Root evidence binder and general arguments
+
+Root binder candidate **6027955a326dd5cb0e1dba59ba76a8901dde5672**, SHA-256 b2ec7f6d52f8959a6a0d5a08b3fcf493985150f0ca4b0f1982e2362d72bdf681, is independently reviewed against current origin/ingress and the expanded 12/24/21 fixture. Its base is committed 8c8a781012871b1f0f748ed46921287efab8e046. It supersedes e4c39270 (old counts), 466f47ac (before ingress) and their earlier root drafts. Empty-data evidence, once designed, requires its own separate integration.
+
+The binder:
+
+- Hashes actual native/generated common origin payloads, checks all counters, and compares native/C2/C3 full-closure origin records.
+- Requires one preparation, one admission encoding, zero reconstruction and one IR check per atomic source call.
+- Binds capability35/55/16 origins and six attributed negatives.
+- Binds the actual standalone native source-evaluation receipt, wrapper/raw source, stdout/stderr and the exact native marker.
+- Binds each generation's two raw source files, actual atomic receipts and shared TS/JS/admission products.
+- Checks the new ingressSnapshots against the actual source receipts with zero added real preparations.
+- Preserves old equality and all required gates. It never compiles or rechecks.
+
+Documentary reviews:
+
+| Document | Candidate | Status |
+| --- | --- | --- |
+| strict/RUNTIME_LAW_REVIEW.md | 9c77b7da9d4d99c2cfe49e0454c8c20b85d844f9 | Complete 45-law conditional source analysis, final 3e112/2b25 references and 12/24/21 counts; all 45 local-law sections unchanged |
+| strict/BACKEND_RULE_ARGUMENTS.md | af3d887349bf27d46140ac2bababfafcbd25c84e | Independently reviewed conditional eleven-expression, let/eta, count/tail, generator and module-order arguments |
+
+The backend review explicitly records the implicit constructor-namespace premise: the name-use walker sees explicit variables/binders, not the namespace printed by a constructor. Actual declaration-name preparation includes inductive namespaces before local naming. Count/tail printed-self comparisons also require the source erasure's no-shadow mapping. Arbitrary typed target-admitted IR alone does not prove these stronger premises. Constructor positional field order is explicitly checked by psIrCheckConstructor as constructor-field-order.
+
+No general correspondence row is closed by these conditional reviews.
+
+## 9. Remaining strict work, including empty regular data
+
+[CORRESPONDENCE.md](docs/selfhost-language/strict/CORRESPONDENCE.md) and [correspondence-obligations.json](docs/selfhost-language/strict/correspondence-obligations.json) enumerate 33 rows: nine erasure/layout, four normalization, eleven expression and nine backend rules. All full general obligations remain open. Update stale concrete Nat/partial/origin descriptions as their reviewed implementation is integrated; do not turn local corrections into whole-row proof claims.
+
+Origins are real provenance, not a complete expression-level source/Core/IR witness. Remaining work includes binder/proof/type/layout association, general normalization/substitution, exact call/capture/evaluation relation, and the common generator/optimization relation.
+
+Empty data/match support is mandatory coverage requiring explicit reconciliation, not an optional corpus-absence waiver. Its complete source map is reviewed and the smallest separate implementation is authorized:
+
+- Both current parsers explicitly reject empty constructor and alternative lists, although their list readers and printers can represent them.
+- Owned kernel elimination and native Lean/provider protocol already support zero constructors/minors; no kernel/provider change appears needed.
+- The IR checker rejects empty-layout/empty-match, ignores the match expected-result hint, and yields invalid for no branch/common type.
+- The module emitter would emit an invalid empty union. A candidate design uses TypeScript never and an empty-elimination generator with explicit never result, while preserving one scrutinee evaluation.
+- Erasure will retain the known motive/major result in a scope-fresh typed IR let around the empty elimination. It must stack onto final 3e112; its recursor block is unchanged by the partial refinement. No IR shape change is authorized.
+- Native Lean at the pinned commit requires at least one ordinary match alternative. Empty elimination is **nomatch e**. The complete design is owned Lean nomatch -> existing matchE with zero alternatives; PS keeps match e with {}. PrintLean must emit nomatch for zero alternatives. Do not permit ambiguous empty Lean match-with, which can consume an outer branch. Empty inductive spans must include the consumed where header.
+- Removing unsupported findings is insufficient: the current invalid result propagates silently through expect. The empty-only checker route must report missing result type explicitly when no expected type is supplied; nonempty match synthesis remains unchanged.
+
+The origin/ingress owner is implementing the reviewed map, with no kernel/provider/AST/IR-shape change. Backend Expr stacks onto dfd581, Erasure Expr onto final 3e112. Coverage uses a separate tiny Lean/PS empty module as a third module in the two existing source-gate preparations, grammar parse/print/precedence/refusal cases, additions to the existing original-IR TS7 compilation and small native checker cases. Preserve the frozen 12/24/21 runtime fixture. This plan adds no full closure/source-gate preparation, TS7 invocation or native checker process. A diagnostic host callback may throw before returning any empty value to observe single scrutinee evaluation; no empty inhabitant or general semantic proof is fabricated. Replace the two old unsupported-empty IR negatives with positive coverage plus actual absent-result, wrong-scrutinee/type-arity and missing-nonempty-coverage negatives. Root must bind the revised source-module counts and evidence after the exact new contract freezes.
+
+## 10. Immediate continuation order
+
+1. Monitor exact run37971952859. On completion fetch compiler/provider jobs, full logs, actual evidence markers and artifact metadata. Authenticate actual receipts/file hashes and exact source. Never infer a pass from a commit or an in-progress step.
+2. If failed, preserve the exact attempt and diagnose its demonstrated class before a new run. Do not weaken gates. If passed, retain the actual limited qualification and provider evidence.
+3. Preserve the now-frozen partial/application/runtime packet 6bb558, runtime-law packet 3ded7 and binder602. Finish and independently review the separate empty-data slice, then bind its actual source/type/grammar evidence without changing the frozen 12/24/21 fixture.
+4. Integrate only exact reviewed blobs on the fresh strict-branch head after the current run is protected. Update correspondence/obligations/proposal/plan and this work state with honest scope.
+5. Run the coherent native preflight and exact-source C2/C3/provider qualification once its dependencies are ready.
+6. Merge only the actually qualified implementation scope under a fresh comparison/lease. R and source authority remain unchanged; strict flags remain false until the complete mandatory contract is discharged.
+7. Continue mandatory semantic/empty-data work before optional language expansion or bulk refactoring.
+
+## 11. Agent and tool handoff
+
+Last active owners: root for integration/evidence/docs/refs; origin_host_native for the separate empty-data implementation; runtime_comparison_finish for independent checker/backend/evidence review; its regression_review peer for independent parser/printer/erasure review. Origin/ingress and partial/shared-runtime packets are frozen. Agent sessions may disappear; recover work by immutable blobs/manifests above and reassign by scope.
+
+In-memory stores expire after roughly twenty minutes. Never rely on an old store name. Costly completed drafts are immutable Git blobs. GitHub fetch_blob/fetch_file return content under structuredContent; inspect isError before storing. Batch a few independent reads with Promise.allSettled and inspect every result. Keep writes/leases sequential.
+
+Do not fetch REST /actions/jobs/:id through generic github_fetch; the connector rejects that endpoint. Use fetch_workflow_run_jobs and fetch_workflow_job_logs. Running logs may be unavailable until completion. The repository actions/runs collection and individual run URL are supported.
+
+Pure SHA-256 review helper blob fe3478ead5638f8647e67a5ef2a2f2de4e2eb896 contains a standalone function before the marker "// Pure data review only:". This is a data hashing helper, not permission to execute compiler code locally.
+
+## 12. Qualified baseline and protected identities
+
+| Scope | Exact source and successful evidence |
 | --- | --- |
-| Canonical new PS source JSON | 8b060f40c279f81abb9f81ab5903457e295e431fc67c945ccd312663cd76e3c3 |
-| Canonical admissions | 9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5 |
-| TypeScript | 0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a |
-| JavaScript | 5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15 |
+| F compiler/runtime/provider | fcd875c8f38db4b0524090bd10c7c2fd5024053d; run37947341800; compiler113876931430, provider113896228512 |
+| R cold native TS7-only recovery | Same runner source; run37947341899; job113876930974 |
+| Root TS7 migration | 9d150afbec1feda8c97058aa56aa5ab92347d96d; run37951869293; job113892421469 |
+| Completed main merge | 37f63c39 -> ed5d00aca0743bde583b45fe7756dd494ac3960f, 16:30:26 UTC |
 
-C2 and C3 match on all four products. N1 matches the final TypeScript and JavaScript, and the fixed-point record binds C1/C2/C3 to the actual selected-R execution chain. The native original IR accepted 56,602 expressions in 728,064 steps with zero findings. Every generated build checked its complete original IR before synchronous emission of that same object.
+F covered 87 behavior cases, 12 public ABI signatures, accepted complete original IR, C2/C3 four-product equality, native TS/JS parity and separate provider acceptance. R recovery reconstructed all four exact products without TS5, generated-parent execution or downloaded compiler artifacts. Root TS7 verification is its own seven-command/eleven-obligation scope, not every historical optional target.
 
-The complete behavior observation digest is 697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be across R/N1/C1/C2/C3. The ABI observation digest is b23c28c75aa3f7955ecbe54fa4580b4278f62c2ed77f1e7ff2a2dbbea6999b49 across C1/C2/C3; reference-type digest a65845d1f9f30b55f1b8b3599c264ae39e4c35fe7c84367575ea6b504644ab82. The supported isolated probe has 19 one-constructor monomorphic inductives, 12 signature annotations and 12 typed generic partial wrappers; it produced 69 prepared declarations. Probe source SHA-256: b8a51317306f4803aaba1a7553999aa41599861d5d0677a2d8f8686f69a3f41b. It is isolated, never merged into the compiler closure, never erased/emitted and never executed as a separate runtime artifact. Actual public Core/IR is observed from the objects already prepared for each build, with no repeated full R-closure preparation.
+Selected R source: fe2560aba0f347b1caf8d000d371464642d44f23. Selected identity: 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225. Manifest blob44a05964c49000478c282afc013c84fca8c2de65, SHA-2567a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694. Recovery policy blobfd75854159544e431497bc7dee8482bea727b5e4.
 
-N1 performed full Lean -> new PS -> Lean canonical correspondence and PS idempotence for all 61 modules, producing 902,538 PS bytes. The full grammar artifact's observed digest is 6d6bdb15cb1c4dacebee92104dd11538058118b072637575f1f39f7e4bb8878c. Its original file bytes were not available through the compact logs; the reviewer validates its N1/final receipt linkage and the source-pinned qualifier's final canonical-product checks. The finite grammar gate separately recorded 18 application boundaries, 22 supported forms, 40 canonical round trips, 35 parse refusals, 2 lexical-position cases, 5 lexical refusals, 3 empty-call refusals and 1 printer refusal. The recursive-generic runtime gate recorded 19 observations per generated stage.
+R products: PS985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07; admissions200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0; TS38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935; JS70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061.
 
-| Retained F evidence | Exact identity |
-| --- | --- |
-| Complete 47-file path manifest | 5ed0a4f6cff3d48672df34076b7ac8801c9299a4 |
-| Path manifest SHA-256 | d6fac3c607da92e9ccae914b971e141587eb7354b2b64b37e8c16e4b1a8ec0f1 |
-| worker-migration-qualification.json | blob 1820e4519018365abbe520ab3dc362b535fdbd45; SHA-256 a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3; 5,284 bytes |
-| worker-migration-provider.json | blob 87ec0c66613ff6c5936d79b56e8e9f000a49bb8c; exact file SHA-256 5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913; 3,532 bytes |
-| worker-migration-evidence.json | blob b2ca50c9e353b91220a5280e90ff7cd45b6b9a7e; SHA-256 7eb162e121ce97f4a9836daa44a85d0c03b30ac1aaa2b90cf43a1a3d69d9d069 |
-| Complete compiler log | blob 5ab3fc932628afac4ff099727663ce45a25b8af8; SHA-256 0029eccaf74c06b1fef9c3f06987cb0dc82003c649912bb1959bf3f13068e931; 757,271 UTF-8 bytes |
-| Complete provider log | blob 41f4e3a7546f9b05f5b27981d247a34a699aed49; SHA-256 99e3e9d913d9322f042d69f0981358bee36fa478849ee249062f6f59c07e80fd; 62,929 UTF-8 bytes |
-| Compiler artifact | 11627040677; archive digest a05e427bb580fea603c1cad9946977910ab85e044caf605fe5b4b5f6f271e728 |
-| Provider artifact | 11626368937; archive digest 2466b46c77d4122a553a3a5a3fccdbf3d142062fadf0bcbb920f0521aa476ae8 |
+Frozen provider source963030dc2d154008fccc82e7c8ed29331f138799; binary88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec; pinned Lean commit as above. Draft PR84 is a separate diverged provider lane; leave it alone.
 
-All paths above are under psc0/docs/selfhost-language; full logs are under evidence-logs, and the remaining complete receipts/APIs/reviews are under seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/. The main qualification file is the exact compact FIXED_POINT JSON substring plus LF, explicitly labelled as that representation. It is not advertised as original pretty artifact bytes. The provider file is the actual read-back file content from its envelope. All 32 compiler and 2 provider marker records, full observation arrays and both independent reviews are retained. Artifact archive bytes were not downloaded.
-
-The pure-data toolkit used successfully by both independent reviewers is blob 490cc9d968bddd92da1ad67e39b3880a35349580; its input/audit manifest is 31293d61303666b1b6f82071c0bfc1f20316254b. Its provider checker derives the distinct digest groups from all eight role hashes and requires the exact qualified-R provider binary. Reviewer/hash source is retained only as inactive .factory.txt evidence. Successful data review does not create a kernel proof or broaden the admitted language profile.
-
-### Completed root TypeScript 7 qualification
-
-- [Run 37951869293](https://github.com/dwijayuda/pskernel/actions/runs/37951869293), source 9d150afbec1feda8c97058aa56aa5ab92347d96d.
-- Root job 113892421469, workflow ID 379741182, attempt 1.
-- Completed successfully: all seven required commands exited zero. The receipt spans 2026-10-09T15:27:57.441Z through 15:28:22.403Z; the job completed at 15:28:26 UTC. Root and projection_repair independently authenticated the full primary log, actual completed API objects, all five original receipt files, all 21 package bindings, the unchanged exact lock (lockGenerated=false), and the 11-obligation adapter record.
-- Dedicated workflow: .github/workflows/root-typescript7-qualify.yml.
-- The passing ordered commands are npm ci; root build; test:packages; conformance build; lean4export build; package integration; check:packages. Their recorded command times total 24,845 ms. This is a run measurement, not a TS5/TS7 benchmark.
-- This root gate does not qualify PSC0, run Lean corpus/oracle tests, change provider acceptance, or promote a seed.
-- The workflow is branch/path plus [root-ts7-qualify] gated. Do not add the marker to evidence/documentation-only commits or rerun after sufficient proof.
-
-The source-pinned root recipe is scripts/root-typescript7-qualify.mjs, blob 1dc573166836765fc7b8d0fa4714b5d1d29ae609, driven by .github/workflows/root-typescript7-qualify.yml, blob 348ab35eaf3210b5a96ac53c08d7c5b201c29c1e, with the committed exact lock below. Its actual ordered command receipt is:
-
-| Phase | Exact command | Actual exit | Recorded milliseconds |
-| --- | --- | --- | --- |
-| install | npm ci --ignore-scripts --no-audit --no-fund | 0 | 1635 |
-| root-build | npm run build | 0 | 336 |
-| package-tests | npm run test:packages | 0 | 13474 |
-| conformance-build | npm run build --workspace @proofscript/conformance | 0 | 201 |
-| lean4export-build | npm run build --workspace @proofscript/lean4export | 0 | 208 |
-| package-integration | npm run test:package-integration | 0 | 8507 |
-| package-boundaries | npm run check:packages | 0 | 484 |
-
-## Why the subset was needed and what actually changed
-
-The original root configuration did not actively select PSC1-selfhost-stable/1 or PSC1-portable-selfhost/1 as the compiler source contract. The practical restrictions came from the owned parser, elaborator, structural recursion normalizer, prelude, erasure and backend coverage. Acceptance by host Lean or a broader language/profile label did not prove that the generated compiler could consume and rebuild that source.
-
-The old recursion normalization required non-decreasing arguments to stay unchanged. Source used returned-function state adapters to work around that implementation boundary. The implemented bounded normalization supports ordinary changing parameters around accepted structural Nat/List/regular-inductive descent and preserves the public function types. Shared exact-name / first-segment / longest proper local-prefix resolution fixes recursive record-parameter projections without changing structural identity checks or adding error fallbacks.
-
-This is a finite practical authoring subset, not unrestricted Lean/PSC1. Do not broaden it by changing a profile string. Current .ps parser/printer/import/session handling is new-only ps-0.9-r3; the 61-module handwritten .lean closure remains authoritative. Switching all handwritten compiler authority to .ps is not part of the completed claim.
-
-### New-only .ps contract
-
-Grammar identity:
-
-    {"edition":"ps-0.9-r3","mode":"new-only","support":"bounded-selfhost-subset","referenceSha256":"4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71","fullStandardConformance":false,"fullPscvConformance":false}
-
-The supplied reference is 401,569 bytes / 8,546 lines and is a design RC with broader Standard/environment conformance pending. Implemented forms include newline-oriented sequences, one explicit comma-separated declaration/constructor binder group, strict record commas, bar cases, grouped/adjacent/native-gap calls and typed lambdas. f(()) remains one Unit argument; empty f() is not silently rewritten to Unit and unsupported completion is refused.
-
-PS lexical boundaries preserve raw UTF-8 positions and LF/CRLF handling, allow a leading BOM only, and reject tabs, lone CR and later BOMs outside the documented literal/comment boundaries. Host decoding is fatal for invalid UTF-8. There is no active legacy PS parser/semicolon mode. Historical Lean/seed source remains at immutable historical refs.
-
-Current unsupported boundaries are explicit: general do, omitted required types, defaults/named arguments, automatic empty-call completion, tuple terms/patterns, arbitrary result projection such as f(x).field, nested patterns, general equation normalization, class/instance synthesis and broader verified effects. Legacy semicolon sequences and repeated explicit PS declaration groups are refused. Typed lambdas and function-valued results remain legitimate constructs; the finite worker cleanup does not ban them. See docs/selfhost-language/CURRENT.md and SPEC.md for authoring rules and PS_GRAMMAR_ADOPTION.md for the source-reference mapping and errata.
-
-### Finite F production migration
-
-Production edits first landed at 9ee0b1fd38dd1456a187d4675f9027440a989f2d and remain unchanged through fcd and the root branch. F changes twelve workers in nine Lean files and removes three projection aliases in a tenth; seven existing source guards were aligned. Public types, parameter order, fuel/zero behavior, reversal/order rules and collision limit 4096 are preserved requirements.
-
-The exact twelve-worker -> nine-file mapping was independently read at fcd and retained in audit blob 48fdd86397ba8fff5d5ba48a3bcf75d40c5b509b. Paths below are repository-relative. Three typed projection aliases are removed in a separate tenth source file; it contains no additional migrated worker.
-
-| Production source file | Ordinary-parameter workers |
-| --- | --- |
-| psc0/packages/erasure/src/Ps/Erasure/Basic.lean | psErasureLocalNameWithFuel |
-| psc0/packages/erasure/src/Ps/Erasure/Expr.lean | psErasureEtaNameWithFuel |
-| psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean | psTsFreshMatchTempWorker |
-| psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean | psTsFreshInternalWorker; psTsBuildSymbolMap |
-| psc0/packages/compiler/src/Ps/Compiler/Api.lean | psCompilerPreparationSourcesWorker |
-| psc0/packages/elab/src/Ps/Elab/Declaration.lean | psAddDeclarationListWorker; psElabDeclarationsWorker |
-| psc0/packages/erasure/src/Ps/Erasure/Definition.lean | psBuildErasureDeclarationNamesWorker; psEraseDefinitionsLoopWorker |
-| psc0/packages/erasure/src/Ps/Erasure/Structure.lean | psPrepareRuntimeStructures |
-| psc0/packages/erasure/src/Ps/Erasure/Inductive.lean | psPrepareRuntimeInductives |
-
-The tenth source file is psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean, blob 94b80cd7fe617e62c9a95446ff019e088d57b0b3. Its cleanup removes one limits : PsIrCheckOptions := options alias in psIrCheckMatchBindings and two currentState : PsIrCheckState := state aliases in psIrCheckRun. Historical inventory line numbers are locators at their old source, not current line numbers.
-
-The original F1/F2 function-scoped source manifests are fbb5cabc6d48f16a0e91c1c4a92c6849791968b7 and ce035d30d64341e3214f241d682c61dac4922649. The current mapping audit preserves exact current source blobs and one declaration occurrence for every name. Use those immutable records and fresh source reads before any later migration.
-
-The twelve signature arities in probe order are [4,4,3,4,2,2,3,2,4,5,5,3]; original partial splits are [3+1,3+1,2+1,3+1,1+1,1+1,1+2,1+1,3+1,3+2,3+2,2+1]. The migration is F1=4 workers plus F2=8 workers, with 44 direct cases + 7 wrapper cases + 36 state cases = 87 unique behavior cases per compiler.
-
-The complete original inventory has 241 locators; 226 remain explicitly deferred. Not every function-valued result is a workaround. Do not perform a wholesale rewrite or silently mark those deferred entries done.
-
-### Earlier F failures are preserved, not hidden
-
-1. Run 37939061854 at 9ee failed a new host fixture's nonexistent structure-constructor call. f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f corrected all 48 invalid calls across 20 structure types with existing neutral factories, same-compiler template copies and three explicit non-IR host records. All independent expectations were retained.
-2. Run 37941485695, compiler job 113856701970, at f62 passed the complete R and N1 87-case reports. Their observation SHA-256 is 697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be. Native original IR accepted 56,602 expressions / 728,064 visited steps / zero findings; all 61 modules round-tripped with 902,538 PS bytes. It then failed before C1 emission because the isolated ABI fixture used unsupported axiom declarations.
-3. fcd replaces that fixture with 19 one-constructor monomorphic inductives and the same 12 explicitly typed partial wrappers. The complete first explicit binder type supplies each reference signature. The corrected preflight and all actual prepared Core/IR ABI checks then passed in every required generation of successful run 37947341800. No worker/compiler behavior was changed by these fixture repairs. The failed runs remain failed records; their successful earlier phases are not relabelled as whole-run qualification.
-
-Attempt-2 F closure was 6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7, with N1 JavaScript 5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15 and TS 0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a. These remain attempt-2 observations. The same products were independently established in the later complete successful fcd run; the final proof is its actual retained receipts, not a substitution of the earlier native result.
-
-Existing files in docs/selfhost-language retain worker-migration-attempt-1.json, worker-migration-fixture-repair.json, worker-migration-attempt-2.json, worker-migration-abi-repair.json and their primary logs. Preserve them alongside the actual final worker-migration-qualification.json, worker-migration-provider.json and worker-migration-evidence.json. The final publication also updates the candidate/qualification ledgers to the proven fcd result; it does not erase failed history or create another qualification.
-
-## Selected R and proven TypeScript 7-only native recovery
-
-R source fe2560aba0f347b1caf8d000d371464642d44f23 qualified in [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635). Compiler job 113804052074, independent provider job 113827136830 and original parent-based cold job 113827137018 passed. Explicit selection is commit e65606397fb679d7cb96f4f0e92700a6cf0944a6. The later collector run 37938411520 retained 18 exact receipt files.
-
-- R source closure: f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226.
-- R selected identity: 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225.
-- Selected manifest actual file SHA-256: 7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694.
-- Selected manifest Git blob: 44a05964c49000478c282afc013c84fca8c2de65.
-- Current selection does not depend on promoting F.
-
-| Exact selected R product | SHA-256 |
-| --- | --- |
-| Canonical PS source JSON | 985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07 |
-| Canonical admissions | 200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0 |
-| TypeScript | 38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935 |
-| JavaScript | 70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061 |
-
-### New cold proof — already successful
-
-[Run 37947341899](https://github.com/dwijayuda/pskernel/actions/runs/37947341899), job 113876930974, source fcd, passed at 14:54:23 UTC. It used no restored compiler artifact, seed cache or native build cache. All 75 recorded commands, including 61 native PS translations, succeeded. All four products above matched, and the tracked raw source, closure and selected manifest remained unchanged.
-
-The native recipe is native-lean-original-ir-four-products-ts7/1. Its original IR check accepted 56,391 expressions / 725,484 visited steps / zero findings, then emitted that same IR. No generated compiler, historical A/S0 compiler, or TypeScript 5 was executed. The exact selected-R seed identity is preserved; this is a new recovery recipe, not a re-identification of the seed.
-
-- Recipe SHA-256: 4ed186c2604bcfaee756881686e70f14569720d72fcd799d9997d2d92217b82a.
-- Policy SHA-256: 0cf0480524ba713e0bcdbeb3cfa3d345e37508743ee5e169b83ba8ee0de160fc.
-- Runner scripts/sh1-native-seed-recovery.mjs blob: 4e2fe462ba5c8160ff5c08f70ce52152173b0d6f.
-- selfhost-seed-recovery.json blob: fd75854159544e431497bc7dee8482bea727b5e4.
-- Independent workflow .github/workflows/psc0-sh1-ts7-recovery.yml blob: 4512b46247642f2ab6043a5d81ba8d2a62fd703f.
-- Exact receipt SHA-256: 0d5606c25e634082da39d80ffa5974b3c390d2765ded71bcf1abaf442b7e3919, 64,164 bytes; blob c495ddf6e7d5075e204e4b0c5957c8c0d3d6a24b.
-- Full decoded log SHA-256: 6f47360b88446d7a06f12561772e8d9e317b1f3bfb6d34d610791436f99b3957; blob d5ae70f7459ad82ba2aa3a23043e374921fb2316.
-- Artifact ID 11624048503, ZIP digest 967adc94a58d02e4e166e24601252f177a372dc5e6fd50ba01a7125cec9dfae5. Archive bytes were not downloaded by the reviewers.
-
-Recorded recovery work was 86.497 seconds; the whole job was 158 seconds. The old parent-based recipe recorded 2,728.787 seconds in a separate run. This is not a controlled benchmark or a measured PSC parsing/self-compilation speedup.
-
-Root and grammar_adoption_audit independently checked the actual completed run/jobs, complete log, 75-command receipt, all four hashes, source/manifest invariance and policy pins. The final cold retention/evidence bundle dd600ce1b24a4e7090ba9d5fa47012b875174d82 is published in 4c2cfec187ec0b48d1dfbc091066b9f1dd763215, with five retained evidence files plus the provenance record (six paths total). Its verified paths are listed below; no additional cold job remains:
-
-- docs/selfhost-language/typescript7-native-recovery.json.
-- docs/selfhost-language/typescript7-native-recovery-evidence.json.
-- docs/selfhost-language/evidence-logs/typescript7-native-recovery.log.
-- API metadata under docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/.
-
-Current PSC0 rejects seed-identity, recover-seed, recover-qualified-seed and recover-successor-seed before resolving TypeScript. Cache misses use the pinned native runner. Do not restore the old TS5 dispatch or repeat the retired full-source TS5/TS7 comparison.
-
-The independent provider remains source 963030dc2d154008fccc82e7c8ed29331f138799, tree 38c8c55bd2b214753e56c58c15c4901c32c01b86, binary 88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec. Lean commit is 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b; fuel 131072 and timeout 60000. Its acceptance is a separate post-emission gate.
-
-## Root workspace TypeScript 5 retirement
-
-The root workspace is distinct from psc0. TypeScript 7.0 has no old programmatic compiler API, so changing version strings alone was insufficient. The implementation replaces the one API importer in packages/backend-ts/src/typescript-compiler.ts with an exact installed-7.0.2 CLI adapter. Microsoft primary reference: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/.
-
-All 21 root/package TypeScript pins are now 7.0.2. Ten unsupported baseUrl fields were removed without changing paths or output layouts; existing rootDir/outDir preserve dist/src exports. Root/backend Node types are explicit at 22.15.3. Two remaining selfhost launchers require 7.0.2 before compilation and use --ignoreConfig.
-
-### Root source commits and bounded corrections
-
-| Source | Change and actual evidence |
-| --- | --- |
-| a02f03b97bb3385b66ad670dabf7f13d334fc79f | 40-file initial root migration. Run 37949490366/job 113884245962 passed lock resolution, clean TS7 install/profile and root build, then the new map-footer test required a trailing newline that the adapter already makes optional. |
-| 3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab | Committed exact npm lock and changed only that footer assertion to accept EOF/LF/CRLF after the same URI. Run 37950075083/job 113886266262 passed complete package tests and all 11 adapter obligations plus conformance build; the additional lean4export build exposed an existing inaccurate stdin type. |
-| 5d3cbc82cb8759b909d1a957d6a22d542509d8c5 | Type-only ChildProcessByStdio<null,Readable,Readable> declaration matching the unchanged ignored-stdin/piped-output spawn. Run 37950522687/job 113887806499 passed all builds, package tests, 11 adapter obligations and package integration; final package-map check found a pre-existing source-language metadata mismatch. |
-| 9d150afbec1feda8c97058aa56aa5ab92347d96d | Aligns the compiler map with its existing mixed-source manifest and paired files; replaces the stale Compiler API note; strengthens exact nonempty language matching across all 20 outer packages. Full root run 37951869293 passed all seven command phases and all eleven adapter obligations; no additional source correction is needed. |
-
-No adapter implementation changed after the initial reviewed CLI replacement. The footer correction changes one test formatting assumption; the exporter correction changes types only; the map correction preserves actual paired-source inventory and every other boundary rule. No native bootstrap target is qualified by the root gate.
-
-Before the latest root run, independent static review read all 178 TS files in the exact twelve source-shape scopes, all ten editor inputs, all 20 package manifests, the complete package tree and all remaining architecture obligations. No further violations were found: maximum TS 300 lines / 201 characters; editor modules 228 lines / 88 characters. This was source review, not a substitute for the actual gate.
-
-### Adapter contract
-
-compileTypeScript remains synchronous and preserves its result fields. It verifies installed package metadata and actual launcher version, creates an exclusive unique sibling source in the logical source directory, emits into a private temporary directory, selects root JS/declaration/map products, restores logical diagnostic/map names, and removes private files in finally. Original logical source and existing output products are not overwritten.
-
-It supports ordinary .ts input names in an existing writable parent directory. The real project CLI creates that directory before calling it. Relative TS imports and package exports are covered. Original-basename self references, unsupported source kinds, malformed maps and basename-dependent emitted output are explicit refusals. This is not a general arbitrary virtual-filesystem compiler host. No TypeScript 5/6 API fallback is permitted.
-
-The actual completed PS_ROOT_TYPESCRIPT7_CONTRACT record has schema psc-root-typescript7-contract-v1, TypeScript 7.0.2, passed=true and these eleven exact obligations: virtual-source-and-existing-products, logical-map-name, config-independent-positional, relative-typescript-import, package-export-import, root-output-selection, logical-diagnostic-position, self-reference-refusal, declaration-input-refusal, missing-directory-refusal, stage-cleanup. The record is at primary-log line 392 and is preserved as compact stdout evidence; it is not invented as a standalone original artifact. The root qualification establishes the supported CLI-host/package contract at the exact source, without claiming arbitrary virtual compiler-host compatibility.
-
-Key current blobs: adapter 1f178560ba824e58538235e93d348a7c97ab54e9; contract test b57719346e08faec054bb1287fc1c36459d79cd7; root gate runner 1dc573166836765fc7b8d0fa4714b5d1d29ae609; workflow 348ab35eaf3210b5a96ac53c08d7c5b201c29c1e; exporter type correction b9b86b7f10584756fda519221e47895ce526038f.
-
-### Exact root lock
-
-package-lock.json is the actual 21,592-byte npm-generated file from the initial cloud run. SHA-256: 69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1. Git blob: 19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb.
-
-It was resolved with --package-lock-only --ignore-scripts before any installation, then installed with npm ci and rehashed. Every one of the 21 source/lock/profile manifest bindings was independently checked. The exact file has remained identical in subsequent runs. Do not fabricate, reserialize or invent registry metadata/integrity.
-
-Final installed-profile file SHA-256 is 630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe (4,644 bytes); installed TypeScript package metadata SHA-256 is 3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e (3,087 bytes); the uploaded five-file evidence-index SHA-256 is 209cd0b9a0bce52405579a1f7c2dc9878b8beb4f890a2bda15e6dd4dcf6a82b4 (820 bytes). The final passing run used lockGenerated=false and npm ci only. The root gate records command/output and installed-profile/lock evidence; the four-product self-host fixed point belongs to the separate PSC0 F gate.
-
-The root runner logs exact JSON file content in PS_ROOT_TS7_EVIDENCE_FILE or ordered MANIFEST/CHUNK records. Concatenate decoded content with no separators and verify actual UTF-8 byte count/SHA. The adapter's PS_ROOT_TYPESCRIPT7_CONTRACT is a compact stdout record, not a standalone receipt file. Preserve that distinction.
-
-The successful root result has been independently authenticated and is published in 4c2cfec187ec0b48d1dfbc091066b9f1dd763215. Its path bundle c3b0275e848fa93f3f33528a8fe239766486a115 maps 48 files, comprising the current root guide update and 47 evidence files; the bundle manifest itself is also committed. Failed attempts remain failed; their earlier completed phases do not imply whole-run qualification. Root source correction, evidence publication and integration are complete; no qualification retry is pending.
-
-| Successful root proof | Exact identity |
-| --- | --- |
-| Evidence index blob | 87dc087ead86d551a6b2e48f0594dd858e7b1b83 |
-| Complete primary log blob | f59f0590c714205f93826c9512c1c0c438a41418 |
-| Primary log SHA-256 / UTF-8 bytes | 5836caa0146f2002bec6954ce285ab7789e7ac1758ede4da80248448cdc79e86 / 84,888 |
-| Full API + exact manifest sources + inheritance proof blob | 45b848ea37dacd4f9aba554b8d90fd794c7cfdb6 |
-| Complete authenticated report blob | 83977c047ba4a382d0512ec9294ba1bbcf30d29e |
-| Original qualification.json blob | 31ec99a5260603659e38ad24c33028c510b46e93 |
-| Original qualification SHA-256 / bytes | a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a / 3,485 |
-| Original installed-profile.json blob | 68ab7c2309f8722988d71d05f05743693f794851 |
-| Original installed TypeScript metadata blob | f4242a69df961fcaf5210ac08ace176ced18c6a4 |
-| Original uploaded evidence-index.json blob | c77c051646afea76427cb175cb14f85c80b0a8cd |
-| Artifact ID / size | 11626670229 / 13,228 bytes |
-| Artifact archive SHA-256 | a424a5c9bacbc31caf51160c471266401d0d4c520b87bce7cb3100c60d552cf6 |
-
-Final root evidence paths are under psc0/docs/selfhost-language: root-typescript7-qualification.json for the exact receipt; root-typescript7-evidence.json for provenance; evidence-logs/root-typescript7-qualification.log for the full log; and seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/ for the five exact files, APIs, complete reviews, source-inheritance proof and all three failed attempts. The root developer guide is docs/TYPESCRIPT7.md, blob 5f36452b237599396b54365deb356cbb8b90b14a. All final path mappings are complete in bundle c3b0275e848fa93f3f33528a8fe239766486a115.
-
-## Completed integration and future continuation
-
-All requested bounded source/toolchain/recovery qualifications, evidence publication and canonical branch integration are complete. There is no outstanding agent result, source fix, test suite or broader research to await for this task.
-
-1. Begin future changes from the live canonical branch psc0/sh1-implementation-v1 after reading this handoff and docs/selfhost-language/CURRENT.md. Use a new work branch when appropriate, preserve concurrent work and record fresh head leases before non-force updates.
-2. Preserve the immutable qualifying source identities, selected-R manifest and current TS7-only recovery policy. Documentation descendants do not change what source a successful run qualified.
-3. Keep future authoring within the implemented ps-0.9-r3/new-only/bounded-selfhost-subset contract. The 61 handwritten Lean modules remain authoritative. The 226 deferred inventory locators and broader Standard/PSCV/strict-SH1 work are future scope, not hidden unfinished steps in this completed finite migration.
-4. For a newly requested source change, diagnose and review the affected class first, use the resident preparation loop for short iteration, and reserve complete qualification for a coherent semantic/toolchain/recovery checkpoint. Do not relaunch successful qualifications for documentation, evidence retention or a branch fast-forward.
-5. Keep this file current after concrete milestones and before any handoff. Explain new risks or unsupported forms from exact evidence; do not revive TS5, old grammar fallback or an archived seed-recovery instruction.
-
-### Integration publication record — completed actual writes
-
-The final evidence publication is [4c2cfec187ec0b48d1dfbc091066b9f1dd763215](https://github.com/dwijayuda/pskernel/commit/4c2cfec187ec0b48d1dfbc091066b9f1dd763215), tree 2935b38a17157fc214e4a0ec09d99a91469ef522, sole parent 8d922c3f47f59a8d7285bfdf998791f042b483b9. It contains exactly 121 planned file changes: 15 modifications and 106 additions, with zero deletions or unexpected deltas. Every new blob matched the prepared path manifest. Only the root docs and psc0 tree entries changed; the other 36 root entries are identical. Complete non-truncated PSC0 subtree comparison proved the executable packages, host, scripts, test, lean-checked and stdlib subtrees unchanged.
-
-The retirement branch publication used expected head 8d922c3f47f59a8d7285bfdf998791f042b483b9 and force false. Projection advanced from fcd875c8f38db4b0524090bd10c7c2fd5024053d; canonical implementation and the earlier TS7 alias advanced from 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a. Each write used the freshly read expected head and force false. All four branches were independently read back at 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 at 2026-10-09 16:02:49 UTC; main was independently read back unchanged at 37f63c39d4a07189938046c64152bba25d789450.
-
-The protected selected-R manifest is still Git blob 44a05964c49000478c282afc013c84fca8c2de65, SHA-256 7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694, with selected identity 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225. psc0/selfhost-seed-recovery.json remains blob fd75854159544e431497bc7dee8482bea727b5e4. No executable source, provider, kernel, toolchain pin, recipe, seed selection or qualification result changed in publication or this documentation-only closeout.
-
-The machine-readable actual snapshot and protected-tree review are in docs/selfhost-language/integration.json. The complete initial publication catalog is docs/selfhost-language/completion-publication.json, blob e8c936151435a59e1e26237bc311b1f55f866cfa. That catalog describes the initial 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 snapshot; the final handoff and qualification ledger are deliberately updated in this containing documentation-only descendant to record completion. Re-read live refs instead of assuming a historical snapshot equals a future branch HEAD. No extra test or qualification run was needed for these documentation-only updates.
-
-An unforeseen future publication guard mismatch should be diagnosed from its exact diff; it does not invalidate a successful immutable source qualification or justify fabricating a pass. A data-reviewer schema mistake likewise remains distinct from a pipeline failure.
-
-## Durable final bundles and developer entry points
-
-The final state is recoverable without live agents or in-memory store keys. All the following identities are immutable Git blobs. Fetch them through the GitHub connector/API; no local checkout, build or test is needed in this cloud-only session. A functions-store reset previously occurred around 15:23 UTC; the retained blobs and committed source, not a private scratch key, are continuation authority.
-
-| Published immutable bundle | Blob and scope |
-| --- | --- |
-| Complete F primary evidence and provenance | 5ed0a4f6cff3d48672df34076b7ac8801c9299a4; 47 mapped files plus its own manifest target; successful compiler/provider runs, full logs, all 32+2 receipts, all worker/Core/IR/generic/capability/probe arrays and exact APIs |
-| Root TypeScript 7 guide/evidence | c3b0275e848fa93f3f33528a8fe239766486a115; 48 files, including docs/TYPESCRIPT7.md and complete successful/three-failed-attempt evidence |
-| TS7-only native selected-R cold evidence | dd600ce1b24a4e7090ba9d5fa47012b875174d82; five retained evidence files plus the provenance record (six paths total), no new cold run |
-| Final eleven PSC0 guides | a609ae5dceef9b20fecab5d4b68413d8e9ed954f; supersedes d4c9cc45dbf539f4bf85e1bca0bca1085a3ec947 after the final three stale-sentence corrections |
-| Actual guarded F document inputs | b2a8a19c506f52316ed30f4ec88682d69e794b87; exact successful source/run/job/product parameters and seven actual evidence objects |
-| Final narrow guide correction pass | 0dcff689d07bc590d78332b70bcfb7f340c88e33; three exact guarded current-F status corrections, no source change |
-| Qualification ledger at initial evidence publication | 9efa5cb3f82f03fb49cfc5b847aeae49ab272759; historical publication snapshot. The current docs/selfhost-language/qualification-evidence.json in this containing closeout supersedes its integration-pending status; every source-proof/history field is preserved |
-| Final worker candidate ledger | 0a9decf3c75c45898697a4284d3877eb6bb5d732; actual successful finite F evidence with failed history and selected R preserved |
-| Exact worker-to-source mapping and document review | 48fdd86397ba8fff5d5ba48a3bcf75d40c5b509b; twelve workers in nine files, three aliases in a tenth, protected 226 deferred locators |
-| Successful F pure-data reader | 490cc9d968bddd92da1ad67e39b3880a35349580; both compiler/provider reviewers applied successfully to complete authenticated primary inputs |
-| F reader contract | 31293d61303666b1b6f82071c0bfc1f20316254b; exact input/representation and bounded-claim contract |
-| Successful root pure-data reader | fe3478ead5638f8647e67a5ef2a2f2de4e2eb896; original passing and failing file evidence authentication, retained as inactive .txt |
-
-The guide reconciliation has already passed all 108 original operation guards (16 source-status plus 92 qualification operations), 24 TS7 post-pass operations, ten disjoint prose guards, seven immutable locator hashes and nine global guards. The final eleven-guide independent check verified ten source/hash bindings, nine evidence copies and 24 links, then applied the three recorded stale-status corrections. Selected R, all 226 deferred locators and immutable historical proofs remain intact.
-
-The final eleven PSC0 guide paths are psc0/README.md and psc0/docs/selfhost-language/{README.md, IMPLEMENTATION.md, MIGRATION.md, SPEC.md, proposal.json, migration-backlog.json, MIGRATION_BACKLOG.md, CURRENT.md, PS_GRAMMAR_ADOPTION.md, TYPESCRIPT7.md}. The root workspace entry point is docs/TYPESCRIPT7.md. TYPESCRIPT7_CHECKPOINT.md is explicitly archival; old TS5 comparison/producer facts are preserved there without a current execution path.
-
-Begin future authoring at psc0/docs/selfhost-language/CURRENT.md. Use SPEC.md for implementation boundaries, MIGRATION.md and migration-backlog.json for the finite completed/deferred scope, PS_GRAMMAR_ADOPTION.md for syntax/reference errata, and TYPESCRIPT7.md for current PSC0 TS7/recovery behavior. Receipt identities, rather than an old heading containing the word current, determine which claim is established.
-
-### Evidence interpretation and immutable render provenance
-
-Pure evidence readers inspect authenticated data; they do not execute compiler code or create kernel proof. Both reviewers independently checked the complete F run/jobs/logs. Compiler compact JSON plus LF is retained with its own explicitly labelled digest. The native cold receipt is exact because the complete logged object reserializes to its separately emitted original file digest. Provider and root envelopes preserve actual read-back file content and byte counts. Artifact ZIP digests are separate from file/log digests; no archive download is implied.
-
-The completed guide-render provenance remains available as template 947971df08c812200f9f71138d6ce4a7c4741a0e, pure-data instantiator 697e9a1f4e635c446a237b1bb268955a003a04da, TS7 post-pass 9b719316fd4297bab7e73cfd8b1bdd7bf6999cd3 and disjoint prose pass 9aa835eaac9e6dc69ae8227e57503b2637432d52. They describe already applied and reviewed transformations; they are not pending tasks or an invitation to replay old inputs against current files. The actual completed input bundle and final guide manifest above supersede obsolete draft/base lists.
-
-For earlier implementation/history reconstruction, root's initial 40-file TS7 bundle is c423053bd360ed4db193c450f52aec8fe9e24a1c and its metadata-correction/static-audit bundle is e712fce4a08e4bc9723a91523a2de54502f21957. The initial native cold retention review is 310c41f7a9b4d7a4052d9ab3c5a81795bd606ab3; the final cold bundle above maps its files to the agreed repository paths. These are completed provenance, not outstanding source work.
-
-Root completed publication and branch integration. The projection, grammar and migration agents completed their source, evidence and document reviews. New chats should use the committed handoff, current guides and immutable manifests; no unavailable old agent or scratch store is required. Do not repeat an already successful audit without a concrete new change or mismatch.
-
-## Daily development from the completed checkpoint
-
-From psc0, the supported short cycle is:
-
-    npm install
-    npm run check:typescript-profile
-    npm run dev:sh1
-    PSC0_ITERATION_SHA256="$(node -p "require('./dist/sh1/N1/receipt.json').artifacts.javascriptSha256")"
-    npm run iterate:sh1 -- --compiler dist/sh1/N1/index.js --compiler-sha256 "$PSC0_ITERATION_SHA256" --loop
-
-These are developer commands, not permission to execute repository code locally in this cloud-only session. The resident loop accepts prepare/Enter, emit, reset and quit. It retains preparation state and invalidates the changed module and dependent suffix. Restart when the compiler changes. emit produces TypeScript; it does not replace fixed-point/provider qualification. Use full qualification for coherent semantic/toolchain/recovery checkpoints, not for every small edit.
-
-Root development uses the committed TS7 lock with npm ci and the documented package commands in docs/TYPESCRIPT7.md. The active root API is the TS7 CLI adapter. Historical TS5/TS7 measurements remain historical; no whole-pipeline or worker speedup is claimed without a suitable measured comparison.
+The old 61-module R/F count and current 64-module attempt count are evidence for those exact closures. Discover new closure counts from actual imports; do not hard-code them into future qualification.
 
 ## Historical completed M6 and TypeScript 7 result
 

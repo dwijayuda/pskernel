@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-runtime-demand-template-correction",
+  "status": "unattached-next-slice-candidate-independently-source-reviewed-awaiting-qualification",
+  "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+  "baseBlobSha": "9628e3c9def09c487abb5b8859a79c7be735acf9",
+  "baseSha256": "ad3315ec4e54cf7a1cb80b100202000f34e7f69cef2d7b99fb73b459bcb96766",
+  "candidateBlobSha": "dfd58154826c892d18b97b84303abbce6a622d7b",
+  "sha256": "6412739b8ff585f8dda07109ad986802e1006d78e35bdb1051497ad452410095",
+  "edits": [
+    {
+      "operation": "stringAtEnd",
+      "before": "  | .stringAtEnd =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (value : String) (position : String) =>\n          let size :=\n            psTsJoin \"\" [\"__ps$utf8(\", value, \").size\"];\n          Except.ok (psTsJoin \"\" [\"(\", position, \" >= \", size, \")\"]);\n      psTsPrinted2 emit arguments\n",
+      "after": "  | .stringAtEnd =>\n      let emit : String -> String -> Except PsTsEmitError String :=\n        fun (value : String) (position : String) =>\n          Except.ok\n            (psTsJoin \"\" [\"((__ps_s: string, __ps_p: bigint) => \", \"(__ps_p >= __ps$utf8(__ps_s).size))(\", value, \", \", position, \")\"]);\n      psTsPrinted2 emit arguments\n"
+    },
+    {
+      "operation": "arrayEmptyWithCapacity",
+      "before": "  | .arrayEmptyWithCapacity =>\n      let emit : String -> Except PsTsEmitError String :=\n        fun (capacity : String) =>\n          Except.ok\n            (psTsJoin \"\" [\"(() => { void (\", capacity, \"); return []; })()\"]);\n      psTsPrinted1 emit arguments\n",
+      "after": "  | .arrayEmptyWithCapacity =>\n      let emit : String -> Except PsTsEmitError String :=\n        fun (capacity : String) =>\n          Except.ok\n            (psTsJoin \"\" [\"((__ps_capacity: bigint) => { void __ps_capacity; return []; })(\", capacity, \")\"]);\n      psTsPrinted1 emit arguments\n"
+    }
+  ],
+  "sourceBasis": {
+    "operationContractBlob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b",
+    "backendRuntimeModuleBlob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+    "sourcePreludeBlob": "d862ba8c806595fbf11237724089bd2282af9866",
+    "nativeLeanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "nativePreludeBlob": "66af67237683d3c7f8230bcf473c0871e67749a2",
+    "nativeRuntimeObjectBlob": "49213d7be079e11589f1efcfe880dba44622a6e7"
+  },
+  "findings": [
+    {
+      "id": "RT-ORDER-01",
+      "operation": "stringAtEnd",
+      "before": "The printed >= expression evaluates the position operand before the string operand.",
+      "consequence": "Violates declared argument evaluation order; pure canonical final Bool examples alone cannot expose order or first-fault differences.",
+      "correction": "Evaluate the original string then original position as typed IIFE call arguments; invoke the unchanged utf8 helper only after both operands have completed.",
+      "scope": "Concrete emitted IR-order discrepancy. No claim that the diagnostic foreign callback or out-of-proof-domain fault cases are admitted strict source."
+    },
+    {
+      "id": "RT-GEN-01",
+      "operation": "arrayEmptyWithCapacity",
+      "before": "The emitted capacity expression is injected inside a new non-generator arrow body.",
+      "consequence": "An ordinary emitted source call uses yield* and becomes invalid TypeScript inside that nested non-generator closure.",
+      "correction": "Evaluate capacity in the surrounding generator as the typed IIFE call argument; the body only consumes the parameter and returns a fresh empty array.",
+      "scope": "Source-reachable through a function-valued capacity callback; no new language or FFI capability is needed."
+    }
+  ],
+  "operationInspection": [
+    {
+      "id": "natAdd",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "natSub",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "natMul",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "natDiv",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "natMod",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "natEq",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "natNe",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "natLe",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "natLt",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intOfNat",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intRepr",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intNegSucc",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intNeg",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intAdd",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intSub",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intMul",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intEq",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intLe",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "intLt",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "boolNot",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "boolAnd",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "left once; right once only if left is true",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "boolOr",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "left once; right once only if left is false",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "boolEq",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "boolNe",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "charOfNat",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "charToNat",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringPush",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringSingleton",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringLength",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringAppend",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringUtf8ByteSize",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringNext",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringGet",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringAtEnd",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "text then position, each once as outer call arguments, before utf8 helper work",
+      "emittedOperandContext": "corrected to value then position as typed IIFE call arguments",
+      "change": "argument-order correction"
+    },
+    {
+      "id": "stringExtract",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "stringEq",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "arrayEmptyWithCapacity",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "corrected to typed IIFE call argument in surrounding generator",
+      "change": "generator-context correction"
+    },
+    {
+      "id": "arraySize",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "arrayPush",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "array expression once, then ordinary dense-array copying, then appended value expression once; copy timing is unobservable under the canonical immutable-value and successful-allocation domain",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "arrayGet",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "arrayGetD",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "arraySet",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "arraySetIfInBounds",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "arrayMap",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    },
+    {
+      "id": "arrayFoldl",
+      "sourceOperandOccurrences": "one textual occurrence per operand",
+      "runtimeDemand": "all source operand expressions once, in declared argument order",
+      "emittedOperandContext": "no source operand moved under a new non-generator function body",
+      "change": "none relative to equality-corrected base"
+    }
+  ],
+  "reviewLimits": "Static inspection of all 45 enabled templates for operand placement, occurrence and order; independent exact two-case forward/reverse reconstruction. Array.push copies between its operand expressions, so this inventory does not claim that every internal helper action follows all operands. No compiler execution, full preservation proof or successful qualification is claimed.",
+  "plannedCombinedFixture": {
+    "owner": "runtime_comparison_finish/regression_review",
+    "totalDeclarations": 12,
+    "totalIndependentNativeValues": 24,
+    "totalDiagnosticHostProbes": 21,
+    "thisCorrectionDeclarations": 2,
+    "thisCorrectionIndependentValues": 7,
+    "thisCorrectionHostProbes": 5,
+    "otherCorrection": "Separate Nat-major and partial-application candidate 3e11222a620cd044c9a5d48243c9b33421b5d5dc, retaining Nat prerequisite 3153b38e9a85e00932cac7cad59440dede218899; no erasure changes are in the two-template file.",
+    "sourceKinds": [
+      "lean",
+      "ps"
+    ],
+    "rawSourceCompilationsPerGeneration": 2,
+    "sharedTypeScriptCompilationsPerGeneration": 1,
+    "addedNativeReferenceRunsPerQualification": 1,
+    "note": "Counts describe the independently source-reviewed next-slice fixture, not executed observations.",
+    "gateBlob": "2b25f896d25689b6a432ad0d8a60d23aec47063c",
+    "gateSha256": "07e740195ccf6051bb3ec4afd1784645a3369ec08be843a676efc26612ba9216",
+    "combinedGuardedManifestBlob": "6bb5580da3073cb5bb0636bb876702918d69aae5",
+    "independentGateReview": {
+      "reviewer": "/root/runtime_comparison_finish",
+      "status": "clear-source-review-only",
+      "predecessorBlob": "4651b0a8c9a32bd4129a641e3dfd9e64c23a3a8f",
+      "predecessorSevenEditReversalToBase8838155f": true,
+      "partialExtension22LineHunksReverseToPredecessor": true,
+      "finalOneCommentDeltaFrom8cd875": true,
+      "old18ValueRowsAnd11ProbeRowsPreservedAsExactPrefixes": true,
+      "rawSourceAndNativeWrapperAndObservationAndHostProbePinsIndependentlyReconstructed": true,
+      "sourceGrammarAndNativeTypesReviewed": true,
+      "nativeReceiptPreservedAndCanonicalObservationObjectSeparate": true,
+      "hostRecordsDoNotClaimPrivateBrandConformance": true,
+      "noExecutionClaim": true
+    },
+    "totalDefinitions": 11,
+    "totalStructures": 1,
+    "pins": {
+      "lean": "aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e",
+      "ps": "2a9ffece8b7dbbec066e0f540c074d6d88b9bf6aecdd6974c70ca1fa119f07f2",
+      "native": "75486abeb314702a573b84c473e8fc8c4659b29ae8793f0ee7f89539e4c4a131",
+      "values": "9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f",
+      "probes": "76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91"
+    },
+    "combinedGuardedManifestSha256": "1539b6f0dde7a1ccbee57ae1e97517d5a55b77ed492610a2c24a05a789f5cbad",
+    "guideBlob": "917d49b4028edcf8ec8d3ee71e057c45c4692fc0"
+  },
+  "invariants": {
+    "allOther43EnabledTemplatesUnchanged": true,
+    "previousSixEqualityFixesPreserved": true,
+    "runtimeHelperOrCacheAlgorithmChanged": false,
+    "kernelOrProviderOrDefeqOrMetatheoryChanged": false,
+    "grammarChanged": false,
+    "seedChanged": false,
+    "qualifiedRuntimeContractChanged": false
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "formalPreservationProven": false,
+  "executed": false,
+  "refUpdated": false,
+  "integration": "Keep separate from the immediate equality qualification. Root alone checks expected file blobs, commits under the current head lease, updates AI_WORK_STATE and evidence, and dispatches the coherent next qualification. This manifest does not update a ref or claim a passing run.",
+  "peerReview": {
+    "reviewer": "/root/runtime_comparison_finish/regression_review",
+    "status": "clear-source-review-only",
+    "exactTwoCaseForwardAndReverseReconstruction": true,
+    "noSourceOperandCaptureIntroduced": true,
+    "capacityYieldRemainsInOuterGenerator": true,
+    "allOther43EnabledTemplatesAndPriorEqualityFixesUnchanged": true,
+    "executed": false
+  },
+  "analysisDocument": {
+    "path": "psc0/docs/selfhost-language/strict/RUNTIME_LAW_REVIEW.md",
+    "sha256": "1d74a422a092c8c63d3a11bfd7e4156b5fc288fa52b29dbbbe6ff9d320e81074",
+    "bytes": 37609,
+    "operationCount": 45,
+    "status": "source-reviewed-conditional-arguments-no-general-discharge",
+    "supersedesBlob": "d9580bbbf2bcb84924984718563909dbea976c4c",
+    "blob": "9c77b7da9d4d99c2cfe49e0454c8c20b85d844f9",
+    "expectedPathAtIntegration": "Root must confirm the proposed new path is absent or explicitly reconcile an existing file.",
+    "immutableDocumentUpdateBase": "d9580bbbf2bcb84924984718563909dbea976c4c",
+    "documentUpdates": [
+      {
+        "purpose": "Describe the coherent proven semantic slice",
+        "before": "The recommended next implementation is the two-operation correction below, together with the separate Nat-major correction and their shared raw-source regression.",
+        "after": "The recommended next implementation is the two-operation correction below, together with the separate Nat-major and partial-application corrections and their shared raw-source regression."
+      },
+      {
+        "purpose": "Extend reviewed erasure boundary",
+        "before": "| Separate Nat-major candidate | `3153b38e9a85e00932cac7cad59440dede218899` | Separate Erasure/Expr change; not included in the two-operation diff |\n| Combined regression gate | `4651b0a8c9a32bd4129a641e3dfd9e64c23a3a8f` | Seven raw declarations, 18 native values and 11 diagnostic host probes |",
+        "after": "| Separate Nat-major prerequisite | `3153b38e9a85e00932cac7cad59440dede218899` | Separate Erasure/Expr change; not included in the two-operation diff |\n| Combined Nat-major and partial-application candidate | `3e11222a620cd044c9a5d48243c9b33421b5d5dc` | Eager capture of supplied computations, with proof-erased runtime annotations |\n| Combined regression gate | `2b25f896d25689b6a432ad0d8a60d23aec47063c` | Eleven definitions and one structure, 24 native values and 21 diagnostic host probes |"
+      },
+      {
+        "purpose": "Update immutable gate review chain",
+        "before": "The combined gate independently reverses through seven edit regions to `8838155fb80ef28f7bf5c3916c207c6c94451634`. Its raw Lean and current new-only `ps-0.9-r3` PS fixtures, native reference wrapper, fixed value rows and host trace rows have independently reconstructed hashes.",
+        "after": "The combined gate's Nat/runtime predecessor `4651b0a8c9a32bd4129a641e3dfd9e64c23a3a8f` independently reverses through seven edit regions to `8838155fb80ef28f7bf5c3916c207c6c94451634`. The reviewed partial-application extension preserves the predecessor's 18 value rows and 11 diagnostic rows as exact prefixes; its additional changes are limited to the bounded raw fixture, native wrapper, diagnostic dispatch and corresponding counts. Its raw Lean and current new-only `ps-0.9-r3` PS fixtures, native reference wrapper, fixed value rows and host trace rows have independently reconstructed hashes."
+      },
+      {
+        "purpose": "Describe all bounded source declarations",
+        "before": "The combined next-slice gate has five Nat-major declarations and the two source declarations for stringAtEnd and array capacity. It compiles equivalent raw Lean and new-only PS through compileStrictSources, checks byte-identical TypeScript/admissions, and performs one additional tiny TypeScript 7 compile of their shared output for each compiler generation.",
+        "after": "The combined next-slice gate has five Nat-major definitions, two source definitions for stringAtEnd and array capacity, and four definitions plus one structure for partial applications. It compiles equivalent raw Lean and new-only PS through compileStrictSources, checks byte-identical TypeScript/admissions, and performs one additional tiny TypeScript 7 compile of their shared output for each compiler generation."
+      },
+      {
+        "purpose": "Record final finite scope without changing general law claims",
+        "before": "A single additional native Lean execution calculates 18 pure values from the exact seven raw Lean definitions, and its retained receipt is reused by N1/C1/C2/C3. Eleven host probes separately inspect once-only evaluation, call order, first-fault identity and unselected-branch non-demand. The String/Array share is seven pure values and five host probes. Array capacity values are bounded by 17.",
+        "after": "A single additional native Lean execution calculates 24 pure values from the exact eleven raw Lean definitions and one structure, and its retained receipt is reused by N1/C1/C2/C3. Twenty-one host probes separately inspect once-only evaluation, call order, first-fault identity and unselected-branch non-demand. Fourteen probes use callbacks alone; seven additionally use a noncanonical host accessor to distinguish computed-callee demand. The String/Array share remains seven pure values and five host probes. Array capacity values are bounded by 17.\n\nThe added partial-application cases inspect a computed function field and two computed supplied arguments, repeated use, an unused saved closure, nested incomplete groups, and erased type/proof arguments. Pure-value cases use plain immutable host records with mathematically related fields; they do not establish full generated-brand carrier conformance. Accessor and callback traces are separate host diagnostics outside admitted source effects. The implementation's runtime annotation removes proof binders in the same way as erasure, and direct generic callees retain their type arguments at the call. These source-inspected cases support the bounded correction; they do not close the general closure, call-group or source-erasure obligations. [P10]"
+      },
+      {
+        "purpose": "Keep finite evidence limitation explicit",
+        "before": "It does not turn 18 or 186 examples into a theorem for arbitrary programs, nor prove source proof provenance.",
+        "after": "It does not turn 24 or 186 examples into a theorem for arbitrary programs, nor prove source proof provenance."
+      },
+      {
+        "purpose": "Separate intrinsic laws from erasure proof",
+        "before": "The Nat-major candidate retains its own separate identity and erasure review. This document neither modifies it nor treats the intrinsic-template proof as a proof of Nat matching, fresh-name generation or branch substitution.",
+        "after": "The Nat-major and partial-application candidates retain their own separate identities and erasure review. This document neither modifies them nor treats the intrinsic-template arguments as proofs of Nat matching, fresh-name generation, branch substitution, general closure capture or application grouping."
+      },
+      {
+        "purpose": "Update integration sequence only",
+        "before": "1. Integrate the reviewed Nat, two-template and source-origin changes as one coherent next semantic slice, with the combined small fixture and exact evidence binding.",
+        "after": "1. Integrate the reviewed Nat, partial-application, two-template, source-origin and ingress-snapshot changes as one coherent next semantic slice, with the combined small fixture and exact evidence binding."
+      },
+      {
+        "purpose": "Pin expanded gate",
+        "before": "[P5]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/4651b0a8c9a32bd4129a641e3dfd9e64c23a3a8f",
+        "after": "[P5]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/2b25f896d25689b6a432ad0d8a60d23aec47063c"
+      },
+      {
+        "purpose": "Pin combined erasure helper",
+        "before": "[N1]: https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Prelude.lean",
+        "after": "[P10]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/3e11222a620cd044c9a5d48243c9b33421b5d5dc\n[N1]: https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Prelude.lean"
+      }
+    ],
+    "all45LocalLawAndCacheSectionsUnchanged": true,
+    "independentStatusAndRegressionReview": {
+      "reviewer": "/root/runtime_comparison_finish/regression_review",
+      "status": "clear-source-review-only",
+      "sourceScope": "Status and section 6 reviewed against final 3e112/2b25 candidates, counts and host diagnostic domains; document SHA256 independently reconstructed.",
+      "executed": false
+    }
+  },
+  "analysisAssurance": {
+    "conditionalFirstOrderLawArguments": 43,
+    "conditionalHigherOrderLawArguments": 2,
+    "wholeLedgerRowsDischarged": 0,
+    "generalProofInferredFromFiniteExamples": false,
+    "allGlobalAssuranceFlagsRemainFalse": true,
+    "cacheAlgorithmChanged": false
+  },
+  "supersedesManifestBlob": "bc95032e7a1fc2c45d4966d5d761a909cd35ff3c",
+  "separateErasureReview": {
+    "status": "source-review-clear",
+    "exprBlob": "3e11222a620cd044c9a5d48243c9b33421b5d5dc",
+    "guardBlob": "852240e14ed49ce01b1f835133492fd117db4327",
+    "manifestBlob": "77934446d86cdd6181b012df93bc55c6a05f8355",
+    "exactEdits": [
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "edits": 3,
+        "forward": true,
+        "reverse": true,
+        "baseHash": "c344f20bd6e2b632ca46eb6428b449fe6387c09e07d87f91b6bf4b8f116f62a2",
+        "candidateHash": "e536b559dee6fa9999389e5a8804563c7a847c0bd09c12c4e309b012c7f6d8c4"
+      },
+      {
+        "path": "psc0/scripts/check-erasure-finish-application-sequencing-selfhost-source-syntax.mjs",
+        "edits": 4,
+        "forward": true,
+        "reverse": true,
+        "baseHash": "41a524081bc83e2419ec4706adc3a8034daa675e85a12bb725cf213542b3aa5f",
+        "candidateHash": "76b8cbbb3bed6c19d58c31ba7589e2119b1bd3001cc3820ef4ada9f4695ad665"
+      }
+    ],
+    "executed": false,
+    "strictQualified": false,
+    "semanticCorrespondenceDischarged": false,
+    "exprSha256": "102e91e3ab8fc7f98e765f7e2e9859e35593605c240598c9183e59acd1325508",
+    "refinementManifest": "35ab1d9ef8faca77d919af2e8c4a52f270710add",
+    "refinementEditRegions": 4,
+    "proofPiAnnotationCornerResolved": true,
+    "qualified": false
+  },
+  "evidenceBinderReview": {
+    "blob": "6027955a326dd5cb0e1dba59ba76a8901dde5672",
+    "sha256": "b2ec7f6d52f8959a6a0d5a08b3fcf493985150f0ca4b0f1982e2362d72bdf681",
+    "status": "clear-source-review-only",
+    "baseIngressBinder": "e4c39270d8dff2943ac3a2c1dc0241dbe35c8e29",
+    "eightCountEditsIndependentlyReversed": true,
+    "sourceOriginAndIngressAndArtifactBindingUnchanged": true,
+    "executed": false
+  }
+}

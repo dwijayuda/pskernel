@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-source-origin-host-native-candidate",
+  "repository": "dwijayuda/pskernel",
+  "reviewedSourceCommit": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
+  "status": "independently-source-reviewed-unattached-awaiting-cloud-qualification",
+  "mode": "guarded-whole-blob-replacements",
+  "entries": [
+    {
+      "path": "psc0/scripts/sh1-strict-source.mjs",
+      "expectedBaseBlob": "6fb4e25238d99ad6e408726831454e2b14235092",
+      "blob": "d01714cc7b8aad63199904fb7944dde51af2ff83"
+    },
+    {
+      "path": "psc0/scripts/StrictSourceCompile.lean",
+      "expectedBaseBlob": "6f3b14e0110548f530a2ec6139105efbeb2e203d",
+      "blob": "c741759094060bcccdbeb67d24bfb30dfe864b0e"
+    },
+    {
+      "path": "psc0/scripts/sh1-capabilities.mjs",
+      "expectedBaseBlob": "dd23adb72d33c0df14a88ec846ab6c705d5813b2",
+      "blob": "8d87080352509dc936614d560aa68ded14fc36e8"
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "blob": "c403bd879e439b7b6e88303df430890352a14115"
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "blob": "a388d013dbf6c9270ffa91997512f672da6aabff"
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "blob": "f31d88f0172122d4cf62d62f35f372fe89581c18"
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "blob": "a947a4058e3d91a02d4f8120a3d86556100c8555"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "blob": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53"
+    }
+  ],
+  "pinnedReviewSources": [
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+      "blob": "4a9daaf4179ca7fa74e9183e542891ec110fd5d7"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Declaration.lean",
+      "blob": "c34c280b1c42f23138cfec79f4e448db17071952"
+    },
+    {
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+      "blob": "9c896076032762543b57d88c0010f90ad0a066d5"
+    },
+    {
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Source.lean",
+      "blob": "1451dabae049d324b7aeb2d1b89b7bf56dea32fd"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "blob": "6543f69216532449bddb341495cada280d7f8943"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "blob": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "blob": "e91415c66fec9115a281c93c9459189bb919f121"
+    },
+    {
+      "path": "psc0/packages/bridge/src/Ps/Bridge/Json.lean",
+      "blob": "4ddfec62f2edd54be87091812dcb6add6304e3ed"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-accumulators.lean",
+      "blob": "dd45dbca35d8ec0373f3f814c6338aecf654ea50"
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-accumulators.ps",
+      "blob": "6f2c84a62e576b309e11d12c4b53b51094c3ac49"
+    }
+  ],
+  "hostReview": {
+    "initialRootDraft": "ea946c3f3d1331316544bb0c412a2e6ede7324e7",
+    "normalizerFacts": [
+      "RewriteCall calls ChangedArguments only with plan.explicitIds and excludes majorId; every other walk only concatenates those changes.",
+      "generalizedIds can contain duplicates from distinct recursive calls. Their exact order and repetition are retained.",
+      "parameterIds come from all actual typed source binders; explicitIds are the explicit subset. Set membership avoids quadratic host assertions.",
+      "BuildNormalizationWithOrigin always constructs forallE workerType and matchE workerValue and retains the fixed binder subset.",
+      "Successful normalized declaration batches are exactly [definition worker, definition publicWrapper].",
+      "Stable data batches contain the actual type, constructors, recursor in actual preparation order; they do not invent separate projection declarations."
+    ],
+    "limits": [
+      "Keep existing raw input text, module-input length 1024, source-option checks, and original-IR carrier checks unchanged.",
+      "Origin source declaration lists use the actual sourcePolicy.stats.declarationCount.",
+      "Parameter, explicit, and generalized ID lists use actual sourcePolicy.stats.visitedSteps.",
+      "Prepared Core list uses min(MAX_SAFE_INTEGER, syntaxSteps + 2 * sourceDeclarationCount); stable value batches have one member, normalized value batches two, and data batches have type/recursor plus explicitly visited constructors.",
+      "Declaration/Core names no longer inherit the unrelated 1024 module-name cap. Owned list/Core-name walks detect cycles.",
+      "Numeric Core-name components remain arbitrary nonnegative bigint decimal strings, without Number conversion.",
+      "The worker-syntax visitor uses a visited-object Set over the already constructed compiler-owned graph; no origin-only default numeric cap is added.",
+      "This is post-emission observation of source-owned results, not admission of arbitrary caller graphs or a global wall-clock/heap guarantee."
+    ]
+  },
+  "sourceOriginsSchema": {
+    "orderedFields": [
+      "policy",
+      "actualParsedModulesRetained",
+      "moduleCount",
+      "sourceDeclarationCount",
+      "coreDeclarationCount",
+      "normalizationCount",
+      "modules",
+      "semanticCorrespondenceDischarged"
+    ],
+    "policy": "psc0-declaration-origins/1",
+    "moduleFields": [
+      "moduleName",
+      "coreStart",
+      "batches"
+    ],
+    "batchFields": [
+      "sourceIndex",
+      "sourceName",
+      "span",
+      "coreStart",
+      "members",
+      "normalization"
+    ],
+    "memberFields": [
+      "index",
+      "name",
+      "role"
+    ],
+    "normalizationFields": [
+      "functionName",
+      "workerName",
+      "parameterIds",
+      "explicitIds",
+      "majorId",
+      "generalizedIds",
+      "workerBinderCount",
+      "workerTypeKind",
+      "workerValueKind",
+      "actualWorkerSyntaxRetained"
+    ],
+    "nameComponent": [
+      "str|num",
+      "exact string or unsigned decimal string"
+    ],
+    "spanFields": {
+      "start": [
+        "byteOffset",
+        "line",
+        "column"
+      ],
+      "stop": [
+        "byteOffset",
+        "line",
+        "column"
+      ]
+    },
+    "identifierArrays": "Unsigned decimal strings preserve actual retained IDs, including repeated generalized IDs.",
+    "normalizationAbsent": null,
+    "semanticCorrespondenceDischarged": false,
+    "generatedOnlyTrailingFields": [
+      "observationsSha256",
+      "observationBoundary"
+    ],
+    "observationBoundary": "after-atomic-source-emission",
+    "generatedDigest": "SHA-256 over UTF-8 JSON.stringify(common ordered sourceOrigins fields), without newline and excluding generated-only trailing fields.",
+    "nativeDigest": "Native serializes exactly the common ordered payload using psJsonObject/psJsonArray. Root's binder must hash its reconstructed common JSON payload and compare with generated observationsSha256; Lean does not fabricate a digest."
+  },
+  "diagnostics": {
+    "newCase": "PsSh1SourceError.origin(moduleName, PsElabOriginError)",
+    "fields": [
+      "stage:source",
+      "code:source-elaboration",
+      "moduleName",
+      "compilerStage:elaboration",
+      "detail",
+      "owner",
+      "sourceIndex",
+      "phase",
+      "span"
+    ],
+    "phases": [
+      "stableDeclaration",
+      "normalizationPlanning",
+      "normalizedWorker",
+      "publicWrapper",
+      "declarationInsertion"
+    ],
+    "detailDifference": "Native detail uses existing psHostElabErrorText; generated detail uses the actual PsElabError variant tag. These human diagnostic details are not an asserted native/generated byte-equality surface."
+  },
+  "receiptCounts": {
+    "preparationCount": 1,
+    "canonicalAdmissionEncodingCount": 1,
+    "environmentReconstructionCount": 0,
+    "portableIrCheckCount": 1
+  },
+  "capabilityFacts": {
+    "reuse": "The two existing Lean/PS raw-source positive compiles and six existing negative source calls; no new full compiler preparation.",
+    "eachPositive": {
+      "sourceDeclarations": 35,
+      "coreDeclarations": 55,
+      "normalizationPlans": 16,
+      "unchangedDeclarationsChecked": 3,
+      "structureBatches": 2,
+      "positionPairs": 35
+    },
+    "duplicateGeneralizedIds": "sh1OuterHypothesis changes the state in two recursive branches; retain [stateId,stateId].",
+    "implicitAndProofBinders": "sh1ReverseInto and sh1WithProof assert explicit parameter positions and fixed binder retention from actual typed IDs.",
+    "negativeCases": 6,
+    "exactPhaseAssertions": 5,
+    "narrowedNestedIh": "Retain actual phase and require a known origin phase, without guessing whether stable declaration or normalized worker was the first refusal.",
+    "historicalStableMode": "Existing explicitly requested stable-mode diagnostic remains separate and unchanged.",
+    "runtimeBehaviorCallsUnchanged": true,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "negativeStoredSpans": "All six negatives assert exact start and stop positions from authored token/tail metadata, including existing ParseLean grouping-span behavior."
+  },
+  "execution": {
+    "localFiles": false,
+    "clone": false,
+    "shell": false,
+    "compilerExecution": false,
+    "workflowExecution": false,
+    "refsMutated": false
+  },
+  "outstanding": [
+    "Root evidence-binder integration and exact common-payload hashing/binding.",
+    "One coherent source-closure cloud qualification with all reviewed portable and host changes.",
+    "General source/Core/IR semantic preservation and full strict SH/1 qualification remain open."
+  ],
+  "peerReview": {
+    "reviewer": "/root/runtime_comparison_finish",
+    "status": "CLEAR for exact final host, native serializer, and corrected capability blobs; no execution",
+    "findings": [
+      {
+        "scope": "four parenthesized-argument negative fixture spans",
+        "source": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "blob": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3",
+        "reason": "psParseLeanApplicationTailWithFuel consumes ')' but passes inner.value to psLeanApplicationWithArgument; psFinishLeanValueDeclaration uses psLeanTermStop(value).",
+        "correction": "Every negative fixture now pins the exact final stored token and excluded raw suffix. Four cases store the final state token span before ')\\n'; two ordinary references store their token span before '\\n'. No second parser or weaker range-only assertion.",
+        "supersedesCapabilityBlob": "cf1dd2947cf8c6cf2f0d7a4148e492459d00ea49"
+      },
+      {
+        "scope": "final exact schema and source-construction audit",
+        "result": "Native 13 syntax constructors have correct arities; 7 origin roles and 5 origin phases match retained declarations. Structured-name ordering, arbitrary numeric decimal components, plan IDs including duplicates, batch/core ordering, and common JSON field order match the host observer. Existing fixtures give 35 source declarations plus 16 worker additions and 4 extra structure members = 55 Core declarations. Host has no extra parse/elaboration/IR-check pass and no unrelated observation-only numeric/name cap."
+      }
+    ],
+    "reviewedManifest": "525e2f063032fe6122b5e37f88619ee578dd23a7",
+    "reviewedFiles": [
+      {
+        "path": "psc0/scripts/sh1-strict-source.mjs",
+        "blob": "d01714cc7b8aad63199904fb7944dde51af2ff83"
+      },
+      {
+        "path": "psc0/scripts/StrictSourceCompile.lean",
+        "blob": "c741759094060bcccdbeb67d24bfb30dfe864b0e"
+      },
+      {
+        "path": "psc0/scripts/sh1-capabilities.mjs",
+        "blob": "8d87080352509dc936614d560aa68ded14fc36e8"
+      }
+    ]
+  },
+  "separatePreExistingFollowUp": {
+    "status": "reported to root; deliberately not included in these frozen blobs",
+    "scope": "compileStrictSources direct sourceOptions/irOptions ingress",
+    "finding": "Caller option records currently reach the portable atomic call before count/type validation. The convenience sourceOptions builder can be bypassed.",
+    "proposal": "Before source input traversal, validate/capture the five source Nat fields and IR maxSteps/maxFindings using their existing safe-count predicate; preserve existing nonnegative-bigint contract for IR maxTypeSteps. Build fresh compiler-owned option records from those captured primitive values. Preserve valid zero resource limits and existing portable refusal diagnostics.",
+    "verification": "Use an atomic-entry spy for malformed direct options and reuse existing zero-budget contracts; no extra full-source preparation."
+  }
+}

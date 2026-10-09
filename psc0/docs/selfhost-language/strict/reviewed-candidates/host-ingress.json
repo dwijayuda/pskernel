@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-host-ingress-snapshot-guarded-manifest",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "observedHead": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+  "status": "independently-source-reviewed-unexecuted",
+  "noRefsUpdated": true,
+  "files": [
+    {
+      "path": "psc0/scripts/sh1-strict-source.mjs",
+      "expectedCommittedBaseBlob": "6fb4e25238d99ad6e408726831454e2b14235092",
+      "newBlob": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+      "reviewedIntermediateBlob": "d01714cc7b8aad63199904fb7944dde51af2ff83",
+      "exactEditsFromReviewedIntermediate": [
+        {
+          "before": "export function strictSourceFailure(error) {",
+          "after": "// Snapshot caller option primitives before inspecting any source. The ordinary\n// constructor functions only build owned records; they do not parse or compile.\n// Preserve the existing count contracts and valid zero limits. The IR type-work\n// budget is any nonnegative bigint, without a new safe-integer ceiling.\nfunction snapshotStrictOptions(compiler, sourceOptions, irOptions) {\n  const source = sourceOptions ?? compiler.psSh1DefaultSourceOptions;\n  const ir = irOptions ?? compiler.psIrCheckDefaultOptions;\n  const sourceValues = sourceOptionKeys.map((key) => {\n    const value = source[key];\n    count(value, 'sourceOptions.' + key);\n    return value;\n  });\n  const maxSteps = ir.maxSteps;\n  const maxTypeSteps = ir.maxTypeSteps;\n  const maxFindings = ir.maxFindings;\n  count(maxSteps, 'irOptions.maxSteps');\n  count(maxFindings, 'irOptions.maxFindings');\n  assert(typeof maxTypeSteps === 'bigint' && maxTypeSteps >= 0n,\n    'PSC0_SH1_IR_OPTION: maxTypeSteps');\n  return {\n    source: compiler.psSh1SourceOptionsWithLimits(...sourceValues),\n    ir: compiler.psIrCheckOptionsWithLimits(maxSteps, maxTypeSteps, maxFindings),\n  };\n}\n\n// Capture caller-owned arrays and getters once, before constructing evidence or\n// portable input. Fixed carrier lengths bound these reads. All later source and\n// identity observations use only the captured strings and private plain records;\n// a caller getter cannot substitute different bytes between hashing and emission.\nfunction snapshotStrictInputs(inputs) {\n  assert(Array.isArray(inputs), 'PSC0_SH1_SOURCE_INPUT_CARRIER');\n  const inputCount = inputs.length;\n  assert(Number.isSafeInteger(inputCount) && inputCount >= 0 && inputCount <= 16384,\n    'PSC0_SH1_SOURCE_INPUT_CARRIER');\n  const captured = [];\n  let bytes = 0;\n  for (let index = 0; index < inputCount; index++) {\n    const input = inputs[index];\n    assert(input, 'PSC0_SH1_SOURCE_MODULE_CARRIER: ' + index);\n    const callerModuleName = input.moduleName;\n    assert(Array.isArray(callerModuleName), 'PSC0_SH1_SOURCE_MODULE_CARRIER: ' + index);\n    const segmentCount = callerModuleName.length;\n    assert(Number.isSafeInteger(segmentCount) && segmentCount >= 0 && segmentCount <= 1024,\n      'PSC0_SH1_SOURCE_MODULE_CARRIER: ' + index);\n    const moduleName = [];\n    let moduleBytes = 0;\n    for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++) {\n      const segment = callerModuleName[segmentIndex];\n      requireText(segment, 1048576, 'module:' + index);\n      moduleName.push(segment);\n      moduleBytes += Buffer.byteLength(segment);\n    }\n    const source = input.source;\n    requireText(source, 67108864, 'source:' + index);\n    bytes += moduleBytes + Buffer.byteLength(source);\n    assert(bytes <= 67108864, 'PSC0_SH1_SOURCE_INPUT_CARRIER_BYTES');\n    captured.push({ moduleName, source });\n  }\n  return { inputs: captured, bytes };\n}\n\nexport function strictSourceFailure(error) {"
+        },
+        {
+          "before": "  const options = sourceOptions ?? compiler.psSh1DefaultSourceOptions;\n  const checkOptions = irOptions ?? compiler.psIrCheckDefaultOptions;\n  // Independent host ingress ceilings protect JS carrier traversal itself.\n  // Portable option exhaustion retains its own source-policy diagnostics.\n  assert(Array.isArray(inputs) && inputs.length <= 16384, 'PSC0_SH1_SOURCE_INPUT_CARRIER');\n  let bytes = 0;\n  const manifest = inputs.map((input, index) => {\n    assert(input && Array.isArray(input.moduleName) && input.moduleName.length <= 1024,\n      'PSC0_SH1_SOURCE_MODULE_CARRIER: ' + index);\n    requireText(input.source, 67108864, 'source:' + index);\n    for (const segment of input.moduleName) requireText(segment, 1048576, 'module:' + index);\n    bytes += Buffer.byteLength(input.source) +\n      input.moduleName.reduce((sum, segment) => sum + Buffer.byteLength(segment), 0);\n    assert(bytes <= 67108864, 'PSC0_SH1_SOURCE_INPUT_CARRIER_BYTES');\n    return { moduleName: [...input.moduleName], sourceSha256: digest(input.source),\n      sourceBytes: Buffer.byteLength(input.source) };\n  });\n  const ownedInputs = list(compiler, inputs.map(({ moduleName, source }) =>\n    compiler.psSh1SourceInput(list(compiler, moduleName), source)));\n",
+          "after": "  const capturedOptions = snapshotStrictOptions(compiler, sourceOptions, irOptions);\n  const options = capturedOptions.source;\n  const checkOptions = capturedOptions.ir;\n  // Independent host ingress ceilings protect JS carrier traversal itself.\n  // Portable option exhaustion retains its own source-policy diagnostics.\n  const { inputs: capturedInputs, bytes } = snapshotStrictInputs(inputs);\n  const manifest = capturedInputs.map(({ moduleName, source }) => ({\n    moduleName: [...moduleName], sourceSha256: digest(source),\n    sourceBytes: Buffer.byteLength(source),\n  }));\n  const ownedInputs = list(compiler, capturedInputs.map(({ moduleName, source }) =>\n    compiler.psSh1SourceInput(list(compiler, moduleName), source)));\n"
+        },
+        {
+          "before": "  assert.equal(count(policy.moduleCount, 'moduleCount'), inputs.length);",
+          "after": "  assert.equal(count(policy.moduleCount, 'moduleCount'), capturedInputs.length);"
+        },
+        {
+          "before": "  const parsedModules = readOwnedList(compiler, atomic.parsedModules, inputs.length, 'parsed modules');\n  assert.equal(parsedModules.length, inputs.length);",
+          "after": "  const parsedModules = readOwnedList(compiler, atomic.parsedModules, capturedInputs.length, 'parsed modules');\n  assert.equal(parsedModules.length, capturedInputs.length);"
+        },
+        {
+          "before": "    readOwnedList(compiler, parsed.moduleName, 1024, 'parsed module name'), inputs[index].moduleName,",
+          "after": "    readOwnedList(compiler, parsed.moduleName, 1024, 'parsed module name'), capturedInputs[index].moduleName,"
+        },
+        {
+          "before": "      sourceKind, options: actualOptions, moduleCount: inputs.length,",
+          "after": "      sourceKind, options: actualOptions, moduleCount: capturedInputs.length,"
+        },
+        {
+          "before": "    sourceOrigins: observeStrictOrigins(compiler, atomic, inputs, parsedModules),",
+          "after": "    sourceOrigins: observeStrictOrigins(compiler, atomic, capturedInputs, parsedModules),"
+        }
+      ],
+      "reversalToReviewedIntermediateVerified": true,
+      "priorOriginManifest": "6dc338dd19c2a14c088a4a7e9f06fd3246cfdfd6"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "expectedCommittedBaseBlob": "7e70f4ec75a156c87dc5f1023c451f77b132bc39",
+      "newBlob": "ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f",
+      "exactEditsFromCommittedBase": [
+        {
+          "before": "export async function runStrictSourceConformance({ compiler, compilerSha256, outDir }) {\n  const accepted = [];",
+          "after": "const sourceLimitKeys = ['maxModules', 'maxInputBytes', 'maxSyntaxSteps', 'maxTypeSteps', 'maxTermSteps'];\nconst irLimitKeys = ['maxSteps', 'maxTypeSteps', 'maxFindings'];\n\n// These boundary probes intercept the atomic entry point and never delegate to\n// it. The normal record/List factories do no source preparation or IR checking.\nfunction probeIngressSnapshots(compiler, compilerSha256) {\n  const aboveSafeInteger = BigInt(Number.MAX_SAFE_INTEGER) + 1n;\n  const cases = [\n    ...sourceLimitKeys.map((key) => ({ id: 'negative-source-' + key, group: 'source', key, value: -1n })),\n    ...irLimitKeys.map((key) => ({ id: 'negative-ir-' + key, group: 'ir', key, value: -1n })),\n    { id: 'number-source-maxModules', group: 'source', key: 'maxModules', value: 1 },\n    { id: 'number-ir-maxTypeSteps', group: 'ir', key: 'maxTypeSteps', value: 1 },\n    { id: 'missing-source-maxSyntaxSteps', group: 'source', key: 'maxSyntaxSteps', value: undefined },\n    { id: 'missing-ir-maxSteps', group: 'ir', key: 'maxSteps', value: undefined },\n    { id: 'unsafe-source-maxInputBytes', group: 'source', key: 'maxInputBytes', value: aboveSafeInteger },\n    { id: 'unsafe-ir-maxFindings', group: 'ir', key: 'maxFindings', value: aboveSafeInteger },\n  ];\n  const malformedOptions = [];\n  for (const test of cases) {\n    let sourceGetterReads = 0;\n    let atomicInterceptions = 0;\n    const sourceOptions = Object.fromEntries(sourceLimitKeys.map((key) =>\n      [key, compiler.psSh1DefaultSourceOptions[key]]));\n    const irOptions = Object.fromEntries(irLimitKeys.map((key) =>\n      [key, compiler.psIrCheckDefaultOptions[key]]));\n    (test.group === 'source' ? sourceOptions : irOptions)[test.key] = test.value;\n    const untouchedInput = {\n      get moduleName() { sourceGetterReads++; throw new Error('PSC0_SH1_UNEXPECTED_SOURCE_READ'); },\n      get source() { sourceGetterReads++; throw new Error('PSC0_SH1_UNEXPECTED_SOURCE_READ'); },\n    };\n    const spy = Object.create(compiler);\n    Object.defineProperty(spy, 'psCompilerSh1TypeScriptSources', { value: () => {\n      atomicInterceptions++;\n      throw new Error('PSC0_SH1_UNEXPECTED_ATOMIC_CALL');\n    } });\n    const option = (test.group === 'source' ? 'sourceOptions.' : 'irOptions.') + test.key;\n    const message = test.group === 'ir' && test.key === 'maxTypeSteps'\n      ? 'PSC0_SH1_IR_OPTION: maxTypeSteps' : 'PSC0_SH1_SOURCE_REPORT_COUNT: ' + option;\n    assert.throws(() => compileStrictSources(spy, [untouchedInput],\n      { compilerSha256, sourceOptions, irOptions }), { message }, test.id);\n    assert.equal(sourceGetterReads, 0, test.id);\n    assert.equal(atomicInterceptions, 0, test.id);\n    malformedOptions.push({ id: test.id, option, refused: true, sourceGetterReads, atomicInterceptions });\n  }\n\n  const optionGetterReads = {};\n  const sourceValues = Object.fromEntries(sourceLimitKeys.map((key) => [key, 0n]));\n  const irValues = { maxSteps: 0n, maxTypeSteps: aboveSafeInteger, maxFindings: 0n };\n  const watchedOptions = (keys, values, prefix) => Object.fromEntries(keys.map((key) => {\n    optionGetterReads[prefix + key] = 0;\n    return [key, { enumerable: true, get() {\n      optionGetterReads[prefix + key]++;\n      return values[key];\n    } }];\n  }));\n  const sourceOptions = Object.defineProperties({}, watchedOptions(sourceLimitKeys, sourceValues, 'source.'));\n  const irOptions = Object.defineProperties({}, watchedOptions(irLimitKeys, irValues, 'ir.'));\n  const inputReads = { length: 0, element: 0, moduleName: 0, moduleLength: 0, segments: [0, 0, 0], source: 0 };\n  const originalName = ['Ps', 'Compiler', 'StrictSnapshot'];\n  const callerName = [...originalName];\n  const moduleName = new Proxy(callerName, { get(target, key, receiver) {\n    if (key === 'length') inputReads.moduleLength++;\n    if (key === '0' || key === '1' || key === '2') inputReads.segments[Number(key)]++;\n    return Reflect.get(target, key, receiver);\n  } });\n  const switchedLiteral = 'def sh1Literal : Nat := 9\\n';\n  const callerInputs = [{\n    get moduleName() { inputReads.moduleName++; return moduleName; },\n    get source() {\n      inputReads.source++;\n      callerName[2] = 'ChangedAfterCapture';\n      callerName.push('ExtraAfterCapture');\n      callerInputs.length = 0;\n      for (const key of sourceLimitKeys) sourceValues[key] = 1n;\n      for (const key of irLimitKeys) irValues[key] = 1n;\n      return inputReads.source === 1 ? literal : switchedLiteral;\n    },\n  }];\n  const inputs = new Proxy(callerInputs, { get(target, key, receiver) {\n    if (key === 'length') inputReads.length++;\n    if (key === '0') inputReads.element++;\n    return Reflect.get(target, key, receiver);\n  } });\n  const stop = new Error('PSC0_SH1_INGRESS_SNAPSHOT_PROBE_COMPLETE');\n  let atomicInterceptions = 0;\n  let portableInputSourceSha256;\n  const spy = Object.create(compiler);\n  Object.defineProperty(spy, 'psCompilerSh1TypeScriptSources', { value: (options, checkOptions, kind, ownedInputs) => {\n    atomicInterceptions++;\n    assert.notEqual(options, sourceOptions);\n    assert.notEqual(checkOptions, irOptions);\n    for (const key of sourceLimitKeys) assert.equal(options[key], 0n);\n    assert.equal(checkOptions.maxSteps, 0n);\n    assert.equal(checkOptions.maxFindings, 0n);\n    assert.equal(checkOptions.maxTypeSteps, aboveSafeInteger);\n    assert.equal(kind, compiler.PsCompilerSourceKind.lean);\n    const expectedName = originalName.reduceRight((tail, head) => compiler.List.cons(head, tail), compiler.List.nil());\n    assert.deepEqual(ownedInputs, compiler.List.cons(\n      compiler.psSh1SourceInput(expectedName, literal), compiler.List.nil()));\n    portableInputSourceSha256 = sha256(ownedInputs.head.source);\n    assert.equal(portableInputSourceSha256, sha256(literal));\n    assert.equal(callerInputs.length, 0);\n    assert.deepEqual(callerName, ['Ps', 'Compiler', 'ChangedAfterCapture', 'ExtraAfterCapture']);\n    assert.deepEqual(inputReads, { length: 1, element: 1, moduleName: 1, moduleLength: 1, segments: [1, 1, 1], source: 1 });\n    for (const reads of Object.values(optionGetterReads)) assert.equal(reads, 1);\n    throw stop;\n  } });\n  assert.throws(() => compileStrictSources(spy, inputs, { compilerSha256, sourceOptions, irOptions }),\n    (error) => error === stop, 'PSC0_SH1_INGRESS_SNAPSHOT_PROBE');\n  assert.equal(atomicInterceptions, 1);\n  return {\n    boundary: 'host-ingress-before-real-portable-call', malformedOptions,\n    snapshotProbe: { optionGetterReads, inputReads, atomicInterceptions, portableInputSourceSha256,\n      zeroBudgetCarriersRetained: true, irTypeBudget: aboveSafeInteger.toString(),\n      realPortableCompilerCalls: 0, preparationCount: 0, portableIrCheckCount: 0 },\n  };\n}\n\n// Reuse the two existing successful fixture calls to cover post-emission\n// manifest/origin readback. Each source getter clears the caller name array\n// after its segments have been captured; a second source read returns other text.\nfunction watchedSourceInput(expected) {\n  const source = expected.source;\n  const expectedName = [...expected.moduleName];\n  const reads = { moduleName: 0, source: 0, segments: expectedName.map(() => 0) };\n  const callerName = [];\n  expectedName.forEach((segment, index) => Object.defineProperty(callerName, index, {\n    configurable: true, enumerable: true, get() { reads.segments[index]++; return segment; },\n  }));\n  const value = {\n    get moduleName() { reads.moduleName++; return callerName; },\n    get source() {\n      reads.source++;\n      callerName.length = 0;\n      return reads.source === 1 ? source : 'def sh1UnexpectedReread : Nat := 9\\n';\n    },\n  };\n  return { value, reads, callerName,\n    manifest: { moduleName: expectedName, sourceSha256: sha256(source), sourceBytes: Buffer.byteLength(source) } };\n}\n\nexport async function runStrictSourceConformance({ compiler, compilerSha256, outDir }) {\n  const ingressSnapshots = probeIngressSnapshots(compiler, compilerSha256);\n  ingressSnapshots.emittedSourceCaptures = [];\n  const accepted = [];"
+        },
+        {
+          "before": "    const result = compileStrictSources(compiler, [library, entry], { compilerSha256, sourceKind: kind });",
+          "after": "    const captures = [library, entry].map(watchedSourceInput);\n    const result = compileStrictSources(compiler, captures.map(({ value }) => value),\n      { compilerSha256, sourceKind: kind });\n    for (const capture of captures) {\n      assert.deepEqual(capture.reads, { moduleName: 1, source: 1,\n        segments: capture.manifest.moduleName.map(() => 1) });\n      assert.equal(capture.callerName.length, 0);\n    }\n    const expectedManifest = captures.map(({ manifest }) => manifest);\n    assert.deepEqual(result.evidence.sourceInputs, expectedManifest);\n    assert.equal(result.evidence.sourceInputsSha256, sha256(JSON.stringify(expectedManifest)));\n    ingressSnapshots.emittedSourceCaptures.push({ sourceKind: kind,\n      inputReads: captures.map(({ reads }) => reads),\n      sourceInputsSha256: result.evidence.sourceInputsSha256,\n      manifestMatchesCapturedSources: true, additionalPreparations: 0 });"
+        },
+        {
+          "before": "    accepted, refused, carrierRefusals,",
+          "after": "    accepted, refused, carrierRefusals, ingressSnapshots,"
+        }
+      ],
+      "reversalToCommittedBaseVerified": true
+    }
+  ],
+  "scope": [
+    "Snapshot and validate the five source option fields and three IR option fields before touching input carriers.",
+    "Retain all seven existing nonnegative safe-bigint count domains; retain arbitrary nonnegative bigint IR maxTypeSteps.",
+    "Construct fresh owned source and IR option records through the existing factories.",
+    "Capture bounded input-array length, input object, module-name array length, every module-name string, and source string once.",
+    "Use only private captures for byte counts, manifest/hash, portable inputs, parsed-module comparisons, and origin readback.",
+    "Preserve existing 16384 input, 1024 module-component, 1048576 segment-unit, and 67108864 source-unit/aggregate-byte ceilings.",
+    "Add no-compiler ingress probes and strengthen the existing two positive calls; no extra real source preparation or IR checking."
+  ],
+  "evidence": {
+    "execution": "none; repository text/JSON transformations and exact reversal checks only",
+    "existingSourceGateCounts": {
+      "accepted": 2,
+      "sourceRefused": 33,
+      "unicodeCarrierRefused": 2
+    },
+    "malformedDirectOptions": 14,
+    "interceptedSnapshotProbes": 1,
+    "existingPositiveCallsReused": 2,
+    "additionalRealPreparations": 0,
+    "counterexample": {
+      "status": "derived from reviewed source, not executed",
+      "sourceA": "def sh1Literal : Nat := 7\n",
+      "sourceB": "def sh1Literal : Nat := 9\n",
+      "getterSequence": "A on reads 1 through 4; B on read 5 (the portable-input pass); A on later origin readback.",
+      "result": "The old manifest can bind A while the portable API receives B. The same byte count and declaration spans do not distinguish them.",
+      "repair": "The same captured source primitive is used for manifest, portable input, and origin readback.",
+      "originalHostBlob": "d01714cc7b8aad63199904fb7944dde51af2ff83",
+      "sourceUtf8Bytes": 26,
+      "reviewedLineReferences": {
+        "directOptions": 334,
+        "sourceValidation": 343,
+        "sourceByteCount": 345,
+        "sourceHash": 348,
+        "sourceBytes": 349,
+        "portableInputPass": 351,
+        "atomicCall": 356,
+        "lateSourceOptionCounts": 371,
+        "lateIrOptionCounts": 387
+      }
+    },
+    "probeReceiptPath": "runStrictSourceConformance output receipt.json: ingressSnapshots",
+    "probeReceiptFields": {
+      "malformedOptions": "14 records; each refused=true, sourceGetterReads=0, atomicInterceptions=0",
+      "snapshotProbe": "All eight option getter counts=1; input length/index/name/name length/each of 3 segments/source count=1; atomicInterceptions=1, zeroBudgetCarriersRetained=true, irTypeBudget=\"9007199254740992\"; realPortableCompilerCalls=preparationCount=portableIrCheckCount=0.",
+      "emittedSourceCaptures": "Lean and PS records reuse the existing positive calls. Each has two inputs with moduleName/source getter counts=1 and 3 segment counts=1; actual sourceInputs and sourceInputsSha256 equal the captured fixture manifest. additionalPreparations=0.",
+      "boundary": "The interrupted spy observes portable input, not an emitted receipt. Final manifest/origin readback is asserted by the existing two successful calls."
+    }
+  },
+  "unchanged": [
+    "Portable source/IR compiler algorithms",
+    "native origin serializer",
+    "capability fixtures",
+    "runtime-template gates",
+    "kernel/provider authority",
+    "strict/semantic qualification flags"
+  ],
+  "entries": [
+    {
+      "path": "psc0/scripts/sh1-strict-source.mjs",
+      "expectedBaseBlob": "6fb4e25238d99ad6e408726831454e2b14235092",
+      "blob": "77a85340d94313b7bfebb604ec9f61c53c28c544"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "expectedBaseBlob": "7e70f4ec75a156c87dc5f1023c451f77b132bc39",
+      "blob": "ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f"
+    }
+  ],
+  "reverseEntries": [
+    {
+      "path": "psc0/scripts/sh1-strict-source.mjs",
+      "expectedBaseBlob": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+      "blob": "6fb4e25238d99ad6e408726831454e2b14235092"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "expectedBaseBlob": "ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f",
+      "blob": "7e70f4ec75a156c87dc5f1023c451f77b132bc39"
+    }
+  ],
+  "exactIngressOnlyReverseEntries": [
+    {
+      "path": "psc0/scripts/sh1-strict-source.mjs",
+      "expectedBaseBlob": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+      "blob": "d01714cc7b8aad63199904fb7944dde51af2ff83"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "expectedBaseBlob": "ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f",
+      "blob": "7e70f4ec75a156c87dc5f1023c451f77b132bc39"
+    }
+  ],
+  "application": "Root only: require exact committed base blobs, then use the cumulative immutable blobs. No ref is updated by this manifest. Only the host entry supersedes its prior origin-manifest entry; the native/capability candidates remain unchanged.",
+  "originBundle": {
+    "previousManifest": "6dc338dd19c2a14c088a4a7e9f06fd3246cfdfd6",
+    "supersededHostBlob": "d01714cc7b8aad63199904fb7944dde51af2ff83",
+    "unchangedNativeBlob": "c741759094060bcccdbeb67d24bfb30dfe864b0e",
+    "unchangedCapabilitiesBlob": "8d87080352509dc936614d560aa68ded14fc36e8",
+    "dependencies": [
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+        "blob": "c403bd879e439b7b6e88303df430890352a14115"
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+        "blob": "a388d013dbf6c9270ffa91997512f672da6aabff"
+      },
+      {
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+        "blob": "f31d88f0172122d4cf62d62f35f372fe89581c18"
+      },
+      {
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+        "blob": "a947a4058e3d91a02d4f8120a3d86556100c8555"
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+        "blob": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53"
+      }
+    ]
+  },
+  "optionDomains": {
+    "source": {
+      "maxModules": "nonnegative bigint <= 9007199254740991",
+      "maxInputBytes": "nonnegative bigint <= 9007199254740991",
+      "maxSyntaxSteps": "nonnegative bigint <= 9007199254740991",
+      "maxTypeSteps": "nonnegative bigint <= 9007199254740991",
+      "maxTermSteps": "nonnegative bigint <= 9007199254740991"
+    },
+    "ir": {
+      "maxSteps": "nonnegative bigint <= 9007199254740991",
+      "maxTypeSteps": "nonnegative bigint without a new safe-integer limit",
+      "maxFindings": "nonnegative bigint <= 9007199254740991"
+    },
+    "convenienceOverrides": "strictSourceOptions continues accepting nonnegative safe JS number overrides and converts them to bigint before the direct entry point.",
+    "noNewPlainObjectRestriction": true,
+    "zeroBudgetBehavior": "Zero is a valid carrier; existing portable source/IR exhaustion diagnostics retain their own boundary."
+  },
+  "nonClaims": [
+    "No executed miscompile reproduction",
+    "No compiler or qualification execution",
+    "No semantic preservation proof from source origins",
+    "No global wall-clock or heap guarantee for arbitrary JavaScript getters",
+    "No arbitrary caller-graph admission",
+    "No strict SH/1, semantic-contract, or provider qualification"
+  ],
+  "peerReview": {
+    "agent": "/root/runtime_comparison_finish",
+    "status": "clear",
+    "reviewedManifest": "657fb2603c530e5f054b808e5565386a48dc2be3",
+    "hostBlob": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+    "sourceGateBlob": "ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f",
+    "scope": [
+      "Exact seven-edit host and three-edit gate reconstruction/reversal",
+      "Eight option reads before any input read",
+      "Existing bigint domains, zeros, and unbounded IR maxTypeSteps",
+      "Actual option constructor argument order and List/source-input ADT fields",
+      "One-time input/name lengths, elements/segments, and source reads",
+      "Exclusive use of private captures after ingress",
+      "Fourteen malformed-option probes and one intercepted mutation probe never delegate to the real atomic compiler",
+      "Existing two positive compiles reused with post-emission getter/hash checks"
+    ],
+    "execution": "none"
+  },
+  "guardsLastObserved": {
+    "head": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+    "hostBlob": "6fb4e25238d99ad6e408726831454e2b14235092",
+    "sourceGateBlob": "7e70f4ec75a156c87dc5f1023c451f77b132bc39"
+  }
+}

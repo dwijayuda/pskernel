@@ -27,7 +27,7 @@ def psKernelEnvironmentHashStringWorker
         (position : Nat)
         (hash : Nat) =>
         if
-            String.Internal.atEnd
+            String.Pos.Raw.atEnd
               value
               (String.Pos.Raw.mk position) then
           hash
@@ -38,7 +38,7 @@ def psKernelEnvironmentHashStringWorker
               (String.Pos.Raw.mk position);
           let next :=
             String.Pos.Raw.byteIdx
-              (String.Internal.next
+              (String.Pos.Raw.next
                 value
                 (String.Pos.Raw.mk position));
           smaller
@@ -282,6 +282,16 @@ def psKernelEnvironmentIndexInsert
         PsKernelEnvironmentIndex.small next
       else
         psKernelEnvironmentIndexBuild next
+  | PsKernelEnvironmentIndex.bucket constants =>
+      -- A root bucket can be supplied by callers of the public index API.
+      -- The branch-only worker cannot read it with positive fuel; rebuilding
+      -- preserves its existing declarations instead of dropping them.
+      psKernelEnvironmentIndexBuild
+        (List.cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            name
+            constants))
   | _ =>
       let hash :=
         psKernelEnvironmentNameHash name;

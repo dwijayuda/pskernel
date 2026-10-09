@@ -32,7 +32,7 @@ def psKernelCacheStringHashWorker
         (position : Nat)
         (hash : Nat) =>
         if
-            String.Internal.atEnd
+            String.Pos.Raw.atEnd
               value
               (String.Pos.Raw.mk position) then
           hash
@@ -43,7 +43,7 @@ def psKernelCacheStringHashWorker
               (String.Pos.Raw.mk position);
           let next :=
             String.Pos.Raw.byteIdx
-              (String.Internal.next
+              (String.Pos.Raw.next
                 value
                 (String.Pos.Raw.mk position));
           smaller

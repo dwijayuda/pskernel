@@ -119,39 +119,31 @@ def psKernelOpenSimpleConstructorParamsWithFuel
                 session
                 type)
         | List.cons param rest =>
-            match
-                psKernelSessionWhnf
-                  remaining
-                  session
-                  type with
-            | Except.error error =>
-                Except.error error
-            | Except.ok reduced =>
-                match Prod.fst reduced with
-                | PsKernelExpr.forallE _ domain body _ =>
-                    match
-                        psKernelSessionIsDefEq
-                          remaining
-                          (Prod.snd reduced)
-                          domain
-                          param.type with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok equal =>
-                        if Prod.fst equal then
-                          smaller
-                            (Prod.snd equal)
-                            rest
-                            (psKernelExprInstantiate1
-                              body
-                              (PsKernelExpr.fvar
-                                param.internalName))
-                        else
-                          Except.error
-                            "simple inductive constructor parameter does not match the datatype parameter"
-                | _ =>
-                    Except.error
-                      "simple inductive constructor has fewer parameters than the datatype"
+            match type with
+            | PsKernelExpr.forallE _ domain body _ =>
+                match
+                    psKernelSessionIsDefEq
+                      remaining
+                      session
+                      domain
+                      param.type with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok equal =>
+                    if Prod.fst equal then
+                      smaller
+                        (Prod.snd equal)
+                        rest
+                        (psKernelExprInstantiate1
+                          body
+                          (PsKernelExpr.fvar
+                            param.internalName))
+                    else
+                      Except.error
+                        "simple inductive constructor parameter does not match the datatype parameter"
+            | _ =>
+                Except.error
+                  "simple inductive constructor has fewer parameters than the datatype"
 
 def psKernelOpenSimpleConstructorParams
     (fuel : Nat)
@@ -448,118 +440,100 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
         (type : PsKernelExpr)
         (revFields : List PsKernelOpenBinder)
         (revRecursive : List PsKernelSimpleRecursiveField) =>
-        match
-            psKernelSessionWhnf
-              remaining
-              session
-              type with
-        | Except.error error =>
-            Except.error error
-        | Except.ok reducedResult =>
-            match Prod.fst reducedResult with
-            | PsKernelExpr.forallE userName domain body binderInfo =>
+        match type with
+        | PsKernelExpr.forallE userName domain body binderInfo =>
+            match
+                psKernelSessionCheck
+                  remaining
+                  session
+                  domain with
+            | Except.error error =>
+                Except.error error
+            | Except.ok domainType =>
                 match
-                    psKernelSessionCheck
+                    psKernelSessionEnsureSort
                       remaining
-                      (Prod.snd reducedResult)
-                      domain with
+                      (Prod.snd domainType)
+                      (Prod.fst domainType) with
                 | Except.error error =>
                     Except.error error
-                | Except.ok domainType =>
-                    match
-                        psKernelSessionEnsureSort
-                          remaining
-                          (Prod.snd domainType)
-                          (Prod.fst domainType) with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok fieldSort =>
+                | Except.ok fieldSort =>
+                    if
                         if
-                            if
-                                psKernelLevelLe
-                                  (Prod.fst fieldSort)
-                                  resultLevel then
-                              true
-                            else
-                              psKernelLevelNormalizesToZero
-                                resultLevel then
-                          let localDomain :=
-                            psKernelExprConsumeTypeAnnotations
-                              domain;
-                          let localResult :=
-                            psKernelSessionWithLocal
-                              (Prod.snd fieldSort)
-                              userName
-                              localDomain
-                              binderInfo;
-                          let fresh :=
-                            Prod.fst localResult;
-                          let field :=
-                            PsKernelOpenBinder.mk
-                              fresh
-                              userName
-                              localDomain
-                              binderInfo;
-                          match
-                              psKernelAnalyzeSimpleRecursiveArgument
-                                remaining
-                                (Prod.snd localResult)
-                                target
-                                levels
-                                params
-                                numIndices
-                                domain with
-                          | Except.error error =>
-                              Except.error error
-                          | Except.ok analysis =>
-                              let child0 :=
-                                Prod.snd localResult;
-                              let analysisLocal :=
-                                analysis.session.context.localContext;
-                              let continuationLocal :=
-                                PsKernelLocalContext.mk
-                                  child0.context.localContext.decls
-                                  analysisLocal.nextIndex;
-                              let child :=
-                                PsKernelCheckerSession.mk
-                                  (psKernelCheckerContextWithLocalContext
-                                    child0.context
-                                    continuationLocal)
-                                  analysis.session.state;
-                              let nextRecursive :
-                                  List PsKernelSimpleRecursiveField :=
-                                match analysis.recursiveInfo with
-                                | Option.none =>
-                                    revRecursive
-                                | Option.some info =>
-                                    List.cons
-                                      (PsKernelSimpleRecursiveField.mk
-                                        field
-                                        (Prod.fst info)
-                                        (Prod.snd info))
-                                      revRecursive;
-                              smaller
-                                child
-                                target
-                                levels
-                                params
-                                numIndices
-                                resultLevel
-                                (psKernelExprInstantiate1
-                                  body
-                                  (PsKernelExpr.fvar fresh))
-                                (List.cons field revFields)
-                                nextRecursive
+                            psKernelLevelLe
+                              (Prod.fst fieldSort)
+                              resultLevel then
+                          true
                         else
-                          Except.error
-                            "simple inductive constructor field universe is too large"
-            | _ =>
-                Except.ok
-                  (PsKernelOpenFieldsResult.mk
-                    (Prod.snd reducedResult)
-                    (psKernelReverseOpenBinders revFields)
-                    (psKernelReverseRecursiveFields revRecursive)
-                    (Prod.fst reducedResult))
+                          psKernelLevelNormalizesToZero
+                            resultLevel then
+                      let localDomain :=
+                        psKernelExprConsumeTypeAnnotations
+                          domain;
+                      let localResult :=
+                        psKernelSessionWithLocal
+                          (Prod.snd fieldSort)
+                          userName
+                          localDomain
+                          binderInfo;
+                      let fresh :=
+                        Prod.fst localResult;
+                      let field :=
+                        PsKernelOpenBinder.mk
+                          fresh
+                          userName
+                          localDomain
+                          binderInfo;
+                      match
+                          psKernelAnalyzeSimpleRecursiveArgument
+                            remaining
+                            (Prod.snd localResult)
+                            target
+                            levels
+                            params
+                            numIndices
+                            domain with
+                      | Except.error error =>
+                          Except.error error
+                      | Except.ok analysis =>
+                          let child0 :=
+                            Prod.snd localResult;
+                          let child :=
+                            psKernelSessionRestoreLocalScope child0 analysis.session;
+                          let nextRecursive :
+                              List PsKernelSimpleRecursiveField :=
+                            match analysis.recursiveInfo with
+                            | Option.none =>
+                                revRecursive
+                            | Option.some info =>
+                                List.cons
+                                  (PsKernelSimpleRecursiveField.mk
+                                    field
+                                    (Prod.fst info)
+                                    (Prod.snd info))
+                                  revRecursive;
+                          smaller
+                            child
+                            target
+                            levels
+                            params
+                            numIndices
+                            resultLevel
+                            (psKernelExprInstantiate1
+                              body
+                              (PsKernelExpr.fvar fresh))
+                            (List.cons field revFields)
+                            nextRecursive
+                    else
+                      Except.error
+                        "simple inductive constructor field universe is too large"
+        | _ =>
+            Except.ok
+              (PsKernelOpenFieldsResult.mk
+                session
+                (psKernelReverseOpenBinders revFields)
+                (psKernelReverseRecursiveFields revRecursive)
+                type)
 
 def psKernelOpenSimpleConstructorFields
     (fuel : Nat)

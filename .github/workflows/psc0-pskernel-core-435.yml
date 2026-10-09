@@ -1,0 +1,314 @@
+name: PSC0 PSKernel Core Lean 4.35
+on:
+  push:
+    branches: [psc0/pskernel-core-lean435-arena-v1]
+    paths:
+      - "psc0/packages/pskernel-core/**"
+      - ".github/workflows/psc0-pskernel-core-435.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc0-kernel-435-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Verify exact 4.35 identity and build candidate
+        working-directory: psc0/packages/pskernel-core
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
+          lean --version
+          lake build psc_kernel_core_arena psc1_kernel_core_foundation_tests pskernel_nat_dispatch_tests
+          lake exe psc1_kernel_core_foundation_tests
+          lake exe pskernel_nat_dispatch_tests
+          .lake/build/bin/psc_kernel_core_arena --version
+          sha256sum .lake/build/bin/psc_kernel_core_arena
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: psc0/packages/pskernel-core/.lake/build/bin/psc_kernel_core_arena
+  proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Check complete metatheory and companion proofs
+        working-directory: psc0/packages/pskernel-core
+        run: npm run test:proofs
+  tutorial:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+      - name: Prepare pinned Arena and exact run binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          mkdir -p arena/checkers/pskernel-435
+          cp kernel/psc_kernel_core_arena arena/checkers/pskernel-435/kernel
+          cat > arena/checkers/pskernel-435.yaml <<'EOF'
+          description: PSC0 PSKernel Core 4.35 candidate; explicit historical Arena regression mode.
+          dir: pskernel-435
+          build: chmod +x kernel
+          run: |
+            ulimit -s 65536
+            ./kernel --check-historical < "$IN"
+          EOF
+          mkdir -p "$RUNNER_TEMP/no-perf"
+          printf '#!/bin/sh\nexit 1\n' > "$RUNNER_TEMP/no-perf/perf"
+          chmod +x "$RUNNER_TEMP/no-perf/perf"
+          echo "$RUNNER_TEMP/no-perf" >> "$GITHUB_PATH"
+      - name: Build pinned corpus and run complete verdict gate
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test 'tutorial' --cache
+          uv run lka.py build-checker pskernel-435
+          uv run lka.py run --checker pskernel-435 --test 'tutorial/*'
+          python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py 'tutorial'
+      - name: Preserve per-case results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-435-tutorial
+          path: arena/_results
+          if-no-files-found: error
+  bugs:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+      - name: Prepare pinned Arena and exact run binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          mkdir -p arena/checkers/pskernel-435
+          cp kernel/psc_kernel_core_arena arena/checkers/pskernel-435/kernel
+          cat > arena/checkers/pskernel-435.yaml <<'EOF'
+          description: PSC0 PSKernel Core 4.35 candidate; explicit historical Arena regression mode.
+          dir: pskernel-435
+          build: chmod +x kernel
+          run: |
+            ulimit -s 65536
+            ./kernel --check-historical < "$IN"
+          EOF
+          mkdir -p "$RUNNER_TEMP/no-perf"
+          printf '#!/bin/sh\nexit 1\n' > "$RUNNER_TEMP/no-perf/perf"
+          chmod +x "$RUNNER_TEMP/no-perf/perf"
+          echo "$RUNNER_TEMP/no-perf" >> "$GITHUB_PATH"
+      - name: Build pinned corpus and run complete verdict gate
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test 'bugs' --cache
+          uv run lka.py build-checker pskernel-435
+          uv run lka.py run --checker pskernel-435 --test 'bugs/*'
+          python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py 'bugs'
+      - name: Preserve per-case results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-435-bugs
+          path: arena/_results
+          if-no-files-found: error
+  corpus:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        test: [init, std]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+      - name: Prepare pinned Arena and exact run binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          mkdir -p arena/checkers/pskernel-435
+          cp kernel/psc_kernel_core_arena arena/checkers/pskernel-435/kernel
+          cat > arena/checkers/pskernel-435.yaml <<'EOF'
+          description: PSC0 PSKernel Core 4.35 candidate; explicit historical Arena regression mode.
+          dir: pskernel-435
+          build: chmod +x kernel
+          run: |
+            ulimit -s 65536
+            ./kernel --check-historical < "$IN"
+          EOF
+          mkdir -p "$RUNNER_TEMP/no-perf"
+          printf '#!/bin/sh\nexit 1\n' > "$RUNNER_TEMP/no-perf/perf"
+          chmod +x "$RUNNER_TEMP/no-perf/perf"
+          echo "$RUNNER_TEMP/no-perf" >> "$GITHUB_PATH"
+      - name: Build pinned corpus and run complete verdict gate
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test '${{ matrix.test }}' --cache
+          uv run lka.py build-checker pskernel-435
+          uv run lka.py run --checker pskernel-435 --test '${{ matrix.test }}'
+          python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py '${{ matrix.test }}'
+      - name: Preserve per-case results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-435-${{ matrix.test }}
+          path: arena/_results
+          if-no-files-found: error
+  mathlib:
+    needs: [proofs, tutorial, bugs, corpus]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+      - name: Prepare pinned Arena and exact run binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          mkdir -p arena/checkers/pskernel-435
+          cp kernel/psc_kernel_core_arena arena/checkers/pskernel-435/kernel
+          cat > arena/checkers/pskernel-435.yaml <<'EOF'
+          description: PSC0 PSKernel Core 4.35 candidate; explicit historical Arena regression mode.
+          dir: pskernel-435
+          build: chmod +x kernel
+          run: |
+            ulimit -s 65536
+            ./kernel --check-historical < "$IN"
+          EOF
+          mkdir -p "$RUNNER_TEMP/no-perf"
+          printf '#!/bin/sh\nexit 1\n' > "$RUNNER_TEMP/no-perf/perf"
+          chmod +x "$RUNNER_TEMP/no-perf/perf"
+          echo "$RUNNER_TEMP/no-perf" >> "$GITHUB_PATH"
+      - name: Build pinned corpus and run complete verdict gate
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test 'mathlib' --cache
+          uv run lka.py build-checker pskernel-435
+          uv run lka.py run --checker pskernel-435 --test 'mathlib'
+          python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py 'mathlib'
+      - name: Preserve per-case results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-435-mathlib
+          path: arena/_results
+          if-no-files-found: error
+  lean435:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+      - name: Export and check fresh 4.35 Prelude and focused UTF8 theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x kernel/psc_kernel_core_arena
+          git clone https://github.com/leanprover/lean4export.git exporter
+          git -C exporter checkout 05d43a2bc773b40ecfdebb32294192a5ef756951
+          cd exporter
+          lake build
+          lake env .lake/build/bin/lean4export Init.Prelude > prelude.ndjson
+          /usr/bin/time -v timeout 120 ../kernel/psc_kernel_core_arena < prelude.ndjson
+          lake env .lake/build/bin/lean4export Init -- '_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec' > utf8.ndjson
+          /usr/bin/time -v timeout 360 ../kernel/psc_kernel_core_arena < utf8.ndjson
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lean435-exports
+          path: exporter/*.ndjson

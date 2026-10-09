@@ -301,67 +301,36 @@ def psKernelReduceNatWith
           | PsKernelExpr.const name levels =>
               match levels with
               | List.nil =>
-                  match
-                      publicWhnf
-                        context
-                        state
-                        left with
-                  | Except.error error =>
-                      Except.error error
-                  | Except.ok leftResult =>
-                      let leftReduced :=
-                        Prod.fst leftResult;
-                      let state1 :=
-                        Prod.snd leftResult;
-                      match
-                          publicWhnf
-                            context
-                            state1
-                            right with
-                      | Except.error error =>
-                          Except.error error
-                      | Except.ok rightResult =>
-                          let rightReduced :=
-                            Prod.fst rightResult;
-                          let state2 :=
-                            Prod.snd rightResult;
-                          match
-                              psKernelExprNatLiteralValue
-                                leftReduced with
-                          | Option.none =>
-                              Except.ok
-                                (Prod.mk
-                                  Option.none
-                                  state2)
-                          | Option.some leftValue =>
-                              match
-                                  psKernelExprNatLiteralValue
-                                    rightReduced with
-                              | Option.none =>
-                                  Except.ok
-                                    (Prod.mk
-                                      Option.none
-                                      state2)
-                              | Option.some rightValue =>
-                                  match
-                                      psKernelReduceNatBinary
-                                        context.maxNatSize
-                                        name
-                                        leftValue
-                                        rightValue with
-                                  | Except.error error =>
-                                      Except.error error
-                                  | Except.ok result =>
-                                      Except.ok
-                                        (Prod.mk
-                                          result
-                                          state2)
+                  if psKernelNatBinarySupported name then
+                    match publicWhnf context state left with
+                    | Except.error error => Except.error error
+                    | Except.ok leftResult =>
+                        let leftReduced := Prod.fst leftResult;
+                        let state1 := Prod.snd leftResult;
+                        match psKernelExprNatLiteralValue leftReduced with
+                        | Option.none =>
+                            Except.ok (Prod.mk Option.none state1)
+                        | Option.some leftValue =>
+                            match publicWhnf context state1 right with
+                            | Except.error error => Except.error error
+                            | Except.ok rightResult =>
+                                let rightReduced := Prod.fst rightResult;
+                                let state2 := Prod.snd rightResult;
+                                match psKernelExprNatLiteralValue rightReduced with
+                                | Option.none =>
+                                    Except.ok (Prod.mk Option.none state2)
+                                | Option.some rightValue =>
+                                    match psKernelReduceNatBinary
+                                        context.maxNatSize name leftValue rightValue with
+                                    | Except.error error => Except.error error
+                                    | Except.ok result =>
+                                        Except.ok (Prod.mk result state2)
+                  else
+                    Except.ok (Prod.mk Option.none state)
               | List.cons _ _ =>
-                  Except.ok
-                    (Prod.mk Option.none state)
+                  Except.ok (Prod.mk Option.none state)
           | _ =>
-              Except.ok
-                (Prod.mk Option.none state)
+              Except.ok (Prod.mk Option.none state)
       | _ =>
           Except.ok
             (Prod.mk Option.none state)

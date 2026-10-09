@@ -7,7 +7,7 @@ structure PsKernelTargetIdentity where
   leanCommit : String
 
 def psKernelTargetIdentityV1 : PsKernelTargetIdentity :=
-  PsKernelTargetIdentity.mk "KernelContract-v1" "4.34.0" "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  PsKernelTargetIdentity.mk "KernelContract-v1" "4.35.0-rc4" "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
 
 inductive PsKernelDeclarationRequest where
   | axiomDecl (value : PsKernelAxiomInfo)

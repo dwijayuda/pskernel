@@ -32,9 +32,9 @@ def psKernelStringEqFromWithFuel
         (right : String)
         (leftPos : Nat)
         (rightPos : Nat) =>
-        if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
-          String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
-        else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
+        if String.Pos.Raw.atEnd left (String.Pos.Raw.mk leftPos) then
+          String.Pos.Raw.atEnd right (String.Pos.Raw.mk rightPos)
+        else if String.Pos.Raw.atEnd right (String.Pos.Raw.mk rightPos) then
           false
         else
           let leftChar :=
@@ -46,11 +46,11 @@ def psKernelStringEqFromWithFuel
               left
               right
               (String.Pos.Raw.byteIdx
-                (String.Internal.next
+                (String.Pos.Raw.next
                   left
                   (String.Pos.Raw.mk leftPos)))
               (String.Pos.Raw.byteIdx
-                (String.Internal.next
+                (String.Pos.Raw.next
                   right
                   (String.Pos.Raw.mk rightPos)))
           else

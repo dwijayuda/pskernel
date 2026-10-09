@@ -1,0 +1,442 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-finite-worker-migration-candidate",
+  "status": "prepared-reviewed-not-applied-to-branch",
+  "repository": "dwijayuda/pskernel",
+  "inspectedBaseRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "sourceGrammar": {
+    "edition": "ps-0.9-r3",
+    "mode": "new-only",
+    "fullStandardConformance": false,
+    "fullPscvConformance": false
+  },
+  "prerequisite": {
+    "kind": "qualified-provider-accepted-cold-recoverable-selected-successor",
+    "satisfiedAtPreparation": false
+  },
+  "scope": {
+    "workers": 12,
+    "workerSourceFiles": 9,
+    "typedIdentityAliasesRemoved": 3,
+    "additionalAliasSourceFiles": 1,
+    "sourceGuardFiles": 7
+  },
+  "files": [
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "oldSha": "a3b2cf9febff4a31a3ad6c7646f4ff2e252932ea",
+      "sha": "3658a56ec4d9b3f454affd623a3ee81134206c2e"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "oldSha": "35485a2cf9e4f07249ee689f0c35b581b305e324",
+      "sha": "fa6491f4861ddc59caba51c03a29790fc6e8653b"
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "oldSha": "b27f87943d042496ec0732c309afc4f770ed6fc4",
+      "sha": "94b80cd7fe617e62c9a95446ff019e088d57b0b3"
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "oldSha": "7f8270f1ba66c786390ef8d7cb54558e28203fba",
+      "sha": "13614bc6eb279c93d4cbcbd8815b671beae38199"
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "oldSha": "dd668b05e34231747b48af3e29468b0fc99607d2",
+      "sha": "8a8005a2ae0aa6564e075e3b224b432295c6bf05"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "oldSha": "c41474cdbd008999368dfaf368be988e9982042b",
+      "sha": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "oldSha": "d288a83320f509fd229139303e06aadcdb7ab39d",
+      "sha": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "oldSha": "0d5e687086dec44e8157a15757bc29350f6f447c",
+      "sha": "28e14f991df68c4a7d49f09120a42c85c919d6a8"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "oldSha": "4098822ae5ca1a1c3d3d476be5b592daad7d2110",
+      "sha": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "oldSha": "864cf3a59c51537aca59e0bb7691a66f0dce777c",
+      "sha": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75"
+    },
+    {
+      "path": "psc0/scripts/check-backend-ts-replay-source.mjs",
+      "oldSha": "511660c15bb4a0c7eea6a33121ad35c870c0d39e",
+      "sha": "01de8bd56f4f647a4865eb0ea548bdf18757e88b"
+    },
+    {
+      "path": "psc0/scripts/check-elab-declarations-selfhost-source-syntax.mjs",
+      "oldSha": "14beb0855b02afc2efa465483931ee654b36432b",
+      "sha": "68d229c41684f40011b9687217c41730f2d8806b"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-declaration-names-selfhost-source-syntax.mjs",
+      "oldSha": "ae8ee243fa1c4dee77787f00c276f4e10d30d4f2",
+      "sha": "90e5462ab2fc6bc3689031bc0896c53b493ecd14"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-definitions-loop-selfhost-source-syntax.mjs",
+      "oldSha": "de68947fb59c877e27fa75277c9ccf485e55d751",
+      "sha": "92a2c55c1c9e5096f1e5c9a73b4f73f28b7cbcb4"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-replay-workers.mjs",
+      "oldSha": "e947be4a26c4d877b5586b7b80ec3b5b5b55c4e0",
+      "sha": "87bf77579e841b079042f2d75003cd484e0ce569"
+    },
+    {
+      "path": "psc0/scripts/check-modular-preparation-source.mjs",
+      "oldSha": "7ed26f6dd903c74cb0794d9393a11a28977795e3",
+      "sha": "e1b31140b366c90c5a4443502723644051e332a3"
+    },
+    {
+      "path": "psc0/scripts/check-replay-emission-source.mjs",
+      "oldSha": "c5ef93aba675efe82c7702f91ebc205b897335a6",
+      "sha": "cbabd81a16fc645468766a5eab50369aa29b07f7"
+    }
+  ],
+  "workers": [
+    {
+      "family": "F1",
+      "name": "psErasureLocalNameWithFuel",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "originalBlobSha": "c41474cdbd008999368dfaf368be988e9982042b",
+      "originalSource": "def psErasureLocalNameWithFuel (scope : PsErasureScope) (base : String) (fuel : Nat) : Nat -> String :=\n  match fuel with\n  | Nat.zero => fun (index : Nat) => String.Internal.append base (String.Internal.append \"$\" (psNatToString index))\n  | Nat.succ remaining =>\n      let smaller : Nat -> String := psErasureLocalNameWithFuel scope base remaining;\n      fun (index : Nat) =>\n        let candidate := String.Internal.append base (String.Internal.append \"$\" (psNatToString index));\n        if psErasureLocalNameUsed scope candidate then smaller (Nat.succ index) else candidate\n\n",
+      "replacementSource": "def psErasureLocalNameWithFuel\n    (scope : PsErasureScope) (base : String) (fuel : Nat) (index : Nat) : String :=\n  match fuel with\n  | Nat.zero =>\n      String.Internal.append base (String.Internal.append \"$\" (psNatToString index))\n  | Nat.succ remaining =>\n      let candidate := String.Internal.append base (String.Internal.append \"$\" (psNatToString index));\n      if psErasureLocalNameUsed scope candidate then\n        psErasureLocalNameWithFuel scope base remaining (Nat.succ index)\n      else candidate\n\n",
+      "originalSha256": "c8e67723ac83103304db82313a5b53f2d43a37bb3908fd19dcc7ac38831b8db8",
+      "replacementSha256": "fc9f1334daff280960cff88eb119784018af67dcffc5028738c67a7ff073345d",
+      "completePublicType": "PsErasureScope -> String -> Nat -> Nat -> String",
+      "argumentOrder": [
+        "scope",
+        "base",
+        "fuel",
+        "index"
+      ],
+      "zeroPolicy": "Return base + \"$\" + decimal index, even if the candidate is already used.",
+      "scanPolicy": "Keep the exact local-before-global collision predicate and caller's input-derived fuel."
+    },
+    {
+      "family": "F1",
+      "name": "psErasureEtaNameWithFuel",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "originalBlobSha": "0d5e687086dec44e8157a15757bc29350f6f447c",
+      "originalSource": "def psErasureEtaNameWithFuel\n    (body : PsVerifiedIrExpr) (used : List PsVerifiedIrParameter) (fuel : Nat) : Nat -> Except PsErasureError String :=\n  match fuel with\n  | Nat.zero => fun (_index : Nat) => Except.error PsErasureError.fuelExhausted\n  | Nat.succ remaining =>\n      let smaller : Nat -> Except PsErasureError String := psErasureEtaNameWithFuel body used remaining;\n      fun (index : Nat) =>\n        let candidate := String.Internal.append \"__ps_eta_\" (psNatToString index);\n        let sameName : PsVerifiedIrParameter -> Bool := fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name candidate;\n        if psListAny sameName used then smaller (Nat.succ index)\n        else if psErasureIrUsesNameWithFuel 4096 body candidate then smaller (Nat.succ index)\n        else Except.ok candidate\n\n",
+      "replacementSource": "def psErasureEtaNameWithFuel\n    (body : PsVerifiedIrExpr) (used : List PsVerifiedIrParameter)\n    (fuel : Nat) (index : Nat) : Except PsErasureError String :=\n  match fuel with\n  | Nat.zero => Except.error PsErasureError.fuelExhausted\n  | Nat.succ remaining =>\n      let candidate := String.Internal.append \"__ps_eta_\" (psNatToString index);\n      let sameName : PsVerifiedIrParameter -> Bool := fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name candidate;\n      if psListAny sameName used then\n        psErasureEtaNameWithFuel body used remaining (Nat.succ index)\n      else if psErasureIrUsesNameWithFuel 4096 body candidate then\n        psErasureEtaNameWithFuel body used remaining (Nat.succ index)\n      else Except.ok candidate\n\n",
+      "originalSha256": "78a1dd0db27b2bcc6260bdb709f4ada18315058b15232dba1849e85187897aef",
+      "replacementSha256": "c8730a6ddfa47a835e0e295c53b90bdd30c8be1c3a42cbbace7242d6d7a0ec25",
+      "completePublicType": "PsVerifiedIrExpr -> List PsVerifiedIrParameter -> Nat -> Nat -> Except PsErasureError String",
+      "argumentOrder": [
+        "body",
+        "used",
+        "fuel",
+        "index"
+      ],
+      "zeroPolicy": "Return Except.error PsErasureError.fuelExhausted without scanning.",
+      "scanPolicy": "Keep used-parameter lookup before the body scan, the 4096 scan allowance, and typed sameName callback."
+    },
+    {
+      "family": "F1",
+      "name": "psTsFreshMatchTempWorker",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "originalBlobSha": "a3b2cf9febff4a31a3ad6c7646f4ff2e252932ea",
+      "originalSource": "def psTsFreshMatchTempWorker (expr : PsVerifiedIrExpr) (attempts : Nat) : Nat -> String :=\n  match attempts with\n  | Nat.zero => fun (_index : Nat) => \"__ps$match$overflow\"\n  | Nat.succ remaining =>\n      let smaller : Nat -> String := psTsFreshMatchTempWorker expr remaining;\n      fun (index : Nat) =>\n        let candidate := String.Internal.append \"__ps$match$\" (psNatToString index);\n        if psTsExprUsesNameWithFuel 4096 expr candidate then smaller (Nat.succ index) else candidate\n\n",
+      "replacementSource": "def psTsFreshMatchTempWorker\n    (expr : PsVerifiedIrExpr) (attempts : Nat) (index : Nat) : String :=\n  match attempts with\n  | Nat.zero => \"__ps$match$overflow\"\n  | Nat.succ remaining =>\n      let candidate := String.Internal.append \"__ps$match$\" (psNatToString index);\n      if psTsExprUsesNameWithFuel 4096 expr candidate then\n        psTsFreshMatchTempWorker expr remaining (Nat.succ index)\n      else candidate\n\n",
+      "originalSha256": "f0afd34d4983b76f54cff12431733dd4cf98a8c0e1f9eb8d8eb799c236734ccc",
+      "replacementSha256": "440fa109b907a2f6a4181e5a95a4a7c630902bcfda68e0d7785c576d6b8d1cfa",
+      "completePublicType": "PsVerifiedIrExpr -> Nat -> Nat -> String",
+      "argumentOrder": [
+        "expr",
+        "attempts",
+        "index"
+      ],
+      "zeroPolicy": "Return exactly __ps$match$overflow independently of index and name collisions.",
+      "scanPolicy": "Keep the 4096 expression-use scan and __ps$match$<index> candidate sequence."
+    },
+    {
+      "family": "F1",
+      "name": "psTsFreshInternalWorker",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "originalBlobSha": "35485a2cf9e4f07249ee689f0c35b581b305e324",
+      "originalSource": "def psTsFreshInternalWorker (used : List String) (namePrefix : String) (attempts : Nat) :\n    Nat -> PsTsFreshNameResult :=\n  match attempts with\n  | Nat.zero => fun (index : Nat) => PsTsFreshNameResult.mk (String.Internal.append namePrefix \"overflow\") (Nat.succ index)\n  | Nat.succ remaining =>\n      let smaller : Nat -> PsTsFreshNameResult := psTsFreshInternalWorker used namePrefix remaining;\n      fun (index : Nat) =>\n        let candidate := String.Internal.append namePrefix (psNatToString index);\n        let sameName : String -> Bool := fun (name : String) => psStringEq name candidate;\n        if psListAny sameName used then smaller (Nat.succ index)\n        else PsTsFreshNameResult.mk candidate (Nat.succ index)\n\n",
+      "replacementSource": "def psTsFreshInternalWorker\n    (used : List String) (namePrefix : String)\n    (attempts : Nat) (index : Nat) : PsTsFreshNameResult :=\n  match attempts with\n  | Nat.zero =>\n      PsTsFreshNameResult.mk (String.Internal.append namePrefix \"overflow\") (Nat.succ index)\n  | Nat.succ remaining =>\n      let candidate := String.Internal.append namePrefix (psNatToString index);\n      let sameName : String -> Bool := fun (name : String) => psStringEq name candidate;\n      if psListAny sameName used then\n        psTsFreshInternalWorker used namePrefix remaining (Nat.succ index)\n      else PsTsFreshNameResult.mk candidate (Nat.succ index)\n\n",
+      "originalSha256": "06779a798b13b4c247d730fdcc68d6472b194fd15d9785cc20790f5dac4b5868",
+      "replacementSha256": "721dd7a6674db9fa58979431a2eb2b560a8d80222bc26c8e8ed8450b7ed6b110",
+      "completePublicType": "List String -> String -> Nat -> Nat -> PsTsFreshNameResult",
+      "argumentOrder": [
+        "used",
+        "namePrefix",
+        "attempts",
+        "index"
+      ],
+      "zeroPolicy": "Return prefix + overflow and nextIndex = index + 1 even when that fallback spelling is already used.",
+      "scanPolicy": "Advance index once for each collision and once in every returned PsTsFreshNameResult; preserve duplicate handling and arbitrary prefixes."
+    },
+    {
+      "family": "F2",
+      "name": "psCompilerPreparationSourcesWorker",
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "originalBlobSha": "7f8270f1ba66c786390ef8d7cb54558e28203fba",
+      "originalSource": "def psCompilerPreparationSourcesWorker\n    (sources : List String) :\n    PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState :=\n  match sources with\n  | List.nil =>\n      fun (state : PsCompilerPreparationState) => Except.ok state\n  | List.cons source rest =>\n      let smaller : PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState :=\n        psCompilerPreparationSourcesWorker rest;\n      fun (state : PsCompilerPreparationState) =>\n        match psCompilerPreparationStep state source with\n        | Except.error error => Except.error error\n        | Except.ok next => smaller next",
+      "replacementSource": "def psCompilerPreparationSourcesWorker\n    (sources : List String)\n    (state : PsCompilerPreparationState) :\n    Except PsCompilerError PsCompilerPreparationState :=\n  match sources with\n  | List.nil =>\n      Except.ok state\n  | List.cons source rest =>\n      match psCompilerPreparationStep state source with\n      | Except.error error => Except.error error\n      | Except.ok next => psCompilerPreparationSourcesWorker rest next",
+      "originalSha256": "2a3f835d953a8c56c889ea75fdb92209383d2ce1d3dab8d58869404a5c93ca5a",
+      "replacementSha256": "20cad13e9ac0737a71cce42c8c7a61e14ac9438a19d15722e145050a574082af",
+      "completePublicType": "def psCompilerPreparationSourcesWorker (sources : List String) : PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState",
+      "argumentOrder": [
+        "sources",
+        "state"
+      ],
+      "preservedContract": [
+        "Step sources in order using the same preparation seam.",
+        "Empty input returns the incoming state; first failure stops before preparing the tail.",
+        "Do not alter session identities, cache invalidation, source kinds, declaration accumulation or admission ownership."
+      ],
+      "projectionSeedRequired": false
+    },
+    {
+      "family": "F2",
+      "name": "psAddDeclarationListWorker",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "originalBlobSha": "dd668b05e34231747b48af3e29468b0fc99607d2",
+      "originalSource": "def psAddDeclarationListWorker\n    (declarations : List PsDeclaration) :\n    PsEnvironment -> Except PsElabError PsEnvironment :=\n  match declarations with\n  | List.nil =>\n      fun (environment : PsEnvironment) =>\n        Except.ok environment\n  | List.cons declaration rest =>\n      let smaller :\n          PsEnvironment -> Except PsElabError PsEnvironment :=\n        psAddDeclarationListWorker rest;\n      fun (environment : PsEnvironment) =>\n        let name := psDeclarationName declaration;\n        let nextResult :=\n          psEnvironmentAddOwnedBootstrapDeclaration\n            environment\n            declaration;\n        match nextResult with\n        | none =>\n            Except.error\n              (PsElabError.duplicateDeclaration name)\n        | some next =>\n            smaller next",
+      "replacementSource": "def psAddDeclarationListWorker\n    (declarations : List PsDeclaration)\n    (environment : PsEnvironment) :\n    Except PsElabError PsEnvironment :=\n  match declarations with\n  | List.nil =>\n      Except.ok environment\n  | List.cons declaration rest =>\n      let name := psDeclarationName declaration;\n      let nextResult :=\n        psEnvironmentAddOwnedBootstrapDeclaration\n          environment\n          declaration;\n      match nextResult with\n      | none =>\n          Except.error\n            (PsElabError.duplicateDeclaration name)\n      | some next =>\n          psAddDeclarationListWorker rest next",
+      "originalSha256": "73258eaaa8a731a4cdd22363b2fc32acb8996bfe6c7bc34e27e5f2b97d7d70d5",
+      "replacementSha256": "42eacf30f983cd3ff4d1846a6828ae612741fc82efcf3b88967ddff1faaacd7a",
+      "completePublicType": "def psAddDeclarationListWorker (declarations : List PsDeclaration) : PsEnvironment -> Except PsElabError PsEnvironment",
+      "argumentOrder": [
+        "declarations",
+        "environment"
+      ],
+      "preservedContract": [
+        "Keep psEnvironmentAddOwnedBootstrapDeclaration, its ownership behavior and first duplicateDeclaration name.",
+        "Empty input preserves environment; no later insertion after the first duplicate.",
+        "Do not change the environment/index implementation."
+      ],
+      "projectionSeedRequired": false
+    },
+    {
+      "family": "F2",
+      "name": "psElabDeclarationsWorker",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "originalBlobSha": "dd668b05e34231747b48af3e29468b0fc99607d2",
+      "originalSource": "def psElabDeclarationsWorker\n    (sources : List PsSyntaxDeclaration) :\n    PsEnvironment ->\n    List PsDeclaration ->\n    Except PsElabError PsElabModuleResult :=\n  match sources with\n  | List.nil =>\n      fun (environment : PsEnvironment) =>\n        fun (declarationsRev : List PsDeclaration) =>\n          Except.ok\n            (PsElabModuleResult.mk\n              environment\n              (psElabReverseDeclarations declarationsRev))\n  | List.cons source rest =>\n      let smaller :\n          PsEnvironment ->\n          List PsDeclaration ->\n          Except PsElabError PsElabModuleResult :=\n        psElabDeclarationsWorker rest;\n      fun (environment : PsEnvironment) =>\n        fun (declarationsRev : List PsDeclaration) =>\n          match psElabDeclarationBatch environment source with\n          | Except.error error => Except.error error\n          | Except.ok result =>\n              match\n                  psAddDeclarationList\n                    environment\n                    result.declarations with\n              | Except.error error => Except.error error\n              | Except.ok nextEnvironment =>\n                  smaller\n                    nextEnvironment\n                    (psPrependBatchReverse\n                      result.declarations\n                      declarationsRev)",
+      "replacementSource": "def psElabDeclarationsWorker\n    (sources : List PsSyntaxDeclaration)\n    (environment : PsEnvironment)\n    (declarationsRev : List PsDeclaration) :\n    Except PsElabError PsElabModuleResult :=\n  match sources with\n  | List.nil =>\n      Except.ok\n        (PsElabModuleResult.mk\n          environment\n          (psElabReverseDeclarations declarationsRev))\n  | List.cons source rest =>\n      match psElabDeclarationBatch environment source with\n      | Except.error error => Except.error error\n      | Except.ok result =>\n          match\n              psAddDeclarationList\n                environment\n                result.declarations with\n          | Except.error error => Except.error error\n          | Except.ok nextEnvironment =>\n              psElabDeclarationsWorker\n                rest\n                nextEnvironment\n                (psPrependBatchReverse\n                  result.declarations\n                  declarationsRev)",
+      "originalSha256": "1e48dca172db12f4c151a0427eec80658b1e5a692c1188262dff9dd085170fce",
+      "replacementSha256": "3f38171536741b46900de0923079600890dff32ffd6e9a5b2e288fe351c41ab9",
+      "completePublicType": "def psElabDeclarationsWorker (sources : List PsSyntaxDeclaration) : PsEnvironment -> List PsDeclaration -> Except PsElabError PsElabModuleResult",
+      "argumentOrder": [
+        "sources",
+        "environment",
+        "declarationsRev"
+      ],
+      "preservedContract": [
+        "Elaborate each batch, add its declarations, then advance with that environment and reverse-prepended batch.",
+        "Preserve first elaboration/duplicate failure, batch order, caller-supplied accumulator suffix and final reversal.",
+        "Keep psElabDeclarations public argument order environment, sources, declarationsRev."
+      ],
+      "projectionSeedRequired": false
+    },
+    {
+      "family": "F2",
+      "name": "psBuildErasureDeclarationNamesWorker",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "originalBlobSha": "d288a83320f509fd229139303e06aadcdb7ab39d",
+      "originalSource": "def psBuildErasureDeclarationNamesWorker\n    (declarations : List PsDeclaration) :\n    PsErasureNameState -> PsErasureNameState :=\n  match declarations with\n  | List.nil =>\n      fun (state : PsErasureNameState) => state\n  | List.cons declaration rest =>\n      let smaller : PsErasureNameState -> PsErasureNameState :=\n        psBuildErasureDeclarationNamesWorker rest;\n      fun (state : PsErasureNameState) =>\n        let sourceName : Option PsName :=\n          match declaration with\n          | PsDeclaration.definitionDecl name _ _ _ => Option.some name\n          | PsDeclaration.partialDecl name _ _ _ => Option.some name\n          | PsDeclaration.theoremDecl name _ _ _ => Option.some name\n          | PsDeclaration.inductiveDecl info => Option.some info.name\n          | _ => Option.none;\n        match sourceName with\n        | Option.none => smaller state\n        | Option.some name =>\n            let raw :=\n              psErasureSafeIdentifier (psNameToString name) \"decl\";\n            let candidate :=\n              psErasureAddUniqueString state.used raw 4096;\n            smaller\n              (PsErasureNameState.mk\n                (List.cons candidate state.used)\n                (List.cons (Prod.mk name candidate) state.entriesRev))",
+      "replacementSource": "def psBuildErasureDeclarationNamesWorker\n    (declarations : List PsDeclaration)\n    (state : PsErasureNameState) : PsErasureNameState :=\n  match declarations with\n  | List.nil =>\n      state\n  | List.cons declaration rest =>\n      let sourceName : Option PsName :=\n        match declaration with\n        | PsDeclaration.definitionDecl name _ _ _ => Option.some name\n        | PsDeclaration.partialDecl name _ _ _ => Option.some name\n        | PsDeclaration.theoremDecl name _ _ _ => Option.some name\n        | PsDeclaration.inductiveDecl info => Option.some info.name\n        | _ => Option.none;\n      match sourceName with\n      | Option.none => psBuildErasureDeclarationNamesWorker rest state\n      | Option.some name =>\n          let raw :=\n            psErasureSafeIdentifier (psNameToString name) \"decl\";\n          let candidate :=\n            psErasureAddUniqueString state.used raw 4096;\n          psBuildErasureDeclarationNamesWorker\n            rest\n            (PsErasureNameState.mk\n              (List.cons candidate state.used)\n              (List.cons (Prod.mk name candidate) state.entriesRev))",
+      "originalSha256": "c11a415c4197128e02983b452cb060ab8904aa51e19169e14fcaadd01da0d609",
+      "replacementSha256": "a1529cbbf7c45ca71e8f1bdee82a426ba13c3ef111a7e16df1b9514c4c417a2c",
+      "completePublicType": "def psBuildErasureDeclarationNamesWorker (declarations : List PsDeclaration) : PsErasureNameState -> PsErasureNameState",
+      "argumentOrder": [
+        "declarations",
+        "state"
+      ],
+      "preservedContract": [
+        "Keep the exact declaration whitelist: definition, partial, theorem and inductive names; skip other declarations.",
+        "Keep identifier sanitization, default decl spelling, 4096 uniqueness fuel, collision order and entriesRev order.",
+        "Retain the typed Option-valued match local; do not change the unique-name algorithm or reverse helper."
+      ],
+      "projectionSeedRequired": true
+    },
+    {
+      "family": "F2",
+      "name": "psEraseDefinitionsLoopWorker",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "originalBlobSha": "d288a83320f509fd229139303e06aadcdb7ab39d",
+      "originalSource": "def psEraseDefinitionsLoopWorker\n    (environment : PsEnvironment)\n    (scope : PsErasureScope)\n    (declarations : List PsDeclaration) :\n    List PsVerifiedIrDeclaration ->\n    Except PsErasureError (List PsVerifiedIrDeclaration) :=\n  match declarations with\n  | List.nil =>\n      fun (declarationsRev : List PsVerifiedIrDeclaration) =>\n        Except.ok (psErasureReverseIrDeclarationsAcc declarationsRev List.nil)\n  | List.cons declaration rest =>\n      let smaller :\n          List PsVerifiedIrDeclaration ->\n          Except PsErasureError (List PsVerifiedIrDeclaration) :=\n        psEraseDefinitionsLoopWorker environment scope rest;\n      fun (declarationsRev : List PsVerifiedIrDeclaration) =>\n        match declaration with\n        | PsDeclaration.definitionDecl name _ type value =>\n            match psEraseDefinition environment scope name type value with\n            | Except.error error => Except.error error\n            | Except.ok result =>\n                match result with\n                | Option.none => smaller declarationsRev\n                | Option.some lowered =>\n                    smaller (List.cons lowered declarationsRev)\n        | PsDeclaration.partialDecl name _ type value =>\n            match psEraseDefinition environment scope name type value with\n            | Except.error error => Except.error error\n            | Except.ok result =>\n                match result with\n                | Option.none => smaller declarationsRev\n                | Option.some lowered =>\n                    smaller (List.cons lowered declarationsRev)\n        | _ => smaller declarationsRev",
+      "replacementSource": "def psEraseDefinitionsLoopWorker\n    (environment : PsEnvironment)\n    (scope : PsErasureScope)\n    (declarations : List PsDeclaration)\n    (declarationsRev : List PsVerifiedIrDeclaration) :\n    Except PsErasureError (List PsVerifiedIrDeclaration) :=\n  match declarations with\n  | List.nil =>\n      Except.ok (psErasureReverseIrDeclarationsAcc declarationsRev List.nil)\n  | List.cons declaration rest =>\n      match declaration with\n      | PsDeclaration.definitionDecl name _ type value =>\n          match psEraseDefinition environment scope name type value with\n          | Except.error error => Except.error error\n          | Except.ok result =>\n              match result with\n              | Option.none =>\n                  psEraseDefinitionsLoopWorker environment scope rest declarationsRev\n              | Option.some lowered =>\n                  psEraseDefinitionsLoopWorker environment scope rest\n                    (List.cons lowered declarationsRev)\n      | PsDeclaration.partialDecl name _ type value =>\n          match psEraseDefinition environment scope name type value with\n          | Except.error error => Except.error error\n          | Except.ok result =>\n              match result with\n              | Option.none =>\n                  psEraseDefinitionsLoopWorker environment scope rest declarationsRev\n              | Option.some lowered =>\n                  psEraseDefinitionsLoopWorker environment scope rest\n                    (List.cons lowered declarationsRev)\n      | _ =>\n          psEraseDefinitionsLoopWorker environment scope rest declarationsRev",
+      "originalSha256": "7614985f0d3aa5b398675cc4f7dd616957ba4710f5cf6ce7d72ae2db6ac199fc",
+      "replacementSha256": "e42bed8e3913d1a2060c38e3bf9b21d3688baa1b848998439f09499010d2d252",
+      "completePublicType": "def psEraseDefinitionsLoopWorker (environment : PsEnvironment) (scope : PsErasureScope) (declarations : List PsDeclaration) : List PsVerifiedIrDeclaration -> Except PsErasureError (List PsVerifiedIrDeclaration)",
+      "argumentOrder": [
+        "environment",
+        "scope",
+        "declarations",
+        "declarationsRev"
+      ],
+      "preservedContract": [
+        "Process definition and partial declaration branches identically as before; skip the same remaining forms.",
+        "Preserve error before Option handling, erased-result omission, first-error order and final local reversal.",
+        "Keep environment and scope fixed and preserve psEraseDefinitionsLoop argument order."
+      ],
+      "projectionSeedRequired": false
+    },
+    {
+      "family": "F2",
+      "name": "psPrepareRuntimeStructures",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "originalBlobSha": "864cf3a59c51537aca59e0bb7691a66f0dce777c",
+      "originalSource": "def psPrepareRuntimeStructures\n    (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) :\n    PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult :=\n  match inputs with\n  | List.nil =>\n      fun (scope : PsErasureScope) (structuresRev : List PsVerifiedIrStructure) =>\n        Except.ok (PsPreparedStructuresResult.mk scope (psListReverse structuresRev))\n  | List.cons declaration rest =>\n    let smaller : PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult :=\n      psPrepareRuntimeStructures environment declarations rest;\n    fun (scope : PsErasureScope) (structuresRev : List PsVerifiedIrStructure) =>\n      match declaration with\n      | .inductiveDecl info =>\n          if info.isStructure then\n            match\n                psPrepareRuntimeStructure\n                  environment\n                  declarations\n                  scope\n                  info with\n            | Except.error error => Except.error error\n            | Except.ok prepared =>\n                smaller\n                  prepared.scope\n                  (List.cons prepared.ir structuresRev)\n          else\n            smaller\n              scope\n              structuresRev\n      | _ =>\n          smaller\n            scope\n            structuresRev\n",
+      "replacementSource": "def psPrepareRuntimeStructures\n    (environment : PsEnvironment)\n    (declarations : List PsDeclaration)\n    (inputs : List PsDeclaration)\n    (scope : PsErasureScope)\n    (structuresRev : List PsVerifiedIrStructure) :\n    Except PsErasureError PsPreparedStructuresResult :=\n  match inputs with\n  | List.nil =>\n      Except.ok (PsPreparedStructuresResult.mk scope (psListReverse structuresRev))\n  | List.cons declaration rest =>\n      match declaration with\n      | .inductiveDecl info =>\n          if info.isStructure then\n            match\n                psPrepareRuntimeStructure\n                  environment\n                  declarations\n                  scope\n                  info with\n            | Except.error error => Except.error error\n            | Except.ok prepared =>\n                psPrepareRuntimeStructures\n                  environment\n                  declarations\n                  rest\n                  prepared.scope\n                  (List.cons prepared.ir structuresRev)\n          else\n            psPrepareRuntimeStructures\n              environment\n              declarations\n              rest\n              scope\n              structuresRev\n      | _ =>\n          psPrepareRuntimeStructures\n            environment\n            declarations\n            rest\n            scope\n            structuresRev\n",
+      "originalSha256": "cf6e09fa41cff546de6d14908351dfdc9776bfe98f8fad4beeebbcf2a0321e1b",
+      "replacementSha256": "034d2c72392b6496bc21c10bd4e5ae407d9d20d21dbacf766d7d14391b71493f",
+      "completePublicType": "def psPrepareRuntimeStructures (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) : PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult",
+      "argumentOrder": [
+        "environment",
+        "declarations",
+        "inputs",
+        "scope",
+        "structuresRev"
+      ],
+      "preservedContract": [
+        "Visit only inductive declarations whose isStructure flag is true.",
+        "Thread prepared.scope after success, preserve all skip paths and reverse output exactly once.",
+        "Retain first failure and the full fixed declaration list used for lookup."
+      ],
+      "projectionSeedRequired": false
+    },
+    {
+      "family": "F2",
+      "name": "psPrepareRuntimeInductives",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "originalBlobSha": "4098822ae5ca1a1c3d3d476be5b592daad7d2110",
+      "originalSource": "def psPrepareRuntimeInductives\n    (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) :\n    PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult :=\n  match inputs with\n  | List.nil =>\n      fun (scope : PsErasureScope) (irRev : List PsVerifiedIrInductive) =>\n        Except.ok (PsPreparedInductivesResult.mk scope (psListReverse irRev))\n  | List.cons declaration rest =>\n    let smaller : PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult :=\n      psPrepareRuntimeInductives environment declarations rest;\n    fun (scope : PsErasureScope) (irRev : List PsVerifiedIrInductive) =>\n      match declaration with\n      | .inductiveDecl info =>\n          if info.isStructure then\n            smaller\n              scope\n              irRev\n          else\n            match\n                psPrepareRuntimeInductive\n                  environment\n                  declarations\n                  scope\n                  info with\n            | Except.error error => Except.error error\n            | Except.ok prepared =>\n                smaller\n                  prepared.scope\n                  (List.cons prepared.ir irRev)\n      | _ =>\n          smaller\n            scope\n            irRev\n",
+      "replacementSource": "def psPrepareRuntimeInductives\n    (environment : PsEnvironment)\n    (declarations : List PsDeclaration)\n    (inputs : List PsDeclaration)\n    (scope : PsErasureScope)\n    (irRev : List PsVerifiedIrInductive) :\n    Except PsErasureError PsPreparedInductivesResult :=\n  match inputs with\n  | List.nil =>\n      Except.ok (PsPreparedInductivesResult.mk scope (psListReverse irRev))\n  | List.cons declaration rest =>\n      match declaration with\n      | .inductiveDecl info =>\n          if info.isStructure then\n            psPrepareRuntimeInductives\n              environment\n              declarations\n              rest\n              scope\n              irRev\n          else\n            match\n                psPrepareRuntimeInductive\n                  environment\n                  declarations\n                  scope\n                  info with\n            | Except.error error => Except.error error\n            | Except.ok prepared =>\n                psPrepareRuntimeInductives\n                  environment\n                  declarations\n                  rest\n                  prepared.scope\n                  (List.cons prepared.ir irRev)\n      | _ =>\n          psPrepareRuntimeInductives\n            environment\n            declarations\n            rest\n            scope\n            irRev\n",
+      "originalSha256": "4099026f30b50c1b1dc28d1b12a90aa9cde6143e885988f3d0d470c5c0b89b2e",
+      "replacementSha256": "92bd27b6d8718b3c8456182fb2ccc310fb5c1f6143d89d4a423bbf40c0c94359",
+      "completePublicType": "def psPrepareRuntimeInductives (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) : PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult",
+      "argumentOrder": [
+        "environment",
+        "declarations",
+        "inputs",
+        "scope",
+        "irRev"
+      ],
+      "preservedContract": [
+        "Visit only inductive declarations whose isStructure flag is false.",
+        "Thread prepared.scope after success, preserve skip paths, first failure and final reversal.",
+        "Do not change constructor preparation, layout policy, lookup or recursor implementation."
+      ],
+      "projectionSeedRequired": false
+    },
+    {
+      "family": "F2",
+      "name": "psTsBuildSymbolMap",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "originalBlobSha": "35485a2cf9e4f07249ee689f0c35b581b305e324",
+      "originalSource": "def psTsBuildSymbolMap (namePrefix : String) (names : List String) : PsTsSymbolMapState -> PsTsSymbolMapState :=\n  match names with\n  | List.nil => fun (state : PsTsSymbolMapState) => state\n  | List.cons name rest =>\n      let smaller : PsTsSymbolMapState -> PsTsSymbolMapState := psTsBuildSymbolMap namePrefix rest;\n      fun (state : PsTsSymbolMapState) =>\n        let fresh := psTsFreshInternal state.used namePrefix state.nextIndex;\n        smaller (PsTsSymbolMapState.mk (List.cons fresh.name state.used) fresh.nextIndex\n          (List.cons (Prod.mk name fresh.name) state.entriesRev))",
+      "replacementSource": "def psTsBuildSymbolMap\n    (namePrefix : String)\n    (names : List String)\n    (state : PsTsSymbolMapState) : PsTsSymbolMapState :=\n  match names with\n  | List.nil => state\n  | List.cons name rest =>\n      let fresh := psTsFreshInternal state.used namePrefix state.nextIndex;\n      psTsBuildSymbolMap namePrefix rest\n        (PsTsSymbolMapState.mk\n          (List.cons fresh.name state.used)\n          fresh.nextIndex\n          (List.cons (Prod.mk name fresh.name) state.entriesRev))",
+      "originalSha256": "9a484af971952079d9173456392a0d12f8cba24cdcdaa59739163f4dbd2e03ba",
+      "replacementSha256": "293812c8b5149fe76d3f7f212a2e499921ed81b0a7f71e06650f9e31dae91ee6",
+      "completePublicType": "def psTsBuildSymbolMap (namePrefix : String) (names : List String) : PsTsSymbolMapState -> PsTsSymbolMapState",
+      "argumentOrder": [
+        "namePrefix",
+        "names",
+        "state"
+      ],
+      "preservedContract": [
+        "Keep fresh-name generation, used list, nextIndex and entriesRev updates in their existing order.",
+        "Both brand and tag wrappers retain their prefixes, initial states and final output handling.",
+        "Repeated source names and collisions keep the existing mapping behavior."
+      ],
+      "projectionSeedRequired": true
+    }
+  ],
+  "aliases": {
+    "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+    "baseCommit": "48723fe676a0d9ae3fa819bd314199fe0ca2e926",
+    "originalBlobSha": "b27f87943d042496ec0732c309afc4f770ed6fc4",
+    "aliasCount": 3,
+    "functions": [
+      {
+        "function": "psIrCheckMatchBindings",
+        "originalSource": "def psIrCheckMatchBindings (options : PsIrCheckOptions) (module : PsVerifiedIrModule)\n    (bindings : List PsVerifiedIrMatchBinding) (fields : List PsVerifiedIrParameter)\n    (substitutions : List (String × PsVerifiedIrType)) (scope : PsIrCheckScope)\n    (seenFields seenNames : List String) (state : PsIrCheckState) : PsIrCheckState :=\n  match bindings with\n  | List.nil => state\n  | List.cons binding rest =>\n      let limits : PsIrCheckOptions := options;\n      let location := psIrCheckAt scope (String.Internal.append \"binding:\" binding.name);\n      let annotated := psIrCheckAnnotation options module state location binding.type;\n      let fieldUnique :=\n        if psIrCheckHasName seenFields binding.field then\n          psIrCheckFinding options annotated location \"duplicate-match-field\" binding.field Option.none Option.none\n        else annotated;\n      let nameUnique :=\n        psIrCheckNames options (List.cons binding.name List.nil) location\n          \"duplicate-binder\" seenNames fieldUnique;\n      let checked : PsIrCheckState :=\n        match psIrCheckFindParameter fields binding.field with\n        | Option.none =>\n            psIrCheckFinding options nameUnique location \"unresolved-match-field\" binding.field Option.none Option.none\n        | Option.some field =>\n            match psIrCheckSubstitute limits.maxTypeSteps substitutions field.type with\n            | Except.error issue => psIrCheckRecordIssue options nameUnique location issue\n            | Except.ok expected => psIrCheckCompare options nameUnique location expected binding.type;\n      psIrCheckMatchBindings options module rest fields substitutions scope\n        (List.cons binding.field seenFields) (List.cons binding.name seenNames) checked\n",
+        "aliases": [
+          {
+            "name": "limits",
+            "type": "PsIrCheckOptions",
+            "value": "options",
+            "count": 1
+          }
+        ],
+        "replacementSource": "def psIrCheckMatchBindings (options : PsIrCheckOptions) (module : PsVerifiedIrModule)\n    (bindings : List PsVerifiedIrMatchBinding) (fields : List PsVerifiedIrParameter)\n    (substitutions : List (String × PsVerifiedIrType)) (scope : PsIrCheckScope)\n    (seenFields seenNames : List String) (state : PsIrCheckState) : PsIrCheckState :=\n  match bindings with\n  | List.nil => state\n  | List.cons binding rest =>\n      let location := psIrCheckAt scope (String.Internal.append \"binding:\" binding.name);\n      let annotated := psIrCheckAnnotation options module state location binding.type;\n      let fieldUnique :=\n        if psIrCheckHasName seenFields binding.field then\n          psIrCheckFinding options annotated location \"duplicate-match-field\" binding.field Option.none Option.none\n        else annotated;\n      let nameUnique :=\n        psIrCheckNames options (List.cons binding.name List.nil) location\n          \"duplicate-binder\" seenNames fieldUnique;\n      let checked : PsIrCheckState :=\n        match psIrCheckFindParameter fields binding.field with\n        | Option.none =>\n            psIrCheckFinding options nameUnique location \"unresolved-match-field\" binding.field Option.none Option.none\n        | Option.some field =>\n            match psIrCheckSubstitute options.maxTypeSteps substitutions field.type with\n            | Except.error issue => psIrCheckRecordIssue options nameUnique location issue\n            | Except.ok expected => psIrCheckCompare options nameUnique location expected binding.type;\n      psIrCheckMatchBindings options module rest fields substitutions scope\n        (List.cons binding.field seenFields) (List.cons binding.name seenNames) checked\n",
+        "originalSha256": "8b2381e3938a4be50bf79e137b09f07f7d5aa1d74d14f2a16e3710f3e7ab277d",
+        "replacementSha256": "42982a9da3312954d540fa9f2839e44cdf736ac6be23301da3a50a9000e165e1"
+      },
+      {
+        "function": "psIrCheckRun",
+        "originalSource": "def psIrCheckRun (options : PsIrCheckOptions) (module : PsVerifiedIrModule)\n    (fuel : Nat) (state : PsIrCheckState) : PsIrCheckState :=\n  match fuel with\n  | Nat.zero =>\n      let currentState : PsIrCheckState := state;\n      if psListIsEmpty currentState.tasks then state\n      else\n        let failed := psIrCheckFinding options state\n          (psIrCheckScopeRoot \"module\" List.nil List.nil)\n          \"checker-resource-limit\" \"dispatcher steps exhausted\" Option.none Option.none;\n        PsIrCheckState.mk List.nil failed.values failed.visitedSteps failed.expressionCount\n          failed.findingCount failed.findingsRev false\n  | Nat.succ remaining =>\n      let currentState : PsIrCheckState := state;\n      match currentState.tasks with\n      | List.nil => state\n      | List.cons task tasks =>\n          let next := PsIrCheckState.mk tasks currentState.values (Nat.succ currentState.visitedSteps)\n            currentState.expressionCount currentState.findingCount currentState.findingsRev currentState.traversalComplete;\n          psIrCheckRun options module remaining (psIrCheckStep options module task next)\n",
+        "aliases": [
+          {
+            "name": "currentState",
+            "type": "PsIrCheckState",
+            "value": "state",
+            "count": 2
+          }
+        ],
+        "replacementSource": "def psIrCheckRun (options : PsIrCheckOptions) (module : PsVerifiedIrModule)\n    (fuel : Nat) (state : PsIrCheckState) : PsIrCheckState :=\n  match fuel with\n  | Nat.zero =>\n      if psListIsEmpty state.tasks then state\n      else\n        let failed := psIrCheckFinding options state\n          (psIrCheckScopeRoot \"module\" List.nil List.nil)\n          \"checker-resource-limit\" \"dispatcher steps exhausted\" Option.none Option.none;\n        PsIrCheckState.mk List.nil failed.values failed.visitedSteps failed.expressionCount\n          failed.findingCount failed.findingsRev false\n  | Nat.succ remaining =>\n      match state.tasks with\n      | List.nil => state\n      | List.cons task tasks =>\n          let next := PsIrCheckState.mk tasks state.values (Nat.succ state.visitedSteps)\n            state.expressionCount state.findingCount state.findingsRev state.traversalComplete;\n          psIrCheckRun options module remaining (psIrCheckStep options module task next)\n",
+        "originalSha256": "496ea739ed9816aa0ce56974c7ecc416cec83d59835f2492dd68ba8be2db26f1",
+        "replacementSha256": "10fab7361240656d442bc8bd892be06e96512491020319ec1a3a170bdf2431a3"
+      }
+    ],
+    "scope": "Only remove three typed identity aliases; preserve all original types, branches, findings, resource bounds, step order and checker/provider behavior.",
+    "originalSha256": "6a8b2cc5eee268804b41692fadb374f97cad6b2bc3b67a65d9736772a31645d5",
+    "replacementSha256": "685034a6bd9ba89de04a7a7fee3a092d9d5daf9a97cbc829ba120a77b2a6ee41"
+  },
+  "plannedGates": {
+    "generatedRuntime": {
+      "casesPerCompiler": 87,
+      "reference": "Authenticated selected R compiler",
+      "candidates": [
+        "N1",
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "explicitExpectedResults": true,
+      "onlyJsonSafeCrossCompilerObservations": true
+    },
+    "publicTypesAndRuntimeSignatures": {
+      "workers": 12,
+      "input": "Existing prepared declarations and original IR from each current-source generation",
+      "completeCoreAlphaEquality": true,
+      "orderedRuntimeParameterAndResultTypes": true,
+      "isolatedSignatureProbe": true,
+      "fullBaselineClosurePreparedAgain": false
+    },
+    "existingPortableIrAndProviderGates": "Retained",
+    "historicalRecovery": "Existing TS5 reconstruction unchanged; its generations do not invoke the new ABI hook",
+    "sourceGuardReview": "Seven updated guards reviewed against exact merged source without executing them"
+  },
+  "verification": {
+    "staticSourceReview": "complete",
+    "outOfScopeSourceBytesPreserved": true,
+    "independentBehaviorAndAbiReview": "complete",
+    "nativeBuildExecuted": false,
+    "generatedRuntimeExecuted": false,
+    "compilerQualification": null,
+    "providerAcceptance": null
+  },
+  "performanceClaim": null
+}

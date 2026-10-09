@@ -1,6 +1,6 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 11:45:30 UTC.
+Updated: 2026-10-09 12:02:35 UTC.
 
 ## Active continuation: new-only R3 source grammar and projection repair
 
@@ -53,7 +53,23 @@ additional direct-reference blocker. The next attempt runs all three existing
 native regression suites before returning their combined failure status, so one
 failing suite cannot hide another suite's diagnostics. No gate is relaxed.
 See [the exact first-attempt evidence](docs/selfhost-language/grammar-migration-attempt-1.json).
-Native regression, N1, C1/C2/C3, provider and cold successor gates have not yet run.
+The coherent correction is `fe2560aba0f347b1caf8d000d371464642d44f23`
+([run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635)).
+Its native build, all three native suites, actual checked-seed build, focused
+source/import tests and CLI boundaries passed. N1 passed the full-closure new
+PS correspondence and generated capability gates; the same-complete-compiler
+TypeScript comparison also passed. C1 is currently running; C2/C3, independent
+provider acceptance and cold successor recovery are pending. No full compiler
+qualification or new seed selection is claimed from the completed N1 gate.
+
+All 12 worker rewrites, three alias removals and seven source-guard updates are
+prepared and independently reviewed, with no active source application yet.
+The [exact candidate fragments and gate plan](docs/selfhost-language/worker-migration-candidate.json)
+preserve every byte outside the 14 named definitions. The prepared 87-case gate
+compares compiler-owned values through JSON observations; the ABI hook reuses the
+existing prepared declarations and exact IR, adding one small isolated signature
+probe instead of preparing the full baseline closure again. Integration still
+requires the fully qualified, accepted, recoverable successor to be selected.
 
 The planned early gates cover migrated native parser/printer/elaboration tests,
 fatal UTF-8 and actual-AST import loading, and successor descriptor integrity.

@@ -1,0 +1,468 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-observed-cloud-failure",
+  "repository": "dwijayuda/pskernel",
+  "commit": "48723fe676a0d9ae3fa819bd314199fe0ca2e926",
+  "runId": 37925016499,
+  "compilerJobId": 113801753453,
+  "runAttempt": 1,
+  "fullDecodedLogBlob": "0b25b8b594673d9a2d457ba02443ff963bc2cb9f",
+  "nativeBuild": "failure",
+  "compilerQualified": false,
+  "failedModules": [
+    "Ps.Syntax.ParseProofScript",
+    "Ps.Elab.Term"
+  ],
+  "diagnostics": [
+    "2026-10-09T11:40:50.4317646Z error: packages/syntax/src/Ps/Syntax/ParseProofScript.lean:487:13: unexpected token 'postfix'; expected '=>'",
+    "2026-10-09T11:40:50.4319511Z error: packages/syntax/src/Ps/Syntax/ParseProofScript.lean:487:21: unexpected token '=>'; expected ':'",
+    "2026-10-09T11:41:02.7111897Z error: packages/elab/src/Ps/Elab/Term.lean:3012:19: Unknown identifier `psListIsEmpty`",
+    "2026-10-09T11:41:08.6137241Z error: build failed",
+    "2026-10-09T11:41:08.6548455Z ##[error]Process completed with exit code 1."
+  ],
+  "currentSourceWarnings": [
+    "2026-10-09T11:41:02.6954022Z warning: packages/elab/src/Ps/Elab/Term.lean:2781:11: Variable name `context` is not explicitly referenced.",
+    "2026-10-09T11:41:02.7095800Z warning: packages/elab/src/Ps/Elab/Term.lean:2782:13: Variable name `recursion` is not explicitly referenced.",
+    "2026-10-09T11:41:02.7106842Z warning: packages/elab/src/Ps/Elab/Term.lean:2783:15: Variable name `index` is not explicitly referenced."
+  ],
+  "downstream": "Native regression tests, checked-source tests, N1, C1, C2/C3, provider admission, and successor cold recovery were skipped.",
+  "observedJobs": [
+    {
+      "id": 113801753453,
+      "name": "compiler",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 113802563849,
+      "name": "successor-recovery",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 113802564183,
+      "name": "kernel-admissions",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "receipts": [
+    {
+      "logLine": 397,
+      "label": "PSC0_TYPESCRIPT_PROFILE",
+      "statusPrefix": "PASS",
+      "exactLoggedLine": "2026-10-09T11:39:29.8208824Z PSC0_TYPESCRIPT_PROFILE: PASS {\"mode\":\"installed-profile-contract\",\"report\":\"/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json\",\"timings\":[{\"phase\":\"positional-source-with-unrelated-config\",\"version\":\"7.0.2\",\"elapsedMs\":81.425476}]}",
+      "rawJson": "{\"mode\":\"installed-profile-contract\",\"report\":\"/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json\",\"timings\":[{\"phase\":\"positional-source-with-unrelated-config\",\"version\":\"7.0.2\",\"elapsedMs\":81.425476}]}",
+      "parsed": {
+        "mode": "installed-profile-contract",
+        "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+        "timings": [
+          {
+            "phase": "positional-source-with-unrelated-config",
+            "version": "7.0.2",
+            "elapsedMs": 81.425476
+          }
+        ]
+      }
+    },
+    {
+      "logLine": 784,
+      "label": "PSC0_SH1_HISTORICAL_TYPESCRIPT_RESOLUTION",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:39:40.9843735Z PSC0_SH1_HISTORICAL_TYPESCRIPT_RESOLUTION: {\"schemaVersion\":1,\"evidence\":\"frozen-historical-typescript-resolution\",\"sourceRef\":\"37f63c39d4a07189938046c64152bba25d789450\",\"expectedLauncher\":\"/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc\",\"expectedVersion\":\"Version 5.8.3\",\"cwd\":\"/home/runner/work/pskernel/pskernel/historical-source/psc0\",\"effectivePath\":\"/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin:/home/runner/.elan/bin:/opt/hostedtoolcache/node/22.23.3/x64/bin:/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/.bin:/home/runner/.elan/bin:/opt/hostedtoolcache/node/22.23.3/x64/bin:/snap/bin:/home/runner/.local/bin:/opt/pipx_bin:/home/runner/.cargo/bin:/home/runner/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/runner/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\",\"passed\":true,\"resolver\":\"Exact cwd/PATH candidate ordering from immutable S0 TypeScriptCompiler.lean.\",\"selectedLauncher\":\"/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc\",\"reportedVersion\":\"Version 5.8.3\"}",
+      "rawJson": "{\"schemaVersion\":1,\"evidence\":\"frozen-historical-typescript-resolution\",\"sourceRef\":\"37f63c39d4a07189938046c64152bba25d789450\",\"expectedLauncher\":\"/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc\",\"expectedVersion\":\"Version 5.8.3\",\"cwd\":\"/home/runner/work/pskernel/pskernel/historical-source/psc0\",\"effectivePath\":\"/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin:/home/runner/.elan/bin:/opt/hostedtoolcache/node/22.23.3/x64/bin:/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/.bin:/home/runner/.elan/bin:/opt/hostedtoolcache/node/22.23.3/x64/bin:/snap/bin:/home/runner/.local/bin:/opt/pipx_bin:/home/runner/.cargo/bin:/home/runner/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/runner/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\",\"passed\":true,\"resolver\":\"Exact cwd/PATH candidate ordering from immutable S0 TypeScriptCompiler.lean.\",\"selectedLauncher\":\"/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc\",\"reportedVersion\":\"Version 5.8.3\"}",
+      "parsed": {
+        "schemaVersion": 1,
+        "evidence": "frozen-historical-typescript-resolution",
+        "sourceRef": "37f63c39d4a07189938046c64152bba25d789450",
+        "expectedLauncher": "/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc",
+        "expectedVersion": "Version 5.8.3",
+        "cwd": "/home/runner/work/pskernel/pskernel/historical-source/psc0",
+        "effectivePath": "/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin:/home/runner/.elan/bin:/opt/hostedtoolcache/node/22.23.3/x64/bin:/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/.bin:/home/runner/.elan/bin:/opt/hostedtoolcache/node/22.23.3/x64/bin:/snap/bin:/home/runner/.local/bin:/opt/pipx_bin:/home/runner/.cargo/bin:/home/runner/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/runner/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+        "passed": true,
+        "resolver": "Exact cwd/PATH candidate ordering from immutable S0 TypeScriptCompiler.lean.",
+        "selectedLauncher": "/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc",
+        "reportedVersion": "Version 5.8.3"
+      }
+    },
+    {
+      "logLine": 1167,
+      "label": "PSC0_SH1_SEED",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:23.2843617Z PSC0_SH1_SEED: {\"cacheHit\":false,\"identitySha256\":\"9ff4523a020329e5cfe6374fa93e17ab267017dd622cc0d7c9f6db71209db6f0\",\"compilerSha256\":\"74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76\",\"sourceRef\":\"37f63c39d4a07189938046c64152bba25d789450\"}",
+      "rawJson": "{\"cacheHit\":false,\"identitySha256\":\"9ff4523a020329e5cfe6374fa93e17ab267017dd622cc0d7c9f6db71209db6f0\",\"compilerSha256\":\"74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76\",\"sourceRef\":\"37f63c39d4a07189938046c64152bba25d789450\"}",
+      "parsed": {
+        "cacheHit": false,
+        "identitySha256": "9ff4523a020329e5cfe6374fa93e17ab267017dd622cc0d7c9f6db71209db6f0",
+        "compilerSha256": "74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76",
+        "sourceRef": "37f63c39d4a07189938046c64152bba25d789450"
+      }
+    },
+    {
+      "logLine": 1432,
+      "label": "PSC0_SH1_SEED_TYPESCRIPT_REPLAY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.0978345Z PSC0_SH1_SEED_TYPESCRIPT_REPLAY: {\"schemaVersion\":1,\"evidence\":\"selected-seed-typescript-recovery-replay\",\"sourceRef\":\"e91b9558d665879871b8bf0893915ae64b27c7fe\",\"toolchain\":{\"node\":\"v22.23.3\",\"platform\":\"linux\",\"architecture\":\"x64\",\"lean\":\"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\"leanGitHash\":\"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\"typescript\":\"Version 5.8.3\"},\"typescriptProfile\":{\"version\":\"5.8.3\",\"purpose\":\"historical-seed-recovery\",\"arguments\":[]},\"expectedTypeScriptSha256\":\"b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1\",\"expectedJavaScriptSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"passed\":true,\"scope\":\"Recompile authenticated A TypeScript with the original 5.8.3 arguments; source reconstruction is a separate recovery route.\",\"typescriptSha256\":\"b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1\",\"compile\":{\"command\":\"/opt/hostedtoolcache/node/22.23.3/x64/bin/node\",\"args\":[\"/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc\",\"/home/runner/work/pskernel/pskernel/psc0/dist/sh1-seed-recovery/typescript5-replay/index.ts\",\"--target\",\"ES2022\",\"--module\",\"ES2022\",\"--moduleResolution\",\"bundler\",\"--strict\",\"--declaration\",\"--sourceMap\",\"--noEmitOnError\",\"--skipLibCheck\",\"--pretty\",\"false\"],\"cwd\":\"/home/runner/work/pskernel/pskernel/psc0\",\"elapsedMs\":8511.283803,\"timeoutMs\":120000,\"maxBufferBytes\":67108864,\"status\":0,\"signal\":null,\"error\":null,\"diagnosticsComplete\":true,\"stdout\":\"compile.stdout.log\",\"stderr\":\"compile.stderr.log\"},\"javascriptSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"declarationSha256\":\"c0e4bfa3f8eccdcf4cf9c02c67f12d653b37f70a09c674a7349ca59fbb07f771\",\"sourceMapSha256\":\"8942b2350518064a58bcd97f34faf87dd4f531f14be0bbe25753c086d86dd26c\",\"elapsedMs\":8528.277801}",
+      "rawJson": "{\"schemaVersion\":1,\"evidence\":\"selected-seed-typescript-recovery-replay\",\"sourceRef\":\"e91b9558d665879871b8bf0893915ae64b27c7fe\",\"toolchain\":{\"node\":\"v22.23.3\",\"platform\":\"linux\",\"architecture\":\"x64\",\"lean\":\"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)\",\"leanGitHash\":\"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b\",\"typescript\":\"Version 5.8.3\"},\"typescriptProfile\":{\"version\":\"5.8.3\",\"purpose\":\"historical-seed-recovery\",\"arguments\":[]},\"expectedTypeScriptSha256\":\"b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1\",\"expectedJavaScriptSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"passed\":true,\"scope\":\"Recompile authenticated A TypeScript with the original 5.8.3 arguments; source reconstruction is a separate recovery route.\",\"typescriptSha256\":\"b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1\",\"compile\":{\"command\":\"/opt/hostedtoolcache/node/22.23.3/x64/bin/node\",\"args\":[\"/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc\",\"/home/runner/work/pskernel/pskernel/psc0/dist/sh1-seed-recovery/typescript5-replay/index.ts\",\"--target\",\"ES2022\",\"--module\",\"ES2022\",\"--moduleResolution\",\"bundler\",\"--strict\",\"--declaration\",\"--sourceMap\",\"--noEmitOnError\",\"--skipLibCheck\",\"--pretty\",\"false\"],\"cwd\":\"/home/runner/work/pskernel/pskernel/psc0\",\"elapsedMs\":8511.283803,\"timeoutMs\":120000,\"maxBufferBytes\":67108864,\"status\":0,\"signal\":null,\"error\":null,\"diagnosticsComplete\":true,\"stdout\":\"compile.stdout.log\",\"stderr\":\"compile.stderr.log\"},\"javascriptSha256\":\"9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096\",\"declarationSha256\":\"c0e4bfa3f8eccdcf4cf9c02c67f12d653b37f70a09c674a7349ca59fbb07f771\",\"sourceMapSha256\":\"8942b2350518064a58bcd97f34faf87dd4f531f14be0bbe25753c086d86dd26c\",\"elapsedMs\":8528.277801}",
+      "parsed": {
+        "schemaVersion": 1,
+        "evidence": "selected-seed-typescript-recovery-replay",
+        "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 5.8.3"
+        },
+        "typescriptProfile": {
+          "version": "5.8.3",
+          "purpose": "historical-seed-recovery",
+          "arguments": []
+        },
+        "expectedTypeScriptSha256": "b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1",
+        "expectedJavaScriptSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "passed": true,
+        "scope": "Recompile authenticated A TypeScript with the original 5.8.3 arguments; source reconstruction is a separate recovery route.",
+        "typescriptSha256": "b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1",
+        "compile": {
+          "command": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "args": [
+            "/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc",
+            "/home/runner/work/pskernel/pskernel/psc0/dist/sh1-seed-recovery/typescript5-replay/index.ts",
+            "--target",
+            "ES2022",
+            "--module",
+            "ES2022",
+            "--moduleResolution",
+            "bundler",
+            "--strict",
+            "--declaration",
+            "--sourceMap",
+            "--noEmitOnError",
+            "--skipLibCheck",
+            "--pretty",
+            "false"
+          ],
+          "cwd": "/home/runner/work/pskernel/pskernel/psc0",
+          "elapsedMs": 8511.283803,
+          "timeoutMs": 120000,
+          "maxBufferBytes": 67108864,
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "diagnosticsComplete": true,
+          "stdout": "compile.stdout.log",
+          "stderr": "compile.stderr.log"
+        },
+        "javascriptSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "declarationSha256": "c0e4bfa3f8eccdcf4cf9c02c67f12d653b37f70a09c674a7349ca59fbb07f771",
+        "sourceMapSha256": "8942b2350518064a58bcd97f34faf87dd4f531f14be0bbe25753c086d86dd26c",
+        "elapsedMs": 8528.277801
+      }
+    },
+    {
+      "logLine": 1495,
+      "label": "PSC0_SH1_IR_DETAIL_COUNTS",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3136739Z PSC0_SH1_IR_DETAIL_COUNTS: {\"path\":\"../qualified-artifact/dist/sh1/C3/original-ir-inventory.json\",\"traversalComplete\":true,\"findingCounts\":{\"call-arity-needs-expression-typing\":245,\"call-type-arity\":19},\"printedTypeArityFindings\":19,\"omittedFindingDetails\":0}",
+      "rawJson": "{\"path\":\"../qualified-artifact/dist/sh1/C3/original-ir-inventory.json\",\"traversalComplete\":true,\"findingCounts\":{\"call-arity-needs-expression-typing\":245,\"call-type-arity\":19},\"printedTypeArityFindings\":19,\"omittedFindingDetails\":0}",
+      "parsed": {
+        "path": "../qualified-artifact/dist/sh1/C3/original-ir-inventory.json",
+        "traversalComplete": true,
+        "findingCounts": {
+          "call-arity-needs-expression-typing": 245,
+          "call-type-arity": 19
+        },
+        "printedTypeArityFindings": 19,
+        "omittedFindingDetails": 0
+      }
+    },
+    {
+      "logLine": 1496,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3141145Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psLexListLength/expression[199]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psLexListLength/expression[199]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psLexListLength/expression[199]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1497,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3143540Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psParseListLength/expression[2254]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psParseListLength/expression[2254]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psParseListLength/expression[2254]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1498,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3145863Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psParseListReverseAcc/expression[2271]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psParseListReverseAcc/expression[2271]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psParseListReverseAcc/expression[2271]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1499,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3148077Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psParseListAppend/expression[2293]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psParseListAppend/expression[2293]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psParseListAppend/expression[2293]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1500,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3150333Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psListLength/expression[15197]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psListLength/expression[15197]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psListLength/expression[15197]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1501,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3152862Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psListAny/expression[15208]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psListAny/expression[15208]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psListAny/expression[15208]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1502,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3155326Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psListReverseAcc/expression[15229]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psListReverseAcc/expression[15229]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psListReverseAcc/expression[15229]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1503,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3157441Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psListAppend/expression[15251]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psListAppend/expression[15251]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psListAppend/expression[15251]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1504,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3159332Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psListMap/expression[15260]\",\"detail\":{\"expected\":2,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psListMap/expression[15260]\",\"detail\":{\"expected\":2,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psListMap/expression[15260]",
+        "detail": {
+          "expected": 2,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1505,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3161315Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psListMapExcept/expression[15278]\",\"detail\":{\"expected\":3,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psListMapExcept/expression[15278]\",\"detail\":{\"expected\":3,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psListMapExcept/expression[15278]",
+        "detail": {
+          "expected": 3,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1506,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3163393Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psListTake/expression[15305]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psListTake/expression[15305]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psListTake/expression[15305]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1507,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3165142Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psListZip/expression[15333]\",\"detail\":{\"expected\":2,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psListZip/expression[15333]\",\"detail\":{\"expected\":2,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psListZip/expression[15333]",
+        "detail": {
+          "expected": 2,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1508,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3167206Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psCheckedNestedConcat/expression[17616]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psCheckedNestedConcat/expression[17616]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psCheckedNestedConcat/expression[17616]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1509,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3169275Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psElabListLength/expression[25985]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psElabListLength/expression[25985]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psElabListLength/expression[25985]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1510,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3171344Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psErasureIndexBucket/expression[34190]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psErasureIndexBucket/expression[34190]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psErasureIndexBucket/expression[34190]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1511,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3173603Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psErasureIndexSet/expression[34252]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psErasureIndexSet/expression[34252]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psErasureIndexSet/expression[34252]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1512,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3175980Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psErasureIndexFindInBucket/expression[34287]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psErasureIndexFindInBucket/expression[34287]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psErasureIndexFindInBucket/expression[34287]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1513,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3178132Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psErasureIndexPrepend/expression[34339]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psErasureIndexPrepend/expression[34339]\",\"detail\":{\"expected\":1,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psErasureIndexPrepend/expression[34339]",
+        "detail": {
+          "expected": 1,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "logLine": 1514,
+      "label": "PSC0_SH1_IR_TYPE_ARITY",
+      "statusPrefix": null,
+      "exactLoggedLine": "2026-10-09T11:40:42.3180152Z PSC0_SH1_IR_TYPE_ARITY: {\"code\":\"call-type-arity\",\"at\":\"declaration:psTsTailMap/expression[47403]\",\"detail\":{\"expected\":2,\"actual\":0}}",
+      "rawJson": "{\"code\":\"call-type-arity\",\"at\":\"declaration:psTsTailMap/expression[47403]\",\"detail\":{\"expected\":2,\"actual\":0}}",
+      "parsed": {
+        "code": "call-type-arity",
+        "at": "declaration:psTsTailMap/expression[47403]",
+        "detail": {
+          "expected": 2,
+          "actual": 0
+        }
+      }
+    }
+  ]
+}

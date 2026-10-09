@@ -484,14 +484,14 @@ def psParseProofScriptApplicationAfterPrimary
       primary.value
       primary.cursor with
   | Except.error error => Except.error error
-  | Except.ok postfix =>
+  | Except.ok postfixResult =>
       psParseProofScriptNativeTailWithFuel
         parseArgument
-        postfix.value
+        postfixResult.value
         fuel
         []
-        (psProofScriptTermStop postfix.value)
-        postfix.cursor
+        (psProofScriptTermStop postfixResult.value)
+        postfixResult.cursor
 
 def psParseProofScriptApplicationWithFuel
     (parseArgument :

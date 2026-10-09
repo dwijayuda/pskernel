@@ -427,9 +427,11 @@ jobs:
         run: lake build psc1 psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests
       - name: Run native parser, translation, and erasure regression targets
         run: |
-          lake exe psc1_tests
-          lake exe psc1_translation_tests
-          lake exe psc1_erasure_tests
+          regression_status=0
+          for target in psc1_tests psc1_translation_tests psc1_erasure_tests; do
+            if ! lake exe "$target"; then regression_status=1; fi
+          done
+          exit "$regression_status"
       - name: Build the actual native checked seed for source and import tests
         working-directory: psc0/lean-checked
         run: lake build psc2_lean_checked_seed

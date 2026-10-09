@@ -1,6 +1,6 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 11:39:00 UTC.
+Updated: 2026-10-09 11:45:30 UTC.
 
 ## Active continuation: new-only R3 source grammar and projection repair
 
@@ -40,6 +40,20 @@ Implementation assembled for the coherent qualification checkpoint:
 
 No new grammar/compiler qualification has completed for this continuation.
 This code checkpoint is a qualification candidate, not a success receipt.
+
+The first cloud attempt at `48723fe676a0d9ae3fa819bd314199fe0ca2e926`
+([run 37925016499](https://github.com/dwijayuda/pskernel/actions/runs/37925016499))
+passed source/profile/helper and authenticated A recovery gates, then stopped in
+the native build. Two root causes were reported: the new local name `postfix`
+is reserved in Lean, and the Term empty-call guard referenced a list helper that
+is not imported there. The correction renames that local to `postfixResult` and
+uses direct `List.nil`/`List.cons` matching without adding an import or changing
+application semantics. The parser/lexer helper and local-name audit found no
+additional direct-reference blocker. The next attempt runs all three existing
+native regression suites before returning their combined failure status, so one
+failing suite cannot hide another suite's diagnostics. No gate is relaxed.
+See [the exact first-attempt evidence](docs/selfhost-language/grammar-migration-attempt-1.json).
+Native regression, N1, C1/C2/C3, provider and cold successor gates have not yet run.
 
 The planned early gates cover migrated native parser/printer/elaboration tests,
 fatal UTF-8 and actual-AST import loading, and successor descriptor integrity.

@@ -3009,31 +3009,31 @@ def psElabTermWithFuel
                 -- R3 empty calls request argument completion. This bounded
                 -- profile has no optional/default parameter metadata yet.
                 -- Keep [] distinct from an explicit Unit argument and fail closed.
-                if psListIsEmpty args then
-                  Except.error PsElabError.emptyCallUnsupported
-                else
-                  match
-                      psTryElabStructuralSelfCall
-                        context
-                        fn
-                        args
-                        expected with
-                  | Except.error error => Except.error error
-                  | Except.ok selfCall =>
-                      match selfCall with
-                      | Option.some result => Except.ok result
-                      | Option.none =>
-                          match smaller context fn Option.none with
-                          | Except.error error => Except.error error
-                          | Except.ok elaboratedFn =>
-                              match psElabApplyArgs
-                                  smaller
-                                  elaboratedFn
-                                  args
-                                  [] with
-                              | Except.error error => Except.error error
-                              | Except.ok application =>
-                                  psElabFinishApplication application expected
+                match args with
+                | List.nil => Except.error PsElabError.emptyCallUnsupported
+                | List.cons _ _ =>
+                    match
+                        psTryElabStructuralSelfCall
+                          context
+                          fn
+                          args
+                          expected with
+                    | Except.error error => Except.error error
+                    | Except.ok selfCall =>
+                        match selfCall with
+                        | Option.some result => Except.ok result
+                        | Option.none =>
+                            match smaller context fn Option.none with
+                            | Except.error error => Except.error error
+                            | Except.ok elaboratedFn =>
+                                match psElabApplyArgs
+                                    smaller
+                                    elaboratedFn
+                                    args
+                                    [] with
+                                | Except.error error => Except.error error
+                                | Except.ok application =>
+                                    psElabFinishApplication application expected
 
 def psElabTerm
     (context : PsElabContext)

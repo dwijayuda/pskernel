@@ -1,0 +1,65 @@
+name: PSC0 kernel focused diagnosis
+on:
+  push:
+    branches: [psc0/pskernel-core-lean435-arena-v1]
+    paths: [".github/workflows/psc0-pskernel-core-focus.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  int64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install pinned Lean and debugger
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          sudo apt-get install -y gdb
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+          run-id: 37984329797
+          github-token: ${{ github.token }}
+      - name: Profile Int64.toBitVec_div from a fresh 4.35 export
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "BINARY_SOURCE_SHA=20ede5d8400d9037197b4e95a673b6321beb9fbc"
+          chmod +x kernel/psc_kernel_core_arena
+          sha256sum kernel/psc_kernel_core_arena
+          git clone https://github.com/leanprover/lean4export.git exporter
+          git -C exporter checkout 05d43a2bc773b40ecfdebb32294192a5ef756951
+          cd exporter
+          lake build
+          lake env .lake/build/bin/lean4export Init -- Int64.toBitVec_div > int64.ndjson
+          ulimit -s 65536
+          set +e
+          /usr/bin/time -v timeout 180 ../kernel/psc_kernel_core_arena --profile < int64.ndjson > profile.stdout 2> profile.log &
+          timer=$!
+          for sample in 1 2 3 4 5 6 7 8; do
+            sleep 15
+            limiter=$(pgrep -P "$timer" | head -n 1)
+            if test -z "$limiter"; then break; fi
+            checker=$(pgrep -P "$limiter" | head -n 1)
+            if test -z "$checker"; then break; fi
+            echo "STACK_SAMPLE=$sample" >> profile.stacks
+            timeout 10 sudo gdb -q -n -batch -ex 'set pagination off' -ex 'set print frame-arguments none' -ex 'bt 32' -ex detach -p "$checker" >> profile.stacks 2>&1
+          done
+          wait "$timer"
+          code=$?
+          set -e
+          echo "FOCUSED_INT64_EXIT=$code"
+          tail -n 45 profile.log
+          if test -f profile.stacks; then cat profile.stacks; fi
+          printf '%s\n' "$code" > profile.exit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: int64-focused-diagnosis
+          path: |
+            exporter/profile.*
+            exporter/int64.ndjson

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "kind": "psc0-runtime-ir-checker-execution",
-  "updatedAt": "2026-10-09T08:14:53Z",
+  "updatedAt": "2026-10-09T08:18:33Z",
   "branch": "psc0/sh1-ir-checker-v1",
-  "status": "implemented-source-form-repair-pending-qualification",
+  "status": "implemented-source-annotation-repair-pending-qualification",
   "baseQualifiedSourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
   "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
   "strictSh1": false,
@@ -47,6 +47,46 @@
         "change": "Use explicitly typed local let RHS callbacks, passed to the helpers by name.",
         "signatureAndSemanticsChanged": false,
         "parserChanged": false,
+        "followupQualification": "parser incompatibility resolved; follow-up stopped during elaboration",
+        "followupSourceRef": "ccb8ba00ddf677327b4c38a0d6a4a459b83f51f8"
+      }
+    },
+    {
+      "sourceRef": "ccb8ba00ddf677327b4c38a0d6a4a459b83f51f8",
+      "runId": 37903821319,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37903821319",
+      "compilerJobId": 113732357007,
+      "result": "failure",
+      "phase": "native-candidate-psc-elaboration",
+      "passed": [
+        "host JavaScript syntax",
+        "bootstrap source restrictions and ownership guards",
+        "authenticated selected Q cache hit",
+        "native Lean build: 133 jobs",
+        "raw PSC source parsing"
+      ],
+      "diagnostic": "PSC1_PROJECT_ELAB_FAILED: packages/compiler-ir/src/Ps/CompilerIr/Check.lean: declaration=psIrCheckMatchBindings: matchExpectedType",
+      "notRun": [
+        "native checker conformance",
+        "native exact-source original IR checker",
+        "N1 generated checker conformance",
+        "Q to C1",
+        "C2/C3 qualification",
+        "pinned provider acceptance"
+      ],
+      "artifact": {
+        "id": 11603921556,
+        "sizeBytes": 374180,
+        "sha256": "78913f3248783812c8dacdd3041c0aa276c1e4c70852a9df84e2057da75ceab3"
+      },
+      "resolution": {
+        "cause": "Unannotated let initializers receive no expected type, while PSC match elaboration requires an expected result type.",
+        "scope": {
+          "directLetMatchBindings": 4
+        },
+        "change": "Annotate all four let-bound match results with their existing result types.",
+        "checkerSemanticsChanged": false,
+        "elaboratorChanged": false,
         "followupQualification": "pending"
       }
     }
@@ -54,6 +94,6 @@
   "claimBoundaries": [
     "Runtime IR typing, generated compiler fixed-point qualification, pinned Core-provider acceptance and full strict SH/1 are separate.",
     "The selected authoring seed remains A.",
-    "No current M6 generated compiler or runtime IR acceptance claim is earned by the first attempt."
+    "Neither source-compatibility attempt reached the current M6 generated checker or runtime IR acceptance gates."
   ]
 }

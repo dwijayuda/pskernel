@@ -46,7 +46,18 @@ nine in CheckTypes.lean. All are now explicitly typed local let initializers
 passed by name, preserving their bodies and signatures. This uses the existing
 full-term let-RHS parser; it adds no parser capability or typing exception.
 The development command also builds `psc1_ir_check_tests`, matching CI.
-The coherent follow-up is pending qualification. Attempt evidence is retained in
+The follow-up checkpoint `ccb8ba00ddf677327b4c38a0d6a4a459b83f51f8`
+passed raw PSC parsing and another 133-job native build in
+[run 37903821319](https://github.com/dwijayuda/pskernel/actions/runs/37903821319).
+It stopped during PSC elaboration of `psIrCheckMatchBindings` with
+`matchExpectedType`, before any checker acceptance gate.
+
+The elaborator requires an expected result type for matches. An unannotated
+let initializer supplies none. All four direct let-bound matches in Check.lean
+now explicitly state their existing result types; the other four new portable
+modules contain no instance of this inference class. The follow-up changes no
+checker rule or elaborator behavior. Current-source qualification remains pending.
+Attempt evidence is retained in
 [runtime-ir-checker-execution.json](docs/selfhost-language/runtime-ir-checker-execution.json).
 
 ## Current source and qualification checkpoints

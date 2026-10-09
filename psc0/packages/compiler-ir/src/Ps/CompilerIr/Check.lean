@@ -345,7 +345,7 @@ def psIrCheckMatchBindings (options : PsIrCheckOptions) (module : PsVerifiedIrMo
       let nameUnique :=
         psIrCheckNames options (List.cons binding.name List.nil) location
           "duplicate-binder" seenNames fieldUnique;
-      let checked :=
+      let checked : PsIrCheckState :=
         match psIrCheckFindParameter fields binding.field with
         | Option.none =>
             psIrCheckFinding options nameUnique location "unresolved-match-field" binding.field Option.none Option.none
@@ -473,7 +473,7 @@ def psIrCheckProjection (options : PsIrCheckOptions) (module : PsVerifiedIrModul
     PsIrCheckState :=
   let annotated := psIrCheckTypeArguments options module typeArguments scope 0 state;
   let ownerType := PsVerifiedIrType.named name typeArguments;
-  let checked :=
+  let checked : PsIrCheckState × PsIrCheckValue :=
     match psIrCheckFindStructure module.structures name with
     | Option.none =>
         Prod.mk
@@ -512,7 +512,7 @@ def psIrCheckMatch (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
       psIrCheckFinding options unique scope "empty-match-unsupported"
         "empty elimination is outside the active runtime contract" Option.none Option.none
     else unique;
-  let layoutResult :=
+  let layoutResult : PsIrCheckState × PsIrCheckMatchPlan :=
     match psIrCheckFindInductive module.inductives name with
     | Option.none =>
         Prod.mk
@@ -701,7 +701,7 @@ def psIrCheckStep (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
       match state.values with
       | List.nil => psIrCheckInternal options state
       | List.cons value values =>
-          let expected :=
+          let expected : Option PsVerifiedIrType :=
             match common with
             | Option.some type => Option.some type
             | Option.none => psIrCheckValueType value;

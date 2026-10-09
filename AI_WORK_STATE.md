@@ -1,5 +1,14 @@
 # AI Work State
 
+## Arena phase diagnostics — latest verified proof sync (2026-10-09)
+
+- Reconciled the four changed metatheory source files from proof checkpoint `bb30978f262d60cfa6cc7127996e270636d92224`; proof CI #37941025964 confirmed the full registered kernel-proofs and portable-erasure jobs green.
+- This synchronization updates **no** `pskernel-core/src/**` implementation. The bounded cache optimization and all production kernel semantics are unchanged.
+- Original proof branch and integration branch remain untouched; this is a separate diagnostic lane.
+- Stage profile #37940220722 confirms the 407876 UTF8 proof stalls during checked inference, after successful header, proposition, closure and universe-parameter checks.
+- Native sampling #37940566847 shows repeated cache-eligibility traversal allocations in WHNF / inductive-recursor reduction. The allocation-free cache candidate is isolated at `pscv/pskernel-core-arena-eligibility-fast-v1` and has not passed the complete proof/large-corpus gates yet.
+
+
 ## Arena v3 verified checkpoint — 2026-10-09
 
 - Optimized bounded-cache kernel retains production source from proof base `5a7d428b303a865b14a81e6bcb4a6e38050d9165` except `Runtime/Acceleration/CachePolicy.lean`. The proof branch HEAD remains unchanged.

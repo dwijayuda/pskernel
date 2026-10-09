@@ -430,3 +430,65 @@ theorem psKernelAddMutualInductiveInfos_member_present
       | tail =>
           simpa [psKernelAddMutualInductiveInfos, next] using
             ih next info (by assumption)
+
+/--
+One transaction-level metadata-replacement contract.
+
+Provisional header publication and independently checked constructor
+publication give semantic lookup extension. Every provisional datatype
+metadata entry remains present after checked constructor insertion, and
+global source-name freshness excludes replacement of an original declaration.
+The actual metadata replacement fold therefore retains all previously
+accepted canonical declarations and refines the authoritative index.
+
+This theorem does not claim constructor typing, recursor validation, or full
+environment well-formedness by itself. The enclosing source transaction
+supplies the checked constructor-history and input freshness certificates.
+-/
+theorem psKernelPreparedMutualHeaderReplacement_semantic_refines
+    (typeNames : List PsKernelName)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (original ctorEnvironment : PsKernelEnvironment)
+    (isRecursive isReflexive : Bool)
+    (hOriginalAbsent : PsKernelInductiveNamesAbsent original
+      (shapes.map (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name)))
+    (hString : PsKernelStringEqSoundLaw)
+    (hReflexive : PsKernelStringEqReflexiveLaw)
+    (hPrepared : PsKernelEnvironmentSemanticExtends original
+      (psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) original))
+    (hCtorSemantic : PsKernelEnvironmentSemanticExtends
+      (psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) original)
+      ctorEnvironment)
+    (hCtorIndex : PsKernelEnvironmentIndexRefines ctorEnvironment) :
+    PsKernelEnvironmentSemanticExtends original
+      (psKernelReplaceMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes)
+        isRecursive isReflexive ctorEnvironment) ∧
+    PsKernelEnvironmentIndexRefines
+      (psKernelReplaceMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes)
+        isRecursive isReflexive ctorEnvironment) := by
+  let infos := psKernelMakeSimpleMutualBaseInfos typeNames decl shapes
+  let work0 := psKernelAddMutualInductiveInfos infos original
+  have hFresh : ∀ info : PsKernelInductiveInfo, info ∈ infos ->
+      psKernelFindConstantInList info.base.name original.constants = none := by
+    intro info hMem
+    exact hOriginalAbsent.lookup_none_of_mem info.base.name
+      (psKernelMakeSimpleMutualBaseInfos_name_member typeNames decl shapes info hMem)
+  have hPresent : ∀ info : PsKernelInductiveInfo, info ∈ infos ->
+      ∃ old : PsKernelConstantInfo,
+        psKernelFindConstantInList info.base.name ctorEnvironment.constants = some old := by
+    intro info hMem
+    obtain ⟨old, hInWork⟩ :=
+      psKernelAddMutualInductiveInfos_member_present infos
+        hReflexive original info hMem
+    exact ⟨old, hCtorSemantic.1 info.base.name old hInWork⟩
+  have hExt : PsKernelEnvironmentSemanticExtends original ctorEnvironment :=
+    PsKernelEnvironmentSemanticExtends.trans original work0 ctorEnvironment
+      hPrepared hCtorSemantic
+  exact psKernelReplaceMutualInductiveInfos_semantic_refines
+    infos isRecursive isReflexive original hString ctorEnvironment
+    hCtorIndex hExt hFresh hPresent

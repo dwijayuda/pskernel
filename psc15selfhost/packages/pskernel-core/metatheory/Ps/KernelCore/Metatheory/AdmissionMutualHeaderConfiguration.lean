@@ -495,7 +495,7 @@ theorem PsKernelCheckedMutualRemainingHeaderHistory.all_headers_have_sorts
       intro typeDecl hMember
       cases hMember with
       | head => exact ⟨headerLevel, hTyping⟩
-      | tail hTail => exact ih typeDecl hTail
+      | tail => exact ih typeDecl (by assumption)
 
 /--
 Successful actual mutual admission sort-types every source datatype header
@@ -524,4 +524,4 @@ theorem psKernelAddSimpleMutualInductive_success_all_headers_sort_typed
   rw [hTypes] at hMember
   cases hMember with
   | head => exact ⟨headerLevel, hFirstTyping⟩
-  | tail hTail => exact hHistory.all_headers_have_sorts typeDecl hTail
+  | tail => exact hHistory.all_headers_have_sorts typeDecl (by assumption)

@@ -1,0 +1,71 @@
+name: PSKernel Core Arena bounded-cache A/B experiment
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-cache-ab
+    paths:
+      - ".github/workflows/pskernel-core-arena-cache-ab.yml"
+      - "psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  same-runner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BASE_SHA: 7bd41fe7059b3628780dc07716ea9f9f7d5a3075
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Prepare immutable baseline and pinned corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin "$BASE_SHA"
+          git worktree add --detach ../pskernel-arena-reference "$BASE_SHA"
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          (cd arena && uv run lka.py build-test init --cache)
+          for n in 200000 362100 380000; do
+            head -n "$n" arena/_build/tests/init.ndjson > "$RUNNER_TEMP/init-ab-${n}.ndjson"
+            wc -l -c "$RUNNER_TEMP/init-ab-${n}.ndjson"
+          done
+      - name: Build and validate candidate checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd ../pskernel-arena-reference/psc15selfhost && lake build psc_kernel_core_arena)
+          (cd psc15selfhost && lake build psc_kernel_core_arena psc1_kernel_core_foundation_tests && lake exe psc1_kernel_core_foundation_tests)
+          (cd psc15selfhost && lake exe psc_kernel_core_arena_level_tests)
+          (cd psc15selfhost && .lake/build/bin/psc_kernel_core_arena < ../oracle/fixtures/lean434-init-prelude.ndjson)
+      - name: A/B under fixed identical prefixes and reverse ordering
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$GITHUB_WORKSPACE/../pskernel-arena-reference/psc15selfhost/.lake/build/bin/psc_kernel_core_arena"
+          NEW="$GITHUB_WORKSPACE/psc15selfhost/.lake/build/bin/psc_kernel_core_arena"
+          measure () {
+            label="$1"; executable="$2"; count="$3"
+            echo "=== ${label} count=${count} ==="
+            /usr/bin/time -f "measurement=${label} count=${count} wall_s=%e peak_rss_kb=%M exit=%x" \
+              timeout 280 "$executable" < "$RUNNER_TEMP/init-ab-${count}.ndjson"
+          }
+          for n in 200000 362100 380000; do
+            measure baseline-1 "$BASE" "$n"
+            measure candidate-1 "$NEW" "$n"
+            measure candidate-2 "$NEW" "$n"
+            measure baseline-2 "$BASE" "$n"
+          done

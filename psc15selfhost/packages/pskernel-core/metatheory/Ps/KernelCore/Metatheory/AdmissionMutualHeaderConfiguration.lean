@@ -382,6 +382,8 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_pipeline
                                                           simp only [hTail] at hRun
                                                           cases hRun
                                                       | ok tailShapes =>
+                                                          simp only [safety] at hTail
+                                                          simp only [hTail] at hRun
                                                           let shapes : List PsKernelSimpleMutualTypeShape :=
                                                             PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
                                                           let work0 := psKernelAddMutualInductiveInfos
@@ -394,10 +396,11 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_pipeline
                                                               (psKernelSimpleMutualNames decl.types)
                                                               shapes paramResult.session work0 0 with
                                                           | error message =>
+                                                              try simp only [hCtor] at hRun
                                                               cases hRun
                                                           | ok ctorResult =>
                                                               have hCtorAligned := hCtor
-                                                              rw [hTypes] at hCtorAligned
+                                                              simp only [hTypes] at hCtorAligned
                                                               refine ⟨first, remaining, checked, sorted, paramResult,
                                                                 indexResult, resultLevel, tailShapes, ctorResult, rfl,
                                                                 hChecked, hSort, hParams, hIndices, hResult, hTail, ?_⟩

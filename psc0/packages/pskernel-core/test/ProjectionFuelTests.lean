@@ -16,7 +16,9 @@ def addFuelChain (side : String) : Nat → PsKernelEnvironment → PsKernelEnvir
   | n + 1, env =>
       let prior := addFuelChain side n env
       psKernelEnvironmentAddUnchecked prior (.defnInfo {
-        base := { name := fuelChainName side (n + 1), levelParams := [],
+        base := {
+          name := fuelChainName side (n + 1)
+          levelParams := []
           type := .sort (.succ .zero) }
         value := fuelChain side n
         hints := .regular (n + 1)

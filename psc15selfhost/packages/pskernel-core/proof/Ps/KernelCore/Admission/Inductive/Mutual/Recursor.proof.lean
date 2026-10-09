@@ -1,4 +1,4 @@
-import Ps.KernelCore.Admission.Inductive.Mutual.Recursor
+import Ps.KernelCore.Metatheory.AdmissionMutualRecursorSemanticConfiguration
 
 theorem psKernelMakeSimpleMutualMotivesWorker_nil
     (levels : List PsKernelLevel)

@@ -1,4 +1,102 @@
-# PSC0 AI work state — continuation authority
+# PSC0 AI work state — active strict SH/1 milestone
+
+Updated: 2026-10-09 16:44:22 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
+
+## Read this first
+
+The user authorized the merge and the next strict SH/1 milestone with “ok do it” after the recommendation to merge the qualified checkpoint, finish the enabled strict contract, and defer wholesale refactoring and optional language expansion. The qualified checkpoint has now been merged. **Strict SH/1 implementation is active work, not yet qualified.**
+
+At 2026-10-09 16:30:26 UTC, main was independently read back at **ed5d00aca0743bde583b45fe7756dd494ac3960f** following an ordinary non-force fast-forward from 37f63c39d4a07189938046c64152bba25d789450. The comparison was ahead 40 / behind 0 with main as merge base. The exact qualified history and source tree were preserved. A new work branch, **psc0/strict-sh1-v1**, was created at ed5d00aca0743bde583b45fe7756dd494ac3960f and read back at 16:32:13 UTC. No strict source changes or new qualifications had been committed at this initial planning checkpoint.
+
+This active section and [strict/PLAN.md](docs/selfhost-language/strict/PLAN.md) supersede the archived instructions below that say “main remains untouched,” “do not merge main,” “the task is complete,” or “no work is outstanding.” Those instructions described the previous completed scope. They do not prohibit the merge and strict implementation now explicitly authorized by the user. The archived evidence and limits remain true for their exact revisions.
+
+**Continue the work; do not restart the earlier research, repeat the completed baseline qualifications, or claim that merging enables unrestricted PSC1.** Main contains the practical language improvement, F worker migrations, new-only ps-0.9-r3 grammar and TypeScript 7 migration. The complete strict source/runtime/semantic contract still has distinct obligations.
+
+## Persistent decisions and execution rules
+
+- Use GitHub connector/MCP for repository reads and writes. Run repository code, builds and tests only in GitHub Actions. No local clone, files, shell, test/build execution, browser or DesktopCommander. Pure in-memory text/JSON transformations and evidence hashing are permitted.
+- Work on psc0/strict-sh1-v1. Root owns commits and branch updates. Delegate independent research or nonoverlapping draft blobs; agents must not move refs.
+- Read fresh heads, check exact base blobs and preserve ancestry/concurrent work. Use expected-head leases and force:false. The earlier main merge is complete; do not repeat it.
+- Keep Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2. TS5/TS6 and old current .ps syntax are retired. Immutable producer metadata and historic receipts are evidence, not execution permissions.
+- Keep selected R and its manifest/recovery policy unchanged. Do not select F or any strict candidate as a seed merely because compilation or conformance passes.
+- No kernel, provider, defeq, cache-algorithm or existing metatheory changes. The frozen provider is an independent admission consumer.
+- Keep handwritten .lean authoritative. Current .ps is ps-0.9-r3/new-only/bounded-selfhost-subset, not full Standard or PSCV.
+- Implement the existing mandatory language/runtime contract first. No bulk rewrite of the 226 historical source locators, additional scalar families, general do, omitted lambda types, nested patterns, new backends or source-authority switch.
+- Preserve explicit fuel/resource refusals, source spans, public signatures, recursion provenance, first errors, immutable state and exact function groups.
+- Review related obligations before running cloud gates. Do not use a speculative test/fix loop. Use a coherent native preflight and then one exact-source full qualification when its dependencies are ready.
+- Keep strictSh1Qualified false until every enabled mandatory obligation has an explicit defensible disposition and its required evidence. Type checking, provider acceptance, fixed-point equality and finite examples have different meanings.
+
+## Verified baseline to preserve
+
+The completed publication is ed5d00aca0743bde583b45fe7756dd494ac3960f, root tree ef2eca27b3b73788e0d80ed353094628c3b60b7a, PSC0 tree 8f65344a97c043e8b0f6ed206552c7958653468c. Its parent is 4c2cfec187ec0b48d1dfbc091066b9f1dd763215. The active strict branch starts from this exact tree.
+
+| Scope | Exact source and successful cloud evidence | Meaning |
+| --- | --- | --- |
+| Qualified F compiler and runtime | fcd875c8f38db4b0524090bd10c7c2fd5024053d; run 37947341800; compiler job 113876931430; provider job 113896228512 | 87 R/F behavior cases; 12 public Core/IR signatures; native/current IR accepted complete with zero findings; C2/C3 all four products equal; native TS/JS parity; new-only grammar and separate provider acceptance |
+| Selected R native TS7-only recovery | Same runner source fcd875c8f38db4b0524090bd10c7c2fd5024053d; run 37947341899; job 113876930974 | Cold recovery of all four exact R products without TS5, generated-parent execution, restored native/seed caches or downloaded compiler artifacts |
+| Repository-root TS7 migration | 9d150afbec1feda8c97058aa56aa5ab92347d96d; run 37951869293; job 113892421469 | Seven commands and eleven adapter obligations passed; all 21 current pins use 7.0.2; root scope is separate from older optional bootstrap/targets |
+| Main integration | 37f63c39d4a07189938046c64152bba25d789450 → ed5d00aca0743bde583b45fe7756dd494ac3960f at 16:30:26 UTC | Authorized normal fast-forward, ahead 40 / behind 0, no source or history rewrite |
+
+Selected R source: fe2560aba0f347b1caf8d000d371464642d44f23. Selected seed identity: 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225. Selected manifest blob: 44a05964c49000478c282afc013c84fca8c2de65; SHA-256 7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694. Recovery policy blob: fd75854159544e431497bc7dee8482bea727b5e4. Do not alter these as a side effect of strict work.
+
+Frozen provider source: 963030dc2d154008fccc82e7c8ed29331f138799; binary SHA-256 88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec; Lean commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b. Its separate draft PR #84 diverges from the merged baseline by 14 provider-lane commits versus 40 checkpoint-lane commits. Do not blindly merge or reimplement that lane.
+
+The old 61-module count belongs to R/F receipts. New portable strict modules naturally change the current closure count; discover it from actual imports rather than hard-coding 61.
+
+## Current implementation assignments and decisions
+
+### Portable source boundary
+
+Agent projection_repair owns new Compiler/Sh1.lean and BackendTs/Sh1.lean, extends BackendTs/Checked.lean, and adds its import to BackendTs/Compiler.lean. Root owns host and qualification integration.
+
+The route is atomic: raw ordered named modules → the real lexer/parser → source/import/capability validation → existing ordered preparation → original IR → accepted complete portable checker report → emission of that same IR. Reuse the resulting prepared object, IR and report; do not prepare the full compiler again merely to collect evidence.
+
+Validate nonempty unique module names, the twelve allowed compiler namespaces, and dependencies present earlier in the supplied raw bundle before existing preparation discards imports. Check declaration/term forms through an explicit bounded AST traversal. Reuse current elaboration and structural-recursion validation, rather than introducing a second type engine.
+
+The Lean parser immediately lowers do to synthetic compilerPure/compilerBind calls. Its source-policy check must distinguish those expansions from ordinary helper calls by the retained do token byte position and synthetic reference span. Do not ban an ordinary identifier, field or explicit helper call by spelling alone. Current .ps already refuses do.
+
+The checked-emission extension should return the exact report with the emitted text. An accepted Boolean or arbitrary caller-supplied prepared object is not strict source provenance. R lacks the new source API; R builds C1 through the qualified bootstrap route, and current N1/C1/C2/C3 must execute their new APIs.
+
+### Enabled runtime contract
+
+Agent grammar_adoption_audit owns original-ir-carrier.mjs, only the arrayGet/arraySet cases of BackendTs/Expr.lean, and new strict runtime contract/reference/conformance files. Root owns package/workflow/qualifier integration.
+
+The enabled runtime has six primitive types, arity-one Array and 45 intrinsic operations. Optional fixed-width, floating and word-sized operations stay refused.
+
+Two concrete gaps are being repaired:
+1. A JavaScript primitive string may contain lone UTF-16 surrogates although Lean String represents valid Unicode scalar sequences. Reject malformed strings at carrier boundaries, including names, without normalization. Bound the additional scan explicitly.
+2. Proof-required arrayGet/arraySet currently reach raw JavaScript indexing. Invalid indices must refuse explicitly before conversion; arguments must still evaluate once in source order; in-bounds Unit elements remain legal. This defensive check does not recover an erased bounds proof.
+
+Pinned Lean 4.34.0 raw String.Pos behavior is the reference for String get/next/extract. Existing string-cache algorithms are not being changed. Bool.and/or demand order and emitter ordering require source-grounded review; do not silently make short-circuit operations eager.
+
+Native/generated finite operation conformance is regression evidence. It is not a general source/IR/JS preservation theorem.
+
+### Correspondence and assurance
+
+Agent migration_inventory owns strict/CORRESPONDENCE.md, correspondence-obligations.json and the new BackendTs/Sh1Target.lean portable name/initializer admission module. The target check must run after IR typing and before emission, with explicit bounded traversal and refusal on exhaustion. Root owns the overall ledger and assurance status.
+
+The remaining mandatory families include normalization and source origins, binder/proof/type erasure, record/constructor layouts, generic/application groups, capture/let scope, initialization order, target names/freshness, generator/trampoline calls, eta simplification, count loops and tail loops. Record the exact assurance method for each: executable admission, per-compilation relation check, rule-level preservation argument, finite conformance, or actual formal lemma.
+
+Existing sibling proofs establish only narrow cursor/omission/reflexivity examples; the sibling erasure contract explicitly leaves global preservation unproved. Do not treat those as compiler-wide evidence. Ps.Meta.Reduce is not a complete runtime semantics oracle and must remain unchanged.
+
+Static code review also identified that arbitrary typed IR can refer to a later eager global constant and can contain names beyond the emitter's valid/fresh-name domain. These are boundary obligations, not claims of an executed defect in the qualified compiler closure. Prefer source-owned provenance and a finite portable admission rule over broad backend rewriting.
+
+## Next concrete actions
+
+1. Commit this active handoff, the merge receipt, the dependency-ordered plan and the honest open-obligation ledger. Mark the old runtime plan archival and reconcile the already-qualified grammar status in proposal.json.
+2. Review the agents' guarded immutable blob manifests against the live strict branch. Assemble one coherent source boundary/runtime checkpoint, retaining no kernel/provider changes.
+3. Wire the atomic API and returned report through native/generated current entry points; preserve the explicit selected-R bootstrap boundary. Include native source/runtime reference receipts and operation/source refusal gates in the cloud recipe identity.
+4. Run one native preflight after source review. Resolve any demonstrated implementation defect as a class, not by weakening assertions or dropping cases.
+5. Complete correspondence admission and rule dispositions, then run exact-source native/N1/C1/C2/C3 qualification and the independent frozen provider gate. Reuse existing prepared/IR objects and stop repeat testing once the concrete required evidence is sufficient.
+6. Publish exact observed results and remaining limits. Do not activate strict SH/1 or merge unqualified strict source merely because a subset of new checks passed.
+
+Initial status: source/runtime drafts in progress; no strict cloud execution yet; strictSh1Qualified false. The detailed live obligation inventory is [strict/obligations.json](docs/selfhost-language/strict/obligations.json). Subsequent commits must update this section after actual milestones.
+
+## Archive boundary — completed pre-strict checkpoint
+
+The rest of this file preserves the completed checkpoint and its historical evidence. Its old “current” statements and permissions are archival and subordinate to the active section above. The historical tail beginning “Historical completed M6 and TypeScript 7 result” is retained byte-for-byte: 25,024 UTF-8 bytes, SHA-256 5ec35639aec88f3c12b2b0000771fa7511f0798feb73ee12b111da24cad5c619.
+
+# Archived PSC0 AI work state — qualified baseline
 
 Updated: 2026-10-09 16:02:49 UTC. All evidence times in this file are UTC. The prior session recorded Asia/Jakarta (UTC+07:00) for user-facing time conversions.
 

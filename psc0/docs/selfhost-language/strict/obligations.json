@@ -1,0 +1,370 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-sh1-obligation-ledger",
+  "contract": "PSC0-SH/1",
+  "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+  "workBranch": "psc0/strict-sh1-v1",
+  "updatedAtUtc": "2026-10-09 16:44:22 UTC",
+  "strictSh1Qualified": false,
+  "sourceCheckpointQualified": false,
+  "enabledScope": {
+    "requiredCapabilityFamilies": 9,
+    "irExpressionForms": 11,
+    "primitiveTypes": [
+      "Nat",
+      "Int",
+      "Bool",
+      "Char",
+      "String",
+      "Unit"
+    ],
+    "genericRuntimeTypes": [
+      {
+        "name": "Array",
+        "arity": 1
+      }
+    ],
+    "intrinsicOperations": 45,
+    "target": "TypeScript 7.0.2 to JavaScript; Node 22.23.3",
+    "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+    "sourceAuthority": ".lean"
+  },
+  "assurancePolicy": "Every enabled mandatory semantic obligation requires an explicit defensible method and evidence; finite examples, IR typing, fixed points and provider admission remain distinct. No machine-checked compiler-wide preservation proof is claimed.",
+  "rows": [
+    {
+      "id": "S0.enabled",
+      "stage": "S0",
+      "obligation": "Enabled capability/value/operation/transformation ledger",
+      "status": "in-progress",
+      "assuranceMethod": "finite contract and rule inventory",
+      "sources": [
+        "SPEC.md §§2–8"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S1.imports",
+      "stage": "S1",
+      "obligation": "Actual parsed ordered module/import closure",
+      "status": "in-progress",
+      "assuranceMethod": "portable admission with raw-source/compiler identities",
+      "sources": [
+        "Compiler/Sh1.lean (new)"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S1.syntax",
+      "stage": "S1",
+      "obligation": "Explicit source signatures, declarations, typed lambdas and supported forms",
+      "status": "in-progress",
+      "assuranceMethod": "exhaustive bounded AST traversal plus existing elaboration",
+      "sources": [
+        "Compiler/Sh1.lean (new)"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S1.do",
+      "stage": "S1",
+      "obligation": "Reject source do while accepting ordinary helper/field spellings",
+      "status": "in-progress",
+      "assuranceMethod": "token-origin and AST-span relation",
+      "sources": [
+        "Syntax/ParseCommon.lean",
+        "Compiler/Sh1.lean (new)"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S1.resource",
+      "stage": "S1",
+      "obligation": "Bounded source work and diagnostic spans",
+      "status": "in-progress",
+      "assuranceMethod": "explicit source/module/syntax budgets; exhaustion refusal",
+      "sources": [
+        "Compiler/Sh1.lean (new)"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S1.atomic",
+      "stage": "S1",
+      "obligation": "One raw-source→prepared→originalIR→checked TS operation",
+      "status": "in-progress",
+      "assuranceMethod": "portable owned path returning exact objects/report",
+      "sources": [
+        "BackendTs/Sh1.lean (new)",
+        "BackendTs/Checked.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S1.host",
+      "stage": "S1",
+      "obligation": "Current native/generated strict consumers and selected-R exception",
+      "status": "pending",
+      "assuranceMethod": "host integration; no current API downgrade",
+      "sources": [
+        "scripts/sh1-qualify.mjs"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S2.carrier",
+      "stage": "S2",
+      "obligation": "Canonical Unicode scalar strings including names",
+      "status": "in-progress",
+      "assuranceMethod": "bounded JavaScript carrier validation",
+      "sources": [
+        "scripts/original-ir-carrier.mjs"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S2.operations",
+      "stage": "S2",
+      "obligation": "45 enabled intrinsic domains and primitive laws",
+      "status": "in-progress",
+      "assuranceMethod": "pinned native reference; explicit rule contract and finite conformance",
+      "sources": [
+        "strict/enabled-runtime-contract.json (new)"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S2.bounds",
+      "stage": "S2",
+      "obligation": "Proof-required array access/update domain",
+      "status": "in-progress",
+      "assuranceMethod": "runtime invalid-bounds refusal plus source proof/provenance obligation",
+      "sources": [
+        "BackendTs/Expr.lean",
+        "Erasure/Expr.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S2.text",
+      "stage": "S2",
+      "obligation": "Pinned scalar/UTF-8/raw String.Pos behavior",
+      "status": "in-progress",
+      "assuranceMethod": "pinned Lean contract and finite Unicode/position boundary evidence",
+      "sources": [
+        "strict/ENABLED_RUNTIME.md (new)"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S3.origin",
+      "stage": "S3",
+      "obligation": "Source/normalization origin retained through diagnostics",
+      "status": "open",
+      "assuranceMethod": "particular transformation provenance relation",
+      "sources": [
+        "Elab/Recursion.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S3.binders",
+      "stage": "S3",
+      "obligation": "Runtime/type/proof binder and declaration omission",
+      "status": "open",
+      "assuranceMethod": "per-compilation relation plus rule-level argument",
+      "sources": [
+        "Erasure/Definition.lean",
+        "Erasure/Basic.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S3.layout",
+      "stage": "S3",
+      "obligation": "Constructor/record field/projection correspondence",
+      "status": "open",
+      "assuranceMethod": "source/runtime mapping relation and rule-level argument",
+      "sources": [
+        "Erasure/Basic.lean",
+        "Erasure/Expr.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S3.abi",
+      "stage": "S3",
+      "obligation": "Generic order, function groups and public signatures",
+      "status": "open",
+      "assuranceMethod": "actual Core/IR mapping; existing 12-worker ABI is supporting finite evidence",
+      "sources": [
+        "CompilerIr/Check.lean",
+        "scripts/sh1-migration-worker-abi.mjs"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S4.normalization",
+      "stage": "S4",
+      "obligation": "Worker/wrapper, structural decrease and simultaneous updates",
+      "status": "open",
+      "assuranceMethod": "complete enabled normalization rule argument and provenance",
+      "sources": [
+        "Elab/Recursion.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S4.ir",
+      "stage": "S4",
+      "obligation": "Eleven IR forms and source/IR evaluation relation",
+      "status": "open",
+      "assuranceMethod": "explicit semantic relation and compositional argument",
+      "sources": [
+        "CompilerIr/Model.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S4.errors",
+      "stage": "S4",
+      "obligation": "Short-circuit demand, first error and state-on-error",
+      "status": "open",
+      "assuranceMethod": "rule-level evaluation contract with bounded conformance",
+      "sources": [
+        "BackendTs/Expr.lean",
+        "BackendTs/Module.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S4.capture",
+      "stage": "S4",
+      "obligation": "Application order, let scope, callbacks and returned functions",
+      "status": "open",
+      "assuranceMethod": "capture/application relation and rule-level argument",
+      "sources": [
+        "BackendTs/Expr.lean",
+        "BackendTs/Module.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S5.initialization",
+      "stage": "S5",
+      "obligation": "Eager globals and initialization demand order",
+      "status": "open",
+      "assuranceMethod": "portable admission or proven source-order provenance",
+      "sources": [
+        "CompilerIr/Check.lean",
+        "BackendTs/Module.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S5.names",
+      "stage": "S5",
+      "obligation": "Target identifier domain and generated-name freshness",
+      "status": "open",
+      "assuranceMethod": "portable name/provenance admission and exhaustion refusal",
+      "sources": [
+        "BackendTs/Expr.lean",
+        "BackendTs/Module.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S5.generator",
+      "stage": "S5",
+      "obligation": "Generator/trampoline lowering",
+      "status": "open",
+      "assuranceMethod": "rule-level preservation argument and particular lowering evidence",
+      "sources": [
+        "BackendTs/Module.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S5.eta",
+      "stage": "S5",
+      "obligation": "Eta expansion/simplification and application grouping",
+      "status": "open",
+      "assuranceMethod": "explicit side conditions and preserved evaluation",
+      "sources": [
+        "Erasure/Expr.lean",
+        "BackendTs/Module.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S5.loops",
+      "stage": "S5",
+      "obligation": "Count-loop and tail-loop routes",
+      "status": "open",
+      "assuranceMethod": "guard/step/capture/simultaneous-update rules",
+      "sources": [
+        "BackendTs/Module.lean"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S6.qualification",
+      "stage": "S6",
+      "obligation": "Exact current-source native/N1/C1/C2/C3 qualification",
+      "status": "pending",
+      "assuranceMethod": "all required source/runtime/correspondence receipts with source/toolchain hashes",
+      "sources": [
+        "scripts/sh1-qualify.mjs"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S6.provider",
+      "stage": "S6",
+      "obligation": "Independent frozen-provider exact-stream acceptance",
+      "status": "pending",
+      "assuranceMethod": "actual selected-provider receipt; separate claim",
+      "sources": [
+        ".github/workflows/psc0-sh1.yml"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    },
+    {
+      "id": "S6.activation",
+      "stage": "S6",
+      "obligation": "All mandatory obligations defensibly closed",
+      "status": "blocked-on-open-obligations",
+      "assuranceMethod": "explicit complete enabled-contract disposition; no implication from finite checks",
+      "sources": [
+        "SPEC.md §8"
+      ],
+      "evidence": [],
+      "strictDischarged": false
+    }
+  ]
+}

@@ -1,3 +1,13 @@
+# Runtime IR work — current continuation and archived M6 plan
+
+The practical F/new-only grammar/TypeScript 7 checkpoint is merged at ed5d00aca0743bde583b45fe7756dd494ac3960f. The current strict implementation plan is [strict/PLAN.md](strict/PLAN.md), with active state in [AI_WORK_STATE.md](../../AI_WORK_STATE.md). Strict SH/1 remains unqualified while its enabled source/runtime/semantic obligations are being completed.
+
+**Everything below is the historical M6 plan and its historical evidence.** Its references to selected A, TypeScript 5 recovery, current TS7 checkpoints and future projection work describe those old revisions. Selected R now remains active; current recovery and development use TypeScript 7.0.2 only; the qualified F projection/worker migrations are complete. Do not revive archived TODOs or execute retired TS5 recovery from this document.
+
+The historical M6 checker and receipts remain valid for their exact sources. They do not establish the new strict milestone or a general preservation theorem.
+
+---
+
 # M6: bounded runtime typing for original PSC0 IR
 
 ## Active implementation and qualification boundary

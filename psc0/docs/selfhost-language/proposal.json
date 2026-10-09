@@ -102,7 +102,7 @@
     {
       "id": "source.ps-0.9-r3",
       "tier": "required-current-source-grammar",
-      "current": "implemented-qualification-pending",
+      "current": "compiler-qualified-provider-accepted; cold-recovered-and-selected",
       "baseline": "historical-semicolon-and-empty-call-to-Unit-parser",
       "proposal": "One new-only current .ps lexer/parser/printer and atomic active-source/tooling migration to the bounded supplied-reference subset; no current legacy grammar mode.",
       "sourceGrammar": {
@@ -147,24 +147,28 @@
         "elaboration": "emptyCallUnsupported until a separate completion/default capability has real metadata and semantics."
       },
       "qualification": {
-        "status": "pending",
+        "status": "compiler-qualified-provider-accepted; cold-recovered-and-selected",
         "fullClosureRoundTrip": "N1 only; supplied raw closure manifest; canonical Lean correspondence and new PS idempotence",
         "canonicalArtifactBinding": "Hash N1's already translated canonical source artifact and require exact C2/C3 surface product equality.",
         "checkedOriginalIrRequired": true,
         "currentC2C3Required": true,
         "separateExactStreamProviderRequired": true,
-        "compilerQualified": false,
+        "compilerQualified": true,
         "fullStandardConformance": false,
         "fullPscvConformance": false,
         "strictSh1Qualified": false,
-        "successorSelected": false,
+        "successorSelected": true,
         "requiredSmallApiGenerations": [
           "N1",
           "C1",
           "C2",
           "C3"
         ],
-        "rawSourceExecutionRequired": true
+        "rawSourceExecutionRequired": true,
+        "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "runId": 37925722635,
+        "evidenceDocument": "PS_GRAMMAR_ADOPTION.md",
+        "checkpoint": "sourceGrammarCheckpoint"
       },
       "evidenceDocument": "PS_GRAMMAR_ADOPTION.md"
     },
@@ -729,13 +733,25 @@
       "requires": [
         "compiler-qualified",
         "all-required-language-capabilities",
-        "runtime-representation-inventory-and-enforcement"
+        "runtime-representation-inventory-and-enforcement",
+        "enabled-primitive-and-canonical-value-laws",
+        "bounds-and-text-position-domain-policy",
+        "source-normalization-and-erasure-layout-correspondence",
+        "evaluation-order-capture-initialization-and-backend-semantic-correspondence",
+        "explicit-evidence-disposition-for-every-enabled-mandatory-obligation"
       ],
       "stages": [
         "M3",
         "M6"
       ],
-      "impliesKernelChecked": false
+      "impliesKernelChecked": false,
+      "activeImplementation": {
+        "branch": "psc0/strict-sh1-v1",
+        "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+        "plan": "strict/PLAN.md",
+        "obligationLedger": "strict/obligations.json",
+        "strictSh1Qualified": false
+      }
     },
     "kernelChecked": {
       "requires": [

@@ -8,6 +8,20 @@ function ownBrand(sample, expected) {
   return symbols[0];
 }
 
+function isWellFormedUtf16(value) {
+  for (let index = 0; index < value.length; index++) {
+    const unit = value.charCodeAt(index);
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      const next = value.charCodeAt(index + 1);
+      if (!(next >= 0xdc00 && next <= 0xdfff)) return false;
+      index++;
+    } else if (unit >= 0xdc00 && unit <= 0xdfff) return false;
+  }
+  return true;
+}
+
+// maxNodes bounds model occurrences and each string's validation in UTF-16 units.
+// Portable checking keeps its independent UTF-8 byte and type-work budgets.
 export function inspectOriginalIrCarrier(compiler, module, { maxNodes = 5000000 } = {}) {
   if (!Number.isSafeInteger(maxNodes) || maxNodes < 1) throw new Error('PSC0_IR_CARRIER_LIMIT');
   const nil = compiler.List.nil();
@@ -122,10 +136,21 @@ export function inspectOriginalIrCarrier(compiler, module, { maxNodes = 5000000 
       continue;
     }
     if (++visitedNodes > maxNodes) return fail('ir-carrier-resource-limit', at, 'Carrier traversal exceeded maxNodes.');
-    if (kind === 'string' || kind === 'bool' || kind === 'nat' || kind === 'int') {
-      const valid = kind === 'string' ? typeof value === 'string' :
-        kind === 'bool' ? typeof value === 'boolean' :
-          typeof value === 'bigint' && (kind === 'int' || value >= 0n);
+    if (kind === 'string') {
+      if (typeof value !== 'string') {
+        return fail('invalid-ir-scalar-carrier', at, 'Expected canonical string carrier.');
+      }
+      if (value.length > maxNodes) {
+        return fail('ir-carrier-resource-limit', at, 'String validation exceeded maxNodes UTF-16 units.');
+      }
+      if (!isWellFormedUtf16(value)) {
+        return fail('invalid-ir-scalar-carrier', at, 'Expected well-formed UTF-16 string carrier.');
+      }
+      continue;
+    }
+    if (kind === 'bool' || kind === 'nat' || kind === 'int') {
+      const valid = kind === 'bool' ? typeof value === 'boolean' :
+        typeof value === 'bigint' && (kind === 'int' || value >= 0n);
       if (!valid) return fail('invalid-ir-scalar-carrier', at, 'Expected canonical ' + kind + ' carrier.');
       continue;
     }

@@ -64,6 +64,16 @@ Explicitly cover public wrappers/workers, structural decrease and simultaneous c
 
 Prefer small admission/provenance checks over rewriting unrelated compiler code. Static risks in arbitrary handcrafted IR are not automatically failures in the qualified source closure. Conversely, a source-closure pass does not establish the safety of arbitrary typed IR.
 
+## First integrated implementation checkpoint
+
+[implementation-checkpoint.json](implementation-checkpoint.json) binds every candidate source, host gate, reference and recipe input by its exact Git blob. The new portable source and atomic backend APIs, target admission, Unicode and array guards, native/current host consumers and actual-file evidence binder are implemented candidates. Cloud execution is still pending at this source checkpoint.
+
+The finite source gate has two positive raw Lean/PS bundles, twenty-one portable refusals and two host Unicode refusals. Target conformance has nine accepted and twenty refused cases. Runtime conformance covers all forty-five enabled operations with 186 independent native observations, eight bounds failures, nine order/fault probes, five invalid carriers and two Unicode/position families. These counts describe planned assertions until their actual receipts pass.
+
+The workflow's [sh1-qualify] source commit runs native preflight and current C1/C2/C3 qualification in one coordinated run; the frozen provider runs only after the compiler job qualifies. The native reference is executed once. Full-source preparation/IR checking is not repeated just to collect reports. The final binder reads the actual files, verifies executing/producing compiler identities and records exact receipt/product hashes.
+
+The [correspondence guide](CORRESPONDENCE.md) and [33-rule ledger](correspondence-obligations.json) complete the rule inventory, not its general preservation proofs. All nine erasure, four normalization, eleven expression and nine backend/runtime rules retain their specific remaining obligations. S3–S5 stay open even after finite source/runtime/target qualification.
+
 ## Qualification workflow and stop rules
 
 All repository execution occurs in GitHub Actions. Review source and related semantic obligations before a native preflight. Add gates and their source identities to the coherent existing qualification recipe. Reuse the prepared module, original IR, returned checker report and compiled native reference.

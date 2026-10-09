@@ -1,0 +1,2009 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-correspondence-obligations",
+  "baseRevision": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+  "scope": "Current source-owned PSC0 original-IR TypeScript 7.0.2 / JavaScript lane",
+  "status": "candidate-ledger; no general preservation discharge",
+  "normativeAuthority": [
+    {
+      "path": "psc0/docs/selfhost-language/SPEC.md",
+      "blob": "61f0f36ffe7880144f60845084e8be6a61b91eed",
+      "sections": [
+        "2",
+        "4",
+        "6",
+        "7",
+        "8"
+      ]
+    },
+    {
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "blob": "3f2bcf9aec687a3395a49042aab7732e34a110e0"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/RUNTIME_IR_PLAN.md",
+      "blob": "5b96f722c573d9e28b376617101d4d7527b44078",
+      "sections": [
+        "3",
+        "7"
+      ]
+    }
+  ],
+  "assurance": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "generalPreservationProven": false,
+    "kernelChanged": false,
+    "providerChanged": false,
+    "defeqChanged": false,
+    "theoryChanged": false,
+    "finiteTestsAreGeneralProof": false,
+    "typingIsSemanticPreservation": false,
+    "fixedPointIsSemanticPreservation": false,
+    "providerAdmissionIsRuntimePreservation": false,
+    "statement": "This ledger does not change the normative MUSTs. Rule arguments are source-grounded obligations and local reasoning, not a claim of completed general proof. Completed compiler/runtime/provider receipts must remain source- and scope-specific."
+  },
+  "coverage": {
+    "ruleCount": 33,
+    "stageCounts": {
+      "S3": 9,
+      "S4": 15,
+      "S5": 9
+    },
+    "originalIrExpressionConstructors": [
+      "literal",
+      "var",
+      "intrinsic",
+      "lambda",
+      "call",
+      "letE",
+      "ifE",
+      "record",
+      "projection",
+      "constructor",
+      "matchE"
+    ],
+    "originalIrExpressionRows": [
+      "EV-01",
+      "EV-02",
+      "EV-03",
+      "EV-04",
+      "EV-05",
+      "EV-06",
+      "EV-07",
+      "EV-08",
+      "EV-09",
+      "EV-10",
+      "EV-11"
+    ],
+    "normalizationRows": [
+      "N-01",
+      "N-02",
+      "N-03",
+      "N-04"
+    ],
+    "erasureRows": [
+      "ER-01",
+      "ER-02",
+      "ER-03",
+      "ER-04",
+      "ER-05",
+      "ER-06",
+      "ER-07",
+      "ER-08",
+      "ER-09"
+    ],
+    "backendRows": [
+      "TS-01",
+      "TS-02",
+      "TS-03",
+      "TS-04",
+      "TS-05",
+      "TS-06",
+      "TS-07",
+      "TS-08",
+      "TS-09"
+    ],
+    "operationContract": {
+      "path": "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+      "candidateBlob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b",
+      "candidateSha256": "21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89",
+      "primitiveCount": 6,
+      "operationCount": 45,
+      "finiteObservationCaseCount": 186,
+      "lawAuthority": "Operation meanings/domains remain in the enabled runtime contract, not duplicated here.",
+      "candidateObservationsAreNotExecutedEvidence": true
+    },
+    "excludedOnlyAsAlreadySpecified": [
+      "Optional fixed-width/floating/word-sized scalar capabilities.",
+      "Additional backend targets and external import/foreign ABI implementations.",
+      "Omitted-domain lambda inference, nested patterns, declaration-wrapper recursion conveniences and Except do.",
+      "A new total-array authoring library; existing enabled Array intrinsic obligations are included, not excluded."
+    ],
+    "mandatoryCoverageNotWaived": [
+      "The currently refused empty runtime data/match forms need explicit reconciliation with the full required regular-data contract.",
+      "Source origins and the source/Core/IR transformation relation remain required despite finite closure qualification.",
+      "Exact demand/evaluation, layout, capture and error correspondence remain open where listed."
+    ]
+  },
+  "relationPlan": {
+    "sourceAuthority": "Handwritten PSC1-compatible .lean parsed by PSC0's own frontend. Current generated .ps remains new-only ps-0.9-r3. No source-authority switch is made by this ledger.",
+    "stages": [
+      "original source and spans",
+      "resolved/normalized prepared Core",
+      "same erased original IR",
+      "emitted TypeScript",
+      "pinned TypeScript 7.0.2 JavaScript"
+    ],
+    "observationAxes": [
+      "related values",
+      "constructor/field interpretation",
+      "lexical capture and parameter groups",
+      "evaluation order and demand",
+      "explicit errors/faults under the declared domains"
+    ],
+    "noUnstatedEquivalence": [
+      "No equal wall-clock, memory, allocation or implementation-step-count claim.",
+      "Host allocation is conditional on success as recorded in the runtime contract.",
+      "Arbitrary mutated/cyclic/foreign JavaScript values and callbacks are not silently included."
+    ],
+    "traceLimitation": "parsedModules and prepared retain real artifacts but do not constitute a declaration-by-declaration normalization/erasure witness. Current Core and original IR have no source-origin field.",
+    "relatedRowsAreNotAnExecutionDag": "Call, closure and machine rows require a mutually consistent simulation relation; relatedObligations are cross-references. The practical implementation/evidence sequence below is dependency-ordered."
+  },
+  "implementationOrder": [
+    {
+      "phase": 1,
+      "id": "freeze-domains",
+      "work": "Keep the enabled primitive/value, source and host-carrier domains explicit; retain refusals for unsupported optional capabilities.",
+      "outputs": [
+        "enabled-runtime-contract.json",
+        "source policy report",
+        "host carrier report"
+      ],
+      "proofLimit": "Finite observations establish only their recorded cases."
+    },
+    {
+      "phase": 2,
+      "id": "atomic-same-ir-boundary",
+      "work": "Parse and admit source in the portable compiler, prepare once, erase once, check the same original IR and run target admission before the same emitter.",
+      "outputs": [
+        "actual parsedModules",
+        "actual prepared",
+        "originalIr",
+        "checkReport",
+        "sourcePolicy",
+        "targetPolicy"
+      ],
+      "proofLimit": "This establishes provenance and checked-path ordering, not transformation preservation."
+    },
+    {
+      "phase": 3,
+      "id": "qualified-current-path",
+      "work": "Qualify that exact source through native and generated compilers, preserve all source/IR/toolchain/product hashes and independent provider decisions.",
+      "outputs": [
+        "native/source/target reports",
+        "C1/C2/C3 reports",
+        "exact-source fixed-point receipts",
+        "independent provider receipts"
+      ],
+      "proofLimit": "Compiler, runtime examples and provider evidence retain separate scopes; strict flags stay false."
+    },
+    {
+      "phase": 4,
+      "id": "retain-transformation-witness",
+      "work": "Design source-origin and resolved-binder/layout associations from existing normalization/erasure metadata, then check actual mappings per compilation. Do not fabricate them from output names.",
+      "outputs": [
+        "versioned original-to-worker/public origin witness",
+        "prepared-to-runtime binding and layout witness"
+      ],
+      "proofLimit": "A witness checker also needs an argument for the property it validates."
+    },
+    {
+      "phase": 5,
+      "id": "shared-semantics",
+      "work": "Define the supported source/Core and original-IR value/environment/evaluation relations, including closures, grouped calls and explicit demand/errors. Relate the generator machine to those rules.",
+      "outputs": [
+        "environment/value relation",
+        "IR evaluation rules",
+        "call/closure/trampoline simulation obligations"
+      ],
+      "proofLimit": "Bounded Meta.Reduce is not a substitute runtime semantics; kernel/provider/defeq need not change."
+    },
+    {
+      "phase": 6,
+      "id": "normalization-and-erasure",
+      "work": "Discharge the finite N/ER rule families against those relations, with source origins, binder substitution, layout and proof independence explicit. Resolve the Nat once-only demand issue separately.",
+      "outputs": [
+        "N-01..N-04 arguments/evidence",
+        "ER-01..ER-09 arguments/evidence"
+      ],
+      "proofLimit": "Later typing cannot replace computational preservation."
+    },
+    {
+      "phase": 7,
+      "id": "templates-and-optimizers",
+      "work": "Discharge the eleven expression rules and the three recognized optimizer rules, then the name/init/toolchain assumptions. Treat recognized rewrites and their fallback path separately.",
+      "outputs": [
+        "EV-01..EV-11 arguments/evidence",
+        "TS-01..TS-09 arguments/evidence"
+      ],
+      "proofLimit": "A recognizer's success is an obligation, not a proof token."
+    },
+    {
+      "phase": 8,
+      "id": "strict-reconciliation",
+      "work": "Reconcile every mandatory normative requirement, including empty-data coverage and any remaining domain/refusal mismatch, and bind completed evidence to one immutable qualifying source.",
+      "outputs": [
+        "complete obligations ledger",
+        "explicit profile activation decision"
+      ],
+      "proofLimit": "Do not activate strict SH/1 while any required semantic or coverage row remains open."
+    }
+  ],
+  "targetAdmission": {
+    "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+    "candidateBlob": "1c5f03cd8d21288f2e1dcb9dbd72191af5f091e5",
+    "policy": "psc0-sh1-ts-target/1",
+    "api": "psSh1CheckTarget (maxSteps : Nat) (module : PsVerifiedIrModule) : Except PsSh1TargetError PsSh1TargetReport",
+    "ordering": "After a complete accepted check of the same original IR and before its emission in the atomic source API.",
+    "reports": [
+      "policy",
+      "accepted",
+      "traversalComplete",
+      "visitedSteps"
+    ],
+    "errors": [
+      "code",
+      "detail",
+      "owner",
+      "path",
+      "visitedSteps"
+    ],
+    "errorCodes": [
+      "target-imports-unsupported",
+      "target-global-collision",
+      "target-generated-name",
+      "target-property-name",
+      "target-binding-name",
+      "target-type-name",
+      "target-type-capture",
+      "target-value-capture",
+      "target-runtime-name",
+      "target-identifier",
+      "target-depth-exhausted",
+      "target-unchecked-type",
+      "target-self-value",
+      "target-global-order",
+      "target-fuel-exhausted"
+    ],
+    "nameDomain": "Actual emitted ASCII identifiers and safe unquoted properties; keywords remain legal properties. Quoted constructor labels are permitted except __proto__. Exact helper/builtin/generated namespaces are checked; no prefix blacklist is imposed.",
+    "conservativePublicNamespace": "The source-owned policy requires distinct public layout/declaration names even for some JS type/value overlaps that could be syntactically legal. Source Core declaration identity is already unique.",
+    "generics": "Local type parameters cannot shadow Array or actual type-bearing layout globals. Generator is permitted locally because authored generator annotations refer to __ps$Computation, whose Generator definition is at module scope.",
+    "constructorCapture": "A constructor expression rejects if its actual emitted inductive namespace is shadowed in lexical runtime locals. Ordinary global variable shadowing remains valid.",
+    "initialization": "A var must be lexical, earlier runtime global, or positive-runtime-arity self. Every nested body is checked conservatively; zero-arity self and hidden forward dependencies refuse.",
+    "freshness": "Actual generated brand/tag candidates and positive-arity implementation names are reserved. Exact __ps$match$0, __ps$count and __ps$cursor are protected without blocking unrelated __ps-prefixed source identifiers.",
+    "resourceDomain": {
+      "work": "One task consumes one unit, including identifier-character tasks; exhaustion is an error.",
+      "depth": 4096,
+      "lambdaWeight": "A lambda node and each lambda parameter consume depth so top-level eta-to-let expansion stays inside the admitted name-scan domain.",
+      "separateCosts": "Persistent index hashing/lookup and String/Nat primitives have separate finite costs; visitedSteps is not a total runtime/allocation counter."
+    },
+    "staticCompatibilityEvidence": [
+      "Erasure sanitizes output names and avoids existing declaration/runtime local output names.",
+      "Normalized declarations return worker before public wrapper.",
+      "Preparation and erasure preserve surviving declaration order.",
+      "Runtime prelude layouts are List/Option/Except plus Prod; Array is the declared type/runtime entry, not an emitted source layout global.",
+      "This static compatibility review is not an executed full-closure target acceptance result."
+    ],
+    "fixtureScope": "T01–T29 are finite candidate boundary cases. Their actual compiler/source receipts must be recorded by qualification; no execution is claimed here.",
+    "sameIrTypingIsRequired": true,
+    "arbitraryTypedIrBecomesStrictSource": false
+  },
+  "reusableArtifacts": [
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+      "blob": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+      "scope": "Existing Core expression model; read-only reuse, no source origins or runtime evaluator inferred."
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+      "scope": "Original runtime type/expression/layout model, not a proof certificate despite its historical name."
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Reduce.lean",
+      "blob": "1b81ba072e26eff9c3afbe58a945e8bf383c6f18",
+      "scope": "Bounded WHNF implementation; not a complete runtime semantics or general preservation proof."
+    },
+    {
+      "path": "pscv0/packages/pscv-theory/proof/Ps/Theory/Refinement.lean",
+      "blob": "ade51f123a2696eb386f47d43894ec2229fa5806",
+      "scope": "Conditional top-level proof omission, reflexive conversion, one fixed specialization example only; no PSC0 whole-compiler proof."
+    },
+    {
+      "path": "pscv0/packages/pscv-theory/proof/Ps/Theory/ParserCursor.lean",
+      "blob": "982b3d441280101f8c3bdd9bc34de8add6e4c62b",
+      "scope": "Cursor/list-length invariant only."
+    },
+    {
+      "path": "pscv0/contracts/ir/ERASURE_PRESERVATION_V0.json",
+      "blob": "ca37f26eb5baa6d5f63ab6201a68b8a061d4b062",
+      "scope": "Existing global preservation target remains unproved; no transfer of a full theorem is asserted."
+    }
+  ],
+  "rows": [
+    {
+      "id": "ER-01",
+      "stage": "S3",
+      "title": "Declaration identity, prelude and ordered module erasure",
+      "forms": [
+        "module",
+        "runtime declaration",
+        "runtime prelude"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+          "blob": "13614bc6eb279c93d4cbcbd8815b671beae38199",
+          "definitions": [
+            "psCompilerPreparationStepParsed",
+            "psCompilerPreparationElaborated",
+            "psCompilerVerifiedIrFromPrepared"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "blob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+          "definitions": [
+            "psEraseDefinitionsLoopWorker",
+            "psEraseCoreModuleWithRuntimePrelude"
+          ]
+        }
+      ],
+      "domain": [
+        "The input is the actual ordered declaration list from preparation, with its checked environment.",
+        "Runtime layouts may use the declared List/Option/Except/Prod prelude; external IR imports are refused in the enabled lane."
+      ],
+      "requiredRelation": "Each retained runtime declaration and reference denotes the corresponding prepared declaration under the declared runtime-prelude interpretation.",
+      "ruleArgument": "Preparation adds elaborated batches in source order and reverses only its accumulator. Erasure walks that ordered list, retains runtime definitions/partials and omits non-runtime entries without permuting surviving definitions. The runtime prelude participates in layout/name preparation; its definition bodies are not silently appended to the authored runtime body list.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Atomic source API produces one prepared value, obtains original IR once, checks that same IR and emits it.",
+          "The target admission checks every free runtime reference, including nested bodies, against lexical locals, earlier runtime declarations or positive-arity self.",
+          "Module/closure, raw source and product identities can bind a receipt to the exact inputs."
+        ],
+        "notEstablished": [
+          "A source-owned pipeline proves object provenance, not the correctness of each source-to-Core or Core-to-IR association.",
+          "The present Core/IR data does not retain a complete source-origin or transformation witness.",
+          "A semantic environment/prelude relation and a general declaration-erasure argument remain required."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": []
+    },
+    {
+      "id": "ER-02",
+      "stage": "S3",
+      "title": "Closed runtime types and rank-1 schemes",
+      "forms": [
+        "runtime type",
+        "type parameter",
+        "function parameter group"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+          "blob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+          "definitions": [
+            "psErasureClassifyBinder",
+            "psEraseRuntimeTypeWithFuelWorker"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+          "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+          "definitions": []
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "Only six enabled primitive types, regular declared layouts and one-parameter Array are admitted.",
+        "Generic schemes are top-level rank-1; actual runtime function groups and ordered type arguments are retained.",
+        "Dependent runtime types, unknown types and uninstantiated generic escapes are refused."
+      ],
+      "requiredRelation": "The erased runtime type describes precisely the related runtime values of each retained prepared type, including grouped arrows and generic instantiation.",
+      "ruleArgument": "Erasure classifies binder domains and maps supported Core types into explicit original-IR constructors. The existing IR checker separately checks scope, exact equality and simultaneous generic substitution. Distinct runtime function groups remain distinct types; a value whose result is a function is not converted into a zero-arity function.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Complete original-IR typing, exact generic/runtime call arity and supported-type checking are available.",
+          "Target admission validates the actual emitted type-name syntax and prevents local type parameters from capturing Array or module layout names."
+        ],
+        "notEstablished": [
+          "Typing an erased type does not prove that classification erased only non-runtime content.",
+          "The logical relation between prepared types and runtime carriers is not yet established for all enabled type rules."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-01"
+      ]
+    },
+    {
+      "id": "ER-03",
+      "stage": "S3",
+      "title": "Proof/type omission and runtime independence",
+      "forms": [
+        "proof declaration",
+        "type binder",
+        "proof binder",
+        "erased local"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+          "blob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+          "definitions": [
+            "psErasureIsProp",
+            "psErasureClassifyBinder"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "blob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+          "definitions": [
+            "psEraseDefinition",
+            "psEraseOpenDefinitionWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "definitions": [
+            "psEraseApplicationArgumentsWorker",
+            "psEraseRuntimeExprWithFuelWorker"
+          ]
+        }
+      ],
+      "domain": [
+        "Proof/type omission follows the current classifier and supported Core typing rules.",
+        "A use of an erased local in a runtime position must fail; the target has no runtime proof or type-reflection carrier."
+      ],
+      "requiredRelation": "Erasing classified proof/type components preserves every observable runtime value and error and does not expose a missing runtime dependency.",
+      "ruleArgument": "Function binders and applications are traversed using the corresponding type telescope. Runtime binders/arguments survive; erased locals are tracked and a direct runtime use fails. A definition classified as Prop is omitted. This describes the implemented mechanism and does not assume the classifier is semantically complete or sound merely because it returns a Boolean.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "The erasure API returns explicit errors for unsupported runtime uses.",
+          "The exact retained IR is checked for closed, well-typed references.",
+          "Provider admission independently checks its own exact Core streams."
+        ],
+        "notEstablished": [
+          "Classifier correctness and general ghost noninterference remain unproved.",
+          "The sibling theorem only proves top-level omission when a supplied Boolean classifier says true; it does not establish this classifier or nested erasure.",
+          "Constructor field preparation currently refuses proof/type fields rather than omitting them; that boundary must not be described as proof-field support."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-02"
+      ]
+    },
+    {
+      "id": "ER-04",
+      "stage": "S3",
+      "title": "Application telescopes, generic order and partial application",
+      "forms": [
+        "application",
+        "type application",
+        "partial application",
+        "function result"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "definitions": [
+            "psEraseApplicationArgumentsWorker",
+            "psEraseFinishApplicationWithFuelWorker",
+            "psErasureEtaFunction"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "blob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+          "definitions": [
+            "psEraseOpenDefinitionWithFuel"
+          ]
+        }
+      ],
+      "domain": [
+        "The callee and its telescope are resolved in the prepared environment.",
+        "All supplied runtime/type arguments are supported and remain in their original groups; missing type instantiation is not guessed.",
+        "Eta completion introduces only the runtime binders supported by the current erasure rule."
+      ],
+      "requiredRelation": "The erased callee, argument groups and returned closures have the same application meaning and demand order as the supported prepared application.",
+      "ruleArgument": "Application erasure advances through the telescope, collecting runtime and type arguments with reverse accumulators whose final reversal restores order. Completion eta-expands missing runtime arguments and rejects unsupported type gaps. Function-result handling retains an explicit lambda or function result instead of relying on JavaScript underapplication.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "IR typing checks exact runtime groups, generic arity, argument/result types and simultaneous substitution.",
+          "Existing isolated full-signature and runtime-partial probes are finite evidence for their listed workers only."
+        ],
+        "notEstablished": [
+          "A general substitution/application relation is still needed, including captures and grouping.",
+          "Type/arity checks do not establish evaluation frequency or the correctness of eta expansion for all accepted prepared terms."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-02",
+        "ER-03",
+        "ER-09"
+      ]
+    },
+    {
+      "id": "ER-05",
+      "stage": "S3",
+      "title": "Structure fields and projections",
+      "forms": [
+        "structure",
+        "record",
+        "projection"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+          "blob": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75",
+          "definitions": [
+            "psPrepareRuntimeStructure"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "definitions": [
+            "psEraseRuntimeStructureFields",
+            "psEraseRuntimeStructureApplication",
+            "psErasureFindProjectionField",
+            "psEraseRuntimeExprWithFuelWorker"
+          ]
+        }
+      ],
+      "domain": [
+        "A supported structure has one constructor, zero indices, matching parameters and runtime-only fields.",
+        "The source/projection index and erased field metadata come from the same admitted declaration family."
+      ],
+      "requiredRelation": "Each record field and projection selects the corresponding related source component, with unchanged field meaning and runtime evaluation order.",
+      "ruleArgument": "Structure preparation records sourceIndex and projectionIndex and derives the IR field list from prepared runtime fields. Constructor applications and projections consult those records. The original IR checker validates owner, instantiation, complete field set and field type; backend names and properties are checked separately.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Retain or expose actual layout metadata for a future per-compilation witness; do not reconstruct an asserted mapping from printed names.",
+          "Original-IR owner/type/field validation and target property-name validation are available."
+        ],
+        "notEstablished": [
+          "No checked source/Core-to-IR layout witness is presently retained.",
+          "A complete field/projection preservation argument, including any source record field evaluation order, remains open.",
+          "Proof/type constructor fields remain unsupported, not silently erased."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-02",
+        "ER-03",
+        "ER-09"
+      ]
+    },
+    {
+      "id": "ER-06",
+      "stage": "S3",
+      "title": "Regular inductives and constructor layout",
+      "forms": [
+        "inductive",
+        "constructor",
+        "constructor field"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+          "blob": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed",
+          "definitions": [
+            "psPrepareInductiveParametersWithFuel",
+            "psPrepareConstructorFieldsWithFuel",
+            "psPrepareRuntimeConstructors",
+            "psPrepareRuntimeInductive"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "definitions": [
+            "psEraseRuntimeConstructorFields",
+            "psEraseRuntimeConstructorApplication"
+          ]
+        }
+      ],
+      "domain": [
+        "Only non-indexed regular runtime data with supported type parameters and runtime-only constructor fields.",
+        "The current checked lane refuses empty layouts and unsupported recursor shapes; these refusals remain explicit coverage obligations under the normative profile."
+      ],
+      "requiredRelation": "Constructor identity and ordered runtime fields are preserved between prepared data and original IR.",
+      "ruleArgument": "Inductive preparation requires the declared parameter/recursor counts, records coreName and source field indices, and derives each IR constructor from that metadata. Constructor erasure selects that resolved family and passes fields in the prepared order. Existing IR typing verifies ownership, instantiation and positional constructor field order.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "The exact original IR has complete layout and match validation.",
+          "Target admission checks emitted layout names, quoted constructor keys, field properties and private tag conflicts."
+        ],
+        "notEstablished": [
+          "Well-typed metadata is not a proof that it is the correct erasure of the prepared constructor family.",
+          "A general representation relation for each constructor and its recursive fields is still required.",
+          "Whether currently refused empty data/matches satisfy the complete mandatory data contract must be resolved explicitly; corpus absence is not a waiver."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-02",
+        "ER-03",
+        "ER-09"
+      ]
+    },
+    {
+      "id": "ER-07",
+      "stage": "S3",
+      "title": "Recursors, induction hypotheses and Nat demand",
+      "forms": [
+        "regular recursor",
+        "recursive hypothesis",
+        "Nat recursor"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "definitions": [
+            "psOpenMatchMinorHypotheses",
+            "psEraseMatchMinor",
+            "psEraseMatchAlternativesWorker",
+            "psEraseNatRecursorAlternatives",
+            "psEraseRuntimeRecursorApplication"
+          ]
+        }
+      ],
+      "domain": [
+        "Only the supported one-motive structural recursor families and runtime result domains.",
+        "Recursive hypotheses refer to the current declaration with its original ordered generic and runtime parameter grouping.",
+        "Source purity alone is not treated as a proof of identical evaluation frequency, faults or resource behavior."
+      ],
+      "requiredRelation": "The erased case dispatch and reconstructed recursive calls preserve the recursor's value, capture, demand and error semantics.",
+      "ruleArgument": "Regular cases open constructor fields and reconstruct recursive calls using the current definition's parameter metadata, replacing the structural argument with the selected child. Nat lowers into an equality test against zero and a predecessor step. In the current Nat rule, a nonvariable scrutinee expression appears in both the equality test and predecessor subtraction.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "IR typing validates the reconstructed call scheme, runtime arguments, cases and result.",
+          "A future lowering witness can record the source major, branch fields and reconstructed argument positions without changing kernel/provider logic."
+        ],
+        "notEstablished": [
+          "Exact once-only Nat major demand is a concrete open obligation: the successor route can evaluate a nonvariable major twice.",
+          "Value agreement under a separately justified total pure semantics would not by itself close demand/error/resource correspondence.",
+          "Do not repair this by weakening the contract or inferring preservation from the compiler fixed point; a separate lowering design and evidence are required."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-04",
+        "ER-06",
+        "N-03"
+      ]
+    },
+    {
+      "id": "ER-08",
+      "stage": "S3",
+      "title": "Structure recursor lowering",
+      "forms": [
+        "structure recursor",
+        "let-bound major",
+        "projection substitution"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+          "blob": "66b20621288b76153fa78db6c923f0c7b0c5d9ab",
+          "definitions": [
+            "psTryLowerStructureRecursorApplication",
+            "psLowerStructureRecursorsWithFuel"
+          ]
+        }
+      ],
+      "domain": [
+        "The structure and minor match the currently supported recursor shape.",
+        "Lifting, substitution and generated binder identity are correct for the opened Core scope."
+      ],
+      "requiredRelation": "Replacing the structure recursor with a let-bound major and projections preserves its result, captures and one evaluation of the major.",
+      "ruleArgument": "The supported rewrite lifts the original major into one let initializer and applies the minor to projections of the introduced local. Recursive traversal processes the rewritten supported structure terms with explicit fuel. The once-bound major is a useful local argument, but depends on the correctness of binder lifting and substitution.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Existing elaboration/admission and erasure failures check supported shape.",
+          "A future witness can bind the original major, new let binder and projection map."
+        ],
+        "notEstablished": [
+          "The general substitution/recursor correspondence is not currently mechanized or separately discharged.",
+          "A shape match and later type check do not prove observational equivalence."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-05",
+        "ER-09"
+      ]
+    },
+    {
+      "id": "ER-09",
+      "stage": "S3",
+      "title": "Opening binders, local identities and emitted names",
+      "forms": [
+        "bound variable",
+        "free local",
+        "lambda binder",
+        "let binder",
+        "match binder"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+          "blob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+          "definitions": [
+            "psErasureLookupRuntimeExpression",
+            "psErasureLocalNameUsed",
+            "psErasureLocalName"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "definitions": [
+            "psOpenMatchMinorFields",
+            "psEraseRuntimeExprWithFuelWorker"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "blob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+          "definitions": [
+            "psBuildErasureDeclarationNamesWorker"
+          ]
+        }
+      ],
+      "domain": [
+        "Prepared bound/free identities have a well-scoped interpretation.",
+        "Erasure's runtime/type/erased-local maps and declaration-name mapping are kept distinct.",
+        "Target lexical checks run on actual emitted strings, not guessed source spellings."
+      ],
+      "requiredRelation": "Each retained variable denotes the related source binding; fresh output names preserve binding identity without capture.",
+      "ruleArgument": "Erasure maintains mappings from local identifiers to runtime names and tracks erased locals separately. Local-name selection sanitizes source text and avoids used runtime/declaration names with a finite candidate allowance. The target checker can reject actual backend helper/type/constructor namespace capture, but cannot recover a wrong earlier Core-to-IR name association.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Existing IR typing resolves nearest lexical bindings and global schemes.",
+          "Target admission separately checks actual binding syntax, generated namespaces and global initialization availability."
+        ],
+        "notEstablished": [
+          "A binding/substitution logical relation from prepared Core to original IR remains open.",
+          "Uniqueness of printed names and a target pass do not certify the source variable map.",
+          "Source-origin preservation through normalization/erasure requires an explicit retained witness rather than reverse inference from display names."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-01"
+      ]
+    },
+    {
+      "id": "N-01",
+      "stage": "S4",
+      "title": "Resolved recursion identity, hygiene and source origins",
+      "forms": [
+        "normalizer traversal",
+        "qualified name",
+        "parameter projection",
+        "source origin"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+          "blob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+          "definitions": [
+            "psElabRecursionLocalId",
+            "psElabRecursionIsSelf",
+            "psElabRecursionWalkWithFuel",
+            "psElabRecursionRenameParameters"
+          ]
+        },
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+          "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+          "definitions": [
+            "psElabNormalizedDefinition"
+          ]
+        },
+        {
+          "path": "psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+          "blob": "4a9daaf4179ca7fa74e9183e542891ec110fd5d7",
+          "definitions": []
+        },
+        {
+          "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+          "blob": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "Only the qualified structural-normalization fallback is used.",
+        "Exact full-name priority and the established first-segment projection priority are preserved; field typing failure does not trigger alternate lookup."
+      ],
+      "requiredRelation": "Normalization renames exactly the intended resolved binders and retains truthful origin information for every generated declaration and diagnostic.",
+      "ruleArgument": "The rewrite tracks bound names and resolved local identifiers rather than substituting arbitrary matching strings. The qualified projection repair extends only the documented local-prefix resolution boundary. Original syntax retains spans, but preparation does not currently expose a complete original-declaration-to-generated-Core witness.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Source admission retains actual parsedModules with spans and actual prepared output separately.",
+          "Existing projection/name fixtures and qualified compiler replay are finite regression evidence."
+        ],
+        "notEstablished": [
+          "Parsed AST plus prepared declarations are not themselves a transformation mapping.",
+          "SPEC's normalization-origin obligation remains open until the mapping is retained and checked or otherwise fully justified.",
+          "General alpha/binding preservation is not established by exact compiler output equality."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": []
+    },
+    {
+      "id": "N-02",
+      "stage": "S4",
+      "title": "Structural major and generalized domain restrictions",
+      "forms": [
+        "structural recursion",
+        "changed parameter",
+        "dependent domain refusal"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+          "blob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+          "definitions": [
+            "psElabRecursionChangedArguments",
+            "psElabRecursionStateIsRuntime",
+            "psElabRecursionCheckDomains",
+            "psElabPlanStructuralNormalization"
+          ]
+        },
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+          "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+          "definitions": [
+            "psElabDeclarationBatch"
+          ]
+        }
+      ],
+      "domain": [
+        "One supported structural major and direct decreasing constructor-field calls.",
+        "Only supported explicit runtime value parameters may vary.",
+        "Unsupported dependence on selected generalized state or the structural major is refused according to the implemented domain check."
+      ],
+      "requiredRelation": "Every accepted normalization uses a valid structural induction motive and does not silently change a dependent runtime calling contract.",
+      "ruleArgument": "The planner discovers changing arguments, validates their binder classes and free-variable dependencies, and normalizes only after the stable elaborator's specific invariant-argument refusal. Unrelated elaboration errors retain their existing failure path.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Ordinary elaboration rechecks the generated worker and public declaration.",
+          "Source/IR policies retain explicit capability and supported-runtime boundaries."
+        ],
+        "notEstablished": [
+          "A full domain-check soundness argument against the resolved Core telescope remains required.",
+          "Post-transform typing supports admissibility but does not prove that the generated function computes the original definition."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "N-01"
+      ]
+    },
+    {
+      "id": "N-03",
+      "stage": "S4",
+      "title": "Function-valued motive and simultaneous state",
+      "forms": [
+        "normalizer worker",
+        "recursive call rewrite",
+        "changing state",
+        "captured invariant"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+          "blob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+          "definitions": [
+            "psElabRecursionRewriteCall",
+            "psElabRecursionSelectedValues",
+            "psElabRecursionWrapAlternatives",
+            "psElabRecursionBuildNormalization"
+          ]
+        }
+      ],
+      "domain": [
+        "Selected varying parameters have supported independent runtime domains.",
+        "Recursive call argument groups and the actual changed values are preserved.",
+        "Evaluation/capture obligations include errors and demand, not only final pure values."
+      ],
+      "requiredRelation": "The normalized function-valued structural fold computes the same supported state transition, with every changed argument evaluated under the original call environment and order.",
+      "ruleArgument": "Normalization separates invariant parameters from selected state, wraps branch results in a function over that state, and rewrites recursive calls to apply the recursive result to the selected changing arguments. This is the intended structural-fold equation; the implementation must be related to that equation under substitution and evaluation.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Generated worker/public declarations undergo existing elaboration and exact original-IR typing.",
+          "Bounded full-signature, partial-application and 87-case worker evidence already applies to the qualified migration checkpoints only."
+        ],
+        "notEstablished": [
+          "The general recursive-call/substitution/evaluation theorem is open.",
+          "Finite worker cases do not prove simultaneous-state or capture preservation for every accepted definition.",
+          "Nat demand in ER-07 is a distinct downstream lowering gap and remains open."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "N-01",
+        "N-02",
+        "ER-04",
+        "ER-09"
+      ]
+    },
+    {
+      "id": "N-04",
+      "stage": "S4",
+      "title": "Public wrapper and full calling contract",
+      "forms": [
+        "public declaration",
+        "normalized worker",
+        "wrapper application"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+          "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+          "definitions": [
+            "psElabNormalizedDefinition"
+          ]
+        },
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+          "blob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+          "definitions": [
+            "psElabRecursionSelectedBinders",
+            "psElabRecursionBuildNormalization"
+          ]
+        }
+      ],
+      "domain": [
+        "The public source declaration's full type and parameter order are authoritative.",
+        "The internal worker is elaborated before the public wrapper and is not substituted for its public API."
+      ],
+      "requiredRelation": "The wrapper retains the complete public function type, original parameter groups and application order while delegating to the normalized worker.",
+      "ruleArgument": "The declaration path first adds the checked worker to the environment, builds the wrapper in that environment and returns the batch in worker/public order. Independent prepared-type annotations and ordered IR signatures can check selected APIs without relying on JS underapplication.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Exact prepared Core type and grouped IR signature checks are available for a finite declared public ABI set.",
+          "Per-compilation evidence must retain actual identities and must not insert probe declarations into the authoritative source closure."
+        ],
+        "notEstablished": [
+          "A finite twelve-worker ABI check does not cover arbitrary public declarations.",
+          "Full wrapper semantic equivalence, as opposed to type equality, remains open."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "N-01",
+        "N-03",
+        "ER-04"
+      ]
+    },
+    {
+      "id": "EV-01",
+      "stage": "S4",
+      "title": "Literal evaluation",
+      "forms": [
+        "PsVerifiedIrExpr.literal"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+          "blob": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79",
+          "definitions": [
+            "psTsEmitLiteral"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "Only checked natural, integer, Bool, String and Unit literal forms; Char arises through its enabled operations.",
+        "Nat is nonnegative, Int arbitrary precision and host text is a well-formed scalar sequence."
+      ],
+      "requiredRelation": "An admitted literal evaluates to the related target value in the enabled value contract.",
+      "ruleArgument": "The backend prints bigint literals for Nat/Int, Boolean syntax, JSON-quoted text and undefined for Unit. Literal typing retains Nat/Int and Char/String distinctions even when target carriers coincide.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Original-IR typing rejects optional machine integer literals in this lane.",
+          "Native/source provenance and host carrier validation delimit admissible literal inputs."
+        ],
+        "notEstablished": [
+          "The carrier relation and escaping/literal argument need to cover all allowed values, not only selected boundary examples.",
+          "Host surrogate rejection and canonical-value validation are separate from compiler typing."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-02",
+        "TS-09"
+      ]
+    },
+    {
+      "id": "EV-02",
+      "stage": "S4",
+      "title": "Lexical and global variables",
+      "forms": [
+        "PsVerifiedIrExpr.var"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "The IR name is resolved under the nearest runtime local or declared global scheme.",
+        "Global initializer availability is checked separately from predeclared typing signatures."
+      ],
+      "requiredRelation": "A variable reads the target value related to the same IR environment binding.",
+      "ruleArgument": "The emitter prints the admitted variable name directly. Correctness therefore depends on an injective/capture-safe emitted environment and initialization schedule, not merely on a successful IR lookup.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Existing IR typing resolves nearest lexical bindings.",
+          "Target admission checks exact names, lexical scope and conservative global availability, including nested function bodies."
+        ],
+        "notEstablished": [
+          "Target admission does not prove that erasure selected the intended source binding.",
+          "A general environment relation remains required."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-09",
+        "TS-01",
+        "TS-08"
+      ]
+    },
+    {
+      "id": "EV-03",
+      "stage": "S4",
+      "title": "Enabled intrinsic evaluation",
+      "forms": [
+        "PsVerifiedIrExpr.intrinsic"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "definitions": [
+            "psErasePrimitiveApplication"
+          ]
+        },
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitIntrinsicFromPrinted"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "Exactly the six-primitive/Array and 45-operation enabled contract.",
+        "Bounds, scalar canonicality, text positions, successful allocation and callback purity use the explicit domains in enabled-runtime-contract.json."
+      ],
+      "requiredRelation": "Each enabled intrinsic obeys its declared operand, result, demand, fault and representation laws.",
+      "ruleArgument": "Original-IR typing checks intrinsic generic/runtime signatures. The backend's operation-specific expression templates supply the computational behavior. Their 45 law rows are authoritative in the separate runtime contract and must not be replaced with a blanket claim from typing or a finite corpus.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Same-IR intrinsic signature checks are available.",
+          "The companion native/JS conformance candidate records 186 observations across the finite operation matrix.",
+          "New arrayGet/set guards explicitly refuse invalid bounds while evaluating operands once in array/index/value order."
+        ],
+        "notEstablished": [
+          "General operation preservation still depends on the complete runtime-contract arguments and explicit domains.",
+          "Deleted proof provenance cannot be reconstructed by the IR checker or by defensive bounds faults.",
+          "Fixed-width, floating and external ABI forms remain refused, even though model constructors exist."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-02",
+        "TS-03"
+      ]
+    },
+    {
+      "id": "EV-04",
+      "stage": "S4",
+      "title": "Lambda closure and captured environment",
+      "forms": [
+        "PsVerifiedIrExpr.lambda"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "Runtime lambdas are monomorphic with an explicit parameter group and result annotation.",
+        "Captured values belong to the same admitted runtime environment; arbitrary host callbacks are not silently added to the portable language."
+      ],
+      "requiredRelation": "The emitted function closes over the related outer environment, binds the same arguments and returns a related result or error when applied.",
+      "ruleArgument": "A lambda is printed as a generator implementation passed to __ps$wrap. Construction captures its lexical surroundings; application is mediated by the runtime registry/trampoline. No body is evaluated merely because the lambda value is constructed.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Existing IR typing checks lambda scope and exact result.",
+          "Target admission traverses the nested body and its actual binders; this is intentionally conservative for forward globals."
+        ],
+        "notEstablished": [
+          "The closure/environment relation and generator registration behavior require a general argument.",
+          "A function-valued test or arity check does not establish all capture behavior."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "EV-02",
+        "TS-04"
+      ]
+    },
+    {
+      "id": "EV-05",
+      "stage": "S4",
+      "title": "Callee and application evaluation",
+      "forms": [
+        "PsVerifiedIrExpr.call"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "The callee has a checked function/scheme and exact runtime argument group.",
+        "Generic type arguments are compile-time information, not extra runtime operands."
+      ],
+      "requiredRelation": "Callee evaluation precedes ordered argument evaluation, each required runtime operand is evaluated once, and invocation respects the same function group.",
+      "ruleArgument": "The general template evaluates the printed callee and comma-separated runtime arguments as arguments to __ps$invoke, then yield-delegates the request. A literal lambda callee is parenthesized. The operation must be interpreted with the same synchronous public-function contract as the trampoline.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Original-IR typing establishes the complete callee/result type and exact argument groups.",
+          "Target checks apply to the callee and each argument."
+        ],
+        "notEstablished": [
+          "The operational application/trampoline relation is open.",
+          "Erasure application grouping and generic substitution correctness are separate upstream obligations."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-04",
+        "EV-04",
+        "TS-04"
+      ]
+    },
+    {
+      "id": "EV-06",
+      "stage": "S4",
+      "title": "Let initializer, shadowing and body",
+      "forms": [
+        "PsVerifiedIrExpr.letE"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitLetStatements",
+            "psTsExprUsesNameWithFuel",
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "The initializer is typed and interpreted in the old scope, and the body in the extended scope.",
+        "The bounded name-use scan is conservative on exhaustion; strict target admission additionally bounds admitted depth."
+      ],
+      "requiredRelation": "The initializer is evaluated once in the old environment, then its related value is bound for the body without temporal-dead-zone capture.",
+      "ruleArgument": "A potentially old-name-using initializer becomes a generator-call argument, outside the scope of the new generator parameter. Other lets use a lexical const block. Tail optimization refuses its direct path when the relevant shadowing guard fails.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Existing IR typing and target scope traversal use the old scope for the initializer.",
+          "Finite M6 shadowing/captured-initializer fixtures are focused regression evidence."
+        ],
+        "notEstablished": [
+          "General nested-let/capture preservation is not proved by those examples.",
+          "The name-use traversal, eta-to-let rewrite and optimized path require compatible depth/freshness reasoning."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "EV-02",
+        "TS-01",
+        "TS-05",
+        "TS-07"
+      ]
+    },
+    {
+      "id": "EV-07",
+      "stage": "S4",
+      "title": "Conditional control",
+      "forms": [
+        "PsVerifiedIrExpr.ifE"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "The condition is Bool and branch result types agree.",
+        "Only the selected branch is demanded."
+      ],
+      "requiredRelation": "The condition is evaluated once and the same branch alone computes the result or fault.",
+      "ruleArgument": "The general emitter uses a conditional expression with the printed condition and two printed branches. Constructing source strings for both branches during compilation does not evaluate either runtime branch.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Original-IR typing checks Bool and compatible branch results.",
+          "Target admission checks both branches conservatively for names/initialization; this is not a claim that both execute."
+        ],
+        "notEstablished": [
+          "A compositional semantics must relate the selected branch and its environment.",
+          "Branch-lazy behavior through erasure and any optimization remains part of the global proof obligation."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "TS-03"
+      ]
+    },
+    {
+      "id": "EV-08",
+      "stage": "S4",
+      "title": "Record construction",
+      "forms": [
+        "PsVerifiedIrExpr.record"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "The structure, type instantiation and complete fields are checked.",
+        "Runtime structures are immutable by the portable contract; arbitrary host mutation is outside the relation."
+      ],
+      "requiredRelation": "Construction produces one related record with each field expression evaluated once in the IR field order.",
+      "ruleArgument": "The emitter builds one object containing the private brand symbol and the actual ordered field entries. The brand carries no source field value. Source-to-IR record argument ordering remains a separate erasure obligation.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "IR typing checks owner, field membership/completeness and types.",
+          "Target admission checks every emitted field property and the private brand namespace."
+        ],
+        "notEstablished": [
+          "The source/Core layout relation and host immutability discipline are not proven by object typing.",
+          "Named-field membership alone does not establish source evaluation order."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-05",
+        "TS-02",
+        "TS-03"
+      ]
+    },
+    {
+      "id": "EV-09",
+      "stage": "S4",
+      "title": "Field projection",
+      "forms": [
+        "PsVerifiedIrExpr.projection"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "The target has the checked instantiated structure type and the field is declared.",
+        "The actual emitted property is a safe property name, including permitted keywords such as do."
+      ],
+      "requiredRelation": "The target expression is evaluated once and the corresponding related field is returned.",
+      "ruleArgument": "The backend emits the target followed by a dot property access. Complete IR typing supplies ownership and result type; source erasure metadata supplies the intended projection association.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Existing owner/instantiation/field typing and target property validation are available."
+        ],
+        "notEstablished": [
+          "The association between source projection index and runtime property is the open ER-05 layout obligation.",
+          "A typed projection can still be the wrong source field if the earlier mapping is wrong."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-05",
+        "TS-02"
+      ]
+    },
+    {
+      "id": "EV-10",
+      "stage": "S4",
+      "title": "Constructor value and ordered fields",
+      "forms": [
+        "PsVerifiedIrExpr.constructor"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "The constructor belongs to the checked instantiated inductive and fields are in the checked positional order.",
+        "The inductive export object is initialized before authored runtime declarations and is not captured by a local value."
+      ],
+      "requiredRelation": "Construction chooses the same constructor identity and related ordered field values.",
+      "ruleArgument": "The expression template accesses inductiveName[quotedConstructor]. A monomorphic nullary constructor is its stored object; otherwise the ordered fields are arguments to the constructor factory. The namespace access is a free emitted value even though it is not an IR var node.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Original-IR constructor validation is complete for the enabled layouts.",
+          "Target admission explicitly refuses constructor namespace capture by lexical locals and rejects __proto__ constructor keys."
+        ],
+        "notEstablished": [
+          "The constructor representation relation is open.",
+          "The shared-object representation of nullary constructors relies on immutable source use; arbitrary external mutation is outside the enabled contract."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-06",
+        "TS-02",
+        "TS-03"
+      ]
+    },
+    {
+      "id": "EV-11",
+      "stage": "S4",
+      "title": "Match scrutinee, tag and branch bindings",
+      "forms": [
+        "PsVerifiedIrExpr.matchE"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        },
+        {
+          "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "definitions": []
+        }
+      ],
+      "domain": [
+        "The scrutinee type and complete nonduplicate constructor coverage are checked.",
+        "Each branch field/name/type binding is valid; empty runtime matches are explicitly refused."
+      ],
+      "requiredRelation": "The scrutinee is evaluated once, exactly the matching constructor branch is selected, and branch variables denote the corresponding fields.",
+      "ruleArgument": "The general backend stores the scrutinee in a fresh local, switches on the private tag and creates branch-local field bindings. An impossible tag throws the explicit existing Error path. This once-bound IR match does not repair the separate duplicated Nat-major erasure rule.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "IR typing checks coverage, owner, binding types and branch result compatibility.",
+          "Target admission reserves actual generated match temporaries and checks all branch local/property names."
+        ],
+        "notEstablished": [
+          "The tag/field relation, fresh-name soundness and branch substitution require a general argument.",
+          "The impossible-tag fault is outside related well-formed constructor values, not proof of source impossibility."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-06",
+        "ER-07",
+        "TS-01",
+        "TS-02"
+      ]
+    },
+    {
+      "id": "TS-01",
+      "stage": "S5",
+      "title": "Binding/property syntax, fresh names and namespace capture",
+      "forms": [
+        "emitted identifier",
+        "property",
+        "private brand/tag",
+        "implementation name",
+        "match temporary"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "definitions": [
+            "psTsFreshInternalWorker",
+            "psTsBuildBrandMap",
+            "psTsBuildTagMap",
+            "psTsEmitDeclarationGeneral"
+          ]
+        },
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsFreshMatchTempWorker",
+            "psTsExprUsesNameWithFuel"
+          ]
+        }
+      ],
+      "domain": [
+        "Actual original IR has already passed complete typing.",
+        "The strict source-owned target policy may conservatively refuse legal arbitrary IR; it does not grant strict status to a direct IR caller.",
+        "Work and weighted-depth allowances are explicit and success never follows exhaustion."
+      ],
+      "requiredRelation": "Every emitted binding/reference/property denotes its intended IR entity; private helper and temporary names cannot capture or collide.",
+      "ruleArgument": "The candidate target walk checks emitted ASCII identifier positions, distinguishes keyword properties from binding keywords, refuses __proto__ keys, checks exact backend helper/builtin names and generated private names, and rejects actual type/constructor namespace capture. It reserves exactly __ps$match$0 and the admitted brand/tag candidates, guaranteeing the existing fresh-name search can choose its first candidate within the admitted depth domain.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "psSh1CheckTarget(maxSteps, originalIr) returns accepted/traversalComplete only after all worklist tasks finish.",
+          "Per-task fuel includes identifier-character visits. Expression/type depth is bounded at 4096; lambda parameter weighting accounts for eta-to-let expansion.",
+          "The native/generated target fixture candidate has explicit acceptance, capture, collision and exhaustion cases."
+        ],
+        "notEstablished": [
+          "This check does not prove the upstream Core-to-IR variable map.",
+          "Index hashing/scans and String/Nat primitive costs are finite separate work, not all included in visitedSteps.",
+          "No whole-program time, allocation or stack bound is inferred."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-09"
+      ]
+    },
+    {
+      "id": "TS-02",
+      "stage": "S5",
+      "title": "Brand/tag and public constructor-object representation",
+      "forms": [
+        "structure interface",
+        "brand symbol",
+        "inductive tag",
+        "constructor factory"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "definitions": [
+            "psTsEmitStructure",
+            "psTsEmitConstructorVariant",
+            "psTsEmitConstructorValue",
+            "psTsEmitInductive"
+          ]
+        },
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        }
+      ],
+      "domain": [
+        "Layout metadata is the checked original IR.",
+        "The portable value model is immutable and has no observation of private-symbol identity or host prototype mutation.",
+        "All layout objects/symbols are emitted before runtime declaration bodies."
+      ],
+      "requiredRelation": "Related records and inductives retain their owner, constructor tag and field interpretation in TS/JS.",
+      "ruleArgument": "Each structure receives a private unique symbol brand; each inductive receives a private unique symbol tag and an exported constructor object. Constructor names are quoted object properties, not additional globals. Factory parameters are fixed internal positional names and source field expressions are evaluated outside those scopes.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "IR layout/field/constructor validation and target names/private collision checks are available.",
+          "Finite native/JS layout observations exercise the implementation but do not quantify over every layout."
+        ],
+        "notEstablished": [
+          "A compositional source/Core→IR→object layout relation remains open.",
+          "The type annotations and private symbols alone do not prove erasure correspondence."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-05",
+        "ER-06",
+        "TS-01"
+      ]
+    },
+    {
+      "id": "TS-03",
+      "stage": "S5",
+      "title": "General expression templates and observable order",
+      "forms": [
+        "literal",
+        "variable",
+        "intrinsic",
+        "lambda",
+        "call",
+        "let",
+        "if",
+        "record",
+        "projection",
+        "constructor",
+        "match"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitIntrinsicFromPrinted",
+            "psTsEmitLetStatements",
+            "psTsEmitExprWithFuel"
+          ]
+        }
+      ],
+      "domain": [
+        "All child expressions satisfy their rule relations and current explicit value domains.",
+        "Exactly the actual template's evaluation order, short circuiting, error and copy behavior is claimed; host effects are not silently generalized."
+      ],
+      "requiredRelation": "The general emitted template simulates the corresponding IR evaluation rule and composes with related child expressions.",
+      "ruleArgument": "The eleven EV rows enumerate every original-IR expression constructor. Their arguments identify the concrete generator/conditional/object/field templates and the cases requiring laziness, old-scope binding or one operand evaluation. Primitive operation laws live in the separate 45-row runtime contract.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Same-IR typing, actual target admission and the existing checked/raw byte-parity comparison can be recorded per compilation.",
+          "Focused operation and source tests can expose counterexamples with exact receipt identities."
+        ],
+        "notEstablished": [
+          "A full IR operational semantics and compositional simulation argument are still missing.",
+          "Byte parity proves that two entry points emitted the same bytes; it does not prove those bytes preserve semantics."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": []
+    },
+    {
+      "id": "TS-04",
+      "stage": "S5",
+      "title": "General declarations, generator trampoline and closures",
+      "forms": [
+        "public function",
+        "generator implementation",
+        "registry",
+        "invoke request",
+        "returned function"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "definitions": [
+            "psTsStackRuntimeSupport",
+            "psTsEmitDeclarationGeneral"
+          ]
+        },
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "definitions": [
+            "psTsEmitExprWithFuel"
+          ]
+        }
+      ],
+      "domain": [
+        "Public calls are synchronous; registered compiler functions and source-owned closures follow the runtime protocol.",
+        "Unregistered foreign host functions and arbitrary effects are not assumed to obey the portable source contract.",
+        "Resource exhaustion/host allocation is not equated to source-level errors."
+      ],
+      "requiredRelation": "Generator suspension, registry lookup and the work stack implement the same function calls/results without changing captures or argument groups.",
+      "ruleArgument": "Positive-arity general declarations emit a public synchronous wrapper, generator implementation and registry association. Lambdas register through __ps$wrap. __ps$invoke yields a function/argument request; __ps$run either pushes its registered implementation or invokes the explicitly represented external value. The latter mechanism does not by itself expand the strict source capability set.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Atomic source checking ensures the admitted source/IR path and target initialization schedule.",
+          "Finite closure, partial-call and recursive fixtures are separate observed evidence."
+        ],
+        "notEstablished": [
+          "A stack/continuation simulation for arbitrary supported calls is open.",
+          "The existing fixed point does not prove exception propagation, capture or callback behavior for every source program."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "EV-04",
+        "EV-05",
+        "TS-08"
+      ]
+    },
+    {
+      "id": "TS-05",
+      "stage": "S5",
+      "title": "Eta inlining",
+      "forms": [
+        "fresh-variable eta application",
+        "lambda-to-let",
+        "let/if/match traversal"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "definitions": [
+            "psTsEtaArgumentsFresh",
+            "psTsEtaBind",
+            "psTsEtaApplyWorker",
+            "psTsInlineEtaApplication"
+          ]
+        }
+      ],
+      "domain": [
+        "Only the actual recognized empty-type-argument call with fresh variable arguments is optimized.",
+        "Lambda parameters, let/branch scopes and evaluation order meet the recognizer's conditions."
+      ],
+      "requiredRelation": "The eta rewrite preserves application, captures and demand, including the generated nested lets.",
+      "ruleArgument": "The optimizer recognizes a restricted eta application, checks argument freshness and pushes the application through supported let/if/match bodies. It replaces the matching lambda's parameters with lets rather than reordering arbitrary argument computations. The target depth weight conservatively covers the possible new let depth.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Recognition conditions run on the actual IR.",
+          "Target names/depth admission ensures relevant bounded name scans stay in their admitted domain."
+        ],
+        "notEstablished": [
+          "A general local rewrite theorem for every recognizer success is open.",
+          "The optimizer's source-inspected guard and finite tests are not a universal preservation proof."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-09",
+        "EV-06",
+        "TS-01"
+      ]
+    },
+    {
+      "id": "TS-06",
+      "stage": "S5",
+      "title": "Specialized count loop",
+      "forms": [
+        "one-argument constructor fold",
+        "Nat count"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "definitions": [
+            "psTsCountLiteral",
+            "psTsCountRecursiveArgument",
+            "psTsCountStepArgument",
+            "psTsEmitCountCases",
+            "psTsEmitCountLoop"
+          ]
+        }
+      ],
+      "domain": [
+        "Exactly the recognized one-runtime-argument, Nat-result, zero/successor fold with the required constructor/recursive-field shape.",
+        "Constructor data obeys the immutable related layout contract."
+      ],
+      "requiredRelation": "Each loop step corresponds to one recognized recursive constructor step and returns the same Nat count.",
+      "ruleArgument": "Recognition identifies zero and one-plus-recursive-child cases from IR shape rather than function names. Emission walks the selected child field and increments a bigint accumulator using reserved internal cursor/count names.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "The recognizer must decline every nonmatching case; target admission protects its exact internal names.",
+          "Existing finite loop/capability observations provide bounded implementation evidence."
+        ],
+        "notEstablished": [
+          "An induction over related constructor chains is still required to discharge the general count-loop rule.",
+          "Cycle/foreign-object behavior is outside related finite source data, not a permitted silent assumption about arbitrary JS."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-06",
+        "TS-01",
+        "TS-02"
+      ]
+    },
+    {
+      "id": "TS-07",
+      "stage": "S5",
+      "title": "Tail-loop lowering and simultaneous updates",
+      "forms": [
+        "monomorphic tail call",
+        "captured self alias",
+        "parallel parameter assignment"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "definitions": [
+            "psTsTailPureWithFuel",
+            "psTsTailAliasValue",
+            "psTsTailBindingSafe",
+            "psTsTailCallArguments",
+            "psTsTailEmitWithFuel",
+            "psTsEmitTailLoop"
+          ]
+        }
+      ],
+      "domain": [
+        "Only the actual monomorphic supported tail-call shapes and purity checks.",
+        "Calls, lambdas, matches and arrayMap/foldl are not silently admitted as pure leaf operands.",
+        "Shadowing or alias cases failing the safety checks use general emission."
+      ],
+      "requiredRelation": "The loop's parameter tuple update corresponds to one original tail call with arguments evaluated under the old environment before simultaneous rebinding.",
+      "ruleArgument": "The optimizer checks exact self or recognized captured aliases, validates binder safety, and emits destructuring assignment whose right-hand side is evaluated before target parameters change. Unsupported shapes return none and fall through to the general emitter.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Actual recognizer/guard decisions run per compilation.",
+          "Target checks protect backend internal names and lexical captures."
+        ],
+        "notEstablished": [
+          "A general invariant relating loop state to the recursive call environment remains open.",
+          "A pure-leaf classifier and TypeScript tuple assignment need a complete rule argument, including errors and evaluation order."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "EV-06",
+        "TS-01",
+        "TS-03",
+        "TS-04"
+      ]
+    },
+    {
+      "id": "TS-08",
+      "stage": "S5",
+      "title": "Global initialization and function registration order",
+      "forms": [
+        "zero-runtime-arity value",
+        "positive-arity function",
+        "nested global read",
+        "layout prelude"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "definitions": [
+            "psTsEmitDeclarationGeneral",
+            "psTsEmitModule"
+          ]
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "blob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+          "definitions": [
+            "psEraseDefinitionsLoopWorker"
+          ]
+        },
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+          "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+          "definitions": [
+            "psElabNormalizedDefinition"
+          ]
+        }
+      ],
+      "domain": [
+        "Runtime layouts and support helpers are initialized before authored declarations.",
+        "Zero-runtime-parameter nongeneric declarations are eager values; positive-arity declarations are callable functions.",
+        "The target policy conservatively checks nested function bodies as potential demands."
+      ],
+      "requiredRelation": "No admitted declaration can read an unavailable global value or require a later registration through an unchecked initializer dependency.",
+      "ruleArgument": "The target walk admits a runtime var only if lexical, an earlier runtime declaration, or positive-arity self. It checks initializer values in the old scope and traverses lambda/branch bodies, so hidden forward demands are rejected. It deliberately rejects some safe deferred closures; no termination or call-graph oracle is claimed.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "The target checks actual ordered original IR after complete typing.",
+          "Static source-order inspection shows worker-before-public normalization and order-preserving erasure; the full current closure must still pass the exact target gate in qualification."
+        ],
+        "notEstablished": [
+          "The conservative admission rule requires a module-order/registration argument to connect it to all emitter paths.",
+          "This does not prove arbitrary forward-reference or mutual-recursion semantics.",
+          "Zero-arity self, including under a delayed closure, remains a deliberate refusal."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": [
+        "ER-01",
+        "TS-01",
+        "TS-04"
+      ]
+    },
+    {
+      "id": "TS-09",
+      "stage": "S5",
+      "title": "TypeScript 7 emission to JavaScript and runtime boundary",
+      "forms": [
+        "TypeScript source",
+        "pinned CLI profile",
+        "JavaScript module",
+        "host carrier"
+      ],
+      "sources": [
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+          "blob": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79",
+          "definitions": []
+        },
+        {
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "definitions": [
+            "psTsEmitModule"
+          ]
+        }
+      ],
+      "domain": [
+        "Only the active pinned TypeScript 7.0.2 CLI/profile and declared Node runtime lane.",
+        "Original input text/carriers obey the current grammar, Unicode and ownership contract.",
+        "Historical immutable receipts retain their original toolchain identities; they are not active toolchain commands."
+      ],
+      "requiredRelation": "The qualified TS-to-JS toolchain and runtime preserve the enabled generated program's observable semantics within the stated host assumptions.",
+      "ruleArgument": "The repository records exact compiler, source, TypeScript profile, toolchain version and product hashes. Current fixed-point/native/provider evidence has its own source identity. These reproducibility and admission facts delimit the trusted toolchain but are not a compiler-correctness theorem for TypeScript or JavaScript.",
+      "perCompilation": {
+        "availableOrCandidate": [
+          "Exact toolchain identity, CLI profile, deterministic products and actual native/generated gate receipts can be checked.",
+          "Selected-provider decisions remain separate and bind only their actual admitted streams."
+        ],
+        "notEstablished": [
+          "The TS compiler and JS engine remain explicit trusted execution assumptions unless separately verified.",
+          "Compiler fixed point, original-IR typing, provider acceptance and runtime examples do not imply general end-to-end source preservation.",
+          "Strict promotion must account for all required open rows, not just reproducible bytes."
+        ]
+      },
+      "generalPreservationProven": false,
+      "strictSh1Discharged": false,
+      "assuranceStatus": "open-preservation-with-explicit-local-obligations",
+      "relatedObligations": []
+    }
+  ]
+}

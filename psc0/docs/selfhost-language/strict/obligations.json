@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-09 16:44:22 UTC",
+  "updatedAtUtc": "2026-10-09 17:12:36 UTC",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -35,136 +35,182 @@
       "id": "S0.enabled",
       "stage": "S0",
       "obligation": "Enabled capability/value/operation/transformation ledger",
-      "status": "in-progress",
+      "status": "contract-and-rule-inventory-recorded",
       "assuranceMethod": "finite contract and rule inventory",
       "sources": [
         "SPEC.md §§2–8"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+        "psc0/docs/selfhost-language/strict/correspondence-obligations.json"
+      ]
     },
     {
       "id": "S1.imports",
       "stage": "S1",
       "obligation": "Actual parsed ordered module/import closure",
-      "status": "in-progress",
+      "status": "implemented-candidate-awaiting-qualification",
       "assuranceMethod": "portable admission with raw-source/compiler identities",
       "sources": [
         "Compiler/Sh1.lean (new)"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+        "psc0/scripts/sh1-strict-source-conformance.mjs"
+      ]
     },
     {
       "id": "S1.syntax",
       "stage": "S1",
       "obligation": "Explicit source signatures, declarations, typed lambdas and supported forms",
-      "status": "in-progress",
+      "status": "implemented-candidate-awaiting-qualification",
       "assuranceMethod": "exhaustive bounded AST traversal plus existing elaboration",
       "sources": [
         "Compiler/Sh1.lean (new)"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+        "psc0/scripts/sh1-strict-source-conformance.mjs"
+      ]
     },
     {
       "id": "S1.do",
       "stage": "S1",
       "obligation": "Reject source do while accepting ordinary helper/field spellings",
-      "status": "in-progress",
+      "status": "implemented-candidate-awaiting-qualification",
       "assuranceMethod": "token-origin and AST-span relation",
       "sources": [
         "Syntax/ParseCommon.lean",
         "Compiler/Sh1.lean (new)"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+        "psc0/scripts/sh1-strict-source-conformance.mjs"
+      ]
     },
     {
       "id": "S1.resource",
       "stage": "S1",
       "obligation": "Bounded source work and diagnostic spans",
-      "status": "in-progress",
+      "status": "implemented-candidate-awaiting-qualification",
       "assuranceMethod": "explicit source/module/syntax budgets; exhaustion refusal",
       "sources": [
         "Compiler/Sh1.lean (new)"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+        "psc0/scripts/sh1-strict-source-conformance.mjs"
+      ]
     },
     {
       "id": "S1.atomic",
       "stage": "S1",
       "obligation": "One raw-source→prepared→originalIR→checked TS operation",
-      "status": "in-progress",
+      "status": "implemented-candidate-awaiting-qualification",
       "assuranceMethod": "portable owned path returning exact objects/report",
       "sources": [
         "BackendTs/Sh1.lean (new)",
         "BackendTs/Checked.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean"
+      ]
     },
     {
       "id": "S1.host",
       "stage": "S1",
       "obligation": "Current native/generated strict consumers and selected-R exception",
-      "status": "pending",
+      "status": "implemented-candidate-awaiting-qualification",
       "assuranceMethod": "host integration; no current API downgrade",
       "sources": [
         "scripts/sh1-qualify.mjs"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/scripts/StrictSourceCompile.lean",
+        "psc0/scripts/sh1-strict-source.mjs",
+        "psc0/scripts/sh1-qualify.mjs"
+      ]
     },
     {
       "id": "S2.carrier",
       "stage": "S2",
       "obligation": "Canonical Unicode scalar strings including names",
-      "status": "in-progress",
+      "status": "implemented-candidate-awaiting-qualification",
       "assuranceMethod": "bounded JavaScript carrier validation",
       "sources": [
         "scripts/original-ir-carrier.mjs"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/scripts/original-ir-carrier.mjs",
+        "psc0/scripts/sh1-strict-runtime-conformance.mjs"
+      ]
     },
     {
       "id": "S2.operations",
       "stage": "S2",
       "obligation": "45 enabled intrinsic domains and primitive laws",
-      "status": "in-progress",
+      "status": "finite-contract-and-conformance-candidate-general-law-obligations-open",
       "assuranceMethod": "pinned native reference; explicit rule contract and finite conformance",
       "sources": [
         "strict/enabled-runtime-contract.json (new)"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+        "psc0/test/StrictRuntimeReference.lean",
+        "psc0/scripts/sh1-strict-runtime-conformance.mjs"
+      ]
     },
     {
       "id": "S2.bounds",
       "stage": "S2",
       "obligation": "Proof-required array access/update domain",
-      "status": "in-progress",
+      "status": "defensive-guards-implemented-source-proof-correspondence-open",
       "assuranceMethod": "runtime invalid-bounds refusal plus source proof/provenance obligation",
       "sources": [
         "BackendTs/Expr.lean",
         "Erasure/Expr.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+        "psc0/docs/selfhost-language/strict/correspondence-obligations.json"
+      ]
     },
     {
       "id": "S2.text",
       "stage": "S2",
       "obligation": "Pinned scalar/UTF-8/raw String.Pos behavior",
-      "status": "in-progress",
+      "status": "pinned-reference-and-finite-conformance-candidate-general-laws-open",
       "assuranceMethod": "pinned Lean contract and finite Unicode/position boundary evidence",
       "sources": [
         "strict/ENABLED_RUNTIME.md (new)"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/docs/selfhost-language/strict/ENABLED_RUNTIME.md",
+        "psc0/test/StrictRuntimeReference.lean"
+      ]
     },
     {
       "id": "S3.origin",
@@ -176,7 +222,8 @@
         "Elab/Recursion.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S3.binders",
@@ -189,7 +236,8 @@
         "Erasure/Basic.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S3.layout",
@@ -202,7 +250,8 @@
         "Erasure/Expr.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S3.abi",
@@ -215,7 +264,8 @@
         "scripts/sh1-migration-worker-abi.mjs"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S4.normalization",
@@ -227,7 +277,8 @@
         "Elab/Recursion.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S4.ir",
@@ -239,7 +290,8 @@
         "CompilerIr/Model.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S4.errors",
@@ -252,7 +304,8 @@
         "BackendTs/Module.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S4.capture",
@@ -265,33 +318,44 @@
         "BackendTs/Module.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S5.initialization",
       "stage": "S5",
       "obligation": "Eager globals and initialization demand order",
-      "status": "open",
+      "status": "portable-target-admission-candidate-general-correspondence-open",
       "assuranceMethod": "portable admission or proven source-order provenance",
       "sources": [
         "CompilerIr/Check.lean",
         "BackendTs/Module.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+        "psc0/scripts/sh1-strict-target-conformance.mjs"
+      ],
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S5.names",
       "stage": "S5",
       "obligation": "Target identifier domain and generated-name freshness",
-      "status": "open",
+      "status": "portable-target-admission-candidate-general-correspondence-open",
       "assuranceMethod": "portable name/provenance admission and exhaustion refusal",
       "sources": [
         "BackendTs/Expr.lean",
         "BackendTs/Module.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+        "psc0/scripts/sh1-strict-target-conformance.mjs"
+      ],
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S5.generator",
@@ -303,7 +367,8 @@
         "BackendTs/Module.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S5.eta",
@@ -316,7 +381,8 @@
         "BackendTs/Module.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S5.loops",
@@ -328,19 +394,24 @@
         "BackendTs/Module.lean"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "correspondenceLedger": "correspondence-obligations.json"
     },
     {
       "id": "S6.qualification",
       "stage": "S6",
       "obligation": "Exact current-source native/N1/C1/C2/C3 qualification",
-      "status": "pending",
+      "status": "integrated-recipe-awaiting-cloud-execution",
       "assuranceMethod": "all required source/runtime/correspondence receipts with source/toolchain hashes",
       "sources": [
         "scripts/sh1-qualify.mjs"
       ],
       "evidence": [],
-      "strictDischarged": false
+      "strictDischarged": false,
+      "implementation": [
+        "psc0/scripts/sh1-qualify.mjs",
+        "psc0/scripts/sh1-strict-evidence.mjs"
+      ]
     },
     {
       "id": "S6.provider",
@@ -366,5 +437,22 @@
       "evidence": [],
       "strictDischarged": false
     }
-  ]
+  ],
+  "implementationManifest": "implementation-checkpoint.json",
+  "correspondenceLedger": {
+    "path": "correspondence-obligations.json",
+    "generalRuleCount": 33,
+    "generalRulesDischarged": 0
+  },
+  "cloudExecution": {
+    "status": "not-started-at-source-checkpoint",
+    "requiredGenerations": [
+      "N1",
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "providerSeparate": true,
+    "selectedSeed": "R"
+  }
 }

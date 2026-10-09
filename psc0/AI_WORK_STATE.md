@@ -1,6 +1,6 @@
 # PSC0 AI work state — active strict SH/1 milestone
 
-Updated: 2026-10-09 16:44:22 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
+Updated: 2026-10-09 17:12:15 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
 
 ## Read this first
 
@@ -81,16 +81,36 @@ Existing sibling proofs establish only narrow cursor/omission/reflexivity exampl
 
 Static code review also identified that arbitrary typed IR can refer to a later eager global constant and can contain names beyond the emitter's valid/fresh-name domain. These are boundary obligations, not claims of an executed defect in the qualified compiler closure. Prefer source-owned provenance and a finite portable admission rule over broad backend rewriting.
 
-## Next concrete actions
+## Integrated strict implementation checkpoint
 
-1. Commit this active handoff, the merge receipt, the dependency-ordered plan and the honest open-obligation ledger. Mark the old runtime plan archival and reconcile the already-qualified grammar status in proposal.json.
-2. Review the agents' guarded immutable blob manifests against the live strict branch. Assemble one coherent source boundary/runtime checkpoint, retaining no kernel/provider changes.
-3. Wire the atomic API and returned report through native/generated current entry points; preserve the explicit selected-R bootstrap boundary. Include native source/runtime reference receipts and operation/source refusal gates in the cloud recipe identity.
-4. Run one native preflight after source review. Resolve any demonstrated implementation defect as a class, not by weakening assertions or dropping cases.
-5. Complete correspondence admission and rule dispositions, then run exact-source native/N1/C1/C2/C3 qualification and the independent frozen provider gate. Reuse existing prepared/IR objects and stop repeat testing once the concrete required evidence is sufficient.
-6. Publish exact observed results and remaining limits. Do not activate strict SH/1 or merge unqualified strict source merely because a subset of new checks passed.
+Updated: 2026-10-09 17:12:15 UTC. The branch already contains planning commit bcf27b6595fb1a7ac03f2ea5c1b1cf2e3f748dff. This source checkpoint composes the reviewed portable, host and runtime candidates. Its exact changed-path/blob inventory is [strict/implementation-checkpoint.json](docs/selfhost-language/strict/implementation-checkpoint.json). At the time this checkpoint is written, no strict candidate compiler, test or workflow has executed. Do not turn static review into a pass.
 
-Initial status: source/runtime drafts in progress; no strict cloud execution yet; strictSh1Qualified false. The detailed live obligation inventory is [strict/obligations.json](docs/selfhost-language/strict/obligations.json). Subsequent commits must update this section after actual milestones.
+| Part | Implemented candidate | Required cloud evidence |
+| --- | --- | --- |
+| Portable source | Compiler/Sh1.lean checks the actual ordered raw bundle, imports, all five declarations and thirteen term forms, do origins and explicit budgets | Current full closure and two Lean/PS positive source bundles; twenty-one portable refusals and two malformed UTF-16 ingress refusals per current executing compiler |
+| Atomic backend | BackendTs/Sh1.lean owns source preparation, one erasure, one original-IR check, target admission and emission of that same IR | Native executable and C1→C2/C2→C3 retain the exact objects and reports; no second full preparation to collect evidence |
+| Target policy | BackendTs/Sh1Target.lean checks binding/property names, actual private helpers, generic/constructor capture and conservative initialization order, with explicit work/depth refusals | T01–T29: nine accepted and twenty refused cases; only deep target stress is explicitly not IR-typed first |
+| Runtime | Canonical UTF-16 carrier rejection; only arrayGet/arraySet production templates changed, with bounds checked before Number conversion and unchanged operand order | Forty-five operations, 186 independent pinned Lean observations, eight defensive bounds refusals, nine evaluation-order probes, five malformed-carrier refusals and two text-position families |
+| Host integration | StrictSourceCompile.lean plus strict source/target/runtime scripts; sh1-qualify.mjs uses the atomic API for current generation and preserves the exact selected-R-only bootstrap exception | One coordinated native preflight then C1/C2/C3 qualification at the same source, plus separate frozen-provider receipt |
+| Evidence | sh1-strict-evidence.mjs reads and hashes the actual reference/conformance/atomic receipt bytes and emitted compiler products | All N1/C1/C2/C3 receipt identities and claims must validate before the final source/target/finite-runtime checkpoint is recorded |
+| Semantic inventory | CORRESPONDENCE.md and correspondence-obligations.json enumerate nine erasure, four normalization, eleven expression and nine target/runtime rules | All 33 general preservation obligations remain open; inventory and finite conformance do not discharge them |
+
+The source module identity is a structured List String bundle key. Equality does not normalize dots or slashes. The host maps actual package source paths to canonical segment lists and hashes each raw source; the portable API is not a general filesystem resolver.
+
+The runtime reference imports pinned Lean directly, uses bounded allocation capacity 17, and reads String.Pos.Raw.byteIdx. It runs once; subsequent current compilers reuse its authenticated observations. Runtime fixtures use one checked-emission call and its returned report, then one TS7 compilation per executing compiler. The evidence binder only reads existing files; it does not re-run a compiler or type check.
+
+Native full compilation runs psc1_sh1_compile. The existing psc1 remains a separate capability reference. Native original-IR conformance reuses the full compiler report and runs psc1_ir_check_tests with no arguments for its small fixtures only. The selected historical R lacks new APIs and is allowed only at its exact authenticated R→C1 boundary. Current C1/C2/C3 have no API-absence fallback.
+
+A qualified checkpoint would establish the source boundary, target admission and listed finite runtime observations for its exact revision. It would not establish source→Core→IR→JS general preservation, strict SH/1 activation, a new authoring seed, or a handwritten .ps source migration.
+
+### Concrete next actions after this source commit
+
+1. Observe the source commit's single PSC0 SH1 workflow. The [sh1-qualify] commit marker selects native preflight and full qualification in one run; native failure stops downstream generation.
+2. Record the exact source/run/job identities and genuine failure or success. If a demonstrated defect exists, fix its cause after source review; retain the failed evidence. Do not weaken checks or repeat already sufficient qualification for unrelated edits.
+3. On success, retain actual source/target/runtime evidence bindings, native/C2 product parity, C2/C3 all four products, existing raw grammar and worker ABI/behavior gates, and independent exact-stream provider decisions. Keep selected R unchanged.
+4. Continue the dependency-ordered correspondence work: retain genuine normalization/binder/layout witnesses, define one value/environment/evaluation relation, then discharge the enabled rules and optimization side conditions. No general row is closed by the finite pass.
+5. Resolve the concrete Nat-major double-demand obligation and the mandatory regular-data/empty-layout scope explicitly. Current refusal and absence from the compiler corpus are not semantic proofs.
+6. Update this active handoff after each real milestone. Merge only a qualified source checkpoint with its honest limited claims; keep strictSh1Qualified and semanticContractQualified false until the complete mandatory ledger is defensibly closed.
 
 ## Archive boundary — completed pre-strict checkpoint
 

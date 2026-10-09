@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { compileStrictSources } from './sh1-strict-source.mjs';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -233,9 +234,11 @@ export async function runSh1Capabilities({
       ? await readProofScriptSource(fixture) : await readFile(fixture, 'utf8');
     const kind = extension === 'lean'
       ? compiler.PsCompilerSourceKind.lean : compiler.PsCompilerSourceKind.proofScript;
-    const prepared = unwrap(compiler.psCompilerPrepareSource(kind, source), 'CAPABILITY_PREPARE_' + extension);
-    const admissions = unwrap(compiler.psCompilerAdmissionsFromPrepared(prepared), 'CAPABILITY_ADMISSIONS');
-    const generatedTs = unwrap(compiler.psCompilerTypeScriptFromPrepared(prepared), 'CAPABILITY_EMIT');
+    const strict = compileStrictSources(compiler, [{
+      moduleName: ['Ps', 'Compiler', 'StrictCapabilities'], source,
+    }], { compilerSha256, sourceKind: extension });
+    const admissions = strict.admissions;
+    const generatedTs = strict.typeScript;
     const generatedJs = await compileTypeScript(generatedTs, path.join(outDir, extension, 'generated'), tsc, root);
     const runtime = await import(pathToFileURL(generatedJs).href);
     assertBehavior(runtime, 'generated ' + extension);
@@ -248,6 +251,7 @@ export async function runSh1Capabilities({
       typescriptSha256: sha256(generatedTs),
       javascriptSha256: sha256(await readFile(generatedJs)),
       generatedCompilerConsumedRawSource: true,
+      strictSourceEnforcement: strict.evidence,
       behavior: 'pass',
       projectionBehavior,
       grammarBehavior,
@@ -271,7 +275,12 @@ export async function runSh1Capabilities({
   }
   const rejected = [];
   for (const test of negativeCases) {
-    const result = compiler.psCompilerPrepareSource(compiler.PsCompilerSourceKind.lean, test.source);
+    const names = ['Ps', 'Compiler', 'StrictNegative'].reduceRight(
+      (tail, head) => compiler.List.cons(head, tail), compiler.List.nil());
+    const input = compiler.psSh1SourceInput(names, test.source);
+    const result = compiler.psCompilerSh1TypeScriptSources(compiler.psSh1DefaultSourceOptions,
+      compiler.psIrCheckDefaultOptions, compiler.PsCompilerSourceKind.lean,
+      compiler.List.cons(input, compiler.List.nil()));
     assert.equal(valueTag(result), 'error', 'PSC0_SH1_NEGATIVE_ACCEPTED: ' + test.name);
     const tags = diagnosticTags(result.error);
     assert(tags.includes(test.expected), 'PSC0_SH1_NEGATIVE_DIAGNOSTIC: ' + test.name +

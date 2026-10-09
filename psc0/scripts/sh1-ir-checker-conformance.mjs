@@ -4,7 +4,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { inventoryOriginalIr } from './original-ir-inventory.mjs';
-import { loadGeneratedCompiler, stripBootstrapImports } from './sh1-source-snapshot.mjs';
+import { loadGeneratedCompiler } from './sh1-source-snapshot.mjs';
 import { compileTypeScript, sha256, unwrap, valueTag } from './sh1-capabilities.mjs';
 
 function fixtureModel(c) {
@@ -327,27 +327,40 @@ export async function runIrCheckerConformance({
 }
 
 export async function runNativeIrCheckerConformance({
-  nativeChecker, closure, nativeTypeScript, root, outDir,
+  nativeChecker, closure, nativeTypeScript, nativeSourceReceipt, root, outDir,
 }) {
+  // The native atomic source compiler already prepared, checked and emitted
+  // this closure. Run the small checker cases independently, then retain the
+  // original report. Do not prepare the whole compiler for a second time.
+  assert(nativeSourceReceipt, 'PSC0_SH1_NATIVE_ATOMIC_SOURCE_RECEIPT_REQUIRED');
   await mkdir(outDir, { recursive: true });
-  const source = closure.ordered.map(({ source }) => stripBootstrapImports(source)).join('\n\n') + '\n';
-  const sourcePath = path.join(outDir, 'current-source.lean');
-  const checkedOutput = path.join(outDir, 'checked-current-source.ts');
-  await writeFile(sourcePath, source);
+  const sourceReportText = await readFile(nativeSourceReceipt, 'utf8');
+  const sourceReport = JSON.parse(sourceReportText);
+  assert.equal(sourceReport.evidence, 'native-atomic-source-and-target-enforcement');
+  assert.equal(sourceReport.sourcePolicy.moduleCount, closure.moduleCount);
+  assert.equal(sourceReport.sourcePolicy.sourceBytes, closure.bytes);
+  assert.equal(sourceReport.sourcePolicy.accepted, true);
+  assert.equal(sourceReport.sourcePolicy.traversalComplete, true);
+  assert.equal(sourceReport.targetPolicy.accepted, true);
+  assert.equal(sourceReport.targetPolicy.traversalComplete, true);
+  assert.equal(sourceReport.preparationCount, 1);
+  assert.equal(sourceReport.portableIrCheckCount, 1);
+  const full = sourceReport.originalIr;
+  assert.equal(full.accepted, true);
+  assert.equal(full.traversalComplete, true);
+  assert.equal(full.findingCount, 0);
+  assert.equal(full.sameOriginalIrCheckedBeforeEmission, true);
   const binarySha256 = sha256(await readFile(nativeChecker));
-  const command = [nativeChecker, sourcePath, checkedOutput];
+  const command = [nativeChecker];
   await writeFile(path.join(outDir, 'execution-inputs.json'), JSON.stringify({
-    nativeCheckerSha256: binarySha256, sourceClosureSha256: closure.sha256,
-    sourceAggregateSha256: sha256(source), command,
+    nativeCheckerSha256: binarySha256, sourceClosureSha256: closure.sha256, command,
+    nativeSourceReceipt, nativeSourceReceiptSha256: sha256(sourceReportText),
   }, null, 2) + '\n');
-  const execution = spawnSync(nativeChecker, command.slice(1), {
+  const execution = spawnSync(nativeChecker, [], {
     cwd: root, encoding: 'utf8', stdio: 'pipe', timeout: 180000,
     maxBuffer: 16 * 1024 * 1024,
   });
-  // Retain the complete bounded diagnostics before checking the exit status.
-  // The shared command helper truncates failures, which would lose root causes.
-  const stdout = execution.stdout ?? '';
-  const stderr = execution.stderr ?? '';
+  const stdout = execution.stdout ?? '', stderr = execution.stderr ?? '';
   await writeFile(path.join(outDir, 'native.stdout.log'), stdout);
   await writeFile(path.join(outDir, 'native.stderr.log'), stderr);
   process.stdout.write(stdout);
@@ -355,27 +368,22 @@ export async function runNativeIrCheckerConformance({
   assert.equal(sha256(await readFile(nativeChecker)), binarySha256, 'PSC0_SH1_IR_NATIVE_BINARY_CHANGED');
   if (execution.error) throw new Error('PSC0_SH1_IR_NATIVE_EXECUTION: ' + execution.error.message);
   assert.equal(execution.status, 0, 'PSC0_SH1_IR_NATIVE_EXECUTION_FAILED: ' + (execution.signal ?? 'exit'));
-  const readReceipt = (marker) => {
-    const lines = execution.stdout.split(/\r?\n/u).filter((line) => line.startsWith(marker + ': '));
-    assert.equal(lines.length, 1, 'PSC0_SH1_IR_NATIVE_RECEIPT: ' + marker);
-    return JSON.parse(lines[0].slice(marker.length + 2));
-  };
-  const fixtures = readReceipt('PSC0_SH1_IR_NATIVE');
-  const full = readReceipt('PSC0_SH1_IR_NATIVE_FULL');
+  const marker = 'PSC0_SH1_IR_NATIVE: ';
+  const lines = stdout.split(/\r?\n/u).filter((line) => line.startsWith(marker));
+  assert.equal(lines.length, 1, 'PSC0_SH1_IR_NATIVE_RECEIPT');
+  const fixtures = JSON.parse(lines[0].slice(marker.length));
   assert.equal(fixtures.status, 'pass');
-  assert.equal(full.accepted, true);
-  assert.equal(full.traversalComplete, true);
-  assert.equal(full.findingCount, 0);
-  const checkedTs = await readFile(checkedOutput, 'utf8');
-  assert.equal(checkedTs, await readFile(nativeTypeScript, 'utf8'), 'PSC0_SH1_IR_NATIVE_FULL_TYPESCRIPT_PARITY');
+  const checkedTs = await readFile(nativeTypeScript, 'utf8');
   const receipt = {
     schemaVersion: 1, evidence: 'native-portable-checker-current-source',
     nativeCheckerSha256: binarySha256, sourceClosureSha256: closure.sha256,
-    sourceAggregateSha256: sha256(source), moduleCount: closure.moduleCount,
-    recipe: 'Ordered raw closure with imports stripped, aggregate native preparation, original IR check, same-IR emission.',
-    fixtures, fullCompilerIr: full,
+    moduleCount: closure.moduleCount, nativeSourceReceipt,
+    nativeSourceReceiptSha256: sha256(sourceReportText),
+    recipe: 'Raw named module bundle enters the native atomic source/target API once; reuse its exact original-IR report and emitted TS; checker fixture executable runs separately.',
+    fixtures, fullCompilerIr: full, sourcePolicy: sourceReport.sourcePolicy,
+    targetPolicy: sourceReport.targetPolicy, fullSourcePreparedAgain: false,
     typescriptSha256: sha256(checkedTs),
-    parity: 'Checked native emission equals the native-generated N1 compiler TypeScript byte for byte.',
+    parity: 'N1 is compiled directly from this native atomic checked emission.',
     strictSh1Qualified: false, provider: { status: 'not-attempted', kernelChecked: false },
   };
   await writeFile(path.join(outDir, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n');

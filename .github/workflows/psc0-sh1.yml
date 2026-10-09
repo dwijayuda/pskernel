@@ -2,7 +2,7 @@ name: PSC0 SH1 language qualification
 
 on:
   push:
-    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1', 'psc0/sh1-projection-grammar-v1']
+    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1', 'psc0/sh1-projection-grammar-v1', 'psc0/strict-sh1-v1']
     paths:
       - 'psc0/packages/bootstrap/**'
       - 'psc0/packages/foundation/**'
@@ -149,6 +149,11 @@ jobs:
           node --check scripts/original-ir-inventory.mjs
           node --check scripts/original-ir-carrier.mjs
           node --check scripts/sh1-ir-checker-conformance.mjs
+          node --check scripts/sh1-strict-source.mjs
+          node --check scripts/sh1-strict-source-conformance.mjs
+          node --check scripts/sh1-strict-target-conformance.mjs
+          node --check scripts/sh1-strict-evidence.mjs
+          node --check scripts/sh1-strict-runtime-conformance.mjs
           node --check scripts/sh1-source-snapshot.mjs
           node --check scripts/sh1-seed-manifest.mjs
           node --check scripts/sh1-grammar-conformance.mjs
@@ -265,7 +270,7 @@ jobs:
             psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
       - name: Build current native compiler
         id: native
-        run: lake build psc1 psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests
+        run: lake build psc1 psc1_sh1_compile psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests
       - name: Run native parser, translation, and erasure regression targets
         run: |
           regression_status=0

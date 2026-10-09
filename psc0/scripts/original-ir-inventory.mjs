@@ -135,6 +135,26 @@ export function inventoryOriginalIr(compiler, module, {
   const typeSteps = maxTypeSteps === undefined ? compiler.psIrCheckDefaultOptions.maxTypeSteps : BigInt(maxTypeSteps);
   const options = compiler.psIrCheckOptionsWithLimits(BigInt(maxSteps), typeSteps, BigInt(maxFindings));
   const report = compiler.psCheckVerifiedIrModule(options, module);
+  return describeOriginalIrCheckReport(compiler, report, {
+    compilerSha256, carrier, maxFindings, maxSteps, typeSteps,
+  });
+}
+
+// Diagnostic serialization only. This function does not check IR, authorize
+// emission, or establish source/IR provenance. The atomic strict source API
+// returns the report for its own checked IR; callers may describe that result
+// without running a second type check or preparing the compiler again.
+export function describeOriginalIrCheckReport(compiler, report, {
+  compilerSha256, carrier, maxFindings, maxSteps, typeSteps,
+  carrierObservation = 'before-portable-check',
+}) {
+  if (!/^[a-f0-9]{64}$/u.test(compilerSha256 ?? '') ||
+      !carrier || carrier.accepted !== true ||
+      !Number.isSafeInteger(maxFindings) || maxFindings < 0 ||
+      !Number.isSafeInteger(maxSteps) || maxSteps < 0 ||
+      typeof typeSteps !== 'bigint' || typeSteps < 0n) {
+    throw new Error('PSC0_IR_CHECK_REPORT_CONTEXT');
+  }
   if (typeof report?.accepted !== 'boolean' || typeof report?.traversalComplete !== 'boolean') {
     throw new Error('PSC0_IR_CHECK_REPORT_SHAPE');
   }
@@ -150,7 +170,7 @@ export function inventoryOriginalIr(compiler, module, {
     status: report.accepted ? 'runtime-ir-types-accepted' : 'rejected',
     strictSh1Qualified: false, runtimeIrTypingAccepted: report.accepted,
     traversalComplete: report.traversalComplete,
-    visitedNodes: checkedCount(report.visitedSteps, 'visitedSteps'), carrier,
+    visitedNodes: checkedCount(report.visitedSteps, 'visitedSteps'), carrier, carrierObservation,
     counts: { expressions: checkedCount(report.expressionCount, 'expressionCount') },
     findingCount, findingCounts,
     findingCountsCoverage: findingCount === findings.length ? 'all-findings' : 'retained-details-only',
@@ -161,7 +181,9 @@ export function inventoryOriginalIr(compiler, module, {
       options: { maxSteps, maxTypeSteps: checkedCount(typeSteps, 'maxTypeSteps'), maxFindings },
     },
     coverage: [
-      'Canonical own-namespace JS carriers before portable code',
+      carrierObservation === 'before-portable-check'
+        ? 'Canonical own-namespace JS carriers before portable code'
+        : 'Host carrier readback of IR created and checked inside the atomic portable source API',
       'Portable module signatures, scoped type substitution and compositional expression typing',
       'The host report serializes portable diagnostics without a second semantic checker',
     ],

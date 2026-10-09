@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-source-target-runtime-implementation-checkpoint",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "baseRef": "bcf27b6595fb1a7ac03f2ea5c1b1cf2e3f748dff",
+  "baseTree": "4942da1a52b10c14474c475359b2f38657db66be",
+  "mergedQualifiedBaseline": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+  "status": "reviewed-source-candidate-awaiting-cloud-qualification",
+  "createdAtUtc": "2026-10-09 17:12:36 UTC",
+  "files": [
+    {
+      "path": "psc0/scripts/original-ir-inventory.mjs",
+      "baseBlob": "cd4dd0c4e9d6709d7de1652382b9cee7a8b39c25",
+      "blob": "d4cf667033cfcd903b4179f8af01fa77f56102bf",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source.mjs",
+      "baseBlob": null,
+      "blob": "6fb4e25238d99ad6e408726831454e2b14235092",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/scripts/StrictSourceCompile.lean",
+      "baseBlob": null,
+      "blob": "6f3b14e0110548f530a2ec6139105efbeb2e203d",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/scripts/sh1-capabilities.mjs",
+      "baseBlob": "d7afde97fc05f37612febcccb6529de9190aae7c",
+      "blob": "dd23adb72d33c0df14a88ec846ab6c705d5813b2",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "baseBlob": null,
+      "blob": "4410601b543b97a848e2b664710f50d4ba3b63c6",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+      "baseBlob": "b3b71e56f701478dfd12a373b94c75469e74161e",
+      "blob": "a5dfb43838615e91288f4d853829618f615dc661",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "baseBlob": "0cbc8354046ce71a17efc588180864fabcbf5dba",
+      "blob": "b4dff9ac3b0ba551d0358b61f2ea7cd1dd3597a4",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/lakefile.lean",
+      "baseBlob": "23220332932b682dc3d5905ce05c26bf4d3cb2e1",
+      "blob": "3f4e86d771fa920dbb21e542cdb9303ef4d4e7d8",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/package.json",
+      "baseBlob": "bea92b3baf38d58062fc15242d0c86733a08f594",
+      "blob": "e0a649158690ff12359926f218b564cc84a4e1b8",
+      "owner": "root"
+    },
+    {
+      "path": ".github/workflows/psc0-sh1.yml",
+      "baseBlob": "add8e9a3249ab35497b85ad91c207fe97142e5d9",
+      "blob": "6f55548d24a91cbb305ec6448bd30e465b9ee69d",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-target-conformance.mjs",
+      "baseBlob": null,
+      "blob": "0bee0e6f67e080dda87fd10c75d2437bb14c3cd1",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "baseBlob": null,
+      "blob": "fb37468df167b0a056b11cf7986bcd66bbf0e60a",
+      "owner": "root"
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "baseBlob": null,
+      "blob": "df1258ab879f2e68f378b1e4877482ea37de585b",
+      "owner": "portable-source"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "baseBlob": null,
+      "blob": "63be15cf691cd4689e566ccd1bcab771215e7700",
+      "owner": "portable-source"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+      "baseBlob": "49ed00023d51b12ef4ab37958ea05a76ea13b530",
+      "blob": "b9b073b7ec341be105895817a6ddda441020e351",
+      "owner": "portable-source"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+      "baseBlob": "4e4c70cb9b8076e97a3716f45f40b0d08d8ddcfd",
+      "blob": "9b6f62bc9b55f1d1ad2ea06a129df11d7e554e44",
+      "owner": "portable-source"
+    },
+    {
+      "path": "psc0/scripts/original-ir-carrier.mjs",
+      "baseBlob": "c1548dbbcbb189a86646431cdfac77a003fd5d85",
+      "blob": "a2c20c50ada6d5dc13746bc3b9e748088464e70c",
+      "owner": "enabled-runtime"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "baseBlob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+      "blob": "2007afe360b9c6fde141c2c3ce5a72ef757d1b19",
+      "owner": "enabled-runtime"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+      "baseBlob": null,
+      "blob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b",
+      "owner": "enabled-runtime"
+    },
+    {
+      "path": "psc0/test/StrictRuntimeReference.lean",
+      "baseBlob": null,
+      "blob": "e32ad5636e16bee3cc83a973b869bc7cb21fe98d",
+      "owner": "enabled-runtime"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-runtime-conformance.mjs",
+      "baseBlob": null,
+      "blob": "df152b4e2bea23b9e9257285c862c7b70b75459d",
+      "owner": "enabled-runtime"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/ENABLED_RUNTIME.md",
+      "baseBlob": null,
+      "blob": "a64fb60851e73f684d1abfd8bb5981af90b98e2a",
+      "owner": "enabled-runtime"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "baseBlob": null,
+      "blob": "1c5f03cd8d21288f2e1dcb9dbd72191af5f091e5",
+      "owner": "target-correspondence"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/CORRESPONDENCE.md",
+      "baseBlob": null,
+      "blob": "74289d66a4366eaed59d679721272c1c29b89ea9",
+      "owner": "target-correspondence"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "baseBlob": null,
+      "blob": "eedc40474f88183243b40d3ab6e4f9ea9090507e",
+      "owner": "target-correspondence"
+    }
+  ],
+  "reviewInputs": {
+    "portableSourceManifest": "ed2960d939ffc14e96f709f09e943b6c4752fdd8",
+    "runtimeManifest": "9b1668240e35ab65acbcb5c56eb1adf89551f764",
+    "targetAndCorrespondenceManifest": "0dae51a53d3127a51a23bd22651e7cd5d85d683b"
+  },
+  "review": {
+    "mode": "source-only; no repository code executed",
+    "sourceAndHostApis": "cross-reviewed against actual compiler model and error APIs",
+    "targetFixtures": "29 unique typed/explicitly target-only cases reviewed; 9 accepted and 20 refused",
+    "runtime": "45-operation contract, 186 native cases, own-model factories and same-IR single-check reuse reviewed",
+    "evidenceBinding": "all actual N1/C1/C2/C3 source/target/runtime receipt files and native/generated atomic reports validated and hashed; correct producer identities; native/C2 product parity",
+    "correspondence": "33 rules with exact source definitions and explicit remaining obligations; no general discharge"
+  },
+  "qualification": {
+    "workflow": ".github/workflows/psc0-sh1.yml",
+    "commitMarker": "[sh1-qualify]",
+    "executionStatus": "not-started-at-source-checkpoint",
+    "sequence": [
+      "pinned toolchain and source checks",
+      "native build and existing regression gates",
+      "strict native full-source build and conformance",
+      "authenticated selected R produces C1",
+      "C1 produces C2 atomically",
+      "C2 produces C3 atomically",
+      "exact receipts and fixed-point products",
+      "separate frozen provider admissions"
+    ],
+    "expectedSourceConformance": {
+      "accepted": 2,
+      "portableRefusals": 21,
+      "hostCarrierRefusals": 2
+    },
+    "expectedTargetConformance": {
+      "accepted": 9,
+      "refused": 20
+    },
+    "expectedRuntimeConformance": {
+      "operations": 45,
+      "nativeObservations": 186,
+      "boundsRefusals": 8,
+      "operandOrderProbes": 9,
+      "malformedCarrierRefusals": 5,
+      "textPositionFamilies": 2
+    }
+  },
+  "sourceOfTruth": {
+    "authoring": ".lean",
+    "psGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+    "toolchain": {
+      "lean": "4.34.0",
+      "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+      "node": "22.23.3",
+      "typescript": "7.0.2"
+    },
+    "selectedR": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "selectedManifestBlob": "44a05964c49000478c282afc013c84fca8c2de65",
+    "recoveryPolicyBlob": "fd75854159544e431497bc7dee8482bea727b5e4",
+    "frozenProviderSource": "963030dc2d154008fccc82e7c8ed29331f138799"
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "providerChecked": false,
+  "selectedSeedChanged": false,
+  "remaining": {
+    "generalCorrespondenceRuleCount": 33,
+    "generalRulesDischarged": 0,
+    "ledger": "correspondence-obligations.json",
+    "overallLedger": "obligations.json",
+    "mainFamilies": [
+      "genuine normalization and erasure source origins/witnesses",
+      "source/Core/IR value, environment, evaluation, capture and grouped-call relation",
+      "Nat major demand and immutable error order",
+      "proof/type/binder/layout correspondence",
+      "generator, eta, count-loop and tail-loop preservation",
+      "mandatory regular-data and empty-layout reconciliation"
+    ]
+  }
+}

@@ -1777,5 +1777,39 @@
       "fullStandardConformance": false,
       "fullPscvConformance": false
     }
+  },
+  "strictEnforcementCheckpoint": {
+    "status": "integrated-source-target-runtime-candidate-awaiting-cloud-qualification",
+    "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+    "branch": "psc0/strict-sh1-v1",
+    "implementationManifest": "strict/implementation-checkpoint.json",
+    "plan": "strict/PLAN.md",
+    "obligations": "strict/obligations.json",
+    "correspondenceLedger": "strict/correspondence-obligations.json",
+    "sourceEntry": "psCompilerSh1TypeScriptSources",
+    "rawSourceOwned": true,
+    "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+    "targetPolicy": "psc0-sh1-ts-target/1",
+    "runtimeContract": "PSC0-TSJS-runtime/1",
+    "operationCount": 45,
+    "plannedNativeObservationCount": 186,
+    "plannedSourceConformance": {
+      "accepted": 2,
+      "portableRefusals": 21,
+      "hostCarrierRefusals": 2
+    },
+    "plannedTargetConformance": {
+      "accepted": 9,
+      "refused": 20
+    },
+    "generalCorrespondenceRules": 33,
+    "generalCorrespondenceRulesDischarged": 0,
+    "qualified": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "selectedSeedUnchanged": "R",
+    "sourceAuthority": ".lean",
+    "cloudExecution": "not-started-at-source-checkpoint"
   }
 }

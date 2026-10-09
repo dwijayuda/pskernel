@@ -9,19 +9,40 @@ inductive PsTsCheckedEmitError where
   | check (report : PsIrCheckReport)
   | emit (error : PsTsEmitError)
 
+structure PsTsCheckedEmission where
+  report : PsIrCheckReport
+  typeScript : String
+
+-- The returned report is diagnostic data, not a transferable emission permit.
+-- Composing entries call this function on their own exact IR, not on a report
+-- supplied by a caller, and retain the same object until emission.
+def psTsCheckModuleForEmission
+    (options : PsIrCheckOptions)
+    (ir : PsVerifiedIrModule) : Except PsTsCheckedEmitError PsIrCheckReport :=
+  let report := psCheckVerifiedIrModule options ir;
+  if report.accepted then
+    if report.traversalComplete then Except.ok report
+    else Except.error (PsTsCheckedEmitError.check report)
+  else
+    Except.error (PsTsCheckedEmitError.check report)
+
+-- Return the actual check report without checking the module a second time.
+def psTsEmitCheckedModuleWithReport
+    (options : PsIrCheckOptions)
+    (ir : PsVerifiedIrModule) : Except PsTsCheckedEmitError PsTsCheckedEmission :=
+  match psTsCheckModuleForEmission options ir with
+  | Except.error error => Except.error error
+  | Except.ok report =>
+      match psTsEmitModule ir with
+      | Except.error error => Except.error (PsTsCheckedEmitError.emit error)
+      | Except.ok output => Except.ok (PsTsCheckedEmission.mk report output)
+
 def psTsEmitCheckedModule
     (options : PsIrCheckOptions)
     (ir : PsVerifiedIrModule) : Except PsTsCheckedEmitError String :=
-  let report := psCheckVerifiedIrModule options ir;
-  if report.accepted then
-    if report.traversalComplete then
-      match psTsEmitModule ir with
-      | Except.error error => Except.error (PsTsCheckedEmitError.emit error)
-      | Except.ok output => Except.ok output
-    else
-      Except.error (PsTsCheckedEmitError.check report)
-  else
-    Except.error (PsTsCheckedEmitError.check report)
+  match psTsEmitCheckedModuleWithReport options ir with
+  | Except.error error => Except.error error
+  | Except.ok result => Except.ok result.typeScript
 
 inductive PsCompilerCheckedTypeScriptError where
   | compiler (error : PsCompilerError)

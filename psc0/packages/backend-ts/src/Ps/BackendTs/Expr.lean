@@ -457,7 +457,7 @@ def psTsEmitIntrinsicFromPrinted
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (array : String) (index : String) =>
           Except.ok
-            (psTsJoin "" ["(<T>(__ps_a: T[], __ps_i: bigint): T => ", "__ps_a[Number(__ps_i)]!)(", array, ", ", index, ")"]);
+            (psTsJoin "" ["(<T>(__ps_a: T[], __ps_i: bigint): T => { ", "if (__ps_i < 0n || __ps_i >= BigInt(__ps_a.length)) ", "throw { code: \"PSC0_ARRAY_GET_BOUNDS\" }; ", "return __ps_a[Number(__ps_i)]!; })(", array, ", ", index, ")"]);
       psTsPrinted2 emit arguments
   | .arrayGetD =>
       let emit : String -> String -> String -> Except PsTsEmitError String :=
@@ -469,7 +469,7 @@ def psTsEmitIntrinsicFromPrinted
       let emit : String -> String -> String -> Except PsTsEmitError String :=
         fun (array : String) (index : String) (value : String) =>
           Except.ok
-            (psTsJoin "" ["(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => {", " const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; ", "return __ps_out; })(", array, ", ", index, ", ", value, ")"]);
+            (psTsJoin "" ["(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => { ", "if (__ps_i < 0n || __ps_i >= BigInt(__ps_a.length)) ", "throw { code: \"PSC0_ARRAY_SET_BOUNDS\" }; ", "const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; ", "return __ps_out; })(", array, ", ", index, ", ", value, ")"]);
       psTsPrinted3 emit arguments
   | .arraySetIfInBounds =>
       let emit : String -> String -> String -> Except PsTsEmitError String :=

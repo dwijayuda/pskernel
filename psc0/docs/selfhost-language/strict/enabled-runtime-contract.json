@@ -1,0 +1,3893 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-enabled-runtime-contract",
+  "version": "PSC0-TSJS-runtime/1",
+  "baseSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+  "status": "candidate-awaiting-qualification",
+  "toolchain": {
+    "lean": "4.34.0",
+    "node": "22.23.3",
+    "typescript": "7.0.2",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "runtime": "Closed enabled TS/JS runtime with canonical values; no optional scalars or external ABI.",
+  "primitiveTypes": [
+    "Nat",
+    "Int",
+    "Bool",
+    "Char",
+    "String",
+    "Unit"
+  ],
+  "namedTypes": [
+    {
+      "name": "Array",
+      "arity": 1
+    }
+  ],
+  "representations": {
+    "Nat": "Nonnegative primitive bigint.",
+    "Int": "Primitive bigint.",
+    "Bool": "Primitive boolean.",
+    "Char": "Exactly one Unicode scalar encoded as well-formed UTF-16.",
+    "String": "Well-formed UTF-16 encoding a sequence of Unicode scalars; no normalization.",
+    "Unit": "undefined.",
+    "Array": "Dense array of canonical element values; no observable pointer identity."
+  },
+  "positions": {
+    "raw": "Nonnegative UTF-8 byte offsets; raw get/next/extract keep their pinned total fallback behavior.",
+    "source": "UTF-8 byteOffset; one-based scalar columns/lines; CRLF consumes two bytes and one newline; initial BOM consumes three bytes without advancing column.",
+    "normalization": false
+  },
+  "proofBoundary": {
+    "arrayGetAndSet": "Source requires a checked i<size proof. Erasure discards that proof; defensive runtime refusal is not a reconstruction or preservation proof.",
+    "faultCodes": [
+      "PSC0_ARRAY_GET_BOUNDS",
+      "PSC0_ARRAY_SET_BOUNDS"
+    ],
+    "faultRepresentation": "Thrown non-value object with the exact code field. No Error/RangeError global name is captured.",
+    "hostProbeScope": "Host callbacks test single evaluation/order with canonical inputs; they are not admitted source or a new FFI capability."
+  },
+  "resources": {
+    "carrier": "maxNodes bounds model occurrences and each string's UTF-16 validation length separately; string length refusal precedes scanning.",
+    "portable": "Existing per-string UTF-8 byte, node and type-work budgets remain independent.",
+    "allocation": "Reference allocation hints are bounded (0 and 17). Value correspondence is conditional on successful allocation; native and JS capacity handling, allocation exhaustion, memory use and resource behavior are not claimed identical or total."
+  },
+  "nonclaims": {
+    "strictSh1Qualified": false,
+    "formalPreservationProven": false,
+    "sourceProofProvenanceReconstructed": false,
+    "fullStandard": false,
+    "fullPscv": false,
+    "providerChanged": false,
+    "seedPromoted": false
+  },
+  "reference": {
+    "path": "test/StrictRuntimeReference.lean",
+    "leanVersion": "4.34.0",
+    "sourceRepository": "leanprover/lean4",
+    "sourceRef": "v4.34.0",
+    "primitiveSourceBlobs": {
+      "prelude": "66af67237683d3c7f8230bcf473c0871e67749a2",
+      "stringBasic": "59a7980adea2db8d99a096db1f92731bedeffb8a",
+      "arrayBasic": "7d58dee5983aa201468b99df02a6d8c18c7a1794",
+      "arraySet": "59b1dbf31a6eb5d334a46e6d6bc9bd94f7d69c16",
+      "runtimeObject": "49213d7be079e11589f1efcfe880dba44622a6e7"
+    },
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "operations": [
+    {
+      "id": "natAdd",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Nat",
+      "law": "Exact sum.",
+      "sourceNames": [
+        "Nat.add",
+        "Nat.succ"
+      ]
+    },
+    {
+      "id": "natSub",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Nat",
+      "law": "max(a-b,0).",
+      "sourceNames": [
+        "Nat.sub"
+      ]
+    },
+    {
+      "id": "natMul",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Nat",
+      "law": "Exact product.",
+      "sourceNames": [
+        "Nat.mul"
+      ]
+    },
+    {
+      "id": "natDiv",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Nat",
+      "law": "Natural quotient; a/0=0.",
+      "sourceNames": [
+        "Nat.div"
+      ]
+    },
+    {
+      "id": "natMod",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Nat",
+      "law": "Natural remainder; a%0=a.",
+      "sourceNames": [
+        "Nat.mod"
+      ]
+    },
+    {
+      "id": "natEq",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Bool",
+      "law": "Natural equality.",
+      "sourceNames": [
+        "Nat.beq"
+      ]
+    },
+    {
+      "id": "natNe",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Bool",
+      "law": "Negated natural equality.",
+      "sourceNames": []
+    },
+    {
+      "id": "natLe",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Bool",
+      "law": "Natural non-strict order.",
+      "sourceNames": [
+        "Nat.ble"
+      ]
+    },
+    {
+      "id": "natLt",
+      "group": "Nat",
+      "typeArity": 0,
+      "parameters": [
+        "Nat",
+        "Nat"
+      ],
+      "result": "Bool",
+      "law": "Natural strict order.",
+      "sourceNames": [
+        "Nat.blt"
+      ]
+    },
+    {
+      "id": "intOfNat",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Nat"
+      ],
+      "result": "Int",
+      "law": "Interpret the same nonnegative bigint as Int.",
+      "sourceNames": [
+        "Int.ofNat"
+      ]
+    },
+    {
+      "id": "intRepr",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Int"
+      ],
+      "result": "String",
+      "law": "Canonical signed decimal text.",
+      "sourceNames": [
+        "Int.repr"
+      ]
+    },
+    {
+      "id": "intNegSucc",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Nat"
+      ],
+      "result": "Int",
+      "law": "-(n+1).",
+      "sourceNames": [
+        "Int.negSucc"
+      ]
+    },
+    {
+      "id": "intNeg",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Int"
+      ],
+      "result": "Int",
+      "law": "Exact negation.",
+      "sourceNames": [
+        "Int.neg"
+      ]
+    },
+    {
+      "id": "intAdd",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Int",
+        "Int"
+      ],
+      "result": "Int",
+      "law": "Exact sum.",
+      "sourceNames": [
+        "Int.add"
+      ]
+    },
+    {
+      "id": "intSub",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Int",
+        "Int"
+      ],
+      "result": "Int",
+      "law": "Exact difference.",
+      "sourceNames": [
+        "Int.sub"
+      ]
+    },
+    {
+      "id": "intMul",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Int",
+        "Int"
+      ],
+      "result": "Int",
+      "law": "Exact product.",
+      "sourceNames": [
+        "Int.mul"
+      ]
+    },
+    {
+      "id": "intEq",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Int",
+        "Int"
+      ],
+      "result": "Bool",
+      "law": "Integer equality.",
+      "sourceNames": []
+    },
+    {
+      "id": "intLe",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Int",
+        "Int"
+      ],
+      "result": "Bool",
+      "law": "Integer non-strict order.",
+      "sourceNames": []
+    },
+    {
+      "id": "intLt",
+      "group": "Int",
+      "typeArity": 0,
+      "parameters": [
+        "Int",
+        "Int"
+      ],
+      "result": "Bool",
+      "law": "Integer strict order.",
+      "sourceNames": []
+    },
+    {
+      "id": "boolNot",
+      "group": "Bool",
+      "typeArity": 0,
+      "parameters": [
+        "Bool"
+      ],
+      "result": "Bool",
+      "law": "Boolean complement.",
+      "sourceNames": [
+        "Bool.not"
+      ]
+    },
+    {
+      "id": "boolAnd",
+      "group": "Bool",
+      "typeArity": 0,
+      "parameters": [
+        "Bool",
+        "Bool"
+      ],
+      "result": "Bool",
+      "law": "Conjunction; source demand short-circuits when first operand is false.",
+      "sourceNames": [
+        "Bool.and"
+      ]
+    },
+    {
+      "id": "boolOr",
+      "group": "Bool",
+      "typeArity": 0,
+      "parameters": [
+        "Bool",
+        "Bool"
+      ],
+      "result": "Bool",
+      "law": "Disjunction; source demand short-circuits when first operand is true.",
+      "sourceNames": [
+        "Bool.or"
+      ]
+    },
+    {
+      "id": "boolEq",
+      "group": "Bool",
+      "typeArity": 0,
+      "parameters": [
+        "Bool",
+        "Bool"
+      ],
+      "result": "Bool",
+      "law": "Boolean equality.",
+      "sourceNames": []
+    },
+    {
+      "id": "boolNe",
+      "group": "Bool",
+      "typeArity": 0,
+      "parameters": [
+        "Bool",
+        "Bool"
+      ],
+      "result": "Bool",
+      "law": "Negated Boolean equality.",
+      "sourceNames": []
+    },
+    {
+      "id": "charOfNat",
+      "group": "Char",
+      "typeArity": 0,
+      "parameters": [
+        "Nat"
+      ],
+      "result": "Char",
+      "law": "Scalar n when n<0xd800 or 0xdfff<n<0x110000; otherwise NUL.",
+      "sourceNames": [
+        "Char.ofNat"
+      ]
+    },
+    {
+      "id": "charToNat",
+      "group": "Char",
+      "typeArity": 0,
+      "parameters": [
+        "Char"
+      ],
+      "result": "Nat",
+      "law": "Unicode scalar value as Nat.",
+      "sourceNames": [
+        "Char.toNat"
+      ]
+    },
+    {
+      "id": "stringPush",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String",
+        "Char"
+      ],
+      "result": "String",
+      "law": "Append one scalar.",
+      "sourceNames": [
+        "String.push"
+      ]
+    },
+    {
+      "id": "stringSingleton",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "Char"
+      ],
+      "result": "String",
+      "law": "One-scalar string.",
+      "sourceNames": [
+        "String.singleton"
+      ]
+    },
+    {
+      "id": "stringLength",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String"
+      ],
+      "result": "Nat",
+      "law": "Unicode scalar count, not UTF-16 units or graphemes.",
+      "sourceNames": [
+        "String.Internal.length"
+      ]
+    },
+    {
+      "id": "stringAppend",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String",
+        "String"
+      ],
+      "result": "String",
+      "law": "Concatenate scalar sequences.",
+      "sourceNames": [
+        "String.Internal.append"
+      ]
+    },
+    {
+      "id": "stringUtf8ByteSize",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String"
+      ],
+      "result": "Nat",
+      "law": "Sum UTF-8 scalar widths.",
+      "sourceNames": [
+        "String.utf8ByteSize"
+      ]
+    },
+    {
+      "id": "stringNext",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String",
+        "Nat"
+      ],
+      "result": "Nat",
+      "law": "At a scalar start before end: p+width; otherwise p+1.",
+      "sourceNames": [
+        "String.Internal.next"
+      ]
+    },
+    {
+      "id": "stringGet",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String",
+        "Nat"
+      ],
+      "result": "Char",
+      "law": "At a scalar start before end: scalar; otherwise 'A'.",
+      "sourceNames": [
+        "String.Internal.get"
+      ]
+    },
+    {
+      "id": "stringAtEnd",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String",
+        "Nat"
+      ],
+      "result": "Bool",
+      "law": "p>=UTF-8 byte size.",
+      "sourceNames": [
+        "String.Internal.atEnd"
+      ]
+    },
+    {
+      "id": "stringExtract",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String",
+        "Nat",
+        "Nat"
+      ],
+      "result": "String",
+      "law": "If start>=stop or start is not a scalar start before end, empty; otherwise copy until the matching stop boundary or end. Mid-byte behavior is pinned to Lean4.34 reference/runtime, not promised across versions.",
+      "sourceNames": [
+        "String.Internal.extract"
+      ]
+    },
+    {
+      "id": "stringEq",
+      "group": "String",
+      "typeArity": 0,
+      "parameters": [
+        "String",
+        "String"
+      ],
+      "result": "Bool",
+      "law": "Exact scalar sequence equality; no normalization.",
+      "sourceNames": [
+        "Eq String in supported condition erasure"
+      ]
+    },
+    {
+      "id": "arrayEmptyWithCapacity",
+      "group": "Array",
+      "typeArity": 1,
+      "parameters": [
+        "Nat"
+      ],
+      "result": "Array A",
+      "law": "Conditional on successful allocation, return an empty array; the capacity hint is evaluated once but is absent from observable array values. Native and JS allocation/resource behavior is not claimed identical.",
+      "sourceNames": [
+        "Array.emptyWithCapacity"
+      ]
+    },
+    {
+      "id": "arraySize",
+      "group": "Array",
+      "typeArity": 1,
+      "parameters": [
+        "Array A"
+      ],
+      "result": "Nat",
+      "law": "Array length.",
+      "sourceNames": [
+        "Array.size"
+      ]
+    },
+    {
+      "id": "arrayPush",
+      "group": "Array",
+      "typeArity": 1,
+      "parameters": [
+        "Array A",
+        "A"
+      ],
+      "result": "Array A",
+      "law": "Append; preserve original array values.",
+      "sourceNames": [
+        "Array.push"
+      ]
+    },
+    {
+      "id": "arrayGet",
+      "group": "Array",
+      "typeArity": 1,
+      "parameters": [
+        "Array A",
+        "Nat"
+      ],
+      "result": "A",
+      "law": "Source requires i<size. Runtime guard refuses invalid bounds; no default.",
+      "sourceNames": [
+        "Array.getInternal"
+      ]
+    },
+    {
+      "id": "arrayGetD",
+      "group": "Array",
+      "typeArity": 1,
+      "parameters": [
+        "Array A",
+        "Nat",
+        "A"
+      ],
+      "result": "A",
+      "law": "Indexed element when in bounds, otherwise supplied fallback.",
+      "sourceNames": [
+        "Array.getD"
+      ]
+    },
+    {
+      "id": "arraySet",
+      "group": "Array",
+      "typeArity": 1,
+      "parameters": [
+        "Array A",
+        "Nat",
+        "A"
+      ],
+      "result": "Array A",
+      "law": "Source requires i<size. Replace one element preserving length; runtime guard refuses invalid bounds.",
+      "sourceNames": [
+        "Array.set"
+      ]
+    },
+    {
+      "id": "arraySetIfInBounds",
+      "group": "Array",
+      "typeArity": 1,
+      "parameters": [
+        "Array A",
+        "Nat",
+        "A"
+      ],
+      "result": "Array A",
+      "law": "Replace when in bounds, otherwise preserve array values.",
+      "sourceNames": [
+        "Array.setIfInBounds"
+      ]
+    },
+    {
+      "id": "arrayMap",
+      "group": "Array",
+      "typeArity": 2,
+      "parameters": [
+        "Function([A],B)",
+        "Array A"
+      ],
+      "result": "Array B",
+      "law": "Apply callback once per element from left to right, return dense array.",
+      "sourceNames": [
+        "Array.map"
+      ]
+    },
+    {
+      "id": "arrayFoldl",
+      "group": "Array",
+      "typeArity": 2,
+      "parameters": [
+        "Function([B,A],B)",
+        "B",
+        "Array A",
+        "Nat",
+        "Nat"
+      ],
+      "result": "B",
+      "law": "Left fold [start,min(stop,size)); return initial accumulator without callback for an empty range.",
+      "sourceNames": [
+        "Array.foldl"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "natAdd.large",
+      "operation": "natAdd",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "17"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natAdd.zero",
+      "operation": "natAdd",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natSub.truncate",
+      "operation": "natSub",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "2"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natSub.equal",
+      "operation": "natSub",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "5"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natSub.large",
+      "operation": "natSub",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natMul.large",
+      "operation": "natMul",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natMul.zero",
+      "operation": "natMul",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natDiv.ordinary",
+      "operation": "natDiv",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "17"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natDiv.zero-divisor",
+      "operation": "natDiv",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natDiv.large",
+      "operation": "natDiv",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "11"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natMod.ordinary",
+      "operation": "natMod",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "17"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natMod.zero-divisor",
+      "operation": "natMod",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natMod.large",
+      "operation": "natMod",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "11"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "natEq.equal",
+      "operation": "natEq",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natEq.ordered",
+      "operation": "natEq",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "3"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natEq.reversed",
+      "operation": "natEq",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "5"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natNe.equal",
+      "operation": "natNe",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natNe.ordered",
+      "operation": "natNe",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "3"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natNe.reversed",
+      "operation": "natNe",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "5"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natLe.equal",
+      "operation": "natLe",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natLe.ordered",
+      "operation": "natLe",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "3"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natLe.reversed",
+      "operation": "natLe",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "5"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natLt.equal",
+      "operation": "natLt",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natLt.ordered",
+      "operation": "natLt",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "3"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "natLt.reversed",
+      "operation": "natLt",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "5"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intOfNat.large",
+      "operation": "intOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "int"
+    },
+    {
+      "id": "intRepr.negative",
+      "operation": "intRepr",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "intRepr.zero",
+      "operation": "intRepr",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "0"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "intNegSucc.zero",
+      "operation": "intNegSucc",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "int"
+    },
+    {
+      "id": "intNegSucc.large",
+      "operation": "intNegSucc",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "int"
+    },
+    {
+      "id": "intNeg.negative",
+      "operation": "intNeg",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "int"
+    },
+    {
+      "id": "intNeg.zero",
+      "operation": "intNeg",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "0"
+        }
+      ],
+      "resultType": "int"
+    },
+    {
+      "id": "intAdd.mixed",
+      "operation": "intAdd",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-900719925474099312345678901234567890"
+        },
+        {
+          "kind": "int",
+          "value": "17"
+        }
+      ],
+      "resultType": "int"
+    },
+    {
+      "id": "intSub.negative",
+      "operation": "intSub",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-3"
+        },
+        {
+          "kind": "int",
+          "value": "5"
+        }
+      ],
+      "resultType": "int"
+    },
+    {
+      "id": "intMul.negative",
+      "operation": "intMul",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-900719925474099312345678901234567890"
+        },
+        {
+          "kind": "int",
+          "value": "7"
+        }
+      ],
+      "resultType": "int"
+    },
+    {
+      "id": "intEq.equal",
+      "operation": "intEq",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-7"
+        },
+        {
+          "kind": "int",
+          "value": "-7"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intEq.ordered",
+      "operation": "intEq",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-7"
+        },
+        {
+          "kind": "int",
+          "value": "3"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intEq.reversed",
+      "operation": "intEq",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "3"
+        },
+        {
+          "kind": "int",
+          "value": "-7"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intLe.equal",
+      "operation": "intLe",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-7"
+        },
+        {
+          "kind": "int",
+          "value": "-7"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intLe.ordered",
+      "operation": "intLe",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-7"
+        },
+        {
+          "kind": "int",
+          "value": "3"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intLe.reversed",
+      "operation": "intLe",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "3"
+        },
+        {
+          "kind": "int",
+          "value": "-7"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intLt.equal",
+      "operation": "intLt",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-7"
+        },
+        {
+          "kind": "int",
+          "value": "-7"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intLt.ordered",
+      "operation": "intLt",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "-7"
+        },
+        {
+          "kind": "int",
+          "value": "3"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "intLt.reversed",
+      "operation": "intLt",
+      "arguments": [
+        {
+          "kind": "int",
+          "value": "3"
+        },
+        {
+          "kind": "int",
+          "value": "-7"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolNot.false",
+      "operation": "boolNot",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolNot.true",
+      "operation": "boolNot",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolAnd.false.false",
+      "operation": "boolAnd",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolAnd.false.true",
+      "operation": "boolAnd",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolAnd.true.false",
+      "operation": "boolAnd",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolAnd.true.true",
+      "operation": "boolAnd",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolOr.false.false",
+      "operation": "boolOr",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolOr.false.true",
+      "operation": "boolOr",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolOr.true.false",
+      "operation": "boolOr",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolOr.true.true",
+      "operation": "boolOr",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolEq.false.false",
+      "operation": "boolEq",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolEq.false.true",
+      "operation": "boolEq",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolEq.true.false",
+      "operation": "boolEq",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolEq.true.true",
+      "operation": "boolEq",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolNe.false.false",
+      "operation": "boolNe",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolNe.false.true",
+      "operation": "boolNe",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": false
+        },
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolNe.true.false",
+      "operation": "boolNe",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "kind": "bool",
+          "value": false
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "boolNe.true.true",
+      "operation": "boolNe",
+      "arguments": [
+        {
+          "kind": "bool",
+          "value": true
+        },
+        {
+          "kind": "bool",
+          "value": true
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "charOfNat.0",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.65",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "65"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.127",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "127"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.128",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "128"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.2047",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "2047"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.2048",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "2048"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.55295",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "55295"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.55296",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "55296"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.57343",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "57343"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.57344",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "57344"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.65535",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "65535"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.65536",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "65536"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.1114111",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "1114111"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.1114112",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "1114112"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charOfNat.900719925474099312345678901234567890",
+      "operation": "charOfNat",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "charToNat.0",
+      "operation": "charToNat",
+      "arguments": [
+        {
+          "kind": "char",
+          "value": "0"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "charToNat.65",
+      "operation": "charToNat",
+      "arguments": [
+        {
+          "kind": "char",
+          "value": "65"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "charToNat.128",
+      "operation": "charToNat",
+      "arguments": [
+        {
+          "kind": "char",
+          "value": "128"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "charToNat.2048",
+      "operation": "charToNat",
+      "arguments": [
+        {
+          "kind": "char",
+          "value": "2048"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "charToNat.128512",
+      "operation": "charToNat",
+      "arguments": [
+        {
+          "kind": "char",
+          "value": "128512"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "charToNat.1114111",
+      "operation": "charToNat",
+      "arguments": [
+        {
+          "kind": "char",
+          "value": "1114111"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringPush.nul",
+      "operation": "stringPush",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "char",
+          "value": "0"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringSingleton.astral",
+      "operation": "stringSingleton",
+      "arguments": [
+        {
+          "kind": "char",
+          "value": "128512"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringLength.empty",
+      "operation": "stringLength",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": ""
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringUtf8ByteSize.empty",
+      "operation": "stringUtf8ByteSize",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": ""
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringLength.mixed",
+      "operation": "stringLength",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringUtf8ByteSize.mixed",
+      "operation": "stringUtf8ByteSize",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAppend.boundary",
+      "operation": "stringAppend",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "é"
+        },
+        {
+          "kind": "string",
+          "value": "😀é"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringEq.equal",
+      "operation": "stringEq",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringEq.no-normalization",
+      "operation": "stringEq",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "é"
+        },
+        {
+          "kind": "string",
+          "value": "é"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.0",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.0",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.0",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.1",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.1",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.1",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.2",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "2"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.2",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "2"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.2",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "2"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.3",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.3",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.3",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.4",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "4"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.4",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "4"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.4",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "4"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.5",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.5",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.5",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "5"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.6",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "6"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.6",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "6"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.6",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "6"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.7",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.7",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.7",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.8",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "8"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.8",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "8"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.8",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "8"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.9",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.9",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.9",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.10",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "10"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.10",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "10"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.10",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "10"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.11",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "11"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.11",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "11"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.11",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "11"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.12",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "12"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.12",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "12"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.12",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "12"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.13",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "13"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.13",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "13"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.13",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "13"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.14",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "14"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.14",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "14"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.14",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "14"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.15",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "15"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.15",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "15"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.15",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "15"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringGet.900719925474099312345678901234567890",
+      "operation": "stringGet",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "char"
+    },
+    {
+      "id": "stringNext.900719925474099312345678901234567890",
+      "operation": "stringNext",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "stringAtEnd.900719925474099312345678901234567890",
+      "operation": "stringAtEnd",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "bool"
+    },
+    {
+      "id": "stringExtract.0.1",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.1.3",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.3.6",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        },
+        {
+          "kind": "nat",
+          "value": "6"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.6.10",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "6"
+        },
+        {
+          "kind": "nat",
+          "value": "10"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.0.14",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "14"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.1.2",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        },
+        {
+          "kind": "nat",
+          "value": "2"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.2.900719925474099312345678901234567890",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "2"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.0.900719925474099312345678901234567890",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.900719925474099312345678901234567890.900719925474099312345678901234567891",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567891"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.6.3",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "6"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.6.6",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "6"
+        },
+        {
+          "kind": "nat",
+          "value": "6"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.14.15",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "14"
+        },
+        {
+          "kind": "nat",
+          "value": "15"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "stringExtract.0.0",
+      "operation": "stringExtract",
+      "arguments": [
+        {
+          "kind": "string",
+          "value": "Aé中😀\u0000é"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "string"
+    },
+    {
+      "id": "arrayEmptyWithCapacity.zero",
+      "operation": "arrayEmptyWithCapacity",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arrayEmptyWithCapacity.bounded",
+      "operation": "arrayEmptyWithCapacity",
+      "arguments": [
+        {
+          "kind": "nat",
+          "value": "17"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arraySize.three",
+      "operation": "arraySize",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arraySize.empty",
+      "operation": "arraySize",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": []
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayPush.large",
+      "operation": "arrayPush",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arrayPush.empty",
+      "operation": "arrayPush",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": []
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arrayGet.0",
+      "operation": "arrayGet",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayGet.2",
+      "operation": "arrayGet",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "2"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayGetD.1",
+      "operation": "arrayGetD",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        },
+        {
+          "kind": "nat",
+          "value": "99"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayGetD.3",
+      "operation": "arrayGetD",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        },
+        {
+          "kind": "nat",
+          "value": "99"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayGetD.900719925474099312345678901234567890",
+      "operation": "arrayGetD",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "99"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayGetD.empty",
+      "operation": "arrayGetD",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": []
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "99"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arraySet.0",
+      "operation": "arraySet",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arraySet.2",
+      "operation": "arraySet",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "2"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arraySetIfInBounds.1",
+      "operation": "arraySetIfInBounds",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arraySetIfInBounds.3",
+      "operation": "arraySetIfInBounds",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arraySetIfInBounds.900719925474099312345678901234567890",
+      "operation": "arraySetIfInBounds",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arraySetIfInBounds.empty",
+      "operation": "arraySetIfInBounds",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": []
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "9"
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arrayMap.three",
+      "operation": "arrayMap",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natAddTen"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arrayMap.empty",
+      "operation": "arrayMap",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natAddTen"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": []
+        }
+      ],
+      "resultType": "arrayNat"
+    },
+    {
+      "id": "arrayFoldl.0.3",
+      "operation": "arrayFoldl",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natDecimalFold"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayFoldl.1.3",
+      "operation": "arrayFoldl",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natDecimalFold"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayFoldl.0.900719925474099312345678901234567890",
+      "operation": "arrayFoldl",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natDecimalFold"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayFoldl.3.900719925474099312345678901234567890",
+      "operation": "arrayFoldl",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natDecimalFold"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "3"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayFoldl.2.1",
+      "operation": "arrayFoldl",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natDecimalFold"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "2"
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayFoldl.0.0",
+      "operation": "arrayFoldl",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natDecimalFold"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": [
+            {
+              "kind": "nat",
+              "value": "1"
+            },
+            {
+              "kind": "nat",
+              "value": "2"
+            },
+            {
+              "kind": "nat",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayFoldl.empty",
+      "operation": "arrayFoldl",
+      "arguments": [
+        {
+          "kind": "callback",
+          "name": "natDecimalFold"
+        },
+        {
+          "kind": "nat",
+          "value": "7"
+        },
+        {
+          "kind": "array",
+          "element": "nat",
+          "values": []
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "nat",
+          "value": "900719925474099312345678901234567890"
+        }
+      ],
+      "resultType": "nat"
+    },
+    {
+      "id": "arrayGet.unit",
+      "operation": "arrayGet",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "unit",
+          "values": [
+            {
+              "kind": "unit"
+            },
+            {
+              "kind": "unit"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "1"
+        }
+      ],
+      "resultType": "unit"
+    },
+    {
+      "id": "arrayGetD.unit-fallback",
+      "operation": "arrayGetD",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "unit",
+          "values": []
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "unit"
+        }
+      ],
+      "resultType": "unit"
+    },
+    {
+      "id": "arraySet.unit",
+      "operation": "arraySet",
+      "arguments": [
+        {
+          "kind": "array",
+          "element": "unit",
+          "values": [
+            {
+              "kind": "unit"
+            },
+            {
+              "kind": "unit"
+            }
+          ]
+        },
+        {
+          "kind": "nat",
+          "value": "0"
+        },
+        {
+          "kind": "unit"
+        }
+      ],
+      "resultType": "arrayUnit"
+    }
+  ],
+  "textPositionCases": [
+    {
+      "id": "scalar-cursor-crlf",
+      "source": "Aé中😀\r\nZ",
+      "after": [
+        {
+          "char": "A",
+          "byteOffset": 1,
+          "line": 1,
+          "column": 2
+        },
+        {
+          "char": "é",
+          "byteOffset": 3,
+          "line": 1,
+          "column": 3
+        },
+        {
+          "char": "中",
+          "byteOffset": 6,
+          "line": 1,
+          "column": 4
+        },
+        {
+          "char": "😀",
+          "byteOffset": 10,
+          "line": 1,
+          "column": 5
+        },
+        {
+          "char": "\r",
+          "byteOffset": 11,
+          "line": 1,
+          "column": 6
+        },
+        {
+          "char": "\n",
+          "byteOffset": 12,
+          "line": 2,
+          "column": 1
+        },
+        {
+          "char": "Z",
+          "byteOffset": 13,
+          "line": 2,
+          "column": 2
+        }
+      ]
+    },
+    {
+      "id": "proofscript-bom-crlf-astral",
+      "source": "﻿def x : String := \"é😀\"\r\ndef y : Nat := 1",
+      "origins": [
+        {
+          "text": "def",
+          "occurrence": 0,
+          "byteOffset": 3,
+          "line": 1,
+          "column": 1
+        },
+        {
+          "text": "x",
+          "occurrence": 0,
+          "byteOffset": 7,
+          "line": 1,
+          "column": 5
+        },
+        {
+          "text": "def",
+          "occurrence": 1,
+          "byteOffset": 31,
+          "line": 2,
+          "column": 1
+        },
+        {
+          "text": "y",
+          "occurrence": 0,
+          "byteOffset": 35,
+          "line": 2,
+          "column": 5
+        },
+        {
+          "text": "1",
+          "occurrence": 0,
+          "byteOffset": 46,
+          "line": 2,
+          "column": 16
+        }
+      ]
+    }
+  ]
+}

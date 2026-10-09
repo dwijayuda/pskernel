@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 51 |
+| A | 50 |
 | B | 6 |
-| C | 16 |
+| C | 17 |
 | D | 6 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -120,7 +120,9 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 
 Counts above apply the stated A/B/C/D criteria to validated cross-module evidence,
 as already done for the typing metatheory. Six grades change: three B, two C,
-and one D become A. The baseline 44/9/19/7 becomes **50/6/17/6**. Every changed
+and one D become A. The baseline was reported as 44/9/19/7 and this refresh reported
+**50/6/17/6**. The 2026-10-09 row recount below corrects the historical
+summary/row mismatch; these historical summary numbers are not fresh evidence. Every changed
 row names its independent semantic/history theorem family and full CI checkpoint;
 no grade changes for companion presence alone. Other rows retain their prior
 grades pending the final whole-tree review.
@@ -146,7 +148,10 @@ The evidence refresh also removes stale infer-only typing claims and stale full-
 ## Evidence refresh — 2026-10-09
 
 Full proof/native #779 and #780 justify one additional C→A upgrade for
-`Admission/Inductive/Mutual/Recursor.lean`. Counts are now **51/6/16/6**.
+`Admission/Inductive/Mutual/Recursor.lean`. A recount found that the prior 79 rows were **49/6/18/6**, despite their
+summary reporting 50/6/17/6. This newly justified C→A upgrade therefore makes
+the actual row totals **50/6/17/6**. The earlier header overstated A by one and
+understated C by one; no extra grade is awarded to reconcile that discrepancy.
 Decimal injectivity, bounded search counting, and explicit cursor/append
 obligation decomposition are also checked at #780; they do not discharge the
 actual opaque primitive bridges or justify an unconditional admission claim.

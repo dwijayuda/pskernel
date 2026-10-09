@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "psc0-sh1-finite-worker-migration-candidate",
-  "status": "applied-qualification-pending",
+  "status": "applied-host-fixture-correction-qualification-pending",
   "repository": "dwijayuda/pskernel",
   "inspectedBaseRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
   "sourceGrammar": {
@@ -440,14 +440,22 @@
     "staticSourceReview": "complete",
     "outOfScopeSourceBytesPreserved": true,
     "independentBehaviorAndAbiReview": "complete",
-    "nativeBuildExecuted": false,
+    "nativeBuildExecuted": true,
     "generatedRuntimeExecuted": false,
     "compilerQualification": null,
-    "providerAcceptance": null
+    "providerAcceptance": null,
+    "nativeBuildResult": {
+      "sourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+      "runId": 37939061854,
+      "core": 75,
+      "translation": 10,
+      "erasure": 16
+    },
+    "generatedRuntimeScope": "Existing N1 compiler/runtime gates passed, but the new 87-case migration gate stopped during its first fixture construction and has no completed receipt."
   },
   "performanceClaim": null,
   "preparedHostCompletion": {
-    "status": "applied-qualification-pending",
+    "status": "applied; focused and actual session gates passed in initial attempt; full F qualification pending",
     "sourceGrammarBoundary": "Require the current grammar for reusable prepare('proofScript') before any cache hit or compiler operation; bind the grammar in its closure hash and receipt.",
     "leanPreparation": "Existing serialization, receipt shape and cache behavior preserved.",
     "files": [
@@ -470,7 +478,15 @@
     "tests": {
       "focusedHostCases": 3,
       "realCompilerCoverage": "Existing q sessionConformance proofScript request",
-      "executed": false
+      "executed": true,
+      "evidence": {
+        "sourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+        "runId": 37939061854,
+        "focusedAllCases": 27,
+        "focusedPassed": 27,
+        "focusedSkipped": 0,
+        "realCompilerSessionPassed": true
+      }
     },
     "providerReceipt": "Preserve the original compact object log and additionally log exact UTF-8 file content, byte count and SHA-256 from read-back Buffer bytes."
   },
@@ -501,5 +517,39 @@
     "parentCommit": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
     "branch": "psc0/sh1-projection-grammar-v1",
     "sourceRefMeaning": "The exact executable source is the commit that applies this candidate; its immutable SHA is recorded with the qualification run."
+  },
+  "initialApplicationSourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+  "attempts": [
+    {
+      "sourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+      "runId": 37939061854,
+      "conclusion": "failure",
+      "evidence": "worker-migration-attempt-1.json",
+      "failureScope": "Missing runtime structure constructor in new host fixture, before worker behavior results."
+    }
+  ],
+  "fixtureCorrection": {
+    "scope": "Two host behavior fixture helpers plus one cheap workflow reference preflight; compiler worker/grammar/checker/ABI/provider/selected-seed source unchanged.",
+    "reason": "The TS backend emits structures as interfaces/private brands, without Type.mk runtime namespaces. Reuse actual neutral factories/templates and explicitly label non-IR structural host fixture records.",
+    "expectedBehaviorChanged": false,
+    "requiredCases": 87,
+    "requiredAbiWorkers": 12,
+    "earlyRequiredExportCheck": true,
+    "constructorSitesCorrected": 48,
+    "structureTypesAudited": 20,
+    "requiredCallableExports": 68,
+    "auditReference": "worker-migration-fixture-repair.json",
+    "referencePreflight": {
+      "source": "authenticated selected R",
+      "script": ".github/workflows/psc0-sh1.yml",
+      "before": "N1",
+      "cases": 87,
+      "compilerBuild": false,
+      "replacesFinalCorrespondence": false
+    },
+    "correctedHelperBlobs": {
+      "freshName": "240727d033a1eb2d630826560c350ea76dd4d4d4",
+      "sharedMigration": "796263a6a5724f3971530b435f13eb7ce1438eb8"
+    }
   }
 }

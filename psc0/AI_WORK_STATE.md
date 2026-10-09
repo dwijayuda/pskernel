@@ -1,12 +1,12 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 13:44:00 UTC.
+Updated: 2026-10-09 14:03:32 UTC.
 
-## Active continuation: F source applied under selected R; qualification pending
+## Active continuation: coherent F fixture correction; qualification pending
 
 The user requests the new supplied `.ps` syntax only, with no active legacy grammar mode. Work remains on `psc0/sh1-projection-grammar-v1`, descended from qualified integration `5e3a991088aaa735c8f324c4e70a7a3dee4cd69a`. The canonical implementation branch remains at that previous completed checkpoint until F qualifies. Main is untouched.
 
-**R is explicitly selected after all evidence gates passed. This source commit applies the finite F migration; its own compiler/runtime/provider qualification is pending.** Handwritten `.lean` remains authoritative; current `.ps` parsing, printing and owned source consumers use bounded new-only `ps-0.9-r3`. Strict SH/1, full Standard/PSCV and unrestricted PSC1 are not claimed.
+**R is explicitly selected after all evidence gates passed. F worker source is applied at `9ee0b1fd38dd1456a187d4675f9027440a989f2d`; its first qualification stopped on a new host-fixture API error before C1. The coherent helper correction requires fresh qualification.** Handwritten `.lean` remains authoritative; current `.ps` parsing, printing and owned source consumers use bounded new-only `ps-0.9-r3`. Strict SH/1, full Standard/PSCV and unrestricted PSC1 are not claimed.
 
 ### Earned R evidence
 
@@ -41,15 +41,25 @@ Shared exact-name / first-segment / longest proper local-prefix resolution repai
 
 The first R attempt (`48723fe676a0d9ae3fa819bd314199fe0ca2e926`, run 37925016499) failed the native build on two direct blockers: reserved local `postfix` and a Term reference to an unimported list helper. R2 renamed the local and used direct list pattern matching, then ran all three native suites without suppressing later diagnostics. [The original failure evidence](docs/selfhost-language/grammar-migration-attempt-1.json) is preserved. No gate was weakened.
 
+### First F attempt and bounded correction
+
+F source `9ee0b1fd38dd1456a187d4675f9027440a989f2d`, [run 37939061854](https://github.com/dwijayuda/pskernel/actions/runs/37939061854), reached N1 after passing the native suites (75/10/16), focused source/snapshot/session tests (27/27), actual import/build cases (4/4), and authenticated warm R cache reuse. N1 passed complete native original-IR checking (56,602 expressions, 728,064 steps, zero findings), full 61-module grammar correspondence (902,538 PS bytes), existing IR/helper/generic gates, and actual preparation-session conformance.
+
+`sh1-fresh-name-conformance.mjs` then called the nonexistent runtime namespace `PsErasureScope.mk` while constructing its first local-name fixture. The TS backend emits structures as interfaces with private brands; it exports constructor namespaces for inductives, not structures. `Prod` and several other new fixture records share this mismatch. No 87-case behavior receipt, 12-worker ABI result, paired R/F result, C1/C2/C3 fixed point or F provider acceptance was earned.
+
+The finite audit covers all constructor/function/field assumptions in the three new helpers. The correction is confined to the two behavior-fixture helpers: use existing neutral `psIrCheckMake*` factories, preserve same-compiler record brands through template copies where available, and explicitly identify the few non-IR plain structural host fixture records with owned tagged children. Do not fabricate private brands or claim those host records were compiler-created. The ABI helper and all twelve worker definitions/three alias removals remain unchanged. The source audit covers all 48 invalid calls across 20 structure types. An early combined assertion checks 68 required callable paths and reports every absent export before fixture construction. The workflow also executes the same 87 expectations against authenticated R before N1, retaining a clearly labelled reference-only receipt without building another compiler. The original paired R/F and full qualification gates remain required. The 87 cases and independent expected outputs remain mandatory.
+
+[The complete failed-attempt evidence](docs/selfhost-language/worker-migration-attempt-1.json) and [full primary log](docs/selfhost-language/evidence-logs/worker-migration-attempt-1.log) are retained. Correct this single demonstrated API-assumption class coherently before another exact-source qualification; do not retry individual constructors, remove cases, alter expectations, or weaken the original-IR/provider/ABI gates.
+
 ### Current F source checkpoint and next qualification
 
 The applied finite candidate contains 12 worker rewrites in nine source files, three typed projection-alias removals in one additional source file, and seven corresponding source-guard updates. Public types, parameter order, fuel behavior, reversal/error ordering and fresh-name limits are preserved. All bytes outside the 14 named definitions were restored exactly. See [the candidate ledger](docs/selfhost-language/worker-migration-candidate.json).
 
 F adds 87 independent worker behavior observations (51 fresh-name / 36 collection-worker cases), paired R/F execution and public Core/ordered-IR ABI comparisons. The ABI hook reuses the already prepared declarations and original IR; it does not prepare the full baseline closure again. A small isolated signature/typed-partial probe and existing partial-application gate cover representation-sensitive behavior.
 
-The applied F host patch closes the reusable PS preparation-session boundary: assert the exact grammar before preparation/cache reuse and bind it in PS session identity/receipts. Three focused host-boundary tests plus the existing real generated PS session exercise that change. The provider receipt logger exposes exact read-back bytes and their digest so F evidence needs no second collector. These F changes have not run yet.
+The applied F host patch closes the reusable PS preparation-session boundary: assert the exact grammar before preparation/cache reuse and bind it in PS session identity/receipts. Three focused host-boundary tests plus the existing real generated PS session exercise that change. The provider receipt logger exposes exact read-back bytes and their digest so F evidence needs no second collector. The focused host tests and real generated preparation-session gate passed in the first F attempt; the provider receipt logger remains unexecuted because that job was not reached.
 
-The prepared F files are applied on the selected-R descendant and this `[sh1-qualify]` source commit requests one coherent qualification. It must pass native/N1 gates, the paired R/F cases and ABI checks, C1/C2/C3 original-IR/fixed-point checks, and independent provider acceptance. **F keeps selected R and does not request another successor promotion or cold-recovery cycle.** After success, preserve actual receipts, finish the current guide/ledgers and normally fast-forward `psc0/sh1-implementation-v1` using a fresh lease.
+The worker source remains applied on the selected-R descendant; the `[sh1-qualify]` helper-correction commit requests a coherent new qualification of the exact corrected recipe. It must pass native/N1 gates, the paired R/F cases and ABI checks, C1/C2/C3 original-IR/fixed-point checks, and independent provider acceptance. **F keeps selected R and does not request another successor promotion or cold-recovery cycle.** After success, preserve actual receipts, finish the current guide/ledgers and normally fast-forward `psc0/sh1-implementation-v1` using a fresh lease.
 
 Current pins remain Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2. Immutable S0/A recovery retains its original revisions and exact TypeScript 5.8.3. The separate root TypeScript compiler-API workspace remains on 5.8.3.
 

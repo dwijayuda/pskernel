@@ -1,10 +1,39 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { runSh1FreshNameCases } from './sh1-fresh-name-conformance.mjs';
+import {
+  runSh1FreshNameCases, sh1FreshNameRequiredExports, assertMigrationRequiredExports,
+} from './sh1-fresh-name-conformance.mjs';
 
 // These gates accept already loaded compiler instances and already prepared
 // products. They do not load code, read files, spawn processes, or select seeds.
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+
+// One finite preflight covers F1 and F2 before either section constructs inputs.
+// Every name is an existing generated export; no structure namespace is assumed.
+const migrationRequiredExports = Object.freeze([...new Set([
+  ...sh1FreshNameRequiredExports,
+  'Option.some',
+  'PsDeclaration.axiomDecl', 'PsDeclaration.definitionDecl',
+  'PsDeclaration.theoremDecl', 'PsDeclaration.partialDecl',
+  'PsDeclaration.opaqueDecl', 'PsDeclaration.inductiveDecl',
+  'PsExpr.constE', 'PsExpr.lit', 'PsExpr.app', 'PsExpr.proj', 'PsExpr.fvar',
+  'PsLiteral.natural', 'PsVerifiedIrType.named',
+  'psNameAppendStr', 'psNameToString', 'psDeclarationName',
+  'psEnvironmentAdd', 'psEnvironmentFind',
+  'psCompilerParseSource', 'psCompilerElaborateSource',
+  'psCompilerPreparationStart', 'psCompilerPreparationStepParsed',
+  'psCompilerPreparationSourcesWorker', 'psAddDeclarationListWorker',
+  'psElabDeclarationsWorker', 'psBuildErasureDeclarationNamesWorker',
+  'psEraseDefinitionsLoopWorker', 'psPrepareRuntimeStructures',
+  'psPrepareRuntimeInductives', 'psTsBuildSymbolMap',
+  'psLocalPushBinding', 'psErasureLookupStructure',
+  'psErasureLookupConstructor', 'psErasureLookupRecursor',
+  'psPrepareRuntimeStructure', 'psPrepareRuntimeInductive',
+  'psTsBuildBrandMap', 'psTsBuildTagMap',
+  'psIrCheckMakeDeclaration', 'psIrCheckMakeStructureField',
+  'psIrCheckMakeStructure', 'psIrCheckMakeConstructorField',
+  'psIrCheckMakeConstructor', 'psIrCheckMakeInductive', 'psIrCheckMakeModule',
+])]);
 
 const f2CaseNames = [
   'preparation-empty-state', 'preparation-ordered-dependencies',
@@ -128,7 +157,7 @@ function ownedApi(compiler, valueTag) {
   const natIr = compiler.PsVerifiedIrType.primitive(compiler.PsVerifiedIrPrimitiveType.nat);
   const irLiteral = (value) => compiler.PsVerifiedIrExpr.literal(
     compiler.PsVerifiedIrLiteral.natural(BigInt(value)));
-  const irDefinition = (text, value) => compiler.PsVerifiedIrDeclaration.mk(
+  const irDefinition = (text, value) => compiler.psIrCheckMakeDeclaration(
     text, nil, nil, natIr, irLiteral(value));
   return {
     compiler, valueTag, fail, list, array, plain, ok, some, error, name, nameText, declName,
@@ -162,8 +191,11 @@ function runF2Cases(compiler, valueTag) {
   const second = definition('f2Second', 23);
   const prefixEnvironment = add(prelude, [prefix]);
   const sourceKind = compiler.PsCompilerSourceKind.lean;
-  const prefixState = compiler.PsCompilerPreparationState.mk(
-    sourceKind, prefixEnvironment, list([prefix]));
+  const prefixState = {
+    ...compiler.psCompilerPreparationStart(sourceKind),
+    environment: prefixEnvironment,
+    declarationsRev: list([prefix]),
+  };
   const sources = [
     'def f2Base : Nat := 17\n',
     'def f2Next : Nat := f2Base\n',
@@ -337,8 +369,15 @@ function runF2Cases(compiler, valueTag) {
   const proofTheorem = compiler.PsDeclaration.theoremDecl(name('f2Theorem'),
     proofDeclaration.levelParams, proofDeclaration.type, proofDeclaration.value);
   const naturalOpaque = compiler.PsDeclaration.opaqueDecl(name('f2Opaque'), nil, nat, literal(41));
-  const nameState = (used, entries) => compiler.PsErasureNameState.mk(list(used),
-    list(entries.map(([text, output]) => compiler.Prod.mk(name(text), output))));
+  // These two worker-state types have no neutral exported constructor. Their
+  // worker paths only project fields, so use explicit unbranded host structural
+  // fixtures with this compiler's List/Prod/Name children. They are not claimed
+  // to be compiler-created records or submitted to original-IR carrier checking.
+  const nameState = (used, entries) => ({
+    used: list(used),
+    entriesRev: list(entries.map(([text, output]) =>
+      compiler.psIrCheckMakePair(name(text), output))),
+  });
   const nameStateView = (state) => ({
     used: array(state.used),
     entriesRev: array(state.entriesRev).map((entry) => [nameText(entry.fst), entry.snd]),
@@ -396,9 +435,9 @@ function runF2Cases(compiler, valueTag) {
   });
 
   const eraseScope = compiler.psErasureScopeEmpty(list([
-    compiler.Prod.mk(name('f2First'), 'runtime_first'),
-    compiler.Prod.mk(name('f2Partial'), 'runtime_partial'),
-    compiler.Prod.mk(name('f2Proof'), 'runtime_proof'),
+    compiler.psIrCheckMakePair(name('f2First'), 'runtime_first'),
+    compiler.psIrCheckMakePair(name('f2Partial'), 'runtime_partial'),
+    compiler.psIrCheckMakePair(name('f2Proof'), 'runtime_proof'),
   ]));
   const irFirst = irDefinition('runtime_first', 17);
   const irPartial = irDefinition('runtime_partial', 29);
@@ -443,45 +482,50 @@ function runF2Cases(compiler, valueTag) {
   });
 
   const scopeNames = list([
-    compiler.Prod.mk(name('F2RecordA'), 'record_A'),
-    compiler.Prod.mk(name('F2RecordB'), 'record_B'),
-    compiler.Prod.mk(name('F2ChoiceA'), 'choice_A'),
-    compiler.Prod.mk(name('F2ChoiceB'), 'choice_B'),
+    compiler.psIrCheckMakePair(name('F2RecordA'), 'record_A'),
+    compiler.psIrCheckMakePair(name('F2RecordB'), 'record_B'),
+    compiler.psIrCheckMakePair(name('F2ChoiceA'), 'choice_A'),
+    compiler.psIrCheckMakePair(name('F2ChoiceB'), 'choice_B'),
   ]);
   const emptyScope = compiler.psErasureScopeEmpty(scopeNames);
   const pushed = compiler.psLocalPushBinding(
     emptyScope.localContext, name('keptLocal'), nat, compiler.PsBinderInfo.explicit);
-  const seededScope = compiler.PsErasureScope.mk(
-    pushed.context,
-    list([compiler.Prod.mk(pushed.id, 'keptRuntime')]),
-    emptyScope.typeLocals, emptyScope.erasedLocals, emptyScope.declarationNames,
-    emptyScope.runtimeConstructors, emptyScope.runtimeRecursors,
-    emptyScope.runtimeStructures, emptyScope.runtimeStructureConstructors,
-    list([compiler.Prod.mk(pushed.id, compiler.PsVerifiedIrExpr.var('keptRuntime'))]),
-    compiler.Option.some(compiler.PsErasureCurrentDefinition.mk(
-      'keptDefinition', nil, list(['keptRuntime']))));
+  const seededScope = {
+    ...emptyScope,
+    localContext: pushed.context,
+    runtimeLocals: list([compiler.psIrCheckMakePair(pushed.id, 'keptRuntime')]),
+    runtimeExpressions: list([
+      compiler.psIrCheckMakePair(pushed.id, compiler.PsVerifiedIrExpr.var('keptRuntime')),
+    ]),
+    // A third explicit host structural fixture: preparation resets this marker
+    // to none without reading its fields or brand. Preserve that reset case.
+    currentDefinition: compiler.Option.some({
+      name: 'keptDefinition', typeArgumentsRev: nil, runtimeParameters: list(['keptRuntime']),
+    }),
+  };
   const namedIr = (text) => compiler.PsVerifiedIrType.named(text, nil);
-  const irRecordA = compiler.PsVerifiedIrStructure.mk('record_A', nil,
-    list([compiler.PsVerifiedIrStructureField.mk('value', natIr)]));
-  const irRecordB = compiler.PsVerifiedIrStructure.mk('record_B', nil,
-    list([compiler.PsVerifiedIrStructureField.mk('prior', namedIr('record_A'))]));
-  const irChoiceA = compiler.PsVerifiedIrInductive.mk('choice_A', nil, list([
-    compiler.PsVerifiedIrConstructor.mk('first', nil),
-    compiler.PsVerifiedIrConstructor.mk('second', nil),
+  const irRecordA = compiler.psIrCheckMakeStructure('record_A', nil,
+    list([compiler.psIrCheckMakeStructureField('value', natIr)]));
+  const irRecordB = compiler.psIrCheckMakeStructure('record_B', nil,
+    list([compiler.psIrCheckMakeStructureField('prior', namedIr('record_A'))]));
+  const irChoiceA = compiler.psIrCheckMakeInductive('choice_A', nil, list([
+    compiler.psIrCheckMakeConstructor('first', nil),
+    compiler.psIrCheckMakeConstructor('second', nil),
   ]));
-  const irChoiceB = compiler.PsVerifiedIrInductive.mk('choice_B', nil,
-    list([compiler.PsVerifiedIrConstructor.mk('wrap',
-      list([compiler.PsVerifiedIrConstructorField.mk('prior', namedIr('choice_A'))]))]));
-  const keptRecordA = compiler.PsVerifiedIrStructure.mk('keptRecordA', nil, nil);
-  const keptRecordB = compiler.PsVerifiedIrStructure.mk('keptRecordB', nil, nil);
-  const keptChoiceA = compiler.PsVerifiedIrInductive.mk('keptChoiceA', nil, nil);
-  const keptChoiceB = compiler.PsVerifiedIrInductive.mk('keptChoiceB', nil, nil);
+  const irChoiceB = compiler.psIrCheckMakeInductive('choice_B', nil,
+    list([compiler.psIrCheckMakeConstructor('wrap',
+      list([compiler.psIrCheckMakeConstructorField('prior', namedIr('choice_A'))]))]));
+  const keptRecordA = compiler.psIrCheckMakeStructure('keptRecordA', nil, nil);
+  const keptRecordB = compiler.psIrCheckMakeStructure('keptRecordB', nil, nil);
+  const keptChoiceA = compiler.psIrCheckMakeInductive('keptChoiceA', nil, nil);
+  const keptChoiceB = compiler.psIrCheckMakeInductive('keptChoiceB', nil, nil);
   const completeDeclarations = metadata.declarations;
   const badInfo = (declaration, missing) => {
     const info = declaration.info;
-    return compiler.PsDeclaration.inductiveDecl(compiler.PsInductiveInfo.mk(
-      info.name, info.levelParams, info.type, info.numParams, info.numIndices,
-      list([name(missing)]), info.isStructure));
+    return compiler.PsDeclaration.inductiveDecl({
+      ...info,
+      constructors: list([name(missing)]),
+    });
   };
   const commonScopeFields = [
     'localContext', 'runtimeLocals', 'typeLocals', 'erasedLocals', 'declarationNames',
@@ -503,9 +547,13 @@ function runF2Cases(compiler, valueTag) {
     same(typeEntry, constructorEntry, 'STRUCTURE_INDEX_AGREEMENT_' + text);
     return plain(typeEntry);
   };
-  const expectedRuntimeRecord = (text, core, constructor, field, type) =>
-    compiler.PsRuntimeStructureInfo.mk(text, name(core), name(constructor), 0n, nil,
-      list([compiler.PsRuntimeStructureField.mk(0n, 0n, field, type)]));
+  // Expected metadata is compared as plain observations, never passed as input
+  // to a compiler operation. Do not assume runtime structure constructors.
+  const expectedRuntimeRecord = (text, core, constructor, field, type) => ({
+    name: text, coreName: name(core), constructorName: name(constructor), numParams: 0n,
+    typeParameters: nil,
+    fields: list([{ sourceIndex: 0n, projectionIndex: 0n, name: field, type }]),
+  });
   const runtimeRecordA = expectedRuntimeRecord(
     'record_A', 'F2RecordA', 'F2RecordA.mk', 'value', natIr);
   const runtimeRecordB = expectedRuntimeRecord(
@@ -555,20 +603,27 @@ function runF2Cases(compiler, valueTag) {
     ]), seededScope, list([keptRecordA])),
   'unknownConstant', 'F2RecordA.missingFirst', 'STRUCTURES_FIRST_REFUSAL'));
 
-  const firstConstructor = compiler.PsRuntimeConstructorInfo.mk(
-    'choice_A', 'first', name('F2ChoiceA.first'), 0n, nil);
-  const secondConstructor = compiler.PsRuntimeConstructorInfo.mk(
-    'choice_A', 'second', name('F2ChoiceA.second'), 0n, nil);
-  const wrapConstructor = compiler.PsRuntimeConstructorInfo.mk(
-    'choice_B', 'wrap', name('F2ChoiceB.wrap'), 0n,
-    list([compiler.PsRuntimeConstructorField.mk(
-      0n, 'prior', namedIr('choice_A'), false)]));
-  const runtimeChoiceA = compiler.PsRuntimeInductiveInfo.mk(
-    'choice_A', name('F2ChoiceA'), name('F2ChoiceA.rec'), 0n, nil,
-    list([firstConstructor, secondConstructor]));
-  const runtimeChoiceB = compiler.PsRuntimeInductiveInfo.mk(
-    'choice_B', name('F2ChoiceB'), name('F2ChoiceB.rec'), 0n, nil,
-    list([wrapConstructor]));
+  const firstConstructor = {
+    inductiveName: 'choice_A', name: 'first', coreName: name('F2ChoiceA.first'),
+    numParams: 0n, fields: nil,
+  };
+  const secondConstructor = {
+    inductiveName: 'choice_A', name: 'second', coreName: name('F2ChoiceA.second'),
+    numParams: 0n, fields: nil,
+  };
+  const wrapConstructor = {
+    inductiveName: 'choice_B', name: 'wrap', coreName: name('F2ChoiceB.wrap'),
+    numParams: 0n,
+    fields: list([{ sourceIndex: 0n, name: 'prior', type: namedIr('choice_A'), recursive: false }]),
+  };
+  const runtimeChoiceA = {
+    name: 'choice_A', coreName: name('F2ChoiceA'), recursorName: name('F2ChoiceA.rec'),
+    numParams: 0n, typeParameters: nil, constructors: list([firstConstructor, secondConstructor]),
+  };
+  const runtimeChoiceB = {
+    name: 'choice_B', coreName: name('F2ChoiceB'), recursorName: name('F2ChoiceB.rec'),
+    numParams: 0n, typeParameters: nil, constructors: list([wrapConstructor]),
+  };
   const inductivesView = (value) => {
     const recursors = ['F2ChoiceA.rec', 'F2ChoiceB.rec'].map((text) =>
       plain(some(compiler.psErasureLookupRecursor(value.runtimeRecursors, name(text)),
@@ -623,8 +678,11 @@ function runF2Cases(compiler, valueTag) {
     ]), seededScope, list([keptChoiceA])),
   'unknownConstant', 'F2ChoiceA.missingFirst', 'INDUCTIVES_FIRST_REFUSAL'));
 
-  const symbolState = (used, index, entries) => compiler.PsTsSymbolMapState.mk(
-    list(used), BigInt(index), list(entries.map(([key, value]) => compiler.Prod.mk(key, value))));
+  const symbolState = (used, index, entries) => ({
+    used: list(used),
+    nextIndex: BigInt(index),
+    entriesRev: list(entries.map(([key, value]) => compiler.psIrCheckMakePair(key, value))),
+  });
   const pairStrings = (value) => array(value).map((entry) => [entry.fst, entry.snd]);
   const symbolStateView = (state) => ({
     used: array(state.used),
@@ -661,7 +719,7 @@ function runF2Cases(compiler, valueTag) {
     return view;
   });
   observe('symbols-brand-wrapper', () => {
-    const module = compiler.PsVerifiedIrModule.mk(
+    const module = compiler.psIrCheckMakeModule(
       nil, list([keptRecordA, keptRecordB]), nil,
       list([irDefinition('__ps$brand$0', 0)]));
     const result = pairStrings(compiler.psTsBuildBrandMap(module));
@@ -671,7 +729,7 @@ function runF2Cases(compiler, valueTag) {
     return result;
   });
   observe('symbols-tag-wrapper', () => {
-    const module = compiler.PsVerifiedIrModule.mk(
+    const module = compiler.psIrCheckMakeModule(
       nil, nil, list([keptChoiceA, keptChoiceB]),
       list([irDefinition('__ps$tag$0', 0)]));
     const result = pairStrings(compiler.psTsBuildTagMap(module));
@@ -693,6 +751,7 @@ function runF2Cases(compiler, valueTag) {
 // The separate ABI gate receives its already prepared declarations and exact IR.
 export function runMigrationWorkerConformance(compiler, valueTag) {
   assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_TAG_READER');
+  assertMigrationRequiredExports(compiler, migrationRequiredExports, 'F1_F2');
   const f1 = runSh1FreshNameCases(compiler);
   const f2 = runF2Cases(compiler, valueTag);
   assert.equal(f1.workerCases, 44, 'PSC0_SH1_MIGRATION_F1_WORKER_COUNT');
@@ -708,6 +767,15 @@ export function runMigrationWorkerConformance(compiler, valueTag) {
     observationSha256: sha256(JSON.stringify(observations)),
     scope: {
       eachCompilerOwnsAllTaggedInputs: true,
+      irRecordsUseExistingCompilerFactories: true,
+      copiedRecordsRetainOwningCompilerBrands: true,
+      hostStructuralFixtureRecords: [
+        'PsErasureNameState', 'PsTsSymbolMapState', 'PsErasureCurrentDefinition',
+      ],
+      hostStructuralFixtureBoundary:
+        'Explicit unbranded non-IR host records with owning-compiler tagged children; ' +
+        'their exercised paths project fields or reset the marker, and do not inspect brands. ' +
+        'They are not compiler-created branded records and never enter original-IR carrier checking.',
       independentExplicitExpectations: true,
       saturatedPublicArgumentOrderChecked: true,
       completePublicTypes: 'separate migration ABI gate',

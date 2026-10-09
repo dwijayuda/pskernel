@@ -450,6 +450,39 @@ jobs:
         run: |
           node scripts/selfhost-replay-runtime.test.mjs
           node scripts/checked-erasure-name-index.test.mjs
+      - name: Verify migration fixture APIs and expectations on the authenticated R compiler
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.has-parent == 'true' }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { mkdir, writeFile } from 'node:fs/promises';
+          import path from 'node:path';
+          import { readSelectedAuthoringSeed } from './scripts/sh1-successor-seed.mjs';
+          import { loadGeneratedCompiler } from './scripts/sh1-source-snapshot.mjs';
+          import { valueTag } from './scripts/sh1-capabilities.mjs';
+          import { runMigrationWorkerConformance } from './scripts/sh1-migration-worker-conformance.mjs';
+          const selected = await readSelectedAuthoringSeed();
+          assert.equal(selected.mode, 'qualified');
+          assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed');
+          const loaded = await loadGeneratedCompiler(path.resolve(selected.compilerPath), {
+            expectedSha256: selected.manifest.expectedArtifacts.javascriptSha256,
+          });
+          const started = performance.now();
+          const report = runMigrationWorkerConformance(loaded.compiler, valueTag);
+          assert.equal(report.cases, 87);
+          const receipt = {
+            schemaVersion: 1, evidence: 'migration-fixture-authenticated-reference-preflight',
+            recipeSourceRef: process.env.GITHUB_SHA, referenceSourceRef: selected.sourceRef,
+            referenceCompilerSha256: loaded.compilerSha256,
+            selectedSeedIdentitySha256: selected.identitySha256,
+            elapsedMs: performance.now() - started, report, passed: true,
+            compilerBuilt: false, currentSourceQualifiedByThisCheck: false,
+          };
+          await mkdir('dist/sh1', { recursive: true });
+          await writeFile('dist/sh1/worker-harness-reference.json',
+            JSON.stringify(receipt, null, 2) + '\n', 'utf8');
+          console.log('PSC0_SH1_WORKER_HARNESS_REFERENCE: ' + JSON.stringify(receipt));
+          NODE
       - name: Run the bounded native development gate before qualification
         id: native-gate
         run: node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out ${{ steps.seed-selection.outputs.full-qualification == 'true' && 'dist/sh1/development' || 'dist/sh1' }}

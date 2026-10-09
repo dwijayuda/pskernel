@@ -7,6 +7,29 @@ import { createHash } from 'node:crypto';
 // Complete public-type/IR and compiled PSC partial-application checks are separate.
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 
+// The TypeScript backend emits structures as interfaces plus private brands,
+// not runtime Type.mk namespaces. Check every callable fixture dependency before
+// allocating inputs, including when this F1 section is used on its own.
+export const sh1FreshNameRequiredExports = Object.freeze([
+  'List.cons', 'List.nil', 'PsName.str',
+  'PsVerifiedIrType.primitive', 'PsVerifiedIrLiteral.natural',
+  'PsVerifiedIrExpr.literal', 'PsVerifiedIrExpr.var', 'PsVerifiedIrExpr.record',
+  'PsVerifiedIrExpr.lambda', 'PsVerifiedIrExpr.letE', 'PsVerifiedIrExpr.projection',
+  'psIrCheckMakePair', 'psIrCheckMakeParameter',
+  'psErasureLocalNameWithFuel', 'psErasureEtaNameWithFuel',
+  'psTsFreshMatchTempWorker', 'psTsFreshInternalWorker',
+  'psErasureScopeEmpty', 'psErasureLocalName', 'psErasureEtaParameters',
+  'psTsFreshMatchTempLoop', 'psTsFreshInternalWithFuel',
+]);
+
+export function assertMigrationRequiredExports(compiler, names, label) {
+  const missing = names.filter((name) => {
+    const value = name.split('.').reduce((owner, key) => owner?.[key], compiler);
+    return typeof value !== 'function';
+  });
+  assert.deepEqual(missing, [], 'PSC0_SH1_MIGRATION_REQUIRED_EXPORTS_' + label);
+}
+
 function tag(value) {
   if (value === null || typeof value !== 'object') return undefined;
   for (const symbol of Object.getOwnPropertySymbols(value)) {
@@ -35,20 +58,19 @@ function natType(runtime) {
 }
 
 function parameter(runtime, name) {
-  return runtime.PsVerifiedIrParameter.mk(name, natType(runtime));
+  return runtime.psIrCheckMakeParameter(name, natType(runtime));
 }
 
 function scope(runtime, localNames, globalNames) {
-  const declarations = list(runtime, globalNames.map((output, index) => runtime.Prod.mk(
+  const declarations = list(runtime, globalNames.map((output, index) => runtime.psIrCheckMakePair(
     runtime.PsName.str(runtime.PsName.anonymous, 'declaration' + index), output)));
   const empty = runtime.psErasureScopeEmpty(declarations);
-  return runtime.PsErasureScope.mk(
-    empty.localContext,
-    list(runtime, localNames.map((name, index) => runtime.Prod.mk(BigInt(index), name))),
-    empty.typeLocals, empty.erasedLocals, empty.declarationNames,
-    empty.runtimeConstructors, empty.runtimeRecursors,
-    empty.runtimeStructures, empty.runtimeStructureConstructors,
-    empty.runtimeExpressions, empty.currentDefinition);
+  // Spread retains this compiler's scope brand and every untouched field.
+  return {
+    ...empty,
+    runtimeLocals: list(runtime, localNames.map((name, index) =>
+      runtime.psIrCheckMakePair(BigInt(index), name))),
+  };
 }
 
 function makeBodyFactory(runtime) {
@@ -66,9 +88,9 @@ function makeBodyFactory(runtime) {
       case 'var': return expr.var(value);
       case 'values':
         return expr.record('Record', nil, list(runtime, value.map((name, index) =>
-          runtime.Prod.mk('field' + index, expr.var(name)))));
+          runtime.psIrCheckMakePair('field' + index, expr.var(name)))));
       case 'field-label':
-        return expr.record('Record', nil, list(runtime, [runtime.Prod.mk(value, literal())]));
+        return expr.record('Record', nil, list(runtime, [runtime.psIrCheckMakePair(value, literal())]));
       case 'lambda-binder':
         return expr.lambda(list(runtime, [parameter(runtime, value)]), natType(runtime), literal());
       case 'let-binder':
@@ -165,12 +187,7 @@ function etaResult(value) {
 }
 
 function inspectRuntime(runtime, label) {
-  for (const name of [
-    'psErasureLocalNameWithFuel', 'psErasureEtaNameWithFuel',
-    'psTsFreshMatchTempWorker', 'psTsFreshInternalWorker',
-    'psErasureScopeEmpty', 'psErasureLocalName', 'psErasureEtaParameters',
-    'psTsFreshMatchTempLoop', 'psTsFreshInternalWithFuel',
-  ]) assert.equal(typeof runtime[name], 'function', 'PSC0_SH1_F1_EXPORT_' + label + '_' + name);
+  assertMigrationRequiredExports(runtime, sh1FreshNameRequiredExports, 'F1_' + label);
   const body = makeBodyFactory(runtime);
   const observations = [];
   function observe(name, actual, expected) {

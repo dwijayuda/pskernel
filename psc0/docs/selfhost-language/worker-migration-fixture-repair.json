@@ -1,0 +1,1101 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-F-generated-helper-constructor-api-audit",
+  "sourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+  "evidence": "source-only audit prompted by N1 helper initialization failure; no compiler execution",
+  "failure": {
+    "helper": "psc0/scripts/sh1-fresh-name-conformance.mjs",
+    "line": 45,
+    "expression": "runtime.PsErasureScope.mk",
+    "classification": "absent runtime structure namespace before first worker result",
+    "aliasHypothesisRejected": true
+  },
+  "cause": {
+    "structureEmitter": {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blobSha": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+      "lines": [
+        82,
+        104
+      ],
+      "behavior": "Private bool-valued brand symbol and exported TypeScript interface; no exported Type.mk runtime object."
+    },
+    "inductiveEmitter": {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "lines": [
+        123,
+        180
+      ],
+      "behavior": "Exported constructor namespace exists; monomorphic zero-field constructors are values, polymorphic or field-bearing constructors are functions."
+    },
+    "recordProjectionEmitter": {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "blobSha": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+      "lines": [
+        614,
+        618
+      ],
+      "behavior": "Record field projection emits ordinary property access, without inspecting brand."
+    }
+  },
+  "scope": {
+    "helpersAudited": 3,
+    "helpersChanged": 2,
+    "structureNamespaceTypes": 20,
+    "invalidCallSites": 48,
+    "behaviorCasesUnchanged": 87,
+    "F1": {
+      "direct": 44,
+      "wrappers": 7
+    },
+    "F2": {
+      "cases": 36
+    },
+    "compilerSourcesChanged": false,
+    "abiGateUnchanged": true,
+    "originalIrChecksUnchanged": true,
+    "privateBrandsFabricated": false
+  },
+  "structureMatrix": [
+    {
+      "type": "Prod",
+      "sites": {
+        "F1": 4,
+        "F2": 11
+      },
+      "definition": {
+        "path": "psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+        "blobSha": "38485851a30f024d973392c6c8e1d86916e31466",
+        "line": 116,
+        "kind": "prelude inductive metadata registered with isStructure=true",
+        "fields": [
+          {
+            "name": "fst",
+            "type": "alpha"
+          },
+          {
+            "name": "snd",
+            "type": "beta"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakePair(first, second)",
+      "runtimeArity": 2,
+      "role": "input pair"
+    },
+    {
+      "type": "PsCompilerPreparationState",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+        "blobSha": "13614bc6eb279c93d4cbcbd8815b671beae38199",
+        "line": 24,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "sourceKind",
+            "type": "PsCompilerSourceKind"
+          },
+          {
+            "name": "environment",
+            "type": "PsEnvironment"
+          },
+          {
+            "name": "declarationsRev",
+            "type": "List PsDeclaration"
+          }
+        ]
+      },
+      "method": "copy-same-compiler-record",
+      "replacement": "{ ...compiler.psCompilerPreparationStart(sourceKind), environment, declarationsRev }",
+      "role": "input preparation state; original brand retained"
+    },
+    {
+      "type": "PsErasureCurrentDefinition",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blobSha": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+        "line": 144,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "typeArgumentsRev",
+            "type": "List PsVerifiedIrType"
+          },
+          {
+            "name": "runtimeParameters",
+            "type": "List String"
+          }
+        ]
+      },
+      "method": "explicit-host-structural-fixture",
+      "replacement": "{ name: string, typeArgumentsRev: ownedList, runtimeParameters: ownedList }",
+      "role": "unbranded reset marker inside same-compiler Option.some; exercised preparation never reads its fields or brand"
+    },
+    {
+      "type": "PsErasureNameState",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+        "blobSha": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+        "line": 34,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "used",
+            "type": "List String"
+          },
+          {
+            "name": "entriesRev",
+            "type": "List (PsName × String)"
+          }
+        ]
+      },
+      "method": "explicit-host-structural-fixture",
+      "replacement": "{ used: ownedList, entriesRev: ownedList }",
+      "role": "unbranded non-IR worker-state input; field projections only"
+    },
+    {
+      "type": "PsErasureScope",
+      "sites": {
+        "F1": 1,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blobSha": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+        "line": 150,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "localContext",
+            "type": "PsLocalContext"
+          },
+          {
+            "name": "runtimeLocals",
+            "type": "List (Nat × String)"
+          },
+          {
+            "name": "typeLocals",
+            "type": "List (Nat × String)"
+          },
+          {
+            "name": "erasedLocals",
+            "type": "List Nat"
+          },
+          {
+            "name": "declarationNames",
+            "type": "PsErasureDeclarationNames"
+          },
+          {
+            "name": "runtimeConstructors",
+            "type": "PsErasureNameIndex PsRuntimeConstructorInfo"
+          },
+          {
+            "name": "runtimeRecursors",
+            "type": "PsErasureNameIndex PsRuntimeInductiveInfo"
+          },
+          {
+            "name": "runtimeStructures",
+            "type": "PsErasureNameIndex PsRuntimeStructureInfo"
+          },
+          {
+            "name": "runtimeStructureConstructors",
+            "type": "PsErasureNameIndex PsRuntimeStructureInfo"
+          },
+          {
+            "name": "runtimeExpressions",
+            "type": "List (Nat × PsVerifiedIrExpr)"
+          },
+          {
+            "name": "currentDefinition",
+            "type": "Option PsErasureCurrentDefinition"
+          }
+        ]
+      },
+      "method": "copy-same-compiler-record",
+      "replacement": "{ ...compiler.psErasureScopeEmpty(declarationNames), explicitly replaced scope fields }",
+      "role": "input erasure scope; original brand and untouched fields retained"
+    },
+    {
+      "type": "PsInductiveInfo",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/core/src/Ps/Core/Declaration.lean",
+        "blobSha": "c34c280b1c42f23138cfec79f4e448db17071952",
+        "line": 3,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "PsName"
+          },
+          {
+            "name": "levelParams",
+            "type": "List PsName"
+          },
+          {
+            "name": "type",
+            "type": "PsExpr"
+          },
+          {
+            "name": "numParams",
+            "type": "Nat"
+          },
+          {
+            "name": "numIndices",
+            "type": "Nat"
+          },
+          {
+            "name": "constructors",
+            "type": "List PsName"
+          },
+          {
+            "name": "isStructure",
+            "type": "Bool"
+          }
+        ]
+      },
+      "method": "copy-same-compiler-record",
+      "replacement": "{ ...elaboratedDeclaration.info, constructors: ownedList }",
+      "role": "deliberately invalid constructor-name metadata with same compiler brand"
+    },
+    {
+      "type": "PsRuntimeConstructorField",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blobSha": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+        "line": 123,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "sourceIndex",
+            "type": "Nat"
+          },
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "type",
+            "type": "PsVerifiedIrType"
+          },
+          {
+            "name": "recursive",
+            "type": "Bool"
+          }
+        ]
+      },
+      "method": "plain-independent-expected-observation",
+      "replacement": "plain object with exact fields",
+      "role": "expected metadata only; never compiler input"
+    },
+    {
+      "type": "PsRuntimeConstructorInfo",
+      "sites": {
+        "F1": 0,
+        "F2": 3
+      },
+      "definition": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blobSha": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+        "line": 129,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "inductiveName",
+            "type": "String"
+          },
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "coreName",
+            "type": "PsName"
+          },
+          {
+            "name": "numParams",
+            "type": "Nat"
+          },
+          {
+            "name": "fields",
+            "type": "List PsRuntimeConstructorField"
+          }
+        ]
+      },
+      "method": "plain-independent-expected-observation",
+      "replacement": "plain object with exact fields",
+      "role": "expected metadata only; never compiler input"
+    },
+    {
+      "type": "PsRuntimeInductiveInfo",
+      "sites": {
+        "F1": 0,
+        "F2": 2
+      },
+      "definition": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blobSha": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+        "line": 136,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "coreName",
+            "type": "PsName"
+          },
+          {
+            "name": "recursorName",
+            "type": "PsName"
+          },
+          {
+            "name": "numParams",
+            "type": "Nat"
+          },
+          {
+            "name": "typeParameters",
+            "type": "List PsVerifiedIrTypeParameter"
+          },
+          {
+            "name": "constructors",
+            "type": "List PsRuntimeConstructorInfo"
+          }
+        ]
+      },
+      "method": "plain-independent-expected-observation",
+      "replacement": "plain object with exact fields",
+      "role": "expected metadata only; never compiler input"
+    },
+    {
+      "type": "PsRuntimeStructureField",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blobSha": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+        "line": 109,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "sourceIndex",
+            "type": "Nat"
+          },
+          {
+            "name": "projectionIndex",
+            "type": "Nat"
+          },
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "type",
+            "type": "PsVerifiedIrType"
+          }
+        ]
+      },
+      "method": "plain-independent-expected-observation",
+      "replacement": "plain object with exact fields",
+      "role": "expected metadata only; never compiler input"
+    },
+    {
+      "type": "PsRuntimeStructureInfo",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blobSha": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+        "line": 115,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "coreName",
+            "type": "PsName"
+          },
+          {
+            "name": "constructorName",
+            "type": "PsName"
+          },
+          {
+            "name": "numParams",
+            "type": "Nat"
+          },
+          {
+            "name": "typeParameters",
+            "type": "List PsVerifiedIrTypeParameter"
+          },
+          {
+            "name": "fields",
+            "type": "List PsRuntimeStructureField"
+          }
+        ]
+      },
+      "method": "plain-independent-expected-observation",
+      "replacement": "plain object with exact fields",
+      "role": "expected metadata only; never compiler input"
+    },
+    {
+      "type": "PsTsSymbolMapState",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+        "blobSha": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+        "line": 33,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "used",
+            "type": "List String"
+          },
+          {
+            "name": "nextIndex",
+            "type": "Nat"
+          },
+          {
+            "name": "entriesRev",
+            "type": "List (String × String)"
+          }
+        ]
+      },
+      "method": "explicit-host-structural-fixture",
+      "replacement": "{ used: ownedList, nextIndex: bigint, entriesRev: ownedList }",
+      "role": "unbranded non-IR worker-state input; field projections only"
+    },
+    {
+      "type": "PsVerifiedIrConstructor",
+      "sites": {
+        "F1": 0,
+        "F2": 3
+      },
+      "definition": {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "line": 220,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "fields",
+            "type": "List PsVerifiedIrConstructorField"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakeConstructor(name, fields)",
+      "runtimeArity": 2,
+      "role": "input IR constructor record"
+    },
+    {
+      "type": "PsVerifiedIrConstructorField",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "line": 216,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "type",
+            "type": "PsVerifiedIrType"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakeConstructorField(name, type)",
+      "runtimeArity": 2,
+      "role": "input IR constructor field"
+    },
+    {
+      "type": "PsVerifiedIrDeclaration",
+      "sites": {
+        "F1": 0,
+        "F2": 1
+      },
+      "definition": {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "line": 229,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "typeParameters",
+            "type": "List PsVerifiedIrTypeParameter"
+          },
+          {
+            "name": "parameters",
+            "type": "List PsVerifiedIrParameter"
+          },
+          {
+            "name": "resultType",
+            "type": "PsVerifiedIrType"
+          },
+          {
+            "name": "body",
+            "type": "PsVerifiedIrExpr"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakeDeclaration(name, typeParameters, parameters, resultType, body)",
+      "runtimeArity": 5,
+      "role": "input/expected IR declaration"
+    },
+    {
+      "type": "PsVerifiedIrInductive",
+      "sites": {
+        "F1": 0,
+        "F2": 4
+      },
+      "definition": {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "line": 224,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "typeParameters",
+            "type": "List PsVerifiedIrTypeParameter"
+          },
+          {
+            "name": "constructors",
+            "type": "List PsVerifiedIrConstructor"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakeInductive(name, typeParameters, constructors)",
+      "runtimeArity": 3,
+      "role": "input/expected IR inductive"
+    },
+    {
+      "type": "PsVerifiedIrModule",
+      "sites": {
+        "F1": 0,
+        "F2": 2
+      },
+      "definition": {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "line": 242,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "imports",
+            "type": "List PsVerifiedIrExternalImport"
+          },
+          {
+            "name": "structures",
+            "type": "List PsVerifiedIrStructure"
+          },
+          {
+            "name": "inductives",
+            "type": "List PsVerifiedIrInductive"
+          },
+          {
+            "name": "declarations",
+            "type": "List PsVerifiedIrDeclaration"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakeModule(imports, structures, inductives, declarations)",
+      "runtimeArity": 4,
+      "role": "input IR module"
+    },
+    {
+      "type": "PsVerifiedIrParameter",
+      "sites": {
+        "F1": 1,
+        "F2": 0
+      },
+      "definition": {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "line": 147,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "type",
+            "type": "PsVerifiedIrType"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakeParameter(name, type)",
+      "runtimeArity": 2,
+      "role": "input IR parameter"
+    },
+    {
+      "type": "PsVerifiedIrStructure",
+      "sites": {
+        "F1": 0,
+        "F2": 4
+      },
+      "definition": {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "line": 211,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "typeParameters",
+            "type": "List PsVerifiedIrTypeParameter"
+          },
+          {
+            "name": "fields",
+            "type": "List PsVerifiedIrStructureField"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakeStructure(name, typeParameters, fields)",
+      "runtimeArity": 3,
+      "role": "input/expected IR structure"
+    },
+    {
+      "type": "PsVerifiedIrStructureField",
+      "sites": {
+        "F1": 0,
+        "F2": 2
+      },
+      "definition": {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "line": 207,
+        "kind": "structure",
+        "fields": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "type",
+            "type": "PsVerifiedIrType"
+          }
+        ]
+      },
+      "method": "existing-neutral-factory",
+      "replacement": "psIrCheckMakeStructureField(name, type)",
+      "runtimeArity": 2,
+      "role": "input IR field"
+    }
+  ],
+  "neutralFactories": {
+    "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+    "blobSha": "154cc013b692a449a6a47e6e4270957856d5bc0b",
+    "existingSuccessfulConsumer": {
+      "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+      "blobSha": "b3b71e56f701478dfd12a373b94c75469e74161e",
+      "lines": [
+        10,
+        52
+      ]
+    }
+  },
+  "callablePreflight": {
+    "combinedPaths": [
+      "List.cons",
+      "List.nil",
+      "Option.some",
+      "PsDeclaration.axiomDecl",
+      "PsDeclaration.definitionDecl",
+      "PsDeclaration.inductiveDecl",
+      "PsDeclaration.opaqueDecl",
+      "PsDeclaration.partialDecl",
+      "PsDeclaration.theoremDecl",
+      "PsExpr.app",
+      "PsExpr.constE",
+      "PsExpr.fvar",
+      "PsExpr.lit",
+      "PsExpr.proj",
+      "PsLiteral.natural",
+      "PsName.str",
+      "PsVerifiedIrExpr.lambda",
+      "PsVerifiedIrExpr.letE",
+      "PsVerifiedIrExpr.literal",
+      "PsVerifiedIrExpr.projection",
+      "PsVerifiedIrExpr.record",
+      "PsVerifiedIrExpr.var",
+      "PsVerifiedIrLiteral.natural",
+      "PsVerifiedIrType.named",
+      "PsVerifiedIrType.primitive",
+      "psAddDeclarationListWorker",
+      "psBuildErasureDeclarationNamesWorker",
+      "psCompilerElaborateSource",
+      "psCompilerParseSource",
+      "psCompilerPreparationSourcesWorker",
+      "psCompilerPreparationStart",
+      "psCompilerPreparationStepParsed",
+      "psDeclarationName",
+      "psElabDeclarationsWorker",
+      "psEnvironmentAdd",
+      "psEnvironmentFind",
+      "psEraseDefinitionsLoopWorker",
+      "psErasureEtaNameWithFuel",
+      "psErasureEtaParameters",
+      "psErasureLocalName",
+      "psErasureLocalNameWithFuel",
+      "psErasureLookupConstructor",
+      "psErasureLookupRecursor",
+      "psErasureLookupStructure",
+      "psErasureScopeEmpty",
+      "psIrCheckMakeConstructor",
+      "psIrCheckMakeConstructorField",
+      "psIrCheckMakeDeclaration",
+      "psIrCheckMakeInductive",
+      "psIrCheckMakeModule",
+      "psIrCheckMakePair",
+      "psIrCheckMakeParameter",
+      "psIrCheckMakeStructure",
+      "psIrCheckMakeStructureField",
+      "psLocalPushBinding",
+      "psNameAppendStr",
+      "psNameToString",
+      "psPrepareRuntimeInductive",
+      "psPrepareRuntimeInductives",
+      "psPrepareRuntimeStructure",
+      "psPrepareRuntimeStructures",
+      "psTsBuildBrandMap",
+      "psTsBuildSymbolMap",
+      "psTsBuildTagMap",
+      "psTsFreshInternalWithFuel",
+      "psTsFreshInternalWorker",
+      "psTsFreshMatchTempLoop",
+      "psTsFreshMatchTempWorker"
+    ],
+    "count": 68,
+    "f1StandaloneCount": 22,
+    "location": "runMigrationWorkerConformance before runSh1FreshNameCases or runF2Cases; F1 checks its subset independently when used alone",
+    "method": "Resolve every path without calling it; collect missing functions and assert the complete missing list once.",
+    "noExtraPreparation": true
+  },
+  "remainingApiReview": {
+    "result": "No other constructor, input field, observed field or function-order mismatch found in the audited finite surface.",
+    "F1": "List.nil()/cons(), PsName.str and anonymous, IR primitive/natural/expression constructors, all 4 worker signatures, wrappers, Except result fields and record result fields match exact definitions.",
+    "F2": "Core constructors, environment/preparation/elaboration APIs, eight worker signatures, structure/inductive preparation helpers, index lookups, result fields and neutral IR factories match exact definitions. Explicit field names in replacement records are listed in structureMatrix.",
+    "ABI": {
+      "path": "psc0/scripts/sh1-migration-worker-abi.mjs",
+      "blobSha": "3e7b1c1559770f738448126c331008a73a54119a",
+      "changed": false,
+      "structureConstructorCalls": 0,
+      "functions": [
+        "psCompilerPrepareSource",
+        "psExprAlphaEq",
+        "psDeclarationName",
+        "psDeclarationType",
+        "psNameToString",
+        "psNameEq",
+        "psRootName"
+      ],
+      "observedFields": [
+        "prepared.declarations",
+        "declaration.levelParams",
+        "type.body",
+        "type.binder",
+        "ir.declarations",
+        "irDeclaration.name",
+        "irDeclaration.typeParameters",
+        "irDeclaration.parameters",
+        "irDeclaration.resultType",
+        "parameter.type",
+        "type.name",
+        "type.arguments",
+        "type.parameters",
+        "type.result"
+      ],
+      "notes": "Complete actual Core and IR type checks retained. Signature-only Lean probe and 12 typed generic partial wrappers remain elaborated, not emitted/executed. No second full source preparation added."
+    }
+  },
+  "hostStructuralBoundary": {
+    "types": [
+      "PsErasureNameState",
+      "PsTsSymbolMapState",
+      "PsErasureCurrentDefinition"
+    ],
+    "compilerCreated": false,
+    "branded": false,
+    "children": "Every List/Prod/Option/Name/IR child is constructed by the supplied compiler namespace.",
+    "statePaths": "Name-state and symbol-state worker implementations project their documented fields; they do not read brand symbols. Plain records isolate these host/API behavior cases.",
+    "markerPaths": [
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+        "lines": [
+          81,
+          98
+        ]
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+        "lines": [
+          331,
+          360
+        ]
+      }
+    ],
+    "markerPurpose": "Preserve the existing currentDefinition-reset assertion; preparation resets it to Option.none without reading marker fields or brand.",
+    "notPassedToOriginalIrCarrier": true
+  },
+  "corrections": [
+    {
+      "path": "psc0/scripts/sh1-fresh-name-conformance.mjs",
+      "baseBlob": "f11931b423f6920ca72a64376e49e1f6234edab5",
+      "replacementBlob": "240727d033a1eb2d630826560c350ea76dd4d4d4",
+      "edits": [
+        {
+          "label": "F1 required export inventory and collected assertion",
+          "occurrences": 1,
+          "original": "const sha256 = (value) => createHash('sha256').update(value).digest('hex');\n",
+          "replacement": "const sha256 = (value) => createHash('sha256').update(value).digest('hex');\n\n// The TypeScript backend emits structures as interfaces plus private brands,\n// not runtime Type.mk namespaces. Check every callable fixture dependency before\n// allocating inputs, including when this F1 section is used on its own.\nexport const sh1FreshNameRequiredExports = Object.freeze([\n  'List.cons', 'List.nil', 'PsName.str',\n  'PsVerifiedIrType.primitive', 'PsVerifiedIrLiteral.natural',\n  'PsVerifiedIrExpr.literal', 'PsVerifiedIrExpr.var', 'PsVerifiedIrExpr.record',\n  'PsVerifiedIrExpr.lambda', 'PsVerifiedIrExpr.letE', 'PsVerifiedIrExpr.projection',\n  'psIrCheckMakePair', 'psIrCheckMakeParameter',\n  'psErasureLocalNameWithFuel', 'psErasureEtaNameWithFuel',\n  'psTsFreshMatchTempWorker', 'psTsFreshInternalWorker',\n  'psErasureScopeEmpty', 'psErasureLocalName', 'psErasureEtaParameters',\n  'psTsFreshMatchTempLoop', 'psTsFreshInternalWithFuel',\n]);\n\nexport function assertMigrationRequiredExports(compiler, names, label) {\n  const missing = names.filter((name) => {\n    const value = name.split('.').reduce((owner, key) => owner?.[key], compiler);\n    return typeof value !== 'function';\n  });\n  assert.deepEqual(missing, [], 'PSC0_SH1_MIGRATION_REQUIRED_EXPORTS_' + label);\n}\n"
+        },
+        {
+          "label": "F1 parameter factory",
+          "occurrences": 1,
+          "original": "runtime.PsVerifiedIrParameter.mk(name, natType(runtime))",
+          "replacement": "runtime.psIrCheckMakeParameter(name, natType(runtime))"
+        },
+        {
+          "label": "F1 pair factories",
+          "occurrences": 4,
+          "original": "runtime.Prod.mk(",
+          "replacement": "runtime.psIrCheckMakePair("
+        },
+        {
+          "label": "F1 owned scope template",
+          "occurrences": 1,
+          "original": "  return runtime.PsErasureScope.mk(\n    empty.localContext,\n    list(runtime, localNames.map((name, index) => runtime.psIrCheckMakePair(BigInt(index), name))),\n    empty.typeLocals, empty.erasedLocals, empty.declarationNames,\n    empty.runtimeConstructors, empty.runtimeRecursors,\n    empty.runtimeStructures, empty.runtimeStructureConstructors,\n    empty.runtimeExpressions, empty.currentDefinition);",
+          "replacement": "  // Spread retains this compiler's scope brand and every untouched field.\n  return {\n    ...empty,\n    runtimeLocals: list(runtime, localNames.map((name, index) =>\n      runtime.psIrCheckMakePair(BigInt(index), name))),\n  };"
+        },
+        {
+          "label": "F1 early collected missing export check",
+          "occurrences": 1,
+          "original": "  for (const name of [\n    'psErasureLocalNameWithFuel', 'psErasureEtaNameWithFuel',\n    'psTsFreshMatchTempWorker', 'psTsFreshInternalWorker',\n    'psErasureScopeEmpty', 'psErasureLocalName', 'psErasureEtaParameters',\n    'psTsFreshMatchTempLoop', 'psTsFreshInternalWithFuel',\n  ]) assert.equal(typeof runtime[name], 'function', 'PSC0_SH1_F1_EXPORT_' + label + '_' + name);",
+          "replacement": "  assertMigrationRequiredExports(runtime, sh1FreshNameRequiredExports, 'F1_' + label);"
+        }
+      ]
+    },
+    {
+      "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+      "baseBlob": "fe63bf7d89b07f7c60ce3a68f09a62e2418b95e9",
+      "replacementBlob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+      "edits": [
+        {
+          "label": "F2 shared export guard import",
+          "occurrences": 1,
+          "original": "import { runSh1FreshNameCases } from './sh1-fresh-name-conformance.mjs';",
+          "replacement": "import {\n  runSh1FreshNameCases, sh1FreshNameRequiredExports, assertMigrationRequiredExports,\n} from './sh1-fresh-name-conformance.mjs';"
+        },
+        {
+          "label": "F2 complete callable inventory",
+          "occurrences": 1,
+          "original": "const sha256 = (value) => createHash('sha256').update(value).digest('hex');\n",
+          "replacement": "const sha256 = (value) => createHash('sha256').update(value).digest('hex');\n\n// One finite preflight covers F1 and F2 before either section constructs inputs.\n// Every name is an existing generated export; no structure namespace is assumed.\nconst migrationRequiredExports = Object.freeze([...new Set([\n  ...sh1FreshNameRequiredExports,\n  'Option.some',\n  'PsDeclaration.axiomDecl', 'PsDeclaration.definitionDecl',\n  'PsDeclaration.theoremDecl', 'PsDeclaration.partialDecl',\n  'PsDeclaration.opaqueDecl', 'PsDeclaration.inductiveDecl',\n  'PsExpr.constE', 'PsExpr.lit', 'PsExpr.app', 'PsExpr.proj', 'PsExpr.fvar',\n  'PsLiteral.natural', 'PsVerifiedIrType.named',\n  'psNameAppendStr', 'psNameToString', 'psDeclarationName',\n  'psEnvironmentAdd', 'psEnvironmentFind',\n  'psCompilerParseSource', 'psCompilerElaborateSource',\n  'psCompilerPreparationStart', 'psCompilerPreparationStepParsed',\n  'psCompilerPreparationSourcesWorker', 'psAddDeclarationListWorker',\n  'psElabDeclarationsWorker', 'psBuildErasureDeclarationNamesWorker',\n  'psEraseDefinitionsLoopWorker', 'psPrepareRuntimeStructures',\n  'psPrepareRuntimeInductives', 'psTsBuildSymbolMap',\n  'psLocalPushBinding', 'psErasureLookupStructure',\n  'psErasureLookupConstructor', 'psErasureLookupRecursor',\n  'psPrepareRuntimeStructure', 'psPrepareRuntimeInductive',\n  'psTsBuildBrandMap', 'psTsBuildTagMap',\n  'psIrCheckMakeDeclaration', 'psIrCheckMakeStructureField',\n  'psIrCheckMakeStructure', 'psIrCheckMakeConstructorField',\n  'psIrCheckMakeConstructor', 'psIrCheckMakeInductive', 'psIrCheckMakeModule',\n])]);\n"
+        },
+        {
+          "label": "F2 existing factory Prod",
+          "occurrences": 11,
+          "original": "compiler.Prod.mk(",
+          "replacement": "compiler.psIrCheckMakePair("
+        },
+        {
+          "label": "F2 existing factory PsVerifiedIrDeclaration",
+          "occurrences": 1,
+          "original": "compiler.PsVerifiedIrDeclaration.mk(",
+          "replacement": "compiler.psIrCheckMakeDeclaration("
+        },
+        {
+          "label": "F2 existing factory PsVerifiedIrStructure",
+          "occurrences": 4,
+          "original": "compiler.PsVerifiedIrStructure.mk(",
+          "replacement": "compiler.psIrCheckMakeStructure("
+        },
+        {
+          "label": "F2 existing factory PsVerifiedIrStructureField",
+          "occurrences": 2,
+          "original": "compiler.PsVerifiedIrStructureField.mk(",
+          "replacement": "compiler.psIrCheckMakeStructureField("
+        },
+        {
+          "label": "F2 existing factory PsVerifiedIrInductive",
+          "occurrences": 4,
+          "original": "compiler.PsVerifiedIrInductive.mk(",
+          "replacement": "compiler.psIrCheckMakeInductive("
+        },
+        {
+          "label": "F2 existing factory PsVerifiedIrConstructor",
+          "occurrences": 3,
+          "original": "compiler.PsVerifiedIrConstructor.mk(",
+          "replacement": "compiler.psIrCheckMakeConstructor("
+        },
+        {
+          "label": "F2 existing factory PsVerifiedIrConstructorField",
+          "occurrences": 1,
+          "original": "compiler.PsVerifiedIrConstructorField.mk(",
+          "replacement": "compiler.psIrCheckMakeConstructorField("
+        },
+        {
+          "label": "F2 existing factory PsVerifiedIrModule",
+          "occurrences": 2,
+          "original": "compiler.PsVerifiedIrModule.mk(",
+          "replacement": "compiler.psIrCheckMakeModule("
+        },
+        {
+          "label": "F2 owned preparation template",
+          "occurrences": 1,
+          "original": "  const prefixState = compiler.PsCompilerPreparationState.mk(\n    sourceKind, prefixEnvironment, list([prefix]));",
+          "replacement": "  const prefixState = {\n    ...compiler.psCompilerPreparationStart(sourceKind),\n    environment: prefixEnvironment,\n    declarationsRev: list([prefix]),\n  };"
+        },
+        {
+          "label": "F2 structural name-state fixture",
+          "occurrences": 1,
+          "original": "  const nameState = (used, entries) => compiler.PsErasureNameState.mk(list(used),\n    list(entries.map(([text, output]) => compiler.psIrCheckMakePair(name(text), output))));",
+          "replacement": "  // These two worker-state types have no neutral exported constructor. Their\n  // worker paths only project fields, so use explicit unbranded host structural\n  // fixtures with this compiler's List/Prod/Name children. They are not claimed\n  // to be compiler-created records or submitted to original-IR carrier checking.\n  const nameState = (used, entries) => ({\n    used: list(used),\n    entriesRev: list(entries.map(([text, output]) =>\n      compiler.psIrCheckMakePair(name(text), output))),\n  });"
+        },
+        {
+          "label": "F2 owned scope template and structural reset marker",
+          "occurrences": 1,
+          "original": "  const seededScope = compiler.PsErasureScope.mk(\n    pushed.context,\n    list([compiler.psIrCheckMakePair(pushed.id, 'keptRuntime')]),\n    emptyScope.typeLocals, emptyScope.erasedLocals, emptyScope.declarationNames,\n    emptyScope.runtimeConstructors, emptyScope.runtimeRecursors,\n    emptyScope.runtimeStructures, emptyScope.runtimeStructureConstructors,\n    list([compiler.psIrCheckMakePair(pushed.id, compiler.PsVerifiedIrExpr.var('keptRuntime'))]),\n    compiler.Option.some(compiler.PsErasureCurrentDefinition.mk(\n      'keptDefinition', nil, list(['keptRuntime']))));",
+          "replacement": "  const seededScope = {\n    ...emptyScope,\n    localContext: pushed.context,\n    runtimeLocals: list([compiler.psIrCheckMakePair(pushed.id, 'keptRuntime')]),\n    runtimeExpressions: list([\n      compiler.psIrCheckMakePair(pushed.id, compiler.PsVerifiedIrExpr.var('keptRuntime')),\n    ]),\n    // A third explicit host structural fixture: preparation resets this marker\n    // to none without reading its fields or brand. Preserve that reset case.\n    currentDefinition: compiler.Option.some({\n      name: 'keptDefinition', typeArgumentsRev: nil, runtimeParameters: list(['keptRuntime']),\n    }),\n  };"
+        },
+        {
+          "label": "F2 owned inductive info template",
+          "occurrences": 1,
+          "original": "    return compiler.PsDeclaration.inductiveDecl(compiler.PsInductiveInfo.mk(\n      info.name, info.levelParams, info.type, info.numParams, info.numIndices,\n      list([name(missing)]), info.isStructure));",
+          "replacement": "    return compiler.PsDeclaration.inductiveDecl({\n      ...info,\n      constructors: list([name(missing)]),\n    });"
+        },
+        {
+          "label": "F2 expected runtime structure fields",
+          "occurrences": 1,
+          "original": "  const expectedRuntimeRecord = (text, core, constructor, field, type) =>\n    compiler.PsRuntimeStructureInfo.mk(text, name(core), name(constructor), 0n, nil,\n      list([compiler.PsRuntimeStructureField.mk(0n, 0n, field, type)]));",
+          "replacement": "  // Expected metadata is compared as plain observations, never passed as input\n  // to a compiler operation. Do not assume runtime structure constructors.\n  const expectedRuntimeRecord = (text, core, constructor, field, type) => ({\n    name: text, coreName: name(core), constructorName: name(constructor), numParams: 0n,\n    typeParameters: nil,\n    fields: list([{ sourceIndex: 0n, projectionIndex: 0n, name: field, type }]),\n  });"
+        },
+        {
+          "label": "F2 expected runtime inductive fields",
+          "occurrences": 1,
+          "original": "  const firstConstructor = compiler.PsRuntimeConstructorInfo.mk(\n    'choice_A', 'first', name('F2ChoiceA.first'), 0n, nil);\n  const secondConstructor = compiler.PsRuntimeConstructorInfo.mk(\n    'choice_A', 'second', name('F2ChoiceA.second'), 0n, nil);\n  const wrapConstructor = compiler.PsRuntimeConstructorInfo.mk(\n    'choice_B', 'wrap', name('F2ChoiceB.wrap'), 0n,\n    list([compiler.PsRuntimeConstructorField.mk(\n      0n, 'prior', namedIr('choice_A'), false)]));\n  const runtimeChoiceA = compiler.PsRuntimeInductiveInfo.mk(\n    'choice_A', name('F2ChoiceA'), name('F2ChoiceA.rec'), 0n, nil,\n    list([firstConstructor, secondConstructor]));\n  const runtimeChoiceB = compiler.PsRuntimeInductiveInfo.mk(\n    'choice_B', name('F2ChoiceB'), name('F2ChoiceB.rec'), 0n, nil,\n    list([wrapConstructor]));",
+          "replacement": "  const firstConstructor = {\n    inductiveName: 'choice_A', name: 'first', coreName: name('F2ChoiceA.first'),\n    numParams: 0n, fields: nil,\n  };\n  const secondConstructor = {\n    inductiveName: 'choice_A', name: 'second', coreName: name('F2ChoiceA.second'),\n    numParams: 0n, fields: nil,\n  };\n  const wrapConstructor = {\n    inductiveName: 'choice_B', name: 'wrap', coreName: name('F2ChoiceB.wrap'),\n    numParams: 0n,\n    fields: list([{ sourceIndex: 0n, name: 'prior', type: namedIr('choice_A'), recursive: false }]),\n  };\n  const runtimeChoiceA = {\n    name: 'choice_A', coreName: name('F2ChoiceA'), recursorName: name('F2ChoiceA.rec'),\n    numParams: 0n, typeParameters: nil, constructors: list([firstConstructor, secondConstructor]),\n  };\n  const runtimeChoiceB = {\n    name: 'choice_B', coreName: name('F2ChoiceB'), recursorName: name('F2ChoiceB.rec'),\n    numParams: 0n, typeParameters: nil, constructors: list([wrapConstructor]),\n  };"
+        },
+        {
+          "label": "F2 structural symbol-state fixture",
+          "occurrences": 1,
+          "original": "  const symbolState = (used, index, entries) => compiler.PsTsSymbolMapState.mk(\n    list(used), BigInt(index), list(entries.map(([key, value]) => compiler.psIrCheckMakePair(key, value))));",
+          "replacement": "  const symbolState = (used, index, entries) => ({\n    used: list(used),\n    nextIndex: BigInt(index),\n    entriesRev: list(entries.map(([key, value]) => compiler.psIrCheckMakePair(key, value))),\n  });"
+        },
+        {
+          "label": "F2 combined preflight before first fixture",
+          "occurrences": 1,
+          "original": "  assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_TAG_READER');\n  const f1 = runSh1FreshNameCases(compiler);",
+          "replacement": "  assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_TAG_READER');\n  assertMigrationRequiredExports(compiler, migrationRequiredExports, 'F1_F2');\n  const f1 = runSh1FreshNameCases(compiler);"
+        },
+        {
+          "label": "F2 explicit host fixture boundary in receipt",
+          "occurrences": 1,
+          "original": "      eachCompilerOwnsAllTaggedInputs: true,\n      independentExplicitExpectations: true,",
+          "replacement": "      eachCompilerOwnsAllTaggedInputs: true,\n      irRecordsUseExistingCompilerFactories: true,\n      copiedRecordsRetainOwningCompilerBrands: true,\n      hostStructuralFixtureRecords: [\n        'PsErasureNameState', 'PsTsSymbolMapState', 'PsErasureCurrentDefinition',\n      ],\n      hostStructuralFixtureBoundary:\n        'Explicit unbranded non-IR host records with owning-compiler tagged children; ' +\n        'their exercised paths project fields or reset the marker, and do not inspect brands. ' +\n        'They are not compiler-created branded records and never enter original-IR carrier checking.',\n      independentExplicitExpectations: true,"
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "javascriptSyntax": "Parsed without invocation",
+    "outsideReviewedReplacementsUnchanged": true,
+    "f1VectorDefinitionsUnchanged": true,
+    "f2CaseNamesAndRawMetadataSourceUnchanged": true,
+    "remainingStructureMkCalls": 0,
+    "allDirectAndAliasedFunctionCallPathsCoveredByPreflight": true,
+    "compilerOrTestExecution": false,
+    "sourceRefOrRunMutations": false
+  },
+  "sourceFiles": {
+    "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+    "psc0/packages/compiler/src/Ps/Compiler/Api.lean": "13614bc6eb279c93d4cbcbd8815b671beae38199",
+    "psc0/packages/erasure/src/Ps/Erasure/Definition.lean": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+    "psc0/packages/erasure/src/Ps/Erasure/Basic.lean": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+    "psc0/packages/core/src/Ps/Core/Declaration.lean": "c34c280b1c42f23138cfec79f4e448db17071952",
+    "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+    "psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean": "38485851a30f024d973392c6c8e1d86916e31466",
+    "psc0/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean": "154cc013b692a449a6a47e6e4270957856d5bc0b",
+    "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+    "psc0/packages/environment/src/Ps/Environment/Basic.lean": "533dd2008b773f820e7fdf87ee01d66d759576c5",
+    "psc0/packages/environment/src/Ps/Environment/LocalContext.lean": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6",
+    "psc0/packages/core/src/Ps/Core/Expr.lean": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+    "psc0/packages/core/src/Ps/Core/Equality.lean": "0762bd4fee3540083eb7dab3aeb70dff8d02b6c4",
+    "psc0/packages/foundation/src/Ps/Foundation/Name.lean": "9c896076032762543b57d88c0010f90ad0a066d5",
+    "psc0/packages/elab/src/Ps/Elab/Declaration.lean": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+    "psc0/packages/erasure/src/Ps/Erasure/Structure.lean": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75",
+    "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed",
+    "psc0/packages/erasure/src/Ps/Erasure/Expr.lean": "28e14f991df68c4a7d49f09120a42c85c919d6a8"
+  },
+  "workflowPreflight": {
+    "baseBlob": "dbaab416795bdafefa680e45d1cd1eab22924e4b",
+    "replacementBlob": "9542565b1f2ea45b49d1bc25c8649708b81da2cd",
+    "exactInsertion": "      - name: Verify migration fixture APIs and expectations on the authenticated R compiler\n        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.has-parent == 'true' }}\n        run: |\n          node --input-type=module <<'NODE'\n          import assert from 'node:assert/strict';\n          import { mkdir, writeFile } from 'node:fs/promises';\n          import path from 'node:path';\n          import { readSelectedAuthoringSeed } from './scripts/sh1-successor-seed.mjs';\n          import { loadGeneratedCompiler } from './scripts/sh1-source-snapshot.mjs';\n          import { valueTag } from './scripts/sh1-capabilities.mjs';\n          import { runMigrationWorkerConformance } from './scripts/sh1-migration-worker-conformance.mjs';\n          const selected = await readSelectedAuthoringSeed();\n          assert.equal(selected.mode, 'qualified');\n          assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed');\n          const loaded = await loadGeneratedCompiler(path.resolve(selected.compilerPath), {\n            expectedSha256: selected.manifest.expectedArtifacts.javascriptSha256,\n          });\n          const started = performance.now();\n          const report = runMigrationWorkerConformance(loaded.compiler, valueTag);\n          assert.equal(report.cases, 87);\n          const receipt = {\n            schemaVersion: 1, evidence: 'migration-fixture-authenticated-reference-preflight',\n            recipeSourceRef: process.env.GITHUB_SHA, referenceSourceRef: selected.sourceRef,\n            referenceCompilerSha256: loaded.compilerSha256,\n            selectedSeedIdentitySha256: selected.identitySha256,\n            elapsedMs: performance.now() - started, report, passed: true,\n            compilerBuilt: false, currentSourceQualifiedByThisCheck: false,\n          };\n          await mkdir('dist/sh1', { recursive: true });\n          await writeFile('dist/sh1/worker-harness-reference.json',\n            JSON.stringify(receipt, null, 2) + '\\n', 'utf8');\n          console.log('PSC0_SH1_WORKER_HARNESS_REFERENCE: ' + JSON.stringify(receipt));\n          NODE\n",
+    "staticReview": "Root and independent peer verified path/root/import/authentication/receipt compatibility without execution.",
+    "cases": 87,
+    "newUniqueCases": 0,
+    "newCompilerBuilds": 0,
+    "originalPairedCorrespondenceRetained": true
+  }
+}

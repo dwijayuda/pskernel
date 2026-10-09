@@ -41,16 +41,20 @@ jobs:
           sha256sum .lake/build/bin/psc_kernel_core_arena
           python3 - <<'PY'
           import pathlib, re
-          p = pathlib.Path(".lake/build/ir/Ps/KernelCore/Core/Expr.c")
-          if p.exists():
+          root = pathlib.Path(".lake/build/ir/Ps/KernelCore")
+          for rel in ["Core/Expr/Shared.c", "Core/Substitution/Instantiate.c", "Runtime/Acceleration/Cache.c"]:
+              p = root / rel
+              if not p.exists():
+                  continue
               source = p.read_text()
-              for name in ["psKernelExprEq", "psKernelExprHasLooseAt", "psKernelExprNodeCount"]:
-                  match = re.search(r"LEAN_EXPORT [^\n]+ l_" + name + r"\([^;]*?\)\s*\{", source)
-                  print("COMPILED_FUNCTION", name)
+              specialized = sorted(set(re.findall(r"[A-Za-z0-9_]*PsKernelSharing_(?:walk|fold)[A-Za-z0-9_]*spec[A-Za-z0-9_]*", source)))
+              print("SPECIALIZED_TRAVERSALS", rel, len(specialized))
+              print("\n".join(specialized[:12]))
+              for name in ["prepareReplacement", "hashCached"]:
+                  pattern = r"LEAN_EXPORT [^\n]*[A-Za-z0-9_]*PsKernelSharing_" + name + r"\([^;]*?\)\s*\{"
+                  match = re.search(pattern, source)
                   if match:
-                      print("\n".join(source[match.start():].splitlines()[:70]))
-                  else:
-                      print("\n".join(line for line in source.splitlines() if name in line)[:5000])
+                      print("COMPILED_FUNCTION", name, "\n".join(source[match.start():].splitlines()[:65]))
           PY
       - uses: actions/upload-artifact@v4
         with:

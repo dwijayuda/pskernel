@@ -251,7 +251,8 @@ def hashAlgebra : Algebra Nat where
 theorem hash_fold (e : PsKernelExpr) (cursor : Nat) :
     fold hashAlgebra e cursor = psKernelExprHash e := by
   induction e generalizing cursor <;>
-    simp_all [fold, hashAlgebra, psKernelExprHash]
+    simp_all [Algebra.atom, Algebra.unary, Algebra.binary, Algebra.ternary,
+      fold, hashAlgebra, psKernelExprHash]
 
 abbrev HashMemo := Squash (Memo PsKernelExpr Nat (fold hashAlgebra))
 

@@ -6,18 +6,20 @@ Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
 The active package is `psc0/packages/pskernel-core`, targeting the user-selected
 Lean **4.35.0-rc4**, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
-The current repair stage addresses reduction order, resource accounting,
-cache modes/scope, and redundant traversal. It does not establish complete
-Arena or Mathlib conformance. Exact final results are recorded below and in
+The repair stage addressed reduction order, resource accounting and cache
+modes/scope. The authorized architectural stage now implements certified native
+sharing and reusable hash metadata. It does not yet establish complete Arena or
+Mathlib conformance. Exact checked results are recorded below and in
 [MIGRATION_EVIDENCE.json](MIGRATION_EVIDENCE.json).
 
 The remaining performance problem is architectural: PSKernel preserves
 sharing when reading an export, but its semantic operations often traverse
-that shared graph as an expanded tree. Increasing timeouts, adding a
-declaration-name exception, or copying a native-only pointer optimization
-does not resolve that mismatch. The next representation stage is specified
-here and remains unimplemented at this checkpoint, honoring the request to
-stop before the next stage.
+that shared graph as an expanded tree. The implementation must preserve sharing while proving that execution returns
+the specified result. This stage follows Con Leche's intrinsic-entry proof
+pattern in safe Lean, retains the original expression specification and avoids
+a simultaneous rewrite of checker judgments. Its runtime dependence is explicit:
+this is a native experiment, not the separately planned portable graph/backend
+qualification. No timeout or declaration-specific acceptance exception is added.
 
 ## Source ownership and exact comparison pins
 
@@ -240,9 +242,98 @@ normalizing them into a more convenient representation. Projection type names,
 phantom/non-uniform parameters, and recursor positivity obligations must remain
 visible. Shared implementation ancestry is not independent evidence.
 
-## Next representation stage: coherent design, not fixture repair
+## Certified native execution architecture
 
-This stage is deliberately not started in the current repair checkpoint.
+The current implementation keeps the original pure syntax in `Core/Expr/Basic`.
+A single cursor-aware fold specifies syntax operations. Its executed walker
+carries entries with an intrinsic equation `value = fold algebra node cursor`;
+there is no external table invariant to assume. A hit validates the stored
+input and cursor. Each substitution operation fixes its parameters for the
+table's lifetime. Keys are non-semantic hints; they cannot authorize a value.
+
+Cursor advancement belongs to each operation's algebra. Instantiation, lifting,
+abstraction and both loose-variable queries advance at binders. Node counts,
+free-variable queries, structural hashes and universe substitution keep their
+cursor fixed: the same node reached at different binder depths must not acquire
+redundant entries for a context it does not depend on. Exact bound-variable
+occurrence uses this same certified fold, including negative searches.
+
+The design uses the [Con Leche entry discipline][con-ops], but does not import
+its exclusivity primitive or its constructor metadata. This distinction matters
+to performance: a safe always-memoized traversal can cost more on an ordinary
+unshared tree. Small bounded shapes use direct pure execution. Boolean queries
+preserve early exits through certificates proving the remaining children cannot
+change the result. Native compiler specialization removes the operation
+dictionary callbacks; generated C is inspected in CI.
+
+Lifting and free-variable abstraction now use structural descent, with all-input
+refinements to the existing reference definitions; term instantiation already
+had that refinement. Rebuilding keeps unchanged nodes. Substitution arguments
+are prepared once: a checked closedness fact proves lifting is the identity at
+every binder depth. Open arguments retain the ordinary lifting operation.
+The argument preparation condition is outside the returned closure in generated
+C. Empty universe substitutions return the original node under an unconditional
+identity theorem.
+
+Exact syntactic equality has a separate pair memo and a proved reflexive pointer
+shortcut. Only successful pair results are retained: a false comparison already
+terminates that conjunction. This is not the checker's definitional-equality
+cache, and it does not infer additional pairs by transitivity.
+
+Hash metadata has a longer lifetime than a substitution memo. A profile of the
+first retained-metadata candidate caught whole bucket-array copying and release
+costs: four of eleven sparse worker samples were inside array copying under memo
+insertion. Retaining a parent state aliases the mutable-array-backed table, so
+the expected in-place insertion cost did not apply. The corrected storage uses
+Lean's [persistent hash trie][persistent-map], with bounded-width path copying.
+A subsequent worker profile still found temporary variable-query memos paying
+persistent-trie insertion costs. The current design separates an operation-local
+`Std.HashMap` scratch delta from its persistent checkpoint. Only updates that
+publish metadata freeze the delta into the checkpoint; read-only cache queries
+return the exact hash without publishing. Scalar mixed keys avoid a pair
+allocation per probe; collisions remain validated. Each semantic map
+or pair set retains a `Squash` of intrinsically certified structural hashes.
+The cached result still equals the original hash; the logically unobservable
+memo can change without changing a returned cache record. Four compiler
+simplification theorems preserve complete map/set operations, including misses.
+This is stronger than claiming that cache hits are sound. A separate full
+state-equality theorem proves that certified context-free hash metadata could be
+retained across scope exit. That theorem is deliberately not installed as a
+compiler rewrite: the retention experiment reached 982,096 KiB peak RSS in the
+600-second Init profile, versus 153,152 KiB in the preceding trie-only profile.
+These are separate-run measurements, not a controlled speed comparison, but they
+expose a lifetime risk. Executed scope exit restores the entire parent cache.
+No environment-dependent semantic fact is moved into syntax metadata.
+
+The code introduces no project-defined unsafe implementation, cast or axiom.
+It relies on Lean's existing pointer-hint contracts, compiler simplification,
+proof erasure, `Squash` and `Lean.PersistentHashMap`. These are native execution dependencies,
+not features established for the current PSC0 bounded frontend/backend.
+`package.json` therefore records `portable: false`,
+`Lean-4.35-native-experimental` and `jointSelfhostQualified: false`.
+The portable target remains the current PSC0 profile, not either old PSC1 profile.
+
+General tests cover constructor variants and binder cursors, forced memo-key
+collisions, open and closed substitution arguments, independently rebuilt equal
+DAGs, hash reuse, symmetric pair lookup and failed lookup. A depth-32 shared
+family denotes 8,589,934,591 expanded nodes. Passing that family demonstrates
+sharing-sensitive execution; it is not a claim that all Arena terms are fast.
+
+The revised worker sample at [run 38000670791](https://github.com/dwijayuda/pskernel/actions/runs/38000670791)
+contained no top-frame whole-table copy among eleven samples. It still showed
+repeated bounded cache-eligibility scans, structural name hashing, substitution
+allocation, semantic-index lookup and scope cleanup. Absence from eleven sparse
+samples is not proof that a cost vanished. The two eligibility specifications
+now share one scalar-code execution worker: zero means exhaustion and successor
+n means n remaining nodes. A decode theorem proves equality for every expression
+and budget, and full-function compiler equations preserve all eligibility
+decisions and the unchanged 256-node policy. For the bounded native path this
+removes per-node Option-result allocations.
+
+## Portable representation and remaining checker work
+
+The native layer above does not implement or qualify the following portable
+storage and context-transport obligations:
 
 1. **Retain a pure expression specification; introduce an explicit internal
    graph with a proved denotation.** Use separate typed handles for names,
@@ -306,7 +397,100 @@ and constant-time mutable arrays are not implied by that profile.
 - Qualify actual generated PSC0 kernel products and the compiler/kernel
   combination separately before selecting this package as the default provider.
 
-## Latest repair checkpoint
+## Native architectural checkpoint
+
+Checked source: `e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4`.
+[Main cloud run 38001623085](https://github.com/dwijayuda/pskernel/actions/runs/38001623085).
+Native binary SHA-256:
+`74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e`.
+
+The native build (241 jobs), full metatheory (199 jobs), all 84 companion files,
+foundations, resource/cache/scope regressions and shared-syntax tests pass.
+Tutorial has 141 correct verdicts and zero declines; bugs have 18 correct
+rejections and zero accepts/declines. Fresh 4.35 Prelude, UTF8, XOR and Int64
+closures all pass. Their separate-run wall times are 1.12, 13.50, 16.75 and
+0.28 seconds respectively; these are not controlled speed ratios.
+
+The final historical Arena run still times out: Init at 500.014 seconds,
+with last progress 2,399,999 records / 18,883 declarations; Std at 590.073
+seconds, with last progress 1,999,999 / 14,314. Mathlib is skipped because
+both prerequisite gates failed.
+
+[Final diagnostic/fresh run 38001895321](https://github.com/dwijayuda/pskernel/actions/runs/38001895321)
+verifies the same binary SHA-256. Complete fresh 4.35 Init and Std also time out
+at the unchanged 500/590-second limits, both with exit code 124:
+
+| Complete fresh input | Records in input | Last progress records / declarations | Peak RSS KiB |
+|---|---:|---:|---:|
+| Init | 6,452,982 | 2,299,999 / 18,434 | 175,280 |
+| Std | 10,193,568 | 1,999,999 / 14,186 | 161,416 |
+
+Their input hashes match the preceding sharing experiment recorded below.
+These progress counters are not full acceptance. The separate 600-second Init
+profile also times out (exit 124), with 175,428 KiB maximum RSS; its last entered
+declaration is record 2,414,950,
+`String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList`.
+The 180-second worker diagnostic exits 124 at record 497,392 and 108,552 KiB.
+Three of eleven sparse top-frame samples show the scalar eligibility traversal;
+other samples include substitution/variable traversal, names, persistent lookup
+and inference. This confirms the scalar worker is executed; it does not establish
+time percentages or eliminate repeated scans.
+
+The final controlled job uses the same 500,000-record historical Init prefix,
+one runner, verified binary hashes, and the order baseline, candidate, candidate,
+baseline:
+
+| Final controlled variant | Wall seconds | Peak RSS KiB | Result |
+|---|---:|---:|---|
+| Repair baseline, first | 143.53 | 331,876 | Accepted prefix |
+| Final sharing candidate, first | 180.00 | 99,232 | Timeout, exit 124 |
+| Final sharing candidate, second | 180.00 | 98,552 | Timeout, exit 124 |
+| Repair baseline, second | 142.83 | 332,012 | Accepted prefix |
+
+The final candidate fails this performance comparison. Its lower observed RSS
+is censored by timeout, so it is not a memory ratio for equal completed work.
+This comparison measures the entire sharing layer against the repair baseline;
+it does not isolate the scalar scan from the preceding sharing revision.
+The candidate remains an unmerged native experiment and is not eligible for
+default-provider promotion.
+
+The preceding scratch/checkpoint revision,
+`2e2068774b73b9affcc0852ed14caf96319d29e8`, provides a controlled warning
+against equating sharing with speed. [Run 38000670791](https://github.com/dwijayuda/pskernel/actions/runs/38000670791)
+ran the exact repair baseline and that candidate on one machine in the order
+baseline, candidate, candidate, baseline. The same 500,000-record historical
+Init prefix has SHA-256
+`0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c`.
+
+| Earlier controlled variant | Wall seconds | Peak RSS KiB | Result |
+|---|---:|---:|---|
+| Repair baseline, first | 109.06 | 332,416 | Accepted prefix |
+| Sharing/checkpoint candidate, first | 160.39 | 100,708 | Accepted prefix |
+| Sharing/checkpoint candidate, second | 163.55 | 99,772 | Accepted prefix |
+| Repair baseline, second | 109.74 | 332,024 | Accepted prefix |
+
+The candidate reduced memory but was slower. Still earlier retained-Std.HashMap
+and all-persistent-trie/cross-scope candidates timed out twice at 180 seconds on
+that same prefix while their paired baselines completed in 143–145 seconds.
+All these outcomes, including the abandoned storage/lifetime policies, remain
+in the JSON receipt. They do not justify provider promotion.
+
+The earlier sharing revision also timed out on complete fresh 4.35 exports:
+Init contained 6,452,982 records (SHA-256
+`42a17cf35c87380eb76c483de4cf3205d278a5a612047a6f90e8bd35c0a10164`);
+Std contained 10,193,568 records (SHA-256
+`c12663bb14aba57c4bd01699c4c90634a4432921d08f794b6736429522126dc3`).
+The unchanged 500/590-second limits were enforced. Historical regression mode
+and strict 4.35 mode are separate tests, not interchangeable evidence.
+
+The architectural result is a proved execution layer and a clearer cost model,
+not complete conformance. Stored constructor/name/level metadata, operation
+cutoffs and batched binder transport remain the material gap from the reference
+kernels. Overlay memo tables alone do not supply those properties. The next
+representation/backend stage must address them with its denotation, lifetime
+and context proofs; it is not claimed complete by this native checkpoint.
+
+## Prior repair baseline
 
 Code/proof revision: `e8ed888bb4f16153b9aac335872d770ac19bbb11`.
 [Cloud run 37990758789](https://github.com/dwijayuda/pskernel/actions/runs/37990758789); native binary SHA-256
@@ -348,9 +532,10 @@ failure are superseded by the checks above. No merge, default-provider
 promotion, selected-compiler change, joint self-host qualification, or
 end-to-end consistency result is included.
 
-**Stage boundary:** the current repair and research checkpoint ends here.
-The coherent graph/metadata/traversal redesign above is the next implementation
-stage; full Init/Std/Mathlib conformance remains an open requirement.
+That was the earlier requested stage boundary. Subsequent user authorization
+started the native architectural work described above. Full Init/Std/Mathlib
+conformance, portable graph/backend qualification and telescope transport remain
+open requirements; proof success or a green diagnostic workflow does not close them.
 
 
 [bundle]: https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/CMakeLists.txt
@@ -377,3 +562,5 @@ stage; full Init/Std/Mathlib conformance remains an open requirement.
 [profile-report]: https://github.com/dwijayuda/pskernel/actions/runs/37989139275
 [samples]: https://github.com/dwijayuda/pskernel/actions/runs/37988687879
 [traversal-experiment]: https://github.com/dwijayuda/pskernel/actions/runs/37988845542
+
+[persistent-map]: https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Data/PersistentHashMap.lean

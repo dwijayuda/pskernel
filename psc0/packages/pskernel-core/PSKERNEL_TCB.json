@@ -19,7 +19,7 @@
       "semanticRole": "logical-rule",
       "trustStatus": "trusted",
       "canAffectAcceptance": true,
-      "note": "Root of the canonical portable semantic closure; target is progressive refinement-proof coverage."
+      "note": "Root of the canonical semantic specification; native sharing execution is experimentally refined against this source, while current generated PSC0 qualification is incomplete."
     }
   ],
   "accelerationTCB": [
@@ -45,20 +45,22 @@
       "semanticRole": "semantic-preserving-acceleration",
       "trustStatus": "trusted",
       "canAffectAcceptanceIfBuggy": false,
-      "refinementStatus": "policy-only-no-state-mutation"
+      "refinementStatus": "all-input scalar-worker refinement for exact remaining budget; full-function equations preserve both eligibility policies and inference/pair wrappers"
     },
     {
       "component": "Certified syntax sharing experiment",
       "path": "src/Ps/KernelCore/Core/SharedMemo.lean",
       "semanticRole": "semantic-preserving-acceleration",
       "trustStatus": "derived",
-      "refinementStatus": "intrinsic value-equality proofs and csimp equations; cloud verification pending",
+      "refinementStatus": "intrinsic exact-result proofs, full-operation csimp equations, complete metatheory and 84 companion files verified at e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
       "executionProfile": "lean-native experiment only; generated PSC0 not qualified",
       "dependencies": [
         "Lean withPtrAddr and withPtrEqDecEq contracts",
         "Lean compiler-simplification and proof erasure",
-        "Std.HashMap implementation"
-      ]
+        "Std.HashMap operation-local scratch and Lean.PersistentHashMap checkpoints"
+      ],
+      "evidence": "https://github.com/dwijayuda/pskernel/actions/runs/38001623085",
+      "semanticCacheTransport": "Full parent-cache restoration at scope exit; cross-scope syntax hash retention theorem exists but is not activated after measured memory pressure."
     }
   ],
   "capabilityTCB": [],

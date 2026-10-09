@@ -2,8 +2,9 @@
 
 This is the current guidance for `psc0/packages/pskernel-core`.
 The user-selected semantic target is Lean **4.35.0-rc4** at
-`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. The source authority is handwritten Lean,
-using [PSC0's current bounded self-host language](../../docs/selfhost-language/CURRENT.md).
+`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. The source authority is handwritten Lean. The portable target is
+[PSC0's current bounded self-host language](../../docs/selfhost-language/CURRENT.md);
+the current certified sharing layer is a Lean-native experiment.
 The former PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1 profiles do not
 constrain this migration.
 
@@ -61,27 +62,37 @@ coverage and verdicts, including declines and timeouts. Historical exports use a
 explicit adapter mode; fresh 4.35 exports use exact version and commit checks.
 An accepted prefix does not certify Init, Std or Mathlib.
 
-The current stage migrates the latest kernel/proofs and fixes confirmed dispatch
-and target-compatibility defects. Stored hashes/variable summaries, DAG-aware
-substitution and refined cache scopes are the next performance stage. Their
-representation and erasure invariants must accompany implementation. Generated
+The migration includes target-compatibility and dispatch repairs. The active
+architectural stage adds proved sharing-sensitive syntax walks, prepared
+substitution arguments and persistent certified hash metadata. Portable stored
+variable summaries, graph lifetimes and telescope/context transport remain open;
+their representation and erasure invariants must accompany implementation. Generated
 JavaScript must never be patched to change kernel semantics.
 
 ## Sharing execution experiment
 
-The architectural stage is now active. The native candidate uses one certified
+This native architectural checkpoint has been implemented and proof-checked. The native candidate uses one certified
 cursor-aware syntax fold for node counts, variable queries, lifting, term and
 universe substitution, and free-variable abstraction. Every memo entry carries
 an equality to the pure fold. Address/cursor keys select candidates only; a hit
 checks the actual node and cursor. A memo belongs to one fixed operation and its
 parameters. No semantic checker, admission rule, cache transitivity rule or
-timeout changes in this experiment.
+timeout changes in this experiment. Exact syntactic pair equality is memoized
+separately, with a proved reflexive pointer shortcut.
 
 Core/Expr/Basic retains the pure expression definitions. Core/Expr/Shared and
 Core/SharedMemo contain safe Lean proofs and compiler-simplification equalities,
 so native calls execute the proved traversal. This uses Lean's existing
-withPtrAddr/withPtrEqDecEq contracts, Squash and Std.HashMap. It introduces no
+withPtrAddr/withPtrEqDecEq contracts, Squash, operation-local Std.HashMap scratch
+and persistent Lean.PersistentHashMap checkpoints. It introduces no
 project-defined unsafe code or unchecked cast.
+
+Expression maps and pair sets retain certified hash metadata in a logically
+unobservable field. Full-operation equations preserve their results and misses;
+hashes still do not prove syntactic or definitional equality. Scope exit restores the whole parent cache, including metadata. Although
+cross-scope hash retention has a full state-equality theorem, its compiler rewrite
+is disabled after the experiment exposed excessive retained memory. Substitution
+arguments carry a proved closed-lifting path prepared once per operation.
 
 This is **native-only experimental support**, not evidence that the current
 PSC0 bounded frontend/backend supports those primitives. Joint generated
@@ -92,6 +103,10 @@ The explicit portable graph/storage design in the research report remains the
 alternative if that extension cannot be qualified. Neither path may silently
 replace the default provider.
 
-Cloud validation must check the general fold/refinement proofs, the existing
-metatheory, shared terms with cursor changes, all constructors, and the unchanged
-Arena corpus limits. No corpus completion is claimed before those runs finish.
+The scalar cache-eligibility worker also has an all-input decode theorem and
+complete function equations; the policy's 256-node bound remains unchanged.
+[Run 38001623085](https://github.com/dwijayuda/pskernel/actions/runs/38001623085)
+at `e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4` verifies the metatheory,
+all 84 companion files and native constructor/cursor/DAG tests. Full conformance
+and generated PSC0 qualification are separate requirements; see the exact
+receipt, including failed performance experiments, in `MIGRATION_EVIDENCE.json`.

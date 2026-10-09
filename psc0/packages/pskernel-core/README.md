@@ -43,21 +43,37 @@ The preserved LEAN_4_34 documents and M3/M4 receipts describe historical
 checkpoints. They do not certify this migration. Current research, changes,
 and outstanding evidence are recorded in [RESEARCH_AND_MIGRATION.md](RESEARCH_AND_MIGRATION.md).
 
-## Current stage result
+## Current architectural stage
 
-[Run 37990758789](https://github.com/dwijayuda/pskernel/actions/runs/37990758789) at
-`e8ed888bb4f16153b9aac335872d770ac19bbb11` passes native foundations and regressions,
-the complete metatheory, all 84 companion proof files, 141/141 tutorial
-verdicts, and 18/18 bug rejections with zero declines. Fresh 4.35 Prelude,
-UTF8, XOR, and Int64 dependency closures also pass.
+[Run 38001623085](https://github.com/dwijayuda/pskernel/actions/runs/38001623085) at
+`e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4` verifies the native sharing layer,
+the complete metatheory and all 84 companion proof files. Foundations,
+scope/cache regressions and the depth-32 shared-expression family pass.
+Fresh 4.35 Prelude, UTF8, XOR and Int64 dependency closures also pass.
 
-**Full conformance remains open:** Init times out at 500 seconds and Std at
-590 seconds; Mathlib is skipped by those prerequisite failures. No time limit
-was increased. See [the exact receipt](MIGRATION_EVIDENCE.json).
+The pure expression specification remains in Core/Expr/Basic. Executed syntax
+walks use intrinsically certified memo entries, exact input/cursor validation,
+and proved compiler simplification. Prepared substitution arguments avoid
+repeated lifting of closed expressions. Operation-local scratch tables are separated from persistent hash checkpoints.
+Context-free operations keep a fixed memo cursor; binding-sensitive operations
+advance it. The two bounded eligibility scans share one scalar worker with an
+all-input refinement theorem. Scope exit restores all parent caches and metadata.
 
-The [research and architecture review](RESEARCH_AND_MIGRATION.md) compares
-pinned official Lean, Con Leche, current Con Ron, Nanoda, and Lean4Lean sources,
-audits the historical Arena branches, and explains the remaining cost of
-repeated expression-tree and binder traversals. This checkpoint stops before
-the next representation redesign. Generated PSC0 compiler/kernel qualification
-and default-provider selection remain separate.
+This is a **Lean-native experiment**: `portable: false` and
+`jointSelfhostQualified: false` are deliberate package metadata.
+The current PSC0 frontend/backend has not qualified these execution primitives.
+Portable graph storage and batched telescope/context transport remain open.
+
+**Full conformance remains incomplete, and the final native candidate regresses
+in the controlled performance check.** Historical and fresh 4.35 Init/Std time
+out at their unchanged 500/590-second limits; Mathlib is skipped by its
+prerequisite gates. On the same 500,000-record prefix and runner, the repair
+baseline completes in 143.53/142.83 seconds while the candidate times out twice
+at 180 seconds. Its lower measured memory is censored by timeout. This draft
+experiment is not eligible for provider promotion.
+See [the exact receipt](MIGRATION_EVIDENCE.json) for all completed measurements.
+
+The [research report](RESEARCH_AND_MIGRATION.md) compares pinned official Lean,
+Con Leche, current Con Ron, Nanoda and Lean4Lean, audits historical Arena branches,
+and records both successful and failed experiments. Default-provider selection
+and generated compiler/kernel qualification remain separate.

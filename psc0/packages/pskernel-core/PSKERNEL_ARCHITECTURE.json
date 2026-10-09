@@ -16,7 +16,7 @@
     "compatibilityShimsAllowedDuringMigration": false,
     "compatibilityShimsAllowedInSemanticRoot": false,
     "migrationShims": [],
-    "completionScope": "Phase B production architecture; long-term Assurance Plane and provider promotion remain separate",
+    "completionScope": "Historical Phase B ownership/import-fence migration only; native syntax sharing, portable representation, complete conformance, final assurance and provider promotion are separate.",
     "compatibilityShimsRetired": true
   },
   "semanticRoles": [
@@ -505,6 +505,28 @@
     "historicalRuleInventory": "LEAN_4_34_KERNEL_RULES.json",
     "targetDelta": "RESEARCH_AND_MIGRATION.md",
     "nativeSharingExperimental": true,
-    "nativeSharingGeneratedQualified": false
+    "nativeSharingGeneratedQualified": false,
+    "nativeSharing": {
+      "status": "native-proof-verified-corpus-timeouts-and-controlled-performance-regression",
+      "codeCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+      "pureSpecification": "Ps.KernelCore.Core.Expr.Basic",
+      "executionModules": [
+        "Ps.KernelCore.Core.SharedMemo",
+        "Ps.KernelCore.Core.Expr.Shared",
+        "Ps.KernelCore.Core.Expr.Equality"
+      ],
+      "storage": "Certified scratch delta in Std.HashMap; retained checkpoints in Lean.PersistentHashMap; validated scalar hints",
+      "scopeExit": "restore complete parent caches and metadata; optional exact retention theorem is not a compiler rewrite",
+      "generatedPsc0Qualified": false,
+      "remaining": [
+        "portable graph/backend qualification",
+        "stored variable summaries",
+        "batched telescopes with context/fuel correspondence",
+        "complete Init, Std and Mathlib"
+      ],
+      "memoCursor": "advance only for binding-sensitive operations; fixed for count, hash, free-variable query and universe substitution",
+      "eligibilityScan": "one scalar-code traversal with exact Option-Nat specification refinement; budget remains 256",
+      "promotionDecision": "not-eligible: corpus timeouts and controlled performance regression"
+    }
   }
 }

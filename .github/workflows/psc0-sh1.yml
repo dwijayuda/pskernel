@@ -2,7 +2,7 @@ name: PSC0 SH1 language qualification
 
 on:
   push:
-    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1']
+    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1']
     paths:
       - 'psc0/packages/bootstrap/**'
       - 'psc0/packages/foundation/**'
@@ -99,6 +99,8 @@ jobs:
           node --check scripts/sh1-check-admissions.mjs
           node --check scripts/generated-preparation-session.mjs
           node --check scripts/original-ir-inventory.mjs
+          node --check scripts/original-ir-carrier.mjs
+          node --check scripts/sh1-ir-checker-conformance.mjs
           node --check scripts/sh1-source-snapshot.mjs
           node --check scripts/sh1-seed-manifest.mjs
           node --check scripts/sh1-iterate.mjs
@@ -235,7 +237,7 @@ jobs:
             psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
       - name: Build current native compiler
         id: native
-        run: lake build psc1
+        run: lake build psc1 psc1_ir_check_tests
       - name: Run the bounded native development gate before qualification
         run: node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out ${{ steps.seed-selection.outputs.full-qualification == 'true' && 'dist/sh1/development' || 'dist/sh1' }}
       - name: Build the selected-seed candidate before full qualification

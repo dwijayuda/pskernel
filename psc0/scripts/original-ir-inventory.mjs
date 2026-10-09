@@ -1,3 +1,188 @@
+import { inspectOriginalIrCarrier } from './original-ir-carrier.mjs';
+
+// Serialize portable checker evidence. This host layer supplies no typing rules.
+function checkedCount(value, name) {
+  if (typeof value !== 'bigint' || value < 0n || value > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error('PSC0_IR_CHECK_REPORT_COUNT: ' + name);
+  }
+  return Number(value);
+}
+
+function reportList(compiler, value, limit, label) {
+  const symbol = symbolFrom(compiler.List.nil(), 'nil');
+  const values = [];
+  const seen = new Set();
+  for (;;) {
+    if (value === null || typeof value !== 'object' || !Object.hasOwn(value, symbol)) {
+      throw new Error('PSC0_IR_CHECK_REPORT_LIST: ' + label);
+    }
+    if (value[symbol] === 'nil') return values;
+    if (value[symbol] !== 'cons' || values.length >= limit || seen.has(value)) {
+      throw new Error('PSC0_IR_CHECK_REPORT_LIST_BOUND: ' + label);
+    }
+    seen.add(value);
+    values.push(value.head);
+    value = value.tail;
+  }
+}
+
+function reportTypeList(compiler, value, limit) {
+  const symbol = symbolFrom(compiler.List.nil(), 'nil');
+  const values = [];
+  const seen = new Set();
+  for (;;) {
+    if (value === null || typeof value !== 'object' || !Object.hasOwn(value, symbol)) {
+      throw new Error('PSC0_IR_CHECK_REPORT_TYPE_LIST');
+    }
+    if (value[symbol] === 'nil') return { values, truncated: false };
+    if (value[symbol] !== 'cons' || seen.has(value)) throw new Error('PSC0_IR_CHECK_REPORT_TYPE_LIST_SHAPE');
+    if (values.length >= limit) return { values, truncated: true };
+    seen.add(value);
+    values.push(value.head);
+    value = value.tail;
+  }
+}
+
+function reportFindings(compiler, report, maxFindings) {
+  const typeSymbol = symbolFrom(compiler.PsVerifiedIrType.unknown, 'unknown');
+  const primitiveSymbol = symbolFrom(compiler.PsVerifiedIrPrimitiveType.nat, 'nat');
+  const optionSymbol = symbolFrom(compiler.Option.none(), 'none');
+  let detailNodes = 0;
+  const encodeType = (root) => {
+    const result = { value: null };
+    const work = [{ value: root, parent: result, key: 'value' }];
+    while (work.length) {
+      const { value, parent, key } = work.pop();
+      if (++detailNodes > 100000) {
+        parent[key] = { detailOmitted: 'diagnostic-type-node-limit' };
+        continue;
+      }
+      const tag = value?.[typeSymbol];
+      if (tag === 'unknown') parent[key] = { kind: tag };
+      else if (tag === 'typeParameter') parent[key] = { kind: tag, name: value.name };
+      else if (tag === 'primitive') parent[key] = { kind: tag, name: value.name?.[primitiveSymbol] };
+      else if (tag === 'function' || tag === 'named') {
+        const field = tag === 'function' ? 'parameters' : 'arguments';
+        const children = reportTypeList(compiler, value[field],
+          Math.max(0, 100000 - detailNodes - work.length - (tag === 'function' ? 1 : 0)));
+        const output = tag === 'function' ? { kind: tag, parameters: [], result: null } :
+          { kind: tag, name: value.name, arguments: [] };
+        parent[key] = output;
+        if (tag === 'function') {
+          if (detailNodes + work.length < 100000) work.push({ value: value.result, parent: output, key: 'result' });
+          else output.result = { detailOmitted: 'diagnostic-type-node-limit' };
+        }
+        children.values.forEach((child, index) => work.push({ value: child, parent: output[field], key: index }));
+        if (children.truncated) output[field][children.values.length] = { detailOmitted: 'diagnostic-type-node-limit' };
+      } else throw new Error('PSC0_IR_CHECK_REPORT_TYPE');
+    }
+    return result.value;
+  };
+  const optionalType = (value) => {
+    if (value?.[optionSymbol] === 'none') return null;
+    if (value?.[optionSymbol] === 'some') return encodeType(value.value);
+    throw new Error('PSC0_IR_CHECK_REPORT_OPTION');
+  };
+  return reportList(compiler, report.findings, maxFindings, 'findings').map((finding) => {
+    for (const key of ['code', 'detail', 'owner', 'path']) {
+      if (typeof finding[key] !== 'string') throw new Error('PSC0_IR_CHECK_REPORT_FIELD: ' + key);
+    }
+    return { code: finding.code, detail: finding.detail, owner: finding.owner, path: finding.path,
+      at: finding.owner + '/' + finding.path,
+      expected: optionalType(finding.expected), actual: optionalType(finding.actual) };
+  });
+}
+
+export function inventoryOriginalIr(compiler, module, {
+  compilerSha256, maxFindings = 1000, maxNodes = 5000000,
+  maxSteps = maxNodes, maxTypeSteps, legacyBoundary,
+} = {}) {
+  if (!/^[a-f0-9]{64}$/u.test(compilerSha256 ?? '')) throw new Error('PSC0_IR_INVENTORY_COMPILER_IDENTITY');
+  if (!Number.isSafeInteger(maxFindings) || maxFindings < 0 ||
+      !Number.isSafeInteger(maxNodes) || maxNodes < 1 ||
+      !Number.isSafeInteger(maxSteps) || maxSteps < 0 ||
+      (maxTypeSteps !== undefined && (!Number.isSafeInteger(maxTypeSteps) || maxTypeSteps < 0))) {
+    throw new Error('PSC0_IR_INVENTORY_LIMIT');
+  }
+  if (typeof compiler.psCheckVerifiedIrModule !== 'function') {
+    if (!legacyBoundary || !['immutable-seed-recovery', 'selected-authoring-seed'].includes(legacyBoundary.kind) ||
+        legacyBoundary.executingCompilerSha256 !== compilerSha256 ||
+        !/^[a-f0-9]{40}$/u.test(legacyBoundary.executingSourceRef ?? '') ||
+        typeof legacyBoundary.reason !== 'string' || legacyBoundary.reason.length === 0) {
+      throw new Error('PSC0_IR_PORTABLE_CHECKER_REQUIRED');
+    }
+    const legacy = inventoryLegacyOriginalIr(compiler, module, {
+      compilerSha256, maxFindings: Math.max(1, maxFindings), maxNodes,
+    });
+    return { ...legacy, runtimeIrTypingAccepted: false,
+      portableChecker: { status: 'unavailable-at-explicit-seed-boundary', boundary: legacyBoundary },
+      notes: [...legacy.notes, 'The pinned pre-checker seed is an explicit bootstrap boundary; this is not a portable pass.'] };
+  }
+  const carrier = inspectOriginalIrCarrier(compiler, module, { maxNodes });
+  if (!carrier.accepted) {
+    const finding = { ...carrier.finding, owner: 'module', path: carrier.finding.at, expected: null, actual: null };
+    return {
+      schemaVersion: 2, kind: 'psc0-original-ir-inventory', compilerSha256,
+      status: 'rejected', strictSh1Qualified: false, runtimeIrTypingAccepted: false,
+      traversalComplete: false, visitedNodes: carrier.visitedNodes, carrier,
+      counts: { expressions: 0 }, findingCount: 1,
+      findingCounts: { [finding.code]: 1 }, findingCountsCoverage: 'all-findings',
+      findings: maxFindings === 0 ? [] : [finding], omittedFindingDetails: maxFindings === 0 ? 1 : 0,
+      portableChecker: { status: 'not-run-invalid-carrier' },
+      unqualifiedObligations: ['Portable checking did not run because the host IR carrier is invalid.'],
+    };
+  }
+  const typeSteps = maxTypeSteps === undefined ? compiler.psIrCheckDefaultOptions.maxTypeSteps : BigInt(maxTypeSteps);
+  const options = compiler.psIrCheckOptionsWithLimits(BigInt(maxSteps), typeSteps, BigInt(maxFindings));
+  const report = compiler.psCheckVerifiedIrModule(options, module);
+  if (typeof report?.accepted !== 'boolean' || typeof report?.traversalComplete !== 'boolean') {
+    throw new Error('PSC0_IR_CHECK_REPORT_SHAPE');
+  }
+  const findingCount = checkedCount(report.findingCount, 'findingCount');
+  const findings = reportFindings(compiler, report, maxFindings);
+  if (findings.length > findingCount || (report.accepted && (!report.traversalComplete || findingCount !== 0))) {
+    throw new Error('PSC0_IR_CHECK_REPORT_INVARIANT');
+  }
+  const findingCounts = {};
+  for (const { code } of findings) findingCounts[code] = (findingCounts[code] ?? 0) + 1;
+  return {
+    schemaVersion: 2, kind: 'psc0-original-ir-inventory', compilerSha256,
+    status: report.accepted ? 'runtime-ir-types-accepted' : 'rejected',
+    strictSh1Qualified: false, runtimeIrTypingAccepted: report.accepted,
+    traversalComplete: report.traversalComplete,
+    visitedNodes: checkedCount(report.visitedSteps, 'visitedSteps'), carrier,
+    counts: { expressions: checkedCount(report.expressionCount, 'expressionCount') },
+    findingCount, findingCounts,
+    findingCountsCoverage: findingCount === findings.length ? 'all-findings' : 'retained-details-only',
+    findings, omittedFindingDetails: findingCount - findings.length,
+    portableChecker: {
+      status: report.accepted ? 'accepted' : 'rejected',
+      implementation: 'Ps.CompilerIr.Check.psCheckVerifiedIrModule',
+      options: { maxSteps, maxTypeSteps: checkedCount(typeSteps, 'maxTypeSteps'), maxFindings },
+    },
+    coverage: [
+      'Canonical own-namespace JS carriers before portable code',
+      'Portable module signatures, scoped type substitution and compositional expression typing',
+      'The host report serializes portable diagnostics without a second semantic checker',
+    ],
+    unqualifiedObligations: [
+      'Enabled primitive laws, text positions and bounds semantics beyond runtime typing',
+      'Erasure preservation, evaluation order and backend semantic correspondence',
+      'Import ABI qualification for unsupported external imports',
+      'Strict SH/1 profile activation and provider decisions remain separate',
+    ],
+    notes: [
+      'A capped diagnostics list does not cap the portable finding count.',
+      'Findings count failed checking obligations; a type operation reports its first failure, not every malformed descendant.',
+      'visitedNodes combines portable input preflight and dispatcher steps, each with its own maxSteps allowance.',
+      'Structural IR paths identify owners and expressions; they are not original source line numbers.',
+      'Runtime IR typing acceptance does not establish Core provider acceptance or strict SH/1.',
+    ],
+  };
+}
+
+// The historical diagnostic inventory is kept only for explicit immutable
+// bootstrap boundaries. Current consumers require the portable checker above.
 // Inventory the original PSC0 PsVerifiedIrModule. This is deliberately a host
 // report, not a validated-IR wrapper or strict SH/1 acceptance gate.
 // Model authority: packages/compiler-ir/src/Ps/CompilerIr/Model.lean.
@@ -45,7 +230,7 @@ function symbolFrom(value, constructor) {
  * Finding locations name the owning declaration/layout and deterministic IR
  * positions; this model has no source-origin field to report original lines.
  */
-export function inventoryOriginalIr(
+export function inventoryLegacyOriginalIr(
   compiler,
   module,
   { compilerSha256, maxFindings = 1000, maxNodes = 5000000 } = {},

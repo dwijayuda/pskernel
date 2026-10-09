@@ -18,6 +18,7 @@ import {
 import { resolveTypeScriptCli } from './typescript-cli.mjs';
 import { createGeneratedPreparationSession } from './generated-preparation-session.mjs';
 import { inventoryOriginalIr } from './original-ir-inventory.mjs';
+import { runIrCheckerConformance, runNativeIrCheckerConformance } from './sh1-ir-checker-conformance.mjs';
 import { runFoundationConformance } from './sh1-foundation-conformance.mjs';
 import { runHelperConformance, runHelperRuntimeConformance } from './sh1-helper-conformance.mjs';
 import { runGenericErasureConformance } from './sh1-generic-erasure-conformance.mjs';
@@ -76,6 +77,8 @@ async function recipeIdentity() {
     'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs',
     'scripts/typescript-cli.mjs', 'scripts/workspace-layout.mjs',
     'scripts/generated-preparation-session.mjs', 'scripts/original-ir-inventory.mjs',
+    'scripts/original-ir-carrier.mjs', 'scripts/sh1-ir-checker-conformance.mjs',
+    'test/IrCheckerTests.lean',
     'scripts/sh1-source-snapshot.mjs', 'scripts/sh1-seed-manifest.mjs',
     'scripts/sh1-iterate.mjs', 'scripts/sh1-iteration-conformance.mjs',
     'scripts/sh1-foundation-conformance.mjs',
@@ -218,7 +221,7 @@ async function selectedAuthoringSeed(compilerOverride) {
 }
 
 async function buildGeneration(compilerPath, closure, outDir, {
-  workspace = root, expectedSha256, authoringSeed,
+  workspace = root, expectedSha256, authoringSeed, legacyIrBoundary,
 } = {}) {
   const start = performance.now();
   const loaded = await loadCompiler(compilerPath, { expectedSha256 });
@@ -258,7 +261,17 @@ async function buildGeneration(compilerPath, closure, outDir, {
   const canonicalText = JSON.stringify(canonical, null, 2) + '\n';
   const canonicalDone = performance.now();
   const ir = unwrap(compiler.psCompilerVerifiedIrFromPrepared(prepared), 'ERASE');
-  const irInventory = inventoryOriginalIr(compiler, ir, { compilerSha256 });
+  const irInventory = inventoryOriginalIr(compiler, ir, {
+    compilerSha256, legacyBoundary: legacyIrBoundary,
+  });
+  const legacyBoundary = irInventory.portableChecker.status === 'unavailable-at-explicit-seed-boundary';
+  if (!legacyBoundary && (!irInventory.runtimeIrTypingAccepted || !irInventory.traversalComplete)) {
+    await writeJson(path.join(outDir, 'original-ir-inventory.json'), irInventory);
+    process.stdout.write('PSC0_SH1_IR_REJECTED: ' + JSON.stringify(irInventory) + '\n');
+    throw new Error('PSC0_SH1_ORIGINAL_IR_TYPES_REJECTED');
+  }
+  // No mutation or asynchronous operation separates a successful portable check
+  // from emission of this exact original IR object.
   const typeScript = unwrap(compiler.psTsEmitModule(ir), 'EMIT');
   const emitDone = performance.now();
   const outputJs = await compileTypeScript(typeScript, outDir, tsc, root);
@@ -290,6 +303,11 @@ async function buildGeneration(compilerPath, closure, outDir, {
       report: 'original-ir-inventory.json',
       traversalComplete: irInventory.traversalComplete,
       findingCounts: irInventory.findingCounts,
+      findingCount: irInventory.findingCount ?? null,
+      findingCountsCoverage: irInventory.findingCountsCoverage ?? 'legacy-inventory',
+      portableChecker: irInventory.portableChecker,
+      runtimeIrTypingAccepted: irInventory.runtimeIrTypingAccepted,
+      sameOriginalIrCheckedBeforeEmission: !legacyBoundary,
       strictSh1Qualified: false,
     },
     timingsMs: {
@@ -460,9 +478,19 @@ async function recoverQualifiedSeed({ sourceRoot, bootstrapCompiler, artifactDir
     'PSC0_SH1_QUALIFIED_BOOTSTRAP_DIGEST');
   const first = await buildGeneration(bootstrapCompiler, closure, path.join(outDir, 'C1'), {
     workspace: sourceRoot, expectedSha256: manifest.bootstrap.compilerSha256,
+    legacyIrBoundary: {
+      kind: 'immutable-seed-recovery', executingSourceRef: historicalRef,
+      executingCompilerSha256: manifest.bootstrap.compilerSha256,
+      reason: 'Immutable S0 predates the portable checker; this reconstructs the pinned selected seed A.',
+    },
   });
   const second = await buildGeneration(first.outputJs, closure, path.join(outDir, 'C2'), {
     workspace: sourceRoot, expectedSha256: first.receipt.artifacts.javascriptSha256,
+    legacyIrBoundary: {
+      kind: 'immutable-seed-recovery', executingSourceRef: manifest.sourceRef,
+      executingCompilerSha256: first.receipt.artifacts.javascriptSha256,
+      reason: 'Immutable C1(A) predates the portable checker; expected selected-seed products are verified afterward.',
+    },
   });
   assert.deepEqual(second.receipt.artifacts, manifest.expectedArtifacts,
     'PSC0_SH1_QUALIFIED_RECOVERY_PRODUCTS');
@@ -519,8 +547,16 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
     'PSC0_SH1_NATIVE_BINARY_CHANGED');
   const outputJs = path.join(directory, 'index.js');
   const compilerSha256 = sha256(await readFile(outputJs));
-  const loaded = await loadCompiler(outputJs, { expectedSha256: compilerSha256 });
   const sourceRef = capture('git', ['rev-parse', 'HEAD']);
+  const nativeIr = await runNativeIrCheckerConformance({
+    nativeChecker: path.join(root, '.lake/build/bin/psc1_ir_check_tests'),
+    closure, nativeTypeScript: path.join(directory, 'index.ts'),
+    root, outDir: path.join(directory, 'ir-checker-native'),
+  });
+  const loaded = await loadCompiler(outputJs, { expectedSha256: compilerSha256 });
+  const irConformance = await runIrCheckerConformance({
+    ...loaded, compilerPath: outputJs, root, outDir: path.join(directory, 'ir-checker'), tsc,
+  });
   await runHelperRuntimeConformance({ ...loaded, outDir: directory });
   await runGenericErasureConformance({
     ...loaded, root, outDir: path.join(directory, 'generic-erasure'), tsc, nativeCompiler,
@@ -567,6 +603,12 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
     recipe: await recipeIdentity(), toolchain: await toolchainIdentity(),
     candidateClaim: 'Native PSC frontend consumes raw current compiler source; generated current compiler executes the raw language and iteration corpus.',
     selectedSeedBootstrapProven: false, currentSourceFixedPointProven: false,
+    runtimeIrTyping: {
+      nativeCurrentSource: { report: 'ir-checker-native/receipt.json', ...nativeIr.fullCompilerIr },
+      generatedConformance: { report: 'ir-checker/receipt.json', compilerSha256: irConformance.compilerSha256,
+        negativeCases: irConformance.rejected.length, behavior: irConformance.behavior },
+      generatedFullCompilerIrChecked: false, strictSh1Qualified: false,
+    },
     provider: { status: 'not-attempted', kernelChecked: false },
     timingsMs: { total: performance.now() - start },
   };
@@ -620,12 +662,20 @@ if (command === 'seed-identity') {
   });
   const generation = await buildGeneration(authoring.compilerPath, closure, path.join(outDir, 'C1'), {
     expectedSha256: authoring.expectedSha256, authoringSeed: authoring.provenance,
+    legacyIrBoundary: {
+      kind: 'selected-authoring-seed', executingSourceRef: authoring.provenance.sourceRef,
+      executingCompilerSha256: authoring.expectedSha256,
+      reason: 'The explicitly pinned pre-checker Q may produce C1; current C1/C2/C3 checker consumers remain mandatory.',
+    },
   });
   await sessionConformance(authoring.compilerPath, generation.outputJs, outDir, {
     oracle: authoring.provenance, candidateSha256: generation.receipt.artifacts.javascriptSha256,
   });
   const loaded = await loadCompiler(generation.outputJs, {
     expectedSha256: generation.receipt.artifacts.javascriptSha256,
+  });
+  await runIrCheckerConformance({
+    ...loaded, compilerPath: generation.outputJs, root, outDir: path.join(outDir, 'C1/ir-checker'), tsc,
   });
   await runHelperRuntimeConformance({ ...loaded, outDir: path.join(outDir, 'C1') });
   await runGenericErasureConformance({
@@ -656,6 +706,10 @@ if (command === 'seed-identity') {
     'PSC0_SH1_CANDIDATE_DIGEST');
   assert.deepEqual(firstReceipt.recipe, await recipeIdentity(), 'PSC0_SH1_CANDIDATE_RECIPE');
   assert.deepEqual(firstReceipt.toolchain, await toolchainIdentity(), 'PSC0_SH1_CANDIDATE_TOOLCHAIN');
+  const irCheckerReceipt = JSON.parse(await readFile(path.join(firstDir, 'ir-checker/receipt.json')));
+  assert.equal(irCheckerReceipt.evidence, 'portable-original-ir-checker-conformance');
+  assert.equal(irCheckerReceipt.compilerSha256, firstReceipt.artifacts.javascriptSha256);
+  assert.equal(irCheckerReceipt.acceptedFixture.runtimeIrTypingAccepted, true);
   const capabilityReceipt = JSON.parse(await readFile(path.join(firstDir, 'capabilities/receipt.json')));
   assert.equal(capabilityReceipt.compilerSha256, firstReceipt.artifacts.javascriptSha256);
   assert.deepEqual(capabilityReceipt.sourceKinds.map((item) => item.sourceKind).sort(), ['lean', 'ps']);
@@ -671,6 +725,12 @@ if (command === 'seed-identity') {
   const secondCompiler = await loadCompiler(second.outputJs, {
     expectedSha256: second.receipt.artifacts.javascriptSha256,
   });
+  assert.equal(second.receipt.originalIrInventory.runtimeIrTypingAccepted, true,
+    'PSC0_SH1_C2_PORTABLE_IR_CHECK_REQUIRED');
+  assert.equal(second.receipt.originalIrInventory.sameOriginalIrCheckedBeforeEmission, true);
+  await runIrCheckerConformance({
+    ...secondCompiler, compilerPath: second.outputJs, root, outDir: path.join(outDir, 'C2/ir-checker'), tsc,
+  });
   await runSh1Capabilities({ ...secondCompiler, root, outDir: path.join(outDir, 'C2/capabilities'), tsc });
   await runHelperRuntimeConformance({ ...secondCompiler, outDir: path.join(outDir, 'C2') });
   await runGenericErasureConformance({
@@ -683,6 +743,12 @@ if (command === 'seed-identity') {
     'PSC0_SH1_C2_C3_ARTIFACT_MISMATCH');
   const thirdCompiler = await loadCompiler(third.outputJs, {
     expectedSha256: third.receipt.artifacts.javascriptSha256,
+  });
+  assert.equal(third.receipt.originalIrInventory.runtimeIrTypingAccepted, true,
+    'PSC0_SH1_C3_PORTABLE_IR_CHECK_REQUIRED');
+  assert.equal(third.receipt.originalIrInventory.sameOriginalIrCheckedBeforeEmission, true);
+  await runIrCheckerConformance({
+    ...thirdCompiler, compilerPath: third.outputJs, root, outDir: path.join(outDir, 'C3/ir-checker'), tsc,
   });
   await runSh1Capabilities({ ...thirdCompiler, root, outDir: path.join(outDir, 'C3/capabilities'), tsc });
   await runHelperRuntimeConformance({ ...thirdCompiler, outDir: path.join(outDir, 'C3') });
@@ -710,6 +776,11 @@ if (command === 'seed-identity') {
     helperRuntimeGenerations: ['C1', 'C2', 'C3'],
     recursiveGenericErasureGenerations: ['C1', 'C2', 'C3'],
     canonicalSourceContract: 'Existing surface printer; normalized worker representation is compared through canonical admissions.',
+    portableIrCheckerGenerations: ['C1', 'C2', 'C3'],
+    originalIrCheckedBuilds: ['C2', 'C3'],
+    originalIrChecking: 'C1 checks the exact current-source IR emitted as C2; C2 checks the exact IR emitted as C3.',
+    immutableSeedBoundary: firstReceipt.originalIrInventory.portableChecker,
+    runtimeIrTypingEnforced: true,
     runtimeIrStrictQualification: 'not-claimed',
     provider: { status: 'not-attempted', kernelChecked: false },
   };

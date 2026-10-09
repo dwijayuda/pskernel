@@ -1,5 +1,6 @@
 import Ps.Compiler.Api
 import Ps.BackendTs.Module
+import Ps.BackendTs.Checked
 
 inductive PsCompilerTypeScriptError where
   | compiler (error : PsCompilerError)

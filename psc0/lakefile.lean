@@ -67,6 +67,10 @@ lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
     `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Construct,
+    `Ps.CompilerIr.CheckTypes,
+    `Ps.CompilerIr.CheckSize,
+    `Ps.CompilerIr.Check,
     `Ps.CompilerIr.Specialize
   ]
 
@@ -94,6 +98,7 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Type,
     `Ps.BackendTs.Expr,
     `Ps.BackendTs.Module,
+    `Ps.BackendTs.Checked,
     `Ps.BackendTs.Compiler
   ]
 
@@ -156,6 +161,10 @@ lean_exe psc1_bridge_tests where
 lean_exe psc1_backend_ts_tests where
   srcDir := "test"
   root := `BackendTsTests
+
+lean_exe psc1_ir_check_tests where
+  srcDir := "test"
+  root := `IrCheckerTests
 
 lean_exe psc1_ir_specialize_tests where
   srcDir := "test"

@@ -1,6 +1,35 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-08 UTC.
+Updated: 2026-10-09 UTC.
+
+## Active M6 implementation checkpoint (2026-10-09)
+
+Work continues on isolated branch `psc0/sh1-ir-checker-v1`, descending from
+integration documentation commit `829a2e953895f03225a77425141aa3ded5e78694`.
+The qualified E source and selected A seed below remain unchanged.
+
+The coherent M6 change adds neutral portable type operations, an explicit input
+size preflight and a task-stack expression checker beside the existing IR model.
+It checks global value/function distinctions, lexical bindings, simultaneous
+generic substitution, exact function grouping, every body/initializer annotation,
+layout ownership and fields, match coverage and intrinsic operand/result types.
+Unknown types, unsupported scalar/import capabilities and exhausted resources
+remain explicit failures. Empty inductives/matches are outside this checkpoint's
+active emission contract.
+
+A separate checked emission API checks the exact IR it emits. The cloud driver
+uses the same portable check-before-emit rule for current generations and retains
+explicit authenticated historical seed boundaries. The host adapter validates
+same-compiler record/constructor brands and canonical scalar carriers; it supplies
+no independent expression typing rules.
+
+Validation is architecture-first: independent source reviews, a native exact-source
+IR gate and focused native/generated conformance matrix, followed by the planned
+C1/C2/C3 and pinned-provider checkpoint. Results are pending; implementation is
+not qualification. No strict profile is activated and no provider or lowering
+preservation claim is inferred from runtime type acceptance. Resource counters
+distinguish input-shape, dispatcher and individual type-operation budgets; finding
+counts count failed checking obligations, with first error within a type operation.
 
 ## Current source and qualification checkpoints
 
@@ -154,12 +183,12 @@ not a benchmark or a general speedup claim. The earlier 14.590-second
 development result used a smaller bounded gate; warm resident preparation
 measurements exclude source reads and optional emission.
 
-The next planned implementation is the coherent M6 slice in
-[docs/selfhost-language/RUNTIME_IR_PLAN.md](docs/selfhost-language/RUNTIME_IR_PLAN.md):
-one portable expression checker for the current IR, with scoped simultaneous
+The active M6 implementation follows
+[docs/selfhost-language/RUNTIME_IR_PLAN.md](docs/selfhost-language/RUNTIME_IR_PLAN.md).
+Its portable expression checker covers the current IR, with scoped simultaneous
 type substitution, checked body/initializer annotations, exact function grouping,
-global value/function distinction and explicit resource failures. Keep the host
-inventory as a report of that portable checker.
+global value/function distinction and explicit resource failures. The host
+inventory reports that portable checker; qualification results are pending above.
 
 Strict runtime enforcement additionally needs enabled primitive/layout/import
 and scalar/bounds/text-position contracts, erasure/backend correspondence and
@@ -175,7 +204,8 @@ that changes nondependent value parameters, a pure preparation seam, and focused
 generated-compiler qualification. Migrate source families only after capability
 evidence passes.
 
-Execution branch: psc0/sh1-implementation-v1.
+Current M6 execution branch: psc0/sh1-ir-checker-v1.
+Qualified integration branch: psc0/sh1-implementation-v1.
 Historical compiler baseline: 37f63c39d4a07189938046c64152bba25d789450.
 The historical 55-module record remains immutable.
 

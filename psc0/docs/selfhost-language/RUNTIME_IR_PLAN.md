@@ -1,6 +1,33 @@
-# Next M6 slice: a portable expression checker for original PSC0 IR
+# M6: portable expression checking for original PSC0 IR
 
-Status: implementation plan. This document does not activate strict SH/1.
+
+## Active implementation checkpoint
+
+The implementation on `psc0/sh1-ir-checker-v1` descends from
+`829a2e953895f03225a77425141aa3ded5e78694`. It adds `CheckTypes.lean`,
+`CheckSize.lean` and `Check.lean` beside the existing model, neutral record
+factories for generated host calls, and a separate checked emission entry.
+Source reviews are complete; native/generated qualification is pending.
+A source implementation is not a qualified capability.
+
+The active scalar typing ledger covers Nat, Int, Bool, Char, String and Unit,
+with an explicit arity-one Array runtime type for the listed array intrinsics.
+Optional scalar, external-import and empty-inductive/match capabilities remain
+explicit refusals. This typing ledger does not establish bounds, text-position,
+primitive, lowering or backend semantic correspondence.
+
+The portable input preflight bounds every model/list occurrence before any
+synchronous signature lookup or binding scan. Input and dispatcher budgets each
+use `maxSteps`; each type operation has its own `maxTypeSteps` budget.
+`visitedSteps` includes a completed input preflight and dispatcher work; a failed
+preflight reports zero because its partial count is not returned. These are
+separate bounded-work scopes, not a wall-clock or total allocation limit.
+Finding counts count failed checking obligations: a type operation retains its
+first error, and the finding-detail cap does not stop expression traversal.
+
+
+The design requirements below record the pre-M6 gap and the implementation plan.
+This document does not activate strict SH/1.
 The current source and qualification results are recorded in
 [IMPLEMENTATION.md](IMPLEMENTATION.md) and
 [qualification-evidence.json](qualification-evidence.json).

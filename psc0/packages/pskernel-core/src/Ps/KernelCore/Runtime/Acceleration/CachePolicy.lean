@@ -171,7 +171,10 @@ def decode : Nat → Option Nat
   | n + 1 => next n
 
 theorem decode_bind (code : Nat) (next : Nat → Nat) :
-    decode (bind code next) = (decode code).bind (fun n => decode (next n)) := by
+    decode (bind code next) =
+      (match decode code with
+       | none => none
+       | some n => decode (next n)) := by
   cases code <;> rfl
 
 def remaining (expr : PsKernelExpr) (fuel : Nat) : Nat :=

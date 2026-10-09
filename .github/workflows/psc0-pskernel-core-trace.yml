@@ -1,4 +1,4 @@
-name: PSC0 kernel scoped-cache experiment
+name: PSC0 kernel traversal experiment
 on:
   push:
     branches: [psc0/pskernel-core-lean435-arena-v1]
@@ -6,62 +6,63 @@ on:
 permissions:
   contents: read
 jobs:
-  trace:
+  measure:
     strategy:
       fail-fast: false
       matrix:
-        budget: [256, 4096]
+        variant: [baseline, structural, open-all, combined]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ad13026571931c0151b7ae53f468cd5363bef391
-      - name: Install pinned Lean
+          ref: dbfa7fed68e40fe878129610c00d9afd5e399ed4
+      - name: Install pinned tools
         run: |
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Build temporary open-term cache experiment
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build temporary comparison variant
         working-directory: psc0/packages/pskernel-core
-        shell: bash
         env:
-          CACHE_BUDGET: ${{ matrix.budget }}
+          VARIANT: ${{ matrix.variant }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import os
-          p = Path("src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean")
-          s = p.read_text()
-          old = "  | PsKernelExpr.fvar _, Nat.succ _ =>\n      Option.none\n"
-          assert s.count(old) == 1
-          s = s.replace(old, "")
-          s = s.replace("  256\n", "  " + os.environ["CACHE_BUDGET"] + "\n")
-          p.write_text(s)
+          variant = os.environ["VARIANT"]
+          if variant in ("structural", "combined"):
+              Path("src/Ps/KernelCore/Core/Substitution/Instantiate.lean").write_text("import Ps.KernelCore.Core.Substitution.Lift\n\n/-\nCapture-avoiding de Bruijn instantiation. Non-dependent instantiate1 returns the codomain unchanged.\n\nThis module is a theory-oriented split of the original portable Instantiate\nimplementation. Public definitions and PSC1 recursion shapes are preserved.\n-/\n\ndef psKernelExprInstantiateAtChangedWithFuel\n    (fuel : Nat) :\n    PsKernelExpr ->\n    Nat ->\n    List PsKernelExpr ->\n    Nat ->\n    Prod PsKernelExpr Bool :=\n  match fuel with\n  | Nat.zero =>\n      fun\n        (expr : PsKernelExpr)\n        (_start : Nat)\n        (_subst : List PsKernelExpr)\n        (_offset : Nat) =>\n        Prod.mk expr false\n  | Nat.succ remaining =>\n      let smaller :\n          PsKernelExpr ->\n          Nat ->\n          List PsKernelExpr ->\n          Nat ->\n          Prod PsKernelExpr Bool :=\n        psKernelExprInstantiateAtChangedWithFuel remaining;\n      fun\n        (expr : PsKernelExpr)\n        (start : Nat)\n        (subst : List PsKernelExpr)\n        (offset : Nat) =>\n        match expr with\n        | PsKernelExpr.bvar index =>\n            let substitutionStart :=\n              Nat.add start offset;\n            if psKernelNatLt index substitutionStart then\n              Prod.mk expr false\n            else\n              let relative :=\n                Nat.sub index substitutionStart;\n              match psKernelExprListGet subst relative with\n              | Option.some replacement =>\n                  Prod.mk\n                    (psKernelExprLiftLooseBVars\n                      replacement\n                      0\n                      offset)\n                    true\n              | Option.none =>\n                  if psKernelExprListIsEmpty subst then\n                    Prod.mk expr false\n                  else\n                    Prod.mk\n                      (PsKernelExpr.bvar\n                        (Nat.sub\n                          index\n                          (psKernelExprListLength subst)))\n                      true\n        | PsKernelExpr.app fn arg =>\n            let fnResult := smaller fn start subst offset;\n            let argResult := smaller arg start subst offset;\n            if (Prod.snd fnResult) then\n              Prod.mk\n                (PsKernelExpr.app\n                  (Prod.fst fnResult)\n                  (Prod.fst argResult))\n                true\n            else if (Prod.snd argResult) then\n              Prod.mk\n                (PsKernelExpr.app\n                  (Prod.fst fnResult)\n                  (Prod.fst argResult))\n                true\n            else\n              Prod.mk expr false\n        | PsKernelExpr.lam name type body binderInfo =>\n            let typeResult := smaller type start subst offset;\n            let bodyResult := smaller body start subst (Nat.succ offset);\n            if (Prod.snd typeResult) then\n              Prod.mk\n                (PsKernelExpr.lam\n                  name\n                  (Prod.fst typeResult)\n                  (Prod.fst bodyResult)\n                  binderInfo)\n                true\n            else if (Prod.snd bodyResult) then\n              Prod.mk\n                (PsKernelExpr.lam\n                  name\n                  (Prod.fst typeResult)\n                  (Prod.fst bodyResult)\n                  binderInfo)\n                true\n            else\n              Prod.mk expr false\n        | PsKernelExpr.forallE name type body binderInfo =>\n            let typeResult := smaller type start subst offset;\n            let bodyResult := smaller body start subst (Nat.succ offset);\n            if (Prod.snd typeResult) then\n              Prod.mk\n                (PsKernelExpr.forallE\n                  name\n                  (Prod.fst typeResult)\n                  (Prod.fst bodyResult)\n                  binderInfo)\n                true\n            else if (Prod.snd bodyResult) then\n              Prod.mk\n                (PsKernelExpr.forallE\n                  name\n                  (Prod.fst typeResult)\n                  (Prod.fst bodyResult)\n                  binderInfo)\n                true\n            else\n              Prod.mk expr false\n        | PsKernelExpr.letE name type value body nondep =>\n            let typeResult := smaller type start subst offset;\n            let valueResult := smaller value start subst offset;\n            let bodyResult := smaller body start subst (Nat.succ offset);\n            if (Prod.snd typeResult) then\n              Prod.mk\n                (PsKernelExpr.letE\n                  name\n                  (Prod.fst typeResult)\n                  (Prod.fst valueResult)\n                  (Prod.fst bodyResult)\n                  nondep)\n                true\n            else if (Prod.snd valueResult) then\n              Prod.mk\n                (PsKernelExpr.letE\n                  name\n                  (Prod.fst typeResult)\n                  (Prod.fst valueResult)\n                  (Prod.fst bodyResult)\n                  nondep)\n                true\n            else if (Prod.snd bodyResult) then\n              Prod.mk\n                (PsKernelExpr.letE\n                  name\n                  (Prod.fst typeResult)\n                  (Prod.fst valueResult)\n                  (Prod.fst bodyResult)\n                  nondep)\n                true\n            else\n              Prod.mk expr false\n        | PsKernelExpr.mdata metadata body =>\n            let bodyResult := smaller body start subst offset;\n            if (Prod.snd bodyResult) then\n              Prod.mk\n                (PsKernelExpr.mdata\n                  metadata\n                  (Prod.fst bodyResult))\n                true\n            else\n              Prod.mk expr false\n        | PsKernelExpr.proj typeName index body =>\n            let bodyResult := smaller body start subst offset;\n            if (Prod.snd bodyResult) then\n              Prod.mk\n                (PsKernelExpr.proj\n                  typeName\n                  index\n                  (Prod.fst bodyResult))\n                true\n            else\n              Prod.mk expr false\n        | _ =>\n            Prod.mk expr false\n\ndef psKernelExprInstantiateAtChanged\n    (expr : PsKernelExpr)\n    (start : Nat)\n    (subst : List PsKernelExpr)\n    (offset : Nat) :\n    Prod PsKernelExpr Bool :=\n  match expr with\n  | PsKernelExpr.bvar index =>\n      let substitutionStart :=\n        Nat.add start offset\n      if psKernelNatLt index substitutionStart then\n        Prod.mk expr false\n      else\n        let relative :=\n          Nat.sub index substitutionStart\n        match psKernelExprListGet subst relative with\n        | Option.some replacement =>\n            Prod.mk\n              (psKernelExprLiftLooseBVars\n                replacement\n                0\n                offset)\n              true\n        | Option.none =>\n            if psKernelExprListIsEmpty subst then\n              Prod.mk expr false\n            else\n              Prod.mk\n                (PsKernelExpr.bvar\n                  (Nat.sub\n                    index\n                    (psKernelExprListLength subst)))\n                true\n  | PsKernelExpr.app fn arg =>\n      let fnResult :=\n        psKernelExprInstantiateAtChanged\n          fn start subst offset\n      let argResult :=\n        psKernelExprInstantiateAtChanged\n          arg start subst offset\n      if Prod.snd fnResult then\n        Prod.mk\n          (PsKernelExpr.app\n            (Prod.fst fnResult)\n            (Prod.fst argResult))\n          true\n      else if Prod.snd argResult then\n        Prod.mk\n          (PsKernelExpr.app\n            (Prod.fst fnResult)\n            (Prod.fst argResult))\n          true\n      else\n        Prod.mk expr false\n  | PsKernelExpr.lam name type body binderInfo =>\n      let typeResult :=\n        psKernelExprInstantiateAtChanged\n          type start subst offset\n      let bodyResult :=\n        psKernelExprInstantiateAtChanged\n          body start subst (Nat.succ offset)\n      if Prod.snd typeResult then\n        Prod.mk\n          (PsKernelExpr.lam\n            name\n            (Prod.fst typeResult)\n            (Prod.fst bodyResult)\n            binderInfo)\n          true\n      else if Prod.snd bodyResult then\n        Prod.mk\n          (PsKernelExpr.lam\n            name\n            (Prod.fst typeResult)\n            (Prod.fst bodyResult)\n            binderInfo)\n          true\n      else\n        Prod.mk expr false\n  | PsKernelExpr.forallE name type body binderInfo =>\n      let typeResult :=\n        psKernelExprInstantiateAtChanged\n          type start subst offset\n      let bodyResult :=\n        psKernelExprInstantiateAtChanged\n          body start subst (Nat.succ offset)\n      if Prod.snd typeResult then\n        Prod.mk\n          (PsKernelExpr.forallE\n            name\n            (Prod.fst typeResult)\n            (Prod.fst bodyResult)\n            binderInfo)\n          true\n      else if Prod.snd bodyResult then\n        Prod.mk\n          (PsKernelExpr.forallE\n            name\n            (Prod.fst typeResult)\n            (Prod.fst bodyResult)\n            binderInfo)\n          true\n      else\n        Prod.mk expr false\n  | PsKernelExpr.letE name type value body nondep =>\n      let typeResult :=\n        psKernelExprInstantiateAtChanged\n          type start subst offset\n      let valueResult :=\n        psKernelExprInstantiateAtChanged\n          value start subst offset\n      let bodyResult :=\n        psKernelExprInstantiateAtChanged\n          body start subst (Nat.succ offset)\n      if Prod.snd typeResult then\n        Prod.mk\n          (PsKernelExpr.letE\n            name\n            (Prod.fst typeResult)\n            (Prod.fst valueResult)\n            (Prod.fst bodyResult)\n            nondep)\n          true\n      else if Prod.snd valueResult then\n        Prod.mk\n          (PsKernelExpr.letE\n            name\n            (Prod.fst typeResult)\n            (Prod.fst valueResult)\n            (Prod.fst bodyResult)\n            nondep)\n          true\n      else if Prod.snd bodyResult then\n        Prod.mk\n          (PsKernelExpr.letE\n            name\n            (Prod.fst typeResult)\n            (Prod.fst valueResult)\n            (Prod.fst bodyResult)\n            nondep)\n          true\n      else\n        Prod.mk expr false\n  | PsKernelExpr.mdata metadata body =>\n      let bodyResult :=\n        psKernelExprInstantiateAtChanged\n          body start subst offset\n      if Prod.snd bodyResult then\n        Prod.mk\n          (PsKernelExpr.mdata\n            metadata\n            (Prod.fst bodyResult))\n          true\n      else\n        Prod.mk expr false\n  | PsKernelExpr.proj typeName index body =>\n      let bodyResult :=\n        psKernelExprInstantiateAtChanged\n          body start subst offset\n      if Prod.snd bodyResult then\n        Prod.mk\n          (PsKernelExpr.proj\n            typeName\n            index\n            (Prod.fst bodyResult))\n          true\n      else\n        Prod.mk expr false\n  | _ =>\n      Prod.mk expr false\n\ndef psKernelExprInstantiateAt\n    (expr : PsKernelExpr)\n    (start : Nat)\n    (subst : List PsKernelExpr)\n    (offset : Nat) : PsKernelExpr :=\n  if psKernelExprListIsEmpty subst then\n    expr\n  else\n    Prod.fst\n      (psKernelExprInstantiateAtChanged\n        expr\n        start\n        subst\n        offset)\n\ndef psKernelExprInstantiate\n    (expr : PsKernelExpr)\n    (subst : List PsKernelExpr) : PsKernelExpr :=\n  psKernelExprInstantiateAt\n    expr\n    0\n    subst\n    0\n\ndef psKernelExprInstantiate1\n    (expr : PsKernelExpr)\n    (replacement : PsKernelExpr) : PsKernelExpr :=\n  if psKernelExprHasLooseBVar expr then\n    psKernelExprInstantiate\n      expr\n      (List.cons replacement List.nil)\n  else\n    expr\n\ndef psKernelExprInstantiateRev\n    (expr : PsKernelExpr)\n    (subst : List PsKernelExpr) : PsKernelExpr :=\n  psKernelExprInstantiate\n    expr\n    (psKernelExprListReverse subst)\n")
+          if variant in ("open-all", "combined"):
+              p = Path("src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean")
+              s = p.read_text()
+              old = "  | PsKernelExpr.fvar _, Nat.succ _ =>\n      Option.none\n"
+              assert s.count(old) == 1
+              p.write_text(s.replace(old, ""))
           PY
           lake build psc_kernel_core_arena
-      - name: Measure focused Int64 closure for 60 seconds
-        shell: bash
+      - name: Measure identical one-million-record Init prefix
         run: |
           set -euo pipefail
-          git clone https://github.com/leanprover/lean4export.git exporter
-          git -C exporter checkout 05d43a2bc773b40ecfdebb32294192a5ef756951
-          cd exporter
-          lake build
-          lake env .lake/build/bin/lean4export Init -- Int64.toBitVec_div > int64.ndjson
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cd arena
+          uv run lka.py build-test init --cache
+          head -n 1000000 _build/tests/init.ndjson > prefix.ndjson
+          sha256sum prefix.ndjson
           ulimit -s 65536
           set +e
-          /usr/bin/time -v timeout 60 ../psc0/packages/pskernel-core/.lake/build/bin/psc_kernel_core_arena --profile < int64.ndjson > trace.stdout 2> trace.log
+          /usr/bin/time -v timeout 240 ../psc0/packages/pskernel-core/.lake/build/bin/psc_kernel_core_arena --check-historical < prefix.ndjson > measure.stdout 2> measure.log
           code=$?
           set -e
-          echo "DIAGNOSTIC_ONLY_EXIT=$code"
-          echo "RECENT_DECLARATIONS"
-          grep 'arena-profile enter' trace.log | tail -n 6
-          tail -n 24 trace.log
-          cat trace.stdout
+          echo "DIAGNOSTIC_PREFIX_ONLY_EXIT=$code"
+          cat measure.stdout
+          tail -n 28 measure.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: int64-open-cache-${{ matrix.budget }}
-          path: exporter/trace.*
+          name: init-prefix-${{ matrix.variant }}
+          path: arena/measure.*

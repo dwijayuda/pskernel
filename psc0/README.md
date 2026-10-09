@@ -1,5 +1,24 @@
 # PSC0 compiler and self-host implementation
 
+## Installable platform preview
+
+The protected `proofscript` npm preview exposes `psc check`, `psc build`,
+version information and extension disclosure. Its public launcher is
+`bin/psc.mjs`; the repository-only bootstrap CLI remains in
+`packages/cli/bin/psc.mjs`.
+
+See [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) for the exact cloud
+qualification, tarball workflow, existing-TypeScript-project example and
+remaining work. [PSC0_ARCHITECTURE_PLAN.md](PSC0_ARCHITECTURE_PLAN.md) is the
+accepted architectural plan. This preview is not yet published to npm.
+
+`psc check` checks canonical declarations through the pinned native PSKernel
+Core provider. `psc build` additionally checks RuntimeIR, validates generated
+TypeScript with TS7.0.2, and publishes owned output with a completion receipt.
+Unsupported PSCV/contract profiles and external extensions are refused.
+
+## Compiler lineage
+
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
 
 This directory began as the preserved 2026-10-03 compiler-only bootstrap snapshot, copied from
@@ -59,13 +78,17 @@ provider evidence requirements. Completed results and pending work are recorded 
 
 The native Lean provider source remains in `packages/pskernel-lean/`
 because the `lean-checked/` seed imports its admission implementation.
-The WASM provider remains the default host-side checked provider.
+The protected checked host now defaults to the exact native PSKernel Core
+provider pinned at source `963030dc2d154008fccc82e7c8ed29331f138799`, using
+Lean 4.34.0 and the canonical compiler-admission protocol. Explicit development
+Lean native/WASM alternatives retain their own descriptors. The public npm
+launcher has no provider-selection override.
 
 `legacy/packages/project` is retained as a *regression-only* Lake
 module import for `test/BootstrapTests.lean`. It is not imported by the
 compiler fixed-point root. The experimental owned-kernel provider is
-optional and is loaded through the host-side adapter when explicitly
-selected; it is not a bootstrap source dependency.
+retained for historical/development comparison; it is not the protected
+`pskernel-core` selector, a public npm choice, or a bootstrap source dependency.
 
 ## Important limits
 

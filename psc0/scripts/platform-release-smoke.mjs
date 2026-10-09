@@ -151,11 +151,11 @@ try {
   assert.match(unsupported.stderr, /PSC_PROJECT_PROFILE_UNSUPPORTED/u);
   observations.push('requested PSCV is explicitly refused');
 
-  const dependencies = success(run('ldd', [provider]), 'packaged provider linked-library inspection');
+  const dependencies = success(run('/usr/bin/ldd', [provider], { env }), 'packaged provider linked-library inspection');
   assert(!/not found|\.elan|provider-source|\.lake/u.test(dependencies.stdout + dependencies.stderr),
     'packaged provider has no unprovided Lean/source/build-path shared library dependency');
-  const interpreter = success(run('readelf', ['-l', provider]), 'packaged provider ELF interpreter inspection');
-  const versions = success(run('readelf', ['--version-info', provider]), 'packaged provider ABI version inspection');
+  const interpreter = success(run('/usr/bin/readelf', ['-l', provider], { env }), 'packaged provider ELF interpreter inspection');
+  const versions = success(run('/usr/bin/readelf', ['--version-info', provider], { env }), 'packaged provider ABI version inspection');
   providerRuntime = {
     linkedLibraries: dependencies.stdout.trim().split('\n').map(line => line.trim()),
     interpreter: /Requesting program interpreter: ([^\]]+)/u.exec(interpreter.stdout)?.[1] ?? null,

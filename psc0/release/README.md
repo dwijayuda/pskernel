@@ -60,9 +60,10 @@ must be unset.
 
 ## Scope of checking
 
-The supervisor admits the canonical declarations through the pinned PSKernel
-Core provider and checks the prepared RuntimeIR before emission. TypeScript
-emission and its TS7 compilation must succeed before a build is published.
+`psc check` admits the canonical declarations through the pinned PSKernel
+Core provider; its receipt explicitly reports RuntimeIR as not requested.
+`psc build` additionally checks the prepared RuntimeIR before emission.
+TypeScript emission and its TS7 compilation must succeed before a build is published.
 The receipt identifies the source, compiler, provider, admissions, and emitted
 artifacts and states the checks actually performed.
 

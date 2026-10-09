@@ -1,0 +1,2380 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-practical-selfhost-migration-backlog",
+  "id": "practical-authoring-v1",
+  "status": "frozen-scope-planned-not-implemented",
+  "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+  "qualifiedCompilerSourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+  "sourceClosureSha256": "1dbe0be4f97ad51c2898b86546590d4331b463dd080976ba4cb2c72f0e7c59a0",
+  "scopeDecision": "Twelve named workers, not every function-valued declaration. This finite scope completes the chosen practical v1 migration; it does not assert whole-repository adapter removal or strict SH/1.",
+  "currentSyntaxDirection": "The user requests atomic current .ps parser/printer/fixture/tooling adoption of the uploaded new grammar, with no active legacy .ps grammar compatibility lane. That coordinated grammar change is a sibling implementation unit, not permission to claim all PSCV capabilities or change Lean/provider pins.",
+  "coverage": {
+    "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+    "entry": "psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+    "moduleCount": 61,
+    "bytes": 1088337,
+    "edgeCount": 142,
+    "unreachableReadFiles": [],
+    "orderedModules": [
+      {
+        "path": "psc0/packages/foundation/src/Ps/Foundation/Source.lean",
+        "blobSha": "1451dabae049d324b7aeb2d1b89b7bf56dea32fd",
+        "bytes": 148
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
+        "blobSha": "6543f69216532449bddb341495cada280d7f8943",
+        "bytes": 2806
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Token.lean",
+        "blobSha": "5bc9895dbe7a9ba9157b00f6e184da6d16af738f",
+        "bytes": 959
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Lexer.lean",
+        "blobSha": "1a0f9e4de803d568de8889c5cb696bbcca365945",
+        "bytes": 31044
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+        "blobSha": "4a9daaf4179ca7fa74e9183e542891ec110fd5d7",
+        "bytes": 3088
+      },
+      {
+        "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+        "blobSha": "9c896076032762543b57d88c0010f90ad0a066d5",
+        "bytes": 3982
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParserState.lean",
+        "blobSha": "e784c5836a37e522a21f67db0d52653d5ab12a57",
+        "bytes": 2516
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+        "blobSha": "45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b",
+        "bytes": 22408
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "blobSha": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3",
+        "bytes": 103198
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+        "blobSha": "3fccc2a0704176e6a2b6d79b94d79f27fa0a6f02",
+        "bytes": 63464
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+        "blobSha": "5d448af4935bdfe885c2d220173410034a70b320",
+        "bytes": 3358
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+        "blobSha": "7bc3c98cbba77e51b521d19492f3c1ec5bd2ef7c",
+        "bytes": 28825
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+        "blobSha": "f05a3cc2150ec7474fea6be9600545cf11d442c1",
+        "bytes": 29931
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Translate.lean",
+        "blobSha": "eafd7159b14a251fe11ffdbfb1e2482bcc773c9b",
+        "bytes": 2074
+      },
+      {
+        "path": "psc0/packages/bridge/src/Ps/Bridge/Json.lean",
+        "blobSha": "4ddfec62f2edd54be87091812dcb6add6304e3ed",
+        "bytes": 35343
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Level.lean",
+        "blobSha": "2607a00d69cb0299de20aecb6b94a00adc7852a2",
+        "bytes": 286
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+        "blobSha": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+        "bytes": 753
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Declaration.lean",
+        "blobSha": "c34c280b1c42f23138cfec79f4e448db17071952",
+        "bytes": 1349
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Abstract.lean",
+        "blobSha": "8ac0f21d92538502ee14fc6932eb0f48fda48a85",
+        "bytes": 2618
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Subst.lean",
+        "blobSha": "c8439e444e38b642043f2d18561a77a2bdd420a2",
+        "bytes": 5297
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Equality.lean",
+        "blobSha": "0762bd4fee3540083eb7dab3aeb70dff8d02b6c4",
+        "bytes": 6468
+      },
+      {
+        "path": "psc0/packages/foundation/src/Ps/Foundation/List.lean",
+        "blobSha": "29e4e59c271c1a26604cc738a8794f9bb70a2e83",
+        "bytes": 2386
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/Basic.lean",
+        "blobSha": "533dd2008b773f820e7fdf87ee01d66d759576c5",
+        "bytes": 9098
+      },
+      {
+        "path": "psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+        "blobSha": "35bc6d634f203eceb41666ddea9cfe8bcf204196",
+        "bytes": 45371
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Builtin.lean",
+        "blobSha": "c64025ddc515c47a4d661076d779e0bccada5046",
+        "bytes": 4949
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/Prelude.lean",
+        "blobSha": "d862ba8c806595fbf11237724089bd2282af9866",
+        "bytes": 24355
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+        "blobSha": "b9127717d5685ae0de6e10251ba1d8d02b6e647d",
+        "bytes": 17298
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+        "blobSha": "38485851a30f024d973392c6c8e1d86916e31466",
+        "bytes": 4407
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/LocalContext.lean",
+        "blobSha": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6",
+        "bytes": 2690
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/Resolve.lean",
+        "blobSha": "4dcad8f12689b21d640fe192ff81191fe506fe10",
+        "bytes": 592
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/LevelSubst.lean",
+        "blobSha": "48f0d7b821fe0c09e14de126cbf4df40cba7559a",
+        "bytes": 3613
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/LevelContext.lean",
+        "blobSha": "4efa1fe2e98b7482d6c85ebb9bcfe596328c3956",
+        "bytes": 8693
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Context.lean",
+        "blobSha": "94f1920fc7e62bbe53f7e70d8d4466d78a0d5755",
+        "bytes": 9088
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Reduce.lean",
+        "blobSha": "1b81ba072e26eff9c3afbe58a945e8bf383c6f18",
+        "bytes": 6218
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+        "blobSha": "25e0c00dfafb0268d6a204089a3eceb10d9bcb0f",
+        "bytes": 19248
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/Instances.lean",
+        "blobSha": "75b0d66c402b2807149cd2c832207a2d311c2db3",
+        "bytes": 1616
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Unify.lean",
+        "blobSha": "9d2e7e01debd1299fc2e685ff4ecc4c593337ed5",
+        "bytes": 11089
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/SynthInstance.lean",
+        "blobSha": "3d42e50aa274a988535f8f7969133df373474ae0",
+        "bytes": 12606
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+        "blobSha": "d9501b06f0e56df2101ca950cfd518d31dd5e26e",
+        "bytes": 2121
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Literal.lean",
+        "blobSha": "a4f0ed94c712495b3d379374b5572a047c0c1919",
+        "bytes": 10474
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+        "blobSha": "63709b2f8b2a5dba7844e63b9b38849b0bc23300",
+        "bytes": 101764
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+        "blobSha": "3b48ff76a206f861c4948eaf99eff06fadd0706e",
+        "bytes": 32466
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+        "blobSha": "dd668b05e34231747b48af3e29468b0fc99607d2",
+        "bytes": 52246
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blobSha": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "bytes": 5378
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blobSha": "c41474cdbd008999368dfaf368be988e9982042b",
+        "bytes": 24687
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "blobSha": "0d5e687086dec44e8157a15757bc29350f6f447c",
+        "bytes": 84675
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+        "blobSha": "4098822ae5ca1a1c3d3d476be5b592daad7d2110",
+        "bytes": 17667
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+        "blobSha": "864cf3a59c51537aca59e0bb7691a66f0dce777c",
+        "bytes": 6762
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+        "blobSha": "66b20621288b76153fa78db6c923f0c7b0c5d9ab",
+        "bytes": 10006
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+        "blobSha": "d288a83320f509fd229139303e06aadcdb7ab39d",
+        "bytes": 20005
+      },
+      {
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+        "blobSha": "7f8270f1ba66c786390ef8d7cb54558e28203fba",
+        "bytes": 10413
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+        "blobSha": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79",
+        "bytes": 4200
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+        "blobSha": "a3b2cf9febff4a31a3ad6c7646f4ff2e252932ea",
+        "bytes": 34704
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+        "blobSha": "35485a2cf9e4f07249ee689f0c35b581b305e324",
+        "bytes": 40314
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+        "blobSha": "71a4231fe23c7049c0930976c383fbc60cc5c24f",
+        "bytes": 26018
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+        "blobSha": "49f267282ea27f978eaa522e6038d8787676994e",
+        "bytes": 18919
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+        "blobSha": "b27f87943d042496ec0732c309afc4f770ed6fc4",
+        "bytes": 46567
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+        "blobSha": "154cc013b692a449a6a47e6e4270957856d5bc0b",
+        "bytes": 2510
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+        "blobSha": "49ed00023d51b12ef4ab37958ea05a76ea13b530",
+        "bytes": 1593
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+        "blobSha": "4e4c70cb9b8076e97a3716f45f40b0d08d8ddcfd",
+        "bytes": 1374
+      },
+      {
+        "path": "psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+        "blobSha": "c88f449644e3caf966c19f01e9534345bbb8c831",
+        "bytes": 242
+      }
+    ],
+    "method": "Read all current raw modules; rebuild the supported import graph from the composition root. Mask nested comments and string/character literals; find top-level declarations and balance binder/type delimiters to locate function-valued result headers. This is locator discovery, not a full PSC parser or acceptance test. Manually inspect the complete body, self-call binding, Nat/List child, moved type dependencies, callbacks, state and error behavior for each of the twelve chosen workers.",
+    "declarationDiscovery": {
+      "ordinaryAssignedDefs": 1311,
+      "equationDeclarations": 20,
+      "functionValuedResultLocators": 241,
+      "requiredTargets": 12,
+      "explicitNonrecursiveRetains": 3,
+      "otherLocatorsDeferredWithoutEligibilityClaim": 226
+    },
+    "scriptsScanned": 189,
+    "testFilesScanned": 23
+  },
+  "constraints": {
+    "noKernelProviderDefeqCacheMetatheoryChanges": true,
+    "lean": "4.34.0",
+    "node": "22.23.3",
+    "currentTypescript": "7.0.2",
+    "historicalS0ATypeScript": "5.8.3",
+    "selectedSeed": "A until explicit qualified successor selection",
+    "strictSh1Qualified": false,
+    "profileActivation": false
+  },
+  "targets": [
+    {
+      "id": "F1-01",
+      "name": "psErasureLocalNameWithFuel",
+      "major": "fuel : Nat",
+      "fixed": [
+        "scope : PsErasureScope",
+        "base : String"
+      ],
+      "state": [
+        "index : Nat"
+      ],
+      "suffix": "String",
+      "preserve": [
+        "Zero fuel returns base + \"$\" + decimal index even if already used; do not replace it with a refusal.",
+        "The same local/global collision predicate and index successor order; callers retain their input-derived fuel."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-replay-emission-source.mjs",
+          "blobSha": "c5ef93aba675efe82c7702f91ebc205b897335a6"
+        }
+      ],
+      "cases": [
+        "fuel zero with unused and colliding candidate",
+        "collision chain, nonzero starting index",
+        "unchanged wrapper fuel and reserved-name handling"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "line": 357,
+      "blobSha": "c41474cdbd008999368dfaf368be988e9982042b",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/erasure/src/Ps/Erasure/Basic.lean#L357",
+      "oldHeader": "def psErasureLocalNameWithFuel (scope : PsErasureScope) (base : String) (fuel : Nat) : Nat -> String",
+      "currentType": "def psErasureLocalNameWithFuel (scope : PsErasureScope) (base : String) (fuel : Nat) : Nat -> String",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psErasureLocalName",
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+          "line": 366
+        }
+      ]
+    },
+    {
+      "id": "F1-02",
+      "name": "psErasureEtaNameWithFuel",
+      "major": "fuel : Nat",
+      "fixed": [
+        "body : PsVerifiedIrExpr",
+        "used : List PsVerifiedIrParameter"
+      ],
+      "state": [
+        "index : Nat"
+      ],
+      "suffix": "Except PsErasureError String",
+      "preserve": [
+        "Zero fuel returns fuelExhausted.",
+        "Preserve used-parameter check before body-name scan; retain the 4096 scan limit and __ps_eta_ spelling.",
+        "Typed sameName callback remains a supported typed local; this migration is not lambda-inference work."
+      ],
+      "guards": [],
+      "cases": [
+        "zero fuel",
+        "collision in used list, in body, and in both",
+        "exact first fresh suffix; conservative exhausted body scan"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "line": 1354,
+      "blobSha": "0d5e687086dec44e8157a15757bc29350f6f447c",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/erasure/src/Ps/Erasure/Expr.lean#L1354",
+      "oldHeader": "def psErasureEtaNameWithFuel\n    (body : PsVerifiedIrExpr) (used : List PsVerifiedIrParameter) (fuel : Nat) : Nat -> Except PsErasureError String",
+      "currentType": "def psErasureEtaNameWithFuel (body : PsVerifiedIrExpr) (used : List PsVerifiedIrParameter) (fuel : Nat) : Nat -> Except PsErasureError String",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psErasureEtaParameters",
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "line": 1367
+        }
+      ]
+    },
+    {
+      "id": "F1-03",
+      "name": "psTsFreshMatchTempWorker",
+      "major": "attempts : Nat",
+      "fixed": [
+        "expr : PsVerifiedIrExpr"
+      ],
+      "state": [
+        "index : Nat"
+      ],
+      "suffix": "String",
+      "preserve": [
+        "Zero attempts returns exactly __ps$match$overflow.",
+        "Preserve the 4096 expression-use scan and candidate sequence __ps$match$<index>."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-backend-ts-replay-source.mjs",
+          "blobSha": "511660c15bb4a0c7eea6a33121ad35c870c0d39e"
+        }
+      ],
+      "cases": [
+        "zero attempts",
+        "first free name and several collisions",
+        "nonzero index and conservative scan exhaustion"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "line": 53,
+      "blobSha": "a3b2cf9febff4a31a3ad6c7646f4ff2e252932ea",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean#L53",
+      "oldHeader": "def psTsFreshMatchTempWorker (expr : PsVerifiedIrExpr) (attempts : Nat) : Nat -> String",
+      "currentType": "def psTsFreshMatchTempWorker (expr : PsVerifiedIrExpr) (attempts : Nat) : Nat -> String",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psTsFreshMatchTempLoop",
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+          "line": 62
+        }
+      ]
+    },
+    {
+      "id": "F1-04",
+      "name": "psTsFreshInternalWorker",
+      "major": "attempts : Nat",
+      "fixed": [
+        "used : List String",
+        "namePrefix : String"
+      ],
+      "state": [
+        "index : Nat"
+      ],
+      "suffix": "PsTsFreshNameResult",
+      "preserve": [
+        "Zero attempts returns prefix + overflow and nextIndex = index + 1.",
+        "A successful result also advances nextIndex once; only collisions consume another attempt.",
+        "Preserve arbitrary prefix and duplicate used-name handling."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-backend-ts-replay-source.mjs",
+          "blobSha": "511660c15bb4a0c7eea6a33121ad35c870c0d39e"
+        }
+      ],
+      "cases": [
+        "zero attempts including colliding overflow spelling",
+        "duplicates, collision chains, nonzero starting index",
+        "exact returned name and nextIndex"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "line": 14,
+      "blobSha": "35485a2cf9e4f07249ee689f0c35b581b305e324",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean#L14",
+      "oldHeader": "def psTsFreshInternalWorker (used : List String) (namePrefix : String) (attempts : Nat) :\n    Nat -> PsTsFreshNameResult",
+      "currentType": "def psTsFreshInternalWorker (used : List String) (namePrefix : String) (attempts : Nat) : Nat -> PsTsFreshNameResult",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psTsFreshInternalWithFuel",
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "id": "F2-01",
+      "name": "psCompilerPreparationSourcesWorker",
+      "major": "sources : List String",
+      "fixed": [],
+      "state": [
+        "state : PsCompilerPreparationState"
+      ],
+      "suffix": "Except PsCompilerError PsCompilerPreparationState",
+      "preserve": [
+        "Step sources in order using the same preparation seam.",
+        "Empty input returns the incoming state; first failure stops before preparing the tail.",
+        "Do not alter session identities, cache invalidation, source kinds, declaration accumulation or admission ownership."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-modular-preparation-source.mjs",
+          "blobSha": "7ed26f6dd903c74cb0794d9393a11a28977795e3"
+        }
+      ],
+      "cases": [
+        "empty/nonempty initial state",
+        "success order and failure in first/middle source",
+        "existing cold/warm and parsed-step correspondence"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "line": 154,
+      "blobSha": "7f8270f1ba66c786390ef8d7cb54558e28203fba",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/compiler/src/Ps/Compiler/Api.lean#L154",
+      "oldHeader": "def psCompilerPreparationSourcesWorker\n    (sources : List String) :\n    PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState",
+      "currentType": "def psCompilerPreparationSourcesWorker (sources : List String) : PsCompilerPreparationState -> Except PsCompilerError PsCompilerPreparationState",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psCompilerElaborateSourcesWorker",
+          "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+          "line": 168
+        },
+        {
+          "name": "psCompilerPrepareSources",
+          "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+          "line": 178
+        }
+      ]
+    },
+    {
+      "id": "F2-02",
+      "name": "psAddDeclarationListWorker",
+      "major": "declarations : List PsDeclaration",
+      "fixed": [],
+      "state": [
+        "environment : PsEnvironment"
+      ],
+      "suffix": "Except PsElabError PsEnvironment",
+      "preserve": [
+        "Keep psEnvironmentAddOwnedBootstrapDeclaration, its ownership behavior and first duplicateDeclaration name.",
+        "Empty input preserves environment; no later insertion after the first duplicate.",
+        "Do not change the environment/index implementation."
+      ],
+      "guards": [],
+      "cases": [
+        "empty list",
+        "ordered insertions",
+        "duplicate against initial environment and earlier input"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "line": 654,
+      "blobSha": "dd668b05e34231747b48af3e29468b0fc99607d2",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/elab/src/Ps/Elab/Declaration.lean#L654",
+      "oldHeader": "def psAddDeclarationListWorker\n    (declarations : List PsDeclaration) :\n    PsEnvironment -> Except PsElabError PsEnvironment",
+      "currentType": "def psAddDeclarationListWorker (declarations : List PsDeclaration) : PsEnvironment -> Except PsElabError PsEnvironment",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psAddDeclarationList",
+          "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+          "line": 678
+        }
+      ]
+    },
+    {
+      "id": "F2-03",
+      "name": "psElabDeclarationsWorker",
+      "major": "sources : List PsSyntaxDeclaration",
+      "fixed": [],
+      "state": [
+        "environment : PsEnvironment",
+        "declarationsRev : List PsDeclaration"
+      ],
+      "suffix": "Except PsElabError PsElabModuleResult",
+      "preserve": [
+        "Elaborate each batch, add its declarations, then advance with that environment and reverse-prepended batch.",
+        "Preserve first elaboration/duplicate failure, batch order, caller-supplied accumulator suffix and final reversal.",
+        "Keep psElabDeclarations public argument order environment, sources, declarationsRev."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-elab-declarations-selfhost-source-syntax.mjs",
+          "blobSha": "14beb0855b02afc2efa465483931ee654b36432b"
+        }
+      ],
+      "cases": [
+        "empty input with nonempty accumulator",
+        "multiple batches and dependency on earlier declaration",
+        "elaboration failure, duplicate failure, exact first error"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "line": 1446,
+      "blobSha": "dd668b05e34231747b48af3e29468b0fc99607d2",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/elab/src/Ps/Elab/Declaration.lean#L1446",
+      "oldHeader": "def psElabDeclarationsWorker\n    (sources : List PsSyntaxDeclaration) :\n    PsEnvironment ->\n    List PsDeclaration ->\n    Except PsElabError PsElabModuleResult",
+      "currentType": "def psElabDeclarationsWorker (sources : List PsSyntaxDeclaration) : PsEnvironment -> List PsDeclaration -> Except PsElabError PsElabModuleResult",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psElabDeclarations",
+          "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+          "line": 1482
+        }
+      ]
+    },
+    {
+      "id": "F2-04",
+      "name": "psBuildErasureDeclarationNamesWorker",
+      "major": "declarations : List PsDeclaration",
+      "fixed": [],
+      "state": [
+        "state : PsErasureNameState"
+      ],
+      "suffix": "PsErasureNameState",
+      "projectionSeedRequired": true,
+      "preserve": [
+        "Keep the exact declaration whitelist: definition, partial, theorem and inductive names; skip other declarations.",
+        "Keep identifier sanitization, default decl spelling, 4096 uniqueness fuel, collision order and entriesRev order.",
+        "Retain the typed Option-valued match local; do not change the unique-name algorithm or reverse helper."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-erasure-declaration-names-selfhost-source-syntax.mjs",
+          "blobSha": "ae8ee243fa1c4dee77787f00c276f4e10d30d4f2"
+        }
+      ],
+      "cases": [
+        "each accepted/skipped declaration form",
+        "empty/nonempty initial used and entriesRev",
+        "sanitization collisions and exact ordered output"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "line": 38,
+      "blobSha": "d288a83320f509fd229139303e06aadcdb7ab39d",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/erasure/src/Ps/Erasure/Definition.lean#L38",
+      "oldHeader": "def psBuildErasureDeclarationNamesWorker\n    (declarations : List PsDeclaration) :\n    PsErasureNameState -> PsErasureNameState",
+      "currentType": "def psBuildErasureDeclarationNamesWorker (declarations : List PsDeclaration) : PsErasureNameState -> PsErasureNameState",
+      "selectedSeedCapability": "qualified-parameter-projection-seed-required",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psBuildErasureDeclarationNames",
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "line": 67
+        }
+      ]
+    },
+    {
+      "id": "F2-05",
+      "name": "psEraseDefinitionsLoopWorker",
+      "major": "declarations : List PsDeclaration",
+      "fixed": [
+        "environment : PsEnvironment",
+        "scope : PsErasureScope"
+      ],
+      "state": [
+        "declarationsRev : List PsVerifiedIrDeclaration"
+      ],
+      "suffix": "Except PsErasureError (List PsVerifiedIrDeclaration)",
+      "preserve": [
+        "Process definition and partial declaration branches identically as before; skip the same remaining forms.",
+        "Preserve error before Option handling, erased-result omission, first-error order and final local reversal.",
+        "Keep environment and scope fixed and preserve psEraseDefinitionsLoop argument order."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-erasure-definitions-loop-selfhost-source-syntax.mjs",
+          "blobSha": "de68947fb59c877e27fa75277c9ccf485e55d751"
+        }
+      ],
+      "cases": [
+        "empty/nonempty initial accumulator",
+        "ordinary, partial, erased and skipped declarations",
+        "first error and exact emitted declaration order"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "line": 402,
+      "blobSha": "d288a83320f509fd229139303e06aadcdb7ab39d",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/erasure/src/Ps/Erasure/Definition.lean#L402",
+      "oldHeader": "def psEraseDefinitionsLoopWorker\n    (environment : PsEnvironment)\n    (scope : PsErasureScope)\n    (declarations : List PsDeclaration) :\n    List PsVerifiedIrDeclaration ->\n    Except PsErasureError (List PsVerifiedIrDeclaration)",
+      "currentType": "def psEraseDefinitionsLoopWorker (environment : PsEnvironment) (scope : PsErasureScope) (declarations : List PsDeclaration) : List PsVerifiedIrDeclaration -> Except PsErasureError (List PsVerifiedIrDeclaration)",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psEraseDefinitionsLoop",
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "line": 437
+        }
+      ]
+    },
+    {
+      "id": "F2-06",
+      "name": "psPrepareRuntimeStructures",
+      "major": "inputs : List PsDeclaration",
+      "fixed": [
+        "environment : PsEnvironment",
+        "declarations : List PsDeclaration"
+      ],
+      "state": [
+        "scope : PsErasureScope",
+        "structuresRev : List PsVerifiedIrStructure"
+      ],
+      "suffix": "Except PsErasureError PsPreparedStructuresResult",
+      "preserve": [
+        "Visit only inductive declarations whose isStructure flag is true.",
+        "Thread prepared.scope after success, preserve all skip paths and reverse output exactly once.",
+        "Retain first failure and the full fixed declaration list used for lookup."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-erasure-replay-workers.mjs",
+          "blobSha": "e947be4a26c4d877b5586b7b80ec3b5b5b55c4e0"
+        }
+      ],
+      "cases": [
+        "mixed declaration stream and nonempty initial accumulator",
+        "scope dependencies between successive structures",
+        "first malformed structure; skip ordinary inductives"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "line": 106,
+      "blobSha": "864cf3a59c51537aca59e0bb7691a66f0dce777c",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/erasure/src/Ps/Erasure/Structure.lean#L106",
+      "oldHeader": "def psPrepareRuntimeStructures\n    (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) :\n    PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult",
+      "currentType": "def psPrepareRuntimeStructures (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) : PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psEraseCoreModuleWithRuntimePrelude",
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "line": 452
+        }
+      ]
+    },
+    {
+      "id": "F2-07",
+      "name": "psPrepareRuntimeInductives",
+      "major": "inputs : List PsDeclaration",
+      "fixed": [
+        "environment : PsEnvironment",
+        "declarations : List PsDeclaration"
+      ],
+      "state": [
+        "scope : PsErasureScope",
+        "irRev : List PsVerifiedIrInductive"
+      ],
+      "suffix": "Except PsErasureError PsPreparedInductivesResult",
+      "preserve": [
+        "Visit only inductive declarations whose isStructure flag is false.",
+        "Thread prepared.scope after success, preserve skip paths, first failure and final reversal.",
+        "Do not change constructor preparation, layout policy, lookup or recursor implementation."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-erasure-replay-workers.mjs",
+          "blobSha": "e947be4a26c4d877b5586b7b80ec3b5b5b55c4e0"
+        }
+      ],
+      "cases": [
+        "mixed declaration stream; skip structures",
+        "scope dependencies between successive inductives",
+        "first invalid inductive and exact output order"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "line": 367,
+      "blobSha": "4098822ae5ca1a1c3d3d476be5b592daad7d2110",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/erasure/src/Ps/Erasure/Inductive.lean#L367",
+      "oldHeader": "def psPrepareRuntimeInductives\n    (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) :\n    PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult",
+      "currentType": "def psPrepareRuntimeInductives (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) : PsErasureScope -> List PsVerifiedIrInductive -> Except PsErasureError PsPreparedInductivesResult",
+      "selectedSeedCapability": "already-in-A-capability",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psEraseCoreModuleWithRuntimePrelude",
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+          "line": 452
+        }
+      ]
+    },
+    {
+      "id": "F2-08",
+      "name": "psTsBuildSymbolMap",
+      "major": "names : List String",
+      "fixed": [
+        "namePrefix : String"
+      ],
+      "state": [
+        "state : PsTsSymbolMapState"
+      ],
+      "suffix": "PsTsSymbolMapState",
+      "projectionSeedRequired": true,
+      "preserve": [
+        "Keep fresh-name generation, used list, nextIndex and entriesRev updates in their existing order.",
+        "Both brand and tag wrappers retain their prefixes, initial states and final output handling.",
+        "Repeated source names and collisions keep the existing mapping behavior."
+      ],
+      "guards": [
+        {
+          "path": "psc0/scripts/check-backend-ts-replay-source.mjs",
+          "blobSha": "511660c15bb4a0c7eea6a33121ad35c870c0d39e"
+        }
+      ],
+      "cases": [
+        "empty and nonempty initial symbol state",
+        "duplicate source names and used-name collisions",
+        "exact name/index/map order for both callers"
+      ],
+      "status": "planned-not-migrated",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "line": 37,
+      "blobSha": "35485a2cf9e4f07249ee689f0c35b581b305e324",
+      "sourceUrl": "https://github.com/dwijayuda/pskernel/blob/5e3a991088aaa735c8f324c4e70a7a3dee4cd69a/psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean#L37",
+      "oldHeader": "def psTsBuildSymbolMap (namePrefix : String) (names : List String) : PsTsSymbolMapState -> PsTsSymbolMapState",
+      "currentType": "def psTsBuildSymbolMap (namePrefix : String) (names : List String) : PsTsSymbolMapState -> PsTsSymbolMapState",
+      "selectedSeedCapability": "qualified-parameter-projection-seed-required",
+      "partialRecursiveBindings": 1,
+      "callers": [
+        {
+          "name": "psTsBuildBrandMap",
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "line": 56
+        },
+        {
+          "name": "psTsBuildTagMap",
+          "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+          "line": 61
+        }
+      ]
+    }
+  ],
+  "familyCounts": [
+    {
+      "id": "F1",
+      "description": "Bounded fresh-name/index workers",
+      "workers": 4,
+      "sourceFiles": 4
+    },
+    {
+      "id": "F2",
+      "description": "Ordered preparation, declaration, erasure and symbol-state folds",
+      "workers": 8,
+      "sourceFiles": 6
+    }
+  ],
+  "distinctTargetSourceFiles": 9,
+  "guardFiles": [
+    {
+      "path": "psc0/scripts/check-replay-emission-source.mjs",
+      "blobSha": "c5ef93aba675efe82c7702f91ebc205b897335a6"
+    },
+    {
+      "path": "psc0/scripts/check-backend-ts-replay-source.mjs",
+      "blobSha": "511660c15bb4a0c7eea6a33121ad35c870c0d39e"
+    },
+    {
+      "path": "psc0/scripts/check-modular-preparation-source.mjs",
+      "blobSha": "7ed26f6dd903c74cb0794d9393a11a28977795e3"
+    },
+    {
+      "path": "psc0/scripts/check-elab-declarations-selfhost-source-syntax.mjs",
+      "blobSha": "14beb0855b02afc2efa465483931ee654b36432b"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-declaration-names-selfhost-source-syntax.mjs",
+      "blobSha": "ae8ee243fa1c4dee77787f00c276f4e10d30d4f2"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-definitions-loop-selfhost-source-syntax.mjs",
+      "blobSha": "de68947fb59c877e27fa75277c9ccf485e55d751"
+    },
+    {
+      "path": "psc0/scripts/check-erasure-replay-workers.mjs",
+      "blobSha": "e947be4a26c4d877b5586b7b80ec3b5b5b55c4e0"
+    }
+  ],
+  "guardPolicy": "Replace only obsolete curried-shape requirements with the selected ordinary-parameter capability/correspondence evidence; preserve unrelated source/library restrictions, ownership checks, first-error sequencing, primitive dispatch/arity and emitted invocation/record guards. Seven directly associated guard files were found by full script reads.",
+  "postSeedAliasCleanup": {
+    "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+    "blobSha": "b27f87943d042496ec0732c309afc4f770ed6fc4",
+    "sites": [
+      {
+        "declaration": "psIrCheckMatchBindings",
+        "line": 339,
+        "alias": "limits : PsIrCheckOptions := options"
+      },
+      {
+        "declaration": "psIrCheckRun",
+        "line": 816,
+        "alias": "currentState : PsIrCheckState := state"
+      },
+      {
+        "declaration": "psIrCheckRun",
+        "line": 825,
+        "alias": "currentState : PsIrCheckState := state"
+      }
+    ],
+    "condition": "Only after a qualified projection-capable successor is explicitly selected; preserve match structure and typing/resource behavior."
+  },
+  "retainedNonTargets": [
+    {
+      "names": [
+        "psPreludeProdOf",
+        "psPreludeArrayOf"
+      ],
+      "reason": "Nonrecursive constructor-building function interfaces, not state-currying workarounds."
+    },
+    {
+      "names": [
+        "psCompilerElaborateSourcesWorker"
+      ],
+      "reason": "Nonrecursive public compatibility wrapper over the preparation seam; retaining its function-valued type is appropriate and preserves API."
+    },
+    {
+      "names": [
+        "psTsLookup",
+        "psErasureIndexFindInBucket"
+      ],
+      "reason": "The searched target is passed unchanged; removing returned-function syntax is not required to gain changing-state authoring capability."
+    }
+  ],
+  "deferredGroups": [
+    {
+      "scope": "Other syntax/lexer/JSON parser and printer workers",
+      "reason": "A separate semantic grammar migration is active. Do not mix broad state-currying cleanup into it; large callback/depth/error workers require their own case inventory."
+    },
+    {
+      "scope": "Large elaboration, erasure and emission dispatch workers",
+      "examples": [
+        "psElabTermWithFuel",
+        "psEraseRuntimeExprWithFuelWorker",
+        "psTsEmitTypeWithFuel",
+        "psTsEmitExprWithFuel"
+      ],
+      "reason": "These pass smaller functions as callbacks or have broad case/error behavior. They are not blindly eligible for the direct saturated-self rewrite. Keep until measured authoring need justifies a bounded later unit."
+    },
+    {
+      "scope": "Recursion normalizer implementation",
+      "reason": "Keep A-consumable during the projection change; self-dogfooding its remaining curried helpers is optional after explicit new-seed selection."
+    },
+    {
+      "scope": "Foundation.Name, Core, Environment index, Meta and checked-admission helpers",
+      "reason": "High fan-in or adjacent to protected defeq/cache/kernel/metatheory responsibilities. Their adapter cleanup is outside practical v1 and should not be slipped into source migration."
+    },
+    {
+      "scope": "Expected-type lambda domains, nested patterns, Except-only do, general equations, new backends and authoritative .ps implementation source",
+      "reason": "Independent follow-on capabilities; none is required to convert the twelve workers."
+    }
+  ],
+  "seedSuccessorPlan": {
+    "currentV1ManifestPath": "psc0/selfhost-seed.json",
+    "currentValidator": "psc0/scripts/sh1-seed-manifest.mjs",
+    "v1MustRemainExact": "Schema1 requires historical S0 bootstrap, TypeScript5.8.3, the original descriptor and recovery recipe. Do not broaden those checks or recompute A identities under TS7.",
+    "requiredSuccessor": "Add a separate versioned manifest/recovery contract binding the exact parent A manifest/identity/compiler digest, new source revision/closure, C2/C3 four products, producer TS7.0.2, runtime tuple, capability descriptor and recovery recipe.",
+    "sequence": [
+      "Keep the projection/new-grammar implementation's .lean source within A's accepted authoring capability; do not remove the three aliases yet.",
+      "Qualify that exact current raw source through C1 = Q(R), where Q is the selected compiler from A, C2 = C1(R), C3 = C2(R), with current new .ps fixture grammar exercised by the newly generated compilers. Require all four C2/C3 products, same-IR typing, relevant runtime tests and separate exact-stream provider decisions.",
+      "Implement a versioned successor reader/identity/cache/artifact/recovery route with an immutable parent edge to the existing A manifest. Keep old S0/A identities and TS5 replay dispatch unchanged.",
+      "Recover A through its existing TS5 path; execute its JS under the pinned Node runtime to compile R; compile R's emitted TypeScript with the exact TS7 CLI/profile; run the first generated compiler on raw R and compare every converged pinned product.",
+      "Use the producing qualification's reconstruction receipts if they exercise that same source-recovery implementation with cache/artifact bypass and final pinned-product verification; otherwise a distinct artifact-free recovery verification remains required before selection. Do not label artifact replay a cold source recovery.",
+      "Only after the exact successor identity, recovery evidence and capability/provider receipts are reviewable, select the successor via an ordinary leased manifest commit. Selection is explicit and does not activate strict SH/1.",
+      "Then migrate the two projection-dependent workers and remove the three compatibility aliases. Both old and new .ps implementations are not kept active; historical source refs remain immutable recovery material."
+    ],
+    "noRuntimeClaim": "Producer toolchain identity and runtime execution identity are separate; importing A's exact JS does not imply rebuilding it with TS7."
+  },
+  "projectionCallerAudit": {
+    "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+    "moduleCount": 61,
+    "scripts": 189,
+    "rootTestFiles": 9,
+    "fixtures": 14,
+    "targets": [
+      {
+        "name": "psElabRecursionWalkWithFuel",
+        "internalLines": [
+          272,
+          283,
+          520,
+          583,
+          587,
+          652
+        ],
+        "externalMatches": 0
+      },
+      {
+        "name": "psElabRecursionRenameParameters",
+        "internalLines": [
+          499,
+          514,
+          580
+        ],
+        "externalMatches": 0
+      }
+    ],
+    "scope": "All raw sources in the 61-module import closure, all 189 immediate psc0/scripts files, all 9 immediate psc0/test files, all 14 recursively listed psc0/test/fixtures files. Exact identifier substring scan across full text; declaration/call lines in Recursion.lean reviewed.",
+    "notClaimed": "Does not cover every file in the repository or concurrent uncommitted/new branch edits."
+  },
+  "qualificationPlan": [
+    "Review all twelve conversions and all seven guard updates before the first candidate gate; preserve names, complete types and binder order, algorithms, fuel policies, first-error behavior and wrapper APIs.",
+    "Preserve raw before sources at the immutable base. Compile before/after slices under the selected generated compiler, compare complete public types and bounded independent behavior cases, and exercise public partial applications.",
+    "Use one native development gate to catch grammar/type/IR issues before the expensive generation sequence. Do not launch full C1/C2/C3 after each helper.",
+    "Keep two source commits for rollback and two family-specific correspondence receipts. If both families are reviewed together, one combined exact-source full qualification can cover their shared final source; report that joint source honestly. Separate full checkpoints only when an intervening promotion or concrete risk requires them.",
+    "Run current raw-source generation with the selected seed, same-IR checker and established runtime/iteration conformance; require C2/C3 equality of canonical source, admissions, TS and JS and separately accepted exact provider streams.",
+    "Review generated loopification and the existing shadowing/tail/evaluation fixtures; source readability alone is not evidence of a runtime speedup.",
+    "Stop at the finite adoption criteria. Additional locator cleanup or optional language features require a new scoped objective."
+  ],
+  "completionCriteria": [
+    "Atomic requested new .ps grammar parser/printer/fixtures/tooling checkpoint is qualified without an active legacy grammar lane.",
+    "Projection capability is implemented, current-source qualified and represented in an explicitly selected recoverable TS7 successor seed.",
+    "All twelve named workers use ordinary value parameters while complete public interfaces and the stated behavior contracts are preserved.",
+    "Three compatibility aliases are removed only under the selected successor, and related replacement capability/correspondence guards pass.",
+    "Family receipts, combined exact-source fixed point, same-IR typing, selected-provider acceptance and current-source iteration receipts are committed against immutable identities.",
+    "Strict SH/1 and full PSCV conformance remain separate unless their independent contracts are completed."
+  ],
+  "functionValuedResultLocatorLedger": {
+    "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean": [
+      {
+        "name": "psLexStringToListFromWithFuel",
+        "line": 11,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/syntax/src/Ps/Syntax/Lexer.lean": [
+      {
+        "name": "psLexSkipLineComment",
+        "line": 59,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLexSkipBlockCommentWithFuel",
+        "line": 79,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLexSkipTriviaWithFuel",
+        "line": 168,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLexReadIdentifier",
+        "line": 348,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLexReadNatural",
+        "line": 372,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLexReadStringBodyWithFuel",
+        "line": 396,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLexAllWorker",
+        "line": 894,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/foundation/src/Ps/Foundation/Name.lean": [
+      {
+        "name": "psStringEqFromWithFuel",
+        "line": 12,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psNameEq",
+        "line": 52,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean": [
+      {
+        "name": "psParseListReverseAcc",
+        "line": 11,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseListAppend",
+        "line": 27,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseSyntaxNameTailWithFuel",
+        "line": 97,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseRecordFieldsWithFuel",
+        "line": 215,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParsePatternBindersWithFuel",
+        "line": 520,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean": [
+      {
+        "name": "psParseLeanListLiteralWithFuel",
+        "line": 127,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanApplicationTailWithFuel",
+        "line": 267,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanSimpleApplicationWithFuel",
+        "line": 379,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanProductWithFuel",
+        "line": 405,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanBinderTypeWithFuel",
+        "line": 464,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanBinderNamesWithFuel",
+        "line": 515,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLeanPrependBinderGroupReverse",
+        "line": 638,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanBindersWithFuel",
+        "line": 699,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanMatchAlternativesAtColumnWithFuel",
+        "line": 1046,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanDoWithFuel",
+        "line": 1172,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanRecordApplicationTailWithFuel",
+        "line": 1301,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanTermWithFuel",
+        "line": 1343,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanInductiveConstructorsWithFuel",
+        "line": 1658,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanStructureFieldsWithFuel",
+        "line": 1823,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanEquationPatternsWithFuel",
+        "line": 2016,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanEquationClausesWithFuel",
+        "line": 2057,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLeanStringListEq",
+        "line": 2129,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLeanEquationHeadPatternsAcc",
+        "line": 2190,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLeanEquationClausesForBranchAcc",
+        "line": 2245,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLeanLowerEquationClauses",
+        "line": 2333,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLeanPrepareEquationBindersAcc",
+        "line": 2405,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanImportsWithFuel",
+        "line": 2692,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseLeanDeclarationsWithFuel",
+        "line": 2728,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean": [
+      {
+        "name": "psParseProofScriptCallArgsWithFuel",
+        "line": 62,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptSimpleApplicationWithFuel",
+        "line": 177,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptBinderTypeWithFuel",
+        "line": 310,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptBindersWithFuel",
+        "line": 370,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptMatchAlternativesWithFuel",
+        "line": 408,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptDoWithFuel",
+        "line": 491,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptTermWithFuel",
+        "line": 620,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptInductiveConstructorsWithFuel",
+        "line": 939,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptStructureFieldsWithFuel",
+        "line": 1046,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptImportsWithFuel",
+        "line": 1325,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psParseProofScriptDeclarationsWithFuel",
+        "line": 1362,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean": [
+      {
+        "name": "psPrintLeanTermWithFuel",
+        "line": 203,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psPrintLeanAppendStrings",
+        "line": 667,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean": [
+      {
+        "name": "psPrintProofScriptTermWithFuel",
+        "line": 138,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psPrintProofScriptAppendStrings",
+        "line": 685,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/bridge/src/Ps/Bridge/Json.lean": [
+      {
+        "name": "psJsonReverseCharsAcc",
+        "line": 31,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonStringCharsAccWithFuel",
+        "line": 45,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonStringOfCharsAcc",
+        "line": 70,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonCharListEq",
+        "line": 84,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonParseStringChars",
+        "line": 313,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonTakeDigits",
+        "line": 380,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonConsumeLiteral",
+        "line": 444,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonReverseValuesAcc",
+        "line": 463,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonParseArrayWith",
+        "line": 479,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonReverseFieldsAcc",
+        "line": 556,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonParseObjectWith",
+        "line": 576,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonParseValueWithFuelWorker",
+        "line": 653,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonCharListLengthAcc",
+        "line": 733,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonObjectFind",
+        "line": 761,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonCompareCharLists",
+        "line": 815,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonInsertObjectFieldInto",
+        "line": 845,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psJsonEncodeCanonicalWithFuel",
+        "line": 949,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/core/src/Ps/Core/Abstract.lean": [
+      {
+        "name": "psExprAbstractFVarAtWorker",
+        "line": 3,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/core/src/Ps/Core/Subst.lean": [
+      {
+        "name": "psExprLiftBVarsWorker",
+        "line": 3,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psExprInstantiateAtWorker",
+        "line": 81,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/core/src/Ps/Core/Equality.lean": [
+      {
+        "name": "psLevelStructuralEq",
+        "line": 33,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLevelListEq",
+        "line": 85,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psExprAlphaEq",
+        "line": 105,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/environment/src/Ps/Environment/Basic.lean": [
+      {
+        "name": "psEnvironmentHashStringWorker",
+        "line": 57,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEnvironmentIndexFindWorker",
+        "line": 78,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEnvironmentIndexSetWorker",
+        "line": 94,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEnvironmentFindInListWorker",
+        "line": 117,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEnvironmentRemoveNameWorker",
+        "line": 167,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean": [
+      {
+        "name": "psBridgeFindConstructor",
+        "line": 301,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psBridgeFindRegularHeightInBucket",
+        "line": 397,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psBridgeHeightBucket",
+        "line": 419,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psBridgeHeightInsertWorker",
+        "line": 434,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psBridgeNatMax",
+        "line": 460,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEncodeCheckedAdmissionsLoop",
+        "line": 566,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedAdmissionReverseStringsAcc",
+        "line": 640,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedBind",
+        "line": 681,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedOpenWorker",
+        "line": 700,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedAddTypes",
+        "line": 744,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedRoots",
+        "line": 755,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedExpand",
+        "line": 791,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedApply",
+        "line": 814,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedHypotheses",
+        "line": 821,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedMinors",
+        "line": 844,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedFields",
+        "line": 869,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCheckedNestedFind",
+        "line": 944,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/environment/src/Ps/Environment/Prelude.lean": [
+      {
+        "name": "psPreludeProdOf",
+        "line": 97,
+        "disposition": "retain-nonrecursive-function-interface"
+      },
+      {
+        "name": "psPreludeArrayOf",
+        "line": 133,
+        "disposition": "retain-nonrecursive-function-interface"
+      }
+    ],
+    "psc0/packages/core/src/Ps/Core/LevelSubst.lean": [
+      {
+        "name": "psFindLevelArgumentWorker",
+        "line": 3,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/meta/src/Ps/Meta/LevelContext.lean": [
+      {
+        "name": "psLevelInstantiateWithFuel",
+        "line": 62,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLevelUnifyWithFuelWorker",
+        "line": 135,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/meta/src/Ps/Meta/Context.lean": [
+      {
+        "name": "psMetaInstantiateRounds",
+        "line": 218,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/meta/src/Ps/Meta/Reduce.lean": [
+      {
+        "name": "psWhnfCoreWithFuel",
+        "line": 20,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psWhnfWithFuel",
+        "line": 66,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psDefEqReadOnlyWithEnvFuel",
+        "line": 110,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/meta/src/Ps/Meta/Infer.lean": [
+      {
+        "name": "psInferAppViewAcc",
+        "line": 86,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psInferApplyStructureParametersWorker",
+        "line": 101,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psInferStructureProjectionFieldWorker",
+        "line": 156,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psInferTypeWithFuelWorker",
+        "line": 318,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/meta/src/Ps/Meta/Unify.lean": [
+      {
+        "name": "psUnifyLevelLists",
+        "line": 55,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psUnifyWithFuelWorker",
+        "line": 80,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/meta/src/Ps/Meta/SynthInstance.lean": [
+      {
+        "name": "psPreparedInstanceArgumentListReverseAux",
+        "line": 42,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psPrepareInstanceWithFuelWorker",
+        "line": 60,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psSolvePreparedInstanceArgumentsWorker",
+        "line": 162,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTryInstanceCandidatesWorker",
+        "line": 247,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psSynthInstanceWithFuelWorker",
+        "line": 310,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/elab/src/Ps/Elab/Literal.lean": [
+      {
+        "name": "psParseNaturalChars",
+        "line": 30,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psReadFixedHex",
+        "line": 101,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psDecodeStringBodyWithFuel",
+        "line": 159,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/elab/src/Ps/Elab/Term.lean": [
+      {
+        "name": "psSyntaxNameAppendSegments",
+        "line": 67,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabProjectionApplyParameters",
+        "line": 144,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabFindStructureField",
+        "line": 169,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabProjectionChainWorker",
+        "line": 286,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabTypedBindersAcc",
+        "line": 504,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabTypedBinderListReverseAux",
+        "line": 578,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCloseElabTypedBinders",
+        "line": 596,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabLambdaExpectedBody",
+        "line": 631,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCloseElabForallBinders",
+        "line": 754,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabFillWildcardAlternatives",
+        "line": 1106,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabMatchAlternativeListReverseAux",
+        "line": 1140,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabPrepareMatchAlternativesWorker",
+        "line": 1201,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabMatchApplyParametersWorker",
+        "line": 1295,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabMatchFieldsWorker",
+        "line": 1388,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabMatchFieldAtWorker",
+        "line": 1462,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabPushRecursiveHypothesesWorker",
+        "line": 1493,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCloseElabMatchFieldsWorker",
+        "line": 1579,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabWildcardBinderNamesWorker",
+        "line": 1612,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabMatchFieldListReverseWorker",
+        "line": 1646,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabMatchMinorsWorker",
+        "line": 1817,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabExprListAppendWorker",
+        "line": 1896,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabStructuralParameterAt",
+        "line": 1919,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabApplyArgsWithFuelWorker",
+        "line": 2129,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabSolvePendingInstancesWorker",
+        "line": 2281,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabDropForallBindersWorker",
+        "line": 2366,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabTakeForallNamesWorker",
+        "line": 2389,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psSyntaxRecordFieldsMatchWorker",
+        "line": 2459,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabNatListAtWorker",
+        "line": 2720,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabValidateStructuralCallWorker",
+        "line": 2748,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabTermWithFuel",
+        "line": 2892,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/elab/src/Ps/Elab/Declaration.lean": [
+      {
+        "name": "psElabFindNatIndexWorker",
+        "line": 34,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psCloseElabImplicitBindersWorker",
+        "line": 277,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psExprListAlphaEqWorker",
+        "line": 309,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabNestedRecursiveFieldTypeSupportedWithFuel",
+        "line": 368,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabReverseNatListAcc",
+        "line": 424,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursiveFieldIndicesWorker",
+        "line": 438,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabReverseDeclarationsAcc",
+        "line": 573,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabInductiveConstructorsWorker",
+        "line": 589,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psAddDeclarationListWorker",
+        "line": 654,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psOpenConstructorFieldsWorker",
+        "line": 684,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabExprAt",
+        "line": 750,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabAppendExprs",
+        "line": 765,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabAppendDeclarations",
+        "line": 776,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psBuildRecursorMinorBindersWorker",
+        "line": 866,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabDeclarationsWorker",
+        "line": 1446,
+        "disposition": "required-practical-v1"
+      }
+    ],
+    "psc0/packages/erasure/src/Ps/Erasure/Basic.lean": [
+      {
+        "name": "psErasureIndexBucket",
+        "line": 18,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureIndexSet",
+        "line": 34,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureIndexFindInBucket",
+        "line": 51,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureIndexPrepend",
+        "line": 67,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureLookupRuntimeExpression",
+        "line": 189,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureLookupNat",
+        "line": 202,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureNatInList",
+        "line": 228,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureSafeStringFromWithFuel",
+        "line": 317,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureLocalNameWithFuel",
+        "line": 357,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psErasureAppViewAcc",
+        "line": 381,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureExprListAtWorker",
+        "line": 392,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseRuntimeTypeWithFuelWorker",
+        "line": 512,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/erasure/src/Ps/Erasure/Expr.lean": [
+      {
+        "name": "psErasureAppendRuntimeArgument",
+        "line": 8,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseApplicationArgumentsWorker",
+        "line": 18,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseFinishApplicationWithFuelWorker",
+        "line": 85,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureLookupTypeSubstitution",
+        "line": 722,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psSubstituteVerifiedTypeWithFuel",
+        "line": 735,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseRuntimeStructureFields",
+        "line": 768,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseRuntimeConstructorFields",
+        "line": 832,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psOpenMatchMinorFields",
+        "line": 904,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureFindStringIndex",
+        "line": 970,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureRecursiveCallArguments",
+        "line": 987,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psOpenMatchMinorHypotheses",
+        "line": 1011,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseMatchAlternativesWorker",
+        "line": 1124,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureIrUsesNameWithFuel",
+        "line": 1312,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureEtaNameWithFuel",
+        "line": 1354,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psErasureEtaParameters",
+        "line": 1367,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseRuntimeExprWithFuelWorker",
+        "line": 1400,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean": [
+      {
+        "name": "psPrepareInductiveParametersWithFuel",
+        "line": 8,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psApplyConstructorParameters",
+        "line": 86,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psPrepareConstructorFieldsWithFuel",
+        "line": 108,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psFindConstructorDeclaration",
+        "line": 190,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psFindRecursorDeclaration",
+        "line": 202,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psPrepareRuntimeConstructors",
+        "line": 214,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psPrepareRuntimeInductives",
+        "line": 367,
+        "disposition": "required-practical-v1"
+      }
+    ],
+    "psc0/packages/erasure/src/Ps/Erasure/Structure.lean": [
+      {
+        "name": "psPrepareRuntimeStructures",
+        "line": 106,
+        "disposition": "required-practical-v1"
+      }
+    ],
+    "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean": [
+      {
+        "name": "psErasureApplyStructureMinorFields",
+        "line": 13,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psLowerStructureRecursorsWithFuel",
+        "line": 117,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/erasure/src/Ps/Erasure/Definition.lean": [
+      {
+        "name": "psErasureStringInList",
+        "line": 11,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psBuildErasureDeclarationNamesWorker",
+        "line": 38,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psErasureReverseDeclarationNamesAcc",
+        "line": 72,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureReverseTypeParametersAcc",
+        "line": 93,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureReverseParametersAcc",
+        "line": 105,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseOpenDefinitionWithFuel",
+        "line": 125,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psErasureReverseIrDeclarationsAcc",
+        "line": 390,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psEraseDefinitionsLoopWorker",
+        "line": 402,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psErasureAppendDeclarations",
+        "line": 445,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/compiler/src/Ps/Compiler/Api.lean": [
+      {
+        "name": "psCompilerPreparationSourcesWorker",
+        "line": 154,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psCompilerElaborateSourcesWorker",
+        "line": 168,
+        "disposition": "retain-nonrecursive-function-interface"
+      }
+    ],
+    "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean": [
+      {
+        "name": "psTsIndexTypesWorker",
+        "line": 47,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsEmitTypeWithFuel",
+        "line": 58,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean": [
+      {
+        "name": "psTsLookup",
+        "line": 3,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsExprUsesNameWithFuel",
+        "line": 12,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsFreshMatchTempWorker",
+        "line": 53,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psTsEmitExprWithFuel",
+        "line": 516,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean": [
+      {
+        "name": "psTsAppendLines",
+        "line": 7,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsFreshInternalWorker",
+        "line": 14,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psTsBuildSymbolMap",
+        "line": 37,
+        "disposition": "required-practical-v1"
+      },
+      {
+        "name": "psTsNameSequence",
+        "line": 70,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsEtaBind",
+        "line": 208,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsEtaApplyWorker",
+        "line": 235,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsTailParametersMatch",
+        "line": 446,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsTailPureWithFuel",
+        "line": 496,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psTsTailEmitWithFuel",
+        "line": 552,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ],
+    "psc0/packages/elab/src/Ps/Elab/Recursion.lean": [
+      {
+        "name": "psElabRecursionContains",
+        "line": 17,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionPushNames",
+        "line": 67,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionChangedArguments",
+        "line": 83,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionSelectArguments",
+        "line": 110,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionWalkTerms",
+        "line": 129,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionWalkFields",
+        "line": 153,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionWalkBinders",
+        "line": 182,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionWalkAlternatives",
+        "line": 207,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionWalkWithFuel",
+        "line": 272,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionSelectedBinders",
+        "line": 465,
+        "disposition": "outside-practical-v1-review-deferred"
+      },
+      {
+        "name": "psElabRecursionRenameParameters",
+        "line": 499,
+        "disposition": "outside-practical-v1-review-deferred"
+      }
+    ]
+  },
+  "nonClaims": [
+    "No implementation, seed selection, migration or test was performed by this inventory.",
+    "The 241 locator count is not an adapter count or an amount of mandatory remaining work.",
+    "The 226 deferred locators have not all received full conversion-safety review.",
+    "No local files, checkouts, builds, tests or shell were used."
+  ],
+  "declarationBinderOrderAudit": {
+    "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+    "scopeModules": 61,
+    "topLevelDeclarations": 1500,
+    "definitions": 1331,
+    "inductives": 56,
+    "structures": 113,
+    "implicitOrInstanceAfterExplicit": 0,
+    "method": "Nested-comment/literal masking, top-level declaration-header boundaries and balanced complete binder groups before the result colon/where. Track explicit vs implicit/instance group order. Static source audit only; does not establish full new grammar print acceptance.",
+    "conclusion": "No existing closure declaration needs public-binder reordering to satisfy the new nonexplicit-before-explicit declaration parameter order."
+  },
+  "errorConsumerAudit": {
+    "sourceRef": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+    "fileCount": 273,
+    "scope": "61 closure sources + 189 scripts + 9 root tests + 14 fixtures",
+    "extraExhaustiveConsumer": {
+      "path": "psc0/test/IrCheckerTests.lean",
+      "declaration": "psIrNativePrintErrorText",
+      "line": 177,
+      "oldCases": [
+        "fuelExhausted",
+        "unsupportedApplication",
+        "emptyName"
+      ],
+      "newCaseNeeded": "unsupportedSourceForm message"
+    },
+    "otherReviewedConsumer": {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "declaration": "psElabDeclarationBatch",
+      "line": 1417,
+      "hasWildcardRethrow": true
+    },
+    "outsideScope": "Native host files outside the raw61module closure, including known HostProjectCompiler renderers, require the owning integration audit."
+  }
+}

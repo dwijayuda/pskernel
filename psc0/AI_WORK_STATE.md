@@ -1,8 +1,60 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 10:28:22 UTC.
+Updated: 2026-10-09 11:01:56 UTC.
 
-## Current M6 and TypeScript 7 result
+## Active continuation: new-only R3 source grammar and projection repair
+
+The user explicitly requests **no active backward-compatibility grammar**: adopt
+the new supplied .ps syntax only where implemented. Work is isolated on
+`psc0/sh1-projection-grammar-v1`, based on qualified integration
+`5e3a991088aaa735c8f324c4e70a7a3dee4cd69a`. Canonical integration remains at that
+completed checkpoint while this new source change is prepared and qualified.
+
+The supplied reference is
+`ProofScript_PSCV_Language_Reference_NORMATIVE_RC_v2_Lean4.35rc3 (1)(6).md`,
+401,569 bytes, 8,546 lines, SHA-256
+`4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71`.
+Its status is PSCV-RC-v2 design, with a pending Standard environment manifest and
+pending implementation conformance. This work adopts a bounded set of its owned
+base grammar rules; it does not claim full PSC2 Standard or PSCV conformance or
+repin the Lean/provider workstream.
+
+Implementation in progress:
+
+- Shared exact-name / first-segment / longest proper local-prefix resolution
+  repairs recursive record-parameter projections. Structural identity predicates
+  stay exact-only; no type-error fallback or name exception is added.
+- Replace the current .ps parser and printer together: newlines for sequence
+  ownership, one comma-oriented explicit declaration/constructor parameter group,
+  strict record commas, complete grouped call terms and adjacent postfix calls.
+- Preserve empty invocation as an empty argument list. Optional argument
+  completion is unsupported and fails explicitly; `f(())` remains one Unit
+  argument. The old `f()`-means-Unit shortcut is removed.
+- Use a PS-specific lexical entry for its whitespace/line rules; the bounded
+  Lean authoring parser remains available as a separate source kind.
+- Migrate owned active PS fixtures and source-loading paths. A full raw-source
+  parser must see PS imports before any host stripping can hide obsolete syntax.
+- Unsupported broader syntax and verification semantics remain explicit
+  refusals. In particular the old compilerBind/compilerPure-specific do sugar
+  is not relabeled as Standard monadic or verified do.
+
+No new grammar/compiler qualification has completed for this continuation.
+Draft blobs and this planning checkpoint are not a success receipt. Current
+Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2 pins remain; historical S0/A recovery
+uses immutable old revisions and exact TypeScript 5.8.3. That recovery is not an
+active old-PS parser in the new compiler. A remains selected until a separately
+qualified recoverable successor is explicitly selected.
+
+The remaining practical source migration is now finite:
+**12 workers in 9 source files across 2 families**, followed by **3 projection
+alias removals** and the final adoption evidence. See
+[the backlog](docs/selfhost-language/MIGRATION_BACKLOG.md) and
+[its machine-readable inventory](docs/selfhost-language/migration-backlog.json).
+All 1,500 declaration headers in the current 61-module closure were inspected;
+none has a non-explicit binder after an explicit binder, so the new declaration
+grammar does not require reordering the current compiler's public telescopes.
+
+## Last completed M6 and TypeScript 7 result
 
 The bounded portable runtime IR checker, same-IR checked emission and scoped-let
 backend correction are qualified under TypeScript 5.8.3 at

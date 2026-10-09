@@ -2,7 +2,7 @@ name: PSC0 SH1 language qualification
 
 on:
   push:
-    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1', 'psc0/sh1-projection-grammar-v1']
+    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1', 'psc0/sh1-projection-grammar-v1', 'psc0/platform-t1-v1']
     paths:
       - 'psc0/packages/bootstrap/**'
       - 'psc0/packages/foundation/**'
@@ -47,6 +47,7 @@ concurrency:
 
 jobs:
   compiler:
+    if: ${{ github.ref != 'refs/heads/psc0/platform-t1-v1' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[sh1-qualify]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     outputs:
@@ -337,6 +338,9 @@ jobs:
         id: qualify
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
         run: node scripts/sh1-qualify.mjs fixed-point --out dist/sh1
+      - name: Exercise the T1 boundary on the exact C3 compiler
+        if: ${{ github.ref == 'refs/heads/psc0/platform-t1-v1' && steps.qualify.outcome == 'success' }}
+        run: node scripts/t1-compiler-conformance.mjs --compiler dist/sh1/C3/index.js --out dist/sh1/t1 --phase c3
       - name: Retain the newly qualified seed without activating a source migration
         if: ${{ steps.qualify.outputs.promoted-seed-cache-key != '' }}
         uses: actions/cache/save@v4

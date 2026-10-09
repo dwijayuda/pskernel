@@ -613,35 +613,37 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
                     | Option.some printedRight => Option.some (psTsJoin "" ["if (", printedCondition, ") { ",
                         printedLeft, " } else { ", printedRight, " }"])
         | PsVerifiedIrExpr.matchE name _ scrutinee alternatives =>
-            match psTsLookup tags name with
-            | Option.none => Option.none
-            | Option.some tag =>
-                match emitPure scrutinee with
-                | Option.none => Option.none
-                | Option.some printedScrutinee =>
-                    let temporary := psTsFreshMatchTemp declaration.body;
-                    let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>
-                      if psTsTailBindingSafe declaration aliases binding.name then
-                        match psTsEmitType binding.type with
-                        | Except.error _ => Option.none
-                        | Except.ok type => Option.some (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temporary, ".", binding.field, ";"])
-                      else Option.none;
-                    let printAlternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Option String :=
-                      fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
-                        match psTsTailMap printBinding (Prod.fst (Prod.snd alternative)) with
+            if psListIsEmpty alternatives then Option.none
+            else
+              match psTsLookup tags name with
+              | Option.none => Option.none
+              | Option.some tag =>
+                  match emitPure scrutinee with
+                  | Option.none => Option.none
+                  | Option.some printedScrutinee =>
+                      let temporary := psTsFreshMatchTemp declaration.body;
+                      let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>
+                        if psTsTailBindingSafe declaration aliases binding.name then
+                          match psTsEmitType binding.type with
+                          | Except.error _ => Option.none
+                          | Except.ok type => Option.some (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temporary, ".", binding.field, ";"])
+                        else Option.none;
+                      let printAlternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Option String :=
+                        fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                          match psTsTailMap printBinding (Prod.fst (Prod.snd alternative)) with
+                          | Option.none => Option.none
+                          | Option.some bindings =>
+                              match smaller aliases (Prod.snd (Prod.snd alternative)) with
+                              | Option.none => Option.none
+                              | Option.some body => Option.some (psTsJoin "" ["case ", psJsonQuote (Prod.fst alternative), ": { ",
+                                  psTsJoin " " bindings, " ", body, " }"]);
+                      if psTsTailBindingSafe declaration aliases temporary then
+                        match psTsTailMap printAlternative alternatives with
                         | Option.none => Option.none
-                        | Option.some bindings =>
-                            match smaller aliases (Prod.snd (Prod.snd alternative)) with
-                            | Option.none => Option.none
-                            | Option.some body => Option.some (psTsJoin "" ["case ", psJsonQuote (Prod.fst alternative), ": { ",
-                                psTsJoin " " bindings, " ", body, " }"]);
-                    if psTsTailBindingSafe declaration aliases temporary then
-                      match psTsTailMap printAlternative alternatives with
-                      | Option.none => Option.none
-                      | Option.some cases => Option.some (psTsJoin "" ["{ const ", temporary, " = ", printedScrutinee,
-                          "; switch (", temporary, "[", tag, "]) { ", psTsJoin " " cases,
-                          " } throw new Error(\"invalid ProofScript constructor tag\"); }"])
-                    else Option.none
+                        | Option.some cases => Option.some (psTsJoin "" ["{ const ", temporary, " = ", printedScrutinee,
+                            "; switch (", temporary, "[", tag, "]) { ", psTsJoin " " cases,
+                            " } throw new Error(\"invalid ProofScript constructor tag\"); }"])
+                      else Option.none
         | _ =>
             match emitPure expr with
             | Option.none => Option.none

@@ -527,7 +527,9 @@ def psElabRecursionRenameParameters
             match psElabRecursionWalkWithFuel 4096 plan environment context (Prod.snd entry) with
             | Except.error error => Except.error error
             | Except.ok type =>
-                let next := PsLocalContext.mk (Nat.succ binder.id)
+                -- Keep every original parameter ID reserved for this syntax walk.
+                -- Only preceding declarations are visible; dummy locals use fresh IDs.
+                let next := PsLocalContext.mk context.nextId
                   (List.cons
                     (PsLocalDecl.binding binder.id binder.name binder.type binder.binder)
                     context.declarations);
@@ -599,7 +601,8 @@ def psElabRecursionBuildNormalizationWithOrigin
     | Except.error error => Except.error error
     | Except.ok _ =>
         match psElabRecursionRenameParameters
-            plan typeResult.context.environment typed binders psLocalEmpty with
+            plan typeResult.context.environment typed binders
+            (PsLocalContext.mk binderResult.context.localContext.nextId List.nil) with
         | Except.error error => Except.error error
         | Except.ok renamedBinders =>
             match psElabRecursionWalkWithFuel

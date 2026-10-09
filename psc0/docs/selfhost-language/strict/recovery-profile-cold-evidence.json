@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-ts7-isolated-native-recovery-evidence",
+  "status": "passed-for-exact-revised-recovery-recipe",
+  "runId": 37983663908,
+  "jobId": 114000151355,
+  "workflowId": 379723916,
+  "runnerSourceRef": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/37983663908",
+  "startedAtUtc": "2026-10-09T19:56:48Z",
+  "completedAtUtc": "2026-10-09T20:00:18Z",
+  "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+  "selectedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+  "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+  "policySha256": "70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30",
+  "recipeSha256": "d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d",
+  "recipe": {
+    "id": "native-lean-original-ir-four-products-ts7/1",
+    "files": [
+      {
+        "path": "scripts/sh1-native-seed-recovery.mjs",
+        "gitBlobSha1": "c1b5673079b2faae56e9c778b62e70087e639fbe"
+      },
+      {
+        "path": "scripts/sh1-successor-seed.mjs",
+        "gitBlobSha1": "3514a7797e739e7a47af33c91ab58e912584d0c7"
+      },
+      {
+        "path": "scripts/sh1-seed-manifest.mjs",
+        "gitBlobSha1": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
+      },
+      {
+        "path": "scripts/sh1-grammar-profile.mjs",
+        "gitBlobSha1": "26836a8e487d77c94a73485e2d11e3575b932edf"
+      },
+      {
+        "path": "scripts/sh1-source-snapshot.mjs",
+        "gitBlobSha1": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+      },
+      {
+        "path": "scripts/workspace-layout.mjs",
+        "gitBlobSha1": "eb7c2c07f147a812f9998904a60123b3719e5539"
+      },
+      {
+        "path": "scripts/typescript-cli.mjs",
+        "gitBlobSha1": "9d6607a6f4284b0afba8023566f6e1d75c30a64a"
+      }
+    ]
+  },
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "rawSourceBytes": 1113918,
+  "moduleCount": 61,
+  "originalIr": {
+    "report": "products/index.ts.ir-report.json",
+    "reportSha256": "e16eefe370f1d0b3c6de87965724e96a6c36941c64afa2c4cb2dc7a3687e79b1",
+    "accepted": true,
+    "traversalComplete": true,
+    "expressionCount": 56391,
+    "visitedSteps": 725484,
+    "findingCount": 0,
+    "sameOriginalIrCheckedBeforeEmission": true
+  },
+  "expectedArtifacts": {
+    "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "actualArtifacts": {
+    "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "commands": 75,
+  "allCommandsPassed": true,
+  "generatedCompilerExecuted": false,
+  "historicalParentCompilerExecuted": false,
+  "historicalTypeScriptExecuted": false,
+  "buildOrSeedCacheRestored": false,
+  "compilerArtifactDownloaded": false,
+  "selectedManifestChanged": false,
+  "sourceCleanBeforeAndAfter": true,
+  "cold": true,
+  "newRecipeQualified": true,
+  "receipt": {
+    "path": "cold-recovery/047a29f17392fea41ac5d59e7f8cbfc172b20313/receipt.json",
+    "blob": "9e8f6f68dea880edf7fa230089cebedac6553ef4",
+    "sha256": "d2068b325f37d688914899d417b208eb2365be6a9c5d065237c8ec5857dace2a",
+    "characters": 64172,
+    "provenance": "The complete receipt JSON was emitted in the actual job log. Applying the writer's two-space JSON serialization plus newline reconstructs bytes whose SHA-256 exactly equals receiptFileSha256 independently printed by the recovery result."
+  },
+  "log": {
+    "path": "cold-recovery/047a29f17392fea41ac5d59e7f8cbfc172b20313/job.log",
+    "blob": "ed40d59d1b8712185ee47152bd96c5b1c8dc0339",
+    "sha256": "a4676fe3baa62c4428e9aba47b6ac808c4ca1d52b69e0ae93b83624ded713984",
+    "characters": 101746
+  },
+  "artifacts": [
+    {
+      "id": 11642138063,
+      "name": "psc0-sh1-native-ts7-cold-047a29f17392fea41ac5d59e7f8cbfc172b20313",
+      "size_in_bytes": 2219318,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642138063",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642138063/zip",
+      "expired": false,
+      "created_at": "2026-10-09T20:00:15Z",
+      "expires_at": "2026-11-08T20:00:14Z",
+      "updated_at": "2026-10-09T20:00:15Z",
+      "digest": "sha256:34cc557bd260af627509cb1103f710d10c66ec04b88f8d03b3cf4c245acb4f6e",
+      "workflow_run": {
+        "id": 37983663908,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/strict-sh1-v1",
+        "head_sha": "047a29f17392fea41ac5d59e7f8cbfc172b20313"
+      }
+    }
+  ],
+  "observedRecipeElapsedMs": 143478.74540699998,
+  "timingScope": "One actual run, not a benchmark or comparative speedup claim.",
+  "currentCompilerQualifiedByThisRecovery": false,
+  "providerCheckedByThisRecovery": false,
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "selectedSeedChanged": false
+}

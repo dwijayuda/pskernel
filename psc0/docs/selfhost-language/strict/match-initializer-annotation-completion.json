@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-match-initializer-annotation-completion",
+  "sourceBase": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+  "status": "one-source-annotation-reviewed-awaiting-exact-source-qualification",
+  "files": [
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "expectedBaseBlob": "ac527384033181014417579e39f93a1595d4cf72",
+      "candidateBlob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+      "sha256": "22eac288f3c48d57a5856e35ec9bcd072cde5fc1fabd674703f5a20bd02e5bef",
+      "edits": [
+        {
+          "before": "  let resultChecked :=\n",
+          "after": "  let resultChecked : PsIrCheckState :=\n"
+        }
+      ],
+      "forwardAndReverseExact": true
+    }
+  ],
+  "observedFailure": {
+    "runId": 37983663904,
+    "compilerJobId": 114000150722,
+    "providerJobId": 114000685482,
+    "failedStep": 24,
+    "diagnosticAtUtc": "2026-10-09T19:58:12.0312428Z",
+    "refusal": {
+      "schemaVersion": 1,
+      "evidence": "native-atomic-source-refusal",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false,
+      "stage": "source",
+      "code": "source-elaboration",
+      "moduleName": "Ps.CompilerIr.Check",
+      "compilerStage": "elaboration",
+      "detail": "matchExpectedType",
+      "owner": "psIrCheckMatch",
+      "sourceIndex": 50,
+      "phase": "stableDeclaration",
+      "span": {
+        "start": {
+          "byteOffset": 24764,
+          "line": 500,
+          "column": 1
+        },
+        "stop": {
+          "byteOffset": 27236,
+          "line": 539,
+          "column": 76
+        }
+      }
+    },
+    "evidenceBlob": "9f3caa4f2350c4b399b5836640c8740afffc4e34",
+    "logBlob": "7840feed77dfe66ca02cdbe7b0ea346531e4727b",
+    "logSha256": "30ec8705c04aeb0e945ef3d2312da493a0032c6cd4c78f58ddeb4119c55849a4"
+  },
+  "mechanism": {
+    "termElaborator": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112",
+    "ifRule": "psElabIf passes the optional expected type into its then branch; an inferred then result supplies the else expectation.",
+    "matchRule": "psElabMatch refuses expected=None before checking alternatives.",
+    "site": "An untyped resultChecked initializer has an if whose then branch starts with match expected. Both branches return PsIrCheckState.",
+    "correction": "State the existing initializer result type explicitly, using the supported authoring boundary. No new inference capability, branch order, runtime layout, source policy or test expectation is introduced."
+  },
+  "classAudit": {
+    "implementationManifestBlob": "a2bade0cd7d0eb33590f9afa36a5cdeed40896b2",
+    "implementationFileCount": 29,
+    "leanFilesReviewed": [
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+        "baseBlob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+        "candidateBlob": "c403bd879e439b7b6e88303df430890352a14115"
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+        "baseBlob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+        "candidateBlob": "ff632f3a40b069bfead799b408af009ec9931261"
+      },
+      {
+        "path": "psc0/scripts/StrictSourceCompile.lean",
+        "baseBlob": "6f3b14e0110548f530a2ec6139105efbeb2e203d",
+        "candidateBlob": "c741759094060bcccdbeb67d24bfb30dfe864b0e"
+      },
+      {
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+        "baseBlob": "13614bc6eb279c93d4cbcbd8815b671beae38199",
+        "candidateBlob": "f31d88f0172122d4cf62d62f35f372fe89581c18"
+      },
+      {
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+        "baseBlob": "9aaa3a72bbfe03ed3fc4918527e2ca200537d61f",
+        "candidateBlob": "a947a4058e3d91a02d4f8120a3d86556100c8555"
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+        "baseBlob": "63be15cf691cd4689e566ccd1bcab771215e7700",
+        "candidateBlob": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53"
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "baseBlob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+        "candidateBlob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+        "baseBlob": "9628e3c9def09c487abb5b8859a79c7be735acf9",
+        "candidateBlob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "baseBlob": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3",
+        "candidateBlob": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd"
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+        "baseBlob": "e91415c66fec9115a281c93c9459189bb919f121",
+        "candidateBlob": "e8d6ebda842dfbfcf3132f832e7630703080fa8a"
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+        "baseBlob": "7bc3c98cbba77e51b521d19492f3c1ec5bd2ef7c",
+        "candidateBlob": "519e2ca622ea5ea7e31dba193237b2db871e6bb7"
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+        "baseBlob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+        "candidateBlob": "ac527384033181014417579e39f93a1595d4cf72"
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+        "baseBlob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+        "candidateBlob": "98bac2823502c641c9b386f0ee1328cd7a688e87"
+      },
+      {
+        "path": "psc0/test/IrCheckerTests.lean",
+        "baseBlob": "5c675cf9d9a8befdd7f6f427d6c737fef304d2e7",
+        "candidateBlob": "2f507fdaef96411dfa5833016c94655549b99938"
+      },
+      {
+        "path": "psc0/test/fixtures/selfhost-sh1-empty.lean",
+        "baseBlob": null,
+        "candidateBlob": "295b7dc991bf37e9de8e3d49b7db3692f0c4cf53"
+      }
+    ],
+    "leanFileCount": 15,
+    "method": "Exact changed spans reviewed against the manifest bases, including control-valued let initializers and lambda binder annotations; native-only harness/tests separately classified.",
+    "reviewers": [
+      {
+        "name": "empty_evidence_finish",
+        "scope": "CompilerIr/Check plus Compiler, Elab, Erasure changes and new empty source fixture",
+        "result": "Only resultChecked requires an explicit PsIrCheckState type"
+      },
+      {
+        "name": "artifact_inspection_review",
+        "scope": "ParseLean, ParseProofScript, PrintLean",
+        "result": "CLEAR: no further missing expected-type or untyped lambda site"
+      },
+      {
+        "name": "runtime_comparison_finish",
+        "scope": "BackendTs/Expr, Module, Sh1, native StrictSourceCompile and IrCheckerTests",
+        "result": "CLEAR: no further source replay blocker of this class"
+      }
+    ],
+    "safeUntypedCases": [
+      "resultHint infers Option PsVerifiedIrType from its then-variable",
+      "Module typeLine infers String from its then psTsJoin application"
+    ],
+    "additionalAnnotationChangesRequired": 0,
+    "extraExecutionDuringAudit": false
+  },
+  "qualification": {
+    "requiredCommitTag": "[sh1-qualify]",
+    "fullExactSourcePending": true,
+    "rerunIsolatedColdRecovery": false,
+    "coldRecipeUnchanged": true,
+    "coldPassedRunId": 37983663908
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalCorrespondenceRowsClosed": 0,
+  "kernelChanged": false,
+  "providerChanged": false,
+  "defeqChanged": false,
+  "cacheAlgorithmChanged": false,
+  "existingTheoryChanged": false,
+  "selectedSeedChanged": false,
+  "typeScript5Reintroduced": false
+}

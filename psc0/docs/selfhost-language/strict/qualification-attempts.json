@@ -879,6 +879,121 @@
       },
       "strictSh1Qualified": false,
       "semanticContractQualified": false
+    },
+    {
+      "attempt": 6,
+      "sourceRef": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+      "runId": 37983663904,
+      "workflowId": 378853677,
+      "compilerJobId": 114000150722,
+      "providerJobId": 114000685482,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37983663904",
+      "status": "failure",
+      "diagnosticAt": "2026-10-09T19:58:12.0312428Z",
+      "failedStep": {
+        "number": 24,
+        "name": "Run the bounded native development gate before qualification"
+      },
+      "actualRefusal": {
+        "schemaVersion": 1,
+        "evidence": "native-atomic-source-refusal",
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false,
+        "stage": "source",
+        "code": "source-elaboration",
+        "moduleName": "Ps.CompilerIr.Check",
+        "compilerStage": "elaboration",
+        "detail": "matchExpectedType",
+        "owner": "psIrCheckMatch",
+        "sourceIndex": 50,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 24764,
+            "line": 500,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 27236,
+            "line": 539,
+            "column": 76
+          }
+        }
+      },
+      "recoveryAuthenticationPassed": true,
+      "resourcePreflight": {
+        "passed": true,
+        "effectiveAvailableBytes": 15235063808,
+        "minimumAvailableBytes": 12884901888,
+        "oldSpaceMiB": 8192,
+        "observedHeapLimitBytes": 8640266240,
+        "receipt": "resource-policy-preflight.log-derived.json",
+        "provenance": "Exact JSON payload observed in decoded job log, not independently retrieved artifact file bytes"
+      },
+      "nativeCompilerBuilt": true,
+      "sourceReplay": "current-authoritative-closure-rejected-before-N1-conformance",
+      "currentGenerationCandidate": "not-started",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/047a29f17392fea41ac5d59e7f8cbfc172b20313/source-refusal.json",
+        "blob": "9f3caa4f2350c4b399b5836640c8740afffc4e34"
+      },
+      "log": {
+        "path": "attempts/047a29f17392fea41ac5d59e7f8cbfc172b20313/job.log",
+        "blob": "7840feed77dfe66ca02cdbe7b0ea346531e4727b",
+        "sha256": "30ec8705c04aeb0e945ef3d2312da493a0032c6cd4c78f58ddeb4119c55849a4",
+        "characters": 259363
+      },
+      "artifacts": [
+        {
+          "id": 11642526368,
+          "name": "psc0-sh1-ts7.0.2-047a29f17392fea41ac5d59e7f8cbfc172b20313",
+          "size_in_bytes": 464146,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642526368",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642526368/zip",
+          "expired": false,
+          "created_at": "2026-10-09T19:58:14Z",
+          "expires_at": "2026-11-08T19:58:13Z",
+          "updated_at": "2026-10-09T19:58:14Z",
+          "digest": "sha256:6aa2642d8658dbc95a03d0231f32a662c013df73763b2958c6a9fb1b0978b792",
+          "workflow_run": {
+            "id": 37983663904,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "047a29f17392fea41ac5d59e7f8cbfc172b20313"
+          }
+        }
+      ],
+      "reviewedCorrection": {
+        "manifest": "match-initializer-annotation-completion.json",
+        "blob": "c3b524d00153400005985f12ce579006df1720c0",
+        "candidateBlob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+        "implementationFilesReviewed": 29,
+        "leanFilesReviewed": 15,
+        "requiredSourceEdits": 1
+      },
+      "separateColdRecovery": {
+        "runId": 37983663908,
+        "result": "success",
+        "evidence": "recovery-profile-cold-evidence.json",
+        "scope": "Revised recipe only; it does not qualify this compiler source"
+      },
+      "scopeOfFailure": "Native compiler build and preceding bounded gates passed. The actual PSC0 frontend rejected the current compiler source before N1 output/conformance, C1, C2/C3 or provider acceptance. This is not a memory exhaustion or seed authentication failure.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "nextReviewedSourceCompletion": {
+        "manifest": "post-review-source-completion.json",
+        "blob": "639e78ffeba7d64f29ef02eadff9b37951073832",
+        "expectedParent": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+        "status": "three-source-files-independently-reviewed-awaiting-one-exact-source-qualification",
+        "sourceFiles": 3,
+        "fixturesAndInvocationCountsUnchanged": true,
+        "newColdRunRequired": false,
+        "sharedGeneralRowsClosed": 0
+      }
     }
   ],
   "selectedSeedChanged": false,

@@ -91,6 +91,24 @@ The overlay requests full qualification and a separate isolated native TS7 cold
 recovery run in parallel. The old cold receipt does not qualify the revised
 recipe. Record the two results separately; neither is a general semantic proof.
 
+The overlay is committed at `047a29f17392fea41ac5d59e7f8cbfc172b20313`.
+Its isolated cold run37983663908 passed75commands and reproduced all four
+selectedR products; [the exact new receipt and evidence](recovery-profile-cold-evidence.json)
+qualify the revised recipe. Its full run37983663904 passed native build and
+memory preflight, then source replay refused the untyped match-valued
+resultChecked local in psIrCheckMatch. [One explicit PsIrCheckState annotation](match-initializer-annotation-completion.json)
+is the only required correction found in the full15-Lean-file changed-span
+audit. It requests a new full-source qualification, without repeating the
+unchanged cold recipe.
+
+The [final reviewed three-file completion](post-review-source-completion.json)
+also includes two findings caught by the semantic source review before another
+execution: tail optimization now declines empty matches, and parameter-domain
+shadow IDs reserve all original parameter IDs while preserving prefix visibility.
+These reuse existing general emission, contexts, gates and fixtures. Their exact
+reversible packets are retained; no broader syntax or test-count change is part
+of this batch.
+
 The next full run uses a fixed 8192 MiB old-space limit and a measured 12 GiB
 available-memory preflight before expensive work. Candidate and fixed-point
 processes repeat the preflight before generated compiler loading; they do not
@@ -106,9 +124,9 @@ observations plus six raw equalities; the shared sequencing fixture adds
 reuses existing source, IR, native and TypeScript invocations.
 
 After exact-source execution, preserve all receipts and the independent
-provider result. Continue the shared value/environment/call relation and the
-actual reachable erasure-scope invariant, then discharge the N/ER/EV/TS rule
-families. A complete source argument over actual metadata or a correct checked
+provider result. The reviewed [shared semantic foundation](SEMANTIC_RELATIONS.md) now supplies
+the indexed relation, eleven IR rules and nine structural scope facts. Prove
+its remaining semantic strengthening while discharging the N/ER/EV/TS families. A complete source argument over actual metadata or a correct checked
 association witness can establish correspondence; an extra serialized
 certificate format is not a normative requirement. All 33 general rows remain
 open until their full arguments and evidence exist.

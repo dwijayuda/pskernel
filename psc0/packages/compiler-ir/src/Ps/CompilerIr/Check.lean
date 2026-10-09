@@ -510,7 +510,7 @@ def psIrCheckMatch (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
   -- Empty elimination has no branch from which to synthesize a result.
   -- The existing expected type is authoritative only for this zero-branch case.
   let resultHint := if psListIsEmpty alternatives then expected else Option.none;
-  let resultChecked :=
+  let resultChecked : PsIrCheckState :=
     if psListIsEmpty alternatives then
       match expected with
       | Option.none =>

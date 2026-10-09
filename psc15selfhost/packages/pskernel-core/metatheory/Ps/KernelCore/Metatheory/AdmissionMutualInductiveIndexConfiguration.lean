@@ -328,7 +328,7 @@ theorem psKernelMakeSimpleMutualBaseInfos_name_member
   have hMapped : List.Mem info.base.name
       ((psKernelMakeSimpleMutualBaseInfos typeNames decl shapes).map
         (fun entry : PsKernelInductiveInfo => entry.base.name)) :=
-    List.mem_map_of_mem hMember
+    List.mem_map_of_mem (f := fun entry : PsKernelInductiveInfo => entry.base.name) hMember
   simpa only [psKernelMakeSimpleMutualBaseInfos_name_provenance] using hMapped
 
 /--

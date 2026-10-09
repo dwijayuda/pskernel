@@ -1,4 +1,4 @@
-import Ps.KernelCore.Metatheory.AdmissionMutualRecursorSemanticConfiguration
+import Ps.KernelCore.Metatheory.AdmissionMutualRecursorPublicationConfiguration
 
 theorem psKernelMakeSimpleMutualMotivesWorker_nil
     (levels : List PsKernelLevel)
@@ -47,3 +47,5 @@ theorem psKernelValidateSimpleMutualRulesWorker_nil
         List.nil =
       Except.ok session := by
   rfl
+
+#print axioms psKernelGeneratedMutualRecursorPublication_refines

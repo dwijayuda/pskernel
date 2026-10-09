@@ -85,3 +85,42 @@ theorem PsKernelMutualRecursorInfosMetadataMatches.name_provenance
   | cons owner shape rest info infos hName hLevels hAll hParams hIndices hMotives
       hMinors hK hUnsafe hRules hTail ih =>
       simp only [List.map_cons, hName, ih]
+
+/--
+Composition for actual generated and validated recursors. Name freshness is
+stated on the input datatype shapes and transported through proved generator
+provenance, rather than assumed independently for opaque generated metadata.
+-/
+theorem psKernelGeneratedMutualRecursorPublication_refines
+    (typeShapes allShapes : List PsKernelSimpleMutualTypeShape)
+    (recLevelParams typeNames : List PsKernelName) (levels : List PsKernelLevel)
+    (params motives minors ruleBinders : List PsKernelOpenBinder)
+    (ctorShapes : List PsKernelSimpleMutualConstructorShape)
+    (owner : Nat) (isUnsafe : Bool) (infos : List PsKernelRecursorInfo)
+    (fuel : Nat) (environment : PsKernelEnvironment)
+    (safety : PsKernelDefinitionSafety) (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hAbsent : PsKernelInductiveNamesAbsent environment
+      (typeShapes.map (fun shape => psKernelSimpleRecName shape.decl.name)))
+    (hUnique : psKernelNameHasDuplicates
+      (typeShapes.map (fun shape => psKernelSimpleRecName shape.decl.name)) = false)
+    (hNative : PsKernelNativeReductionSoundLaw) (hString : PsKernelStringEqSoundLaw)
+    (hBuild : psKernelBuildSimpleMutualRecInfosFromConstructorsWorker typeShapes allShapes
+      recLevelParams typeNames levels params motives minors ruleBinders ctorShapes owner
+      isUnsafe = Except.ok infos)
+    (hValidate : psKernelValidateMutualRecursorInfosWorker infos fuel
+      (psKernelAddMutualRecursorInfos infos environment) recLevelParams safety maxRecDepth maxNatSize
+      levels params motives minors ruleBinders ctorShapes owner = Except.ok ()) :
+    PsKernelMutualRecursorInfosMetadataMatches recLevelParams typeNames params motives minors
+      ctorShapes isUnsafe owner typeShapes infos ∧
+    PsKernelMutualRecursorPublicationValid environment
+      (psKernelAddMutualRecursorInfos infos environment) levels params motives ruleBinders
+      ctorShapes owner infos := by
+  have hMetadata := psKernelBuildSimpleMutualRecInfosFromConstructorsWorker_metadata
+    typeShapes allShapes recLevelParams typeNames levels params motives minors ruleBinders
+    ctorShapes owner isUnsafe infos hBuild
+  refine ⟨hMetadata, psKernelMutualRecursorPublication_refines infos fuel environment recLevelParams
+    safety maxRecDepth maxNatSize levels params motives minors ruleBinders ctorShapes owner
+    hIndex ?_ ?_ hNative hString hValidate⟩
+  · simpa only [hMetadata.name_provenance] using hAbsent
+  · simpa only [hMetadata.name_provenance] using hUnique

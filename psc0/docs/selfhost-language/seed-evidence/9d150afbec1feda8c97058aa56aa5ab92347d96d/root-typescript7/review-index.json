@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-typescript7-qualified-evidence-index",
+  "repository": "dwijayuda/pskernel",
+  "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+  "tree": "c97468df9855bb7379b49e0771ed5e373e39c8b2",
+  "workflowRunId": 37951869293,
+  "jobId": 113892421469,
+  "workflowId": 379741182,
+  "runAttempt": 1,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37951869293",
+  "workflowStatus": "completed",
+  "workflowConclusion": "success",
+  "evidenceReaderBlob": "fe3478ead5638f8647e67a5ef2a2f2de4e2eb896",
+  "primaryLog": {
+    "blob": "f59f0590c714205f93826c9512c1c0c438a41418",
+    "sha256": "5836caa0146f2002bec6954ce285ab7789e7ac1758ede4da80248448cdc79e86",
+    "bytes": 84888
+  },
+  "fullApiAndExactSourceEvidenceBlob": "45b848ea37dacd4f9aba554b8d90fd794c7cfdb6",
+  "authenticatedReportBlob": "83977c047ba4a382d0512ec9294ba1bbcf30d29e",
+  "actualFiles": [
+    {
+      "path": "dist/typescript7-root/package-lock.json",
+      "blob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592
+    },
+    {
+      "path": "dist/typescript7-root/installed-typescript-package.json",
+      "blob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087
+    },
+    {
+      "path": "dist/typescript7-root/installed-profile.json",
+      "blob": "68ab7c2309f8722988d71d05f05743693f794851",
+      "sha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+      "bytes": 4644
+    },
+    {
+      "path": "dist/typescript7-root/qualification.json",
+      "blob": "31ec99a5260603659e38ad24c33028c510b46e93",
+      "sha256": "a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a",
+      "bytes": 3485
+    },
+    {
+      "path": "dist/typescript7-root/evidence-index.json",
+      "blob": "c77c051646afea76427cb175cb14f85c80b0a8cd",
+      "sha256": "209cd0b9a0bce52405579a1f7c2dc9878b8beb4f890a2bda15e6dd4dcf6a82b4",
+      "bytes": 820
+    }
+  ],
+  "artifact": {
+    "id": 11626670229,
+    "name": "root-typescript7-9d150afbec1feda8c97058aa56aa5ab92347d96d",
+    "sizeInBytes": 13228,
+    "digest": "sha256:a424a5c9bacbc31caf51160c471266401d0d4c520b87bce7cb3100c60d552cf6",
+    "expired": false,
+    "workflowRun": {
+      "id": 37951869293,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "psc0/typescript-7-only-v1",
+      "head_sha": "9d150afbec1feda8c97058aa56aa5ab92347d96d"
+    }
+  },
+  "exactArtifactLogLines": [
+    "2026-10-09T15:28:23.2070052Z SHA256 digest of uploaded artifact zip is a424a5c9bacbc31caf51160c471266401d0d4c520b87bce7cb3100c60d552cf6",
+    "2026-10-09T15:28:23.4713064Z Artifact root-typescript7-9d150afbec1feda8c97058aa56aa5ab92347d96d.zip successfully finalized. Artifact ID 11626670229",
+    "2026-10-09T15:28:23.4714537Z Artifact root-typescript7-9d150afbec1feda8c97058aa56aa5ab92347d96d has been successfully uploaded! Final size is 13228 bytes. Artifact ID is 11626670229",
+    "2026-10-09T15:28:23.4719676Z Artifact download URL: https://github.com/dwijayuda/pskernel/actions/runs/37951869293/artifacts/11626670229"
+  ],
+  "summary": {
+    "passed": true,
+    "qualifiedByThisReview": true,
+    "packagePins": 21,
+    "typescript": "7.0.2",
+    "node": "v22.23.3",
+    "lockGenerated": false,
+    "lockResolution": "existing lock, npm ci only",
+    "currentCompilerInstalled": true,
+    "commands": 7,
+    "completeCommandSequence": true,
+    "adapterContractCompleted": true,
+    "adapterObligations": 11,
+    "psc0Qualification": false,
+    "coldFQualification": false,
+    "seedSelectionChanged": false
+  },
+  "commands": [
+    {
+      "name": "install",
+      "exitCode": 0,
+      "elapsedMs": 1635
+    },
+    {
+      "name": "root-build",
+      "exitCode": 0,
+      "elapsedMs": 336
+    },
+    {
+      "name": "package-tests",
+      "exitCode": 0,
+      "elapsedMs": 13474
+    },
+    {
+      "name": "conformance-build",
+      "exitCode": 0,
+      "elapsedMs": 201
+    },
+    {
+      "name": "lean4export-build",
+      "exitCode": 0,
+      "elapsedMs": 208
+    },
+    {
+      "name": "package-integration",
+      "exitCode": 0,
+      "elapsedMs": 8507
+    },
+    {
+      "name": "package-boundaries",
+      "exitCode": 0,
+      "elapsedMs": 484
+    }
+  ],
+  "totalCommandElapsedMs": 24845,
+  "startedAt": "2026-10-09T15:27:57.441Z",
+  "completedAt": "2026-10-09T15:28:22.403Z",
+  "contract": {
+    "evidenceKind": "compact JSON stdout record, not a separate receipt file",
+    "line": 392,
+    "value": {
+      "schema": "psc-root-typescript7-contract-v1",
+      "typescript": "7.0.2",
+      "passed": true,
+      "cases": [
+        "virtual-source-and-existing-products",
+        "logical-map-name",
+        "config-independent-positional",
+        "relative-typescript-import",
+        "package-export-import",
+        "root-output-selection",
+        "logical-diagnostic-position",
+        "self-reference-refusal",
+        "declaration-input-refusal",
+        "missing-directory-refusal",
+        "stage-cleanup"
+      ]
+    }
+  },
+  "scopeNote": "Passing root TypeScript7 host/adapter/package qualification only. No PSC0 fixed-point or provider/cold-F qualification, native-bootstrap qualification, or seed selection follows from this evidence.",
+  "originalBytesNote": "Each actualFiles blob contains the exact UTF-8 receipt bytes authenticated from the job's exact-file envelopes. Archive digests and the compact adapter contract are not substituted for receipt-file hashes.",
+  "sourceChangesOrRetriesByReviewer": false
+}

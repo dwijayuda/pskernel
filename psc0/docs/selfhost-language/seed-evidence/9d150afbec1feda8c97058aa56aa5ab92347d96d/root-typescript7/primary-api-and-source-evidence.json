@@ -1,0 +1,760 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-typescript7-primary-api-and-source-evidence",
+  "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+  "workflowRunId": 37951869293,
+  "jobId": 113892421469,
+  "run": {
+    "id": 37951869293,
+    "name": "Root TypeScript 7 qualification",
+    "node_id": "WFR_kwLOUlmxxc8AAAAI1huRbQ",
+    "head_branch": "psc0/typescript-7-only-v1",
+    "head_sha": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+    "path": ".github/workflows/root-typescript7-qualify.yml",
+    "display_title": "Reconcile compiler source inventory and enforce exact package languag…",
+    "run_number": 4,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 379741182,
+    "check_suite_id": 102829589474,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAX8R8D4g",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/37951869293",
+    "pull_requests": [],
+    "created_at": "2026-10-09T15:27:26Z",
+    "updated_at": "2026-10-09T15:28:27Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-09T15:27:26Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/102829589474",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/379741182",
+    "head_commit": {
+      "id": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+      "tree_id": "c97468df9855bb7379b49e0771ed5e373e39c8b2",
+      "message": "Reconcile compiler source inventory and enforce exact package language metadata [root-ts7-qualify]\n\nPreserve the compiler manifest's actual paired TypeScript/Lean/ProofScript bootstrap source inventory in the package map. Name the active TypeScript 7.0.2 CLI in the host pipeline. Require exact nonempty source-language agreement for every outer package while retaining all graph, status, source-shape, editor and architecture checks.\n\nRun 37950522687 passed all builds, package tests, all 11 TS7 adapter obligations and package integration before exposing this existing metadata mismatch. A complete static review of the remaining map/architecture rules, all 178 scoped TypeScript files and 10 editor inputs found no further violations. No native bootstrap, provider or kernel behavior is changed.",
+      "timestamp": "2026-10-09T15:27:15Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "jobs": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 113892421469,
+        "run_id": 37951869293,
+        "workflow_name": "Root TypeScript 7 qualification",
+        "head_branch": "psc0/typescript-7-only-v1",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAahIRvXQ",
+        "head_sha": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/113892421469",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/37951869293/job/113892421469",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-09T15:27:27Z",
+        "started_at": "2026-10-09T15:27:34Z",
+        "completed_at": "2026-10-09T15:28:26Z",
+        "name": "qualify",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-09T15:27:35Z",
+            "completed_at": "2026-10-09T15:27:36Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-09T15:27:36Z",
+            "completed_at": "2026-10-09T15:27:56Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-09T15:27:56Z",
+            "completed_at": "2026-10-09T15:27:57Z"
+          },
+          {
+            "name": "Resolve the exact lock and run the root compiler gates once",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-09T15:27:57Z",
+            "completed_at": "2026-10-09T15:28:22Z"
+          },
+          {
+            "name": "Preserve exact lock, receipts, and gate output",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-09T15:28:22Z",
+            "completed_at": "2026-10-09T15:28:23Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-09T15:28:23Z",
+            "completed_at": "2026-10-09T15:28:23Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-09T15:28:23Z",
+            "completed_at": "2026-10-09T15:28:23Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-09T15:28:23Z",
+            "completed_at": "2026-10-09T15:28:23Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/113892421469",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000016191,
+        "runner_name": "GitHub Actions 1000016191",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  },
+  "artifacts": {
+    "total_count": 1,
+    "artifacts": [
+      {
+        "id": 11626670229,
+        "node_id": "MDg6QXJ0aWZhY3QxMTYyNjY3MDIyOQ==",
+        "name": "root-typescript7-9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "size_in_bytes": 13228,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11626670229",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11626670229/zip",
+        "expired": false,
+        "digest": "sha256:a424a5c9bacbc31caf51160c471266401d0d4c520b87bce7cb3100c60d552cf6",
+        "created_at": "2026-10-09T15:28:23Z",
+        "updated_at": "2026-10-09T15:28:23Z",
+        "expires_at": "2026-11-08T15:28:22Z",
+        "workflow_run": {
+          "id": 37951869293,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/typescript-7-only-v1",
+          "head_sha": "9d150afbec1feda8c97058aa56aa5ab92347d96d"
+        }
+      }
+    ]
+  },
+  "actualApiResponseTexts": {
+    "run": "{\"id\":37951869293,\"name\":\"Root TypeScript 7 qualification\",\"node_id\":\"WFR_kwLOUlmxxc8AAAAI1huRbQ\",\"head_branch\":\"psc0/typescript-7-only-v1\",\"head_sha\":\"9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"path\":\".github/workflows/root-typescript7-qualify.yml\",\"display_title\":\"Reconcile compiler source inventory and enforce exact package languag…\",\"run_number\":4,\"event\":\"push\",\"status\":\"completed\",\"conclusion\":\"success\",\"workflow_id\":379741182,\"check_suite_id\":102829589474,\"check_suite_node_id\":\"CS_kwDOUlmxxc8AAAAX8R8D4g\",\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293\",\"html_url\":\"https://github.com/dwijayuda/pskernel/actions/runs/37951869293\",\"pull_requests\":[],\"created_at\":\"2026-10-09T15:27:26Z\",\"updated_at\":\"2026-10-09T15:28:27Z\",\"actor\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"run_attempt\":1,\"referenced_workflows\":[],\"run_started_at\":\"2026-10-09T15:27:26Z\",\"triggering_actor\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"jobs_url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/jobs\",\"logs_url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/logs\",\"check_suite_url\":\"https://api.github.com/repos/dwijayuda/pskernel/check-suites/102829589474\",\"artifacts_url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/artifacts\",\"cancel_url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/cancel\",\"rerun_url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293/rerun\",\"previous_attempt_url\":null,\"workflow_url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/379741182\",\"head_commit\":{\"id\":\"9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"tree_id\":\"c97468df9855bb7379b49e0771ed5e373e39c8b2\",\"message\":\"Reconcile compiler source inventory and enforce exact package language metadata [root-ts7-qualify]\\n\\nPreserve the compiler manifest's actual paired TypeScript/Lean/ProofScript bootstrap source inventory in the package map. Name the active TypeScript 7.0.2 CLI in the host pipeline. Require exact nonempty source-language agreement for every outer package while retaining all graph, status, source-shape, editor and architecture checks.\\n\\nRun 37950522687 passed all builds, package tests, all 11 TS7 adapter obligations and package integration before exposing this existing metadata mismatch. A complete static review of the remaining map/architecture rules, all 178 scoped TypeScript files and 10 editor inputs found no further violations. No native bootstrap, provider or kernel behavior is changed.\",\"timestamp\":\"2026-10-09T15:27:15Z\",\"author\":{\"name\":\"Dwija Yuda\",\"email\":\"dwijayuda@gmail.com\"},\"committer\":{\"name\":\"Dwija Yuda\",\"email\":\"dwijayuda@gmail.com\"}},\"repository\":{\"id\":1381609925,\"node_id\":\"R_kgDOUlmxxQ\",\"name\":\"pskernel\",\"full_name\":\"dwijayuda/pskernel\",\"private\":false,\"owner\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"html_url\":\"https://github.com/dwijayuda/pskernel\",\"description\":null,\"fork\":false,\"url\":\"https://api.github.com/repos/dwijayuda/pskernel\",\"forks_url\":\"https://api.github.com/repos/dwijayuda/pskernel/forks\",\"keys_url\":\"https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}\",\"collaborators_url\":\"https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}\",\"teams_url\":\"https://api.github.com/repos/dwijayuda/pskernel/teams\",\"hooks_url\":\"https://api.github.com/repos/dwijayuda/pskernel/hooks\",\"issue_events_url\":\"https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}\",\"events_url\":\"https://api.github.com/repos/dwijayuda/pskernel/events\",\"assignees_url\":\"https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}\",\"branches_url\":\"https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}\",\"tags_url\":\"https://api.github.com/repos/dwijayuda/pskernel/tags\",\"blobs_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}\",\"git_tags_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}\",\"git_refs_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}\",\"trees_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}\",\"statuses_url\":\"https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}\",\"languages_url\":\"https://api.github.com/repos/dwijayuda/pskernel/languages\",\"stargazers_url\":\"https://api.github.com/repos/dwijayuda/pskernel/stargazers\",\"contributors_url\":\"https://api.github.com/repos/dwijayuda/pskernel/contributors\",\"subscribers_url\":\"https://api.github.com/repos/dwijayuda/pskernel/subscribers\",\"subscription_url\":\"https://api.github.com/repos/dwijayuda/pskernel/subscription\",\"commits_url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}\",\"git_commits_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}\",\"comments_url\":\"https://api.github.com/repos/dwijayuda/pskernel/comments{/number}\",\"issue_comment_url\":\"https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}\",\"contents_url\":\"https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}\",\"compare_url\":\"https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}\",\"merges_url\":\"https://api.github.com/repos/dwijayuda/pskernel/merges\",\"archive_url\":\"https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}\",\"downloads_url\":\"https://api.github.com/repos/dwijayuda/pskernel/downloads\",\"issues_url\":\"https://api.github.com/repos/dwijayuda/pskernel/issues{/number}\",\"pulls_url\":\"https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}\",\"milestones_url\":\"https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}\",\"notifications_url\":\"https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}\",\"labels_url\":\"https://api.github.com/repos/dwijayuda/pskernel/labels{/name}\",\"releases_url\":\"https://api.github.com/repos/dwijayuda/pskernel/releases{/id}\",\"deployments_url\":\"https://api.github.com/repos/dwijayuda/pskernel/deployments\"},\"head_repository\":{\"id\":1381609925,\"node_id\":\"R_kgDOUlmxxQ\",\"name\":\"pskernel\",\"full_name\":\"dwijayuda/pskernel\",\"private\":false,\"owner\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"html_url\":\"https://github.com/dwijayuda/pskernel\",\"description\":null,\"fork\":false,\"url\":\"https://api.github.com/repos/dwijayuda/pskernel\",\"forks_url\":\"https://api.github.com/repos/dwijayuda/pskernel/forks\",\"keys_url\":\"https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}\",\"collaborators_url\":\"https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}\",\"teams_url\":\"https://api.github.com/repos/dwijayuda/pskernel/teams\",\"hooks_url\":\"https://api.github.com/repos/dwijayuda/pskernel/hooks\",\"issue_events_url\":\"https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}\",\"events_url\":\"https://api.github.com/repos/dwijayuda/pskernel/events\",\"assignees_url\":\"https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}\",\"branches_url\":\"https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}\",\"tags_url\":\"https://api.github.com/repos/dwijayuda/pskernel/tags\",\"blobs_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}\",\"git_tags_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}\",\"git_refs_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}\",\"trees_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}\",\"statuses_url\":\"https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}\",\"languages_url\":\"https://api.github.com/repos/dwijayuda/pskernel/languages\",\"stargazers_url\":\"https://api.github.com/repos/dwijayuda/pskernel/stargazers\",\"contributors_url\":\"https://api.github.com/repos/dwijayuda/pskernel/contributors\",\"subscribers_url\":\"https://api.github.com/repos/dwijayuda/pskernel/subscribers\",\"subscription_url\":\"https://api.github.com/repos/dwijayuda/pskernel/subscription\",\"commits_url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}\",\"git_commits_url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}\",\"comments_url\":\"https://api.github.com/repos/dwijayuda/pskernel/comments{/number}\",\"issue_comment_url\":\"https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}\",\"contents_url\":\"https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}\",\"compare_url\":\"https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}\",\"merges_url\":\"https://api.github.com/repos/dwijayuda/pskernel/merges\",\"archive_url\":\"https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}\",\"downloads_url\":\"https://api.github.com/repos/dwijayuda/pskernel/downloads\",\"issues_url\":\"https://api.github.com/repos/dwijayuda/pskernel/issues{/number}\",\"pulls_url\":\"https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}\",\"milestones_url\":\"https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}\",\"notifications_url\":\"https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}\",\"labels_url\":\"https://api.github.com/repos/dwijayuda/pskernel/labels{/name}\",\"releases_url\":\"https://api.github.com/repos/dwijayuda/pskernel/releases{/id}\",\"deployments_url\":\"https://api.github.com/repos/dwijayuda/pskernel/deployments\"}}",
+    "jobs": "{\"total_count\":1,\"jobs\":[{\"id\":113892421469,\"run_id\":37951869293,\"workflow_name\":\"Root TypeScript 7 qualification\",\"head_branch\":\"psc0/typescript-7-only-v1\",\"run_url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37951869293\",\"run_attempt\":1,\"node_id\":\"CR_kwDOUlmxxc8AAAAahIRvXQ\",\"head_sha\":\"9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/113892421469\",\"html_url\":\"https://github.com/dwijayuda/pskernel/actions/runs/37951869293/job/113892421469\",\"status\":\"completed\",\"conclusion\":\"success\",\"created_at\":\"2026-10-09T15:27:27Z\",\"started_at\":\"2026-10-09T15:27:34Z\",\"completed_at\":\"2026-10-09T15:28:26Z\",\"name\":\"qualify\",\"steps\":[{\"name\":\"Set up job\",\"status\":\"completed\",\"conclusion\":\"success\",\"number\":1,\"started_at\":\"2026-10-09T15:27:35Z\",\"completed_at\":\"2026-10-09T15:27:36Z\"},{\"name\":\"Run actions/checkout@v4\",\"status\":\"completed\",\"conclusion\":\"success\",\"number\":2,\"started_at\":\"2026-10-09T15:27:36Z\",\"completed_at\":\"2026-10-09T15:27:56Z\"},{\"name\":\"Run actions/setup-node@v4\",\"status\":\"completed\",\"conclusion\":\"success\",\"number\":3,\"started_at\":\"2026-10-09T15:27:56Z\",\"completed_at\":\"2026-10-09T15:27:57Z\"},{\"name\":\"Resolve the exact lock and run the root compiler gates once\",\"status\":\"completed\",\"conclusion\":\"success\",\"number\":4,\"started_at\":\"2026-10-09T15:27:57Z\",\"completed_at\":\"2026-10-09T15:28:22Z\"},{\"name\":\"Preserve exact lock, receipts, and gate output\",\"status\":\"completed\",\"conclusion\":\"success\",\"number\":5,\"started_at\":\"2026-10-09T15:28:22Z\",\"completed_at\":\"2026-10-09T15:28:23Z\"},{\"name\":\"Post Run actions/setup-node@v4\",\"status\":\"completed\",\"conclusion\":\"success\",\"number\":9,\"started_at\":\"2026-10-09T15:28:23Z\",\"completed_at\":\"2026-10-09T15:28:23Z\"},{\"name\":\"Post Run actions/checkout@v4\",\"status\":\"completed\",\"conclusion\":\"success\",\"number\":10,\"started_at\":\"2026-10-09T15:28:23Z\",\"completed_at\":\"2026-10-09T15:28:23Z\"},{\"name\":\"Complete job\",\"status\":\"completed\",\"conclusion\":\"success\",\"number\":11,\"started_at\":\"2026-10-09T15:28:23Z\",\"completed_at\":\"2026-10-09T15:28:23Z\"}],\"check_run_url\":\"https://api.github.com/repos/dwijayuda/pskernel/check-runs/113892421469\",\"labels\":[\"ubuntu-latest\"],\"runner_id\":1000016191,\"runner_name\":\"GitHub Actions 1000016191\",\"runner_group_id\":0,\"runner_group_name\":\"GitHub Actions\"}]}",
+    "artifacts": "{\"total_count\":1,\"artifacts\":[{\"id\":11626670229,\"node_id\":\"MDg6QXJ0aWZhY3QxMTYyNjY3MDIyOQ==\",\"name\":\"root-typescript7-9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"size_in_bytes\":13228,\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11626670229\",\"archive_download_url\":\"https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11626670229/zip\",\"expired\":false,\"digest\":\"sha256:a424a5c9bacbc31caf51160c471266401d0d4c520b87bce7cb3100c60d552cf6\",\"created_at\":\"2026-10-09T15:28:23Z\",\"updated_at\":\"2026-10-09T15:28:23Z\",\"expires_at\":\"2026-11-08T15:28:22Z\",\"workflow_run\":{\"id\":37951869293,\"repository_id\":1381609925,\"head_repository_id\":1381609925,\"head_branch\":\"psc0/typescript-7-only-v1\",\"head_sha\":\"9d150afbec1feda8c97058aa56aa5ab92347d96d\"}}]}",
+    "sourceInheritance": "{\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/compare/5d3cbc82cb8759b909d1a957d6a22d542509d8c5...9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"html_url\":\"https://github.com/dwijayuda/pskernel/compare/5d3cbc82cb8759b909d1a957d6a22d542509d8c5...9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"permalink_url\":\"https://github.com/dwijayuda/pskernel/compare/dwijayuda:5d3cbc8...dwijayuda:9d150af\",\"diff_url\":\"https://github.com/dwijayuda/pskernel/compare/5d3cbc82cb8759b909d1a957d6a22d542509d8c5...9d150afbec1feda8c97058aa56aa5ab92347d96d.diff\",\"patch_url\":\"https://github.com/dwijayuda/pskernel/compare/5d3cbc82cb8759b909d1a957d6a22d542509d8c5...9d150afbec1feda8c97058aa56aa5ab92347d96d.patch\",\"base_commit\":{\"sha\":\"5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"node_id\":\"C_kwDOUlmxxdoAKDVkM2NiYzgyY2I4NzU5YjkwOWQxYTk1N2Q2YTIyZDU0MjUwOWQ4YzU\",\"commit\":{\"author\":{\"name\":\"Dwija Yuda\",\"email\":\"dwijayuda@gmail.com\",\"date\":\"2026-10-09T15:16:32Z\"},\"committer\":{\"name\":\"Dwija Yuda\",\"email\":\"dwijayuda@gmail.com\",\"date\":\"2026-10-09T15:16:32Z\"},\"message\":\"Correct the Lean exporter subprocess type for its existing ignored stdin [root-ts7-qualify]\\n\\nDeclare the actual ChildProcessByStdio<null, Readable, Readable> result of stdio ['ignore', 'pipe', 'pipe']. Its three consumers use the existing piped stdout/stderr and process events; no executable statement, provider behavior, cast, or compiler option changes.\\n\\nRoot run 37950075083 passed clean TS7 installation, the root build, complete ordered package tests including all 11 adapter obligations, and the conformance package build. The newly included lean4export build exposed this previously inconsistent declaration.\",\"tree\":{\"sha\":\"11dcc66a83aa3bdb390ec3f4de96c4dc10a1f553\",\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/trees/11dcc66a83aa3bdb390ec3f4de96c4dc10a1f553\"},\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"comment_count\":0,\"verification\":{\"verified\":false,\"reason\":\"unsigned\",\"signature\":null,\"payload\":null,\"verified_at\":null}},\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"html_url\":\"https://github.com/dwijayuda/pskernel/commit/5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"comments_url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5/comments\",\"author\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"committer\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"parents\":[{\"sha\":\"3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab\",\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab\",\"html_url\":\"https://github.com/dwijayuda/pskernel/commit/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab\"}]},\"merge_base_commit\":{\"sha\":\"5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"node_id\":\"C_kwDOUlmxxdoAKDVkM2NiYzgyY2I4NzU5YjkwOWQxYTk1N2Q2YTIyZDU0MjUwOWQ4YzU\",\"commit\":{\"author\":{\"name\":\"Dwija Yuda\",\"email\":\"dwijayuda@gmail.com\",\"date\":\"2026-10-09T15:16:32Z\"},\"committer\":{\"name\":\"Dwija Yuda\",\"email\":\"dwijayuda@gmail.com\",\"date\":\"2026-10-09T15:16:32Z\"},\"message\":\"Correct the Lean exporter subprocess type for its existing ignored stdin [root-ts7-qualify]\\n\\nDeclare the actual ChildProcessByStdio<null, Readable, Readable> result of stdio ['ignore', 'pipe', 'pipe']. Its three consumers use the existing piped stdout/stderr and process events; no executable statement, provider behavior, cast, or compiler option changes.\\n\\nRoot run 37950075083 passed clean TS7 installation, the root build, complete ordered package tests including all 11 adapter obligations, and the conformance package build. The newly included lean4export build exposed this previously inconsistent declaration.\",\"tree\":{\"sha\":\"11dcc66a83aa3bdb390ec3f4de96c4dc10a1f553\",\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/trees/11dcc66a83aa3bdb390ec3f4de96c4dc10a1f553\"},\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"comment_count\":0,\"verification\":{\"verified\":false,\"reason\":\"unsigned\",\"signature\":null,\"payload\":null,\"verified_at\":null}},\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"html_url\":\"https://github.com/dwijayuda/pskernel/commit/5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"comments_url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5/comments\",\"author\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"committer\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"parents\":[{\"sha\":\"3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab\",\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab\",\"html_url\":\"https://github.com/dwijayuda/pskernel/commit/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab\"}]},\"status\":\"ahead\",\"ahead_by\":1,\"behind_by\":0,\"total_commits\":1,\"commits\":[{\"sha\":\"9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"node_id\":\"C_kwDOUlmxxdoAKDlkMTUwYWZiZWMxZmVkYThjOTcwNThhYTU2YWE1YWI5MjM0N2Q5NmQ\",\"commit\":{\"author\":{\"name\":\"Dwija Yuda\",\"email\":\"dwijayuda@gmail.com\",\"date\":\"2026-10-09T15:27:15Z\"},\"committer\":{\"name\":\"Dwija Yuda\",\"email\":\"dwijayuda@gmail.com\",\"date\":\"2026-10-09T15:27:15Z\"},\"message\":\"Reconcile compiler source inventory and enforce exact package language metadata [root-ts7-qualify]\\n\\nPreserve the compiler manifest's actual paired TypeScript/Lean/ProofScript bootstrap source inventory in the package map. Name the active TypeScript 7.0.2 CLI in the host pipeline. Require exact nonempty source-language agreement for every outer package while retaining all graph, status, source-shape, editor and architecture checks.\\n\\nRun 37950522687 passed all builds, package tests, all 11 TS7 adapter obligations and package integration before exposing this existing metadata mismatch. A complete static review of the remaining map/architecture rules, all 178 scoped TypeScript files and 10 editor inputs found no further violations. No native bootstrap, provider or kernel behavior is changed.\",\"tree\":{\"sha\":\"c97468df9855bb7379b49e0771ed5e373e39c8b2\",\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/trees/c97468df9855bb7379b49e0771ed5e373e39c8b2\"},\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/git/commits/9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"comment_count\":0,\"verification\":{\"verified\":false,\"reason\":\"unsigned\",\"signature\":null,\"payload\":null,\"verified_at\":null}},\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"html_url\":\"https://github.com/dwijayuda/pskernel/commit/9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"comments_url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/9d150afbec1feda8c97058aa56aa5ab92347d96d/comments\",\"author\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"committer\":{\"login\":\"dwijayuda\",\"id\":193330113,\"node_id\":\"U_kgDOC4X7wQ\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/193330113?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/dwijayuda\",\"html_url\":\"https://github.com/dwijayuda\",\"followers_url\":\"https://api.github.com/users/dwijayuda/followers\",\"following_url\":\"https://api.github.com/users/dwijayuda/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/dwijayuda/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/dwijayuda/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/dwijayuda/subscriptions\",\"organizations_url\":\"https://api.github.com/users/dwijayuda/orgs\",\"repos_url\":\"https://api.github.com/users/dwijayuda/repos\",\"events_url\":\"https://api.github.com/users/dwijayuda/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/dwijayuda/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"parents\":[{\"sha\":\"5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"url\":\"https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5\",\"html_url\":\"https://github.com/dwijayuda/pskernel/commit/5d3cbc82cb8759b909d1a957d6a22d542509d8c5\"}]}],\"files\":[{\"sha\":\"1c541e688f7f69c5bc08d79b2754f20d28cf0487\",\"filename\":\"packages/package-map.json\",\"status\":\"modified\",\"additions\":2,\"deletions\":2,\"changes\":4,\"blob_url\":\"https://github.com/dwijayuda/pskernel/blob/9d150afbec1feda8c97058aa56aa5ab92347d96d/packages%2Fpackage-map.json\",\"raw_url\":\"https://github.com/dwijayuda/pskernel/raw/9d150afbec1feda8c97058aa56aa5ab92347d96d/packages%2Fpackage-map.json\",\"contents_url\":\"https://api.github.com/repos/dwijayuda/pskernel/contents/packages%2Fpackage-map.json?ref=9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"patch\":\"@@ -544,15 +544,15 @@\\n         \\\"backend-ts\\\",\\n         \\\"kernel\\\"\\n       ],\\n-      \\\"sourceLanguage\\\": \\\"typescript\\\",\\n+      \\\"sourceLanguage\\\": \\\"typescript+lean+proofscript-bootstrap\\\",\\n       \\\"notes\\\": [\\n         \\\"Canonical verified compilation now also carries globally synthesized class dictionaries as ordinary pskernel-checked definition arguments; no compiler-specific typeclass representation is introduced.\\\",\\n         \\\"Verified compilation now inherits acyclic local where helpers through ordinary checked-core let/lambda erasure; no compiler-specific where representation was added.\\\",\\n         \\\"Canonical verified compilation now covers parameterized pskernel structures, record construction, and projection with TypeScript generic API preservation.\\\",\\n         \\\"A source-level composition gate asserts nested let -> lambda(if) -> ADT match in verified IR and local higher-order calls from both match branches, preventing feature support from remaining isolated happy paths.\\\",\\n         \\\"Canonical integration now covers higher-order generic structural recursion: map over a pskernel-admitted recursive generic list preserves TypeScript generics/function types while compiling recursor IHs to ordinary JavaScript recursion.\\\",\\n         \\\"Compiler orchestration starts at CheckedCoreModule; it has no syntax, parser, language-checker, or elaborator dependency.\\\",\\n-        \\\"The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript Compiler API -> JavaScript/.d.ts/source map.\\\",\\n+        \\\"The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript 7.0.2 CLI -> JavaScript/.d.ts/source map.\\\",\\n         \\\"The compiler is untrusted with respect to theorem validity; pskernel admission has already occurred before this package runs.\\\",\\n         \\\"The verified compiler now covers construction and elimination of non-recursive unindexed generic ADTs through kernel-admitted constructors/recursors.\\\",\\n         \\\"The verified compiler now carries direct recursive ADTs and primitive structurally recursive functions—with invariant runtime parameters—from pskernel recursors to ordinary TypeScript/JavaScript recursion.\\\",\"},{\"sha\":\"b34fdc703d57f540d3b9487c349e82fffdbf900f\",\"filename\":\"scripts/package-map-check.mjs\",\"status\":\"modified\",\"additions\":3,\"deletions\":2,\"changes\":5,\"blob_url\":\"https://github.com/dwijayuda/pskernel/blob/9d150afbec1feda8c97058aa56aa5ab92347d96d/scripts%2Fpackage-map-check.mjs\",\"raw_url\":\"https://github.com/dwijayuda/pskernel/raw/9d150afbec1feda8c97058aa56aa5ab92347d96d/scripts%2Fpackage-map-check.mjs\",\"contents_url\":\"https://api.github.com/repos/dwijayuda/pskernel/contents/scripts%2Fpackage-map-check.mjs?ref=9d150afbec1feda8c97058aa56aa5ab92347d96d\",\"patch\":\"@@ -43,8 +43,9 @@ for(const pkg of map.packages){\\n   const manifest=JSON.parse(readFileSync(manifestPath,'utf8'));\\n   if(manifest.name!==pkg.packageName)throw new Error(`package-map: manifest name drift for ${pkg.name}`);\\n   if(manifest.proofscript?.status!==pkg.status)throw new Error(`package-map: status drift for ${pkg.name}`);\\n-  if(pkg.sourceLanguage==='typescript'&&manifest.proofscript?.sourceLanguage!=='typescript'){\\n-    throw new Error(`package-map: TypeScript source policy missing in manifest for ${pkg.name}`);\\n+  if(typeof pkg.sourceLanguage!=='string'||pkg.sourceLanguage.length===0||\\n+    manifest.proofscript?.sourceLanguage!==pkg.sourceLanguage){\\n+    throw new Error(`package-map: source language drift for ${pkg.name}`);\\n   }\\n }\\n \"}]}"
+  },
+  "manifestSourceReadRef": "5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+  "manifestSources": {
+    "package.json": "{\n  \"name\": \"lean-ts-kernel\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run test:outer && npm run test:kernel\",\n    \"check\": \"npm run test && node scripts/anti-drift.mjs && npm run check:packages && node scripts/oracle-fingerprint.mjs\",\n    \"replay\": \"npm run build --silent && node scripts/replay.mjs\",\n    \"oracle:official\": \"node scripts/official-oracle.mjs\",\n    \"check:oracle\": \"npm run check && npm run oracle:official && npm run oracle:primitive && npm run oracle:defeq && npm run oracle:adversarial\",\n    \"oracle:primitive\": \"npm run build --silent && node scripts/primitive-closure-oracle.mjs\",\n    \"oracle:defeq\": \"npm run build --silent && node scripts/defeq-differential.mjs\",\n    \"oracle:init\": \"npm run build --silent && node scripts/init-prelude-oracle.mjs\",\n    \"check:corpus\": \"npm run check:oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap\",\n    \"oracle:std-parsec\": \"npm run build --silent && node scripts/std-parsec-oracle.mjs\",\n    \"oracle:std-sat-cnf\": \"npm run build --silent && node scripts/std-sat-cnf-oracle.mjs\",\n    \"oracle:std-byteslice\": \"npm run build --silent && node scripts/std-byteslice-oracle.mjs\",\n    \"oracle:lean-rbmap\": \"npm run build --silent && node scripts/lean-rbmap-oracle.mjs\",\n    \"oracle:adversarial\": \"node scripts/adversarial-oracle.mjs\",\n    \"oracle:lean-rbmap-full\": \"npm run build --silent && node scripts/lean-rbmap-full-oracle.mjs\",\n    \"check:large-corpus\": \"npm run oracle:lean-rbmap-full\",\n    \"oracle:lean-persistentarray\": \"npm run build --silent && node scripts/lean-persistentarray-oracle.mjs\",\n    \"oracle:lean-persistenthashmap\": \"npm run build --silent && node scripts/lean-persistenthashmap-oracle.mjs\",\n    \"generate:fixtures\": \"bash scripts/generate-oracle-fixtures.sh\",\n    \"oracle:arena\": \"npm run build --silent && node scripts/arena-static-oracle.mjs\",\n    \"oracle:std-full\": \"npm run build --silent && node scripts/full-std-oracle.mjs\",\n    \"test:syntax\": \"tsc -p packages/syntax/tsconfig.json && node packages/syntax/dist/test/syntax.test.js && node packages/syntax/dist/test/v061-conformance.test.js\",\n    \"test:packages\": \"npm run test:syntax && tsc -p packages/browser/tsconfig.json && node packages/browser/dist/test/index.test.js && tsc -p packages/pretty/tsconfig.json && node packages/pretty/dist/test/index.test.js && tsc -p packages/meta/tsconfig.json && node packages/meta/dist/test/index.test.js && tsc -p packages/environment/tsconfig.json && node packages/environment/dist/test/index.test.js && tsc -p packages/checked-core/tsconfig.json && node packages/checked-core/dist/test/index.test.js && tsc -p packages/tactic/tsconfig.json && node packages/tactic/dist/test/index.test.js && tsc -p packages/elab/tsconfig.json && node packages/elab/dist/test/index.test.js && tsc -p packages/compiler-ir/tsconfig.json && node packages/compiler-ir/dist/test/index.test.js && tsc -p packages/erasure/tsconfig.json && node packages/erasure/dist/test/index.test.js && tsc -p packages/runtime/tsconfig.json && node packages/runtime/dist/test/index.test.js && tsc -p packages/backend-ts/tsconfig.json && node packages/backend-ts/dist/test/index.test.js && node packages/backend-ts/dist/test/typescript-compiler.test.js && tsc -p packages/compiler/tsconfig.json && node packages/compiler/dist/test/index.test.js && tsc -p packages/project/tsconfig.json && node packages/project/dist/test/index.test.js && tsc -p packages/language-service/tsconfig.json && node packages/language-service/dist/test/index.test.js && tsc -p packages/lsp/tsconfig.json && node packages/lsp/dist/test/index.test.js && tsc -p packages/module/tsconfig.json && tsc -p packages/cli/tsconfig.json && node packages/cli/dist/test/cli.test.js\",\n    \"check:packages\": \"node scripts/package-map-check.mjs && npm run check:source-shape && npm run check:vscode && npm run check:architecture\",\n    \"test:package-integration\": \"node scripts/package-integration-smoke.mjs\",\n    \"check:source-shape\": \"node scripts/source-shape-check.mjs\",\n    \"check:vscode\": \"node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs\",\n    \"check:architecture\": \"node scripts/proofscript-architecture-check.mjs\",\n    \"build:src\": \"tsc -p tsconfig.src.json\",\n    \"test:outer\": \"npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages\",\n    \"check:oracle-syntax\": \"node --check scripts/module-stream-oracle.mjs && node --check scripts/full-std-oracle.mjs && node --check scripts/std-hot-oracle.mjs && node --check scripts/std-bisect-oracle.mjs && node --check scripts/std-bisect-oracle-test.mjs && node --check scripts/adaptive-root-oracle.mjs && node --check scripts/kernel-study-regression-matrix.mjs && node --check scripts/official-oracle.mjs && node --check scripts/defeq-differential.mjs && node --check scripts/adversarial-oracle.mjs && node --check scripts/native-oracle-smoke.mjs\",\n    \"oracle:std-probe\": \"npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029 0 250 100 10\",\n    \"oracle:std-range\": \"npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029\",\n    \"oracle:std-hot\": \"npm run build --silent && node scripts/std-hot-oracle.mjs\",\n    \"oracle:std-bisect\": \"npm run build --silent && node scripts/std-bisect-oracle.mjs\",\n    \"test:oracle-tools\": \"node scripts/std-bisect-oracle-test.mjs && node scripts/lean-native-evaluator-test.mjs && npm run test:kernel-study-matrix\",\n    \"oracle:native-smoke\": \"npm run build --silent && node scripts/native-oracle-smoke.mjs\",\n    \"test:kernel-study-matrix\": \"node scripts/kernel-study-regression-matrix.mjs\",\n    \"oracle:init-canonical\": \"npm run build --silent && node scripts/module-stream-oracle.mjs Init.Prelude\",\n    \"test:kernel\": \"npm run check:oracle-syntax && npm run build && npm run test:oracle-tools && node dist/test/all.test.js\",\n    \"check:kernel-oracle\": \"npm run oracle:official && npm run oracle:primitive && npm run oracle:defeq && npm run oracle:adversarial\",\n    \"check:kernel-corpus\": \"npm run check:kernel-oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap\",\n    \"oracle:text-foundation\": \"npm run build --silent && tsc -p packages/environment/tsconfig.json && node scripts/text-foundation-oracle.mjs\",\n    \"oracle:selfhost-foundation\": \"npm run build --silent && tsc -p packages/environment/tsconfig.json && node scripts/selfhost-foundation-oracle.mjs\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\",\n    \"@types/node\": \"22.15.3\"\n  },\n  \"main\": \"./dist/src/index.js\",\n  \"types\": \"./dist/src/index.d.ts\",\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    },\n    \"./lean4export\": {\n      \"types\": \"./dist/src/integration/lean4export.d.ts\",\n      \"import\": \"./dist/src/integration/lean4export.js\"\n    },\n    \"./native\": {\n      \"types\": \"./dist/src/kernel/reduction/native.d.ts\",\n      \"import\": \"./dist/src/kernel/reduction/native.js\"\n    }\n  },\n  \"workspaces\": [\n    \"packages/*\"\n  ]\n}\n",
+    "packages/backend-ts/package.json": "{\n  \"name\": \"@proofscript/backend-ts\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"ProofScript checked executable IR to TypeScript source, compiled to JavaScript by TypeScript.\",\n  \"proofscript\": {\n    \"status\": \"verified-esm-imports+verified-core-typescript-mvp\",\n    \"phase\": \"C\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    },\n    \"./verified\": {\n      \"types\": \"./dist/src/verified-api.d.ts\",\n      \"import\": \"./dist/src/verified-api.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js && node dist/test/typescript-compiler.test.js\"\n  },\n  \"dependencies\": {\n    \"typescript\": \"7.0.2\",\n    \"@proofscript/compiler-ir\": \"file:../compiler-ir\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"22.15.3\"\n  }\n}\n",
+    "packages/browser/package.json": "{\n  \"name\": \"@proofscript/browser\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Web Worker/browser host wrapper for streaming kernel verification.\",\n  \"proofscript\": {\n    \"status\": \"foundation\",\n    \"phase\": \"A\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/checked-core/package.json": "{\n  \"name\": \"@proofscript/checked-core\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Kernel-admitted dependent core boundary shared by ProofScript elaboration and compilation.\",\n  \"proofscript\": {\n    \"status\": \"replayable-runtime-externals+admission-codec-v2\",\n    \"phase\": \"B\",\n    \"trust\": \"untrusted-boundary\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/cli/package.json": "{\n  \"name\": \"pskernel-cli\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"bin\": {\n    \"pskernel\": \"./dist/bin/pskernel.js\",\n    \"psc\": \"./dist/bin/psc.js\"\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/cli.test.js && node dist/bin/pskernel.js --help && node dist/bin/psc.js --help\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\",\n    \"@proofscript/module\": \"file:../module\",\n    \"@proofscript/syntax\": \"file:../syntax\",\n    \"@proofscript/backend-ts\": \"file:../backend-ts\",\n    \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n    \"@proofscript/elab\": \"file:../elab\",\n    \"@proofscript/compiler\": \"file:../compiler\",\n    \"@proofscript/environment\": \"file:../environment\",\n    \"@proofscript/checked-core\": \"file:../checked-core\",\n    \"@proofscript/project\": \"file:../project\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"22.15.3\",\n    \"typescript\": \"7.0.2\"\n  },\n  \"description\": \"ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.\",\n  \"proofscript\": {\n    \"status\": \"verified-only+runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache\",\n    \"phase\": \"A\",\n    \"trust\": \"untrusted-support\",\n    \"futureName\": \"@proofscript/cli\",\n    \"sourceLanguage\": \"typescript\"\n  }\n}\n",
+    "packages/compiler-ir/package.json": "{\n  \"name\": \"@proofscript/compiler-ir\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Runtime-oriented compiler IR and lowering/optimization passes.\",\n  \"proofscript\": {\n    \"status\": \"verified-ir-external-imports+intrinsic-contract\",\n    \"phase\": \"C\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    },\n    \"./verified\": {\n      \"types\": \"./dist/src/verified.d.ts\",\n      \"import\": \"./dist/src/verified.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/compiler/package.json": "{\n  \"name\": \"@proofscript/compiler\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Orchestrates verified compilation from kernel-admitted checked core through erasure, compiler IR, TypeScript, and JavaScript.\",\n  \"proofscript\": {\n    \"status\": \"checked-core-to-js-generic-structure+structural-recursion-mvp\",\n    \"phase\": \"C\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript+lean+proofscript-bootstrap\",\n    \"portableSourceRoots\": [\n      \"src/ProofScript\"\n    ],\n    \"pairedSources\": true,\n    \"bootstrapBuild\": \"../../selfhost/lakefile.lean\",\n    \"futureArtifactRoot\": \"dist/proofscript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\",\n    \"build:lean-bootstrap\": \"cd ../../selfhost && lake build ProofScriptCompiler\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\",\n    \"@proofscript/checked-core\": \"file:../checked-core\",\n    \"@proofscript/erasure\": \"file:../erasure\",\n    \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n    \"@proofscript/backend-ts\": \"file:../backend-ts\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/conformance/package.json": "{\n  \"name\": \"@proofscript/conformance\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Reusable pskernel conformance runner for accept/reject corpora such as Lean Kernel Arena.\",\n  \"proofscript\": {\n    \"status\": \"mvp\",\n    \"phase\": \"A\",\n    \"trust\": \"test-only\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"bin\": {\n    \"pskernel-conformance\": \"./dist/bin/pskernel-conformance.js\"\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/conformance.test.js\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"22.15.3\",\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/elab/package.json": "{\n  \"name\": \"@proofscript/elab\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"ProofScript term/command/declaration elaboration into kernel declarations.\",\n  \"proofscript\": {\n    \"status\": \"v061-exact-search-eq-symmetry+zero-subgoal-exact-search+induction-branch-names+bounded-rfl+nested-expected-args+source-ffi-admission+imported-metadata+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+dependent-type-terms+simp-explicit-set+rw+induction+cases+constructor+refine+multigoal+global-instance+structural-recursion\",\n    \"phase\": \"B\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\",\n    \"@proofscript/meta\": \"file:../meta\",\n    \"@proofscript/syntax\": \"file:../syntax\",\n    \"@proofscript/checked-core\": \"file:../checked-core\",\n    \"@proofscript/tactic\": \"file:../tactic\"\n  }\n}\n",
+    "packages/environment/package.json": "{\n  \"name\": \"@proofscript/environment\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Shared Lean 4.34 environment replay/provider boundary for ProofScript compiler and tooling.\",\n  \"proofscript\": {\n    \"status\": \"lean434-prelude-provider-mvp\",\n    \"phase\": \"B\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    },\n    \"./node\": {\n      \"types\": \"./dist/src/node.d.ts\",\n      \"import\": \"./dist/src/node.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"22.15.3\",\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/erasure/package.json": "{\n  \"name\": \"@proofscript/erasure\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Lean-aware erasure from kernel-admitted ProofScript checked core to verified compiler IR.\",\n  \"proofscript\": {\n    \"status\": \"verified-external-import-erasure+dependent-runtime-erasure\",\n    \"phase\": \"C\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\",\n    \"@proofscript/checked-core\": \"file:../checked-core\",\n    \"@proofscript/compiler-ir\": \"file:../compiler-ir\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/language-service/package.json": "{\n  \"name\": \"@proofscript/language-service\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Proof-aware editor language service over ProofScript syntax/elaboration and pskernel admission.\",\n  \"proofscript\": {\n    \"status\": \"dual-source-editor-mvp\",\n    \"phase\": \"D\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"dependencies\": {\n    \"@proofscript/syntax\": \"file:../syntax\",\n    \"@proofscript/elab\": \"file:../elab\",\n    \"lean-ts-kernel\": \"file:../..\",\n    \"@proofscript/checked-core\": \"file:../checked-core\",\n    \"@proofscript/project\": \"file:../project\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/lean4export/package.json": "{\n  \"name\": \"@proofscript/lean4export\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Cross-platform pinned Lean exporter process/stream transport for pskernel and ProofScript.\",\n  \"proofscript\": {\n    \"status\": \"mvp\",\n    \"phase\": \"A\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"bin\": {\n    \"proofscript-lean4export\": \"./dist/bin/proofscript-lean4export.js\"\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/lean4export.test.js\"\n  },\n  \"dependencies\": {\n    \"@proofscript/module\": \"file:../module\",\n    \"lean-ts-kernel\": \"file:../..\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"22.15.3\",\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/lsp/package.json": "{\n  \"name\": \"@proofscript/lsp\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Thin Language Server Protocol transport over the proof-aware ProofScript language service.\",\n  \"proofscript\": {\n    \"status\": \"dual-source-editor-mvp\",\n    \"phase\": \"D\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"22.15.3\",\n    \"typescript\": \"7.0.2\"\n  },\n  \"bin\": {\n    \"proofscript-lsp\": \"./dist/src/bin.js\"\n  },\n  \"dependencies\": {\n    \"@proofscript/language-service\": \"file:../language-service\",\n    \"lean-ts-kernel\": \"file:../..\",\n    \"@proofscript/environment\": \"file:../environment\",\n    \"@proofscript/project\": \"file:../project\"\n  }\n}\n",
+    "packages/meta/package.json": "{\n  \"name\": \"@proofscript/meta\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Metavariables, unification, transparency, goals and instance synthesis.\",\n  \"proofscript\": {\n    \"status\": \"expr+level-mvar-context-mvp\",\n    \"phase\": \"B\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\"\n  }\n}\n",
+    "packages/module/package.json": "{\n  \"name\": \"@proofscript/module\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Portable deterministic ProofScript checked-module artifacts with integrity and kernel replay.\",\n  \"proofscript\": {\n    \"status\": \"checked-admission-artifact-v2+external-codec-1.1\",\n    \"phase\": \"B\",\n    \"trust\": \"untrusted-support\",\n    \"artifactFormat\": \"proofscript-module@1|2\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/module.test.js\"\n  },\n  \"dependencies\": {\n    \"lean-ts-kernel\": \"file:../..\",\n    \"@proofscript/checked-core\": \"file:../checked-core\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"22.15.3\",\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/pretty/package.json": "{\n  \"name\": \"@proofscript/pretty\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"ProofScript/Expr pretty printing, parenthesization and diagnostic rendering.\",\n  \"proofscript\": {\n    \"status\": \"foundation\",\n    \"phase\": \"B\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/project/package.json": "{\n  \"name\": \"@proofscript/project\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"npm-oriented ProofScript project graph, cache and build orchestration.\",\n  \"proofscript\": {\n    \"status\": \"runtime-package-subpaths+runtime-dependency-policy+dual-source-node-resolver+module-graph-mvp\",\n    \"phase\": \"D\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    },\n    \"./node\": {\n      \"types\": \"./dist/src/node.d.ts\",\n      \"import\": \"./dist/src/node.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\",\n    \"@types/node\": \"22.15.3\"\n  }\n}\n",
+    "packages/runtime/package.json": "{\n  \"name\": \"@proofscript/runtime\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"JavaScript runtime semantics and executable support primitives.\",\n  \"proofscript\": {\n    \"status\": \"foundation\",\n    \"phase\": \"C\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/syntax/package.json": "{\n  \"name\": \"@proofscript/syntax\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"ProofScript v0.7 source positions, trivia-preserving tokens, lexical errors, and feature identifiers.\",\n  \"proofscript\": {\n    \"status\": \"v061-bounded-rfl+source-ffi+ds5-import-headers+lean-ds3-registered-frontend+translation-target-dispatch+canonical-ps-printer+frontend-registry+exact-search+dependent-pi+bool-theorem-terms+nat-relation-theorem-terms+nat-theorem-terms+propositional-equality+ordered-tactics+dependent-type-surface\",\n    \"phase\": \"B\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\",\n    \"specVersion\": \"0.7.0\",\n    \"leanSemantics\": \"4.34.0\",\n    \"implementedFeatures\": [\n      \"L-CORE-LEAN\",\n      \"D-CALL\",\n      \"D-EXPLICIT-PARAMS\",\n      \"D-DECL-SEMI\",\n      \"D-CONST-ALIAS\",\n      \"D-FUNCTION-ALIAS\",\n      \"E-IF-BRACE\",\n      \"E-MATCH-BODY\",\n      \"E-STRUCT-BODY\",\n      \"E-INDUCTIVE-BODY\",\n      \"E-WHERE-BODY\",\n      \"E-CLASS-BODY\",\n      \"D-EXTERN-FFI\"\n    ]\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/syntax.test.js && node dist/test/v061-conformance.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n",
+    "packages/tactic/package.json": "{\n  \"name\": \"@proofscript/tactic\",\n  \"version\": \"0.0.0-dev\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"description\": \"Untrusted ordered proof-goal state and tactic transition protocols.\",\n  \"proofscript\": {\n    \"status\": \"ordered-multigoal-refine-integrated\",\n    \"phase\": \"B\",\n    \"trust\": \"untrusted-support\",\n    \"sourceLanguage\": \"typescript\"\n  },\n  \"exports\": {\n    \".\": {\n      \"types\": \"./dist/src/index.d.ts\",\n      \"import\": \"./dist/src/index.js\"\n    }\n  },\n  \"scripts\": {\n    \"build\": \"tsc -p tsconfig.json\",\n    \"test\": \"npm run build --silent && node dist/test/index.test.js\"\n  },\n  \"devDependencies\": {\n    \"typescript\": \"7.0.2\"\n  }\n}\n"
+  },
+  "manifestSourceBlobPins": [
+    {
+      "path": "package.json",
+      "blob": "9a65637ea04f32aec6d015e0856de05701cb99bf"
+    },
+    {
+      "path": "packages/backend-ts/package.json",
+      "blob": "65b6b65bcdf4435b8dd049655f43015beabaed45"
+    },
+    {
+      "path": "packages/browser/package.json",
+      "blob": "818056f2673a4f0e5e57fc27ff7df85d4b0b845b"
+    },
+    {
+      "path": "packages/checked-core/package.json",
+      "blob": "10a1c26663398eda4fc3baccb79ea6bea7f5937c"
+    },
+    {
+      "path": "packages/cli/package.json",
+      "blob": "acca300590a96603f00a329c24b642b2bad28cf0"
+    },
+    {
+      "path": "packages/compiler-ir/package.json",
+      "blob": "dfd18e21622371b1416f1b0454abb281347498d5"
+    },
+    {
+      "path": "packages/compiler/package.json",
+      "blob": "ab577cc9070318717f7303095c822a8f4e6c8f79"
+    },
+    {
+      "path": "packages/conformance/package.json",
+      "blob": "7510d203f741310c783b0574f00553c56b3f3d26"
+    },
+    {
+      "path": "packages/elab/package.json",
+      "blob": "5d442e3283a31efd76dc0a1ff0be4f54ac3d2b49"
+    },
+    {
+      "path": "packages/environment/package.json",
+      "blob": "594b05d64d165c012f6a7c4308a911e55b07607d"
+    },
+    {
+      "path": "packages/erasure/package.json",
+      "blob": "a9d125fd3f94dc3d7527e9852a65f1dc4db84f4a"
+    },
+    {
+      "path": "packages/language-service/package.json",
+      "blob": "4f67c5383e45e84f5c7ac9c7e15172bbc34c4db3"
+    },
+    {
+      "path": "packages/lean4export/package.json",
+      "blob": "15fc3b5499504fe255834caf9e0bbd52bffea579"
+    },
+    {
+      "path": "packages/lsp/package.json",
+      "blob": "4baa6d946c16ced0de2abfdb8a907ec0e8388fea"
+    },
+    {
+      "path": "packages/meta/package.json",
+      "blob": "3334fa16575a3a6c2017f56e58699adb367de12b"
+    },
+    {
+      "path": "packages/module/package.json",
+      "blob": "f569fe2278e8b9bf8f24147e4b4aea72d4fd449b"
+    },
+    {
+      "path": "packages/pretty/package.json",
+      "blob": "22cc5b248a4e94ff07a4de3ac7b7fb2041a10b9f"
+    },
+    {
+      "path": "packages/project/package.json",
+      "blob": "2dd2c72ad2d832ddb7cf90c286be91a205cc978e"
+    },
+    {
+      "path": "packages/runtime/package.json",
+      "blob": "10bd252fa63f13891eb1fefcfa3234695c81a3c0"
+    },
+    {
+      "path": "packages/syntax/package.json",
+      "blob": "51f7b67539032b095ea7f7779ef8d0a8f5513877"
+    },
+    {
+      "path": "packages/tactic/package.json",
+      "blob": "63e1dbf3b075185ba6339913170544dfe8d8cb73"
+    }
+  ],
+  "sourceInheritance": {
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/compare/5d3cbc82cb8759b909d1a957d6a22d542509d8c5...9d150afbec1feda8c97058aa56aa5ab92347d96d",
+    "html_url": "https://github.com/dwijayuda/pskernel/compare/5d3cbc82cb8759b909d1a957d6a22d542509d8c5...9d150afbec1feda8c97058aa56aa5ab92347d96d",
+    "permalink_url": "https://github.com/dwijayuda/pskernel/compare/dwijayuda:5d3cbc8...dwijayuda:9d150af",
+    "diff_url": "https://github.com/dwijayuda/pskernel/compare/5d3cbc82cb8759b909d1a957d6a22d542509d8c5...9d150afbec1feda8c97058aa56aa5ab92347d96d.diff",
+    "patch_url": "https://github.com/dwijayuda/pskernel/compare/5d3cbc82cb8759b909d1a957d6a22d542509d8c5...9d150afbec1feda8c97058aa56aa5ab92347d96d.patch",
+    "base_commit": {
+      "sha": "5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+      "node_id": "C_kwDOUlmxxdoAKDVkM2NiYzgyY2I4NzU5YjkwOWQxYTk1N2Q2YTIyZDU0MjUwOWQ4YzU",
+      "commit": {
+        "author": {
+          "name": "Dwija Yuda",
+          "email": "dwijayuda@gmail.com",
+          "date": "2026-10-09T15:16:32Z"
+        },
+        "committer": {
+          "name": "Dwija Yuda",
+          "email": "dwijayuda@gmail.com",
+          "date": "2026-10-09T15:16:32Z"
+        },
+        "message": "Correct the Lean exporter subprocess type for its existing ignored stdin [root-ts7-qualify]\n\nDeclare the actual ChildProcessByStdio<null, Readable, Readable> result of stdio ['ignore', 'pipe', 'pipe']. Its three consumers use the existing piped stdout/stderr and process events; no executable statement, provider behavior, cast, or compiler option changes.\n\nRoot run 37950075083 passed clean TS7 installation, the root build, complete ordered package tests including all 11 adapter obligations, and the conformance package build. The newly included lean4export build exposed this previously inconsistent declaration.",
+        "tree": {
+          "sha": "11dcc66a83aa3bdb390ec3f4de96c4dc10a1f553",
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees/11dcc66a83aa3bdb390ec3f4de96c4dc10a1f553"
+        },
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+      "html_url": "https://github.com/dwijayuda/pskernel/commit/5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5/comments",
+      "author": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab",
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/commits/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab",
+          "html_url": "https://github.com/dwijayuda/pskernel/commit/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab"
+        }
+      ]
+    },
+    "merge_base_commit": {
+      "sha": "5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+      "node_id": "C_kwDOUlmxxdoAKDVkM2NiYzgyY2I4NzU5YjkwOWQxYTk1N2Q2YTIyZDU0MjUwOWQ4YzU",
+      "commit": {
+        "author": {
+          "name": "Dwija Yuda",
+          "email": "dwijayuda@gmail.com",
+          "date": "2026-10-09T15:16:32Z"
+        },
+        "committer": {
+          "name": "Dwija Yuda",
+          "email": "dwijayuda@gmail.com",
+          "date": "2026-10-09T15:16:32Z"
+        },
+        "message": "Correct the Lean exporter subprocess type for its existing ignored stdin [root-ts7-qualify]\n\nDeclare the actual ChildProcessByStdio<null, Readable, Readable> result of stdio ['ignore', 'pipe', 'pipe']. Its three consumers use the existing piped stdout/stderr and process events; no executable statement, provider behavior, cast, or compiler option changes.\n\nRoot run 37950075083 passed clean TS7 installation, the root build, complete ordered package tests including all 11 adapter obligations, and the conformance package build. The newly included lean4export build exposed this previously inconsistent declaration.",
+        "tree": {
+          "sha": "11dcc66a83aa3bdb390ec3f4de96c4dc10a1f553",
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees/11dcc66a83aa3bdb390ec3f4de96c4dc10a1f553"
+        },
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+        "comment_count": 0,
+        "verification": {
+          "verified": false,
+          "reason": "unsigned",
+          "signature": null,
+          "payload": null,
+          "verified_at": null
+        }
+      },
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+      "html_url": "https://github.com/dwijayuda/pskernel/commit/5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5/comments",
+      "author": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab",
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/commits/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab",
+          "html_url": "https://github.com/dwijayuda/pskernel/commit/3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab"
+        }
+      ]
+    },
+    "status": "ahead",
+    "ahead_by": 1,
+    "behind_by": 0,
+    "total_commits": 1,
+    "commits": [
+      {
+        "sha": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "node_id": "C_kwDOUlmxxdoAKDlkMTUwYWZiZWMxZmVkYThjOTcwNThhYTU2YWE1YWI5MjM0N2Q5NmQ",
+        "commit": {
+          "author": {
+            "name": "Dwija Yuda",
+            "email": "dwijayuda@gmail.com",
+            "date": "2026-10-09T15:27:15Z"
+          },
+          "committer": {
+            "name": "Dwija Yuda",
+            "email": "dwijayuda@gmail.com",
+            "date": "2026-10-09T15:27:15Z"
+          },
+          "message": "Reconcile compiler source inventory and enforce exact package language metadata [root-ts7-qualify]\n\nPreserve the compiler manifest's actual paired TypeScript/Lean/ProofScript bootstrap source inventory in the package map. Name the active TypeScript 7.0.2 CLI in the host pipeline. Require exact nonempty source-language agreement for every outer package while retaining all graph, status, source-shape, editor and architecture checks.\n\nRun 37950522687 passed all builds, package tests, all 11 TS7 adapter obligations and package integration before exposing this existing metadata mismatch. A complete static review of the remaining map/architecture rules, all 178 scoped TypeScript files and 10 editor inputs found no further violations. No native bootstrap, provider or kernel behavior is changed.",
+          "tree": {
+            "sha": "c97468df9855bb7379b49e0771ed5e373e39c8b2",
+            "url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees/c97468df9855bb7379b49e0771ed5e373e39c8b2"
+          },
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits/9d150afbec1feda8c97058aa56aa5ab92347d96d",
+          "comment_count": 0,
+          "verification": {
+            "verified": false,
+            "reason": "unsigned",
+            "signature": null,
+            "payload": null,
+            "verified_at": null
+          }
+        },
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/commits/9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "html_url": "https://github.com/dwijayuda/pskernel/commit/9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/commits/9d150afbec1feda8c97058aa56aa5ab92347d96d/comments",
+        "author": {
+          "login": "dwijayuda",
+          "id": 193330113,
+          "node_id": "U_kgDOC4X7wQ",
+          "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/dwijayuda",
+          "html_url": "https://github.com/dwijayuda",
+          "followers_url": "https://api.github.com/users/dwijayuda/followers",
+          "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+          "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+          "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+          "repos_url": "https://api.github.com/users/dwijayuda/repos",
+          "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "committer": {
+          "login": "dwijayuda",
+          "id": 193330113,
+          "node_id": "U_kgDOC4X7wQ",
+          "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/dwijayuda",
+          "html_url": "https://github.com/dwijayuda",
+          "followers_url": "https://api.github.com/users/dwijayuda/followers",
+          "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+          "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+          "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+          "repos_url": "https://api.github.com/users/dwijayuda/repos",
+          "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "parents": [
+          {
+            "sha": "5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+            "url": "https://api.github.com/repos/dwijayuda/pskernel/commits/5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+            "html_url": "https://github.com/dwijayuda/pskernel/commit/5d3cbc82cb8759b909d1a957d6a22d542509d8c5"
+          }
+        ]
+      }
+    ],
+    "files": [
+      {
+        "sha": "1c541e688f7f69c5bc08d79b2754f20d28cf0487",
+        "filename": "packages/package-map.json",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2,
+        "changes": 4,
+        "blob_url": "https://github.com/dwijayuda/pskernel/blob/9d150afbec1feda8c97058aa56aa5ab92347d96d/packages%2Fpackage-map.json",
+        "raw_url": "https://github.com/dwijayuda/pskernel/raw/9d150afbec1feda8c97058aa56aa5ab92347d96d/packages%2Fpackage-map.json",
+        "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/packages%2Fpackage-map.json?ref=9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "patch": "@@ -544,15 +544,15 @@\n         \"backend-ts\",\n         \"kernel\"\n       ],\n-      \"sourceLanguage\": \"typescript\",\n+      \"sourceLanguage\": \"typescript+lean+proofscript-bootstrap\",\n       \"notes\": [\n         \"Canonical verified compilation now also carries globally synthesized class dictionaries as ordinary pskernel-checked definition arguments; no compiler-specific typeclass representation is introduced.\",\n         \"Verified compilation now inherits acyclic local where helpers through ordinary checked-core let/lambda erasure; no compiler-specific where representation was added.\",\n         \"Canonical verified compilation now covers parameterized pskernel structures, record construction, and projection with TypeScript generic API preservation.\",\n         \"A source-level composition gate asserts nested let -> lambda(if) -> ADT match in verified IR and local higher-order calls from both match branches, preventing feature support from remaining isolated happy paths.\",\n         \"Canonical integration now covers higher-order generic structural recursion: map over a pskernel-admitted recursive generic list preserves TypeScript generics/function types while compiling recursor IHs to ordinary JavaScript recursion.\",\n         \"Compiler orchestration starts at CheckedCoreModule; it has no syntax, parser, language-checker, or elaborator dependency.\",\n-        \"The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript Compiler API -> JavaScript/.d.ts/source map.\",\n+        \"The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript 7.0.2 CLI -> JavaScript/.d.ts/source map.\",\n         \"The compiler is untrusted with respect to theorem validity; pskernel admission has already occurred before this package runs.\",\n         \"The verified compiler now covers construction and elimination of non-recursive unindexed generic ADTs through kernel-admitted constructors/recursors.\",\n         \"The verified compiler now carries direct recursive ADTs and primitive structurally recursive functions—with invariant runtime parameters—from pskernel recursors to ordinary TypeScript/JavaScript recursion.\","
+      },
+      {
+        "sha": "b34fdc703d57f540d3b9487c349e82fffdbf900f",
+        "filename": "scripts/package-map-check.mjs",
+        "status": "modified",
+        "additions": 3,
+        "deletions": 2,
+        "changes": 5,
+        "blob_url": "https://github.com/dwijayuda/pskernel/blob/9d150afbec1feda8c97058aa56aa5ab92347d96d/scripts%2Fpackage-map-check.mjs",
+        "raw_url": "https://github.com/dwijayuda/pskernel/raw/9d150afbec1feda8c97058aa56aa5ab92347d96d/scripts%2Fpackage-map-check.mjs",
+        "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/scripts%2Fpackage-map-check.mjs?ref=9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "patch": "@@ -43,8 +43,9 @@ for(const pkg of map.packages){\n   const manifest=JSON.parse(readFileSync(manifestPath,'utf8'));\n   if(manifest.name!==pkg.packageName)throw new Error(`package-map: manifest name drift for ${pkg.name}`);\n   if(manifest.proofscript?.status!==pkg.status)throw new Error(`package-map: status drift for ${pkg.name}`);\n-  if(pkg.sourceLanguage==='typescript'&&manifest.proofscript?.sourceLanguage!=='typescript'){\n-    throw new Error(`package-map: TypeScript source policy missing in manifest for ${pkg.name}`);\n+  if(typeof pkg.sourceLanguage!=='string'||pkg.sourceLanguage.length===0||\n+    manifest.proofscript?.sourceLanguage!==pkg.sourceLanguage){\n+    throw new Error(`package-map: source language drift for ${pkg.name}`);\n   }\n }\n "
+      }
+    ]
+  },
+  "sourceInheritanceConclusion": "The sole descendant commit changes only packages/package-map.json and scripts/package-map-check.mjs; all21 exact manifest source bytes are unchanged.",
+  "evidenceReaderBlob": "fe3478ead5638f8647e67a5ef2a2f2de4e2eb896",
+  "evidenceReaderEntry": "authenticateRootTypeScript7Log",
+  "primaryLogBlob": "f59f0590c714205f93826c9512c1c0c438a41418",
+  "primaryLogSha256": "5836caa0146f2002bec6954ce285ab7789e7ac1758ede4da80248448cdc79e86",
+  "primaryLogUtf8Bytes": 84888
+}

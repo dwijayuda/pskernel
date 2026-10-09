@@ -1,0 +1,608 @@
+{
+  "schemaVersion": 1,
+  "kind": "completed-F-document-input-and-guarded-extra-operations",
+  "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+  "sourceBaseRef": "8d922c3f47f59a8d7285bfdf998791f042b483b9",
+  "templateBlob": "947971df08c812200f9f71138d6ce4a7c4741a0e",
+  "instantiatorBlob": "697e9a1f4e635c446a237b1bb268955a003a04da",
+  "ts7PostBlob": "9b719316fd4297bab7e73cfd8b1bdd7bf6999cd3",
+  "prosePassBlob": "9aa835eaac9e6dc69ae8227e57503b2637432d52",
+  "parameters": {
+    "fQualifyingSourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "fRunId": "37947341800",
+    "fCompilerJobId": "113876931430",
+    "fProviderJobId": "113896228512",
+    "fModuleCount": 61,
+    "fSourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+    "fCompilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+    "fQualificationDocTarget": "worker-migration-qualification.json",
+    "fQualificationReceiptSha256": "a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3",
+    "fProviderDocTarget": "worker-migration-provider.json",
+    "fProviderReceiptSha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913"
+  },
+  "evidence": {
+    "compilerQualification": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "compilerJobId": "113876931430",
+      "passed": true,
+      "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+      "moduleCount": 61,
+      "sourceBytes": 1112320,
+      "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "8b060f40c279f81abb9f81ab5903457e295e431fc67c945ccd312663cd76e3c3",
+        "normalizedCanonicalAdmissionsSha256": "9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5",
+        "typescriptSha256": "0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a",
+        "javascriptSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15"
+      },
+      "recipeSha256": "90a5fc6131e151a7ed24c8a1e5f2d424c8b14e7eda813b34b5b301f37623a0b1",
+      "qualificationReference": "worker-migration-qualification.json",
+      "retainedQualificationSha256": "a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3",
+      "serialization": "Raw compact FIXED_POINT JSON from the complete decoded job log followed by LF; this is not an unavailable original pretty artifact receipt digest.",
+      "fullLogReference": "evidence-logs/worker-migration-compiler.log",
+      "fullLogSha256": "0029eccaf74c06b1fef9c3f06987cb0dc82003c649912bb1959bf3f13068e931",
+      "selectedRPreserved": true,
+      "strictSh1Qualified": false
+    },
+    "providerAcceptance": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "providerJobId": "113896228512",
+      "accepted": true,
+      "receiptReference": "worker-migration-provider.json",
+      "receiptSha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+      "receiptBytes": 3532,
+      "serialization": "Exact original UTF-8 file contents read back by the provider runner and authenticated from its complete log envelope.",
+      "selectedProvider": {
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+        "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+        "metadata": {
+          "protocol": "pskernel-core/1",
+          "provider": "pskernel-core-native",
+          "leanVersion": "4.34.0",
+          "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "profile": "lean4.34-core",
+          "status": "ready"
+        },
+        "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+        "node": "v22.23.3",
+        "command": [
+          "psc_kernel_core_provider",
+          "--check"
+        ],
+        "resourcePolicy": "Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.",
+        "timeoutMs": 60000
+      },
+      "unchangedProviderBinary": true,
+      "distinctAdmissionStreams": 4,
+      "artifactRoles": 8,
+      "streams": [
+        {
+          "canonicalAdmissionsSha256": "9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5",
+          "artifacts": [
+            "C2 compiler source",
+            "C3 compiler source"
+          ],
+          "durationMs": 1555.7454980000002,
+          "result": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": true
+          }
+        },
+        {
+          "canonicalAdmissionsSha256": "372371596fba560eca5ba52d29e20d91780d5c3321e4353a7a4c1a009167e10f",
+          "artifacts": [
+            "C2 raw lean capability source",
+            "C3 raw lean capability source"
+          ],
+          "durationMs": 14.807432000000063,
+          "result": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": true
+          }
+        },
+        {
+          "canonicalAdmissionsSha256": "bb84332515024d4145b7cedb636fb6095d3cbe20a4fc3043dc37905f7574a900",
+          "artifacts": [
+            "C2 raw ps capability source",
+            "C3 raw ps capability source"
+          ],
+          "durationMs": 16.380443000000014,
+          "result": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": true
+          }
+        },
+        {
+          "canonicalAdmissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+          "artifacts": [
+            "C2 raw recursive-generic fixture source",
+            "C3 raw recursive-generic fixture source"
+          ],
+          "durationMs": 7.705719000000045,
+          "result": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": true
+          }
+        }
+      ],
+      "emissionWasGatedByThisCheck": false
+    },
+    "behaviorCorrespondence": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "passed": true,
+      "casesPerCompiler": 87,
+      "directCases": 44,
+      "wrapperCases": 7,
+      "stateCases": 36,
+      "stagesCompared": [
+        "R",
+        "N1",
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "completeObservationArraysCompared": true,
+      "observationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+      "pairedSource": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "pairedCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "afterSourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "afterCompilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+      "originalCorrespondenceReceiptSha256": "4039fa48ddcb357588292e49782b516518793a4282527a4f7ef3075823f17224",
+      "retainedFullReports": "worker-migration-evidence.json",
+      "fixtureBoundary": "Owning-compiler factories or copied branded records for IR values; PsErasureNameState, PsTsSymbolMapState and PsErasureCurrentDefinition are explicit non-IR structural host fixtures."
+    },
+    "publicTypeAndIrAbi": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "passed": true,
+      "workers": 12,
+      "builds": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "completePublicCoreAlphaEquality": true,
+      "orderedRuntimeTypesAndArities": true,
+      "arities": [
+        4,
+        4,
+        3,
+        4,
+        2,
+        2,
+        3,
+        2,
+        4,
+        5,
+        5,
+        3
+      ],
+      "observationSha256": "b23c28c75aa3f7955ecbe54fa4580b4278f62c2ed77f1e7ff2a2dbbea6999b49",
+      "referenceProbeTypeSha256": "a65845d1f9f30b55f1b8b3599c264ae39e4c35fe7c84367575ea6b504644ab82",
+      "referenceProbe": {
+        "abstractTypeDeclarations": 19,
+        "signatureTypeAnnotations": 12,
+        "typedGenericPartialWrappers": 12,
+        "runtimeExecuted": false,
+        "erasedOrEmitted": false,
+        "currentSourceCoreOrIrCompared": false
+      },
+      "existingPreparedObjectReadOnly": true,
+      "existingIrObjectReadOnly": true,
+      "fullBaselineClosurePreparedAgain": false,
+      "runtimeParameterDisplayNamesCompared": false,
+      "completeObservationsReference": "worker-migration-evidence.json"
+    },
+    "hostProofScriptPreparation": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "passed": true,
+      "focusedHostCases": 3,
+      "focusedCases": [
+        {
+          "name": "reusable PS preparation rejects old and mismatched grammars before compiler operations",
+          "subtestLogLine": 1970,
+          "resultLogLine": 1971,
+          "result": "2026-10-09T14:52:42.5008069Z ok 19 - reusable PS preparation rejects old and mismatched grammars before compiler operations"
+        },
+        {
+          "name": "reusable current PS preparation binds grammar in cold and warm receipts",
+          "subtestLogLine": 1976,
+          "resultLogLine": 1977,
+          "result": "2026-10-09T14:52:42.5010018Z ok 20 - reusable current PS preparation binds grammar in cold and warm receipts"
+        },
+        {
+          "name": "reusable historical Lean preparation retains its receipt and warm state after PS refusal",
+          "subtestLogLine": 1982,
+          "resultLogLine": 1983,
+          "result": "2026-10-09T14:52:42.5011971Z ok 21 - reusable historical Lean preparation retains its receipt and warm state after PS refusal"
+        }
+      ],
+      "sourceSnapshotAndSessionTests": {
+        "total": 27,
+        "passed": 27,
+        "failed": 0,
+        "skipped": 0
+      },
+      "actualGeneratedPreparationSessions": {
+        "count": 2,
+        "passed": true,
+        "markers": [
+          {
+            "logLine": 2179,
+            "exactLoggedLine": "2026-10-09T14:56:41.1139959Z PSC0_SH1_SESSION_CONFORMANCE: PASS (recorded aggregate oracle; warm, prefix, body edit, failure recovery, frozen parse errors, source kind, fresh instance)"
+          },
+          {
+            "logLine": 2195,
+            "exactLoggedLine": "2026-10-09T15:09:52.2123429Z PSC0_SH1_SESSION_CONFORMANCE: PASS (recorded aggregate oracle; warm, prefix, body edit, failure recovery, frozen parse errors, source kind, fresh instance)"
+          }
+        ]
+      },
+      "grammar": {
+        "edition": "ps-0.9-r3",
+        "mode": "new-only",
+        "support": "bounded-selfhost-subset",
+        "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+        "fullStandardConformance": false,
+        "fullPscvConformance": false
+      },
+      "grammarCheckedBeforeCacheOrCompiler": true,
+      "proofScriptGrammarBoundInClosureAndReceipt": true,
+      "leanReceiptAndWarmStatePreserved": true,
+      "hostDoublesNotSyntaxProof": true
+    },
+    "providerReceiptLogging": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "passed": true,
+      "providerJobId": "113896228512",
+      "path": "kernel-admissions.json",
+      "retainedReference": "worker-migration-provider.json",
+      "sha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+      "bytes": 3532,
+      "exactUtf8FileBytesAuthenticated": true,
+      "compactObjectEqualsFileObject": true,
+      "acceptanceSemanticsUnchanged": true,
+      "fullLogReference": "evidence-logs/worker-migration-provider.log",
+      "fullLogSha256": "99e3e9d913d9322f042d69f0981358bee36fa478849ee249062f6f59c07e80fd"
+    },
+    "qualificationReceipts": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "compiler": {
+        "reference": "worker-migration-qualification.json",
+        "sha256": "a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3",
+        "serialization": "Compact logged JSON plus LF."
+      },
+      "provider": {
+        "reference": "worker-migration-provider.json",
+        "sha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+        "bytes": 3532,
+        "serialization": "Actual original file bytes from the read-back envelope."
+      },
+      "completeEvidence": "worker-migration-evidence.json",
+      "completeLogs": [
+        "evidence-logs/worker-migration-compiler.log",
+        "evidence-logs/worker-migration-provider.log"
+      ],
+      "selectedRSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "selectedRIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+      "seedSelectionChanged": false
+    }
+  },
+  "qualificationEvidence": {
+    "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "runId": "37947341800",
+    "compilerJobId": "113876931430",
+    "providerJobId": "113896228512",
+    "compilerQualified": true,
+    "providerAccepted": true,
+    "allRequiredGatesPassed": true
+  },
+  "verification": {
+    "exactTemplateBlobVerified": true,
+    "exactOriginalDocumentBlobsVerified": 10,
+    "exactOperationGuardsPassed": 108,
+    "phaseCounts": {
+      "appliedSourceOperations": 16,
+      "qualificationOperations": 92
+    },
+    "requiredEvidenceObjects": [
+      "behaviorCorrespondence",
+      "compilerQualification",
+      "hostProofScriptPreparation",
+      "providerAcceptance",
+      "providerReceiptLogging",
+      "publicTypeAndIrAbi",
+      "qualificationReceipts"
+    ],
+    "selectedRPreserved": true,
+    "historicalInventoryPreserved": true,
+    "strictAndBroaderClaimsUnchanged": true,
+    "executionMeaning": "Data, identity, and preservation guards only. External job success is supplied by the caller's actual retained evidence; this utility does not execute or independently authenticate compiler/provider jobs.",
+    "sideEffects": "none; no files, refs, workflows, or repository executables touched"
+  },
+  "postOperations": [
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "pointer": "/target/historicalRecoveryTypeScriptMeaning",
+      "purpose": "preserve the historical scalar while retiring its current execution meaning"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "pointer": "/target/currentRecovery",
+      "purpose": "make the current recovery profile explicit"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "pointer": "/currentGenerationContract/toolchainMeaning",
+      "purpose": "remove the obsolete dual current/recovery CLI contract"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "pointer": "/runtimeIrTypingCheckpoint/checkpointMeaning",
+      "purpose": "scope the preserved TS5/TS7 checkpoint observations"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "pointer": "/runtimeIrTypingCheckpoint/qualifications/currentTs7/attemptHistory",
+      "purpose": "retain the old attempt-history link in its archived document"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "pointer": "/sourceGrammarCheckpoint/historicalRecovery",
+      "purpose": "retire future S0/A execution without rewriting the old identities"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "pointer": "/sourceGrammarCheckpoint/coldRecoveryMeaning",
+      "purpose": "separate the old selection prerequisite from current recovery"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "pointer": "/sourceGrammarCheckpoint/currentNativeRecovery",
+      "purpose": "record the already proven independent native TS7 cold result"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/constraints/historicalS0ATypeScriptMeaning",
+      "purpose": "scope the historical version constraint"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/constraints/currentRecovery",
+      "purpose": "state the current recovery dependency"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/v1MustRemainExact",
+      "purpose": "preserve the original identity contract as history"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/sequence/2",
+      "purpose": "remove the promise to keep current TS5 replay dispatch"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/sequence/3",
+      "purpose": "replace the obsolete parent reconstruction command sequence"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/sequence/4",
+      "purpose": "preserve old evidence and identify the proven current route"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/sequence/6",
+      "purpose": "keep the finite migration scope separate from recovery history"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/noRuntimeClaim",
+      "purpose": "replace the now-inactive A runtime route explanation"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/baselinePathMeaning",
+      "purpose": "disambiguate historical field names from active routing"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/currentEvidence/originalColdReceiptMeaning",
+      "purpose": "label the existing evidence as the original prerequisite"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/migration-backlog.json",
+      "pointer": "/seedSuccessorPlan/currentEvidence/nativeTypeScript7Recovery",
+      "purpose": "link the new exact cold proof without replacing original R selection evidence"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/MIGRATION_BACKLOG.md",
+      "pointer": null,
+      "purpose": "scope-recovery-sequence"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/MIGRATION_BACKLOG.md",
+      "pointer": null,
+      "purpose": "retire-old-current-replay"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/MIGRATION_BACKLOG.md",
+      "pointer": null,
+      "purpose": "state-current-native-route"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/MIGRATION_BACKLOG.md",
+      "pointer": null,
+      "purpose": "retain-both-cold-evidence-records"
+    },
+    {
+      "phase": "TS7-post",
+      "path": "psc0/docs/selfhost-language/MIGRATION_BACKLOG.md",
+      "pointer": null,
+      "purpose": "keep-finite-authoring-scope"
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/README.md",
+      "id": "T1",
+      "purpose": "State the current PSC0 emission and recovery toolchain."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/README.md",
+      "id": "T2",
+      "purpose": "Retire the obsolete root-workspace and historical replay instructions."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/CURRENT.md",
+      "id": "T3",
+      "purpose": "Make the current version list and recovery requirement unambiguous."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/IMPLEMENTATION.md",
+      "id": "T4",
+      "purpose": "Distinguish historical M6 comparisons from current TS7-only execution."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/IMPLEMENTATION.md",
+      "id": "T5",
+      "purpose": "Replace the old two-profile CI and historical recovery command policy."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/IMPLEMENTATION.md",
+      "id": "A1",
+      "purpose": "Correct the obsolete axiom-probe description without changing ABI scope."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/MIGRATION.md",
+      "id": "T6",
+      "purpose": "Keep original recovery recipes as history while naming the current native route."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/MIGRATION.md",
+      "id": "T7",
+      "purpose": "Move the previous two-toolchain comparison to its archived checkpoint."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/MIGRATION.md",
+      "id": "T8",
+      "purpose": "Replace the future dual-profile experiment with the proven current recovery policy."
+    },
+    {
+      "phase": "current-prose",
+      "path": "psc0/docs/selfhost-language/PS_GRAMMAR_ADOPTION.md",
+      "id": "T9",
+      "purpose": "State TS7-only current compilation and recovery without altering R selection history."
+    }
+  ],
+  "extraOperations": [
+    {
+      "path": "psc0/docs/selfhost-language/IMPLEMENTATION.md",
+      "oldText": "### Recovery without relying on mutable dist",
+      "newText": "### Historical recovery without relying on mutable dist",
+      "purpose": "Mark the preserved S0/A/Q operational section as historical.",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "path": "psc0/docs/selfhost-language/SPEC.md",
+      "oldText": "This evidence is separate from strict SH/1 activation and from F qualification.",
+      "newText": "R2 evidence is separate from strict SH/1 activation and from the independently recorded F qualification.",
+      "purpose": "Disambiguate the historical R2 evidence antecedent.",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "path": "psc0/docs/selfhost-language/CURRENT.md",
+      "oldText": "Immutable S0/A\nrecovery uses its old source revisions and producer identities. It does not add a\nlegacy mode to current PS.",
+      "newText": "Historical S0/A recovery evidence retains its original source revisions and\nproducer identities. Current recovery uses the TypeScript 7-only native route;\nthose archived records do not add a legacy mode to current PS.",
+      "purpose": "Separate archived recovery evidence from the active native route.",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "path": "psc0/docs/selfhost-language/CURRENT.md",
+      "oldText": "| Evidence needed before promotion | Current entry |",
+      "newText": "| Qualified source and selected-seed evidence | Current entry |",
+      "purpose": "Avoid implying that completed F qualification automatically selects F.",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "path": "psc0/docs/selfhost-language/CURRENT.md",
+      "oldText": "| F independent provider | **Passed** — [receipt](worker-migration-provider.json), SHA-256 `5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913` |",
+      "newText": "| F independent provider | **Passed** — [receipt](worker-migration-provider.json), SHA-256 `5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913` |\n| Current R recovery with TypeScript 7 only | **Passed** — [exact native receipt](typescript7-native-recovery.json), [independent cold run 37947341899](https://github.com/dwijayuda/pskernel/actions/runs/37947341899); all four selected R products matched |\n| Root TypeScript 7 host and packages | **Passed** — [exact root receipt](root-typescript7-qualification.json), [run 37951869293](https://github.com/dwijayuda/pskernel/actions/runs/37951869293); all seven command phases and eleven adapter obligations |\n\n[F provenance](worker-migration-evidence.json) distinguishes the retained compact\ncompiler log JSON from original provider file bytes and links the complete records.",
+      "purpose": "Expose the two independently proven TS7 scopes beside the F evidence.",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "path": "psc0/docs/selfhost-language/CURRENT.md",
+      "oldText": "selected-seed sequence. Promote once the exact source passes C1/C2/C3, required\ncurrent product equality, original-IR checking, bounded runtime/grammar gates and\nseparate exact-stream provider decisions.",
+      "newText": "selected-seed sequence. Integrate a source change once its exact source passes\nC1/C2/C3, required current product equality, original-IR checking, bounded\nruntime/grammar gates and separate exact-stream provider decisions. Selecting a\nnew authoring seed also requires its separate recovery proof and explicit\nselection; F remains a qualified source migration while R stays selected.",
+      "purpose": "Distinguish source integration from unrequested F seed selection.",
+      "expectedOccurrenceCount": 1
+    }
+  ],
+  "sourceWorkerMappingAuditBlob": "48fdd86397ba8fff5d5ba48a3bcf75d40c5b509b",
+  "typescriptGuidePreparedBaseBlob": "17aa59ef4f391d135517b6c2bff612999cd700a5",
+  "finalTypescriptGuideStatusReplacement": {
+    "oldText": "**Qualification status:** TypeScript 7-only native selected-R recovery and the\nseparate root workspace qualification have passed, with exact receipts retained\nbelow. The final twelve-worker F compiler/provider qualification is the remaining\nactive gate at this documentation preparation checkpoint. No new compiler or\nrecovery run is required for the already proven scopes.",
+    "newText": "**Qualification status: passed.** The current twelve-worker F compiler migration\npassed C1/C2/C3, all four fixed-point products, the twelve Core/IR ABI checks,\n87-case behavior correspondence and independent provider acceptance in\n[run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800).\nTypeScript 7-only native selected-R recovery and the separate root workspace\nqualification also passed, with exact evidence retained below. R remains the\nselected authoring compiler; this source migration does not select F."
+  }
+}

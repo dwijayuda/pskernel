@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "evidence": "actual-completed-F-evidence-review-inputs",
+  "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+  "compilerJobId": 113876931430,
+  "providerJobId": 113896228512,
+  "runId": 37947341800,
+  "run": {
+    "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/run.api.json",
+    "sha256": "f1aeb453745eab734c1df521cfb13d1099f73f4eabd5f617240d2be131c0d5f4"
+  },
+  "jobs": {
+    "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/jobs.api.json",
+    "sha256": "eee48c097877e2b41b0b9db4575be04c247cd1e78988e7a82c11167a70a23c62"
+  },
+  "artifacts": {
+    "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/artifacts.api.json",
+    "sha256": "d1502ffe2c0f2ccb2fee95c95fd3fb70d0b4e038cfb751bf41fae6ad5f6cdb62"
+  },
+  "compilerLog": {
+    "path": "psc0/docs/selfhost-language/evidence-logs/worker-migration-compiler.log",
+    "sha256": "0029eccaf74c06b1fef9c3f06987cb0dc82003c649912bb1959bf3f13068e931"
+  },
+  "providerLog": {
+    "path": "psc0/docs/selfhost-language/evidence-logs/worker-migration-provider.log",
+    "sha256": "99e3e9d913d9322f042d69f0981358bee36fa478849ee249062f6f59c07e80fd"
+  },
+  "selected": {
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225"
+  },
+  "grammar": {
+    "edition": "ps-0.9-r3",
+    "mode": "new-only",
+    "support": "bounded-selfhost-subset",
+    "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "fullStandardConformance": false,
+    "fullPscvConformance": false
+  },
+  "reviewFactory": {
+    "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/evidence-review.factory.txt",
+    "blob": "490cc9d968bddd92da1ad67e39b3880a35349580",
+    "sha256": "f3ca1f6717ebe45f66735601f5f5731d59c78f69ead524b5cab274d88d38c487"
+  },
+  "sha256Factory": {
+    "path": "psc0/docs/selfhost-language/seed-evidence/fcd875c8f38db4b0524090bd10c7c2fd5024053d/F/sha256-utf8.factory.txt",
+    "blob": "e916f13aad289319c225fae91649e6315a3d8d78",
+    "sha256": "7bb18f96dfd4a5e711dbbbbe05618745007979345167d553b2914193c13ea07d"
+  },
+  "grammarClosureArtifact": null,
+  "parsedRepresentation": "Reconstruct with the retained toolkit's parseFWorkflowLog on each exact complete decoded log. Preserve all records and line metadata; no abbreviated observations are supplied.",
+  "procedure": [
+    "Read and independently authenticate all named GitHub primary input bytes and digests.",
+    "Obtain api by evaluating the retained pure-data factory; it has no imports, filesystem access or compiler execution.",
+    "Supply actual run/jobs objects, exact source and job IDs, parsed complete compiler log, selected R identity, grammar and a trusted synchronous UTF8 SHA256 callback to reviewFCompilerEvidence.",
+    "Supply actual run/jobs, exact provider job ID, parsed complete provider log and successful compilerReview to reviewFProviderEvidence.",
+    "Keep compiler qualification, post-emission provider acceptance, and the separate already proven TS7-native R recovery as separate evidence scopes."
+  ],
+  "observedResult": {
+    "compilerReviewPassed": true,
+    "providerReviewPassed": true,
+    "independentRootReviewPassed": true,
+    "sourceOrWorkflowMutationsByCollector": false,
+    "newQualificationRunsByCollector": false
+  }
+}

@@ -1,16 +1,21 @@
 # Finite practical self-host migration backlog
 
-## Current F implementation candidate
+Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
+
+<a id="current-f-implementation-candidate"></a>
+
+## Qualified F implementation
 
 The frozen source inventory below describes the audited 5e3 baseline. The F
 checkpoint implements its twelve eligible worker rewrites and three scoped typed
-alias removals as one candidate, with seven related source guards updated.
-F qualification is pending. R2 source
+alias removals as one qualified change, with seven related source guards updated.
+F at `fcd875c8f38db4b0524090bd10c7c2fd5024053d` is compiler-qualified and independently
+provider-accepted in [F run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800). R2 source
 `fe2560aba0f347b1caf8d000d371464642d44f23` passed compiler qualification and
 independent provider acceptance in [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635).
 Cold recovery is verified, and [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) explicitly selects R.
-F had not been applied at the original R2 evidence point. Its current candidate
-must use that authenticated R compiler and earn its own pending qualification.
+F had not been applied at the original R2 evidence point. It subsequently used
+that authenticated R compiler and earned its own qualification; R remains selected.
 
 The implementation reuses existing prepared declarations and exact IR to check
 all twelve complete public types and ordered runtime signatures. Its generated
@@ -20,7 +25,7 @@ there is no separate full qualification run per worker. The complete locator
 inventory and deferred groups remain historical audit data, outside this finite
 migration. Current `.ps` stays new-only `ps-0.9-r3`, with `.lean` authoritative.
 
-See [the current candidate ledger](proposal.json),
+See [the current implementation ledger](proposal.json),
 [the exact source fragments](worker-migration-candidate.json), and
 [the migration sequence](MIGRATION.md#current-f-checkpoint-implemented-candidate-qualification-pending).
 
@@ -30,7 +35,7 @@ The accompanying [migration-backlog.json](migration-backlog.json) records exact 
 
 ## Current grammar direction and scope
 
-The user requests the new uploaded **.ps grammar only** in the current implementation. R2 moved the parser, printer, raw fixtures and tooling together and earned separate compiler/provider qualification. Current PS has no legacy grammar mode. [IMPLEMENTATION.md](IMPLEMENTATION.md#r2-compiler-and-provider-evidence) records the compiler/provider evidence, verified cold recovery and explicit R selection. Immutable historical revisions remain recovery material. R2's implementation remains A-consumable `.lean`; F will use the selected R successor. This checkpoint does not claim general PSCV support or change the pinned Lean/provider version.
+The user requests the new uploaded **.ps grammar only** in the current implementation. R2 moved the parser, printer, raw fixtures and tooling together and earned separate compiler/provider qualification. Current PS has no legacy grammar mode. [IMPLEMENTATION.md](IMPLEMENTATION.md#r2-compiler-and-provider-evidence) records the compiler/provider evidence, verified cold recovery and explicit R selection. Immutable historical revisions remain recovery material. R2's implementation remains A-consumable `.lean`; qualified F used the selected R successor. This checkpoint does not claim general PSCV support or change the pinned Lean/provider version.
 
 The practical finish line consists of the coordinated grammar checkpoint, the parameter-projection repair, explicit recoverable successor-seed selection, the 12 workers below, the three alias removals and the final adoption evidence. Optional inference, nested patterns, general equations, new backends and converting the implementation itself to authoritative `.ps` source are outside that finish line. Full strict SH/1 has its own remaining runtime/semantic obligations described in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md).
 
@@ -226,7 +231,7 @@ In [CompilerIr/Check.lean](https://github.com/dwijayuda/pskernel/blob/5e3a991088
 | `psIrCheckRun` | 816 | `currentState : PsIrCheckState := state` |
 | `psIrCheckRun` | 825 | `currentState : PsIrCheckState := state` |
 
-Before R selection, these aliases remained in R2's A-consumable source. R is now qualified, cold-recovered and explicitly selected. The F candidate removes only these three aliases and retains its own pending source/runtime qualification. The cleanup keeps the root matches, resource accounting, diagnostic policy and runtime typing behavior. Successful compilation by a new candidate alone is not seed selection.
+Before R selection, these aliases remained in R2's A-consumable source. R is now qualified, cold-recovered and explicitly selected. Qualified F removed only these three aliases and has its own retained source/runtime evidence. The cleanup keeps the root matches, resource accounting, diagnostic policy and runtime typing behavior. Successful compilation by a new candidate alone is not seed selection.
 
 ## Recoverable TS7 successor seed
 
@@ -234,15 +239,15 @@ The historical [schema-1 validator](https://github.com/dwijayuda/pskernel/blob/5
 
 R2 implements the separate versioned successor contract. It binds the exact immutable parent A manifest, parent identity/compiler digest, new source revision/closure, all four converged product hashes, TS7 producer identity, Node/platform/architecture/Lean execution tuple, authoring capability descriptor and recovery recipe. Use an identity/cache namespace appropriate to that contract; changing a v1 checker to accept arbitrary TS versions would not preserve A's identity.
 
-The sequence below retains the recovery and promotion contract. R2's implementation, compiler/provider qualification, verified cold recovery and explicit selection are complete. Its selection is recorded by [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6); F source/runtime qualification remains pending.
+The sequence below records R's original qualification and selection history together with its now-proven TS7-only recovery route. R2's implementation, compiler/provider qualification, verified cold recovery and explicit selection are complete. Its selection is recorded by [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6); F has separately completed its source/runtime and provider qualification at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`.
 
 1. R2's implementation remains A-consumable `.lean`, including the three aliases. F's consumer source is a separate checkpoint after R selection.
 2. Qualify raw successor source R: **C1 = Q(R), C2 = C1(R), C3 = C2(R)**, where Q is the selected compiler from A. Newly generated compilers exercise current new-grammar `.ps` fixtures. Require four-product C2/C3 equality, same-IR typing, relevant behavior and separate exact-stream provider acceptance.
-3. R2 supplies versioned selection/identity/cache/artifact/recovery dispatch while preserving the old S0/A TS5 route exactly.
-4. The source recovery edge is **recover A under TS5 → execute exact Q on R → compile emitted TS with TS7 → run that first compiler on R → compare all four pinned successor products**. Historical TS replay stays TS5; new generation stays TS7. The existing per-child explicit launcher/PATH selection must be retained.
-5. The separate [cold-recovery receipt](grammar-migration-cold-recovery.json), SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`, records the source reconstruction and final pinned-product comparison required before selection. Retained artifacts and compiler qualification remain distinct evidence.
+3. R2's successor descriptor and embedded parent identity remain unchanged. The old S0/A TS5 recipes are retained as history; current tooling no longer executes their replay dispatch.
+4. Current selected-R cache-miss recovery authenticates [the separate native policy](../../selfhost-seed-recovery.json), builds pinned R with native Lean, emits from its checked original IR, compiles with TypeScript 7, obtains native admissions and all 61 canonical `.ps` modules, and compares all four pinned R products before retaining the seed. It executes no parent compiler or TypeScript 5 profile.
+5. The original pre-selection [cold-recovery receipt](grammar-migration-cold-recovery.json), SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`, remains historical evidence. The independent [TS7-native receipt](typescript7-native-recovery.json), SHA-256 `0d5606c25e634082da39d80ffa5974b3c390d2765ded71bcf1abaf442b7e3919`, passed [run 37947341899](https://github.com/dwijayuda/pskernel/actions/runs/37947341899) with all four R products matching and no seed/build cache or compiler artifact restored. The [reviewed evidence](typescript7-native-recovery-evidence.json) and [complete job log](evidence-logs/typescript7-native-recovery.log) retain that result separately from F qualification.
 6. [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) selects the exact qualified, cold-recovered manifest, SHA-256 `7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694`, with seed identity `47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225`. Selection enables this authoring capability; it does not activate strict SH/1.
-7. Apply the projection-dependent worker edits and alias cleanup. Current grammar stays new-only; immutable old revisions remain the reproducible parent chain.
+7. F's bounded source migration covers twelve ordinary-parameter workers and three typed projection-alias removals under selected R, with its own qualification evidence. Current grammar stays new-only. Old revisions remain historical evidence and do not create a current grammar or TypeScript 5 fallback.
 
 ## What is intentionally outside this finish line
 
@@ -262,11 +267,11 @@ Reasons differ:
 
 Review both families and all seven guard changes before running a candidate gate. Keep immutable before slices, compare their complete public types and bounded behavior under the selected generated compiler, and include partial application plus nonempty initial state. Reuse the existing iteration, let-shadowing, generic-erasure and IR checks where they already cover the relevant behavior.
 
-Use the native development gate before expensive generation. F1 and F2 have been reviewed together and form one coherent F source candidate, with separate family observations inside the 87-case report. Qualify that combined exact source once, using the existing prepared Core and IR for ABI observations. Split full qualification only for an intervening promotion or a concrete remaining risk. Do not run a full compiler fixed point after each helper.
+F1 and F2 were reviewed and qualified as one coherent exact source, with separate family observations inside the 87-case report and ABI observations from the existing prepared Core and IR. The chosen practical-v1 scope is complete. Use the bounded development route for ordinary edits; reserve further full qualification for a separately scoped promotion or concrete remaining risk.
 
 The target is authoring efficiency. Cleaner source does not itself prove faster generated code; inspect existing loopification/evaluation behavior and use recorded stage timings. Do not attribute all self-host time to TypeScript compilation.
 
-Practical v1 is complete once the coordinated grammar/projection capability checkpoint is qualified and recoverably selected, all twelve workers and the three aliases are migrated with their preserved contracts, replacement guards and family receipts pass, the final exact source has its four-product fixed point and separate provider acceptance, and current-source iteration still works. Stop there. Extra locator cleanup is a new scoped objective.
+Practical v1 is complete: R supplies the qualified recoverable selected grammar/projection capability, and F supplies the twelve migrated workers, three alias removals, passing guards and correspondence/ABI/iteration results, four-product fixed point and independent provider acceptance. The retained F receipts bind those results to `fcd875c8f38db4b0524090bd10c7c2fd5024053d`. The 226 deferred locators remain outside this scope. Extra locator cleanup requires a new scoped objective.
 
 ## Scoped projection caller audit
 

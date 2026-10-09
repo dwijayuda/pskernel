@@ -1,0 +1,435 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-typescript7-prior-failed-attempt-evidence",
+  "evidenceReaderBlob": "fe3478ead5638f8647e67a5ef2a2f2de4e2eb896",
+  "rootQualifierSourceUnchanged": true,
+  "attempts": [
+    {
+      "number": 1,
+      "sourceRef": "a02f03b97bb3385b66ad670dabf7f13d334fc79f",
+      "runId": 37949490366,
+      "jobId": 113884245962,
+      "lockGenerated": true,
+      "passed": false,
+      "qualifiedByThisReview": false,
+      "records": [
+        {
+          "relativePath": "qualification.log",
+          "blob": "e024d2405e77359b8ab16ef592124b6e1e44bd18",
+          "sha256": "7aec216ae8c07352d91c034c9c7263af6a3a8ab2e6bed464b3168f98c5a8e6cc",
+          "bytes": 77919,
+          "evidenceKind": "exact decoded primary GitHub job log"
+        },
+        {
+          "relativePath": "package-lock.json",
+          "blob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+          "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+          "bytes": 21592,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "installed-typescript-package.json",
+          "blob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+          "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+          "bytes": 3087,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "installed-profile.json",
+          "blob": "1f7d0ec7b84b25aae111de72821b6e76e7d51ee6",
+          "sha256": "78b015ca6df3fcd12d16023269c253f82632a2ffea3bd609693d5a54e5fdbdc7",
+          "bytes": 4643,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "qualification.json",
+          "blob": "f9d9651f016ff79f7c6c358415b47c7b9ce61aac",
+          "sha256": "819a0523eacb1b02c23fbeab288a71329948f8e6810e4c06eea3f0cd33a3b1f9",
+          "bytes": 2396,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "evidence-index.json",
+          "blob": "9020b7825b9e735e601973e3ad9dea2b4adb3431",
+          "sha256": "8becd1cbf52289487b3d1eb61afbbacad315493d7cc09f3cd7376c32aedde4c9",
+          "bytes": 820,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "run.json",
+          "blob": "44878bbd946cefc50f1d9370fd52e3f5b2394ea5",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "d89f12bbc5d1748e101271477e039c10f11c5ce07999ee5b994d236fa74003c8",
+          "bytes": 12492
+        },
+        {
+          "relativePath": "jobs.json",
+          "blob": "a86c24e239884422b99432882f7bfb414c847855",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "c2ea5bf5e4be40a55779aa0726a994397efa92d9f2c1ca72651f1d2153d379e1",
+          "bytes": 2310
+        },
+        {
+          "relativePath": "artifacts.json",
+          "blob": "60da488d826b0d5d891a4f582ed894c4c3a1abc0",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "a044f15a5d82bf529739a6cd989f208e52e09a1ba88f3d72b5075c282060fc62",
+          "bytes": 773
+        },
+        {
+          "relativePath": "authenticated-failure-report.json",
+          "blob": "5812e398cce8f8c32f0661d79d71894c768b8b5e",
+          "evidenceKind": "pure-data exact-file authentication result; qualification remains false",
+          "sha256": "935306e6ecf991cffdf4a9151694d52e0f342226c362bf152b103303fe7ec850",
+          "bytes": 108365
+        }
+      ],
+      "qualificationSha256": "819a0523eacb1b02c23fbeab288a71329948f8e6810e4c06eea3f0cd33a3b1f9",
+      "summary": {
+        "passed": false,
+        "qualifiedByThisReview": false,
+        "packagePins": 21,
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "lockGenerated": true,
+        "lockResolution": "metadata-only --package-lock-only, then separate npm ci",
+        "currentCompilerInstalled": true,
+        "commands": 4,
+        "completeCommandSequence": false,
+        "adapterContractCompleted": false,
+        "adapterObligations": null,
+        "psc0Qualification": false,
+        "coldFQualification": false,
+        "seedSelectionChanged": false
+      },
+      "commands": [
+        {
+          "name": "resolve-lock",
+          "exitCode": 0
+        },
+        {
+          "name": "install",
+          "exitCode": 0
+        },
+        {
+          "name": "root-build",
+          "exitCode": 0
+        },
+        {
+          "name": "package-tests",
+          "exitCode": 1
+        }
+      ],
+      "artifact": {
+        "id": 11625775703,
+        "node_id": "MDg6QXJ0aWZhY3QxMTYyNTc3NTcwMw==",
+        "name": "root-typescript7-a02f03b97bb3385b66ad670dabf7f13d334fc79f",
+        "size_in_bytes": 11025,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11625775703",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11625775703/zip",
+        "expired": false,
+        "digest": "sha256:81ba1c5b5b49083ece3f95f0d22aabcac9b1a55537cef843d38b5a2c2d63bbd0",
+        "created_at": "2026-10-09T15:09:14Z",
+        "updated_at": "2026-10-09T15:09:14Z",
+        "expires_at": "2026-11-08T15:09:13Z",
+        "workflow_run": {
+          "id": 37949490366,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/typescript-7-only-v1",
+          "head_sha": "a02f03b97bb3385b66ad670dabf7f13d334fc79f"
+        }
+      }
+    },
+    {
+      "number": 2,
+      "sourceRef": "3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab",
+      "runId": 37950075083,
+      "jobId": 113886266262,
+      "lockGenerated": false,
+      "passed": false,
+      "qualifiedByThisReview": false,
+      "records": [
+        {
+          "relativePath": "qualification.log",
+          "blob": "2304e3d1cdb7040f851196e7a7b3e7f99411755a",
+          "sha256": "2baa34f1d9e6f13dd367ff17686c5258bac2ba005a6a1cc97028e0136e280ebd",
+          "bytes": 84632,
+          "evidenceKind": "exact decoded primary GitHub job log"
+        },
+        {
+          "relativePath": "package-lock.json",
+          "blob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+          "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+          "bytes": 21592,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "installed-typescript-package.json",
+          "blob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+          "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+          "bytes": 3087,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "installed-profile.json",
+          "blob": "6a445dc2e3eca77042635ab351cb66b8daa670c6",
+          "sha256": "5cff347f0380141ce6947775dffbc0776036e69c9a46050df06c02be883700c4",
+          "bytes": 4644,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "qualification.json",
+          "blob": "64ebc858d8821f98cd8d544e648c1cce517120fe",
+          "sha256": "dfaae28f2b7fc8dd296a6d0becc64ede620bb8c298ae59afe0279d5ccbb661d3",
+          "bytes": 2804,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "evidence-index.json",
+          "blob": "f721e376291000315f3d895de7c5a3e664e8b9da",
+          "sha256": "1d6cdd5aebaef8b18a312f3df69771e652a09d2c46f630e21c66ebd6b34b397b",
+          "bytes": 820,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "run.json",
+          "blob": "89027ae432a28ddfe39d4f156e77882e88c3ce8b",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "aadf12cebc45fa190175febd68fd4b25972c4ca1032f435c683e7fb4cd4166ca",
+          "bytes": 12602
+        },
+        {
+          "relativePath": "jobs.json",
+          "blob": "8cc32dce8d77c6b460e24783138312d1090b48fa",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "6bdf37c59afa2d66e80ab18ddf85c8366936593a73b9c22189cb7a3a59fd3475",
+          "bytes": 2310
+        },
+        {
+          "relativePath": "artifacts.json",
+          "blob": "19e7b397647097eb523e1744947f9e54cae6da2c",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "0bbee649e42355efe5792edd356e7d0979c5469c4ba6cfaf27757386a443d705",
+          "bytes": 773
+        },
+        {
+          "relativePath": "authenticated-failure-report.json",
+          "blob": "8180ed4f3fde8e1a48276b8cb9f3f4367afb7432",
+          "evidenceKind": "pure-data exact-file authentication result; qualification remains false",
+          "sha256": "4834e97fa6304f74f6dd6b33416bde4a9ef648069367e18e8ae9ccae0dba7581",
+          "bytes": 110353
+        }
+      ],
+      "qualificationSha256": "dfaae28f2b7fc8dd296a6d0becc64ede620bb8c298ae59afe0279d5ccbb661d3",
+      "summary": {
+        "passed": false,
+        "qualifiedByThisReview": false,
+        "packagePins": 21,
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "lockGenerated": false,
+        "lockResolution": "existing lock, npm ci only",
+        "currentCompilerInstalled": true,
+        "commands": 5,
+        "completeCommandSequence": false,
+        "adapterContractCompleted": true,
+        "adapterObligations": 11,
+        "psc0Qualification": false,
+        "coldFQualification": false,
+        "seedSelectionChanged": false
+      },
+      "commands": [
+        {
+          "name": "install",
+          "exitCode": 0
+        },
+        {
+          "name": "root-build",
+          "exitCode": 0
+        },
+        {
+          "name": "package-tests",
+          "exitCode": 0
+        },
+        {
+          "name": "conformance-build",
+          "exitCode": 0
+        },
+        {
+          "name": "lean4export-build",
+          "exitCode": 2
+        }
+      ],
+      "artifact": {
+        "id": 11625656719,
+        "node_id": "MDg6QXJ0aWZhY3QxMTYyNTY1NjcxOQ==",
+        "name": "root-typescript7-3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab",
+        "size_in_bytes": 12538,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11625656719",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11625656719/zip",
+        "expired": false,
+        "digest": "sha256:7dca0d0dc49fd38b5c2d0c2cd39b62612f852048e024b6be454d2b0ae166930a",
+        "created_at": "2026-10-09T15:14:04Z",
+        "updated_at": "2026-10-09T15:14:04Z",
+        "expires_at": "2026-11-08T15:14:03Z",
+        "workflow_run": {
+          "id": 37950075083,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/typescript-7-only-v1",
+          "head_sha": "3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab"
+        }
+      }
+    },
+    {
+      "number": 3,
+      "sourceRef": "5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+      "runId": 37950522687,
+      "jobId": 113887806499,
+      "lockGenerated": false,
+      "passed": false,
+      "qualifiedByThisReview": false,
+      "records": [
+        {
+          "relativePath": "qualification.log",
+          "blob": "6ae6a31caf429b3063e77c99916aa6149b53a317",
+          "sha256": "f4a2faa5f90aed700e7bb4ec6445c9514a591532197b29201f1fee631692622b",
+          "bytes": 85951,
+          "evidenceKind": "exact decoded primary GitHub job log"
+        },
+        {
+          "relativePath": "package-lock.json",
+          "blob": "19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb",
+          "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+          "bytes": 21592,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "installed-typescript-package.json",
+          "blob": "f4242a69df961fcaf5210ac08ace176ced18c6a4",
+          "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+          "bytes": 3087,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "installed-profile.json",
+          "blob": "a33442fa942dbc64d3a1fcc80344715c93f28a57",
+          "sha256": "6704cdcaa52d8601a25db687fda00805ad89b4012c9dc8a7fc7aad3bb8d0a5bd",
+          "bytes": 4644,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "qualification.json",
+          "blob": "6156a43d4f05e1071c2046b75ac84f702d3a6a30",
+          "sha256": "6eee4c15020b32f724cf150f847f5671ee0ee8975b1d752122a4495a851b47c3",
+          "bytes": 3574,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "evidence-index.json",
+          "blob": "8c31bb76e540a4d1b26ec88a50e57c6c1f71b4be",
+          "sha256": "8217fa5af55fc78f447aea60972fffc51c6957ba6663849a6543487a27f24f66",
+          "bytes": 820,
+          "evidenceKind": "exact actual UTF-8 artifact file"
+        },
+        {
+          "relativePath": "run.json",
+          "blob": "edb02d46bebe5197614d228bcda09c58ca0a1fe8",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "64fb3e73f4d86d86fb670f4034df795d56cff86718e4ebabff71067439e2a8ff",
+          "bytes": 12577
+        },
+        {
+          "relativePath": "jobs.json",
+          "blob": "b022e9d1e46fa6a8920000c1e5ec582361acb69e",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "84b982776a4756f1ece964b613a1f7d3412ee2f13c5cab986181870d226187d2",
+          "bytes": 2310
+        },
+        {
+          "relativePath": "artifacts.json",
+          "blob": "8a6e13e2abc95c6ddbde1c7f9bda45af9e9cb25b",
+          "evidenceKind": "exact GitHub API response JSON text",
+          "sha256": "e57f49dab036ba91cb205bb935d743f548e1262e39e9905fe905dd23b736716a",
+          "bytes": 773
+        },
+        {
+          "relativePath": "authenticated-failure-report.json",
+          "blob": "c916480451e5b06500ce4dc807cb3c059152609b",
+          "evidenceKind": "pure-data exact-file authentication result; qualification remains false",
+          "sha256": "658e83af2c974c2ba8c82fbefb09d44aefc7ea894dc0f75f297a035e4914949d",
+          "bytes": 112948
+        }
+      ],
+      "qualificationSha256": "6eee4c15020b32f724cf150f847f5671ee0ee8975b1d752122a4495a851b47c3",
+      "summary": {
+        "passed": false,
+        "qualifiedByThisReview": false,
+        "packagePins": 21,
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "lockGenerated": false,
+        "lockResolution": "existing lock, npm ci only",
+        "currentCompilerInstalled": true,
+        "commands": 7,
+        "completeCommandSequence": true,
+        "adapterContractCompleted": true,
+        "adapterObligations": 11,
+        "psc0Qualification": false,
+        "coldFQualification": false,
+        "seedSelectionChanged": false
+      },
+      "commands": [
+        {
+          "name": "install",
+          "exitCode": 0
+        },
+        {
+          "name": "root-build",
+          "exitCode": 0
+        },
+        {
+          "name": "package-tests",
+          "exitCode": 0
+        },
+        {
+          "name": "conformance-build",
+          "exitCode": 0
+        },
+        {
+          "name": "lean4export-build",
+          "exitCode": 0
+        },
+        {
+          "name": "package-integration",
+          "exitCode": 0
+        },
+        {
+          "name": "package-boundaries",
+          "exitCode": 1
+        }
+      ],
+      "artifact": {
+        "id": 11626081245,
+        "node_id": "MDg6QXJ0aWZhY3QxMTYyNjA4MTI0NQ==",
+        "name": "root-typescript7-5d3cbc82cb8759b909d1a957d6a22d542509d8c5",
+        "size_in_bytes": 13394,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11626081245",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11626081245/zip",
+        "expired": false,
+        "digest": "sha256:d5ea77cdd1c88fb5ce52327b57c752a0c15ea87e998041d4305fa4ff165fc1c1",
+        "created_at": "2026-10-09T15:17:41Z",
+        "updated_at": "2026-10-09T15:17:41Z",
+        "expires_at": "2026-11-08T15:17:40Z",
+        "workflow_run": {
+          "id": 37950522687,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/typescript-7-only-v1",
+          "head_sha": "5d3cbc82cb8759b909d1a957d6a22d542509d8c5"
+        }
+      }
+    }
+  ]
+}

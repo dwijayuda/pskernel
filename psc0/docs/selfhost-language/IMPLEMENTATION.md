@@ -1,5 +1,9 @@
 # PSC0 SH/1 implementation and qualification
 
+Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
+
+That initial attempt stopped at a new test-helper construction error (`PsErasureScope.mk` was not a generated runtime export). C1/C2/C3 and provider qualification were not reached; its passing native checks do not establish completed F qualification.
+
 Status: bounded runtime IR typing M6 is compiler-qualified with independent
 selected-provider acceptance in both its TypeScript 5 baseline and the current
 TypeScript 7.0.2 integration. The exact qualifying source checkpoints are:
@@ -10,17 +14,19 @@ TypeScript 7.0.2 integration. The exact qualifying source checkpoints are:
 | M6 with current TypeScript 7.0.2 | `99786185f77edf952f11989d4c9bc44028f22f11` | [Run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506) |
 | R2, new-only PS grammar and parameter projections | `fe2560aba0f347b1caf8d000d371464642d44f23` | [Run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635): compiler/provider/cold recovery passed; exact R successor explicitly selected |
 
-The portable M6 source is the same in both checkpoints. The TypeScript integration
-changes current host/CLI selection and qualification tooling; historical S0/A
-recovery remains pinned to 5.8.3. Current seed identity is authenticated by
-`selfhost-seed.json` and its receipts; the F candidate requires a qualified,
-recoverable, explicitly selected projection-capable R successor.
+The portable M6 source is the same in both historical checkpoints. Current
+host/CLI selection, qualification and selected-R cache-miss recovery use
+TypeScript 7.0.2. S0/A's original TypeScript 5.8.3 metadata and recovery recipes
+remain archived evidence; current tooling does not execute them.
+Current seed identity is authenticated by
+`selfhost-seed.json` and its receipts; F used the qualified, cold-recovered,
+explicitly selected projection-capable R successor.
 The earlier qualified integration branch is `psc0/sh1-implementation-v1`;
 its documentation descendants preserve the exact qualifying source references
 above. R2 has earned its own compiler/provider results and verified cold source
 recovery. The exact R successor is explicitly selected by [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6).
-F is an **implemented candidate with qualification pending** and does not inherit
-R2's compiler/provider results.
+F is **compiler-qualified and independently provider-accepted** at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`.
+Its own results are recorded below; R remains the selected authoring seed.
 
 The installed checker verifies its bounded runtime type contract before emitting
 the same IR. Strict SH/1 remains false because the remaining primitive/value,
@@ -39,8 +45,8 @@ together to edition `ps-0.9-r3`, mode `new-only`, support
 `bounded-selfhost-subset`. [PS_GRAMMAR_ADOPTION.md](PS_GRAMMAR_ADOPTION.md)
 records the exact supplied reference SHA-256, finite enabled grammar and
 unsupported forms. R2 has its own completed compiler/provider, cold-recovery and
-explicit selection records below. The F candidate must use that authenticated
-selected R compiler and satisfy its own source/runtime qualification.
+explicit selection records below. F used that authenticated selected R compiler
+and earned its own separate source/runtime qualification.
 Full Standard/PSCV conformance and strict SH/1 remain unearned, and Lean remains
 4.34.0.
 
@@ -86,8 +92,9 @@ equality and separate exact-stream provider acceptance retain their own gates.
 
 Handwritten compiler `.lean` remains authoritative. R is implemented in forms
 that A can consume for immutable recovery. F's required R successor has verified
-recovery and explicit selection; F itself remains unqualified. F removes
-only the three scoped aliases described below. Historical S0/A source, canonical
+recovery and explicit selection. F separately passed compiler qualification
+and independent provider acceptance at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`, including
+the three scoped alias removals described below. Historical S0/A source, canonical
 products and recovery toolchains retain their immutable identities; current
 products carry the new grammar identity.
 
@@ -106,7 +113,7 @@ qualification. This result is separate from the historical TS5/TS7 M6 receipts.
 | Independent provider | [provider job 113827136830](https://github.com/dwijayuda/pskernel/actions/runs/37925722635/job/113827136830) accepted four distinct exact streams covering eight roles; provider implementation unchanged |
 | Cold source recovery | Passed in job `113827137018`; [receipt](grammar-migration-cold-recovery.json), SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d` |
 | Explicit successor selection | [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6); selected manifest SHA-256 `7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694`; seed identity `47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225` |
-| F source/runtime qualification | Pending; F is a separate implementation candidate |
+| F source/runtime qualification | Passed separately at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`; see the F evidence below |
 
 The retained [qualification file](seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/qualification.json)
 has SHA-256 `b3e9a277a7ce5ee9e0bccc449c9ca20a06766cd94cabd34fe4d722c6425e6fac`; the independent
@@ -119,7 +126,43 @@ remain separate.
 
 ## F checkpoint: ordinary worker parameters
 
-Status: **implemented candidate; qualification pending**. F applies the frozen
+### F evidence at the exact source
+
+[F run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800) qualified `fcd875c8f38db4b0524090bd10c7c2fd5024053d`, using selected R.
+[Compiler job 113876931430](https://github.com/dwijayuda/pskernel/actions/runs/37947341800/job/113876931430)
+and the separate
+[provider job 113896228512](https://github.com/dwijayuda/pskernel/actions/runs/37947341800/job/113896228512)
+retain distinct results.
+
+| Observation | F result |
+| --- | --- |
+| Exact raw source closure | 61 modules; SHA-256 `6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7` |
+| Ordinary-source migration | Twelve workers and three aliases, with seven associated source guards passed |
+| Worker correspondence | 87 independent cases per compared compiler: F1 51 and F2 36; paired R/F observations agree |
+| Public ABI | All twelve actual Core types and ordered runtime signatures passed; original public names/types/order preserved |
+| Runtime/IR boundary | Required existing runtime/partial-application/iteration gates and original-IR checks passed; exact measured counts and object provenance are in the retained F receipt |
+| Current fixed point | Canonical source, admissions, TypeScript and JavaScript agree across C2/C3; compiler JavaScript SHA-256 `5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15` |
+| Host PS preparation | Three focused boundary cases and the real generated PS-session checks passed |
+| Independent provider | Accepted the exact required F streams; the retained provider receipt supplies the actual stream counts and decisions |
+
+The [F qualification record](worker-migration-qualification.json) has SHA-256
+`a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3`. Its provenance identifies the serialization
+actually retained: a digest of compact logged-object text plus LF does not claim
+the unavailable original pretty-printed artifact bytes. The [F provider receipt](worker-migration-provider.json)
+has SHA-256 `5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913` for the exact read-back receipt file
+bytes. Acceptance gates and provider implementation remain unchanged.
+
+The behavior gate uses each compiler's tagged values. IR records use existing
+compiler factories, and copies retain their compiler's brands. Three non-IR
+records—`PsErasureNameState`, `PsTsSymbolMapState`, and the
+`PsErasureCurrentDefinition` marker—are explicitly unbranded host structural
+fixtures with owning-compiler tagged children. Their exercised paths project
+fields or reset the marker; they are not compiler-created branded records and
+do not enter the original-IR carrier checker. R stays selected. F qualification does not select a new seed,
+activate strict SH/1 or establish full Standard/PSCV or a measured speedup.
+
+
+Status: **compiler-qualified and independently provider-accepted** at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`. F completed the frozen
 practical-v1 scope using the now-qualified, cold-recovered and explicitly selected
 projection-capable R seed. It changes twelve worker definitions and removes three
 typed projection aliases; it does not extend the accepted language or alter the
@@ -152,18 +195,20 @@ The exact target inventory and seven guard updates are in
 | [sh1-migration-worker-conformance.mjs](../../scripts/sh1-migration-worker-conformance.mjs) | One synchronous 87-case gate: F1's 51 cases and F2's 36 cases; each R/F compiler constructs its own values and only JSON observations cross the comparison |
 | [sh1-migration-worker-abi.mjs](../../scripts/sh1-migration-worker-abi.mjs) | `runMigrationWorkerAbi(compiler, prepared, ir, valueTag)` checks all twelve actual public Core types and ordered signatures in the already produced IR |
 
-The ABI hook elaborates one small isolated module of signature axioms and typed
-generic partial-application wrappers. These declarations are never merged into
-the authoritative closure, erased, emitted or runtime-executed. Existing SH1
+The ABI hook elaborates one small isolated module with 19 mock inductives, each with one
+constructor, and 12 typed generic partial-application wrappers. Each wrapper's
+first explicit parameter annotation supplies the full independently declared
+function type used as its worker's reference. These probe declarations are never
+merged into the authoritative closure, erased, emitted or runtime-executed. Existing SH1
 runtime partial-application checks cover lowering separately. The hook avoids
 another full baseline preparation and runs before the original-IR check; no
 asynchronous operation or mutation separates a successful original-IR check from
 emission of that exact object.
 
-Qualification records the paired R/F behavior, ABI observations, one coherent
+F qualification recorded the paired R/F behavior, ABI observations, one coherent
 current-source generation chain, C2/C3 canonical-source/admissions/TS/JS equality
-and separate exact-stream provider acceptance. Candidate implementation and
-static review do not satisfy those pending gates. Historical A/B/H/E/M6/TS7
+and separate exact-stream provider acceptance. The retained execution evidence
+establishes these results; source inspection alone did not establish them. Historical A/B/H/E/M6/TS7
 receipts retain their identities; no provider, kernel, metatheory, general PSC1,
 strict SH/1 or full PSCV claim is added by F.
 
@@ -174,8 +219,8 @@ ProofScript grammar before any PS parsing, preparation or cache hit. Its PS
 closure hash and receipt include the exact grammar profile. The existing Lean
 serialization, receipt shape and cache behavior are preserved. Three focused
 host-boundary cases cover the new refusal and cache contract; the existing real
-generated PS session supplies compiler execution evidence. F qualification is
-still pending.
+generated PS session supplies the separate real-compiler evidence. Both the
+focused host cases and the generated session passed in the recorded F run.
 
 The independent provider script additionally logs the exact read-back receipt
 file content, byte count and SHA-256. This permits later evidence retrieval from
@@ -271,10 +316,12 @@ This runs `lake build psc1 psc1_ir_check_tests` followed by
 `node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1`.
 Current PSC0 compilation requires exact TypeScript 7.0.2. Install the `psc0` development dependency or provide the installed
 launcher through `PSC0_TSC`; `PSC0_TYPESCRIPT_VERSION` defaults to `7.0.2`.
-CI installs separate exact current and historical profiles. The historical
-recovery commands require `5.8.3` and its matching launcher; source manifests
-and recovery product hashes retain that version. See [TYPESCRIPT7.md](TYPESCRIPT7.md)
-for scope, profile selection and the qualification evidence boundary.
+Current CI installs the exact TypeScript `7.0.2` profile. Selected-R cache-miss
+recovery uses native Lean and that same TypeScript version, then checks all four
+pinned R products before retaining the cache. Historical source manifests,
+producer versions, recipes and product hashes remain unchanged as evidence;
+current tooling provides no TypeScript 5 installer or recovery dispatcher. See
+[TYPESCRIPT7.md](TYPESCRIPT7.md) for active commands and qualification evidence.
 
 The first execution of this gate at
 `9641928bcf7d5394f46e19a31a8ae3fd096d44b5` passed in
@@ -411,7 +458,7 @@ compiler-qualified while retaining `strictSh1Qualified: false`. Provider
 evidence is a separate reference. Evidence links can change without changing
 the identity of the compiler bytes used for generation.
 
-### Recovery without relying on mutable dist
+### Historical recovery without relying on mutable dist
 
 Qualified seed reuse follows three routes:
 
@@ -436,9 +483,9 @@ selected R. The tooling does not assert that historical S0 can consume F.
 
 ### Full current-source qualification
 
-For the pending F checkpoint, the selected R compiler consumes the exact raw F
-source: `C1 = R(F)`, `C2 = C1(F)`, `C3 = C2(F)`. Required current C2/C3 products,
-original-IR/runtime checks and provider decisions remain F's own evidence. The
+The qualified F checkpoint used selected R to consume the exact raw F source:
+`C1 = R(F)`, `C2 = C1(F)`, `C3 = C2(F)`. Its required current C2/C3 products,
+original-IR/runtime checks and provider decisions have their own retained evidence. The
 initial A and later Q/B equations below retain their historical meaning.
 
 The initial A checkpoint evaluates:
@@ -856,11 +903,11 @@ defines that repair's scope.
 6. R compiler/provider checkpoint completed: R2 qualified the parameter-projection
    repair and new-only `ps-0.9-r3` lexer/parser/printer, fixtures and provenance.
    Its source remains A-consumable for recovery. Cold recovery is verified and
-   the exact R successor is selected; F's own migration qualification is pending.
-7. F implemented candidate, qualification pending: migrate the twelve frozen
-   workers, remove the three scoped aliases, update the seven affected guards,
-   and qualify the coherent final source with the 87-case gate, actual Core/IR
-   ABI observations, current C2/C3 products and exact provider decisions.
+   the exact R successor is selected; F has now earned its own migration qualification.
+7. Completed F: the twelve frozen workers, three scoped aliases and seven guards
+   are migrated and qualified together with the 87-case gate, all twelve actual
+   Core/IR signatures, current C2/C3 products and exact provider decisions. The
+   original 226 deferred locators remain outside this completed practical-v1 scope.
 8. Routine iteration: use the native development gate and suitable resident
    preparation reuse. Reserve full fixed-point/provider work for semantic
    promotion checkpoints.

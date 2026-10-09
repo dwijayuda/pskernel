@@ -1,8 +1,12 @@
 # PSC0-SH/1 implementation and migration plan
 
+Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
+
 Historical milestones: M0–M3 have a qualified implementation and selected authoring seed A at `e91b9558d665879871b8bf0893915ae64b27c7fe`. Foundation.List (B, `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and exact provider acceptance on its first execution. M5 remains bounded follow-on authoring work. The bounded M6 runtime typing checkpoint is compiler-qualified on TS5 and on the current TS7 profile, with separate exact-stream provider acceptance for each. Complete strict runtime enforcement remains separate. M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The historical baseline is in [README.md](README.md), language requirements are in [SPEC.md](SPEC.md), and the installed M6 scope, separately earned TS5/TS7 qualification and remaining requirements are in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md).
 
-## Current F checkpoint: implemented candidate, qualification pending
+<a id="current-f-checkpoint-implemented-candidate-qualification-pending"></a>
+
+## Completed F checkpoint: practical-v1 source migration
 
 F is the finite practical-v1 migration in
 [migration-backlog.json](migration-backlog.json), prepared against R2 source
@@ -10,8 +14,9 @@ F is the finite practical-v1 migration in
 qualification and independent provider check in [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635).
 R cold recovery is verified, and [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) explicitly selects
 that successor. F had not been applied at the original R2 evidence point and
-retains its own pending qualification. Exact R records do not supply F runtime
-or fixed-point evidence.
+has now earned its own compiler/provider qualification at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`
+in [F run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800). Exact R records remain separate from F's runtime and
+fixed-point evidence.
 
 The candidate replaces twelve handwritten returned-function workers with ordinary
 parameters: four fresh-name workers and eight state/accumulator workers. It also
@@ -21,7 +26,13 @@ order, accumulator reversal, first errors and wrappers remain the contract.
 Seven associated shape guards are updated without relaxing their unrelated checks.
 The current `.ps` edition stays new-only `ps-0.9-r3`; `.lean` remains authoritative.
 
-Use this finite integration sequence:
+The finite sequence below is complete for F at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`.
+Its 87-case correspondence, twelve public Core/IR signatures, seven source guards,
+current C2/C3 products, original-IR/runtime/iteration checks, host PS-session cases
+and independent provider decision are recorded in the
+[F qualification record](worker-migration-qualification.json) and
+[F provider receipt](worker-migration-provider.json). R remains the selected authoring seed.
+The sequence is retained to explain the evidence boundary:
 
 1. R2 compiler qualification, provider acceptance, cold source recovery and
    explicit successor selection are complete. Authenticate that selected R
@@ -41,7 +52,7 @@ Use this finite integration sequence:
    canonical-source/admissions/TS/JS equality and separate exact-stream provider
    acceptance. Reuse generated products; do not repeat full qualification per
    worker. Keep actual compiler, source, toolchain and receipt identities.
-6. Mark practical-v1 complete only after the pending F evidence is recorded.
+6. Practical-v1 is complete at the exact F source with the recorded evidence.
    Unrestricted PSC1, strict SH/1, full PSCV and a measured compiler speedup remain
    outside this source migration.
 
@@ -55,9 +66,11 @@ mode `new-only`, support `bounded-selfhost-subset`. The user explicitly chose th
 new edition without a current legacy grammar mode.
 [PS_GRAMMAR_ADOPTION.md](PS_GRAMMAR_ADOPTION.md) pins the supplied reference,
 records errata, and defines the enabled syntax and refusal boundaries. The
-compiler's handwritten `.lean` authority and immutable historical S0/A recovery
-remain in place. The current authoring seed is the explicitly selected R
-successor, whose separate manifest preserves the immutable A parent.
+compiler's handwritten `.lean` authority remains in place. Original S0/A
+revisions, producer identities and recovery recipes remain immutable historical
+evidence. The current authoring seed is the explicitly selected R successor,
+whose manifest preserves the immutable A parent; current cache-miss recovery
+uses the independently proven native Lean plus TypeScript 7 route.
 The grammar implementation and paired projection repair earned their own R2
 compiler/provider results; no earlier receipt was reused as that evidence.
 [IMPLEMENTATION.md](IMPLEMENTATION.md#r2-compiler-and-provider-evidence) records
@@ -66,8 +79,8 @@ verified by [its receipt](grammar-migration-cold-recovery.json), SHA-256
 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`, and [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) records explicit selection.
 
 The R implementation/compiler/provider/recovery/selection requirements below
-have their own completed evidence. F's source/runtime qualification remains
-pending:
+have their own completed evidence. F's subsequent source/runtime qualification
+has its separate records above:
 
 1. Pin the reference and finite support scope before changing accepted syntax.
    Keep omitted annotations, defaults, named arguments, tuples, generic do and
@@ -224,7 +237,7 @@ R supplies the new-only `.ps` edition and bounded projection repair. F consumes
 that capability under its selected-seed prerequisite; it does not add another
 grammar transition. Broader inference/semantic conveniences remain separate.
 
-1. Completed in R2: repair parameter projections in the existing recursion normalizer under the bounded contract below. Cold recovery and explicit selection are recorded; F must still qualify its own use of that capability.
+1. Completed in R2: repair parameter projections in the existing recursion normalizer under the bounded contract below. Cold recovery and explicit selection are recorded; F separately qualified its use of that capability at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`, with its own compiler and provider receipts.
 2. Common equation/lambda-wrapped declaration and harmless-let normalization.
 3. Expected-type lambda domains with explicit fallback diagnostics.
 4. Nested constructor patterns lowered to flat decision trees.
@@ -279,7 +292,7 @@ The TS5 M6 baseline at `1b5fd12382c920944924c9d03e0851984293caa2` passed compile
 
 The selected provider accepted the three exact required admission streams in its separate successful job, after emission; the [provider receipt](runtime-ir-checker-provider.json) records that boundary. Selected A, `psconfig` and strict-profile activation are unchanged.
 
-The current TS7 source at `99786185f77edf952f11989d4c9bc44028f22f11` separately passed compiler qualification and provider acceptance in [run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506), using the same portable M6 implementation. Its native full IR and C2/C3 current-source IR checks are complete and accepted with zero findings; the generated builds check the same IR before emission. Current C2/C3 products agree within the TS7 profile. Its compiler JS SHA-256 is `37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161`, while the preserved TS5 baseline keeps its separate JS identity. The [TS7 compiler/runtime receipt](typescript7-qualification.json) and [TS7 provider receipt](typescript7-provider.json) record the independent result. Historical recovery stays pinned to TS5; [TYPESCRIPT7.md](TYPESCRIPT7.md) retains the toolchain attempts and the one sequential same-full-source CLI comparison.
+The current TS7 source at `99786185f77edf952f11989d4c9bc44028f22f11` separately passed compiler qualification and provider acceptance in [run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506), using the same portable M6 implementation. Its native full IR and C2/C3 current-source IR checks are complete and accepted with zero findings; the generated builds check the same IR before emission. Current C2/C3 products agree within the TS7 profile. Its compiler JS SHA-256 is `37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161`, while the preserved TS5 baseline keeps its separate JS identity. The [TS7 compiler/runtime receipt](typescript7-qualification.json) and [TS7 provider receipt](typescript7-provider.json) record the independent result. [TYPESCRIPT7_CHECKPOINT.md](TYPESCRIPT7_CHECKPOINT.md) preserves those historical toolchain attempts and the sequential same-full-source CLI comparison. Current development and selected-R recovery use TypeScript 7 only, as documented in [TYPESCRIPT7.md](TYPESCRIPT7.md).
 
 The TS5 baseline and the separate current TS7 checkpoint have completed the following gates. Keep them as acceptance requirements for subsequent compiler milestones:
 
@@ -287,7 +300,7 @@ The TS5 baseline and the separate current TS7 checkpoint have completed the foll
 2. Require accepted, complete current-source portable reports where the executing compiler contains M6, plus the focused positive/negative, simultaneous-substitution, exhaustion, carrier and checked-emission cases. A capped diagnostic list must not conceal the total failed-obligation count.
 3. Establish exact-current-source C2/C3 product equality within the selected toolchain profile. The old selected Q boundary remains explicitly legacy; the new C1 executable must exercise the installed checker. Obtain separate provider acceptance for the exact required admission streams.
 4. Record the installed typing API, runtime evidence, compiler fixed point and provider decision as separate claims. The historical M6 integrations retained then-selected A and did not activate strict SH/1. R's later explicit selection has separate recovery/evidence records. Do not repeat completed full qualification for ordinary edits covered by the bounded development gate.
-5. R's bounded projection/new-grammar implementation is qualified, cold-recovered and explicitly selected, with immutable A-consumable source preserved. F's implemented candidate uses that seed for the three scoped aliases and twelve handwritten state adapters; qualify F's coherent source separately. Preserve public types, error/exhaustion behavior and supported optimization paths.
+5. R's bounded projection/new-grammar implementation is qualified, cold-recovered and explicitly selected, with immutable A-consumable source preserved. F used that seed for the three scoped aliases and twelve handwritten state adapters and earned its own coherent-source qualification. Preserve public types, error/exhaustion behavior and supported optimization paths.
 
 Strict enforcement still requires the applicable primitive/value, scalar/bounds/text-position, layout and erasure/backend correspondence obligations. External imports and optional scalar capabilities remain refused until their own contracts are qualified. The tested let-initializer scope correction is one bounded backend repair, not a general preservation proof. Neither an accepted typing report nor provider acceptance alone activates strict SH/1.
 
@@ -303,9 +316,9 @@ Require qualification of every enabled capability used by the authoritative sour
 
 ## 3. Correct generation and promotion procedure
 
-The current pending F sequence uses authenticated selected R: `C1 = R(F)`,
-`C2 = C1(F)`, `C3 = C2(F)`, all reading the same exact raw F source. Its evidence
-remains pending. The initial S0/A construction below is the historical parent
+The completed F sequence used authenticated selected R: `C1 = R(F)`,
+`C2 = C1(F)`, `C3 = C2(F)`, all reading the same exact raw F source. Its retained
+qualification and provider receipts establish the bounded results. The initial S0/A construction below is the historical parent
 procedure, not a claim that S0 or A can consume F.
 
 Let A be the exact source tree containing the improved compiler, written in the old subset. Let S0 be the pinned old compiler.
@@ -322,7 +335,7 @@ After promotion, let B be compiler source migrated to ordinary SH/1. Repeat the 
 
 A syntax-only translation route is insufficient here. The shared preparation/normalization seam must support ordinary authoring input and supply deterministic canonical output in its ordered environment. Source emission and compilation must use the same lowering implementation.
 
-A toolchain upgrade receives its own current-source qualification. The preserved S0/A recovery recipes keep TypeScript 5.8.3 and their original artifact identity. Current TypeScript 7 uses a separate explicit CLI/profile; compare C2/C3 within that profile. A TS5 receipt does not qualify TS7, and cross-version emitted JS need not be byte-identical. Reuse the same already emitted full-compiler TS for the bounded 5/7 comparison rather than repeating PSC preparation. See [TYPESCRIPT7.md](TYPESCRIPT7.md).
+Each toolchain change requires evidence for its actual current source and profile. Current development and selected-R recovery use only TypeScript 7.0.2; C2/C3 comparisons use that exact profile. The independent native R recovery rebuilds pinned R with Lean, compiles its checked TypeScript with TS7, and compares the canonical `.ps`, admissions, TypeScript and JavaScript products with the four selected-R hashes. Historical S0/A recipes and TS5 receipts remain archived identities and observations; current tooling does not execute them or use them as TS7 qualification. See [TYPESCRIPT7.md](TYPESCRIPT7.md).
 
 Required receipt fields:
 

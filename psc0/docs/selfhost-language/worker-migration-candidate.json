@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "psc0-sh1-finite-worker-migration-candidate",
-  "status": "applied-supported-ABI-probe-and-TypeScript7-only-tooling-qualification-pending",
+  "status": "compiler-qualified-provider-accepted; practical-v1-complete",
   "repository": "dwijayuda/pskernel",
   "inspectedBaseRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
   "sourceGrammar": {
@@ -433,7 +433,7 @@
       "fullBaselineClosurePreparedAgain": false
     },
     "existingPortableIrAndProviderGates": "Retained",
-    "historicalRecovery": "Existing TS5 reconstruction unchanged; its generations do not invoke the new ABI hook",
+    "historicalRecovery": "Archived original S0/A/TS5 recipe descriptions are historical evidence only. Current selected-R recovery is independently cold-proven with native Lean 4.34.0 and TypeScript 7.0.2; the selected manifest and four product hashes are unchanged.",
     "sourceGuardReview": "Seven updated guards reviewed against exact merged source without executing them"
   },
   "verification": {
@@ -442,27 +442,198 @@
     "independentBehaviorAndAbiReview": "complete",
     "nativeBuildExecuted": true,
     "generatedRuntimeExecuted": true,
-    "compilerQualification": null,
-    "providerAcceptance": null,
+    "compilerQualification": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "compilerJobId": "113876931430",
+      "passed": true,
+      "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+      "moduleCount": 61,
+      "sourceBytes": 1112320,
+      "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "8b060f40c279f81abb9f81ab5903457e295e431fc67c945ccd312663cd76e3c3",
+        "normalizedCanonicalAdmissionsSha256": "9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5",
+        "typescriptSha256": "0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a",
+        "javascriptSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15"
+      },
+      "recipeSha256": "90a5fc6131e151a7ed24c8a1e5f2d424c8b14e7eda813b34b5b301f37623a0b1",
+      "qualificationReference": "worker-migration-qualification.json",
+      "retainedQualificationSha256": "a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3",
+      "serialization": "Raw compact FIXED_POINT JSON from the complete decoded job log followed by LF; this is not an unavailable original pretty artifact receipt digest.",
+      "fullLogReference": "evidence-logs/worker-migration-compiler.log",
+      "fullLogSha256": "0029eccaf74c06b1fef9c3f06987cb0dc82003c649912bb1959bf3f13068e931",
+      "selectedRPreserved": true,
+      "strictSh1Qualified": false
+    },
+    "providerAcceptance": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "providerJobId": "113896228512",
+      "accepted": true,
+      "receiptReference": "worker-migration-provider.json",
+      "receiptSha256": "5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913",
+      "receiptBytes": 3532,
+      "serialization": "Exact original UTF-8 file contents read back by the provider runner and authenticated from its complete log envelope.",
+      "selectedProvider": {
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+        "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+        "metadata": {
+          "protocol": "pskernel-core/1",
+          "provider": "pskernel-core-native",
+          "leanVersion": "4.34.0",
+          "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "profile": "lean4.34-core",
+          "status": "ready"
+        },
+        "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+        "node": "v22.23.3",
+        "command": [
+          "psc_kernel_core_provider",
+          "--check"
+        ],
+        "resourcePolicy": "Pinned compilerSelfHostResourcePolicy; default fuel 131072, unchanged.",
+        "timeoutMs": 60000
+      },
+      "unchangedProviderBinary": true,
+      "distinctAdmissionStreams": 4,
+      "artifactRoles": 8,
+      "streams": [
+        {
+          "canonicalAdmissionsSha256": "9fffa1ecd53f4befe3c0296cbbe0069dfb8cf1a91169a6dc44f3f1d6dbf1b8d5",
+          "artifacts": [
+            "C2 compiler source",
+            "C3 compiler source"
+          ],
+          "durationMs": 1555.7454980000002,
+          "result": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": true
+          }
+        },
+        {
+          "canonicalAdmissionsSha256": "372371596fba560eca5ba52d29e20d91780d5c3321e4353a7a4c1a009167e10f",
+          "artifacts": [
+            "C2 raw lean capability source",
+            "C3 raw lean capability source"
+          ],
+          "durationMs": 14.807432000000063,
+          "result": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": true
+          }
+        },
+        {
+          "canonicalAdmissionsSha256": "bb84332515024d4145b7cedb636fb6095d3cbe20a4fc3043dc37905f7574a900",
+          "artifacts": [
+            "C2 raw ps capability source",
+            "C3 raw ps capability source"
+          ],
+          "durationMs": 16.380443000000014,
+          "result": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": true
+          }
+        },
+        {
+          "canonicalAdmissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+          "artifacts": [
+            "C2 raw recursive-generic fixture source",
+            "C3 raw recursive-generic fixture source"
+          ],
+          "durationMs": 7.705719000000045,
+          "result": {
+            "protocol": "pskernel-core/1",
+            "provider": "pskernel-core-native",
+            "leanVersion": "4.34.0",
+            "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+            "profile": "lean4.34-core",
+            "accepted": true
+          }
+        }
+      ],
+      "emissionWasGatedByThisCheck": false
+    },
     "nativeBuildResult": {
-      "sourceRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
-      "runId": 37941485695,
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": 37947341800,
       "core": 75,
       "translation": 10,
-      "erasure": 16
+      "erasure": 16,
+      "passed": true
     },
-    "generatedRuntimeScope": "Attempt 2 completed all 87 migration cases on authenticated R and current native F with deeply equal reports. C1/C2/C3 paired behavior, twelve-worker current Core/IR ABI, fixed point and provider acceptance remain pending.",
+    "generatedRuntimeScope": "The qualifying run completed all 87 cases with deeply equal full observations across R/N1/C1/C2/C3, all twelve current prepared Core/IR ABI checks in C1/C2/C3, the four-product fixed point and independent F provider acceptance.",
     "nativeBehavior": {
-      "sourceRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
-      "runId": 37941485695,
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": 37947341800,
       "cases": 87,
       "referenceAndCurrentReportsEqual": true,
       "observationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be"
-    }
+    },
+    "publicTypeAndIrAbi": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": "37947341800",
+      "reference": "worker-migration-evidence.json",
+      "passed": true,
+      "workers": 12,
+      "builds": [
+        "C1",
+        "C2",
+        "C3"
+      ],
+      "completePublicCoreAlphaEquality": true,
+      "orderedRuntimeTypesAndArities": true,
+      "arities": [
+        4,
+        4,
+        3,
+        4,
+        2,
+        2,
+        3,
+        2,
+        4,
+        5,
+        5,
+        3
+      ],
+      "observationSha256": "b23c28c75aa3f7955ecbe54fa4580b4278f62c2ed77f1e7ff2a2dbbea6999b49",
+      "referenceProbeTypeSha256": "a65845d1f9f30b55f1b8b3599c264ae39e4c35fe7c84367575ea6b504644ab82",
+      "referenceProbe": {
+        "abstractTypeDeclarations": 19,
+        "signatureTypeAnnotations": 12,
+        "typedGenericPartialWrappers": 12,
+        "runtimeExecuted": false,
+        "erasedOrEmitted": false,
+        "currentSourceCoreOrIrCompared": false
+      },
+      "existingPreparedObjectReadOnly": true,
+      "existingIrObjectReadOnly": true,
+      "fullBaselineClosurePreparedAgain": false,
+      "runtimeParameterDisplayNamesCompared": false,
+      "completeObservationsReference": "worker-migration-evidence.json"
+    },
+    "retainedEvidence": "worker-migration-evidence.json",
+    "sourceCodeChangesAfterQualification": false
   },
   "performanceClaim": null,
   "preparedHostCompletion": {
-    "status": "applied; focused and actual session gates passed in initial attempt; full F qualification pending",
+    "status": "applied-and-qualified; current host cases and real preparation sessions passed",
     "sourceGrammarBoundary": "Require the current grammar for reusable prepare('proofScript') before any cache hit or compiler operation; bind the grammar in its closure hash and receipt.",
     "leanPreparation": "Existing serialization, receipt shape and cache behavior preserved.",
     "files": [
@@ -487,20 +658,80 @@
       "realCompilerCoverage": "Existing q sessionConformance proofScript request",
       "executed": true,
       "evidence": {
-        "sourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
-        "runId": 37939061854,
-        "focusedAllCases": 27,
-        "focusedPassed": 27,
-        "focusedSkipped": 0,
-        "realCompilerSessionPassed": true
+        "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+        "runId": "37947341800",
+        "reference": "worker-migration-evidence.json",
+        "passed": true,
+        "focusedHostCases": 3,
+        "focusedCases": [
+          {
+            "name": "reusable PS preparation rejects old and mismatched grammars before compiler operations",
+            "subtestLogLine": 1970,
+            "resultLogLine": 1971,
+            "result": "2026-10-09T14:52:42.5008069Z ok 19 - reusable PS preparation rejects old and mismatched grammars before compiler operations"
+          },
+          {
+            "name": "reusable current PS preparation binds grammar in cold and warm receipts",
+            "subtestLogLine": 1976,
+            "resultLogLine": 1977,
+            "result": "2026-10-09T14:52:42.5010018Z ok 20 - reusable current PS preparation binds grammar in cold and warm receipts"
+          },
+          {
+            "name": "reusable historical Lean preparation retains its receipt and warm state after PS refusal",
+            "subtestLogLine": 1982,
+            "resultLogLine": 1983,
+            "result": "2026-10-09T14:52:42.5011971Z ok 21 - reusable historical Lean preparation retains its receipt and warm state after PS refusal"
+          }
+        ],
+        "sourceSnapshotAndSessionTests": {
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0
+        },
+        "actualGeneratedPreparationSessions": {
+          "count": 2,
+          "passed": true,
+          "markers": [
+            {
+              "logLine": 2179,
+              "exactLoggedLine": "2026-10-09T14:56:41.1139959Z PSC0_SH1_SESSION_CONFORMANCE: PASS (recorded aggregate oracle; warm, prefix, body edit, failure recovery, frozen parse errors, source kind, fresh instance)"
+            },
+            {
+              "logLine": 2195,
+              "exactLoggedLine": "2026-10-09T15:09:52.2123429Z PSC0_SH1_SESSION_CONFORMANCE: PASS (recorded aggregate oracle; warm, prefix, body edit, failure recovery, frozen parse errors, source kind, fresh instance)"
+            }
+          ]
+        },
+        "grammar": {
+          "edition": "ps-0.9-r3",
+          "mode": "new-only",
+          "support": "bounded-selfhost-subset",
+          "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+          "fullStandardConformance": false,
+          "fullPscvConformance": false
+        },
+        "grammarCheckedBeforeCacheOrCompiler": true,
+        "proofScriptGrammarBoundInClosureAndReceipt": true,
+        "leanReceiptAndWarmStatePreserved": true,
+        "hostDoublesNotSyntaxProof": true
       }
     },
-    "providerReceipt": "Preserve the original compact object log and additionally log exact UTF-8 file content, byte count and SHA-256 from read-back Buffer bytes."
+    "providerReceipt": "Preserve the original compact object log and additionally log exact UTF-8 file content, byte count and SHA-256 from read-back Buffer bytes.",
+    "initialAttemptEvidence": {
+      "sourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
+      "runId": 37939061854,
+      "focusedAllCases": 27,
+      "focusedPassed": 27,
+      "focusedSkipped": 0,
+      "realCompilerSessionPassed": true
+    }
   },
   "preparedCurrentGuide": {
     "path": "psc0/docs/selfhost-language/CURRENT.md",
-    "sha": "90a482894c01111f62349b8455ca86756806c7be",
-    "status": "applied-current-R-evidence-and-F-qualification-pending"
+    "sha": "d7de8eeaa78c4eecc0b7cd44a51e23922cb0e26b",
+    "status": "qualified-F-and-TypeScript7-only-current-guide-reconciled",
+    "previousBlob": "90a482894c01111f62349b8455ca86756806c7be"
   },
   "preparedRReceiptCollection": {
     "workflow": ".github/workflows/psc0-sh1-seed-evidence.yml",
@@ -519,11 +750,11 @@
     "providerReceiptSha256": "1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77",
     "coldReceiptSha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d"
   },
-  "sourceRef": null,
+  "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
   "application": {
     "parentCommit": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
     "branch": "psc0/sh1-projection-grammar-v1",
-    "sourceRefMeaning": "The exact executable source is the commit that applies this candidate; its immutable SHA is recorded with the qualification run."
+    "sourceRefMeaning": "Exact qualifying F source fcd875c8f38db4b0524090bd10c7c2fd5024053d; initial production changes remain at 9ee0b1fd38dd1456a187d4675f9027440a989f2d. Actual run/receipts distinguish the successful correction from the two earlier failures."
   },
   "initialApplicationSourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
   "attempts": [
@@ -540,6 +771,17 @@
       "conclusion": "failure",
       "evidence": "worker-migration-attempt-2.json",
       "failureScope": "C1 isolated signature source rejected by the owned Lean frontend; complete current-source ABI/fixed-point/provider gates remain unearned."
+    },
+    {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "runId": 37947341800,
+      "compilerJobId": 113876931430,
+      "providerJobId": 113896228512,
+      "conclusion": "success",
+      "evidence": "worker-migration-evidence.json",
+      "qualification": "worker-migration-qualification.json",
+      "provider": "worker-migration-provider.json",
+      "passedScope": "Complete finite twelve-worker/three-alias F source/runtime and exact-stream provider qualification. R remains selected."
     }
   ],
   "fixtureCorrection": {
@@ -589,7 +831,14 @@
   "currentTypeScriptPolicy": {
     "version": "7.0.2",
     "oldCompilerRetiredFromActivePsc0Tooling": true,
-    "coldRecoveryProofPending": true,
-    "rootWorkspaceRetirementSeparateAndPending": true
+    "coldRecoveryProofPending": false,
+    "rootWorkspaceRetirementSeparateAndPending": false,
+    "qualified": true,
+    "psc0Reference": "worker-migration-evidence.json",
+    "nativeColdReference": "typescript7-native-recovery-evidence.json",
+    "nativeColdRunId": 37947341899,
+    "rootReference": "root-typescript7-evidence.json",
+    "rootRunId": 37951869293,
+    "oldCompilerRetiredFromActiveRootTooling": true
   }
 }

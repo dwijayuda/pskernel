@@ -1,20 +1,28 @@
 # PSC0 current authoring guide
 
+Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
+
 This is the developer entry point for the current bounded self-host language.
 The implementation basis is R2,
-`fe2560aba0f347b1caf8d000d371464642d44f23`; the finite F source migration is an
-implemented candidate awaiting its own qualification. R2 has earned compiler
+`fe2560aba0f347b1caf8d000d371464642d44f23`; F at `fcd875c8f38db4b0524090bd10c7c2fd5024053d` is now
+compiler-qualified and independently provider-accepted in [F run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800). R2 has earned compiler
 qualification, independent provider acceptance and verified cold source recovery.
 [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) explicitly selects its exact compiler. R2 evidence
 does not qualify F.
 
-| Evidence needed before promotion | Current entry |
+| Qualified source and selected-seed evidence | Current entry |
 |---|---|
 | R compiler qualification | **Passed** — [retained qualification](seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/qualification.json), SHA-256 `b3e9a277a7ce5ee9e0bccc449c9ca20a06766cd94cabd34fe4d722c6425e6fac`; job `113804052074` |
 | R independent provider decision | **Passed** — [receipt](grammar-migration-provider.json), SHA-256 `1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77`; four distinct streams covering eight roles |
 | R cold source recovery | **Passed** — [receipt](grammar-migration-cold-recovery.json), SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d` |
 | Explicit selection of R | **Selected** — [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6); manifest SHA-256 `7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694`; seed identity `47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225` |
-| F source revision, paired behavior, ABI and fixed-point evidence | **PENDING — insert immutable F receipts** |
+| F source/runtime qualification | **Passed** — [qualification](worker-migration-qualification.json), SHA-256 `a2ee15bb0c45a465c2f437fc7d74fcb87bfb8a05a3449f202c3670232c70e1a3`; 87 cases, twelve public Core/IR signatures and C2/C3 four-product equality |
+| F independent provider | **Passed** — [receipt](worker-migration-provider.json), SHA-256 `5e674b2808523ff5c3c40d9220ac0810905f248945d3c20813c27a4e1b2f8913` |
+| Current R recovery with TypeScript 7 only | **Passed** — [exact native receipt](typescript7-native-recovery.json), [independent cold run 37947341899](https://github.com/dwijayuda/pskernel/actions/runs/37947341899); all four selected R products matched |
+| Root TypeScript 7 host and packages | **Passed** — [exact root receipt](root-typescript7-qualification.json), [run 37951869293](https://github.com/dwijayuda/pskernel/actions/runs/37951869293); all seven command phases and eleven adapter obligations |
+
+[F provenance](worker-migration-evidence.json) distinguishes the retained compact
+compiler log JSON from original provider file bytes and links the complete records.
 
 ## One current PS grammar; Lean source authority
 
@@ -28,12 +36,14 @@ reference errata. Current configuration records this identity in
 
 The handwritten compiler remains authoritative **`.lean`**, consumed through
 PSC0's own bounded Lean frontend. Generated PS is a canonical surface product;
-the grammar change does not move compiler source authority. Immutable S0/A
-recovery uses its old source revisions and producer identities. It does not add a
-legacy mode to current PS.
+the grammar change does not move compiler source authority. Historical S0/A recovery evidence retains its original source revisions and
+producer identities. Current recovery uses the TypeScript 7-only native route;
+those archived records do not add a legacy mode to current PS.
 
 Current tools require Lean **4.34.0**, Node **22.23.3** and TypeScript **7.0.2**.
-Historical S0/A recovery retains TypeScript **5.8.3**. See
+Selected-R cache-miss recovery uses the proven native Lean plus TypeScript 7
+route. Historical S0/A TypeScript **5.8.3** metadata and recipes remain archival
+facts, with no current TypeScript 5 execution path. See
 [TYPESCRIPT7.md](TYPESCRIPT7.md). Full Standard/PSCV conformance, Lean 4.35 and
 strict SH/1 activation are separate work.
 
@@ -110,7 +120,7 @@ the already prepared Core declarations and exact existing IR, then prepares only
 a small isolated signature/typed-partial module. It does not prepare the entire
 baseline closure again or inject probes into compiler source. Runtime partial
 application retains its separate gate. R's authoring prerequisite is now complete;
-F's own promotion evidence remains pending.
+F's own qualification and provider evidence are recorded above. R remains selected.
 
 ## Daily iteration
 
@@ -150,10 +160,12 @@ bytes against the supplied compiler digest.
 ## Qualification and remaining limits
 
 Use the native gate to check the coherent change before the expensive
-selected-seed sequence. Promote once the exact source passes C1/C2/C3, required
-current product equality, original-IR checking, bounded runtime/grammar gates and
-separate exact-stream provider decisions. R's verified source recovery and explicit
-selection are recorded above; F must earn its own exact-source results. See [IMPLEMENTATION.md](IMPLEMENTATION.md)
+selected-seed sequence. Integrate a source change once its exact source passes
+C1/C2/C3, required current product equality, original-IR checking, bounded
+runtime/grammar gates and separate exact-stream provider decisions. Selecting a
+new authoring seed also requires its separate recovery proof and explicit
+selection; F remains a qualified source migration while R stays selected. R's verified source recovery and explicit
+selection are recorded above; F has separately earned its exact-source results. See [IMPLEMENTATION.md](IMPLEMENTATION.md)
 and [MIGRATION.md](MIGRATION.md); receipts determine completion.
 
 Unsupported capabilities include general `do`, omitted required types,

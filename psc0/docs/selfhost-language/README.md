@@ -1,5 +1,7 @@
 # PSC0 self-host language: findings and decisions
 
+Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
+
 Start with [CURRENT.md](CURRENT.md) for the current source forms, daily commands,
 qualification boundary and remaining limits. This file retains the research
 baseline and its evidence.
@@ -8,9 +10,10 @@ Status, updated 2026-10-09: R2's new-only grammar and parameter-projection repai
 are **compiler-qualified and independently provider-accepted**. Cold source
 recovery is verified, and the exact R successor is explicitly selected by
 [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6).
-The finite F source migration remains an **implemented candidate with
-qualification pending**. Its required authoring seed is now the authenticated R
-compiler; R evidence does not qualify F.
+The finite F source migration is **compiler-qualified and independently
+provider-accepted** at `fcd875c8f38db4b0524090bd10c7c2fd5024053d`, with its own [F run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800).
+R remains the authenticated selected authoring seed. The chosen practical-v1
+source migration is complete; broader language and strict-profile work remain separate.
 Foundation.List B, helper migration H and recursive generic-erasure repair E
 retain their original qualification receipts. The M6 portable runtime IR checker
 and current TypeScript 7.0.2 integration are now separately qualified, including
@@ -23,9 +26,12 @@ The earlier completed TypeScript 7 integration source is
 Its portable M6 implementation was independently qualified under TypeScript
 5.8.3 at `1b5fd12382c920944924c9d03e0851984293caa2`
 ([run 37906602597](https://github.com/dwijayuda/pskernel/actions/runs/37906602597)).
-Historical S0/A recovery keeps TypeScript 5.8.3; new PSC0 emission uses 7.0.2.
-The separate root compiler-API workspace remains on 5.8.3.
-[TYPESCRIPT7.md](TYPESCRIPT7.md) records scope, commands and measured costs.
+Current PSC0 and repository-root development use TypeScript 7.0.2. Selected-R
+cache-miss recovery uses the separately proven native Lean plus TypeScript 7
+route. S0/A's original TypeScript 5.8.3 identities and recipes remain archived
+evidence. [TYPESCRIPT7.md](TYPESCRIPT7.md) records the active commands and proof
+boundaries; [TYPESCRIPT7_CHECKPOINT.md](TYPESCRIPT7_CHECKPOINT.md) preserves the
+earlier two-toolchain measurements.
 
 [IMPLEMENTATION.md](IMPLEMENTATION.md) documents installed behavior and commands;
 [qualification-evidence.json](qualification-evidence.json) records exact results.
@@ -55,7 +61,7 @@ The source grammar change follows the user's explicit new-version-only decision.
 
 The checkpoint replaces semicolon sequences with newline sequences, uses a single typed comma group in declaration and constructor headers, retains native typed lambda binder sequences, and preserves adjacent call groups separately from whitespace applications. It supports annotated parameterless `const` and positive-arity `function` aliases. `f()` remains an explicit empty call in the syntax tree and is refused during elaboration until completion semantics are implemented; `f(())` passes Unit. General `do`, omitted required annotations, defaults, named arguments, tuples and unsupported source constructs fail closed. The canonical printer and active fixtures change in the same checkpoint.
 
-R2 source `fe2560aba0f347b1caf8d000d371464642d44f23` passed compiler qualification in [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635) and separate exact-stream provider acceptance. Its 61-module captured closure passed the new-PS canonical round trip, and all four declared C2/C3 products agree. [IMPLEMENTATION.md](IMPLEMENTATION.md#r2-compiler-and-provider-evidence) records the exact source/closure and jobs. Cold recovery is verified by [its exact receipt](grammar-migration-cold-recovery.json), SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`. R is the selected authoring seed at [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6); F retains its own pending source/runtime qualification. Neither checkpoint establishes full Standard or PSCV conformance, activates strict SH/1, or upgrades the Lean 4.34.0 provider.
+R2 source `fe2560aba0f347b1caf8d000d371464642d44f23` passed compiler qualification in [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635) and separate exact-stream provider acceptance. Its 61-module captured closure passed the new-PS canonical round trip, and all four declared C2/C3 products agree. [IMPLEMENTATION.md](IMPLEMENTATION.md#r2-compiler-and-provider-evidence) records the exact source/closure and jobs. Cold recovery is verified by [its exact receipt](grammar-migration-cold-recovery.json), SHA-256 `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`. R is the selected authoring seed at [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6); F has its own completed source/runtime qualification, recorded below. Neither checkpoint establishes full Standard or PSCV conformance, activates strict SH/1, or upgrades the Lean 4.34.0 provider.
 
 ## F checkpoint: finite worker migration
 
@@ -63,9 +69,9 @@ F implements the twelve workers frozen in [migration-backlog.json](migration-bac
 
 Complete public types and argument order are preserved. The candidate retains each worker's distinct fuel-exhaustion policy, collision order, accumulator reversal, first-error behavior and wrappers. Seven related source guards change their obsolete spelling requirements while keeping their other checks. This finite migration does not include the remaining locator inventory.
 
-Qualification is **pending**. The shared API gate has 87 explicit behavior cases: 51 for F1 and 36 for F2. A separate ABI hook reads the already prepared declarations and exact IR, compares full public Core types and ordered runtime signatures, and elaborates a small isolated signature/typed-partial module. It does not rebuild the baseline closure or add probe declarations to the compiler. Existing runtime partial-application checks remain separate.
+F qualification passed against its exact source. The shared API gate passed 87 explicit behavior cases per compared compiler: 51 for F1 and 36 for F2. A separate ABI hook reads the already prepared declarations and exact IR, compares full public Core types and ordered runtime signatures, and elaborates a small isolated signature/typed-partial module. It does not rebuild the baseline closure or add probe declarations to the compiler. Existing runtime partial-application checks remain separate.
 
-Use the authenticated selected R compiler for one coherent F qualification. Record paired R/F behavior, the ABI observations, current C2/C3 products, checked original IR and exact provider decisions before calling F qualified. [IMPLEMENTATION.md](IMPLEMENTATION.md#f-checkpoint-ordinary-worker-parameters) and [MIGRATION.md](MIGRATION.md#current-f-checkpoint-implemented-candidate-qualification-pending) describe the integration. No unrestricted PSC1, strict SH/1, full PSCV or measured runtime-speedup claim follows from these source rewrites.
+The coherent F qualification used authenticated selected R and recorded paired R/F behavior, all twelve public Core/IR signatures, current C2/C3 products, checked original IR and separate exact provider decisions. [IMPLEMENTATION.md](IMPLEMENTATION.md#f-checkpoint-ordinary-worker-parameters) and [MIGRATION.md](MIGRATION.md#current-f-checkpoint-implemented-candidate-qualification-pending) describe the integration. No unrestricted PSC1, strict SH/1, full PSCV or measured runtime-speedup claim follows from these source rewrites.
 
 ## 1. Correct the premise for the historical baseline
 
@@ -113,6 +119,12 @@ The closure's declaration inventory contains **1,205 ordinary defs, 47 inductive
 
 ## 2. Why ordinary source fails
 
+Historical scope: this section describes the pinned research baseline
+[`37f63c39d4a07189938046c64152bba25d789450`](https://github.com/dwijayuda/pskernel/tree/37f63c39d4a07189938046c64152bba25d789450/psc0).
+Its elaborator restrictions and IR gaps are historical findings, not a list of
+post-F current defects. Current implemented capabilities and actual qualification
+status are recorded in [CURRENT.md](CURRENT.md) and [IMPLEMENTATION.md](IMPLEMENTATION.md).
+
 ### 2.1 A small owned frontend is doing the work
 
 The syntax AST has definitions, partial definitions, theorems, inductives and structures. It has typed lambda binders and flat constructor patterns. It has no general source declaration for classes or instances, no arbitrary macro expansion system, and no recursive pattern tree. The presence of instance synthesis modules does not create source syntax that the parser lacks.[AST]
@@ -131,7 +143,7 @@ Consequently, an ordinary operation shaped like `scan tail (index + 1) updatedSt
 
 The existing list library demonstrates that this is a usable encoding: reverse, append, take and zip already use function-valued recursion. It also already provides map, mapExcept, length and any; there is no need to invent a new walker for every call site.[LIST]
 
-**Root cause:** the current elaborator makes authors perform a transformation that a bounded compiler pass can perform systematically. Generalizing changing parameters into the recursion motive is the highest-value first language improvement.
+**Root cause at the pinned baseline:** its elaborator made authors perform a transformation that a bounded compiler pass can perform systematically. Generalizing changing parameters into the recursion motive is the highest-value first language improvement.
 
 ### 2.3 Recognition guards have become refactoring constraints
 

@@ -4,11 +4,13 @@ The user has retired TypeScript 5 from future development. The current PSC0
 profile accepts **TypeScript 7.0.2 only**, and positional compilation always
 uses `--ignoreConfig`. Current tooling has no supported TypeScript 5 fallback.
 
-**Qualification status:** the current-only PSC0 changes and native selected-R
-recovery route are applied for cloud qualification. Their new full compiler
-and independent cold-recovery evidence are pending. The separate repository-root
-compiler-API adapter and workspace dependencies are a separate migration in
-progress. These pending changes are not yet a repository-wide retirement result.
+**Qualification status: passed.** The current twelve-worker F compiler migration
+passed C1/C2/C3, all four fixed-point products, the twelve Core/IR ABI checks,
+87-case behavior correspondence and independent provider acceptance in
+[run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800).
+TypeScript 7-only native selected-R recovery and the separate root workspace
+qualification also passed, with exact evidence retained below. R remains the
+selected authoring compiler; this source migration does not select F.
 
 The [current implementation guide](CURRENT.md) identifies the selected compiler
 and finite source migration. The [evidence ledger](qualification-evidence.json)
@@ -102,9 +104,41 @@ The current `sh1-qualify.mjs` rejects `seed-identity`, `recover-seed`,
 resolution. Those commands belong to their archived source revisions. Current
 cache-miss recovery uses `sh1-native-seed-recovery.mjs`.
 
-A successful isolated cold run is required before calling this replacement
-recovery route qualified. The previous 45-minute parent-based recovery result
-does not qualify the new route.
+### Independent cold proof
+
+[Run 37947341899](https://github.com/dwijayuda/pskernel/actions/runs/37947341899),
+job **113876930974**, passed for runner source
+`fcd875c8f38db4b0524090bd10c7c2fd5024053d`. The standalone job restored no
+compiler artifact, seed cache or native build cache. Every one of its **75
+recorded commands** succeeded, including native translation of all **61**
+modules. All four selected-R hashes above matched; tracked source, closure and
+selected manifest were unchanged.
+
+The original IR check accepted **56,391 expressions**, visited **725,484
+steps**, and reported **zero findings** before that same IR was emitted.
+No generated compiler, historical parent compiler or TypeScript 5 was executed.
+The recipe is `native-lean-original-ir-four-products-ts7/1`, with recipe SHA-256
+`4ed186c2604bcfaee756881686e70f14569720d72fcd799d9997d2d92217b82a`
+and policy SHA-256
+`0cf0480524ba713e0bcdbeb3cfa3d345e37508743ee5e169b83ba8ee0de160fc`.
+
+| Retained proof | Identity |
+| --- | --- |
+| [Exact native recovery receipt](typescript7-native-recovery.json) | 64,164 UTF-8 bytes; SHA-256 `0d5606c25e634082da39d80ffa5974b3c390d2765ded71bcf1abaf442b7e3919` |
+| [Independent evidence and provenance](typescript7-native-recovery-evidence.json) | Exact completed run/jobs, policy, command and four-product bindings |
+| [Complete decoded job log](evidence-logs/typescript7-native-recovery.log) | SHA-256 `6f47360b88446d7a06f12561772e8d9e317b1f3bfb6d34d610791436f99b3957` |
+| Uploaded artifact | 11624048503; ZIP SHA-256 `967adc94a58d02e4e166e24601252f177a372dc5e6fd50ba01a7125cec9dfae5` |
+
+Recorded recovery work took **86.497 seconds**; the complete job took **158
+seconds**. Native build recorded 17.998 seconds, checked original-IR emission
+59.859 seconds, the TypeScript phase 1.674 seconds and native admissions 3.486
+seconds. These figures describe this run. The older parent-based recipe recorded
+2,728.787 seconds in a different run using a different route; the two runs are
+not a controlled compiler benchmark.
+
+This proof qualifies the replacement recovery route for the existing selected
+R. It neither selects F as a new seed nor substitutes for independent provider
+acceptance of a newly qualified compiler.
 
 ## Efficient daily development
 
@@ -136,17 +170,59 @@ correspondence and separate provider acceptance. Native selected-seed recovery
 has its own independent cold proof. Ordinary edits should not repeat the full
 qualification unless they change the qualified semantic or recovery contract.
 
-## Separate root workspace
+## Root workspace: TypeScript 7-only qualification passed
 
-The repository-root TypeScript workspace is distinct from `psc0`. Its old
-backend uses TypeScript's programmatic compiler API. TypeScript 7's CLI migration
-must preserve the actual compiler and CLI callers' virtual source content,
-module resolution, output artifacts and diagnostics; updating package versions
-alone is insufficient.
+The repository-root TypeScript workspace is distinct from `psc0`. All **21**
+root and package compiler pins now require **7.0.2**, and the exact committed
+npm lock contains that current compiler profile. The sole backend compiler-API
+importer has been replaced by an installed TypeScript 7 CLI adapter. The remaining
+older `selfhost` launchers likewise require 7.0.2 and use `--ignoreConfig`.
 
-That adapter migration and its workspace pins are being completed separately.
-Its own existing backend/compiler/CLI/integration gates must pass before this
-guide can claim that TypeScript 5 is retired across the whole repository.
+The adapter preserves the existing synchronous result contract, virtual source
+content, logical diagnostic positions, module resolution and root
+JavaScript/declaration/source-map products. It uses a unique sibling input and
+private output directory, then removes its private files. Relative TypeScript
+imports and package exports are qualified. Its supported input is an ordinary
+`.ts` filename in an existing writable parent directory; original-basename
+self references, declaration inputs, missing directories and unsupported
+basename-dependent output are explicit refusals. It is not a general arbitrary
+virtual-filesystem compiler host.
+
+Ten unsupported `baseUrl` settings were removed while existing paths and
+output layouts were preserved. Explicit Node type inputs cover the native CLI
+adapter. A Lean exporter TypeScript declaration now describes its actual ignored
+stdin; process behavior is unchanged. The package-map checker now enforces the
+exact declared source language for all twenty packages, including the compiler's
+existing mixed-source manifest.
+
+[Root run 37951869293](https://github.com/dwijayuda/pskernel/actions/runs/37951869293),
+job **113892421469**, passed at source
+`9d150afbec1feda8c97058aa56aa5ab92347d96d`:
+
+| Required root gate | Result |
+| --- | --- |
+| Clean installation from the committed lock | Passed; no lock regeneration |
+| Root build | Passed |
+| Ordered package tests | Passed, including all eleven adapter obligations |
+| Conformance package build | Passed |
+| Lean exporter package build | Passed |
+| Package integration | Passed |
+| Package map, source shape, editor and architecture checks | Passed |
+
+The actual receipt spans 2026-10-09 15:27:57.441 through 15:28:22.403 UTC;
+its seven command records total 24.845 seconds. It reports actual installed
+TypeScript 7.0.2, Node v22.23.3 and `lockGenerated: false`. All 21 source,
+lock and installed-profile bindings and all five original receipt files were
+independently authenticated.
+
+See the [exact root qualification](root-typescript7-qualification.json),
+[complete provenance and attempts](root-typescript7-evidence.json),
+[full decoded root log](evidence-logs/root-typescript7-qualification.log)
+and [root development guide](../../../docs/TYPESCRIPT7.md). The exact
+qualification file is 3,485 bytes with SHA-256
+`a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a`.
+The root gate does not execute a native bootstrap, Lean corpus or kernel oracle,
+and adds no PSC0 fixed-point/provider or new seed-selection claim.
 
 ## Historical evidence
 

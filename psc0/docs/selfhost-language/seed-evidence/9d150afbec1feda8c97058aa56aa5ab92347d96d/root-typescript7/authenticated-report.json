@@ -1,0 +1,1395 @@
+{
+  "schemaVersion": 1,
+  "kind": "authenticated-root-typescript7-evidence",
+  "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+  "workflowConclusion": "success",
+  "qualifiedByThisReview": true,
+  "workflowRunId": 37951869293,
+  "workflowRunAttempt": 1,
+  "jobId": 113892421469,
+  "fullLogSha256": "5836caa0146f2002bec6954ce285ab7789e7ac1758ede4da80248448cdc79e86",
+  "fullLogUtf8Bytes": 84888,
+  "envelopeCount": 27,
+  "files": {
+    "dist/typescript7-root/package-lock.json": {
+      "path": "dist/typescript7-root/package-lock.json",
+      "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+      "bytes": 21592,
+      "content": "{\n  \"name\": \"lean-ts-kernel\",\n  \"version\": \"0.1.0\",\n  \"lockfileVersion\": 3,\n  \"requires\": true,\n  \"packages\": {\n    \"\": {\n      \"name\": \"lean-ts-kernel\",\n      \"version\": \"0.1.0\",\n      \"workspaces\": [\n        \"packages/*\"\n      ],\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"node_modules/@proofscript/backend-ts\": {\n      \"resolved\": \"packages/backend-ts\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/browser\": {\n      \"resolved\": \"packages/browser\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/checked-core\": {\n      \"resolved\": \"packages/checked-core\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/compiler\": {\n      \"resolved\": \"packages/compiler\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/compiler-ir\": {\n      \"resolved\": \"packages/compiler-ir\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/conformance\": {\n      \"resolved\": \"packages/conformance\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/elab\": {\n      \"resolved\": \"packages/elab\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/environment\": {\n      \"resolved\": \"packages/environment\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/erasure\": {\n      \"resolved\": \"packages/erasure\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/language-service\": {\n      \"resolved\": \"packages/language-service\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/lean4export\": {\n      \"resolved\": \"packages/lean4export\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/lsp\": {\n      \"resolved\": \"packages/lsp\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/meta\": {\n      \"resolved\": \"packages/meta\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/module\": {\n      \"resolved\": \"packages/module\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/pretty\": {\n      \"resolved\": \"packages/pretty\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/project\": {\n      \"resolved\": \"packages/project\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/runtime\": {\n      \"resolved\": \"packages/runtime\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/syntax\": {\n      \"resolved\": \"packages/syntax\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/tactic\": {\n      \"resolved\": \"packages/tactic\",\n      \"link\": true\n    },\n    \"node_modules/@types/node\": {\n      \"version\": \"22.15.3\",\n      \"resolved\": \"https://registry.npmjs.org/@types/node/-/node-22.15.3.tgz\",\n      \"integrity\": \"sha512-lX7HFZeHf4QG/J7tBZqrCAXwz9J5RD56Y6MpP0eJkka8p+K0RY/yBTW7CYFJ4VGCclxqOLKmiGP5juQc6MKgcw==\",\n      \"dev\": true,\n      \"license\": \"MIT\",\n      \"dependencies\": {\n        \"undici-types\": \"~6.21.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-aix-ppc64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-aix-ppc64/-/typescript-aix-ppc64-7.0.2.tgz\",\n      \"integrity\": \"sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==\",\n      \"cpu\": [\n        \"ppc64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"aix\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-darwin-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-darwin-arm64/-/typescript-darwin-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-gowzar9MwS/aRWp6f3a4KUqzRjAZjOsmGNCM6LcTgXum+dBfgsBVMN+AgvOCCbguXyick6LJhpBszxMebJ8syA==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"darwin\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-darwin-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-darwin-x64/-/typescript-darwin-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-SZ9xZInqApNlNGc9s0W1VSsktYSOe9cFqNOIqmN1Gs8SmkjKZYFt017G4VwPxASInODuAdbTW7sXiFUf893RgA==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"darwin\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-freebsd-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-freebsd-arm64/-/typescript-freebsd-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-W5NH4y/J0plIIS5b2xvTEkU7JFxyqdMAOgf+Ilhl0vHQXKO5dZoxd+C/jEtq56c4F3wk71RB4BMRQ2XdI+bwYQ==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"freebsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-freebsd-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-freebsd-x64/-/typescript-freebsd-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-UMGDx5sTpzNw3WiPebH7l90IWfJggEd+egHt/q6p7/Cm3zqoV7VxkGXt+3DxPIw8CcmvAB0j3sVVfbhX+M4Tpw==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"freebsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-arm\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-arm/-/typescript-linux-arm-7.0.2.tgz\",\n      \"integrity\": \"sha512-gffT3xPz9sR7j/YJExkyPntrI0P2EP9XbOyWzth2/Gs0RstK+90RBcO0ncXoXy/beYll1SXw846Nf2zdnEz0QQ==\",\n      \"cpu\": [\n        \"arm\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-arm64/-/typescript-linux-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-Qh4eU4/y3yDjnfjjyPYihMj5/ODIlmt+Bzu17OI+fiSRDW57QmU5SiN63exPRNJPKUzcc1INa1NXdrJ+MqHjUQ==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-loong64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-loong64/-/typescript-linux-loong64-7.0.2.tgz\",\n      \"integrity\": \"sha512-uEHck9i8hoAzXPiYRib1O7miOnz23SxIeVl6F4LXox+qov1K35jHcEW6VHKvZI+pyvl7fZEP4MCU5LYvIq1GuQ==\",\n      \"cpu\": [\n        \"loong64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-mips64el\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-mips64el/-/typescript-linux-mips64el-7.0.2.tgz\",\n      \"integrity\": \"sha512-R4KvAMnE43W5Qeqb0Ly56O3mWMWIAgsMyz36DCaycd5nbg/9kzm0liw3JocfRqyJY0KPmzFjbswozXyW0DnIYA==\",\n      \"cpu\": [\n        \"mips64el\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-ppc64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-ppc64/-/typescript-linux-ppc64-7.0.2.tgz\",\n      \"integrity\": \"sha512-DORx5b3sd/4S7eayxm4FQv+A7CrkUIGRaHiwI8oiHTAI1fAPWhF4J0vAlkC8biAlHSVVwxMQ3tjZ2/DVbnQiiA==\",\n      \"cpu\": [\n        \"ppc64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-riscv64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-riscv64/-/typescript-linux-riscv64-7.0.2.tgz\",\n      \"integrity\": \"sha512-wf0jqEDOjrPRnKwYRyyJDRo11KMbvMFrU+q4zqKyChODBzvlkbhNQfKvLxQCcwTpdDaXSHZTVuh0JoCrKCUMHQ==\",\n      \"cpu\": [\n        \"riscv64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-s390x\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-s390x/-/typescript-linux-s390x-7.0.2.tgz\",\n      \"integrity\": \"sha512-IkwJc3L7yhytWd/ewjyxNDfOmswCm9GWMJT/ue/dU4aZNbwZeYAetq42VyLmsmSjvoX7z74X6ZaYCtzAr0EuGw==\",\n      \"cpu\": [\n        \"s390x\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-x64/-/typescript-linux-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-EYdf2cNg7rgCWJnxCdJ+F3V39O8ihb37eHAu1LK8oAFizgTQbPOK7zHHXbPt8rX24COqODXeI3sIf0fCXG7H/A==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-netbsd-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-netbsd-arm64/-/typescript-netbsd-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-+polYF4MF04aPpO5FTkHran9yUQDSXqy5GiSDKpsll5jy3l3+g9QLhpf39T+ePtefhXLOGrLl0QIjkQP6VnelA==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"netbsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-netbsd-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-netbsd-x64/-/typescript-netbsd-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-8YIT0EHM/3dq10ZOVF/A7pc/YSMtbcecct4rWtexrnSCHOPcpC2KTLXfTCR6vDpnSiY12heNb1GiN/wu+T/FyA==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"netbsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-openbsd-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-openbsd-arm64/-/typescript-openbsd-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-APT8+ClYnuYm1u9+kgGXoMj2VzWzcymwh2gNSQVySHfkRDGOTVkoWLjCmOQSaO+PoqQ57B0flRp9SA+7GnnkzQ==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"openbsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-openbsd-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-openbsd-x64/-/typescript-openbsd-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-yX7s+Q0Dln0Dt9tEzZsAjXXR/+ytBM7AlglaqyeMPxQszJ1JhlJdZ6jLA+IzldHtflX81em7lDao1xXu+aRRkg==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"openbsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-sunos-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-sunos-x64/-/typescript-sunos-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-dLJDGaLZ1D4HPQn62u1n8mBDkJREwMsAkCdkwd4Ieqw+x3TUyTsqY0YiBCtE6H6OzzgGk3iuZ3vFWRS+E8/d1g==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"sunos\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-win32-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-win32-arm64/-/typescript-win32-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"win32\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-win32-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"win32\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/lean-ts-kernel\": {\n      \"resolved\": \"\",\n      \"link\": true\n    },\n    \"node_modules/pskernel-cli\": {\n      \"resolved\": \"packages/cli\",\n      \"link\": true\n    },\n    \"node_modules/typescript\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz\",\n      \"integrity\": \"sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==\",\n      \"license\": \"Apache-2.0\",\n      \"bin\": {\n        \"tsc\": \"bin/tsc\"\n      },\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      },\n      \"optionalDependencies\": {\n        \"@typescript/typescript-aix-ppc64\": \"7.0.2\",\n        \"@typescript/typescript-darwin-arm64\": \"7.0.2\",\n        \"@typescript/typescript-darwin-x64\": \"7.0.2\",\n        \"@typescript/typescript-freebsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-freebsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-linux-arm\": \"7.0.2\",\n        \"@typescript/typescript-linux-arm64\": \"7.0.2\",\n        \"@typescript/typescript-linux-loong64\": \"7.0.2\",\n        \"@typescript/typescript-linux-mips64el\": \"7.0.2\",\n        \"@typescript/typescript-linux-ppc64\": \"7.0.2\",\n        \"@typescript/typescript-linux-riscv64\": \"7.0.2\",\n        \"@typescript/typescript-linux-s390x\": \"7.0.2\",\n        \"@typescript/typescript-linux-x64\": \"7.0.2\",\n        \"@typescript/typescript-netbsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-netbsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-openbsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-openbsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-sunos-x64\": \"7.0.2\",\n        \"@typescript/typescript-win32-arm64\": \"7.0.2\",\n        \"@typescript/typescript-win32-x64\": \"7.0.2\"\n      }\n    },\n    \"node_modules/undici-types\": {\n      \"version\": \"6.21.0\",\n      \"resolved\": \"https://registry.npmjs.org/undici-types/-/undici-types-6.21.0.tgz\",\n      \"integrity\": \"sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==\",\n      \"dev\": true,\n      \"license\": \"MIT\"\n    },\n    \"packages/backend-ts\": {\n      \"name\": \"@proofscript/backend-ts\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n        \"typescript\": \"7.0.2\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\"\n      }\n    },\n    \"packages/browser\": {\n      \"name\": \"@proofscript/browser\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/checked-core\": {\n      \"name\": \"@proofscript/checked-core\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/cli\": {\n      \"name\": \"pskernel-cli\",\n      \"version\": \"0.1.0\",\n      \"dependencies\": {\n        \"@proofscript/backend-ts\": \"file:../backend-ts\",\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/compiler\": \"file:../compiler\",\n        \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n        \"@proofscript/elab\": \"file:../elab\",\n        \"@proofscript/environment\": \"file:../environment\",\n        \"@proofscript/module\": \"file:../module\",\n        \"@proofscript/project\": \"file:../project\",\n        \"@proofscript/syntax\": \"file:../syntax\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"bin\": {\n        \"psc\": \"dist/bin/psc.js\",\n        \"pskernel\": \"dist/bin/pskernel.js\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/compiler\": {\n      \"name\": \"@proofscript/compiler\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/backend-ts\": \"file:../backend-ts\",\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n        \"@proofscript/erasure\": \"file:../erasure\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/compiler-ir\": {\n      \"name\": \"@proofscript/compiler-ir\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/conformance\": {\n      \"name\": \"@proofscript/conformance\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"bin\": {\n        \"pskernel-conformance\": \"dist/bin/pskernel-conformance.js\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/elab\": {\n      \"name\": \"@proofscript/elab\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/meta\": \"file:../meta\",\n        \"@proofscript/syntax\": \"file:../syntax\",\n        \"@proofscript/tactic\": \"file:../tactic\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/environment\": {\n      \"name\": \"@proofscript/environment\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/erasure\": {\n      \"name\": \"@proofscript/erasure\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/language-service\": {\n      \"name\": \"@proofscript/language-service\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/elab\": \"file:../elab\",\n        \"@proofscript/project\": \"file:../project\",\n        \"@proofscript/syntax\": \"file:../syntax\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/lean4export\": {\n      \"name\": \"@proofscript/lean4export\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/module\": \"file:../module\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"bin\": {\n        \"proofscript-lean4export\": \"dist/bin/proofscript-lean4export.js\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/lsp\": {\n      \"name\": \"@proofscript/lsp\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/environment\": \"file:../environment\",\n        \"@proofscript/language-service\": \"file:../language-service\",\n        \"@proofscript/project\": \"file:../project\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"bin\": {\n        \"proofscript-lsp\": \"dist/src/bin.js\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/meta\": {\n      \"name\": \"@proofscript/meta\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/module\": {\n      \"name\": \"@proofscript/module\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/pretty\": {\n      \"name\": \"@proofscript/pretty\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/project\": {\n      \"name\": \"@proofscript/project\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/runtime\": {\n      \"name\": \"@proofscript/runtime\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/syntax\": {\n      \"name\": \"@proofscript/syntax\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/tactic\": {\n      \"name\": \"@proofscript/tactic\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    }\n  }\n}\n",
+      "parsed": {
+        "name": "lean-ts-kernel",
+        "version": "0.1.0",
+        "lockfileVersion": 3,
+        "requires": true,
+        "packages": {
+          "": {
+            "name": "lean-ts-kernel",
+            "version": "0.1.0",
+            "workspaces": [
+              "packages/*"
+            ],
+            "devDependencies": {
+              "@types/node": "22.15.3",
+              "typescript": "7.0.2"
+            }
+          },
+          "node_modules/@proofscript/backend-ts": {
+            "resolved": "packages/backend-ts",
+            "link": true
+          },
+          "node_modules/@proofscript/browser": {
+            "resolved": "packages/browser",
+            "link": true
+          },
+          "node_modules/@proofscript/checked-core": {
+            "resolved": "packages/checked-core",
+            "link": true
+          },
+          "node_modules/@proofscript/compiler": {
+            "resolved": "packages/compiler",
+            "link": true
+          },
+          "node_modules/@proofscript/compiler-ir": {
+            "resolved": "packages/compiler-ir",
+            "link": true
+          },
+          "node_modules/@proofscript/conformance": {
+            "resolved": "packages/conformance",
+            "link": true
+          },
+          "node_modules/@proofscript/elab": {
+            "resolved": "packages/elab",
+            "link": true
+          },
+          "node_modules/@proofscript/environment": {
+            "resolved": "packages/environment",
+            "link": true
+          },
+          "node_modules/@proofscript/erasure": {
+            "resolved": "packages/erasure",
+            "link": true
+          },
+          "node_modules/@proofscript/language-service": {
+            "resolved": "packages/language-service",
+            "link": true
+          },
+          "node_modules/@proofscript/lean4export": {
+            "resolved": "packages/lean4export",
+            "link": true
+          },
+          "node_modules/@proofscript/lsp": {
+            "resolved": "packages/lsp",
+            "link": true
+          },
+          "node_modules/@proofscript/meta": {
+            "resolved": "packages/meta",
+            "link": true
+          },
+          "node_modules/@proofscript/module": {
+            "resolved": "packages/module",
+            "link": true
+          },
+          "node_modules/@proofscript/pretty": {
+            "resolved": "packages/pretty",
+            "link": true
+          },
+          "node_modules/@proofscript/project": {
+            "resolved": "packages/project",
+            "link": true
+          },
+          "node_modules/@proofscript/runtime": {
+            "resolved": "packages/runtime",
+            "link": true
+          },
+          "node_modules/@proofscript/syntax": {
+            "resolved": "packages/syntax",
+            "link": true
+          },
+          "node_modules/@proofscript/tactic": {
+            "resolved": "packages/tactic",
+            "link": true
+          },
+          "node_modules/@types/node": {
+            "version": "22.15.3",
+            "resolved": "https://registry.npmjs.org/@types/node/-/node-22.15.3.tgz",
+            "integrity": "sha512-lX7HFZeHf4QG/J7tBZqrCAXwz9J5RD56Y6MpP0eJkka8p+K0RY/yBTW7CYFJ4VGCclxqOLKmiGP5juQc6MKgcw==",
+            "dev": true,
+            "license": "MIT",
+            "dependencies": {
+              "undici-types": "~6.21.0"
+            }
+          },
+          "node_modules/@typescript/typescript-aix-ppc64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-aix-ppc64/-/typescript-aix-ppc64-7.0.2.tgz",
+            "integrity": "sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==",
+            "cpu": [
+              "ppc64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "aix"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-darwin-arm64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-darwin-arm64/-/typescript-darwin-arm64-7.0.2.tgz",
+            "integrity": "sha512-gowzar9MwS/aRWp6f3a4KUqzRjAZjOsmGNCM6LcTgXum+dBfgsBVMN+AgvOCCbguXyick6LJhpBszxMebJ8syA==",
+            "cpu": [
+              "arm64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "darwin"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-darwin-x64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-darwin-x64/-/typescript-darwin-x64-7.0.2.tgz",
+            "integrity": "sha512-SZ9xZInqApNlNGc9s0W1VSsktYSOe9cFqNOIqmN1Gs8SmkjKZYFt017G4VwPxASInODuAdbTW7sXiFUf893RgA==",
+            "cpu": [
+              "x64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "darwin"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-freebsd-arm64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-freebsd-arm64/-/typescript-freebsd-arm64-7.0.2.tgz",
+            "integrity": "sha512-W5NH4y/J0plIIS5b2xvTEkU7JFxyqdMAOgf+Ilhl0vHQXKO5dZoxd+C/jEtq56c4F3wk71RB4BMRQ2XdI+bwYQ==",
+            "cpu": [
+              "arm64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "freebsd"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-freebsd-x64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-freebsd-x64/-/typescript-freebsd-x64-7.0.2.tgz",
+            "integrity": "sha512-UMGDx5sTpzNw3WiPebH7l90IWfJggEd+egHt/q6p7/Cm3zqoV7VxkGXt+3DxPIw8CcmvAB0j3sVVfbhX+M4Tpw==",
+            "cpu": [
+              "x64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "freebsd"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-linux-arm": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-arm/-/typescript-linux-arm-7.0.2.tgz",
+            "integrity": "sha512-gffT3xPz9sR7j/YJExkyPntrI0P2EP9XbOyWzth2/Gs0RstK+90RBcO0ncXoXy/beYll1SXw846Nf2zdnEz0QQ==",
+            "cpu": [
+              "arm"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "linux"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-linux-arm64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-arm64/-/typescript-linux-arm64-7.0.2.tgz",
+            "integrity": "sha512-Qh4eU4/y3yDjnfjjyPYihMj5/ODIlmt+Bzu17OI+fiSRDW57QmU5SiN63exPRNJPKUzcc1INa1NXdrJ+MqHjUQ==",
+            "cpu": [
+              "arm64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "linux"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-linux-loong64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-loong64/-/typescript-linux-loong64-7.0.2.tgz",
+            "integrity": "sha512-uEHck9i8hoAzXPiYRib1O7miOnz23SxIeVl6F4LXox+qov1K35jHcEW6VHKvZI+pyvl7fZEP4MCU5LYvIq1GuQ==",
+            "cpu": [
+              "loong64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "linux"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-linux-mips64el": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-mips64el/-/typescript-linux-mips64el-7.0.2.tgz",
+            "integrity": "sha512-R4KvAMnE43W5Qeqb0Ly56O3mWMWIAgsMyz36DCaycd5nbg/9kzm0liw3JocfRqyJY0KPmzFjbswozXyW0DnIYA==",
+            "cpu": [
+              "mips64el"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "linux"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-linux-ppc64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-ppc64/-/typescript-linux-ppc64-7.0.2.tgz",
+            "integrity": "sha512-DORx5b3sd/4S7eayxm4FQv+A7CrkUIGRaHiwI8oiHTAI1fAPWhF4J0vAlkC8biAlHSVVwxMQ3tjZ2/DVbnQiiA==",
+            "cpu": [
+              "ppc64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "linux"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-linux-riscv64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-riscv64/-/typescript-linux-riscv64-7.0.2.tgz",
+            "integrity": "sha512-wf0jqEDOjrPRnKwYRyyJDRo11KMbvMFrU+q4zqKyChODBzvlkbhNQfKvLxQCcwTpdDaXSHZTVuh0JoCrKCUMHQ==",
+            "cpu": [
+              "riscv64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "linux"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-linux-s390x": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-s390x/-/typescript-linux-s390x-7.0.2.tgz",
+            "integrity": "sha512-IkwJc3L7yhytWd/ewjyxNDfOmswCm9GWMJT/ue/dU4aZNbwZeYAetq42VyLmsmSjvoX7z74X6ZaYCtzAr0EuGw==",
+            "cpu": [
+              "s390x"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "linux"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-linux-x64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-x64/-/typescript-linux-x64-7.0.2.tgz",
+            "integrity": "sha512-EYdf2cNg7rgCWJnxCdJ+F3V39O8ihb37eHAu1LK8oAFizgTQbPOK7zHHXbPt8rX24COqODXeI3sIf0fCXG7H/A==",
+            "cpu": [
+              "x64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "linux"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-netbsd-arm64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-netbsd-arm64/-/typescript-netbsd-arm64-7.0.2.tgz",
+            "integrity": "sha512-+polYF4MF04aPpO5FTkHran9yUQDSXqy5GiSDKpsll5jy3l3+g9QLhpf39T+ePtefhXLOGrLl0QIjkQP6VnelA==",
+            "cpu": [
+              "arm64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "netbsd"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-netbsd-x64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-netbsd-x64/-/typescript-netbsd-x64-7.0.2.tgz",
+            "integrity": "sha512-8YIT0EHM/3dq10ZOVF/A7pc/YSMtbcecct4rWtexrnSCHOPcpC2KTLXfTCR6vDpnSiY12heNb1GiN/wu+T/FyA==",
+            "cpu": [
+              "x64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "netbsd"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-openbsd-arm64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-openbsd-arm64/-/typescript-openbsd-arm64-7.0.2.tgz",
+            "integrity": "sha512-APT8+ClYnuYm1u9+kgGXoMj2VzWzcymwh2gNSQVySHfkRDGOTVkoWLjCmOQSaO+PoqQ57B0flRp9SA+7GnnkzQ==",
+            "cpu": [
+              "arm64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "openbsd"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-openbsd-x64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-openbsd-x64/-/typescript-openbsd-x64-7.0.2.tgz",
+            "integrity": "sha512-yX7s+Q0Dln0Dt9tEzZsAjXXR/+ytBM7AlglaqyeMPxQszJ1JhlJdZ6jLA+IzldHtflX81em7lDao1xXu+aRRkg==",
+            "cpu": [
+              "x64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "openbsd"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-sunos-x64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-sunos-x64/-/typescript-sunos-x64-7.0.2.tgz",
+            "integrity": "sha512-dLJDGaLZ1D4HPQn62u1n8mBDkJREwMsAkCdkwd4Ieqw+x3TUyTsqY0YiBCtE6H6OzzgGk3iuZ3vFWRS+E8/d1g==",
+            "cpu": [
+              "x64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "sunos"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-win32-arm64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-win32-arm64/-/typescript-win32-arm64-7.0.2.tgz",
+            "integrity": "sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ==",
+            "cpu": [
+              "arm64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "win32"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/@typescript/typescript-win32-x64": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz",
+            "integrity": "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==",
+            "cpu": [
+              "x64"
+            ],
+            "license": "Apache-2.0",
+            "optional": true,
+            "os": [
+              "win32"
+            ],
+            "engines": {
+              "node": ">=16.20.0"
+            }
+          },
+          "node_modules/lean-ts-kernel": {
+            "resolved": "",
+            "link": true
+          },
+          "node_modules/pskernel-cli": {
+            "resolved": "packages/cli",
+            "link": true
+          },
+          "node_modules/typescript": {
+            "version": "7.0.2",
+            "resolved": "https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz",
+            "integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+            "license": "Apache-2.0",
+            "bin": {
+              "tsc": "bin/tsc"
+            },
+            "engines": {
+              "node": ">=16.20.0"
+            },
+            "optionalDependencies": {
+              "@typescript/typescript-aix-ppc64": "7.0.2",
+              "@typescript/typescript-darwin-arm64": "7.0.2",
+              "@typescript/typescript-darwin-x64": "7.0.2",
+              "@typescript/typescript-freebsd-arm64": "7.0.2",
+              "@typescript/typescript-freebsd-x64": "7.0.2",
+              "@typescript/typescript-linux-arm": "7.0.2",
+              "@typescript/typescript-linux-arm64": "7.0.2",
+              "@typescript/typescript-linux-loong64": "7.0.2",
+              "@typescript/typescript-linux-mips64el": "7.0.2",
+              "@typescript/typescript-linux-ppc64": "7.0.2",
+              "@typescript/typescript-linux-riscv64": "7.0.2",
+              "@typescript/typescript-linux-s390x": "7.0.2",
+              "@typescript/typescript-linux-x64": "7.0.2",
+              "@typescript/typescript-netbsd-arm64": "7.0.2",
+              "@typescript/typescript-netbsd-x64": "7.0.2",
+              "@typescript/typescript-openbsd-arm64": "7.0.2",
+              "@typescript/typescript-openbsd-x64": "7.0.2",
+              "@typescript/typescript-sunos-x64": "7.0.2",
+              "@typescript/typescript-win32-arm64": "7.0.2",
+              "@typescript/typescript-win32-x64": "7.0.2"
+            }
+          },
+          "node_modules/undici-types": {
+            "version": "6.21.0",
+            "resolved": "https://registry.npmjs.org/undici-types/-/undici-types-6.21.0.tgz",
+            "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==",
+            "dev": true,
+            "license": "MIT"
+          },
+          "packages/backend-ts": {
+            "name": "@proofscript/backend-ts",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "@proofscript/compiler-ir": "file:../compiler-ir",
+              "typescript": "7.0.2"
+            },
+            "devDependencies": {
+              "@types/node": "22.15.3"
+            }
+          },
+          "packages/browser": {
+            "name": "@proofscript/browser",
+            "version": "0.0.0-dev",
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/checked-core": {
+            "name": "@proofscript/checked-core",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "lean-ts-kernel": "file:../.."
+            },
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/cli": {
+            "name": "pskernel-cli",
+            "version": "0.1.0",
+            "dependencies": {
+              "@proofscript/backend-ts": "file:../backend-ts",
+              "@proofscript/checked-core": "file:../checked-core",
+              "@proofscript/compiler": "file:../compiler",
+              "@proofscript/compiler-ir": "file:../compiler-ir",
+              "@proofscript/elab": "file:../elab",
+              "@proofscript/environment": "file:../environment",
+              "@proofscript/module": "file:../module",
+              "@proofscript/project": "file:../project",
+              "@proofscript/syntax": "file:../syntax",
+              "lean-ts-kernel": "file:../.."
+            },
+            "bin": {
+              "psc": "dist/bin/psc.js",
+              "pskernel": "dist/bin/pskernel.js"
+            },
+            "devDependencies": {
+              "@types/node": "22.15.3",
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/compiler": {
+            "name": "@proofscript/compiler",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "@proofscript/backend-ts": "file:../backend-ts",
+              "@proofscript/checked-core": "file:../checked-core",
+              "@proofscript/compiler-ir": "file:../compiler-ir",
+              "@proofscript/erasure": "file:../erasure",
+              "lean-ts-kernel": "file:../.."
+            },
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/compiler-ir": {
+            "name": "@proofscript/compiler-ir",
+            "version": "0.0.0-dev",
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/conformance": {
+            "name": "@proofscript/conformance",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "lean-ts-kernel": "file:../.."
+            },
+            "bin": {
+              "pskernel-conformance": "dist/bin/pskernel-conformance.js"
+            },
+            "devDependencies": {
+              "@types/node": "22.15.3",
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/elab": {
+            "name": "@proofscript/elab",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "@proofscript/checked-core": "file:../checked-core",
+              "@proofscript/meta": "file:../meta",
+              "@proofscript/syntax": "file:../syntax",
+              "@proofscript/tactic": "file:../tactic",
+              "lean-ts-kernel": "file:../.."
+            },
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/environment": {
+            "name": "@proofscript/environment",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "lean-ts-kernel": "file:../.."
+            },
+            "devDependencies": {
+              "@types/node": "22.15.3",
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/erasure": {
+            "name": "@proofscript/erasure",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "@proofscript/checked-core": "file:../checked-core",
+              "@proofscript/compiler-ir": "file:../compiler-ir",
+              "lean-ts-kernel": "file:../.."
+            },
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/language-service": {
+            "name": "@proofscript/language-service",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "@proofscript/checked-core": "file:../checked-core",
+              "@proofscript/elab": "file:../elab",
+              "@proofscript/project": "file:../project",
+              "@proofscript/syntax": "file:../syntax",
+              "lean-ts-kernel": "file:../.."
+            },
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/lean4export": {
+            "name": "@proofscript/lean4export",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "@proofscript/module": "file:../module",
+              "lean-ts-kernel": "file:../.."
+            },
+            "bin": {
+              "proofscript-lean4export": "dist/bin/proofscript-lean4export.js"
+            },
+            "devDependencies": {
+              "@types/node": "22.15.3",
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/lsp": {
+            "name": "@proofscript/lsp",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "@proofscript/environment": "file:../environment",
+              "@proofscript/language-service": "file:../language-service",
+              "@proofscript/project": "file:../project",
+              "lean-ts-kernel": "file:../.."
+            },
+            "bin": {
+              "proofscript-lsp": "dist/src/bin.js"
+            },
+            "devDependencies": {
+              "@types/node": "22.15.3",
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/meta": {
+            "name": "@proofscript/meta",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "lean-ts-kernel": "file:../.."
+            },
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/module": {
+            "name": "@proofscript/module",
+            "version": "0.0.0-dev",
+            "dependencies": {
+              "@proofscript/checked-core": "file:../checked-core",
+              "lean-ts-kernel": "file:../.."
+            },
+            "devDependencies": {
+              "@types/node": "22.15.3",
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/pretty": {
+            "name": "@proofscript/pretty",
+            "version": "0.0.0-dev",
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/project": {
+            "name": "@proofscript/project",
+            "version": "0.0.0-dev",
+            "devDependencies": {
+              "@types/node": "22.15.3",
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/runtime": {
+            "name": "@proofscript/runtime",
+            "version": "0.0.0-dev",
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/syntax": {
+            "name": "@proofscript/syntax",
+            "version": "0.0.0-dev",
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          },
+          "packages/tactic": {
+            "name": "@proofscript/tactic",
+            "version": "0.0.0-dev",
+            "devDependencies": {
+              "typescript": "7.0.2"
+            }
+          }
+        }
+      },
+      "framing": "chunks",
+      "firstLogLine": 246
+    },
+    "dist/typescript7-root/installed-typescript-package.json": {
+      "path": "dist/typescript7-root/installed-typescript-package.json",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "bytes": 3087,
+      "content": "{\n    \"name\": \"typescript\",\n    \"version\": \"7.0.2\",\n    \"license\": \"Apache-2.0\",\n    \"author\": \"Microsoft Corp.\",\n    \"homepage\": \"https://www.typescriptlang.org/\",\n    \"description\": \"TypeScript is a language for application scale JavaScript development\",\n    \"keywords\": [\n        \"TypeScript\",\n        \"Microsoft\",\n        \"compiler\",\n        \"language\",\n        \"javascript\"\n    ],\n    \"bugs\": {\n        \"url\": \"https://github.com/microsoft/TypeScript/issues\"\n    },\n    \"repository\": {\n        \"type\": \"git\",\n        \"url\": \"https://github.com/microsoft/TypeScript.git\"\n    },\n    \"type\": \"module\",\n    \"preferUnplugged\": true,\n    \"engines\": {\n        \"node\": \">=16.20.0\"\n    },\n    \"files\": [\n        \"bin\",\n        \"lib\",\n        \"dist\",\n        \"vendor\",\n        \"NOTICE.txt\"\n    ],\n    \"bin\": {\n        \"tsc\": \"./bin/tsc\"\n    },\n    \"exports\": {\n        \"./package.json\": \"./package.json\",\n        \".\": \"./lib/version.cjs\",\n        \"./unstable/sync\": \"./dist/api/sync/api.js\",\n        \"./unstable/async\": \"./dist/api/async/api.js\",\n        \"./unstable/fs\": \"./dist/api/fs.js\",\n        \"./unstable/proto\": \"./dist/api/proto.js\",\n        \"./unstable/ast\": \"./dist/ast/index.js\",\n        \"./unstable/ast/is\": \"./dist/ast/is.js\",\n        \"./unstable/ast/factory\": \"./dist/ast/factory.generated.js\",\n        \"./unstable/ast/utils\": \"./dist/ast/utils.js\",\n        \"./unstable/ast/scanner\": \"./dist/ast/scanner.js\",\n        \"./unstable/ast/visitor\": \"./dist/ast/visitor.js\",\n        \"./unstable/ast/clone\": \"./dist/ast/clone.js\"\n    },\n    \"imports\": {\n        \"#getExePath\": \"./lib/getExePath.js\",\n        \"#enums/*\": {\n            \"types\": \"./dist/enums/*.enum.d.ts\",\n            \"default\": \"./dist/enums/*.js\"\n        },\n        \"#vscode-jsonrpc/node\": \"./vendor/vscode-jsonrpc/lib/node/main.js\"\n    },\n    \"gitHead\": \"2bd066d87f5bafd315be9f40889d0a60b9e58e0b\",\n    \"publishConfig\": {\n        \"access\": \"public\",\n        \"tag\": \"latest\"\n    },\n    \"optionalDependencies\": {\n        \"@typescript/typescript-win32-x64\": \"7.0.2\",\n        \"@typescript/typescript-win32-arm64\": \"7.0.2\",\n        \"@typescript/typescript-linux-x64\": \"7.0.2\",\n        \"@typescript/typescript-linux-arm\": \"7.0.2\",\n        \"@typescript/typescript-linux-arm64\": \"7.0.2\",\n        \"@typescript/typescript-darwin-x64\": \"7.0.2\",\n        \"@typescript/typescript-darwin-arm64\": \"7.0.2\",\n        \"@typescript/typescript-aix-ppc64\": \"7.0.2\",\n        \"@typescript/typescript-freebsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-freebsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-linux-loong64\": \"7.0.2\",\n        \"@typescript/typescript-linux-mips64el\": \"7.0.2\",\n        \"@typescript/typescript-linux-ppc64\": \"7.0.2\",\n        \"@typescript/typescript-linux-riscv64\": \"7.0.2\",\n        \"@typescript/typescript-linux-s390x\": \"7.0.2\",\n        \"@typescript/typescript-netbsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-netbsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-openbsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-openbsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-sunos-x64\": \"7.0.2\"\n    }\n}",
+      "parsed": {
+        "name": "typescript",
+        "version": "7.0.2",
+        "license": "Apache-2.0",
+        "author": "Microsoft Corp.",
+        "homepage": "https://www.typescriptlang.org/",
+        "description": "TypeScript is a language for application scale JavaScript development",
+        "keywords": [
+          "TypeScript",
+          "Microsoft",
+          "compiler",
+          "language",
+          "javascript"
+        ],
+        "bugs": {
+          "url": "https://github.com/microsoft/TypeScript/issues"
+        },
+        "repository": {
+          "type": "git",
+          "url": "https://github.com/microsoft/TypeScript.git"
+        },
+        "type": "module",
+        "preferUnplugged": true,
+        "engines": {
+          "node": ">=16.20.0"
+        },
+        "files": [
+          "bin",
+          "lib",
+          "dist",
+          "vendor",
+          "NOTICE.txt"
+        ],
+        "bin": {
+          "tsc": "./bin/tsc"
+        },
+        "exports": {
+          "./package.json": "./package.json",
+          ".": "./lib/version.cjs",
+          "./unstable/sync": "./dist/api/sync/api.js",
+          "./unstable/async": "./dist/api/async/api.js",
+          "./unstable/fs": "./dist/api/fs.js",
+          "./unstable/proto": "./dist/api/proto.js",
+          "./unstable/ast": "./dist/ast/index.js",
+          "./unstable/ast/is": "./dist/ast/is.js",
+          "./unstable/ast/factory": "./dist/ast/factory.generated.js",
+          "./unstable/ast/utils": "./dist/ast/utils.js",
+          "./unstable/ast/scanner": "./dist/ast/scanner.js",
+          "./unstable/ast/visitor": "./dist/ast/visitor.js",
+          "./unstable/ast/clone": "./dist/ast/clone.js"
+        },
+        "imports": {
+          "#getExePath": "./lib/getExePath.js",
+          "#enums/*": {
+            "types": "./dist/enums/*.enum.d.ts",
+            "default": "./dist/enums/*.js"
+          },
+          "#vscode-jsonrpc/node": "./vendor/vscode-jsonrpc/lib/node/main.js"
+        },
+        "gitHead": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b",
+        "publishConfig": {
+          "access": "public",
+          "tag": "latest"
+        },
+        "optionalDependencies": {
+          "@typescript/typescript-win32-x64": "7.0.2",
+          "@typescript/typescript-win32-arm64": "7.0.2",
+          "@typescript/typescript-linux-x64": "7.0.2",
+          "@typescript/typescript-linux-arm": "7.0.2",
+          "@typescript/typescript-linux-arm64": "7.0.2",
+          "@typescript/typescript-darwin-x64": "7.0.2",
+          "@typescript/typescript-darwin-arm64": "7.0.2",
+          "@typescript/typescript-aix-ppc64": "7.0.2",
+          "@typescript/typescript-freebsd-arm64": "7.0.2",
+          "@typescript/typescript-freebsd-x64": "7.0.2",
+          "@typescript/typescript-linux-loong64": "7.0.2",
+          "@typescript/typescript-linux-mips64el": "7.0.2",
+          "@typescript/typescript-linux-ppc64": "7.0.2",
+          "@typescript/typescript-linux-riscv64": "7.0.2",
+          "@typescript/typescript-linux-s390x": "7.0.2",
+          "@typescript/typescript-netbsd-arm64": "7.0.2",
+          "@typescript/typescript-netbsd-x64": "7.0.2",
+          "@typescript/typescript-openbsd-arm64": "7.0.2",
+          "@typescript/typescript-openbsd-x64": "7.0.2",
+          "@typescript/typescript-sunos-x64": "7.0.2"
+        }
+      },
+      "framing": "whole",
+      "firstLogLine": 271
+    },
+    "dist/typescript7-root/installed-profile.json": {
+      "path": "dist/typescript7-root/installed-profile.json",
+      "sha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+      "bytes": 4644,
+      "content": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"root-typescript7-installed-profile\",\n  \"sourceRef\": \"9d150afbec1feda8c97058aa56aa5ab92347d96d\",\n  \"workflowRunId\": 37951869293,\n  \"workflowRunAttempt\": 1,\n  \"node\": \"v22.23.3\",\n  \"platform\": \"linux\",\n  \"architecture\": \"x64\",\n  \"typescript\": \"7.0.2\",\n  \"reportedVersion\": \"Version 7.0.2\",\n  \"launcherSha256\": \"2219f428a7e55aaf1f7ad85b9b0f0cf5078aeb76ccc9a7c6036c92d48f492ffd\",\n  \"lockGenerated\": false,\n  \"packageLockSha256\": \"69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1\",\n  \"manifests\": [\n    {\n      \"path\": \"package.json\",\n      \"sha256\": \"7134c3f84b92442c0ea20117d9d68e5fe327b630b2d06200fc4fe84c3485c6bb\"\n    },\n    {\n      \"path\": \"packages/backend-ts/package.json\",\n      \"sha256\": \"01ce17eac169bf3a9b52c79a2df383e696554bbb2a8d87d3578afe57f17e012d\"\n    },\n    {\n      \"path\": \"packages/browser/package.json\",\n      \"sha256\": \"0b547866087820f9a2b69c5a6b3a9ec4269d499542503057a58b13df5fe65331\"\n    },\n    {\n      \"path\": \"packages/checked-core/package.json\",\n      \"sha256\": \"509507a75506587e9d4d5674dc2b9f9abad5d215a64db027d4f10617cbceb609\"\n    },\n    {\n      \"path\": \"packages/cli/package.json\",\n      \"sha256\": \"978fba06b269d508cb1b8a46a1d467553d0db3f37108d0f9db927d0993a7bb36\"\n    },\n    {\n      \"path\": \"packages/compiler-ir/package.json\",\n      \"sha256\": \"e840be27225f47bb6ae07b28dc5da046d473583cd0f92f2e9f0af5f75e4033b8\"\n    },\n    {\n      \"path\": \"packages/compiler/package.json\",\n      \"sha256\": \"0700268a945c6d8421ce0adb310228ba7c8dccb540a510831e50449b5b4242c2\"\n    },\n    {\n      \"path\": \"packages/conformance/package.json\",\n      \"sha256\": \"22563d0c6935e2a2def621e8809e66ae4d4814d67b1cf9bbe9709a68f3662518\"\n    },\n    {\n      \"path\": \"packages/elab/package.json\",\n      \"sha256\": \"d6655712683f75a986e462f1e2a983c29ac75b3be728cb3067f6c4ac0e238bef\"\n    },\n    {\n      \"path\": \"packages/environment/package.json\",\n      \"sha256\": \"dcf7cb7b3a451768f97290c2c85d024e82a3ec152b80f39b9e6e627d5770bf99\"\n    },\n    {\n      \"path\": \"packages/erasure/package.json\",\n      \"sha256\": \"6b589740a1f5c854454078506fdda9a3542c65294867084ac9069113a21c51b0\"\n    },\n    {\n      \"path\": \"packages/language-service/package.json\",\n      \"sha256\": \"7d3353f0da775c603694a9af9c231ba4e5eac74651799f8b3cfed8fb9da6043b\"\n    },\n    {\n      \"path\": \"packages/lean4export/package.json\",\n      \"sha256\": \"75a88451ba54d25478e668d5f71842bd205c06bef2a543cfa1330f9ab1330948\"\n    },\n    {\n      \"path\": \"packages/lsp/package.json\",\n      \"sha256\": \"d3213eb0b2961b095c69e375dfbcdd36ee69e18e0711325d379d21524655f555\"\n    },\n    {\n      \"path\": \"packages/meta/package.json\",\n      \"sha256\": \"8e9ce16be33e2fef9f140bc80a66c121e1ecb6eadd418cb39ca744f6cd3af9f1\"\n    },\n    {\n      \"path\": \"packages/module/package.json\",\n      \"sha256\": \"ab02c38611e688f3143e3f71da888fc3de8e54c762b31f597b19d8a9447b7117\"\n    },\n    {\n      \"path\": \"packages/pretty/package.json\",\n      \"sha256\": \"1876a58f8349e25fcccae9ae40d8507d831ea7e435614c6c10ab32e31cdcbe9c\"\n    },\n    {\n      \"path\": \"packages/project/package.json\",\n      \"sha256\": \"81b57ea3bb383b7d3ad2a29be4ec5de11bac12034659654aa2f64005f775e591\"\n    },\n    {\n      \"path\": \"packages/runtime/package.json\",\n      \"sha256\": \"c7ecdb938467bac410a5719c270ce7a408315544d938d1e1ad159c7c05dcbfe4\"\n    },\n    {\n      \"path\": \"packages/syntax/package.json\",\n      \"sha256\": \"bf69bbeb3e87f6ab9425cee1eca99db6fab76f4f449dde03dff9d3fb4c196606\"\n    },\n    {\n      \"path\": \"packages/tactic/package.json\",\n      \"sha256\": \"e4f5f12a47dee0c279bfb0c69dda93729254f8b6fd8362607d1c0d355ffe5ed7\"\n    }\n  ],\n  \"optionalDependencies\": {\n    \"@typescript/typescript-win32-x64\": \"7.0.2\",\n    \"@typescript/typescript-win32-arm64\": \"7.0.2\",\n    \"@typescript/typescript-linux-x64\": \"7.0.2\",\n    \"@typescript/typescript-linux-arm\": \"7.0.2\",\n    \"@typescript/typescript-linux-arm64\": \"7.0.2\",\n    \"@typescript/typescript-darwin-x64\": \"7.0.2\",\n    \"@typescript/typescript-darwin-arm64\": \"7.0.2\",\n    \"@typescript/typescript-aix-ppc64\": \"7.0.2\",\n    \"@typescript/typescript-freebsd-arm64\": \"7.0.2\",\n    \"@typescript/typescript-freebsd-x64\": \"7.0.2\",\n    \"@typescript/typescript-linux-loong64\": \"7.0.2\",\n    \"@typescript/typescript-linux-mips64el\": \"7.0.2\",\n    \"@typescript/typescript-linux-ppc64\": \"7.0.2\",\n    \"@typescript/typescript-linux-riscv64\": \"7.0.2\",\n    \"@typescript/typescript-linux-s390x\": \"7.0.2\",\n    \"@typescript/typescript-netbsd-arm64\": \"7.0.2\",\n    \"@typescript/typescript-netbsd-x64\": \"7.0.2\",\n    \"@typescript/typescript-openbsd-arm64\": \"7.0.2\",\n    \"@typescript/typescript-openbsd-x64\": \"7.0.2\",\n    \"@typescript/typescript-sunos-x64\": \"7.0.2\"\n  },\n  \"retiredCompilerRuntimeUsed\": false\n}\n",
+      "parsed": {
+        "schemaVersion": 1,
+        "kind": "root-typescript7-installed-profile",
+        "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "workflowRunId": 37951869293,
+        "workflowRunAttempt": 1,
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "typescript": "7.0.2",
+        "reportedVersion": "Version 7.0.2",
+        "launcherSha256": "2219f428a7e55aaf1f7ad85b9b0f0cf5078aeb76ccc9a7c6036c92d48f492ffd",
+        "lockGenerated": false,
+        "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+        "manifests": [
+          {
+            "path": "package.json",
+            "sha256": "7134c3f84b92442c0ea20117d9d68e5fe327b630b2d06200fc4fe84c3485c6bb"
+          },
+          {
+            "path": "packages/backend-ts/package.json",
+            "sha256": "01ce17eac169bf3a9b52c79a2df383e696554bbb2a8d87d3578afe57f17e012d"
+          },
+          {
+            "path": "packages/browser/package.json",
+            "sha256": "0b547866087820f9a2b69c5a6b3a9ec4269d499542503057a58b13df5fe65331"
+          },
+          {
+            "path": "packages/checked-core/package.json",
+            "sha256": "509507a75506587e9d4d5674dc2b9f9abad5d215a64db027d4f10617cbceb609"
+          },
+          {
+            "path": "packages/cli/package.json",
+            "sha256": "978fba06b269d508cb1b8a46a1d467553d0db3f37108d0f9db927d0993a7bb36"
+          },
+          {
+            "path": "packages/compiler-ir/package.json",
+            "sha256": "e840be27225f47bb6ae07b28dc5da046d473583cd0f92f2e9f0af5f75e4033b8"
+          },
+          {
+            "path": "packages/compiler/package.json",
+            "sha256": "0700268a945c6d8421ce0adb310228ba7c8dccb540a510831e50449b5b4242c2"
+          },
+          {
+            "path": "packages/conformance/package.json",
+            "sha256": "22563d0c6935e2a2def621e8809e66ae4d4814d67b1cf9bbe9709a68f3662518"
+          },
+          {
+            "path": "packages/elab/package.json",
+            "sha256": "d6655712683f75a986e462f1e2a983c29ac75b3be728cb3067f6c4ac0e238bef"
+          },
+          {
+            "path": "packages/environment/package.json",
+            "sha256": "dcf7cb7b3a451768f97290c2c85d024e82a3ec152b80f39b9e6e627d5770bf99"
+          },
+          {
+            "path": "packages/erasure/package.json",
+            "sha256": "6b589740a1f5c854454078506fdda9a3542c65294867084ac9069113a21c51b0"
+          },
+          {
+            "path": "packages/language-service/package.json",
+            "sha256": "7d3353f0da775c603694a9af9c231ba4e5eac74651799f8b3cfed8fb9da6043b"
+          },
+          {
+            "path": "packages/lean4export/package.json",
+            "sha256": "75a88451ba54d25478e668d5f71842bd205c06bef2a543cfa1330f9ab1330948"
+          },
+          {
+            "path": "packages/lsp/package.json",
+            "sha256": "d3213eb0b2961b095c69e375dfbcdd36ee69e18e0711325d379d21524655f555"
+          },
+          {
+            "path": "packages/meta/package.json",
+            "sha256": "8e9ce16be33e2fef9f140bc80a66c121e1ecb6eadd418cb39ca744f6cd3af9f1"
+          },
+          {
+            "path": "packages/module/package.json",
+            "sha256": "ab02c38611e688f3143e3f71da888fc3de8e54c762b31f597b19d8a9447b7117"
+          },
+          {
+            "path": "packages/pretty/package.json",
+            "sha256": "1876a58f8349e25fcccae9ae40d8507d831ea7e435614c6c10ab32e31cdcbe9c"
+          },
+          {
+            "path": "packages/project/package.json",
+            "sha256": "81b57ea3bb383b7d3ad2a29be4ec5de11bac12034659654aa2f64005f775e591"
+          },
+          {
+            "path": "packages/runtime/package.json",
+            "sha256": "c7ecdb938467bac410a5719c270ce7a408315544d938d1e1ad159c7c05dcbfe4"
+          },
+          {
+            "path": "packages/syntax/package.json",
+            "sha256": "bf69bbeb3e87f6ab9425cee1eca99db6fab76f4f449dde03dff9d3fb4c196606"
+          },
+          {
+            "path": "packages/tactic/package.json",
+            "sha256": "e4f5f12a47dee0c279bfb0c69dda93729254f8b6fd8362607d1c0d355ffe5ed7"
+          }
+        ],
+        "optionalDependencies": {
+          "@typescript/typescript-win32-x64": "7.0.2",
+          "@typescript/typescript-win32-arm64": "7.0.2",
+          "@typescript/typescript-linux-x64": "7.0.2",
+          "@typescript/typescript-linux-arm": "7.0.2",
+          "@typescript/typescript-linux-arm64": "7.0.2",
+          "@typescript/typescript-darwin-x64": "7.0.2",
+          "@typescript/typescript-darwin-arm64": "7.0.2",
+          "@typescript/typescript-aix-ppc64": "7.0.2",
+          "@typescript/typescript-freebsd-arm64": "7.0.2",
+          "@typescript/typescript-freebsd-x64": "7.0.2",
+          "@typescript/typescript-linux-loong64": "7.0.2",
+          "@typescript/typescript-linux-mips64el": "7.0.2",
+          "@typescript/typescript-linux-ppc64": "7.0.2",
+          "@typescript/typescript-linux-riscv64": "7.0.2",
+          "@typescript/typescript-linux-s390x": "7.0.2",
+          "@typescript/typescript-netbsd-arm64": "7.0.2",
+          "@typescript/typescript-netbsd-x64": "7.0.2",
+          "@typescript/typescript-openbsd-arm64": "7.0.2",
+          "@typescript/typescript-openbsd-x64": "7.0.2",
+          "@typescript/typescript-sunos-x64": "7.0.2"
+        },
+        "retiredCompilerRuntimeUsed": false
+      },
+      "framing": "whole",
+      "firstLogLine": 272
+    },
+    "dist/typescript7-root/qualification.json": {
+      "path": "dist/typescript7-root/qualification.json",
+      "sha256": "a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a",
+      "bytes": 3485,
+      "content": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"root-typescript7-qualification\",\n  \"sourceRef\": \"9d150afbec1feda8c97058aa56aa5ab92347d96d\",\n  \"workflowRunId\": 37951869293,\n  \"workflowRunAttempt\": 1,\n  \"startedAt\": \"2026-10-09T15:27:57.441Z\",\n  \"completedAt\": \"2026-10-09T15:28:22.403Z\",\n  \"passed\": true,\n  \"node\": \"v22.23.3\",\n  \"typescript\": \"7.0.2\",\n  \"lockGenerated\": false,\n  \"packageLockSha256\": \"69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1\",\n  \"installedProfileSha256\": \"630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe\",\n  \"commands\": [\n    {\n      \"name\": \"install\",\n      \"command\": [\n        \"npm\",\n        \"ci\",\n        \"--ignore-scripts\",\n        \"--no-audit\",\n        \"--no-fund\"\n      ],\n      \"exitCode\": 0,\n      \"signal\": null,\n      \"elapsedMs\": 1635,\n      \"stdoutSha256\": \"42655418c228288a9dba4735657fb971df86f631b04c4ca47178142ac98df7fb\",\n      \"stderrSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n    },\n    {\n      \"name\": \"root-build\",\n      \"command\": [\n        \"npm\",\n        \"run\",\n        \"build\"\n      ],\n      \"exitCode\": 0,\n      \"signal\": null,\n      \"elapsedMs\": 336,\n      \"stdoutSha256\": \"0ad5fa5e957471919af121f63e7be285285f8dfd9a8e7c2a4e40fe58db00d963\",\n      \"stderrSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n    },\n    {\n      \"name\": \"package-tests\",\n      \"command\": [\n        \"npm\",\n        \"run\",\n        \"test:packages\"\n      ],\n      \"exitCode\": 0,\n      \"signal\": null,\n      \"elapsedMs\": 13474,\n      \"stdoutSha256\": \"48b83f50ec3c2b48a18478ddd66d1d25a0f9016fd072838425a2cd5ed1c0587c\",\n      \"stderrSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n    },\n    {\n      \"name\": \"conformance-build\",\n      \"command\": [\n        \"npm\",\n        \"run\",\n        \"build\",\n        \"--workspace\",\n        \"@proofscript/conformance\"\n      ],\n      \"exitCode\": 0,\n      \"signal\": null,\n      \"elapsedMs\": 201,\n      \"stdoutSha256\": \"fa8d35b1f896977818e177e65159971f324da48eeb6e54ae39eef9ce0a9dabae\",\n      \"stderrSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n    },\n    {\n      \"name\": \"lean4export-build\",\n      \"command\": [\n        \"npm\",\n        \"run\",\n        \"build\",\n        \"--workspace\",\n        \"@proofscript/lean4export\"\n      ],\n      \"exitCode\": 0,\n      \"signal\": null,\n      \"elapsedMs\": 208,\n      \"stdoutSha256\": \"0db7c2249c7666c8aec0a7cdbaea383495b76e865cd17e7298f350548d24896a\",\n      \"stderrSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n    },\n    {\n      \"name\": \"package-integration\",\n      \"command\": [\n        \"npm\",\n        \"run\",\n        \"test:package-integration\"\n      ],\n      \"exitCode\": 0,\n      \"signal\": null,\n      \"elapsedMs\": 8507,\n      \"stdoutSha256\": \"32ddb05951dc8a589ce06873fe26a4010c437067416483f9123180116a4d6dd1\",\n      \"stderrSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n    },\n    {\n      \"name\": \"package-boundaries\",\n      \"command\": [\n        \"npm\",\n        \"run\",\n        \"check:packages\"\n      ],\n      \"exitCode\": 0,\n      \"signal\": null,\n      \"elapsedMs\": 484,\n      \"stdoutSha256\": \"0bef7975893b8fcd3e18fbad0112f26b60239637dfe77d6874ff09814d73aceb\",\n      \"stderrSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n    }\n  ],\n  \"retiredCompilerRuntimeUsed\": false,\n  \"psc0Qualification\": false,\n  \"kernelOracleOrCorpusExecuted\": false,\n  \"seedSelectionChanged\": false\n}\n",
+      "parsed": {
+        "schemaVersion": 1,
+        "kind": "root-typescript7-qualification",
+        "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "workflowRunId": 37951869293,
+        "workflowRunAttempt": 1,
+        "startedAt": "2026-10-09T15:27:57.441Z",
+        "completedAt": "2026-10-09T15:28:22.403Z",
+        "passed": true,
+        "node": "v22.23.3",
+        "typescript": "7.0.2",
+        "lockGenerated": false,
+        "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+        "installedProfileSha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+        "commands": [
+          {
+            "name": "install",
+            "command": [
+              "npm",
+              "ci",
+              "--ignore-scripts",
+              "--no-audit",
+              "--no-fund"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "elapsedMs": 1635,
+            "stdoutSha256": "42655418c228288a9dba4735657fb971df86f631b04c4ca47178142ac98df7fb",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "name": "root-build",
+            "command": [
+              "npm",
+              "run",
+              "build"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "elapsedMs": 336,
+            "stdoutSha256": "0ad5fa5e957471919af121f63e7be285285f8dfd9a8e7c2a4e40fe58db00d963",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "name": "package-tests",
+            "command": [
+              "npm",
+              "run",
+              "test:packages"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "elapsedMs": 13474,
+            "stdoutSha256": "48b83f50ec3c2b48a18478ddd66d1d25a0f9016fd072838425a2cd5ed1c0587c",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "name": "conformance-build",
+            "command": [
+              "npm",
+              "run",
+              "build",
+              "--workspace",
+              "@proofscript/conformance"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "elapsedMs": 201,
+            "stdoutSha256": "fa8d35b1f896977818e177e65159971f324da48eeb6e54ae39eef9ce0a9dabae",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "name": "lean4export-build",
+            "command": [
+              "npm",
+              "run",
+              "build",
+              "--workspace",
+              "@proofscript/lean4export"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "elapsedMs": 208,
+            "stdoutSha256": "0db7c2249c7666c8aec0a7cdbaea383495b76e865cd17e7298f350548d24896a",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "name": "package-integration",
+            "command": [
+              "npm",
+              "run",
+              "test:package-integration"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "elapsedMs": 8507,
+            "stdoutSha256": "32ddb05951dc8a589ce06873fe26a4010c437067416483f9123180116a4d6dd1",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "name": "package-boundaries",
+            "command": [
+              "npm",
+              "run",
+              "check:packages"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "elapsedMs": 484,
+            "stdoutSha256": "0bef7975893b8fcd3e18fbad0112f26b60239637dfe77d6874ff09814d73aceb",
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "retiredCompilerRuntimeUsed": false,
+        "psc0Qualification": false,
+        "kernelOracleOrCorpusExecuted": false,
+        "seedSelectionChanged": false
+      },
+      "framing": "whole",
+      "firstLogLine": 499
+    },
+    "dist/typescript7-root/evidence-index.json": {
+      "path": "dist/typescript7-root/evidence-index.json",
+      "sha256": "209cd0b9a0bce52405579a1f7c2dc9878b8beb4f890a2bda15e6dd4dcf6a82b4",
+      "bytes": 820,
+      "content": "{\n  \"schemaVersion\": 1,\n  \"sourceRef\": \"9d150afbec1feda8c97058aa56aa5ab92347d96d\",\n  \"files\": [\n    {\n      \"path\": \"dist/typescript7-root/package-lock.json\",\n      \"sha256\": \"69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1\",\n      \"bytes\": 21592\n    },\n    {\n      \"path\": \"dist/typescript7-root/installed-typescript-package.json\",\n      \"sha256\": \"3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e\",\n      \"bytes\": 3087\n    },\n    {\n      \"path\": \"dist/typescript7-root/installed-profile.json\",\n      \"sha256\": \"630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe\",\n      \"bytes\": 4644\n    },\n    {\n      \"path\": \"dist/typescript7-root/qualification.json\",\n      \"sha256\": \"a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a\",\n      \"bytes\": 3485\n    }\n  ]\n}\n",
+      "parsed": {
+        "schemaVersion": 1,
+        "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+        "files": [
+          {
+            "path": "dist/typescript7-root/package-lock.json",
+            "sha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+            "bytes": 21592
+          },
+          {
+            "path": "dist/typescript7-root/installed-typescript-package.json",
+            "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+            "bytes": 3087
+          },
+          {
+            "path": "dist/typescript7-root/installed-profile.json",
+            "sha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+            "bytes": 4644
+          },
+          {
+            "path": "dist/typescript7-root/qualification.json",
+            "sha256": "a6f2b2e31ca61a8249954d43849bb622d01b876db7f8046a67353ce82e9de39a",
+            "bytes": 3485
+          }
+        ]
+      },
+      "framing": "whole",
+      "firstLogLine": 500
+    }
+  },
+  "packageLockSource": "{\n  \"name\": \"lean-ts-kernel\",\n  \"version\": \"0.1.0\",\n  \"lockfileVersion\": 3,\n  \"requires\": true,\n  \"packages\": {\n    \"\": {\n      \"name\": \"lean-ts-kernel\",\n      \"version\": \"0.1.0\",\n      \"workspaces\": [\n        \"packages/*\"\n      ],\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"node_modules/@proofscript/backend-ts\": {\n      \"resolved\": \"packages/backend-ts\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/browser\": {\n      \"resolved\": \"packages/browser\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/checked-core\": {\n      \"resolved\": \"packages/checked-core\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/compiler\": {\n      \"resolved\": \"packages/compiler\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/compiler-ir\": {\n      \"resolved\": \"packages/compiler-ir\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/conformance\": {\n      \"resolved\": \"packages/conformance\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/elab\": {\n      \"resolved\": \"packages/elab\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/environment\": {\n      \"resolved\": \"packages/environment\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/erasure\": {\n      \"resolved\": \"packages/erasure\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/language-service\": {\n      \"resolved\": \"packages/language-service\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/lean4export\": {\n      \"resolved\": \"packages/lean4export\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/lsp\": {\n      \"resolved\": \"packages/lsp\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/meta\": {\n      \"resolved\": \"packages/meta\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/module\": {\n      \"resolved\": \"packages/module\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/pretty\": {\n      \"resolved\": \"packages/pretty\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/project\": {\n      \"resolved\": \"packages/project\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/runtime\": {\n      \"resolved\": \"packages/runtime\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/syntax\": {\n      \"resolved\": \"packages/syntax\",\n      \"link\": true\n    },\n    \"node_modules/@proofscript/tactic\": {\n      \"resolved\": \"packages/tactic\",\n      \"link\": true\n    },\n    \"node_modules/@types/node\": {\n      \"version\": \"22.15.3\",\n      \"resolved\": \"https://registry.npmjs.org/@types/node/-/node-22.15.3.tgz\",\n      \"integrity\": \"sha512-lX7HFZeHf4QG/J7tBZqrCAXwz9J5RD56Y6MpP0eJkka8p+K0RY/yBTW7CYFJ4VGCclxqOLKmiGP5juQc6MKgcw==\",\n      \"dev\": true,\n      \"license\": \"MIT\",\n      \"dependencies\": {\n        \"undici-types\": \"~6.21.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-aix-ppc64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-aix-ppc64/-/typescript-aix-ppc64-7.0.2.tgz\",\n      \"integrity\": \"sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==\",\n      \"cpu\": [\n        \"ppc64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"aix\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-darwin-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-darwin-arm64/-/typescript-darwin-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-gowzar9MwS/aRWp6f3a4KUqzRjAZjOsmGNCM6LcTgXum+dBfgsBVMN+AgvOCCbguXyick6LJhpBszxMebJ8syA==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"darwin\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-darwin-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-darwin-x64/-/typescript-darwin-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-SZ9xZInqApNlNGc9s0W1VSsktYSOe9cFqNOIqmN1Gs8SmkjKZYFt017G4VwPxASInODuAdbTW7sXiFUf893RgA==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"darwin\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-freebsd-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-freebsd-arm64/-/typescript-freebsd-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-W5NH4y/J0plIIS5b2xvTEkU7JFxyqdMAOgf+Ilhl0vHQXKO5dZoxd+C/jEtq56c4F3wk71RB4BMRQ2XdI+bwYQ==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"freebsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-freebsd-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-freebsd-x64/-/typescript-freebsd-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-UMGDx5sTpzNw3WiPebH7l90IWfJggEd+egHt/q6p7/Cm3zqoV7VxkGXt+3DxPIw8CcmvAB0j3sVVfbhX+M4Tpw==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"freebsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-arm\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-arm/-/typescript-linux-arm-7.0.2.tgz\",\n      \"integrity\": \"sha512-gffT3xPz9sR7j/YJExkyPntrI0P2EP9XbOyWzth2/Gs0RstK+90RBcO0ncXoXy/beYll1SXw846Nf2zdnEz0QQ==\",\n      \"cpu\": [\n        \"arm\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-arm64/-/typescript-linux-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-Qh4eU4/y3yDjnfjjyPYihMj5/ODIlmt+Bzu17OI+fiSRDW57QmU5SiN63exPRNJPKUzcc1INa1NXdrJ+MqHjUQ==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-loong64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-loong64/-/typescript-linux-loong64-7.0.2.tgz\",\n      \"integrity\": \"sha512-uEHck9i8hoAzXPiYRib1O7miOnz23SxIeVl6F4LXox+qov1K35jHcEW6VHKvZI+pyvl7fZEP4MCU5LYvIq1GuQ==\",\n      \"cpu\": [\n        \"loong64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-mips64el\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-mips64el/-/typescript-linux-mips64el-7.0.2.tgz\",\n      \"integrity\": \"sha512-R4KvAMnE43W5Qeqb0Ly56O3mWMWIAgsMyz36DCaycd5nbg/9kzm0liw3JocfRqyJY0KPmzFjbswozXyW0DnIYA==\",\n      \"cpu\": [\n        \"mips64el\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-ppc64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-ppc64/-/typescript-linux-ppc64-7.0.2.tgz\",\n      \"integrity\": \"sha512-DORx5b3sd/4S7eayxm4FQv+A7CrkUIGRaHiwI8oiHTAI1fAPWhF4J0vAlkC8biAlHSVVwxMQ3tjZ2/DVbnQiiA==\",\n      \"cpu\": [\n        \"ppc64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-riscv64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-riscv64/-/typescript-linux-riscv64-7.0.2.tgz\",\n      \"integrity\": \"sha512-wf0jqEDOjrPRnKwYRyyJDRo11KMbvMFrU+q4zqKyChODBzvlkbhNQfKvLxQCcwTpdDaXSHZTVuh0JoCrKCUMHQ==\",\n      \"cpu\": [\n        \"riscv64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-s390x\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-s390x/-/typescript-linux-s390x-7.0.2.tgz\",\n      \"integrity\": \"sha512-IkwJc3L7yhytWd/ewjyxNDfOmswCm9GWMJT/ue/dU4aZNbwZeYAetq42VyLmsmSjvoX7z74X6ZaYCtzAr0EuGw==\",\n      \"cpu\": [\n        \"s390x\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-linux-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-linux-x64/-/typescript-linux-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-EYdf2cNg7rgCWJnxCdJ+F3V39O8ihb37eHAu1LK8oAFizgTQbPOK7zHHXbPt8rX24COqODXeI3sIf0fCXG7H/A==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"linux\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-netbsd-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-netbsd-arm64/-/typescript-netbsd-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-+polYF4MF04aPpO5FTkHran9yUQDSXqy5GiSDKpsll5jy3l3+g9QLhpf39T+ePtefhXLOGrLl0QIjkQP6VnelA==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"netbsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-netbsd-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-netbsd-x64/-/typescript-netbsd-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-8YIT0EHM/3dq10ZOVF/A7pc/YSMtbcecct4rWtexrnSCHOPcpC2KTLXfTCR6vDpnSiY12heNb1GiN/wu+T/FyA==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"netbsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-openbsd-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-openbsd-arm64/-/typescript-openbsd-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-APT8+ClYnuYm1u9+kgGXoMj2VzWzcymwh2gNSQVySHfkRDGOTVkoWLjCmOQSaO+PoqQ57B0flRp9SA+7GnnkzQ==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"openbsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-openbsd-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-openbsd-x64/-/typescript-openbsd-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-yX7s+Q0Dln0Dt9tEzZsAjXXR/+ytBM7AlglaqyeMPxQszJ1JhlJdZ6jLA+IzldHtflX81em7lDao1xXu+aRRkg==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"openbsd\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-sunos-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-sunos-x64/-/typescript-sunos-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-dLJDGaLZ1D4HPQn62u1n8mBDkJREwMsAkCdkwd4Ieqw+x3TUyTsqY0YiBCtE6H6OzzgGk3iuZ3vFWRS+E8/d1g==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"sunos\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-win32-arm64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-win32-arm64/-/typescript-win32-arm64-7.0.2.tgz\",\n      \"integrity\": \"sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ==\",\n      \"cpu\": [\n        \"arm64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"win32\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/@typescript/typescript-win32-x64\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz\",\n      \"integrity\": \"sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==\",\n      \"cpu\": [\n        \"x64\"\n      ],\n      \"license\": \"Apache-2.0\",\n      \"optional\": true,\n      \"os\": [\n        \"win32\"\n      ],\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      }\n    },\n    \"node_modules/lean-ts-kernel\": {\n      \"resolved\": \"\",\n      \"link\": true\n    },\n    \"node_modules/pskernel-cli\": {\n      \"resolved\": \"packages/cli\",\n      \"link\": true\n    },\n    \"node_modules/typescript\": {\n      \"version\": \"7.0.2\",\n      \"resolved\": \"https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz\",\n      \"integrity\": \"sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==\",\n      \"license\": \"Apache-2.0\",\n      \"bin\": {\n        \"tsc\": \"bin/tsc\"\n      },\n      \"engines\": {\n        \"node\": \">=16.20.0\"\n      },\n      \"optionalDependencies\": {\n        \"@typescript/typescript-aix-ppc64\": \"7.0.2\",\n        \"@typescript/typescript-darwin-arm64\": \"7.0.2\",\n        \"@typescript/typescript-darwin-x64\": \"7.0.2\",\n        \"@typescript/typescript-freebsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-freebsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-linux-arm\": \"7.0.2\",\n        \"@typescript/typescript-linux-arm64\": \"7.0.2\",\n        \"@typescript/typescript-linux-loong64\": \"7.0.2\",\n        \"@typescript/typescript-linux-mips64el\": \"7.0.2\",\n        \"@typescript/typescript-linux-ppc64\": \"7.0.2\",\n        \"@typescript/typescript-linux-riscv64\": \"7.0.2\",\n        \"@typescript/typescript-linux-s390x\": \"7.0.2\",\n        \"@typescript/typescript-linux-x64\": \"7.0.2\",\n        \"@typescript/typescript-netbsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-netbsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-openbsd-arm64\": \"7.0.2\",\n        \"@typescript/typescript-openbsd-x64\": \"7.0.2\",\n        \"@typescript/typescript-sunos-x64\": \"7.0.2\",\n        \"@typescript/typescript-win32-arm64\": \"7.0.2\",\n        \"@typescript/typescript-win32-x64\": \"7.0.2\"\n      }\n    },\n    \"node_modules/undici-types\": {\n      \"version\": \"6.21.0\",\n      \"resolved\": \"https://registry.npmjs.org/undici-types/-/undici-types-6.21.0.tgz\",\n      \"integrity\": \"sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==\",\n      \"dev\": true,\n      \"license\": \"MIT\"\n    },\n    \"packages/backend-ts\": {\n      \"name\": \"@proofscript/backend-ts\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n        \"typescript\": \"7.0.2\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\"\n      }\n    },\n    \"packages/browser\": {\n      \"name\": \"@proofscript/browser\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/checked-core\": {\n      \"name\": \"@proofscript/checked-core\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/cli\": {\n      \"name\": \"pskernel-cli\",\n      \"version\": \"0.1.0\",\n      \"dependencies\": {\n        \"@proofscript/backend-ts\": \"file:../backend-ts\",\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/compiler\": \"file:../compiler\",\n        \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n        \"@proofscript/elab\": \"file:../elab\",\n        \"@proofscript/environment\": \"file:../environment\",\n        \"@proofscript/module\": \"file:../module\",\n        \"@proofscript/project\": \"file:../project\",\n        \"@proofscript/syntax\": \"file:../syntax\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"bin\": {\n        \"psc\": \"dist/bin/psc.js\",\n        \"pskernel\": \"dist/bin/pskernel.js\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/compiler\": {\n      \"name\": \"@proofscript/compiler\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/backend-ts\": \"file:../backend-ts\",\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n        \"@proofscript/erasure\": \"file:../erasure\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/compiler-ir\": {\n      \"name\": \"@proofscript/compiler-ir\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/conformance\": {\n      \"name\": \"@proofscript/conformance\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"bin\": {\n        \"pskernel-conformance\": \"dist/bin/pskernel-conformance.js\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/elab\": {\n      \"name\": \"@proofscript/elab\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/meta\": \"file:../meta\",\n        \"@proofscript/syntax\": \"file:../syntax\",\n        \"@proofscript/tactic\": \"file:../tactic\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/environment\": {\n      \"name\": \"@proofscript/environment\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/erasure\": {\n      \"name\": \"@proofscript/erasure\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/compiler-ir\": \"file:../compiler-ir\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/language-service\": {\n      \"name\": \"@proofscript/language-service\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"@proofscript/elab\": \"file:../elab\",\n        \"@proofscript/project\": \"file:../project\",\n        \"@proofscript/syntax\": \"file:../syntax\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/lean4export\": {\n      \"name\": \"@proofscript/lean4export\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/module\": \"file:../module\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"bin\": {\n        \"proofscript-lean4export\": \"dist/bin/proofscript-lean4export.js\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/lsp\": {\n      \"name\": \"@proofscript/lsp\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/environment\": \"file:../environment\",\n        \"@proofscript/language-service\": \"file:../language-service\",\n        \"@proofscript/project\": \"file:../project\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"bin\": {\n        \"proofscript-lsp\": \"dist/src/bin.js\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/meta\": {\n      \"name\": \"@proofscript/meta\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/module\": {\n      \"name\": \"@proofscript/module\",\n      \"version\": \"0.0.0-dev\",\n      \"dependencies\": {\n        \"@proofscript/checked-core\": \"file:../checked-core\",\n        \"lean-ts-kernel\": \"file:../..\"\n      },\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/pretty\": {\n      \"name\": \"@proofscript/pretty\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/project\": {\n      \"name\": \"@proofscript/project\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"@types/node\": \"22.15.3\",\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/runtime\": {\n      \"name\": \"@proofscript/runtime\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/syntax\": {\n      \"name\": \"@proofscript/syntax\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    },\n    \"packages/tactic\": {\n      \"name\": \"@proofscript/tactic\",\n      \"version\": \"0.0.0-dev\",\n      \"devDependencies\": {\n        \"typescript\": \"7.0.2\"\n      }\n    }\n  }\n}\n",
+  "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+  "installedProfile": {
+    "schemaVersion": 1,
+    "kind": "root-typescript7-installed-profile",
+    "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+    "workflowRunId": 37951869293,
+    "workflowRunAttempt": 1,
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "typescript": "7.0.2",
+    "reportedVersion": "Version 7.0.2",
+    "launcherSha256": "2219f428a7e55aaf1f7ad85b9b0f0cf5078aeb76ccc9a7c6036c92d48f492ffd",
+    "lockGenerated": false,
+    "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+    "manifests": [
+      {
+        "path": "package.json",
+        "sha256": "7134c3f84b92442c0ea20117d9d68e5fe327b630b2d06200fc4fe84c3485c6bb"
+      },
+      {
+        "path": "packages/backend-ts/package.json",
+        "sha256": "01ce17eac169bf3a9b52c79a2df383e696554bbb2a8d87d3578afe57f17e012d"
+      },
+      {
+        "path": "packages/browser/package.json",
+        "sha256": "0b547866087820f9a2b69c5a6b3a9ec4269d499542503057a58b13df5fe65331"
+      },
+      {
+        "path": "packages/checked-core/package.json",
+        "sha256": "509507a75506587e9d4d5674dc2b9f9abad5d215a64db027d4f10617cbceb609"
+      },
+      {
+        "path": "packages/cli/package.json",
+        "sha256": "978fba06b269d508cb1b8a46a1d467553d0db3f37108d0f9db927d0993a7bb36"
+      },
+      {
+        "path": "packages/compiler-ir/package.json",
+        "sha256": "e840be27225f47bb6ae07b28dc5da046d473583cd0f92f2e9f0af5f75e4033b8"
+      },
+      {
+        "path": "packages/compiler/package.json",
+        "sha256": "0700268a945c6d8421ce0adb310228ba7c8dccb540a510831e50449b5b4242c2"
+      },
+      {
+        "path": "packages/conformance/package.json",
+        "sha256": "22563d0c6935e2a2def621e8809e66ae4d4814d67b1cf9bbe9709a68f3662518"
+      },
+      {
+        "path": "packages/elab/package.json",
+        "sha256": "d6655712683f75a986e462f1e2a983c29ac75b3be728cb3067f6c4ac0e238bef"
+      },
+      {
+        "path": "packages/environment/package.json",
+        "sha256": "dcf7cb7b3a451768f97290c2c85d024e82a3ec152b80f39b9e6e627d5770bf99"
+      },
+      {
+        "path": "packages/erasure/package.json",
+        "sha256": "6b589740a1f5c854454078506fdda9a3542c65294867084ac9069113a21c51b0"
+      },
+      {
+        "path": "packages/language-service/package.json",
+        "sha256": "7d3353f0da775c603694a9af9c231ba4e5eac74651799f8b3cfed8fb9da6043b"
+      },
+      {
+        "path": "packages/lean4export/package.json",
+        "sha256": "75a88451ba54d25478e668d5f71842bd205c06bef2a543cfa1330f9ab1330948"
+      },
+      {
+        "path": "packages/lsp/package.json",
+        "sha256": "d3213eb0b2961b095c69e375dfbcdd36ee69e18e0711325d379d21524655f555"
+      },
+      {
+        "path": "packages/meta/package.json",
+        "sha256": "8e9ce16be33e2fef9f140bc80a66c121e1ecb6eadd418cb39ca744f6cd3af9f1"
+      },
+      {
+        "path": "packages/module/package.json",
+        "sha256": "ab02c38611e688f3143e3f71da888fc3de8e54c762b31f597b19d8a9447b7117"
+      },
+      {
+        "path": "packages/pretty/package.json",
+        "sha256": "1876a58f8349e25fcccae9ae40d8507d831ea7e435614c6c10ab32e31cdcbe9c"
+      },
+      {
+        "path": "packages/project/package.json",
+        "sha256": "81b57ea3bb383b7d3ad2a29be4ec5de11bac12034659654aa2f64005f775e591"
+      },
+      {
+        "path": "packages/runtime/package.json",
+        "sha256": "c7ecdb938467bac410a5719c270ce7a408315544d938d1e1ad159c7c05dcbfe4"
+      },
+      {
+        "path": "packages/syntax/package.json",
+        "sha256": "bf69bbeb3e87f6ab9425cee1eca99db6fab76f4f449dde03dff9d3fb4c196606"
+      },
+      {
+        "path": "packages/tactic/package.json",
+        "sha256": "e4f5f12a47dee0c279bfb0c69dda93729254f8b6fd8362607d1c0d355ffe5ed7"
+      }
+    ],
+    "optionalDependencies": {
+      "@typescript/typescript-win32-x64": "7.0.2",
+      "@typescript/typescript-win32-arm64": "7.0.2",
+      "@typescript/typescript-linux-x64": "7.0.2",
+      "@typescript/typescript-linux-arm": "7.0.2",
+      "@typescript/typescript-linux-arm64": "7.0.2",
+      "@typescript/typescript-darwin-x64": "7.0.2",
+      "@typescript/typescript-darwin-arm64": "7.0.2",
+      "@typescript/typescript-aix-ppc64": "7.0.2",
+      "@typescript/typescript-freebsd-arm64": "7.0.2",
+      "@typescript/typescript-freebsd-x64": "7.0.2",
+      "@typescript/typescript-linux-loong64": "7.0.2",
+      "@typescript/typescript-linux-mips64el": "7.0.2",
+      "@typescript/typescript-linux-ppc64": "7.0.2",
+      "@typescript/typescript-linux-riscv64": "7.0.2",
+      "@typescript/typescript-linux-s390x": "7.0.2",
+      "@typescript/typescript-netbsd-arm64": "7.0.2",
+      "@typescript/typescript-netbsd-x64": "7.0.2",
+      "@typescript/typescript-openbsd-arm64": "7.0.2",
+      "@typescript/typescript-openbsd-x64": "7.0.2",
+      "@typescript/typescript-sunos-x64": "7.0.2"
+    },
+    "retiredCompilerRuntimeUsed": false
+  },
+  "qualification": {
+    "schemaVersion": 1,
+    "kind": "root-typescript7-qualification",
+    "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+    "workflowRunId": 37951869293,
+    "workflowRunAttempt": 1,
+    "startedAt": "2026-10-09T15:27:57.441Z",
+    "completedAt": "2026-10-09T15:28:22.403Z",
+    "passed": true,
+    "node": "v22.23.3",
+    "typescript": "7.0.2",
+    "lockGenerated": false,
+    "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+    "installedProfileSha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+    "commands": [
+      {
+        "name": "install",
+        "command": [
+          "npm",
+          "ci",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "elapsedMs": 1635,
+        "stdoutSha256": "42655418c228288a9dba4735657fb971df86f631b04c4ca47178142ac98df7fb",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "root-build",
+        "command": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "elapsedMs": 336,
+        "stdoutSha256": "0ad5fa5e957471919af121f63e7be285285f8dfd9a8e7c2a4e40fe58db00d963",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "package-tests",
+        "command": [
+          "npm",
+          "run",
+          "test:packages"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "elapsedMs": 13474,
+        "stdoutSha256": "48b83f50ec3c2b48a18478ddd66d1d25a0f9016fd072838425a2cd5ed1c0587c",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "conformance-build",
+        "command": [
+          "npm",
+          "run",
+          "build",
+          "--workspace",
+          "@proofscript/conformance"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "elapsedMs": 201,
+        "stdoutSha256": "fa8d35b1f896977818e177e65159971f324da48eeb6e54ae39eef9ce0a9dabae",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "lean4export-build",
+        "command": [
+          "npm",
+          "run",
+          "build",
+          "--workspace",
+          "@proofscript/lean4export"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "elapsedMs": 208,
+        "stdoutSha256": "0db7c2249c7666c8aec0a7cdbaea383495b76e865cd17e7298f350548d24896a",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "package-integration",
+        "command": [
+          "npm",
+          "run",
+          "test:package-integration"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "elapsedMs": 8507,
+        "stdoutSha256": "32ddb05951dc8a589ce06873fe26a4010c437067416483f9123180116a4d6dd1",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "package-boundaries",
+        "command": [
+          "npm",
+          "run",
+          "check:packages"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "elapsedMs": 484,
+        "stdoutSha256": "0bef7975893b8fcd3e18fbad0112f26b60239637dfe77d6874ff09814d73aceb",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "retiredCompilerRuntimeUsed": false,
+    "psc0Qualification": false,
+    "kernelOracleOrCorpusExecuted": false,
+    "seedSelectionChanged": false
+  },
+  "contract": {
+    "evidenceKind": "compact JSON stdout record, not a separate receipt file",
+    "line": 392,
+    "value": {
+      "schema": "psc-root-typescript7-contract-v1",
+      "typescript": "7.0.2",
+      "passed": true,
+      "cases": [
+        "virtual-source-and-existing-products",
+        "logical-map-name",
+        "config-independent-positional",
+        "relative-typescript-import",
+        "package-export-import",
+        "root-output-selection",
+        "logical-diagnostic-position",
+        "self-reference-refusal",
+        "declaration-input-refusal",
+        "missing-directory-refusal",
+        "stage-cleanup"
+      ]
+    }
+  },
+  "summary": {
+    "passed": true,
+    "qualifiedByThisReview": true,
+    "packagePins": 21,
+    "typescript": "7.0.2",
+    "node": "v22.23.3",
+    "lockGenerated": false,
+    "lockResolution": "existing lock, npm ci only",
+    "currentCompilerInstalled": true,
+    "commands": 7,
+    "completeCommandSequence": true,
+    "adapterContractCompleted": true,
+    "adapterObligations": 11,
+    "psc0Qualification": false,
+    "coldFQualification": false,
+    "seedSelectionChanged": false
+  }
+}

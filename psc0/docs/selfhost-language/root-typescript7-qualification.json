@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-typescript7-qualification",
+  "sourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+  "workflowRunId": 37951869293,
+  "workflowRunAttempt": 1,
+  "startedAt": "2026-10-09T15:27:57.441Z",
+  "completedAt": "2026-10-09T15:28:22.403Z",
+  "passed": true,
+  "node": "v22.23.3",
+  "typescript": "7.0.2",
+  "lockGenerated": false,
+  "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+  "installedProfileSha256": "630d6c0e07ca2eba789b21fbe978303b174979c25be192b8e0167fb7969d3dbe",
+  "commands": [
+    {
+      "name": "install",
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 1635,
+      "stdoutSha256": "42655418c228288a9dba4735657fb971df86f631b04c4ca47178142ac98df7fb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "root-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 336,
+      "stdoutSha256": "0ad5fa5e957471919af121f63e7be285285f8dfd9a8e7c2a4e40fe58db00d963",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "package-tests",
+      "command": [
+        "npm",
+        "run",
+        "test:packages"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 13474,
+      "stdoutSha256": "48b83f50ec3c2b48a18478ddd66d1d25a0f9016fd072838425a2cd5ed1c0587c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "conformance-build",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--workspace",
+        "@proofscript/conformance"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 201,
+      "stdoutSha256": "fa8d35b1f896977818e177e65159971f324da48eeb6e54ae39eef9ce0a9dabae",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "lean4export-build",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--workspace",
+        "@proofscript/lean4export"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 208,
+      "stdoutSha256": "0db7c2249c7666c8aec0a7cdbaea383495b76e865cd17e7298f350548d24896a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "package-integration",
+      "command": [
+        "npm",
+        "run",
+        "test:package-integration"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 8507,
+      "stdoutSha256": "32ddb05951dc8a589ce06873fe26a4010c437067416483f9123180116a4d6dd1",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "package-boundaries",
+      "command": [
+        "npm",
+        "run",
+        "check:packages"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 484,
+      "stdoutSha256": "0bef7975893b8fcd3e18fbad0112f26b60239637dfe77d6874ff09814d73aceb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "retiredCompilerRuntimeUsed": false,
+  "psc0Qualification": false,
+  "kernelOracleOrCorpusExecuted": false,
+  "seedSelectionChanged": false
+}

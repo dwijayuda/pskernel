@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-typescript7-qualification",
+  "sourceRef": "3fce771a3607341ce0c9dfc1f1fa3974e2f0dbab",
+  "workflowRunId": 37950075083,
+  "workflowRunAttempt": 1,
+  "startedAt": "2026-10-09T15:13:43.512Z",
+  "completedAt": "2026-10-09T15:14:03.426Z",
+  "passed": false,
+  "node": "v22.23.3",
+  "typescript": "7.0.2",
+  "lockGenerated": false,
+  "packageLockSha256": "69c5e49b040ff3d45909e15cf1e2123af39fa223b00a7241b533c022a49e33e1",
+  "installedProfileSha256": "5cff347f0380141ce6947775dffbc0776036e69c9a46050df06c02be883700c4",
+  "commands": [
+    {
+      "name": "install",
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 2280,
+      "stdoutSha256": "42655418c228288a9dba4735657fb971df86f631b04c4ca47178142ac98df7fb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "root-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 739,
+      "stdoutSha256": "0ad5fa5e957471919af121f63e7be285285f8dfd9a8e7c2a4e40fe58db00d963",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "package-tests",
+      "command": [
+        "npm",
+        "run",
+        "test:packages"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 16183,
+      "stdoutSha256": "48b83f50ec3c2b48a18478ddd66d1d25a0f9016fd072838425a2cd5ed1c0587c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "conformance-build",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--workspace",
+        "@proofscript/conformance"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 252,
+      "stdoutSha256": "fa8d35b1f896977818e177e65159971f324da48eeb6e54ae39eef9ce0a9dabae",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "lean4export-build",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--workspace",
+        "@proofscript/lean4export"
+      ],
+      "exitCode": 2,
+      "signal": null,
+      "elapsedMs": 262,
+      "stdoutSha256": "8d5fe8cf89b2813a6c07cc31f146b272334870889cd2001736aeeb1cfa309b1c",
+      "stderrSha256": "a1eac35140740673ecb41a635cf118cec4523bb03ad4cf66c3fbde8d90949f39"
+    }
+  ],
+  "retiredCompilerRuntimeUsed": false,
+  "psc0Qualification": false,
+  "kernelOracleOrCorpusExecuted": false,
+  "seedSelectionChanged": false,
+  "failure": "AssertionError [ERR_ASSERTION]: lean4export-build failed\n\n2 !== 0\n"
+}

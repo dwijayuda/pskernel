@@ -9,6 +9,8 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_CORE_CHECKER_OPS_CONFORMANCE: FAIL")
+  else if !psKernelSpecifiedStringMigrationTests then
+    throw (IO.userError "PSC1_KERNEL_CORE_SPECIFIED_STRING_MIGRATION: FAIL")
   else if !psKernelCoreNameTests then
     throw
       (IO.userError

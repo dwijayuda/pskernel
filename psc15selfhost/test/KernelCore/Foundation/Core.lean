@@ -111,6 +111,27 @@ def psKernelNameTestReplacement : PsKernelName :=
     PsKernelName.anonymous
     "Portable"
 
+-- Exercise native UTF-8 cursor boundaries and repeated candidate collisions.
+-- This is conformance evidence; quantified freshness is checked in metatheory.
+def psKernelSpecifiedStringMigrationTests : Bool :=
+  let samples := ["", "a", "b", "é", "ê", "λ", "中", "😀", "aλ中😀", "u_10", "a\\nb"]
+  let equality := samples.all fun left =>
+    samples.all fun right => psKernelStringEq left right == (left == right)
+  let cursors := samples.all fun value =>
+    (List.range (value.utf8ByteSize + 2)).all fun pos =>
+      let raw := String.Pos.Raw.mk pos
+      String.Pos.Raw.atEnd value raw == String.Internal.atEnd value raw &&
+      (String.Pos.Raw.next value raw).byteIdx == (String.Internal.next value raw).byteIdx
+  let candidates := (List.range 40).all fun i =>
+    psKernelNameEq (psKernelSimpleElimNameCandidate i)
+      (PsKernelName.str PsKernelName.anonymous
+        (if i == 0 then "u" else String.Internal.append "u_" (psKernelNatToString i)))
+  let occupied := (List.range 32).map psKernelSimpleElimNameCandidate
+  equality && cursors && candidates &&
+    psKernelNameEq (psKernelSimpleFreshElimName occupied) (psKernelSimpleElimNameCandidate 32) &&
+    psKernelNameEq (psKernelSimpleFreshElimName (occupied ++ occupied))
+      (psKernelSimpleElimNameCandidate 32)
+
 def psKernelCoreNameTests : Bool :=
   Bool.and
     (psKernelNameDifferentialCase

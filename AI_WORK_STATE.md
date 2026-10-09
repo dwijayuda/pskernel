@@ -1,5 +1,21 @@
 # AI Work State
 
+## Authorized specified-primitive migration — 2026-10-09
+- User explicitly approved the narrow primitive API migration and required
+  portable compiler support. Equality cursor calls and candidate append now
+  use specified Lean operations; fuel, branches and candidate format are retained.
+- Concrete comparator reflexivity, candidate injectivity and fresh-name exclusion
+  are implemented, pending cloud CI. Freshness keeps existing positive StringEq
+  soundness; it no longer assumes append/cursor laws or reflexivity.
+- Portable names are definition aliases of existing primitives, with both
+  spellings mapped to existing IR operations. Exact prelude additions are
+  declared in the extension contract; the frozen baseline remains unchanged.
+- Native UTF-8/collision regressions, dual-source portable emitted-code comparison,
+  checked TypeScript erasure tests and frozen-prelude parity are included in CI.
+- Last verified green remains #786; no green claim is made for this submission.
+- Full ordinary/mutual/nested closure, final session/API family, audit and
+  integration reconciliation remain open. Historical checkpoint details follow.
+
 ## Current checkpoint — primitive research and mutual recursor closure — 2026-10-09
 - Full proof and native foundation conformance **#786 GREEN** at
   `b9861c0544e0890c3648547f88f611c19d49cab6`:

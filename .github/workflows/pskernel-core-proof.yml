@@ -61,3 +61,25 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1_kernel_core_foundation_tests
+
+      - name: Check portable primitive aliases and frozen prelude parity
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe psc1_erasure_tests
+          lake build psc2_joint_closure_inventory
+          npm run check:prelude-declaration-parity
+
+  portable-erasure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:src
+      - run: npm run test:packages

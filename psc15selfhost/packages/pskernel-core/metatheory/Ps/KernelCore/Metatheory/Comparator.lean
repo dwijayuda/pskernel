@@ -29,18 +29,18 @@ theorem psKernelStringEqFromWithFuel_symm_core
   | succ remaining ih =>
       dsimp only [psKernelStringEqFromWithFuel]
       cases hLeft :
-          String.Internal.atEnd
+          String.Pos.Raw.atEnd
             left
             (String.Pos.Raw.mk leftPos) with
       | true =>
           cases hRight :
-              String.Internal.atEnd
+              String.Pos.Raw.atEnd
                 right
                 (String.Pos.Raw.mk rightPos) <;>
             simp [hLeft, hRight]
       | false =>
           cases hRight :
-              String.Internal.atEnd
+              String.Pos.Raw.atEnd
                 right
                 (String.Pos.Raw.mk rightPos) with
           | true =>
@@ -86,11 +86,11 @@ theorem psKernelStringEqFromWithFuel_symm_core
                   exact
                     ih
                       (String.Pos.Raw.byteIdx
-                        (String.Internal.next
+                        (String.Pos.Raw.next
                           left
                           (String.Pos.Raw.mk leftPos)))
                       (String.Pos.Raw.byteIdx
-                        (String.Internal.next
+                        (String.Pos.Raw.next
                           right
                           (String.Pos.Raw.mk rightPos)))
 
@@ -455,19 +455,19 @@ theorem psKernelStringEqFromWithFuel_trans_core
   | succ remaining ih =>
       dsimp only [psKernelStringEqFromWithFuel] at hLeft hRight ⊢
       cases hLeftEnd :
-          String.Internal.atEnd
+          String.Pos.Raw.atEnd
             left
             (String.Pos.Raw.mk leftPos) with
       | true =>
           cases hMiddleEnd :
-              String.Internal.atEnd
+              String.Pos.Raw.atEnd
                 middle
                 (String.Pos.Raw.mk middlePos) with
           | false =>
               simp [hLeftEnd, hMiddleEnd] at hLeft
           | true =>
               cases hRightEnd :
-                  String.Internal.atEnd
+                  String.Pos.Raw.atEnd
                     right
                     (String.Pos.Raw.mk rightPos) with
               | false =>
@@ -480,14 +480,14 @@ theorem psKernelStringEqFromWithFuel_trans_core
                   ]
       | false =>
           cases hMiddleEnd :
-              String.Internal.atEnd
+              String.Pos.Raw.atEnd
                 middle
                 (String.Pos.Raw.mk middlePos) with
           | true =>
               simp [hLeftEnd, hMiddleEnd] at hLeft
           | false =>
               cases hRightEnd :
-                  String.Internal.atEnd
+                  String.Pos.Raw.atEnd
                     right
                     (String.Pos.Raw.mk rightPos) with
               | true =>
@@ -544,11 +544,11 @@ theorem psKernelStringEqFromWithFuel_trans_core
                                   left
                                   middle
                                   (String.Pos.Raw.byteIdx
-                                    (String.Internal.next
+                                    (String.Pos.Raw.next
                                       left
                                       (String.Pos.Raw.mk leftPos)))
                                   (String.Pos.Raw.byteIdx
-                                    (String.Internal.next
+                                    (String.Pos.Raw.next
                                       middle
                                       (String.Pos.Raw.mk middlePos))) =
                                 true := by
@@ -565,11 +565,11 @@ theorem psKernelStringEqFromWithFuel_trans_core
                                   middle
                                   right
                                   (String.Pos.Raw.byteIdx
-                                    (String.Internal.next
+                                    (String.Pos.Raw.next
                                       middle
                                       (String.Pos.Raw.mk middlePos)))
                                   (String.Pos.Raw.byteIdx
-                                    (String.Internal.next
+                                    (String.Pos.Raw.next
                                       right
                                       (String.Pos.Raw.mk rightPos))) =
                                 true := by
@@ -583,15 +583,15 @@ theorem psKernelStringEqFromWithFuel_trans_core
                           have hRest :=
                             ih
                               (String.Pos.Raw.byteIdx
-                                (String.Internal.next
+                                (String.Pos.Raw.next
                                   left
                                   (String.Pos.Raw.mk leftPos)))
                               (String.Pos.Raw.byteIdx
-                                (String.Internal.next
+                                (String.Pos.Raw.next
                                   middle
                                   (String.Pos.Raw.mk middlePos)))
                               (String.Pos.Raw.byteIdx
-                                (String.Internal.next
+                                (String.Pos.Raw.next
                                   right
                                   (String.Pos.Raw.mk rightPos)))
                               hLeftRest
@@ -821,14 +821,10 @@ theorem psKernelNameEq_trans_core
 
 
 /-
-Lean 4.34 exposes `String.Internal.atEnd/get/next` as opaque externs in
-`Init.Data.String.Bootstrap`.  The logical library does not provide a theorem
-identifying those externs with the reducible `String.Pos.Raw` operations.
-Consequently reflexivity of the portable String comparator is a runtime/TCB
-obligation rather than something derivable from the current logical interface.
-
-Keeping this as a named premise makes the boundary explicit.  All higher
-comparator reflexivity facts below are derived from this one obligation.
+The named reflexivity interface is retained for reusable comparator lemmas.
+The equality traversal uses specified String.Pos.Raw cursor operations;
+BootstrapStringObligations proves this law without a new trusted premise.
+Positive equality soundness remains a separately named trusted boundary.
 -/
 
 def PsKernelStringEqReflexiveLaw : Prop :=

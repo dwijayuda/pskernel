@@ -92,3 +92,7 @@ theorem psKernelNameEq_true_iff_of_string_laws
 
 #print axioms psKernelNatToString_injective
 #print axioms psKernelSimpleFreshElimName_fresh_of_primitive_obligations
+
+#print axioms psKernelStringEq_reflexive
+#print axioms psKernelSimpleElimNameCandidate_injective
+#print axioms psKernelSimpleFreshElimName_fresh

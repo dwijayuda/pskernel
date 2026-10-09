@@ -536,6 +536,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
+      else if psStringEq text "String.append" then
+        binary PsVerifiedIrIntrinsic.stringAppend
       else if psStringEq text "String.Internal.append" then
         binary PsVerifiedIrIntrinsic.stringAppend
       else if psStringEq text "String.utf8ByteSize" then
@@ -549,10 +551,14 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
+      else if psStringEq text "String.Pos.Raw.next" then
+        binary PsVerifiedIrIntrinsic.stringNext
       else if psStringEq text "String.Internal.next" then
         binary PsVerifiedIrIntrinsic.stringNext
       else if psStringEq text "String.Internal.get" then
         binary PsVerifiedIrIntrinsic.stringGet
+      else if psStringEq text "String.Pos.Raw.atEnd" then
+        binary PsVerifiedIrIntrinsic.stringAtEnd
       else if psStringEq text "String.Internal.atEnd" then
         binary PsVerifiedIrIntrinsic.stringAtEnd
       else if psStringEq text "String.Internal.extract" then

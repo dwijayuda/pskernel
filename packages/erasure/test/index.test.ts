@@ -1243,3 +1243,44 @@ console.log('ok - @proofscript/erasure generic structure metadata');
   if(body?.kind==='call')equal(body.fn.kind,'var');
 }
 console.log('ok - @proofscript/erasure external import lowering');
+
+{
+  // Exercise checked admission and erasure for both spellings of each primitive.
+  for(const [legacy,specified,result,argument,operation] of [
+    ['String.Internal.append','String.append','String','String','string.append'],
+    ['String.Internal.next','String.Pos.Raw.next','Nat','Nat','string.next'],
+    ['String.Internal.atEnd','String.Pos.Raw.atEnd','Bool','Nat','string.atEnd'],
+  ]){
+    const env=new Environment();
+    for(const name of ['String','Nat','Bool']){
+      env.add({kind:'axiom',name:nameFromDotted(name!),levelParams:[],
+        type:sort(levelSucc(levelZero))});
+    }
+    const stringType=constant(nameFromDotted('String'));
+    const argumentType=constant(nameFromDotted(argument!));
+    const type=forallE(nameFromDotted('s'),stringType,
+      forallE(nameFromDotted('p'),argumentType,constant(nameFromDotted(result!))));
+    env.add({kind:'axiom',name:nameFromDotted(legacy!),levelParams:[],type});
+    env.add({kind:'definition',name:nameFromDotted(specified!),levelParams:[],type,
+      value:constant(nameFromDotted(legacy!)),hints:{kind:'regular',height:1n},safety:'safe'});
+    const checked=admitCheckedCoreModule(env,[
+      ...[legacy!,specified!].map((primitive,index)=>({
+        kind:'definition' as const,name:nameFromDotted('primitiveUse'+index),levelParams:[],type,
+        value:lam(nameFromDotted('s'),stringType,
+          lam(nameFromDotted('p'),argumentType,
+            mkAppN(constant(nameFromDotted(primitive)),[bvar(1),bvar(0)]))),
+        hints:{kind:'regular' as const,height:2n},safety:'safe' as const,
+      })),
+    ]);
+    const erased=eraseCheckedCoreModule(checked);
+    equal(validateVerifiedIrModule(erased),true);
+    for(const declaration of erased.declarations.filter(d=>d.name.startsWith('primitiveUse'))){
+      equal(declaration.body.kind,'intrinsic');
+      if(declaration.body.kind==='intrinsic'){
+        equal(declaration.body.operation,operation);
+        equal(declaration.body.args.length,2);
+      }
+    }
+  }
+}
+console.log('ok - specified String definitions preserve text primitive lowering');

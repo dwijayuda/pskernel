@@ -835,8 +835,24 @@ def psPreludeEnvText11 : PsEnvironment :=
     (PsDeclaration.axiomDecl
       psStringPosRawByteIdxName [] psPreludeNatUnaryType)
 
-def psPreludeEnvList0 : PsEnvironment :=
+-- Portable source aliases preserve the existing primitive ABI without adding axioms.
+def psPreludeEnvText12 : PsEnvironment :=
   psPreludeAdd psPreludeEnvText11
+    (PsDeclaration.definitionDecl psStringSpecifiedAppendName [] psPreludeStringBinaryType
+      (PsExpr.const psStringAppendName []))
+
+def psPreludeEnvText13 : PsEnvironment :=
+  psPreludeAdd psPreludeEnvText12
+    (PsDeclaration.definitionDecl psStringPosRawNextName [] psPreludeStringPositionType
+      (PsExpr.const psStringNextName []))
+
+def psPreludeEnvText14 : PsEnvironment :=
+  psPreludeAdd psPreludeEnvText13
+    (PsDeclaration.definitionDecl psStringPosRawAtEndName [] psPreludeStringAtEndType
+      (PsExpr.const psStringAtEndName []))
+
+def psPreludeEnvList0 : PsEnvironment :=
+  psPreludeAdd psPreludeEnvText14
     (PsDeclaration.axiomDecl
       psListName [] psPreludeUnaryTypeConstructorType)
 

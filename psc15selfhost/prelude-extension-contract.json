@@ -44,6 +44,258 @@
         },
         "value": null
       }
+    },
+    {
+      "name": "String.append",
+      "insertBefore": "String.Pos.Raw.byteIdx",
+      "declaration": {
+        "kind": "definition",
+        "levelParameters": [],
+        "metadata": null,
+        "name": "String.append",
+        "type": {
+          "b": {
+            "b": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "String"
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "b"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "String"
+              }
+            }
+          },
+          "bi": "default",
+          "k": "forall",
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "a"
+          },
+          "t": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "String"
+            }
+          }
+        },
+        "value": {
+          "k": "const",
+          "ls": [],
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "String"
+              },
+              "v": "Internal"
+            },
+            "v": "append"
+          }
+        }
+      }
+    },
+    {
+      "name": "String.Pos.Raw.next",
+      "insertBefore": "String.Pos.Raw.byteIdx",
+      "declaration": {
+        "kind": "definition",
+        "levelParameters": [],
+        "metadata": null,
+        "name": "String.Pos.Raw.next",
+        "type": {
+          "b": {
+            "b": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "n"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            }
+          },
+          "bi": "default",
+          "k": "forall",
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "s"
+          },
+          "t": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "String"
+            }
+          }
+        },
+        "value": {
+          "k": "const",
+          "ls": [],
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "String"
+              },
+              "v": "Internal"
+            },
+            "v": "next"
+          }
+        }
+      }
+    },
+    {
+      "name": "String.Pos.Raw.atEnd",
+      "insertBefore": "String.Pos.Raw.byteIdx",
+      "declaration": {
+        "kind": "definition",
+        "levelParameters": [],
+        "metadata": null,
+        "name": "String.Pos.Raw.atEnd",
+        "type": {
+          "b": {
+            "b": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Bool"
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "n"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            }
+          },
+          "bi": "default",
+          "k": "forall",
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "s"
+          },
+          "t": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "String"
+            }
+          }
+        },
+        "value": {
+          "k": "const",
+          "ls": [],
+          "n": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "String"
+              },
+              "v": "Internal"
+            },
+            "v": "atEnd"
+          }
+        }
+      }
     }
   ]
 }

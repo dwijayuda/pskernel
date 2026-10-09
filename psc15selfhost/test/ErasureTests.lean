@@ -298,6 +298,23 @@ def psTestDualSourceLeanNativeStringRawPositionBridge : Bool :=
           "export function rawNext(s: string, p: bigint): bigint"
   | _, _ => false
 
+def psTestSpecifiedStringPrimitiveAliases : Bool :=
+  let source :=
+    "def appendAlias (a : String) (b : String) : String := String.append a b\n" ++
+    "def nextAlias (s : String) (p : Nat) : Nat := " ++
+    "String.Pos.Raw.byteIdx (String.Pos.Raw.next s (String.Pos.Raw.mk p))\n" ++
+    "def endAlias (s : String) (p : Nat) : Bool := " ++
+    "String.Pos.Raw.atEnd s (String.Pos.Raw.mk p)"
+  let legacy := (source.replace "String.append" "String.Internal.append").replace
+    "String.Pos.Raw.next" "String.Internal.next" |>.replace
+    "String.Pos.Raw.atEnd" "String.Internal.atEnd"
+  match psCompileLeanSourceToTypeScript source,
+      psCompileLeanSourceViaProofScriptToTypeScript source,
+      psCompileLeanSourceToTypeScript legacy with
+  | Except.ok direct, Except.ok translated, Except.ok old =>
+      direct == translated && direct == old
+  | _, _, _ => false
+
 def psTestDualSourceLeanNativePartialDefinition : Bool :=
   let leanSource :=
     "partial def loop (n : Nat) : Nat := loop n"
@@ -680,6 +697,7 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native Array foldl", passed := psTestDualSourceLeanNativeArrayFoldl },
   { name := "dual-source Lean-native Array higher-order", passed := psTestDualSourceLeanNativeArrayHigherOrder },
   { name := "dual-source Lean-native partial application", passed := psTestDualSourceLeanNativePartialApplication },
+  { name := "specified String primitive aliases preserve emitted code", passed := psTestSpecifiedStringPrimitiveAliases },
   { name := "dual-source Lean-native text primitives", passed := psTestDualSourceLeanNativeTextPrimitives },
   { name := "dual-source Lean-native String raw-position bridge", passed := psTestDualSourceLeanNativeStringRawPositionBridge },
   { name := "dual-source Lean-native controlled partial def", passed := psTestDualSourceLeanNativePartialDefinition },

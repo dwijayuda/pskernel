@@ -230,3 +230,12 @@ def psStringAtEndName : PsName :=
 
 def psStringExtractName : PsName :=
   psNameAppendStr psStringInternalName "extract"
+
+def psStringSpecifiedAppendName : PsName :=
+  psNameAppendStr psStringName "append"
+
+def psStringPosRawNextName : PsName :=
+  psNameAppendStr psStringPosRawName "next"
+
+def psStringPosRawAtEndName : PsName :=
+  psNameAppendStr psStringPosRawName "atEnd"

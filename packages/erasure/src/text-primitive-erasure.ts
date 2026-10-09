@@ -34,10 +34,13 @@ const textIntrinsics=new Map<
   ['String.push',{operation:'string.push',arity:2}],
   ['String.singleton',{operation:'string.singleton',arity:1}],
   ['String.Internal.length',{operation:'string.length',arity:1}],
+  ['String.append',{operation:'string.append',arity:2}],
   ['String.Internal.append',{operation:'string.append',arity:2}],
   ['String.utf8ByteSize',{operation:'string.utf8ByteSize',arity:1}],
+  ['String.Pos.Raw.next',{operation:'string.next',arity:2}],
   ['String.Internal.next',{operation:'string.next',arity:2}],
   ['String.Internal.get',{operation:'string.get',arity:2}],
+  ['String.Pos.Raw.atEnd',{operation:'string.atEnd',arity:2}],
   ['String.Internal.atEnd',{operation:'string.atEnd',arity:2}],
   ['String.Internal.extract',{operation:'string.extract',arity:3}],
 ]);

@@ -1,6 +1,14 @@
 # PSKernel Core inductive closure: bootstrap primitive boundary
 
-Status: **partially resolved; no new trusted premise adopted**.
+Status: **user-authorized migration implemented; cloud validation pending**.
+The user explicitly approved the three-operation specification/API migration.
+The historical investigation below explains the former opaque-primitive gap.
+Actual equality now uses specified cursor operations, and candidates use specified
+append. Concrete reflexivity and candidate injectivity proofs need no primitive
+hypotheses; freshness retains only existing positive StringEq soundness.
+Portable prelude additions are definition aliases, not new axiom declarations.
+Old names and primitive IR operations remain supported. No equality theorem
+between opaque and specified Lean constants is claimed.
 
 ## Proved progress
 

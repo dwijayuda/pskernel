@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "change": "actual-prepared-core-nat-recursion-evidence",
+  "authority": "Unattached candidate only. Root owns source integration, evidence binder, refs and qualification.",
+  "files": [
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
+      "baseBlob": "e903fb4762f9638655a8be2d4b99421c5b5ebdd3",
+      "baseSha256": "dbc006e4de8284e3d36f60b531166652114879daf4ca2e6042a6b593f8e83bd3",
+      "candidateBlob": "aee5fd7bf96dbfec9ee1c3b4c2698178c55a10e3",
+      "candidateSha256": "6b43a4c92695d355dba24764901cc8b35e50bf43a428ffbc57046be9283c3b7c",
+      "candidateBytes": 5369,
+      "edits": [
+        {
+          "before": "// Type-only generic prefixes activate their computed body at instantiation.\n// Their internal Unit entry adapter is absent from the source telescope.",
+          "after": "-- Type-only generic prefixes activate their computed body at instantiation.\n-- Their internal Unit entry adapter is absent from the source telescope."
+        },
+        {
+          "before": "roupIdentity f value;\n  run 7\n\ndef sh1GroupProjection (f : Nat -> Nat -> Nat) : Nat :=\n  let holder := sh1GroupIdentity (Sh1GroupRecord.mk f);\n  holder.run 3 7\n",
+          "after": "roupIdentity f value;\n  run 7\n\ndef sh1GroupProjection (f : Nat -> Nat -> Nat) : Nat :=\n  let holder := sh1GroupIdentity (Sh1GroupRecord.mk f);\n  holder.run 3 7\n\n-- These finite equations inspect the actual prepared Core before erasure.\n-- A minor must use the reconstructed current constructor, not a captured major.\ndef sh1CoreMajorCapture (n : Nat) : Nat :=\n  match n with\n  | Nat.zero => 0\n  | Nat.succ predecessor =>\n      Nat.add n (sh1CoreMajorCapture predecessor)\n\n-- Nested inspection retains the established outer-child recursive hypothesis.\n-- The newly inspected inner field is not a recursive-call permission.\ndef sh1CoreNestedOuter (n : Nat) : Nat :=\n  match n with\n  | Nat.zero => 0\n  | Nat.succ outer =>\n      match outer with\n      | Nat.zero => Nat.add n (sh1CoreNestedOuter outer)\n      | Nat.succ inner => Nat.add n (sh1CoreNestedOuter outer)\n"
+        }
+      ],
+      "forwardReverseVerified": true,
+      "immutableReadbackVerified": true
+    },
+    {
+      "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+      "baseBlob": "0a9775e708b70980bdb887cd240f7fbc04d082c9",
+      "baseSha256": "5472ac55fbf3741902bed9ef5495b36ff7755b0b002d4da1d12301ea1433e619",
+      "candidateBlob": "59aa5df7a650f4e3134a41c34377eac9aa75dc1d",
+      "candidateSha256": "dbc556d46a0f2e67e902021cf98cb14fc842bd889d68ae83dc586ac6732a2c6f",
+      "candidateBytes": 29200,
+      "edits": [
+        {
+          "before": "export async function runGenericErasureConformance({",
+          "after": "\nconst recursionCases = [\n  { id: 'major-capture-two', declaration: 'sh1CoreMajorCapture', input: 2n, expected: 3n },\n  { id: 'major-capture-three', declaration: 'sh1CoreMajorCapture', input: 3n, expected: 6n },\n  { id: 'nested-outer-two', declaration: 'sh1CoreNestedOuter', input: 2n, expected: 3n },\n  { id: 'nested-outer-three', declaration: 'sh1CoreNestedOuter', input: 3n, expected: 6n },\n];\n\n// This is a finite independent value reference for these two Nat declarations,\n// not a compiler evaluator or a general source/Core demand semantics. It reads\n// the exact prepared objects later passed to erasure, including the actual minor\n// closures and their captured environments. Only constant-Nat motives are used.\nfunction checkPreparedCoreRecursion(prepared, sourceSha256) {\n  const prefix = 'PSC0_SH1_RECURSION_CORE_';\n  const natural = (value, label) => {\n    assert(typeof value === 'bigint' && value >= 0n, prefix + 'NAT: ' + label);\n    return value;\n  };\n  const name = (value) => {\n    const segments = [];\n    while (valueTag(value) !== 'anonymous') {\n      assert(segments.length < 32, prefix + 'NAME_BOUND');\n      const tag = valueTag(value);\n      if (tag === 'str') {\n        assert.equal(typeof value.value, 'string', prefix + 'NAME_STRING');\n        segments.push(['str', value.value]);\n      } else {\n        assert.equal(tag, 'num', prefix + 'NAME_FORM');\n        segments.push(['num', natural(value.value, 'name').toString()]);\n      }\n      value = value.parent;\n    }\n    return segments.reverse();\n  };\n  const nameKey = (value) => JSON.stringify(name(value));\n  const namedKey = (text) => JSON.stringify(text.split('.').map((part) => ['str', part]));\n  const wanted = [...new Set(recursionCases.map((item) => item.declaration))];\n  const wantedKeys = new Map(wanted.map((item) => [namedKey(item), item]));\n  const definitions = new Map();\n  for (const declaration of list(prepared.declarations, 'prepared Core declarations')) {\n    if (valueTag(declaration) !== 'definitionDecl') continue;\n    const label = wantedKeys.get(nameKey(declaration.name));\n    if (label === undefined) continue;\n    assert(!definitions.has(label), prefix + 'DUPLICATE: ' + label);\n    definitions.set(label, declaration);\n  }\n  assert.equal(definitions.size, 2, prefix + 'DECLARATION_COUNT');\n  const natKey = namedKey('Nat');\n  const natType = (expression, label) => {\n    assert.equal(valueTag(expression), 'constE', prefix + 'NAT_TYPE: ' + label);\n    assert.equal(nameKey(expression.name), natKey, prefix + 'NAT_TYPE_NAME: ' + label);\n    assert.equal(list(expression.levels, label).length, 0, prefix + 'NAT_TYPE_LEVELS');\n  };\n  const binder = (value) => {\n    const tag = valueTag(value);\n    assert(['explicit', 'implicit', 'strictImplicit', 'instanceImplicit'].includes(tag),\n      prefix + 'BINDER_FORM');\n    return tag;\n  };\n  let snapshotNodes = 0;\n  const snapshotStep = (depth) => {\n    assert(depth <= 128, prefix + 'SNAPSHOT_DEPTH');\n    assert(++snapshotNodes <= 8192, prefix + 'SNAPSHOT_BOUND');\n  };\n  const levelSnapshot = (level, depth) => {\n    snapshotStep(depth);\n    const tag = valueTag(level);\n    if (tag === 'zero') return { tag };\n    if (tag === 'succ') return { tag, of: levelSnapshot(level.of, depth + 1) };\n    if (tag === 'max' || tag === 'imax') return {\n      tag, left: levelSnapshot(level.left, depth + 1),\n      right: levelSnapshot(level.right, depth + 1),\n    };\n    assert.fail(prefix + 'CLOSED_LEVEL_FORM: ' + String(tag));\n  };\n  const snapshot = (expression, depth = 0) => {\n    snapshotStep(depth);\n    const tag = valueTag(expression);\n    if (tag === 'bvar') return { tag, index: natural(expression.index, 'bvar').toString() };\n    if (tag === 'sortE') return { tag, level: levelSnapshot(expression.level, depth + 1) };\n    if (tag === 'constE') return {\n      tag, name: name(expression.name),\n      levels: list(expression.levels, 'constant levels').map((level) => levelSnapshot(level, depth + 1)),\n    };\n    if (tag === 'app') return {\n      tag, fn: snapshot(expression.fn, depth + 1), arg: snapshot(expression.arg, depth + 1),\n    };\n    if (tag === 'lam' || tag === 'forallE') return {\n      tag, name: name(expression.name), type: snapshot(expression.type, depth + 1),\n      body: snapshot(expression.body, depth + 1), binder: binder(expression.binder),\n    };\n    if (tag === 'letE') return {\n      tag, name: name(expression.name), type: snapshot(expression.type, depth + 1),\n      value: snapshot(expression.value, depth + 1), body: snapshot(expression.body, depth + 1),\n    };\n    if (tag === 'lit') {\n      assert.equal(valueTag(expression.value), 'natural', prefix + 'LITERAL_FORM');\n      return { tag, value: { tag: 'natural', value: natural(expression.value.value, 'literal').toString() } };\n    }\n    assert.fail(prefix + 'SNAPSHOT_FORM: ' + String(tag));\n  };\n  const declarationSnapshots = wanted.map((label) => {\n    const declaration = definitions.get(label);\n    assert(declaration, prefix + 'DECLARATION: ' + label);\n    assert.equal(list(declaration.levelParams, label).length, 0, prefix + 'LEVEL_PARAMETERS');\n    assert.equal(valueTag(declaration.type), 'forallE', prefix + 'TYPE_TELESCOPE: ' + label);\n    assert.equal(binder(declaration.type.binder), 'explicit', prefix + 'TYPE_BINDER: ' + label);\n    natType(declaration.type.type, label + ' parameter');\n    natType(declaration.type.body, label + ' result');\n    assert.equal(valueTag(declaration.value), 'lam', prefix + 'VALUE_PREFIX: ' + label);\n    assert.equal(binder(declaration.value.binder), 'explicit', prefix + 'VALUE_BINDER: ' + label);\n    natType(declaration.value.type, label + ' lambda parameter');\n    return { name: label, type: snapshot(declaration.type), value: snapshot(declaration.value) };\n  });\n\n  const budget = { limit: 20000, used: 0, remaining: 20000 };\n  let recursorApplications = 0;\n  const tick = () => {\n    assert(budget.remaining > 0, prefix + 'EVALUATION_BUDGET');\n    budget.remaining--;\n    budget.used++;\n  };\n  const builtins = new Map([\n    [namedKey('Nat.succ'), { name: 'Nat.succ', arity: 1 }],\n    [namedKey('Nat.add'), { name: 'Nat.add', arity: 2 }],\n    [namedKey('Nat.rec'), { name: 'Nat.rec', arity: 4 }],\n  ]);\n  const evaluate = (expression, environment) => {\n    tick();\n    const tag = valueTag(expression);\n    if (tag === 'bvar') {\n      const index = natural(expression.index, 'bvar');\n      assert(index < BigInt(environment.length) && index < 128n, prefix + 'BVAR_SCOPE');\n      return environment[Number(index)];\n    }\n    if (tag === 'lam') return { kind: 'closure', node: expression, environment };\n    if (tag === 'app') {\n      const fn = evaluate(expression.fn, environment);\n      const argument = evaluate(expression.arg, environment);\n      return apply(fn, argument);\n    }\n    if (tag === 'letE') {\n      const value = evaluate(expression.value, environment);\n      assert(environment.length < 128, prefix + 'ENVIRONMENT_BOUND');\n      return evaluate(expression.body, [value, ...environment]);\n    }\n    if (tag === 'lit') {\n      assert.equal(valueTag(expression.value), 'natural', prefix + 'RUNTIME_LITERAL_FORM');\n      return natural(expression.value.value, 'runtime literal');\n    }\n    if (tag === 'constE') {\n      const key = nameKey(expression.name);\n      if (key === namedKey('Nat.zero')) return 0n;\n      const builtin = builtins.get(key);\n      if (builtin) return { kind: 'builtin', ...builtin, arguments: [] };\n      const label = wantedKeys.get(key);\n      if (label !== undefined) return evaluate(definitions.get(label).value, []);\n      assert.fail(prefix + 'RUNTIME_CONSTANT: ' + key);\n    }\n    assert.fail(prefix + 'RUNTIME_FORM: ' + String(tag));\n  };\n  const apply = (fn, argument) => {\n    tick();\n    assert(fn !== null && typeof fn === 'object', prefix + 'FUNCTION_VALUE');\n    if (fn.kind === 'closure') {\n      assert(fn.environment.length < 128, prefix + 'ENVIRONMENT_BOUND');\n      return evaluate(fn.node.body, [argument, ...fn.environment]);\n    }\n    assert.equal(fn.kind, 'builtin', prefix + 'FUNCTION_FORM');\n    const arguments_ = [...fn.arguments, argument];\n    assert(arguments_.length <= fn.arity, prefix + 'BUILTIN_ARITY');\n    if (arguments_.length < fn.arity) return { ...fn, arguments: arguments_ };\n    if (fn.name === 'Nat.succ') return natural(arguments_[0], 'succ') + 1n;\n    if (fn.name === 'Nat.add') return natural(arguments_[0], 'add left') + natural(arguments_[1], 'add right');\n    assert.equal(fn.name, 'Nat.rec', prefix + 'BUILTIN_NAME');\n    const [motive, zero, step, major] = arguments_;\n    assert.equal(motive.kind, 'closure', prefix + 'MOTIVE_CLOSURE');\n    natType(motive.node.type, 'motive parameter');\n    natType(motive.node.body, 'constant motive result');\n    assert.equal(step.kind, 'closure', prefix + 'STEP_CLOSURE');\n    let result = natural(zero, 'recursor zero minor');\n    const count = natural(major, 'recursor major');\n    assert(count <= 64n, prefix + 'RECURSOR_MAJOR_BOUND');\n    recursorApplications++;\n    for (let predecessor = 0n; predecessor < count; predecessor++) {\n      tick();\n      result = natural(apply(apply(step, predecessor), result), 'recursor step result');\n    }\n    return result;\n  };\n  const observations = recursionCases.map(({ id, declaration, input, expected }) => {\n    const stepsBefore = budget.used;\n    const recursorsBefore = recursorApplications;\n    const actual = natural(apply(evaluate(definitions.get(declaration).value, []), input), id);\n    assert.equal(actual, expected, prefix + 'EQUATION: ' + id);\n    const usedRecursors = recursorApplications - recursorsBefore;\n    assert(usedRecursors > 0, prefix + 'ACTUAL_RECURSOR: ' + id);\n    return { id, declaration, input: input.toString(), value: actual.toString(),\n      steps: budget.used - stepsBefore, recursorApplications: usedRecursors, status: 'pass' };\n  });\n  const artifact = {\n    schemaVersion: 1, evidence: 'actual-prepared-core-nat-recursion',\n    sourceSha256, declarations: declarationSnapshots,\n  };\n  const artifactText = JSON.stringify(artifact, null, 2) + '\\n';\n  const receipt = {\n    policy: 'prepared-core-nat-reference/1',\n    preparedObject: 'same PsCompilerAdmissionReadyModule used for original IR',\n    artifact: { path: 'recursion-core.json', sha256: sha256(artifactText), bytes: Buffer.byteLength(artifactText) },\n    declarations: declarationSnapshots.map((declaration) => ({\n      name: declaration.name, sourceRuntimeArity: 1, coreSha256: sha256(JSON.stringify(declaration)),\n    })),\n    observations, observationCount: observations.length,\n    budget: { ...budget, scope: 'shared across all four reference observations' },\n    snapshot: { nodes: snapshotNodes, nodeLimit: 8192, depthLimit: 128 },\n    supportedExecutableForms: ['bvar', 'lam', 'app', 'letE', 'lit.natural', 'constE'],\n    runtimeConstants: ['Nat.zero', 'Nat.succ', 'Nat.add', 'Nat.rec', ...wanted],\n    suppliedNatRecMinorClosures: true,\n    additionalPreparations: 0, additionalTypeScriptCompilations: 0, additionalNativeExecutions: 0,\n    status: 'pass', exhaustiveForAllInputs: false, generalRecursorDemandAdequacy: false,\n  };\n  return { receipt, artifactText };\n}\n\nfunction checkRecursionBehavior(runtime, label) {\n  const observations = recursionCases.map(({ id, declaration, input, expected }) => {\n    assert.equal(typeof runtime[declaration], 'function', label + ': recursion declaration');\n    assert.equal(runtime[declaration].length, 1, label + ': recursion entry arity');\n    const actual = runtime[declaration](input);\n    assert.equal(actual, expected, label + ': recursion equation ' + id);\n    return { id, declaration, input: input.toString(), value: actual.toString(), status: 'pass' };\n  });\n  return { observations, observationCount: observations.length, status: 'pass',\n    exhaustiveForAllInputs: false };\n}\n\nexport async function runGenericErasureConformance({"
+        },
+        {
+          "before": "    'GENERIC_ERASURE_PREPARE');\n  const ir =",
+          "after": "    'GENERIC_ERASURE_PREPARE');\n  const recursionReference = checkPreparedCoreRecursion(prepared, sha256(source));\n  const ir ="
+        },
+        {
+          "before": "  const functionValueBehavior = checkFunctionValueBehavior(runtime, 'generated PSC');\n",
+          "after": "  const functionValueBehavior = checkFunctionValueBehavior(runtime, 'generated PSC');\n  const recursionBehavior = checkRecursionBehavior(runtime, 'generated PSC');\n"
+        },
+        {
+          "before": "    functionValues: { ir: functionValueIr, behavior: functionValueBehavior },\n",
+          "after": "    functionValues: { ir: functionValueIr, behavior: functionValueBehavior },\n    recursion: { reference: recursionReference.receipt, behavior: recursionBehavior },\n"
+        },
+        {
+          "before": "      functionValueBehavior: checkFunctionValueBehavior(nativeRuntime, 'native PSC'),\n",
+          "after": "      functionValueBehavior: checkFunctionValueBehavior(nativeRuntime, 'native PSC'),\n      recursionBehavior: checkRecursionBehavior(nativeRuntime, 'native PSC'),\n"
+        },
+        {
+          "before": "  await writeFile(path.join(outDir, 'admissions.json'), admissions);\n",
+          "after": "  await writeFile(path.join(outDir, 'admissions.json'), admissions);\n  await writeFile(path.join(outDir, 'recursion-core.json'), recursionReference.artifactText);\n"
+        }
+      ],
+      "forwardReverseVerified": true,
+      "immutableReadbackVerified": true
+    }
+  ],
+  "cases": [
+    {
+      "id": "major-capture-two",
+      "declaration": "sh1CoreMajorCapture",
+      "input": "2",
+      "value": "3"
+    },
+    {
+      "id": "major-capture-three",
+      "declaration": "sh1CoreMajorCapture",
+      "input": "3",
+      "value": "6"
+    },
+    {
+      "id": "nested-outer-two",
+      "declaration": "sh1CoreNestedOuter",
+      "input": "2",
+      "value": "3"
+    },
+    {
+      "id": "nested-outer-three",
+      "declaration": "sh1CoreNestedOuter",
+      "input": "3",
+      "value": "6"
+    }
+  ],
+  "receiptBinding": {
+    "parent": "generic-erasure/receipt.json",
+    "newFields": [
+      "recursion.reference",
+      "recursion.behavior",
+      "native.recursionBehavior"
+    ],
+    "reference": {
+      "policy": "prepared-core-nat-reference/1",
+      "preparedObject": "same PsCompilerAdmissionReadyModule used for original IR",
+      "artifact": {
+        "path": "recursion-core.json",
+        "sha256": "SHA256 of exact UTF-8 artifact bytes, including final newline",
+        "bytes": "actual UTF-8 byte count"
+      },
+      "declarations": "Two entries in order sh1CoreMajorCapture, sh1CoreNestedOuter: {name, sourceRuntimeArity:1, coreSha256:SHA256(JSON.stringify(the matching artifact declaration record))}",
+      "observations": "The four cases in the manifest's fixed order, each adds positive integer steps, positive integer recursorApplications, status:'pass'. No values are derived from erasure or emitted runtime.",
+      "observationCount": 4,
+      "budget": {
+        "limit": 20000,
+        "used": "sum of four observation.steps",
+        "remaining": "20000 - used, nonnegative",
+        "scope": "shared across all four reference observations"
+      },
+      "snapshot": {
+        "nodes": "positive integer <=8192",
+        "nodeLimit": 8192,
+        "depthLimit": 128
+      },
+      "supportedExecutableForms": [
+        "bvar",
+        "lam",
+        "app",
+        "letE",
+        "lit.natural",
+        "constE"
+      ],
+      "runtimeConstants": [
+        "Nat.zero",
+        "Nat.succ",
+        "Nat.add",
+        "Nat.rec",
+        "sh1CoreMajorCapture",
+        "sh1CoreNestedOuter"
+      ],
+      "suppliedNatRecMinorClosures": true,
+      "additionalPreparations": 0,
+      "additionalTypeScriptCompilations": 0,
+      "additionalNativeExecutions": 0,
+      "status": "pass",
+      "exhaustiveForAllInputs": false,
+      "generalRecursorDemandAdequacy": false
+    },
+    "behavior": "Both recursion.behavior and native.recursionBehavior are {observations:[the exact four cases with status:'pass'], observationCount:4, status:'pass', exhaustiveForAllInputs:false}. Runtime exports each have physical arity1.",
+    "coreArtifact": {
+      "schemaVersion": 1,
+      "evidence": "actual-prepared-core-nat-recursion",
+      "sourceSha256": "6b43a4c92695d355dba24764901cc8b35e50bf43a428ffbc57046be9283c3b7c",
+      "declarations": "Two exact actual prepared declarations: {name,type:<typed Core snapshot>,value:<typed Core snapshot>}. The live objects used for snapshots are also used by the evaluator and remain inside the same prepared object passed to original-IR erasure."
+    },
+    "preservedCounts": {
+      "originalGenericDeclarations": 4,
+      "originalGenericBehaviorObservations": 19,
+      "canonicalValueEntries": 20,
+      "canonicalValueBehaviorObservations": 19
+    },
+    "compilerInvocationCounts": {
+      "preparations": 1,
+      "originalIrCheckerCalls": 1,
+      "typeScriptCompilationsWhenNativeEnabled": 2,
+      "nativeCompilerCallsWhenEnabled": 1
+    },
+    "noOtherReceiptFieldsChanged": true
+  },
+  "sourceArgument": [
+    "The first new definition has the independent source equation S(0)=0 and S(k+1)=(k+1)+S(k). The second branches on k but both alternatives compute (k+1)+S(k) using only the root-established recursive call on k. Thus each has S(2)=3 and S(3)=6.",
+    "The Core reference implements Nat.rec M z s 0=z and Nat.rec M z s (k+1)=s k (Nat.rec M z s k), restricted to a syntactically constant Nat motive and proper Nat values. It applies the actual prepared minor closure, preserving its actual lexical environment. A captured original major n therefore repeats n at each fold step and yields 4/9 on inputs2/3; constructor refinement yields3/6.",
+    "bvar index0 denotes the nearest environment value. Applying an actual Core lambda extends its captured environment on the left. Core app evaluates fn, then arg, then applies; letE evaluates its initializer in the old environment, then extends the environment for its body. Neither closure environments nor minors are synthesized from expected fixture values.",
+    "The shared20,000 budget counts every runtime expression dispatch, application and Nat-rec iteration across allfour observations and recursive definition calls. Major values above64, environments beyond128, unsupported runtime forms/constants, open terms/levels, or malformed names/lists are refused. Snapshot traversal has its own8,192-node/128-depth bound and includes actual annotations.",
+    "The observed prepared declarations are selected by exact typed PsName segments, checked to have no universe parameters and exactly one explicit Nat parameter with Nat result, serialized from actual .type/.value fields, and hashed independently of admissions normalization or original-IR erasure.",
+    "This is finite value evidence over two closed total Nat programs. It does not establish general source/Core demand semantics, callback/divergence adequacy, all-input correctness, a kernel theorem, or any strict/general conformance closure."
+  ],
+  "sourcePins": {
+    "Core/Expr.lean": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+    "Core/Level.lean": "2607a00d69cb0299de20aecb6b94a00adc7852a2",
+    "Core/Declaration.lean": "c34c280b1c42f23138cfec79f4e448db17071952",
+    "Environment/Prelude.lean": "d862ba8c806595fbf11237724089bd2282af9866",
+    "Compiler/Api.lean": "f31d88f0172122d4cf62d62f35f372fe89581c18",
+    "Elab/Term.lean-before-pending-refinement": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112"
+  },
+  "sourcePinExplanations": [
+    "Prelude553-572 fixes Nat.rec's ordered four arguments motive, zero minor, successor minor, major; successor minor receives predecessor then IH. Prelude617-628 records zero parameters/indices, one motive andtwo minors.",
+    "Term2094-2118 constructs the constant-result motive lambda and the recursor application spine from actual minors followed by the actual major. The pending producer correction changes minor bodies/context, not this recursor ABI.",
+    "Compiler/Api PsCompilerAdmissionReadyModule carries declarations; psCompilerPrepareSource returns this object, and psCompilerVerifiedIrFromPrepared consumes that same object.",
+    "Core PsExpr field names used by the reference exactly match bvar.index, constE.name/levels, app.fn/arg, lam/forallE.name/type/body/binder, letE.name/type/value/body, lit.value; PsLiteral.natural.value is the bigint."
+  ],
+  "lexicalReview": {
+    "entireFinalFixtureScanned": true,
+    "oldDefinitionBodiesByteUnchanged": true,
+    "oldDefinitions": 24,
+    "newDefinitions": 26,
+    "lineCommentCount": 17,
+    "invalidSlashComments": 0,
+    "blockComments": 0,
+    "nonAsciiCharacters": 0,
+    "carriageReturns": 0,
+    "commentRepairs": "Exactly two inherited line prefixes // become --; no declaration body edits."
+  },
+  "preservedGates": "All four preexisting assertion function source regions are byte-identical. Existing source preparation, original-IR checking, admissions creation, emissions, TS compilation and native compiler invocations retain their call sites and argument vectors.",
+  "execution": {
+    "localExecution": false,
+    "compilerExecution": false,
+    "testsExecuted": false,
+    "refMutation": false,
+    "qualificationRun": false
+  },
+  "globalClaims": {
+    "strictSh1Qualified": false,
+    "semanticCorrespondenceQualified": false,
+    "all33ObligationsClosed": false
+  },
+  "reviewStatus": "Source candidates read back exactly; independent evaluator/frontend peer review pending."
+}

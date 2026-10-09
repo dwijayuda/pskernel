@@ -151,6 +151,39 @@ theorem psKernelAddMutualInductiveInfos_semantic_extends
             (ih next hRemaining hUniqueTail.2)
 
 /--
+Provisional mutual-header insertion preserves the canonical absence of a
+disjoint reserved-name family.  The disjointness is an explicit executable
+name-list fact; no comparator reflexivity is inferred here.
+-/
+theorem psKernelAddMutualInductiveInfos_preserves_absent_names
+    (infos : List PsKernelInductiveInfo) (environment : PsKernelEnvironment)
+    (names : List PsKernelName)
+    (hAbsent : PsKernelInductiveNamesAbsent environment names)
+    (hDisjoint : ∀ info : PsKernelInductiveInfo, info ∈ infos ->
+      psKernelNameListContains info.base.name names = false) :
+    PsKernelInductiveNamesAbsent
+      (psKernelAddMutualInductiveInfos infos environment) names := by
+  induction infos generalizing environment with
+  | nil =>
+      simpa [psKernelAddMutualInductiveInfos] using hAbsent
+  | cons info rest ih =>
+      let next :=
+        psKernelEnvironmentAddUnchecked
+          environment (PsKernelConstantInfo.inductInfo info)
+      have hStep : PsKernelInductiveNamesAbsent next names := by
+        apply psKernelInductiveNamesAbsent_add_disjoint
+          environment (PsKernelConstantInfo.inductInfo info) names hAbsent
+        simpa [next, psKernelConstantInfoName, psKernelConstantInfoBase] using
+          hDisjoint info (List.Mem.head rest)
+      have hTail : ∀ other : PsKernelInductiveInfo, other ∈ rest ->
+          psKernelNameListContains other.base.name names = false := by
+        intro other hMem
+        exact hDisjoint other (List.Mem.tail info hMem)
+      have hRemaining := ih next hStep hTail
+      simpa [psKernelAddMutualInductiveInfos, next] using hRemaining
+
+
+/--
 Every replacement is justified by current canonical presence. Presence survives
 earlier replacements, so the loop needs no repeated unchecked lookup premise.
 Original declarations are protected by absence of each replacement name there.

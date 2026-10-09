@@ -1,0 +1,94 @@
+name: PSKernel Core focused theorem native stack sample
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-phase-profile-v1
+    paths:
+      - ".github/workflows/pskernel-core-arena-stack-sample.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean, uv and GDB
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          if ! command -v gdb >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gdb
+          fi
+      - name: Build canonical checker and focused pinned theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc15selfhost && lake build psc_kernel_core_arena)
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cat > arena/tests/pskernel-gdb-utf8.lean <<'EOF'
+          import Init
+          EOF
+          cat > arena/tests/pskernel-gdb-utf8.yaml <<'EOF'
+          description: Exact UTF8 theorem for diagnostic native stack sampling.
+          leanfile: tests/pskernel-gdb-utf8.lean
+          export-decls:
+            - _private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec
+          outcome: accept
+          EOF
+          (cd arena && uv run lka.py build-test pskernel-gdb-utf8 --cache)
+      - name: Sample the executing native checker call stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -s 65536
+          python3 - <<'PY'
+          import os, signal, subprocess
+          runner = "psc15selfhost/.lake/build/bin/psc_kernel_core_arena"
+          stream = "arena/_build/tests/pskernel-gdb-utf8.ndjson"
+          name = "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec"
+          command = [
+              "gdb", "--nx", "--quiet", "--batch",
+              "-ex", "set pagination off",
+              "-ex", "set confirm off",
+              "-ex", "handle SIGINT stop print nopass",
+              "-ex", "run < " + stream,
+              "-ex", "thread apply all bt 50",
+              "--args", runner, "--phase-theorem", name,
+          ]
+          proc = subprocess.Popen(command, stdout=subprocess.PIPE,
+                                  stderr=subprocess.STDOUT, text=True,
+                                  start_new_session=True)
+          try:
+              output, _ = proc.communicate(timeout=75)
+              print("GDB_FINISHED_UNEXPECTEDLY",proc.returncode)
+          except subprocess.TimeoutExpired:
+              os.killpg(proc.pid, signal.SIGINT)
+              try:
+                  output, _ = proc.communicate(timeout=20)
+              except subprocess.TimeoutExpired:
+                  os.killpg(proc.pid,signal.SIGKILL)
+                  output, _ = proc.communicate()
+                  print("GDB_ABORTED_AFTER_INTERRUPT")
+          with open(os.environ["RUNNER_TEMP"]+"/pskernel-gdb-sample.txt","w",encoding="utf-8") as file:
+              file.write(output)
+          print(output[-25000:])
+          print("HOST_ONLY_STACK_SAMPLE_NOT_A_KERNEL_VERDICT")
+          PY
+      - name: Preserve native diagnostic trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-gdb-utf8-${{ github.run_id }}
+          path: ${{ runner.temp }}/pskernel-gdb-sample.txt
+          if-no-files-found: ignore

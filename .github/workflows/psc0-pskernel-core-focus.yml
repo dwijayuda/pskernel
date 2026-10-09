@@ -8,7 +8,7 @@ permissions:
   contents: read
   actions: read
 jobs:
-  int64:
+  init:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -18,29 +18,30 @@ jobs:
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           sudo apt-get install -y gdb
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - uses: actions/download-artifact@v4
         with:
           name: pskernel-435-binary
           path: kernel
-          run-id: 37984329797
+          run-id: 37987687009
           github-token: ${{ github.token }}
-      - name: Profile Int64.toBitVec_div from a fresh 4.35 export
+      - name: Sample full Init traversal for 180 seconds
         shell: bash
         run: |
           set -euo pipefail
-          echo "BINARY_SOURCE_SHA=20ede5d8400d9037197b4e95a673b6321beb9fbc"
+          echo "BINARY_SOURCE_SHA=dbfa7fed68e40fe878129610c00d9afd5e399ed4"
           chmod +x kernel/psc_kernel_core_arena
           sha256sum kernel/psc_kernel_core_arena
-          git clone https://github.com/leanprover/lean4export.git exporter
-          git -C exporter checkout 05d43a2bc773b40ecfdebb32294192a5ef756951
-          cd exporter
-          lake build
-          lake env .lake/build/bin/lean4export Init -- Int64.toBitVec_div > int64.ndjson
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cd arena
+          uv run lka.py build-test init --cache
           ulimit -s 65536
           set +e
-          /usr/bin/time -v timeout 60 ../kernel/psc_kernel_core_arena --profile < int64.ndjson > profile.stdout 2> profile.log &
+          /usr/bin/time -v timeout 180 ../kernel/psc_kernel_core_arena --profile-historical < _build/tests/init.ndjson > profile.stdout 2> profile.log &
           timer=$!
-          for sample in 1 2 3; do
+          for sample in $(seq 1 11); do
             sleep 15
             limiter=$(pgrep -P "$timer" | head -n 1)
             if test -z "$limiter"; then break; fi
@@ -52,14 +53,25 @@ jobs:
           wait "$timer"
           code=$?
           set -e
-          echo "FOCUSED_INT64_EXIT=$code"
+          echo "DIAGNOSTIC_INIT_EXIT=$code"
           tail -n 45 profile.log
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          rows = []
+          for line in Path("profile.log").read_text().splitlines():
+              m = re.search(r"elapsed_ms=(\d+)", line)
+              if m:
+                  rows.append((int(m[1]), line))
+          print("TOP_SLOW_DECLARATIONS")
+          for _, line in sorted(rows, reverse=True)[:20]:
+              print(line)
+          PY
           if test -f profile.stacks; then cat profile.stacks; fi
           printf '%s\n' "$code" > profile.exit
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: int64-focused-diagnosis
+          name: init-worker-samples
           path: |
-            exporter/profile.*
-            exporter/int64.ndjson
+            arena/profile.*

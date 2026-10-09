@@ -685,7 +685,7 @@ theorem psKernelExprInstantiateAtChanged_refines_reference_core
   induction expr generalizing start offset <;>
     simp_all [psKernelExprInstantiateAtChanged,
       psKernelExprInstantiateAtReferenceChanged,
-      psKernelExprLiftLooseBVars_refines_reference_core]
+      psKernelExprLiftLooseBVars_refines_reference_core] <;> try rfl
 
 theorem psKernelExprInstantiateAt_refines_reference_core
     (expr : PsKernelExpr)

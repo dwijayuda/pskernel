@@ -1,6 +1,6 @@
 # PSC0 Architecture Plan
 
-**Status:** researched architectural direction and migration plan; implementation is pending.
+**Status:** accepted architectural direction; the first protected-host and npm-preview implementation milestone is recorded in [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md). The full package, extension, module, and formal-assurance migration remains incremental.
 
 **Decision update:** 10 October 2026, Asia/Jakarta.
 
@@ -11,6 +11,8 @@
 **Distribution/user-experience follow-up:** 10 October 2026, Asia/Jakarta. The npm product name comes from the user; scoped names and CLI examples are proposed. Package-manager observations use the cited npm v12 documentation, not a newly executed installation.
 
 **Incremental-tooling follow-up:** 10 October 2026, Asia/Jakarta. The TS emitter, runtime identities, erased type representations, preparation state, and IR module shape were inspected at `3fbf7f778ab20aaeaafe87ae07b04c00ab2d29f7`. The default-package, neighboring-TS, watch, and editor workflows below are proposals, not demonstrated current functionality or a new qualification run.
+
+**Implementation follow-up:** 10 October 2026, Asia/Jakarta. [Draft PR90](https://github.com/dwijayuda/pskernel/pull/90) implements the initial protected compilation/publication route and an installable Linux x64 preview. The research observations below retain their original evidence cuts; [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) distinguishes newly executed package checks from remaining proposals.
 
 **Canonical plan format:** this Markdown file. It supersedes the earlier PDF draft for future plan revisions.
 

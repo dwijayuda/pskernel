@@ -1,45 +1,71 @@
-# PSC0 platform implementation — active continuation
+# PSC0 platform — active continuation
 
-Updated: 2026-10-09 20:44 UTC. This section supersedes the historical handoff below for the newly authorized platform work.
+Updated: 2026-10-09 21:02 UTC. This section supersedes the historical handoff below for the newly authorized platform implementation.
 
-## Active request and scope
+## Current result
 
-The user approved implementation of PSC0_ARCHITECTURE_PLAN.md after choosing the proofscript npm product / psc command, ps-prefixed components, a required TS7 path, optional future backends/tooling, and out-of-bootstrap .proof.lean assurance work. The current working branch is `psc0/platform-v1`, based on architecture plan commit `ab23c842077ad6dd9224335e52ccdc4e6dfeb39e`. The implementation is in progress; no npm publication, seed promotion, or main merge is authorized by this checkpoint.
+The **first protected-host and installable-preview milestone is implemented and cloud-qualified** on `psc0/platform-v1`, [draft PR90](https://github.com/dwijayuda/pskernel/pull/90), based on architecture plan commit `ab23c842077ad6dd9224335e52ccdc4e6dfeb39e`. This is not completion of all architecture phases 0–4 or the complete T1 module/ABI milestone.
 
-The first implementation closes the protected host path: exact compiler bytes → immutable source/prepared session → canonical native Core admission → checked emission of the same original RuntimeIR → pinned TS7 target validation → owned output publication and a completion receipt. It also prepares a self-contained Linux x64 npm preview. Cloud validation is required before any operational success claim.
+Read [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) for the exact behavior, user workflow, remaining scope and evidence. [PSC0_ARCHITECTURE_PLAN.md](PSC0_ARCHITECTURE_PLAN.md) remains the accepted full plan.
 
-## What this checkpoint changes
+Qualified runtime/package source: `48be48c0fd91407ca531692be2a3bd8bc24b058b`, tree `0cbeb41c6016295be2247ee27c16d074d7b46810`. [Run 37990210503](https://github.com/dwijayuda/pskernel/actions/runs/37990210503), attempt 1, passed both jobs and completed at 2026-10-09 20:57:03 UTC. The containing follow-up only records documentation and evidence; it does not change runtime/package bytes.
 
-- The public `psc0/bin/psc.mjs` preserves the caller's working directory, uses release-owned compiler/provider paths and pins, reports the actual empty external-extension set, and refuses unsupported extension or verification configuration.
-- The protected generated session has no raw-emitter fallback. Its RuntimeIR claim is bounded typing/traversal acceptance; it is not a compiler semantic-preservation proof or strict SH/1.
-- Default `pskernel-core` routes to the qualified native provider. The old generated-owned adapter remains explicitly historical and is not the public default. Provider algorithms and kernel semantics are unchanged.
-- The build host checks target TypeScript with TS7.0.2 before publishing. Requested .ts output creates .ts plus a receipt only. Requested .js output includes the corresponding TS, declaration, source map and admissions.
-- The publisher rejects unowned or modified outputs, uses an exclusive output-directory lease, stages private files, rechecks known source invalidation, and commits the receipt last. Handled failures roll back only attributable bytes; incomplete rollback retains a discoverable journal/backups. This is not atomic visibility to an independent filesystem watcher. Explicit interrupted-transaction recovery remains a later tool.
-- The release assembler copies a small explicit host closure and exact prequalified runtime bytes. It does not rebuild or execute arbitrary inputs during assembly and has no install hook. The preview does not yet implement open plugin execution, watch, LSP, PSCV, per-source module facades, or the final ps-prefixed package split.
+- Host/session/publication/CLI/assembly: **61 passed, 0 failed, 0 skipped**.
+- Actual native-provider and generated-compiler integration: **16 passed, 0 failed, 0 skipped**.
+- Separate fresh installed-package job: **12 observations passed**, including a real existing TS project importing and executing neighboring generated TS.
+- Actual installed environment: Ubuntu 24.04.5 x64, image ubuntu24/20261004.327.1, Node 22.23.3/npm 10.9.9, TS7.0.2. Execution PATH contains only a dedicated Node symlink. No source checkout or Lean installation is required for that tested package.
+- Tarball `proofscript-0.1.0-preview.0.tgz`: 1,890,798 bytes, SHA-256 `f44034b3624f67660e252df919f0188991613ac7069e47805355e2760374f12c`. This size excludes separately installed npm dependencies.
+- Candidate artifact **11644293016**; installed evidence artifact **11645305653**. Both expire 8 November 2026. Compact exact logged evidence and API metadata are committed under `docs/platform/`; they are not a permanent copy of executable archive bytes.
+- Earlier runs 37989444677 and37989830598 also passed. No test failure was waived or gate weakened. Do not rerun compiler fixed-point qualification or these completed gates for documentation-only changes.
 
-## Immutable execution inputs
+Main was re-read at `ed5d00aca0743bde583b45fe7756dd494ac3960f` and was not changed. No PR was merged and **nothing was published to npm**.
 
-- Qualified F compiler source: `fcd875c8f38db4b0524090bd10c7c2fd5024053d`.
-- 61-module raw compiler source closure SHA-256: `6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7`. No portable Lean compiler source changes are included in this host/package slice.
-- Compiler JavaScript SHA-256: `5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15`.
-- Existing F qualification run: [37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800); compiler artifact 11627040677.
-- Native compiler-admission provider source: `963030dc2d154008fccc82e7c8ed29331f138799`, binary SHA-256 `88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec`, Lean 4.34.0. The separate Lean 4.35 Arena lane has a different protocol and is not substituted here.
-- Node 22.23.3 and TypeScript 7.0.2. No TS5/TS6 fallback.
-- Selected authoring seed R remains unchanged. Retained F fixed-point evidence remains valid for the unchanged source closure; host integration must earn its own focused evidence.
+## Implemented boundary
 
-## Workflow and next actions
+The release-owned public `bin/psc.mjs` preserves caller cwd and routes builds through authenticated compiler bytes, immutable source/prepared state, exact native Core admission, checked emission of the same original RuntimeIR, TS7 target validation and owned output publication. The old raw generated build driver now delegates to that host. A native seed's raw emit protocol is explicitly unqualified for this protected build route.
 
-All repository reads/writes use GitHub connector/MCP. Actual builds/tests run only in GitHub Actions. Do not clone, build, test, execute repository code locally, or switch to browser/Desktop Commander. Pure in-memory text/JSON work is allowed. Use fresh head leases, non-force branch updates, and preserve concurrent ancestry.
+`psc check` is admission-only and reports RuntimeIR as not requested. `psc build` adds the IR/target/publication gates. Requested .ts output creates only TS and its receipt; .js output includes the bundle sidecars. Existing unowned or manually edited generated files are preserved by refusal.
 
-Integrate the independently reviewed provider/session/release slices, run focused host/negative tests and real generated-compiler/native-provider builds, install the assembled npm tarball in a fresh project, and retain exact run/artifact results. Continue to a coherent usable milestone; do not relaunch completed compiler fixed-point qualification for unchanged portable sources. Current cloud outcome is pending. Maintain this active section after observed results.
+Publication uses a directory-wide lease, staged old/new inventories, final eligibility/artifact checks and receipt commitment last. Conservative rollback preserves conflicting user writes. Incomplete recovery retains a visible lock and backups; postcommit cleanup failure reports committed status. Multiple filesystem files do not become atomically visible to independent watchers, and power-loss durability is not claimed.
 
-Proof infrastructure belongs in `proofs/**/*.proof.lean` outside the bootstrap closure. Full metatheory, implementation refinement, semantic preservation, sound VC generation, verified transformations/backends and bootstrap/isolation theorems are later assurance gates. Do not label ordinary checked output as PSCV-proved or logically consistent merely because tests pass.
+All external-extension execution is currently **unsupported**. The supervisor always discloses an empty external set. Root-project unsupported profiles, verification settings and extension requests fail explicitly. This is not an implemented plugin sandbox or a claim that arbitrary npm code can safely share the host process.
+
+The release assembler has a complete 17-file maintained host import closure, exact compiler/native-provider pins, one exact TS7 dependency and no lifecycle scripts. The compiler remains bundled; the final ps-prefixed source/package split is still planned. Host sources currently remain Node .mjs modules; no TypeScript rewrite of the portable compiler is claimed.
+
+## Preserved compiler and kernel inputs
+
+- F compiler source `fcd875c8f38db4b0524090bd10c7c2fd5024053d`; its existing full qualification is run 37947341800.
+- Exact 61-module raw compiler closure: `6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7`.
+- F JavaScript: `5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15`.
+- Selected authoring seed R remains `fe2560aba0f347b1caf8d000d371464642d44f23`; manifest, active TS7 recovery policy and historical identities unchanged.
+- Native compiler-admission provider source `963030dc2d154008fccc82e7c8ed29331f138799`, binary `88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec`, Lean 4.34.0. Its algorithms are unchanged.
+- Separate Lean 4.35 Arena work uses a different protocol; do not substitute its binary or transfer its proof results to the pinned 4.34 admission path.
+- Toolchain policy: Node 22.23.3 and TypeScript 7.0.2, no TS5/TS6 fallback.
+
+No portable compiler source changed, so the existing fixed-point evidence remains the applicable compiler evidence. The new host earned separate execution/refusal evidence. No joint generated compiler/kernel fixed point, semantic-preservation theorem, logical-consistency result, PSCV verification or strict SH/1 qualification is claimed.
+
+## Next complete milestones
+
+1. One constrained isolated extension runner and data protocol; explicit project activation; actual-load disclosure; complete official and third-party examples. Never grant guest code provider/admission/reporting/final-output authority or use in-process npm imports as isolation.
+2. Stable primitive/runtime identities and extension contracts, narrow SDK and bounded producer/validator examples.
+3. Final ps-prefixed module/package boundaries, ordinary npm ProofScript libraries, locked project installs and durable release-input recovery. The preview workflow currently reads a retained F Actions artifact, so source/release retention must be closed before a durable public release. The current preview is UNLICENSED pending a distribution-license decision.
+4. Full T1 export map, neighboring facades and narrow checked ABI before psdev/watch; then cancellation/invalidation/recovery/downstream coordination and separate LSP/editor snapshots.
+
+The user prefers `proofscript` as npm product, `psc` as command, ps-prefixed components and TS as the required reference backend. Other backends, dev/watch, LSP and editor tooling can be added incrementally outside the compiler self-host closure.
+
+Formal assurance stays a **later gate**. Use `proofs/**/*.proof.lean` plus ordinary shared Lean model/lemma modules, full Lean tooling and a proof-only environment outside bootstrap. The plan already defines the layout and direct-file runner approach. No proof workspace or new compiler theorem suite was implemented in this milestone. Do not turn incomplete proofs into an implementation-closing gate or describe runtime typing as compiler correctness.
+
+## Execution and workstream boundaries
+
+All repository source reads/writes use GitHub connector/MCP. Actual builds/tests run only in GitHub Actions. Do not clone, build, test or execute repository code locally, or switch to browser/Desktop Commander. Pure in-memory text/JSON transformations and evidence hashing are allowed. Git-backed deliverables stay in the repository.
+
+Use fresh head leases, non-force branch updates and preserved ancestry. Do not change kernel/provider/metatheory/definitional-equality/cache algorithms, select F as authoring seed, weaken acceptance gates, merge main or publish npm as an incidental continuation. Read live branch/lane handoffs before later integration. Preserve concurrent 4.35/strict/proof work and its separate evidence.
 
 ---
 
 # Historical completed compiler/TypeScript handoff
 
-The complete prior handoff below is retained as evidence. Its “current”, “complete”, and “next” wording describes its own earlier checkpoint, not the active platform implementation above.
+The complete prior handoff below is retained as evidence. Its “current”, “complete”, and “next” wording describes its own earlier checkpoint, not the active platform work above.
 
 
 Updated: 2026-10-09 16:02:49 UTC. All evidence times in this file are UTC. The prior session recorded Asia/Jakarta (UTC+07:00) for user-facing time conversions.

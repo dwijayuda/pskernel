@@ -31,9 +31,10 @@ jobs:
           set -euo pipefail
           test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
           lean --version
-          lake build psc_kernel_core_arena psc1_kernel_core_foundation_tests pskernel_nat_dispatch_tests
+          lake build psc_kernel_core_arena psc1_kernel_core_foundation_tests pskernel_nat_dispatch_tests pskernel_projection_fuel_tests
           lake exe psc1_kernel_core_foundation_tests
           lake exe pskernel_nat_dispatch_tests
+          lake exe pskernel_projection_fuel_tests
           .lake/build/bin/psc_kernel_core_arena --version
           sha256sum .lake/build/bin/psc_kernel_core_arena
       - uses: actions/upload-artifact@v4
@@ -312,3 +313,77 @@ jobs:
         with:
           name: lean435-exports
           path: exporter/*.ndjson
+  focused-std:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+      - name: Export and check mkXorCached dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x kernel/psc_kernel_core_arena
+          git clone https://github.com/leanprover/lean4export.git exporter
+          git -C exporter checkout 05d43a2bc773b40ecfdebb32294192a5ef756951
+          cd exporter
+          lake build
+          lake env .lake/build/bin/lean4export Std -- Std.Sat.AIG.mkXorCached > xor.ndjson
+          /usr/bin/time -v timeout 360 ../kernel/psc_kernel_core_arena < xor.ndjson
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focused-std-export
+          path: exporter/xor.ndjson
+  profile-init:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+      - name: Profile pinned Arena Init with declaration labels
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x kernel/psc_kernel_core_arena
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cd arena
+          uv run lka.py build-test init --cache
+          ulimit -s 65536
+          set +e
+          /usr/bin/time -v timeout 600 ../kernel/psc_kernel_core_arena --profile-historical < _build/tests/init.ndjson > profile.stdout 2> profile.log
+          code=$?
+          set -e
+          echo "PROFILE_INIT_EXIT=$code"
+          tail -n 70 profile.log
+          printf '%s\n' "$code" > profile.exit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: init-profile
+          path: arena/profile.*

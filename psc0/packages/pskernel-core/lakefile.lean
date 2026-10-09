@@ -265,3 +265,7 @@ lean_exe psc_kernel_core_arena where
 lean_exe pskernel_nat_dispatch_tests where
   srcDir := "test"
   root := `NatDispatchTests
+
+lean_exe pskernel_projection_fuel_tests where
+  srcDir := "test"
+  root := `ProjectionFuelTests

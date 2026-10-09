@@ -70,6 +70,7 @@ def PsKernelDefEqKnotAfterProjectionMissSound (fuel : Nat) : Prop :=
         (Prod.mk (PsKernelDeltaResult.residual leftDelta rightDelta)
           lazyState) ->
     psKernelDefEqProjectionShortcut
+        fuel
         (psKernelIsDefEqWithFuel fuel)
         nextContext lazyState leftDelta rightDelta =
       Except.ok (Prod.mk Option.none shortcutState) ->
@@ -105,12 +106,15 @@ theorem psKernelDefEqKnot_after_lazy_residual_sound_of_projection
   have hShortcut :
       PsKernelOptionalDefEqConfigurationSound
         (psKernelDefEqProjectionShortcut
+          fuel
           (psKernelIsDefEqWithFuel fuel)) :=
     psKernelDefEqProjectionShortcut_configuration_sound
+      fuel
       (psKernelIsDefEqWithFuel fuel)
       hDefEq hBeta hNative hString
   cases hShortcutRun :
       psKernelDefEqProjectionShortcut
+        fuel
         (psKernelIsDefEqWithFuel fuel)
         nextContext lazyState leftDelta rightDelta with
   | error error =>

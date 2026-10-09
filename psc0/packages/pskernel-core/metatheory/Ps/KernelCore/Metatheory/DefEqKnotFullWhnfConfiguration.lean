@@ -71,6 +71,7 @@ def PsKernelDefEqKnotAfterFullWhnfSound (fuel : Nat) : Prop :=
         (Prod.mk (PsKernelDeltaResult.residual leftDelta rightDelta)
           lazyState) ->
     psKernelDefEqProjectionShortcut
+        fuel
         (psKernelIsDefEqWithFuel fuel)
         nextContext lazyState leftDelta rightDelta =
       Except.ok (Prod.mk Option.none shortcutState) ->

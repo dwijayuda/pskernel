@@ -7,14 +7,15 @@ Concrete projection shortcut refinement used by the DefEq checker knot.
 
 The head equality checks are validated against the independent name and
 universe semantics. Projection comparison uses the separately proved
-projection-sensitive lazy-delta fuel induction at its precise expression-size
-budget.  Only a successful equality decision becomes semantic DefEq evidence;
+projection-sensitive lazy-delta fuel induction at the caller-supplied
+budget. Term size is not a bound on delta-reduction.  Only a successful equality decision becomes semantic DefEq evidence;
 an undecided result still preserves checker configuration.
 
 No unrestricted transitivity or additional trusted reduction laws are used.
 -/
 
 theorem psKernelDefEqProjectionShortcut_configuration_sound
+    (fuel : Nat)
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -26,7 +27,7 @@ theorem psKernelDefEqProjectionShortcut_configuration_sound
     (hNative : PsKernelNativeReductionSoundLaw)
     (hString : PsKernelStringEqSoundLaw) :
     PsKernelOptionalDefEqConfigurationSound
-      (psKernelDefEqProjectionShortcut defeq) := by
+      (psKernelDefEqProjectionShortcut fuel defeq) := by
   intro context state nextState left right answer hConfig hRun
   cases left with
   | const leftName leftLevels =>
@@ -104,12 +105,7 @@ theorem psKernelDefEqProjectionShortcut_configuration_sound
               psKernelNameEq leftName rightName = true
           · by_cases hIndex :
                 Nat.beq leftIndex rightIndex = true
-            · let fuel :=
-                Nat.succ
-                  (Nat.add
-                    (psKernelExprNodeCount leftExpr)
-                    (psKernelExprNodeCount rightExpr))
-              have hCore :
+            · have hCore :
                   PsKernelWhnfCoreConfigurationSound
                     (psKernelWhnfCoreWithRecursorFuel
                       fuel defeq) :=
@@ -133,12 +129,10 @@ theorem psKernelDefEqProjectionShortcut_configuration_sound
                   hDefEq hQuick hCore hString
               cases hLazy :
                   psKernelDefEqLazyProjReductionWithFuel
-                    (psKernelExprNodeCount leftExpr +
-                      psKernelExprNodeCount rightExpr + 1)
+                    fuel
                     defeq
                     (psKernelWhnfCoreWithRecursorFuel
-                      (psKernelExprNodeCount leftExpr +
-                        psKernelExprNodeCount rightExpr + 1) defeq)
+                      fuel defeq)
                     context state
                     leftExpr rightExpr leftName leftIndex with
               | error error =>

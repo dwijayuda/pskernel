@@ -9,8 +9,9 @@ for r in rows:
     print("ARENA_RESULT", r.get("test"), r.get("status"), r.get("correctness"), r.get("exit_code"), r.get("wall_time"), r.get("max_rss"))
     # This known decline is recorded explicitly; it is never counted as a rejection.
     known = group == "bugs" and r.get("test") == "bugs/rec-missing-ih" and r.get("correctness") == "declined"
-    if r.get("correctness") != "correct" and not known:
-        bad.append(r)
-        print((r.get("stderr") or "")[-6000:])
+    if r.get("correctness") != "correct":
+        print((r.get("stderr") or "")[-12000:])
+        if not known:
+            bad.append(r)
 assert not bad, [(r.get("test"), r.get("status"), r.get("correctness")) for r in bad]
 print("ARENA_COVERAGE_PASS", group, len(rows), "correct", sum(r.get("correctness") == "correct" for r in rows), "declined", sum(r.get("correctness") == "declined" for r in rows))

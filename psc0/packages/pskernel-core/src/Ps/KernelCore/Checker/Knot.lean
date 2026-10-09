@@ -204,6 +204,7 @@ def psKernelInferWithRecursorFuel
     expr
 
 def psKernelDefEqProjectionShortcut
+    (fuel : Nat)
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -264,16 +265,10 @@ def psKernelDefEqProjectionShortcut
                 false then
             match
                 psKernelDefEqLazyProjReductionWithFuel
-                  (Nat.succ
-                    (Nat.add
-                      (psKernelExprNodeCount leftExpr)
-                      (psKernelExprNodeCount rightExpr)))
+                  fuel
                   defeq
                   (psKernelWhnfCoreWithRecursorFuel
-                    (Nat.succ
-                      (Nat.add
-                        (psKernelExprNodeCount leftExpr)
-                        (psKernelExprNodeCount rightExpr)))
+                    fuel
                     defeq)
                   context
                   state
@@ -516,6 +511,7 @@ def psKernelIsDefEqWithFuel
                                                             | PsKernelDeltaResult.residual leftDelta rightDelta =>
                                                                 match
                                                                     psKernelDefEqProjectionShortcut
+                                                                      remaining
                                                                       defeq
                                                                       nextContext
                                                                       (Prod.snd deltaResult)

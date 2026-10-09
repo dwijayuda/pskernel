@@ -397,6 +397,8 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_pipeline
                                                               (psKernelSimpleMutualNames (first :: remaining))
                                                               shapes paramResult.session work0 0 with
                                                           | error message =>
+                                                              simp only [shapes, work0, safety] at hCtor
+                                                              simp only [hCtor] at hRun
                                                               cases hRun
                                                           | ok ctorResult =>
                                                               refine ⟨first, remaining, checked, sorted, paramResult,

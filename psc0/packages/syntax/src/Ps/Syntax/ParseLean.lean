@@ -224,6 +224,100 @@ def psParseLeanListLiteral
     opening.cursor
     List.nil
 
+-- The Lean grouping parser preserves inner semantic spans. A nomatch span
+-- additionally covers its actually consumed tokens, including grouped scrutinees.
+-- The input is the finite token list already constructed by the owned lexer.
+def psLeanNomatchConsumedStop
+    (tokens : List PsToken) :
+    Option PsToken -> PsSourcePos -> PsSourcePos :=
+  match tokens with
+  | List.nil =>
+      fun (_next : Option PsToken) (latest : PsSourcePos) => latest
+  | List.cons token rest =>
+      let smaller : Option PsToken -> PsSourcePos -> PsSourcePos :=
+        psLeanNomatchConsumedStop rest;
+      fun (next : Option PsToken) (latest : PsSourcePos) =>
+        let finished : Bool :=
+          if psTokenKindEq token.kind PsTokenKind.endOfInput then true
+          else
+            match next with
+            | Option.none => false
+            | Option.some unconsumed =>
+                Nat.ble unconsumed.span.start.byteOffset token.span.start.byteOffset;
+        if finished then latest
+        else smaller next token.span.stop
+
+def psParseLeanNomatch
+    (parseScrutinee :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match psTokenCursorAdvance cursor with
+  | Option.none => Except.error (PsParseError.unexpectedEnd "nomatch scrutinee")
+  | Option.some keyword =>
+      match parseScrutinee keyword.cursor with
+      | Except.error error => Except.error error
+      | Except.ok scrutinee =>
+          let stop : PsSourcePos :=
+            psLeanNomatchConsumedStop keyword.cursor.remaining
+              (psTokenCursorPeek scrutinee.cursor) keyword.token.span.stop;
+          Except.ok {
+            value :=
+              PsSyntaxTerm.matchE scrutinee.value List.nil {
+                start := keyword.token.span.start
+                stop := stop
+              }
+            cursor := scrutinee.cursor
+          }
+
+-- Each application family supplies its existing recursive parser here.
+-- Grouped and list heads therefore retain that family's expression boundary.
+def psParseLeanApplicationPrimary
+    (parseNomatchScrutinee :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (parseParenthesized :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  if psTokenCursorAtText cursor "nomatch" then
+    psParseLeanNomatch parseNomatchScrutinee cursor
+  else if psTokenCursorAtText cursor "(" then
+    match psTokenCursorAdvance cursor with
+    | Option.none => Except.error (PsParseError.unexpectedEnd "(")
+    | Option.some opening =>
+        if psTokenCursorAtText opening.cursor ")" then
+          match psTokenCursorAdvance opening.cursor with
+          | Option.none => Except.error (PsParseError.unexpectedEnd ")")
+          | Option.some close =>
+              Except.ok {
+                value := PsSyntaxTerm.unit {
+                  start := opening.token.span.start
+                  stop := close.token.span.stop
+                }
+                cursor := close.cursor
+              }
+        else
+          match parseParenthesized opening.cursor with
+          | Except.error error => Except.error error
+          | Except.ok inner =>
+              match psTokenCursorExpectText inner.cursor ")" with
+              | Except.error error => Except.error error
+              | Except.ok close =>
+                  Except.ok {
+                    value := inner.value
+                    cursor := close.cursor
+                  }
+  else if psTokenCursorAtText cursor "[" then
+    match psTokenCursorAdvance cursor with
+    | Option.none => Except.error (PsParseError.unexpectedEnd "[")
+    | Option.some opening =>
+        psParseLeanListLiteral parseParenthesized opening
+  else
+    psParseSimpleTerm cursor
+
 def psLeanCanStartSimpleArgument
     (current : PsSyntaxTerm)
     (cursor : PsTokenCursor) : Bool :=
@@ -359,7 +453,10 @@ def psParseLeanApplicationTailWithFuel
       else
         Except.ok { value := current, cursor := cursor }
 
-def psParseLeanApplicationWithFuel
+def psParseLeanApplicationWithNomatchWithFuel
+    (parseNomatchScrutinee :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
     (parseParenthesized :
       PsTokenCursor ->
       Except PsParseError (PsParseResult PsSyntaxTerm))
@@ -369,7 +466,11 @@ def psParseLeanApplicationWithFuel
   match fuel with
   | 0 => Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      match psParseSimpleTerm cursor with
+      match
+          psParseLeanApplicationPrimary
+            parseNomatchScrutinee
+            parseParenthesized
+            cursor with
       | Except.error error => Except.error error
       | Except.ok first =>
           psParseLeanApplicationTailWithFuel
@@ -377,6 +478,19 @@ def psParseLeanApplicationWithFuel
             remaining
             first.value
             first.cursor
+
+def psParseLeanApplicationWithFuel
+    (parseParenthesized :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (fuel : Nat)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  psParseLeanApplicationWithNomatchWithFuel
+    parseParenthesized
+    parseParenthesized
+    fuel
+    cursor
 
 def psParseLeanSimpleApplicationWithFuel
     (fuel : Nat) :
@@ -404,7 +518,11 @@ def psParseLeanSimpleApplication
     (Nat.add (psParseListLength cursor.remaining) 1)
     cursor
 
-def psParseLeanProductWithFuel
+def psParseLeanProductWithNomatchWithFuel
+    (useNomatchParser : Bool)
+    (parseNomatchScrutinee :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
     (fuel : Nat) :
     PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
@@ -416,10 +534,18 @@ def psParseLeanProductWithFuel
       let smaller :
           PsTokenCursor ->
           Except PsParseError (PsParseResult PsSyntaxTerm) :=
-        psParseLeanProductWithFuel remaining;
+        psParseLeanProductWithNomatchWithFuel
+          useNomatchParser
+          parseNomatchScrutinee
+          remaining;
+      let parseScrutinee :
+          PsTokenCursor ->
+          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+        if useNomatchParser then parseNomatchScrutinee else smaller;
       fun (cursor : PsTokenCursor) =>
         match
-            psParseLeanApplicationWithFuel
+            psParseLeanApplicationWithNomatchWithFuel
+              parseScrutinee
               smaller
               (Nat.add remaining 1)
               cursor with
@@ -455,6 +581,15 @@ def psParseLeanProductWithFuel
                       }
             else
               Except.ok left
+
+def psParseLeanProductWithFuel
+    (fuel : Nat) :
+    PsTokenCursor ->
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  psParseLeanProductWithNomatchWithFuel
+    false
+    psParseLeanSimpleApplication
+    fuel
 
 def psParseLeanProduct
     (cursor : PsTokenCursor) :
@@ -1342,29 +1477,6 @@ def psParseLeanRecordApplicationTailWithFuel
             cursor := cursor
           }
 
--- The Lean grouping parser preserves inner semantic spans. A nomatch span
--- additionally covers its actually consumed tokens, including grouped scrutinees.
--- The input is the finite token list already constructed by the owned lexer.
-def psLeanNomatchConsumedStop
-    (tokens : List PsToken) :
-    Option PsToken -> PsSourcePos -> PsSourcePos :=
-  match tokens with
-  | List.nil =>
-      fun (_next : Option PsToken) (latest : PsSourcePos) => latest
-  | List.cons token rest =>
-      let smaller : Option PsToken -> PsSourcePos -> PsSourcePos :=
-        psLeanNomatchConsumedStop rest;
-      fun (next : Option PsToken) (latest : PsSourcePos) =>
-        let finished : Bool :=
-          if psTokenKindEq token.kind PsTokenKind.endOfInput then true
-          else
-            match next with
-            | Option.none => false
-            | Option.some unconsumed =>
-                Nat.ble unconsumed.span.start.byteOffset token.span.start.byteOffset;
-        if finished then latest
-        else smaller next token.span.stop
-
 def psParseLeanTermWithFuel
     (fuel : Nat) :
     PsTokenCursor ->
@@ -1389,23 +1501,7 @@ def psParseLeanTermWithFuel
               keyword.token.span.start
               keyword.cursor
       else if psTokenCursorAtText cursor "nomatch" then
-        match psTokenCursorAdvance cursor with
-        | Option.none => Except.error (PsParseError.unexpectedEnd "nomatch scrutinee")
-        | Option.some keyword =>
-            match smaller keyword.cursor with
-            | Except.error error => Except.error error
-            | Except.ok scrutinee =>
-                let stop : PsSourcePos :=
-                  psLeanNomatchConsumedStop keyword.cursor.remaining
-                    (psTokenCursorPeek scrutinee.cursor) keyword.token.span.stop;
-                Except.ok {
-                  value :=
-                    PsSyntaxTerm.matchE scrutinee.value List.nil {
-                      start := keyword.token.span.start
-                      stop := stop
-                    }
-                  cursor := scrutinee.cursor
-                }
+        psParseLeanNomatch smaller cursor
       else if psTokenCursorAtText cursor "match" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "match scrutinee")
@@ -1678,7 +1774,12 @@ def psParseLeanTermWithFuel
                               cursor := close.cursor
                             }
       else
-        match psParseLeanProductWithFuel remaining cursor with
+        match
+            psParseLeanProductWithNomatchWithFuel
+              true
+              smaller
+              remaining
+              cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
             match

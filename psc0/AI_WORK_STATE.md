@@ -1,12 +1,78 @@
 # PSC0 AI work state — strict SH/1 work in progress
 
-Updated: 2026-10-09 20:18 UTC. Evidence times are UTC. Jakarta is UTC+07:00.
+Updated: 2026-10-09 20:41:18 UTC. Evidence times are UTC. Jakarta is UTC+07:00.
 
 ## Read this first
 
 The user authorized merging the qualified practical checkpoint and continuing the mandatory strict SH/1 work. The practical checkpoint is already merged. Continue the strict branch; do not restart the earlier research or repeat completed baseline qualifications. Merging practical improvements does not enable unrestricted PSC1, and neither typing nor finite execution alone activates strict SH/1.
 
 This current section supersedes stale assignments, pending-run descriptions and completed-scope instructions in the archived work states. The previous complete active state is retained at [history/AI_WORK_STATE_2026-10-09_18-13.md](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-09_18-13.md), exact blob dfa4b108a4a4982e0b7f78357b7de835324edc5e. Its evidence remains true for the revisions it describes. The historical M6/TypeScript 7 section below is preserved byte-for-byte.
+
+## Current parser integration and seventh attempt — read before historical detail
+
+This enclosing commit is the reviewed parser correction over **3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc** (base tree **c6e87b80d9e837c7a295f40041e409b69e77ae2f**). Discover its actual commit and Actions run before continuing; do not call the base the latest head after integration. This is a **source/documentation checkpoint without a qualification tag**. Source review proved a second mandatory erasure gap before the planned run, so the next full qualification is deferred until that complete saturation-boundary class is corrected and independently reviewed. No cold recovery rerun is needed. Main remains **ed5d00aca0743bde583b45fe7756dd494ac3960f**; practical integration is complete. Strict integration and seed promotion remain pending.
+
+The base 3c0 integrated Check **178ecf89498be6502be5f747f0c0d62eb1133420**, Recursion **ea8518afd0982e64d6fcfcd2320501d89e0385ec**, Backend Module **2580754407e70be69cc10101c4ebe03c7304a8f0**, source-completion **639e78ffeba7d64f29ef02eadff9b37951073832** and the final semantic foundation **40e540b325186ee514ff3af9e39a22126d29a167** / manifest **09c621ccba856c8906f24dcba5c9104fdfd08014**. Exact readback confirmed its 21 paths: 3 compiler sources and 18 documentation/evidence files. All earlier pending descriptions of that batch below are historical.
+
+### Final parser correction integrated by this checkpoint
+
+[ParseLean.lean](packages/syntax/src/Ps/Syntax/ParseLean.lean) changes from **e4ffc2f29643145ff5e5eea21e8ee59f000414bd** to **8c39064e8a9c4bcda1ec9f2432ccbe0a70769574**, SHA-256 **7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8**. The exact six-edit manifest is [nomatch-application-entry.json](docs/selfhost-language/strict/reviewed-candidates/nomatch-application-entry.json), blob **aa62fec9ef76acc69f289d168b2b23b21dc07d93**. Root reconstructed all six edits forward and backward; all 75 existing definition headers and the moved consumed-span helper are byte-identical. Four internal definitions are added. Independent class review and source authoring review are CLEAR; this is source analysis, not an execution result.
+
+The old Application primary called psParseSimpleTerm, bypassing the full Term nomatch branch and rejecting primary heads beginning with '(' or '['. The new primary recognizes nomatch and the existing grouping/list forms. Its internal Application/Product workers carry a separate nomatch scrutinee callback. Full Term supplies its already-decreased full parser; only the nomatch head uses it. Ordinary groups/lists keep their existing family callback. Product recursion decreases its own fuel; full Term reentry decreases the enclosing Term fuel. Public wrappers, fuel defaults, zero rules and product/arrow/application-tail logic remain.
+
+This intentionally adds compositional acceptance of nested grouping/list primary heads, including their non-nomatch counterparts. It does not claim identical acceptance on every ordinary input, introduce unrestricted grouped control forms, or enable grouped function-arrow syntax. The final helper uses a Bool selector and an ordinary typed function callback: **do not restore** the earlier Option(function-arrow) draft **357419a4e8d93d81d7e494a8cb37b66f5d115586** or the earlier incomplete-scrutinee draft **098c313d917d41ce1d656ded9ea5f45eecc22ab2**. Those were caught in source review, before execution.
+
+Direct nomatch, grouped arguments, repeated parentheses, grouped/list scrutinees and already-supported conditional/let/call/record scrutinee routes were reviewed as a class. PS parser, printers, AST/IR shapes, grammar fixtures and every gate invocation remain unchanged. Preserve all 5 accepted empty pairs, 6 refusals, 1 zero-field pair and 2 zero-field refusals. No assertion, expected AST or capability is waived.
+
+### Exact seventh-attempt outcome
+
+Full run [37986002380](https://github.com/dwijayuda/pskernel/actions/runs/37986002380), compiler job **114008036763**, completed with failure at native step 24. Provider **114009942633 skipped**. Cold run **37986002167 skipped by tag as intended**; successful revised cold recovery **37983663908** remains the qualification of the unchanged recipe.
+
+The actual native atomic API admitted **64 modules / 1,209,116 source bytes / 149 imports / 1,664 source declarations / 2,510 Core declarations / 39 normalizations**. Original IR: **62,169 expressions / 792,484 steps / 0 findings / complete traversal**. Target admission completed 1,610,037 steps. The receipt observes one preparation, one canonical admission encoding, zero environment reconstructions and one IR check.
+
+Before failure, the run passed 15 native checker cases; source 2 accepted / 33 refused / 2 carrier refusals; target 9 accepted / 20 refused; 45 operations / 186 native runtime observations; source evaluation 12 declarations / 24 values / 21 host probes; IR 61 behavior observations / 38 refusals; native/generated empty and zero-field checks; generic/session/helper checks. The whole 64-module Lean → new PS → Lean and idempotent PS comparison passed with 988,207 PS bytes and closure SHA-256 **baa67e4ed50d0a25d9d97999a10a20d3b436c8bd54304c220dc79cfab386a699**. These are finite partial results. N1 grammar/capability conformance did not finish; C1/C2/C3 and provider were not reached.
+
+At **20:22:37.6258849Z**, sh1-grammar-conformance.mjs line 543 failed **grouped-empty-argument: common AST**. Parenthesized Lean nomatch value became app(reference nomatch,[reference value]); the intended shared AST is matchE(value,[]). The parser correction above addresses this exact expression-entry class.
+
+Durable evidence:
+
+- [job.log](docs/selfhost-language/strict/attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/job.log): blob **00fbc9633180a6aa86d54e312f6166bf0a3e2cbc**, SHA-256 **158daa528895baff99f9c136fb6a75e4c96ed0d81176a135b34c10891f823b28**, 1,031,393 characters.
+- [grammar-failure.json](docs/selfhost-language/strict/attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/grammar-failure.json): blob **8faa56832c7db88ba3cf109ffe58c63c4ad8e1e8**.
+- [strict-source-native.json](docs/selfhost-language/strict/attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/strict-source-native.json): blob **bca25c3e02c234ece65d257b29e94bd893697d25**, SHA-256 **dbe4957462d35bf7beb1895f5ef39135afe064aed26a5d0c7cd9f14eec3e5381**. The complete compact log JSON plus newline independently matches the actual native receipt file hash. Pretty-printing changes its bytes and is not that file.
+- Artifact **11642987189**, 1,803,936 bytes, digest **6e9f4f2b85e7ed3c1a5dd919f826a5466fa8eab6116aa3695f64a888ff15018d**, expires 2026-11-08.
+- N1 JS **914211c326068981686413f53021bb16773d59293332f8d1dc017ec6ab0b750b**; native TS **74e90228b8b5149a66425f687548cebd09d13a561ac00b34009eee52ccb66db8**. Neither is a new selected seed or complete qualification.
+
+The preflight observed **15,394,009,088 available bytes** and V8 heap limit **8,640,266,240 bytes** under the 8,192 MiB process policy. C2 was not reached, so the C2 peak-memory repair remains unqualified. Preserve the current full gate and resource measurements.
+
+### General argument progress and active review boundary
+
+The following source-grounded general local arguments are integrated with explicit remaining composition premises. They are not a claim that their entire correspondence rows are discharged.
+
+| Packet | Exact document blob | Review / residual boundary |
+| --- | --- | --- |
+| [NORMALIZATION_ARGUMENTS.md](docs/selfhost-language/strict/NORMALIZATION_ARGUMENTS.md) | d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a | N-01–N-04, root and two bounded peers CLEAR; actual Core/type/sort and independently justified source demand/call grouping remain to compose |
+| [TS_RULE_ARGUMENTS.md](docs/selfhost-language/strict/TS_RULE_ARGUMENTS.md) | bc72390c69e0c92cd7dce56092a65731748c96ec | TS-01–TS-09, root and bounded peer CLEAR; exact actual erasure/Core, primitive/host and all-index adequacy premises remain |
+
+N manifest **0b0e21e4c8b710aeee623c8a92b567e46d2d9bbc** and TS manifest **833ec6592774e2c002701959614abe47213b3021** bind exact source/doc pins at 3c0. Their conditional case arguments include complete syntax partitions, scope/provenance, normalization telescope/state readiness, generator reentry, eta/count/tail dispatch and module initialization. The shared budget is residual and never resets at callbacks or private helpers. Total immutable reads can move across a possible abort without changing the first abort or demanded computation order; do not restore the earlier overstrong “crosses no abort” wording.
+
+The reviewed [EV_RULE_ARGUMENTS.md](docs/selfhost-language/strict/EV_RULE_ARGUMENTS.md) is integrated: blob **7e90465301005a395a871a0563b19c164dcda750**, SHA-256 **d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38**; manifest [ev-rule-arguments.json](docs/selfhost-language/strict/reviewed-candidates/ev-rule-arguments.json), blob **9f7d2bfe1161d23b8a3ee232f7e3845a47291fca**. Root and all three bounded peers are CLEAR. It covers all eleven IR forms and the complete intrinsic family under the same residual relations. Five precise wording corrections preserve actual runtime-only field admission, omission of generic type parameters, ER-05 projection, ER-07 empty motive, and distinct erasure result-eta versus backend EtaBind producer facts. Root verified the exact five edits forward/reverse, readback/hash and all 15 source pins. No whole EV row is closed before shared ER/Core/host composition.
+
+The ER author has a durable incomplete checkpoint **5bef308cee061026ee715f696dc4d8c92a668dd4** (sections 0–3 only: actual name/index allocation, opening/closing, bounded type substitution and mode-indexed environments). It is not a complete packet or a closed row. Continue ER-01–ER-09 with actual layouts, proof/type classification, target name provenance and call grouping.
+
+A mandatory generic application-group gap is now source-proved, without running a new fixture. The supported Lean source is:
+
+~~~lean
+def groupId {alpha : Type} (value : alpha) : alpha := value
+def groupUse (f : Nat -> Nat) : Nat := groupId f 0
+~~~
+
+The independent infer review derives closed Core (((groupId (Nat -> Nat)) f) 0) with no unresolved metas. Erasure flattens the full Core application spine, drops the type operand, then passes f and 0 to groupId's one-runtime-parameter IR scheme; the unchanged exact-arity checker must refuse. A typed let around groupId f is not a remedy: Finish treats its instantiated arrow result as a missing runtime argument and eta-expands to a two-argument call to the same one-argument declaration. This is a required accepted-source coverage gap, not an executed failure or evidence of emitted incorrect JS.
+
+The whole type/group class must be resolved coherently: erase(A -> T0) substituted with T0 := (B -> R) retains a nested IR function result, whereas erasing the concrete adjacent arrows produces a flattened group. Review actual saturation boundaries, generic result and function parameter/layout substitution, higher-order value adapters, ordinary partial capture, result eta and backend eta together. Do not flatten checker equality, narrow generic type instantiation or revise the semantic contract to hide the defect. Runtime reviewer coordinates the remedy; ER reviewer owns the relevant source changes; infer reviewer independently validates the complete type/source class. All agents use unattached blobs; root alone integrates.
+
+The separate result-eta delay question remains an argument obligation under the unchanged pure/total source contract. Do not invent divergence/effects or treat proof-budget invocation counts as contract observations. The explicit (Nat -> Nat) application-operand spelling is outside the bounded parser; the implicit witness above uses a supported typed binder and is the valid source witness.
+
+All **33 general rows remain open**. Keep strictSh1Qualified, semanticContractQualified, generalPreservationProven and formalPreservationProven false until actual composition and exact-source qualification support them.
 
 ## 1. Current integration, setup correction and completed attempts
 
@@ -299,25 +365,29 @@ The uninhabited raw files remain byte-identical: test/fixtures/selfhost-sh1-empt
 Final grammar coverage retains5 empty syntax pairs/6 refusals and adds1 zero-field pair/2 refusals, all parse/print only. The original-IR gate extends its existing one TS7 compilation to33 positive declarations/4 inductives/3 structures,38 rejections and61 behavior observations; separate empty evidence records2 layouts/5 eliminations and5 actual d.ts ABI signatures, with one callback that throws before producing any empty inhabitant. Native checker coverage becomes15 cases in its existing process, retaining the exact five-declaration Lean fixture and separate nullary-record coverage. These counts are integrated assertion contracts awaiting actual execution; final evidence binding and independent review are complete. No additional full/source preparation, TS7 invocation or native checker process is required by this coverage.
 ## 10. Immediate continuation order
 
-1. Read the actual strict-branch head and the latest source qualification run.047a's full run failed at the reviewed checker annotation; its revised isolated cold run passed. The current three-file completion overlay and full15-Lean-file annotation audit are recorded above. Do not repeat cold recovery or artifact inspection without a new concrete dependency change.
-2. Qualify the corrected exact current source through the existing full workflow with [sh1-qualify]. Retain the measured early/process-entry resource receipts. Observe native source replay and all current N1 fixtures before R-to-C1; no prior revision supplies these results.
-3. Observe C2/C3, actual native/C2/C3 origins, four fixed-point products, runtime/grammar/IR gates and final actual-file binding. On failure, identify the exact logged phase/class before changing source or rerunning.
-4. Preserve the separately pinned provider result if the compiler qualifies. A skipped provider is neither acceptance nor rejection. Revised recovery recipe d4c361/policy70806f is now independently cold-qualified and remains distinct from current-source/compiler qualification.
-5. Continue the N/ER/EV/TS arguments over the shared semantic foundation. Root owns EV and integration; artifact agent N1–4; empty agent ER1–9; runtime agent TS1–9. Shared premises must be proved, not assumed circularly. No finite fixture or typing result closes a general row by itself.
-6. Continue the general arguments using the reviewed normalizer reserved-ID correction and empty-tail fallback in the current three-file overlay. Their source findings and exact changes are recorded; neither is a new language version or a substitute for the pending exact-source qualification.
-7. Keep all mandatory strict flags false until every row, required coverage, exact-source qualification and provider obligation has its supported disposition. Strict source remains unmerged; R remains selected and .lean authoritative. Bulk refactoring, optional syntax expansion and seed promotion remain deferred.
+1. Read the actual strict-branch head. This parser/document checkpoint launches no qualification. The completed seventh run 37986002380 is a failure; it is not active. The final reviewed parser manifest is aa62fec9ef76acc69f289d168b2b23b21dc07d93, source 8c39064e8a9c4bcda1ec9f2432ccbe0a70769574. Do not rerun the unchanged cold recovery or completed artifact inspection.
+2. Complete the source-proven generic saturation/group class correction and independent source review, then integrate one coherent batch and request one full [sh1-qualify] run. Verify its exact source, native source replay and complete N1 grammar/capability gate before R-to-C1. Keep early and designated-process resource receipts. No earlier revision supplies current C1/C2/C3 results.
+3. Observe C2/C3, actual native/C2/C3 origins, the four fixed-point products, runtime/grammar/IR gates and final actual-file binder. On failure, identify the exact logged phase and source class before any change or rerun. Preserve every gate count and fixture.
+4. Bind the separately pinned provider result if the compiler qualifies. A skipped provider is neither acceptance nor rejection. Revised recovery recipe d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d / policy 70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30 remains independently cold-qualified.
+5. Complete ER-01–ER-09 and the actual Core/type/sort plus source-demand/call-group interfaces. Compose the already-reviewed N, EV and TS local arguments under the same relation. Distinguish real source-admitted coverage/semantic defects from arbitrary target-IR countermodels and proof-device observations.
+6. Record exact evidence and row dispositions. Do not label conditional local lemmas, source provenance, typing or finite fixture passes as whole general preservation.
+7. Keep mandatory strict flags false while any required obligation remains open. Strict source is unmerged, R selected and .lean authoritative. Bulk refactoring, optional syntax expansion and seed promotion remain deferred.
 
 ## 11. Agent and tool handoff
 
-Root owns integration/evidence/docs/refs, exact cloud follow-through and the EV rule argument. empty_evidence_finish completed the shared semantic foundation and the full15-Lean-file source-annotation audit and now owns the nine ER rows. runtime_comparison_finish completed recovery/resource/call-domain reviews and owns TS1–9. artifact_inspection_review completed source/scope/resource/syntax reviews and owns N1–4. All three helped close the bounded annotation class audit before another execution. Recover by immutable blobs/manifests; sessions may disappear.
+Root owns integration, source/ref guards, cloud evidence, documentation and the EV rule packet. Only root commits or updates refs, always non-force after exact base/head checks. All work is GitHub MCP plus GitHub Actions; no local files, shell, clone, browser or local builds/tests.
 
-The shared-semantics work is documentation/source argument only so far, not production code, a closed row or a claimed theorem. Concrete premises found during its inventory: executable scopes differ from type-only scopes; output-only fresh names are not Core fvars; simultaneous type substitution has a fuel-zero unchanged fallback that needs a depth/coverage argument; missing-argument capture, result-group eta flattening and backend eta-to-let are distinct obligations. None alone is a demonstrated accepted-source defect. Do not start a test/fix loop from a conditional proof premise.
+- empty_evidence_finish completed the foundation, source annotation and parser repair; completed bounded EV §§7–12 readback; now implement/review the generic saturation-boundary class with the runtime reviewer, then finish the nine ER rows from the durable incomplete checkpoint.
+- artifact_inspection_review completed the N packet and independently cleared the final parser. It proved the supported implicit generic witness's closed Core shape and now independently audits the saturation/type-representation correction, then resumes the narrow actual infer/WHNF/type/sort residuals.
+- runtime_comparison_finish completed the TS packet. It source-proved the generic saturation-boundary refusal class and now coordinates a complete class remedy with ER and infer reviewers, plus actual O-GROUP/ER-ETA-GROUP closure.
 
-In-memory stores expire after roughly twenty minutes. Never rely on an old store name. Costly completed drafts are immutable Git blobs. GitHub fetch_blob/fetch_file return content under structuredContent; inspect isError. Batch a few independent reads with Promise.allSettled and inspect every result. Keep writes/leases sequential.
+Keep the latest packet identities in the current section authoritative. Every temporary candidate is recoverable through immutable blobs/manifests; do not depend on expiring in-memory stores. Source/code changes need a complete relevant class review before another coherent execution. Ordinary typed substitution/layout and induction hypotheses should be proved once and reused; do not let them become permanent labels that prevent completion.
 
-Use fetch_workflow_run_jobs and fetch_workflow_job_logs with repo_full_name. Generic REST /actions/jobs/:id is unsupported; repository actions/runs collection and individual run URLs work. Running logs may be unavailable until completion.
+Concrete remaining distinctions: executable scope versus type-only scope; output-only names versus Core fvars; the type-substitution fuel-zero unchanged fallback versus the actual target depth bound; supplied-operand capture versus result-group eta versus backend eta-to-let; source partial-definition refusal versus arbitrary foreign callbacks. No source observation may be invented to fit lowering.
 
-Pure SHA-256 review helper blob fe3478ead5638f8647e67a5ef2a2f2de4e2eb896 contains a standalone function before "// Pure data review only:". It authorizes only data hashing, not local compiler execution.
+Use fetch_workflow_run_jobs and fetch_workflow_job_logs with repo_full_name. Generic REST /actions/jobs/:id is unsupported; repository Actions run collections and individual run URLs work. Running logs may be unavailable until completion. Batch a few independent reads with Promise.allSettled and inspect every result; keep writes, leases and dependent operations sequential.
+
+Pure SHA-256 helper blob fe3478ead5638f8647e67a5ef2a2f2de4e2eb896 contains a standalone function before "// Pure data review only:". It authorizes only in-memory data hashing, not compiler execution. Never print the complete sourceOrigins receipt or deep target path: retain the exact blob and report scalar counts.
 
 ## 12. Qualified baseline and protected identities
 

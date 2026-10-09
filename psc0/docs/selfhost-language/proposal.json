@@ -1779,7 +1779,7 @@
     }
   },
   "strictEnforcementCheckpoint": {
-    "status": "sixth-attempt-native-source-replay-refusal-single-reviewed-annotation-awaiting-qualification",
+    "status": "parser-review-complete-generic-saturation-class-correction-before-next-full-qualification",
     "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
     "branch": "psc0/strict-sh1-v1",
     "implementationManifest": "strict/implementation-checkpoint.json",
@@ -1815,24 +1815,26 @@
     "selectedSeedUnchanged": "R",
     "sourceAuthority": ".lean",
     "cloudExecution": {
-      "status": "sixth-attempt-native-source-replay-refusal-single-reviewed-annotation-awaiting-qualification",
-      "sourceRef": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
-      "runId": 37983663904,
+      "status": "seventh-attempt-native-source-and-partial-conformance-passed-grouped-empty-grammar-assertion",
+      "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "runId": 37986002380,
       "workflowId": 378853677,
-      "compilerJobId": 114000150722,
-      "providerJobId": 114000685482,
+      "compilerJobId": 114008036763,
+      "providerJobId": 114009942633,
       "providerStatus": "skipped",
-      "attempts": 6,
+      "attempts": 7,
       "failedStep": 24,
-      "diagnostic": "source-elaboration/matchExpectedType in psIrCheckMatch resultChecked initializer",
+      "diagnostic": "grouped-empty-argument common AST: parenthesized nomatch parsed as ordinary application",
       "nativeCompilerBuilt": true,
       "resourcePreflightPassed": true,
-      "effectiveAvailableBytes": 15235063808,
+      "effectiveAvailableBytes": 15394009088,
       "observedHeapLimitBytes": 8640266240,
+      "nativeSourceAdmitted": true,
+      "nativeOriginalIrAccepted": true,
       "nativeStrictConformanceCompleted": false,
       "c1Started": false,
       "fixedPointStarted": false,
-      "failureEvidence": "strict/attempts/047a29f17392fea41ac5d59e7f8cbfc172b20313/source-refusal.json"
+      "failureEvidence": "strict/attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/grammar-failure.json"
     },
     "initialImplementationRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
     "sourceBoundaryCorrection": "strict/source-boundary-correction.json",
@@ -1957,10 +1959,12 @@
       "expectedParent": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
       "sourcePath": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
       "sourceBlob": "178ecf89498be6502be5f747f0c0d62eb1133420",
-      "status": "one-explicit-type-annotation-reviewed-awaiting-exact-source-qualification",
+      "status": "integrated-own-source-admission-passed-full-qualification-incomplete",
       "changedLeanFilesAudited": 15,
       "strictSh1Qualified": false,
-      "semanticContractQualified": false
+      "semanticContractQualified": false,
+      "integratedSourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "observedRunId": 37986002380
     },
     "sharedSemanticFoundation": {
       "document": "strict/SEMANTIC_RELATIONS.md",
@@ -1976,11 +1980,111 @@
       "manifest": "strict/post-review-source-completion.json",
       "blob": "639e78ffeba7d64f29ef02eadff9b37951073832",
       "expectedParent": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
-      "status": "three-source-files-independently-reviewed-awaiting-one-exact-source-qualification",
+      "status": "integrated-own-source-admission-and-partial-conformance-passed-grammar-gate-incomplete",
       "sourceFiles": 3,
       "fixturesAndInvocationCountsUnchanged": true,
       "newColdRunRequired": false,
-      "sharedGeneralRowsClosed": 0
+      "sharedGeneralRowsClosed": 0,
+      "integratedSourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "observedRunId": 37986002380
+    },
+    "reviewedParserCorrection": {
+      "manifest": "strict/reviewed-candidates/nomatch-application-entry.json",
+      "manifestBlob": "aa62fec9ef76acc69f289d168b2b23b21dc07d93",
+      "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "baseBlob": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
+      "sourceBlob": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "sourceSha256": "7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8",
+      "status": "reviewed-six-edit-source-correction-integrated-by-enclosing-commit-awaiting-one-full-qualification",
+      "review": "Root exact forward/reverse reconstruction; all 75 existing definition headers unchanged; independent bounded source-class review CLEAR.",
+      "acceptanceScope": "The shared nomatch primary preserves full-term scrutinees through grouped/list application paths. It intentionally closes existing grouped/list primary forms under nesting, including non-nomatch counterparts; other full-control family restrictions and public fuel defaults remain.",
+      "fixturesAndInvocationCountsUnchanged": true,
+      "coldRecipeChanged": false,
+      "newColdRunRequired": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    "reviewedGeneralArguments": [
+      {
+        "family": "N",
+        "rows": [
+          "N-01",
+          "N-02",
+          "N-03",
+          "N-04"
+        ],
+        "document": "strict/NORMALIZATION_ARGUMENTS.md",
+        "blob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+        "sha256": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+        "manifest": "strict/reviewed-candidates/normalization-arguments.json",
+        "manifestBlob": "0b0e21e4c8b710aeee623c8a92b567e46d2d9bbc",
+        "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+        "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
+        "rowsClosed": 0
+      },
+      {
+        "family": "TS",
+        "rows": [
+          "TS-01",
+          "TS-02",
+          "TS-03",
+          "TS-04",
+          "TS-05",
+          "TS-06",
+          "TS-07",
+          "TS-08",
+          "TS-09"
+        ],
+        "document": "strict/TS_RULE_ARGUMENTS.md",
+        "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+        "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+        "manifest": "strict/reviewed-candidates/ts-rule-arguments.json",
+        "manifestBlob": "833ec6592774e2c002701959614abe47213b3021",
+        "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+        "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
+        "rowsClosed": 0
+      },
+      {
+        "family": "EV",
+        "rows": [
+          "EV-01",
+          "EV-02",
+          "EV-03",
+          "EV-04",
+          "EV-05",
+          "EV-06",
+          "EV-07",
+          "EV-08",
+          "EV-09",
+          "EV-10",
+          "EV-11"
+        ],
+        "document": "strict/EV_RULE_ARGUMENTS.md",
+        "blob": "7e90465301005a395a871a0563b19c164dcda750",
+        "sha256": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+        "manifest": "strict/reviewed-candidates/ev-rule-arguments.json",
+        "manifestBlob": "9f7d2bfe1161d23b8a3ee232f7e3845a47291fca",
+        "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+        "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
+        "rowsClosed": 0
+      }
+    ],
+    "pendingErasureClassCorrection": {
+      "status": "source-proven-mandatory-coverage-gap-not-executed",
+      "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "leanSource": "def groupId {alpha : Type} (value : alpha) : alpha := value\ndef groupUse (f : Nat -> Nat) : Nat := groupId f 0\n",
+      "inference": "Supported typed binder and implicit generic application produce closed Core (((groupId (Nat -> Nat)) f) 0), with no unresolved metas.",
+      "erasure": "The whole-spine runtime operands [f,0] target the generic identity's one-runtime-parameter IR scheme. Existing exact call-arity checking refuses. A typed-let intermediate is also incorrectly eta-expanded by Finish after it sees the instantiated arrow result.",
+      "classScope": [
+        "Runtime saturation boundaries before and after generic result substitution",
+        "Adjacent concrete arrow flattening versus nested substituted function groups",
+        "Function-valued generic parameter/layout/result representation and necessary adapters",
+        "Ordinary partial capture, result eta and backend eta"
+      ],
+      "next": "Complete coherent class correction and independent source review before one next full qualification.",
+      "contractAndCheckerMustNotBeWeakened": true,
+      "newColdRunRequired": false
     }
   }
 }

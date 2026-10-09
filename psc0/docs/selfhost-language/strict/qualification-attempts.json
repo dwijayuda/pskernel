@@ -994,10 +994,193 @@
         "newColdRunRequired": false,
         "sharedGeneralRowsClosed": 0
       }
+    },
+    {
+      "attempt": 7,
+      "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "runId": 37986002380,
+      "workflowId": 378853677,
+      "compilerJobId": 114008036763,
+      "providerJobId": 114009942633,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37986002380",
+      "status": "failure",
+      "diagnosticAt": "2026-10-09T20:22:37.6258849Z",
+      "failedStep": {
+        "number": 24,
+        "name": "Run the bounded native development gate before qualification",
+        "timestamp": "2026-10-09T20:22:37.6258849Z",
+        "exitCode": 1,
+        "error": "AssertionError [ERR_ASSERTION]: grouped-empty-argument: common AST",
+        "script": "psc0/scripts/sh1-grammar-conformance.mjs",
+        "line": 543,
+        "comparison": "Lean parenthesized nomatch value parsed as app(reference nomatch,[reference value]); expected the shared empty matchE(value,[]) AST",
+        "sourceCodeCorrection": "Final independently reviewed parser expression-entry correction is integrated by the enclosing commit; see reviewed-candidates/nomatch-application-entry.json. No assertion or fixture weakened."
+      },
+      "sourceReplay": "current-authoritative-closure-admitted-N1-built-partial-native-conformance-passed",
+      "nativeSourceReceipt": {
+        "path": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/strict-source-native.json",
+        "blob": "bca25c3e02c234ece65d257b29e94bd893697d25",
+        "sha256": "dbe4957462d35bf7beb1895f5ef39135afe064aed26a5d0c7cd9f14eec3e5381",
+        "characters": 589363,
+        "fileHashIndependentlyMatched": true
+      },
+      "nativeOriginalIr": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 792484,
+        "expressionCount": 62169,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "strictSh1Qualified": false
+      },
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "accepted": true,
+        "traversalComplete": true,
+        "moduleCount": 64,
+        "sourceBytes": 1209116,
+        "inputBytes": 1210195,
+        "importCount": 149,
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "stats": {
+          "visitedSteps": 142830,
+          "typeSteps": 17482,
+          "termSteps": 55698,
+          "declarationCount": 1664,
+          "theoremCount": 0
+        }
+      },
+      "sourceOriginsSummary": {
+        "policy": "psc0-declaration-origins/1",
+        "actualParsedModulesRetained": 64,
+        "moduleCount": 64,
+        "sourceDeclarationCount": 1664,
+        "coreDeclarationCount": 2510,
+        "normalizationCount": 39,
+        "semanticCorrespondenceDischarged": false
+      },
+      "partialConformance": {
+        "nativeCheckerCases": 15,
+        "sourceAccepted": 2,
+        "sourceRefused": 33,
+        "carrierRefusals": 2,
+        "targetAccepted": 9,
+        "targetRefused": 20,
+        "runtimeOperations": 45,
+        "nativeRuntimeObservations": 186,
+        "sourceEvaluationObservations": 24,
+        "sourceEvaluationHostProbes": 21,
+        "irBehaviorObservations": 61,
+        "irRefusals": 38,
+        "grammarClosure": {
+          "compilerSha256": "914211c326068981686413f53021bb16773d59293332f8d1dc017ec6ab0b750b",
+          "closureSha256": "baa67e4ed50d0a25d9d97999a10a20d3b436c8bd54304c220dc79cfab386a699",
+          "moduleCount": 64,
+          "proofScriptBytes": 988207,
+          "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent"
+        }
+      },
+      "currentGenerationCandidate": "not-started",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/grammar-failure.json",
+        "blob": "8faa56832c7db88ba3cf109ffe58c63c4ad8e1e8"
+      },
+      "log": {
+        "path": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/job.log",
+        "blob": "00fbc9633180a6aa86d54e312f6166bf0a3e2cbc",
+        "sha256": "158daa528895baff99f9c136fb6a75e4c96ed0d81176a135b34c10891f823b28",
+        "characters": 1031393
+      },
+      "artifacts": [
+        {
+          "id": 11642987189,
+          "name": "psc0-sh1-ts7.0.2-3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+          "size_in_bytes": 1803936,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642987189",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11642987189/zip",
+          "expired": false,
+          "created_at": "2026-10-09T20:22:41Z",
+          "expires_at": "2026-11-08T20:22:39Z",
+          "updated_at": "2026-10-09T20:22:41Z",
+          "digest": "sha256:6e9f4f2b85e7ed3c1a5dd919f826a5466fa8eab6116aa3695f64a888ff15018d",
+          "workflow_run": {
+            "id": 37986002380,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc"
+          }
+        }
+      ],
+      "coldRecovery": {
+        "runId": 37986002167,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "The complete N1 grammar/capability gate did not finish. Successful partial checks are exact-source finite evidence only; current C1/C2/C3 and provider qualification were not reached.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
     }
   ],
   "selectedSeedChanged": false,
   "mainAtLastVerified": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "strictSh1Qualified": false,
-  "semanticContractQualified": false
+  "semanticContractQualified": false,
+  "nextQualification": {
+    "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+    "parserCorrection": {
+      "manifest": "reviewed-candidates/nomatch-application-entry.json",
+      "manifestBlob": "aa62fec9ef76acc69f289d168b2b23b21dc07d93",
+      "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "baseBlob": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
+      "sourceBlob": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "sourceSha256": "7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8",
+      "status": "reviewed-six-edit-source-correction-integrated-by-enclosing-commit-awaiting-one-full-qualification",
+      "review": "Root exact forward/reverse reconstruction; all 75 existing definition headers unchanged; independent bounded source-class review CLEAR.",
+      "acceptanceScope": "The shared nomatch primary preserves full-term scrutinees through grouped/list application paths. It intentionally closes existing grouped/list primary forms under nesting, including non-nomatch counterparts; other full-control family restrictions and public fuel defaults remain.",
+      "fixturesAndInvocationCountsUnchanged": true,
+      "coldRecipeChanged": false,
+      "newColdRunRequired": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    "request": "deferred until source-proven generic saturation-boundary class is corrected and independently reviewed; this enclosing parser/doc checkpoint has no qualification tag",
+    "runId": null,
+    "actualRunDiscoveryRequired": true,
+    "coldRerunRequired": false,
+    "triggeredByThisCheckpoint": false,
+    "erasureClassFinding": {
+      "status": "source-proven-mandatory-coverage-gap-not-executed",
+      "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "leanSource": "def groupId {alpha : Type} (value : alpha) : alpha := value\ndef groupUse (f : Nat -> Nat) : Nat := groupId f 0\n",
+      "inference": "Supported typed binder and implicit generic application produce closed Core (((groupId (Nat -> Nat)) f) 0), with no unresolved metas.",
+      "erasure": "The whole-spine runtime operands [f,0] target the generic identity's one-runtime-parameter IR scheme. Existing exact call-arity checking refuses. A typed-let intermediate is also incorrectly eta-expanded by Finish after it sees the instantiated arrow result.",
+      "classScope": [
+        "Runtime saturation boundaries before and after generic result substitution",
+        "Adjacent concrete arrow flattening versus nested substituted function groups",
+        "Function-valued generic parameter/layout/result representation and necessary adapters",
+        "Ordinary partial capture, result eta and backend eta"
+      ],
+      "next": "Complete coherent class correction and independent source review before one next full qualification.",
+      "contractAndCheckerMustNotBeWeakened": true,
+      "newColdRunRequired": false
+    }
+  }
 }

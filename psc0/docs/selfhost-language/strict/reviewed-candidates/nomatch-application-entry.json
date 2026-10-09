@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-lean-nomatch-application-entry-repair",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+  "status": "unattached candidate; bounded independent source review complete; candidate not executed",
+  "files": [
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "expectedBaseBlob": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
+      "expectedBaseSha256": "410d0f855c800fe24aea43ed9b224dbc8fa1ecb04234a9f133de18ec0d435783",
+      "candidate": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "sha256": "7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8",
+      "utf8Bytes": 107237,
+      "edits": [
+        {
+          "purpose": "Move the unchanged consumed-token span helper before its use; add shared nomatch and callback-preserving primary parsers.",
+          "before": "def psLeanCanStartSimpleArgument\n",
+          "after": "-- The Lean grouping parser preserves inner semantic spans. A nomatch span\n-- additionally covers its actually consumed tokens, including grouped scrutinees.\n-- The input is the finite token list already constructed by the owned lexer.\ndef psLeanNomatchConsumedStop\n    (tokens : List PsToken) :\n    Option PsToken -> PsSourcePos -> PsSourcePos :=\n  match tokens with\n  | List.nil =>\n      fun (_next : Option PsToken) (latest : PsSourcePos) => latest\n  | List.cons token rest =>\n      let smaller : Option PsToken -> PsSourcePos -> PsSourcePos :=\n        psLeanNomatchConsumedStop rest;\n      fun (next : Option PsToken) (latest : PsSourcePos) =>\n        let finished : Bool :=\n          if psTokenKindEq token.kind PsTokenKind.endOfInput then true\n          else\n            match next with\n            | Option.none => false\n            | Option.some unconsumed =>\n                Nat.ble unconsumed.span.start.byteOffset token.span.start.byteOffset;\n        if finished then latest\n        else smaller next token.span.stop\n\ndef psParseLeanNomatch\n    (parseScrutinee :\n      PsTokenCursor ->\n      Except PsParseError (PsParseResult PsSyntaxTerm))\n    (cursor : PsTokenCursor) :\n    Except PsParseError (PsParseResult PsSyntaxTerm) :=\n  match psTokenCursorAdvance cursor with\n  | Option.none => Except.error (PsParseError.unexpectedEnd \"nomatch scrutinee\")\n  | Option.some keyword =>\n      match parseScrutinee keyword.cursor with\n      | Except.error error => Except.error error\n      | Except.ok scrutinee =>\n          let stop : PsSourcePos :=\n            psLeanNomatchConsumedStop keyword.cursor.remaining\n              (psTokenCursorPeek scrutinee.cursor) keyword.token.span.stop;\n          Except.ok {\n            value :=\n              PsSyntaxTerm.matchE scrutinee.value List.nil {\n                start := keyword.token.span.start\n                stop := stop\n              }\n            cursor := scrutinee.cursor\n          }\n\n-- Each application family supplies its existing recursive parser here.\n-- Grouped and list heads therefore retain that family's expression boundary.\ndef psParseLeanApplicationPrimary\n    (parseNomatchScrutinee :\n      PsTokenCursor ->\n      Except PsParseError (PsParseResult PsSyntaxTerm))\n    (parseParenthesized :\n      PsTokenCursor ->\n      Except PsParseError (PsParseResult PsSyntaxTerm))\n    (cursor : PsTokenCursor) :\n    Except PsParseError (PsParseResult PsSyntaxTerm) :=\n  if psTokenCursorAtText cursor \"nomatch\" then\n    psParseLeanNomatch parseNomatchScrutinee cursor\n  else if psTokenCursorAtText cursor \"(\" then\n    match psTokenCursorAdvance cursor with\n    | Option.none => Except.error (PsParseError.unexpectedEnd \"(\")\n    | Option.some opening =>\n        if psTokenCursorAtText opening.cursor \")\" then\n          match psTokenCursorAdvance opening.cursor with\n          | Option.none => Except.error (PsParseError.unexpectedEnd \")\")\n          | Option.some close =>\n              Except.ok {\n                value := PsSyntaxTerm.unit {\n                  start := opening.token.span.start\n                  stop := close.token.span.stop\n                }\n                cursor := close.cursor\n              }\n        else\n          match parseParenthesized opening.cursor with\n          | Except.error error => Except.error error\n          | Except.ok inner =>\n              match psTokenCursorExpectText inner.cursor \")\" with\n              | Except.error error => Except.error error\n              | Except.ok close =>\n                  Except.ok {\n                    value := inner.value\n                    cursor := close.cursor\n                  }\n  else if psTokenCursorAtText cursor \"[\" then\n    match psTokenCursorAdvance cursor with\n    | Option.none => Except.error (PsParseError.unexpectedEnd \"[\")\n    | Option.some opening =>\n        psParseLeanListLiteral parseParenthesized opening\n  else\n    psParseSimpleTerm cursor\n\ndef psLeanCanStartSimpleArgument\n"
+        },
+        {
+          "purpose": "Keep the public application signature; add its internal worker with a separate nomatch scrutinee callback.",
+          "before": "def psParseLeanApplicationWithFuel\n    (parseParenthesized :\n      PsTokenCursor ->\n      Except PsParseError (PsParseResult PsSyntaxTerm))\n    (fuel : Nat)\n    (cursor : PsTokenCursor) :\n    Except PsParseError (PsParseResult PsSyntaxTerm) :=\n  match fuel with\n  | 0 => Except.error PsParseError.fuelExhausted\n  | remaining + 1 =>\n      match psParseSimpleTerm cursor with\n      | Except.error error => Except.error error\n      | Except.ok first =>\n          psParseLeanApplicationTailWithFuel\n            parseParenthesized\n            remaining\n            first.value\n            first.cursor\n\n",
+          "after": "def psParseLeanApplicationWithNomatchWithFuel\n    (parseNomatchScrutinee :\n      PsTokenCursor ->\n      Except PsParseError (PsParseResult PsSyntaxTerm))\n    (parseParenthesized :\n      PsTokenCursor ->\n      Except PsParseError (PsParseResult PsSyntaxTerm))\n    (fuel : Nat)\n    (cursor : PsTokenCursor) :\n    Except PsParseError (PsParseResult PsSyntaxTerm) :=\n  match fuel with\n  | 0 => Except.error PsParseError.fuelExhausted\n  | remaining + 1 =>\n      match\n          psParseLeanApplicationPrimary\n            parseNomatchScrutinee\n            parseParenthesized\n            cursor with\n      | Except.error error => Except.error error\n      | Except.ok first =>\n          psParseLeanApplicationTailWithFuel\n            parseParenthesized\n            remaining\n            first.value\n            first.cursor\n\ndef psParseLeanApplicationWithFuel\n    (parseParenthesized :\n      PsTokenCursor ->\n      Except PsParseError (PsParseResult PsSyntaxTerm))\n    (fuel : Nat)\n    (cursor : PsTokenCursor) :\n    Except PsParseError (PsParseResult PsSyntaxTerm) :=\n  psParseLeanApplicationWithNomatchWithFuel\n    parseParenthesized\n    parseParenthesized\n    fuel\n    cursor\n\n"
+        },
+        {
+          "purpose": "Keep the public product signature; carry the supplied callback with a Bool selector through the bounded internal worker.",
+          "before": "def psParseLeanProductWithFuel\n    (fuel : Nat) :\n    PsTokenCursor ->\n    Except PsParseError (PsParseResult PsSyntaxTerm) :=\n  match fuel with\n  | 0 =>\n      fun (_cursor : PsTokenCursor) =>\n        Except.error PsParseError.fuelExhausted\n  | remaining + 1 =>\n      let smaller :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanProductWithFuel remaining;\n      fun (cursor : PsTokenCursor) =>\n        match\n            psParseLeanApplicationWithFuel\n              smaller\n              (Nat.add remaining 1)\n              cursor with\n        | Except.error error => Except.error error\n        | Except.ok left =>\n            if psTokenCursorAtText left.cursor \"×\" then\n              match psTokenCursorAdvance left.cursor with\n              | Option.none =>\n                  Except.error\n                    (PsParseError.unexpectedEnd \"product type\")\n              | Option.some afterProduct =>\n                  match smaller afterProduct.cursor with\n                  | Except.error error => Except.error error\n                  | Except.ok right =>\n                      let span :=\n                        psSyntaxSpanJoin\n                          (psSyntaxTermSpan left.value)\n                          (psSyntaxTermSpan right.value);\n                      let prodName : PsSyntaxName := {\n                        segments :=\n                          List.cons \"Prod\" List.nil\n                        span := afterProduct.token.span\n                      };\n                      Except.ok {\n                        value :=\n                          PsSyntaxTerm.app\n                            (PsSyntaxTerm.reference prodName)\n                            (List.cons\n                              left.value\n                              (List.cons right.value List.nil))\n                            span\n                        cursor := right.cursor\n                      }\n            else\n              Except.ok left\n\n",
+          "after": "def psParseLeanProductWithNomatchWithFuel\n    (useNomatchParser : Bool)\n    (parseNomatchScrutinee :\n      PsTokenCursor ->\n      Except PsParseError (PsParseResult PsSyntaxTerm))\n    (fuel : Nat) :\n    PsTokenCursor ->\n    Except PsParseError (PsParseResult PsSyntaxTerm) :=\n  match fuel with\n  | 0 =>\n      fun (_cursor : PsTokenCursor) =>\n        Except.error PsParseError.fuelExhausted\n  | remaining + 1 =>\n      let smaller :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanProductWithNomatchWithFuel\n          useNomatchParser\n          parseNomatchScrutinee\n          remaining;\n      let parseScrutinee :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        if useNomatchParser then parseNomatchScrutinee else smaller;\n      fun (cursor : PsTokenCursor) =>\n        match\n            psParseLeanApplicationWithNomatchWithFuel\n              parseScrutinee\n              smaller\n              (Nat.add remaining 1)\n              cursor with\n        | Except.error error => Except.error error\n        | Except.ok left =>\n            if psTokenCursorAtText left.cursor \"×\" then\n              match psTokenCursorAdvance left.cursor with\n              | Option.none =>\n                  Except.error\n                    (PsParseError.unexpectedEnd \"product type\")\n              | Option.some afterProduct =>\n                  match smaller afterProduct.cursor with\n                  | Except.error error => Except.error error\n                  | Except.ok right =>\n                      let span :=\n                        psSyntaxSpanJoin\n                          (psSyntaxTermSpan left.value)\n                          (psSyntaxTermSpan right.value);\n                      let prodName : PsSyntaxName := {\n                        segments :=\n                          List.cons \"Prod\" List.nil\n                        span := afterProduct.token.span\n                      };\n                      Except.ok {\n                        value :=\n                          PsSyntaxTerm.app\n                            (PsSyntaxTerm.reference prodName)\n                            (List.cons\n                              left.value\n                              (List.cons right.value List.nil))\n                            span\n                        cursor := right.cursor\n                      }\n            else\n              Except.ok left\n\ndef psParseLeanProductWithFuel\n    (fuel : Nat) :\n    PsTokenCursor ->\n    Except PsParseError (PsParseResult PsSyntaxTerm) :=\n  psParseLeanProductWithNomatchWithFuel\n    false\n    psParseLeanSimpleApplication\n    fuel\n\n"
+        },
+        {
+          "purpose": "Remove the old location of the byte-identical consumed-token span helper.",
+          "before": "-- The Lean grouping parser preserves inner semantic spans. A nomatch span\n-- additionally covers its actually consumed tokens, including grouped scrutinees.\n-- The input is the finite token list already constructed by the owned lexer.\ndef psLeanNomatchConsumedStop\n    (tokens : List PsToken) :\n    Option PsToken -> PsSourcePos -> PsSourcePos :=\n  match tokens with\n  | List.nil =>\n      fun (_next : Option PsToken) (latest : PsSourcePos) => latest\n  | List.cons token rest =>\n      let smaller : Option PsToken -> PsSourcePos -> PsSourcePos :=\n        psLeanNomatchConsumedStop rest;\n      fun (next : Option PsToken) (latest : PsSourcePos) =>\n        let finished : Bool :=\n          if psTokenKindEq token.kind PsTokenKind.endOfInput then true\n          else\n            match next with\n            | Option.none => false\n            | Option.some unconsumed =>\n                Nat.ble unconsumed.span.start.byteOffset token.span.start.byteOffset;\n        if finished then latest\n        else smaller next token.span.stop\n\ndef psParseLeanTermWithFuel\n",
+          "after": "def psParseLeanTermWithFuel\n"
+        },
+        {
+          "purpose": "Use the shared constructor at the existing full-term nomatch branch.",
+          "before": "      else if psTokenCursorAtText cursor \"nomatch\" then\n        match psTokenCursorAdvance cursor with\n        | Option.none => Except.error (PsParseError.unexpectedEnd \"nomatch scrutinee\")\n        | Option.some keyword =>\n            match smaller keyword.cursor with\n            | Except.error error => Except.error error\n            | Except.ok scrutinee =>\n                let stop : PsSourcePos :=\n                  psLeanNomatchConsumedStop keyword.cursor.remaining\n                    (psTokenCursorPeek scrutinee.cursor) keyword.token.span.stop;\n                Except.ok {\n                  value :=\n                    PsSyntaxTerm.matchE scrutinee.value List.nil {\n                      start := keyword.token.span.start\n                      stop := stop\n                    }\n                  cursor := scrutinee.cursor\n                }\n",
+          "after": "      else if psTokenCursorAtText cursor \"nomatch\" then\n        psParseLeanNomatch smaller cursor\n"
+        },
+        {
+          "purpose": "Supply the existing smaller full-term callback to the product fallback while preserving its fuel.",
+          "before": "      else\n        match psParseLeanProductWithFuel remaining cursor with\n        | Except.error error => Except.error error\n        | Except.ok domain =>\n            match\n                psParseLeanRecordApplicationTailWithFuel",
+          "after": "      else\n        match\n            psParseLeanProductWithNomatchWithFuel\n              true\n              smaller\n              remaining\n              cursor with\n        | Except.error error => Except.error error\n        | Except.ok domain =>\n            match\n                psParseLeanRecordApplicationTailWithFuel"
+        }
+      ]
+    }
+  ],
+  "observedFailure": {
+    "sourceCommit": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+    "actionsRun": 37986002380,
+    "gate": 24,
+    "script": "psc0/scripts/sh1-grammar-conformance.mjs",
+    "scriptBlob": "2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141",
+    "assertion": "grouped-empty-argument: common AST",
+    "reportedLine": 543,
+    "reportedActual": "app(reference nomatch, [reference value])",
+    "expected": "matchE(reference value, [])",
+    "cause": "The full Term fallback gave Product its own recursive parser for grouped/list application arguments. That path used psParseSimpleTerm at its head, bypassing the full Term nomatch dispatch."
+  },
+  "sourceReview": {
+    "sharedConstructor": "psParseLeanNomatch calls the supplied scrutinee parser exactly once, builds matchE with List.nil alternatives, and uses the unchanged consumed-token stop helper. The existing full-term branch delegates to this helper with the same smaller full-term callback.",
+    "headDispatch": "The new application primary recognizes nomatch, Unit/grouped heads and list heads, then falls back to the unchanged psParseSimpleTerm. The old psParseSimpleTerm head rejected leading '(' and '['. Accepting those heads is an intentional compositional closure needed for repeated parentheses and grouped/list nomatch scrutinees, and also admits their ordinary grouped/list-head counterparts. Grouped/list recursion uses the existing expression-family callback; grouped syntax preserves the inner semantic AST/span and advances past its own closing token. This does not give ordinary grouped if/let/fun/record forms an unrestricted full Term callback.",
+    "fullScrutineePlumbing": "The internal product worker carries a Bool selector and an ordinary typed callback. The full Term fallback supplies true and its existing smaller full-term parser. Recursive product/group/list entries carry both unchanged; only a nomatch head uses the selected scrutinee callback. Ordinary grouped expressions still use the recursive Product parser.",
+    "standaloneEntries": "All 75 pre-existing definition headers are byte-identical. Public ApplicationWithFuel passes its existing callback in both roles. Public ProductWithFuel uses false and the pre-existing psParseLeanSimpleApplication value; every false-mode recursive level selects its own smaller Product parser, so that supplied fallback is not invoked. These standalone entries retain their restriction on full control-form callbacks. The new primary intentionally closes existing grouping/list forms under nesting and can accept previously rejected grouped/list-head inputs; identical acceptance on all non-nomatch inputs is not claimed.",
+    "boundedFuel": "No public fuel default or zero/successor behavior changes. Application tail, list and product recursion keep their existing counters. Product recursion decreases its own fuel. Each true-mode return to full Term uses the enclosing Term's already-decreased smaller callback; this decreases the enclosing Term fuel even after finite grouped/list product descent. No fuel retry, fresh token-count budget for nomatch, or unbounded recursion is added.",
+    "spans": "The existing psLeanNomatchConsumedStop definition and comments are moved byte-identically. It stops before the next unconsumed token and includes consumed scrutinee parentheses. Parentheses surrounding the complete nomatch do not alter its semantic span. Lexer positions and UTF-8 byte offsets are unchanged.",
+    "authoringForms": {
+      "declarationOrder": "The moved span helper precedes shared nomatch; shared nomatch and primary precede the internal/public application workers; those precede SimpleApplication and the internal/public Product workers; full Term follows all of them. Every new referenced global is already declared.",
+      "callbackTypes": "All new callback binders use the existing standalone typed-binder arrow form, matching existing parser callbacks. No Option of a grouped function-arrow type, type alias, new datatype, mutual definition, notation or unsupported binder syntax is introduced.",
+      "selectedParser": "The if-valued parseScrutinee local has an explicit PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) type.",
+      "otherBindings": "The span stop local has an explicit PsSourcePos type; moved helper lambdas have explicit parameter types; new branches return directly under the declared Except result. No new untyped lambda or match-valued unannotated local is introduced.",
+      "recursion": "The internal Product worker structurally recurses on remaining fuel while the selector/callback parameters are unchanged. The full Term self-reference remains its already existing smaller binding. Public wrappers add no recursive call. The new primary is the intentional grouping/list compositional extension described above; no broader grouped function-arrow or full control callback capability is added."
+    },
+    "classAudit": [
+      {
+        "entry": "direct nomatch and a top-level grouped nomatch",
+        "argument": "Use the shared constructor with the same smaller full Term parser as the base; empty alternatives and scrutinee parsing are unchanged."
+      },
+      {
+        "entry": "nomatch inside a grouped application argument",
+        "argument": "Full Term -> internal Product(true, smallerFull) -> application tail -> recursive Product -> primary nomatch -> smallerFull. This removes the observed reference/application AST."
+      },
+      {
+        "entry": "repeated parentheses around the argument",
+        "argument": "The primary handles leading parentheses recursively, returning the same inner AST after consuming the closing token. Repeated grouping reaches the same nomatch callback rather than psParseSimpleTerm."
+      },
+      {
+        "entry": "grouped or repeated-group scrutinee",
+        "argument": "After nomatch, the full Term callback handles grouping using its existing rules. The shared consumed-stop helper includes the consumed scrutinee closing parentheses and excludes enclosing argument parentheses."
+      },
+      {
+        "entry": "list argument and nested list/group heads",
+        "argument": "Both the existing application-list path and the new list primary retain the recursive Product callback carrying the selector/full callback. A nomatch element thus uses full scrutinee semantics; comma and closing-bracket handling remain in the unchanged list parser."
+      },
+      {
+        "entry": "if, let, call, record and record-application scrutinees under grouped nomatch",
+        "argument": "The keyword-specific callback is the same full Term smaller value used at the direct nomatch entry, so these existing full-term forms use their existing dispatch and terminators. An ordinary grouped expression is still parsed by the Product family, with the explicit grouping/list primary extension but without an unrestricted full control-form callback."
+      },
+      {
+        "entry": "outer match alternatives, if branches, let bodies, lambda bodies, record fields and do children",
+        "argument": "These existing full-term child callbacks continue to reach the shared direct nomatch constructor. The patch does not consume outer alternative bars or change their parser."
+      }
+    ],
+    "printer": "PrintLean 519e2ca622ea5ea7e31dba193237b2db871e6bb7 prints empty match as nomatch plus its recursively printed scrutinee and groups a nonsimple application argument. The corrected keyword-specific full callback now handles the grouped if/let/call/record scrutinee composition; no printer edit or expected-output weakening is needed.",
+    "proofScript": "ParseProofScript e8d6ebda842dfbfcf3132f832e7630703080fa8a remains unchanged. Its full-term empty-brace match construction and grouped-call argument parsing already produce the expected empty match AST."
+  },
+  "unchangedGrammarGate": {
+    "path": "psc0/scripts/sh1-grammar-conformance.mjs",
+    "blob": "2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141",
+    "emptyPairs": 5,
+    "emptyRefusals": 6,
+    "zeroFieldRecordPairs": 1,
+    "zeroFieldRecordRefusals": 2,
+    "emptyCanonicalRoundTrips": 5,
+    "zeroFieldRecordCanonicalRoundTrips": 1,
+    "pairs": [
+      {
+        "name": "empty-type-command-boundary",
+        "review": "Inductive parsing and where/next-command boundary are untouched; the empty constructor list and declaration spans are unchanged."
+      },
+      {
+        "name": "empty-elimination",
+        "review": "The same full-term callback and byte-identical span construction are shared, with no alternative parser call."
+      },
+      {
+        "name": "grouped-empty-scrutinee-consumed-span",
+        "review": "The full-term grouped scrutinee path and actual consumed-token span logic are unchanged, including the leading non-ASCII comment's lexer offsets."
+      },
+      {
+        "name": "nested-empty-keeps-outer-alternatives",
+        "review": "The outer match parser and alternative list are untouched; the empty inner match's scrutinee stops before the next bar through the existing application stop rule."
+      },
+      {
+        "name": "grouped-empty-argument",
+        "review": "The application argument's Product callback now recognizes nomatch and obtains its full-term scrutinee; the expected single argument is the empty match AST."
+      },
+      {
+        "name": "inhabited-zero-field-structure-and-record",
+        "review": "Structure declaration and empty record literal parsing/printing are unchanged; the pair remains distinct from an empty inductive elimination."
+      }
+    ],
+    "refusals": [
+      {
+        "name": "bare-lean-empty-match",
+        "review": "The existing nonempty match-alternative requirement is untouched."
+      },
+      {
+        "name": "lean-nomatch-missing-scrutinee",
+        "review": "The shared helper still requires its scrutinee parser to succeed; end of input is not a simple term."
+      },
+      {
+        "name": "lean-multiple-nomatch-scrutinees",
+        "review": "The scrutinee parser still leaves the comma unconsumed at a declaration body; no multi-scrutinee production is added."
+      },
+      {
+        "name": "ps-empty-match-missing-close",
+        "review": "ProofScript parser unchanged; closing brace remains required."
+      },
+      {
+        "name": "ps-empty-type-missing-close",
+        "review": "ProofScript parser unchanged; closing brace remains required."
+      },
+      {
+        "name": "ps-empty-match-orphan-bar",
+        "review": "ProofScript parser unchanged; a bar still requires an alternative."
+      },
+      {
+        "name": "zero-field-structure-missing-close",
+        "review": "ProofScript parser unchanged; closing brace remains required."
+      },
+      {
+        "name": "zero-field-structure-semicolon",
+        "review": "ProofScript parser unchanged; the semicolon is not an empty field list terminator."
+      }
+    ],
+    "allAssertionsAndCountsByteUnchanged": true,
+    "newFixtureOrGateExecution": false
+  },
+  "validation": {
+    "method": "GitHub MCP immutable reads/writes and pure in-memory text/JSON/SHA transforms only",
+    "exactFinalBlobReadback": true,
+    "exactSixEditForwardAndReverse": true,
+    "all75ExistingDefinitionHeadersByteIdentical": true,
+    "movedSpanHelperByteIdentical": true,
+    "allOtherSourceBytesOutsideEditsUnchanged": true,
+    "independentReview": {
+      "reviewer": "/root/artifact_inspection_review",
+      "candidate": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "outcome": "bounded CLEAR",
+      "scope": "Nomatch entry class, full-term-only callback selection, repeated group/list handling, printer composition, source annotation/binder forms, declaration order, unchanged public signatures and fuel, exact reverse/readback/hash.",
+      "note": "Earlier 357419a4e8d93d81d7e494a8cb37b66f5d115586 clearance was explicitly withdrawn for Option(function-arrow) source syntax and superseded by this Bool/callback candidate. Root independently reviewed final 8c390 and required the explicit intentional grouping/list-primary acceptance scope recorded here."
+    },
+    "candidateCompiled": false,
+    "candidateTested": false,
+    "actionsStarted": false,
+    "refsMutated": false,
+    "localExecution": false
+  },
+  "supersedesReviewDrafts": [
+    "098c313d917d41ce1d656ded9ea5f45eecc22ab2",
+    "357419a4e8d93d81d7e494a8cb37b66f5d115586"
+  ],
+  "unchanged": {
+    "selectedSeed": "R",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "nodeVersion": "22.23.3",
+    "typescriptVersion": "7.0.2",
+    "grammarEdition": "ps-0.9-r3",
+    "grammarMode": "new-only",
+    "sourceAuthority": ".lean",
+    "proofScriptParser": true,
+    "printers": true,
+    "fixturesAndGateCounts": true,
+    "kernel": true,
+    "provider": true,
+    "defeq": true,
+    "cache": true,
+    "existingTheory": true,
+    "declarationImportAndModuleIdentityRules": true
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalPreservationProven": false,
+  "fullStandardConformance": false,
+  "fullPscvConformance": false,
+  "correspondenceRowsClosed": []
+}

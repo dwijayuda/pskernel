@@ -574,7 +574,8 @@ lean_lib PsKernelCoreArenaHost where
   srcDir := "host/src"
   roots := #[
     `Ps.Host.KernelCoreArena.CoreIntern,
-    `Ps.Host.KernelCoreArena.Replay
+    `Ps.Host.KernelCoreArena.Replay,
+    `Ps.Host.KernelCoreArena.Phase
   ]
 
 lean_exe psc_kernel_core_arena where

@@ -394,7 +394,7 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
       (tailShapes : List PsKernelSimpleMutualTypeShape),
       decl.types = first :: remaining ∧
       PsKernelTypingJudgment environment psKernelLocalContextEmpty
-        first.type (PsKernelExpr.sort sorted.1) ∧
+        first.type (PsKernelExpr.sort headerLevel) ∧
       PsKernelCheckerConfigurationSound
         paramResult.session.context paramResult.session.state ∧
       PsKernelCheckerConfigurationSound

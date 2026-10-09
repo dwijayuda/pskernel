@@ -162,6 +162,9 @@ def decode : Nat → Option Nat
   | 0 => none
   | n + 1 => some n
 
+@[simp] theorem decode_zero : decode 0 = none := rfl
+@[simp] theorem decode_succ (n : Nat) : decode (n + 1) = some n := rfl
+
 @[inline] def bind (code : Nat) (next : Nat → Nat) : Nat :=
   match code with
   | 0 => 0
@@ -189,7 +192,7 @@ termination_by structural expr
 theorem remaining_eq (expr : PsKernelExpr) (fuel : Nat) :
     decode (remaining expr fuel) = psKernelSemanticCacheRemaining expr fuel := by
   induction expr generalizing fuel <;> cases fuel <;>
-    simp_all [remaining, decode_bind, decode, psKernelSemanticCacheRemaining,
+    simp_all [remaining, decode_bind, psKernelSemanticCacheRemaining,
       Option.bind]
 
 theorem semantic_whnf_eq (expr : PsKernelExpr) (fuel : Nat) :

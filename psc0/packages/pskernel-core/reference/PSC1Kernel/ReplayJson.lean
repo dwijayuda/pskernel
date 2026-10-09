@@ -585,7 +585,7 @@ def decodeLine (raw : String) : Except String Replay.Record := do
 def replayLine
     (state : Replay.State)
     (raw : String) : Except String Replay.State := do
-  if raw.trim.isEmpty then
+  if raw.trimAscii.isEmpty then
     pure state
   else
     state.replay (← decodeLine raw)

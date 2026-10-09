@@ -651,7 +651,8 @@ theorem psKernelInferCoreWithFuel_unknown_fvar_ignores_cache
       psKernelInferCoreWithFuel,
       psKernelInferCacheEligible,
       psKernelSemanticCacheEligible,
-      psKernelExprHasFVar,
+      psKernelSemanticCacheRemaining,
+      psKernelSemanticCacheNodeBudget,
       hDepth,
       hMissing
     ]

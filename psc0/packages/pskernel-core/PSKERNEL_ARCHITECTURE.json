@@ -3,8 +3,8 @@
   "reference": "PSKERNEL_REFERENCE.md",
   "target": {
     "product": "Lean",
-    "version": "4.34.0",
-    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+    "version": "4.35.0-rc4",
+    "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
   "semanticRootModule": "Ps.KernelCore.SelfHost",
   "semanticRootPath": "packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
@@ -479,5 +479,14 @@
   ],
   "lakeLibrary": "PsKernelCore",
   "ruleInventory": "LEAN_4_34_KERNEL_RULES.json",
-  "diagnosticInventory": "KERNEL_DIAGNOSTICS.json"
+  "diagnosticInventory": "KERNEL_DIAGNOSTICS.json",
+  "psc0Migration": {
+    "sourceCommit": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
+    "arenaCommit": "132d817071cd62c23a70c15984d6c73e14d6e856",
+    "authoringGuide": "../../docs/selfhost-language/CURRENT.md",
+    "jointSelfhostQualified": false,
+    "defaultProviderPromoted": false,
+    "historicalRuleInventory": "LEAN_4_34_KERNEL_RULES.json",
+    "targetDelta": "RESEARCH_AND_MIGRATION.md"
+  }
 }

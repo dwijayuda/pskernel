@@ -1,4 +1,10 @@
-# PSKernel Self-Host Development Plan
+# Historical PSKernel Self-Host Development Plan
+
+This document preserves the pre-migration 4.34 milestones and receipts. Current
+PSC0 authoring, the user-selected 4.35 target, and current-stage evidence take
+precedence: see `README.md`, `PSKERNEL_CORE_ARCHITECTURE.md`, and
+`RESEARCH_AND_MIGRATION.md`. Completion statements below are historical and do
+not certify this migrated revision.
 
 ## Active phase status
 

@@ -2,7 +2,8 @@ import Ps.KernelCore.Runtime.Capability.Lean434NativeReduction
 import Ps.KernelCore.Metatheory.Judgments
 
 /-
-Explicit Assurance Plane model of the trusted native-reduction boundary.
+Historical Assurance Plane model of the Lean 4.34 native-reduction boundary.
+The 4.35 production checker does not invoke this capability.
 
 A native evaluator is an extension of the TCB.  These constructors do not
 attempt to prove the evaluator internally; they record exactly which evaluator
@@ -62,12 +63,12 @@ inductive PsKernelTrustedNativeReduction
 
 /-
 The native evaluator is intentionally outside the portable logical kernel.
-This law is the exact TCB bridge consumed by WHNF soundness: whenever the
+This law is the bridge consumed by WHNF soundness: whenever the
 installed runtime capability publishes a native reduction, that answer must be
 a valid reduction in the current semantic environment/local context.
 
-Keeping the obligation at `psKernelReduceNative` avoids pretending that the
-opaque evaluator implementation has been verified inside the Assurance Plane.
+For 4.35 the law is discharged below because psKernelReduceNative always
+returns no reduction. The legacy evaluator itself is not claimed verified.
 -/
 def PsKernelNativeReductionSoundLaw : Prop :=
   ∀

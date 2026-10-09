@@ -23,6 +23,6 @@
   "scripts": {
     "build": "lake build PsKernelCore",
     "test": "lake exe psc1_kernel_core_foundation_tests && lake exe pskernel_nat_dispatch_tests",
-    "test:proofs": "lake build PsKernelCoreMetatheory && node scripts/check-proofs.mjs"
+    "test:proofs": "lake build PsKernelCore PsKernelCoreMetatheory && node scripts/check-proofs.mjs"
   }
 }

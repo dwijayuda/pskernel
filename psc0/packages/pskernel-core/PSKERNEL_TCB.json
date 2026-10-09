@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "target": {
     "product": "Lean",
-    "version": "4.34.0",
-    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+    "version": "4.35.0-rc4",
+    "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
   "productionSemanticRoot": "Ps.KernelCore.SelfHost",
   "policy": {
@@ -29,7 +29,7 @@
       "semanticRole": "semantic-preserving-acceleration",
       "trustStatus": "trusted",
       "canAffectAcceptanceIfBuggy": true,
-      "refinementStatus": "invariant-tested-not-formally-proved"
+      "refinementStatus": "conditional-refinement-proofs-present; final-kernel-semantic-closure-not-complete"
     },
     {
       "component": "Environment lookup index",
@@ -37,7 +37,7 @@
       "semanticRole": "semantic-preserving-acceleration",
       "trustStatus": "trusted",
       "canAffectAcceptanceIfBuggy": true,
-      "refinementStatus": "invariant-tested-not-formally-proved"
+      "refinementStatus": "conditional-refinement-proofs-present; final-kernel-semantic-closure-not-complete"
     },
     {
       "component": "Inference cache eligibility policy",
@@ -48,22 +48,12 @@
       "refinementStatus": "policy-only-no-state-mutation"
     }
   ],
-  "capabilityTCB": [
-    {
-      "component": "Lean 4.34 native reduction capability",
-      "path": "src/Ps/KernelCore/Runtime/Capability/Lean434NativeReduction.lean",
-      "semanticRole": "trusted-capability",
-      "trustStatus": "trusted",
-      "canAffectAcceptance": true,
-      "optional": true,
-      "targetSpecific": "Lean 4.34"
-    }
-  ],
+  "capabilityTCB": [],
   "executionTCB": [
     {
       "mode": "lean-native",
       "dependencies": [
-        "Lean 4.34 compiler/runtime",
+        "Lean 4.35.0-rc4 compiler/runtime",
         "host runtime and memory safety"
       ],
       "status": "external-trusted-execution"
@@ -74,17 +64,17 @@
         "PSC compiler/backend-ts",
         "JavaScript engine/runtime"
       ],
-      "status": "external-trusted-execution"
+      "status": "not-jointly-qualified-for-this-migration"
     }
   ],
   "assuranceOnly": [
     {
-      "component": "Official pinned Lean 4.34 differential oracle",
+      "component": "Official pinned Lean 4.35.0-rc4 reference",
       "semanticRole": "assurance-only",
       "productionFallback": false
     },
     {
-      "component": "Frozen PSC1Kernel regression oracle",
+      "component": "Frozen PSC1Kernel 4.34 regression reference (transport API adapted for 4.35)",
       "semanticRole": "assurance-only",
       "productionFallback": false
     },
@@ -92,6 +82,15 @@
       "component": "Conformance, benchmark, future independent-checker and formal verification tooling",
       "semanticRole": "assurance-only",
       "productionFallback": false
+    }
+  ],
+  "legacyCapabilities": [
+    {
+      "component": "Lean 4.34 native reduction record and helper",
+      "path": "src/Ps/KernelCore/Runtime/Capability/Lean434NativeReduction.lean",
+      "invokedBy435Checker": false,
+      "canAffect435Acceptance": false,
+      "evidence": "psKernelReduceNative_disabled_lean435; psKernelNativeReductionSound_lean435"
     }
   ]
 }

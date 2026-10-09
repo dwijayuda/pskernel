@@ -1,0 +1,116 @@
+name: PSC0 Windows native provider probe
+
+on:
+  push:
+    branches: ['psc0/platform-windows-probe']
+    paths:
+      - '.github/workflows/psc0-platform-windows-probe.yml'
+      - 'psc0/scripts/windows-provider-probe.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc0-windows-provider-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-candidate:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - name: Preserve canonical source bytes before either checkout
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Check out the unchanged 4.34 compiler-admission provider
+        uses: actions/checkout@v4
+        with:
+          ref: 963030dc2d154008fccc82e7c8ed29331f138799
+          path: provider-source
+          sparse-checkout: psc0
+      - name: Download and authenticate the official Lean 4.34 Windows toolchain
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'lean-4.34.0-windows.zip'
+          $install = Join-Path $env:RUNNER_TEMP 'psc0-lean434'
+          curl.exe --fail --location --retry 3 --output $archive 'https://github.com/leanprover/lean4/releases/download/v4.34.0/lean-4.34.0-windows.zip'
+          if ($LASTEXITCODE -ne 0) { throw 'Lean download failed' }
+          $digest = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant()
+          if ($digest -ne 'd382797e1abb1becd1b22593c059c223bf0698f6593bb9cdeddbf7fe23f54ca0') { throw 'Lean toolchain archive hash mismatch' }
+          if ((Get-Item $archive).Length -ne 850488083) { throw 'Lean archive size mismatch' }
+          7z x $archive "-o$install" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Lean archive extraction failed' }
+          $toolchain = Join-Path $install 'lean-4.34.0-windows'
+          $lean = Join-Path $toolchain 'bin\lean.exe'
+          $lake = Join-Path $toolchain 'bin\lake.exe'
+          $version = & $lean --version
+          if ($LASTEXITCODE -ne 0 -or $version -notmatch '4\.34\.0' -or $version -notmatch '293d5d0') { throw "Unexpected Lean version: $version" }
+          Write-Output $version
+          & $lake --version
+          if ($LASTEXITCODE -ne 0) { throw 'Lake version failed' }
+          "PSC0_WINDOWS_LEAN_ROOT=$toolchain" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          (Join-Path $toolchain 'bin') | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Cold build exact provider source without a build cache
+        shell: pwsh
+        working-directory: provider-source/psc0
+        env:
+          LEAN_NUM_THREADS: '4'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $source = git rev-parse HEAD
+          if ($source -ne '963030dc2d154008fccc82e7c8ed29331f138799') { throw 'Provider source mismatch' }
+          $tree = git rev-parse 'HEAD^{tree}'
+          if ($tree -ne '38c8c55bd2b214753e56c58c15c4901c32c01b86') { throw 'Provider tree mismatch' }
+          if ((Get-Content lean-toolchain -Raw).Trim() -ne 'leanprover/lean4:v4.34.0') { throw 'Provider toolchain mismatch' }
+          & (Join-Path $env:PSC0_WINDOWS_LEAN_ROOT 'bin\lake.exe') build psc_kernel_core_provider
+          if ($LASTEXITCODE -ne 0) { throw 'Provider build failed' }
+      - name: Discover executable bytes and the native DLL closure
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $readobj = 'C:\Program Files\LLVM\bin\llvm-readobj.exe'
+          if (-not (Test-Path $readobj)) { throw 'Windows image lacks the documented LLVM inspector' }
+          & $readobj --version
+          node psc0/scripts/windows-provider-probe.mjs collect provider-source $env:PSC0_WINDOWS_LEAN_ROOT candidate $readobj
+          if ($LASTEXITCODE -ne 0) { throw 'PE discovery failed' }
+      - name: Retain candidate payload and discovery evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-windows-provider-candidate-${{ github.sha }}
+          path: candidate
+          if-no-files-found: error
+          retention-days: 30
+
+  fresh-native-smoke:
+    needs: build-candidate
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Fetch the candidate without checking out source or installing Lean
+        uses: actions/download-artifact@v4
+        with:
+          name: psc0-windows-provider-candidate-${{ github.sha }}
+          path: candidate
+      - name: Authenticate all payload bytes and exercise native protocol with only the Windows system PATH
+        shell: pwsh
+        run: |
+          node candidate/windows-provider-probe.mjs verify candidate clean-evidence
+          if ($LASTEXITCODE -ne 0) { throw 'Fresh Windows native provider smoke failed' }
+      - name: Retain clean-runner evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-windows-provider-clean-${{ github.sha }}
+          path: clean-evidence
+          if-no-files-found: warn
+          retention-days: 30

@@ -349,6 +349,42 @@ def psKernelExprInstantiateAtChanged
   | _ =>
       Prod.mk expr false
 
+namespace PsKernelSharing
+
+def instantiateAlgebra (start : Nat) (subst : List PsKernelExpr) : Algebra Changed :=
+  changedAlgebra fun e offset =>
+    match e with
+    | .bvar index =>
+      if psKernelNatLt index (start + offset) then (e, false)
+      else match psKernelExprListGet subst (index - (start + offset)) with
+        | some replacement => (psKernelExprLiftLooseBVars replacement 0 offset, true)
+        | none => if psKernelExprListIsEmpty subst then (e, false)
+            else (.bvar (index - psKernelExprListLength subst), true)
+    | _ => (e, false)
+
+theorem instantiate_fold (e : PsKernelExpr) (start : Nat)
+    (subst : List PsKernelExpr) (offset : Nat) :
+    fold (instantiateAlgebra start subst) e offset =
+      psKernelExprInstantiateAtChanged e start subst offset := by
+  induction e generalizing offset <;>
+    simp_all [PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
+      PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
+      PsKernelSharing.rebuildTernary, instantiateAlgebra,
+      psKernelExprInstantiateAtChanged] <;> try rfl
+
+end PsKernelSharing
+
+def psKernelExprInstantiateAtChangedShared (e : PsKernelExpr) (start : Nat)
+    (subst : List PsKernelExpr) (offset : Nat) : Prod PsKernelExpr Bool :=
+  PsKernelSharing.run (PsKernelSharing.instantiateAlgebra start subst) e offset
+
+@[csimp] theorem psKernelExprInstantiateAtChanged_shared_eq :
+    psKernelExprInstantiateAtChanged = psKernelExprInstantiateAtChangedShared := by
+  funext e start subst offset
+  rw [psKernelExprInstantiateAtChangedShared, PsKernelSharing.run_eq,
+    PsKernelSharing.instantiate_fold]
+
+
 def psKernelExprInstantiateAt
     (expr : PsKernelExpr)
     (start : Nat)

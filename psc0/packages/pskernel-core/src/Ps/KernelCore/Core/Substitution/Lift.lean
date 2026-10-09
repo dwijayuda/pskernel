@@ -156,18 +156,168 @@ def psKernelExprLiftLooseBVarsChangedWithFuel
 def psKernelExprLiftLooseBVarsChanged
     (expr : PsKernelExpr)
     (start : Nat)
-    (amount : Nat) :
-    Prod PsKernelExpr Bool :=
-  -- The worker already returns this result for zero. Avoid counting the tree
-  -- and constructing its fuel worker before reaching that same branch.
+    (amount : Nat) : Prod PsKernelExpr Bool :=
   if Nat.beq amount 0 then
     Prod.mk expr false
   else
-    psKernelExprLiftLooseBVarsChangedWithFuel
-      (Nat.succ (psKernelExprNodeCount expr))
-      expr
-      start
-      amount
+    match expr with
+    | PsKernelExpr.bvar index =>
+        if psKernelNatGe index start then
+          Prod.mk
+            (PsKernelExpr.bvar
+              (Nat.add index amount))
+            true
+        else
+          Prod.mk expr false
+    | PsKernelExpr.app fn arg =>
+        let fnResult := psKernelExprLiftLooseBVarsChanged fn start amount;
+        let argResult := psKernelExprLiftLooseBVarsChanged arg start amount;
+        if (Prod.snd fnResult) then
+          Prod.mk
+            (PsKernelExpr.app
+              (Prod.fst fnResult)
+              (Prod.fst argResult))
+            true
+        else if (Prod.snd argResult) then
+          Prod.mk
+            (PsKernelExpr.app
+              (Prod.fst fnResult)
+              (Prod.fst argResult))
+            true
+        else
+          Prod.mk expr false
+    | PsKernelExpr.lam name type body binderInfo =>
+        let typeResult := psKernelExprLiftLooseBVarsChanged type start amount;
+        let bodyResult := psKernelExprLiftLooseBVarsChanged body (Nat.succ start) amount;
+        if (Prod.snd typeResult) then
+          Prod.mk
+            (PsKernelExpr.lam
+              name
+              (Prod.fst typeResult)
+              (Prod.fst bodyResult)
+              binderInfo)
+            true
+        else if (Prod.snd bodyResult) then
+          Prod.mk
+            (PsKernelExpr.lam
+              name
+              (Prod.fst typeResult)
+              (Prod.fst bodyResult)
+              binderInfo)
+            true
+        else
+          Prod.mk expr false
+    | PsKernelExpr.forallE name type body binderInfo =>
+        let typeResult := psKernelExprLiftLooseBVarsChanged type start amount;
+        let bodyResult := psKernelExprLiftLooseBVarsChanged body (Nat.succ start) amount;
+        if (Prod.snd typeResult) then
+          Prod.mk
+            (PsKernelExpr.forallE
+              name
+              (Prod.fst typeResult)
+              (Prod.fst bodyResult)
+              binderInfo)
+            true
+        else if (Prod.snd bodyResult) then
+          Prod.mk
+            (PsKernelExpr.forallE
+              name
+              (Prod.fst typeResult)
+              (Prod.fst bodyResult)
+              binderInfo)
+            true
+        else
+          Prod.mk expr false
+    | PsKernelExpr.letE name type value body nondep =>
+        let typeResult := psKernelExprLiftLooseBVarsChanged type start amount;
+        let valueResult := psKernelExprLiftLooseBVarsChanged value start amount;
+        let bodyResult := psKernelExprLiftLooseBVarsChanged body (Nat.succ start) amount;
+        if (Prod.snd typeResult) then
+          Prod.mk
+            (PsKernelExpr.letE
+              name
+              (Prod.fst typeResult)
+              (Prod.fst valueResult)
+              (Prod.fst bodyResult)
+              nondep)
+            true
+        else if (Prod.snd valueResult) then
+          Prod.mk
+            (PsKernelExpr.letE
+              name
+              (Prod.fst typeResult)
+              (Prod.fst valueResult)
+              (Prod.fst bodyResult)
+              nondep)
+            true
+        else if (Prod.snd bodyResult) then
+          Prod.mk
+            (PsKernelExpr.letE
+              name
+              (Prod.fst typeResult)
+              (Prod.fst valueResult)
+              (Prod.fst bodyResult)
+              nondep)
+            true
+        else
+          Prod.mk expr false
+    | PsKernelExpr.mdata metadata body =>
+        let bodyResult := psKernelExprLiftLooseBVarsChanged body start amount;
+        if (Prod.snd bodyResult) then
+          Prod.mk
+            (PsKernelExpr.mdata
+              metadata
+              (Prod.fst bodyResult))
+            true
+        else
+          Prod.mk expr false
+    | PsKernelExpr.proj typeName index body =>
+        let bodyResult := psKernelExprLiftLooseBVarsChanged body start amount;
+        if (Prod.snd bodyResult) then
+          Prod.mk
+            (PsKernelExpr.proj
+              typeName
+              index
+              (Prod.fst bodyResult))
+            true
+        else
+          Prod.mk expr false
+    | _ =>
+        Prod.mk expr false
+
+namespace PsKernelSharing
+
+def liftAlgebra (amount : Nat) : Algebra Changed :=
+  changedAlgebra fun e start =>
+    if Nat.beq amount 0 then (e, false)
+    else match e with
+      | .bvar i => if psKernelNatGe i start then (.bvar (i + amount), true) else (e, false)
+      | _ => (e, false)
+
+theorem lift_fold (e : PsKernelExpr) (start amount : Nat) :
+    fold (liftAlgebra amount) e start = psKernelExprLiftLooseBVarsChanged e start amount := by
+  induction e generalizing start <;>
+    simp_all [PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
+      PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
+      PsKernelSharing.rebuildTernary, liftAlgebra,
+      psKernelExprLiftLooseBVarsChanged] <;>
+    try (split <;> simp_all [psKernelExprLiftLooseBVarsChanged])
+
+end PsKernelSharing
+
+def psKernelExprLiftLooseBVarsChangedShared (e : PsKernelExpr) (start amount : Nat) :
+    Prod PsKernelExpr Bool :=
+  if Nat.beq amount 0 then (e, false)
+  else PsKernelSharing.run (PsKernelSharing.liftAlgebra amount) e start
+
+@[csimp] theorem psKernelExprLiftLooseBVarsChanged_shared_eq :
+    psKernelExprLiftLooseBVarsChanged = psKernelExprLiftLooseBVarsChangedShared := by
+  funext e start amount
+  unfold psKernelExprLiftLooseBVarsChangedShared
+  split
+  next h => simp [psKernelExprLiftLooseBVarsChanged, h]
+  next h => rw [PsKernelSharing.run_eq, PsKernelSharing.lift_fold]
+
 
 def psKernelExprLiftLooseBVars
     (expr : PsKernelExpr)

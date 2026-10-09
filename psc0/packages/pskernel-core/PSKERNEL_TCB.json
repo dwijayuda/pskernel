@@ -46,6 +46,19 @@
       "trustStatus": "trusted",
       "canAffectAcceptanceIfBuggy": false,
       "refinementStatus": "policy-only-no-state-mutation"
+    },
+    {
+      "component": "Certified syntax sharing experiment",
+      "path": "src/Ps/KernelCore/Core/SharedMemo.lean",
+      "semanticRole": "semantic-preserving-acceleration",
+      "trustStatus": "derived",
+      "refinementStatus": "intrinsic value-equality proofs and csimp equations; cloud verification pending",
+      "executionProfile": "lean-native experiment only; generated PSC0 not qualified",
+      "dependencies": [
+        "Lean withPtrAddr and withPtrEqDecEq contracts",
+        "Lean compiler-simplification and proof erasure",
+        "Std.HashMap implementation"
+      ]
     }
   ],
   "capabilityTCB": [],

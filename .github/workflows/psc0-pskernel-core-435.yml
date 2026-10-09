@@ -31,11 +31,12 @@ jobs:
           set -euo pipefail
           test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
           lean --version
-          lake build psc_kernel_core_arena psc1_kernel_core_foundation_tests pskernel_nat_dispatch_tests pskernel_projection_fuel_tests pskernel_cache_mode_tests
+          lake build psc_kernel_core_arena psc1_kernel_core_foundation_tests pskernel_nat_dispatch_tests pskernel_projection_fuel_tests pskernel_cache_mode_tests pskernel_shared_syntax_tests
           lake exe psc1_kernel_core_foundation_tests
           lake exe pskernel_nat_dispatch_tests
           lake exe pskernel_projection_fuel_tests
           timeout 30 lake exe pskernel_cache_mode_tests
+          timeout 30 lake exe pskernel_shared_syntax_tests
           .lake/build/bin/psc_kernel_core_arena --version
           sha256sum .lake/build/bin/psc_kernel_core_arena
           python3 - <<'PY'

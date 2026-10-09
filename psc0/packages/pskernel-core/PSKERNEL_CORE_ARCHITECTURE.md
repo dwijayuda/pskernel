@@ -66,3 +66,32 @@ and target-compatibility defects. Stored hashes/variable summaries, DAG-aware
 substitution and refined cache scopes are the next performance stage. Their
 representation and erasure invariants must accompany implementation. Generated
 JavaScript must never be patched to change kernel semantics.
+
+## Sharing execution experiment
+
+The architectural stage is now active. The native candidate uses one certified
+cursor-aware syntax fold for node counts, variable queries, lifting, term and
+universe substitution, and free-variable abstraction. Every memo entry carries
+an equality to the pure fold. Address/cursor keys select candidates only; a hit
+checks the actual node and cursor. A memo belongs to one fixed operation and its
+parameters. No semantic checker, admission rule, cache transitivity rule or
+timeout changes in this experiment.
+
+Core/Expr/Basic retains the pure expression definitions. Core/Expr/Shared and
+Core/SharedMemo contain safe Lean proofs and compiler-simplification equalities,
+so native calls execute the proved traversal. This uses Lean's existing
+withPtrAddr/withPtrEqDecEq contracts, Squash and Std.HashMap. It introduces no
+project-defined unsafe code or unchecked cast.
+
+This is **native-only experimental support**, not evidence that the current
+PSC0 bounded frontend/backend supports those primitives. Joint generated
+qualification remains false. The portable pure definitions are still the
+semantic specification; promoting this execution layer to generated PSC0
+requires explicit runtime support and preservation/qualification evidence.
+The explicit portable graph/storage design in the research report remains the
+alternative if that extension cannot be qualified. Neither path may silently
+replace the default provider.
+
+Cloud validation must check the general fold/refinement proofs, the existing
+metatheory, shared terms with cursor changes, all constructors, and the unchanged
+Arena corpus limits. No corpus completion is claimed before those runs finish.

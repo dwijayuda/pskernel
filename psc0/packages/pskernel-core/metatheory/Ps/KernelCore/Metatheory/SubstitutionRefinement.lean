@@ -320,23 +320,9 @@ theorem psKernelExprLiftLooseBVarsChanged_refines_reference_core
     psKernelExprLiftLooseBVarsChanged expr start amount =
       psKernelExprLiftLooseBVarsReferenceChanged
         expr start amount := by
-  cases amount with
-  | zero =>
-      rw [psKernelExprLiftLooseBVarsChanged_zero_amount_core]
-      symm
-      exact
-        psKernelExprLiftLooseBVarsReferenceChanged_zero_amount
-          expr
-          start
-  | succ amount =>
-      simpa [psKernelExprLiftLooseBVarsChanged] using
-        psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference_core
-          expr
-          (Nat.succ (psKernelExprNodeCount expr))
-          start
-          (Nat.succ amount)
-          (Nat.lt_succ_self
-            (psKernelExprNodeCount expr))
+  induction expr generalizing start amount <;>
+    simp_all [psKernelExprLiftLooseBVarsChanged,
+      psKernelExprLiftLooseBVarsReferenceChanged]
 
 theorem psKernelExprLiftLooseBVars_refines_reference_core
     (expr : PsKernelExpr)
@@ -1097,15 +1083,10 @@ theorem psKernelExprAbstractFVarsAtChanged_refines_reference_core
         expr fvars offset =
       psKernelExprAbstractFVarsAtReferenceChanged
         expr fvars offset := by
-  unfold psKernelExprAbstractFVarsAtChanged
-  exact
-    psKernelExprAbstractFVarsAtChangedWithFuel_refines_reference_core
-      expr
-      (Nat.succ (psKernelExprNodeCount expr))
-      offset
-      fvars
-      (Nat.lt_succ_self
-        (psKernelExprNodeCount expr))
+  induction expr generalizing offset <;>
+    simp_all [psKernelExprAbstractFVarsAtChanged,
+      psKernelExprAbstractFVarsAtReferenceChanged,
+      psKernelNameLastIndex_refines_reference_core] <;> try rfl
 
 theorem psKernelExprAbstractFVarsAt_refines_reference_core
     (expr : PsKernelExpr)

@@ -273,3 +273,8 @@ lean_exe pskernel_projection_fuel_tests where
 lean_exe pskernel_cache_mode_tests where
   srcDir := "test"
   root := `CacheModeTests
+
+
+lean_exe pskernel_shared_syntax_tests where
+  srcDir := "test"
+  root := `SharedSyntaxTests

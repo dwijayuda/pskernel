@@ -151,3 +151,109 @@ def psKernelWhnfCacheEligible
   | Option.some _ => true
   | Option.none => false
 
+
+
+namespace PsKernelCacheScan
+
+/-- Zero encodes budget exhaustion; succ n encodes exactly n unused nodes.
+The recursive worker uses scalar Nat values instead of allocating Option at
+every expression node. The public specification remains Option Nat. -/
+def decode : Nat → Option Nat
+  | 0 => none
+  | n + 1 => some n
+
+@[inline] def bind (code : Nat) (next : Nat → Nat) : Nat :=
+  match code with
+  | 0 => 0
+  | n + 1 => next n
+
+theorem decode_bind (code : Nat) (next : Nat → Nat) :
+    decode (bind code next) = (decode code).bind (fun n => decode (next n)) := by
+  cases code <;> rfl
+
+def remaining (expr : PsKernelExpr) (fuel : Nat) : Nat :=
+  match fuel with
+  | 0 => 0
+  | n + 1 =>
+    match expr with
+    | .app f x => bind (remaining f n) (fun left => remaining x left)
+    | .lam _ t b _ | .forallE _ t b _ =>
+        bind (remaining t n) (fun left => remaining b left)
+    | .letE _ t v b _ =>
+        bind (remaining t n) (fun left =>
+          bind (remaining v left) (fun rest => remaining b rest))
+    | .mdata _ b | .proj _ _ b => remaining b n
+    | _ => n + 1
+termination_by structural expr
+
+theorem remaining_eq (expr : PsKernelExpr) (fuel : Nat) :
+    decode (remaining expr fuel) = psKernelSemanticCacheRemaining expr fuel := by
+  induction expr generalizing fuel <;> cases fuel <;>
+    simp_all [remaining, decode_bind, decode, psKernelSemanticCacheRemaining,
+      Option.bind]
+
+theorem semantic_whnf_eq (expr : PsKernelExpr) (fuel : Nat) :
+    psKernelSemanticCacheRemaining expr fuel = psKernelWhnfCacheRemaining expr fuel := by
+  induction expr generalizing fuel <;> cases fuel <;>
+    simp_all [psKernelSemanticCacheRemaining, psKernelWhnfCacheRemaining]
+
+end PsKernelCacheScan
+
+def psKernelSemanticCacheRemainingScalar (expr : PsKernelExpr) (fuel : Nat) : Option Nat :=
+  PsKernelCacheScan.decode (PsKernelCacheScan.remaining expr fuel)
+
+@[csimp] theorem psKernelSemanticCacheRemaining_scalar_eq :
+    psKernelSemanticCacheRemaining = psKernelSemanticCacheRemainingScalar := by
+  funext expr fuel
+  exact (PsKernelCacheScan.remaining_eq expr fuel).symm
+
+@[csimp] theorem psKernelWhnfCacheRemaining_scalar_eq :
+    psKernelWhnfCacheRemaining = psKernelSemanticCacheRemainingScalar := by
+  funext expr fuel
+  exact (PsKernelCacheScan.semantic_whnf_eq expr fuel).symm.trans
+    (PsKernelCacheScan.remaining_eq expr fuel).symm
+
+def psKernelSemanticCacheEligibleScalar (expr : PsKernelExpr) : Bool :=
+  match PsKernelCacheScan.remaining expr psKernelSemanticCacheNodeBudget with
+  | 0 => false
+  | _ + 1 => true
+
+@[csimp] theorem psKernelSemanticCacheEligible_scalar_eq :
+    psKernelSemanticCacheEligible = psKernelSemanticCacheEligibleScalar := by
+  funext expr
+  unfold psKernelSemanticCacheEligible psKernelSemanticCacheEligibleScalar
+  rw [← PsKernelCacheScan.remaining_eq]
+  cases PsKernelCacheScan.remaining expr psKernelSemanticCacheNodeBudget <;> rfl
+
+@[csimp] theorem psKernelWhnfCacheEligible_scalar_eq :
+    psKernelWhnfCacheEligible = psKernelSemanticCacheEligibleScalar := by
+  funext expr
+  unfold psKernelWhnfCacheEligible psKernelSemanticCacheEligibleScalar
+  rw [← PsKernelCacheScan.semantic_whnf_eq, ← PsKernelCacheScan.remaining_eq]
+  cases PsKernelCacheScan.remaining expr psKernelSemanticCacheNodeBudget <;> rfl
+
+/-- These wrappers propagate the proved scalar scan into callers that were
+compiled before its compiler-simplification theorem was registered. -/
+def psKernelSemanticPairCacheEligibleScalar (left right : PsKernelExpr) : Bool :=
+  if psKernelSemanticCacheEligibleScalar left then
+    psKernelSemanticCacheEligibleScalar right else false
+
+@[csimp] theorem psKernelSemanticPairCacheEligible_scalar_eq :
+    psKernelSemanticPairCacheEligible = psKernelSemanticPairCacheEligibleScalar := by
+  funext left right
+  simp only [psKernelSemanticPairCacheEligible, psKernelSemanticPairCacheEligibleScalar,
+    ← psKernelSemanticCacheEligible_scalar_eq]
+
+def psKernelInferCacheEligibleScalar (inferOnly : Bool) (expr : PsKernelExpr) : Bool :=
+  match expr with
+  | .lit _ => false
+  | .app .. | .lam .. | .forallE .. =>
+      if inferOnly then psKernelSemanticCacheEligibleScalar expr else false
+  | _ => psKernelSemanticCacheEligibleScalar expr
+
+@[csimp] theorem psKernelInferCacheEligible_scalar_eq :
+    psKernelInferCacheEligible = psKernelInferCacheEligibleScalar := by
+  funext inferOnly expr
+  cases expr <;>
+    simp only [psKernelInferCacheEligible, psKernelInferCacheEligibleScalar,
+      ← psKernelSemanticCacheEligible_scalar_eq]

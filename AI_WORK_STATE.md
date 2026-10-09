@@ -1,5 +1,17 @@
 # AI Work State
 
+## Primitive bridge investigation — 2026-10-09
+- Reverified proof frontier `ff178a4c2a3f1b52543bd7ec7b0195c2aff311a9`.
+- Latest full proof/native conformance remains **#776 GREEN**, run
+  https://github.com/dwijayuda/pskernel/actions/runs/37856152005.
+- Documentation checkpoint `bb85dcc329a91b22311b2d1469f9c6f670852631` records
+  pinned checked `String.append` injectivity versus separately opaque
+  `String.Internal.append`. The shared external symbol is not a checked
+  equality bridge. Standard append lemmas alone do not discharge freshness.
+- No proof or production change, new axiom, trusted law, audit upgrade, or
+  completion claim. The existing primitive bridge blocker and remaining
+  acceptance work below remain open.
+
 ## Current PSKernel Core checkpoint — 2026-10-08
 - Proof HEAD before this state update: `7fc10594f7e26216aa30b709e586786221138415`.
 - Latest verified full proof and native conformance: **#775 GREEN** at

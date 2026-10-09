@@ -1015,3 +1015,68 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_stage_refines
     ctorResult, added, hShapeDecls, hParamsConfig.1, hParamEnv,
     hPrepared, hCtor, hHistory, hExt, hFinalIndex,
     hReserved, hAdded, hQuot, hNames⟩
+
+/--
+Every actual independently checked constructor insertion extends authoritative
+lookup semantics from the previous work environment. This proof uses the
+stored canonical fresh-name witness at each history step and the pre-existing
+positive StringEq soundness law; no new type inference is performed.
+-/
+theorem PsKernelCheckedMutualConstructorHistory.semantic_extension
+    (hString : PsKernelStringEqSoundLaw)
+    {targets : List PsKernelName} {typeShapes : List PsKernelSimpleMutualTypeShape}
+    {levels : List PsKernelLevel} {params : List PsKernelOpenBinder}
+    {resultLevel : PsKernelLevel} {typeShape : PsKernelSimpleMutualTypeShape}
+    {owner : Nat} {levelParams : List PsKernelName}
+    {safety : PsKernelDefinitionSafety} {headerLocal : PsKernelLocalContext}
+    {work finalEnvironment : PsKernelEnvironment}
+    {index : Nat} {ctors : List PsKernelSimpleConstructorDecl}
+    {shapes : List PsKernelSimpleMutualConstructorShape}
+    (hHistory : PsKernelCheckedMutualConstructorHistory
+      targets typeShapes levels params resultLevel typeShape owner
+      levelParams safety headerLocal work index ctors shapes finalEnvironment) :
+    PsKernelEnvironmentSemanticExtends work finalEnvironment := by
+  induction hHistory with
+  | done work index =>
+      exact PsKernelEnvironmentSemanticExtends.refl work
+  | step work index ctor rest tailShapes finalEnvironment inferredType level
+      fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
+      let added := PsKernelConstantInfo.ctorInfo
+        (PsKernelConstructorInfo.mk
+          (PsKernelConstantBase.mk ctor.name levelParams ctor.type)
+          typeShape.decl.name index (psKernelOpenBinderListLength params)
+          (psKernelOpenBinderListLength fields)
+          (psKernelDefinitionSafetyIsUnsafe safety))
+      have hStep := psKernelEnvironmentAddUnchecked_fresh_semantic_extends
+        work added hString (by
+          simpa [added, psKernelConstantInfoName, psKernelConstantInfoBase] using hFresh)
+      exact PsKernelEnvironmentSemanticExtends.trans work
+        (psKernelEnvironmentAddUnchecked work added)
+        finalEnvironment hStep ih
+
+/--
+A checked family constructor history semantically extends its starting
+environment through every owner and constructor. The result provides the
+provisional metadata lookup transport required before replacing inductive
+flags; the source environment itself is not reinterpreted.
+-/
+theorem PsKernelCheckedMutualFamilyConstructorHistory.semantic_extension
+    (hString : PsKernelStringEqSoundLaw)
+    {targets : List PsKernelName} {allShapes : List PsKernelSimpleMutualTypeShape}
+    {levels : List PsKernelLevel} {params : List PsKernelOpenBinder}
+    {resultLevel : PsKernelLevel} {levelParams : List PsKernelName}
+    {safety : PsKernelDefinitionSafety} {headerLocal : PsKernelLocalContext}
+    {work finalEnvironment : PsKernelEnvironment} {owner : Nat}
+    {types : List PsKernelSimpleMutualTypeShape}
+    {shapes : List PsKernelSimpleMutualConstructorShape}
+    (hHistory : PsKernelCheckedMutualFamilyConstructorHistory targets allShapes
+      levels params resultLevel levelParams safety headerLocal
+      work owner types shapes finalEnvironment) :
+    PsKernelEnvironmentSemanticExtends work finalEnvironment := by
+  induction hHistory with
+  | done work owner =>
+      exact PsKernelEnvironmentSemanticExtends.refl work
+  | step work ownEnvironment finalEnvironment owner shape rest ownShapes tailShapes
+      hOwner hOwn hTail ih =>
+      exact PsKernelEnvironmentSemanticExtends.trans work ownEnvironment
+        finalEnvironment (hOwn.semantic_extension hString) ih

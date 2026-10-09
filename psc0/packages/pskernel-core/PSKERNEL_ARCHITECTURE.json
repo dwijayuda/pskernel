@@ -392,6 +392,18 @@
     {
       "area": "selfhost",
       "module": "Ps.KernelCore.SelfHost"
+    },
+    {
+      "area": "core-shared-memo",
+      "module": "Ps.KernelCore.Core.SharedMemo"
+    },
+    {
+      "area": "core-expr-basic",
+      "module": "Ps.KernelCore.Core.Expr.Basic"
+    },
+    {
+      "area": "core-expr-shared",
+      "module": "Ps.KernelCore.Core.Expr.Shared"
     }
   ],
   "recursiveWiring": {
@@ -487,6 +499,8 @@
     "jointSelfhostQualified": false,
     "defaultProviderPromoted": false,
     "historicalRuleInventory": "LEAN_4_34_KERNEL_RULES.json",
-    "targetDelta": "RESEARCH_AND_MIGRATION.md"
+    "targetDelta": "RESEARCH_AND_MIGRATION.md",
+    "nativeSharingExperimental": true,
+    "nativeSharingGeneratedQualified": false
   }
 }

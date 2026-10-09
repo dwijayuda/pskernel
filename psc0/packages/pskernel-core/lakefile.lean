@@ -37,6 +37,7 @@ lean_lib PsKernelCore where
   roots := #[
     `Ps.KernelCore.Core.Name,
     `Ps.KernelCore.Core.Level,
+    `Ps.KernelCore.Core.SharedMemo,
     `Ps.KernelCore.Core.Expr,
     `Ps.KernelCore.Core.Substitution.ListOps,
     `Ps.KernelCore.Core.Substitution.Lift,

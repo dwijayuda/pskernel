@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "kind": "psc0-runtime-ir-checker-execution",
-  "updatedAt": "2026-10-09T08:18:33Z",
+  "updatedAt": "2026-10-09T08:28:56Z",
   "branch": "psc0/sh1-ir-checker-v1",
-  "status": "implemented-source-annotation-repair-pending-qualification",
+  "status": "implemented-recursive-projection-compatibility-repair-pending-qualification",
   "baseQualifiedSourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
   "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
   "strictSh1": false,
@@ -87,6 +87,60 @@
         "change": "Annotate all four let-bound match results with their existing result types.",
         "checkerSemanticsChanged": false,
         "elaboratorChanged": false,
+        "followupQualification": "match expected-type requirement resolved; follow-up exposed parameter-projection renaming omission",
+        "followupSourceRef": "ce11b93f1f824ccb5a8acb1b43d5f47d05ecbb26"
+      }
+    },
+    {
+      "sourceRef": "ce11b93f1f824ccb5a8acb1b43d5f47d05ecbb26",
+      "runId": 37904253709,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37904253709",
+      "compilerJobId": 113733787103,
+      "providerJobId": 113734113161,
+      "result": "failure",
+      "phase": "native-candidate-psc-elaboration",
+      "passed": [
+        "host JavaScript syntax",
+        "bootstrap source restrictions and ownership guards",
+        "authenticated selected Q cache hit",
+        "native Lean build: 133 jobs",
+        "raw PSC source parsing",
+        "explicit let-match expected-type elaboration"
+      ],
+      "diagnostic": "PSC1_PROJECT_ELAB_FAILED: packages/compiler-ir/src/Ps/CompilerIr/Check.lean: declaration=psIrCheckMatchBindings: unknownName:options",
+      "notRun": [
+        "native checker conformance",
+        "native exact-source original IR checker",
+        "N1 generated checker conformance",
+        "Q to C1",
+        "C2/C3 qualification",
+        "pinned provider acceptance"
+      ],
+      "artifact": {
+        "id": 11603922380,
+        "sizeBytes": 374180,
+        "sha256": "f076005e980f0de20f79590509cd2b19a8ac909ff00d11c18cd4788e7aefd51c"
+      },
+      "resolution": {
+        "cause": "Changing-parameter recursion normalization renames all original parameter binders but only rewrites exact local references; dotted references such as options.maxTypeSteps retain the original receiver name.",
+        "sourceTrace": [
+          "Recursion.lean: psElabRecursionLocalId and reference branch in psElabRecursionWalkWithFuel",
+          "Recursion.lean: psElabRecursionRenameParameters",
+          "Term.lean: psElabNamedReference and psElabProjectionReference"
+        ],
+        "scope": {
+          "recursiveDefinitions": [
+            "psIrCheckMatchBindings",
+            "psIrCheckRun"
+          ],
+          "parameterProjectionOccurrences": 9,
+          "typedBranchLocalAliases": 3
+        },
+        "change": "Bind original options/state values to explicitly typed branch-local aliases, and project from those aliases. Ordinary parameter references are renamed correctly; new local aliases remain in scope.",
+        "checkerSemanticsChanged": false,
+        "normalizerChanged": false,
+        "selectedSeedChanged": false,
+        "generalNormalizerRepair": "Separate language capability: preserve qualified-name resolution priority and shadowing, and support projections whose hygienic base names have multiple segments.",
         "followupQualification": "pending"
       }
     }
@@ -94,6 +148,6 @@
   "claimBoundaries": [
     "Runtime IR typing, generated compiler fixed-point qualification, pinned Core-provider acceptance and full strict SH/1 are separate.",
     "The selected authoring seed remains A.",
-    "Neither source-compatibility attempt reached the current M6 generated checker or runtime IR acceptance gates."
+    "None of the first three source-compatibility attempts reached the current M6 generated checker or runtime IR acceptance gates."
   ]
 }

@@ -57,6 +57,22 @@ let initializer supplies none. All four direct let-bound matches in Check.lean
 now explicitly state their existing result types; the other four new portable
 modules contain no instance of this inference class. The follow-up changes no
 checker rule or elaborator behavior. Current-source qualification remains pending.
+
+Checkpoint `ce11b93f1f824ccb5a8acb1b43d5f47d05ecbb26` passed native
+compilation again in [run 37904253709](https://github.com/dwijayuda/pskernel/actions/runs/37904253709)
+and cleared `matchExpectedType`, then exposed `unknownName:options` in the
+same helper. Source tracing proved a normalizer omission: all original
+parameters are renamed, but dotted parameter references retain the old receiver.
+Nine sites in two new recursive functions are affected. Three typed branch-local
+aliases preserve those receivers without changing recursion, checking rules or
+resource accounting. This compatibility spelling remains consumable by selected
+seed A; the general normalizer itself is unchanged in this M6 checkpoint.
+
+A future projection-renaming capability must preserve exact qualified-name
+resolution priority and local shadowing, and handle multi-segment internal
+parameter names. Do not invent named getters for these PSC structures: this
+frontend installs type, constructor and recursor declarations, and handles
+field syntax directly. Qualification of the alias repair remains pending.
 Attempt evidence is retained in
 [runtime-ir-checker-execution.json](docs/selfhost-language/runtime-ir-checker-execution.json).
 

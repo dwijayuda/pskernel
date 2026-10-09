@@ -1143,7 +1143,7 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+    "expectedParent": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
     "parserCorrection": {
       "manifest": "reviewed-candidates/nomatch-application-entry.json",
       "manifestBlob": "aa62fec9ef76acc69f289d168b2b23b21dc07d93",
@@ -1152,16 +1152,17 @@
       "baseBlob": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
       "sourceBlob": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
       "sourceSha256": "7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8",
-      "status": "reviewed-six-edit-source-correction-integrated-by-enclosing-commit-awaiting-one-full-qualification",
+      "status": "integrated-at-fc961-and-native-development-passed-full-qualification-still-pending",
       "review": "Root exact forward/reverse reconstruction; all 75 existing definition headers unchanged; independent bounded source-class review CLEAR.",
       "acceptanceScope": "The shared nomatch primary preserves full-term scrutinees through grouped/list application paths. It intentionally closes existing grouped/list primary forms under nesting, including non-nomatch counterparts; other full-control family restrictions and public fuel defaults remain.",
       "fixturesAndInvocationCountsUnchanged": true,
       "coldRecipeChanged": false,
       "newColdRunRequired": false,
       "strictSh1Qualified": false,
-      "semanticContractQualified": false
+      "semanticContractQualified": false,
+      "nativeCheckpointRunId": 37988707250
     },
-    "request": "deferred until source-proven generic saturation-boundary class is corrected and independently reviewed; this enclosing parser/doc checkpoint has no qualification tag",
+    "request": "Complete and independently review the canonical unary function-value correction, exact declaration entry activation, host ABI adjustments and additive generic class fixture; then one coherent full qualification. This documentation-only checkpoint requests no execution.",
     "runId": null,
     "actualRunDiscoveryRequired": true,
     "coldRerunRequired": false,
@@ -1180,7 +1181,61 @@
       ],
       "next": "Complete coherent class correction and independent source review before one next full qualification.",
       "contractAndCheckerMustNotBeWeakened": true,
-      "newColdRunRequired": false
+      "newColdRunRequired": false,
+      "chosenArchitecture": {
+        "valueType": "canonical unary function at every runtime Pi, including generic/named/container positions",
+        "knownEntry": "flat actual aligned original forall/lambda prefix, with cached original slot classification before type substitution",
+        "computedResult": "retain returned closure boundary; remove arbitrary result-arrow eta exposure",
+        "typeOnlyGenericEntry": "fresh ignored Unit physical parameter with Unit activation argument; logical runtime arity stays zero; preserve current exact IR checker and generic-value refusal",
+        "arrayFoldl": "capture once and bridge canonical callback to the unchanged flat binary intrinsic callback",
+        "coldRecipeChanged": false
+      },
+      "sourceCandidate": {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "baseBlob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+        "candidateBlob": "ac62e1da317a18300b8669bf68f9b6414159156e",
+        "manifestBlob": "7dc9946a6904395e77d33957c2f10fbfa94b63d8",
+        "status": "unattached; four-edit bounded peer review CLEAR; companion Expr/Definition integration required; not executed"
+      }
+    },
+    "expectedParentMeaning": "Last verified branch head before the enclosing documentation checkpoint; discover its actual descendant head before any ref update.",
+    "compilerSourceAtLastNativePass": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504"
+  },
+  "nativeCheckpoints": [
+    {
+      "sourceRef": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+      "runId": 37988707250,
+      "compilerJobId": 114017088870,
+      "providerJobId": 114019030861,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37988707250",
+      "status": "success",
+      "fullQualificationRequested": false,
+      "scope": "native-development-only; selected-R candidate, C2/C3 and provider skipped",
+      "evidence": {
+        "path": "attempts/fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504/native-checkpoint.json",
+        "blob": "53eac1c981b15e4c9d2eaa4eef8399a9030e3925",
+        "sha256": "3b59dc0c47d603361b1b718fc2ca69b34eb12b4b03bbf08b8d9303d1567ce041"
+      },
+      "log": {
+        "path": "job.log",
+        "blob": "8c8f01abbeecb3a6d666fe017708bdf048cd09b1",
+        "sha256": "45489f8482ac035d35a81538c1eb7beb9abd0268261ebb85cc23251af753cde3",
+        "characters": 1094678,
+        "source": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+        "runId": 37988707250,
+        "jobId": 114017088870,
+        "retrieval": "GitHub Actions job-log API decoded text"
+      },
+      "nativeSourceReceipt": {
+        "path": "strict-source-native.json",
+        "blob": "4fb3222220b56345871a170230aed525def5f18a",
+        "sha256": "e59bd0ceff69c039c90b448c82df19569f1458f52fe6312087125b35f87ea6a3",
+        "characters": 590639,
+        "hashMatchesActualReceipt": true,
+        "byteIdentity": "Complete compact native marker plus writer newline independently matches the actual native receipt file hash."
+      },
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
     }
-  }
+  ]
 }

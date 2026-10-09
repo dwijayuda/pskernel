@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-native-checkpoint-evidence",
+  "sourceRef": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "runId": 37988707250,
+  "workflowId": 378853677,
+  "compilerJobId": 114017088870,
+  "providerJobId": 114019030861,
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/37988707250",
+  "status": "success",
+  "runStartedAt": "2026-10-09T20:41:51Z",
+  "runUpdatedAt": "2026-10-09T20:47:08Z",
+  "executionScope": "native-development-only",
+  "fullQualificationRequested": false,
+  "nativeGate": {
+    "step": 24,
+    "status": "success"
+  },
+  "selectedSeedCandidate": {
+    "step": 25,
+    "status": "skipped"
+  },
+  "fixedPoint": {
+    "step": 26,
+    "status": "skipped"
+  },
+  "providerStatus": "skipped",
+  "coldRecovery": {
+    "runId": 37988707255,
+    "status": "skipped",
+    "recipeChanged": false,
+    "qualifiedUnchangedRecoveryRun": 37983663908,
+    "repeatRequired": false
+  },
+  "sourcePolicy": {
+    "profile": "PSC0-SH/1",
+    "enforcementVersion": 1,
+    "sourceKind": "lean",
+    "accepted": true,
+    "traversalComplete": true,
+    "moduleCount": 64,
+    "sourceBytes": 1212568,
+    "inputBytes": 1213647,
+    "importCount": 149,
+    "options": {
+      "maxModules": 1024,
+      "maxInputBytes": 16777216,
+      "maxSyntaxSteps": 5000000,
+      "maxTypeSteps": 1000000,
+      "maxTermSteps": 5000000
+    },
+    "stats": {
+      "visitedSteps": 143223,
+      "typeSteps": 17570,
+      "termSteps": 55812,
+      "declarationCount": 1668,
+      "theoremCount": 0
+    }
+  },
+  "sourceOriginsSummary": {
+    "policy": "psc0-declaration-origins/1",
+    "actualParsedModulesRetained": 64,
+    "moduleCount": 64,
+    "sourceDeclarationCount": 1668,
+    "coreDeclarationCount": 2514,
+    "normalizationCount": 39,
+    "semanticCorrespondenceDischarged": false
+  },
+  "originalIr": {
+    "schemaVersion": 1,
+    "kind": "psc0-native-original-ir-check",
+    "accepted": true,
+    "traversalComplete": true,
+    "visitedSteps": 793972,
+    "expressionCount": 62289,
+    "findingCount": 0,
+    "retainedFindingCount": 0,
+    "omittedFindingDetails": 0,
+    "sameOriginalIrCheckedBeforeEmission": true,
+    "strictSh1Qualified": false
+  },
+  "preparationCount": 1,
+  "canonicalAdmissionEncodingCount": 1,
+  "environmentReconstructionCount": 0,
+  "portableIrCheckCount": 1,
+  "sourceClosureSha256": "44331be90edf828bcb0ccc8e2ae3b45f7e7d70714b5b3722b8a6a4a4f43f456b",
+  "grammarClosure": {
+    "compilerSha256": "04336b5cb042ffdc833c7aad1fd9ec1aa8ee0aea7e1aff14408192ea8316e1ce",
+    "closureSha256": "44331be90edf828bcb0ccc8e2ae3b45f7e7d70714b5b3722b8a6a4a4f43f456b",
+    "moduleCount": 64,
+    "proofScriptBytes": 991085,
+    "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent"
+  },
+  "conformance": {
+    "grammar": {
+      "applicationBoundaries": 18,
+      "supportedSyntax": 22,
+      "canonicalRoundTrips": 40,
+      "parseRefusals": 35,
+      "lexicalPositionCases": 2,
+      "lexicalRefusals": 5,
+      "emptyCallRefusals": 3,
+      "printerRefusals": 1,
+      "emptySyntaxPairs": 5,
+      "emptySyntaxRefusals": 6,
+      "zeroFieldRecordPairs": 1,
+      "zeroFieldRecordRefusals": 2
+    },
+    "groupedEmptyArgumentAstSha256": "f4248596a8ca5de612812ecdbaa2fe39e4fc35f9c629b19fa8c61e79880f16e1",
+    "workerMigrationCases": 87,
+    "enabledRuntimeOperations": 45,
+    "runtimeObservations": 186,
+    "sourceEqualityObservations": 6,
+    "sourceEvaluationObservations": 24,
+    "sourceEvaluationHostProbes": 21,
+    "genericBehaviorObservations": 19
+  },
+  "nativeArtifacts": {
+    "javascriptSha256": "04336b5cb042ffdc833c7aad1fd9ec1aa8ee0aea7e1aff14408192ea8316e1ce",
+    "typescriptSha256": "0267d0c167eed7ec2d61edf282aa7be6991ebacf8a711b30fca42136893eefaf"
+  },
+  "nativeCompilerBinarySha256": "40e1a83ed9ad1ab7799571f6e7f4d73c0fdd6e82a0f40eb899cfa5483a1b9544",
+  "generalCompilerBinarySha256": "007bf9e6be9df3e8a53ec844c09a469d97db4e5a49525f8b072337202b60cb7f",
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "timingObservationMs": 239281.54148699998,
+  "timingIsBenchmark": false,
+  "nativeSourceReceipt": {
+    "path": "strict-source-native.json",
+    "blob": "4fb3222220b56345871a170230aed525def5f18a",
+    "sha256": "e59bd0ceff69c039c90b448c82df19569f1458f52fe6312087125b35f87ea6a3",
+    "characters": 590639,
+    "hashMatchesActualReceipt": true,
+    "byteIdentity": "Complete compact native marker plus writer newline independently matches the actual native receipt file hash."
+  },
+  "log": {
+    "path": "job.log",
+    "blob": "8c8f01abbeecb3a6d666fe017708bdf048cd09b1",
+    "sha256": "45489f8482ac035d35a81538c1eb7beb9abd0268261ebb85cc23251af753cde3",
+    "characters": 1094678,
+    "source": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+    "runId": 37988707250,
+    "jobId": 114017088870,
+    "retrieval": "GitHub Actions job-log API decoded text"
+  },
+  "artifacts": [
+    {
+      "id": 11645090241,
+      "name": "psc0-sh1-ts7.0.2-fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+      "size_in_bytes": 1525447,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11645090241",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11645090241/zip",
+      "expired": false,
+      "created_at": "2026-10-09T20:47:04Z",
+      "expires_at": "2026-11-08T20:47:03Z",
+      "updated_at": "2026-10-09T20:47:04Z",
+      "digest": "sha256:f9f8a0a4a43c4ef2654283eea67be3188669760f360a047f2d79539e43bd4b27",
+      "workflow_run": {
+        "id": 37988707250,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/strict-sh1-v1",
+        "head_sha": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504"
+      }
+    }
+  ],
+  "scope": "The exact parser/source checkpoint passes the bounded native route. It does not qualify C1/C2/C3, provider admission, all-index semantic preservation, or the unexecuted canonical-function correction.",
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalPreservationProven": false
+}

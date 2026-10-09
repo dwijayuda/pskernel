@@ -280,24 +280,24 @@ def psSh1TargetStep
       | List.cons item rest =>
           let scope := psSh1TargetRootScope item.name;
           Except.ok (psSh1TargetSchedule state
-            [.name scope .globalType item.name, .addGlobal scope item.name true,
-             .collectStructures rest])
+            [PsSh1TargetTask.name scope PsSh1TargetNameRole.globalType item.name, PsSh1TargetTask.addGlobal scope item.name true,
+             PsSh1TargetTask.collectStructures rest])
   | .collectInductives items =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           let scope := psSh1TargetRootScope item.name;
           Except.ok (psSh1TargetSchedule state
-            [.name scope .globalBoth item.name, .addGlobal scope item.name true,
-             .collectInductives rest])
+            [PsSh1TargetTask.name scope PsSh1TargetNameRole.globalBoth item.name, PsSh1TargetTask.addGlobal scope item.name true,
+             PsSh1TargetTask.collectInductives rest])
   | .collectDeclarations items =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           let scope := psSh1TargetRootScope item.name;
           Except.ok (psSh1TargetSchedule state
-            [.name scope .globalValue item.name, .addGlobal scope item.name false,
-             .collectDeclarations rest])
+            [PsSh1TargetTask.name scope PsSh1TargetNameRole.globalValue item.name, PsSh1TargetTask.addGlobal scope item.name false,
+             PsSh1TargetTask.collectDeclarations rest])
   | .addGlobal scope name isType =>
       if psSh1TargetHasName state.globals name then
         Except.error (psSh1TargetErrorAt state scope "target-global-collision" name)
@@ -309,28 +309,28 @@ def psSh1TargetStep
       | List.nil => Except.ok state
       | List.cons item rest =>
           Except.ok (psSh1TargetSchedule state
-            [.addPrivate (psSh1TargetRootScope item.name)
+            [PsSh1TargetTask.addPrivate (psSh1TargetRootScope item.name)
                (String.Internal.append "__ps$brand$" (psNatToString index)),
-             .brandNames rest (Nat.succ index)])
+             PsSh1TargetTask.brandNames rest (Nat.succ index)])
   | .tagNames items index =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           Except.ok (psSh1TargetSchedule state
-            [.addPrivate (psSh1TargetRootScope item.name)
+            [PsSh1TargetTask.addPrivate (psSh1TargetRootScope item.name)
                (String.Internal.append "__ps$tag$" (psNatToString index)),
-             .tagNames rest (Nat.succ index)])
+             PsSh1TargetTask.tagNames rest (Nat.succ index)])
   | .implementationNames items =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           match item.parameters with
-          | List.nil => Except.ok (psSh1TargetSchedule state [.implementationNames rest])
+          | List.nil => Except.ok (psSh1TargetSchedule state [PsSh1TargetTask.implementationNames rest])
           | List.cons _ _ =>
               Except.ok (psSh1TargetSchedule state
-                [.addPrivate (psSh1TargetRootScope item.name)
+                [PsSh1TargetTask.addPrivate (psSh1TargetRootScope item.name)
                    (String.Internal.append "__ps$impl$" item.name),
-                 .implementationNames rest])
+                 PsSh1TargetTask.implementationNames rest])
   | .addPrivate scope name =>
       if psSh1TargetHasName state.globals name then
         Except.error (psSh1TargetErrorAt state scope "target-generated-name" name)
@@ -350,7 +350,7 @@ def psSh1TargetStep
         if valid then
           let next := String.Pos.Raw.byteIdx (String.Internal.next value (String.Pos.Raw.mk position));
           Except.ok (psSh1TargetSchedule state
-            [.nameChars scope role value next false])
+            [PsSh1TargetTask.nameChars scope role value next false])
         else Except.error (psSh1TargetErrorAt state scope "target-identifier" value)
   | .structures items =>
       match items with
@@ -358,51 +358,51 @@ def psSh1TargetStep
       | List.cons item rest =>
           let scope := psSh1TargetRootScope item.name;
           Except.ok (psSh1TargetSchedule state
-            [.typeParameters scope item.typeParameters 0,
-             .structureFields scope item.fields 0, .structures rest])
+            [PsSh1TargetTask.typeParameters scope item.typeParameters 0,
+             PsSh1TargetTask.structureFields scope item.fields 0, PsSh1TargetTask.structures rest])
   | .inductives items =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           let scope := psSh1TargetRootScope item.name;
           Except.ok (psSh1TargetSchedule state
-            [.typeParameters scope item.typeParameters 0,
-             .constructors scope item.constructors 0, .inductives rest])
+            [PsSh1TargetTask.typeParameters scope item.typeParameters 0,
+             PsSh1TargetTask.constructors scope item.constructors 0, PsSh1TargetTask.inductives rest])
   | .structureFields scope items index =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           let atField := psSh1TargetAtIndex scope "field" index;
           Except.ok (psSh1TargetSchedule state
-            [.name atField .property item.name,
-             .runtimeType atField 4096 item.type,
-             .structureFields scope rest (Nat.succ index)])
+            [PsSh1TargetTask.name atField PsSh1TargetNameRole.property item.name,
+             PsSh1TargetTask.runtimeType atField 4096 item.type,
+             PsSh1TargetTask.structureFields scope rest (Nat.succ index)])
   | .constructors scope items index =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           let atCtor := psSh1TargetAtIndex scope "constructor" index;
           Except.ok (psSh1TargetSchedule state
-            [.name atCtor .quotedProperty item.name,
-             .constructorFields atCtor item.fields 0,
-             .constructors scope rest (Nat.succ index)])
+            [PsSh1TargetTask.name atCtor PsSh1TargetNameRole.quotedProperty item.name,
+             PsSh1TargetTask.constructorFields atCtor item.fields 0,
+             PsSh1TargetTask.constructors scope rest (Nat.succ index)])
   | .constructorFields scope items index =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           let atField := psSh1TargetAtIndex scope "field" index;
           Except.ok (psSh1TargetSchedule state
-            [.name atField .property item.name,
-             .runtimeType atField 4096 item.type,
-             .constructorFields scope rest (Nat.succ index)])
+            [PsSh1TargetTask.name atField PsSh1TargetNameRole.property item.name,
+             PsSh1TargetTask.runtimeType atField 4096 item.type,
+             PsSh1TargetTask.constructorFields scope rest (Nat.succ index)])
   | .typeParameters scope items index =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           let atType := psSh1TargetAtIndex scope "typeParameter" index;
           Except.ok (psSh1TargetSchedule state
-            [.name atType .localType item.name,
-             .typeParameters scope rest (Nat.succ index)])
+            [PsSh1TargetTask.name atType PsSh1TargetNameRole.localType item.name,
+             PsSh1TargetTask.typeParameters scope rest (Nat.succ index)])
   | .declarations earlier items =>
       match items with
       | List.nil => Except.ok state
@@ -413,15 +413,15 @@ def psSh1TargetStep
           let scope := PsSh1TargetScope.mk item.name "body" earlier
             psSh1TargetEmptyNames item.name hasParameters;
           Except.ok (psSh1TargetSchedule state
-            [.typeParameters scope item.typeParameters 0,
-             .parameters scope 4096 false item.parameters 0 item.resultType item.body,
-             .declarations (psSh1TargetInsertName earlier item.name) rest])
+            [PsSh1TargetTask.typeParameters scope item.typeParameters 0,
+             PsSh1TargetTask.parameters scope 4096 false item.parameters 0 item.resultType item.body,
+             PsSh1TargetTask.declarations (psSh1TargetInsertName earlier item.name) rest])
   | .parameters scope depth weighted items index resultType body =>
       match items with
       | List.nil =>
           Except.ok (psSh1TargetSchedule state
-            [.runtimeType (psSh1TargetAt scope "resultType") 4096 resultType,
-             .expression scope depth body])
+            [PsSh1TargetTask.runtimeType (psSh1TargetAt scope "resultType") 4096 resultType,
+             PsSh1TargetTask.expression scope depth body])
       | List.cons item rest =>
           match depth with
           | Nat.zero =>
@@ -431,9 +431,9 @@ def psSh1TargetStep
               let nextDepth := if weighted then remaining else depth;
               let atParameter := psSh1TargetAtIndex scope "parameter" index;
               Except.ok (psSh1TargetSchedule state
-                [.name atParameter .localValue item.name,
-                 .runtimeType atParameter 4096 item.type,
-                 .parameters (psSh1TargetWithLocal scope item.name) nextDepth weighted
+                [PsSh1TargetTask.name atParameter PsSh1TargetNameRole.localValue item.name,
+                 PsSh1TargetTask.runtimeType atParameter 4096 item.type,
+                 PsSh1TargetTask.parameters (psSh1TargetWithLocal scope item.name) nextDepth weighted
                    rest (Nat.succ index) resultType body])
   | .runtimeType scope depth value =>
       match depth with
@@ -447,21 +447,21 @@ def psSh1TargetStep
                 "target-unchecked-type" "original-IR typing is required before target admission")
           | .primitive _ => Except.ok state
           | .typeParameter name =>
-              Except.ok (psSh1TargetSchedule state [.name scope .reference name])
+              Except.ok (psSh1TargetSchedule state [PsSh1TargetTask.name scope PsSh1TargetNameRole.reference name])
           | .named name arguments =>
               Except.ok (psSh1TargetSchedule state
-                [.name scope .reference name, .runtimeTypes scope remaining arguments 0])
+                [PsSh1TargetTask.name scope PsSh1TargetNameRole.reference name, PsSh1TargetTask.runtimeTypes scope remaining arguments 0])
           | .function parameters resultType =>
               Except.ok (psSh1TargetSchedule state
-                [.runtimeTypes scope remaining parameters 0,
-                 .runtimeType (psSh1TargetAt scope "result") remaining resultType])
+                [PsSh1TargetTask.runtimeTypes scope remaining parameters 0,
+                 PsSh1TargetTask.runtimeType (psSh1TargetAt scope "result") remaining resultType])
   | .runtimeTypes scope depth items index =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           Except.ok (psSh1TargetSchedule state
-            [.runtimeType (psSh1TargetAtIndex scope "type" index) depth item,
-             .runtimeTypes scope depth rest (Nat.succ index)])
+            [PsSh1TargetTask.runtimeType (psSh1TargetAtIndex scope "type" index) depth item,
+             PsSh1TargetTask.runtimeTypes scope depth rest (Nat.succ index)])
   | .expression scope depth value =>
       match depth with
       | Nat.zero =>
@@ -472,61 +472,61 @@ def psSh1TargetStep
           | .literal _ => Except.ok state
           | .var name =>
               Except.ok (psSh1TargetSchedule state
-                [.name scope .reference name, .readVariable scope name])
+                [PsSh1TargetTask.name scope PsSh1TargetNameRole.reference name, PsSh1TargetTask.readVariable scope name])
           | .intrinsic _ typeArguments arguments =>
               Except.ok (psSh1TargetSchedule state
-                [.runtimeTypes scope 4096 typeArguments 0,
-                 .expressions scope remaining arguments 0])
+                [PsSh1TargetTask.runtimeTypes scope 4096 typeArguments 0,
+                 PsSh1TargetTask.expressions scope remaining arguments 0])
           | .lambda parameters resultType body =>
               Except.ok (psSh1TargetSchedule state
-                [.parameters (psSh1TargetAt scope "lambda") remaining true
+                [PsSh1TargetTask.parameters (psSh1TargetAt scope "lambda") remaining true
                    parameters 0 resultType body])
           | .call fn typeArguments arguments =>
               Except.ok (psSh1TargetSchedule state
-                [.expression (psSh1TargetAt scope "callee") remaining fn,
-                 .runtimeTypes scope 4096 typeArguments 0,
-                 .expressions scope remaining arguments 0])
+                [PsSh1TargetTask.expression (psSh1TargetAt scope "callee") remaining fn,
+                 PsSh1TargetTask.runtimeTypes scope 4096 typeArguments 0,
+                 PsSh1TargetTask.expressions scope remaining arguments 0])
           | .letE name type value body =>
               Except.ok (psSh1TargetSchedule state
-                [.name (psSh1TargetAt scope "letName") .localValue name,
-                 .runtimeType (psSh1TargetAt scope "letType") 4096 type,
-                 .expression (psSh1TargetAt scope "initializer") remaining value,
-                 .expression (psSh1TargetAt (psSh1TargetWithLocal scope name) "letBody")
+                [PsSh1TargetTask.name (psSh1TargetAt scope "letName") PsSh1TargetNameRole.localValue name,
+                 PsSh1TargetTask.runtimeType (psSh1TargetAt scope "letType") 4096 type,
+                 PsSh1TargetTask.expression (psSh1TargetAt scope "initializer") remaining value,
+                 PsSh1TargetTask.expression (psSh1TargetAt (psSh1TargetWithLocal scope name) "letBody")
                    remaining body])
           | .ifE condition thenBranch elseBranch =>
               Except.ok (psSh1TargetSchedule state
-                [.expression (psSh1TargetAt scope "condition") remaining condition,
-                 .expression (psSh1TargetAt scope "then") remaining thenBranch,
-                 .expression (psSh1TargetAt scope "else") remaining elseBranch])
+                [PsSh1TargetTask.expression (psSh1TargetAt scope "condition") remaining condition,
+                 PsSh1TargetTask.expression (psSh1TargetAt scope "then") remaining thenBranch,
+                 PsSh1TargetTask.expression (psSh1TargetAt scope "else") remaining elseBranch])
           | .record _ typeArguments fields =>
               Except.ok (psSh1TargetSchedule state
-                [.runtimeTypes scope 4096 typeArguments 0,
-                 .expressionFields scope remaining fields 0])
+                [PsSh1TargetTask.runtimeTypes scope 4096 typeArguments 0,
+                 PsSh1TargetTask.expressionFields scope remaining fields 0])
           | .projection _ typeArguments target field =>
               Except.ok (psSh1TargetSchedule state
-                [.runtimeTypes scope 4096 typeArguments 0,
-                 .name (psSh1TargetAt scope "field") .property field,
-                 .expression (psSh1TargetAt scope "target") remaining target])
+                [PsSh1TargetTask.runtimeTypes scope 4096 typeArguments 0,
+                 PsSh1TargetTask.name (psSh1TargetAt scope "field") PsSh1TargetNameRole.property field,
+                 PsSh1TargetTask.expression (psSh1TargetAt scope "target") remaining target])
           | .constructor inductiveName name typeArguments fields =>
               if psSh1TargetHasName scope.locals inductiveName then
                 Except.error (psSh1TargetErrorAt state scope
                   "target-value-capture" inductiveName)
               else Except.ok (psSh1TargetSchedule state
-                [.name (psSh1TargetAt scope "constructor") .quotedProperty name,
-                 .runtimeTypes scope 4096 typeArguments 0,
-                 .expressionFields scope remaining fields 0])
+                [PsSh1TargetTask.name (psSh1TargetAt scope "constructor") PsSh1TargetNameRole.quotedProperty name,
+                 PsSh1TargetTask.runtimeTypes scope 4096 typeArguments 0,
+                 PsSh1TargetTask.expressionFields scope remaining fields 0])
           | .matchE _ typeArguments scrutinee alternatives =>
               Except.ok (psSh1TargetSchedule state
-                [.runtimeTypes scope 4096 typeArguments 0,
-                 .expression (psSh1TargetAt scope "scrutinee") remaining scrutinee,
-                 .alternatives scope remaining alternatives 0])
+                [PsSh1TargetTask.runtimeTypes scope 4096 typeArguments 0,
+                 PsSh1TargetTask.expression (psSh1TargetAt scope "scrutinee") remaining scrutinee,
+                 PsSh1TargetTask.alternatives scope remaining alternatives 0])
   | .expressions scope depth items index =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           Except.ok (psSh1TargetSchedule state
-            [.expression (psSh1TargetAtIndex scope "argument" index) depth item,
-             .expressions scope depth rest (Nat.succ index)])
+            [PsSh1TargetTask.expression (psSh1TargetAtIndex scope "argument" index) depth item,
+             PsSh1TargetTask.expressions scope depth rest (Nat.succ index)])
   | .readVariable scope name =>
       if psSh1TargetHasName scope.locals name then Except.ok state
       else if psStringEq scope.selfName name then
@@ -540,28 +540,28 @@ def psSh1TargetStep
       | List.cons item rest =>
           let atField := psSh1TargetAtIndex scope "field" index;
           Except.ok (psSh1TargetSchedule state
-            [.name atField .property item.fst,
-             .expression atField depth item.snd,
-             .expressionFields scope depth rest (Nat.succ index)])
+            [PsSh1TargetTask.name atField PsSh1TargetNameRole.property item.fst,
+             PsSh1TargetTask.expression atField depth item.snd,
+             PsSh1TargetTask.expressionFields scope depth rest (Nat.succ index)])
   | .alternatives scope depth items index =>
       match items with
       | List.nil => Except.ok state
       | List.cons item rest =>
           let atAlternative := psSh1TargetAtIndex scope "alternative" index;
           Except.ok (psSh1TargetSchedule state
-            [.name atAlternative .quotedProperty item.fst,
-             .matchBindings atAlternative depth item.snd.fst 0 item.snd.snd,
-             .alternatives scope depth rest (Nat.succ index)])
+            [PsSh1TargetTask.name atAlternative PsSh1TargetNameRole.quotedProperty item.fst,
+             PsSh1TargetTask.matchBindings atAlternative depth item.snd.fst 0 item.snd.snd,
+             PsSh1TargetTask.alternatives scope depth rest (Nat.succ index)])
   | .matchBindings scope depth items index body =>
       match items with
-      | List.nil => Except.ok (psSh1TargetSchedule state [.expression scope depth body])
+      | List.nil => Except.ok (psSh1TargetSchedule state [PsSh1TargetTask.expression scope depth body])
       | List.cons item rest =>
           let atBinding := psSh1TargetAtIndex scope "binding" index;
           Except.ok (psSh1TargetSchedule state
-            [.name atBinding .localValue item.name,
-             .name atBinding .property item.field,
-             .runtimeType atBinding 4096 item.type,
-             .matchBindings (psSh1TargetWithLocal scope item.name) depth
+            [PsSh1TargetTask.name atBinding PsSh1TargetNameRole.localValue item.name,
+             PsSh1TargetTask.name atBinding PsSh1TargetNameRole.property item.field,
+             PsSh1TargetTask.runtimeType atBinding 4096 item.type,
+             PsSh1TargetTask.matchBindings (psSh1TargetWithLocal scope item.name) depth
                rest (Nat.succ index) body])
 
 def psSh1TargetFinished (state : PsSh1TargetState) : PsSh1TargetReport :=
@@ -589,15 +589,15 @@ def psSh1TargetRun (fuel : Nat) (state : PsSh1TargetState) :
 def psSh1CheckTarget (maxSteps : Nat) (module : PsVerifiedIrModule) :
     Except PsSh1TargetError PsSh1TargetReport :=
   let tasks : List PsSh1TargetTask :=
-    [.noImports module.imports,
-     .collectStructures module.structures,
-     .collectInductives module.inductives,
-     .collectDeclarations module.declarations,
-     .brandNames module.structures 0,
-     .tagNames module.inductives 0,
-     .implementationNames module.declarations,
-     .structures module.structures,
-     .inductives module.inductives,
-     .declarations psSh1TargetEmptyNames module.declarations];
+    [PsSh1TargetTask.noImports module.imports,
+     PsSh1TargetTask.collectStructures module.structures,
+     PsSh1TargetTask.collectInductives module.inductives,
+     PsSh1TargetTask.collectDeclarations module.declarations,
+     PsSh1TargetTask.brandNames module.structures 0,
+     PsSh1TargetTask.tagNames module.inductives 0,
+     PsSh1TargetTask.implementationNames module.declarations,
+     PsSh1TargetTask.structures module.structures,
+     PsSh1TargetTask.inductives module.inductives,
+     PsSh1TargetTask.declarations psSh1TargetEmptyNames module.declarations];
   psSh1TargetRun maxSteps
     (PsSh1TargetState.mk tasks psSh1TargetEmptyNames psSh1TargetEmptyNames 0)

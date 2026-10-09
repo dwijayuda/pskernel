@@ -1779,7 +1779,7 @@
     }
   },
   "strictEnforcementCheckpoint": {
-    "status": "integrated-source-target-runtime-candidate-awaiting-cloud-qualification",
+    "status": "first-source-attempt-refused-reviewed-correction-awaiting-cloud-qualification",
     "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
     "branch": "psc0/strict-sh1-v1",
     "implementationManifest": "strict/implementation-checkpoint.json",
@@ -1795,8 +1795,12 @@
     "plannedNativeObservationCount": 186,
     "plannedSourceConformance": {
       "accepted": 2,
-      "portableRefusals": 21,
-      "hostCarrierRefusals": 2
+      "portableOrCompilerRefusals": 33,
+      "hostCarrierRefusals": 2,
+      "reservedNameCases": {
+        "leanPolicy": 6,
+        "psGrammar": 6
+      }
     },
     "plannedTargetConformance": {
       "accepted": 9,
@@ -1810,6 +1814,15 @@
     "providerChecked": false,
     "selectedSeedUnchanged": "R",
     "sourceAuthority": ".lean",
-    "cloudExecution": "not-started-at-source-checkpoint"
+    "cloudExecution": {
+      "status": "failed-before-N1-emission",
+      "sourceRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
+      "runId": 37964798240,
+      "compilerJobId": 113936354535,
+      "providerStatus": "skipped"
+    },
+    "initialImplementationRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
+    "sourceBoundaryCorrection": "strict/source-boundary-correction.json",
+    "qualificationAttempts": "strict/qualification-attempts.json"
   }
 }

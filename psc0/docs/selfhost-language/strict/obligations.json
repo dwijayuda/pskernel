@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-09 17:12:36 UTC",
+  "updatedAtUtc": "2026-10-09 17:28:40 UTC",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -445,14 +445,31 @@
     "generalRulesDischarged": 0
   },
   "cloudExecution": {
-    "status": "not-started-at-source-checkpoint",
-    "requiredGenerations": [
-      "N1",
-      "C1",
-      "C2",
-      "C3"
-    ],
+    "status": "first-attempt-refused-correction-awaiting-qualification",
+    "failedSourceRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
+    "runId": 37964798240,
+    "compilerJobId": 113936354535,
     "providerSeparate": true,
     "selectedSeed": "R"
+  },
+  "sourceBoundaryCorrection": "source-boundary-correction.json",
+  "qualificationAttempts": "qualification-attempts.json",
+  "sourceIdentityAdmission": {
+    "operationAdapterSymbolCount": 43,
+    "alreadyPreludeProtected": 38,
+    "previouslyMissingSymbols": [
+      "Bool.and",
+      "Bool.or",
+      "Bool.not",
+      "Array.getInternal",
+      "Array.set"
+    ],
+    "separatelyReservedType": "String.Pos.Raw",
+    "sourceConformanceRefusals": 33,
+    "leanNamePolicyCases": 6,
+    "psDottedNameGrammarCases": 6,
+    "document": "PRIMITIVE_IDENTITY.md",
+    "status": "source-reviewed-candidate-awaiting-qualification",
+    "semanticPreservationProven": false
   }
 }

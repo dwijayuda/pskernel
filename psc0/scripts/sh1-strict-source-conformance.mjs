@@ -10,6 +10,50 @@ const input = (source, tail = 'StrictCase') => ({
 });
 const literal = 'def sh1Literal : Nat := 7\n';
 
+
+function reservedRuntimeNameCases() {
+  const definitions = [
+  {
+    "name": "Bool.and",
+    "lean": "def Bool.and (left : Bool) (right : Bool) : Bool := true\n",
+    "ps": "def Bool.and(left : Bool, right : Bool) : Bool := true\n"
+  },
+  {
+    "name": "Bool.or",
+    "lean": "def Bool.or (left : Bool) (right : Bool) : Bool := false\n",
+    "ps": "def Bool.or(left : Bool, right : Bool) : Bool := false\n"
+  },
+  {
+    "name": "Bool.not",
+    "lean": "def Bool.not (value : Bool) : Bool := value\n",
+    "ps": "def Bool.not(value : Bool) : Bool := value\n"
+  },
+  {
+    "name": "Array.getInternal",
+    "lean": "def Array.getInternal {alpha : Type} (values : Array alpha) (index : Nat) (fallback : alpha) : alpha := fallback\n",
+    "ps": "def Array.getInternal {alpha : Type}(values : Array alpha, index : Nat, fallback : alpha) : alpha := fallback\n"
+  },
+  {
+    "name": "Array.set",
+    "lean": "def Array.set {alpha : Type} (values : Array alpha) (index : Nat) (value : alpha) (ignored : Nat) : Array alpha := values\n",
+    "ps": "def Array.set {alpha : Type}(values : Array alpha, index : Nat, value : alpha, ignored : Nat) : Array alpha := values\n"
+  },
+  {
+    "name": "String.Pos.Raw",
+    "policyCode": "source-builtin-type-name-reserved",
+    "lean": "inductive String.Pos.Raw where\n  | marker\n",
+    "ps": "inductive String.Pos.Raw where {\n  | marker\n}\n"
+  }
+];
+  return definitions.flatMap((definition) => ['lean', 'ps'].map((kind) => ({
+    id: 'reserved-runtime-name-' + definition.name + '-' + kind, kind,
+    inputs: [input(definition[kind])],
+    code: kind === 'lean' ? definition.policyCode ?? 'source-intrinsic-name-reserved' : 'source-compiler',
+    ...(kind === 'lean' ? { exactName: definition.name } : {}),
+    boundary: kind === 'lean' ? 'portable-source-name-policy' : 'new-only-ps-declared-name-grammar',
+  })));
+}
+
 function sourceCases() {
   return [
     { id: 'empty-bundle', inputs: [], code: 'source-empty-bundle' },
@@ -50,6 +94,7 @@ function sourceCases() {
       code: 'source-type-limit' },
     { id: 'term-position-budget', inputs: [input(literal)], limits: { maxTermSteps: 0 },
       code: 'source-term-limit' },
+    ...reservedRuntimeNameCases(),
   ];
 }
 
@@ -60,7 +105,7 @@ export async function runStrictSourceConformance({ compiler, compilerSha256, out
       'def sh1ExplicitHelpers (compilerPure : Nat -> Nat) (compilerBind : Nat -> Nat) (value : Nat) : Nat := compilerBind (compilerPure value)\n' +
       '-- do compilerPure compilerBind are comment text.\n' +
       'def sh1OriginWords : String := "do compilerPure compilerBind"\n',
-    ps: 'structure Sh1DoField where\n  do : Nat\n' +
+    ps: 'structure Sh1DoField where {\n  do : Nat\n}\n' +
       'def sh1ExplicitHelpers(compilerPure : Nat -> Nat, compilerBind : Nat -> Nat, value : Nat) : Nat := compilerBind(compilerPure(value))\n' +
       '-- do compilerPure compilerBind are comment text.\n' +
       'def sh1OriginWords : String := "do compilerPure compilerBind"\n',
@@ -88,13 +133,20 @@ export async function runStrictSourceConformance({ compiler, compilerSha256, out
     }
     assert(failure, 'PSC0_SH1_SOURCE_REFUSAL_MISSING: ' + test.id);
     assert.equal(failure.code, test.code, 'PSC0_SH1_SOURCE_REFUSAL_CODE: ' + test.id);
+    if (test.exactName) {
+      const offset = test.inputs[0].source.indexOf(test.exactName);
+      assert.equal(failure.owner, test.exactName);
+      assert.equal(failure.span?.start?.byteOffset, offset);
+      assert.equal(failure.span?.stop?.byteOffset, offset + test.exactName.length);
+    }
     if (test.exactDoSpan) {
       const offset = test.inputs[0].source.indexOf('do return');
       assert.equal(failure.span?.start?.byteOffset, offset);
       assert.equal(failure.span?.stop?.byteOffset, offset + 2);
     }
     refused.push({ id: test.id, sourceKind: test.kind ?? 'lean',
-      inputSha256: sha256(JSON.stringify(test.inputs)), limits: test.limits ?? {}, failure });
+      inputSha256: sha256(JSON.stringify(test.inputs)), limits: test.limits ?? {},
+      ...(test.boundary ? { boundary: test.boundary } : {}), failure });
   }
   const badText = [String.fromCharCode(0xd800), String.fromCharCode(0xdc00)];
   const carrierRefusals = [];

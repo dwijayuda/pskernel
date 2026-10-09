@@ -87,7 +87,7 @@ export async function bindStrictQualificationEvidence({
     noStrictClaim(source.value, name + ' source conformance');
     assert.equal(source.value.semanticContractQualified, false);
     assert.equal(source.value.accepted.length, 2);
-    assert.equal(source.value.refused.length, 21);
+    assert.equal(source.value.refused.length, 33);
     assert.equal(source.value.carrierRefusals.length, 2);
     for (const item of source.value.accepted) {
       assert.equal(item.compilerSha256, compilerSha256);
@@ -140,7 +140,7 @@ export async function bindStrictQualificationEvidence({
     noStrictClaim(runtime.value, name + ' runtime conformance');
     const compiler = await artifact(outDir, directory + '/index.js', compilerSha256);
     generationEvidence.push({ name, compiler, source: source.file, target: target.file, runtime: runtime.file,
-      operationCount: 45, observationCount: 186, sourceRefusals: 21, targetRefusals: 20 });
+      operationCount: 45, observationCount: 186, sourceRefusals: 33, targetRefusals: 20 });
   }
 
   const nativeFile = await jsonFile(outDir, 'development/N1/strict-source-native.json');

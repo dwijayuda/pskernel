@@ -1,6 +1,6 @@
 # PSC0 AI work state — active strict SH/1 milestone
 
-Updated: 2026-10-09 17:12:15 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
+Updated: 2026-10-09 17:28:40 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
 
 ## Read this first
 
@@ -81,9 +81,34 @@ Existing sibling proofs establish only narrow cursor/omission/reflexivity exampl
 
 Static code review also identified that arbitrary typed IR can refer to a later eager global constant and can contain names beyond the emitter's valid/fresh-name domain. These are boundary obligations, not claims of an executed defect in the qualified compiler closure. Prefer source-owned provenance and a finite portable admission rule over broad backend rewriting.
 
+## Current qualification status and reviewed correction
+
+The first source attempt **cf35b6b2a3328a065721ef48cf633a44e6122362** ran in [Actions run 37964798240](https://github.com/dwijayuda/pskernel/actions/runs/37964798240), compiler job 113936354535. The job failed at native strict full-source preparation; provider job 113938374217 was skipped. [strict/qualification-attempts.json](docs/selfhost-language/strict/qualification-attempts.json) retains the exact refusal, successful earlier steps, artifact identity and decoded primary-log hash. Do not erase or relabel that attempt.
+
+The native Lean build, native regression targets, host/source/import checks and authenticated R behavior/ABI preflight passed. The owned source frontend then refused Ps.BackendTs.Sh1Target at 283:14: expected 'term', got '.'. N1 generation and current source/target/runtime conformance did not complete, and C1/C2/C3 qualification was not reached.
+
+The correction has two source changes and two host-gate changes:
+
+- Sh1Target.lean qualifies all 116 unsupported constructor expressions (98 task and 18 name-role constructors). All 58 supported shorthand patterns and every other byte, argument, task order, policy, diagnostic and budget are preserved. Root and the target owner independently reconstructed the exact reversible edit.
+- Compiler/Sh1.lean reserves all 43 exact operation/adapter names recognized before ordinary erasure dispatch. Thirty-eight already have prelude duplicate protection; Bool.and, Bool.or, Bool.not, Array.getInternal and Array.set were absent and could acquire intrinsic meaning despite an unrelated authored body. The separate absent String.Pos.Raw type identity is also reserved because runtime type erasure maps it to Nat by name. This does not install those absent operations or enable optional scalars.
+- The source gate now has 33 portable/compiler refusals: the original 21, six Lean reserved-name refusals and six current PS dotted-declaration grammar refusals. Lean name-policy errors retain the exact name span. PS allows only a simple declared name and therefore refuses the dotted names earlier as source-compiler; do not claim it exercised the name policy.
+- The positive PS structure fixture now uses the required where-brace form. The evidence binder requires the actual 33-case source receipts. Two positive bundles and two host carrier refusals remain separate.
+
+The concise source identity argument is [strict/PRIMITIVE_IDENTITY.md](docs/selfhost-language/strict/PRIMITIVE_IDENTITY.md). The exact corrective path/blob manifest is [strict/source-boundary-correction.json](docs/selfhost-language/strict/source-boundary-correction.json). The original implementation-checkpoint.json remains a pinned inventory of the first cf35 candidate.
+
+The strict branch has no successful current-source qualification yet. The next correction commit must receive one coordinated native/current fixed-point/provider run. Source review is not a substitute for that run. Keep strictSh1Qualified, semanticContractQualified and candidate/provider qualification false until their respective actual evidence exists.
+
+### Next origin slice — unattached, do not confuse with the correction
+
+A separate origin-retention candidate is being prepared for after this checkpoint qualifies. Its proposed APIs retain actual source-batch/member ordinals, Core names, source spans, compact recursion plans and actual normalized worker syntax at the existing construction sites. Errors retain their original PsElabError plus a truthful declaration/planning/worker/wrapper/insertion phase. No origin is inferred from a printed worker name and no environment/context snapshot is retained per origin.
+
+Proposed companion APIs are psElabDeclarationBatchWithOrigins and psElabModuleWithOrigins. Root will compose them into the source-owned preparation result, retaining the actual final environment and one successful canonical-admission encoding for reuse. Arbitrary Prepared APIs must keep validating/rebuilding as before. The existing preparation cache protocol and algorithms stay unchanged.
+
+The candidate Recursion/Declaration blobs and review are not part of this source correction. They need their own coherent integration and evidence, including the existing declaration-worker source guard following the richer fold. Retention can close a scoped declaration/normalized-syntax origin obligation; it cannot discharge binding substitution, erased proof independence or general preservation.
+
 ## Integrated strict implementation checkpoint
 
-Updated: 2026-10-09 17:12:15 UTC. The branch already contains planning commit bcf27b6595fb1a7ac03f2ea5c1b1cf2e3f748dff. This source checkpoint composes the reviewed portable, host and runtime candidates. Its exact changed-path/blob inventory is [strict/implementation-checkpoint.json](docs/selfhost-language/strict/implementation-checkpoint.json). At the time this checkpoint is written, no strict candidate compiler, test or workflow has executed. Do not turn static review into a pass.
+Updated: 2026-10-09 17:12:15 UTC. The first integrated source checkpoint, cf35b6b2a3328a065721ef48cf633a44e6122362, follows planning commit bcf27b6595fb1a7ac03f2ea5c1b1cf2e3f748dff. The inventory below describes that original candidate; the correction and actual failed run are recorded above. Its exact changed-path/blob inventory is [strict/implementation-checkpoint.json](docs/selfhost-language/strict/implementation-checkpoint.json). At the time the original source checkpoint was written, no strict candidate execution had occurred. Its later actual failure is recorded above; none of the intended assertions below is a pass.
 
 | Part | Implemented candidate | Required cloud evidence |
 | --- | --- | --- |

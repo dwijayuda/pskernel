@@ -394,12 +394,70 @@ def psSh1DeclarationTasks
    PsSh1SyntaxTask.term owner PsSh1SyntaxRegion.type type,
    PsSh1SyntaxTask.term owner PsSh1SyntaxRegion.term value]
 
+-- Erasure gives these exact source symbols intrinsic meaning before ordinary
+-- declaration dispatch. The source-owned lane reserves all of them; a missing
+-- prelude symbol is not permission to define an unrelated implementation.
+-- The finite inventory is audited against psErasePrimitiveApplication.
+def psSh1PrimitiveDeclarationNameReserved (text : String) : Bool :=
+  if psStringEq text "Prod.fst" then true
+  else if psStringEq text "Prod.snd" then true
+  else if psStringEq text "Int.ofNat" then true
+  else if psStringEq text "Int.repr" then true
+  else if psStringEq text "Int.negSucc" then true
+  else if psStringEq text "Int.neg" then true
+  else if psStringEq text "Int.add" then true
+  else if psStringEq text "Int.sub" then true
+  else if psStringEq text "Int.mul" then true
+  else if psStringEq text "Nat.succ" then true
+  else if psStringEq text "Nat.add" then true
+  else if psStringEq text "Nat.sub" then true
+  else if psStringEq text "Nat.mul" then true
+  else if psStringEq text "Nat.div" then true
+  else if psStringEq text "Nat.mod" then true
+  else if psStringEq text "Nat.beq" then true
+  else if psStringEq text "Nat.ble" then true
+  else if psStringEq text "Nat.blt" then true
+  else if psStringEq text "Bool.and" then true
+  else if psStringEq text "Bool.or" then true
+  else if psStringEq text "Bool.not" then true
+  else if psStringEq text "Char.ofNat" then true
+  else if psStringEq text "Char.toNat" then true
+  else if psStringEq text "String.Pos.Raw.mk" then true
+  else if psStringEq text "String.Pos.Raw.byteIdx" then true
+  else if psStringEq text "String.push" then true
+  else if psStringEq text "String.singleton" then true
+  else if psStringEq text "String.Internal.length" then true
+  else if psStringEq text "String.Internal.append" then true
+  else if psStringEq text "String.utf8ByteSize" then true
+  else if psStringEq text "String.Internal.next" then true
+  else if psStringEq text "String.Internal.get" then true
+  else if psStringEq text "String.Internal.atEnd" then true
+  else if psStringEq text "String.Internal.extract" then true
+  else if psStringEq text "Array.emptyWithCapacity" then true
+  else if psStringEq text "Array.size" then true
+  else if psStringEq text "Array.push" then true
+  else if psStringEq text "Array.getInternal" then true
+  else if psStringEq text "Array.getD" then true
+  else if psStringEq text "Array.set" then true
+  else if psStringEq text "Array.setIfInBounds" then true
+  else if psStringEq text "Array.map" then true
+  else psStringEq text "Array.foldl"
+
+def psSh1SourceDeclarationName (source : PsSyntaxDeclaration) : PsSyntaxName :=
+  match source with
+  | PsSyntaxDeclaration.definition name _ _ _ _ => name
+  | PsSyntaxDeclaration.partialDefinition name _ _ _ _ => name
+  | PsSyntaxDeclaration.theoremDecl name _ _ _ _ => name
+  | PsSyntaxDeclaration.inductiveDecl name _ _ _ _ => name
+  | PsSyntaxDeclaration.structureDecl name _ _ _ => name
+
+
 -- General partial definitions are excluded. Theorems use the existing
 -- proof/type-erasure preparation path; they are not silently banned or declared
 -- kernel-checked.
 -- Axiom, opaque, class/instance, macro and extension commands have no declaration
 -- constructor in this source AST: the real parser refuses them before this walk.
-def psSh1SyntaxDeclarationStep
+def psSh1SyntaxDeclarationBodyStep
     (moduleName : String) (source : PsSyntaxDeclaration) (state : PsSh1SyntaxState) :
     Except PsSh1SourceError PsSh1SyntaxState :=
   match source with
@@ -428,6 +486,24 @@ def psSh1SyntaxDeclarationStep
       let owner : String := psSh1NameText name.segments;
       Except.ok (psSh1SyntaxSchedule (psSh1CountDeclaration state false)
         [PsSh1SyntaxTask.binders owner params, PsSh1SyntaxTask.binders owner fields])
+
+
+def psSh1SyntaxDeclarationStep
+    (moduleName : String) (source : PsSyntaxDeclaration) (state : PsSh1SyntaxState) :
+    Except PsSh1SourceError PsSh1SyntaxState :=
+  let name : PsSyntaxName := psSh1SourceDeclarationName source;
+  let text : String := psSh1NameText name.segments;
+  if psSh1PrimitiveDeclarationNameReserved text then
+    Except.error
+      (psSh1SourceFailure "source-intrinsic-name-reserved"
+        "source declarations cannot redefine a reserved erasure intrinsic symbol"
+        moduleName text (Option.some name.span))
+  else if psStringEq text "String.Pos.Raw" then
+    Except.error
+      (psSh1SourceFailure "source-builtin-type-name-reserved"
+        "source declarations cannot redefine the fixed raw string position type"
+        moduleName text (Option.some name.span))
+  else psSh1SyntaxDeclarationBodyStep moduleName source state
 
 def psSh1PatternBody
     (owner : String) (region : PsSh1SyntaxRegion)

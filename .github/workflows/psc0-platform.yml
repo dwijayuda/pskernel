@@ -106,12 +106,6 @@ jobs:
       - name: Build the unchanged provider target
         working-directory: provider-source/psc0
         run: lake build psc_kernel_core_provider
-      - name: Retain provider build cache
-        if: ${{ steps.provider-cache.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v4
-        with:
-          path: provider-source/psc0/.lake/build
-          key: ${{ steps.provider-cache.outputs.cache-primary-key }}
       - name: Authenticate provider executable before integration
         run: |
           node --input-type=module <<'NODE'
@@ -129,6 +123,12 @@ jobs:
             leanVersion: '4.34.0', algorithmChanged: false,
           }, null, 2) + '\n');
           NODE
+      - name: Retain provider build cache
+        if: ${{ steps.provider-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: provider-source/psc0/.lake/build
+          key: ${{ steps.provider-cache.outputs.cache-primary-key }}
       - name: Install exact TypeScript 7 for source-host integration
         run: |
           npm install --prefix "$RUNNER_TEMP/psc0-platform-typescript" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2

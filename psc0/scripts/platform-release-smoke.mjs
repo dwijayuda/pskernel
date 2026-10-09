@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -20,6 +20,10 @@ const observations = [];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 let passed = false;
 let failure;
+let tarballSha256 = null;
+let tarballBytes = null;
+let releaseIdentity = null;
+let providerRuntime = null;
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -39,6 +43,9 @@ async function missing(file) {
 }
 
 try {
+  const archive = await readFile(tarball);
+  tarballSha256 = digest(archive);
+  tarballBytes = archive.length;
   await mkdir(path.join(project, 'src'), { recursive: true });
   await writeFile(path.join(project, 'package.json'), JSON.stringify({
     name: 'proofscript-installed-fixture', private: true, type: 'module',
@@ -49,6 +56,7 @@ try {
   const installed = path.join(prefix, 'lib/node_modules/proofscript');
   const command = path.join(prefix, 'bin/psc');
   const release = JSON.parse(await readFile(path.join(installed, 'release.json'), 'utf8'));
+  releaseIdentity = { version: release.version, compiler: release.compiler, kernel: release.kernel, typescriptVersion: release.typescriptVersion };
   const metadata = JSON.parse(await readFile(path.join(installed, 'package.json'), 'utf8'));
   assert.equal(metadata.name, 'proofscript');
   assert.equal(metadata.dependencies.typescript, '7.0.2');
@@ -57,9 +65,12 @@ try {
   const provider = path.join(installed, 'runtime/kernel/linux-x64/psc_kernel_core_provider');
   assert.equal(digest(await readFile(provider)), release.kernel.sha256);
 
-  // The CLI gets only its own bin and Node on PATH. No Lean/lake/npm/tsc fallback
+  // The CLI gets only a dedicated Node symlink directory on PATH. No Lean/lake/npm/tsc fallback
   // can satisfy the package smoke. Build invokes absolute packaged tools.
-  const env = { ...process.env, PATH: path.dirname(process.execPath) };
+  const nodeOnlyPath = path.join(temporary, 'node-only');
+  await mkdir(nodeOnlyPath);
+  await symlink(process.execPath, path.join(nodeOnlyPath, 'node'));
+  const env = { ...process.env, PATH: nodeOnlyPath };
   for (const name of ['PSC0_TSC', 'PSC0_TYPESCRIPT_VERSION', 'PSC_KERNEL_CORE_PROVIDER_BIN',
     'PSC_LEAN_KERNEL_PROVIDER_BIN', 'PSC0_TEST_KERNEL_CORE_PROVIDER_BIN',
     'PSC0_PLATFORM_COMPILER', 'LEAN_PATH', 'LEAN_SRC_PATH', 'ELAN_HOME', 'NODE_PATH',
@@ -145,6 +156,11 @@ try {
     'packaged provider has no unprovided Lean/source/build-path shared library dependency');
   const interpreter = success(run('readelf', ['-l', provider]), 'packaged provider ELF interpreter inspection');
   const versions = success(run('readelf', ['--version-info', provider]), 'packaged provider ABI version inspection');
+  providerRuntime = {
+    linkedLibraries: dependencies.stdout.trim().split('\n').map(line => line.trim()),
+    interpreter: /Requesting program interpreter: ([^\]]+)/u.exec(interpreter.stdout)?.[1] ?? null,
+    requiredGlibcVersions: [...new Set(versions.stdout.match(/GLIBC_[0-9]+(?:\.[0-9]+)+/gu) ?? [])].sort(),
+  };
   await writeFile(path.join(evidence, 'provider-ldd.txt'), dependencies.stdout + dependencies.stderr);
   await writeFile(path.join(evidence, 'provider-elf-program-headers.txt'), interpreter.stdout);
   await writeFile(path.join(evidence, 'provider-abi-versions.txt'), versions.stdout);
@@ -158,7 +174,8 @@ try {
   const result = {
     schemaVersion: 1, kind: 'proofscript-installed-package-qualification',
     sourceRef: process.env.GITHUB_SHA, runId: process.env.GITHUB_RUN_ID,
-    tarballSha256: digest(await readFile(tarball)), nodeVersion: process.version,
+    tarballSha256, tarballBytes, releaseIdentity, providerRuntime,
+    nodeOnlyExecutionPath: true, nodeVersion: process.version,
     platform: process.platform, architecture: process.arch,
     runnerImage: process.env.ImageOS ?? null, runnerImageVersion: process.env.ImageVersion ?? null,
     observations, passed, ...(failure ? { failure } : {}),

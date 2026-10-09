@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { createHash } from 'node:crypto';
 import { createCheckedPreparedSession, leanCheckedIdentity } from './checked-prepared-session.mjs';
 
 const tag = Symbol('Except');
@@ -7,9 +8,24 @@ const ok = value => ({ [tag]: 'ok', value });
 const identity = { protocol: 'pskernel-lean/1', provider: 'lean4-cpp',
   leanVersion: '4.34.0', leanCommit: '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
   profile: 'lean4.34-core', accepted: true };
-function fixture(provider = () => identity) {
-  const calls = []; let prepared;
+const defaultIrOptions = Object.freeze({
+  maxSteps: 5000000n, maxTypeSteps: 65536n, maxFindings: 1000n,
+});
+const makeIrOptions = (maxSteps, maxTypeSteps, maxFindings) =>
+  ({ maxSteps, maxTypeSteps, maxFindings });
+const checkedOptionsApi = {
+  psIrCheckDefaultOptions: defaultIrOptions,
+  psIrCheckOptionsWithLimits: makeIrOptions,
+};
+function fixture(provider = () => identity, configure = () => {}) {
+  const calls = []; const optionCalls = []; let prepared; let constructedOptions;
   const compiler = {
+    ...checkedOptionsApi,
+    psIrCheckOptionsWithLimits(...limits) {
+      optionCalls.push(limits);
+      constructedOptions = makeIrOptions(...limits);
+      return constructedOptions;
+    },
     List: { nil: () => null, cons: (head, tail) => ({ head, tail }) },
     psCompilerPrepareSources(kind, sources) {
       calls.push('prepare-modules');
@@ -25,14 +41,23 @@ function fixture(provider = () => identity) {
     psCompilerAdmissionsFromPrepared(value) {
       assert.equal(value, prepared); calls.push('encode'); return ok(JSON.stringify(value.declarations));
     },
-    psCompilerTypeScriptFromPrepared(value) {
-      assert.equal(value, prepared); calls.push('emit'); return ok('export const answer = 42n;');
+    psCompilerCheckedTypeScriptFromPrepared(options, value) {
+      assert.equal(options, constructedOptions);
+      assert.ok(Object.isFrozen(options));
+      assert.equal(value, prepared);
+      calls.push('checked-emit');
+      return ok('export const answer = 42n;');
+    },
+    psCompilerTypeScriptFromPrepared() {
+      calls.push('raw-emit');
+      throw new Error('raw emission must never be used');
     },
   };
+  configure(compiler);
   const session = createCheckedPreparedSession(compiler, admissions => {
     calls.push('kernel'); return provider(admissions, prepared);
   }, leanCheckedIdentity);
-  return { session, calls, getPrepared: () => prepared };
+  return { session, calls, compiler, optionCalls, getPrepared: () => prepared };
 }
 
 test('module preparation preserves order and checks one combined immutable payload', async () => {
@@ -44,7 +69,7 @@ test('module preparation preserves order and checks one combined immutable paylo
   assert.deepEqual(getPrepared().declarations.map(item => item.value),
     ['def first : Nat := 1', 'def second : Nat := first']);
   assert.equal(session.emit(handle), 'export const answer = 42n;');
-  assert.deepEqual(calls, ['prepare-modules', 'encode', 'kernel', 'encode', 'emit']);
+  assert.deepEqual(calls, ['prepare-modules', 'encode', 'kernel', 'encode', 'checked-emit']);
 });
 
 test('module preparation cannot bypass kernel rejection or use a fallback', async () => {
@@ -62,20 +87,20 @@ test('one preparation; exact checked object reaches emission', async () => {
   const { session, calls } = fixture();
   const checked = await session.check('lean', '42');
   assert.equal(session.emit(checked), 'export const answer = 42n;');
-  assert.deepEqual(calls, ['prepare', 'encode', 'kernel', 'encode', 'emit']);
+  assert.deepEqual(calls, ['prepare', 'encode', 'kernel', 'encode', 'checked-emit']);
   assert.match(checked.canonicalAdmissionsSha256, /^[0-9a-f]{64}$/);
   assert.equal(checked.provider.profile, 'lean4.34-core');
 });
 test('no emission after kernel rejection', async () => {
   const { session, calls } = fixture(() => ({ ...identity, accepted: false, errorKind: 'kernel-rejection' }));
   await assert.rejects(session.check('lean', '42'), /KERNEL_REJECTED/);
-  assert.ok(!calls.includes('emit'));
+  assert.ok(!calls.includes('checked-emit'));
 });
 test('provider failure does not fall back', async () => {
   const { session, calls } = fixture(() => { throw new Error('provider unavailable'); });
   await assert.rejects(session.check('lean', '42'), /provider unavailable/);
   assert.equal(calls.filter(x => x === 'kernel').length, 1);
-  assert.ok(!calls.includes('emit'));
+  assert.ok(!calls.includes('checked-emit'));
 });
 for (const field of ['protocol', 'provider', 'leanVersion', 'leanCommit', 'profile']) {
   test(`reject mismatched ${field}`, async () => {
@@ -107,9 +132,10 @@ test('semantic graph is frozen before checker is called', async () => {
 test('changed canonical output is rejected before emission', async () => {
   let count = 0; const calls = [];
   const compiler = {
+    ...checkedOptionsApi,
     psCompilerPrepareSource: () => ok({ declarations: [] }),
     psCompilerAdmissionsFromPrepared: () => ok(String(count++)),
-    psCompilerTypeScriptFromPrepared: () => { calls.push('emit'); return ok('bad'); },
+    psCompilerCheckedTypeScriptFromPrepared: () => { calls.push('checked-emit'); return ok('bad'); },
   };
   const session = createCheckedPreparedSession(compiler, () => identity, leanCheckedIdentity);
   const checked = await session.check('lean', '42');
@@ -119,9 +145,10 @@ test('changed canonical output is rejected before emission', async () => {
 test('malformed frontend result fails before checker', async () => {
   let called = false;
   const compiler = {
+    ...checkedOptionsApi,
     psCompilerPrepareSource: () => ({ value: {} }),
     psCompilerAdmissionsFromPrepared: () => ok(''),
-    psCompilerTypeScriptFromPrepared: () => ok(''),
+    psCompilerCheckedTypeScriptFromPrepared: () => ok(''),
   };
   const session = createCheckedPreparedSession(compiler, () => { called = true; return identity; });
   await assert.rejects(session.check('lean', ''), /RESULT_SHAPE/);
@@ -132,4 +159,104 @@ test('source text is a value, not a file read between check and emit', async () 
   let source = 'original'; const checked = await session.check('lean', source);
   source = 'changed'; session.emit(checked);
   assert.equal(getPrepared().declarations[0].value, 'original');
+});
+
+test('checked emission constructs own-compiler options and returns exact scoped evidence', async () => {
+  const { session, calls, optionCalls } = fixture();
+  const handle = await session.check('lean', '42');
+  const result = session.emitChecked(handle);
+  assert.deepEqual(optionCalls, [[5000000n, 65536n, 1000n]]);
+  assert.deepEqual(calls, ['prepare', 'encode', 'kernel', 'encode', 'checked-emit']);
+  assert.equal(result.typeScript, 'export const answer = 42n;');
+  assert.equal(result.validation.kind, 'psc0-runtime-ir-checked-emission');
+  assert.equal(result.validation.emitter, 'psCompilerCheckedTypeScriptFromPrepared');
+  assert.equal(result.validation.sourceSha256, handle.sourceSha256);
+  assert.equal(result.validation.canonicalAdmissionsSha256, handle.canonicalAdmissionsSha256);
+  assert.equal(result.validation.typeScriptSha256,
+    createHash('sha256').update(result.typeScript, 'utf8').digest('hex'));
+  assert.equal(result.validation.runtimeIrTypingAccepted, true);
+  assert.equal(result.validation.traversalComplete, true);
+  assert.equal(result.validation.sameOriginalIrCheckedBeforeEmission, true);
+  assert.equal(result.validation.strictSh1Qualified, false);
+  assert.equal(result.validation.semanticContractQualified, false);
+  assert.deepEqual(result.validation.options, {
+    maxSteps: 5000000, maxTypeSteps: 65536, maxFindings: 1000,
+  });
+  assert.doesNotThrow(() => JSON.stringify(result.validation));
+  assert.ok(Object.isFrozen(result));
+  assert.ok(Object.isFrozen(result.validation));
+  assert.ok(Object.isFrozen(result.validation.options));
+  assert.throws(() => { result.typeScript = 'changed'; }, TypeError);
+  assert.throws(() => { result.validation.runtimeIrTypingAccepted = false; }, TypeError);
+  assert.throws(() => { result.validation.options.maxSteps = 1; }, TypeError);
+  assert.throws(() => session.emitChecked(result.validation), /UNCHECKED_MODULE/);
+});
+
+test('missing checked emitter cannot fall back to the raw compiler API', () => {
+  assert.throws(() => fixture(undefined, compiler => {
+    delete compiler.psCompilerCheckedTypeScriptFromPrepared;
+  }), /CHECKED_API_MISSING: psCompilerCheckedTypeScriptFromPrepared/);
+});
+
+test('checked options must use the compiler factory', () => {
+  assert.throws(() => fixture(undefined, compiler => {
+    delete compiler.psIrCheckOptionsWithLimits;
+  }), /CHECKED_API_MISSING: psIrCheckOptionsWithLimits/);
+});
+
+for (const [label, defaults] of [
+  ['missing record', undefined],
+  ['null record', null],
+  ['number carrier', { ...defaultIrOptions, maxSteps: 1 }],
+  ['negative limit', { ...defaultIrOptions, maxTypeSteps: -1n }],
+  ['unsafe evidence count', { ...defaultIrOptions, maxFindings: BigInt(Number.MAX_SAFE_INTEGER) + 1n }],
+]) {
+  test('malformed default IR limits refuse before preparation: ' + label, () => {
+    assert.throws(() => fixture(undefined, compiler => {
+      compiler.psIrCheckDefaultOptions = defaults;
+    }), /CHECKED_IR_OPTIONS_DEFAULTS/);
+  });
+}
+
+test('an options factory cannot silently change the recorded checking limits', () => {
+  assert.throws(() => fixture(undefined, compiler => {
+    compiler.psIrCheckOptionsWithLimits = (...limits) => ({
+      ...makeIrOptions(...limits), maxSteps: 1n,
+    });
+  }), /CHECKED_IR_OPTIONS_RESULT: maxSteps/);
+});
+
+test('checked emitter rejection produces neither output nor validation and has no fallback', async () => {
+  let attempted = 0;
+  const { session, calls } = fixture(undefined, compiler => {
+    compiler.psCompilerCheckedTypeScriptFromPrepared = () => {
+      attempted++;
+      return { [tag]: 'error', error: { reason: 'runtime IR rejected' } };
+    };
+  });
+  const handle = await session.check('lean', '42');
+  assert.throws(() => session.emitChecked(handle), /CHECKED_EMIT_FAILED/);
+  assert.throws(() => session.emit(handle), /CHECKED_EMIT_FAILED/);
+  assert.equal(attempted, 2);
+  assert.ok(!calls.includes('raw-emit'));
+});
+
+test('an accepted flag or malformed result cannot substitute for checked output', async () => {
+  const { session, calls } = fixture(undefined, compiler => {
+    compiler.psCompilerCheckedTypeScriptFromPrepared = () =>
+      ok({ accepted: true, traversalComplete: true, typeScript: 'unchecked' });
+  });
+  const handle = await session.check('lean', '42');
+  assert.throws(() => session.emitChecked(handle), /CHECKED_EMIT_RESULT_SHAPE/);
+  assert.ok(!calls.includes('raw-emit'));
+});
+
+test('validation-returning emission retains private handle and admission readback checks', async () => {
+  const { session, compiler, calls } = fixture();
+  const handle = await session.check('lean', '42');
+  assert.throws(() => session.emitChecked({ ...handle }), /UNCHECKED_MODULE/);
+  assert.throws(() => fixture().session.emitChecked(handle), /UNCHECKED_MODULE/);
+  compiler.psCompilerAdmissionsFromPrepared = () => ok('changed');
+  assert.throws(() => session.emitChecked(handle), /CHECKED_PAYLOAD_CHANGED/);
+  assert.ok(!calls.includes('checked-emit'));
 });

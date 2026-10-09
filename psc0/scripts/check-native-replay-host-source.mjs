@@ -11,7 +11,21 @@ for (const marker of ['psCompilerAdmissionsFromPrepared prepared',
 }
 const host = await readFile(new URL('../host/src/Ps/Host/TypeScriptCompiler.lean', import.meta.url), 'utf8');
 assert(!host.includes('"npx"') && !host.includes('"npx.cmd"'));
-assert(host.includes('IO.FS.realPath candidate'));
-assert(host.includes('endsWith "/typescript/bin/tsc"'));
-assert(host.includes('cmd := "node"'));
-console.log('PSC2_NATIVE_REPLAY_HOST_SOURCE: PASS (installed TypeScript entry, exact payload transport and emission integrity)');
+for (const marker of ['IO.getEnv "PSC0_TSC"', 'IO.getEnv "PSC0_TYPESCRIPT_VERSION"',
+  'psTypeScriptInstalledLauncher (System.FilePath.mk override)',
+  'psJsonGetField metadata "name"', 'psJsonGetField metadata "bin"',
+  'psJsonGetField bins "tsc"', 'IO.FS.FileType.file',
+  'IO.FS.withFile launcher .read', 'PSC0_TYPESCRIPT_CLI_OVERRIDE',
+  'if raw != "Version " ++ expected then',
+  'if version == "7.0.2" then #["--ignoreConfig"] ++ args else args',
+  'cmd := "node"']) {
+  assert(host.includes(marker), 'missing installed TypeScript profile guard: ' + marker);
+}
+assert(!host.includes('endsWith "/typescript/bin/tsc"'), 'installed package metadata must select the launcher');
+const compile = host.slice(host.indexOf('def psCompileTypeScriptFile'),
+  host.indexOf('def psWriteAndCompileTypeScript'));
+const verify = compile.indexOf('let version ← psTypeScriptVerifyVersion cli expected');
+assert(verify >= 0 && verify < compile.indexOf('let output ← IO.Process.output'),
+  'the selected launcher must report the exact profile version before compilation');
+assert(!compile.includes('← psTypeScriptVersion'), 'compilation must retain its already verified launcher and version');
+console.log('PSC2_NATIVE_REPLAY_HOST_SOURCE: PASS (installed TypeScript profiles, exact payload transport and emission integrity)');

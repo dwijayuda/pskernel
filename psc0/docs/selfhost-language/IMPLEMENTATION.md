@@ -9,8 +9,9 @@ A remains the selected recoverable authoring seed. The canonical implementation
 branch is `psc0/sh1-implementation-v1`; E was qualified independently on
 `psc0/sh1-generic-erasure-v1` before fast-forward integration.
 
-This document supplements [SPEC.md](SPEC.md). Strict runtime profile activation
-remains pending M6 enforcement. Exact source identities, original receipts and
+This document supplements [SPEC.md](SPEC.md). The M6 runtime IR checker and
+TypeScript 7 migration have separate qualification checkpoints. Strict runtime
+profile activation also requires the remaining contracts in SPEC.md. Exact source identities, original receipts and
 cloud outcomes are indexed in [qualification-evidence.json](qualification-evidence.json).
 
 ## Implemented capability
@@ -95,10 +96,15 @@ iteration corpus through that compiler. From `psc0`:
 npm run dev:sh1
 ```
 
-This runs `lake build psc1` followed by
+This runs `lake build psc1 psc1_ir_check_tests` followed by
 `node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1`.
-TypeScript 5.8.3 must be available to the existing resolver or on `PATH`; CI
-installs an isolated pinned copy.
+On the TypeScript 7 migration branch, current compilation requires TypeScript
+7.0.2. Install the `psc0` development dependency or provide the installed
+launcher through `PSC0_TSC`; `PSC0_TYPESCRIPT_VERSION` defaults to `7.0.2`.
+CI installs separate exact current and historical profiles. The historical
+recovery commands require `5.8.3` and its matching launcher; source manifests
+and recovery product hashes retain that version. See [TYPESCRIPT7.md](TYPESCRIPT7.md)
+for scope, profile selection and the qualification evidence boundary.
 
 The first execution of this gate at
 `9641928bcf7d5394f46e19a31a8ae3fd096d44b5` passed in

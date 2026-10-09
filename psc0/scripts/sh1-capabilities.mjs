@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { expectedTypeScriptVersion, typeScriptProfileArgs } from './typescript-cli.mjs';
 
 export function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -54,15 +55,15 @@ export function runCommand(command, args, options = {}) {
   return result;
 }
 
-export async function compileTypeScript(source, directory, tsc, cwd) {
+export async function compileTypeScript(source, directory, tsc, cwd, version = expectedTypeScriptVersion()) {
   await mkdir(directory, { recursive: true });
   const input = path.join(directory, 'index.ts');
   await writeFile(input, source, 'utf8');
-  runCommand(process.execPath, [
-    tsc, input, '--target', 'ES2022', '--module', 'ES2022',
+  runCommand(process.execPath, [tsc, ...typeScriptProfileArgs([
+    input, '--target', 'ES2022', '--module', 'ES2022',
     '--moduleResolution', 'bundler', '--strict', '--declaration',
     '--sourceMap', '--noEmitOnError', '--skipLibCheck', '--pretty', 'false',
-  ], { cwd, timeout: 120000 });
+  ], version)], { cwd, timeout: 120000 });
   return path.join(directory, 'index.js');
 }
 

@@ -3,29 +3,18 @@ import './native-workspace-isolation.test.mjs';
 import './native-typescript-cli.test.mjs';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
-import { existsSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { expectedTypeScriptVersion, resolveTypeScriptCli, typeScriptProfileArgs } from './typescript-cli.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
-let tsc;
-try { tsc = require.resolve('typescript/bin/tsc'); } catch {
-  for (const directory of (process.env.PATH ?? '').split(path.delimiter)) {
-    for (const file of [path.join(directory, 'tsc'), path.join(directory, 'node_modules/typescript/bin/tsc'),
-      ...(path.basename(directory) === '.bin' ? [path.join(directory, '../typescript/bin/tsc')] : [])]) {
-      if (existsSync(file)) {
-        const resolved = realpathSync(file);
-        if (resolved.replaceAll('\\', '/').endsWith('/typescript/bin/tsc')) tsc = resolved;
-      }
-    }
-    if (tsc) break;
-  }
-}
-assert(tsc, 'TypeScript 5.8.3 must be installed locally or available on PATH');
-assert.equal(execFileSync(process.execPath, [tsc, '--version'], { encoding: 'utf8' }).trim(), 'Version 5.8.3');
+const expectedVersion = expectedTypeScriptVersion();
+const tsc = resolveTypeScriptCli();
+assert.equal(execFileSync(process.execPath, [tsc, '--version'], { encoding: 'utf8' }).trim(),
+  'Version ' + expectedVersion);
 const compiler = path.join(root, '.lake/build/bin', process.platform === 'win32' ? 'psc1.exe' : 'psc1');
 const staging = await mkdtemp(path.join(tmpdir(), 'psc2-replay-runtime-'));
 try {
@@ -35,7 +24,11 @@ try {
     });
     const input = path.join(staging, `${fixture}.ts`);
     await writeFile(input, source);
-    execFileSync(process.execPath, [tsc, input, '--strict', '--target', 'ES2022', '--module', 'commonjs'], {
+    // TS7 permits CommonJS with bundler resolution; keep TS5 recovery arguments unchanged.
+    execFileSync(process.execPath, [tsc, ...typeScriptProfileArgs([
+      input, '--strict', '--target', 'ES2022', '--module', 'commonjs',
+      ...(expectedVersion === '7.0.2' ? ['--moduleResolution', 'bundler'] : []),
+    ], expectedVersion)], {
       encoding: 'utf8', timeout: 120000,
     });
     const compiled = require(path.join(staging, `${fixture}.js`));

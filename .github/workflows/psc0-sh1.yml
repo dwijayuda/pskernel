@@ -2,7 +2,7 @@ name: PSC0 SH1 language qualification
 
 on:
   push:
-    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1']
+    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1']
     paths:
       - 'psc0/packages/bootstrap/**'
       - 'psc0/packages/foundation/**'
@@ -87,13 +87,52 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
-      - name: Install isolated pinned TypeScript
+      - name: Install separate pinned current and historical TypeScript profiles
+        id: typescript
         shell: bash
         run: |
-          npm install --prefix "$RUNNER_TEMP/psc0-sh1-tools" --ignore-scripts --no-package-lock --no-audit --no-fund typescript@5.8.3
-          echo "$RUNNER_TEMP/psc0-sh1-tools/node_modules/.bin" >> "$GITHUB_PATH"
+          npm install --prefix "$RUNNER_TEMP/psc0-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+          npm install --prefix "$RUNNER_TEMP/psc0-typescript-5.8.3" --ignore-scripts --save-exact --no-audit --no-fund typescript@5.8.3
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { appendFileSync, copyFileSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
+          import path from 'node:path';
+          import { createRequire } from 'node:module';
+          import { spawnSync } from 'node:child_process';
+          const require = createRequire(import.meta.url);
+          const directory = path.resolve('dist/typescript-profile/install');
+          mkdirSync(directory, { recursive: true });
+          for (const [profile, version] of [['current', '7.0.2'], ['historical', '5.8.3']]) {
+            const prefix = path.join(process.env.RUNNER_TEMP, 'psc0-typescript-' + version);
+            const manifestPath = require.resolve('typescript/package.json', { paths: [prefix] });
+            const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+            assert.equal(manifest.name, 'typescript');
+            assert.equal(manifest.version, version);
+            const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;
+            assert.equal(typeof bin, 'string', 'PSC0_TYPESCRIPT_BIN_METADATA');
+            const launcher = realpathSync(path.resolve(path.dirname(manifestPath), bin));
+            const result = spawnSync(process.execPath, [launcher, '--version'], { encoding: 'utf8' });
+            assert.equal(result.status, 0, result.stderr);
+            assert.equal(result.stdout.trim(), 'Version ' + version);
+            appendFileSync(process.env.GITHUB_OUTPUT, profile + '-cli=' + launcher + '\n');
+            copyFileSync(path.join(prefix, 'package-lock.json'), path.join(directory, profile + '-package-lock.json'));
+            copyFileSync(manifestPath, path.join(directory, profile + '-package.json'));
+            if (profile === 'current') {
+              appendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=' + version + '\n');
+              appendFileSync(process.env.GITHUB_PATH, path.join(prefix, 'node_modules/.bin') + '\n');
+            } else {
+              appendFileSync(process.env.GITHUB_OUTPUT, 'historical-path=' + path.join(prefix, 'node_modules/.bin') + path.delimiter + process.env.PATH + '\n');
+            }
+          }
+          NODE
+      - name: Verify the installed TypeScript 7 profile before compiler generation
+        run: node scripts/check-typescript-profile.mjs --out dist/typescript-profile/contract
       - name: Verify host syntax and bootstrap source restrictions
         run: |
+          node --check scripts/typescript-cli.mjs
+          node --check scripts/check-typescript-profile.mjs
+          node --check scripts/native-typescript-cli.test.mjs
+          node scripts/check-native-replay-host-source.mjs
           node --check scripts/sh1-qualify.mjs
           node --check scripts/sh1-capabilities.mjs
           node --check scripts/sh1-check-admissions.mjs
@@ -145,6 +184,10 @@ jobs:
           path: historical-source/psc0/.lake/build
           key: psc0-sh1-historical-lake-v1-${{ runner.os }}-${{ runner.arch }}-37f63c39d4a07189938046c64152bba25d789450
       - name: Identify the pinned recovery recipe and toolchain
+        env:
+          PSC0_TSC: ${{ steps.typescript.outputs.historical-cli }}
+          PSC0_TYPESCRIPT_VERSION: '5.8.3'
+          PATH: ${{ steps.typescript.outputs.historical-path }}
         if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' }}
         id: seed-identity
         run: node scripts/sh1-qualify.mjs seed-identity --source ../historical-source/psc0
@@ -156,6 +199,10 @@ jobs:
           path: psc0/.selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
           key: psc0-sh1-seed-v1-${{ steps.seed-identity.outputs.identity }}
       - name: Verify seed digests or recover once from the preserved source
+        env:
+          PSC0_TSC: ${{ steps.typescript.outputs.historical-cli }}
+          PSC0_TYPESCRIPT_VERSION: '5.8.3'
+          PATH: ${{ steps.typescript.outputs.historical-path }}
         if: ${{ steps.seed-cache-check.outputs.needs-historical == 'true' }}
         run: node scripts/sh1-qualify.mjs recover-seed --source ../historical-source/psc0 --out .selfhost-seeds/37f63c39d4a07189938046c64152bba25d789450
       - name: Retain historical native outputs before testing changed source
@@ -187,6 +234,10 @@ jobs:
           path: qualified-source
           sparse-checkout: psc0
       - name: Verify or recover the selected qualified authoring seed
+        env:
+          PSC0_TSC: ${{ steps.typescript.outputs.historical-cli }}
+          PSC0_TYPESCRIPT_VERSION: '5.8.3'
+          PATH: ${{ steps.typescript.outputs.historical-path }}
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' && steps.seed-selection.outputs.mode == 'qualified' }}
         run: node scripts/sh1-qualify.mjs recover-qualified-seed --source ../qualified-source/psc0 --artifact ../qualified-artifact/dist/sh1 --out dist/sh1-seed-recovery
       - name: Report retained seed IR type-argument findings
@@ -232,14 +283,22 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: psc0/.lake/build
-          key: psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-${{ github.sha }}
+          key: psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-ts7.0.2-${{ github.sha }}
           restore-keys: |
             psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
       - name: Build current native compiler
         id: native
         run: lake build psc1 psc1_ir_check_tests
+      - name: Verify native and generated TypeScript CLI boundaries
+        run: |
+          node scripts/selfhost-replay-runtime.test.mjs
+          node scripts/checked-erasure-name-index.test.mjs
       - name: Run the bounded native development gate before qualification
+        id: native-gate
         run: node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out ${{ steps.seed-selection.outputs.full-qualification == 'true' && 'dist/sh1/development' || 'dist/sh1' }}
+      - name: Compare TypeScript 5 and 7 on the same complete emitted compiler
+        if: ${{ !cancelled() && steps.native-gate.outcome != 'skipped' }}
+        run: node scripts/check-typescript-profile.mjs --out dist/typescript-profile/full-compiler --source ${{ steps.seed-selection.outputs.full-qualification == 'true' && 'dist/sh1/development/N1/index.ts' || 'dist/sh1/N1/index.ts' }} --historical-tsc ${{ steps.typescript.outputs.historical-cli }}
       - name: Build the selected-seed candidate before full qualification
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
         run: node scripts/sh1-qualify.mjs candidate --seed ${{ steps.seed-selection.outputs.compiler-path }} --out dist/sh1 --native .lake/build/bin/psc1
@@ -263,11 +322,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: psc0-sh1-${{ github.sha }}
+          name: psc0-sh1-ts7.0.2-${{ github.sha }}
           path: |
             psc0/dist/sh1
             psc0/.selfhost-seeds
             psc0/dist/sh1-seed-recovery
+            psc0/dist/typescript-profile
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 30
@@ -314,7 +374,7 @@ jobs:
       - name: Read exact compiler qualification artifacts from this run
         uses: actions/download-artifact@v4
         with:
-          name: psc0-sh1-${{ github.sha }}
+          name: psc0-sh1-ts7.0.2-${{ github.sha }}
           path: qualification-artifacts
       - name: Obtain actual provider decisions for the qualified admission streams
         working-directory: psc0
@@ -323,7 +383,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: psc0-sh1-kernel-${{ github.sha }}
+          name: psc0-sh1-kernel-ts7.0.2-${{ github.sha }}
           path: qualification-artifacts/dist/sh1/kernel-admissions.json
           if-no-files-found: ignore
           retention-days: 30

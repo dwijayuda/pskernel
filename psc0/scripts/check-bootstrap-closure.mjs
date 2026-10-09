@@ -9,6 +9,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { expectedTypeScriptVersion } from "./typescript-cli.mjs";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
 import { bootstrapManifestSchemaVersion } from "./bootstrap-manifest.mjs";
 import {
@@ -345,7 +346,8 @@ if (
 ) {
   process.stdout.write("PSC2_FIXED_POINT_SOURCE_ISOLATION: PASS (14 production-CLI cases; compiler/tsc test doubles)\n");
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-  const toolPrefix = path.join("/tmp", "psc2-fixed-point-tools");
+  const typescriptVersion = expectedTypeScriptVersion();
+  const toolPrefix = path.join("/tmp", "psc2-fixed-point-tools-" + typescriptVersion);
   const install = spawnSync(
     npm,
     [
@@ -354,7 +356,7 @@ if (
       toolPrefix,
       "--no-audit",
       "--no-fund",
-      "typescript@5.8.3",
+      "typescript@" + typescriptVersion,
     ],
     { cwd: root, stdio: "inherit", encoding: "utf8" },
   );
@@ -380,6 +382,11 @@ if (
   await auditSelfhostReplay();
 
   const toolBin = path.join(toolPrefix, "node_modules", ".bin");
+  const toolPackageDirectory = path.join(toolPrefix, "node_modules", "typescript");
+  const toolPackage = JSON.parse(await readFile(path.join(toolPackageDirectory, "package.json"), "utf8"));
+  if (toolPackage.name !== "typescript" || toolPackage.version !== typescriptVersion ||
+      typeof toolPackage.bin?.tsc !== "string") throw new Error("PSC0_TYPESCRIPT_INSTALLED_PROFILE");
+  const toolCli = path.resolve(toolPackageDirectory, toolPackage.bin.tsc);
   const fixedPoint = spawnSync(
     npm,
     ["run", "fixed-point"],
@@ -390,6 +397,8 @@ if (
       env: {
         ...process.env,
         PATH: `${toolBin}${path.delimiter}${process.env.PATH ?? ""}`,
+        PSC0_TSC: toolCli,
+        PSC0_TYPESCRIPT_VERSION: typescriptVersion,
         PSC2_FIXED_POINT_PROBE_ACTIVE: "1",
       },
     },

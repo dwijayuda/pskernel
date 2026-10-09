@@ -128,9 +128,10 @@
     "generation:next": "node scripts/selfhost-generation.mjs",
     "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs",
     "dev:sh1": "lake build psc1 psc1_ir_check_tests && node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1",
-    "iterate:sh1": "node scripts/sh1-iterate.mjs"
+    "iterate:sh1": "node scripts/sh1-iterate.mjs",
+    "check:typescript-profile": "node scripts/check-typescript-profile.mjs --out dist/typescript-profile"
   },
   "devDependencies": {
-    "typescript": "5.8.3"
+    "typescript": "7.0.2"
   }
 }

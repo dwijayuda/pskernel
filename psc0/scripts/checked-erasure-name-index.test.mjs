@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { resolveTypeScriptCli } from './typescript-cli.mjs';
+import { expectedTypeScriptVersion, resolveTypeScriptCli, typeScriptProfileArgs } from './typescript-cli.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const seed=path.join(root,'.lake/build/bin/psc1'+(process.platform==='win32'?'.exe':''));
@@ -26,8 +26,13 @@ test('generated erasure indexes preserve collisions, structured names, precedenc
     await writeFile(input,source);await writeFile(path.join(dir,'package.json'),'{"type":"module"}');
     const output=execFileSync(seed,['typescript',input],{encoding:'utf8',timeout:60000,maxBuffer:8*1024*1024});
     await writeFile(ts,output);
+    const expectedVersion=expectedTypeScriptVersion();
     const compiler=resolveTypeScriptCli();
-    execFileSync(process.execPath,[compiler,'--strict','--target','ES2022','--module','ES2022','--outDir',dir,ts],{encoding:'utf8',timeout:60000});
+    assert.equal(execFileSync(process.execPath,[compiler,'--version'],{encoding:'utf8',timeout:10000}).trim(),'Version '+expectedVersion);
+    execFileSync(process.execPath,[compiler,...typeScriptProfileArgs([
+      '--strict','--target','ES2022','--module','ES2022',
+      ...(expectedVersion==='7.0.2'?['--moduleResolution','bundler']:[]),
+      '--outDir',dir,ts],expectedVersion)],{encoding:'utf8',timeout:60000});
     const m=await import(pathToFileURL(path.join(dir,'index.js')).href);
     assert.equal(m.erasureScopeCollision(7n),16n, 'local output names must not capture a qualified declaration');
     const tag=x=>x?.[Object.getOwnPropertySymbols(x??{})[0]],N=s=>m.PsName.str(m.PsName.anonymous,s);

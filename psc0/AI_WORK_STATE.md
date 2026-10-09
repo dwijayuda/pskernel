@@ -96,14 +96,27 @@ name scan detects possible capture; ordinary const blocks remain unchanged.
 The tail optimizer declines the same case, retaining the corrected generator
 path. Focused coverage includes a yielding initializer, an initializer closure
 capturing the outer value, and nested shadowing through deep recursion.
-No checker rule is weakened and the original fixture remains intact. Full
-generated conformance, C1/C2/C3 and provider qualification remain pending.
+No checker rule is weakened and the original fixture remains intact. The TypeScript 5.8.3 repair baseline at
+`1b5fd12382c920944924c9d03e0851984293caa2` has passed the native development
+and selected-seed C1 gates in [run 37906602597](https://github.com/dwijayuda/pskernel/actions/runs/37906602597).
+Current-source C2/C3 and provider qualification remain pending.
 
-The user also authorized a possible TypeScript 7.0.2 upgrade. Audit and staging
-are separate from the running 5.8.3 baseline. Keep historical S0/A recovery on its
-recorded 5.8.3 toolchain; scope current CLI changes to psc0, because the repository's
-separate root workspace uses the JavaScript compiler API. Record both toolchain
-identities and measure the TypeScript phase before claiming an iteration speedup.
+The user also authorized a possible TypeScript 7.0.2 upgrade. The isolated
+`psc0/typescript-7-v1` branch starts at the M6 emitter repair checkpoint
+`1b5fd12382c920944924c9d03e0851984293caa2`. Current CLI integration is staged
+with exact `PSC0_TSC` and `PSC0_TYPESCRIPT_VERSION` profiles. Historical S0/A
+recovery retains 5.8.3 and its existing identity; current emission uses 7.0.2.
+The separate root workspace still uses the older compiler API and remains on
+5.8.3. Actual installed-package, native-CLI and same-source TypeScript comparison
+gates precede expensive current-source qualification. The standalone
+package/CLI availability check passed on its first execution in
+[run 37907973917](https://github.com/dwijayuda/pskernel/actions/runs/37907973917)
+at `cb0a9d012c66e3e02e2391562243912a0e8700d4`. Full current-source native,
+generated, fixed-point and provider outcomes remain pending cloud evidence.
+Cache/artifact reuse also recompiles authenticated A TypeScript with 5.8.3 and
+requires the exact original JavaScript hash before current qualification proceeds.
+See [TYPESCRIPT7.md](docs/selfhost-language/TYPESCRIPT7.md).
+Do not claim a speedup before comparing the measured TypeScript phase.
 
 ## Current source and qualification checkpoints
 

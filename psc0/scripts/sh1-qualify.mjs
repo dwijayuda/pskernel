@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { appendFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -15,7 +16,7 @@ import {
   readSelectedSeed, qualifiedSeedIdentity, validateQualifiedSeedManifest,
   makeQualifiedSeedManifest, verifyQualifiedSeedCache, materializeQualifiedSeed,
 } from './sh1-seed-manifest.mjs';
-import { resolveTypeScriptCli } from './typescript-cli.mjs';
+import { resolveTypeScriptCli, expectedTypeScriptVersion, typeScriptProfileArgs } from './typescript-cli.mjs';
 import { createGeneratedPreparationSession } from './generated-preparation-session.mjs';
 import { inventoryOriginalIr } from './original-ir-inventory.mjs';
 import { runIrCheckerConformance, runNativeIrCheckerConformance } from './sh1-ir-checker-conformance.mjs';
@@ -37,7 +38,17 @@ const historicalRecipe = Object.freeze({
   artifacts: ['index.ts', 'index.js', 'index.d.ts', 'index.js.map'],
   leanGitHash: '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
 });
+const [command, ...args] = process.argv.slice(2);
+const historicalCommands = new Set(['seed-identity', 'recover-seed', 'recover-qualified-seed']);
+const typescriptVersion = expectedTypeScriptVersion();
+assert.equal(typescriptVersion, historicalCommands.has(command) ? '5.8.3' : '7.0.2',
+  'PSC0_SH1_TYPESCRIPT_PROFILE: recovery requires 5.8.3; current qualification requires 7.0.2');
 const tsc = resolveTypeScriptCli();
+const typescriptProfile = Object.freeze({
+  version: typescriptVersion,
+  purpose: historicalCommands.has(command) ? 'historical-seed-recovery' : 'current-emission',
+  arguments: typeScriptProfileArgs([], typescriptVersion),
+});
 
 function capture(command, args, cwd = root) {
   return runCommand(command, args, {
@@ -45,7 +56,7 @@ function capture(command, args, cwd = root) {
   }).stdout.trim();
 }
 
-assert.equal(capture(process.execPath, [tsc, '--version']), 'Version 5.8.3',
+assert.equal(capture(process.execPath, [tsc, '--version']), 'Version ' + typescriptVersion,
   'PSC0_SH1_TYPESCRIPT_PIN');
 
 async function writeJson(file, value) {
@@ -75,7 +86,7 @@ async function toolchainIdentity() {
 async function recipeIdentity() {
   const files = [
     'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs',
-    'scripts/typescript-cli.mjs', 'scripts/workspace-layout.mjs',
+    'scripts/typescript-cli.mjs', 'scripts/check-typescript-profile.mjs', 'scripts/workspace-layout.mjs',
     'scripts/generated-preparation-session.mjs', 'scripts/original-ir-inventory.mjs',
     'scripts/original-ir-carrier.mjs', 'scripts/sh1-ir-checker-conformance.mjs',
     'test/IrCheckerTests.lean',
@@ -95,7 +106,23 @@ async function recipeIdentity() {
   return { files: contents, sha256: sha256(JSON.stringify(contents)) };
 }
 
-async function historicalIdentity(sourceRoot) {
+function executionRuntime(toolchain) {
+  const { typescript, ...runtime } = toolchain;
+  return runtime;
+}
+
+async function verifySeedExecutionRuntime(producerToolchain) {
+  assert.equal(producerToolchain?.typescript, 'Version 5.8.3',
+    'PSC0_SH1_SEED_PRODUCER_TYPESCRIPT_PIN');
+  assert.deepEqual(executionRuntime(await toolchainIdentity()), executionRuntime(producerToolchain),
+    'PSC0_SH1_SELECTED_SEED_EXECUTION_RUNTIME');
+}
+
+async function historicalIdentity(sourceRoot, producerToolchain) {
+  // Authenticating existing seed bytes uses their recorded producer toolchain.
+  // Rebuilding those bytes still requires the actual original TypeScript CLI.
+  if (producerToolchain) await verifySeedExecutionRuntime(producerToolchain);
+  else assert.equal(typescriptVersion, '5.8.3', 'PSC0_SH1_HISTORICAL_RECOVERY_TYPESCRIPT_PIN');
   assert.equal(capture('git', ['rev-parse', 'HEAD'], sourceRoot), historicalRef,
     'PSC0_SH1_HISTORICAL_REF');
   assert.equal(capture('git', ['rev-parse', 'HEAD:psc0'], sourceRoot), historicalTree,
@@ -118,7 +145,7 @@ async function historicalIdentity(sourceRoot) {
     sourceRef: historicalRef,
     sourceTree: historicalTree,
     sourceClosureSha256: closure.sha256,
-    toolchain: await toolchainIdentity(),
+    toolchain: producerToolchain ?? await toolchainIdentity(),
     recipe: historicalRecipe,
   };
   assert.equal(identity.toolchain.leanGitHash, historicalRecipe.leanGitHash,
@@ -188,17 +215,21 @@ async function selectedAuthoringSeed(compilerOverride) {
   let expectedSha256;
   let identitySha256;
   let sourceClosureSha256;
+  let producerToolchain;
   if (selected.mode === 'qualified') {
-    assert.deepEqual(await toolchainIdentity(), selected.manifest.toolchain,
-      'PSC0_SH1_SELECTED_SEED_TOOLCHAIN');
+    await verifySeedExecutionRuntime(selected.manifest.toolchain);
     expectedSha256 = selected.manifest.expectedArtifacts.javascriptSha256;
     identitySha256 = selected.identitySha256;
     sourceClosureSha256 = selected.manifest.sourceClosureSha256;
+    producerToolchain = selected.manifest.toolchain;
   } else {
     // An explicit --seed override must still be the verified historical seed.
     // Its claimed ancestry cannot be inferred from the supplied filename.
-    const historical = await historicalIdentity(path.resolve(root, '../historical-source/psc0'));
     const directory = path.dirname(path.resolve(root, selected.compilerPath));
+    const recordedReceipt = JSON.parse(await readFile(path.join(directory, 'seed.json'), 'utf8'));
+    producerToolchain = recordedReceipt.identity?.toolchain;
+    assert(producerToolchain, 'PSC0_SH1_HISTORICAL_PRODUCER_TOOLCHAIN_REQUIRED');
+    const historical = await historicalIdentity(path.resolve(root, '../historical-source/psc0'), producerToolchain);
     const receipt = await verifyHistoricalSeedReceipt(directory, historical);
     expectedSha256 = receipt.artifacts['index.js'];
     identitySha256 = historical.identitySha256;
@@ -216,6 +247,8 @@ async function selectedAuthoringSeed(compilerOverride) {
       identitySha256,
       independentAlgorithm: selected.mode === 'historical',
       priorQualification: selected.manifest?.qualification ?? null,
+      producerToolchain,
+      executionRuntime: executionRuntime(await toolchainIdentity()),
     },
   };
 }
@@ -274,7 +307,7 @@ async function buildGeneration(compilerPath, closure, outDir, {
   // from emission of this exact original IR object.
   const typeScript = unwrap(compiler.psTsEmitModule(ir), 'EMIT');
   const emitDone = performance.now();
-  const outputJs = await compileTypeScript(typeScript, outDir, tsc, root);
+  const outputJs = await compileTypeScript(typeScript, outDir, tsc, root, typescriptVersion);
   const javascript = await readFile(outputJs);
   await writeJson(path.join(outDir, 'original-ir-inventory.json'), irInventory);
   await writeFile(path.join(outDir, 'admissions.json'), admissions);
@@ -292,6 +325,7 @@ async function buildGeneration(compilerPath, closure, outDir, {
     language: { implementation: 'PSC1', candidateCapability: 'PSC0-SH/1 structural state generalization' },
     recipe: await recipeIdentity(),
     toolchain: await toolchainIdentity(),
+    typescriptProfile,
     artifacts: {
       canonicalSurfaceSourceSha256: sha256(canonicalText),
       normalizedCanonicalAdmissionsSha256: sha256(admissions),
@@ -432,6 +466,68 @@ async function sessionConformance(seedPath, candidatePath, outDir, {
 }
 
 
+async function verifySelectedSeedTypeScript(directory, manifest, outDir) {
+  assert.equal(typescriptVersion, '5.8.3', 'PSC0_SH1_SEED_REPLAY_TYPESCRIPT_PIN');
+  const outputDirectory = path.join(outDir, 'typescript5-replay');
+  await mkdir(outputDirectory, { recursive: true });
+  const receipt = {
+    schemaVersion: 1,
+    evidence: 'selected-seed-typescript-recovery-replay',
+    sourceRef: manifest.sourceRef,
+    toolchain: await toolchainIdentity(),
+    typescriptProfile,
+    expectedTypeScriptSha256: manifest.expectedArtifacts.typescriptSha256,
+    expectedJavaScriptSha256: manifest.expectedArtifacts.javascriptSha256,
+    passed: false,
+    scope: 'Recompile authenticated A TypeScript with the original 5.8.3 arguments; source reconstruction is a separate recovery route.',
+  };
+  const start = performance.now();
+  try {
+    const source = await readFile(path.join(directory, 'index.ts'));
+    receipt.typescriptSha256 = sha256(source);
+    assert.equal(receipt.typescriptSha256, receipt.expectedTypeScriptSha256);
+    const input = path.join(outputDirectory, 'index.ts');
+    await writeFile(input, source);
+    const compilerArgs = [
+      tsc, input, '--target', 'ES2022', '--module', 'ES2022',
+      '--moduleResolution', 'bundler', '--strict', '--declaration',
+      '--sourceMap', '--noEmitOnError', '--skipLibCheck', '--pretty', 'false',
+    ];
+    const compileStarted = performance.now();
+    const output = spawnSync(process.execPath, compilerArgs, {
+      cwd: root, encoding: 'utf8', stdio: 'pipe', timeout: 120000,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    receipt.compile = {
+      command: process.execPath, args: compilerArgs, cwd: root,
+      elapsedMs: performance.now() - compileStarted, timeoutMs: 120000,
+      maxBufferBytes: 64 * 1024 * 1024,
+      status: output.status, signal: output.signal,
+      error: output.error ? { name: output.error.name, message: output.error.message, code: output.error.code } : null,
+      diagnosticsComplete: !output.error && output.signal === null,
+      stdout: 'compile.stdout.log', stderr: 'compile.stderr.log',
+    };
+    await writeFile(path.join(outputDirectory, 'compile.stdout.log'), output.stdout ?? '');
+    await writeFile(path.join(outputDirectory, 'compile.stderr.log'), output.stderr ?? '');
+    await writeJson(path.join(outputDirectory, 'compile.command.json'), receipt.compile);
+    assert.equal(receipt.compile.error, null, 'PSC0_SH1_SEED_REPLAY_PROCESS');
+    assert.equal(output.status, 0, 'PSC0_SH1_SEED_REPLAY_COMPILE: retained logs contain the diagnostics');
+    receipt.javascriptSha256 = sha256(await readFile(path.join(outputDirectory, 'index.js')));
+    assert.equal(receipt.javascriptSha256, receipt.expectedJavaScriptSha256,
+      'PSC0_SH1_SEED_REPLAY_JAVASCRIPT_DIGEST');
+    receipt.declarationSha256 = sha256(await readFile(path.join(outputDirectory, 'index.d.ts')));
+    receipt.sourceMapSha256 = sha256(await readFile(path.join(outputDirectory, 'index.js.map')));
+    receipt.passed = true;
+  } catch (error) {
+    receipt.error = { name: error.name, message: error.message };
+    throw error;
+  } finally {
+    receipt.elapsedMs = performance.now() - start;
+    await writeJson(path.join(outputDirectory, 'receipt.json'), receipt);
+    process.stdout.write('PSC0_SH1_SEED_TYPESCRIPT_REPLAY: ' + JSON.stringify(receipt) + '\n');
+  }
+}
+
 async function recoverQualifiedSeed({ sourceRoot, bootstrapCompiler, artifactDirectory, outDir }) {
   const selected = await readSelectedSeed();
   assert.equal(selected.mode, 'qualified', 'PSC0_SH1_QUALIFIED_PIN_REQUIRED');
@@ -439,10 +535,12 @@ async function recoverQualifiedSeed({ sourceRoot, bootstrapCompiler, artifactDir
   assert.deepEqual(await toolchainIdentity(), manifest.toolchain, 'PSC0_SH1_QUALIFIED_TOOLCHAIN');
   const cacheDirectory = path.join(root, selected.cacheDirectory);
   if (await verifyQualifiedSeedCache(cacheDirectory, manifest)) {
+    await verifySelectedSeedTypeScript(cacheDirectory, manifest, outDir);
     process.stdout.write('PSC0_SH1_QUALIFIED_SEED: CACHE_HIT ' + selected.identitySha256 + '\n');
     return;
   }
   if (artifactDirectory && existsSync(path.join(artifactDirectory, 'qualification.json'))) {
+    let artifactRestored = false;
     try {
       const qualification = JSON.parse(await readFile(path.join(artifactDirectory, 'qualification.json')));
       assert.equal(qualification.evidence, 'compiler-qualified-current-source-fixed-point');
@@ -462,10 +560,14 @@ async function recoverQualifiedSeed({ sourceRoot, bootstrapCompiler, artifactDir
         generationDirectory: path.join(artifactDirectory, 'C3'), cacheDirectory, manifest,
         origin: 'Hash-verified immutable qualification artifact, generation C3.',
       });
-      process.stdout.write('PSC0_SH1_QUALIFIED_SEED: ARTIFACT_HIT ' + selected.identitySha256 + '\n');
-      return;
+      artifactRestored = true;
     } catch (error) {
       process.stdout.write('PSC0_SH1_QUALIFIED_ARTIFACT: RECOMPUTE (' + String(error.message).slice(0, 512) + ')\n');
+    }
+    if (artifactRestored) {
+      await verifySelectedSeedTypeScript(cacheDirectory, manifest, outDir);
+      process.stdout.write('PSC0_SH1_QUALIFIED_SEED: ARTIFACT_HIT ' + selected.identitySha256 + '\n');
+      return;
     }
   }
   assert.equal(capture('git', ['rev-parse', 'HEAD'], sourceRoot), manifest.sourceRef,
@@ -513,6 +615,14 @@ async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, 
       sourceRef: selected.sourceRef,
       compilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,
       futurePromotion: 'A later language capability promotion needs an explicit parent-seed recovery plan.',
+    });
+    return;
+  }
+  if (typescriptVersion !== '5.8.3') {
+    await writeJson(path.join(outDir, 'seed-selection.json'), {
+      status: 'historical-authoring-seed-retained',
+      sourceRef: selected.sourceRef,
+      reason: 'A TypeScript 7 product needs an explicit new seed manifest and parent-seed recovery recipe.',
     });
     return;
   }
@@ -600,7 +710,7 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
       javascriptSha256: compilerSha256,
       typescriptSha256: sha256(await readFile(path.join(directory, 'index.ts'))),
     },
-    recipe: await recipeIdentity(), toolchain: await toolchainIdentity(),
+    recipe: await recipeIdentity(), toolchain: await toolchainIdentity(), typescriptProfile,
     candidateClaim: 'Native PSC frontend consumes raw current compiler source; generated current compiler executes the raw language and iteration corpus.',
     selectedSeedBootstrapProven: false, currentSourceFixedPointProven: false,
     runtimeIrTyping: {
@@ -624,7 +734,6 @@ function option(args, name, fallback) {
   return args[index + 1];
 }
 
-const [command, ...args] = process.argv.slice(2);
 const outDir = path.resolve(root, option(args, '--out', 'dist/sh1'));
 if (command === 'seed-identity') {
   const sourceRoot = path.resolve(root, option(args, '--source', '../historical-source/psc0'));
@@ -766,6 +875,8 @@ if (command === 'seed-identity') {
       ? 'C1=S0(A); C2=C1(A); C3=C2(A); compare C2 and C3 products'
       : 'Q is the pinned qualified compiler from A; C1=Q(B); C2=C1(B); C3=C2(B); compare C2 and C3 products',
     authoringSeed: authoring.provenance,
+    toolchain: await toolchainIdentity(),
+    typescriptProfile,
     rawAuthoringSourceConsumedEveryGeneration: true,
     artifacts: second.receipt.artifacts,
     c1CompilerSha256: firstReceipt.artifacts.javascriptSha256,

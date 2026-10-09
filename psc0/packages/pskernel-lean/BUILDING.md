@@ -18,7 +18,7 @@ Profile:   lean4.34-core
 
 Do not substitute another Lean release when validating this provider profile.
 
-For host scripts, CI uses Node 22. TypeScript is needed only when a `psc build ...` path continues from kernel admission into TS/JS generation; the workspace pins TypeScript `5.8.3`.
+For host scripts, CI uses Node 22. TypeScript is needed only when a `psc build ...` path continues from kernel admission into TS/JS generation; the TypeScript 7 migration branch pins TypeScript `7.0.2` for current output. Historical S0/A recovery keeps its recorded `5.8.3` profile.
 
 ## 2. Normal npm use: no Lean build required
 
@@ -234,20 +234,20 @@ A build without `--kernel lean434` preserves the existing self-host/bootstrap be
 
 ### TypeScript for gated JS builds
 
-The workspace pins `typescript@5.8.3`. If `tsc` is not available on your machine, install/use that exact version before testing JS output:
+Current `psc0` output on the TypeScript 7 migration branch uses `typescript@7.0.2`. Install that exact CLI before testing JS output. The installed launcher is discovered from package metadata; `PSC0_TSC` can select an absolute launcher explicitly, and `PSC0_TYPESCRIPT_VERSION` defaults to `7.0.2`:
 
 ```text
-npm install --global typescript@5.8.3
+npm install --global typescript@7.0.2
 tsc --version
 ```
 
 Expected:
 
 ```text
-Version 5.8.3
+Version 7.0.2
 ```
 
-This TypeScript requirement is for the final TS -> JS build stage, not for Lean kernel admission itself.
+This requirement applies to the final TS -> JS build stage. Historical S0/A reconstruction requires a separate `5.8.3` installation and profile; keep its original manifest and output hashes. See [the TypeScript profile migration](../../docs/selfhost-language/TYPESCRIPT7.md). Lean kernel admission has its own native toolchain and evidence.
 
 ## 10. Explicit provider override
 
@@ -341,7 +341,7 @@ A kernel rejection is not the same as a provider crash. Inspect `errorKind`, `de
 
 ### TypeScript build fails after kernel acceptance
 
-Kernel admission already succeeded; diagnose the TypeScript/backend stage separately. Confirm `tsc --version` is `5.8.3` and inspect the emitted TypeScript/compiler diagnostic.
+Kernel admission already succeeded; diagnose the TypeScript/backend stage separately. Confirm the selected launcher reports `Version 7.0.2` for current output, or `Version 5.8.3` for an explicitly selected historical recovery profile, and inspect the emitted TypeScript/compiler diagnostic. `PSC0_TSC` overrides discovery; an invalid explicit path or mismatched `PSC0_TYPESCRIPT_VERSION` fails before compilation.
 
 ## 13. Separate future work
 

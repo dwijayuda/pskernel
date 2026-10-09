@@ -2,6 +2,12 @@
 
 Status: historical research baseline with a working implementation, 2026-10-08. The selected authoring seed A (`e91b9558d665879871b8bf0893915ae64b27c7fe`) and Foundation.List migration B are qualified, including their exact-stream provider checks. The three-helper migration H (`671685c3f0059574405a1e630dd965d421a26f05`) passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E (`cf8fbd784944a98b1e390b709685ca54c2511827`) passed compiler qualification and exact provider acceptance on its first execution. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents commands and boundaries; [qualification-evidence.json](qualification-evidence.json) records exact results. Strict runtime profile enforcement remains pending.
 
+The isolated current-output upgrade to TypeScript 7.0.2 is documented in
+[TYPESCRIPT7.md](TYPESCRIPT7.md). Its exact package/CLI check passed
+[run 37907973917](https://github.com/dwijayuda/pskernel/actions/runs/37907973917);
+full PSC0 integration qualification is pending. Historical S0/A products retain
+their original 5.8.3 toolchain and A remains selected.
+
 The audit and its source citations below describe the immutable baseline. Later implementation evidence is recorded separately; the historical 55-module inventory remains unchanged.
 
 The implementation now accepts the bounded ordinary-parameter recursion capability and has migrated Foundation.List plus three compiler helpers. E preserves declaration generic arguments when erasure reconstructs recursive calls. Its complete C2/C3 inventories contain zero type-argument arity findings and 244 remaining call-expression typing obligations. Those remaining records require a compositional portable checker, specified in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md); they are not 244 demonstrated runtime failures. The selected A seed remains unchanged.
@@ -35,7 +41,7 @@ The architecture already describes the right bootstrap discipline: implement new
 | Full source inventory in those 12 packages | 60 source modules; five are outside the entry closure |
 | Historical declaration count | 1,916, from the October 3 receipt |
 | Historical lane | Compiler-only PSC source and TS/JS fixed point |
-| Current generated backend in that closure | TypeScript, compiled by TypeScript 5.8.3 to JavaScript |
+| Historical generated backend in that closure | TypeScript, compiled by TypeScript 5.8.3 to JavaScript |
 | Source provenance | All 12 whole-package Git trees exactly match historical `d4298a7...` |
 | Kernel claim | A new checked current-source fixed point is not established by those preserved source identities |
 

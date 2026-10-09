@@ -43,34 +43,51 @@ proof and measured TypeScript phase.
 ## Current strict SH/1 source integration
 
 The practical migration is merged in main at `ed5d00aca0743bde583b45fe7756dd494ac3960f`.
-The reviewed 43-file canonical/recursion batch is `656ed78db6a2c26feced9374cd7b251c062a42df`;
-the closed-local native-keyword repair is `45d314b970d9d76fce9387f6bc8108fb9fab611c`.
-That repaired compiler passed native build, regression, checked-seed and
-grammar/import/workspace gates in [run38002284953](https://github.com/dwijayuda/pskernel/actions/runs/38002284953).
-The run then failed at the old host call `replayReturnedFunction(n, 11n)`:
-the new actual entry returns a unary function, so the caller must use `(n)(11n)`.
-N1/C1/C2/C3 and provider qualification did not start. The exact failure and log
-are retained in [the attempt ledger](strict/qualification-attempts.json).
+The canonical/recursion source656ed78, closed-local alpha repair45d314b and
+seven-host completion00e963b are integrated on psc0/strict-sh1-v1.
 
-The enclosing [host completion](strict/reviewed-candidates/host-function-entry-completion.json)
-changes seven host/test scripts, with production Lean and all six replay fixtures
-unchanged. It corrects ten replay calls, pairs reference calls with their actual
-authenticated R/current producer, and repairs the moved Basic source-slice boundary.
-Three replay tail-route assertions are explicitly reconciled with the canonical
-returned-function contract: these sources use exported arity1 general entries.
-Their expected values,20,000-step checks and invalid-tag faults remain.
-Positive flat-tail swap, captured-alias and reversal checks are added to the
-existing IR fixture/compilation, separately bound as12 observations; the old61
-IR observations and38 refusals remain. No extra compiler/TypeScript/native
-invocation is introduced. This does not claim a performance improvement or
-restore arbitrary computed-result eta. One full **[sh1-qualify]** run is requested.
+[Run38004581681](https://github.com/dwijayuda/pskernel/actions/runs/38004581681)
+at00e963b passed steps18–23, including native build/regressions/checked seed,
+grammar/import/workspace, all six replay fixtures and authenticated R migration.
+Step24 then refused Ps.Erasure.Expr641:31: expected '=>', got '('.
+Native Lean accepts the nested List pattern there; the owned source parser
+requires the supported flat form. N1 was not generated, C1/C2/C3 did not start,
+and provider114070642522 skipped. The new positive flat-tail IR block was not
+reached. TS7 and resource preflights passed. The exact attempt10 failure and
+full log are retained in [qualification-attempts.json](strict/qualification-attempts.json).
 
-The [cross-family review](strict/CROSS_FAMILY_INTERFACE_REVIEW.md) supplies
-all ten shared semantic interfaces; the [source/runtime review](strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md)
-supplies the11 S0/S1/S2 stage mappings. Both are independently reviewed and
-root-CLEAR in the stated source/value/proof/host domain. Final33-row/27-stage
-administrative disposition and strict activation require the actual integrated
-qualification and independent provider evidence.
+The enclosing [one-helper flat-pattern repair](strict/reviewed-candidates/foldl-flat-pattern-repair.json)
+changes only Expr.psEraseArrayFoldl from e3ed96f to a4d296a.
+Existing flat List matches cover lengths0,1,2 and greater than2. Every non-two
+case returns the same error before runtime operand erasure. The length-two case
+executes the same sole2,801-byte body with eight added indentation spaces,
+retaining the whole original typeArguments, operand order, errors, captures,
+fresh names and canonical-to-flat fold bridge. Both new binders are fresh.
+Root and independent reviews verify all exact guards, hashes and whole-file
+forward/reverse reconstruction. The complete31-file canonical/recursion Lean
+audit found one unsupported pattern before this correction and none after.
+Its4,664 heads become4,668; the independent pass also inspected2,124 scrutinees.
+The audit does not claim every64-file closure source. No parser, new syntax,
+host script or fixture changes are included.
+
+The [seven-host completion](strict/reviewed-candidates/host-function-entry-completion.json)
+remains unchanged and its replay fixes now have observed PASS evidence.
+The three general returned-function routes retain their value/depth/fault checks.
+Separate swap, captured-alias and reversal flat-IR functions supply12 positive
+optimizer observations alongside the old61 behaviors and38 refusals in the
+existing gate; execution of that block remains pending.
+No extra workflow step or compiler call site is added; the changed source
+requests one full **[sh1-qualify]** run.
+
+The [cross-family review](strict/CROSS_FAMILY_INTERFACE_REVIEW.md) supplies all
+ten semantic interfaces; the [source/runtime review](strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md)
+supplies all11 S0/S1/S2 mappings. Both are independently CLEAR in the stated
+domain. The flat-pattern case argument transports the affected ER/GROUP/fold
+interface without rewriting historical proof or execution pins.
+Final33-row/27-stage disposition still requires exact qualification and
+independent provider evidence. Strict/global/semantic/provider flags remain
+false. No machine-checked theorem, allocation/timing equality or speed gain
+is claimed by this source correction. No cold/native-only repeat is required.
 
 
 Function values use nested unary runtime arrows throughout generic arguments,

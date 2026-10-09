@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-09T23:25:44Z",
+  "updatedAtUtc": "2026-10-09T23:52:00Z",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -450,26 +450,28 @@
     "generalRulesDischarged": 0
   },
   "cloudExecution": {
-    "status": "ninth-attempt-native-gates-passed-runtime-cli-host-call-failed",
-    "sourceRef": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
-    "runId": 38002284953,
+    "status": "tenth-attempt-native-replay-passed-owned-source-pattern-refused",
+    "sourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "runId": 38004581681,
     "workflowId": 378853677,
-    "compilerJobId": 114062934819,
-    "providerJobId": 114063308633,
+    "compilerJobId": 114070320734,
+    "providerJobId": 114070642522,
     "providerStatus": "skipped",
-    "attempts": 9,
-    "failedStep": 22,
-    "diagnostic": "Existing replayReturnedFunction host call used flat2 instead of actual1+1; returned function versus18n.",
+    "attempts": 10,
+    "failedStep": 24,
+    "diagnostic": "Ps.Erasure.Expr:641:31: expected '=>', got '('",
     "nativeCompilerBuilt": true,
     "nativeRegressionsPassed": true,
     "nativeCheckedSeedBuilt": true,
     "sourceGrammarImportsAndWorkspacePassed": true,
+    "replayCliPassed": true,
+    "authenticatedRMigrationPreflightPassed": true,
     "resourcePreflightPassed": true,
     "nativeStrictConformanceCompleted": false,
     "c1Started": false,
     "fixedPointStarted": false,
-    "failureEvidence": "attempts/45d314b970d9d76fce9387f6bc8108fb9fab611c/runtime-cli-failure.json",
-    "failureEvidenceBlob": "57fe49c8a9421dd859ce15b5e50b7fe02e7f7c56"
+    "failureEvidence": "attempts/00e963bb8c84fc9b29f7cc8228f1520de5ca2081/source-parse-failure.json",
+    "failureEvidenceBlob": "fb9c40b2c5c8fbceed61302624e27fdac223fad4"
   },
   "sourceBoundaryCorrection": "source-boundary-correction.json",
   "qualificationAttempts": "qualification-attempts.json",
@@ -687,7 +689,8 @@
       "status": "independently-reviewed-local-general-entry-and-finite-placement-arguments",
       "rowsClosed": 0,
       "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
-      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
+      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition",
+      "currentSourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
     },
     {
       "family": "ER",
@@ -711,7 +714,8 @@
       "rowsClosed": 0,
       "finalCrossFamilyCompositionPending": false,
       "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
-      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
+      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition",
+      "currentSourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
     }
   ],
   "pendingErasureClassCorrection": {
@@ -754,15 +758,16 @@
     "historicalCounterexampleSource": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc"
   },
   "currentQualificationRequest": {
-    "status": "enclosing-host-completion-commit-requests-full-qualification-awaiting-run-discovery",
-    "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
-    "priorCompilerSource": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
-    "priorAttemptRunId": 38002284953,
-    "manifest": "reviewed-candidates/host-function-entry-completion.json",
-    "manifestBlob": "2d0a961d675206b07f14ac71fe88a21e00655bea",
-    "sourceFiles": 7,
-    "productionLeanChanges": 0,
+    "status": "enclosing-flat-pattern-source-completion-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "priorCompilerSource": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "priorAttemptRunId": 38004581681,
+    "manifest": "reviewed-candidates/foldl-flat-pattern-repair.json",
+    "manifestBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+    "sourceFiles": 1,
+    "productionLeanChanges": 1,
     "cumulativeReviewedSourceFiles": 46,
+    "hostChanges": 0,
     "trigger": "[sh1-qualify]",
     "repeatColdRecovery": false,
     "repeatNativeOnlyCheckpoint": false,
@@ -873,29 +878,33 @@
     "interfaces": 10,
     "rowsClosed": 0,
     "qualificationPending": true,
-    "formalPreservationProven": false
+    "formalPreservationProven": false,
+    "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
   },
   "latestExecution": {
-    "sourceRef": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
-    "runId": 38002284953,
-    "compilerJobId": 114062934819,
-    "status": "runtime-cli-host-call-failure-before-generations",
-    "failedStep": 22,
+    "sourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "runId": 38004581681,
+    "compilerJobId": 114070320734,
+    "status": "owned-source-parser-refusal-before-N1-generation",
+    "failedStep": 24,
     "nativeCompilerBuild": "success",
     "nativeRegressionTargets": "success",
     "nativeCheckedSeedBuild": "success",
     "sourceGrammarImportsAndWorkspace": "success",
-    "evidence": "attempts/45d314b970d9d76fce9387f6bc8108fb9fab611c/runtime-cli-failure.json",
-    "evidenceBlob": "57fe49c8a9421dd859ce15b5e50b7fe02e7f7c56",
-    "providerJobId": 114063308633,
+    "replayCli": "success",
+    "authenticatedRMigrationPreflight": "success",
+    "evidence": "attempts/00e963bb8c84fc9b29f7cc8228f1520de5ca2081/source-parse-failure.json",
+    "evidenceBlob": "fb9c40b2c5c8fbceed61302624e27fdac223fad4",
+    "providerJobId": 114070642522,
     "providerStatus": "skipped",
-    "N1": "not-started",
+    "N1": "source-preparation-refused-no-success-receipt",
     "C1": "not-started",
     "C2": "not-started",
-    "C3": "not-started"
+    "C3": "not-started",
+    "positiveFlatTailExecution": "not-reached-before-owned-source-parse-refusal"
   },
   "reviewedHostFunctionEntryCompletion": {
-    "status": "reviewed-seven-host-script-completion-integrated-by-enclosing-commit",
+    "status": "integrated-replay-cli-passed-full-native-and-generation-qualification-pending",
     "manifest": "reviewed-candidates/host-function-entry-completion.json",
     "manifestBlob": "2d0a961d675206b07f14ac71fe88a21e00655bea",
     "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
@@ -918,7 +927,10 @@
       "empty_evidence_finish"
     ],
     "sourceReview": "CLEAR",
-    "executionQualification": false
+    "executionQualification": false,
+    "passedReplayRun": 38004581681,
+    "passedReplaySource": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "positiveFlatTailExecution": "not-reached-before-owned-source-parse-refusal"
   },
   "reviewedSourceRuntimeInterface": {
     "document": "SOURCE_RUNTIME_INTERFACE_REVIEW.md",
@@ -931,7 +943,8 @@
     "stageRows": 11,
     "rowsClosed": 0,
     "qualificationPending": true,
-    "formalPreservationProven": false
+    "formalPreservationProven": false,
+    "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
   },
   "finalDisposition": {
     "status": "pending-exact-integrated-qualification-and-current-row-disposition",
@@ -942,5 +955,51 @@
     "correspondenceRowsClosed": 0,
     "stageObligationsClosed": 0,
     "formalPreservationProven": false
+  },
+  "reviewedPortablePatternCompletion": {
+    "status": "one-helper-flat-pattern-correction-integrated-by-enclosing-commit-awaiting-exact-source-run",
+    "manifest": "reviewed-candidates/foldl-flat-pattern-repair.json",
+    "manifestBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+    "manifestSha256": "a133929cb5d6de03dfb17a9750edeb12180113b0c91da279f22b2c71ff289d88",
+    "manifestBytes": 48534,
+    "expectedParent": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+    "definition": "psEraseArrayFoldl",
+    "baseBlob": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+    "baseSha256": "10306c15e992fd75d4762a6ff4c017cda56dde72e0382a18d5c646f40be9f419",
+    "baseBytes": 137412,
+    "candidateBlob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+    "candidateSha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+    "candidateBytes": 138060,
+    "files": 1,
+    "guards": 1,
+    "helperDefinitions": 1,
+    "unchangedSuccessBody": {
+      "sha256": "d5b48e271188de232c3014a49fdace9a1bddc612e063e35ca41b56da4a797ea8",
+      "bytes": 2801,
+      "addedIndentSpaces": 8
+    },
+    "argument": "Exhaustive List lengths 0, 1, 2 and greater than 2 preserve the same result/error and sole length-two runtime-erasure body. The original whole typeArguments and every capture/bridge operation remain. Both fresh tail binders are globally fresh in the base. No timing, allocation or generated-byte identity claim.",
+    "audit": {
+      "files": 31,
+      "productionLeanFiles": 30,
+      "genericLeanFixtures": 1,
+      "patternHeadsBefore": 4664,
+      "patternHeadsAfter": 4668,
+      "independentScrutinees": 2124,
+      "unsupportedNestedPatternsBefore": 1,
+      "unsupportedNestedPatternsAfter": 0,
+      "scope": "Complete canonical/recursion Lean inventory, not all 64 compiler closure files."
+    },
+    "sourceReview": "root-and-independent-CLEAR",
+    "exactManifestReadback": "root-and-runtime_final-CLEAR",
+    "hostScriptsChanged": 0,
+    "replayFixturesChanged": 0,
+    "newSyntaxCapability": false,
+    "parserChanged": false,
+    "newWorkflowSteps": 0,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
   }
 }

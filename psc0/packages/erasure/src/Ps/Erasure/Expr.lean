@@ -638,50 +638,56 @@ def psEraseArrayFoldl
   | Except.error error => Except.error error
   | Except.ok typeArguments =>
       match typeArguments with
-      | List.cons elementType (List.cons accumulatorType List.nil) =>
-          match psEraseSelectedArguments erase arguments [2, 3, 4, 5, 6] with
-          | Except.error error => Except.error error
-          | Except.ok runtimeArguments =>
-              match runtimeArguments with
-              | List.nil => Except.error PsErasureError.unsupportedApplication
-              | List.cons callback rest =>
-                  let callbackType := PsVerifiedIrType.function [accumulatorType]
-                    (PsVerifiedIrType.function [elementType] accumulatorType);
-                  match psErasureCaptureTypedApplicationValue
-                      (PsErasureApplicationCaptureState.mk scope List.nil List.nil)
-                      "_psFoldFn" callbackType callback with
+      | List.nil => Except.error PsErasureError.unsupportedApplication
+      | List.cons elementType foldTypeTail =>
+          match foldTypeTail with
+          | List.nil => Except.error PsErasureError.unsupportedApplication
+          | List.cons accumulatorType foldAfterAccumulator =>
+              match foldAfterAccumulator with
+              | List.nil =>
+                  match psEraseSelectedArguments erase arguments [2, 3, 4, 5, 6] with
                   | Except.error error => Except.error error
-                  | Except.ok captured =>
-                      match captured.valuesRev with
-                      | List.nil => Except.error PsErasureError.binderMismatch
-                      | List.cons called _ =>
-                          let accumulatorName :=
-                            psErasureLocalName captured.scope "_psFoldAcc" "_psFoldAcc"
-                              captured.scope.localContext.nextId;
-                          if psErasureLocalNameUsed captured.scope accumulatorName then
-                            Except.error PsErasureError.fuelExhausted
-                          else
-                            let accumulatorScope :=
-                              psErasureReserveOutputName captured.scope accumulatorName;
-                            let elementName :=
-                              psErasureLocalName accumulatorScope "_psFoldElement" "_psFoldElement"
-                                accumulatorScope.localContext.nextId;
-                            if psErasureLocalNameUsed accumulatorScope elementName then
-                              Except.error PsErasureError.fuelExhausted
-                            else
-                              let bridge := PsVerifiedIrExpr.lambda
-                                [PsVerifiedIrParameter.mk accumulatorName accumulatorType,
-                                  PsVerifiedIrParameter.mk elementName elementType]
-                                accumulatorType
-                                (PsVerifiedIrExpr.call
-                                  (PsVerifiedIrExpr.call called List.nil
-                                    [PsVerifiedIrExpr.var accumulatorName])
-                                  List.nil [PsVerifiedIrExpr.var elementName]);
-                              Except.ok
-                                (psErasureWrapApplicationCaptures captured.bindingsRev
-                                  (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.arrayFoldl
-                                    typeArguments (List.cons bridge rest)))
-      | _ => Except.error PsErasureError.unsupportedApplication
+                  | Except.ok runtimeArguments =>
+                      match runtimeArguments with
+                      | List.nil => Except.error PsErasureError.unsupportedApplication
+                      | List.cons callback rest =>
+                          let callbackType := PsVerifiedIrType.function [accumulatorType]
+                            (PsVerifiedIrType.function [elementType] accumulatorType);
+                          match psErasureCaptureTypedApplicationValue
+                              (PsErasureApplicationCaptureState.mk scope List.nil List.nil)
+                              "_psFoldFn" callbackType callback with
+                          | Except.error error => Except.error error
+                          | Except.ok captured =>
+                              match captured.valuesRev with
+                              | List.nil => Except.error PsErasureError.binderMismatch
+                              | List.cons called _ =>
+                                  let accumulatorName :=
+                                    psErasureLocalName captured.scope "_psFoldAcc" "_psFoldAcc"
+                                      captured.scope.localContext.nextId;
+                                  if psErasureLocalNameUsed captured.scope accumulatorName then
+                                    Except.error PsErasureError.fuelExhausted
+                                  else
+                                    let accumulatorScope :=
+                                      psErasureReserveOutputName captured.scope accumulatorName;
+                                    let elementName :=
+                                      psErasureLocalName accumulatorScope "_psFoldElement" "_psFoldElement"
+                                        accumulatorScope.localContext.nextId;
+                                    if psErasureLocalNameUsed accumulatorScope elementName then
+                                      Except.error PsErasureError.fuelExhausted
+                                    else
+                                      let bridge := PsVerifiedIrExpr.lambda
+                                        [PsVerifiedIrParameter.mk accumulatorName accumulatorType,
+                                          PsVerifiedIrParameter.mk elementName elementType]
+                                        accumulatorType
+                                        (PsVerifiedIrExpr.call
+                                          (PsVerifiedIrExpr.call called List.nil
+                                            [PsVerifiedIrExpr.var accumulatorName])
+                                          List.nil [PsVerifiedIrExpr.var elementName]);
+                                      Except.ok
+                                        (psErasureWrapApplicationCaptures captured.bindingsRev
+                                          (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.arrayFoldl
+                                            typeArguments (List.cons bridge rest)))
+              | List.cons _ _ => Except.error PsErasureError.unsupportedApplication
 
 def psErasePrimitiveApplication
     (environment : PsEnvironment)

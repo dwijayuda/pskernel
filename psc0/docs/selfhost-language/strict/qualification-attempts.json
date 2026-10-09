@@ -1330,6 +1330,114 @@
       "scopeOfFailure": "The native keyword repair passed compilation and regressions. An existing host test still passed returned-function operands in one flat call. Actual returned function vs expected18n is preserved. N1/C1/C2/C3 and provider did not run. This is a caller-convention correction, not an observed compiler semantic or memory failure.",
       "strictSh1Qualified": false,
       "semanticContractQualified": false
+    },
+    {
+      "attempt": 10,
+      "sourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+      "runId": 38004581681,
+      "workflowId": 378853677,
+      "compilerJobId": 114070320734,
+      "providerJobId": 114070642522,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38004581681",
+      "status": "failure",
+      "failedStep": {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 24,
+        "timestamp": "2026-10-09T23:29:32.5344343Z",
+        "moduleName": "Ps.Erasure.Expr",
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "line": 641,
+        "column": 31,
+        "diagnostic": "Ps.Erasure.Expr:641:31: expected '=>', got '('",
+        "classification": "owned-source-parser-nested-constructor-pattern-refusal",
+        "exitCode": 1
+      },
+      "nativeCompilerBuilt": true,
+      "nativeRegressionsPassed": true,
+      "nativeCheckedSeedBuilt": true,
+      "sourceGrammarImportsAndWorkspacePassed": true,
+      "replayCliPassed": true,
+      "authenticatedRMigrationPreflightPassed": true,
+      "sourceReplay": "not-started",
+      "currentGenerationCandidate": "native-owned-source-preparation-refused",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "positiveFlatTailExecution": "not-reached-before-owned-source-parse-refusal",
+      "failureEvidence": {
+        "path": "attempts/00e963bb8c84fc9b29f7cc8228f1520de5ca2081/source-parse-failure.json",
+        "blob": "fb9c40b2c5c8fbceed61302624e27fdac223fad4",
+        "sha256": "1cadc932791b1e6b1c8812e7832c2e96b84fb62914e74b65d408c8160ccbc154",
+        "bytes": 7121
+      },
+      "log": {
+        "path": "attempts/00e963bb8c84fc9b29f7cc8228f1520de5ca2081/job.log",
+        "blob": "35de2a9c845a4af0d445319fede4ee3556b6610a",
+        "sha256": "51a88936c40e534dcdeae67d473860322a5c29826fec5bf9c5561799562fd515",
+        "bytes": 256537
+      },
+      "artifacts": [
+        {
+          "id": 11651005983,
+          "name": "psc0-sh1-ts7.0.2-00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+          "bytes": 463965,
+          "digest": "sha256:2045862d164cad3c781e3c5a21440bc1ae588398044b096e37437c89e28ae693",
+          "createdAt": "2026-10-09T23:29:34Z",
+          "expiresAt": "2026-11-08T23:29:33Z",
+          "sourceCommit": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+          "runId": 38004581681,
+          "uploadFileCountFromLog": 44,
+          "archiveInspected": false
+        }
+      ],
+      "resourcePreflight": {
+        "timestamp": "2026-10-09T23:28:48.3739082Z",
+        "passed": true,
+        "policyId": "psc0-sh1-generated-qualification-resources/1",
+        "node": "v22.23.3",
+        "oldSpaceMiB": 8192,
+        "observedHeapLimitBytes": 8640266240,
+        "effectiveAvailableBytes": 15313190912,
+        "minimumAvailableBytes": 12884901888
+      },
+      "typescriptProfile": {
+        "version": "7.0.2",
+        "status": "passed-step8"
+      },
+      "passedEvidence": {
+        "replay": {
+          "timestamp": "2026-10-09T23:29:26.0754843Z",
+          "marker": "PSC2_SELFHOST_REPLAY_RUNTIME",
+          "text": "PASS (strict TypeScript; 20000-step recursion, function results, name collisions, generic lists and exact UTF-8 positions)",
+          "scriptBlob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53",
+          "scope": "All six existing replay fixtures, including 20000-step behavior and malformed-tag assertions; source fixture bytes unchanged."
+        },
+        "authenticatedReference": {
+          "timestamp": "2026-10-09T23:29:29.3522531Z",
+          "recipeSourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+          "referenceSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+          "referenceCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+          "cases": 87,
+          "signatureTypeAnnotations": 12,
+          "typedGenericPartialWrappers": 12,
+          "passed": true,
+          "currentSourceQualifiedByThisCheck": false,
+          "fullPayloadLocation": "Exact JSON is preserved at the PSC0_SH1_WORKER_HARNESS_REFERENCE line in the complete log."
+        }
+      },
+      "coldRecovery": {
+        "runId": 38004581696,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "The seven host changes passed replay and authenticated R migration. The next failure is one nested List pattern accepted by native Lean but refused by the owned source parser. N1 was not generated; C1/C2/C3 and provider did not run. This is not a heap failure. No automatic retry.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
     }
   ],
   "selectedSeedChanged": false,
@@ -1337,15 +1445,16 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "enclosing-host-completion-commit-requests-full-qualification-awaiting-run-discovery",
-    "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
-    "priorCompilerSource": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
-    "priorAttemptRunId": 38002284953,
-    "manifest": "reviewed-candidates/host-function-entry-completion.json",
-    "manifestBlob": "2d0a961d675206b07f14ac71fe88a21e00655bea",
-    "sourceFiles": 7,
-    "productionLeanChanges": 0,
+    "status": "enclosing-flat-pattern-source-completion-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "priorCompilerSource": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "priorAttemptRunId": 38004581681,
+    "manifest": "reviewed-candidates/foldl-flat-pattern-repair.json",
+    "manifestBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+    "sourceFiles": 1,
+    "productionLeanChanges": 1,
     "cumulativeReviewedSourceFiles": 46,
+    "hostChanges": 0,
     "trigger": "[sh1-qualify]",
     "repeatColdRecovery": false,
     "repeatNativeOnlyCheckpoint": false,
@@ -1390,5 +1499,5 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-09T23:25:44Z"
+  "updatedAtUtc": "2026-10-09T23:52:00Z"
 }

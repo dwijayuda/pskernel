@@ -1,0 +1,69 @@
+name: PSKernel Core Arena Init hot-record diagnostics
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-optimized-v3
+    paths:
+      - ".github/workflows/pskernel-core-arena-init-hot-diagnostic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-hot-records:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build proof-synced checker
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build psc_kernel_core_arena
+          .lake/build/bin/psc_kernel_core_arena --version
+      - name: Build exact pinned Init and 430k records
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          (cd arena && uv run lka.py build-test init --cache)
+          head -n 430000 arena/_build/tests/init.ndjson > "$RUNNER_TEMP/arena-init-hot-430k.ndjson"
+          wc -l -c "$RUNNER_TEMP/arena-init-hot-430k.ndjson"
+      - name: Run diagnostic-only timed prefix
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -f 'diagnostic_wall_s=%e diagnostic_peak_rss_kb=%M diagnostic_exit=%x' \
+            timeout 720 psc15selfhost/.lake/build/bin/psc_kernel_core_arena --profile \
+            < "$RUNNER_TEMP/arena-init-hot-430k.ndjson" 2>&1 | tee "$RUNNER_TEMP/arena-init-hot-profile.txt"
+          status=${PIPESTATUS[0]}
+          echo "PROFILE_EXIT=$status"
+          echo "PROFILE_STATUS_DID_NOT_CHANGE_KERNEL_SEMANTICS=1"
+          if [ "$status" -eq 0 ]; then
+            echo "430k prefix accepted, but this does NOT establish full Init correctness"
+          elif [ "$status" -eq 124 ]; then
+            echo "Profiler reached diagnostic time limit: inspect last entered record to find the hot declaration"
+          else
+            echo "Profile returned code $status; investigate separately"
+            exit "$status"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arena-optimized-init-hot-${{ github.run_id }}
+          path: ${{ runner.temp }}/arena-init-hot-profile.txt
+          if-no-files-found: ignore

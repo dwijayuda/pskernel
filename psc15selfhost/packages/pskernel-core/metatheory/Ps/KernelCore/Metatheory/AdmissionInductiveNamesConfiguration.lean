@@ -386,3 +386,72 @@ theorem psKernelNameHasDuplicates_append_false_refines
         cases hMem with
         | head => exact hHead.2
         | tail => exact hDisjoint name (by assumption)
+
+/-- The portable mutual-name concatenator is structurally ordinary list append. -/
+theorem psKernelMutualNameListAppend_eq_append
+    (left right : List PsKernelName) :
+    psKernelMutualNameListAppend left right = left ++ right := by
+  induction left with
+  | nil => rfl
+  | cons head rest ih => exact congrArg (List.cons head) ih
+
+/--
+The executable global preflight guard separates into source type, recursor and
+constructor freshness, internal uniqueness, and cross-family exclusion.
+The latter remains an executable negative-name-membership fact; no new
+comparator law or unproved syntactic-disjointness assertion is introduced.
+-/
+theorem psKernelAddSimpleMutualInductive_success_partitioned_name_guards
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hRun : psKernelAddSimpleMutualInductive fuel environment decl
+      maxRecDepth maxNatSize = Except.ok result) :
+    PsKernelInductiveNamesAbsent environment (psKernelSimpleMutualNames decl.types) ∧
+    PsKernelInductiveNamesAbsent environment (psKernelSimpleMutualRecNames decl.types) ∧
+    PsKernelInductiveNamesAbsent environment (psKernelSimpleMutualCtorNames decl.types) ∧
+    psKernelNameHasDuplicates (psKernelSimpleMutualNames decl.types) = false ∧
+    psKernelNameHasDuplicates (psKernelSimpleMutualRecNames decl.types) = false ∧
+    psKernelNameHasDuplicates (psKernelSimpleMutualCtorNames decl.types) = false ∧
+    (∀ name : PsKernelName, List.Mem name (psKernelSimpleMutualNames decl.types) ->
+      psKernelNameListContains name
+        (psKernelSimpleMutualRecNames decl.types ++
+          psKernelSimpleMutualCtorNames decl.types) = false) ∧
+    (∀ name : PsKernelName, List.Mem name (psKernelSimpleMutualRecNames decl.types) ->
+      psKernelNameListContains name (psKernelSimpleMutualCtorNames decl.types) = false) := by
+  obtain ⟨_, _, hAllUnique, hAllAbsent⟩ :=
+    psKernelAddSimpleMutualInductive_success_name_guards
+      fuel environment result decl maxRecDepth maxNatSize hIndex hRun
+  let xs := psKernelSimpleMutualNames decl.types
+  let ys := psKernelSimpleMutualRecNames decl.types
+  let zs := psKernelSimpleMutualCtorNames decl.types
+  have hAbsent : PsKernelInductiveNamesAbsent environment (xs ++ (ys ++ zs)) := by
+    simpa [xs, ys, zs, psKernelMutualNameListAppend_eq_append] using hAllAbsent
+  have hUnique : psKernelNameHasDuplicates (xs ++ (ys ++ zs)) = false := by
+    have hAll := psKernelSimpleNameListUnique_true_no_duplicates
+      (psKernelMutualNameListAppend
+        (psKernelSimpleMutualNames decl.types)
+        (psKernelMutualNameListAppend
+          (psKernelSimpleMutualRecNames decl.types)
+          (psKernelSimpleMutualCtorNames decl.types))) hAllUnique
+    simpa [xs, ys, zs, psKernelMutualNameListAppend_eq_append] using hAll
+  obtain ⟨hXsAbsent, hOthersAbsent⟩ :=
+    PsKernelInductiveNamesAbsent.append_split environment xs (ys ++ zs) hAbsent
+  obtain ⟨hYsAbsent, hZsAbsent⟩ :=
+    PsKernelInductiveNamesAbsent.append_split environment ys zs hOthersAbsent
+  obtain ⟨hXsUnique, hOthersUnique, hXDisjoint⟩ :=
+    psKernelNameHasDuplicates_append_false_refines xs (ys ++ zs) hUnique
+  obtain ⟨hYsUnique, hZsUnique, hYDisjoint⟩ :=
+    psKernelNameHasDuplicates_append_false_refines ys zs hOthersUnique
+  change PsKernelInductiveNamesAbsent environment xs ∧
+    PsKernelInductiveNamesAbsent environment ys ∧
+    PsKernelInductiveNamesAbsent environment zs ∧
+    psKernelNameHasDuplicates xs = false ∧
+    psKernelNameHasDuplicates ys = false ∧
+    psKernelNameHasDuplicates zs = false ∧
+    (∀ name : PsKernelName, List.Mem name xs ->
+      psKernelNameListContains name (ys ++ zs) = false) ∧
+    (∀ name : PsKernelName, List.Mem name ys ->
+      psKernelNameListContains name zs = false)
+  exact ⟨hXsAbsent, hYsAbsent, hZsAbsent,
+    hXsUnique, hYsUnique, hZsUnique, hXDisjoint, hYDisjoint⟩

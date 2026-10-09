@@ -54,7 +54,7 @@ theorem psKernelDefEqKnot_success_cache_sound
     (hConfig :
       PsKernelCheckerConfigurationSound context state)
     (hHit :
-      psKernelExprPairSetContains state.success left right = true) :
+      psKernelDefEqSuccessCacheHit state left right = true) :
     PsKernelCheckerConfigurationSound context state ∧
       PsKernelDefEqJudgment
         context.environment context.localContext left right := by
@@ -64,7 +64,11 @@ theorem psKernelDefEqKnot_success_cache_sound
     rcases hConfig.2.2 with
       ⟨_, _, _, _, _, hSuccessCache⟩
     exact hSuccessCache
-  exact ⟨hConfig, hCache left right hHit⟩
+  have hRaw : psKernelExprPairSetContains state.success left right = true := by
+    cases hEligible : psKernelSemanticPairCacheEligible left right with
+    | false => simp [psKernelDefEqSuccessCacheHit, hEligible] at hHit
+    | true => simpa [psKernelDefEqSuccessCacheHit, hEligible] using hHit
+  exact ⟨hConfig, hCache left right hRaw⟩
 
 
 theorem psKernelDefEqKnot_lift_optional

@@ -23,7 +23,7 @@ def PsKernelDefEqKnotMissConfigurationSound (fuel : Nat) : Prop :=
     psKernelCheckerContextEnterRecDepth context =
       Except.ok nextContext ->
     psKernelExprEq left right = false ->
-    psKernelExprPairSetContains state.success left right = false ->
+    psKernelDefEqSuccessCacheHit state left right = false ->
     psKernelIsDefEqWithFuel
         (Nat.succ fuel) context state left right =
       Except.ok (Prod.mk value nextState) ->
@@ -74,8 +74,7 @@ theorem psKernelIsDefEqWithFuel_succ_configuration_sound_of_miss
           | false => rfl
           | true => exact False.elim (hSame hBool)
         by_cases hCached :
-            psKernelExprPairSetContains
-                state.success left right = true
+            psKernelDefEqSuccessCacheHit state left right = true
         · have hCachedRun :
               (Except.ok (Prod.mk true state) :
                 Except String (Prod Bool PsKernelCheckerState)) =
@@ -91,11 +90,9 @@ theorem psKernelIsDefEqWithFuel_succ_configuration_sound_of_miss
               context state left right hConfig hCached
           exact ⟨hCacheSound.1, fun _ => hCacheSound.2⟩
         · have hUncached :
-              psKernelExprPairSetContains
-                  state.success left right = false := by
+              psKernelDefEqSuccessCacheHit state left right = false := by
             cases hBool :
-                psKernelExprPairSetContains
-                  state.success left right with
+                psKernelDefEqSuccessCacheHit state left right with
             | false => rfl
             | true => exact False.elim (hCached hBool)
           have hNextConfig :=

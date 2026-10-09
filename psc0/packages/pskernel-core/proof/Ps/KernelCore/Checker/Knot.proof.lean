@@ -363,3 +363,10 @@ theorem psKernelCheckerInfer_configuration_preserves
       result
       hConfig
       hSuccess
+
+theorem psKernelDefEqSuccessCacheHit_ineligible
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hEligible : psKernelSemanticPairCacheEligible left right = false) :
+    psKernelDefEqSuccessCacheHit state left right = false := by
+  simp [psKernelDefEqSuccessCacheHit, hEligible]

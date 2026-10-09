@@ -300,6 +300,16 @@ def psKernelDefEqProjectionShortcut
       Except.ok
         (Prod.mk Option.none state)
 
+-- Use the same bounded key policy for lookup and publication. In particular,
+-- hashing a key that can never enter this cache defeats the traversal budget.
+def psKernelDefEqSuccessCacheHit
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) : Bool :=
+  if psKernelSemanticPairCacheEligible left right then
+    psKernelExprPairSetContains state.success left right
+  else
+    false
+
 def psKernelIsDefEqWithFuel
     (fuel : Nat) :
     PsKernelCheckerContext ->
@@ -345,8 +355,8 @@ def psKernelIsDefEqWithFuel
                   right
                   true)
             else if
-                psKernelExprPairSetContains
-                  state.success
+                psKernelDefEqSuccessCacheHit
+                  state
                   left
                   right then
               Except.ok

@@ -38,3 +38,12 @@ def main : IO Unit := do
   unless counted.2 == 1 do
     throw (IO.userError "lambda spine consumed the wrong number of arguments")
   IO.println "PSKERNEL_LAMBDA_SPINE_BOUND: PASS"
+
+  let indexed := { psKernelCheckerStateEmpty with
+    success := { small := [], index := some PsKernelExprPairSetIndex.empty } }
+  if psKernelDefEqSuccessCacheHit indexed dag (.sort .zero) then
+    throw (IO.userError "ineligible key unexpectedly hit empty cache")
+  match psKernelIsDefEqWithFuel 1 ctx indexed (.fvar name) dag with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "zero remaining reduction fuel unexpectedly succeeded")
+  IO.println "PSKERNEL_BOUNDED_SUCCESS_LOOKUP: PASS"

@@ -20,7 +20,7 @@ def PsKernelDefEqKnotAfterQuickSound (fuel : Nat) : Prop :=
     psKernelCheckerContextEnterRecDepth context =
       Except.ok nextContext ->
     psKernelExprEq left right = false ->
-    psKernelExprPairSetContains state.success left right = false ->
+    psKernelDefEqSuccessCacheHit state left right = false ->
     psKernelDefEqQuick
         (psKernelIsDefEqWithFuel fuel)
         nextContext state left right =

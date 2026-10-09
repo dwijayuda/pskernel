@@ -56,29 +56,41 @@ theorem psKernelAddSimpleMutualInductive_success_minors_stage
       (psKernelMutualNameListAppend
         (psKernelSimpleMutualRecNames decl.types)
         (psKernelSimpleMutualCtorNames decl.types))
+  /-
+  Reduce the executable preflight before rewriting the source family equation.
+  Otherwise rewriting decl.types first changes the syntactic guard arguments
+  and prevents the original guarded execution from normalizing.
+  -/
+  simp only [psKernelAddSimpleMutualInductive, hDuplicate, hMinTypes, hUnique] at hRun
   cases hFresh : psKernelCheckFreshInductiveNames allNames environment with
   | error message =>
-      simp [psKernelAddSimpleMutualInductive, hDuplicate, hMinTypes,
-        allNames, hUnique, hFresh] at hRun
+      simp only [hFresh] at hRun
+      cases hRun
   | ok fresh =>
+      simp only [hFresh] at hRun
       cases hUniform : psKernelSimpleCheckUniformOccurrences
           (psKernelSimpleMutualNames decl.types) decl.levelParams decl.numParams
           (psKernelSimpleMutualCtorTypes decl.types) with
       | error message =>
-          simp [psKernelAddSimpleMutualInductive, hDuplicate, hMinTypes,
-            allNames, hUnique, hFresh, hUniform] at hRun
+          simp only [hUniform] at hRun
+          cases hRun
       | ok uniform =>
+          simp only [hUniform] at hRun
+          simp only [hTypes] at hRun
           cases hClosed : psKernelCheckNoMVarNoFVar first.type with
           | error message =>
-              simp [psKernelAddSimpleMutualInductive, hDuplicate, hMinTypes,
-                allNames, hUnique, hFresh, hUniform, hTypes, hClosed] at hRun
+              simp only [hClosed] at hRun
+              cases hRun
           | ok closed =>
+              simp only [hClosed] at hRun
               cases hLevels : psKernelCheckLevelParams first.type decl.levelParams with
               | error message =>
-                  simp [psKernelAddSimpleMutualInductive, hDuplicate, hMinTypes,
-                    allNames, hUnique, hFresh, hUniform, hTypes,
-                    hClosed, hLevels] at hRun
+                  simp only [hLevels] at hRun
+                  cases hRun
               | ok checkedLevels =>
+                  simp only [hLevels] at hRun
+                  have hCtorTypes := hCtor
+                  rw [hTypes] at hCtorTypes
                   let shapes : List PsKernelSimpleMutualTypeShape :=
                     PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
                   let levels := psKernelLevelParamsToLevels decl.levelParams
@@ -87,10 +99,8 @@ theorem psKernelAddSimpleMutualInductive_success_minors_stage
                     PsKernelLevel.param (psKernelSimpleFreshElimName decl.levelParams)
                   let motives := psKernelMakeSimpleMutualMotives
                     levels paramResult.binders elimLevel shapes
-                  simp only [psKernelAddSimpleMutualInductive, hDuplicate, hMinTypes,
-                    allNames, hUnique, hFresh, hUniform, hTypes,
-                    hClosed, hLevels, hCheck, hSort, hParams,
-                    hIndices, hResult, hTail, hCtor] at hRun
+                  simp only [hCheck, hSort, hParams, hIndices, hResult,
+                    hTail, hCtorTypes] at hRun
                   cases hMinors : psKernelMakeSimpleMutualMinors
                       levels paramResult.binders motives ctorResult.shapes with
                   | error message =>

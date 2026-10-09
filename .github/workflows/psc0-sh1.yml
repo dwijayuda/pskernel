@@ -119,7 +119,6 @@ jobs:
             copyFileSync(manifestPath, path.join(directory, profile + '-package.json'));
             if (profile === 'current') {
               appendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=' + version + '\n');
-              appendFileSync(process.env.GITHUB_PATH, path.join(prefix, 'node_modules/.bin') + '\n');
             } else {
               appendFileSync(process.env.GITHUB_OUTPUT, 'historical-path=' + path.join(prefix, 'node_modules/.bin') + path.delimiter + process.env.PATH + '\n');
             }

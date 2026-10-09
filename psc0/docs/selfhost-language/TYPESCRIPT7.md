@@ -96,6 +96,16 @@ must resolve the historical PATH installation without an ancestor installation
 of TypeScript 7. Current qualification receives the current launcher/profile.
 Installed manifests and package locks are retained with the run evidence.
 
+The first integration run exposed a runner-specific PATH precedence issue:
+`GITHUB_PATH` entries are prepended after the configured step environment is
+printed. A global current-TypeScript entry therefore displaced the historical
+selection used by frozen S0. The repair removes that unnecessary global entry,
+supplies an explicit historical child PATH after runner augmentation, and
+checks the frozen cwd/PATH lookup against the exact selected 5.8.3 launcher
+before building. Conflicting cwd-local installations fail at that boundary.
+The effective path, selected launcher and reported version are retained.
+This changes tool selection without changing the historical compiler recipe.
+
 Qualified current-source products do not automatically become the next seed.
 A remains selected. A future seed promotion must explicitly define and qualify
 its parent-seed recovery path and its new product/toolchain identities.
@@ -185,5 +195,9 @@ therefore cannot directly shorten its warm preparation stage. Report the
 measured TypeScript phase and total workflow costs separately; do not apply
 Microsoft's general benchmark multipliers to this compiler without evidence.
 
-No current-source TypeScript 7 performance number or full qualification result
-has been earned at this staging checkpoint.
+The first complete integration attempt stopped at historical S0 tool discovery
+before current compilation; its package/profile checks passed. The full record
+and the source-proven repair are in
+[typescript7-execution.json](typescript7-execution.json). No current-source
+TypeScript 7 performance number or full qualification result has been earned at
+this repair checkpoint.

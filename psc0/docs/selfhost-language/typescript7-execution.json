@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-typescript7-upgrade-execution",
+  "updatedAt": "2026-10-09T09:15:00Z",
+  "branch": "psc0/typescript-7-v1",
+  "requestedVersion": "7.0.2",
+  "historicalRecoveryVersion": "5.8.3",
+  "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+  "selectedSeedChanged": false,
+  "rootWorkspaceCompilerApiDependencyChanged": false,
+  "portableM6SourceRef": "1b5fd12382c920944924c9d03e0851984293caa2",
+  "status": "historical-child-discovery-repair-pending-qualification",
+  "packageAvailability": "typescript7-package-evidence.json",
+  "attempts": [
+    {
+      "sourceRef": "956e2c3345d8d634904ff812b31d3b84fc9c23d9",
+      "runId": 37909229485,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37909229485",
+      "compilerJobId": 113750067620,
+      "conclusion": "failure",
+      "failedStage": "Verify seed digests or recover once from the preserved source",
+      "passed": [
+        "Both exact TypeScript profile installations",
+        "Actual installed TypeScript 7 package, platform executable and profile contract",
+        "Host/source guards",
+        "Historical toolchain identity",
+        "Frozen historical native build: 118 jobs"
+      ],
+      "diagnostic": {
+        "code": "TS5112",
+        "message": "tsconfig.json is present but will not be loaded if files are specified on commandline. Use '--ignoreConfig' to skip this error."
+      },
+      "cause": "The runner prepends GITHUB_PATH entries after printing step env.PATH. The installed current7 path displaced the configured historical5-first path. Frozen S0 independently discovers a launcher from cwd/PATH and ignores PSC0_TSC.",
+      "observationalLimit": "The final child PATH/launcher was reconstructed from exact runner and frozen-source code; the failed log prints only the pre-augmentation step environment.",
+      "runnerVersion": "2.337.0",
+      "sourceProof": [
+        "https://github.com/actions/runner/blob/v2.337.0/src/Runner.Worker/ActionRunner.cs",
+        "https://github.com/actions/runner/blob/v2.337.0/src/Runner.Worker/Handlers/ScriptHandler.cs",
+        "https://github.com/actions/runner/blob/v2.337.0/src/Runner.Worker/Handlers/Handler.cs",
+        "https://github.com/actions/runner/blob/v2.337.0/src/Runner.Worker/FileCommandManager.cs",
+        "https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/host/src/Ps/Host/TypeScriptCompiler.lean"
+      ],
+      "notReached": [
+        "A recovery / TypeScript5 seed replay",
+        "Current native compiler and CLI boundary checks",
+        "Current N1 development gate",
+        "Same-source full-compiler TypeScript comparison",
+        "C1/C2/C3 qualification",
+        "Provider acceptance"
+      ],
+      "artifact": {
+        "id": 11606206671,
+        "name": "psc0-sh1-ts7.0.2-956e2c3345d8d634904ff812b31d3b84fc9c23d9",
+        "sizeBytes": 196002,
+        "zipSha256": "cbc38cabfcebc94d8ab356557343c3a6dc786b611b2652cf6e3e15624a2c121d",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/37909229485/artifacts/11606206671"
+      },
+      "repair": [
+        "Remove unused global current-TypeScript GITHUB_PATH injection",
+        "Supply frozen recovery children an explicit historical-first environment after runner augmentation",
+        "Verify and retain exact frozen-resolver launcher/version before recovery build",
+        "Preserve historical source, arguments, manifests and seed identities"
+      ]
+    }
+  ],
+  "claimBoundaries": [
+    "The package probe and profile contract are not full PSC0 compatibility evidence.",
+    "No full-compiler TypeScript performance measurement has been earned by the failed integration attempt.",
+    "A remains selected; compiler qualification, portable IR typing, provider acceptance and full strict SH/1 remain separate."
+  ]
+}

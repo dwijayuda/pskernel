@@ -116,6 +116,17 @@ generated, fixed-point and provider outcomes remain pending cloud evidence.
 Cache/artifact reuse also recompiles authenticated A TypeScript with 5.8.3 and
 requires the exact original JavaScript hash before current qualification proceeds.
 See [TYPESCRIPT7.md](docs/selfhost-language/TYPESCRIPT7.md).
+The first integrated TypeScript 7 checkpoint, `956e2c3345d8d634904ff812b31d3b84fc9c23d9`,
+failed only in frozen S0 recovery in [run 37909229485](https://github.com/dwijayuda/pskernel/actions/runs/37909229485).
+The exact installed-profile contract, source guards and historical native build
+(118 jobs) passed. The runner globally prepended current TypeScript 7 after
+printing the historical step PATH; frozen S0 ignores the new explicit override
+and then encountered TS5112. Current PSC0 generation was not reached.
+The coherent repair removes the unused global current-TypeScript PATH entry,
+pins the historical child environment after runner augmentation, and records
+the frozen resolver's effective launcher/version before any recovery build.
+Historical source, compiler flags, seed hashes and A selection remain unchanged.
+See [typescript7-execution.json](docs/selfhost-language/typescript7-execution.json).
 Do not claim a speedup before comparing the measured TypeScript phase.
 
 ## Current source and qualification checkpoints

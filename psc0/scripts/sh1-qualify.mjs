@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { appendFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { appendFile, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -168,6 +168,62 @@ async function verifyHistoricalSeedReceipt(directory, { closure, identity, ident
   return receipt;
 }
 
+async function historicalChildEnvironment(sourceRoot, outDir) {
+  assert.equal(typescriptVersion, '5.8.3', 'PSC0_SH1_HISTORICAL_CHILD_PROFILE');
+  // Pin after the Actions runner has augmented PATH. Frozen S0 cannot read
+  // PSC0_TSC and must discover this exact installed launcher itself.
+  const env = { ...process.env,
+    PATH: path.dirname(tsc) + path.delimiter + (process.env.PATH ?? ''),
+  };
+  const receipt = {
+    schemaVersion: 1,
+    evidence: 'frozen-historical-typescript-resolution',
+    sourceRef: historicalRef,
+    expectedLauncher: await realpath(tsc),
+    expectedVersion: 'Version 5.8.3',
+    cwd: sourceRoot,
+    effectivePath: env.PATH,
+    passed: false,
+    resolver: 'Exact cwd/PATH candidate ordering from immutable S0 TypeScriptCompiler.lean.',
+  };
+  try {
+    let selected;
+    // This intentionally mirrors the frozen resolver, including cwd-local
+    // precedence. Any conflicting local installation is rejected before build.
+    for (const directory of [sourceRoot, ...env.PATH.split(path.delimiter)]) {
+      const base = path.resolve(sourceRoot, directory || '.');
+      for (const candidate of [
+        path.join(base, 'node_modules/typescript/bin/tsc'),
+        path.join(base, '../typescript/bin/tsc'), path.join(base, 'tsc'),
+      ]) {
+        if (existsSync(candidate)) {
+          const resolved = await realpath(candidate);
+          if (resolved.replaceAll("\\", '/').endsWith('/typescript/bin/tsc')) {
+            selected = resolved;
+            break;
+          }
+        }
+      }
+      if (selected) break;
+    }
+    receipt.selectedLauncher = selected ?? null;
+    assert.equal(selected, receipt.expectedLauncher, 'PSC0_SH1_HISTORICAL_CHILD_LAUNCHER');
+    receipt.reportedVersion = runCommand(process.execPath, [selected, '--version'], {
+      cwd: sourceRoot, env, encoding: 'utf8', stdio: 'pipe', timeout: 10000,
+    }).stdout.trim();
+    assert.equal(receipt.reportedVersion, receipt.expectedVersion,
+      'PSC0_SH1_HISTORICAL_CHILD_TYPESCRIPT_PIN');
+    receipt.passed = true;
+    return env;
+  } catch (error) {
+    receipt.error = { name: error.name, message: error.message };
+    throw error;
+  } finally {
+    await writeJson(path.join(outDir, 'historical-typescript-resolution.json'), receipt);
+    process.stdout.write('PSC0_SH1_HISTORICAL_TYPESCRIPT_RESOLUTION: ' + JSON.stringify(receipt) + '\n');
+  }
+}
+
 async function recoverSeed(sourceRoot, outDir) {
   const { closure, identity, identitySha256 } = await historicalIdentity(sourceRoot);
   const receiptPath = path.join(outDir, 'seed.json');
@@ -181,10 +237,11 @@ async function recoverSeed(sourceRoot, outDir) {
     }
   }
   if (!cached) {
-    runCommand(historicalRecipe.build[0], historicalRecipe.build.slice(1), { cwd: sourceRoot });
+    const env = await historicalChildEnvironment(sourceRoot, outDir);
+    runCommand(historicalRecipe.build[0], historicalRecipe.build.slice(1), { cwd: sourceRoot, env });
     await mkdir(outDir, { recursive: true });
     const command = historicalRecipe.compile.map((item) => item.replace('<output>', outDir));
-    runCommand(path.join(sourceRoot, command[0]), command.slice(1), { cwd: sourceRoot });
+    runCommand(path.join(sourceRoot, command[0]), command.slice(1), { cwd: sourceRoot, env });
     const artifacts = {};
     for (const name of historicalRecipe.artifacts) {
       artifacts[name] = sha256(await readFile(path.join(outDir, name)));

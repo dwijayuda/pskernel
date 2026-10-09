@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtemp, writeFile, readFile, readdir, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, readdir, rm, symlink, chmod } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -30,14 +30,14 @@ test('accepted bytes and completion receipt match, including a subsequent owned 
   assert.notEqual(second.transactionId, first.transactionId);
   assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'second');
   assert.equal(second.artifacts[0].sha256, hash('second'));
-  assert.equal(existsSync(path.join(directory, '.answer.psc-lock')), false);
+  assert.equal(existsSync(path.join(directory, '.psc-output-lock')), false);
 }));
 test('handwritten output is preserved and receives no ownership receipt', () => fixture(async ({ directory, publish }) => {
   await writeFile(path.join(directory, 'answer.ts'), 'handwritten');
   await assert.rejects(publish({ 'answer.ts': 'generated' }), /OUTPUT_UNOWNED/);
   assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'handwritten');
   assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
-  assert.equal(existsSync(path.join(directory, '.answer.psc-lock')), false);
+  assert.equal(existsSync(path.join(directory, '.psc-output-lock')), false);
 }));
 test('manual edits to previously generated output are never overwritten', () => fixture(async ({ directory, publish }) => {
   await publish({ 'answer.ts': 'first' });
@@ -101,7 +101,7 @@ test('a real partial rename failure restores the complete preceding generation',
   assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'first');
   assert.equal(await readFile(path.join(directory, 'answer.js'), 'utf8'), 'first js');
   assert.deepEqual(await readFile(path.join(directory, 'answer.checked.json')), receipt);
-  assert.equal(existsSync(path.join(directory, '.answer.psc-lock')), false);
+  assert.equal(existsSync(path.join(directory, '.psc-output-lock')), false);
 }));
 test('a first-generation partial failure leaves no new output or completion receipt', () => fixture(async ({ directory, publish }) => {
   await assert.rejects(publish({ 'answer.ts': 'new', 'answer.js': 'new js' }, {
@@ -114,7 +114,7 @@ test('a first-generation partial failure leaves no new output or completion rece
   assert.equal(existsSync(path.join(directory, 'answer.ts')), false);
   assert.equal(existsSync(path.join(directory, 'answer.js')), false);
   assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
-  assert.equal(existsSync(path.join(directory, '.answer.psc-lock')), false);
+  assert.equal(existsSync(path.join(directory, '.psc-output-lock')), false);
 }));
 test('output names cannot escape the selected stem and symbolic links are refused', () => fixture(async ({ directory, publish }) => {
   await assert.rejects(publish({ 'answer.ts': 'safe', '../other.ts': 'bad' }), /OUTPUT_ARTIFACT_NAME/);
@@ -156,7 +156,7 @@ test('incomplete rollback retains backups and never restores a stale receipt', (
   assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'first');
   assert.equal(await readFile(path.join(directory, 'answer.js'), 'utf8'), 'concurrent user edit');
   assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
-  const lock = path.join(directory, '.answer.psc-lock');
+  const lock = path.join(directory, '.psc-output-lock');
   const journal = JSON.parse(await readFile(path.join(lock, 'journal.json'), 'utf8'));
   assert.equal(existsSync(path.join(journal.staging, 'previous', 'answer.checked.json')), true);
   assert.equal(existsSync(path.join(lock, 'recovery.json')), true);
@@ -167,4 +167,75 @@ test('a previously absent destination appearing during validation is preserved',
   }), /OUTPUT_CHANGED_DURING_BUILD/);
   assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'new user file');
   assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
+}));
+
+test('overlapping stems share the output directory lease', () => fixture(async ({ directory, publish }) => {
+  let release, entered;
+  const ready = new Promise(resolve => { entered = resolve; });
+  const held = new Promise(resolve => { release = resolve; });
+  const first = publish({ 'answer.ts': 'first', 'answer.d.ts': 'declaration' }, {
+    beforeCommit: async () => { entered(); await held; },
+  });
+  await ready;
+  try {
+    await assert.rejects(publish({ 'answer.d.ts': 'competing' }, {
+      outputPath: path.join(directory, 'answer.d.ts'),
+    }), /OUTPUT_BUSY/);
+  } finally { release(); }
+  await first;
+  assert.equal(await readFile(path.join(directory, 'answer.d.ts'), 'utf8'), 'declaration');
+}));
+test('final artifact edits cannot acquire a completed receipt', () => fixture(async ({ directory, publish }) => {
+  let checks = 0;
+  await assert.rejects(publish({ 'answer.ts': 'generated' }, {
+    beforeCommit: async () => {
+      if (++checks === 2) await writeFile(path.join(directory, 'answer.ts'), 'late user edit');
+    },
+  }), /OUTPUT_RECOVERY_REQUIRED/);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'late user edit');
+  assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
+  assert.equal(existsSync(path.join(directory, '.psc-output-lock/recovery.json')), true);
+}));
+test('a receipt created after artifact writes is preserved and never overwritten', () => fixture(async ({ directory, publish }) => {
+  let checks = 0;
+  const external = 'user-created receipt bytes';
+  await assert.rejects(publish({ 'answer.ts': 'generated' }, {
+    beforeCommit: async () => {
+      if (++checks === 2) await writeFile(path.join(directory, 'answer.checked.json'), external);
+    },
+  }), /OUTPUT_CHANGED_DURING_BUILD/);
+  assert.equal(existsSync(path.join(directory, 'answer.ts')), false);
+  assert.equal(await readFile(path.join(directory, 'answer.checked.json'), 'utf8'), external);
+}));
+
+test('cleanup failure is disclosed after commitment without rolling back valid outputs', {
+  skip: process.platform === 'win32' || process.getuid?.() === 0,
+}, () => fixture(async ({ directory, publish }) => {
+  const lock = path.join(directory, '.psc-output-lock');
+  const warnings = [];
+  const originalWrite = process.stderr.write;
+  let checks = 0;
+  process.stderr.write = function (chunk, ...rest) {
+    if (String(chunk).startsWith('PSC0_OUTPUT_COMMITTED_CLEANUP_REQUIRED: ')) {
+      warnings.push(String(chunk));
+      return true;
+    }
+    return originalWrite.call(this, chunk, ...rest);
+  };
+  try {
+    const receipt = await publish({ 'answer.ts': 'committed' }, {
+      beforeCommit: async () => { if (++checks === 2) await chmod(lock, 0o500); },
+    });
+    assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'committed');
+    assert.deepEqual(JSON.parse(await readFile(path.join(directory, 'answer.checked.json'), 'utf8')), receipt);
+    assert.equal(warnings.length, 1);
+    const detail = JSON.parse(warnings[0].slice('PSC0_OUTPUT_COMMITTED_CLEANUP_REQUIRED: '.length));
+    assert.equal(detail.committed, true);
+    assert.equal(detail.transactionId, receipt.transactionId);
+    assert.equal(detail.lock, lock);
+    assert(detail.paths.includes(lock));
+  } finally {
+    process.stderr.write = originalWrite;
+    if (existsSync(lock)) await chmod(lock, 0o700);
+  }
 }));

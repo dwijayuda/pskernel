@@ -49,7 +49,7 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     buffers.set(name, Buffer.from(bytes));
   }
   await mkdir(directory, { recursive: true });
-  const lock = path.join(directory, '.' + stem + '.psc-lock');
+  const lock = path.join(directory, '.psc-output-lock');
   try { await mkdir(lock); }
   catch (error) {
     if (error.code === 'EEXIST') throw new Error('PSC0_OUTPUT_BUSY: ' + lock);
@@ -147,6 +147,22 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     // Observe known invalidation again after the awaited artifact operations.
     // This does not claim an instantaneous snapshot against arbitrary writers.
     await beforeCommit?.();
+    const finalLease = JSON.parse((await regularBytes(path.join(lock, 'owner.json')))?.toString('utf8') ?? 'null');
+    if (finalLease?.transactionId !== transactionId) throw new Error('PSC0_OUTPUT_LEASE_CHANGED');
+    if (await regularBytes(receiptPath) !== undefined) {
+      throw new Error('PSC0_OUTPUT_CHANGED_DURING_BUILD: ' + receiptName);
+    }
+    for (const [name, expected] of buffers) {
+      const current = await regularBytes(path.join(directory, name));
+      if (current === undefined || !current.equals(expected)) {
+        throw new Error('PSC0_OUTPUT_CHANGED_DURING_BUILD: ' + name);
+      }
+    }
+    for (const name of previous.keys()) {
+      if (!buffers.has(name) && await regularBytes(path.join(directory, name)) !== undefined) {
+        throw new Error('PSC0_OUTPUT_CHANGED_DURING_BUILD: ' + name);
+      }
+    }
     // This audit receipt is never a portable proof or a transferable capability.
     await rename(path.join(staging, receiptName), receiptPath);
     completed = true;
@@ -206,11 +222,17 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     // break another writer's lease automatically. Private backups are retained
     // when explicit recovery is required; no completed result is reported.
     if (completed || rollbackComplete) {
-      if (staging) await rm(staging, { recursive: true, force: true }).catch(() => {});
+      const cleanupFailures = [];
+      if (staging) await rm(staging, { recursive: true, force: true }).catch(() => cleanupFailures.push(staging));
       const lease = await regularBytes(path.join(lock, 'owner.json')).catch(() => undefined);
       let owned = false;
       try { owned = JSON.parse(lease?.toString('utf8') ?? 'null')?.transactionId === transactionId; } catch {}
-      if (owned) await rm(lock, { recursive: true, force: true }).catch(() => {});
+      if (owned) await rm(lock, { recursive: true, force: true }).catch(() => cleanupFailures.push(lock));
+      else cleanupFailures.push(lock);
+      if (cleanupFailures.length && completed) {
+        process.stderr.write('PSC0_OUTPUT_COMMITTED_CLEANUP_REQUIRED: ' +
+          JSON.stringify({ committed: true, transactionId, lock, staging, paths: cleanupFailures }) + '\n');
+      }
     } else if (staging) {
       await writeFile(path.join(lock, 'recovery.json'), JSON.stringify({
         staging, output, entryPath: owner, state: 'recovery-required',

@@ -612,7 +612,13 @@ theorem psKernelInferCoreWithFuel_app_checked_defeq_rejects
       ]
 
 
-theorem psKernelInferCoreWithFuel_unknown_fvar_ignores_cache
+/-
+Open cache keys are scoped to the checker configuration. A raw state supplied
+by a caller may already contain a hit, so this operational miss equation makes
+that premise explicit. Fresh sessions satisfy it unconditionally (below).
+The configuration-soundness theorems retain their existing cache invariants.
+-/
+theorem psKernelInferCoreWithFuel_unknown_fvar_cache_miss
     (remaining : Nat)
     (whnf :
       PsKernelCheckerContext ->
@@ -629,6 +635,11 @@ theorem psKernelInferCoreWithFuel_unknown_fvar_ignores_cache
     (state : PsKernelCheckerState)
     (name : PsKernelName)
     (inferOnly : Bool)
+    (hCacheMiss :
+      psKernelExprMapGet
+          (if inferOnly then state.inferOnly else state.checkedInfer)
+          (PsKernelExpr.fvar name) =
+        Option.none)
     (hDepth :
       psKernelCheckerContextEnterRecDepth context =
         Except.ok nextContext)
@@ -647,7 +658,7 @@ theorem psKernelInferCoreWithFuel_unknown_fvar_ignores_cache
         inferOnly =
       Except.error "unknown free variable" := by
   cases inferOnly <;>
-    simp [
+    simp_all [
       psKernelInferCoreWithFuel,
       psKernelInferCacheEligible,
       psKernelSemanticCacheEligible,
@@ -656,3 +667,36 @@ theorem psKernelInferCoreWithFuel_unknown_fvar_ignores_cache
       hDepth,
       hMissing
     ]
+
+theorem psKernelInferCoreWithFuel_unknown_fvar_empty
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (name : PsKernelName)
+    (inferOnly : Bool)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hMissing :
+      psKernelLocalContextFind nextContext.localContext name =
+        Option.none) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining) whnf defeq context
+        psKernelCheckerStateEmpty (PsKernelExpr.fvar name) inferOnly =
+      Except.error "unknown free variable" := by
+  apply psKernelInferCoreWithFuel_unknown_fvar_cache_miss
+    remaining whnf defeq context nextContext
+    psKernelCheckerStateEmpty name inferOnly
+  · cases inferOnly <;> rfl
+  · exact hDepth
+  · exact hMissing

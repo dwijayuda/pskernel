@@ -17,10 +17,10 @@ def traceTheoremPhases
   | .error failure =>
       IO.eprintln ("PHASE_ERROR transport " ++ failure.message)
       pure failure.exitCode
-  | .ok theorem => do
+  | .ok thmInfo => do
       let fuel := state.session.resources.fuel
       let resources := state.session.resources
-      IO.eprintln ("PHASE_THEOREM " ++ coreNameText theorem.base.name)
+      IO.eprintln ("PHASE_THEOREM " ++ coreNameText thmInfo.base.name)
       IO.eprintln ("PHASE_FUEL " ++ toString fuel)
       match psKernelKernelSessionPreflight state.session with
       | .error error =>
@@ -31,13 +31,13 @@ def traceTheoremPhases
           let initial :=
             psKernelMkCheckerSession
               (psKernelKernelSessionEnvironment state.session)
-              theorem.base.levelParams
+              thmInfo.base.levelParams
               PsKernelDefinitionSafety.safe
               resources.maxRecDepth
               resources.maxNatSize
           IO.eprintln "PHASE_BEGIN header"
           let t0 ← IO.monoMsNow
-          match psKernelCheckConstantBaseWithSession fuel initial theorem.base with
+          match psKernelCheckConstantBaseWithSession fuel initial thmInfo.base with
           | .error error =>
               IO.eprintln ("PHASE_ERROR header " ++ error)
               pure 1
@@ -46,7 +46,7 @@ def traceTheoremPhases
               IO.eprintln ("PHASE_END header elapsed_ms=" ++ toString (t1-t0))
               IO.eprintln "PHASE_BEGIN proposition"
               let t2 ← IO.monoMsNow
-              match psKernelSessionIsProp fuel afterHeader theorem.base.type with
+              match psKernelSessionIsProp fuel afterHeader thmInfo.base.type with
               | .error error =>
                   IO.eprintln ("PHASE_ERROR proposition " ++ error)
                   pure 1
@@ -59,7 +59,7 @@ def traceTheoremPhases
                     IO.eprintln ("PHASE_END proposition elapsed_ms=" ++ toString (t3-t2))
                     IO.eprintln "PHASE_BEGIN closed_term"
                     let t4 ← IO.monoMsNow
-                    match psKernelCheckNoMVarNoFVar theorem.value with
+                    match psKernelCheckNoMVarNoFVar thmInfo.value with
                     | .error error =>
                         IO.eprintln ("PHASE_ERROR closed_term " ++ error)
                         pure 1
@@ -68,7 +68,7 @@ def traceTheoremPhases
                         IO.eprintln ("PHASE_END closed_term elapsed_ms=" ++ toString (t5-t4))
                         IO.eprintln "PHASE_BEGIN universe_params"
                         let t6 ← IO.monoMsNow
-                        match psKernelCheckLevelParams theorem.value theorem.base.levelParams with
+                        match psKernelCheckLevelParams thmInfo.value thmInfo.base.levelParams with
                         | .error error =>
                             IO.eprintln ("PHASE_ERROR universe_params " ++ error)
                             pure 1
@@ -77,7 +77,7 @@ def traceTheoremPhases
                             IO.eprintln ("PHASE_END universe_params elapsed_ms=" ++ toString (t7-t6))
                             IO.eprintln "PHASE_BEGIN checked_inference"
                             let t8 ← IO.monoMsNow
-                            match psKernelSessionCheck fuel (Prod.snd propResult) theorem.value with
+                            match psKernelSessionCheck fuel (Prod.snd propResult) thmInfo.value with
                             | .error error =>
                                 IO.eprintln ("PHASE_ERROR checked_inference " ++ error)
                                 pure 1
@@ -88,7 +88,7 @@ def traceTheoremPhases
                                 let t10 ← IO.monoMsNow
                                 match psKernelSessionIsDefEq
                                     fuel (Prod.snd inferred) (Prod.fst inferred)
-                                    theorem.base.type with
+                                    thmInfo.base.type with
                                 | .error error =>
                                     IO.eprintln ("PHASE_ERROR final_defeq " ++ error)
                                     pure 1

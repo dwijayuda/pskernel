@@ -390,7 +390,7 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
     ∃ (first : PsKernelSimpleMutualTypeDecl)
       (remaining : List PsKernelSimpleMutualTypeDecl)
       (paramResult indexResult : PsKernelOpenBindersResult)
-      (resultLevel : PsKernelLevel)
+      (headerLevel resultLevel : PsKernelLevel)
       (tailShapes : List PsKernelSimpleMutualTypeShape),
       decl.types = first :: remaining ∧
       PsKernelTypingJudgment environment psKernelLocalContextEmpty
@@ -465,6 +465,6 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
     · apply PsKernelDefEqJudgment.reductionClosure
       simpa [hCheckedContext, hSortedContext, initial,
         psKernelMkCheckerSession, psKernelCheckerContextEmpty] using hSortSound.1
-  exact ⟨first, remaining, paramResult, indexResult, resultLevel, tailShapes,
+  exact ⟨first, remaining, paramResult, indexResult, sorted.1, resultLevel, tailShapes,
     hTypes, hHeaderTyping, hParamsConfig.1, hIndicesConfig.1,
     hParamEnv, hIndexEnv, hHistory⟩

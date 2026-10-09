@@ -1,0 +1,91 @@
+name: PSC0 generated JS kernel differential corpus
+
+on:
+  push:
+    branches: ['psc0/generated-kernel-differential-v1']
+  workflow_dispatch:
+
+concurrency:
+  group: psc0-core-differential-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generated-kernel-corpus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache@v4
+        with:
+          path: psc0/.lake/build
+          key: psc0-generated-corpus-${{ runner.os }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean', 'psc0/packages/pskernel-core/src/**/*.lean') }}
+          restore-keys: |
+            psc0-joint-native-${{ runner.os }}-
+            psc0-core-${{ runner.os }}-
+      - name: Check unchanged compiler and kernel implementation closure
+        run: |
+          node scripts/selfhost-baseline.mjs --assert-unchanged
+          node scripts/joint-kernel-closure.mjs --assert-full
+          node --check scripts/generated-core-differential-corpus.mjs
+          node --test scripts/generated-core-provider.test.mjs
+      - name: Build actual native PSKernel Core and host prelude inventory
+        run: lake build psc_kernel_core_provider psc2_joint_closure_inventory
+      - name: Download immutable native-checked source and canonical admissions
+        uses: actions/download-artifact@v4
+        with:
+          name: psc0-kernel-checked-ts
+          repository: ${{ github.repository }}
+          run-id: 37850559156
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: psc0/dist/transpiler-bench/source
+      - name: Download TypeScript 7 strictly checked JavaScript candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: psc0-ts7-checked-corpus-replay
+          repository: ${{ github.repository }}
+          run-id: 37851336504
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: psc0/dist/transpiler-bench
+      - name: Export exact typed prelude from the installed PSC0 source
+        run: |
+          mkdir -p dist/joint-kernel
+          lake exe psc2_joint_closure_inventory --prelude dist/joint-kernel/checked-prelude.json
+      - name: Differentially replay the full positive and negative provider corpus
+        run: |
+          node scripts/generated-core-differential-corpus.mjs \
+            dist/transpiler-bench/ts7/index.js \
+            dist/joint-kernel/checked-prelude.json \
+            dist/transpiler-bench/source/index.ts \
+            dist/transpiler-bench/source/index.admissions.json \
+            dist/transpiler-bench/source/index.checked.json \
+            dist/transpiler-bench/reports/ts7.json
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Preserve real checked-kernel cross-runtime conformance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-generated-core-differential-corpus
+          path: |
+            psc0/dist/joint-kernel/generated-core-differential-corpus.json
+            psc0/dist/joint-kernel/checked-prelude.json
+          if-no-files-found: ignore
+          retention-days: 14

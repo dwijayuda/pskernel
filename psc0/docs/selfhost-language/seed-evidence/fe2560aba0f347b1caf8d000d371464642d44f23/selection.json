@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-explicit-qualified-successor-selection",
+  "selectedSeed": "R",
+  "selectionRecordedInThisCommit": true,
+  "selectionParentCommit": "4b8c3277fcbf53ba3b42d30cdf2e84505c75e6e9",
+  "branch": "psc0/sh1-projection-grammar-v1",
+  "observedUtc": "2026-10-09 13:41:00 UTC",
+  "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "qualificationRun": {
+    "id": 37925722635,
+    "attempt": 1,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "compiler",
+        "id": 113804052074,
+        "conclusion": "success",
+        "completedUtc": "2026-10-09T12:50:43Z"
+      },
+      {
+        "name": "kernel-admissions",
+        "id": 113827136830,
+        "conclusion": "success",
+        "completedUtc": "2026-10-09T12:52:11Z"
+      },
+      {
+        "name": "successor-recovery",
+        "id": 113827137018,
+        "conclusion": "success",
+        "completedUtc": "2026-10-09T13:37:09Z"
+      }
+    ]
+  },
+  "collectorRun": {
+    "id": 37938411520,
+    "attempt": 1,
+    "sourceRef": "4b8c3277fcbf53ba3b42d30cdf2e84505c75e6e9",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/37938411520",
+    "conclusion": "success",
+    "jobId": 113846248702,
+    "artifact": {
+      "id": 11619261585,
+      "name": "psc0-sh1-seed-evidence-fe2560aba0f347b1caf8d000d371464642d44f23-37938411520",
+      "size_in_bytes": 68235,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11619261585",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11619261585/zip",
+      "expired": false,
+      "created_at": "2026-10-09T13:39:49Z",
+      "expires_at": "2026-11-08T13:39:49Z",
+      "updated_at": "2026-10-09T13:39:49Z",
+      "digest": "sha256:b473a2cdcc65d106be0cd5c066a5c53482803ba875ad65aec484ec1cf94bb75e",
+      "workflow_run": {
+        "id": 37938411520,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/sh1-projection-grammar-v1",
+        "head_sha": "4b8c3277fcbf53ba3b42d30cdf2e84505c75e6e9"
+      }
+    }
+  },
+  "previousSeed": {
+    "name": "A",
+    "manifestGitBlob": "0e6061816357df8a768f513748d1c57e7304e368",
+    "identitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+    "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096"
+  },
+  "selectedSeedChanged": true,
+  "selectionMethod": "Explicit non-force branch commit after compiler fixed point, independent provider acceptance, independent cold recovery, and authentication of the original retained receipt-file bytes.",
+  "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+  "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+  "selectedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+  "providerReceiptSha256": "1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77",
+  "coldRecoveryReceiptSha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d",
+  "qualificationFileSha256": "b3e9a277a7ce5ee9e0bccc449c9ca20a06766cd94cabd34fe4d722c6425e6fac",
+  "fileMappings": [
+    {
+      "artifactPath": "index.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/collector-index.json",
+      "sha256": "6588aeb4e4e57e7c9b9f8c4ddbc76748495097399deeb334b0bc0389fd146ba5",
+      "bytes": 46875,
+      "gitBlob": "60715f7db20ac755ec3e721a4bafd92a143774d2"
+    },
+    {
+      "artifactPath": "proposed/psc0/selfhost-seed.json",
+      "repositoryPath": "psc0/selfhost-seed.json",
+      "sha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+      "bytes": 13593,
+      "gitBlob": "44a05964c49000478c282afc013c84fca8c2de65"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/grammar-migration-cold-recovery.json",
+      "repositoryPath": "psc0/docs/selfhost-language/grammar-migration-cold-recovery.json",
+      "sha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d",
+      "bytes": 3123,
+      "gitBlob": "e54b0ae8fb835ffd86a3143adbdd400e60841cc3"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/grammar-migration-provider.json",
+      "repositoryPath": "psc0/docs/selfhost-language/grammar-migration-provider.json",
+      "sha256": "1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77",
+      "bytes": 3525,
+      "gitBlob": "61fd209bf140c8c4cda07b7f27178675eb3ba154"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/C1-receipt.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/C1-receipt.json",
+      "sha256": "82c7e0757e060511ca1b26dfe41f5bd9fd9fab45c21cc083e32a31b910fc082d",
+      "bytes": 11626,
+      "gitBlob": "21bd7cc284d49df3dfc8c14b1be26f0e7e2453a2"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/C2-receipt.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/C2-receipt.json",
+      "sha256": "02e1f1c00ef220f961bd81f928af203f0454ee53a02c18ed0af476b54289a0fb",
+      "bytes": 9939,
+      "gitBlob": "9f446f2c3c199b26f384a8350ead9095ad494ce7"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/C3-receipt.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/C3-receipt.json",
+      "sha256": "ddae7e175e4aaa96e7bd4564d866e89332c846b2149b440da2b14d747ea70293",
+      "bytes": 9934,
+      "gitBlob": "b4be37f9fd56573fbcd8e6d73b4804780f8b08b5"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/N1-grammar-closure.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/N1-grammar-closure.json",
+      "sha256": "183d4a9696db8ba4b54754323e8e13b9d4919bd4860f68413642c5c221f46b5e",
+      "bytes": 24885,
+      "gitBlob": "893fe530c8e0424a0f03d60887b768cfca1f34eb"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/N1-receipt.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/N1-receipt.json",
+      "sha256": "f358d77d2f691466ccde09a90fbece926f9db38440453780ab043a4ff262b9cd",
+      "bytes": 8815,
+      "gitBlob": "dffee0189cd3343ef5879c83266e045c524edc6d"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/cold-C1-receipt.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/cold-C1-receipt.json",
+      "sha256": "7bdf9c43bbf93a25de4096d847ad47b2cf7415c72aeff3c0921e3ec4494ce5ef",
+      "bytes": 10069,
+      "gitBlob": "a1cf6741af62589e9dbe14bcaa7ad0552cf02dc4"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/cold-C2-receipt.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/cold-C2-receipt.json",
+      "sha256": "4947d5fcb0864f2b5595ddf8cd37603698f9b7015e692d8d53a038f34bbcf7e9",
+      "bytes": 9941,
+      "gitBlob": "1ea44c4d7b1b181056363eb531134298c2f3140f"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/cold-seed-promotion.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/cold-seed-promotion.json",
+      "sha256": "d74a04176e7b5a71e4757f737b02737d166c754c35b04dc40d1642985aa95c22",
+      "bytes": 12460,
+      "gitBlob": "018b1d11583a09c84fd44e48e50911404e6ea846"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/parent-A-manifest.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/parent-A-manifest.json",
+      "sha256": "e05247358018ebf685b148c43e700398c7c56f7c6aa6bfb54b8a012d0185cecc",
+      "bytes": 2880,
+      "gitBlob": "0e6061816357df8a768f513748d1c57e7304e368"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/qualification.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/qualification.json",
+      "sha256": "b3e9a277a7ce5ee9e0bccc449c9ca20a06766cd94cabd34fe4d722c6425e6fac",
+      "bytes": 5156,
+      "gitBlob": "39ea5c5ec80eb98f425da740e31152e3071db4ce"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/seed-promotion.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/seed-promotion.json",
+      "sha256": "d74a04176e7b5a71e4757f737b02737d166c754c35b04dc40d1642985aa95c22",
+      "bytes": 12460,
+      "gitBlob": "018b1d11583a09c84fd44e48e50911404e6ea846"
+    },
+    {
+      "artifactPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/source-closure.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/source-closure.json",
+      "sha256": "7331074b94d1571016ca6fa160bb2ef765e6099a36d32c81abb3264134ab4ee7",
+      "bytes": 9213,
+      "gitBlob": "b4ac36c8a8d04257123f575369c83374011ff534"
+    },
+    {
+      "artifactPath": "request.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/collector-request.json",
+      "sha256": "1c5d4406c753c02a5c150cc4128ecce95e3c868677cd46b122d6286d323bbead",
+      "bytes": 534,
+      "gitBlob": "d30fda9f14ae870f835fe12a4afe749a961d50a8"
+    },
+    {
+      "artifactPath": "run-provenance.json",
+      "repositoryPath": "psc0/docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/collector-run-provenance.json",
+      "sha256": "29c50cde81742b5118837d73408c2d1d0a3d904e2a0a301d5bd361b273514311",
+      "bytes": 42270,
+      "gitBlob": "8ca95726ebfc086641817ca94a016795ffc058f9"
+    }
+  ],
+  "artifactBytePolicy": "Every mapped file preserves the exact collector content and SHA-256. Archive digests identify ZIP artifacts and are not substituted for receipt-file hashes. The collector index is preserved verbatim; its artifact-internal paths and selectedSeedChanged:false describe collection, while this record describes the later explicit selection.",
+  "workerMigrationApplied": false,
+  "workerMigrationQualified": false,
+  "strictSh1Qualified": false,
+  "fullStandardConformance": false,
+  "fullPscvConformance": false
+}

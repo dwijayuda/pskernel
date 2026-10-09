@@ -1,145 +1,59 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 12:55:25 UTC.
+Updated: 2026-10-09 13:41:00 UTC.
 
-## Active continuation: new-only R3 source grammar and projection repair
+## Active continuation: R selected; finite F source migration prepared
 
-The user explicitly requests **no active backward-compatibility grammar**: adopt
-the new supplied .ps syntax only where implemented. Work is isolated on
-`psc0/sh1-projection-grammar-v1`, based on qualified integration
-`5e3a991088aaa735c8f324c4e70a7a3dee4cd69a`. Canonical integration remains at that
-completed checkpoint while this new source change is prepared and qualified.
+The user requests the new supplied `.ps` syntax only, with no active legacy grammar mode. Work remains on `psc0/sh1-projection-grammar-v1`, descended from qualified integration `5e3a991088aaa735c8f324c4e70a7a3dee4cd69a`. The canonical implementation branch remains at that previous completed checkpoint until F qualifies. Main is untouched.
 
-The supplied reference is
-`ProofScript_PSCV_Language_Reference_NORMATIVE_RC_v2_Lean4.35rc3 (1)(6).md`,
-401,569 bytes, 8,546 lines, SHA-256
-`4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71`.
-Its status is PSCV-RC-v2 design, with a pending Standard environment manifest and
-pending implementation conformance. This work adopts a bounded set of its owned
-base grammar rules; it does not claim full PSC2 Standard or PSCV conformance or
-repin the Lean/provider workstream.
+**R is now explicitly selected after all evidence gates passed. F source is still prepared and unapplied in this selection commit.** Handwritten `.lean` remains authoritative; current `.ps` parsing, printing and owned source consumers use bounded new-only `ps-0.9-r3`. Strict SH/1, full Standard/PSCV and unrestricted PSC1 are not claimed.
 
-Implementation assembled for the coherent qualification checkpoint:
+### Earned R evidence
 
-- Shared exact-name / first-segment / longest proper local-prefix resolution
-  repairs recursive record-parameter projections. Structural identity predicates
-  stay exact-only; no type-error fallback or name exception is added.
-- Replace the current .ps parser and printer together: newlines for sequence
-  ownership, one comma-oriented explicit declaration/constructor parameter group,
-  strict record commas, complete grouped call terms and adjacent postfix calls.
-- Preserve empty invocation as an empty argument list. Optional argument
-  completion is unsupported and fails explicitly; `f(())` remains one Unit
-  argument. The old `f()`-means-Unit shortcut is removed.
-- Use a PS-specific lexical entry for its whitespace/line rules; the bounded
-  Lean authoring parser remains available as a separate source kind.
-- Migrate owned active PS fixtures and source-loading paths. A full raw-source
-  parser must see PS imports before any host stripping can hide obsolete syntax.
-- Unsupported broader syntax and verification semantics remain explicit
-  refusals. In particular the old compilerBind/compilerPure-specific do sugar
-  is not relabeled as Standard monadic or verified do.
+Qualified source `fe2560aba0f347b1caf8d000d371464642d44f23`, [run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635), attempt 1, completed successfully. Compiler job `113804052074`, independent provider job `113827136830`, and cold recovery job `113827137018` all passed. The successful source has 61 modules and 1,113,918 raw source bytes.
 
-The R2 compiler qualification and independent selected-provider acceptance have
-completed successfully. Cold successor recovery is still running, so the selected
-manifest remains A and the F worker source remains unapplied.
+- Source closure: `f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226`.
+- C1/C2/C3 JavaScript: `70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061`.
+- Selected R identity: `47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225`.
+- Selected manifest actual file SHA-256: `7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694`.
+- Provider receipt actual file SHA-256: `1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77`.
+- Cold receipt actual file SHA-256: `2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d`.
 
-The first cloud attempt at `48723fe676a0d9ae3fa819bd314199fe0ca2e926`
-([run 37925016499](https://github.com/dwijayuda/pskernel/actions/runs/37925016499))
-passed source/profile/helper and authenticated A recovery gates, then stopped in
-the native build. Two root causes were reported: the new local name `postfix`
-is reserved in Lean, and the Term empty-call guard referenced a list helper that
-is not imported there. The correction renames that local to `postfixResult` and
-uses direct `List.nil`/`List.cons` matching without adding an import or changing
-application semantics. The parser/lexer helper and local-name audit found no
-additional direct-reference blocker. The next attempt runs all three existing
-native regression suites before returning their combined failure status, so one
-failing suite cannot hide another suite's diagnostics. No gate is relaxed.
-See [the exact first-attempt evidence](docs/selfhost-language/grammar-migration-attempt-1.json).
-The coherent correction is `fe2560aba0f347b1caf8d000d371464642d44f23`
-([run 37925722635](https://github.com/dwijayuda/pskernel/actions/runs/37925722635)).
-Its native build, all three native suites, actual checked-seed build, focused
-source/import tests and CLI boundaries passed. The native suites recorded
-75 core, 10 translation and 16 erasure passes. N1 passed full new-PS correspondence
-for all 61 modules (904,355 PS bytes) and generated capability gates. Its complete
-native original-IR check accepted 56,391 expressions and 725,484 visited steps,
-with zero findings.
+Native suites passed 75 core, 10 translation and 16 erasure cases. N1 checked complete Lean-to-new-PS-to-Lean correspondence for all 61 modules and 904,355 PS bytes. Its full original-IR checker accepted 56,391 expressions and 725,484 visited steps with zero findings. C2/C3 accepted the complete original IR with zero findings before emitting that same IR and matched all four required products. Their full expression/step counts are not inferred from the native counts.
 
-Compiler job `113804052074` completed successfully at 12:50:43 UTC. C1, C2 and
-C3 generated the same JavaScript SHA-256,
-`70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061`.
-C2/C3 agree on all four required products. The original IR used for C2 and C3
-emission was completely checked and accepted, with zero findings. C1 preserves
-the explicit pre-checker A boundary; its historical canonical surface and
-different TypeScript source are not a current legacy grammar mode. The raw
-61-module source closure is
-`f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226`.
+Per-generation capability gates passed 21 projection API cases, 39 projection and 34 grammar behavior observations per raw Lean/PS fixture, plus the complete bounded grammar positive/refusal suite. C1 preserves the explicitly historical A boundary for its first canonical product. That immutable historical artifact is not a current legacy parser mode.
 
-Independent provider job `113827136830` passed at 12:52:11 UTC. It accepted four
-distinct exact admission streams across eight C2/C3 artifact roles, under the
-unchanged Lean 4.34.0 provider. This is post-emission admission acceptance, not
-a claim that this provider invocation gated emission.
+The unchanged Lean 4.34.0 provider accepted four distinct exact admission streams covering eight C2/C3 roles. This is post-emission acceptance; it does not claim this provider invocation gated emission.
 
-Cold job `113827137018` began its fresh two-generation rebuild from A at
-12:51:35 UTC and remains running. Neither cold recovery nor successor selection
-is claimed from the completed compiler/provider jobs. The complete 33 compiler
-and one provider logged JSON records are preserved in
-[the R2 compiler/provider evidence bundle](docs/selfhost-language/grammar-migration-compiler-evidence.json).
-Its logged provider object is not substituted for the original receipt file:
-the separate collector must retrieve and hash the actual artifact bytes before
-selection.
+Cold recovery independently rebuilt two new raw-source generations from pinned A into fresh output/cache directories. The pinned same-revision recovery runner matched all first/final products, checked the final original IR before emission, authenticated the parent/cache and recorded success. Its measured elapsed time was 2,728,786.866427 ms, about 45m29s. The job finished at 13:37:09 UTC.
 
-The same emitted TypeScript source compiled with TS 5.8.3 in 8,391.102236 ms
-and TS 7.0.2 in 2,649.813612 ms in this run. These are single-pair direct compiler
-timings. Generated C1/C2/C3 builds took 1,085.325 / 1,148.619 / 1,200.500 seconds;
-preparation and emission dominate, so the direct TS timing is not a whole-pipeline
-speedup claim.
+The separate [receipt collector](https://github.com/dwijayuda/pskernel/actions/runs/37938411520) authenticated the successful run, jobs, immutable artifact IDs and 18 exact retained JSON files. Those original file bytes are committed verbatim. The collector did not activate the seed; this later explicit selection commit writes its authenticated proposed manifest. The [selection record](docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/selection.json) maps every retained file to its exact digest and Git blob. Archive digests are not receipt-file digests.
 
-All 12 worker rewrites, three alias removals and seven source-guard updates are
-prepared and independently reviewed, with no active source application yet.
-The [exact candidate fragments and gate plan](docs/selfhost-language/worker-migration-candidate.json)
-preserve every byte outside the 14 named definitions. The prepared 87-case gate
-compares compiler-owned values through JSON observations; the ABI hook reuses the
-existing prepared declarations and exact IR, adding one small isolated signature
-probe instead of preparing the full baseline closure again. Integration still
-requires the fully qualified, accepted, recoverable successor to be selected.
+R compiler/provider logs and all 34 complete logged records remain in `docs/selfhost-language/grammar-migration-compiler-evidence.json` and `evidence-logs/`. The cold log and its three-record evidence bundle are retained alongside them. Exact artifact receipts, ancestry, qualification and grammar evidence are under `docs/selfhost-language/seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/`.
 
-The new-only consumer audit found one reusable-API gap beyond the already guarded
-CLI paths. The prepared F host patch asserts the exact current PS grammar before
-preparation or cache reuse and binds its profile in PS session hashes/receipts.
-Three focused host-boundary tests and the existing real generated PS session
-cover that addition; these new tests have not executed yet. Lean preparation is
-unchanged. A small provider receipt log addition exposes exact read-back file
-bytes and their SHA-256, so the final F evidence can be authenticated without a
-second collection workflow. A concise current authoring guide is also prepared.
+### Implemented grammar and compiler repair
 
-The planned early gates cover migrated native parser/printer/elaboration tests,
-fatal UTF-8 and actual-AST import loading, and successor descriptor integrity.
-N1 checks 40 small grammar round trips plus explicit refusals and the complete
-61-module Lean-to-new-PS-to-Lean correspondence. The exact N1 canonical surface
-digest is reused as the required C2/C3 surface digest, avoiding a repeated full
-round-trip pass. Each current generated compiler also executes the raw capability
-fixtures, including 39 projection and 34 new-grammar behavior observations.
+The adopted reference has SHA-256 `4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71` (401,569 bytes / 8,546 lines). It is a design RC with pending Standard environment and implementation conformance. The implementation adopts the documented bounded grammar, not the entire reference.
 
-A distinct TS7 successor descriptor and same-revision recovery runner are included.
-They preserve the complete unchanged v1 A descriptor and compare the separate
-first-generation and final products of A(raw successor source) and C1(raw source).
-Only a fresh two-generation recovery may earn the cold-recovery receipt. Seed
-selection requires both that receipt and actual independent provider acceptance;
-compiler qualification alone never changes the selected manifest. The remaining
-12 worker migrations are prepared separately and are not part of this source
-checkpoint. Current
-Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2 pins remain; historical S0/A recovery
-uses immutable old revisions and exact TypeScript 5.8.3. That recovery is not an
-active old-PS parser in the new compiler. A remains selected until a separately
-qualified recoverable successor is explicitly selected.
+The parser/printer now own newline sequences, one comma-oriented explicit declaration/constructor binder group, strict record commas, grouped call terms and adjacent postfix calls. Empty invocation stays an empty argument list and unsupported completion is refused; `f(())` remains one Unit argument. PS whitespace/BOM positions have a dedicated lexical entry. Current raw PS imports are parsed before host processing. Unsupported broader syntax remains explicit refusals.
 
-The remaining practical source migration is now finite:
-**12 workers in 9 source files across 2 families**, followed by **3 projection
-alias removals** and the final adoption evidence. See
-[the backlog](docs/selfhost-language/MIGRATION_BACKLOG.md) and
-[its machine-readable inventory](docs/selfhost-language/migration-backlog.json).
-All 1,500 declaration headers in the audited 5e3 baseline's 61-module closure were inspected;
-none has a non-explicit binder after an explicit binder, so the new declaration
-grammar does not require reordering the current compiler's public telescopes.
+Shared exact-name / first-segment / longest proper local-prefix resolution repairs recursive record-parameter projections. Structural identity predicates remain exact-only, and recursion substitutes only the selected parameter base with scope/shadowing respected. No type-error fallback or name exception is added.
+
+The first R attempt (`48723fe676a0d9ae3fa819bd314199fe0ca2e926`, run 37925016499) failed the native build on two direct blockers: reserved local `postfix` and a Term reference to an unimported list helper. R2 renamed the local and used direct list pattern matching, then ran all three native suites without suppressing later diagnostics. [The original failure evidence](docs/selfhost-language/grammar-migration-attempt-1.json) is preserved. No gate was weakened.
+
+### Next authorized work: apply and qualify F
+
+The prepared finite candidate contains 12 worker rewrites in nine source files, three typed projection-alias removals in one additional source file, and seven corresponding source-guard updates. Public types, parameter order, fuel behavior, reversal/error ordering and fresh-name limits are preserved. All bytes outside the 14 named definitions were restored exactly. See [the candidate ledger](docs/selfhost-language/worker-migration-candidate.json).
+
+F adds 87 independent worker behavior observations (51 fresh-name / 36 collection-worker cases), paired R/F execution and public Core/ordered-IR ABI comparisons. The ABI hook reuses the already prepared declarations and original IR; it does not prepare the full baseline closure again. A small isolated signature/typed-partial probe and existing partial-application gate cover representation-sensitive behavior.
+
+F also closes the reusable PS preparation-session boundary: assert the exact grammar before preparation/cache reuse and bind it in PS session identity/receipts. Three focused host-boundary tests plus the existing real generated PS session exercise that change. The provider receipt logger exposes exact read-back bytes and their digest so F evidence needs no second collector. These F changes have not run yet.
+
+Apply the prepared F files only on this selected-R descendant, then run one `[sh1-qualify]` source checkpoint. It must pass native/N1 gates, the paired R/F cases and ABI checks, C1/C2/C3 original-IR/fixed-point checks, and independent provider acceptance. **F keeps selected R and does not request another successor promotion or cold-recovery cycle.** After success, preserve actual receipts, finish the current guide/ledgers and normally fast-forward `psc0/sh1-implementation-v1` using a fresh lease.
+
+Current pins remain Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2. Immutable S0/A recovery retains its original revisions and exact TypeScript 5.8.3. The separate root TypeScript compiler-API workspace remains on 5.8.3.
+
+The R run's same emitted TypeScript source compiled in 8,391.102236 ms with 5.8.3 and 2,649.813612 ms with 7.0.2. These are one-pair direct compiler timings. Its C1/C2/C3 builds took about 1,085 / 1,149 / 1,201 seconds; preparation and emission dominate. No whole-pipeline or worker-rewrite speedup is claimed.
 
 ## Historical completed M6 and TypeScript 7 result
 

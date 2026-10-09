@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+  "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+  "moduleCount": 61,
+  "sourceBytes": 1113918,
+  "sourceKind": "raw-authoritative-lean",
+  "language": {
+    "implementation": "PSC1",
+    "candidateCapability": "PSC0-SH/1 structural state generalization and parameter projections",
+    "canonicalSourceGrammar": {
+      "edition": "ps-0.9-r3",
+      "mode": "new-only",
+      "support": "bounded-selfhost-subset",
+      "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+      "fullStandardConformance": false,
+      "fullPscvConformance": false
+    }
+  },
+  "recipe": {
+    "files": [
+      {
+        "path": "scripts/sh1-qualify.mjs",
+        "sha256": "37b3a9bca3c5dc599f13c61a1d7cb5219004d775e34bb240b5e17f58ad66d41a"
+      },
+      {
+        "path": "scripts/sh1-capabilities.mjs",
+        "sha256": "29a45533419aee1b3e1ac4c0417ce690885748fa66620a158be924caeec01684"
+      },
+      {
+        "path": "scripts/sh1-grammar-conformance.mjs",
+        "sha256": "65c4f90ff8f8b4d7436f623517a06839c18d70a7b1dfd62d60162ce86f21477e"
+      },
+      {
+        "path": "scripts/sh1-projection-conformance.mjs",
+        "sha256": "44a9baad9f18a231e681b71dc696373ca15a4cdd8b252c31656f5f9b8404051f"
+      },
+      {
+        "path": "scripts/sh1-successor-seed.mjs",
+        "sha256": "c65be03a65e0da19c99707319d41c4836f97f1addcb082bc4959946d1fa7e9f8"
+      },
+      {
+        "path": "psconfig.json",
+        "sha256": "2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-accumulators.lean",
+        "sha256": "45d7948c21431670d89762f97a6679a371b37defbfcc9d15138639c5f926d9e6"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-accumulators.ps",
+        "sha256": "e0619554ac2384922ebe1739fa208114b08229118c6a995b7ee7ab2da9a28e65"
+      },
+      {
+        "path": "scripts/proofscript-source.mjs",
+        "sha256": "98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608"
+      },
+      {
+        "path": "scripts/checked-source-snapshot.mjs",
+        "sha256": "1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c"
+      },
+      {
+        "path": "scripts/selfhost-source-workspace.mjs",
+        "sha256": "ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8"
+      },
+      {
+        "path": "scripts/LeanCheckedSeed.lean",
+        "sha256": "f5af4cb73002682ab0e43f78a22d79c6d1006f5f4a0fd8b980c0a7bb3ac91ad1"
+      },
+      {
+        "path": "scripts/typescript-cli.mjs",
+        "sha256": "6e25698d6bd0d1793f1eb77d5f66a127d46039a8ec773a67960d116e26e7a64a"
+      },
+      {
+        "path": "scripts/check-typescript-profile.mjs",
+        "sha256": "a96dfd40691da9e9f3343f2a90af31406796449ff68a61f4dd5956a4edc44c17"
+      },
+      {
+        "path": "scripts/workspace-layout.mjs",
+        "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1"
+      },
+      {
+        "path": "scripts/generated-preparation-session.mjs",
+        "sha256": "96838acd33a35a84705c6116bbebc881e91e96188c75ce3170ca836a04ca71ad"
+      },
+      {
+        "path": "scripts/original-ir-inventory.mjs",
+        "sha256": "bb11bea9a2c9a242fbbd0234078773b7a91a1c99697292e581cc56870000f47f"
+      },
+      {
+        "path": "scripts/original-ir-carrier.mjs",
+        "sha256": "745f5920e4d6459e00af883bafeaf2ab169a1d3a3a5ebe60fe97d46b80ef9ed2"
+      },
+      {
+        "path": "scripts/sh1-ir-checker-conformance.mjs",
+        "sha256": "fc6f436f430ada8d0caec75efe217c19db77289ab9d7a528142296ed2772936b"
+      },
+      {
+        "path": "test/IrCheckerTests.lean",
+        "sha256": "36790248f17f147fe5958256c7cb9ed26f767c410c1319aeadf590d480e69f9d"
+      },
+      {
+        "path": "scripts/sh1-source-snapshot.mjs",
+        "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8"
+      },
+      {
+        "path": "scripts/sh1-seed-manifest.mjs",
+        "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f"
+      },
+      {
+        "path": "scripts/sh1-iterate.mjs",
+        "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8"
+      },
+      {
+        "path": "scripts/sh1-iteration-conformance.mjs",
+        "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4"
+      },
+      {
+        "path": "scripts/sh1-foundation-conformance.mjs",
+        "sha256": "4bcb6ef9606e8527c47c2f736b56ae115df472e0ced8a5c9cfc1da88f633e383"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-foundation-reference.lean",
+        "sha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-foundation-probe.lean",
+        "sha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819"
+      },
+      {
+        "path": "scripts/sh1-helper-conformance.mjs",
+        "sha256": "b239a2da5479711a47c7721ab9e98a7e6ec88437f43f9e262dece8664779a83d"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-helpers-reference.lean",
+        "sha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-helpers-probe.lean",
+        "sha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9"
+      },
+      {
+        "path": "scripts/sh1-generic-erasure-conformance.mjs",
+        "sha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+        "sha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de"
+      }
+    ],
+    "sha256": "5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb"
+  },
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "typescriptProfile": {
+    "version": "7.0.2",
+    "purpose": "current-emission",
+    "arguments": [
+      "--ignoreConfig"
+    ]
+  },
+  "artifacts": {
+    "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "preparation": {
+    "schemaVersion": 1,
+    "kind": "psc0-preparation-session",
+    "evidence": "admission-ready",
+    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "sourceKind": "lean",
+    "closureSha256": "07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538",
+    "moduleCount": 61,
+    "cache": {
+      "prefixModules": 0,
+      "parseHits": 0,
+      "parseMisses": 61,
+      "parseEvictions": 0,
+      "parseUncachedModules": 0,
+      "preparedModules": 61,
+      "finishHit": false,
+      "retainedParsedEntries": 61,
+      "retainedParsedSourceBytes": 1110100,
+      "retainedPrefixModules": 61,
+      "retainedPrefixSourceBytes": 1110100,
+      "maxParsedEntries": 128,
+      "maxParsedSourceBytes": 8388608
+    },
+    "timingsMs": {
+      "input": 2.110924999928102,
+      "parse": 40511.33755200077,
+      "prepare": 545218.6212810003,
+      "finish": 112675.55638900003,
+      "freeze": 383.8315560000483,
+      "total": 698794.243481
+    },
+    "warmNoChange": {
+      "schemaVersion": 1,
+      "kind": "psc0-preparation-session",
+      "evidence": "admission-ready",
+      "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "sourceKind": "lean",
+      "closureSha256": "07ceecb011cfffad090e30f560a2e81f264bea3a28e743949532b36fb3117538",
+      "moduleCount": 61,
+      "cache": {
+        "prefixModules": 61,
+        "parseHits": 0,
+        "parseMisses": 0,
+        "parseEvictions": 0,
+        "parseUncachedModules": 0,
+        "preparedModules": 0,
+        "finishHit": true,
+        "retainedParsedEntries": 61,
+        "retainedParsedSourceBytes": 1110100,
+        "retainedPrefixModules": 61,
+        "retainedPrefixSourceBytes": 1110100,
+        "maxParsedEntries": 128,
+        "maxParsedSourceBytes": 8388608
+      },
+      "timingsMs": {
+        "input": 2.027462000027299,
+        "parse": 0,
+        "prepare": 0,
+        "finish": 0,
+        "freeze": 0,
+        "total": 2.0572379999794066
+      }
+    }
+  },
+  "originalIrInventory": {
+    "report": "original-ir-inventory.json",
+    "traversalComplete": true,
+    "findingCounts": {},
+    "findingCount": 0,
+    "findingCountsCoverage": "all-findings",
+    "portableChecker": {
+      "status": "accepted",
+      "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+      "options": {
+        "maxSteps": 5000000,
+        "maxTypeSteps": 65536,
+        "maxFindings": 1000
+      }
+    },
+    "runtimeIrTypingAccepted": true,
+    "sameOriginalIrCheckedBeforeEmission": true,
+    "strictSh1Qualified": false
+  },
+  "timingsMs": {
+    "loadAndPrepare": 698966.014034,
+    "admissions": 113074.94499600003,
+    "canonicalSurface": 45282.051597999875,
+    "emit": 339873.16518500005,
+    "tscAndWrite": 3304.2846570000984,
+    "total": 1200500.461399
+  },
+  "normalizationEvidence": "Elaborated worker representation is compared in canonical admissions; source comparison uses canonical surface syntax.",
+  "evidence": "candidate-build",
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

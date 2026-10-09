@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+  "moduleCount": 61,
+  "evidence": "compiler-qualified-current-source-fixed-point",
+  "equation": "Q is the pinned qualified compiler from A; C1=Q(B); C2=C1(B); C3=C2(B); compare C2 and C3 products",
+  "authoringSeed": {
+    "kind": "previous-qualified-authoring-seed",
+    "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+    "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+    "identitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+    "independentAlgorithm": false,
+    "priorQualification": {
+      "evidence": "compiler-qualified-current-source-fixed-point",
+      "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+      "runId": 37831951758,
+      "artifactName": "psc0-sh1-e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "claim": "Compiler-qualified seed; selected-provider acceptance is a separate receipt."
+    },
+    "producerToolchain": {
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+      "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+      "typescript": "Version 5.8.3"
+    },
+    "executionRuntime": {
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+      "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+    }
+  },
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "typescriptProfile": {
+    "version": "7.0.2",
+    "purpose": "current-emission",
+    "arguments": [
+      "--ignoreConfig"
+    ]
+  },
+  "rawAuthoringSourceConsumedEveryGeneration": true,
+  "artifacts": {
+    "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "c1CompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+  "c2CompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+  "c3CompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+  "rawCapabilityKinds": [
+    "lean",
+    "proofScript"
+  ],
+  "helperSourceCorrespondence": "helpers/receipt.json",
+  "helperRuntimeGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "recursiveGenericErasureGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "sourceGrammar": {
+    "edition": "ps-0.9-r3",
+    "mode": "new-only",
+    "support": "bounded-selfhost-subset",
+    "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "fullStandardConformance": false,
+    "fullPscvConformance": false
+  },
+  "grammarGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "projectionResolutionGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "canonicalSourceContract": "C2/C3 emit and consume the bounded new-only ps-0.9-r3 grammar. The pinned parent may emit its historical canonical form as the C1 build artifact; it is not a current parser mode.",
+  "nativeCanonicalSourceCorrespondence": {
+    "report": "development/N1/grammar-closure.json",
+    "reportSha256": "183d4a9696db8ba4b54754323e8e13b9d4919bd4860f68413642c5c221f46b5e",
+    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "moduleCount": 61
+  },
+  "portableIrCheckerGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "originalIrCheckedBuilds": [
+    "C2",
+    "C3"
+  ],
+  "originalIrChecking": "C1 checks the exact current-source IR emitted as C2; C2 checks the exact IR emitted as C3.",
+  "immutableSeedBoundary": {
+    "status": "unavailable-at-explicit-seed-boundary",
+    "boundary": {
+      "kind": "selected-authoring-seed",
+      "executingSourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+      "reason": "The explicitly pinned pre-checker Q may produce C1; current C1/C2/C3 checker consumers remain mandatory."
+    }
+  },
+  "runtimeIrTypingEnforced": true,
+  "runtimeIrStrictQualification": "not-claimed",
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

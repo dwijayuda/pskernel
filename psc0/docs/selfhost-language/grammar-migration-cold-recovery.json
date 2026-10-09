@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "evidence": "qualified-successor-cold-recovery",
+  "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+  "parentIdentitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+  "parentCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+  "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+  "successorIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+  "runnerSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "runnerRecipeSha256": "5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb",
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "expectedFirstGenerationArtifacts": {
+    "canonicalSurfaceSourceSha256": "a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "expectedArtifacts": {
+    "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "coldSuccessorRecovery": true,
+  "passed": true,
+  "selectedSeedChanged": false,
+  "strictSh1Qualified": false,
+  "fullPscvConformance": false,
+  "method": "pinned-parent-two-new-raw-source-generations",
+  "actualFirstGenerationArtifacts": {
+    "canonicalSurfaceSourceSha256": "a6f286aa69415eb86a36d80b6a100f74b9b5e2e6854a5a65b25ec624ed3f88d2",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "6bc6dbbce90a9ae1b2e76ce33bcefb430a4ee8405841e1c1ce15af6db8492954",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "actualArtifacts": {
+    "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "originalIrCheckedBeforeEmission": true,
+  "parentCacheVerified": true,
+  "elapsedMs": 2728786.866427
+}

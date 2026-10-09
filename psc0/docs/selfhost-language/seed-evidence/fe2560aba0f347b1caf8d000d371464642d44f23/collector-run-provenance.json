@@ -1,0 +1,990 @@
+{
+  "schemaVersion": 1,
+  "evidence": "github-api-run-job-artifact-binding",
+  "request": {
+    "schemaVersion": 1,
+    "kind": "psc0-sh1-seed-evidence-request",
+    "repository": "dwijayuda/pskernel",
+    "runId": 37925722635,
+    "runAttempt": 1,
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "sourceBranch": "psc0/sh1-projection-grammar-v1",
+    "workflowId": 378853677,
+    "workflowPath": ".github/workflows/psc0-sh1.yml",
+    "requiredJobs": [
+      "compiler",
+      "successor-recovery",
+      "kernel-admissions"
+    ],
+    "purpose": "Collect authenticated file evidence and a proposed selection; never activate the seed."
+  },
+  "collector": {
+    "runId": 37938411520,
+    "sourceRef": "4b8c3277fcbf53ba3b42d30cdf2e84505c75e6e9"
+  },
+  "run": {
+    "id": 37925722635,
+    "name": "PSC0 SH1 language qualification",
+    "node_id": "WFR_kwLOUlmxxc8AAAAI1IyaCw",
+    "head_branch": "psc0/sh1-projection-grammar-v1",
+    "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "path": ".github/workflows/psc0-sh1.yml",
+    "display_title": "fix(psc0): correct native grammar build blockers and collect regressi…",
+    "run_number": 17,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 378853677,
+    "check_suite_id": 102755520806,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAX7LTRJg",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635",
+    "pull_requests": [],
+    "created_at": "2026-10-09T11:45:41Z",
+    "updated_at": "2026-10-09T13:37:09Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-09T11:45:41Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/102755520806",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/378853677",
+    "head_commit": {
+      "id": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "tree_id": "68a744ebc21330d06fbfbddfaac0130625860d16",
+      "message": "fix(psc0): correct native grammar build blockers and collect regression outcomes [sh1-qualify]\n\nRename the reserved postfix local without losing the compiled grammar identity.\nUse a direct List constructor match for empty-call refusal in Term, preserving\nthe nonempty application branch and avoiding a new dependency. Collect all three\nexisting native suite outcomes before failing the regression step.\n\nRetain the exact first cloud attempt and its skipped qualification status.\nThe selected seed, provider, fuel checks and grammar acceptance policy are unchanged.",
+      "timestamp": "2026-10-09T11:45:32Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "jobs": [
+    {
+      "id": 113804052074,
+      "run_id": 37925722635,
+      "workflow_name": "PSC0 SH1 language qualification",
+      "head_branch": "psc0/sh1-projection-grammar-v1",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAaf0AGag",
+      "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/113804052074",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635/job/113804052074",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-09T11:45:42Z",
+      "started_at": "2026-10-09T11:45:44Z",
+      "completed_at": "2026-10-09T12:50:43Z",
+      "name": "compiler",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-09T11:45:45Z",
+          "completed_at": "2026-10-09T11:45:48Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-09T11:45:48Z",
+          "completed_at": "2026-10-09T11:46:11Z"
+        },
+        {
+          "name": "Select the historical, v1, or qualified successor authoring seed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-09T11:46:11Z",
+          "completed_at": "2026-10-09T11:46:11Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-09T11:46:11Z",
+          "completed_at": "2026-10-09T11:46:17Z"
+        },
+        {
+          "name": "Run leanprover/lean-action@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-09T11:46:17Z",
+          "completed_at": "2026-10-09T11:46:34Z"
+        },
+        {
+          "name": "Install separate pinned current and historical TypeScript profiles",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-09T11:46:34Z",
+          "completed_at": "2026-10-09T11:46:38Z"
+        },
+        {
+          "name": "Verify the installed TypeScript 7 profile before compiler generation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-09T11:46:38Z",
+          "completed_at": "2026-10-09T11:46:38Z"
+        },
+        {
+          "name": "Verify host syntax and bootstrap source restrictions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-09T11:46:38Z",
+          "completed_at": "2026-10-09T11:46:40Z"
+        },
+        {
+          "name": "Verify successor seed descriptor and cache contracts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-09T11:46:40Z",
+          "completed_at": "2026-10-09T11:46:41Z"
+        },
+        {
+          "name": "Restore the selected qualified compiler bytes",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-09T11:46:41Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Verify the restored selected compiler bytes",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Restore the immutable v1 parent when a successor cache misses",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Route only the recovery edges whose exact cache is missing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Preserve an immutable historical source checkout when recovery needs it",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Restore historical native build",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Identify the pinned recovery recipe and toolchain",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Restore exact historical seed",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Verify seed digests or recover once from the preserved source",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Retain historical native outputs before testing changed source",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 19,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Retain verified seed before testing changed source",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 20,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Retrieve the immutable v1 parent artifact if it is still retained",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 21,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Read the immutable v1 source only when its bytes need recovery",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 22,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:42Z"
+        },
+        {
+          "name": "Verify or recover the v1 seed with its original TypeScript replay",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-09T11:46:42Z",
+          "completed_at": "2026-10-09T11:46:50Z"
+        },
+        {
+          "name": "Retain recovered immutable parent bytes before successor recovery",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 24,
+          "started_at": "2026-10-09T11:46:50Z",
+          "completed_at": "2026-10-09T11:46:50Z"
+        },
+        {
+          "name": "Read the selected successor's pinned recovery runner and source",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-10-09T11:46:50Z",
+          "completed_at": "2026-10-09T11:46:50Z"
+        },
+        {
+          "name": "Retrieve the selected successor artifact when retained",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 26,
+          "started_at": "2026-10-09T11:46:50Z",
+          "completed_at": "2026-10-09T11:46:50Z"
+        },
+        {
+          "name": "Recover a missing successor with its own pinned runner under TypeScript 7",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 27,
+          "started_at": "2026-10-09T11:46:50Z",
+          "completed_at": "2026-10-09T11:46:50Z"
+        },
+        {
+          "name": "Verify selected authoring cache and execution runtime before current generation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-09T11:46:50Z",
+          "completed_at": "2026-10-09T11:46:50Z"
+        },
+        {
+          "name": "Report retained seed IR type-argument findings",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-09T11:46:50Z",
+          "completed_at": "2026-10-09T11:46:51Z"
+        },
+        {
+          "name": "Retain the verified qualified authoring seed",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 30,
+          "started_at": "2026-10-09T11:46:51Z",
+          "completed_at": "2026-10-09T11:46:51Z"
+        },
+        {
+          "name": "Restore incremental current compiler build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-09T11:46:51Z",
+          "completed_at": "2026-10-09T11:46:52Z"
+        },
+        {
+          "name": "Build current native compiler",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32,
+          "started_at": "2026-10-09T11:46:52Z",
+          "completed_at": "2026-10-09T11:47:03Z"
+        },
+        {
+          "name": "Run native parser, translation, and erasure regression targets",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33,
+          "started_at": "2026-10-09T11:47:03Z",
+          "completed_at": "2026-10-09T11:47:05Z"
+        },
+        {
+          "name": "Build the actual native checked seed for source and import tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34,
+          "started_at": "2026-10-09T11:47:05Z",
+          "completed_at": "2026-10-09T11:47:12Z"
+        },
+        {
+          "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35,
+          "started_at": "2026-10-09T11:47:12Z",
+          "completed_at": "2026-10-09T11:47:16Z"
+        },
+        {
+          "name": "Verify native and generated TypeScript CLI boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36,
+          "started_at": "2026-10-09T11:47:16Z",
+          "completed_at": "2026-10-09T11:47:19Z"
+        },
+        {
+          "name": "Run the bounded native development gate before qualification",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37,
+          "started_at": "2026-10-09T11:47:19Z",
+          "completed_at": "2026-10-09T11:52:11Z"
+        },
+        {
+          "name": "Compare TypeScript 5 and 7 on the same complete emitted compiler",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 38,
+          "started_at": "2026-10-09T11:52:11Z",
+          "completed_at": "2026-10-09T11:52:22Z"
+        },
+        {
+          "name": "Build the selected-seed candidate before full qualification",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 39,
+          "started_at": "2026-10-09T11:52:22Z",
+          "completed_at": "2026-10-09T12:10:58Z"
+        },
+        {
+          "name": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 40,
+          "started_at": "2026-10-09T12:10:58Z",
+          "completed_at": "2026-10-09T12:50:36Z"
+        },
+        {
+          "name": "Retain the newly qualified seed without activating a source migration",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 41,
+          "started_at": "2026-10-09T12:50:36Z",
+          "completed_at": "2026-10-09T12:50:36Z"
+        },
+        {
+          "name": "Retain incremental native outputs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 42,
+          "started_at": "2026-10-09T12:50:36Z",
+          "completed_at": "2026-10-09T12:50:38Z"
+        },
+        {
+          "name": "Retain compiler evidence and exact generated artifacts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 43,
+          "started_at": "2026-10-09T12:50:38Z",
+          "completed_at": "2026-10-09T12:50:41Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 85,
+          "started_at": "2026-10-09T12:50:41Z",
+          "completed_at": "2026-10-09T12:50:41Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 86,
+          "started_at": "2026-10-09T12:50:41Z",
+          "completed_at": "2026-10-09T12:50:41Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 87,
+          "started_at": "2026-10-09T12:50:41Z",
+          "completed_at": "2026-10-09T12:50:41Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/113804052074",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000016094,
+      "runner_name": "GitHub Actions 1000016094",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 113827136830,
+      "run_id": 37925722635,
+      "workflow_name": "PSC0 SH1 language qualification",
+      "head_branch": "psc0/sh1-projection-grammar-v1",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAagKBFPg",
+      "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/113827136830",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635/job/113827136830",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-09T12:50:43Z",
+      "started_at": "2026-10-09T12:50:46Z",
+      "completed_at": "2026-10-09T12:52:11Z",
+      "name": "kernel-admissions",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-09T12:50:47Z",
+          "completed_at": "2026-10-09T12:50:48Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-09T12:50:48Z",
+          "completed_at": "2026-10-09T12:51:09Z"
+        },
+        {
+          "name": "Read the independently qualified native provider at its exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-09T12:51:09Z",
+          "completed_at": "2026-10-09T12:51:17Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-09T12:51:17Z",
+          "completed_at": "2026-10-09T12:51:17Z"
+        },
+        {
+          "name": "Run leanprover/lean-action@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-09T12:51:17Z",
+          "completed_at": "2026-10-09T12:51:29Z"
+        },
+        {
+          "name": "Restore pinned native provider build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-09T12:51:29Z",
+          "completed_at": "2026-10-09T12:51:29Z"
+        },
+        {
+          "name": "Build the existing provider target without editing its implementation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-09T12:51:29Z",
+          "completed_at": "2026-10-09T12:52:03Z"
+        },
+        {
+          "name": "Retain the pinned provider build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-09T12:52:03Z",
+          "completed_at": "2026-10-09T12:52:04Z"
+        },
+        {
+          "name": "Read exact compiler qualification artifacts from this run",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-09T12:52:04Z",
+          "completed_at": "2026-10-09T12:52:05Z"
+        },
+        {
+          "name": "Obtain actual provider decisions for the qualified admission streams",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-09T12:52:05Z",
+          "completed_at": "2026-10-09T12:52:08Z"
+        },
+        {
+          "name": "Retain provider acceptance or the exact rejection evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-09T12:52:08Z",
+          "completed_at": "2026-10-09T12:52:08Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-09T12:52:08Z",
+          "completed_at": "2026-10-09T12:52:09Z"
+        },
+        {
+          "name": "Post Read the independently qualified native provider at its exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-09T12:52:09Z",
+          "completed_at": "2026-10-09T12:52:09Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-09T12:52:09Z",
+          "completed_at": "2026-10-09T12:52:09Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-09T12:52:09Z",
+          "completed_at": "2026-10-09T12:52:09Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/113827136830",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000016119,
+      "runner_name": "GitHub Actions 1000016119",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 113827137018,
+      "run_id": 37925722635,
+      "workflow_name": "PSC0 SH1 language qualification",
+      "head_branch": "psc0/sh1-projection-grammar-v1",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/37925722635",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAagKBF-g",
+      "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/113827137018",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/37925722635/job/113827137018",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-09T12:50:43Z",
+      "started_at": "2026-10-09T12:50:46Z",
+      "completed_at": "2026-10-09T13:37:09Z",
+      "name": "successor-recovery",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-09T12:50:47Z",
+          "completed_at": "2026-10-09T12:50:48Z"
+        },
+        {
+          "name": "Read the exact qualified successor revision and its recovery runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-09T12:50:48Z",
+          "completed_at": "2026-10-09T12:51:10Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-09T12:51:10Z",
+          "completed_at": "2026-10-09T12:51:11Z"
+        },
+        {
+          "name": "Run leanprover/lean-action@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-09T12:51:11Z",
+          "completed_at": "2026-10-09T12:51:30Z"
+        },
+        {
+          "name": "Install the pinned TypeScript 7 recovery compiler in isolation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-09T12:51:30Z",
+          "completed_at": "2026-10-09T12:51:33Z"
+        },
+        {
+          "name": "Read the candidate descriptor and its immutable parent bytes from this run",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-09T12:51:33Z",
+          "completed_at": "2026-10-09T12:51:34Z"
+        },
+        {
+          "name": "Select the provisional successor without activating it",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-09T12:51:34Z",
+          "completed_at": "2026-10-09T12:51:35Z"
+        },
+        {
+          "name": "Rebuild the successor from its parent into fresh output and cache directories",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-09T12:51:35Z",
+          "completed_at": "2026-10-09T13:37:05Z"
+        },
+        {
+          "name": "Authenticate the cold recovery receipt and the rebuilt successor bytes",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-09T13:37:05Z",
+          "completed_at": "2026-10-09T13:37:05Z"
+        },
+        {
+          "name": "Retain the independent recovery receipt, exact products, and rebuilt cache",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-09T13:37:05Z",
+          "completed_at": "2026-10-09T13:37:07Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-09T13:37:07Z",
+          "completed_at": "2026-10-09T13:37:07Z"
+        },
+        {
+          "name": "Post Read the exact qualified successor revision and its recovery runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-09T13:37:07Z",
+          "completed_at": "2026-10-09T13:37:07Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-09T13:37:07Z",
+          "completed_at": "2026-10-09T13:37:07Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/113827137018",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000016120,
+      "runner_name": "GitHub Actions 1000016120",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ],
+  "artifacts": {
+    "compiler": {
+      "id": 11617460205,
+      "node_id": "MDg6QXJ0aWZhY3QxMTYxNzQ2MDIwNQ==",
+      "name": "psc0-sh1-ts7.0.2-fe2560aba0f347b1caf8d000d371464642d44f23",
+      "size_in_bytes": 7477193,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11617460205",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11617460205/zip",
+      "expired": false,
+      "digest": "sha256:28d65fad4a77f96676fad530e786761e6955444690e3707e2ae8b8181041bc0a",
+      "created_at": "2026-10-09T12:50:41Z",
+      "updated_at": "2026-10-09T12:50:41Z",
+      "expires_at": "2026-11-08T12:50:38Z",
+      "workflow_run": {
+        "id": 37925722635,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/sh1-projection-grammar-v1",
+        "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23"
+      }
+    },
+    "provider": {
+      "id": 11616189342,
+      "node_id": "MDg6QXJ0aWZhY3QxMTYxNjE4OTM0Mg==",
+      "name": "psc0-sh1-kernel-ts7.0.2-fe2560aba0f347b1caf8d000d371464642d44f23",
+      "size_in_bytes": 1283,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11616189342",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11616189342/zip",
+      "expired": false,
+      "digest": "sha256:26c0dfc6b2315de0785341015281b445c07e842102079ef19c5b2586f321df59",
+      "created_at": "2026-10-09T12:52:08Z",
+      "updated_at": "2026-10-09T12:52:08Z",
+      "expires_at": "2026-11-08T12:52:08Z",
+      "workflow_run": {
+        "id": 37925722635,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/sh1-projection-grammar-v1",
+        "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23"
+      }
+    },
+    "cold": {
+      "id": 11618882773,
+      "node_id": "MDg6QXJ0aWZhY3QxMTYxODg4Mjc3Mw==",
+      "name": "psc0-sh1-successor-recovery-ts7.0.2-fe2560aba0f347b1caf8d000d371464642d44f23",
+      "size_in_bytes": 2670771,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11618882773",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11618882773/zip",
+      "expired": false,
+      "digest": "sha256:00bb3be4fc777340cb05a8cd7c145ada2a7fd6e3b827ab5bfe8ef46246dacd04",
+      "created_at": "2026-10-09T13:37:06Z",
+      "updated_at": "2026-10-09T13:37:06Z",
+      "expires_at": "2026-11-08T13:37:05Z",
+      "workflow_run": {
+        "id": 37925722635,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/sh1-projection-grammar-v1",
+        "head_sha": "fe2560aba0f347b1caf8d000d371464642d44f23"
+      }
+    }
+  },
+  "note": "Artifact archive digests are transport metadata; receipt hashes are computed from the extracted receipt file bytes."
+}

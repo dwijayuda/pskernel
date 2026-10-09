@@ -270,26 +270,5 @@
       "sha256": "5e29ee890f5c08d3d3bfdfda4d060b20c03be14693feb0dcefbb457d6849eddb"
     },
     "sourceKind": "raw-authoritative-lean"
-  },
-  "recoveryEvidence": {
-    "evidence": "qualified-successor-cold-recovery",
-    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
-    "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
-    "parentIdentitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
-    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
-    "receiptSha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d",
-    "reference": "docs/selfhost-language/grammar-migration-cold-recovery.json",
-    "passed": true,
-    "coldSuccessorRecovery": true,
-    "runId": 37925722635
-  },
-  "providerEvidence": {
-    "providerSourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
-    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
-    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
-    "receiptSha256": "1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77",
-    "reference": "docs/selfhost-language/grammar-migration-provider.json",
-    "accepted": true,
-    "runId": 37925722635
   }
 }

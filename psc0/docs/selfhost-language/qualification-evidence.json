@@ -4,8 +4,8 @@
   "repository": "dwijayuda/pskernel",
   "historicalSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
   "implementationBranch": "psc0/sh1-implementation-v1",
-  "updatedUtc": "2026-10-09 12:55:25 UTC",
-  "currentStatus": "The bounded new-only ps-0.9-r3 grammar and projection source R2 is compiler-qualified and independently selected-provider accepted. Cold successor recovery is running; A remains selected and the prepared finite F worker migration has not been applied. Historical B/H/E/M6/TypeScript7 qualification is retained. Strict SH/1 and full Standard/PSCV conformance remain false.",
+  "updatedUtc": "2026-10-09 13:41:00 UTC",
+  "currentStatus": "The bounded new-only ps-0.9-r3 grammar/projection R2 is compiler-qualified, independently provider-accepted, cold-recoverable, and explicitly selected as authoring seed R after exact artifact receipt-byte authentication. The finite F source migration remains prepared but unapplied. Canonical integration is still at the prior qualified TS7 checkpoint. Strict SH/1 and full Standard/PSCV conformance remain false.",
   "checkpoints": {
     "boundedDevelopment": {
       "sourceRef": "9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
@@ -3353,13 +3353,15 @@
         "providerConclusion": "success",
         "providerCompletedUtc": "2026-10-09T12:52:11Z",
         "coldJob": 113827137018,
-        "coldConclusion": null
+        "coldConclusion": "success",
+        "conclusion": "success",
+        "coldCompletedUtc": "2026-10-09T13:37:09Z"
       },
-      "evidence": "compiler-qualified-current-source-fixed-point",
+      "evidence": "compiler-qualified-provider-accepted-cold-recoverable-selected-successor",
       "compilerQualified": true,
       "providerAccepted": true,
-      "coldRecoveryPassed": false,
-      "successorSelected": false,
+      "coldRecoveryPassed": true,
+      "successorSelected": true,
       "candidateIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
       "candidateJavaScriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
       "nativeOriginalIr": {
@@ -3534,7 +3536,9 @@
             ],
             "accepted": true
           }
-        ]
+        ],
+        "receiptSha256": "1736aa0c1b3fdd5d59b4c2653c053261e3ada36ea82b68d6b88400e17fc1ab77",
+        "receiptReference": "grammar-migration-provider.json"
       },
       "timings": {
         "scope": "One observed run, not a controlled benchmark.",
@@ -3593,19 +3597,40 @@
         "providerJsonRecords": 1,
         "compilerFullLogBlob": "3906e3a16673e71fb0fc6279ebb1d639a8552192",
         "providerFullLogBlob": "0102aea32c2250db6d6907bbb52d6989d4123318",
-        "scope": "Complete logged evidence; the selected manifest still requires the actual provider and cold receipt file bytes.",
+        "scope": "Complete primary compiler/provider/cold logs are retained separately from the original artifact files. The selected manifest binds the actual provider and cold receipt-file hashes.",
         "compilerFullLogReference": "evidence-logs/grammar-r2-compiler.log",
-        "providerFullLogReference": "evidence-logs/grammar-r2-provider.log"
+        "providerFullLogReference": "evidence-logs/grammar-r2-provider.log",
+        "coldJsonRecords": 3,
+        "coldFullLogBlob": "2343b6ca7e5bfadb030c56ca5cb4f05de4010983",
+        "coldFullLogReference": "evidence-logs/grammar-r2-cold-recovery.log",
+        "coldBundleReference": "grammar-migration-cold-evidence.json"
       },
       "strictSh1Qualified": false,
       "fullStandardConformance": false,
       "fullPscvConformance": false,
       "remaining": [
-        "Finish independent cold recovery.",
-        "Authenticate original receipt-file bytes with the evidence collector.",
-        "Explicitly select proven R.",
-        "Apply and qualify the prepared finite F worker and host completion."
-      ]
+        "Apply the prepared finite F worker and host completion under selected R.",
+        "Qualify exact F source once, preserve its evidence, and finish current guidance/integration."
+      ],
+      "selectedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+      "coldRecovery": {
+        "receiptReference": "grammar-migration-cold-recovery.json",
+        "receiptSha256": "2aa93517b848da1493386ab9be50527275fe1a7a1c7e12f422d8d8431d8d9f1d",
+        "passed": true,
+        "coldSuccessorRecovery": true,
+        "elapsedMs": 2728786.866427,
+        "originalIrCheckedBeforeEmission": true,
+        "parentCacheVerified": true,
+        "method": "pinned-parent-two-new-raw-source-generations"
+      },
+      "exactReceiptFiles": {
+        "qualificationReference": "seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/qualification.json",
+        "qualificationSha256": "b3e9a277a7ce5ee9e0bccc449c9ca20a06766cd94cabd34fe4d722c6425e6fac",
+        "selectionReference": "seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/selection.json",
+        "collectorRunId": 37938411520,
+        "collectorRunConclusion": "success",
+        "copiedJsonFiles": 18
+      }
     }
   },
   "acceptanceAxes": {
@@ -3801,8 +3826,8 @@
     }
   },
   "currentOriginalIrObservation": {
-    "sourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
-    "runId": 37910429506,
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "runId": 37925722635,
     "generations": [
       "C2",
       "C3"
@@ -3815,27 +3840,28 @@
     "sameOriginalIrCheckedBeforeEmission": true,
     "expressionCount": null,
     "visitedSteps": null,
-    "unprintedCounts": "The completed generation summaries do not print these full counts; see the exact full inventory reports in the retained compiler artifact. Native counts are separately reported and are not substituted.",
+    "unprintedCounts": "Full generated expression and step counts are not printed in the generation summary; native counts are reported separately and not substituted.",
     "native": {
       "schemaVersion": 1,
       "kind": "psc0-native-original-ir-check",
       "accepted": true,
       "traversalComplete": true,
-      "visitedSteps": 707753,
-      "expressionCount": 54879,
+      "visitedSteps": 725484,
+      "expressionCount": 56391,
       "findingCount": 0,
       "retainedFindingCount": 0,
       "omittedFindingDetails": 0,
       "strictSh1Qualified": false,
-      "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      "reportPath": "dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
     },
     "strictSh1Qualified": false,
     "profileActivated": false,
     "receipts": [
-      "typescript7-qualification.json",
-      "typescript7-provider.json"
+      "seed-evidence/fe2560aba0f347b1caf8d000d371464642d44f23/qualification.json",
+      "grammar-migration-provider.json",
+      "grammar-migration-cold-recovery.json"
     ],
-    "remainingPlan": "RUNTIME_IR_PLAN.md"
+    "remainingPlan": "Finite F worker migration and host completion."
   },
   "recursiveGenericFindingResolution": {
     "historicalRecord": "retainedInitialIrTypeArguments",
@@ -3916,14 +3942,53 @@
         "runtime-ir-checker-provider.json"
       ],
       "remainingPlan": "RUNTIME_IR_PLAN.md"
+    },
+    {
+      "sourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+      "runId": 37910429506,
+      "generations": [
+        "C2",
+        "C3"
+      ],
+      "checker": "portable bounded runtime IR checker",
+      "accepted": true,
+      "traversalComplete": true,
+      "findingCount": 0,
+      "findingCountsCoverage": "all-findings",
+      "sameOriginalIrCheckedBeforeEmission": true,
+      "expressionCount": null,
+      "visitedSteps": null,
+      "unprintedCounts": "The completed generation summaries do not print these full counts; see the exact full inventory reports in the retained compiler artifact. Native counts are separately reported and are not substituted.",
+      "native": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 707753,
+        "expressionCount": 54879,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "strictSh1Qualified": false,
+        "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      },
+      "strictSh1Qualified": false,
+      "profileActivated": false,
+      "receipts": [
+        "typescript7-qualification.json",
+        "typescript7-provider.json"
+      ],
+      "remainingPlan": "RUNTIME_IR_PLAN.md"
     }
   ],
   "activeContinuation": {
     "branch": "psc0/sh1-projection-grammar-v1",
     "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
-    "stage": "R compiler/provider passed; cold recovery running",
+    "stage": "R fully qualified, recovered, authenticated, and explicitly selected; F prepared",
     "canonicalBranchIntegrated": false,
-    "selectedSeed": "A",
+    "selectedSeed": "R",
+    "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "selectedSeedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
     "workerMigrationApplied": false,
     "workerMigrationQualified": false
   }

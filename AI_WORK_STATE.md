@@ -1,5 +1,60 @@
 # AI Work State
 
+## Current checkpoint — primitive research and mutual recursor closure — 2026-10-09
+- Full proof and native foundation conformance **#786 GREEN** at
+  `b9861c0544e0890c3648547f88f611c19d49cab6`:
+  https://github.com/dwijayuda/pskernel/actions/runs/37905141235.
+  All 84 proof files passed; the canonical inventory remains 79 source/proof pairs.
+- Integration HEAD reverified unchanged:
+  `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`.
+- **Unconditionally proved:** decimal representation injectivity via pinned
+  Lean's checked digit round trip; specified standard cursor end/progress facts;
+  exact candidate-search trace including every skipped candidate.
+- **Explicitly conditional:** counting excludes fuel exhaustion under finite
+  candidate distinctness and existing positive StringEq soundness. Semantic
+  freshness additionally needs comparator reflexivity. The latter is reduced
+  to actual opaque cursor end/progress properties; candidate distinctness is
+  reduced to actual opaque append on the prefixed decimal family.
+- **Mutual recursor refinement:** actual rule validation yields independent
+  owner-filtered RHS typing, selected motive, exact rule exhaustion and
+  preserved checker context/configuration. Actual generation yields constructor
+  provenance, field counts, recursor names, universes and arity metadata.
+  Actual full recursor validation yields ordered Sort-typed headers and typed
+  rules. Generated/validated publication composes this with exact declaration
+  insertion, old canonical lookup preservation and refined indexes under
+  explicit input shape-name freshness/uniqueness and input-index invariants.
+  The enclosing full mutual transaction still must discharge its input invariants.
+- Axiom audit of decimal injectivity, conditional freshness and generated
+  mutual publication reports only Lean foundations:
+  `propext`, `Classical.choice`, `Quot.sound`.
+  This does not erase the explicitly quantified NativeReduction/StringEq and
+  primitive obligations from the theorem statements.
+- Partial semantic audit row totals are **50/6/17/6**. A recount exposed a
+  historical mismatch: the previous table had 49/6/18/6 while its summary
+  claimed 50/6/17/6. The newly evidenced mutual Recursor C→A upgrade makes
+  the actual current rows 50/6/17/6. No grade was invented to repair totals.
+- No production kernel changes, new axioms, accepted new trusted law,
+  unrestricted DefEq transitivity, or infer-only typing certificates.
+  GitHub/cloud only; no local files/checkouts/builds/tests were used.
+
+### Concrete decision needed for unconditional primitive closure
+- Research and reviewed scope:
+  `psc15selfhost/packages/pskernel-core/metatheory/PSKERNEL_CORE_BOOTSTRAP_PRIMITIVE_RESOLUTION.md`.
+- Recommended route: migrate the relevant calls to specified `String.append`,
+  `String.Pos.Raw.atEnd`, and `String.Pos.Raw.next`, retaining their existing
+  native external symbols. Account for portable erasure aliases/prelude support,
+  which currently recognize the opaque names, and validate conformance.
+- This is a primitive specification/API migration, not a confirmed runtime
+  semantic defect. The user's source-change constraint therefore requires an
+  explicit exception before that migration is applied. No exception or new
+  trust premise has been presumed.
+- Alternatively, a checked bridge for the actual opaque declarations would
+  close the current-source obligation; none has been established.
+- Complete ordinary environment well-formedness, full mutual/nested
+  transactions, final Kernel/API/session theorem family, full audit and
+  integration reconciliation remain incomplete. This is a validated milestone,
+  not full task completion.
+
 ## Mutual recursor and bounded search checkpoint — 2026-10-09
 - Full proof and native conformance **#779 GREEN** at
   `a0942db7318df227340a2ad784482b94216ee881`,

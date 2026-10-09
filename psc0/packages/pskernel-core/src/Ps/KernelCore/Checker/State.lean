@@ -210,7 +210,11 @@ def psKernelCheckerStateExitLocalScopeShared
     failure := psKernelExprPairSetRetainHash parent.failure child.failure
   }
 
-@[csimp] theorem psKernelCheckerStateExitLocalScope_shared_eq :
+/-- Exactness alone does not justify retaining this metadata at runtime.
+The cross-scope retention experiment raised peak memory substantially on the
+full Init profile. Keep the theorem available, but leave parent restoration as
+the executed policy until a bounded lifetime design is independently measured. -/
+theorem psKernelCheckerStateExitLocalScope_shared_eq :
     psKernelCheckerStateExitLocalScope = psKernelCheckerStateExitLocalScopeShared := by
   funext parent child
   simp [psKernelCheckerStateExitLocalScopeShared, psKernelCheckerStateExitLocalScope,

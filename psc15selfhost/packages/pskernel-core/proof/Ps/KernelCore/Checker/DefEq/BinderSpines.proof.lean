@@ -293,5 +293,6 @@ theorem psKernelDefEqFinish_fvar_pair_not_cached
     psKernelDefEqFinish,
     psKernelSemanticPairCacheEligible,
     psKernelSemanticCacheEligible,
-    psKernelExprHasFVar
+    psKernelSemanticCacheRemaining,
+    psKernelSemanticCacheNodeBudget
   ]

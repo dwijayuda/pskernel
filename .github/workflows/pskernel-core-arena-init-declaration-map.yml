@@ -1,0 +1,73 @@
+name: PSKernel Core Arena map expensive Init declarations
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-budget-study-v1
+    paths:
+      - ".github/workflows/pskernel-core-arena-init-declaration-map.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  map-init-declarations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build pinned upstream Init export
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          (cd arena && uv run lka.py build-test init --cache)
+      - name: Resolve all declaration identities around 390k-430k
+        working-directory: arena
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          lo, hi = 385000, 430000
+          names = {0: "_"}
+          def name_of(idx):
+              return names.get(idx, f"name#{idx}")
+          with open("_build/tests/init.ndjson", encoding="utf-8") as inp:
+              for line_no, raw in enumerate(inp, 1):
+                  obj = json.loads(raw)
+                  if "in" in obj:
+                      idx = obj["in"]
+                      if "str" in obj:
+                          node = obj["str"]
+                          parent = name_of(node["pre"])
+                          part = node["str"]
+                          names[idx] = part if parent == "_" else parent + "." + part
+                      elif "num" in obj:
+                          node = obj["num"]
+                          parent = name_of(node["pre"])
+                          part = str(node["i"])
+                          names[idx] = part if parent == "_" else parent + "." + part
+                  if line_no < lo:
+                      continue
+                  if line_no > hi:
+                      break
+                  for kind in ("axiom","def","thm","opaque","quot"):
+                      if kind in obj:
+                          value = obj[kind]
+                          print("DECL", line_no, kind, name_of(value.get("name")))
+                          break
+                  else:
+                      if "inductive" in obj:
+                          kinds = [name_of(x.get("name")) for x in obj["inductive"].get("types",[])]
+                          print("DECL", line_no, "inductive", ",".join(kinds))
+          PY

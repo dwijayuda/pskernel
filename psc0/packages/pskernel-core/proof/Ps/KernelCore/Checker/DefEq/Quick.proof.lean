@@ -62,7 +62,7 @@ theorem psKernelLevelListsEquivalent_nil_cons
   rfl
 
 
-theorem psKernelDefEqQuick_fvar_ignores_success_cache
+theorem psKernelDefEqQuick_fvar_cache_miss
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -77,7 +77,8 @@ theorem psKernelDefEqQuick_fvar_ignores_success_cache
       psKernelExprEq
           (PsKernelExpr.fvar name)
           right =
-        false) :
+        false)
+    (hMiss : psKernelExprPairSetContains state.success (.fvar name) right = false) :
     psKernelDefEqQuick
         defeq
         context
@@ -85,11 +86,7 @@ theorem psKernelDefEqQuick_fvar_ignores_success_cache
         (PsKernelExpr.fvar name)
         right =
       Except.ok (Prod.mk Option.none state) := by
-  simp [
-    psKernelDefEqQuick,
-    hEq,
-    psKernelSemanticPairCacheEligible,
-    psKernelSemanticCacheEligible,
-    psKernelSemanticCacheRemaining,
-    psKernelSemanticCacheNodeBudget,
-  ]
+  have hFvar : psKernelSemanticCacheEligible (.fvar name) = true := rfl
+  cases hEligible : psKernelSemanticCacheEligible right <;>
+    simp [psKernelDefEqQuick, hEq, hMiss,
+      psKernelSemanticPairCacheEligible, hFvar, hEligible]

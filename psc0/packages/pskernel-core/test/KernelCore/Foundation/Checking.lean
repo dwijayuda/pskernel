@@ -870,9 +870,9 @@ def psKernelCoreRecursorTests : Bool :=
             psKernelExprMapGet
               (Prod.snd portableResult).inferOnly
               portableMajor with
-         -- Semantic caches must exclude fvar-bearing keys.
-         | Option.some _ => false
-         | Option.none => true)
+         -- A scoped infer-only cache may retain this local's exact type.
+         | Option.some cached => psKernelExprEq cached inductExpr
+         | Option.none => false)
   | _, _ =>
       false
 

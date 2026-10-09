@@ -2,64 +2,26 @@ import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 theorem psKernelSemanticCacheEligible_fvar
     (name : PsKernelName) :
-    psKernelSemanticCacheEligible
-        (PsKernelExpr.fvar name) =
-      false := by
+    psKernelSemanticCacheEligible (.fvar name) = true := by
   rfl
-
-theorem psKernelSemanticCacheEligible_app_with_fvar_left
-    (name : PsKernelName)
-    (arg : PsKernelExpr) :
-    psKernelSemanticCacheEligible
-        (PsKernelExpr.app
-          (PsKernelExpr.fvar name)
-          arg) =
-      false := by
-  rfl
-
-theorem psKernelSemanticCacheEligible_app_with_fvar_right
-    (fn : PsKernelExpr)
-    (name : PsKernelName) :
-    psKernelSemanticCacheEligible
-        (PsKernelExpr.app
-          fn
-          (PsKernelExpr.fvar name)) =
-      false := by
-  have hFVar : ∀ fuel : Nat,
-      psKernelSemanticCacheRemaining (PsKernelExpr.fvar name) fuel = none := by
-    intro fuel
-    cases fuel <;> rfl
-  cases hFn : psKernelSemanticCacheRemaining fn 255 with
-  | none =>
-      simp [psKernelSemanticCacheEligible, psKernelSemanticCacheNodeBudget,
-        psKernelSemanticCacheRemaining, hFn, hFVar]
-  | some remaining =>
-      simp [psKernelSemanticCacheEligible, psKernelSemanticCacheNodeBudget,
-        psKernelSemanticCacheRemaining, hFn, hFVar]
 
 theorem psKernelSemanticPairCacheEligible_left_fvar
-    (name : PsKernelName)
-    (right : PsKernelExpr) :
-    psKernelSemanticPairCacheEligible
-        (PsKernelExpr.fvar name)
-        right =
-      false := by
+    (name : PsKernelName) (right : PsKernelExpr) :
+    psKernelSemanticPairCacheEligible (.fvar name) right =
+      psKernelSemanticCacheEligible right := by
   rfl
 
 theorem psKernelSemanticPairCacheEligible_right_fvar
-    (left : PsKernelExpr)
-    (name : PsKernelName) :
-    psKernelSemanticPairCacheEligible
-        left
-        (PsKernelExpr.fvar name) =
-      false := by
-  cases hLeft :
-      psKernelSemanticCacheEligible left <;>
-    simp [
-      psKernelSemanticPairCacheEligible,
-      hLeft,
-      psKernelSemanticCacheEligible_fvar
-    ]
+    (left : PsKernelExpr) (name : PsKernelName) :
+    psKernelSemanticPairCacheEligible left (.fvar name) =
+      psKernelSemanticCacheEligible left := by
+  cases h : psKernelSemanticCacheEligible left <;>
+    simp [psKernelSemanticPairCacheEligible, h,
+      psKernelSemanticCacheEligible_fvar]
+
+theorem psKernelSemanticCacheRemaining_zero (expr : PsKernelExpr) :
+    psKernelSemanticCacheRemaining expr 0 = none := by
+  cases expr <;> rfl
 
 theorem psKernelInferCacheEligible_literal
     (inferOnly : Bool)
@@ -123,7 +85,7 @@ theorem psKernelInferCacheEligible_fvar
     psKernelInferCacheEligible
         inferOnly
         (PsKernelExpr.fvar name) =
-      false := by
+      true := by
   rfl
 
 -- Reduction cache keys may mention locals, within the existing scope invariant.

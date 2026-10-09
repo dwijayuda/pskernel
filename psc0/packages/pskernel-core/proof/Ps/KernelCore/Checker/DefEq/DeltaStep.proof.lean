@@ -236,13 +236,13 @@ theorem psKernelDefEqTryUnfoldProjApp_success_refines_reduction
     hSuccess
 
 
-theorem psKernelDefEqUnfold_fvar_ignores_cache
+theorem psKernelDefEqUnfold_fvar_cache_miss
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
-    (name : PsKernelName) :
-    psKernelDefEqUnfold
-        context
-        state
-        (PsKernelExpr.fvar name) =
+    (name : PsKernelName)
+    (hMiss : psKernelExprMapGet state.unfold (.fvar name) = none) :
+    psKernelDefEqUnfold context state (.fvar name) =
       Prod.mk Option.none state := by
-  rfl
+  simp [psKernelDefEqUnfold, psKernelSemanticCacheEligible,
+    psKernelSemanticCacheRemaining, psKernelSemanticCacheNodeBudget,
+    hMiss, psKernelUnfoldDefinition, psKernelExprGetAppFn]

@@ -279,20 +279,13 @@ theorem psKernelDefEqFinish_configuration_refines
         exact hSemantic
 
 
-theorem psKernelDefEqFinish_fvar_pair_not_cached
+theorem psKernelDefEqFinish_fvar_pair_scoped_cache
     (state : PsKernelCheckerState)
     (name : PsKernelName)
     (right : PsKernelExpr) :
-    psKernelDefEqFinish
-        state
-        (PsKernelExpr.fvar name)
-        right
-        true =
-      Prod.mk true state := by
-  simp [
-    psKernelDefEqFinish,
-    psKernelSemanticPairCacheEligible,
-    psKernelSemanticCacheEligible,
-    psKernelSemanticCacheRemaining,
-    psKernelSemanticCacheNodeBudget,
-  ]
+    psKernelDefEqFinish state (.fvar name) right true =
+      if psKernelSemanticCacheEligible right then
+        Prod.mk true (psKernelCheckerStateWithSuccess state
+          (psKernelExprPairSetInsert state.success (.fvar name) right))
+      else Prod.mk true state := by
+  rfl

@@ -682,16 +682,10 @@ theorem psKernelExprInstantiateAtChanged_refines_reference_core
         expr start subst offset =
       psKernelExprInstantiateAtReferenceChanged
         expr start subst offset := by
-  unfold psKernelExprInstantiateAtChanged
-  exact
-    psKernelExprInstantiateAtChangedWithFuel_refines_reference_core
-      expr
-      (Nat.succ (psKernelExprNodeCount expr))
-      start
-      offset
-      subst
-      (Nat.lt_succ_self
-        (psKernelExprNodeCount expr))
+  induction expr generalizing start offset <;>
+    simp_all [psKernelExprInstantiateAtChanged,
+      psKernelExprInstantiateAtReferenceChanged,
+      psKernelExprLiftLooseBVars_refines_reference_core]
 
 theorem psKernelExprInstantiateAt_refines_reference_core
     (expr : PsKernelExpr)

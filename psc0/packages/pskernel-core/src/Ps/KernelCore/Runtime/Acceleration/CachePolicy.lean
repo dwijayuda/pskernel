@@ -3,7 +3,10 @@ import Ps.KernelCore.Core.Expr
 /-
 Non-semantic checker cache policy.
 
-This module decides whether an inference result is worth memoizing. It does not
+This module decides whether an inference result is worth memoizing.
+Open keys are valid only in their checker configuration. Binder exit restores
+parent caches and new declaration sessions start empty; cache state must never
+be transplanted into a different local context. It does not
 read or mutate checker state and must not change the inferred type or
 accept/reject judgment.
 
@@ -18,7 +21,7 @@ remain memoized because whole-expression inference results are commonly reused.
 /--
 Maximum structural key size worth memoizing in the portable checker caches.
 
-Cache entries are an acceleration only. Declining to memoize a larger closed
+Cache entries are an acceleration only. Declining to memoize a larger
 term cannot change kernel acceptance, while it prevents cache eligibility and
 hashing from repeatedly traversing giant proof terms. The budget is consumed
 across the whole expression tree, not independently per branch.
@@ -29,8 +32,6 @@ def psKernelSemanticCacheNodeBudget : Nat :=
 def psKernelSemanticCacheRemaining :
     PsKernelExpr -> Nat -> Option Nat
   | _expr, Nat.zero =>
-      Option.none
-  | PsKernelExpr.fvar _, Nat.succ _ =>
       Option.none
   | PsKernelExpr.app fn arg, Nat.succ remaining =>
       match psKernelSemanticCacheRemaining fn remaining with
@@ -97,8 +98,8 @@ def psKernelInferCacheEligible
       psKernelSemanticCacheEligible expr
 
 /--
-Reduction caches live in a checker local scope. Unlike persistent closed-key
-inference/equality caches, they must also memoize bounded open expressions:
+Checker caches live in a fixed environment and local scope. They memoize
+bounded open expressions:
 repeated normalization of symbolic arithmetic can otherwise be exponential.
 The 256-node key bound still prevents hashing giant expanded expression trees.
 

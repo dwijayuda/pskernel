@@ -84,3 +84,29 @@ def main : IO Unit := do
   if psKernelWhnfCacheEligible dag then
     throw (IO.userError "giant reduction cache key escaped the node bound")
   IO.println "PSKERNEL_OPEN_WHNF_SCOPE: PASS"
+
+  let inferred ← match psKernelCheckerInfer 64 firstLocal.2 parent (.fvar firstLocal.1) with
+    | .error e => throw (IO.userError e)
+    | .ok pair => pure pair
+  match psKernelExprMapGet inferred.2.inferOnly (.fvar firstLocal.1) with
+  | .none => throw (IO.userError "local inference result was not cached")
+  | .some cached =>
+    unless psKernelExprEq cached (.sort (.succ .zero)) do
+      throw (IO.userError "local inference cached the wrong type")
+  let equalityState := (psKernelDefEqFinish inferred.2 (.fvar firstLocal.1) (.sort .zero) true).2
+  unless psKernelExprPairSetContains equalityState.success (.fvar firstLocal.1) (.sort .zero) do
+    throw (IO.userError "open equality result was not cached")
+  let restoredAll := psKernelCheckerStateExitLocalScope parent equalityState
+  if psKernelExprPairSetContains restoredAll.success (.fvar firstLocal.1) (.sort .zero) then
+    throw (IO.userError "child equality cache escaped its scope")
+  match psKernelCheckerInfer 64 secondLocal.2 restoredAll (.fvar firstLocal.1) with
+  | .error e => throw (IO.userError e)
+  | .ok pair =>
+    unless psKernelExprEq pair.1 (.sort (.succ (.succ .zero))) do
+      throw (IO.userError "second scope reused the first local's type")
+  match psKernelIsDefEq 64 secondLocal.2 restoredAll (.fvar firstLocal.1) (.sort .zero) with
+  | .error e => throw (IO.userError e)
+  | .ok pair =>
+    if pair.1 then
+      throw (IO.userError "second scope reused the first local's equality")
+  IO.println "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE: PASS"

@@ -388,23 +388,21 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_pipeline
                                                             PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
                                                           let work0 := psKernelAddMutualInductiveInfos
                                                             (psKernelMakeSimpleMutualBaseInfos
-                                                              (psKernelSimpleMutualNames decl.types) decl shapes) environment
+                                                              (psKernelSimpleMutualNames (first :: remaining))
+                                                              decl shapes) environment
                                                           cases hCtor : psKernelAddSimpleMutualTypesWorker
                                                               shapes fuel safety resultLevel
                                                               (psKernelLevelParamsToLevels decl.levelParams)
                                                               paramResult.binders
-                                                              (psKernelSimpleMutualNames decl.types)
+                                                              (psKernelSimpleMutualNames (first :: remaining))
                                                               shapes paramResult.session work0 0 with
                                                           | error message =>
-                                                              try simp only [hCtor] at hRun
                                                               cases hRun
                                                           | ok ctorResult =>
-                                                              have hCtorAligned := hCtor
-                                                              simp only [hTypes] at hCtorAligned
                                                               refine ⟨first, remaining, checked, sorted, paramResult,
                                                                 indexResult, resultLevel, tailShapes, ctorResult, rfl,
                                                                 hChecked, hSort, hParams, hIndices, hResult, hTail, ?_⟩
-                                                              simpa only [shapes, work0, safety] using hCtorAligned
+                                                              simpa only [shapes, work0, safety] using hCtor
                                                   | _ => simp only [hResult] at hRun; cases hRun
 
 

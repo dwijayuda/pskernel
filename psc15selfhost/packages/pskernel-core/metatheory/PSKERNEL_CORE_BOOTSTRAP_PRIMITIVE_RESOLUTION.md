@@ -127,3 +127,14 @@ unresolved primitive and transaction obligations.
 - [Integer representation](https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Data/Int/Repr.lean)
 - [Native append and next](https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/runtime/object.cpp)
 - [Lean FFI reference](https://lean-lang.org/doc/reference/latest/Run-Time-Code/Foreign-Function-Interface/)
+
+## Dependency-complete cursor scope
+
+Cloud proof #787 exposed that the two acceleration hash workers must share
+the equality traversal's cursor API for their existing unconditional structural
+hash-compatibility proofs. Their cursor calls are migrated identically; mix
+functions, seeds, modulus, fuel and traversal control flow are preserved.
+The CacheHash and EnvironmentIndexHash theorem statements remain unchanged.
+Native differential tests compare both hash workers to the legacy cursor
+implementation. The TypeScript package/erasure suite passed in #787.
+This is migration dependency closure, not a claimed hash defect or a new trust law.

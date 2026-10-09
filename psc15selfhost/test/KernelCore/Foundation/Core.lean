@@ -111,6 +111,46 @@ def psKernelNameTestReplacement : PsKernelName :=
     PsKernelName.anonymous
     "Portable"
 
+def psKernelLegacyStringHashWorker
+    (fuel : Nat) :
+    String -> Nat -> Nat -> Nat :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_value : String)
+        (_position : Nat)
+        (hash : Nat) =>
+        hash
+  | Nat.succ remaining =>
+      let smaller :
+          String -> Nat -> Nat -> Nat :=
+        psKernelLegacyStringHashWorker remaining;
+      fun
+        (value : String)
+        (position : Nat)
+        (hash : Nat) =>
+        if
+            String.Internal.atEnd
+              value
+              (String.Pos.Raw.mk position) then
+          hash
+        else
+          let char :=
+            String.Internal.get
+              value
+              (String.Pos.Raw.mk position);
+          let next :=
+            String.Pos.Raw.byteIdx
+              (String.Internal.next
+                value
+                (String.Pos.Raw.mk position));
+          smaller
+            value
+            next
+            (psKernelCacheMix
+              hash
+              (Char.toNat char))
+
 -- Exercise native UTF-8 cursor boundaries and repeated candidate collisions.
 -- This is conformance evidence; quantified freshness is checked in metatheory.
 def psKernelSpecifiedStringMigrationTests : Bool :=
@@ -122,12 +162,18 @@ def psKernelSpecifiedStringMigrationTests : Bool :=
       let raw := String.Pos.Raw.mk pos
       String.Pos.Raw.atEnd value raw == String.Internal.atEnd value raw &&
       (String.Pos.Raw.next value raw).byteIdx == (String.Internal.next value raw).byteIdx
+  let hashes := samples.all fun value =>
+    [0, 1, 65520].all fun seed =>
+      let fuel := Nat.succ value.utf8ByteSize
+      let expected := psKernelLegacyStringHashWorker fuel value 0 seed
+      psKernelCacheStringHashWorker fuel value 0 seed == expected &&
+      psKernelEnvironmentHashStringWorker fuel value 0 seed == expected
   let candidates := (List.range 40).all fun i =>
     psKernelNameEq (psKernelSimpleElimNameCandidate i)
       (PsKernelName.str PsKernelName.anonymous
         (if i == 0 then "u" else String.Internal.append "u_" (psKernelNatToString i)))
   let occupied := (List.range 32).map psKernelSimpleElimNameCandidate
-  equality && cursors && candidates &&
+  equality && cursors && hashes && candidates &&
     psKernelNameEq (psKernelSimpleFreshElimName occupied) (psKernelSimpleElimNameCandidate 32) &&
     psKernelNameEq (psKernelSimpleFreshElimName (occupied ++ occupied))
       (psKernelSimpleElimNameCandidate 32)

@@ -25,12 +25,12 @@ theorem psKernelEnvironmentHashStringWorker_of_stringEqFrom_true
       simp [psKernelStringEqFromWithFuel] at hEq
   | succ remaining ih =>
       cases hLeft :
-          String.Internal.atEnd
+          String.Pos.Raw.atEnd
             left
             (String.Pos.Raw.mk leftPos) with
       | true =>
           cases hRight :
-              String.Internal.atEnd
+              String.Pos.Raw.atEnd
                 right
                 (String.Pos.Raw.mk rightPos) with
           | false =>
@@ -47,7 +47,7 @@ theorem psKernelEnvironmentHashStringWorker_of_stringEqFrom_true
               ]
       | false =>
           cases hRight :
-              String.Internal.atEnd
+              String.Pos.Raw.atEnd
                 right
                 (String.Pos.Raw.mk rightPos) with
           | true =>
@@ -74,11 +74,11 @@ theorem psKernelEnvironmentHashStringWorker_of_stringEqFrom_true
                         left
                         right
                         (String.Pos.Raw.byteIdx
-                          (String.Internal.next
+                          (String.Pos.Raw.next
                             left
                             (String.Pos.Raw.mk leftPos)))
                         (String.Pos.Raw.byteIdx
-                          (String.Internal.next
+                          (String.Pos.Raw.next
                             right
                             (String.Pos.Raw.mk rightPos))) =
                       true := by
@@ -93,11 +93,11 @@ theorem psKernelEnvironmentHashStringWorker_of_stringEqFrom_true
                 have hIH :=
                   ih
                     (String.Pos.Raw.byteIdx
-                      (String.Internal.next
+                      (String.Pos.Raw.next
                         left
                         (String.Pos.Raw.mk leftPos)))
                     (String.Pos.Raw.byteIdx
-                      (String.Internal.next
+                      (String.Pos.Raw.next
                         right
                         (String.Pos.Raw.mk rightPos)))
                     (Nat.mod
@@ -240,7 +240,7 @@ theorem psKernelEnvironmentHashStringWorker_lt_modulus
       exact hHash
   | succ remaining ih =>
       cases hEnd :
-          String.Internal.atEnd
+          String.Pos.Raw.atEnd
             value
             (String.Pos.Raw.mk position) with
       | true =>

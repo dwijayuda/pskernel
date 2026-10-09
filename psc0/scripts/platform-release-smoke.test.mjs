@@ -148,7 +148,8 @@ test('missing tarballs still produce failed evidence without claiming the clean 
   t.after(() => rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }));
   t.mock.method(console, 'log', () => {});
   const evidence = path.join(directory, 'evidence');
-  await assert.rejects(qualifyInstalledPackage(path.join(directory, 'missing.tgz'), evidence), { code: 'ENOENT' });
+  await assert.rejects(qualifyInstalledPackage(path.join(directory, 'missing.tgz'), evidence,
+    path.join(directory, 'missing-psdev.tgz')), { code: 'ENOENT' });
   const result = JSON.parse(await readFile(path.join(evidence, 'installed-package-qualification.json'), 'utf8'));
   assert.equal(result.passed, false);
   assert.equal(result.tarballSha256, null);
@@ -157,5 +158,6 @@ test('missing tarballs still produce failed evidence without claiming the clean 
   assert.equal(result.npmRuntime, null);
   assert.equal(result.shellRuntime, null);
   assert.deepEqual(result.observations, []);
+  assert.deepEqual(result.extensionDemos, []);
   assert.match(result.failure.message, /ENOENT/u);
 });

@@ -1,5 +1,16 @@
 # AI Work State
 
+## Arena v3 verified checkpoint — 2026-10-09
+
+- Optimized bounded-cache kernel retains production source from proof base `5a7d428b303a865b14a81e6bcb4a6e38050d9165` except `Runtime/Acceleration/CachePolicy.lean`. The proof branch HEAD remains unchanged.
+- Kernel proof CI #37930905933 on commit `3171b8f90f42b2a964471ca48a93eebd96a6642e`: **SUCCESS**, 84 registered proof files compiled; native foundation, primitive/prelude parity and portable-erasure gates passed.
+- Arena readiness #37930905911: pinned Prelude and Tutorial 141/141 green. Historical negative corpus #37930905967: 17 correct plus one conservative decline, zero false accepts.
+- Exact full Init/Std run #37929499464 on the same optimized production kernel was unsuccessful due solely to upstream timeout: Init 500s (through 399,999 records), Std 590s (through 999,999 records), both `exit_code=-9`, not proven semantic rejection. Retain the original limits and fail-closed classification.
+- The Mathlib gate is now explicitly dependent on *both* full Init and Std passing and includes a renewed proof-tree gate. No Mathlib-complete claim has been made.
+- Performance investigation: 430k Init per-record diagnostic CI #37931073049; same-runner bounded-cache budget comparison #37932067467; 385k-430k upstream declaration-name inventory #37932180550. These independent jobs were active at checkpoint. They do not replace any acceptance gate.
+- Next: identify the first post-380k expensive declaration; determine the common checker algorithmic cost; implement one general optimization, revalidate proof/negative corpus, and repeat official full Init/Std before full Mathlib.
+
+
 ## Arena optimized-v3 acceptance candidate — 2026-10-09
 
 # Arena optimized v3 acceptance

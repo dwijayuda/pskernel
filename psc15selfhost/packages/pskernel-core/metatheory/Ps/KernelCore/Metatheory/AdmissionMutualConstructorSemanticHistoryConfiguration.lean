@@ -896,6 +896,125 @@ theorem psKernelAddSimpleMutualInductive_success_shape_ctor_rec_disjoint
     rw [psKernelMutualShapeRecursorNames_source, hShapeDecls]
   simpa only [hCtorNames, hRecNames] using hCross
 
+/-- Reusable semantic composition for the exact constructor-pipeline witnesses.
+It preserves those witnesses so subsequent recursor stages can share them. -/
+theorem psKernelMutualConstructorPipeline_semantic_refines
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (first : PsKernelSimpleMutualTypeDecl) (remaining : List PsKernelSimpleMutualTypeDecl)
+    (checked : PsKernelExpr × PsKernelCheckerSession)
+    (sorted : PsKernelLevel × PsKernelCheckerSession)
+    (paramResult indexResult : PsKernelOpenBindersResult)
+    (resultLevel : PsKernelLevel) (tailShapes : List PsKernelSimpleMutualTypeShape)
+    (ctorResult : PsKernelAddMutualConstructorsResult)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hNative : PsKernelNativeReductionSoundLaw) (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelAddSimpleMutualInductive
+      fuel environment decl maxRecDepth maxNatSize = Except.ok result)
+    (hTypes : decl.types = first :: remaining)
+    (hCheck : psKernelSessionCheck fuel
+      (psKernelMkCheckerSession environment decl.levelParams
+        (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef else PsKernelDefinitionSafety.safe)
+        maxRecDepth maxNatSize) first.type = Except.ok checked)
+    (hSort : psKernelSessionEnsureSort fuel checked.2 checked.1 = Except.ok sorted)
+    (hParams : psKernelOpenSimpleHeaderParams fuel sorted.2 first.type decl.numParams =
+      Except.ok paramResult)
+    (hTail : psKernelOpenSimpleMutualRemainingTypesWorker remaining fuel environment
+      decl.levelParams
+      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef else PsKernelDefinitionSafety.safe)
+      maxRecDepth maxNatSize paramResult.session paramResult.binders resultLevel =
+        Except.ok tailShapes)
+    (hCtor : psKernelAddSimpleMutualTypesWorker
+      (PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes)
+      fuel (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef else PsKernelDefinitionSafety.safe)
+      resultLevel (psKernelLevelParamsToLevels decl.levelParams) paramResult.binders
+      (psKernelSimpleMutualNames decl.types)
+      (PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes)
+      paramResult.session
+      (psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos (psKernelSimpleMutualNames decl.types) decl
+          (PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes))
+        environment) 0 = Except.ok ctorResult) :
+    let shapes := PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
+    ∃ added : List PsKernelConstantInfo,
+      let work0 := psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos
+          (psKernelSimpleMutualNames decl.types) decl shapes) environment
+      shapes.map PsKernelSimpleMutualTypeShape.decl = decl.types ∧
+      PsKernelCheckerConfigurationSound paramResult.session.context paramResult.session.state ∧
+      paramResult.session.context.environment = environment ∧
+      PsKernelPreparedMutualConstructorInputsValid environment decl shapes ∧
+      PsKernelCheckedMutualFamilyConstructorHistory
+        (psKernelSimpleMutualNames decl.types) shapes
+        (psKernelLevelParamsToLevels decl.levelParams) paramResult.binders resultLevel
+        paramResult.session.context.levelParams
+        (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+          else PsKernelDefinitionSafety.safe)
+        paramResult.session.context.localContext work0 0 shapes ctorResult.shapes
+        ctorResult.environment ∧
+      PsKernelEnvironmentSemanticExtends environment ctorResult.environment ∧
+      PsKernelEnvironmentIndexRefines ctorResult.environment ∧
+      PsKernelInductiveNamesAbsent ctorResult.environment
+        (shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+          psKernelSimpleRecName shape.decl.name)) ∧
+      PsKernelEnvironmentExtendsBy work0 ctorResult.environment added.reverse ∧
+      ctorResult.environment.quotInitialized = work0.quotInitialized ∧
+      added.map psKernelConstantInfoName = psKernelMutualShapeConstructorNames shapes := by
+  let initial := psKernelMkCheckerSession environment decl.levelParams
+    (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+      else PsKernelDefinitionSafety.safe) maxRecDepth maxNatSize
+  have hInitial := psKernelMkCheckerSession_configuration_sound
+    environment decl.levelParams
+      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+        else PsKernelDefinitionSafety.safe) maxRecDepth maxNatSize hIndex
+  have hCheckSound := psKernelSessionCheck_concrete_refines_typing
+    fuel hNative hString initial checked.2 first.type checked.1 hInitial hCheck
+  have hCheckedContext := psKernelSessionCheck_success_preserves_context_core
+    fuel initial checked.2 first.type checked.1 hCheck
+  have hCheckedConfig : PsKernelCheckerConfigurationSound
+      checked.2.context checked.2.state := by
+    simpa [hCheckedContext] using hCheckSound.2
+  have hSortSound := psKernelSessionEnsureSort_concrete_refines_reduction
+    fuel hNative hString checked.2 sorted.2 checked.1 sorted.1 hCheckedConfig hSort
+  have hSortedContext := psKernelSessionEnsureSort_success_preserves_context_core
+    fuel checked.2 sorted.2 checked.1 sorted.1 hSort
+  have hSortedEnv : sorted.2.context.environment = environment := by
+    rw [hSortedContext, hCheckedContext]
+    simp [initial, psKernelMkCheckerSession, psKernelCheckerContextEmpty]
+  have hSortedConfig : PsKernelCheckerConfigurationSound
+      sorted.2.context sorted.2.state := by
+    simpa [hSortedContext] using hSortSound.2
+  have hParamsConfig := psKernelOpenSimpleHeaderParams_configuration_refines
+    fuel decl.numParams hNative hString sorted.2 first.type paramResult
+    hSortedConfig hParams
+  have hParamEnv : paramResult.session.context.environment = environment :=
+    hParamsConfig.2.1.trans hSortedEnv
+  have hRemainingHistory := psKernelOpenSimpleMutualRemainingTypesWorker_header_history
+    remaining fuel environment decl.levelParams
+      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+       else PsKernelDefinitionSafety.safe)
+      maxRecDepth maxNatSize paramResult.session paramResult.binders
+      resultLevel tailShapes hIndex hParamsConfig.1 hParamEnv
+      hNative hString hTail
+  let shapes : List PsKernelSimpleMutualTypeShape :=
+    PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
+  have hShapeDecls : shapes.map PsKernelSimpleMutualTypeShape.decl = decl.types := by
+    rw [hTypes]
+    simpa [shapes] using congrArg (List.cons first) hRemainingHistory.shape_provenance
+  have hPrepared := psKernelPreparedMutualConstructorInputs_for_source_shapes
+    fuel environment result decl maxRecDepth maxNatSize shapes
+    hShapeDecls hIndex hNative hString hRun
+  have hCross := psKernelAddSimpleMutualInductive_success_shape_ctor_rec_disjoint
+    fuel environment result decl maxRecDepth maxNatSize
+    shapes hShapeDecls hIndex hRun
+  obtain ⟨added, hHistory, hExt, hFinalIndex, hReserved, hAdded, hQuot, hNames⟩ :=
+    psKernelMutualConstructorWorker_prepared_refines
+      fuel environment decl shapes paramResult.session resultLevel paramResult.binders
+      ctorResult hPrepared hParamsConfig.1 hParamEnv hCross
+      hNative hString hCtor
+  exact ⟨added, hShapeDecls, hParamsConfig.1, hParamEnv, hPrepared,
+    hHistory, hExt, hFinalIndex, hReserved, hAdded, hQuot, hNames⟩
+
 /--
 Actual successful mutual admission yields independently checked complete
 constructor-family history with canonical and publication guarantees.
@@ -953,62 +1072,16 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_stage_refines
     hResult, hTail, hCtor⟩ :=
     psKernelAddSimpleMutualInductive_success_constructor_pipeline
       fuel environment result decl maxRecDepth maxNatSize hRun
-  let initial := psKernelMkCheckerSession environment decl.levelParams
-    (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
-      else PsKernelDefinitionSafety.safe) maxRecDepth maxNatSize
-  have hInitial := psKernelMkCheckerSession_configuration_sound
-    environment decl.levelParams
-      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
-        else PsKernelDefinitionSafety.safe) maxRecDepth maxNatSize hIndex
-  have hCheckSound := psKernelSessionCheck_concrete_refines_typing
-    fuel hNative hString initial checked.2 first.type checked.1 hInitial hCheck
-  have hCheckedContext := psKernelSessionCheck_success_preserves_context_core
-    fuel initial checked.2 first.type checked.1 hCheck
-  have hCheckedConfig : PsKernelCheckerConfigurationSound
-      checked.2.context checked.2.state := by
-    simpa [hCheckedContext] using hCheckSound.2
-  have hSortSound := psKernelSessionEnsureSort_concrete_refines_reduction
-    fuel hNative hString checked.2 sorted.2 checked.1 sorted.1 hCheckedConfig hSort
-  have hSortedContext := psKernelSessionEnsureSort_success_preserves_context_core
-    fuel checked.2 sorted.2 checked.1 sorted.1 hSort
-  have hSortedEnv : sorted.2.context.environment = environment := by
-    rw [hSortedContext, hCheckedContext]
-    simp [initial, psKernelMkCheckerSession, psKernelCheckerContextEmpty]
-  have hSortedConfig : PsKernelCheckerConfigurationSound
-      sorted.2.context sorted.2.state := by
-    simpa [hSortedContext] using hSortSound.2
-  have hParamsConfig := psKernelOpenSimpleHeaderParams_configuration_refines
-    fuel decl.numParams hNative hString sorted.2 first.type paramResult
-    hSortedConfig hParams
-  have hParamEnv : paramResult.session.context.environment = environment :=
-    hParamsConfig.2.1.trans hSortedEnv
-  have hRemainingHistory := psKernelOpenSimpleMutualRemainingTypesWorker_header_history
-    remaining fuel environment decl.levelParams
-      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
-       else PsKernelDefinitionSafety.safe)
-      maxRecDepth maxNatSize paramResult.session paramResult.binders
-      resultLevel tailShapes hIndex hParamsConfig.1 hParamEnv
-      hNative hString hTail
-  let shapes : List PsKernelSimpleMutualTypeShape :=
-    PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
-  have hShapeDecls : shapes.map PsKernelSimpleMutualTypeShape.decl = decl.types := by
-    rw [hTypes]
-    simpa [shapes] using congrArg (List.cons first) hRemainingHistory.shape_provenance
-  have hPrepared := psKernelPreparedMutualConstructorInputs_for_source_shapes
-    fuel environment result decl maxRecDepth maxNatSize shapes
-    hShapeDecls hIndex hNative hString hRun
-  have hCross := psKernelAddSimpleMutualInductive_success_shape_ctor_rec_disjoint
-    fuel environment result decl maxRecDepth maxNatSize
-    shapes hShapeDecls hIndex hRun
-  obtain ⟨added, hHistory, hExt, hFinalIndex, hReserved, hAdded, hQuot, hNames⟩ :=
-    psKernelMutualConstructorWorker_prepared_refines
-      fuel environment decl shapes paramResult.session resultLevel paramResult.binders
-      ctorResult hPrepared hParamsConfig.1 hParamEnv hCross
-      hNative hString hCtor
-  exact ⟨shapes, paramResult.session, paramResult.binders, resultLevel,
-    ctorResult, added, hShapeDecls, hParamsConfig.1, hParamEnv,
-    hPrepared, hCtor, hHistory, hExt, hFinalIndex,
-    hReserved, hAdded, hQuot, hNames⟩
+  obtain ⟨added, hShapeDecls, hConfig, hEnv, hPrepared, hHistory,
+    hExt, hFinalIndex, hReserved, hAdded, hQuot, hNames⟩ :=
+    psKernelMutualConstructorPipeline_semantic_refines
+      fuel environment result decl maxRecDepth maxNatSize first remaining checked sorted
+      paramResult indexResult resultLevel tailShapes ctorResult
+      hIndex hNative hString hRun hTypes hCheck hSort hParams hTail hCtor
+  exact ⟨PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes,
+    paramResult.session, paramResult.binders, resultLevel, ctorResult, added,
+    hShapeDecls, hConfig, hEnv, hPrepared, hCtor, hHistory, hExt,
+    hFinalIndex, hReserved, hAdded, hQuot, hNames⟩
 
 /--
 Every actual independently checked constructor insertion extends authoritative

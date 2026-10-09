@@ -1,4 +1,5 @@
-import {spawn,spawnSync,type ChildProcessWithoutNullStreams} from 'node:child_process';
+import {spawn,spawnSync,type ChildProcessByStdio} from 'node:child_process';
+import type {Readable} from 'node:stream';
 import {createWriteStream,existsSync} from 'node:fs';
 import {pipeline} from 'node:stream/promises';
 import {createInterface} from 'node:readline';
@@ -9,7 +10,7 @@ export interface LeanVersionInfo {readonly line:string;readonly version:string|n
 export interface LeanToolchain extends LeanVersionInfo {readonly version:string;readonly binDir:string;readonly executable:string}
 export interface DiscoverLeanOptions {readonly binDir?:string;readonly expectedVersion?:string|null;readonly env?:NodeJS.ProcessEnv}
 export interface SpawnLeanExporterOptions extends DiscoverLeanOptions {readonly script:string;readonly moduleName:string;readonly args?:readonly string[];readonly cwd?:string}
-export interface SpawnLeanExporterResult {readonly toolchain:LeanToolchain;readonly child:ChildProcessWithoutNullStreams;readonly scriptPath:string}
+export interface SpawnLeanExporterResult {readonly toolchain:LeanToolchain;readonly child:ChildProcessByStdio<null,Readable,Readable>;readonly scriptPath:string}
 export interface CollectOptions {readonly maxBytes?:number}
 export interface CollectedLeanExport {readonly text:string;readonly stderr:string;readonly toolchain:LeanToolchain}
 export interface FileLeanExport {readonly file:string;readonly stderr:string;readonly toolchain:LeanToolchain}

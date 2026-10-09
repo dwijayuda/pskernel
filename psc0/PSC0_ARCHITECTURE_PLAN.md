@@ -16,6 +16,8 @@
 
 **Onboarding and command-extension follow-up:** 10 October 2026, Asia/Jakarta. The next bounded milestone adds `psc init`, project entry/output defaults, shipped source/TypeScript/refusal examples, and a separately installed `psdev` command demo. Its initial operation is `psc dev --once`; full watch still follows T1 module/export and ABI work. The command guest uses a deliberately restricted V8 WebAssembly profile and the same checked host/publication path. Source e5c4a561 passed [all six jobs in run 37998655835](https://github.com/dwijayuda/pskernel/actions/runs/37998655835), including both independent command-package identities and the user's Windows/Node26 environment. Exact qualification is recorded in [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md); the dated research and full roadmap below are not retroactively claimed complete.
 
+**Wasm Core follow-up:** 10 October 2026, Asia/Jakarta. The requested direction is a qualified `pskernel-core-wasm` default with an explicit optional `pskernel-core-native` runtime, sharing one semantic Core. [The dedicated Wasm provider plan](docs/platform/wasm-core-provider-plan.md) records the inspected source seam, reusable build work, isolation limits, packaging, proof obligations and W0–W3 promotion gates. This is a researched recommendation; preview2 still uses its qualified native artifacts. The existing Lean-C++ Wasm checker and the tiny command guests are different implementations/profiles.
+
 **Canonical plan format:** this Markdown file. It supersedes the earlier PDF draft for future plan revisions.
 
 ## Decisions confirmed by the user
@@ -337,6 +339,8 @@ Names below follow the user's selected ps-prefixed basename convention. The user
 | Module / proposed package | Owns | Dependency rule |
 | --- | --- | --- |
 | pskernel-core | Kernel terms and declarations, admission, conversion, authoritative environments, kernel proof sources | No frontend, plugin loader, CLI, backend, or PSCV dependency |
+| pskernel-core-wasm | Proposed required Wasm execution artifact and minimal adapter for the same selected Core | Release-authenticated provider; no ordinary plugin authority; default only after qualification |
+| pskernel-core-native | Proposed optional native execution artifact for the same source/profile/capabilities | Explicit runtime selection; no semantic fallback or automatic native evaluator |
 | pscore | Canonical data contracts and bridge, fixed RuntimeIR, invariants, erasure, explicit semantic pass contracts | Pure internal modules; no host IO or backend imports |
 | psfrontend | Default bounded .ps/.lean parsing, names, macros, elaboration, meta state | Produces Core proposals through public data contracts |
 | psc, distributed through proofscript | Trusted supervisor, CLI, policy, kernel service, resolver, extension runner, receipts, publication | Owns capabilities and decisions; does not import external package code |
@@ -351,6 +355,14 @@ Names below follow the user's selected ps-prefixed basename convention. The user
 Here, core distribution means the required compiler product: psc, pscore, psfrontend, pskernel-core, and psbackend-ts with their declared runtime/toolchain dependencies. Thus `npm install -g proofscript` should provide all five components without five manual installs. They can be bundled modules or actual required npm dependencies; this plan does not assume ownership or separate publication of every unscoped name. It does not mean putting TypeScript lowering or TypeScript-specific concepts inside pscore or the logical kernel. The source compiler remains written in its supported .lean/.ps profile.
 
 Publish the supervisor and kernel at clear consumer boundaries. The compiler-core, frontend, and TS backend can initially be subpackages or subpaths under a shared version if separate publication would add only coordination work. Proof sources, docs, archives, and historical seeds remain in the repository without automatically entering release tarballs.
+
+### Wasm-first Core execution
+
+For the latest requested direction, retain `pskernel-core` as the one logical/source component and make its qualified Wasm artifact the required default. Offer the native artifact as an explicit runtime option. Bundling versus separate npm publication can remain an incremental packaging choice; these two execution packages do not create two semantic kernels or expand the compiler's source import closure.
+
+The proposed `--kernel-runtime wasm|native` selects a release-approved artifact before admission. It never enables the acceptance-affecting native-reduction capability, falls back after a rejection/timeout, or accepts an arbitrary third-party checker. The supervisor owns identity reporting and exact request/artifact binding. Use a release-owned Node provider process with a qualified minimal Wasm import/adapter boundary first; do not infer isolation from a generic Emscripten launcher or Node WASI.
+
+Source-level kernel proofs can be shared when their assumptions match. Lean/C/runtime-to-Wasm refinement and engine correctness remain explicit substantial obligations or assumptions; Wasm validation and differential tests do not discharge them. Formal assurance remains a later gate. The complete sequence and measurable release gates are in [wasm-core-provider-plan.md](docs/platform/wasm-core-provider-plan.md). Current native receipts and fixed-point evidence remain accurately labeled.
 
 Use one development-only compiler assurance workspace at `psc0/proofs/`, organized by package. This is a source/build boundary, not another mandatory npm package or compiler plugin framework. Its pinned Lean toolchain and optional proof libraries are installed by the assurance workflow only. Keep the kernel's canonical assurance library under its existing ownership and reuse its results at an explicit source/profile boundary; do not create a second kernel proof copy. Section 16 specifies the layout.
 

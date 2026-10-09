@@ -1,3 +1,39 @@
+# PSC0 Wasm Core direction — research complete, implementation pending
+
+Updated: 2026-10-09 22:52:02 UTC. This section is active and supersedes the completed onboarding checkpoint below.
+
+## Current result
+
+The user's requested direction is recorded in [docs/platform/wasm-core-provider-plan.md](docs/platform/wasm-core-provider-plan.md) and integrated into [PSC0_ARCHITECTURE_PLAN.md](PSC0_ARCHITECTURE_PLAN.md): pursue a qualified **pskernel-core-wasm default** with an **explicit optional pskernel-core-native runtime**, using one semantic Core implementation.
+
+This follow-up changes documentation only. No Core Wasm artifact was built or qualified, no default was switched, no tests were rerun and no npm package was published. The current installed product remains the native-backed proofscript 0.1.0-preview.2 qualified at e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1 in run37998655835. Its download and instructions remain in PLATFORM_IMPLEMENTATION.md and the preceding completed checkpoint.
+
+## Evidence and architectural boundaries
+
+- Platform source inspected at cb7b241d9387e7d2095f1a2a94db182290f93e09. The selected Core source is separately pinned at 963030dc2d154008fccc82e7c8ed29331f138799.
+- The Core admission function is pure; the native process shell is a separate small wrapper. The explicit provider source graph includes78Core+7host+16bridge/data/foundation modules, excluding implicit LeanInit. This is not a linked-artifact or TCB size claim.
+- Existing pskernel-lean-wasm is Lean4.34's C++ checker, protocol pskernel-lean/1, not Core. Its target-width/i386/current-runtime/ABI build work can be reused. Its 2,177,471-byte artifact is not a Core size estimate.
+- Historical Lean-Wasm run36933643176 succeeded for an earlier artifact. Run37014379617 passed provider/host steps but was cancelled during its fixed-point step. Do not claim a completed Wasm fixed point from it.
+- Prefer a release-owned Node subprocess with a minimal Wasm admission ABI, inspected imports and explicit bounds. A generic Emscripten launcher, NODEFS or node:wasi is not automatically the proposed security boundary. The tiny psc-command/1 profile stays separate.
+- Proposed --kernel-runtime wasm|native selects an approved execution artifact before admission, never an arbitrary plugin checker. Keep nativeEvaluator=none for both; native execution does not enable native reduction. No fallback after rejection, timeout, trap or missing payload.
+- Source proofs can be reused when their source/profile/assumptions match. Lean/C/runtime/LLVM/Wasm/engine refinement remains a substantial separate obligation or explicit assumption. Wasm validation, hashes and finite differential tests are not proofs of logical soundness or compilation correctness.
+
+## Next implementation checkpoint
+
+The new document defines W0 actual same-source cross-build, W1 bounded provider/identity qualification, W2 installed product/native option and full-current-F admission replay, and W3 default promotion. It includes exact evidence distinctions, rough line estimates, measured-resource requirements, clean-build reproducibility and twelve acceptance criteria. Start with one cold build feasibility checkpoint before assuming the existing recipe suffices.
+
+The present research/planning follow-up is complete. W0–W3 are not implemented by this documentation commit. Main, bootstrap pins, selected seed and qualified runtime bytes remain unchanged. Keep formal proofs as a later assurance gate in proofs/**/*.proof.lean, outside the bootstrap cycle; mandatory operational admission/isolation/package checks still gate a default release.
+
+## Execution rules for continuation
+
+Use a fresh live head and this handoff before writes. Repository source reads/writes remain GitHub connector/MCP only; actual builds/tests run only in GitHub Actions. No local checkout/source execution/shell build/test/browser/DesktopCommander. Pure in-memory text/JSON transformations and evidence hashing are allowed. Git-backed deliverables remain in the repository.
+
+Use leased non-force updates, preserve all concurrent history and slice ancestry, and do not change kernel algorithms/metatheory/defeq/cache as incidental porting work. Preserve the 61-module F closure and selected R seed. Bootstrap remains Node22.23.3/Lean4.34.0/TypeScript7.0.2 with no TS5/6 fallback. No automatic 4.35 Arena substitution, seed promotion, main merge or npm publication.
+
+---
+
+# Previous completed onboarding checkpoint
+
 # PSC0 onboarding and isolated command demo — complete
 
 Updated: 2026-10-09 22:28:35 UTC. This section is active and supersedes the completed Windows-preview checkpoint below.

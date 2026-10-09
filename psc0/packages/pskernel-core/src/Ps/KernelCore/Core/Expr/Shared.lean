@@ -20,6 +20,12 @@ structure Algebra (β : Type) where
   unary : PsKernelExpr → Nat → β → β
   binary : PsKernelExpr → Nat → β → β → β
   ternary : PsKernelExpr → Nat → β → β → β → β
+  binaryStop : (e : PsKernelExpr) → (d : Nat) → (l : β) →
+    Option { v : β // ∀ r, v = binary e d l r } := fun _ _ _ => none
+  ternaryStop1 : (e : PsKernelExpr) → (d : Nat) → (t : β) →
+    Option { r : β // ∀ v b, r = ternary e d t v b } := fun _ _ _ => none
+  ternaryStop2 : (e : PsKernelExpr) → (d : Nat) → (t v : β) →
+    Option { r : β // ∀ b, r = ternary e d t v b } := fun _ _ _ _ => none
 
 def fold (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) : β :=
   match e with
@@ -35,28 +41,68 @@ def isCompound : PsKernelExpr → Bool
   | .app .. | .lam .. | .forallE .. | .letE .. | .mdata .. | .proj .. => true
   | _ => false
 
+/-- A bounded shape check. This is only an execution policy: the pure fold is
+cheaper than a memo for the bottom three constructor layers (at most 13 nodes). -/
+def smallWithFuel (fuel : Nat) (e : PsKernelExpr) : Bool :=
+  match fuel with
+  | 0 => false
+  | n + 1 =>
+    match e with
+    | .app f x => smallWithFuel n f && smallWithFuel n x
+    | .lam _ t b _ | .forallE _ t b _ => smallWithFuel n t && smallWithFuel n b
+    | .letE _ t v b _ => smallWithFuel n t && smallWithFuel n v && smallWithFuel n b
+    | .mdata _ b | .proj _ _ b => smallWithFuel n b
+    | _ => true
+
+def small (e : PsKernelExpr) : Bool := smallWithFuel 3 e
+
 def walk (a : Algebra β) (e : @& PsKernelExpr) (cursor : Nat)
     (memo : Memo PsKernelExpr β (fold a)) : Squash (Result (fold a) e cursor) :=
   let descend := fun _ : Unit =>
     match h : e with
     | .app f x =>
       Squash.lift (walk a f cursor memo) fun (fr, m) =>
-      Squash.lift (walk a x cursor m) fun (xr, m) =>
-      Squash.mk (⟨a.binary e cursor fr.1 xr.1, by simp [h, fold, fr.2, xr.2]⟩, m)
+      match a.binaryStop e cursor fr.1 with
+      | some cut =>
+          Squash.mk (⟨cut.1, by
+            simpa [h, fold, fr.2] using cut.2 (fold a x cursor)⟩, m)
+      | none =>
+          Squash.lift (walk a x cursor m) fun (xr, m) =>
+          Squash.mk (⟨a.binary e cursor fr.1 xr.1, by simp [h, fold, fr.2, xr.2]⟩, m)
     | .lam n t b bi =>
       Squash.lift (walk a t cursor memo) fun (tr, m) =>
-      Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
-      Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [h, fold, tr.2, br.2]⟩, m)
+      match a.binaryStop e cursor tr.1 with
+      | some cut =>
+          Squash.mk (⟨cut.1, by
+            simpa [h, fold, tr.2] using cut.2 (fold a b (cursor + 1))⟩, m)
+      | none =>
+          Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
+          Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [h, fold, tr.2, br.2]⟩, m)
     | .forallE n t b bi =>
       Squash.lift (walk a t cursor memo) fun (tr, m) =>
-      Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
-      Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [h, fold, tr.2, br.2]⟩, m)
+      match a.binaryStop e cursor tr.1 with
+      | some cut =>
+          Squash.mk (⟨cut.1, by
+            simpa [h, fold, tr.2] using cut.2 (fold a b (cursor + 1))⟩, m)
+      | none =>
+          Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
+          Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [h, fold, tr.2, br.2]⟩, m)
     | .letE n t v b nd =>
       Squash.lift (walk a t cursor memo) fun (tr, m) =>
-      Squash.lift (walk a v cursor m) fun (vr, m) =>
-      Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
-      Squash.mk (⟨a.ternary e cursor tr.1 vr.1 br.1,
-        by simp [h, fold, tr.2, vr.2, br.2]⟩, m)
+      match a.ternaryStop1 e cursor tr.1 with
+      | some cut =>
+          Squash.mk (⟨cut.1, by
+            simpa [h, fold, tr.2] using cut.2 (fold a v cursor) (fold a b (cursor + 1))⟩, m)
+      | none =>
+          Squash.lift (walk a v cursor m) fun (vr, m) =>
+          match a.ternaryStop2 e cursor tr.1 vr.1 with
+          | some cut =>
+              Squash.mk (⟨cut.1, by
+                simpa [h, fold, tr.2, vr.2] using cut.2 (fold a b (cursor + 1))⟩, m)
+          | none =>
+              Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
+              Squash.mk (⟨a.ternary e cursor tr.1 vr.1 br.1,
+                by simp [h, fold, tr.2, vr.2, br.2]⟩, m)
     | .mdata md b =>
       Squash.lift (walk a b cursor memo) fun (br, m) =>
       Squash.mk (⟨a.unary e cursor br.1, by simp [h, fold, br.2]⟩, m)
@@ -65,15 +111,19 @@ def walk (a : Algebra β) (e : @& PsKernelExpr) (cursor : Nat)
       Squash.mk (⟨a.unary e cursor br.1, by simp [h, fold, br.2]⟩, m)
     | .bvar _ | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ =>
       Squash.mk (⟨a.atom e cursor, by simp [h, fold]⟩, memo)
-  if isCompound e then step e cursor memo descend else descend ()
+  if small e then Squash.mk (⟨fold a e cursor, rfl⟩, memo)
+  else step e cursor memo descend
 termination_by structural e
 
 def run (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) : β :=
-  value (walk a e cursor {})
+  if small e then fold a e cursor else value (walk a e cursor {})
 
 theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
-    run a e cursor = fold a e cursor :=
-  value_eq _
+    run a e cursor = fold a e cursor := by
+  unfold run
+  split
+  · rfl
+  · exact value_eq _
 
 def countAlgebra : Algebra Nat where
   atom := fun _ _ => 1
@@ -89,6 +139,13 @@ def looseAlgebra : Algebra Bool where
   binary := fun _ _ l r => if l then true else r
   ternary := fun _ _ t v b => if t then true else if v then true else b
 
+  binaryStop := fun _ _ l =>
+    if h : l = true then some ⟨true, by intro r; simp [h]⟩ else none
+  ternaryStop1 := fun _ _ t =>
+    if h : t = true then some ⟨true, by intro v b; simp [h]⟩ else none
+  ternaryStop2 := fun _ _ t v =>
+    if h : v = true then some ⟨true, by intro b; cases t <;> simp [h]⟩ else none
+
 def fvarAlgebra : Algebra Bool where
   atom := fun e _ => match e with
     | .fvar _ => true
@@ -96,6 +153,13 @@ def fvarAlgebra : Algebra Bool where
   unary := fun _ _ b => b
   binary := fun _ _ l r => if l then true else r
   ternary := fun _ _ t v b => if t then true else if v then true else b
+
+  binaryStop := fun _ _ l =>
+    if h : l = true then some ⟨true, by intro r; simp [h]⟩ else none
+  ternaryStop1 := fun _ _ t =>
+    if h : t = true then some ⟨true, by intro v b; simp [h]⟩ else none
+  ternaryStop2 := fun _ _ t v =>
+    if h : v = true then some ⟨true, by intro b; cases t <;> simp [h]⟩ else none
 
 theorem count_fold (e : PsKernelExpr) (d : Nat) :
     fold countAlgebra e d = psKernelExprNodeCount e := by
@@ -184,7 +248,7 @@ def rebuildTernary (e : PsKernelExpr) (_d : Nat) (t v b : Changed) : Changed :=
   else (e, false)
 
 def changedAlgebra (atom : PsKernelExpr → Nat → Changed) : Algebra Changed :=
-  ⟨atom, rebuildUnary, rebuildBinary, rebuildTernary⟩
+  { atom := atom, unary := rebuildUnary, binary := rebuildBinary, ternary := rebuildTernary }
 
 end PsKernelSharing
 

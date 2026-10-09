@@ -38,7 +38,8 @@ theorem psKernelExprInstantiate1_bvar_zero
         (PsKernelExpr.bvar 0)
         replacement =
       replacement := by
-  rfl
+  change (psKernelExprLiftLooseBVarsChanged replacement 0 0).1 = replacement
+  rw [PsKernelSharing.lift_zero]
 
 theorem psKernelExprInstantiate1_bvar_succ
     (index : Nat)

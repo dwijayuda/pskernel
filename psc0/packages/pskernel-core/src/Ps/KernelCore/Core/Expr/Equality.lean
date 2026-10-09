@@ -255,15 +255,56 @@ def eqWalk (left right : @& PsKernelExpr) (memo : EqMemo) :
         Squash.mk (⟨r0.1, by simp [eqSpec, hl, hr, psKernelExprEq, hg.1, hi, ←hr0]⟩, memo)
       else Squash.mk (⟨psKernelExprEq left right, by simp [eqSpec, hl, hr]⟩, memo)
     | _, _ => Squash.mk (⟨psKernelExprEq left right, by simp [eqSpec, hl, hr]⟩, memo)
-  if isCompound left then eqStep left right memo descend else descend ()
+  if small left then Squash.mk (⟨psKernelExprEq left right, rfl⟩, memo)
+  else eqStep left right memo descend
 termination_by structural left
 
 end PsKernelSharing
 
 def psKernelExprEqShared (left right : PsKernelExpr) : Bool :=
-  PsKernelSharing.value (PsKernelSharing.eqWalk left right {})
+  if PsKernelSharing.small left then psKernelExprEq left right
+  else PsKernelSharing.value (PsKernelSharing.eqWalk left right {})
 
 @[csimp] theorem psKernelExprEq_shared_eq : psKernelExprEq = psKernelExprEqShared := by
   funext left right
-  simpa only [psKernelExprEqShared, PsKernelSharing.eqSpec] using
-    (PsKernelSharing.value_eq (PsKernelSharing.eqWalk left right ({} : PsKernelSharing.EqMemo))).symm
+  unfold psKernelExprEqShared
+  split
+  · rfl
+  · simpa only [PsKernelSharing.eqSpec] using
+      (PsKernelSharing.value_eq (PsKernelSharing.eqWalk left right ({} : PsKernelSharing.EqMemo))).symm
+
+namespace PsKernelSharing
+
+theorem level_params_empty (u : PsKernelLevel) (values : List PsKernelLevel) :
+    psKernelLevelInstantiateParams u [] values = u := by
+  induction u <;>
+    simp_all [psKernelLevelInstantiateParams, psKernelNameLookupLevel,
+      psKernelLevelEq_refl_of_string_law string_reflexive]
+
+theorem level_list_params_empty (us : List PsKernelLevel) (values : List PsKernelLevel) :
+    psKernelInstantiateLevelList us [] values = us := by
+  induction us <;> simp_all [psKernelInstantiateLevelList, level_params_empty]
+
+theorem expr_params_empty (e : PsKernelExpr) (values : List PsKernelLevel) :
+    psKernelExprInstantiateLevelParams e [] values = e := by
+  induction e <;> simp_all [psKernelExprInstantiateLevelParams,
+    level_params_empty, level_list_params_empty]
+
+end PsKernelSharing
+
+/-- An empty universe substitution preserves the original node, including its sharing. -/
+def psKernelExprInstantiateLevelParamsSharedFast (e : PsKernelExpr)
+    (params : List PsKernelName) (levels : List PsKernelLevel) : PsKernelExpr :=
+  match params with
+  | [] => e
+  | _ :: _ => psKernelExprInstantiateLevelParamsShared e params levels
+
+@[csimp] theorem psKernelExprInstantiateLevelParamsShared_fast_eq :
+    psKernelExprInstantiateLevelParamsShared = psKernelExprInstantiateLevelParamsSharedFast := by
+  funext e params levels
+  cases params with
+  | nil =>
+      simpa only [psKernelExprInstantiateLevelParamsSharedFast,
+        ← psKernelExprInstantiateLevelParams_shared_eq] using
+        PsKernelSharing.expr_params_empty e levels
+  | cons _ _ => rfl

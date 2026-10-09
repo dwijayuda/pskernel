@@ -39,6 +39,21 @@ def main : IO Unit := do
   for e in examples do
     for f in examples do
       ensure (psKernelExprEq e f == PsKernelSharing.eqSpec (e, f) 0) "exact syntactic equality"
+  let collisionEntry : PsKernelSharing.Entry PsKernelExpr Bool
+      (PsKernelSharing.fold PsKernelSharing.looseAlgebra) :=
+    ⟨.bvar 0, 0, true, rfl⟩
+  let collisionMemo : PsKernelSharing.Memo PsKernelExpr Bool
+      (PsKernelSharing.fold PsKernelSharing.looseAlgebra) :=
+    ({} : PsKernelSharing.Memo PsKernelExpr Bool
+      (PsKernelSharing.fold PsKernelSharing.looseAlgebra)).insert (0, 0) collisionEntry
+  let missNode := PsKernelSharing.value
+    (PsKernelSharing.probe (0, 0) (.sort .zero) 0 collisionMemo (fun _ =>
+      Squash.mk (⟨false, rfl⟩, collisionMemo)))
+  ensure (!missNode) "hash collision must validate the node"
+  let missCursor := PsKernelSharing.value
+    (PsKernelSharing.probe (0, 0) (.bvar 0) 1 collisionMemo (fun _ =>
+      Squash.mk (⟨false, rfl⟩, collisionMemo)))
+  ensure (!missCursor) "hash collision must validate the cursor"
   let depth := 32
   let closed := dag depth (.sort .zero)
   ensure (psKernelExprNodeCount closed == 2 ^ (depth + 1) - 1) "shared node count"
@@ -56,4 +71,6 @@ def main : IO Unit := do
   ensure (psKernelExprNodeCount levelResult == 2 ^ (depth + 1) - 1) "shared universe result"
   ensure (psKernelExprEq closed closed) "shared reflexivity"
   ensure (psKernelExprEq closed levelResult) "independently rebuilt shared equality"
+  ensure (psKernelExprEq closed (psKernelExprInstantiateLevelParams closed [] [.zero]))
+    "empty universe substitution with arbitrary values"
   IO.println "PSKERNEL_SHARED_SYNTAX: PASS cursors=4 variants=14 DAG-depth=32"

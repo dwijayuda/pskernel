@@ -167,7 +167,8 @@ theorem psKernelExprCheapBetaReduce_single_refines_beta
                       (PsKernelExpr.bvar 0)
                       arg =
                     arg := by
-                rfl
+                change (psKernelExprLiftLooseBVarsChanged arg 0 0).1 = arg
+                rw [PsKernelSharing.lift_zero]
               have hBeta :
                   PsKernelReductionStep
                     environment

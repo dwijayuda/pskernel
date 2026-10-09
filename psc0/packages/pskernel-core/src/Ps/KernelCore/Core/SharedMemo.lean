@@ -17,7 +17,7 @@ structure Entry (α β : Type) (spec : α → Nat → β) where
   valid : value = spec node cursor
 
 abbrev Memo (α β : Type) (spec : α → Nat → β) :=
-  Std.HashMap (USize × Nat) (Entry α β spec)
+  Std.HashMap Nat (Entry α β spec)
 
 abbrev Result {α β : Type} (spec : α → Nat → β) (node : α) (cursor : Nat) :=
   { value : β // value = spec node cursor } × Memo α β spec
@@ -34,7 +34,7 @@ theorem value_eq {α β : Type} {spec : α → Nat → β} {node : α} {cursor :
   | _ p => exact p.1.2
 
 @[inline] def probe {α β : Type} [DecidableEq α] {spec : α → Nat → β}
-    (key : USize × Nat) (node : @& α) (cursor : Nat) (memo : Memo α β spec)
+    (key : Nat) (node : @& α) (cursor : Nat) (memo : Memo α β spec)
     (descend : Unit → Squash (Result spec node cursor))
     (cacheResult : β → Bool := fun _ => true) :
     Squash (Result spec node cursor) :=
@@ -53,11 +53,17 @@ theorem value_eq {α β : Type} {spec : α → Nat → β} {node : α} {cursor :
       | isFalse _ => miss ()
     else miss ()
 
+/-- A mixed scalar hint avoids allocating a pair at every probe. Collisions are
+permitted: probe still validates the full node and cursor. The high bit is
+discarded so ordinary 64-bit native keys fit Lean's scalar Nat representation. -/
+@[inline] def memoKey (address : USize) (cursor : Nat) : Nat :=
+  (mixHash (hash address) (hash cursor) >>> 1).toNat
+
 @[inline] def step {α β : Type} [DecidableEq α] {spec : α → Nat → β}
     (node : @& α) (cursor : Nat) (memo : Memo α β spec)
     (descend : Unit → Squash (Result spec node cursor)) :
     Squash (Result spec node cursor) :=
-  withPtrAddr node (fun address => probe (address, cursor) node cursor memo descend)
+  withPtrAddr node (fun address => probe (memoKey address cursor) node cursor memo descend)
     (fun _ _ => Subsingleton.elim _ _)
 
 

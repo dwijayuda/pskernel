@@ -256,7 +256,7 @@ theorem hash_fold (e : PsKernelExpr) (cursor : Nat) :
 
 abbrev HashMemo := Squash (Memo PsKernelExpr Nat (fold hashAlgebra))
 
-def hashCached (e : PsKernelExpr) (memo : HashMemo) : Nat × HashMemo :=
+def hashCached (e : @& PsKernelExpr) (memo : HashMemo) : Nat × HashMemo :=
   valueAndMemo (Squash.lift memo fun m =>
     step e 0 m (fun _ => walk hashAlgebra e 0 m))
 

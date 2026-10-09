@@ -53,13 +53,13 @@ def main : IO Unit := do
   let collisionMemo : PsKernelSharing.Memo PsKernelExpr Bool
       (PsKernelSharing.fold PsKernelSharing.looseAlgebra) :=
     ({} : PsKernelSharing.Memo PsKernelExpr Bool
-      (PsKernelSharing.fold PsKernelSharing.looseAlgebra)).insert (0, 0) collisionEntry
+      (PsKernelSharing.fold PsKernelSharing.looseAlgebra)).insert 0 collisionEntry
   let missNode := PsKernelSharing.value
-    (PsKernelSharing.probe (0, 0) (.sort .zero) 0 collisionMemo (fun _ =>
+    (PsKernelSharing.probe 0 (.sort .zero) 0 collisionMemo (fun _ =>
       Squash.mk (⟨false, rfl⟩, collisionMemo)))
   ensure (!missNode) "hash collision must validate the node"
   let missCursor := PsKernelSharing.value
-    (PsKernelSharing.probe (0, 0) (.bvar 0) 1 collisionMemo (fun _ =>
+    (PsKernelSharing.probe 0 (.bvar 0) 1 collisionMemo (fun _ =>
       Squash.mk (⟨false, rfl⟩, collisionMemo)))
   ensure (!missCursor) "hash collision must validate the cursor"
   let depth := 32

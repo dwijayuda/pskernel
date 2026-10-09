@@ -188,7 +188,7 @@ abbrev EqResult (left right : PsKernelExpr) := Result eqSpec (left, right) 0
       letI : DecidableEq PsKernelExpr :=
         fun a b => withPtrEqDecEq a b (fun _ => originalDecEq a b)
       let probePair := fun _ : Unit =>
-        probe (leftAddress, rightAddress.toNat) (left, right) 0 memo descend (fun result => result)
+        probe (memoKey leftAddress rightAddress.toNat) (left, right) 0 memo descend (fun result => result)
       if leftAddress == rightAddress then
         match withPtrEqDecEq left right (fun _ => originalDecEq left right) with
         | isTrue h =>

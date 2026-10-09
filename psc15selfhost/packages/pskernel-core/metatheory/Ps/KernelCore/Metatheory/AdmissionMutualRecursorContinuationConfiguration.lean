@@ -87,7 +87,7 @@ theorem psKernelAddSimpleMutualInductive_success_transaction_pipeline
       (psKernelMutualNameListAppend
         (psKernelSimpleMutualRecNames (first :: remaining))
         (psKernelSimpleMutualCtorNames (first :: remaining)))
-  simp [hDuplicate, hMinTypes, hUnique] at hRun
+  simp only [hDuplicate, hMinTypes, hUnique] at hRun
   cases hFresh : psKernelCheckFreshInductiveNames allNames environment with
   | error message =>
       simp only [allNames] at hFresh
@@ -132,11 +132,11 @@ theorem psKernelAddSimpleMutualInductive_success_transaction_pipeline
                       levels paramResult.binders motives ctorResult.shapes with
                   | error message =>
                       simp only [shapes, levels, elimOnlyAtZero, elimLevel, motives] at hMinors
-                      simp only [hMinors] at hRun
+                      rw [hMinors] at hRun
                       cases hRun
                   | ok minors =>
                       simp only [shapes, levels, elimOnlyAtZero, elimLevel, motives] at hMinors
-                      simp only [hMinors] at hRun
+                      rw [hMinors] at hRun
                       let recLevelParams := if elimOnlyAtZero then decl.levelParams else
                         psKernelSimpleFreshElimName decl.levelParams :: decl.levelParams
                       let ruleBinders := psKernelOpenBinderListAppend paramResult.binders

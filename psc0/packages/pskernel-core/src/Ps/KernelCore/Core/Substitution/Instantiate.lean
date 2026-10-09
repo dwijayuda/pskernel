@@ -375,16 +375,90 @@ theorem instantiate_fold (e : PsKernelExpr) (start : Nat)
 
 end PsKernelSharing
 
+
+namespace PsKernelSharing
+
+/-- A substitution argument is classified once per operation. The certificate
+makes the closed path valid at every binder depth, not just depth zero. -/
+structure PreparedReplacement where
+  source : PsKernelExpr
+  liftAt : Nat → PsKernelExpr
+  valid : ∀ amount, liftAt amount = psKernelExprLiftLooseBVars source 0 amount
+
+def prepareReplacement (e : PsKernelExpr) : PreparedReplacement :=
+  let lifted : { f : Nat → PsKernelExpr //
+      ∀ amount, f amount = psKernelExprLiftLooseBVars e 0 amount } :=
+    if h : psKernelExprHasLooseBVar e = false then
+      ⟨fun _ => e, fun amount => by
+        exact (congrArg Prod.fst (lift_closed e 0 amount h)).symm⟩
+    else
+      ⟨fun amount => psKernelExprLiftLooseBVars e 0 amount, fun _ => rfl⟩
+  { source := e, liftAt := lifted.1, valid := lifted.2 }
+
+theorem prepareReplacement_valid (e : PsKernelExpr) (amount : Nat) :
+    (prepareReplacement e).liftAt amount = psKernelExprLiftLooseBVars e 0 amount :=
+  (prepareReplacement e).valid amount
+
+def prepareSubst : List PsKernelExpr → List PreparedReplacement
+  | [] => []
+  | e :: es => prepareReplacement e :: prepareSubst es
+
+def preparedLookup : List PreparedReplacement → Nat → Nat → Option PsKernelExpr
+  | [], _, _ => none
+  | e :: _, 0, amount => some (e.liftAt amount)
+  | _ :: es, i + 1, amount => preparedLookup es i amount
+
+theorem preparedLookup_eq (subst : List PsKernelExpr) (index amount : Nat) :
+    preparedLookup (prepareSubst subst) index amount =
+      (psKernelExprListGet subst index).map
+        (fun e => psKernelExprLiftLooseBVars e 0 amount) := by
+  induction subst generalizing index with
+  | nil => simp [prepareSubst, preparedLookup, psKernelExprListGet]
+  | cons e es ih =>
+      cases index <;>
+        simp [prepareSubst, preparedLookup, psKernelExprListGet,
+          prepareReplacement_valid, ih]
+
+@[inline, instance_reducible]
+def preparedInstantiateAlgebra (start : Nat) (subst : List PsKernelExpr)
+    (prepared : List PreparedReplacement) : Algebra Changed :=
+  changedAlgebra fun e offset =>
+    match e with
+    | .bvar index =>
+      if psKernelNatLt index (start + offset) then (e, false)
+      else match preparedLookup prepared (index - (start + offset)) offset with
+        | some replacement => (replacement, true)
+        | none => if psKernelExprListIsEmpty subst then (e, false)
+            else (.bvar (index - psKernelExprListLength subst), true)
+    | _ => (e, false)
+
+theorem preparedInstantiateAlgebra_eq (start : Nat) (subst : List PsKernelExpr) :
+    preparedInstantiateAlgebra start subst (prepareSubst subst) =
+      instantiateAlgebra start subst := by
+  unfold preparedInstantiateAlgebra instantiateAlgebra
+  congr 1
+  funext e offset
+  cases e <;> simp only [preparedLookup_eq]
+  case bvar index =>
+    split
+    · rfl
+    · cases psKernelExprListGet subst (index - (start + offset)) <;> rfl
+
+end PsKernelSharing
+
 def psKernelExprInstantiateAtChangedShared (e : PsKernelExpr) (start : Nat)
     (subst : List PsKernelExpr) (offset : Nat) : Prod PsKernelExpr Bool :=
   if PsKernelSharing.small e then psKernelExprInstantiateAtChanged e start subst offset
-  else PsKernelSharing.run (PsKernelSharing.instantiateAlgebra start subst) e offset
+  else
+    let prepared := PsKernelSharing.prepareSubst subst
+    PsKernelSharing.run
+      (PsKernelSharing.preparedInstantiateAlgebra start subst prepared) e offset
 
 @[csimp] theorem psKernelExprInstantiateAtChanged_shared_eq :
     psKernelExprInstantiateAtChanged = psKernelExprInstantiateAtChangedShared := by
   funext e start subst offset
   simp [psKernelExprInstantiateAtChangedShared, PsKernelSharing.run_eq,
-    PsKernelSharing.instantiate_fold]
+    PsKernelSharing.preparedInstantiateAlgebra_eq, PsKernelSharing.instantiate_fold]
 
 
 def psKernelExprInstantiateAt

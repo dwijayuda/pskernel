@@ -73,4 +73,16 @@ def main : IO Unit := do
   ensure (psKernelExprEq closed levelResult) "independently rebuilt shared equality"
   ensure (psKernelExprEq closed (psKernelExprInstantiateLevelParams closed [] [.zero]))
     "empty universe substitution with arbitrary values"
+  let preparedClosed := PsKernelSharing.prepareReplacement closed
+  for amount in [0, 1, 7, 100] do
+    ensure (psKernelExprEq (preparedClosed.liftAt amount) closed) "prepared closed argument"
+  let preparedOpen := PsKernelSharing.prepareSubst [PsKernelExpr.bvar 2, .fvar n]
+  ensure (PsKernelSharing.preparedLookup preparedOpen 0 5 == some (.bvar 7))
+    "prepared open argument still lifts"
+  ensure (PsKernelSharing.preparedLookup preparedOpen 2 5 == none)
+    "prepared substitution preserves missing entries"
+  let underBinder := PsKernelExpr.lam n (.sort .zero) (dag depth (.bvar 1)) .default
+  let substituted := psKernelExprInstantiate1 underBinder closed
+  let expected := PsKernelExpr.lam n (.sort .zero) (dag depth closed) .default
+  ensure (psKernelExprEq substituted expected) "closed argument shared beneath binder"
   IO.println "PSKERNEL_SHARED_SYNTAX: PASS cursors=4 variants=14 DAG-depth=32"

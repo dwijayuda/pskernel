@@ -345,3 +345,129 @@ def psKernelExprLift
     expr
     0
     amount
+
+namespace PsKernelSharing
+
+/-- Lifting preserves a term when no loose index reaches the lifting cursor. -/
+theorem lift_closed (expr : PsKernelExpr) (offset amount : Nat)
+    (hClosed : psKernelExprHasLooseAt expr offset = false) :
+    psKernelExprLiftLooseBVarsChanged expr offset amount = (expr, false) := by
+  by_cases ha : amount = 0
+  · subst amount
+    exact lift_zero expr offset
+  induction expr generalizing offset with
+  | bvar index =>
+      have hb : Nat.ble offset index = false := by
+        simpa [psKernelExprHasLooseAt] using hClosed
+      simp [psKernelExprLiftLooseBVarsChanged, ha, psKernelNatGe, hb]
+  | fvar name =>
+      simp [psKernelExprLiftLooseBVarsChanged, ha]
+  | mvar name =>
+      simp [psKernelExprLiftLooseBVarsChanged, ha]
+  | sort level =>
+      simp [psKernelExprLiftLooseBVarsChanged, ha]
+  | const name levels =>
+      simp [psKernelExprLiftLooseBVarsChanged, ha]
+  | app fn arg ihFn ihArg =>
+      cases hFn :
+          psKernelExprHasLooseAt fn offset with
+      | true =>
+          simp [psKernelExprHasLooseAt, hFn] at hClosed
+      | false =>
+          have hArg :
+              psKernelExprHasLooseAt arg offset = false := by
+            simpa [psKernelExprHasLooseAt, hFn] using hClosed
+          have hFnClosed := ihFn offset hFn
+          have hArgClosed := ihArg offset hArg
+          simp [
+            psKernelExprLiftLooseBVarsChanged, ha,
+            hFnClosed,
+            hArgClosed
+          ]
+  | lam name type body binderInfo ihType ihBody =>
+      cases hType :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [psKernelExprHasLooseAt, hType] at hClosed
+      | false =>
+          have hBody :
+              psKernelExprHasLooseAt body (Nat.succ offset) =
+                false := by
+            simpa [psKernelExprHasLooseAt, hType] using hClosed
+          have hTypeClosed := ihType offset hType
+          have hBodyClosed := ihBody (Nat.succ offset) hBody
+          simp [
+            psKernelExprLiftLooseBVarsChanged, ha,
+            hTypeClosed,
+            hBodyClosed
+          ]
+  | forallE name type body binderInfo ihType ihBody =>
+      cases hType :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [psKernelExprHasLooseAt, hType] at hClosed
+      | false =>
+          have hBody :
+              psKernelExprHasLooseAt body (Nat.succ offset) =
+                false := by
+            simpa [psKernelExprHasLooseAt, hType] using hClosed
+          have hTypeClosed := ihType offset hType
+          have hBodyClosed := ihBody (Nat.succ offset) hBody
+          simp [
+            psKernelExprLiftLooseBVarsChanged, ha,
+            hTypeClosed,
+            hBodyClosed
+          ]
+  | letE name type value body nondep ihType ihValue ihBody =>
+      cases hType :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [psKernelExprHasLooseAt, hType] at hClosed
+      | false =>
+          cases hValue :
+              psKernelExprHasLooseAt value offset with
+          | true =>
+              simp [psKernelExprHasLooseAt, hType, hValue] at hClosed
+          | false =>
+              have hBody :
+                  psKernelExprHasLooseAt
+                      body
+                      (Nat.succ offset) =
+                    false := by
+                simpa [
+                  psKernelExprHasLooseAt,
+                  hType,
+                  hValue
+                ] using hClosed
+              have hTypeClosed := ihType offset hType
+              have hValueClosed := ihValue offset hValue
+              have hBodyClosed :=
+                ihBody (Nat.succ offset) hBody
+              simp [
+                psKernelExprLiftLooseBVarsChanged, ha,
+                hTypeClosed,
+                hValueClosed,
+                hBodyClosed
+              ]
+  | lit literal =>
+      simp [psKernelExprLiftLooseBVarsChanged, ha]
+  | mdata metadata body ihBody =>
+      have hBody :
+          psKernelExprHasLooseAt body offset = false := by
+        simpa [psKernelExprHasLooseAt] using hClosed
+      have hBodyClosed := ihBody offset hBody
+      simp [
+        psKernelExprLiftLooseBVarsChanged, ha,
+        hBodyClosed
+      ]
+  | proj typeName index body ihBody =>
+      have hBody :
+          psKernelExprHasLooseAt body offset = false := by
+        simpa [psKernelExprHasLooseAt] using hClosed
+      have hBodyClosed := ihBody offset hBody
+      simp [
+        psKernelExprLiftLooseBVarsChanged, ha,
+        hBodyClosed
+      ]
+
+end PsKernelSharing

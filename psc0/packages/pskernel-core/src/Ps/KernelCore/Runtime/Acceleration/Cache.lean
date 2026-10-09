@@ -882,8 +882,8 @@ def psKernelExprPairSetContainsShared (set : PsKernelExprPairSet)
       psKernelExprPairSetContainsIn left right
         (psKernelExprPairSetIndexBucket 16 index
           (Nat.mod
-            (PsKernelSharing.hashRead left set.hashMemo +
-              PsKernelSharing.hashRead right set.hashMemo) psKernelCacheHashModulus))
+            (Nat.add (PsKernelSharing.hashRead left set.hashMemo)
+              (PsKernelSharing.hashRead right set.hashMemo)) psKernelCacheHashModulus))
 
 @[csimp] theorem psKernelExprPairSetContains_shared_eq :
     psKernelExprPairSetContains = psKernelExprPairSetContainsShared := by

@@ -242,15 +242,17 @@ def eqWalk (left right : @& PsKernelExpr) (memo : EqMemo) :
       else Squash.mk (⟨false, by simp [eqSpec, hl, hr, psKernelExprEq, ←hr0, hr0t]⟩, memo)
     | .mdata md b, .mdata me c =>
       if hg : Nat.beq md me = true then
+        have hm : md = me := by simpa using hg
         Squash.lift (eqWalk b c memo) fun (r0, memo) =>
         have hr0 : r0.1 = psKernelExprEq b c := r0.2
-        Squash.mk (⟨r0.1, by simp [eqSpec, hl, hr, psKernelExprEq, hg, ←hr0]⟩, memo)
+        Squash.mk (⟨r0.1, by simp [eqSpec, hl, hr, psKernelExprEq, hm, ←hr0]⟩, memo)
       else Squash.mk (⟨psKernelExprEq left right, by simp [eqSpec, hl, hr]⟩, memo)
     | .proj n i b, .proj m j c =>
       if hg : psKernelNameEq n m = true ∧ Nat.beq i j = true then
+        have hi : i = j := by simpa using hg.2
         Squash.lift (eqWalk b c memo) fun (r0, memo) =>
         have hr0 : r0.1 = psKernelExprEq b c := r0.2
-        Squash.mk (⟨r0.1, by simp [eqSpec, hl, hr, psKernelExprEq, hg.1, hg.2, ←hr0]⟩, memo)
+        Squash.mk (⟨r0.1, by simp [eqSpec, hl, hr, psKernelExprEq, hg.1, hi, ←hr0]⟩, memo)
       else Squash.mk (⟨psKernelExprEq left right, by simp [eqSpec, hl, hr]⟩, memo)
     | _, _ => Squash.mk (⟨psKernelExprEq left right, by simp [eqSpec, hl, hr]⟩, memo)
   if isCompound left then eqStep left right memo descend else descend ()
@@ -263,4 +265,5 @@ def psKernelExprEqShared (left right : PsKernelExpr) : Bool :=
 
 @[csimp] theorem psKernelExprEq_shared_eq : psKernelExprEq = psKernelExprEqShared := by
   funext left right
-  exact (PsKernelSharing.value_eq _).symm
+  simpa only [psKernelExprEqShared, PsKernelSharing.eqSpec] using
+    (PsKernelSharing.value_eq (PsKernelSharing.eqWalk left right ({} : PsKernelSharing.EqMemo))).symm

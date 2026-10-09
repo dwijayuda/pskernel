@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-whole-entry-recursion-provenance-candidate",
+  "repository": "dwijayuda/pskernel",
+  "status": "unattached-reviewed-source-overlay-no-execution",
+  "sourceAnchor": "715a17ba725cf3bdcc9ae6c95278ca9ca240fa46",
+  "composition": {
+    "canonicalIntegrationManifest": "79494ab9b502358a5d6872a30ba8c96fb2bb3fda",
+    "natPlacementManifest": "1530f2bec9a7b66bddd317ff94409297c39adaca",
+    "overlayBaseIsComposedCandidate": true
+  },
+  "files": [
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "baseBlob": "f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12",
+      "baseSha256": "ec134fbe9ed4b38cad38eedc6ab1c0380d3c1f9aaee7e0c7c963eafa8aaae0c5",
+      "candidateBlob": "f1ecc9458fe0c606b0a34c321517069cd27280e4",
+      "candidateSha256": "0119067649f78605eac5c1339a92ab9171b7c06180932d5db1d606ff074b530b",
+      "edits": [
+        {
+          "description": "Add an executable child-scope operation that clears only whole-entry recursion eligibility.",
+          "before": "def psEraseRuntimeExprWithFuelWorker\n",
+          "after": "-- Only the whole expression reached after opening a declaration's actual entry\n-- may establish its recursion equation. Child computations retain established\n-- IH replacements but cannot manufacture another equation for that declaration.\ndef psErasureNestedRuntimeScope (scope : PsErasureScope) : PsErasureScope :=\n  PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals\n    scope.erasedLocals scope.declarationNames scope.runtimeConstructors\n    scope.runtimeRecursors scope.runtimeStructures scope.runtimeStructureConstructors\n    scope.runtimeExpressions Option.none\n\ndef psEraseRuntimeExprWithFuelWorker\n",
+          "expectedOccurrences": 1
+        },
+        {
+          "description": "Every recursive expression descent retains installed IH expressions but clears eligibility to create a new current-definition recurrence.",
+          "before": "      let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=\n        psEraseRuntimeExprWithFuelWorker environment remaining;",
+          "after": "      let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=\n        fun (nextScope : PsErasureScope) (value : PsExpr) =>\n          psEraseRuntimeExprWithFuelWorker environment remaining\n            (psErasureNestedRuntimeScope nextScope) value;",
+          "expectedOccurrences": 1
+        }
+      ]
+    }
+  ],
+  "purpose": "Only the actual whole expression after aligned declaration opening may use currentDefinition to construct a recursive-hypothesis replacement. Every recursive child computation retains the already constructed replacements but loses permission to construct a new whole-definition recurrence.",
+  "sourceCaseArgument": {
+    "entry": "psEraseOpenDefinition calls the expression eraser after consuming the actual aligned raw type/value prefix. This initial expression receives currentDefinition and its actual ordered type/runtime parameters.",
+    "descent": "The sole self-recursive worker binding now builds a typed callback which clears currentDefinition in the supplied child scope, leaving localContext, runtimeLocals, typeLocals, erasedLocals, declarationNames including entries, constructor/recursor/structure indexes, and runtimeExpressions unchanged.",
+    "rootMinor": "psEraseRuntimeRecursorApplication and psOpenMatchMinorHypotheses inspect the original root scope before their eraseAt callback. They can install the valid outer IH expressions. When eraseAt lowers the minor body, the callback clears eligibility but retains those expressions.",
+    "nestedForms": "Callee/operand, primitive, special completion/suffix, constructor field, projection target, lambda body, let initializer/body and nested minor paths all enter through that same recursive callback. No nested recursor can infer a new whole-definition equation merely from an entry-parameter spelling.",
+    "scope": "This erasure correction is paired with the source producer's constructor-refinement and one-shot root-IH correction. It is not a standalone proof that arbitrary caller-supplied raw scopes or arbitrary Core recursors denote the current definition.",
+    "sourceOwnedRootOrigin": "Term's ordinary global reference constructs constE name [] and immediately calls psElabResolvedTerm. Infer rejects incorrect universe arity. Nat.rec, List.rec, Option.rec, Except.rec, Prod.rec and every authored regular recursor each have one declared universe parameter; generated match supplies its inferred result level. Thus direct authored raw recursor heads are refused before their arguments are elaborated. This is a source-owned reachability premise, not a stronger raw-Core API contract.",
+    "sourcePins": {
+      "term": "dc7b325b8b18770ae8ebfddec14b768d5a7d461f",
+      "infer": "25e0c00dfafb0268d6a204089a3eceb10d9bcb0f",
+      "declaration": "3525a93bc88da5cdd8e190819aa4b39f2ec011ba",
+      "corePrelude": "d862ba8c806595fbf11237724089bd2282af9866",
+      "runtimePrelude": "b9127717d5685ae0de6e10251ba1d8d02b6e647d",
+      "prodPrelude": "38485851a30f024d973392c6c8e1d86916e31466"
+    }
+  },
+  "preserved": [
+    "All public signatures and existing error constructors",
+    "Core IDs and lexical/output maps",
+    "Original aligned entry and canonical unary value implementation",
+    "Existing outer IH reconstruction terms and source argument order",
+    "All per-recursion remaining fuel values and actual syntax/body branches",
+    "All exact original-IR/type/target checks",
+    "All existing primitive/constructor/recursor saturated rules",
+    "No kernel/provider/defeq/cache/existing-theory changes"
+  ],
+  "validation": {
+    "forwardExact": true,
+    "reverseExact": true,
+    "blobReadbackExact": true,
+    "sourceExecution": false,
+    "compilerExecution": false,
+    "testsExecuted": false,
+    "refsMutated": false,
+    "peerReviews": [
+      {
+        "reviewer": "artifact_inspection_review",
+        "disposition": "bounded-CLEAR",
+        "scope": "exact two-edit reversal; whole-entry app, root IH installation before child descent, all recursive descent routes, preserved runtimeExpressions; source-owned domain only"
+      },
+      {
+        "reviewer": "runtime_comparison_finish",
+        "disposition": "bounded-CLEAR",
+        "scope": "exact two-edit reversal; only actual Expr reads of currentDefinition are root-parameter selection/IH construction; canonical/direct/special/fold paths independent"
+      }
+    ]
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalTheoremsAdded": false,
+  "requiredCompanion": "The separate reviewed source producer correction must refine the original major to the actual constructor in legal root minors and consume root-IH registration once, retaining established outer child calls in nested control. This manifest does not supply that source fix by itself."
+}

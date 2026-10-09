@@ -1,489 +1,241 @@
 # PSC0 AI work state — strict SH/1 work in progress
 
-Updated: 2026-10-09 21:16:00 UTC. Evidence times are UTC. Jakarta is UTC+07:00.
+Updated: 2026-10-09 21:51:00 UTC. Evidence times are UTC.
 
 ## Read this first
 
-The user authorized merging the qualified practical checkpoint and continuing the mandatory strict SH/1 work. The practical checkpoint is already merged. Continue the strict branch; do not restart the earlier research or repeat completed baseline qualifications. Merging practical improvements does not enable unrestricted PSC1, and neither typing nor finite execution alone activates strict SH/1.
+The practical source/grammar/TypeScript migration is **already merged** into main at **ed5d00aca0743bde583b45fe7756dd494ac3960f**. The user authorized finishing the strict SH/1 branch. Do not merge the practical checkpoint again, restart the initial research, or treat a profile name as capability evidence.
 
-This current section supersedes stale assignments, pending-run descriptions and completed-scope instructions in the archived work states. The previous complete active state is retained at [history/AI_WORK_STATE_2026-10-09_18-13.md](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-09_18-13.md), exact blob dfa4b108a4a4982e0b7f78357b7de835324edc5e. Its evidence remains true for the revisions it describes. The historical M6/TypeScript 7 section below is preserved byte-for-byte.
+This is a **documentation-only checkpoint** over strict head **715a17ba725cf3bdcc9ae6c95278ca9ca240fa46**, tree **9741564c64bdf057188c1ea7e807311733299a43**. Its compiler source still equals **fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504**. Discover the actual enclosing documentation head before any next ref write. This commit requests no execution and changes no compiler, fixture, script, workflow, dependency or recovery recipe.
 
-## Current native success and coherent function-value correction — read first
+**The next full run is held for two source-proven recursion correspondence defects.** A coherent 41-code-file canonical-function/allocation/host batch is reviewed but not integrated. The final producer correction will also change Elab/Context, making at least42 code files. Do not push the previous 41-file assembly as complete. No source-only native checkpoint or cold-recovery rerun is needed.
 
-This is a documentation/evidence checkpoint over **fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504**, root tree **0f3e673da896471b145f45d9e36f0638cbef0656**. Discover the actual enclosing documentation head before the next commit. The compiler source still equals fc961; this checkpoint changes no compiler, fixture, script, workflow, dependency or recovery recipe and requests no execution. Main remains **ed5d00aca0743bde583b45fe7756dd494ac3960f**. Do not merge the practical checkpoint again.
+This current section supersedes stale assignments, candidates and pending-run instructions in the archives. [The complete previous state](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-09_21-16.md) is exact blob **4b24227ce30ae29de701029eb049e9e9b626d5b8**. The earlier18:13 state remains in history. The historical completed M6/TypeScript 7 section below is preserved byte-for-byte, SHA256 **5ec35639aec88f3c12b2b0000771fa7511f0798feb73ee12b111da24cad5c619**.
 
-### Exact native result retained
+## User decisions and execution rules
 
-The parser checkpoint's ordinary native development run [37988707250](https://github.com/dwijayuda/pskernel/actions/runs/37988707250) is **successful**. Compiler job **114017088870** passed step24; steps25/26/27 were skipped because the source commit deliberately had no full-qualification tag. Provider job **114019030861 skipped**. The run started20:41:51Z and was last updated20:47:08Z. Cold37988707255 was skipped; unchanged revised cold37983663908 remains sufficient for the frozen recovery recipe.
+- Work on **psc0/strict-sh1-v1**. Use **GitHub MCP and GitHub Actions only**: no local filesystem, shell, clone, browser, local compiler or local tests. Pure in-memory text/JSON/hash review is allowed.
+- Root alone creates commits or updates refs. Agents may create unattached candidate blobs and review packets. Check exact fresh head and base blobs; update_ref must use expected_sha and force:false.
+- Keep **Node22.23.3 / TypeScript7.0.2 / Lean4.34.0 commit293d5d0c0c3f3dded4688b3ccd6a33939ac5102b**. TS5 is retired from current development and recovery. Historical evidence remains historical.
+- Current .ps grammar is **ps-0.9-r3/new-only/bounded-selfhost-subset**. There is no backward grammar mode. Handwritten .lean remains authoritative and is parsed by PSC0's own frontend.
+- Keep selected **R** and the frozen provider. No kernel/provider/defeq/cache algorithm or existing theory change. Narrow pure finite worker-binding placement is permitted; actual headers, state transitions, fuel policies and active bodies are unchanged.
+- Finish proven source classes before one coherent qualification. Preserve failures and all existing assertions. Do not repeat passed gates without a concrete remaining risk or turn finite execution into general preservation.
+- Bulk optional refactoring, new syntax, deeper recursion capabilities, .ps source-authority migration and seed promotion are deferred. Strict merge requires earned acceptance; there is no permission to relabel an open obligation as complete.
 
-Actual source: **64 modules / 1,212,568 source bytes / 1,213,647 input bytes / 149 imports / 1,668 source declarations / 2,514 Core declarations / 39 normalizations**. Source/type/term walks:143223/17570/55812. Original IR: **62,289 expressions / 793,972 steps / zero findings / complete traversal**. Exactly one preparation, one canonical admission encoding, zero environment reconstructions and one original IR check are recorded. This is finite exact-source evidence, not a general semantic proof.
+## Current blocker: source, prepared Core and erased code must agree
 
-Grammar conformance now passes all18 application boundaries,22 supported syntax cases,40 canonical round trips,35 parse refusals,2 lexical-position cases,5 lexical refusals,3 empty-call refusals,1 printer refusal,5 empty pairs/6 refusals and1 zero-field pair/2 refusals. The formerly failing grouped-empty-argument AST hash is **f4248596a8ca5de612812ecdbaa2fe39e4fc35f9c629b19fa8c61e79880f16e1**. Full64-module canonical Lean/new-PS correspondence passes with991085 PS bytes and closure hash **44331be90edf828bcb0ccc8e2ae3b45f7e7d70714b5b3722b8a6a4a4f43f456b**. Runtime45 operations/186 values, source-evaluation24 values/21 host probes, migration87 observations and the existing generic19 values also passed. The old unchanged generic fixture does not cover the new defect below.
+Three reviewers confirmed both findings by exact source/normalizer/elaborator/erasure walks. These are **source derivations, not an execution**.
 
-Durable files under [attempts/fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504](docs/selfhost-language/strict/attempts/fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504):
+### Root major capture — mandatory direct structural recursion
 
-| File | Blob / identity |
-| --- | --- |
-| native-checkpoint.json | **53eac1c981b15e4c9d2eaa4eef8399a9030e3925**; SHA256 **3b59dc0c47d603361b1b718fc2ca69b34eb12b4b03bbf08b8d9303d1567ce041** |
-| job.log | **8c8f01abbeecb3a6d666fe017708bdf048cd09b1**; decoded text SHA256 **45489f8482ac035d35a81538c1eb7beb9abd0268261ebb85cc23251af753cde3**;1094678 characters |
-| strict-source-native.json | **4fb3222220b56345871a170230aed525def5f18a**; SHA256 **e59bd0ceff69c039c90b448c82df19569f1458f52fe6312087125b35f87ea6a3**;590639 characters; compact marker+newline independently matches actual receipt file hash |
-| native-candidate.logged.json | **4d6af40c66caaa904aa3986a082175974247f59a**; SHA256 **8342361b0ff80e736de4a07f35aa92e415633792627d0d314bad5f3781c3ab79**; explicitly formatted log-derived record, not claimed artifact-file byte identity |
-
-Artifact **11645090241** is1525447 bytes, digest **f9f8a0a4a43c4ef2654283eea67be3188669760f360a047f2d79539e43bd4b27**, expires2026-11-08T20:47:03Z. N1 JS **04336b5cb042ffdc833c7aad1fd9ec1aa8ee0aea7e1aff14408192ea8316e1ce**, TS **0267d0c167eed7ec2d61edf282aa7be6991ebacf8a711b30fca42136893eefaf**, atomic native binary **40e1a83ed9ad1ab7799571f6e7f4d73c0fdd6e82a0f40eb899cfa5483a1b9544**. Native stage elapsed239281.541487ms is one observation, not a benchmark.
-
-No current C1/C2/C3, provider, peak-memory or general strict qualification has been established. R remains selected. Strict/global flags remain false.
-
-### One complete representation correction before the next full run
-
-The implicit generic identity witness in the previous section is source-proved to lose its original saturation boundary. The chosen correction is **canonical unary function-value types plus flat actual declaration entries**:
-
-1. Erase every supported runtime Pi as Function([domain],result). Apply recursively beneath named/array/field types. This makes runtime type substitution structural; do not use deep recursive type-pair adapters or flatten checker equality.
-2. Cache the actual aligned raw Core forall/lambda prefix before generic substitution. Count original type/proof/runtime slots, keeping the exact original type order. Direct known calls use that flat entry prefix. Partial/value exposure curries it; unknown/local function values use canonical unary calls.
-3. Stop opening at a computed function body. Remove arbitrary result-arrow eta exposure so its work and faults remain at the body boundary. Returned closures remain values.
-4. For a type-only generic actual prefix with no source runtime parameters, use one fresh ignored physical Unit parameter and a Unit argument at type-instantiation activation. Logical source runtime arity stays zero. This avoids the unchanged IR checker's and backend's generic-value-unsupported case without weakening either; do not introduce a zero-arity generic admission exemption or a new source argument.
-5. Preserve the exact binary Array.foldl intrinsic callback by a capture-once bridge that applies the canonical callback to accumulator and element successively. Array.map is already unary.
-6. Keep monomorphic initialized values, erased type/proof-only value prefixes, scalar intrinsics, constructors, recursors, and source-driven demand consistent. No unsafe casts, source effects, callback budget resets or invented source divergence.
-7. Review the whole class and new tests before one full **[sh1-qualify]** source commit. No new cold recovery is required. Do not perform speculative loop optimizations or claim this correction is a speedup: computed worker closures may cease matching old whole-definition tail-loop optimization. Use the existing resource traces to observe that cost once.
-
-Basic candidate **ac62e1da317a18300b8669bf68f9b6414159156e** (base **e0c932e0280b9c0e2b7f7ad1974b548881f452d0**) and exact four-edit manifest **7dc9946a6904395e77d33957c2f10fbfa94b63d8** are unattached. Candidate SHA256 **2054873c6cc383a229e99e805ad58d749a13fca0a6db7bf8638f022b7a3d8d29**,29538 UTF-8 bytes. The independent bounded review is CLEAR for original slot classification/counts, first-entry index precedence, raw value-spine shape-only traversal, StructureRecursor prefix preservation, Prop skip, fuel refusal and unary runtime type construction. Runtime owns this candidate. Full integration is not cleared until Expr/Definition install/copy/use the catalogue correctly.
-
-A subsequent source review identified a required efficiency audit before execution: stable fuel workers often bind a recursively computed smaller worker before returning state lambdas. Preserving real result boundaries can eagerly build the entire fuel-length closure chain (4096 in the new catalogue helper). Runtime is correcting that newly added helper and auditing the same pattern throughout the actual64-file closure; do not treat the first Basic blob as the final efficiency candidate. Exact closure inventory blob **0e55da5c7112a41a6541700a01fb60825adcf2aa** binds every current path/blob. Compare a uniform source arrangement with explicit headers or justified fusion before choosing any broader change; do not run another full bootstrap just to discover this source-predictable allocation class. The quoted Basic CLEAR remains a correctness review of that exact provisional blob.
-
-Empty owns Expr base **6da268d23db1d2a709134f54dc8ae8a7f81367d3** and Definition base **709fc44f59bddb3c3d7354ba31ea01f296c9cde8**. Artifact reviewer independently audits infer/layout/demand/ABI and all final source candidates. Root owns host scripts, fixtures, evidence/docs and every branch/ref write. Basic's catalogue is stored inside declarationNames; all copies of that record must preserve the new entries index. No source candidate in this section is committed or executed yet.
-
-Later authoring checkpoint: Definition **bd2ae9994d2ba554191d77d211ea8e41ece73252** contains the entry prepass, removal of result eta and type-only Unit entry. Expr **788de1c6d5e2e00a3788aa4af58ceb9bb216dd4e** contains the unary lambda/curry builder, catalogue propagation and Unit-name helper but is **intentionally incomplete**: entry/canonical/special-call integration is missing. Preserve these as resumable work only; do not integrate either as a complete feature before companion review.
-
-### Unattached host/gate candidates already prepared
-
-Root's exact forward/reverse review confirms all eight edits plus the new helper against the fc961 tree. These are immutable candidate blobs, not published source:
-
-| Script under psc0/scripts | Candidate blob |
-| --- | --- |
-| sh1-migration-worker-abi.mjs | 4a24f22050cdbe9660501b58bc1eeed9c8005319 |
-| sh1-foundation-conformance.mjs | 2b740f5caf1348e81706f2dfb683f61c43651f2d |
-| sh1-helper-conformance.mjs | 99a32b8bbc457a3026c70a1f6fa6747a64b33ca4 |
-| sh1-projection-conformance.mjs | 1c69c032f260eac8d868173b7f8b5b06e90a4a29 |
-| sh1-fresh-name-conformance.mjs | 9eaa7b1cbdb50dec79aca57150d825cbdd51f8d7 |
-| sh1-capabilities.mjs | 14c581f57a28b5f9edcd372e10fea1a1e575c217 |
-| sh1-strict-runtime-conformance.mjs | c38e6b50806481c270db9dfbd9d75e3a4a8f3b29 |
-| sh1-qualify.mjs | e6fe221b92cc25c0473c140cfc469559fcf8c029 |
-| sh1-function-entry.mjs | ceb4a39851e421e1d95f009cbf31d500e6ff1bb1 |
-
-The new helper is a narrow bootstrap-tooling ABI bridge. Exact source pins show psNameEq and psExprAlphaEq have1+1 groups, and psErasureEtaParameters2+1+1. Frozen R and the C1 it produces retain the old flat ABI; N1/C2/C3 use current groups. Select once by the exported function's fixed formal arity; apply exact declared groups. Returned __ps$wrap closures have rest parameters, so never inspect their length. No catch/retry/result-based compatibility path or source grammar mode is added. Runtime independently CLEARed the helper and all three source group derivations.
-
-Reference/current foundation/helper fixtures keep raw source bytes and every expected result. Their differently authored prefix groups are called explicitly. The12 public F worker signatures and1666/2198/1568 observations remain. Runtime changes only the two host function fields to unary chaining, keeping all raw Lean/PS sources, native references,24 values/21 trace probes and45-operation/186-value coverage. Capabilities keep the original raw computed-result definitions and expected values, while invoking their actual returned closure boundaries. The new helper is added to the full qualification recipe; the frozen seven-file cold-recovery import graph is untouched.
-
-The additive generic fixture **4d3ca0b084cb19c5726e8d7a27e10d49f52b904f** (base **284d971fe1944bd1d63b3eb41f9ff0d9a049dd84**) and gate **5d755904dda5a064267c12a1afa1944d7553394e** (base **91a18f1cd26eeec36d720a8acbca6a79a3a9b1ab**) have independent bounded CLEAR. They preserve the existing4 recursive IR checks and19 values, add15 source declarations/13 known entry boundaries and14 observations (9 pure values plus5 host demand diagnostics), check the same actual original IR before emission, and reuse the same preparation/TS/native invocations. Source forms use supported typed binders/results/lets and implicit function-type instantiation. Coverage includes returned generics, typed-let intermediates, higher-order inputs, known flat entries as values, record and inductive fields, arrays/map/fold, computed closure reuse/discard and first callback fault.
-
-The newly discovered Unit activation case requires an **additive follow-up before those fixture/gate candidates are final**: a computed type-only generic identity, concrete and function-valued use, and a generic+proof-only prefix. Root is preparing it. Re-read the latest immutable candidates; do not publish the earlier fixture/gate pair as complete for Unit activation. The evidence binder should retain the resulting exact finite receipt without introducing extra compiler executions.
-
-### Remaining finish gates and invariants
-
-Complete and independently review Expr/Definition plus all special-head routes; then update the ER argument from its incomplete **5bef308cee061026ee715f696dc4d8c92a668dd4** checkpoint and compose the shared actual-Core/type/proof/demand/host premises. Existing N/EV/TS local packets remain valuable, but their erasure producer pins and call-group explanation need the exact new-source addendum. All33 correspondence rows are still open; never turn a finite conformance pass into a universal proof.
-
-Root must verify exact base blobs, forward/reverse edits, immutable readback and final branch head before a non-force update. Integrate one reviewed compiler/host/fixture batch and request one full qualification. Read exact N1/C1/C2/C3 native parity, fixed-point products, full source/IR/grammar/runtime gates, resource trace and provider result. Preserve failures if any; resolve a whole source class rather than running incremental test/fix loops. Then reconcile the strict ledger and update this work state. Strict merge/seed selection require earned evidence; bulk code refactoring and .ps source-authority migration remain deferred.
-
-Use **GitHub MCP and GitHub Actions only**: no local filesystem, shell, clone, browser or local build/test. Root alone writes refs. Continue Node22.23.3 / TypeScript7.0.2 / Lean4.34.0 commit293d5d0c0c3f3dded4688b3ccd6a33939ac5102b; TS5 remains retired. Existing kernel/provider/defeq/cache algorithms/theory are unchanged.
-
-## Previous parser checkpoint and seventh attempt — historical exact-source evidence
-
-This enclosing commit is the reviewed parser correction over **3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc** (base tree **c6e87b80d9e837c7a295f40041e409b69e77ae2f**). Discover its actual commit and Actions run before continuing; do not call the base the latest head after integration. This is a **source/documentation checkpoint without a qualification tag**. Source review proved a second mandatory erasure gap before the planned run, so the next full qualification is deferred until that complete saturation-boundary class is corrected and independently reviewed. No cold recovery rerun is needed. Main remains **ed5d00aca0743bde583b45fe7756dd494ac3960f**; practical integration is complete. Strict integration and seed promotion remain pending.
-
-The base 3c0 integrated Check **178ecf89498be6502be5f747f0c0d62eb1133420**, Recursion **ea8518afd0982e64d6fcfcd2320501d89e0385ec**, Backend Module **2580754407e70be69cc10101c4ebe03c7304a8f0**, source-completion **639e78ffeba7d64f29ef02eadff9b37951073832** and the final semantic foundation **40e540b325186ee514ff3af9e39a22126d29a167** / manifest **09c621ccba856c8906f24dcba5c9104fdfd08014**. Exact readback confirmed its 21 paths: 3 compiler sources and 18 documentation/evidence files. All earlier pending descriptions of that batch below are historical.
-
-### Final parser correction integrated by this checkpoint
-
-[ParseLean.lean](packages/syntax/src/Ps/Syntax/ParseLean.lean) changes from **e4ffc2f29643145ff5e5eea21e8ee59f000414bd** to **8c39064e8a9c4bcda1ec9f2432ccbe0a70769574**, SHA-256 **7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8**. The exact six-edit manifest is [nomatch-application-entry.json](docs/selfhost-language/strict/reviewed-candidates/nomatch-application-entry.json), blob **aa62fec9ef76acc69f289d168b2b23b21dc07d93**. Root reconstructed all six edits forward and backward; all 75 existing definition headers and the moved consumed-span helper are byte-identical. Four internal definitions are added. Independent class review and source authoring review are CLEAR; this is source analysis, not an execution result.
-
-The old Application primary called psParseSimpleTerm, bypassing the full Term nomatch branch and rejecting primary heads beginning with '(' or '['. The new primary recognizes nomatch and the existing grouping/list forms. Its internal Application/Product workers carry a separate nomatch scrutinee callback. Full Term supplies its already-decreased full parser; only the nomatch head uses it. Ordinary groups/lists keep their existing family callback. Product recursion decreases its own fuel; full Term reentry decreases the enclosing Term fuel. Public wrappers, fuel defaults, zero rules and product/arrow/application-tail logic remain.
-
-This intentionally adds compositional acceptance of nested grouping/list primary heads, including their non-nomatch counterparts. It does not claim identical acceptance on every ordinary input, introduce unrestricted grouped control forms, or enable grouped function-arrow syntax. The final helper uses a Bool selector and an ordinary typed function callback: **do not restore** the earlier Option(function-arrow) draft **357419a4e8d93d81d7e494a8cb37b66f5d115586** or the earlier incomplete-scrutinee draft **098c313d917d41ce1d656ded9ea5f45eecc22ab2**. Those were caught in source review, before execution.
-
-Direct nomatch, grouped arguments, repeated parentheses, grouped/list scrutinees and already-supported conditional/let/call/record scrutinee routes were reviewed as a class. PS parser, printers, AST/IR shapes, grammar fixtures and every gate invocation remain unchanged. Preserve all 5 accepted empty pairs, 6 refusals, 1 zero-field pair and 2 zero-field refusals. No assertion, expected AST or capability is waived.
-
-### Exact seventh-attempt outcome
-
-Full run [37986002380](https://github.com/dwijayuda/pskernel/actions/runs/37986002380), compiler job **114008036763**, completed with failure at native step 24. Provider **114009942633 skipped**. Cold run **37986002167 skipped by tag as intended**; successful revised cold recovery **37983663908** remains the qualification of the unchanged recipe.
-
-The actual native atomic API admitted **64 modules / 1,209,116 source bytes / 149 imports / 1,664 source declarations / 2,510 Core declarations / 39 normalizations**. Original IR: **62,169 expressions / 792,484 steps / 0 findings / complete traversal**. Target admission completed 1,610,037 steps. The receipt observes one preparation, one canonical admission encoding, zero environment reconstructions and one IR check.
-
-Before failure, the run passed 15 native checker cases; source 2 accepted / 33 refused / 2 carrier refusals; target 9 accepted / 20 refused; 45 operations / 186 native runtime observations; source evaluation 12 declarations / 24 values / 21 host probes; IR 61 behavior observations / 38 refusals; native/generated empty and zero-field checks; generic/session/helper checks. The whole 64-module Lean → new PS → Lean and idempotent PS comparison passed with 988,207 PS bytes and closure SHA-256 **baa67e4ed50d0a25d9d97999a10a20d3b436c8bd54304c220dc79cfab386a699**. These are finite partial results. N1 grammar/capability conformance did not finish; C1/C2/C3 and provider were not reached.
-
-At **20:22:37.6258849Z**, sh1-grammar-conformance.mjs line 543 failed **grouped-empty-argument: common AST**. Parenthesized Lean nomatch value became app(reference nomatch,[reference value]); the intended shared AST is matchE(value,[]). The parser correction above addresses this exact expression-entry class.
-
-Durable evidence:
-
-- [job.log](docs/selfhost-language/strict/attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/job.log): blob **00fbc9633180a6aa86d54e312f6166bf0a3e2cbc**, SHA-256 **158daa528895baff99f9c136fb6a75e4c96ed0d81176a135b34c10891f823b28**, 1,031,393 characters.
-- [grammar-failure.json](docs/selfhost-language/strict/attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/grammar-failure.json): blob **8faa56832c7db88ba3cf109ffe58c63c4ad8e1e8**.
-- [strict-source-native.json](docs/selfhost-language/strict/attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/strict-source-native.json): blob **bca25c3e02c234ece65d257b29e94bd893697d25**, SHA-256 **dbe4957462d35bf7beb1895f5ef39135afe064aed26a5d0c7cd9f14eec3e5381**. The complete compact log JSON plus newline independently matches the actual native receipt file hash. Pretty-printing changes its bytes and is not that file.
-- Artifact **11642987189**, 1,803,936 bytes, digest **6e9f4f2b85e7ed3c1a5dd919f826a5466fa8eab6116aa3695f64a888ff15018d**, expires 2026-11-08.
-- N1 JS **914211c326068981686413f53021bb16773d59293332f8d1dc017ec6ab0b750b**; native TS **74e90228b8b5149a66425f687548cebd09d13a561ac00b34009eee52ccb66db8**. Neither is a new selected seed or complete qualification.
-
-The preflight observed **15,394,009,088 available bytes** and V8 heap limit **8,640,266,240 bytes** under the 8,192 MiB process policy. C2 was not reached, so the C2 peak-memory repair remains unqualified. Preserve the current full gate and resource measurements.
-
-### General argument progress and active review boundary
-
-The following source-grounded general local arguments are integrated with explicit remaining composition premises. They are not a claim that their entire correspondence rows are discharged.
-
-| Packet | Exact document blob | Review / residual boundary |
-| --- | --- | --- |
-| [NORMALIZATION_ARGUMENTS.md](docs/selfhost-language/strict/NORMALIZATION_ARGUMENTS.md) | d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a | N-01–N-04, root and two bounded peers CLEAR; actual Core/type/sort and independently justified source demand/call grouping remain to compose |
-| [TS_RULE_ARGUMENTS.md](docs/selfhost-language/strict/TS_RULE_ARGUMENTS.md) | bc72390c69e0c92cd7dce56092a65731748c96ec | TS-01–TS-09, root and bounded peer CLEAR; exact actual erasure/Core, primitive/host and all-index adequacy premises remain |
-
-N manifest **0b0e21e4c8b710aeee623c8a92b567e46d2d9bbc** and TS manifest **833ec6592774e2c002701959614abe47213b3021** bind exact source/doc pins at 3c0. Their conditional case arguments include complete syntax partitions, scope/provenance, normalization telescope/state readiness, generator reentry, eta/count/tail dispatch and module initialization. The shared budget is residual and never resets at callbacks or private helpers. Total immutable reads can move across a possible abort without changing the first abort or demanded computation order; do not restore the earlier overstrong “crosses no abort” wording.
-
-The reviewed [EV_RULE_ARGUMENTS.md](docs/selfhost-language/strict/EV_RULE_ARGUMENTS.md) is integrated: blob **7e90465301005a395a871a0563b19c164dcda750**, SHA-256 **d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38**; manifest [ev-rule-arguments.json](docs/selfhost-language/strict/reviewed-candidates/ev-rule-arguments.json), blob **9f7d2bfe1161d23b8a3ee232f7e3845a47291fca**. Root and all three bounded peers are CLEAR. It covers all eleven IR forms and the complete intrinsic family under the same residual relations. Five precise wording corrections preserve actual runtime-only field admission, omission of generic type parameters, ER-05 projection, ER-07 empty motive, and distinct erasure result-eta versus backend EtaBind producer facts. Root verified the exact five edits forward/reverse, readback/hash and all 15 source pins. No whole EV row is closed before shared ER/Core/host composition.
-
-The ER author has a durable incomplete checkpoint **5bef308cee061026ee715f696dc4d8c92a668dd4** (sections 0–3 only: actual name/index allocation, opening/closing, bounded type substitution and mode-indexed environments). It is not a complete packet or a closed row. Continue ER-01–ER-09 with actual layouts, proof/type classification, target name provenance and call grouping.
-
-A mandatory generic application-group gap is now source-proved, without running a new fixture. The supported Lean source is:
-
-~~~lean
-def groupId {alpha : Type} (value : alpha) : alpha := value
-def groupUse (f : Nat -> Nat) : Nat := groupId f 0
-~~~
-
-The independent infer review derives closed Core (((groupId (Nat -> Nat)) f) 0) with no unresolved metas. Erasure flattens the full Core application spine, drops the type operand, then passes f and 0 to groupId's one-runtime-parameter IR scheme; the unchanged exact-arity checker must refuse. A typed let around groupId f is not a remedy: Finish treats its instantiated arrow result as a missing runtime argument and eta-expands to a two-argument call to the same one-argument declaration. This is a required accepted-source coverage gap, not an executed failure or evidence of emitted incorrect JS.
-
-The whole type/group class must be resolved coherently: erase(A -> T0) substituted with T0 := (B -> R) retains a nested IR function result, whereas erasing the concrete adjacent arrows produces a flattened group. Review actual saturation boundaries, generic result and function parameter/layout substitution, higher-order value adapters, ordinary partial capture, result eta and backend eta together. Do not flatten checker equality, narrow generic type instantiation or revise the semantic contract to hide the defect. Runtime reviewer coordinates the remedy; ER reviewer owns the relevant source changes; infer reviewer independently validates the complete type/source class. All agents use unattached blobs; root alone integrates.
-
-The separate result-eta delay question remains an argument obligation under the unchanged pure/total source contract. Do not invent divergence/effects or treat proof-budget invocation counts as contract observations. The explicit (Nat -> Nat) application-operand spelling is outside the bounded parser; the implicit witness above uses a supported typed binder and is the valid source witness.
-
-All **33 general rows remain open**. Keep strictSh1Qualified, semanticContractQualified, generalPreservationProven and formalPreservationProven false until actual composition and exact-source qualification support them.
-
-## 1. Current integration, setup correction and completed attempts
-
-- The practical checkpoint is already merged to main: **ed5d00aca0743bde583b45fe7756dd494ac3960f**, by non-force fast-forward from37f63c39 at16:30:26 UTC. Do not repeat that merge.
-- Continue **psc0/strict-sh1-v1**. The coherent29-file implementation plus14 documentation/evidence files is committed at **2b5a4c903ed8a069cde8f08265b28042bcaf5766**, root tree **30750fad133a878aba3563b01fb315d4e07a97fd**, parent5becf0cf22a8deec760e0da68b706e95ca72f902. Exact readback confirmed all43 paths and blob identities. The seven-file overlay is now047a; its completed full/cold results and the next reviewed three-file source completion are recorded immediately below. Discover the actual enclosing/new qualification head; do not rerun the completed cold route.
-- Base implementation manifest: [strict-implementation-batch.json](docs/selfhost-language/strict/reviewed-candidates/strict-implementation-batch.json), blob **a2bade0cd7d0eb33590f9afa36a5cdeed40896b2**, binds the29 source/fixture/workflow files integrated at2b5. The current seven-file overlay is [recovery-profile-isolation.json](docs/selfhost-language/strict/recovery-profile-isolation.json), blob **a930b0bcc8e17cf474014d359e0fe7897bb16ae3**. Apply its final host/profile/recipe identities over the base manifest. The047a recovery overlay left compiler .lean bytes at2b5; this checkpoint's three-file source completion below supersedes Check.lean, Recursion.lean and BackendTs/Module.lean only.
-- This batch includes origins, source-owned preparation/admission reuse, immutable host ingress, Nat and partial-application demand repairs, the corrected new-only PS fixture, empty inductive elimination, inhabited zero-field records, the final actual-file evidence binder, and bounded qualification memory/phase instrumentation.
-- Fifth attempt [37982287451](https://github.com/dwijayuda/pskernel/actions/runs/37982287451), compiler **113995538185**, failed at seed authentication step3 before memory preflight, toolchain installation, compiler execution or fixture checks. Provider **113995716773 skipped**; artifact list is empty. It exposed the recovery/conformance pin coupling described below. No current-source compiler result exists for2b5. The overlay commit requests both **[sh1-qualify] [sh1-ts7-cold]**, running independent full qualification and isolated native cold recovery in parallel. Do not borrow success from05f or the old recovery recipe.
-- The preceding executable source was **05f37fc04e52bfaed70389291a0fcdeda819f71f**. Its fourth run [37971952859](https://github.com/dwijayuda/pskernel/actions/runs/37971952859), compiler job **113960540944**, failed at fixed-point step25. Native development step23 and selected-R C1 step24 passed. V8 reported heap exhaustion at19:02:29 UTC and exit134 at19:02:59. Provider job **113979513794 was skipped**.
-- Docs checkpoints **818a1a5ea794694e6891d104307ffc74300722a2** and **5becf0cf22a8deec760e0da68b706e95ca72f902** preserved reviewed packets and evidence without altering the05f compiler. 818a had11 documentation files;5bec had8 documentation files plus the independent read-only inspection workflow.
-- Strict source is not merged to main and not selected as an authoring seed. **R remains selected; strictSh1Qualified and semanticContractQualified remain false.**
-
-### Latest source replay and revised recovery result
-
-The seven-file recovery overlay was committed at **047a29f17392fea41ac5d59e7f8cbfc172b20313**, root **e6ec818c1a31482f76a100e899dd92326e776932**, parent2b5. Readback confirmed exactly16 paths:7 recovery/profile/workflow files and9 documentation/evidence files. Its full run **37983663904**, compiler **114000150722**, passed seed authentication, the measured memory preflight, native build and the preceding source/CLI/translation gates. It failed at native development step24 at **19:58:12 UTC**: source-elaboration/matchExpectedType, modulePs.CompilerIr.Check, ownerpsIrCheckMatch, sourceIndex50, stableDeclaration, lines500–539. Provider **114000685482 skipped**. N1 conformance, C1 and C2/C3 did not start.
-
-The exact correction is **`let resultChecked : PsIrCheckState :=`**, source blob **178ecf89498be6502be5f747f0c0d62eb1133420** overac527384033181014417579e39f93a1595d4cf72. The existing psElabIf forwards absent expected type to its then branch; that branch begins with match, and psElabMatch refuses a missing expected type. A complete review of the29-file implementation's **15 changed/new Lean files** found no other required annotation of this class. Inferred resultHint and Backend Module typeLine are valid because their then branches have known types. Native-only harness/test additions have their own native/contextual inference. Manifest [match-initializer-annotation-completion.json](docs/selfhost-language/strict/match-initializer-annotation-completion.json), blob **c3b524d00153400005985f12ce579006df1720c0**, records every base/candidate and the three bounded peer reviews. This is an authoring annotation, not a new inference feature, diagnostic waiver or test expectation change.
-
-Sixth-attempt exact log **7840feed77dfe66ca02cdbe7b0ea346531e4727b**, SHA-256 **30ec8705c04aeb0e945ef3d2312da493a0032c6cd4c78f58ddeb4119c55849a4**,259363 characters; structured failure **9f3caa4f2350c4b399b5836640c8740afffc4e34**. Artifact **11642526368**,464146 bytes, SHA-256 **6aa2642d8658dbc95a03d0231f32a662c013df73763b2958c6a9fb1b0978b792**. The actual memory preflight passed with **15235063808 available bytes**, minimum12884901888, and V8 heap limit8640266240 bytes under8192MiB old space. Its exact log JSON is retained as **9de5622136362dd6ad6c11f824ba24bbab0e1469** and explicitly labelled log-derived; this is not evidence that generated C2 peak memory has been repaired.
-
-**The revised isolated native cold recovery PASSED** in [run37983663908](https://github.com/dwijayuda/pskernel/actions/runs/37983663908), job **114000151355**, at047a. Its75 commands all succeeded, reproducing all four exact selectedR products from61 pinned raw-source modules with Lean4.34.0/Node22.23.3/TS7.0.2, without generated/historical-parent/TS5 compiler execution, seed/build cache restore or compiler artifact download. Original R IR:56391 expressions,725484 visits,0findings,complete. Selected R identity and manifest are unchanged. Recipe elapsed143478.745407ms is one observation, not a benchmark.
-
-The exact new cold receipt is **9e8f6f68dea880edf7fa230089cebedac6553ef4**, SHA-256 **d2068b325f37d688914899d417b208eb2365be6a9c5d065237c8ec5857dace2a**. Reconstructing its writer's JSON-plus-newline from the complete actual log payload independently matches the printed receiptFileSha256. Exact log **ed40d59d1b8712185ee47152bd96c5b1c8dc0339**, SHA-256 **a4676fe3baa62c4428e9aba47b6ac808c4ca1d52b69e0ae93b83624ded713984**,101746 characters. Artifact **11642138063**,2219318 bytes, SHA-256 **34cc557bd260af627509cb1103f710d10c66ec04b88f8d03b3cf4c245acb4f6e**. [recovery-profile-cold-evidence.json](docs/selfhost-language/strict/recovery-profile-cold-evidence.json), blob **cb178079ea2a32f1cea671de503a02c4145021a3**, binds this exact revised recipe. **Do not rerun cold recovery for the checker annotation or general semantic documentation; neither changes its recipe/source/products.** The failed full run remains a separate result.
-
-### Coherent three-file source completion before the next run
-
-The final current source overlay is [post-review-source-completion.json](docs/selfhost-language/strict/post-review-source-completion.json), blob **639e78ffeba7d64f29ef02eadff9b37951073832**. It combines the checker annotation with two independently reviewed source findings discovered before any further execution:
-
-| Current source file | Exact final blob | Change |
-| --- | --- | --- |
-| packages/compiler-ir/src/Ps/CompilerIr/Check.lean |178ecf89498be6502be5f747f0c0d62eb1133420|Explicit resultChecked : PsIrCheckState; only required annotation in15-file class audit|
-| packages/backend-ts/src/Ps/BackendTs/Module.lean |2580754407e70be69cc10101c4ebe03c7304a8f0|Tail matcher declines empty alternatives; count already declines; general typed empty generator handles them|
-| packages/elab/src/Ps/Elab/Recursion.lean |ea8518afd0982e64d6fcfcd2320501d89e0385ec|Reserve complete original parameter nextId while exposing only preceding declarations to each domain walk|
-
-Empty-tail manifest **a3db2591e9e0d7f7dcbef45ad4cc241980d92095** preserves the old nonempty branch modulo indentation. Source analysis of all dispatch paths predicts the existing native four-empty-generator assertion will now use the intended path; no assertion, count, fixture or invocation is changed, and no new test result is claimed. A nested empty branch also forces the optional optimizer to fall back.
-
-Normalizer manifest **fabe10858976ba2fc0d892ef8c0ab20ef227beb6** changes exactly two executable expressions plus explanatory comments. Originally, a dummy binder inside an earlier parameter's type could reuse a future parameter ID and be mistaken for that parameter by the complete plan's ID list. The actual caller now starts with the completed binder nextId and no visible declarations, and each prefix step preserves that reserved counter while prepending the same original ID/name/type/kind. Dummy IDs stay above all plan IDs. Body/result walks, fixed/state order, checks, origins and public construction are unchanged. This corrects a source-derived association/refusal risk, without claiming an executed/accepted miscompilation or a new mandatory type-syntax capability. No arbitrary caller-supplied invalid context is newly certified.
-
-All three corrections have independent bounded peer clearance and exact root forward/reverse review. New branch contexts have their existing expected return types; no new inference-only match initializer was introduced. The foundation remains explicitly source-anchored to2b5; this overlay supersedes its source pins where those three functions changed. O-SUB/O-SCOPE/N/TS arguments must use the new reserved-ID and empty-fallback facts. General preservation and strict flags remain false.
-
-### Fifth-attempt setup refusal and completed dependency review
-
-At19:45:02 UTC, readNativeSeedRecoveryPolicy refused **PSC0_SH1_NATIVE_SEED_RECIPE_FILE_PIN: scripts/sh1-grammar-conformance.mjs**. Expected48efa9b0c90e7904a1df49f43253395841bff90c, actual77dcbec4a94f7ba27b0727a0888b4098d77f05fc. Exact decoded log blob **4a86c2878cd576768532f780da0e3e71bc7050d5**, SHA-256 **70068f4f4f838620d1971b520d615a3d9377852153008074d46cbdde21e38316**,22551 characters, and structured setup failure **fb79c27029ec3b87ebc465546aebc65157549f24** are retained under attempts/2b5a4c903ed8a069cde8f08265b28042bcaf5766/.
-
-The complete seven-module recovery graph and all29 changed implementation files were reviewed. Only the grammar-conformance module overlapped its frozen runner recipe. Recovery uses none of its test functions: successor-seed imports only the six-field frozen grammar profile. That exact profile block/property order is byte-identical in old48efa, current77dcb and the new dependency-free data module.
-
-The reviewed correction isolates the stable data, preserving the existing conformance export. Recovery authenticates the profile module directly; evolving fixtures no longer enter that recipe. Historical requiredRecipeFiles metadata, the selectedR manifest/identity/source/toolchain and all four expected products are unchanged. No pin check is removed. Both pre-import and post-recovery recipe checks remain. Final overlay files:
-
-| File | Final blob |
-| --- | --- |
-| scripts/sh1-grammar-profile.mjs |26836a8e487d77c94a73485e2d11e3575b932edf|
-| scripts/sh1-grammar-conformance.mjs |2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141|
-| scripts/sh1-successor-seed.mjs |3514a7797e739e7a47af33c91ab58e912584d0c7|
-| scripts/sh1-native-seed-recovery.mjs |c1b5673079b2faae56e9c778b62e70087e639fbe|
-| selfhost-seed-recovery.json |6e4e90f8fe67a47e280721fd64a72a4410025fca|
-| scripts/sh1-qualify.mjs |eedce11a6d99dee010c3de4352a716e5385eb156|
-| .github/workflows/psc0-sh1-ts7-recovery.yml |499763e3ee1bcb7a3d62e56c543d9232b0630591|
-
-New policy SHA-256 **70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30**; new recipe SHA-256 **d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d**. The earlier successful cold receipt qualifies the old recipe only. **That requirement is now satisfied by the exact isolated cold receipt from37983663908, recorded above.** Its workflow has no cache/artifact restore, its own pinnedR checkout and cache directory, an independent concurrency group and cancel-in-progress:false. Full qualification can independently authenticate already qualifiedR bytes while cold recovery runs; their results are not substitutes.
-
-### Authenticated failure inspection
-
-The completed fourth compiler log has SHA-256 **ba246485c1297ee3631ffbf30547f6801ef665587eae9867b0646dee93f330ed**,719267 characters. Artifact **11639377985**,3182763 bytes, digest **2efaf91d57973103e53288140b2adeca3f13c53267138b228c25079d82dc287e**, expires2026-11-08.
-
-The read-only inspection **PASSED**: [run37980548050](https://github.com/dwijayuda/pskernel/actions/runs/37980548050), job **113989649430**, workflow379962074, source5bec. It authenticated metadata/archive/C1 hashes, counted241 files and read8 complete C1 function excerpts. It executed no compiler or tests. Actual evidence blob **77c6e9ae9dbf0a2c6f47cb7b0d415437bf056f0e**, SHA-256 **8dd073faaf235c9c5bffed661d7335ec5a4bdc8dd4225d77ad3e1603aef2496c**, is retained at [retained-artifact-inspection.json](docs/selfhost-language/strict/attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/retained-artifact-inspection.json).
-
-Actual C1 JS:3109387 bytes, **ccdfb5f1c226dce25776b817a391a09c783a71e695ea30ca3702df198bd1d23b**. Its actual receipt:168198 bytes, SHA-256 **b1f907a79cc97e0b6ee440d8147f0b1bbdf2372a2268ad3cf26fe339064f2a3f**. **The archive contains no C2 files.** Under the unchanged complete dist/sh1 upload this places failure before the first TypeScript product write; it does not distinguish the internal synchronous compilation/translation/ABI phase.
-
-C2 was the first build in a fresh fixed-point Node process. Cross-generation module accumulation cannot explain this failure. Source audit confirms three complete admission encodings and one environment rebuild in the executed C1 route. The integrated source reduces these to one and zero. It still retains the original environment until erasure and adds origins; no lower peak is proved yet. Canonical encoding builds linked string lists, complete strings and suspended recursive continuations, with an optional normalized Core graph; it is not a generic PsJsonValue-tree encode. The UTF-8 cache holds two views, not unbounded source strings. No cache algorithm was changed.
-
-### Bounded resource policy for this run
-
-Reviewed resource manifest **5a71a7f7c6074aea8a4380d3d200756fa02c3878**, SHA-256 **3cf59fc94d2bca253828115ef2190b987c5a7022df66b665ea799bc17fc6ea60**, binds:
-
-| File | Final blob |
-| --- | --- |
-| scripts/sh1-resource-policy.mjs |7e3066c513a91a6e0717aac9465a879097c0dd82|
-| scripts/sh1-qualify.mjs |eedce11a6d99dee010c3de4352a716e5385eb156 (1945 resource implementation plus one profile recipe input)|
-| .github/workflows/psc0-sh1.yml |cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8|
-
-Full qualification uses **8192 MiB old-space**, requires **12 GiB effectively available memory at process entry**, and verifies the observed V8 heap-limit band. It takes the minimum of physical MemAvailable, Node availability and each resolvable visible cgroup ancestor's remaining limit. Unsupported mappings, inherited heap overrides or quoted/backslash NODE_OPTIONS refuse with a saved policy receipt. A root with no memory counters is accepted only when cgroup.type and cgroup.events are also absent: both are kernel interfaces omitted only on the actual hierarchy root, avoiding namespace-root misclassification.
-
-The workflow checks this before expensive work and each candidate/fixed-point process checks before generated compiler loading. No dynamic fallback, global NODE_OPTIONS, source callback/FFI, timer, explicit GC or cache change is introduced. Native dev:sh1 stays on its existing native-candidate command. Full CLI entry points now require the explicit flag:
-
-```text
-node --max-old-space-size=8192 scripts/sh1-qualify.mjs candidate --seed <authenticated-R-index.js> --out dist/sh1 --native .lake/build/bin/psc1
-node --max-old-space-size=8192 scripts/sh1-qualify.mjs fixed-point --out dist/sh1
+```lean
+def f (n : Nat) : Nat :=
+  match n with
+  | Nat.zero => 0
+  | Nat.succ k => Nat.add n (f k)
 ```
 
-Each generated build synchronously appends scalar-only checkpoints to resource-usage.jsonl before/after loading, the atomic source wrapper, admission reuse, canonical translation, IR/ABI readback, emission reuse, TS child and writes. Generation receipts bind the actual trace hash. Policy files are resource-policy-preflight.json, resource-policy-candidate.json and resource-policy-fixed-point.json. The atomic wrapper includes ingress and post-emission host readback; its internal phase/transient heap peak remains opaque. Process maxRSS is retrospective RSS high-water, not V8 peak heap. The12 GiB entry check reserves no memory and guarantees no later peak; old-space is not an RSS limit.
+The old minor closes only k and its IH, leaving the original n captured. Prepared Core is schematically **fun n => Nat.rec 0 (fun k ih => n + ih) n**: at2 it gives4. The authored/native recurrence and reconstructed self-call IR give3. Native-source-versus-IR parity alone therefore misses this Core producer defect.
 
-## 2. Persistent user decisions and execution rules
+Required correction: reconstruct the matched original major from the branch's actual constructor, original parameters and opened field variables, and substitute it capture-avoidably into the checked minor before closing fields/IHs. Establish a legal original telescope and nondependent result before applying that refinement; unresolved or exhausted checks refuse. Do not implement general dependent matching implicitly.
 
-1. Use GitHub MCP/connector for repository reads/writes. Execute repository code, builds and tests only in GitHub Actions. No local files, clone, shell, browser, DesktopCommander, local compilers or test execution. Pure in-memory text/JSON transformations and evidence hashing are allowed.
-2. Root alone creates commits or changes refs. Agents may create unattached immutable blobs and guarded manifests. Verify exact base blobs and fresh heads, preserve ancestry/concurrent work, and use expected-head leases with force:false.
-3. Keep Lean 4.34.0, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b; Node 22.23.3; TypeScript 7.0.2. TS5/TS6 are retired from current development/recovery. Historical producer metadata does not authorize running an old compiler.
-4. Keep current .ps grammar **ps-0.9-r3/new-only/bounded-selfhost-subset**. No old grammar compatibility switch.
-5. Keep handwritten PSC1-compatible .lean as authoring authority, parsed by PSC0's own frontend. No authority switch to generated .ps.
-6. Keep selectedR and its exact authenticated manifest/identity/products. The separate native recovery runner policy has the explicitly reviewed profile-isolation update above and requires its own new cold receipt; it does not replace the selected manifest or weaken checks. Do not promoteF or any strict candidate merely because compilation or conformance passes.
-7. No kernel, provider, definitional-equality, cache-algorithm or existing metatheory changes. The frozen provider remains an independent exact-stream admission consumer.
-8. Complete existing mandatory language/runtime obligations first. Defer bulk refactoring, optional scalars/backends, general do, omitted lambda domains, nested patterns, source-authority changes and seed promotion.
-9. Preserve explicit resource refusals, truthful spans/origins, immutable source state, first errors, exact function groups and public source calling contracts.
-10. Review related implementation classes before one coherent cloud qualification. Avoid a speculative repeated test/fix loop. Extend existing small fixtures and reuse existing source/reference calls where possible.
-11. Keep strictSh1Qualified and semanticContractQualified false until every required obligation has an explicit defensible disposition and its required evidence. Provider acceptance, original-IR typing, finite observations and compiler fixed points are different claims.
+### Nested IH provenance — previously advertised coverage was unsound
 
-## 3. Current implemented boundary and observed comparison correction
+```lean
+def f (n : Nat) : Nat :=
+  match n with
+  | Nat.zero => 0
+  | Nat.succ k =>
+      match n with
+      | Nat.zero => 100
+      | Nat.succ j => Nat.add (f j) 1
+```
 
-The strict branch already contains the atomic raw-source path:
+The old source context registers j with the nested recursor's IH because the result types match. Prepared Core's nested recurrence starts at100, so f1 gives101. Erasure instead substitutes the whole f j and gives1, matching native source while hiding the different admitted Core meaning.
 
-ordered named sources -> real parser -> bounded exhaustive source policy -> one preparation -> actual original IR -> complete typing -> target admission -> emission of that same IR.
+The selected correction preserves the **normative direct structural minimum**. SPEC's minimum table requires direct descent; aliases in§5A require separately tracked provenance. Explicit nested control and calls to already established outer-child identities remain supported. Only the actual whole-root match can register new current-definition IH mappings; its permission is consumed before nested body elaboration.
 
-The source-owned API accepts no externally supplied prepared/IR/report authority token. Actual parsed modules, prepared data, original IR and reports are retained. Source conformance is 2 accepted / 33 refused / 2 Unicode carrier refusals. Target conformance is 9 accepted / 20 refused. Target admission protects actual emitted identifiers, private names, globals, parameter groups and conservative initialization order; it does not prove source erasure.
+The IMPLEMENTATION sentence claiming that matching result telescopes enable descendant IHs is incorrect and must be explicitly corrected, with these counterexamples retained. A plain fold supplies f(child), from which f(grandchild) cannot generally be recovered. Deeper descendants/second-match child aliases require a separately implemented history/provenance route and are explicitly refused now. This is an acknowledged capability correction, not a hidden fixture waiver or blanket nested-match ban. The independent current64-module/1461-definition scan found no self-call requiring a newly nested descendant. Existing sh1OuterHypothesis and narrowed-nested-IH cases retain their old meaning/assertions.
 
-The enabled runtime contract has six primitive types, Array, 45 operations and 186 native reference observations, plus eight bounds refusals, nine operand observations, five malformed-carrier cases and two text-position families. Array bounds checks preserve evaluation order and check bigint indices before Number conversion. They do not recover erased proof provenance.
+### Production ownership and current immutable overlays
 
-The 05f correction, exercised successfully by N1 and C1 finite conformance, widens six comparison templates to their already checked primitive TypeScript types: Nat equality/inequality, Int equality, Bool equality/inequality and String equality. It adds no runtime conversion or extra operand evaluation. Six raw Nat.beq declarations enter through both Lean and current PS; their TS and admissions must agree, then one shared tiny TS7 compile executes fixed expected Bool results.
-
-Exact 05f predecessor correction blobs (cumulative current overlays are in the integration manifest):
-
-| File | Blob |
+| Owner | Active work |
 | --- | --- |
-| BackendTs/Expr.lean | 9628e3c9def09c487abb5b8859a79c7be735acf9 |
-| sh1-strict-runtime-conformance.mjs | 8838155fb80ef28f7bf5c3916c207c6c94451634 |
-| sh1-strict-evidence.mjs | 8c8a781012871b1f0f748ed46921287efab8e046 |
-| strict/runtime-comparison-correction.json | b080891c021aa58909b8d318e4bbdc3eefd85d7d |
+| artifact_inspection_review | Term/Context/Declaration producer correction; complete original parameter-ID list including implicit/proof binders; original telescope/result occurrence guard; one-shot root registration; constructor refinement; exact constructor-copy inventory |
+| empty_evidence_finish | Expr whole-entry eligibility overlay and ER01–09 general argument |
+| runtime_comparison_finish | Canonical/Core call-group addendum and independent finite evaluation of actual prepared Core witnesses, reusing the generic fixture preparation/IR/native/TS products |
+| root | Host/gate/binder integration, evidence/docs, all Git ref writes and Actions execution discovery |
 
-The six equality observations are equal, disjoint, reversed, zero, a value above 2^53 and a computed addition. The binder reads actual raw-source files, both atomic receipts and shared TS/JS/admission products for N1/C1/C2/C3; it does not execute or recheck them.
+Expr overlay **f1ecc9458fe0c606b0a34c321517069cd27280e4** over **f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12**, SHA256 **0119067649f78605eac5c1339a92ab9171b7c06180932d5db1d606ff074b530b**, has two exact edits. Final reviewed manifest **fb2b9ddb916f768f0afa5205dce34075e2d60d40** records them, SHA256 **651ca9bebe85e5d8e55ff2d5886debac9e18b27a48e6e4b18671fe5f1e090655**. The recursive child callback clears only currentDefinition, preserving runtimeExpressions and every local/layout/name map. Thus only the actual whole entry expression may establish self-call substitutions; valid installed outer IH expressions remain available in nested bodies. Root and both independent reviews are CLEAR at that exact overlay; final producer composition remains pending. This overlay alone does not fix elaboration.
 
-Other entry points remain scoped: sh1-iterate.mjs still uses the admission-ready cached prefix/raw emitter route with strict=false. Adding the strict atomic API does not silently change every compiler entry point or cache protocol.
+Exact source admission already refuses explicitly authored recursor heads: global references use constE name [] and ordinary inference rejects their nonzero universe arity; Nat/List/Option/Except/Prod and authored regular recursors have a result universe parameter. Generated match construction supplies it. There is no explicit universe-argument source syntax. Record this source-origin premise in ER; it does not upgrade raw prepared/Core APIs to the source-owned strict contract.
 
-## 4. Retained cloud attempts
+## Reviewed canonical function-value correction — awaiting final composition
 
-See [qualification-attempts.json](docs/selfhost-language/strict/qualification-attempts.json) for exact records.
+The former implicit generic identity erased a substituted function result as extra entry arguments. The supported source **groupId f 0** targeted a one-runtime-parameter entry with two arguments and the exact IR checker refused. Typed-let intermediate use was also wrongly eta-expanded.
 
-| Source / run | Actual result | Reviewed class correction |
-| --- | --- | --- |
-| cf35b6b2a3328a065721ef48cf633a44e6122362 / 37964798240 | Native build/prior gates passed; owned parser refused leading-dot constructor terms in Sh1Target before N1 emission | Qualified 116 constructor terms, preserving 58 shorthand patterns |
-| ce3c4f55f99fd11c7a61d5449e67bc49d58658db / 37966777236 | Module parsed; owned elaborator refused matchExpectedType | Added Bool annotation to the sole inference-only match initializer; audited all 41 matches |
-| d6b7044258efaa272dcf396ce08b0c10496edcd2 / 37967710379 | N1 raw-source/IR/target and source/target gates passed; native 186 observations produced; TS7 runtime fixture failed 11 TS2367 comparisons | Current six-template primitive widening plus raw-source equality fixture |
-| 05f37fc04e52bfaed70389291a0fcdeda819f71f / 37971952859 | Native development and C1 candidate passed, including all 45/186 runtime observations and six raw-source equalities at N1/C1; fresh fixed-point process hit JavaScript heap OOM before a C2 receipt was logged | Resource/lifetime audit and exact artifact inspection; newer reuse candidates have not executed |
+The chosen representation is coherent across the whole class:
 
-The third attempt accepted 64 modules, 1,178,731 source bytes and 149 imports. Its original IR had 60,937 expressions, 777,667 visits, zero findings and complete traversal; target traversal accepted 1,572,007 visits. Runtime comparison, C1/C2/C3 and provider were not reached in that attempt.
+1. Every runtime Pi erases to **Function([domain], result)**, recursively beneath named/array/field types. This makes runtime type substitution structural.
+2. Known declaration entries retain the **actual aligned original Core forall/lambda prefix**. Cache original type/proof/runtime slots before substitution. Full known calls use this flat prefix; partial/value exposure curries it; returned/computed/local functions use unary calls.
+3. Do not eta-expand arbitrary result arrows. Computed function-body work and faults occur at the original entry boundary, and captured results are not recomputed when returned closures are invoked.
+4. A generic actual prefix with zero logical runtime parameters uses a fresh ignored **physical Unit parameter** and a Unit activation argument. Logical source/runtime metadata remains zero. The original IR checker and backend generic-value refusal are unchanged.
+5. Array.foldl retains its exact flat two-parameter intrinsic callback. Capture the canonical callback once and bridge it by two unary calls. Map is already unary. All43 special descriptor heads/dispatch boundaries were independently matched.
+6. A checked-Core type view recovers annotations at exactly three sites: lambda body, projection target and computed callee. It follows declared Pi types and substitution under the already-checked Core premise. The remaining ordinary inference sites are constant heads. It does not replace admission, weaken the original IR checker, or change type equality.
+7. Direct erasure APIs derive missing entry metadata from actual environment definitions; single-definition erasure seeds its supplied raw type/value while the environment may still contain its self axiom. Normal whole-module erasure retains one prepass.
 
-Exact third-attempt log SHA-256: a29f53b59ad41bb4621ea63d0711333e5e7dbf86777d90905dbbcebafeecef6e, 334689 characters. Artifact 11634467384 digest: 09c421c7b7899bee5001ef2fd0b5bc42735478bb0ccc30743d18d8c323fa2118. The actual native source receipt is retained at strict/attempts/d6b7044258efaa272dcf396ce08b0c10496edcd2/native-source.json; blob b2cc2580e82b9f43c2f96f70cd6abc2a3741624f, exact SHA-256 4002227af1aa5667d75006cb72407cead865195e16583d8be47b00eff906ccbf. It was reconstructed from the actual JSON marker plus writer newline and independently matched the native IR receipt's file hash.
+The final canonical semantic layers before placement are Basic **2c7c0ed567804f189d1facfd3987b6a13f9504f9**, Expr **cdc76937f215fd2803841600266816acb122ea90**, Definition **ac3329f77a4f5cc98d4bc5c53b3d1623c52a6f52**. They are exactly4/20/4 guarded edits over actual fc961 sources. Old ac62/788/bd2 and earlier fixture candidates are superseded.
 
-### Fourth-attempt retained evidence
+## Bounded allocation placement — no algorithm rewrite
 
-The exact native source receipt is [attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/native-source.json](docs/selfhost-language/strict/attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/native-source.json), blob **49db2db65f5ca25cf7624b98659ab3e3cf30a96c**, SHA-256 **a69f300947b32fbb908085fde7798f19f6c03f9185c2646c9dbb691f760626ee**. The actual native JSON marker plus writer newline independently matches nativeSourceReceiptSha256 in the native IR evidence. Sixteen successful actual JSON marker payloads are retained in log-derived-evidence.json, blob **6ad2813cdefeb3b726498da2598c386ae487cea0**, SHA-256 **daf8ee081c5da9cf40bfcee9398eccdb2631ff26352d3ef15ed562793708e401**. That container is explicitly log-derived; it does not pretend to be byte-identical to every separate receipt file.
+The Nat inventory had103 sites; one old Finish worker was removed by the canonical semantic correction. The reviewed final packet contains **102 moves across29 files:90 fuel workers and12 other Nat workers**. It moves only the pure construction of the smaller worker beneath the immediately returned existing state lambdas. Actual self head/predecessor/fixed operands, headers, zero cases, active bodies, callbacks, first errors, state updates and fuel values remain. Both name-capture directions were checked. The one parser selector is a total selection of already obtained function values moved with its dependency.
 
-Fourth-attempt native source: **64 modules / 1178903 bytes / 149 imports / 1623 source declarations**; original IR **60937 expressions / 777667 visits / zero findings / complete**. N1 JS **4cc5c2561937ccafa440a3c2eb698b3b359e0a58eada682cc846eb31bc8858b7**; C1 JS **ccdfb5f1c226dce25776b817a391a09c783a71e695ea30ca3702df198bd1d23b**. These are different compiler products; no native/C2 parity result was obtained. C1 was built by authenticated R **70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061**. Its actual build timing was 1279.686 seconds: load/preparation742.471, separate admissions117.410, canonical translation48.751, erasure/emission367.366 and TS/write3.688. These are observations from one run, not a speedup benchmark.
+Three additional Lexer moves cover **psLexSkipLineComment, psLexReadIdentifier, psLexReadNatural**. Their old construction walked the entire remaining source before the first delimiter test; repeated short tokens/comments induced a quadratic sum of suffix lengths. The new binding position constructs the same proper-list tail worker only after state is supplied. Predicate/position/accumulator/delimiter/cursor behavior remains byte-identical.
 
-N1 and C1 each passed finite source2/33/2, target9/20, runtime45/186 plus8 bounds/9 operand/5 carrier/2 text families, and the6 raw-source equality cases. The C1 candidate also passed87 worker observations and12 public-signature checks. The complete strict semantic contract remains open.
+The final Lexer is **598b8d75d0d1bf1b6ea7ec05a62814343e33599a**, SHA256 **adab283e1881058bfed285a62478f1f4d55bce73b8373a4017353529e479d372**,36625 UTF-8 bytes. This is a3-edit overlay over Nat Lexer0bee57ae5cfc0c83b9c9855edd88500dfa8d53b6. Root and independent peer verified full forward/reverse reconstruction.
 
-## 5. Integrated origin and preparation-reuse slice
+These arguments require proper finite Nat/List values, immutable bindings and successful allocation. They are not arbitrary call-by-value let/lambda commutation or resource-failure equivalence. No measured runtime/heap improvement or total lexer-linearity claim exists. The other169 structural list/tree occurrences in128 functions, JSON digit reader and existing string/comment length scans remain untouched.
 
-These changes are not in 05f. Exact committed bases must be checked before integration.
+## Exact reviewed packets and pre-recursion candidate inventory
 
-| File | Expected committed base | Reviewed candidate |
-| --- | --- | --- |
-| packages/elab/src/Ps/Elab/Recursion.lean | bba4a42a13c29ed5b41761e883e8da0b81a34192 | c403bd879e439b7b6e88303df430890352a14115 |
-| packages/elab/src/Ps/Elab/Declaration.lean | 8a8005a2ae0aa6564e075e3b224b432295c6bf05 | a388d013dbf6c9270ffa91997512f672da6aabff |
-| packages/compiler/src/Ps/Compiler/Api.lean | 13614bc6eb279c93d4cbcbd8815b671beae38199 | f31d88f0172122d4cf62d62f35f372fe89581c18 |
-| scripts/check-elab-declarations-selfhost-source-syntax.mjs | 68d229c41684f40011b9687217c41730f2d8806b | 3957a932618c1b61ffc45d9d8924b32c90c7b5e4 |
-| scripts/check-modular-preparation-source.mjs | e1b31140b366c90c5a4443502723644051e332a3 | 495012a236a1bb3a5626a826e22a4ff1dab99efc |
-| packages/compiler/src/Ps/Compiler/Sh1.lean | 9aaa3a72bbfe03ed3fc4918527e2ca200537d61f | a947a4058e3d91a02d4f8120a3d86556100c8555 |
-| packages/backend-ts/src/Ps/BackendTs/Sh1.lean | 63be15cf691cd4689e566ccd1bcab771215e7700 | 1026e3a9d1f89432d9a94d9cd098900f6e4d8b53 |
-| scripts/StrictSourceCompile.lean | 6f3b14e0110548f530a2ec6139105efbeb2e203d | c741759094060bcccdbeb67d24bfb30dfe864b0e |
-| scripts/sh1-capabilities.mjs | dd23adb72d33c0df14a88ec846ab6c705d5813b2 | 8d87080352509dc936614d560aa68ded14fc36e8 |
-| strict/ORIGIN_RETENTION.md under docs/selfhost-language | absent | 124c5155e445bf2f1800b8a32a47b4504bf64020 |
+[The current pending inventory](docs/selfhost-language/strict/pending-canonical-recursion-review.json) binds all41 pre-recursion code candidates and exact base/byte/hash information. The packet attachments are source-review records; their earlier unattached/pending statuses are historical. Root/peer final class CLEAR does not itself grant execution or semantic qualification.
 
-The host is now superseded by the final ingress candidate in section 6. Do not use older ea946/9fd/37d/cf1 drafts.
-
-Elab origin manifest: b65d43687f3eecae05749078d5c26b96f7f065bd. Final origin host/native/capability review manifest: 6dc338dd19c2a14c088a4a7e9f06fd3246cfdfd6, whose host d01714cc is then extended by the ingress manifest below.
-
-Key API facts:
-
-- PsElabBatchOrigin retains actual source index/name/span, actual ordered Core member names/indices/roles, and optional actual successful normalization plan plus already constructed worker binders/type/value.
-- Seven roles: sourceDeclaration, inductiveType, structureType, constructor, recursor, normalizedWorker, publicWrapper.
-- Five diagnostic phases: stableDeclaration, normalizationPlanning, normalizedWorker, publicWrapper, declarationInsertion.
-- A normalized batch is actual worker then public wrapper. A structure batch is actual type/constructor/recursor; no invented projection declarations.
-- generalizedIds may contain duplicates, because the real scanner concatenates changed-argument identities across recursive calls. Preserve their order.
-- Core name components preserve string versus arbitrary Nat numeric components; do not stringify ambiguous display names or convert numeric components through Number.
-- PsCompilerPreparationOutput contains prepared/environment/admissions. The source-owned path retains the actual final environment and the one canonical admission encoding.
-- Three admission encodings become one; one redundant environment reconstruction becomes zero. Raw externally supplied prepared APIs retain validation/reconstruction. This is not a cache change or transferable authority token.
-- Existing public preparation APIs preserve their signatures/results/errors by projection. Existing syntax guards inspect the actual richer worker and retain old signature/projection/forbidden-form checks.
-
-The host observes retained objects only after the same atomic emission. Origin receipts cover prepared source Core members, excluding runtime prelude and admission auxiliaries. Never equate that Core count with the total original-IR declaration count.
-
-The two existing capability source calls each assert 35 source declarations, 55 Core declarations and 16 normalization plans, plus exact positions, structure batches and duplicate generalized state IDs. Six existing elaboration refusals now check owner/module/index/phase/span. Review corrected four final-token span expectations: the actual parser span ends before the closing parenthesis in those application fixtures. No extra preparation was added.
-
-## 6. Final reviewed host input/option snapshot repair
-
-The same ingress review established two concrete source-derived gaps:
-
-- Direct option records reached portable Nat/budget operations before host validation.
-- Repeated source/name reads could bind receipt source A to emitted source B. A getter returning the 26-byte literal-7 definition for manifest reads and the same-length literal-9 definition for portable input could retain the same names/spans/byte counts. This is a source-derived counterexample, not an executed miscompile claim.
-
-Final independently reviewed manifest: **4020771505138199353795f9709fb79c065e09f0**.
-
-| File | Expected committed base | Final candidate |
-| --- | --- | --- |
-| scripts/sh1-strict-source.mjs | 6fb4e25238d99ad6e408726831454e2b14235092 | 77a85340d94313b7bfebb604ec9f61c53c28c544 |
-| scripts/sh1-strict-source-conformance.mjs | 7e70f4ec75a156c87dc5f1023c451f77b132bc39 | ea8dc01fd75c11e17fa77233bbfe56c02ca4de4f |
-
-The host snapshots all eight option primitives before source traversal and constructs owned option records. Five source limits and IR maxSteps/maxFindings retain their nonnegative safe-integer bigint contract. IR maxTypeSteps remains a nonnegative bigint with no new MAX_SAFE limit. Valid zero budgets remain valid carriers with their existing portable exhaustion diagnostics.
-
-Inputs, fixed lengths, name segments and source strings are captured once into private plain records; every later manifest, portable input, parsed-module comparison and origin readback uses those captures. Existing carrier byte/module limits remain. No arbitrary new declaration-name/origin caps are added.
-
-The gate keeps 2 accepted / 33 refused / 2 Unicode refusals. It adds ingressSnapshots with 14 malformed-option spies, one intercepted mutation/snapshot probe, and captured-source assertions on the same two positive calls. All new spy probes do zero real compiler preparations/checks. The snapshot retains all zero budgets and IR maxTypeSteps 9007199254740992, verifies eight single option reads and one read of each input/name/source component, then stops at the atomic spy.
-
-## 7. Final reviewed evaluation corrections and shared fixture
-
-### Nat major
-
-Reviewed candidate Erasure/Expr 3153b38e9a85e00932cac7cad59440dede218899 against 28e14f991df68c4a7d49f09120a42c85c919d6a8 binds a computed Nat major once before zero-test/predecessor use. Variable/literal and non-Nat paths retain their prior output. Fresh names reserve only the output-name index; no fabricated Core fvar is inserted. The explicit freshness refusal can occur earlier only for inconsistent fabricated name-index/count inputs.
-
-### Two enabled intrinsic templates
-
-BackendTs/Expr candidate dfd58154826c892d18b97b84303abbce6a622d7b against current 9628e3c9 changes exactly two templates:
-
-- stringAtEnd evaluates source text before position through outer IIFE arguments, then calls the existing UTF-8 helper.
-- arrayEmptyWithCapacity evaluates its capacity expression as an outer argument, so a computed call's yield remains in the surrounding generator context.
-
-All other 43 enabled templates, current six comparison fixes, runtime helpers and cache algorithms remain unchanged. Final runtime/doc manifest **a91a81a762943d30fcf15f7026016f7c8d4e9481**, SHA-256 **71dc255e27e43e4647f62006f32d144c3c3def7e410993ff211457eccd0fdb49**, supersedes published 3ded7 and binds the unchanged 45-operation audit to the final candidate and the corrected raw PS fixture.
-
-### Partial-application demand
-
-Source review found that psEraseFinishApplicationWithFuelWorker placed already supplied callee/operand computations inside the new completion lambda. Saving and using that lambda could recompute them. Final independently reviewed candidate **3e11222a620cd044c9a5d48243c9b33421b5d5dc**, SHA-256 102e91e3ab8fc7f98e765f7e2e9859e35593605c240598c9183e59acd1325508, extends the Nat correction and supersedes 0476a750. It reconstructs a computed monomorphic callee's retained function type from ordered supplied runtime domains, completion parameter types and final result, omitting erased proof/type binders. This avoids the complete original proof-bearing Core telescope producing unknown. Direct generic variable calls skip unnecessary capture annotation. The exact four refinement edits are preserved in manifest 35ab1d9ef8faca77d919af2e8c4a52f270710add. Independent source review is CLEAR; no execution is claimed.
-
-The candidate retains supplied Core runtime-domain types, captures computed callees/operands in ordered typed IR lets outside the closure, preserves direct generic variable calls/type arguments, omits proof/type operands, and uses existing protected output names for captures and eta parameters. General source applications use a typed companion. The old low-level untyped helper fails closed for computed partial operands lacking type metadata.
-
-Complete source callsite review found only the recursive-hypothesis source route still using the old helper, with var callee and var arguments. External replay-audit cases likewise use value-only inputs. PsErasureAppliedArguments and its four record constructions occur only in Expr. The corresponding source-sequencing guard candidate is 852240e14ed49ce01b1f835133492fd117db4327; it protects the new freshness/name step and all nine sequencing semicolons.
-
-### Shared finite fixture
-
-Final guarded combined manifest **64717ffed1cc1bc46a66ba9d928bd71144b87c7d**, SHA-256 **bc8c691a66633343ff95ae0fcfd05fc294b49438aca3f6f74e9e71ac35028733**, supersedes published 6bb558 and composes all Nat/runtime/partial edits against the equality-corrected committed bases, with exact forward/reverse validation. Final SOURCE_EVALUATION.md is **caa111e6447e53e633d2a40d59a6274fd0329e61**, SHA-256 **08ffd9c065f1086f776c6d8762e3f8563e86685af9a6a672c826ee51bdd1ef22**, four exact edits from published 917d49.
-
-Final gate **df55eb56e9ce5c7f26a134b48de5114feeaaaad6**, SHA-256 **612068d19691c8ccca5d41461d8d1cb4184d515753a0b72a432b96d72850dddc**, has **12 source declarations (11 definitions and one function-valued structure), 24 native pure values and 21 host traces**. It retains two raw compilations, one shared TS7 compile and one small native reference for the entire qualification, reused across N1/C1/C2/C3. Earlier18 value/11 probe rows remain unchanged prefixes. A pre-execution review found that strictPartialCalls used Lean-style if/then/else in PS; the exact correction is `if (useSaved) { Nat.add(saved(next), saved(next)) } else { next }`. The previous PS grammar clearance is withdrawn. The full corrected PS fixture was independently reviewed against actual parser/printer/common/lexer productions:11 definitions,1 structure,11 explicit comma groups,2 proof prefixes,6 matches,8 typed lets,1 braced conditional and2 field-projection callees. No parser execution is claimed. Production3e112/dfd581 and all counts/four other fixture pins are unchanged.
-
-Five exported pins: Lean aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e; PS 27d9877bdd05f2189735047edf33b509ae6adab028fb7ebb128509e96b6cab1e; native wrapper75486abeb314702a573b84c473e8fc8c4659b29ae8793f0ee7f89539e4c4a131; values9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f; host probes76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91.
-
-Diagnostic callback/accessor traces remain outside canonical immutable source values; they add no source effects or FFI. Native reference values use ordinary pure functions/immutable records.
-
-## 8. Root evidence binder and general arguments
-
-Final integrated binder **bb02be336824c078f118be130128aa38c15615bf**, SHA-256 **24b1f1786a2b8c5b782c0d2553d026bb350981d411fa7fec316b2ef8736f019c**, has independent CLEAR review. Manifest **a1786b4e0ad9660ac3e904347749d294c4b71865** retains15 exact reversible edits from reviewed6027955a326dd5cb0e1dba59ba76a8901dde5672 and10 from interimb1fcb553a724d59f346a266da78e5a2f9958bfba. Its expected committed base was8c8a781012871b1f0f748ed46921287efab8e046. **Never restore602 or b1 over this final binder.** Source counts are11/16, ingress captures3 inputs, and separate source/grammar/native/IR empty/zero-field evidence is bound to actual receipts, artifact bytes and origins. Both frozen source-evaluation binder functions remain byte-identical, preserving the dynamic PS hash27d987 and12/24/21 fixture.
-
-The binder:
-
-- Hashes actual native/generated common origin payloads, checks all counters, and compares native/C2/C3 full-closure origin records.
-- Requires one preparation, one admission encoding, zero reconstruction and one IR check per atomic source call.
-- Binds capability35/55/16 origins and six attributed negatives.
-- Binds the actual standalone native source-evaluation receipt, wrapper/raw source, stdout/stderr and the exact native marker.
-- Binds each generation's two raw source files, actual atomic receipts and shared TS/JS/admission products.
-- Checks the new ingressSnapshots against the actual source receipts with zero added real preparations.
-- Preserves old equality and all required gates. It never compiles or rechecks.
-
-Documentary reviews:
-
-| Document | Candidate | Status |
-| --- | --- | --- |
-| strict/RUNTIME_LAW_REVIEW.md | 682250126807cf520fb4c354ad0b52577a04d8b0 | Complete45-law conditional analysis; four doc edits from9c77 correct the PS grammar review and final df55 pointer; all law/cache sections and12/24/21 unchanged |
-| strict/BACKEND_RULE_ARGUMENTS.md | af3d887349bf27d46140ac2bababfafcbd25c84e | Independently reviewed conditional eleven-expression, let/eta, count/tail, generator and module-order arguments |
-
-The backend review explicitly records the implicit constructor-namespace premise: the name-use walker sees explicit variables/binders, not the namespace printed by a constructor. Actual declaration-name preparation includes inductive namespaces before local naming. Count/tail printed-self comparisons also require the source erasure's no-shadow mapping. Arbitrary typed target-admitted IR alone does not prove these stronger premises. Constructor positional field order is explicitly checked by psIrCheckConstructor as constructor-field-order.
-
-No general correspondence row is closed by these conditional reviews.
-
-The reviewed shared foundation [SEMANTIC_RELATIONS.md](docs/selfhost-language/strict/SEMANTIC_RELATIONS.md), blob **40e540b325186ee514ff3af9e39a22126d29a167**, SHA-256 **852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90**, is included in this checkpoint. Manifest **09c621ccba856c8906f24dcba5c9104fdfd08014** binds its new-only document addition and29 exact source/doc pins at2b5. Both bounded peers and root source/document review are CLEAR. It supplies indexed values/environments/calls/errors, all11IR rules,9 structural source-case facts, executable/auxiliary/reservation scope modes, the complete direct binder/substitution inventory and10 explicit open interfaces. A recursive capture-definition issue was repaired: E^n is pointwise V^n; function capture/environment edges decrease the index; index0/W contain structural identities only. The computation relation also now threads one residual interaction budget through callee/arguments, initializer/body, selected branches, callbacks and nested runner reentry. A logical application consumes one unit; terminal values are related at the remaining index, and observation cuts off before an unlicensed invocation at index0. Wrappers and registry bookkeeping do not reset or double-charge that budget, and optimized loops account for matched logical calls. This corrects the earlier too-strong exact-result C^0 clause; all-index adequacy and exclusion of infinite silent stuttering remain open. Root checked all five exact forward/reverse document edits and the final SHA-256; the earlier unattached foundation drafts are superseded. It adds no serialized-witness MUST or proof-code/theorem claim. All33general rows remain open.
-
-
-## 9. Remaining strict work, including empty regular data
-
-[CORRESPONDENCE.md](docs/selfhost-language/strict/CORRESPONDENCE.md) and [correspondence-obligations.json](docs/selfhost-language/strict/correspondence-obligations.json) enumerate 33 rows: nine erasure/layout, four normalization, eleven expression and nine backend rules. All full general obligations remain open. Update stale concrete Nat/partial/origin descriptions as their reviewed implementation is integrated; do not turn local corrections into whole-row proof claims.
-
-Origins are real provenance, not a complete expression-level source/Core/IR witness. Remaining work includes binder/proof/type/layout association, general normalization/substitution, exact call/capture/evaluation relation, and the common generator/optimization relation.
-
-Empty data and zero-field structures are mandatory regular-data coverage. They are different cases: an empty inductive has zero constructors/no inhabitant; a zero-field structure has one nullary constructor/an inhabitant. The reviewed implementation keeps the existing AST/IR shapes and kernel/provider unchanged.
-
-- Empty inductive/elimination: owned Lean accepts single-scrutinee `nomatch`; PS accepts `match e with {}`. Ordinary bare empty Lean match-with remains refused, preserving outer-branch boundaries. PrintLean emits nomatch. Consumed spans include where/grouping/closing braces correctly.
-- The IR checker accepts zero-constructor layouts and takes an existing checked expected type only for zero-branch matches; missing result evidence explicitly refuses. Nonempty synthesis, owner/type-arity/scrutinee/coverage checks remain unchanged.
-- Erasure wraps the known motive/major result in a fresh typed IR let. The backend emits `never`; empty elimination evaluates the scrutinee once in a `__ps$Computation<never>` generator before an unreachable throw.
-- Zero-field structure parsers and elaborator no longer reject an empty field list. The discovered bare-constructor gap is repaired by the integrated Erasure constE lookup through runtimeStructureConstructors; it reuses the existing zero-argument structure application lowering to actual IR record[]. Previously the bare constructor reached unknownConstant. This is a source-derived defect, not an executed failed test.
-- Core uninhabited manifest **5360abde1e14fe714a7d1105b28c5131f79d355d** is independently reviewed; the zero-field stacked core manifest **06ca2937bb073583b4a0f02cc12219253172228c** is independently reviewed. Final cumulative Erasure Expr is **6da268d23db1d2a709134f54dc8ae8a7f81367d3**, SHA-256 **3c05cf0890507d2fdf2706dd0576b7bf03ed2c2b97c8619115cfaa791227e20b**, extending3e112 through empty elimination and nullary record lookup. Retrieve final exact parser/declaration/backend blobs from these guarded manifests; preserve origin a388 and backend dfd581 cumulative bases.
-
-Final evidence packet **c822a05b23225b39c306c3ac4ba0898b25876e49** has completed independent review and is integrated. Source gate **e987f2834e74c8acded0fa628e245ef823dcc17a** retains accepted2/refused33/carrier2 and exactly two preparations/checks. Each positive now has **3 modules /11 source declarations /16 Core declarations /1 import /0 normalizations**. The earlier13-Core guess was corrected directly from actual structure batches; do not reuse it. The uninhabited fixture alone remains5 source/6 Core, with4 typed empty eliminations. The existing library adds one zero-field structure/value (2 source/4 Core); it uses the existing emitted TS bundles and has separate zeroFieldRecords observations.
-
-The uninhabited raw files remain byte-identical: test/fixtures/selfhost-sh1-empty.lean blob **295b7dc991bf37e9de8e3d49b7db3692f0c4cf53**, SHA-256 **243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5**,345 bytes; .ps blob **cada46d9d1f10d95bcd6053fff6078262b600b6c**, SHA-256 **71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390**,369 bytes. Source receipts bind written empty.lean/empty.ps and accepted-lean.ts/accepted-ps.ts to actual atomic input/output hashes.
-
-Final grammar coverage retains5 empty syntax pairs/6 refusals and adds1 zero-field pair/2 refusals, all parse/print only. The original-IR gate extends its existing one TS7 compilation to33 positive declarations/4 inductives/3 structures,38 rejections and61 behavior observations; separate empty evidence records2 layouts/5 eliminations and5 actual d.ts ABI signatures, with one callback that throws before producing any empty inhabitant. Native checker coverage becomes15 cases in its existing process, retaining the exact five-declaration Lean fixture and separate nullary-record coverage. These counts are integrated assertion contracts awaiting actual execution; final evidence binding and independent review are complete. No additional full/source preparation, TS7 invocation or native checker process is required by this coverage.
-## 10. Immediate continuation order
-
-1. Read the actual strict-branch head. This parser/document checkpoint launches no qualification. The completed seventh run 37986002380 is a failure; it is not active. The final reviewed parser manifest is aa62fec9ef76acc69f289d168b2b23b21dc07d93, source 8c39064e8a9c4bcda1ec9f2432ccbe0a70769574. Do not rerun the unchanged cold recovery or completed artifact inspection.
-2. Complete the source-proven generic saturation/group class correction and independent source review, then integrate one coherent batch and request one full [sh1-qualify] run. Verify its exact source, native source replay and complete N1 grammar/capability gate before R-to-C1. Keep early and designated-process resource receipts. No earlier revision supplies current C1/C2/C3 results.
-3. Observe C2/C3, actual native/C2/C3 origins, the four fixed-point products, runtime/grammar/IR gates and final actual-file binder. On failure, identify the exact logged phase and source class before any change or rerun. Preserve every gate count and fixture.
-4. Bind the separately pinned provider result if the compiler qualifies. A skipped provider is neither acceptance nor rejection. Revised recovery recipe d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d / policy 70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30 remains independently cold-qualified.
-5. Complete ER-01–ER-09 and the actual Core/type/sort plus source-demand/call-group interfaces. Compose the already-reviewed N, EV and TS local arguments under the same relation. Distinguish real source-admitted coverage/semantic defects from arbitrary target-IR countermodels and proof-device observations.
-6. Record exact evidence and row dispositions. Do not label conditional local lemmas, source provenance, typing or finite fixture passes as whole general preservation.
-7. Keep mandatory strict flags false while any required obligation remains open. Strict source is unmerged, R selected and .lean authoritative. Bulk refactoring, optional syntax expansion and seed promotion remain deferred.
-
-## 11. Agent and tool handoff
-
-Root owns integration, source/ref guards, cloud evidence, documentation and the EV rule packet. Only root commits or updates refs, always non-force after exact base/head checks. All work is GitHub MCP plus GitHub Actions; no local files, shell, clone, browser or local builds/tests.
-
-- empty_evidence_finish completed the foundation, source annotation and parser repair; completed bounded EV §§7–12 readback; now implement/review the generic saturation-boundary class with the runtime reviewer, then finish the nine ER rows from the durable incomplete checkpoint.
-- artifact_inspection_review completed the N packet and independently cleared the final parser. It proved the supported implicit generic witness's closed Core shape and now independently audits the saturation/type-representation correction, then resumes the narrow actual infer/WHNF/type/sort residuals.
-- runtime_comparison_finish completed the TS packet. It source-proved the generic saturation-boundary refusal class and now coordinates a complete class remedy with ER and infer reviewers, plus actual O-GROUP/ER-ETA-GROUP closure.
-
-Keep the latest packet identities in the current section authoritative. Every temporary candidate is recoverable through immutable blobs/manifests; do not depend on expiring in-memory stores. Source/code changes need a complete relevant class review before another coherent execution. Ordinary typed substitution/layout and induction hypotheses should be proved once and reused; do not let them become permanent labels that prevent completion.
-
-Concrete remaining distinctions: executable scope versus type-only scope; output-only names versus Core fvars; the type-substitution fuel-zero unchanged fallback versus the actual target depth bound; supplied-operand capture versus result-group eta versus backend eta-to-let; source partial-definition refusal versus arbitrary foreign callbacks. No source observation may be invented to fit lowering.
-
-Use fetch_workflow_run_jobs and fetch_workflow_job_logs with repo_full_name. Generic REST /actions/jobs/:id is unsupported; repository Actions run collections and individual run URLs work. Running logs may be unavailable until completion. Batch a few independent reads with Promise.allSettled and inspect every result; keep writes, leases and dependent operations sequential.
-
-Pure SHA-256 helper blob fe3478ead5638f8647e67a5ef2a2f2de4e2eb896 contains a standalone function before "// Pure data review only:". It authorizes only in-memory data hashing, not compiler execution. Never print the complete sourceOrigins receipt or deep target path: retain the exact blob and report scalar counts.
-
-## 12. Qualified baseline and protected identities
-
-| Scope | Exact source and successful evidence |
+| Packet under strict/reviewed-candidates | Blob |
 | --- | --- |
-| F compiler/runtime/provider | fcd875c8f38db4b0524090bd10c7c2fd5024053d; run37947341800; compiler113876931430, provider113896228512 |
-| R cold native TS7-only recovery | Same runner source; run37947341899; job113876930974 |
-| Root TS7 migration | 9d150afbec1feda8c97058aa56aa5ab92347d96d; run37951869293; job113892421469 |
-| Completed main merge | 37f63c39 -> ed5d00aca0743bde583b45fe7756dd494ac3960f, 16:30:26 UTC |
+| canonical-function-value-basic.json | 4371148c1998a8500bf5d24001c34901d87a0740 |
+| canonical-function-value-erasure.json | 79494ab9b502358a5d6872a30ba8c96fb2bb3fda |
+| nat-worker-placement-plan.json | 38d9ea5bd95d0909b9ceedc99a71944f969f896d |
+| nat-worker-placement.json | 1530f2bec9a7b66bddd317ff94409297c39adaca |
+| lexer-streaming-reader-placement.json | b6407ad9b00b69dbe9f9db99f557793657a96bd1 |
+| canonical-function-value-host-gates.json | a3f7498b98e62432da18ed77245d5d1748b13764 |
 
-F covered 87 behavior cases, 12 public ABI signatures, accepted complete original IR, C2/C3 four-product equality, native TS/JS parity and separate provider acceptance. R recovery reconstructed all four exact products without TS5, generated-parent execution or downloaded compiler artifacts. Root TS7 verification is its own seven-command/eleven-obligation scope, not every historical optional target.
+Do **not** use unattached assembly **5bb17b70724fa9a17d53f732f4a79f2553d15b3d** as final integration. It was built before the recursion findings, assumes parent715a and contains41 files. Final source pins, parent, counts and evidence statements must be regenerated after the producer/Expr/fixture correction.
 
-Selected R source: fe2560aba0f347b1caf8d000d371464642d44f23. Selected identity: 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225. Manifest blob44a05964c49000478c282afc013c84fca8c2de65, SHA-2567a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694. Recovery policy blobfd75854159544e431497bc7dee8482bea727b5e4.
+| Pre-recursion code path under psc0 | Reviewed candidate blob |
+| --- | --- |
+| packages/syntax/src/Ps/Syntax/Cursor.lean | cde16d84dc7a088bf7b9f74c65303b22b991fe85 |
+| packages/syntax/src/Ps/Syntax/Lexer.lean | 598b8d75d0d1bf1b6ea7ec05a62814343e33599a |
+| packages/foundation/src/Ps/Foundation/Name.lean | b907616cb4cbf65089ba0c9a8e13f57b220008cf |
+| packages/syntax/src/Ps/Syntax/ParseCommon.lean | 717882ba07d3fc463d08259bf1d3035d484917ef |
+| packages/syntax/src/Ps/Syntax/ParseLean.lean | 6c9056bb03424fb73667e9c74d59432e05cf0a71 |
+| packages/syntax/src/Ps/Syntax/ParseProofScript.lean | b569a73ef70e8cf2bfb81b7737c990e8e3b2374a |
+| packages/syntax/src/Ps/Syntax/PrintLean.lean | 2a98cf0d24b73343defff9824a991b57270b9723 |
+| packages/syntax/src/Ps/Syntax/PrintProofScript.lean | 01c006d2c243676f47e29cd14949f4019e002d59 |
+| packages/bridge/src/Ps/Bridge/Json.lean | 1b4ff4efcf78be15221514f8eea0dd47fe43be0e |
+| packages/environment/src/Ps/Environment/Basic.lean | 26016c3e4a460358fa34d34a3b4e2966744912a7 |
+| packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean | a9b2c3f4184a5c20b46c97354f2a44c04b978851 |
+| packages/meta/src/Ps/Meta/LevelContext.lean | b0fcde267d2a9dd07f7de9fc12f57ca5b3a38882 |
+| packages/meta/src/Ps/Meta/Context.lean | dd69906bb92ffbae9a4f8541d9941c10eb239771 |
+| packages/meta/src/Ps/Meta/Reduce.lean | 1a547f20911ac23a1f0a9368839593383f9c31e0 |
+| packages/meta/src/Ps/Meta/Infer.lean | cad2c470d5c7682ffdc4caa111dafb5f076b27b3 |
+| packages/meta/src/Ps/Meta/Unify.lean | 18f904b9d2d06fbe9b5330fc2d30e04a4dba1848 |
+| packages/meta/src/Ps/Meta/SynthInstance.lean | 9d64e65a7e3ca2a9d55b575bbdfa7003c4686f55 |
+| packages/elab/src/Ps/Elab/Literal.lean | dae4980c822dae5c9170638ee51ef8525635ce01 |
+| packages/elab/src/Ps/Elab/Term.lean | dc7b325b8b18770ae8ebfddec14b768d5a7d461f |
+| packages/elab/src/Ps/Elab/Recursion.lean | 8b1c409244b9669224fc3caff796aea69eac1401 |
+| packages/elab/src/Ps/Elab/Declaration.lean | 3525a93bc88da5cdd8e190819aa4b39f2ec011ba |
+| packages/erasure/src/Ps/Erasure/Basic.lean | 7de707103e0b88e6a5ab206ee242d72a131ca3b7 |
+| packages/erasure/src/Ps/Erasure/Inductive.lean | afd981e10d609d38db9ce4698fb4a6152bb50c7f |
+| packages/erasure/src/Ps/Erasure/StructureRecursor.lean | 897a2514e18e0ba51fb93cde6ab933a72a2c6f7f |
+| packages/erasure/src/Ps/Erasure/Definition.lean | 4c9d3878c01751239022e755e2860c6d49ddf301 |
+| packages/backend-ts/src/Ps/BackendTs/Type.lean | 074bf2b838994d2af375a20ef1600941d21e956c |
+| packages/backend-ts/src/Ps/BackendTs/Expr.lean | e85eaa03ef8781fe0fa18a92e120a13e47907ef3 |
+| packages/backend-ts/src/Ps/BackendTs/Module.lean | 662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5 |
+| packages/erasure/src/Ps/Erasure/Expr.lean | f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12 |
+| scripts/sh1-migration-worker-abi.mjs | 4a24f22050cdbe9660501b58bc1eeed9c8005319 |
+| scripts/sh1-foundation-conformance.mjs | 2b740f5caf1348e81706f2dfb683f61c43651f2d |
+| scripts/sh1-helper-conformance.mjs | 99a32b8bbc457a3026c70a1f6fa6747a64b33ca4 |
+| scripts/sh1-projection-conformance.mjs | 1c69c032f260eac8d868173b7f8b5b06e90a4a29 |
+| scripts/sh1-fresh-name-conformance.mjs | 9eaa7b1cbdb50dec79aca57150d825cbdd51f8d7 |
+| scripts/sh1-capabilities.mjs | 14c581f57a28b5f9edcd372e10fea1a1e575c217 |
+| scripts/sh1-strict-runtime-conformance.mjs | c38e6b50806481c270db9dfbd9d75e3a4a8f3b29 |
+| scripts/sh1-qualify.mjs | e6fe221b92cc25c0473c140cfc469559fcf8c029 |
+| scripts/sh1-function-entry.mjs | ceb4a39851e421e1d95f009cbf31d500e6ff1bb1 |
+| test/fixtures/selfhost-sh1-generic-erasure.lean | e903fb4762f9638655a8be2d4b99421c5b5ebdd3 |
+| scripts/sh1-generic-erasure-conformance.mjs | 0a9775e708b70980bdb887cd240f7fbc04d082c9 |
+| scripts/sh1-strict-evidence.mjs | b816395c6727b2319040523548ef0b3a43056d66 |
 
-R products: PS985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07; admissions200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0; TS38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935; JS70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061.
+Basic and Definition keep their final7de707/4c9d387 pins unless the producer review requires a specific change. Expr must compose the pending f1ecc eligibility overlay, and Term/Context/Declaration will receive the producer correction. Re-read the current agent manifests; do not restore an old canonical or Nat layer over a newer overlay.
 
-Frozen provider source963030dc2d154008fccc82e7c8ed29331f138799; binary88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec; pinned Lean commit as above. Draft PR84 is a separate diverged provider lane; leave it alone.
+## Host and fixture evidence boundaries
 
-The old 61-module R/F count and current 64-module attempt count are evidence for those exact closures. Discover new closure counts from actual imports; do not hard-code them into future qualification.
+The new sh1-function-entry.mjs is a narrow bootstrap-tooling bridge, not a source grammar compatibility mode. Exact source groups are psNameEq1+1, psExprAlphaEq1+1 and psErasureEtaParameters2+1+1. Frozen R and its C1 retain old flat2/2/4 ABIs; N1/C2/C3 use current groups. Select once by the exported fixed formal arity, then apply exact groups. Returned __ps$wrap rest closures have length0: never inspect their length or retry based on results/failures.
+
+The eight host edits retain all original raw source and expected values. Public F12 worker signatures and1666/2198/1568 cases remain. Runtime changes only two host callback fields to unary chaining while retaining24 values/21 probes and45 operations/186 values. The helper is added only to the full qualification recipe; none of the frozen seven cold-recovery runtime files changes.
+
+The pre-recursion generic fixture e903fb... preserves the old4 recursive definitions and19 values. It adds22 declarations/20 definitions, for26 declarations/24 definitions total, including18 ordinary entry checks and2 type-only Unit entries. Its new function-value observations are **19 =14 pure values +5 host demand diagnostics**. Original generic19 values remain separate.
+
+The gate0a9775... checks the actual original fixture IR once before emission, and reuses the existing preparation/TS/native invocations. Binderb816... authenticates the actual checkout fixture, each N1/C1/C2/C3 receipt/compiler/admission/TS/JS hash, and requires N1 native artifacts including the already compiled native JavaScript hash. It introduces only a finite function-value qualification field; strict/general/provider flags stay false.
+
+The later complete fixture read found two erroneous // comment prefixes before sh1GroupTypeOnly in e903fb. Runtime is correcting them to native Lean -- comments while appending the new witnesses; retain the declaration bodies and assertions. Do not publish the old e903fb fixture unchanged.
+
+The new recursion finding now requires additive **actual prepared-Core** evidence. Runtime is extending the same fixture/gate with a narrow independently reviewed finite Nat reference evaluator over its stored Core declarations. Do not claim source/native-vs-IR parity alone catches the old Core4/IR3 witness. Preserve old4/19 and canonical20-entry/19-observation assertions; add a separately labelled recursion result and exact refusals as needed. No second whole-compiler preparation or native build is justified merely to collect it.
+
+## Exact completed native checkpoint
+
+The last compiler source fc961 passed ordinary native development run **37988707250**, compiler job **114017088870**, native step24. Full steps25/26/27 skipped; provider **114019030861 skipped**. This was not a full qualification. Cold37988707255 skipped; no execution is currently requested by this documentation checkpoint.
+
+Actual source:64 modules /1,212,568 source bytes /1,213,647 input bytes /149 imports /1,668 source declarations /2,514 Core declarations /39 normalizations. Original IR:62,289 expressions /793,972 steps /0 findings /complete. Source/type/term walks143223/17570/55812. Exactly1 preparation,1 canonical admission encoding,0 environment reconstructions and1 original IR check. Elapsed239281.541487ms is one observation, not a benchmark.
+
+Grammar passed18 application boundaries,22 syntax cases,40 round trips,35 parse refusals,2 lexical-position cases,5 lexical refusals,3 empty-call refusals,1 printer refusal,5 empty pairs/6 refusals and1 zero-field pair/2 refusals. Grouped-empty AST hash f4248596a8ca5de612812ecdbaa2fe39e4fc35f9c629b19fa8c61e79880f16e1. Full canonical closure hash44331be90edf828bcb0ccc8e2ae3b45f7e7d70714b5b3722b8a6a4a4f43f456b. These counts must not be hard-coded as the new source outcome.
+
+Durable fc961 evidence under strict/attempts/fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504:
+native-checkpoint53eac1c981b15e4c9d2eaa4eef8399a9030e3925; job.log8c8f01abbeecb3a6d666fe017708bdf048cd09b1; strict-source-native4fb3222220b56345871a170230aed525def5f18a; logged native candidate4d6af40c66caaa904aa3986a082175974247f59a; exact64-source inventory0e55da5c7112a41a6541700a01fb60825adcf2aa.
+
+Native receipt SHA e59bd0ceff69c039c90b448c82df19569f1458f52fe6312087125b35f87ea6a3; log SHA45489f8482ac035d35a81538c1eb7beb9abd0268261ebb85cc23251af753cde3. Artifact11645090241,1525447 bytes, digestf9f8a0a4a43c4ef2654283eea67be3188669760f360a047f2d79539e43bd4b27, expires2026-11-08T20:47:03Z.
+
+N1 JS04336b5cb042ffdc833c7aad1fd9ec1aa8ee0aea7e1aff14408192ea8316e1ce; TS0267d0c167eed7ec2d61edf282aa7be6991ebacf8a711b30fca42136893eefaf; atomic native40e1a83ed9ad1ab7799571f6e7f4d73c0fdd6e82a0f40eb899cfa5483a1b9544. No current C1/C2/C3/provider/peak-memory or general strict result follows.
+
+## General correspondence completion
+
+All **33 rows remain open**:9 ER,4 N,11 EV,9 TS. The27 stage obligations likewise are not discharged merely by these finite/source checkpoints. Read SPEC, strict/PLAN.md, obligations.json and correspondence-obligations.json. The latest current instructions here override stale planned-run/candidate text in those records until final reconciliation.
+
+| General packet | Exact reviewed blob / meaning |
+| --- | --- |
+| SEMANTIC_RELATIONS.md |40e540b325186ee514ff3af9e39a22126d29a167; V/E/C definitions,11 IR rules,9 scope facts, open upstream/composition interfaces |
+| NORMALIZATION_ARGUMENTS.md |d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a; N01–04 local general arguments |
+| TS_RULE_ARGUMENTS.md |bc72390c69e0c92cd7dce56092a65731748c96ec; TS01–09 local general arguments |
+| EV_RULE_ARGUMENTS.md |7e90465301005a395a871a0563b19c164dcda750; all11 forms and45 intrinsic templates, local general arguments |
+| ER incomplete authoring checkpoint |5b4f38f04501e244d1691a7a22f16a7d3da2cf11; sections1–9,8461 words; sections10–14 and producer correction remain pending; older5bef is superseded |
+| Canonical/Core addendum candidate |b2270f6991752022367230ff8df05b08bb4331a6; SHA fe3ad53818f2cd29fb8e5ac3821beb621c178c831e4ba04f9c5d7b22f02833ba;6494 words; peer review pending |
+
+The canonical addendum constructs entry-prefix alignment, partial residual closures, Unit activation, callback bridging and finite administrative progress. CI and IJ need not use identical numerical budgets; composition uses cofinal projected finite prefixes, not same-index transitivity. A shared residual is never reset on callback/reentry. It does not claim source elaboration/recursor adequacy or close the newly found producer defect.
+
+Complete ER and the upstream source/Core/ghost/provenance/initialization premises, then independently review actual composition. A local argument under an open premise is not a fully discharged row. Finite tests, IR typing, fixed points and provider admission remain separate from semantic preservation. Do not demand an unrequested monolithic machine proof, but do not replace general reasoning with fixtures.
+
+## Qualification order after source review
+
+1. Finish producer correction and Expr/evidence overlays; independently review all affected sources, exact forward/reverse guards, new constructors/callers and supported/refused source cases.
+2. Update the capability boundary honestly and regenerate final code/guard manifests against the actual fresh documentation head. All source/recipe/fixture pins must be final. Preserve old assertions.
+3. Commit one coherent source batch with **[sh1-qualify]**. Do not create another native-only checkpoint; do not add [sh1-ts7-cold]. Read back all exact changed paths and actual Actions head_sha.
+4. While the full native/N1/C1/C2/C3 workflow runs, finish/review general packets. Observe actual source/IR/grammar/runtime/origin/preparation evidence, native parity, four fixed-point products, resource traces and separate frozen-provider acceptance.
+5. Record failures exactly if any. Use source analysis to resolve a whole evidenced class; do not enter incremental test/fix loops. A failed/exhausted/skipped stage is not success.
+6. Reconcile ledgers and commit final evidence and this state. Merge strict source only when every mandatory enabled obligation and exact execution gate is justified. Do not select a new seed implicitly.
+
+The current resource recipe uses8192MiB old space and a measured12GiB available-memory preflight before expensive generated compiler loading. Scalar synchronous phase records survive aborts. No claimed memory repair exists until actual full execution. The previous4GiB C2 OOM retained no C2 files; do not redo its completed read-only archive inspection.
+
+## Protected completed baselines
+
+- Revised isolated TS7 cold recovery **047a29f17392fea41ac5d59e7f8cbfc172b20313**, run**37983663908**, job114000151355, passed75 commands at19:56:48–20:00:18Z and reproduced all4 selected R products. Receipt9e8f6f68dea880edf7fa230089cebedac6553ef4, SHA d2068b325f37d688914899d417b208eb2365be6a9c5d065237c8ec5857dace2a. Evidencecb178079ea2a32f1cea671de503a02c4145021a3. New policy/recipe are separately qualified.
+- The frozen7-file cold import graph is native-seed-recovery, successor-seed, seed-manifest, grammar-profile, source-snapshot, workspace-layout, typescript-cli. None of the pending host/generic/source changes alters it. No cold repeat.
+- Last full attempt7 at3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc, run37986002380/compiler114008036763, failed grouped-empty-argument step24; provider114009942633 skipped. The subsequent parser correction fc961 native passed. All7 full attempts and the separate fc961 native checkpoint are in qualification-attempts.json.
+- Qualified practical F: fcd875c8f38db4b0524090bd10c7c2fd5024053d, run37947341800/compiler113876931430/provider113896228512. It earned87 behaviors,12 ABI checks, original IR, C2/C3 products and native parity within its stated scope.
+- Root TS7 migration:9d150afbec1feda8c97058aa56aa5ab92347d96d, run37951869293/job113892421469. Practical main merge completed16:30:26Z. Do not merge again.
+- Selected R source **fe2560aba0f347b1caf8d000d371464642d44f23**, selectione65606397fb679d7cb96f4f0e92700a6cf0944a6. Manifest44a05964c49000478c282afc013c84fca8c2de65, SHA7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694; identity47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225.
+- R products: PS985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07; admissions200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0; TS38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935; JS70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061.
+- Frozen provider source963030dc2d154008fccc82e7c8ed29331f138799; binary88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec; Lean pin above, timeout60000/fuel131072. Diverged draft PR84 is a separate provider lane; leave it alone.
+
+## Tool and continuation mechanics
+
+Discover exact GitHub MCP schemas from filtered ALL_TOOLS. github_fetch reads approved GitHub API/raw/blob URLs; github_fetch_blob returns structuredContent.content raw text. Pure in-memory SHA256 helper blobfe3478ead5638f8647e67a5ef2a2f2de4e2eb896 is available if needed; no local runtime is permitted.
+
+For source reconstruction use the attached guarded manifests and actual base blobs. Batch independent reads with Promise.allSettled and inspect every result; keep mutations sequential. Avoid printing entire logs, source-origin arrays or full repository trees. Read nonrecursive root tree then the psc0 subtree recursively; the full repository recursive response can exceed transport limits.
+
+Git mutations use repository_full_name; workflow tools use repo_full_name. Tools: create_blob, create_tree(base_tree_sha), create_commit(parent_sha), update_ref(branch_name,expected_sha,force:false). Workflow dispatch is unavailable; the reviewed source commit tag triggers qualification. Discover runs through the repository runs collection with exact head_sha; the convenience commit-runs wrapper filters PR events and is unsuitable.
+
+No workflow is running for the unintegrated candidates. To inspect an actual run use fetch_workflow_run_jobs and fetch_workflow_job_logs; individual-job generic GET is unsupported. Preserve actual receipt/log bytes and distinguish log-derived records from artifact-file hashes. C2/C3 artifacts may not exist after a failed phase; never invent them.
+
+Function stores expire; the immutable Git blobs, attached review packets and this work state are the durable authority. At restart, read this section and the actual branch head, contact the three current owners, and continue from the final source/proof state rather than reconstructing an old draft.
 
 ## Historical completed M6 and TypeScript 7 result
 

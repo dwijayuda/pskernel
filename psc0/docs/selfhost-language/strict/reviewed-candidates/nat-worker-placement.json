@@ -1,0 +1,1981 @@
+{
+  "format": "psc0-sh1-guarded-nat-closure-placement/1",
+  "sourceRef": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "documentationCheckpoint": "715a17ba725cf3bdcc9ae6c95278ca9ca240fa46",
+  "planBlob": "38d9ea5bd95d0909b9ceedc99a71944f969f896d",
+  "planSha256": "56bbd17d2baee4db4e5b9daf380b2d2065b2023c2dd7153f0a6685e24c991eae",
+  "counts": {
+    "inventoriedNatFunctions": 103,
+    "movedExistingFunctions": 102,
+    "movedFuelFunctions": 90,
+    "movedOtherNatFunctions": 12,
+    "replacedExistingFunctions": 1,
+    "files": 29
+  },
+  "baseOverlay": {
+    "basic": "2c7c0ed567804f189d1facfd3987b6a13f9504f9",
+    "basicManifest": "4371148c1998a8500bf5d24001c34901d87a0740",
+    "expr": "cdc76937f215fd2803841600266816acb122ea90",
+    "definition": "ac3329f77a4f5cc98d4bc5c53b3d1623c52a6f52"
+  },
+  "status": "unattached-source-candidates-source-reviewed-no-execution",
+  "rule": "Move only the finite pure self-recursive function-construction binding prefix below all of its existing immediate returned state lambdas; keep original declaration headers and activated body operations byte-identical.",
+  "exception": "psParseLeanProductWithNomatchWithFuel also moves its dependent total boolean selection of an already-obtained function value after smaller in the same order.",
+  "excluded": "The separately inventoried172 list/tree binding occurrences are not moved or covered by this Nat proof.",
+  "eliminated": [
+    {
+      "function": "psEraseFinishApplicationWithFuelWorker",
+      "originalBlob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "replacedBy": "psEraseFinishEntryWithFuel",
+      "reason": "Canonical entry completion replaces the old all-remaining-arrows worker with an entry-aware worker whose actual values precede its fuel dispatch."
+    }
+  ],
+  "files": [
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "sourceBaseBlob": "6543f69216532449bddb341495cada280d7f8943",
+      "baseBlob": "6543f69216532449bddb341495cada280d7f8943",
+      "baseSha256": "ebcc71d953f31cc28b7ce4e37ebd000c3173a2d9d3c57149be3168830e4926e4",
+      "candidateBlob": "cde16d84dc7a088bf7b9f74c65303b22b991fe85",
+      "candidateSha256": "eb80cd45e1df4072cac276d16d26c07ef6e37ae1ddb8769ff534e0a5b54f6c2e",
+      "candidateBytes": 2808,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psLexStringToListFromWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "source",
+            "position"
+          ],
+          "exception": null,
+          "before": "      let smaller : String -> Nat -> List Char := psLexStringToListFromWithFuel remaining;\n      fun (source : String) (position : Nat) =>",
+          "after": "      fun (source : String) (position : Nat) =>\n        let smaller : String -> Nat -> List Char := psLexStringToListFromWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Lexer.lean",
+      "sourceBaseBlob": "335a78cad3eda53c9dd8687064002c9313901964",
+      "baseBlob": "335a78cad3eda53c9dd8687064002c9313901964",
+      "baseSha256": "775a5b8f0b664db53baeb63873667088fda72d6c3ad0c99b2cdf0bd2c86db974",
+      "candidateBlob": "0bee57ae5cfc0c83b9c9855edd88500dfa8d53b6",
+      "candidateSha256": "0ed9ad3683379a2ce283d68866854936fa8a5d7fa19dad41fdd30b3b947c7e26",
+      "candidateBytes": 36613,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psLexSkipBlockCommentWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "depth",
+            "remaining",
+            "start",
+            "position"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          Nat ->\n          List Char ->\n          PsSourcePos ->\n          PsSourcePos ->\n          Except PsLexError PsLexCursor :=\n        psLexSkipBlockCommentWithFuel remainingFuel;\n      fun (depth : Nat) (remaining : List Char) (start : PsSourcePos) (position : PsSourcePos) =>",
+          "after": "      fun (depth : Nat) (remaining : List Char) (start : PsSourcePos) (position : PsSourcePos) =>\n        let smaller :\n            Nat ->\n            List Char ->\n            PsSourcePos ->\n            PsSourcePos ->\n            Except PsLexError PsLexCursor :=\n          psLexSkipBlockCommentWithFuel remainingFuel;"
+        },
+        {
+          "function": "psLexSkipTriviaWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "remaining",
+            "position"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List Char ->\n          PsSourcePos ->\n          Except PsLexError PsLexCursor :=\n        psLexSkipTriviaWithFuel remainingFuel;\n      fun (remaining : List Char) (position : PsSourcePos) =>",
+          "after": "      fun (remaining : List Char) (position : PsSourcePos) =>\n        let smaller :\n            List Char ->\n            PsSourcePos ->\n            Except PsLexError PsLexCursor :=\n          psLexSkipTriviaWithFuel remainingFuel;"
+        },
+        {
+          "function": "psLexReadStringBodyWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "remaining",
+            "position",
+            "start",
+            "charsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List Char ->\n          PsSourcePos ->\n          PsSourcePos ->\n          List Char ->\n          Except PsLexError PsLexRead :=\n        psLexReadStringBodyWithFuel remainingFuel;\n      fun (remaining : List Char) (position : PsSourcePos) (start : PsSourcePos) (charsRev : List Char) =>",
+          "after": "      fun (remaining : List Char) (position : PsSourcePos) (start : PsSourcePos) (charsRev : List Char) =>\n        let smaller :\n            List Char ->\n            PsSourcePos ->\n            PsSourcePos ->\n            List Char ->\n            Except PsLexError PsLexRead :=\n          psLexReadStringBodyWithFuel remainingFuel;"
+        },
+        {
+          "function": "psLexAllWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsLexCursor ->\n          Except PsLexError (List PsToken) :=\n        psLexAllWorker inputBound remainingFuel;\n      fun (cursor : PsLexCursor) =>",
+          "after": "      fun (cursor : PsLexCursor) =>\n        let smaller :\n            PsLexCursor ->\n            Except PsLexError (List PsToken) :=\n          psLexAllWorker inputBound remainingFuel;"
+        },
+        {
+          "function": "psLexSkipProofScriptTriviaWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "remaining",
+            "position"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List Char ->\n          PsSourcePos ->\n          Except PsLexError PsLexCursor :=\n        psLexSkipProofScriptTriviaWithFuel remainingFuel;\n      fun (remaining : List Char) (position : PsSourcePos) =>",
+          "after": "      fun (remaining : List Char) (position : PsSourcePos) =>\n        let smaller :\n            List Char ->\n            PsSourcePos ->\n            Except PsLexError PsLexCursor :=\n          psLexSkipProofScriptTriviaWithFuel remainingFuel;"
+        },
+        {
+          "function": "psLexAllProofScriptWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsLexCursor ->\n          Except PsLexError (List PsToken) :=\n        psLexAllProofScriptWorker inputBound remainingFuel;\n      fun (cursor : PsLexCursor) =>",
+          "after": "      fun (cursor : PsLexCursor) =>\n        let smaller :\n            PsLexCursor ->\n            Except PsLexError (List PsToken) :=\n          psLexAllProofScriptWorker inputBound remainingFuel;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+      "sourceBaseBlob": "9c896076032762543b57d88c0010f90ad0a066d5",
+      "baseBlob": "9c896076032762543b57d88c0010f90ad0a066d5",
+      "baseSha256": "8d483f35ad8370305a76724e714a123d560a5e7670f20346336fe5ef5eca06e8",
+      "candidateBlob": "b907616cb4cbf65089ba0c9a8e13f57b220008cf",
+      "candidateSha256": "9f8c895567542c90ac9088b3ce25ccda6f374e016069faa4068feca0e28b7092",
+      "candidateBytes": 3984,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psStringEqFromWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "left",
+            "right",
+            "leftPos",
+            "rightPos"
+          ],
+          "exception": null,
+          "before": "      let smaller : String -> String -> Nat -> Nat -> Bool := psStringEqFromWithFuel remaining;\n      fun (left : String) (right : String) (leftPos : Nat) (rightPos : Nat) =>",
+          "after": "      fun (left : String) (right : String) (leftPos : Nat) (rightPos : Nat) =>\n        let smaller : String -> String -> Nat -> Nat -> Bool := psStringEqFromWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+      "sourceBaseBlob": "45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b",
+      "baseBlob": "45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b",
+      "baseSha256": "3ebbeaf7a5530509029c7e0dd5e4b8524125e063a82ee06e43f5298566cf2c33",
+      "candidateBlob": "717882ba07d3fc463d08259bf1d3035d484917ef",
+      "candidateSha256": "d12d8b22c2ea21180ea575f0cde3393a6d3409e6e92552585490904b46ce58e8",
+      "candidateBytes": 22448,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psParseSyntaxNameTailWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "segmentsRev",
+            "start",
+            "stop",
+            "tokens"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List String ->\n          PsSourcePos ->\n          PsSourcePos ->\n          List PsToken ->\n          Except PsParseError (PsParseResult PsSyntaxName) :=\n        psParseSyntaxNameTailWithFuel remainingFuel;\n      fun\n          (segmentsRev : List String)\n          (start : PsSourcePos)\n          (stop : PsSourcePos)\n          (tokens : List PsToken) =>",
+          "after": "      fun\n          (segmentsRev : List String)\n          (start : PsSourcePos)\n          (stop : PsSourcePos)\n          (tokens : List PsToken) =>\n        let smaller :\n            List String ->\n            PsSourcePos ->\n            PsSourcePos ->\n            List PsToken ->\n            Except PsParseError (PsParseResult PsSyntaxName) :=\n          psParseSyntaxNameTailWithFuel remainingFuel;"
+        },
+        {
+          "function": "psParseRecordFieldsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "fieldsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (Prod PsSyntaxName PsSyntaxTerm) ->\n          Except PsParseError\n            (PsParseResult\n              (List (Prod PsSyntaxName PsSyntaxTerm))) :=\n        psParseRecordFieldsWithFuel parseTerm remaining;\n      fun\n          (cursor : PsTokenCursor)\n          (fieldsRev :\n            List (Prod PsSyntaxName PsSyntaxTerm)) =>",
+          "after": "      fun\n          (cursor : PsTokenCursor)\n          (fieldsRev :\n            List (Prod PsSyntaxName PsSyntaxTerm)) =>\n        let smaller :\n            PsTokenCursor ->\n            List (Prod PsSyntaxName PsSyntaxTerm) ->\n            Except PsParseError\n              (PsParseResult\n                (List (Prod PsSyntaxName PsSyntaxTerm))) :=\n          psParseRecordFieldsWithFuel parseTerm remaining;"
+        },
+        {
+          "function": "psParsePatternBindersWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "bindersRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxName ->\n          Except PsParseError\n            (PsParseResult (List PsSyntaxName)) :=\n        psParsePatternBindersWithFuel remaining;\n      fun\n          (cursor : PsTokenCursor)\n          (bindersRev : List PsSyntaxName) =>",
+          "after": "      fun\n          (cursor : PsTokenCursor)\n          (bindersRev : List PsSyntaxName) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxName ->\n            Except PsParseError\n              (PsParseResult (List PsSyntaxName)) :=\n          psParsePatternBindersWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "sourceBaseBlob": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "baseBlob": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "baseSha256": "7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8",
+      "candidateBlob": "6c9056bb03424fb73667e9c74d59432e05cf0a71",
+      "candidateSha256": "601ea280e3f6aafad69abf150afde89fbdade582b796ce1b4de49ffd43baad41",
+      "candidateBytes": 107433,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psParseLeanListLiteralWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "start",
+            "cursor",
+            "elementsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsSourcePos ->\n          PsTokenCursor ->\n          List PsSyntaxTerm ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanListLiteralWithFuel\n          parseTerm\n          remaining;\n      fun\n          (start : PsSourcePos)\n          (cursor : PsTokenCursor)\n          (elementsRev : List PsSyntaxTerm) =>",
+          "after": "      fun\n          (start : PsSourcePos)\n          (cursor : PsTokenCursor)\n          (elementsRev : List PsSyntaxTerm) =>\n        let smaller :\n            PsSourcePos ->\n            PsTokenCursor ->\n            List PsSyntaxTerm ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseLeanListLiteralWithFuel\n            parseTerm\n            remaining;"
+        },
+        {
+          "function": "psParseLeanApplicationTailWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "current",
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsSyntaxTerm ->\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanApplicationTailWithFuel\n          parseParenthesized\n          remaining;\n      fun\n          (current : PsSyntaxTerm)\n          (cursor : PsTokenCursor) =>",
+          "after": "      fun\n          (current : PsSyntaxTerm)\n          (cursor : PsTokenCursor) =>\n      let smaller :\n          PsSyntaxTerm ->\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanApplicationTailWithFuel\n          parseParenthesized\n          remaining;"
+        },
+        {
+          "function": "psParseLeanSimpleApplicationWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanSimpleApplicationWithFuel remaining;\n      fun (cursor : PsTokenCursor) =>",
+          "after": "      fun (cursor : PsTokenCursor) =>\n        let smaller :\n            PsTokenCursor ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseLeanSimpleApplicationWithFuel remaining;"
+        },
+        {
+          "function": "psParseLeanProductWithNomatchWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller",
+            "parseScrutinee"
+          ],
+          "crossedParameters": [
+            "cursor"
+          ],
+          "exception": "pure-boolean-function-selection",
+          "before": "      let smaller :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanProductWithNomatchWithFuel\n          useNomatchParser\n          parseNomatchScrutinee\n          remaining;\n      let parseScrutinee :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        if useNomatchParser then parseNomatchScrutinee else smaller;\n      fun (cursor : PsTokenCursor) =>",
+          "after": "      fun (cursor : PsTokenCursor) =>\n        let smaller :\n            PsTokenCursor ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseLeanProductWithNomatchWithFuel\n            useNomatchParser\n            parseNomatchScrutinee\n            remaining;\n        let parseScrutinee :\n            PsTokenCursor ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          if useNomatchParser then parseNomatchScrutinee else smaller;"
+        },
+        {
+          "function": "psParseLeanBinderTypeWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanBinderTypeWithFuel remaining;\n      fun (cursor : PsTokenCursor) =>",
+          "after": "      fun (cursor : PsTokenCursor) =>\n        let smaller :\n            PsTokenCursor ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseLeanBinderTypeWithFuel remaining;"
+        },
+        {
+          "function": "psParseLeanBindersWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "bindersRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (PsSyntaxBinderHead × PsSyntaxTerm) ->\n          Except PsParseError\n            (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=\n        psParseLeanBindersWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>\n        let smaller :\n            PsTokenCursor ->\n            List (PsSyntaxBinderHead × PsSyntaxTerm) ->\n            Except PsParseError\n              (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=\n          psParseLeanBindersWithFuel remaining;"
+        },
+        {
+          "function": "psParseLeanMatchAlternativesAtColumnWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "previousBranchLine",
+            "cursor",
+            "alternativesRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          Nat ->\n          PsTokenCursor ->\n          List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) ->\n          Except PsParseError\n            (PsParseResult\n              (List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) :=\n        psParseLeanMatchAlternativesAtColumnWithFuel\n          parseTerm\n          branchColumn\n          remaining;\n      fun\n        (previousBranchLine : Nat)\n        (cursor : PsTokenCursor)\n        (alternativesRev :\n          List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan)) =>",
+          "after": "      fun\n        (previousBranchLine : Nat)\n        (cursor : PsTokenCursor)\n        (alternativesRev :\n          List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan)) =>\n        let smaller :\n            Nat ->\n            PsTokenCursor ->\n            List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) ->\n            Except PsParseError\n              (PsParseResult\n                (List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) :=\n          psParseLeanMatchAlternativesAtColumnWithFuel\n            parseTerm\n            branchColumn\n            remaining;"
+        },
+        {
+          "function": "psParseLeanDoWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "start",
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsSourcePos ->\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanDoWithFuel parseTerm remaining;\n      fun\n        (start : PsSourcePos)\n        (cursor : PsTokenCursor) =>",
+          "after": "      fun\n        (start : PsSourcePos)\n        (cursor : PsTokenCursor) =>\n      let smaller :\n          PsSourcePos ->\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanDoWithFuel parseTerm remaining;"
+        },
+        {
+          "function": "psParseLeanRecordApplicationTailWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "current",
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsSyntaxTerm ->\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanRecordApplicationTailWithFuel\n          parseTerm\n          remaining;\n      fun\n        (current : PsSyntaxTerm)\n        (cursor : PsTokenCursor) =>",
+          "after": "      fun\n        (current : PsSyntaxTerm)\n        (cursor : PsTokenCursor) =>\n        let smaller :\n            PsSyntaxTerm ->\n            PsTokenCursor ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseLeanRecordApplicationTailWithFuel\n            parseTerm\n            remaining;"
+        },
+        {
+          "function": "psParseLeanTermWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanTermWithFuel remaining;\n      fun (cursor : PsTokenCursor) =>",
+          "after": "      fun (cursor : PsTokenCursor) =>\n      let smaller :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseLeanTermWithFuel remaining;"
+        },
+        {
+          "function": "psParseLeanInductiveConstructorsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "constructorsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxInductiveConstructor ->\n          Except PsParseError\n            (PsParseResult (List PsSyntaxInductiveConstructor)) :=\n        psParseLeanInductiveConstructorsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (constructorsRev : List PsSyntaxInductiveConstructor) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (constructorsRev : List PsSyntaxInductiveConstructor) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxInductiveConstructor ->\n            Except PsParseError\n              (PsParseResult (List PsSyntaxInductiveConstructor)) :=\n          psParseLeanInductiveConstructorsWithFuel remaining;"
+        },
+        {
+          "function": "psParseLeanStructureFieldsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "fieldsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (PsSyntaxBinderHead × PsSyntaxTerm) ->\n          Except PsParseError\n            (PsParseResult\n              (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=\n        psParseLeanStructureFieldsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (fieldsRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (fieldsRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>\n        let smaller :\n            PsTokenCursor ->\n            List (PsSyntaxBinderHead × PsSyntaxTerm) ->\n            Except PsParseError\n              (PsParseResult\n                (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=\n          psParseLeanStructureFieldsWithFuel remaining;"
+        },
+        {
+          "function": "psParseLeanEquationPatternsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "patternsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxPattern ->\n          Except PsParseError\n            (PsParseResult (List PsSyntaxPattern)) :=\n        psParseLeanEquationPatternsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (patternsRev : List PsSyntaxPattern) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (patternsRev : List PsSyntaxPattern) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxPattern ->\n            Except PsParseError\n              (PsParseResult (List PsSyntaxPattern)) :=\n          psParseLeanEquationPatternsWithFuel remaining;"
+        },
+        {
+          "function": "psParseLeanEquationClausesWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "clausesRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsLeanEquationClause ->\n          Except PsParseError\n            (PsParseResult (List PsLeanEquationClause)) :=\n        psParseLeanEquationClausesWithFuel\n          parseTerm\n          remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (clausesRev : List PsLeanEquationClause) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (clausesRev : List PsLeanEquationClause) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsLeanEquationClause ->\n            Except PsParseError\n              (PsParseResult (List PsLeanEquationClause)) :=\n          psParseLeanEquationClausesWithFuel\n            parseTerm\n            remaining;"
+        },
+        {
+          "function": "psLeanPrepareEquationBindersAcc",
+          "major": "remaining",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "available",
+            "bindersRev",
+            "namesRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          Nat ->\n          List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->\n          List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->\n          List PsSyntaxName ->\n          Option\n            (Prod\n              (List (Prod PsSyntaxBinderHead PsSyntaxTerm))\n              (List PsSyntaxName)) :=\n        psLeanPrepareEquationBindersAcc smallerRemaining;\n      fun\n        (index : Nat)\n        (available : List (Prod PsSyntaxBinderHead PsSyntaxTerm))\n        (bindersRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm))\n        (namesRev : List PsSyntaxName) =>",
+          "after": "      fun\n        (index : Nat)\n        (available : List (Prod PsSyntaxBinderHead PsSyntaxTerm))\n        (bindersRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm))\n        (namesRev : List PsSyntaxName) =>\n        let smaller :\n            Nat ->\n            List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->\n            List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->\n            List PsSyntaxName ->\n            Option\n              (Prod\n                (List (Prod PsSyntaxBinderHead PsSyntaxTerm))\n                (List PsSyntaxName)) :=\n          psLeanPrepareEquationBindersAcc smallerRemaining;"
+        },
+        {
+          "function": "psParseLeanImportsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "importsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxImport ->\n          Except PsParseError (PsParseResult (List PsSyntaxImport)) :=\n        psParseLeanImportsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (importsRev : List PsSyntaxImport) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (importsRev : List PsSyntaxImport) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxImport ->\n            Except PsParseError (PsParseResult (List PsSyntaxImport)) :=\n          psParseLeanImportsWithFuel remaining;"
+        },
+        {
+          "function": "psParseLeanDeclarationsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "declarationsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxDeclaration ->\n          Except PsParseError (PsParseResult (List PsSyntaxDeclaration)) :=\n        psParseLeanDeclarationsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (declarationsRev : List PsSyntaxDeclaration) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (declarationsRev : List PsSyntaxDeclaration) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxDeclaration ->\n            Except PsParseError (PsParseResult (List PsSyntaxDeclaration)) :=\n          psParseLeanDeclarationsWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "sourceBaseBlob": "e8d6ebda842dfbfcf3132f832e7630703080fa8a",
+      "baseBlob": "e8d6ebda842dfbfcf3132f832e7630703080fa8a",
+      "baseSha256": "c2d6266cd8f5d3c44ab761cad60fdf212d2f83c37945194db7fc9cb60e282690",
+      "candidateBlob": "b569a73ef70e8cf2bfb81b7737c990e8e3b2374a",
+      "candidateSha256": "9a69a130171bc9fcefc6a040bde659da77f050ebdf65ed56fd879c1781c1c5fd",
+      "candidateBytes": 77046,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psParseProofScriptCallArgsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "argsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxTerm ->\n          Except PsParseError PsProofScriptCallArgs :=\n        psParseProofScriptCallArgsWithFuel\n          parseArgument\n          remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (argsRev : List PsSyntaxTerm) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (argsRev : List PsSyntaxTerm) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxTerm ->\n            Except PsParseError PsProofScriptCallArgs :=\n          psParseProofScriptCallArgsWithFuel\n            parseArgument\n            remaining;"
+        },
+        {
+          "function": "psParseProofScriptRecordFieldsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "fieldsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (Prod PsSyntaxName PsSyntaxTerm) ->\n          Except PsParseError\n            (PsParseResult (List (Prod PsSyntaxName PsSyntaxTerm))) :=\n        psParseProofScriptRecordFieldsWithFuel parseTerm remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (fieldsRev : List (Prod PsSyntaxName PsSyntaxTerm)) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (fieldsRev : List (Prod PsSyntaxName PsSyntaxTerm)) =>\n        let smaller :\n            PsTokenCursor ->\n            List (Prod PsSyntaxName PsSyntaxTerm) ->\n            Except PsParseError\n              (PsParseResult (List (Prod PsSyntaxName PsSyntaxTerm))) :=\n          psParseProofScriptRecordFieldsWithFuel parseTerm remaining;"
+        },
+        {
+          "function": "psParseProofScriptPostfixTailWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "current",
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsSyntaxTerm ->\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseProofScriptPostfixTailWithFuel parseArgument remaining;\n      fun (current : PsSyntaxTerm) (cursor : PsTokenCursor) =>",
+          "after": "      fun (current : PsSyntaxTerm) (cursor : PsTokenCursor) =>\n        let smaller :\n            PsSyntaxTerm ->\n            PsTokenCursor ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseProofScriptPostfixTailWithFuel parseArgument remaining;"
+        },
+        {
+          "function": "psParseProofScriptNativeTailWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "argsRev",
+            "stop",
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List PsSyntaxTerm ->\n          PsSourcePos ->\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseProofScriptNativeTailWithFuel parseArgument head remaining;\n      fun\n        (argsRev : List PsSyntaxTerm)\n        (stop : PsSourcePos)\n        (cursor : PsTokenCursor) =>",
+          "after": "      fun\n        (argsRev : List PsSyntaxTerm)\n        (stop : PsSourcePos)\n        (cursor : PsTokenCursor) =>\n        let smaller :\n            List PsSyntaxTerm ->\n            PsSourcePos ->\n            PsTokenCursor ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseProofScriptNativeTailWithFuel parseArgument head remaining;"
+        },
+        {
+          "function": "psParseProofScriptBinderTypeWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseProofScriptBinderTypeWithFuel remaining;\n      fun (cursor : PsTokenCursor) =>",
+          "after": "      fun (cursor : PsTokenCursor) =>\n        let smaller : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseProofScriptBinderTypeWithFuel remaining;"
+        },
+        {
+          "function": "psParseProofScriptBindersWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "bindersRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (PsSyntaxBinderHead × PsSyntaxTerm) ->\n          Except PsParseError\n            (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=\n        psParseProofScriptBindersWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>\n        let smaller :\n            PsTokenCursor ->\n            List (PsSyntaxBinderHead × PsSyntaxTerm) ->\n            Except PsParseError\n              (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=\n          psParseProofScriptBindersWithFuel remaining;"
+        },
+        {
+          "function": "psParseProofScriptExplicitEntriesWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "entriesRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->\n          Except PsParseError\n            (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=\n        psParseProofScriptExplicitEntriesWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (entriesRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (entriesRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>\n        let smaller :\n            PsTokenCursor ->\n            List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->\n            Except PsParseError\n              (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=\n          psParseProofScriptExplicitEntriesWithFuel remaining;"
+        },
+        {
+          "function": "psParseProofScriptDeclarationBindersWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "prefixRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->\n          Except PsParseError\n            (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=\n        psParseProofScriptDeclarationBindersWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (prefixRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (prefixRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>\n        let smaller :\n            PsTokenCursor ->\n            List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->\n            Except PsParseError\n              (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=\n          psParseProofScriptDeclarationBindersWithFuel remaining;"
+        },
+        {
+          "function": "psParseProofScriptMatchAlternativesWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "alternativesRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) ->\n          Except PsParseError\n            (PsParseResult (List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))) :=\n        psParseProofScriptMatchAlternativesWithFuel parseTerm remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (alternativesRev : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (alternativesRev : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) =>\n        let smaller :\n            PsTokenCursor ->\n            List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) ->\n            Except PsParseError\n              (PsParseResult (List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))) :=\n          psParseProofScriptMatchAlternativesWithFuel parseTerm remaining;"
+        },
+        {
+          "function": "psParseProofScriptTermWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          Except PsParseError (PsParseResult PsSyntaxTerm) :=\n        psParseProofScriptTermWithFuel remaining;\n      fun (cursor : PsTokenCursor) =>",
+          "after": "      fun (cursor : PsTokenCursor) =>\n        let smaller :\n            PsTokenCursor ->\n            Except PsParseError (PsParseResult PsSyntaxTerm) :=\n          psParseProofScriptTermWithFuel remaining;"
+        },
+        {
+          "function": "psParseProofScriptInductiveConstructorsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "constructorsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxInductiveConstructor ->\n          Except PsParseError (PsParseResult (List PsSyntaxInductiveConstructor)) :=\n        psParseProofScriptInductiveConstructorsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (constructorsRev : List PsSyntaxInductiveConstructor) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (constructorsRev : List PsSyntaxInductiveConstructor) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxInductiveConstructor ->\n            Except PsParseError (PsParseResult (List PsSyntaxInductiveConstructor)) :=\n          psParseProofScriptInductiveConstructorsWithFuel remaining;"
+        },
+        {
+          "function": "psParseProofScriptStructureFieldsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "fieldsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List (PsSyntaxBinderHead × PsSyntaxTerm) ->\n          Except PsParseError\n            (PsParseResult\n              (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=\n        psParseProofScriptStructureFieldsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (fieldsRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (fieldsRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>\n        let smaller :\n            PsTokenCursor ->\n            List (PsSyntaxBinderHead × PsSyntaxTerm) ->\n            Except PsParseError\n              (PsParseResult\n                (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=\n          psParseProofScriptStructureFieldsWithFuel remaining;"
+        },
+        {
+          "function": "psParseProofScriptImportsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "importsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxImport ->\n          Except PsParseError (PsParseResult (List PsSyntaxImport)) :=\n        psParseProofScriptImportsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (importsRev : List PsSyntaxImport) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (importsRev : List PsSyntaxImport) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxImport ->\n            Except PsParseError (PsParseResult (List PsSyntaxImport)) :=\n          psParseProofScriptImportsWithFuel remaining;"
+        },
+        {
+          "function": "psParseProofScriptDeclarationsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "cursor",
+            "declarationsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsTokenCursor ->\n          List PsSyntaxDeclaration ->\n          Except PsParseError\n            (PsParseResult (List PsSyntaxDeclaration)) :=\n        psParseProofScriptDeclarationsWithFuel remaining;\n      fun\n        (cursor : PsTokenCursor)\n        (declarationsRev : List PsSyntaxDeclaration) =>",
+          "after": "      fun\n        (cursor : PsTokenCursor)\n        (declarationsRev : List PsSyntaxDeclaration) =>\n        let smaller :\n            PsTokenCursor ->\n            List PsSyntaxDeclaration ->\n            Except PsParseError\n              (PsParseResult (List PsSyntaxDeclaration)) :=\n          psParseProofScriptDeclarationsWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+      "sourceBaseBlob": "519e2ca622ea5ea7e31dba193237b2db871e6bb7",
+      "baseBlob": "519e2ca622ea5ea7e31dba193237b2db871e6bb7",
+      "baseSha256": "fd2d9ec4fc86e6eda2a34817bdb8189b2c1a07e0d149ae508c3a42d0d27aee47",
+      "candidateBlob": "2a98cf0d24b73343defff9824a991b57270b9723",
+      "candidateSha256": "b039b4b5b91f43fa3653a75c8f861f734e9a2cafa74affcb6e032a4baad38c19",
+      "candidateBytes": 29048,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psPrintLeanTermWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "term"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsSyntaxTerm -> Except PsSourcePrintError String :=\n        psPrintLeanTermWithFuel remaining;\n      fun (term : PsSyntaxTerm) =>",
+          "after": "      fun (term : PsSyntaxTerm) =>\n      let smaller :\n          PsSyntaxTerm -> Except PsSourcePrintError String :=\n        psPrintLeanTermWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+      "sourceBaseBlob": "4ab23fcc1ae2ef70bd90a997319e421f5744a723",
+      "baseBlob": "4ab23fcc1ae2ef70bd90a997319e421f5744a723",
+      "baseSha256": "3321f152fbb6c16f1d743c401fcbd9479933e7b710f9f613fb7600bc3b4c983f",
+      "candidateBlob": "01c006d2c243676f47e29cd14949f4019e002d59",
+      "candidateSha256": "c9fa8c42789c1cc6b5b9611580cacfe0a63158eccbd552bce0f64c76326d24c7",
+      "candidateBytes": 31557,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psPrintProofScriptTermWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "term"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsSyntaxTerm -> Except PsSourcePrintError String :=\n        psPrintProofScriptTermWithFuel remaining;\n      fun (term : PsSyntaxTerm) =>",
+          "after": "      fun (term : PsSyntaxTerm) =>\n      let smaller :\n          PsSyntaxTerm -> Except PsSourcePrintError String :=\n        psPrintProofScriptTermWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/bridge/src/Ps/Bridge/Json.lean",
+      "sourceBaseBlob": "4ddfec62f2edd54be87091812dcb6add6304e3ed",
+      "baseBlob": "4ddfec62f2edd54be87091812dcb6add6304e3ed",
+      "baseSha256": "5f8743761564b80a898f640866c110b24f39aa430f23d8e8d3d59304cb9c3e36",
+      "candidateBlob": "1b4ff4efcf78be15221514f8eea0dd47fe43be0e",
+      "candidateSha256": "bea85555e39544b1768f660a72595447c8fda088b4eff1c0731a5b37da446e1e",
+      "candidateBytes": 35383,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psJsonStringCharsAccWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "value",
+            "position",
+            "charsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller : String -> Nat -> List Char -> List Char :=\n        psJsonStringCharsAccWithFuel remaining;\n      fun (value : String) (position : Nat) (charsRev : List Char) =>",
+          "after": "      fun (value : String) (position : Nat) (charsRev : List Char) =>\n        let smaller : String -> Nat -> List Char -> List Char :=\n          psJsonStringCharsAccWithFuel remaining;"
+        },
+        {
+          "function": "psJsonParseStringChars",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "chars",
+            "charsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List Char ->\n          List Char ->\n          Except PsJsonParseError (String × List Char) :=\n        psJsonParseStringChars remaining;\n      fun (chars : List Char) (charsRev : List Char) =>",
+          "after": "      fun (chars : List Char) (charsRev : List Char) =>\n        let smaller :\n            List Char ->\n            List Char ->\n            Except PsJsonParseError (String × List Char) :=\n          psJsonParseStringChars remaining;"
+        },
+        {
+          "function": "psJsonParseArrayWith",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "input",
+            "valuesRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List Char ->\n          List PsJsonValue ->\n          Except PsJsonParseError PsJsonParseResult :=\n        psJsonParseArrayWith parseValue remaining;\n      fun (input : List Char) (valuesRev : List PsJsonValue) =>",
+          "after": "      fun (input : List Char) (valuesRev : List PsJsonValue) =>\n        let smaller :\n            List Char ->\n            List PsJsonValue ->\n            Except PsJsonParseError PsJsonParseResult :=\n          psJsonParseArrayWith parseValue remaining;"
+        },
+        {
+          "function": "psJsonParseObjectWith",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "input",
+            "fieldsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List Char ->\n          List (String × PsJsonValue) ->\n          Except PsJsonParseError PsJsonParseResult :=\n        psJsonParseObjectWith parseValue remaining;\n      fun\n          (input : List Char)\n          (fieldsRev : List (String × PsJsonValue)) =>",
+          "after": "      fun\n          (input : List Char)\n          (fieldsRev : List (String × PsJsonValue)) =>\n        let smaller :\n            List Char ->\n            List (String × PsJsonValue) ->\n            Except PsJsonParseError PsJsonParseResult :=\n          psJsonParseObjectWith parseValue remaining;"
+        },
+        {
+          "function": "psJsonParseValueWithFuelWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "requested",
+            "input"
+          ],
+          "exception": null,
+          "before": "      let smaller : Nat -> List Char -> Except PsJsonParseError PsJsonParseResult :=\n        psJsonParseValueWithFuelWorker fallback remaining;\n      fun (requested : Nat) (input : List Char) =>",
+          "after": "      fun (requested : Nat) (input : List Char) =>\n        let smaller : Nat -> List Char -> Except PsJsonParseError PsJsonParseResult :=\n          psJsonParseValueWithFuelWorker fallback remaining;"
+        },
+        {
+          "function": "psJsonEncodeCanonicalWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "value"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsJsonValue -> Except PsJsonEncodeError String := psJsonEncodeCanonicalWithFuel remaining;\n      fun (value : PsJsonValue) =>",
+          "after": "      fun (value : PsJsonValue) =>\n        let smaller : PsJsonValue -> Except PsJsonEncodeError String := psJsonEncodeCanonicalWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/environment/src/Ps/Environment/Basic.lean",
+      "sourceBaseBlob": "533dd2008b773f820e7fdf87ee01d66d759576c5",
+      "baseBlob": "533dd2008b773f820e7fdf87ee01d66d759576c5",
+      "baseSha256": "a321746e2880c97a19198c71abb0605b2282c296b4e05e50bb4155d761d6e11f",
+      "candidateBlob": "26016c3e4a460358fa34d34a3b4e2966744912a7",
+      "candidateSha256": "6290401a7cdb3111b0b4557532e6eabde1848d39608d1415659e631cf165493b",
+      "candidateBytes": 9104,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psEnvironmentHashStringWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "value",
+            "position",
+            "hash"
+          ],
+          "exception": null,
+          "before": "      let smaller : String -> Nat -> Nat -> Nat := psEnvironmentHashStringWorker remaining;\n      fun (value : String) (position : Nat) (hash : Nat) =>",
+          "after": "      fun (value : String) (position : Nat) (hash : Nat) =>\n        let smaller : String -> Nat -> Nat -> Nat := psEnvironmentHashStringWorker remaining;"
+        },
+        {
+          "function": "psEnvironmentIndexFindWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "hash"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration := psEnvironmentIndexFindWorker remaining;\n      fun (index : PsEnvironmentIndex) (hash : Nat) =>",
+          "after": "      fun (index : PsEnvironmentIndex) (hash : Nat) =>\n        let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration := psEnvironmentIndexFindWorker remaining;"
+        },
+        {
+          "function": "psEnvironmentIndexSetWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "hash",
+            "declarations"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration -> PsEnvironmentIndex := psEnvironmentIndexSetWorker remaining;\n      fun (index : PsEnvironmentIndex) (hash : Nat) (declarations : List PsDeclaration) =>",
+          "after": "      fun (index : PsEnvironmentIndex) (hash : Nat) (declarations : List PsDeclaration) =>\n        let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration -> PsEnvironmentIndex := psEnvironmentIndexSetWorker remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+      "sourceBaseBlob": "35bc6d634f203eceb41666ddea9cfe8bcf204196",
+      "baseBlob": "35bc6d634f203eceb41666ddea9cfe8bcf204196",
+      "baseSha256": "645d3daf197e830b18d0a9dbca0b41f3530229dc826da50cc97fb374585e6109",
+      "candidateBlob": "a9b2c3f4184a5c20b46c97354f2a44c04b978851",
+      "candidateSha256": "fc8976ef9821753f1c575062c7fee0c2abc8cf28e422088691678f49fae7bbab",
+      "candidateBytes": 45383,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psBridgeHeightBucket",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "hash"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsBridgeHeightIndex -> Nat -> List (PsName × Nat) := psBridgeHeightBucket remaining;\n      fun (index : PsBridgeHeightIndex) (hash : Nat) =>",
+          "after": "      fun (index : PsBridgeHeightIndex) (hash : Nat) =>\n        let smaller : PsBridgeHeightIndex -> Nat -> List (PsName × Nat) := psBridgeHeightBucket remaining;"
+        },
+        {
+          "function": "psBridgeHeightInsertWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "hash",
+            "name",
+            "height"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsBridgeHeightIndex -> Nat -> PsName -> Nat -> PsBridgeHeightIndex := psBridgeHeightInsertWorker remaining;\n      fun (index : PsBridgeHeightIndex) (hash : Nat) (name : PsName) (height : Nat) =>",
+          "after": "      fun (index : PsBridgeHeightIndex) (hash : Nat) (name : PsName) (height : Nat) =>\n        let smaller : PsBridgeHeightIndex -> Nat -> PsName -> Nat -> PsBridgeHeightIndex := psBridgeHeightInsertWorker remaining;"
+        },
+        {
+          "function": "psBridgeNatMax",
+          "major": "left",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "right"
+          ],
+          "exception": null,
+          "before": "      let smaller : Nat -> Nat :=\n        psBridgeNatMax leftPred;\n      fun (right : Nat) =>",
+          "after": "      fun (right : Nat) =>\n        let smaller : Nat -> Nat :=\n          psBridgeNatMax leftPred;"
+        },
+        {
+          "function": "psCheckedNestedOpenWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "id",
+            "type"
+          ],
+          "exception": null,
+          "before": "      let smaller : Nat -> PsExpr -> List PsCheckedNestedBinder := psCheckedNestedOpenWorker remaining;\n      fun (id : Nat) (type : PsExpr) =>",
+          "after": "      fun (id : Nat) (type : PsExpr) =>\n        let smaller : Nat -> PsExpr -> List PsCheckedNestedBinder := psCheckedNestedOpenWorker remaining;"
+        },
+        {
+          "function": "psCheckedNestedExpand",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "pending",
+            "done"
+          ],
+          "exception": null,
+          "before": "      let smaller : List PsExpr -> List PsExpr -> Except PsCheckedAdmissionCodecError (List PsExpr) := psCheckedNestedExpand name remaining;\n      fun (pending : List PsExpr) (done : List PsExpr) =>",
+          "after": "      fun (pending : List PsExpr) (done : List PsExpr) =>\n        let smaller : List PsExpr -> List PsExpr -> Except PsCheckedAdmissionCodecError (List PsExpr) := psCheckedNestedExpand name remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/LevelContext.lean",
+      "sourceBaseBlob": "4efa1fe2e98b7482d6c85ebb9bcfe596328c3956",
+      "baseBlob": "4efa1fe2e98b7482d6c85ebb9bcfe596328c3956",
+      "baseSha256": "325614e51db8e84e72a499493d8c29f9ca75a53d91185f8442584a85ad679bda",
+      "candidateBlob": "b0fcde267d2a9dd07f7de9fc12f57ca5b3a38882",
+      "candidateSha256": "9d8cf3cd5bb840d1b2a979df7b784b2eea632964ac7882266ef72340420a7718",
+      "candidateBytes": 8701,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psLevelInstantiateWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "level"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsLevel -> PsLevel :=\n        psLevelInstantiateWithFuel context remaining;\n      fun (level : PsLevel) =>",
+          "after": "      fun (level : PsLevel) =>\n        let smaller : PsLevel -> PsLevel :=\n          psLevelInstantiateWithFuel context remaining;"
+        },
+        {
+          "function": "psLevelUnifyWithFuelWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "context",
+            "left",
+            "right"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=\n        psLevelUnifyWithFuelWorker remaining;\n      fun (context : PsLevelMetaContext) (left : PsLevel) (right : PsLevel) =>",
+          "after": "      fun (context : PsLevelMetaContext) (left : PsLevel) (right : PsLevel) =>\n        let smaller : PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=\n          psLevelUnifyWithFuelWorker remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Context.lean",
+      "sourceBaseBlob": "94f1920fc7e62bbe53f7e70d8d4466d78a0d5755",
+      "baseBlob": "94f1920fc7e62bbe53f7e70d8d4466d78a0d5755",
+      "baseSha256": "8c079574586c99b87afd4144f4694463cc20554b32bcfd5a09fb4fcb6b8e22d6",
+      "candidateBlob": "dd69906bb92ffbae9a4f8541d9941c10eb239771",
+      "candidateSha256": "2121f70e32299107ffdd3a91e4d73943db6d2be3388a982d539e433bcbe690b9",
+      "candidateBytes": 9092,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psMetaInstantiateRounds",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "expr"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsExpr -> PsExpr :=\n        psMetaInstantiateRounds context remaining;\n      fun (expr : PsExpr) =>",
+          "after": "      fun (expr : PsExpr) =>\n        let smaller : PsExpr -> PsExpr :=\n          psMetaInstantiateRounds context remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Reduce.lean",
+      "sourceBaseBlob": "1b81ba072e26eff9c3afbe58a945e8bf383c6f18",
+      "baseBlob": "1b81ba072e26eff9c3afbe58a945e8bf383c6f18",
+      "baseSha256": "55ba6dfa53c4d21e60563e589ef73b8335d7b05cc13b894e3461451fdc48351d",
+      "candidateBlob": "1a547f20911ac23a1f0a9368839593383f9c31e0",
+      "candidateSha256": "c3ae3055299a13d9ac409450c1682ae202a97ec6a7b6a4e0c12e4a384d2ca51e",
+      "candidateBytes": 6230,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psWhnfCoreWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "expr"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsExpr -> PsExpr :=\n        psWhnfCoreWithFuel metaContext localContext remaining;\n      fun (expr : PsExpr) =>",
+          "after": "      fun (expr : PsExpr) =>\n        let smaller : PsExpr -> PsExpr :=\n          psWhnfCoreWithFuel metaContext localContext remaining;"
+        },
+        {
+          "function": "psWhnfWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "expr"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsExpr -> PsExpr :=\n        psWhnfWithFuel environment metaContext localContext remaining;\n      fun (expr : PsExpr) =>",
+          "after": "      fun (expr : PsExpr) =>\n        let smaller : PsExpr -> PsExpr :=\n          psWhnfWithFuel environment metaContext localContext remaining;"
+        },
+        {
+          "function": "psDefEqReadOnlyWithEnvFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "left",
+            "right"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsExpr -> PsExpr -> Bool :=\n        psDefEqReadOnlyWithEnvFuel environment metaContext localContext remaining;\n      fun (left : PsExpr) (right : PsExpr) =>",
+          "after": "      fun (left : PsExpr) (right : PsExpr) =>\n        let smaller : PsExpr -> PsExpr -> Bool :=\n          psDefEqReadOnlyWithEnvFuel environment metaContext localContext remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+      "sourceBaseBlob": "25e0c00dfafb0268d6a204089a3eceb10d9bcb0f",
+      "baseBlob": "25e0c00dfafb0268d6a204089a3eceb10d9bcb0f",
+      "baseSha256": "e59c67c3ea9544815866e319f6a7a0a24a2ba71a9e253aea87abe487c60739e1",
+      "candidateBlob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+      "candidateSha256": "1180f6d8392837fbcc2694478e2747026dfbd56cca5a3d765aeecb086c0ed9df",
+      "candidateBytes": 19480,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psInferStructureProjectionFieldWorker",
+          "major": "remainingFuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "environment",
+            "metaContext",
+            "localContext",
+            "typeName",
+            "target",
+            "requestedIndex",
+            "fieldIndex",
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsEnvironment ->\n          PsMetaContext ->\n          PsLocalContext ->\n          PsName ->\n          PsExpr ->\n          Nat ->\n          Nat ->\n          PsExpr ->\n          Except PsInferError PsExpr :=\n        psInferStructureProjectionFieldWorker fuel;\n      fun (environment : PsEnvironment) =>\n        fun (metaContext : PsMetaContext) =>\n          fun (localContext : PsLocalContext) =>\n            fun (typeName : PsName) =>\n              fun (target : PsExpr) =>\n                fun (requestedIndex : Nat) =>\n                  fun (fieldIndex : Nat) =>\n                    fun (cursor : PsExpr) =>",
+          "after": "      fun (environment : PsEnvironment) =>\n        fun (metaContext : PsMetaContext) =>\n          fun (localContext : PsLocalContext) =>\n            fun (typeName : PsName) =>\n              fun (target : PsExpr) =>\n                fun (requestedIndex : Nat) =>\n                  fun (fieldIndex : Nat) =>\n                    fun (cursor : PsExpr) =>\n                      let smaller :\n                          PsEnvironment ->\n                          PsMetaContext ->\n                          PsLocalContext ->\n                          PsName ->\n                          PsExpr ->\n                          Nat ->\n                          Nat ->\n                          PsExpr ->\n                          Except PsInferError PsExpr :=\n                        psInferStructureProjectionFieldWorker fuel;"
+        },
+        {
+          "function": "psInferTypeWithFuelWorker",
+          "major": "remainingFuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "environment",
+            "metaContext",
+            "localContext",
+            "expr"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsEnvironment ->\n          PsMetaContext ->\n          PsLocalContext ->\n          PsExpr ->\n          Except PsInferError PsExpr :=\n        psInferTypeWithFuelWorker fuel;\n      fun (environment : PsEnvironment) =>\n        fun (metaContext : PsMetaContext) =>\n          fun (localContext : PsLocalContext) =>\n            fun (expr : PsExpr) =>",
+          "after": "      fun (environment : PsEnvironment) =>\n        fun (metaContext : PsMetaContext) =>\n          fun (localContext : PsLocalContext) =>\n            fun (expr : PsExpr) =>\n              let smaller :\n                  PsEnvironment ->\n                  PsMetaContext ->\n                  PsLocalContext ->\n                  PsExpr ->\n                  Except PsInferError PsExpr :=\n                psInferTypeWithFuelWorker fuel;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Unify.lean",
+      "sourceBaseBlob": "9d2e7e01debd1299fc2e685ff4ecc4c593337ed5",
+      "baseBlob": "9d2e7e01debd1299fc2e685ff4ecc4c593337ed5",
+      "baseSha256": "403817b493d835cdec35d404288149474b2e5f5f350b72123384a187ff8e0275",
+      "candidateBlob": "18f904b9d2d06fbe9b5330fc2d30e04a4dba1848",
+      "candidateSha256": "79562973eaad71b335f2c6104f1beea911ed1056618bc9adba9541a3a7238396",
+      "candidateBytes": 11105,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psUnifyWithFuelWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "environment",
+            "localContext",
+            "context",
+            "left",
+            "right"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsEnvironment ->\n          PsLocalContext ->\n          PsMetaContext ->\n          PsExpr ->\n          PsExpr ->\n          PsUnifyResult :=\n        psUnifyWithFuelWorker remaining;\n      fun (environment : PsEnvironment)\n          (localContext : PsLocalContext)\n          (context : PsMetaContext)\n          (left : PsExpr)\n          (right : PsExpr) =>",
+          "after": "      fun (environment : PsEnvironment)\n          (localContext : PsLocalContext)\n          (context : PsMetaContext)\n          (left : PsExpr)\n          (right : PsExpr) =>\n        let smaller :\n            PsEnvironment ->\n            PsLocalContext ->\n            PsMetaContext ->\n            PsExpr ->\n            PsExpr ->\n            PsUnifyResult :=\n          psUnifyWithFuelWorker remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/SynthInstance.lean",
+      "sourceBaseBlob": "3d42e50aa274a988535f8f7969133df373474ae0",
+      "baseBlob": "3d42e50aa274a988535f8f7969133df373474ae0",
+      "baseSha256": "75edc5939751a0775a227672b4fa80517068b01e1dbf8c994318cc3f374b537b",
+      "candidateBlob": "9d64e65a7e3ca2a9d55b575bbdfa7003c4686f55",
+      "candidateSha256": "ea73668c788e16d4fb65b41b1b97ae58dc585027234d5185514e8194baf166b6",
+      "candidateBytes": 12794,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psPrepareInstanceWithFuelWorker",
+          "major": "remainingFuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "environment",
+            "localContext",
+            "context",
+            "value",
+            "type",
+            "arguments"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsEnvironment ->\n          PsLocalContext ->\n          PsMetaContext ->\n          PsExpr ->\n          PsExpr ->\n          List PsPreparedInstanceArgument ->\n          PsPreparedInstance :=\n        psPrepareInstanceWithFuelWorker fuel;\n      fun (environment : PsEnvironment) =>\n        fun (localContext : PsLocalContext) =>\n          fun (context : PsMetaContext) =>\n            fun (value : PsExpr) =>\n              fun (type : PsExpr) =>\n                fun (arguments : List PsPreparedInstanceArgument) =>",
+          "after": "      fun (environment : PsEnvironment) =>\n        fun (localContext : PsLocalContext) =>\n          fun (context : PsMetaContext) =>\n            fun (value : PsExpr) =>\n              fun (type : PsExpr) =>\n                fun (arguments : List PsPreparedInstanceArgument) =>\n                  let smaller :\n                      PsEnvironment ->\n                      PsLocalContext ->\n                      PsMetaContext ->\n                      PsExpr ->\n                      PsExpr ->\n                      List PsPreparedInstanceArgument ->\n                      PsPreparedInstance :=\n                    psPrepareInstanceWithFuelWorker fuel;"
+        },
+        {
+          "function": "psSynthInstanceWithFuelWorker",
+          "major": "remainingFuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "environment",
+            "localContext",
+            "index",
+            "context",
+            "target"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsEnvironment ->\n          PsLocalContext ->\n          PsInstanceIndex ->\n          PsMetaContext ->\n          PsExpr ->\n          PsSynthInstanceResult :=\n        psSynthInstanceWithFuelWorker fuel;\n      fun (environment : PsEnvironment) =>\n        fun (localContext : PsLocalContext) =>\n          fun (index : PsInstanceIndex) =>\n            fun (context : PsMetaContext) =>\n              fun (target : PsExpr) =>",
+          "after": "      fun (environment : PsEnvironment) =>\n        fun (localContext : PsLocalContext) =>\n          fun (index : PsInstanceIndex) =>\n            fun (context : PsMetaContext) =>\n              fun (target : PsExpr) =>\n                let smaller :\n                    PsEnvironment ->\n                    PsLocalContext ->\n                    PsInstanceIndex ->\n                    PsMetaContext ->\n                    PsExpr ->\n                    PsSynthInstanceResult :=\n                  psSynthInstanceWithFuelWorker fuel;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Literal.lean",
+      "sourceBaseBlob": "a4f0ed94c712495b3d379374b5572a047c0c1919",
+      "baseBlob": "a4f0ed94c712495b3d379374b5572a047c0c1919",
+      "baseSha256": "4ee8d73db4ad43b1a19db2c44dba2990103456b02b78b4ea4cd9e0baaf1b8b47",
+      "candidateBlob": "dae4980c822dae5c9170638ee51ef8525635ce01",
+      "candidateSha256": "0369cd23303d3133b92b40aaf7ece65df86e864596adb85556d994e846258b71",
+      "candidateBytes": 10490,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psReadFixedHex",
+          "major": "count",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "chars",
+            "value"
+          ],
+          "exception": null,
+          "before": "      let smaller : List Char -> Nat -> Option (Prod Nat (List Char)) :=\n        psReadFixedHex nextCount;\n      fun (chars : List Char) =>\n        fun (value : Nat) =>",
+          "after": "      fun (chars : List Char) =>\n        fun (value : Nat) =>\n          let smaller : List Char -> Nat -> Option (Prod Nat (List Char)) :=\n            psReadFixedHex nextCount;"
+        },
+        {
+          "function": "psDecodeStringBodyWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "chars",
+            "charsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller : List Char -> List Char -> Option String :=\n        psDecodeStringBodyWithFuel nextFuel;\n      fun (chars : List Char) =>\n        fun (charsRev : List Char) =>",
+          "after": "      fun (chars : List Char) =>\n        fun (charsRev : List Char) =>\n          let smaller : List Char -> List Char -> Option String :=\n            psDecodeStringBodyWithFuel nextFuel;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "sourceBaseBlob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112",
+      "baseBlob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112",
+      "baseSha256": "deffd2b9b7e96c157679158189800aac7c727bf45b05d4cf6797b477d796b13b",
+      "candidateBlob": "dc7b325b8b18770ae8ebfddec14b768d5a7d461f",
+      "candidateSha256": "1cc03a761f56c02f7b47bee87d02d6b576a981b8cf228278e5cec4fbc57a2b06",
+      "candidateBytes": 103775,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psElabFindStructureField",
+          "major": "remaining",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "cursor"
+          ],
+          "exception": null,
+          "before": "      let smaller : Nat -> PsExpr -> Except PsElabError Nat :=\n        psElabFindStructureField\n          context\n          typeName\n          target\n          fieldName\n          nextRemaining;\n      fun (index : Nat) =>\n        fun (cursor : PsExpr) =>",
+          "after": "      fun (index : Nat) =>\n        fun (cursor : PsExpr) =>\n          let smaller : Nat -> PsExpr -> Except PsElabError Nat :=\n            psElabFindStructureField\n              context\n              typeName\n              target\n              fieldName\n              nextRemaining;"
+        },
+        {
+          "function": "psElabMatchFieldAtWorker",
+          "major": "index",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "fields"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List PsElabMatchField -> Option PsElabMatchField :=\n        psElabMatchFieldAtWorker nextIndex;\n      fun (fields : List PsElabMatchField) =>",
+          "after": "      fun (fields : List PsElabMatchField) =>\n        let smaller :\n            List PsElabMatchField -> Option PsElabMatchField :=\n          psElabMatchFieldAtWorker nextIndex;"
+        },
+        {
+          "function": "psElabWildcardBinderNamesWorker",
+          "major": "remaining",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index"
+          ],
+          "exception": null,
+          "before": "      let smaller : Nat -> List PsSyntaxName :=\n        psElabWildcardBinderNamesWorker\n          span\n          nextRemaining;\n      fun (index : Nat) =>",
+          "after": "      fun (index : Nat) =>\n        let smaller : Nat -> List PsSyntaxName :=\n          psElabWildcardBinderNamesWorker\n            span\n            nextRemaining;"
+        },
+        {
+          "function": "psElabApplyArgsWithFuelWorker",
+          "major": "remainingFuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "current",
+            "arguments",
+            "pendingInstancesRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsElabTermResult ->\n          List PsSyntaxTerm ->\n          List Nat ->\n          Except PsElabError PsElabApplicationResult :=\n        psElabApplyArgsWithFuelWorker elaborate fuel;\n      fun (current : PsElabTermResult) =>\n        fun (arguments : List PsSyntaxTerm) =>\n          fun (pendingInstancesRev : List Nat) =>",
+          "after": "      fun (current : PsElabTermResult) =>\n        fun (arguments : List PsSyntaxTerm) =>\n          fun (pendingInstancesRev : List Nat) =>\n            let smaller :\n                PsElabTermResult ->\n                List PsSyntaxTerm ->\n                List Nat ->\n                Except PsElabError PsElabApplicationResult :=\n              psElabApplyArgsWithFuelWorker elaborate fuel;"
+        },
+        {
+          "function": "psElabDropForallBindersWorker",
+          "major": "remaining",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "type"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsExpr -> Option PsExpr :=\n        psElabDropForallBindersWorker nextRemaining;\n      fun (type : PsExpr) =>",
+          "after": "      fun (type : PsExpr) =>\n        let smaller : PsExpr -> Option PsExpr :=\n          psElabDropForallBindersWorker nextRemaining;"
+        },
+        {
+          "function": "psElabTakeForallNamesWorker",
+          "major": "remaining",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "type"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsExpr -> Option (List String) :=\n        psElabTakeForallNamesWorker nextRemaining;\n      fun (type : PsExpr) =>",
+          "after": "      fun (type : PsExpr) =>\n        let smaller : PsExpr -> Option (List String) :=\n          psElabTakeForallNamesWorker nextRemaining;"
+        },
+        {
+          "function": "psElabNatListAtWorker",
+          "major": "index",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "values"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List Nat -> Option Nat :=\n        psElabNatListAtWorker nextIndex;\n      fun (values : List Nat) =>",
+          "after": "      fun (values : List Nat) =>\n        let smaller :\n            List Nat -> Option Nat :=\n          psElabNatListAtWorker nextIndex;"
+        },
+        {
+          "function": "psElabTermWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "context",
+            "term",
+            "expected"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsElabContext ->\n          PsSyntaxTerm ->\n          Option PsExpr ->\n          Except PsElabError PsElabTermResult :=\n        psElabTermWithFuel remaining;\n      fun (context : PsElabContext) =>\n        fun (term : PsSyntaxTerm) =>\n          fun (expected : Option PsExpr) =>",
+          "after": "      fun (context : PsElabContext) =>\n        fun (term : PsSyntaxTerm) =>\n          fun (expected : Option PsExpr) =>\n            let smaller :\n                PsElabContext ->\n                PsSyntaxTerm ->\n                Option PsExpr ->\n                Except PsElabError PsElabTermResult :=\n              psElabTermWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "sourceBaseBlob": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "baseBlob": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "baseSha256": "487deb18c577a22ed10885238b78b5ea31f4e212e738fff13cee3c4f8d259549",
+      "candidateBlob": "8b1c409244b9669224fc3caff796aea69eac1401",
+      "candidateSha256": "e93aed0fe805385ff6dfcaf6ac190894254a34746f4c60002e33fbb561f80efe",
+      "candidateBytes": 35801,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psElabRecursionWalkWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "context",
+            "source"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsLocalContext -> PsSyntaxTerm ->\n          Except PsElabError PsElabRecursionWalkResult :=\n        psElabRecursionWalkWithFuel remaining plan environment;\n      fun (context : PsLocalContext) (source : PsSyntaxTerm) =>",
+          "after": "      fun (context : PsLocalContext) (source : PsSyntaxTerm) =>\n        let smaller : PsLocalContext -> PsSyntaxTerm ->\n            Except PsElabError PsElabRecursionWalkResult :=\n          psElabRecursionWalkWithFuel remaining plan environment;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "sourceBaseBlob": "ff632f3a40b069bfead799b408af009ec9931261",
+      "baseBlob": "ff632f3a40b069bfead799b408af009ec9931261",
+      "baseSha256": "b205b496158f08636b3fda12ccfcec0a541e5e125128571206aa391768a2b181",
+      "candidateBlob": "3525a93bc88da5cdd8e190819aa4b39f2ec011ba",
+      "candidateSha256": "aad96ce6052819ccedbe7e357dd63a8edc610611c7743e9e97d7ec0d3a41ed71",
+      "candidateBytes": 60156,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psElabNestedRecursiveFieldTypeSupportedWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "inductiveName",
+            "type"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsName -> PsExpr -> Bool :=\n        psElabNestedRecursiveFieldTypeSupportedWithFuel remaining;\n      fun (inductiveName : PsName) (type : PsExpr) =>",
+          "after": "      fun (inductiveName : PsName) (type : PsExpr) =>\n        let smaller : PsName -> PsExpr -> Bool :=\n          psElabNestedRecursiveFieldTypeSupportedWithFuel remaining;"
+        },
+        {
+          "function": "psOpenConstructorFieldsWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "context",
+            "cursor",
+            "bindersRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsElabContext ->\n          PsExpr ->\n          List PsElabTypedBinder ->\n          Except PsElabError PsElabConstructorBuildResult :=\n        psOpenConstructorFieldsWorker remaining;\n      fun (context : PsElabContext)\n          (cursor : PsExpr)\n          (bindersRev : List PsElabTypedBinder) =>",
+          "after": "      fun (context : PsElabContext)\n          (cursor : PsExpr)\n          (bindersRev : List PsElabTypedBinder) =>\n        let smaller :\n            PsElabContext ->\n            PsExpr ->\n            List PsElabTypedBinder ->\n            Except PsElabError PsElabConstructorBuildResult :=\n          psOpenConstructorFieldsWorker remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "sourceBaseBlob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+      "baseBlob": "2c7c0ed567804f189d1facfd3987b6a13f9504f9",
+      "baseSha256": "7c00bf246372f477d81362ce57b392a3225b4c8fca3105e9d35ca244ad9055b7",
+      "candidateBlob": "7de707103e0b88e6a5ab206ee242d72a131ca3b7",
+      "candidateSha256": "71149b463305b007021b8d73f43fe4960f3712029d784a86b5d6bcfb861c6ecc",
+      "candidateBytes": 29658,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psErasureIndexBucket",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "hash"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) := psErasureIndexBucket Value remaining;\n      fun (index : PsErasureNameIndex Value) (hash : Nat) =>",
+          "after": "      fun (index : PsErasureNameIndex Value) (hash : Nat) =>\n        let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) := psErasureIndexBucket Value remaining;"
+        },
+        {
+          "function": "psErasureIndexSet",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "hash",
+            "entries"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) -> PsErasureNameIndex Value := psErasureIndexSet Value remaining;\n      fun (index : PsErasureNameIndex Value) (hash : Nat) (entries : List (Prod PsName Value)) =>",
+          "after": "      fun (index : PsErasureNameIndex Value) (hash : Nat) (entries : List (Prod PsName Value)) =>\n        let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) -> PsErasureNameIndex Value := psErasureIndexSet Value remaining;"
+        },
+        {
+          "function": "psErasureSafeStringFromWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "raw",
+            "position",
+            "mapped"
+          ],
+          "exception": null,
+          "before": "      let smaller : String -> Nat -> String -> String := psErasureSafeStringFromWithFuel remaining;\n      fun (raw : String) (position : Nat) (mapped : String) =>",
+          "after": "      fun (raw : String) (position : Nat) (mapped : String) =>\n        let smaller : String -> Nat -> String -> String := psErasureSafeStringFromWithFuel remaining;"
+        },
+        {
+          "function": "psErasureExprListAtWorker",
+          "major": "index",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "values"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          List PsExpr -> Option PsExpr :=\n        psErasureExprListAtWorker nextIndex;\n      fun (values : List PsExpr) =>",
+          "after": "      fun (values : List PsExpr) =>\n        let smaller :\n            List PsExpr -> Option PsExpr :=\n          psErasureExprListAtWorker nextIndex;"
+        },
+        {
+          "function": "psEraseRuntimeTypeWithFuelWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "scope",
+            "type"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrType :=\n        psEraseRuntimeTypeWithFuelWorker environment remaining;\n      fun (scope : PsErasureScope) (type : PsExpr) =>",
+          "after": "      fun (scope : PsErasureScope) (type : PsExpr) =>\n        let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrType :=\n          psEraseRuntimeTypeWithFuelWorker environment remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "sourceBaseBlob": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed",
+      "baseBlob": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed",
+      "baseSha256": "d8056734c48fd092ed2c1a58bbad624790c909c8d74e852c8997abd5c8760f03",
+      "candidateBlob": "afd981e10d609d38db9ce4698fb4a6152bb50c7f",
+      "candidateSha256": "06f584ff2d4bae2c16d70e899d255a16155df3cf774830ebc99ecd24ac574af6",
+      "candidateBytes": 17652,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psPrepareInductiveParametersWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "scope",
+            "cursor",
+            "count",
+            "index",
+            "valuesRev",
+            "parametersRev"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsExpr -> List PsVerifiedIrTypeParameter -> Except PsErasureError PsPreparedInductiveParameters :=\n        psPrepareInductiveParametersWithFuel environment remainingFuel;\n      fun (scope : PsErasureScope) (cursor : PsExpr) (count : Nat) (index : Nat) (valuesRev : List PsExpr) (parametersRev : List PsVerifiedIrTypeParameter) =>",
+          "after": "      fun (scope : PsErasureScope) (cursor : PsExpr) (count : Nat) (index : Nat) (valuesRev : List PsExpr) (parametersRev : List PsVerifiedIrTypeParameter) =>\n        let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsExpr -> List PsVerifiedIrTypeParameter -> Except PsErasureError PsPreparedInductiveParameters :=\n          psPrepareInductiveParametersWithFuel environment remainingFuel;"
+        },
+        {
+          "function": "psPrepareConstructorFieldsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "scope",
+            "cursor",
+            "count",
+            "index",
+            "fieldsRev"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsRuntimeConstructorField -> Except PsErasureError PsPreparedConstructorFields :=\n        psPrepareConstructorFieldsWithFuel environment remainingFuel;\n      fun (scope : PsErasureScope) (cursor : PsExpr) (count : Nat) (index : Nat) (fieldsRev : List PsRuntimeConstructorField) =>",
+          "after": "      fun (scope : PsErasureScope) (cursor : PsExpr) (count : Nat) (index : Nat) (fieldsRev : List PsRuntimeConstructorField) =>\n        let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsRuntimeConstructorField -> Except PsErasureError PsPreparedConstructorFields :=\n          psPrepareConstructorFieldsWithFuel environment remainingFuel;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "sourceBaseBlob": "66b20621288b76153fa78db6c923f0c7b0c5d9ab",
+      "baseBlob": "66b20621288b76153fa78db6c923f0c7b0c5d9ab",
+      "baseSha256": "445f2e69466cee3725821e43c46c6b04577986bd9b3b7ce6623e8e154009940a",
+      "candidateBlob": "897a2514e18e0ba51fb93cde6ab933a72a2c6f7f",
+      "candidateSha256": "c102169cc4cbb03c5cc9016666cc53acc116404430e4d724aee5f8f9863a2172",
+      "candidateBytes": 10012,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psErasureApplyStructureMinorFields",
+          "major": "count",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index",
+            "minor"
+          ],
+          "exception": null,
+          "before": "    let smaller : Nat -> PsExpr -> Except PsErasureError PsExpr :=\n      psErasureApplyStructureMinorFields structureName major remaining;\n    fun (index : Nat) (minor : PsExpr) =>",
+          "after": "    fun (index : Nat) (minor : PsExpr) =>\n      let smaller : Nat -> PsExpr -> Except PsErasureError PsExpr :=\n        psErasureApplyStructureMinorFields structureName major remaining;"
+        },
+        {
+          "function": "psLowerStructureRecursorsWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "expr"
+          ],
+          "exception": null,
+          "before": "    let smaller : PsExpr -> Except PsErasureError PsExpr := psLowerStructureRecursorsWithFuel environment remaining;\n    fun (expr : PsExpr) =>",
+          "after": "    fun (expr : PsExpr) =>\n      let smaller : PsExpr -> Except PsErasureError PsExpr := psLowerStructureRecursorsWithFuel environment remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "sourceBaseBlob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+      "baseBlob": "ac3329f77a4f5cc98d4bc5c53b3d1623c52a6f52",
+      "baseSha256": "c2f8fa972415fd65462041c12f1a1501b0fc8b6fa470964b6167be790d1e038e",
+      "candidateBlob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "candidateSha256": "a55cb381a686ab9081587380793b1b3d8fe485c86b88770fbce4a3e2250516a7",
+      "candidateBytes": 22534,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psEraseOpenDefinitionWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "scope",
+            "currentType",
+            "currentValue",
+            "typeIndex",
+            "typeParametersRev",
+            "parametersRev"
+          ],
+          "exception": null,
+          "before": "      let smaller :\n          PsErasureScope ->\n          PsExpr ->\n          PsExpr ->\n          Nat ->\n          List PsVerifiedIrTypeParameter ->\n          List PsVerifiedIrParameter ->\n          Except PsErasureError PsOpenedErasedDefinition :=\n        psEraseOpenDefinitionWithFuel environment remaining;\n      fun (scope : PsErasureScope)\n          (currentType : PsExpr)\n          (currentValue : PsExpr)\n          (typeIndex : Nat)\n          (typeParametersRev : List PsVerifiedIrTypeParameter)\n          (parametersRev : List PsVerifiedIrParameter) =>",
+          "after": "      fun (scope : PsErasureScope)\n          (currentType : PsExpr)\n          (currentValue : PsExpr)\n          (typeIndex : Nat)\n          (typeParametersRev : List PsVerifiedIrTypeParameter)\n          (parametersRev : List PsVerifiedIrParameter) =>\n        let smaller :\n            PsErasureScope ->\n            PsExpr ->\n            PsExpr ->\n            Nat ->\n            List PsVerifiedIrTypeParameter ->\n            List PsVerifiedIrParameter ->\n            Except PsErasureError PsOpenedErasedDefinition :=\n          psEraseOpenDefinitionWithFuel environment remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "sourceBaseBlob": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79",
+      "baseBlob": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79",
+      "baseSha256": "5ce445709a6ce1b68e82bdfd7ae1e026da3c05e201832d254c14c45fa3bd50a0",
+      "candidateBlob": "074bf2b838994d2af375a20ef1600941d21e956c",
+      "candidateSha256": "c231a737470c0d6ef2451f642089e22cebea97da55527500beff82bb610f99cf",
+      "candidateBytes": 4202,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psTsEmitTypeWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "type"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsVerifiedIrType -> Except PsTsEmitError String := psTsEmitTypeWithFuel remaining;\n      fun (type : PsVerifiedIrType) =>",
+          "after": "      fun (type : PsVerifiedIrType) =>\n        let smaller : PsVerifiedIrType -> Except PsTsEmitError String := psTsEmitTypeWithFuel remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "sourceBaseBlob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "baseBlob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "baseSha256": "694c4fc4136364d6344d7d511099dd5e25f54133ee51b94c445d84992ae44894",
+      "candidateBlob": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "candidateSha256": "b488587a271702fe336ccacc8e5bda976f835b59be9b0419e697850cead9e46e",
+      "candidateBytes": 35639,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psTsExprUsesNameWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "expr",
+            "name"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;\n      fun (expr : PsVerifiedIrExpr) (name : String) =>",
+          "after": "      fun (expr : PsVerifiedIrExpr) (name : String) =>\n        let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;"
+        },
+        {
+          "function": "psTsEmitExprWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "expr"
+          ],
+          "exception": null,
+          "before": "    let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;\n    fun (expr : PsVerifiedIrExpr) =>",
+          "after": "    fun (expr : PsVerifiedIrExpr) =>\n      let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "sourceBaseBlob": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "baseBlob": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "baseSha256": "8c3cdadebb41f7ee8d2c3bad82c54c077e5e51e920351f5af2608f8b765c4c75",
+      "candidateBlob": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "candidateSha256": "efbf0a1365f27da7d1fd05a67e21e50b8d8aaf852d0f22132c1ff6ad518331e3",
+      "candidateBytes": 40409,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psTsEtaApplyWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "fn"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsVerifiedIrExpr -> Option PsVerifiedIrExpr := psTsEtaApplyWorker arguments remaining;\n      fun (fn : PsVerifiedIrExpr) =>",
+          "after": "      fun (fn : PsVerifiedIrExpr) =>\n        let smaller : PsVerifiedIrExpr -> Option PsVerifiedIrExpr := psTsEtaApplyWorker arguments remaining;"
+        },
+        {
+          "function": "psTsTailPureWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "expr"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsVerifiedIrExpr -> Bool := psTsTailPureWithFuel aliases remaining;\n      fun (expr : PsVerifiedIrExpr) =>",
+          "after": "      fun (expr : PsVerifiedIrExpr) =>\n        let smaller : PsVerifiedIrExpr -> Bool := psTsTailPureWithFuel aliases remaining;"
+        },
+        {
+          "function": "psTsTailEmitWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "aliases",
+            "expr"
+          ],
+          "exception": null,
+          "before": "      let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitWithFuel brands tags declaration remaining;\n      fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>",
+          "after": "      fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>\n        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitWithFuel brands tags declaration remaining;"
+        },
+        {
+          "function": "psTsNameSequence",
+          "major": "count",
+          "class": "nat-count-index-value",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "index"
+          ],
+          "exception": null,
+          "before": "      let smaller : Nat -> List String := psTsNameSequence namePrefix remaining;\n      fun (index : Nat) =>",
+          "after": "      fun (index : Nat) => let smaller : Nat -> List String := psTsNameSequence namePrefix remaining;"
+        }
+      ]
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "sourceBaseBlob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "baseBlob": "cdc76937f215fd2803841600266816acb122ea90",
+      "baseSha256": "a0c4a522e556fac7f27cce6ad8ae4e14396a44b31ec711fdbe0ef505a3986a7e",
+      "candidateBlob": "f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12",
+      "candidateSha256": "ec134fbe9ed4b38cad38eedc6ab1c0380d3c1f9aaee7e0c7c963eafa8aaae0c5",
+      "candidateBytes": 127010,
+      "exactForwardReverse": true,
+      "exactReadback": true,
+      "edits": [
+        {
+          "function": "psSubstituteVerifiedTypeWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "type"
+          ],
+          "exception": null,
+          "before": "    let smaller : PsVerifiedIrType -> PsVerifiedIrType :=\n      psSubstituteVerifiedTypeWithFuel substitutions remaining;\n    fun (type : PsVerifiedIrType) =>",
+          "after": "    fun (type : PsVerifiedIrType) =>\n      let smaller : PsVerifiedIrType -> PsVerifiedIrType :=\n        psSubstituteVerifiedTypeWithFuel substitutions remaining;"
+        },
+        {
+          "function": "psErasureIrUsesNameWithFuel",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "expr",
+            "name"
+          ],
+          "exception": null,
+          "before": "      let smaller : PsVerifiedIrExpr -> String -> Bool := psErasureIrUsesNameWithFuel remaining;\n      fun (expr : PsVerifiedIrExpr) (name : String) =>",
+          "after": "      fun (expr : PsVerifiedIrExpr) (name : String) =>\n        let smaller : PsVerifiedIrExpr -> String -> Bool := psErasureIrUsesNameWithFuel remaining;"
+        },
+        {
+          "function": "psEraseRuntimeExprWithFuelWorker",
+          "major": "fuel",
+          "class": "fuel",
+          "bindings": [
+            "smaller"
+          ],
+          "crossedParameters": [
+            "scope",
+            "expr"
+          ],
+          "exception": null,
+          "before": "    let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=\n      psEraseRuntimeExprWithFuelWorker environment remaining;\n    fun (scope : PsErasureScope) (expr : PsExpr) =>",
+          "after": "    fun (scope : PsErasureScope) (expr : PsExpr) =>\n      let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=\n        psEraseRuntimeExprWithFuelWorker environment remaining;"
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "allTypedVariableOnlyRecursiveInitializers": true,
+    "allOriginalNatConstructorBranchesReturnLambdas": true,
+    "bidirectionalNameNonCapture": true,
+    "exactHeadersAndPublicTypes": true,
+    "unchangedZeroAndActivatedBodyBytes": true,
+    "noFuelResetOrDefaultChange": true,
+    "noCallbackOrBodyComputationMoved": true,
+    "noOracleOrFixtureChange": true,
+    "noKernelProviderAlgorithmChange": true
+  },
+  "executed": false,
+  "strictQualified": false,
+  "semanticCorrespondenceQualified": false
+}

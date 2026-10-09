@@ -291,6 +291,7 @@ structure PsCompilerProjectOwner where
   sourceId : String
   declarations : List PsName
   exports : List PsName
+  arities : List (Prod PsName Nat)
 
 structure PsCompilerAdmissionReadyProject where
   prepared : PsCompilerAdmissionReadyModule
@@ -322,6 +323,19 @@ def psCompilerProjectAuthoredNames
       match psCompilerProjectAuthoredName declaration with
       | Option.none => psCompilerProjectAuthoredNames rest
       | Option.some name => List.cons name (psCompilerProjectAuthoredNames rest)
+
+def psCompilerProjectAuthoredArities
+    (declarations : List PsSyntaxDeclaration) : List (Prod PsName Nat) :=
+  match declarations with
+  | List.nil => List.nil
+  | List.cons declaration rest =>
+      let tail := psCompilerProjectAuthoredArities rest;
+      match declaration with
+      | PsSyntaxDeclaration.definition syntaxName binders _ _ _ =>
+          match psSyntaxNameToName syntaxName with
+          | Option.none => tail
+          | Option.some name => List.cons (Prod.mk name (psListLength binders)) tail
+      | _ => tail
 
 def psCompilerProjectFindName (names : List PsName) : String -> Option PsName :=
   match names with
@@ -416,7 +430,8 @@ def psCompilerPrepareProjectWorker
                     let next := PsCompilerPreparationState.mk
                       state.sourceKind elaborated.environment
                       (psListAppend (psListReverse elaborated.declarations) state.declarationsRev);
-                    let owner := PsCompilerProjectOwner.mk source.sourceId declarations selected;
+                    let owner := PsCompilerProjectOwner.mk source.sourceId declarations selected
+                      (psCompilerProjectAuthoredArities parsed.declarations);
                     psCompilerPrepareProjectWorker rest next (List.cons owner ownersRev)
 
 def psCompilerPrepareProject

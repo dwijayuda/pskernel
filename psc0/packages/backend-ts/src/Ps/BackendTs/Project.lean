@@ -15,6 +15,7 @@ structure PsTsProjectBinding where
   runtimeName : String
   binding : String
   typeOnly : Bool
+  sourceArity : Nat
   coreType : PsExpr
 
 structure PsTsProjectBindingState where
@@ -79,9 +80,18 @@ def psTsProjectRuntimeTypeExists (ir : PsVerifiedIrModule) (name : String) : Boo
   if psListAny structureMatches ir.structures then true
   else psListAny inductiveMatches ir.inductives
 
+def psTsProjectAuthoredArity (arities : List (Prod PsName Nat)) :
+    PsName -> Option Nat :=
+  match arities with
+  | List.nil => fun (_name : PsName) => Option.none
+  | List.cons entry rest =>
+      let smaller : PsName -> Option Nat := psTsProjectAuthoredArity rest;
+      fun (name : PsName) =>
+        if psNameEq (Prod.fst entry) name then Option.some (Prod.snd entry) else smaller name
+
 def psTsProjectBuildOwnerBindings
     (declarations : List PsDeclaration) (lowered : PsErasedNamedModule)
-    (sourceId : String) (names : List PsName)
+    (sourceId : String) (arities : List (Prod PsName Nat)) (names : List PsName)
     (state : PsTsProjectBindingState) :
     Except PsCompilerCheckedTypeScriptProjectError PsTsProjectBindingState :=
   match names with
@@ -112,15 +122,19 @@ def psTsProjectBuildOwnerBindings
               match shape with
               | Option.none => Except.error failure
               | Option.some selected =>
-                  let fresh := psTsFreshInternal state.used "__ps$public$" state.nextIndex;
-                  let collision : String -> Bool := fun (used : String) => psStringEq used fresh.name;
-                  if psListAny collision state.used then Except.error failure
-                  else
-                    let binding := PsTsProjectBinding.mk sourceId name runtimeName fresh.name
-                      (Prod.fst selected) (Prod.snd selected);
-                    psTsProjectBuildOwnerBindings declarations lowered sourceId rest
-                      (PsTsProjectBindingState.mk (List.cons fresh.name state.used)
-                        fresh.nextIndex (List.cons binding state.bindingsRev))
+                  let sourceArity := if Prod.fst selected then Option.some 0 else psTsProjectAuthoredArity arities name;
+                  match sourceArity with
+                  | Option.none => Except.error failure
+                  | Option.some arity =>
+                      let fresh := psTsFreshInternal state.used "__ps$public$" state.nextIndex;
+                      let collision : String -> Bool := fun (used : String) => psStringEq used fresh.name;
+                      if psListAny collision state.used then Except.error failure
+                      else
+                        let binding := PsTsProjectBinding.mk sourceId name runtimeName fresh.name
+                          (Prod.fst selected) arity (Prod.snd selected);
+                        psTsProjectBuildOwnerBindings declarations lowered sourceId arities rest
+                          (PsTsProjectBindingState.mk (List.cons fresh.name state.used)
+                            fresh.nextIndex (List.cons binding state.bindingsRev))
 
 def psTsProjectBuildBindings
     (declarations : List PsDeclaration) (lowered : PsErasedNamedModule)
@@ -130,7 +144,7 @@ def psTsProjectBuildBindings
   match owners with
   | List.nil => Except.ok state
   | List.cons owner rest =>
-      match psTsProjectBuildOwnerBindings declarations lowered owner.sourceId owner.exports state with
+      match psTsProjectBuildOwnerBindings declarations lowered owner.sourceId owner.arities owner.exports state with
       | Except.error error => Except.error error
       | Except.ok next => psTsProjectBuildBindings declarations lowered rest next
 
@@ -353,7 +367,8 @@ def psTsProjectEmitValue
         match psTsProjectCoreSignature bindings binding.coreType with
         | Except.error error => Except.error error
         | Except.ok signature =>
-            if psTsProjectParametersAgree signature.parameters declaration.parameters then
+            let authoredArityAgrees := Nat.beq binding.sourceArity (psListLength signature.parameters);
+            if if authoredArityAgrees then psTsProjectParametersAgree signature.parameters declaration.parameters else false then
               if psTsProjectIrTypeEqual signature.result declaration.resultType then
                 match psTsProjectEmitParameters types signature.parameters used with
                 | Except.error error => Except.error error

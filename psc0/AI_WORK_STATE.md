@@ -1,6 +1,6 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 12:02:35 UTC.
+Updated: 2026-10-09 12:18:08 UTC.
 
 ## Active continuation: new-only R3 source grammar and projection repair
 
@@ -58,8 +58,9 @@ The coherent correction is `fe2560aba0f347b1caf8d000d371464642d44f23`
 Its native build, all three native suites, actual checked-seed build, focused
 source/import tests and CLI boundaries passed. N1 passed the full-closure new
 PS correspondence and generated capability gates; the same-complete-compiler
-TypeScript comparison also passed. C1 is currently running; C2/C3, independent
-provider acceptance and cold successor recovery are pending. No full compiler
+TypeScript comparison also passed. C1 passed at 12:10:58 UTC after an 18m36s
+selected-seed candidate step. C2/C3 qualification is running; independent provider
+acceptance and cold successor recovery remain pending. No full compiler
 qualification or new seed selection is claimed from the completed N1 gate.
 
 All 12 worker rewrites, three alias removals and seven source-guard updates are
@@ -70,6 +71,15 @@ compares compiler-owned values through JSON observations; the ABI hook reuses th
 existing prepared declarations and exact IR, adding one small isolated signature
 probe instead of preparing the full baseline closure again. Integration still
 requires the fully qualified, accepted, recoverable successor to be selected.
+
+The new-only consumer audit found one reusable-API gap beyond the already guarded
+CLI paths. The prepared F host patch asserts the exact current PS grammar before
+preparation or cache reuse and binds its profile in PS session hashes/receipts.
+Three focused host-boundary tests and the existing real generated PS session
+cover that addition; these new tests have not executed yet. Lean preparation is
+unchanged. A small provider receipt log addition exposes exact read-back file
+bytes and their SHA-256, so the final F evidence can be authenticated without a
+second collection workflow. A concise current authoring guide is also prepared.
 
 The planned early gates cover migrated native parser/printer/elaboration tests,
 fatal UTF-8 and actual-AST import loading, and successor descriptor integrity.

@@ -438,5 +438,49 @@
     "compilerQualification": null,
     "providerAcceptance": null
   },
-  "performanceClaim": null
+  "performanceClaim": null,
+  "preparedHostCompletion": {
+    "status": "prepared-reviewed-not-applied-to-branch",
+    "sourceGrammarBoundary": "Require the current grammar for reusable prepare('proofScript') before any cache hit or compiler operation; bind the grammar in its closure hash and receipt.",
+    "leanPreparation": "Existing serialization, receipt shape and cache behavior preserved.",
+    "files": [
+      {
+        "path": "psc0/scripts/generated-preparation-session.mjs",
+        "oldSha": "ff8e9e97043d164b0ac5e26b03ac0159af8d3280",
+        "sha": "3d1edcd9e03ed53c926fbc38e3b1fb81f2e50fc7"
+      },
+      {
+        "path": "psc0/scripts/proofscript-source.test.mjs",
+        "oldSha": "f7639bbe56608665c48a2baca5b2a8cf9e1600fe",
+        "sha": "0e1f9d15a6c37a62a9c904d5e81d1bd1e9a3cc2c"
+      },
+      {
+        "path": "psc0/scripts/sh1-check-admissions.mjs",
+        "oldSha": "0ec7ef9941d59c0c9f00d2cc1a5514b262e4d03e",
+        "sha": "750fe59f317056bfe76b2c77ffd7d09a82aac342"
+      }
+    ],
+    "tests": {
+      "focusedHostCases": 3,
+      "realCompilerCoverage": "Existing q sessionConformance proofScript request",
+      "executed": false
+    },
+    "providerReceipt": "Preserve the original compact object log and additionally log exact UTF-8 file content, byte count and SHA-256 from read-back Buffer bytes."
+  },
+  "preparedCurrentGuide": {
+    "path": "psc0/docs/selfhost-language/CURRENT.md",
+    "sha": "8d92bd838fa81eeb2cb88e93964262fdf945f539",
+    "status": "unattached-draft-live-evidence-pending"
+  },
+  "preparedRReceiptCollection": {
+    "workflow": ".github/workflows/psc0-sh1-seed-evidence.yml",
+    "workflowBlob": "a62ea8c8799a945f7aba694ec35b897408b34c44",
+    "request": "docs/psc0-sh1-seed-evidence-request.json",
+    "requestBlob": "d30fda9f14ae870f835fe12a4afe749a961d50a8",
+    "runId": 37925722635,
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "launchPrerequisite": "All three R2 jobs must succeed",
+    "launched": false,
+    "selectionPerformed": false
+  }
 }

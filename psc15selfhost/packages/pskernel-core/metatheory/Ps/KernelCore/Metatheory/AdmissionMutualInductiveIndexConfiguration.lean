@@ -256,3 +256,58 @@ theorem psKernelReplaceMutualInductiveInfos_preserves_absent_names
         exact hDisjoint info (List.Mem.head rest)
       · intro other hMem
         exact hDisjoint other (List.Mem.tail info hMem)
+
+/--
+The provisional inductive declaration names are exactly the source header
+shape names. This is a source-order provenance fact, not a lookup assumption.
+-/
+theorem psKernelMakeSimpleMutualBaseInfos_name_provenance
+    (typeNames : List PsKernelName)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (shapes : List PsKernelSimpleMutualTypeShape) :
+    (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes).map
+      (fun info : PsKernelInductiveInfo => info.base.name) =
+    shapes.map (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name) := by
+  induction shapes with
+  | nil => rfl
+  | cons shape rest ih =>
+      simp [psKernelMakeSimpleMutualBaseInfos, ih]
+
+/--
+The actual provisional mutual-header publication preserves canonical prior
+declarations, executable environment indexes and exact insertion provenance.
+Its only naming premises are about the source header shapes. The enclosing
+transaction must derive these from its checked preflight guards.
+-/
+theorem psKernelPreparedMutualHeaders_semantic_refines
+    (typeNames : List PsKernelName)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (environment : PsKernelEnvironment)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hString : PsKernelStringEqSoundLaw)
+    (hAbsent : PsKernelInductiveNamesAbsent environment
+      (shapes.map (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name)))
+    (hUnique : psKernelNameHasDuplicates
+      (shapes.map (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name)) = false) :
+    PsKernelEnvironmentSemanticExtends environment
+      (psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) environment) ∧
+    PsKernelEnvironmentIndexRefines
+      (psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) environment) ∧
+    PsKernelEnvironmentExtendsBy environment
+      (psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) environment)
+      ((psKernelMakeSimpleMutualBaseInfos typeNames decl shapes).map
+        (fun info : PsKernelInductiveInfo => PsKernelConstantInfo.inductInfo info)).reverse := by
+  have hNames := psKernelMakeSimpleMutualBaseInfos_name_provenance typeNames decl shapes
+  refine ⟨psKernelAddMutualInductiveInfos_semantic_extends
+    (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) environment
+    hString ?_ ?_,
+    psKernelAddMutualInductiveInfos_index_refines
+      (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) environment hIndex,
+    psKernelAddMutualInductiveInfos_refines_extension
+      (psKernelMakeSimpleMutualBaseInfos typeNames decl shapes) environment⟩
+  · simpa only [hNames] using hAbsent
+  · simpa only [hNames] using hUnique

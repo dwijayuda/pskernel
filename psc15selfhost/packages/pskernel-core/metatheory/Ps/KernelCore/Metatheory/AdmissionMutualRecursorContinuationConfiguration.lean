@@ -176,8 +176,9 @@ theorem psKernelAddSimpleMutualInductive_success_transaction_pipeline
                               cases validated
                               simp only [shapes, levels, elimOnlyAtZero, elimLevel, motives,
                                 recLevelParams, ruleBinders, work1, work2] at hValidate
+                              simp only [hValidate] at hRun
                               have hFinal : result = work2 := by
-                                simpa [hValidate] using hRun.symm
+                                simpa using hRun.symm
                               refine ⟨first, remaining, checked, sorted, paramResult, indexResult,
                                 resultLevel, tailShapes, ctorResult, minors, recInfos,
                                 hTypes, hCheck, hSort, hParams, hIndices, hResult, hTail, hCtor, ?_⟩

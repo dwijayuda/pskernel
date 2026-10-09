@@ -1,14 +1,14 @@
 # PSC0 AI work state — continuation authority
 
-Updated: 2026-10-09 15:56:06 UTC. All evidence times in this file are UTC. The prior session recorded Asia/Jakarta (UTC+07:00) for user-facing time conversions.
+Updated: 2026-10-09 16:02:49 UTC. All evidence times in this file are UTC. The prior session recorded Asia/Jakarta (UTC+07:00) for user-facing time conversions.
 
 ## Read this first
 
-This is the current handoff for the ongoing dwijayuda/pskernel work. The user explicitly requested a detailed committed AI_WORK_STATE.md so a new chat can finish the work without drifting. Continue the authorized implementation; do not restart the research or ask the user to authorize work already accepted.
+This is the completed handoff for the authorized dwijayuda/pskernel implementation, qualification and migration work. The user explicitly requested this detailed committed AI_WORK_STATE.md so a new chat can resume from verified facts without drifting. The bounded task is complete. Future chats should read this active section and the current developer guide, preserve the decisions below, and act on the user's next requested change. Do not restart completed research, repeat successful qualifications or treat archived TODOs as current work.
 
 **Current result: all requested source qualification scopes have passed.** F has completed C1/C2/C3, all four fixed-point products, native/final TS and JS parity, the complete 87-case R/F behavior correspondence, all twelve public Core/IR signatures, new-only grammar/runtime gates and separate exact-stream provider acceptance. The TypeScript 7-only native recovery of selected R is independently cold-proven. The separate repository-root TypeScript 7 migration passed all seven commands and all eleven adapter obligations. TypeScript 5 is retired from current development and recovery; immutable old producer metadata stays historical.
 
-**Only publication and normal branch integration remain at this preparation snapshot.** The complete actual evidence and eleven reconciled PSC0 guides are already reviewed and retained in immutable blobs. Publish those verified bundles, record the actual resulting commit in the integration paragraph below, then fast-forward the authorized working/canonical branches with fresh leases and ancestry checks. No source qualification, compiler repair, test, retry, additional research or seed promotion is outstanding. Do not rerun a successful scope merely to publish its evidence.
+**Publication and branch integration are complete.** Commit 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 retains the authenticated evidence, eleven reconciled PSC0 guides, current ledgers and detailed handoff. At 2026-10-09 16:02:49 UTC, all four authorized working/canonical branches were independently read back at that commit after ordinary non-force fast-forwards. This containing documentation-only closeout records those actual writes and preserves every qualified executable and selected-R identity. No source qualification, compiler repair, test, retry, additional research or seed promotion is outstanding. Live branch heads can later advance; re-read them before any future write.
 
 Everything at and below the later heading "Historical completed M6 and TypeScript 7 result" is archival. Some historical subsections contain words such as "Current", "next" or "selected"; those describe their old checkpoints, not today's active instructions. This active section takes precedence.
 
@@ -32,16 +32,18 @@ Pins: Lean 4.34.0, Node 22.23.3, TypeScript 7.0.2. Continue useful work while Ac
 
 ## Branches, exact sources and qualification runs
 
-Read the live refs before doing further writes. This handoff is prepared against documentation checkpoint 8d922c3f47f59a8d7285bfdf998791f042b483b9 and exact file blob 9131d580f1da79bc34171148b512a3a605de52fa on the root retirement branch. That checkpoint follows qualified root source 9d150afbec1feda8c97058aa56aa5ab92347d96d and changes only this handoff file. These are pinned source/evidence boundaries, not permission to assume later live branch heads. Fresh-verify every documentation descendant's ancestry and protected executable/seed identities before updating refs.
+Read live refs before any future write. The following is the verified publication boundary at 2026-10-09 16:02:49 UTC, not an assertion about an unseen later HEAD. Publication 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 has parent 8d922c3f47f59a8d7285bfdf998791f042b483b9 and tree 2935b38a17157fc214e4a0ec09d99a91469ef522. The parent is the committed handoff checkpoint following qualified root source 9d150afbec1feda8c97058aa56aa5ab92347d96d. The documentation-only closeout containing this file is a descendant of the publication; source qualifications remain pinned to their original commits below.
 
-| Branch or evidence | Exact identity at this checkpoint | Meaning |
+| Branch or evidence | Verified publication identity | Meaning |
 | --- | --- | --- |
-| psc0/typescript-7-only-v1 | handoff base 8d922c3f47f59a8d7285bfdf998791f042b483b9; qualified source 9d150afbec1feda8c97058aa56aa5ab92347d96d; qualified source tree c97468df9855bb7379b49e0771ed5e373e39c8b2 | Combined descendant containing F/PSC0 retirement and the passed root TS7 migration; re-read its live head before publication |
-| psc0/sh1-projection-grammar-v1 | qualified source fcd875c8f38db4b0524090bd10c7c2fd5024053d; tree 0bda17a81be9f790fa12a5fc38bd32d36f38f6ae | Pinned successful F compiler/provider source and successful native cold recipe source; fast-forward only after fresh verification |
-| psc0/sh1-implementation-v1 | last confirmed 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a | Canonical integration remains at the earlier completed checkpoint; re-read before fast-forward |
-| psc0/typescript-7-v1 | last confirmed 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a | Earlier TS7 integration alias; re-read before fast-forward |
-| main | last confirmed 37f63c39d4a07189938046c64152bba25d789450 | Unchanged by this work |
-| Selected R source | fe2560aba0f347b1caf8d000d371464642d44f23 | Fully qualified, explicitly selected authoring compiler |
+| psc0/typescript-7-only-v1 | 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 | Combined qualified PSC0/root result and retained evidence; integration complete |
+| psc0/sh1-projection-grammar-v1 | 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 | Fast-forwarded from qualified F source fcd875c8f38db4b0524090bd10c7c2fd5024053d |
+| psc0/sh1-implementation-v1 | 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 | Canonical branch integrated by normal fast-forward from 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a |
+| psc0/typescript-7-v1 | 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 | Earlier TS7 alias integrated by normal fast-forward from the same 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a |
+| main | 37f63c39d4a07189938046c64152bba25d789450 | Re-read unchanged; never updated by this work |
+| Qualified F/PSC0 source | fcd875c8f38db4b0524090bd10c7c2fd5024053d; tree 0bda17a81be9f790fa12a5fc38bd32d36f38f6ae | Immutable source for successful compiler/provider and native cold runs |
+| Qualified root TS7 source | 9d150afbec1feda8c97058aa56aa5ab92347d96d; tree c97468df9855bb7379b49e0771ed5e373e39c8b2 | Immutable source for successful root package/adapter run |
+| Selected R source | fe2560aba0f347b1caf8d000d371464642d44f23 | Fully qualified, explicitly selected authoring compiler; not replaced by F |
 
 ### Completed F qualification — no relaunch or repair remains
 
@@ -196,7 +198,7 @@ The native recipe is native-lean-original-ir-four-products-ts7/1. Its original I
 
 Recorded recovery work was 86.497 seconds; the whole job was 158 seconds. The old parent-based recipe recorded 2,728.787 seconds in a separate run. This is not a controlled benchmark or a measured PSC parsing/self-compilation speedup.
 
-Root and grammar_adoption_audit independently checked the actual completed run/jobs, complete log, 75-command receipt, all four hashes, source/manifest invariance and policy pins. The final cold retention/evidence bundle is ready as blob dd600ce1b24a4e7090ba9d5fa47012b875174d82, with five retained evidence files plus the provenance record (six paths total). Publish its already reviewed mappings at these paths; no additional cold job remains:
+Root and grammar_adoption_audit independently checked the actual completed run/jobs, complete log, 75-command receipt, all four hashes, source/manifest invariance and policy pins. The final cold retention/evidence bundle dd600ce1b24a4e7090ba9d5fa47012b875174d82 is published in 4c2cfec187ec0b48d1dfbc091066b9f1dd763215, with five retained evidence files plus the provenance record (six paths total). Its verified paths are listed below; no additional cold job remains:
 
 - docs/selfhost-language/typescript7-native-recovery.json.
 - docs/selfhost-language/typescript7-native-recovery-evidence.json.
@@ -246,7 +248,7 @@ Final installed-profile file SHA-256 is 630d6c0e07ca2eba789b21fbe978303b174979c2
 
 The root runner logs exact JSON file content in PS_ROOT_TS7_EVIDENCE_FILE or ordered MANIFEST/CHUNK records. Concatenate decoded content with no separators and verify actual UTF-8 byte count/SHA. The adapter's PS_ROOT_TYPESCRIPT7_CONTRACT is a compact stdout record, not a standalone receipt file. Preserve that distinction.
 
-The successful root result has been independently authenticated and all final repository paths are mapped in ready bundle c3b0275e848fa93f3f33528a8fe239766486a115: 48 files, comprising the current root guide update and 47 evidence files. Failed attempts remain failed; their earlier completed phases do not imply whole-run qualification. Publication is the only remaining root task; no adapter/source correction or qualification retry is pending.
+The successful root result has been independently authenticated and is published in 4c2cfec187ec0b48d1dfbc091066b9f1dd763215. Its path bundle c3b0275e848fa93f3f33528a8fe239766486a115 maps 48 files, comprising the current root guide update and 47 evidence files; the bundle manifest itself is also committed. Failed attempts remain failed; their earlier completed phases do not imply whole-run qualification. Root source correction, evidence publication and integration are complete; no qualification retry is pending.
 
 | Successful root proof | Exact identity |
 | --- | --- |
@@ -265,26 +267,33 @@ The successful root result has been independently authenticated and all final re
 
 Final root evidence paths are under psc0/docs/selfhost-language: root-typescript7-qualification.json for the exact receipt; root-typescript7-evidence.json for provenance; evidence-logs/root-typescript7-qualification.log for the full log; and seed-evidence/9d150afbec1feda8c97058aa56aa5ab92347d96d/root-typescript7/ for the five exact files, APIs, complete reviews, source-inheritance proof and all three failed attempts. The root developer guide is docs/TYPESCRIPT7.md, blob 5f36452b237599396b54365deb356cbb8b90b14a. All final path mappings are complete in bundle c3b0275e848fa93f3f33528a8fe239766486a115.
 
-## Exact remaining work — publication and normal fast-forward only
+## Completed integration and future continuation
 
-All source qualifications are complete. The final compiler/provider/native-cold/root results, original failures and complete primary inputs are already retained. No agent result, test suite, source fix or broader research remains to be awaited.
+All requested bounded source/toolchain/recovery qualifications, evidence publication and canonical branch integration are complete. There is no outstanding agent result, source fix, test suite or broader research to await for this task.
 
-1. Re-read live refs and apply exact base/source/seed guards before publication. The preparation base is 8d922c3f47f59a8d7285bfdf998791f042b483b9. Root verified fcd -> 8d is a five-commit descendant chain whose only PSC0 change is AI_WORK_STATE.md; 9d -> 8d changes only that handoff. The complete PSC0 parent tree e0c62a692607396a6478e3b3444995748dad967f was read recursively with 1,350 entries and no truncation. Canonical 5e3 is an ancestor 16 commits behind this base; unchanged main 37f6 is an ancestor 38 commits behind it. These observations bind this preparation, not an unseen later head. Preserve all qualified executable/toolchain/recipe files and the exact selected-R manifest while publishing reviewed documentation/evidence.
-2. Publish the ready F, root, native-cold and current-guide bundles listed below, plus the completed qualification/candidate ledgers and this handoff. The eleven PSC0 guides have already been rendered from actual authenticated evidence; do not reconstruct old drafts or refill guessed inputs. The final independent guide review corrected only three stale current-F sentences and found no remaining current TS5/grammar-authority/seed ambiguity. Record the actual publication commit and file manifest in the integration paragraph below. Evidence-only work must not acquire a qualification marker or create another source experiment.
-3. After the combined descendant is committed and reviewed, use fresh head leases and ordinary ancestry-preserving fast-forwards for psc0/sh1-projection-grammar-v1, psc0/sh1-implementation-v1 and psc0/typescript-7-v1 to the authorized combined result on psc0/typescript-7-only-v1. Verify each result after writing. Preserve concurrent work, never force-push and never update main. Record the actual resulting heads and source-inheritance check here; a later documentation descendant does not change the immutable qualifying source identities.
-4. Give the user a self-contained final report: exact changed source areas, the chosen finite language and new-only PS grammar, completed source/TS7 recovery/root-workspace proof, preserved selected R, resulting branches/commits, genuine remaining language/host limits and daily iteration commands. Stop optional testing.
+1. Begin future changes from the live canonical branch psc0/sh1-implementation-v1 after reading this handoff and docs/selfhost-language/CURRENT.md. Use a new work branch when appropriate, preserve concurrent work and record fresh head leases before non-force updates.
+2. Preserve the immutable qualifying source identities, selected-R manifest and current TS7-only recovery policy. Documentation descendants do not change what source a successful run qualified.
+3. Keep future authoring within the implemented ps-0.9-r3/new-only/bounded-selfhost-subset contract. The 61 handwritten Lean modules remain authoritative. The 226 deferred inventory locators and broader Standard/PSCV/strict-SH1 work are future scope, not hidden unfinished steps in this completed finite migration.
+4. For a newly requested source change, diagnose and review the affected class first, use the resident preparation loop for short iteration, and reserve complete qualification for a coherent semantic/toolchain/recovery checkpoint. Do not relaunch successful qualifications for documentation, evidence retention or a branch fast-forward.
+5. Keep this file current after concrete milestones and before any handoff. Explain new risks or unsupported forms from exact evidence; do not revive TS5, old grammar fallback or an archived seed-recovery instruction.
 
-### Integration publication record — update from actual writes
+### Integration publication record — completed actual writes
 
-Publication/fast-forward status at preparation: pending root's final repository writes. This blob is prepared against 8d922c3f47f59a8d7285bfdf998791f042b483b9; no publication or ref update is claimed by its author. All three qualification scopes are complete and the exact ready bundles below require no further source work or qualification. Root will replace this paragraph with the actual publication commit, post-write branch heads and verified protected source/selected-seed identities after completing the writes.
+The final evidence publication is [4c2cfec187ec0b48d1dfbc091066b9f1dd763215](https://github.com/dwijayuda/pskernel/commit/4c2cfec187ec0b48d1dfbc091066b9f1dd763215), tree 2935b38a17157fc214e4a0ec09d99a91469ef522, sole parent 8d922c3f47f59a8d7285bfdf998791f042b483b9. It contains exactly 121 planned file changes: 15 modifications and 106 additions, with zero deletions or unexpected deltas. Every new blob matched the prepared path manifest. Only the root docs and psc0 tree entries changed; the other 36 root entries are identical. Complete non-truncated PSC0 subtree comparison proved the executable packages, host, scripts, test, lean-checked and stdlib subtrees unchanged.
 
-A new unforeseen failure in a publication guard is an integration mismatch to investigate from the exact diff; it is not a reason to relaunch a successful compiler or fabricate a pass. A data-reviewer schema mistake is likewise distinct from a pipeline failure. Preserve the actual evidence and diagnose the demonstrated mismatch without weakening checks.
+The retirement branch publication used expected head 8d922c3f47f59a8d7285bfdf998791f042b483b9 and force false. Projection advanced from fcd875c8f38db4b0524090bd10c7c2fd5024053d; canonical implementation and the earlier TS7 alias advanced from 5e3a991088aaa735c8f324c4e70a7a3dee4cd69a. Each write used the freshly read expected head and force false. All four branches were independently read back at 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 at 2026-10-09 16:02:49 UTC; main was independently read back unchanged at 37f63c39d4a07189938046c64152bba25d789450.
+
+The protected selected-R manifest is still Git blob 44a05964c49000478c282afc013c84fca8c2de65, SHA-256 7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694, with selected identity 47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225. psc0/selfhost-seed-recovery.json remains blob fd75854159544e431497bc7dee8482bea727b5e4. No executable source, provider, kernel, toolchain pin, recipe, seed selection or qualification result changed in publication or this documentation-only closeout.
+
+The machine-readable actual snapshot and protected-tree review are in docs/selfhost-language/integration.json. The complete initial publication catalog is docs/selfhost-language/completion-publication.json, blob e8c936151435a59e1e26237bc311b1f55f866cfa. That catalog describes the initial 4c2cfec187ec0b48d1dfbc091066b9f1dd763215 snapshot; the final handoff and qualification ledger are deliberately updated in this containing documentation-only descendant to record completion. Re-read live refs instead of assuming a historical snapshot equals a future branch HEAD. No extra test or qualification run was needed for these documentation-only updates.
+
+An unforeseen future publication guard mismatch should be diagnosed from its exact diff; it does not invalidate a successful immutable source qualification or justify fabricating a pass. A data-reviewer schema mistake likewise remains distinct from a pipeline failure.
 
 ## Durable final bundles and developer entry points
 
 The final state is recoverable without live agents or in-memory store keys. All the following identities are immutable Git blobs. Fetch them through the GitHub connector/API; no local checkout, build or test is needed in this cloud-only session. A functions-store reset previously occurred around 15:23 UTC; the retained blobs and committed source, not a private scratch key, are continuation authority.
 
-| Ready immutable bundle | Blob and scope |
+| Published immutable bundle | Blob and scope |
 | --- | --- |
 | Complete F primary evidence and provenance | 5ed0a4f6cff3d48672df34076b7ac8801c9299a4; 47 mapped files plus its own manifest target; successful compiler/provider runs, full logs, all 32+2 receipts, all worker/Core/IR/generic/capability/probe arrays and exact APIs |
 | Root TypeScript 7 guide/evidence | c3b0275e848fa93f3f33528a8fe239766486a115; 48 files, including docs/TYPESCRIPT7.md and complete successful/three-failed-attempt evidence |
@@ -292,7 +301,7 @@ The final state is recoverable without live agents or in-memory store keys. All 
 | Final eleven PSC0 guides | a609ae5dceef9b20fecab5d4b68413d8e9ed954f; supersedes d4c9cc45dbf539f4bf85e1bca0bca1085a3ec947 after the final three stale-sentence corrections |
 | Actual guarded F document inputs | b2a8a19c506f52316ed30f4ec88682d69e794b87; exact successful source/run/job/product parameters and seven actual evidence objects |
 | Final narrow guide correction pass | 0dcff689d07bc590d78332b70bcfb7f340c88e33; three exact guarded current-F status corrections, no source change |
-| Final qualification ledger | 9efa5cb3f82f03fb49cfc5b847aeae49ab272759; all three source-proof scopes complete, only integration pending |
+| Qualification ledger at initial evidence publication | 9efa5cb3f82f03fb49cfc5b847aeae49ab272759; historical publication snapshot. The current docs/selfhost-language/qualification-evidence.json in this containing closeout supersedes its integration-pending status; every source-proof/history field is preserved |
 | Final worker candidate ledger | 0a9decf3c75c45898697a4284d3877eb6bb5d732; actual successful finite F evidence with failed history and selected R preserved |
 | Exact worker-to-source mapping and document review | 48fdd86397ba8fff5d5ba48a3bcf75d40c5b509b; twelve workers in nine files, three aliases in a tenth, protected 226 deferred locators |
 | Successful F pure-data reader | 490cc9d968bddd92da1ad67e39b3880a35349580; both compiler/provider reviewers applied successfully to complete authenticated primary inputs |
@@ -313,9 +322,9 @@ The completed guide-render provenance remains available as template 947971df08c8
 
 For earlier implementation/history reconstruction, root's initial 40-file TS7 bundle is c423053bd360ed4db193c450f52aec8fe9e24a1c and its metadata-correction/static-audit bundle is e712fce4a08e4bc9723a91523a2de54502f21957. The initial native cold retention review is 310c41f7a9b4d7a4052d9ab3c5a81795bd606ab3; the final cold bundle above maps its files to the agreed repository paths. These are completed provenance, not outstanding source work.
 
-Root owns final publication/ref integration. The projection, grammar and migration agents have completed their assigned source, evidence and document reviews; no further agent output is required before the final writes. New chats should continue from the committed handoff and immutable manifests, not wait for an unavailable old agent or repeat an already successful audit.
+Root completed publication and branch integration. The projection, grammar and migration agents completed their source, evidence and document reviews. New chats should use the committed handoff, current guides and immutable manifests; no unavailable old agent or scratch store is required. Do not repeat an already successful audit without a concrete new change or mismatch.
 
-## Daily development after this checkpoint closes
+## Daily development from the completed checkpoint
 
 From psc0, the supported short cycle is:
 

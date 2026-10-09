@@ -4,8 +4,8 @@
   "repository": "dwijayuda/pskernel",
   "historicalSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
   "implementationBranch": "psc0/sh1-implementation-v1",
-  "updatedUtc": "2026-10-09 15:50:34 UTC",
-  "currentStatus": "The finite F migration is compiler-qualified and independently provider-accepted at fcd875c8f38db4b0524090bd10c7c2fd5024053d. All 87 behavior cases and all 12 public Core/IR signatures passed; C2/C3 agree on four products. Current PSC0 compilation and selected-R native cold recovery use TypeScript 7.0.2 only. The separate root workspace TS7 migration is qualified at 9d150afbec1feda8c97058aa56aa5ab92347d96d. R remains selected; strict SH/1, full Standard/PSCV and F seed selection are not claimed. Final documentation/evidence publication and branch fast-forward are the only remaining integration actions.",
+  "updatedUtc": "2026-10-09 16:02:49 UTC",
+  "currentStatus": "The finite F migration is compiler-qualified and independently provider-accepted at fcd875c8f38db4b0524090bd10c7c2fd5024053d. All 87 behavior cases and all 12 public Core/IR signatures passed; C2/C3 agree on four products. Current PSC0 compilation and selected-R native cold recovery use TypeScript 7.0.2 only. The separate root workspace TS7 migration is qualified at 9d150afbec1feda8c97058aa56aa5ab92347d96d. R remains selected; strict SH/1, full Standard/PSCV and F seed selection are not claimed. Documentation/evidence publication and normal fast-forward integration are complete at 4c2cfec187ec0b48d1dfbc091066b9f1dd763215; all four working branches were read back at this publication boundary. The containing documentation-only closeout records completion without changing source qualification.",
   "checkpoints": {
     "boundedDevelopment": {
       "sourceRef": "9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
@@ -4695,16 +4695,29 @@
       "psc0/sh1-projection-grammar-v1",
       "psc0/typescript-7-v1"
     ],
-    "status": "qualified-ready-for-final-documentation-publication-and-fast-forward",
+    "status": "completed-qualified-evidence-published-and-canonical-branches-integrated",
     "documentationBaseRef": "8d922c3f47f59a8d7285bfdf998791f042b483b9",
     "qualifiedPsc0SourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
     "qualifiedRootSourceRef": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
     "selectedAuthoringSeedSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
-    "method": "Normal fast-forward to the combined qualified descendant, with final changes restricted to documentation/evidence. Actual integration is recorded after fresh-lease publication.",
+    "method": "Normal non-force fast-forwards to the combined qualified descendant after exact documentation/evidence tree verification and fresh expected-head leases. All four working branches and unchanged main were independently read back. The containing closeout changes only documentation.",
     "executableSourcesChangedByFinalRetention": false,
     "selectedAuthoringSeedChanged": false,
     "strictSh1Qualified": false,
-    "profileActivated": false
+    "profileActivated": false,
+    "publicationRef": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+    "publicationTree": "2935b38a17157fc214e4a0ec09d99a91469ef522",
+    "verifiedUtc": "2026-10-09 16:02:49 UTC",
+    "verifiedBranchHeads": {
+      "psc0/typescript-7-only-v1": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+      "psc0/sh1-projection-grammar-v1": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+      "psc0/sh1-implementation-v1": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+      "psc0/typescript-7-v1": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+      "main": "37f63c39d4a07189938046c64152bba25d789450"
+    },
+    "integrationRecordPath": "psc0/docs/selfhost-language/integration.json",
+    "publicationCatalogPath": "psc0/docs/selfhost-language/completion-publication.json",
+    "snapshotSemantics": "Actual initial evidence-publication boundary; the containing final documentation-only handoff follows it. Re-read live refs before a future write."
   },
   "historicalOriginalIrObservations": [
     {
@@ -4840,8 +4853,8 @@
   "activeContinuation": {
     "branch": "psc0/typescript-7-only-v1",
     "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
-    "stage": "All requested bounded source/toolchain/recovery gates passed; final documentation retention and branch integration pending.",
-    "canonicalBranchIntegrated": false,
+    "stage": "Completed: all requested bounded source/toolchain/recovery gates passed, authenticated evidence retained, and canonical working branches integrated. Begin future work only from the user's next requested change and the current finite contract.",
+    "canonicalBranchIntegrated": true,
     "selectedSeed": "R",
     "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
     "selectedSeedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
@@ -4858,7 +4871,9 @@
     "exactRootRunId": 37951869293,
     "exactNativeColdRunId": 37947341899,
     "sourceChangesStillRequired": false,
-    "additionalQualificationRunsRequired": false
+    "additionalQualificationRunsRequired": false,
+    "integrationPublicationRef": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+    "integrationVerifiedUtc": "2026-10-09 16:02:49 UTC"
   },
   "historyInterpretation": "Older checkpoints preserve their original source, producer versions, failures, then-current plans and remaining obligations. The completed finiteWorkerMigration and typeScript5Retirement entries are the current bounded implementation status; historical TS5 values do not authorize active TS5 execution.",
   "historicalIntegrations": [

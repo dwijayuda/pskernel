@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-completed-integration-snapshot",
+  "repository": "dwijayuda/pskernel",
+  "status": "completed",
+  "verifiedUtc": "2026-10-09 16:02:49 UTC",
+  "publication": {
+    "commit": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+    "tree": "2935b38a17157fc214e4a0ec09d99a91469ef522",
+    "parent": "8d922c3f47f59a8d7285bfdf998791f042b483b9",
+    "catalogPath": "psc0/docs/selfhost-language/completion-publication.json",
+    "catalogBlob": "e8c936151435a59e1e26237bc311b1f55f866cfa"
+  },
+  "refUpdates": [
+    {
+      "branch": "psc0/typescript-7-only-v1",
+      "previous": "8d922c3f47f59a8d7285bfdf998791f042b483b9",
+      "sha": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+      "force": false,
+      "success": true
+    },
+    {
+      "branch": "psc0/sh1-projection-grammar-v1",
+      "previous": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "sha": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+      "force": false,
+      "success": true
+    },
+    {
+      "branch": "psc0/sh1-implementation-v1",
+      "previous": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+      "sha": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+      "force": false,
+      "success": true
+    },
+    {
+      "branch": "psc0/typescript-7-v1",
+      "previous": "5e3a991088aaa735c8f324c4e70a7a3dee4cd69a",
+      "sha": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+      "force": false,
+      "success": true
+    }
+  ],
+  "verifiedBranchHeads": {
+    "psc0/typescript-7-only-v1": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+    "psc0/sh1-projection-grammar-v1": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+    "psc0/sh1-implementation-v1": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+    "psc0/typescript-7-v1": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+    "main": "37f63c39d4a07189938046c64152bba25d789450"
+  },
+  "publicationTreeReview": {
+    "status": "passed",
+    "publicationCommit": "4c2cfec187ec0b48d1dfbc091066b9f1dd763215",
+    "publicationTree": "2935b38a17157fc214e4a0ec09d99a91469ef522",
+    "parent": "8d922c3f47f59a8d7285bfdf998791f042b483b9",
+    "rootEntriesUnchanged": 36,
+    "changedFiles": 121,
+    "modified": 15,
+    "added": 106,
+    "deletions": 0,
+    "unexpectedDeltas": 0,
+    "selectedSeedBlob": "44a05964c49000478c282afc013c84fca8c2de65",
+    "recoveryPolicy": {
+      "path": "psc0/selfhost-seed-recovery.json",
+      "sha": "fd75854159544e431497bc7dee8482bea727b5e4"
+    },
+    "psc0ExecutableSubtrees": [
+      {
+        "path": "packages",
+        "sha": "3a9c54944c7ffbea7ad6fa1a5d7672c806370501"
+      },
+      {
+        "path": "host",
+        "sha": "711c7b5c618d6ac2e02765b15e375fe3ed9536ee"
+      },
+      {
+        "path": "scripts",
+        "sha": "4721e9c068005baecab666a6f0419dda181d1ec2"
+      },
+      {
+        "path": "test",
+        "sha": "373775f9feb06508e6f8ee9db61960806c548b32"
+      },
+      {
+        "path": "lean-checked",
+        "sha": "cc3872a7de36b3a5dfa9bcee7526e1522189e0f1"
+      },
+      {
+        "path": "stdlib",
+        "sha": "949175001d115d4c0913f204e5d4fd87a85d3c82"
+      }
+    ],
+    "scope": "documentation/evidence only"
+  },
+  "qualifiedSources": {
+    "psc0": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+    "rootTypeScript7": "9d150afbec1feda8c97058aa56aa5ab92347d96d",
+    "selectedR": "fe2560aba0f347b1caf8d000d371464642d44f23"
+  },
+  "successfulRuns": {
+    "fCompilerAndProvider": 37947341800,
+    "selectedRNativeCold": 37947341899,
+    "rootTypeScript7": 37951869293
+  },
+  "selectedSeed": {
+    "name": "R",
+    "manifestBlob": "44a05964c49000478c282afc013c84fca8c2de65",
+    "manifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+    "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "recoveryPolicyBlob": "fd75854159544e431497bc7dee8482bea727b5e4",
+    "selectionChanged": false
+  },
+  "handoffHistory": {
+    "marker": "## Historical completed M6 and TypeScript 7 result",
+    "utf8Bytes": 25024,
+    "sha256": "5ec35639aec88f3c12b2b0000771fa7511f0798feb73ee12b111da24cad5c619",
+    "preservedExactly": true
+  },
+  "scope": {
+    "sourceWorkComplete": true,
+    "evidenceRetentionComplete": true,
+    "canonicalIntegrationComplete": true,
+    "executableChangesInPublication": 0,
+    "executableChangesInContainingCloseout": 0,
+    "additionalQualificationRunsRequired": false,
+    "mainChanged": false,
+    "fSeedSelected": false,
+    "typeScript5ActiveFallback": false,
+    "legacyPsFallback": false,
+    "strictSh1Claimed": false,
+    "unrestrictedPsc1Claimed": false,
+    "fullStandardClaimed": false,
+    "fullPscvClaimed": false,
+    "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+    "authoritativeSource": "61 handwritten Lean modules"
+  },
+  "recordSemantics": "This records actual publication and independent branch read-back at verifiedUtc. The documentation-only commit containing this file follows that publication and records completion; snapshot hashes are not assertions about an unseen later HEAD. Source qualifications retain their original immutable source identities."
+}

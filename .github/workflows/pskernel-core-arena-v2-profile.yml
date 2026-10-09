@@ -8,6 +8,8 @@ on:
       - ".github/workflows/pskernel-core-arena-v2-profile.yml"
       - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/Main.lean"
       - "psc15selfhost/packages/pskernel-core/**"
+      - "psc15selfhost/lakefile.lean"
+      - "psc15selfhost/packages/pskernel/PSC1Kernel/Replay*.lean"
   workflow_dispatch:
 
 permissions:

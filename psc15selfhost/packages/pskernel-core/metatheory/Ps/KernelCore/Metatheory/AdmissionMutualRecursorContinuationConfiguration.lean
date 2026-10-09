@@ -50,17 +50,18 @@ theorem psKernelAddSimpleMutualInductive_success_minors_stage
   obtain ⟨hDuplicate, hMinTypes, hUnique, _⟩ :=
     psKernelAddSimpleMutualInductive_success_name_guards
       fuel environment result decl maxRecDepth maxNatSize hIndex hRun
+  /-
+  Normalize both the executable pipeline and its guard witnesses to the same
+  checked source family before decomposing the remaining successful path.
+  This avoids silently changing the family on only one side of a guard.
+  -/
+  rw [hTypes] at hRun hMinTypes hUnique
   let allNames : List PsKernelName :=
     psKernelMutualNameListAppend
-      (psKernelSimpleMutualNames decl.types)
+      (psKernelSimpleMutualNames (first :: remaining))
       (psKernelMutualNameListAppend
-        (psKernelSimpleMutualRecNames decl.types)
-        (psKernelSimpleMutualCtorNames decl.types))
-  /-
-  Reduce the executable preflight before rewriting the source family equation.
-  Otherwise rewriting decl.types first changes the syntactic guard arguments
-  and prevents the original guarded execution from normalizing.
-  -/
+        (psKernelSimpleMutualRecNames (first :: remaining))
+        (psKernelSimpleMutualCtorNames (first :: remaining)))
   simp only [psKernelAddSimpleMutualInductive, hDuplicate, hMinTypes, hUnique] at hRun
   cases hFresh : psKernelCheckFreshInductiveNames allNames environment with
   | error message =>
@@ -69,14 +70,13 @@ theorem psKernelAddSimpleMutualInductive_success_minors_stage
   | ok fresh =>
       simp only [hFresh] at hRun
       cases hUniform : psKernelSimpleCheckUniformOccurrences
-          (psKernelSimpleMutualNames decl.types) decl.levelParams decl.numParams
-          (psKernelSimpleMutualCtorTypes decl.types) with
+          (psKernelSimpleMutualNames (first :: remaining)) decl.levelParams decl.numParams
+          (psKernelSimpleMutualCtorTypes (first :: remaining)) with
       | error message =>
           simp only [hUniform] at hRun
           cases hRun
       | ok uniform =>
           simp only [hUniform] at hRun
-          simp only [hTypes] at hRun
           cases hClosed : psKernelCheckNoMVarNoFVar first.type with
           | error message =>
               simp only [hClosed] at hRun

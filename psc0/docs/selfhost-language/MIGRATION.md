@@ -1,6 +1,6 @@
 # PSC0-SH/1 implementation and migration plan
 
-Status: M0–M3 have a qualified implementation and selected authoring seed A at `e91b9558d665879871b8bf0893915ae64b27c7fe`. Foundation.List (B, `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and exact provider acceptance on its first execution. M5 remains optional authoring work, M6 still needs portable runtime enforcement, and M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The historical baseline is in [README.md](README.md), language requirements are in [SPEC.md](SPEC.md), and the next coherent M6 implementation is in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md).
+Status: M0–M3 have a qualified implementation and selected authoring seed A at `e91b9558d665879871b8bf0893915ae64b27c7fe`. Foundation.List (B, `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0`) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and exact provider acceptance on its first execution. M5 remains bounded follow-on authoring work. The bounded M6 runtime typing checkpoint is compiler-qualified on TS5 and on the current TS7 profile, with separate exact-stream provider acceptance for each. Complete strict runtime enforcement remains separate. M7 remains optional. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents the installed workflow; [qualification-evidence.json](qualification-evidence.json) records actual results. The historical baseline is in [README.md](README.md), language requirements are in [SPEC.md](SPEC.md), and the installed M6 scope, separately earned TS5/TS7 qualification and remaining requirements are in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md).
 
 ## 1. Execute two coordinated tracks
 
@@ -12,7 +12,7 @@ Later evidence supersedes that pending status. The separately pinned provider at
 
 ## 2. Ordered implementation units
 
-M0–M3 below preserve the implementation and acceptance requirements met by A. M4 records the migrated source families; M6 distinguishes the completed generic-erasure repair from the remaining portable runtime checker.
+M0–M3 below preserve the implementation and acceptance requirements met by A. M4 records the migrated source families; M6 distinguishes the historical generic-erasure repair, the installed bounded typing checkpoint, and the remaining strict contract.
 
 ### M0 — preserve and make the baseline recoverable
 
@@ -121,18 +121,46 @@ Choose additional source families from measured remaining authoring cost. Do not
 
 ### M5 — add conveniences in measured priority order
 
-1. Common equation/lambda-wrapped declaration and harmless-let normalization.
-2. Expected-type lambda domains with explicit fallback diagnostics.
-3. Nested constructor patterns lowered to flat decision trees.
-4. Except-only do if repeated explicit error plumbing remains a significant authoring cost.
+1. Repair parameter projections in the existing recursion normalizer, under the bounded contract below.
+2. Common equation/lambda-wrapped declaration and harmless-let normalization.
+3. Expected-type lambda domains with explicit fallback diagnostics.
+4. Nested constructor patterns lowered to flat decision trees.
+5. Except-only do if repeated explicit error plumbing remains a significant authoring cost.
 
 These are independent improvements. Do not delay useful accumulator migration until a general equation compiler, all nested patterns or full monads are complete. Do not add unneeded source class/instance/deriving support.
 
-Use actual remaining workaround counts to choose between items 2 and 3. A parser change affects a large part of this closure; it deserves a separate seed qualification rather than being mixed into a data-structure cleanup.
+Use actual remaining workaround counts to choose between the broader inference and nested-pattern extensions. A parser change affects a large part of this closure; it deserves a separate seed qualification rather than being mixed into a data-structure cleanup.
+
+### Follow-on repair — parameter projections in recursion normalization
+
+M6 remains consumable by selected A by using three current source idioms: typed local callbacks passed by name, explicit result types on match-valued let initializers, and typed branch-local aliases before projecting original record parameters in generalized recursion. [SPEC.md](SPEC.md#current-authoring-forms) describes the exact restrictions. Qualification of M6 does not remove them.
+
+The next bounded normalizer repair has a source-backed design; it is **planned, not implemented**. The implementation touches two Lean files: add a shared resolver returning an untyped resolved base and field suffix in `Elab/Term.lean`, then thread immutable `PsEnvironment` through the recursion walk/normalizer in `Elab/Recursion.lean`. The current lookup and rewriting paths are visible in [Term.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Term.lean#L306-L366) and [Recursion.lean](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/elab/src/Ps/Elab/Recursion.lean#L281-L305).
+
+The resolver must use this order:
+
+1. Resolve the complete exact local/global name first, preserving existing qualified-name meaning.
+2. If there is no exact result, retain the existing first-segment local/global projection base whenever that base resolves.
+3. Only if that first-segment base is absent, try the longest proper multi-segment **local** prefix and retain the remaining field suffix. Do not expand global prefixes or exempt a magic internal-name spelling.
+4. Type the selected base and field chain once. A field-typing failure is final; it must not cause lookup to retry a different prefix.
+
+Raw binders are currently single-segment in both [Lean syntax](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean#L528-L546) and [common binder parsing](https://github.com/dwijayuda/pskernel/blob/99786185f77edf952f11989d4c9bc44028f22f11/psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean#L565-L581). The additional local-prefix path is needed for complete hygienic names such as `$psc0SH.0`; merely changing the printed prefix leaves the current first-segment resolver unable to find that binding.
+
+Its acceptance contract is:
+
+1. Keep `psElabRecursionLocalId` and `psElabSyntaxLocalId` exact-only. A projected value such as `state.field` must not acquire the identity of an unchanged whole parameter or a known constructor child. Use projection-base resolution only in the rewriting/type-elaboration path that needs it.
+2. Rewrite according to resolved binder identity and lexical scope. Preserve let, lambda and match-pattern shadowing, including exact qualified-name collisions; cover both fixed record parameters and generalized record state.
+3. Preserve public binder order/kinds, the root structural match, child provenance, simultaneous recursive arguments and existing dependent/recursive-escape refusals. Do not weaken the stable recursive-call guard or invent structure getter declarations absent from the PSC environment.
+4. Keep implementation source compilable by selected A using supported forms. Exercise ordinary raw source with direct projections under the repaired native and generated compilers; pre-normalized worker input or an external source rewrite is insufficient.
+5. Use one focused family for direct/chained state and fixed-parameter projections, exact-name and prefix collisions, first-segment selection whose field typing fails, and let/lambda/pattern shadowing. Include refusals proving that projected values cannot masquerade as whole recursion arguments. Check runtime results and original-IR types, and review the entire affected reference class before one candidate gate.
+6. Require exact-current-source C2/C3 equality and independent selected-provider decisions. Only a separate, explicit seed-selection checkpoint can permit compiler source to depend on the newly accepted form and remove compatibility aliases.
+
+This repair addresses an observed authoring limitation. It does not promise general equation inference, arbitrary projections through dependent layouts, or unrestricted PSC1/Lean.
+
 
 ### M6 — strengthen the portable runtime contract
 
-The report-only inventory is installed. B's complete traversals recorded 244 call-expression typing obligations and 19 type-argument arity findings. That 19-finding result and the empty current-definition generic context are historical evidence; E implements their bounded repair.
+The historical report-only inventory preceded the portable checker. B's complete traversals recorded 244 call-expression typing obligations and 19 type-argument arity findings. That 19-finding result and the empty current-definition generic context are historical evidence; E implements their bounded repair.
 
 E at `cf8fbd784944a98b1e390b709685ca54c2511827` preserves the current declaration's ordered generic arguments while type binders are opened, carries them through runtime/proof binders, and supplies them when reconstructing recursive induction-hypothesis calls. It uses only declaration binders; it does not collect every `scope.typeLocals` entry or whitelist affected helper names.
 
@@ -140,9 +168,25 @@ The focused fixture checks exact original-IR argument order for one, two and thr
 
 E's C2 and C3 inventories complete with **zero type-argument arity findings** and **244 remaining call-expression typing obligations**, with no other recorded categories. C1's inventory still has the historical 19 findings because the older selected Q produced that first-generation IR. C1's executable contains the repaired erasure and produces the corrected C2 IR; C2 reproduces it for C3. This is the reason for the C2-versus-C3 equality contract, rather than requiring C1 to be byte-identical across a compiler change.
 
-The next coherent unit is a portable expression checker over the existing original IR. [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) specifies compositional callee typing, ordered scoped substitution, checking of annotated bodies/initializers, layout and intrinsic signatures, exact function parameter grouping, global values versus functions, and explicit resource exhaustion. The host inventory should report the portable checker rather than become a separate semantic implementation.
+The bounded M6 implementation is now installed over the same original IR. It includes portable type operations, a whole-input preflight, compositional expression checking, neutral construction functions for generated host callers, and checked emission of the exact validated IR. The current host inventory validates carriers and reports this portable checker instead of maintaining a second expression-typing implementation. Its legacy inventory is restricted to explicit immutable-recovery or selected-authoring-seed boundaries and cannot grant runtime typing acceptance. [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) records the implementation and report contract.
 
-Those 244 records are unfinished typing obligations, not 244 demonstrated runtime failures. Strict enforcement also requires the enabled primitive, scalar/bounds/text-position, import ABI and erasure/backend correspondence contracts. Zero type-arity findings alone does not activate strict SH/1. The current inventory remains diagnostic, and provider acceptance is an independent Core-admission claim.
+Those historical 244 records were unfinished checking obligations, not 244 demonstrated runtime failures. Compare each new portable report using its own executing compiler, source closure, options and completeness; do not relabel E's report or old Q's C1 inventory as an M6 pass.
+
+The TS5 M6 baseline at `1b5fd12382c920944924c9d03e0851984293caa2` passed compiler qualification and separate provider acceptance in [run 37906602597](https://github.com/dwijayuda/pskernel/actions/runs/37906602597). Its 61-module, 1,088,337-byte source closure passed the complete native IR check with 54,879 expressions, 707,753 visited steps and zero findings. All N1/C1/C2/C3 checker runs passed 59 runtime observations, 36 negative IR cases and five carrier refusals, plus the resource/substitution/checked-entry cases. C2/C3 complete current-source IR reports are accepted with zero findings and confirm same-IR checking before emission. All four deterministic C2/C3 products agree, and N1 TS/JS agree with them. C2/C3 expression and step counts were not printed in the completed log and are not inferred from the native report. See the [compiler/runtime receipt](runtime-ir-checker-qualification.json).
+
+The selected provider accepted the three exact required admission streams in its separate successful job, after emission; the [provider receipt](runtime-ir-checker-provider.json) records that boundary. Selected A, `psconfig` and strict-profile activation are unchanged.
+
+The current TS7 source at `99786185f77edf952f11989d4c9bc44028f22f11` separately passed compiler qualification and provider acceptance in [run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506), using the same portable M6 implementation. Its native full IR and C2/C3 current-source IR checks are complete and accepted with zero findings; the generated builds check the same IR before emission. Current C2/C3 products agree within the TS7 profile. Its compiler JS SHA-256 is `37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161`, while the preserved TS5 baseline keeps its separate JS identity. The [TS7 compiler/runtime receipt](typescript7-qualification.json) and [TS7 provider receipt](typescript7-provider.json) record the independent result. Historical recovery stays pinned to TS5; [TYPESCRIPT7.md](TYPESCRIPT7.md) retains the toolchain attempts and the one sequential same-full-source CLI comparison.
+
+The TS5 baseline and the separate current TS7 checkpoint have completed the following gates. Keep them as acceptance requirements for subsequent compiler milestones:
+
+1. Require successful raw PSC preparation of the complete current closure, then the bounded native/N1 checker and language fixtures. Preserve full typed rejection diagnostics and input identities before changing source again.
+2. Require accepted, complete current-source portable reports where the executing compiler contains M6, plus the focused positive/negative, simultaneous-substitution, exhaustion, carrier and checked-emission cases. A capped diagnostic list must not conceal the total failed-obligation count.
+3. Establish exact-current-source C2/C3 product equality within the selected toolchain profile. The old selected Q boundary remains explicitly legacy; the new C1 executable must exercise the installed checker. Obtain separate provider acceptance for the exact required admission streams.
+4. Record the installed typing API, runtime evidence, compiler fixed point and provider decision as separate claims. Integrate the earned checkpoint without changing selected authoring seed A or activating strict SH/1; do not repeat completed full qualification for ordinary edits covered by the bounded development gate.
+5. Implement and qualify the bounded two-file projection repair above as the next language slice. Keep the implementation consumable by A and retain compiler-source aliases until a separate explicit selection of a qualified seed. Preserve public types, error/exhaustion behavior and supported optimization paths; choose later source families from measured authoring cost.
+
+Strict enforcement still requires the applicable primitive/value, scalar/bounds/text-position, layout and erasure/backend correspondence obligations. External imports and optional scalar capabilities remain refused until their own contracts are qualified. The tested let-initializer scope correction is one bounded backend repair, not a general preservation proof. Neither an accepted typing report nor provider acceptance alone activates strict SH/1.
 
 Preserve the original TS path. Do not make the copied direct JS/Rust/Wasm backends prerequisites. Integrate a new target only after choosing a coherent IR interface, wiring its build/driver dependencies, and demonstrating the scalar/ADT/function contract and generated self-host evidence for that target.
 
@@ -169,6 +213,8 @@ C1 can legitimately differ from C2 when the compiler's emitter or normalization 
 After promotion, let B be compiler source migrated to ordinary SH/1. Repeat the same procedure and C2-versus-C3 product equality using the promoted seed, and make each generated compiler consume B's **raw authored source**. If every generation only sees a pre-normalized workspace, the fixed point does not exercise the authoring normalizer.
 
 A syntax-only translation route is insufficient here. The shared preparation/normalization seam must support ordinary authoring input and supply deterministic canonical output in its ordered environment. Source emission and compilation must use the same lowering implementation.
+
+A toolchain upgrade receives its own current-source qualification. The preserved S0/A recovery recipes keep TypeScript 5.8.3 and their original artifact identity. Current TypeScript 7 uses a separate explicit CLI/profile; compare C2/C3 within that profile. A TS5 receipt does not qualify TS7, and cross-version emitted JS need not be byte-identical. Reuse the same already emitted full-compiler TS for the bounded 5/7 comparison rather than repeating PSC preparation. See [TYPESCRIPT7.md](TYPESCRIPT7.md).
 
 Required receipt fields:
 

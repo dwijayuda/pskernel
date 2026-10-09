@@ -4,8 +4,8 @@
   "repository": "dwijayuda/pskernel",
   "historicalSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
   "implementationBranch": "psc0/sh1-implementation-v1",
-  "updatedUtc": "2026-10-08T23:02:49Z",
-  "currentStatus": "A remains the selected qualified authoring seed. Foundation.List B, three-helper migration H and recursive generic-erasure E are compiler-qualified and selected-provider accepted; strict runtime IR enforcement remains pending.",
+  "updatedUtc": "2026-10-09T10:28:22Z",
+  "currentStatus": "A remains the selected qualified authoring seed. Foundation.List B, three-helper migration H, recursive generic-erasure E, bounded runtime IR typing M6 under TypeScript 5.8.3, and current PSC0 TypeScript 7.0.2 are compiler-qualified and separately selected-provider accepted. Strict SH/1 and profile activation remain false.",
   "checkpoints": {
     "boundedDevelopment": {
       "sourceRef": "9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
@@ -2791,12 +2791,549 @@
           "message": "PASS (verified selected seed, current raw source and generated capability execution)"
         }
       ]
+    },
+    "runtimeIrChecker": {
+      "status": "compiler-qualified-runtime-ir-typing-and-selected-provider-accepted",
+      "sourceRef": "1b5fd12382c920944924c9d03e0851984293caa2",
+      "baseQualifiedSourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+      "executionBranch": "psc0/sh1-ir-checker-v1",
+      "runId": 37906602597,
+      "compilerJobId": 113741458448,
+      "providerJobId": 113763408946,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37906602597",
+      "conclusion": "success",
+      "sourceClosureSha256": "1dbe0be4f97ad51c2898b86546590d4331b463dd080976ba4cb2c72f0e7c59a0",
+      "moduleCount": 61,
+      "sourceBytes": 1088337,
+      "portableSourceFiles": [
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+        "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+        "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+        "psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+        "psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+        "psc0/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean"
+      ],
+      "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "compilerQualified": true,
+      "runtimeIrTypingQualified": true,
+      "selectedProviderAccepted": true,
+      "strictSh1Qualified": false,
+      "profileActivated": false,
+      "selectedSeedChanged": false,
+      "providerImplementationChanged": false,
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+        "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+        "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+        "javascriptSha256": "eb9768db1a10ca6da40666914e116431646a6fcdeca50c3a2f5e6dd250a031af"
+      },
+      "nativeRuntimeIrTyping": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 707753,
+        "expressionCount": 54879,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "strictSh1Qualified": false,
+        "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      },
+      "originalIrCheckedBuilds": [
+        "C2",
+        "C3"
+      ],
+      "nativeGeneratedProductsEqualC2C3": true,
+      "C1LegacyInventory": {
+        "report": "original-ir-inventory.json",
+        "traversalComplete": true,
+        "findingCounts": {
+          "call-arity-needs-expression-typing": 255,
+          "call-type-arity": 19
+        },
+        "findingCount": null,
+        "findingCountsCoverage": "legacy-inventory",
+        "portableChecker": {
+          "status": "unavailable-at-explicit-seed-boundary",
+          "boundary": {
+            "kind": "selected-authoring-seed",
+            "executingSourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+            "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+            "reason": "The explicitly pinned pre-checker Q may produce C1; current C1/C2/C3 checker consumers remain mandatory."
+          }
+        },
+        "runtimeIrTypingAccepted": false,
+        "sameOriginalIrCheckedBeforeEmission": false,
+        "strictSh1Qualified": false
+      },
+      "generatedConformance": {
+        "compilerGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "behaviorObservationsPerGeneration": 59,
+        "letScopeObservationsPerGeneration": 29,
+        "letScopeCaseCount": 4,
+        "negativeIrCasesPerGeneration": 36,
+        "malformedOrForeignCarrierCasesPerGeneration": 5,
+        "resourceAndDirectTypeOperations": "Exact receipts retained in compiler evidence bundle",
+        "checkedPreparedEntry": "passed",
+        "sameInspectedIrEmitted": true
+      },
+      "generations": [
+        {
+          "name": "C1",
+          "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "cb8bc40a9cff4f6640d722da7d84a66affe2f5a8d614a61dd0d366a2b8e85130",
+            "javascriptSha256": "0c92671ac8ae345339a950d624539737565aa70b85508140906c8e5cfce6c8cf"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 716432.6719079999,
+            "admissions": 114031.97828600009,
+            "canonicalSurface": 47396.19891899999,
+            "emit": 257391.14638599998,
+            "tscAndWrite": 10233.747195000062,
+            "total": 1145485.745169
+          }
+        },
+        {
+          "name": "C2",
+          "executingCompilerSha256": "0c92671ac8ae345339a950d624539737565aa70b85508140906c8e5cfce6c8cf",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+            "javascriptSha256": "eb9768db1a10ca6da40666914e116431646a6fcdeca50c3a2f5e6dd250a031af"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 707944.385822,
+            "admissions": 109689.25371700001,
+            "canonicalSurface": 45822.93511399999,
+            "emit": 314359.46253499994,
+            "tscAndWrite": 10008.663947000168,
+            "total": 1187824.702237
+          }
+        },
+        {
+          "name": "C3",
+          "executingCompilerSha256": "eb9768db1a10ca6da40666914e116431646a6fcdeca50c3a2f5e6dd250a031af",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+            "javascriptSha256": "eb9768db1a10ca6da40666914e116431646a6fcdeca50c3a2f5e6dd250a031af"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 701342.6303990001,
+            "admissions": 105496.29189800005,
+            "canonicalSurface": 44721.86960899993,
+            "emit": 337417.0768210001,
+            "tscAndWrite": 10412.700968999881,
+            "total": 1199390.5709880001
+          }
+        }
+      ],
+      "toolchain": {
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+        "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "typescript": "Version 5.8.3"
+      },
+      "recipeSha256": "6272a00efd47467e16f7626b8ad7190a89760274f71591e2e57d3bc2d35fd8cf",
+      "artifactArchives": {
+        "compiler": {
+          "id": 11606909869,
+          "sizeBytes": 4957858,
+          "sha256": "624e2d60ce5683126e38a45a369415c74d6ac8b74602f7a375da19684fc7bc1c"
+        },
+        "provider": {
+          "id": 11607339121,
+          "sizeBytes": 1226,
+          "sha256": "1c1baa26d7cb7dac2380bd1f50e55cc8c3426d7f16648d217b51b5cc537582fb"
+        }
+      },
+      "receipts": {
+        "compiler": "runtime-ir-checker-qualification.json",
+        "provider": "runtime-ir-checker-provider.json",
+        "executionHistory": "runtime-ir-checker-execution.json",
+        "firstNativeHistorical": "runtime-ir-checker-first-native.json"
+      },
+      "providerAcceptance": {
+        "accepted": true,
+        "exactStreamCount": 3,
+        "emissionWasGatedByThisCheck": false
+      }
+    },
+    "currentTypeScript7": {
+      "status": "compiler-qualified-runtime-ir-typing-and-selected-provider-accepted",
+      "sourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+      "sourceTree": "8daf2f7c37edf94f1c2b91332212baef6eea0139",
+      "executionBranch": "psc0/typescript-7-v1",
+      "runId": 37910429506,
+      "compilerJobId": 113753993100,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37910429506",
+      "baselineRuntimeIrCheckpoint": "runtimeIrChecker",
+      "baselineSourceRef": "1b5fd12382c920944924c9d03e0851984293caa2",
+      "toolchainProfiles": {
+        "currentTypeScript": "7.0.2",
+        "historicalRecoveryTypeScript": "5.8.3",
+        "node": "22.23.3",
+        "lean": "4.34.0"
+      },
+      "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+      "selectedSeedChanged": false,
+      "portableM6ImplementationChanged": false,
+      "rootWorkspaceCompilerApiDependencyChanged": false,
+      "providerImplementationChanged": false,
+      "strictSh1Qualified": false,
+      "profileActivated": false,
+      "receipts": {
+        "compiler": "typescript7-qualification.json",
+        "provider": "typescript7-provider.json",
+        "executionHistory": "typescript7-execution.json",
+        "packageAvailability": "typescript7-package-evidence.json"
+      },
+      "crossVersionOutputPolicy": "Record actual independently qualified outputs. Cross-version byte equality is not required; C2/C3 equality within the current profile is mandatory.",
+      "performancePolicy": "Record the actual full-source comparison's measured compile phases separately from generation tscAndWrite and from the earlier tiny package fixture.",
+      "compilerQualified": true,
+      "runtimeIrTypingQualified": true,
+      "compilerConclusion": "success",
+      "providerJobId": 113775134434,
+      "typeScriptComparison": {
+        "sourceSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+        "typescript5": {
+          "version": "5.8.3",
+          "elapsedMs": 9281.561786999999
+        },
+        "typescript7": {
+          "version": "7.0.2",
+          "elapsedMs": 2866.11967
+        },
+        "ratio": 3.2383720345494154,
+        "elapsedReductionPercent": 69.12028669556062,
+        "savedMs": 6415.442116999999,
+        "scope": "One sequential direct-CLI compilation per profile on the same full emitted compiler source, TypeScript 5 then 7; process startup, type checking and emission included; not a controlled repeated benchmark or full self-host pipeline timing."
+      },
+      "currentCompilerJavascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161",
+      "selectedProviderAccepted": true,
+      "providerConclusion": "success",
+      "conclusion": "success",
+      "artifactArchives": {
+        "compiler": {
+          "id": 11608909925,
+          "sizeBytes": 7337028,
+          "sha256": "0cd1e3526f66de2fe075bed9f69c21d9c71fa02b06092d3a689f5721e4ad9a6e"
+        },
+        "provider": {
+          "id": 11609599962,
+          "sizeBytes": 1223,
+          "sha256": "37f6aede62d3c872e6d2427145ef827e7c923ea10861a9081e3fd65fcb47280a"
+        }
+      },
+      "sourceClosureSha256": "1dbe0be4f97ad51c2898b86546590d4331b463dd080976ba4cb2c72f0e7c59a0",
+      "providerAcceptance": {
+        "accepted": true,
+        "exactStreamCount": 3,
+        "emissionWasGatedByThisCheck": false,
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+        "streams": [
+          {
+            "canonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "artifacts": [
+              "C2 compiler source",
+              "C3 compiler source"
+            ],
+            "durationMs": 1002.410885,
+            "accepted": true
+          },
+          {
+            "canonicalAdmissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "artifacts": [
+              "C2 raw lean capability source",
+              "C2 raw ps capability source",
+              "C3 raw lean capability source",
+              "C3 raw ps capability source"
+            ],
+            "durationMs": 6.712974999999915,
+            "accepted": true
+          },
+          {
+            "canonicalAdmissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+            "artifacts": [
+              "C2 raw recursive-generic fixture source",
+              "C3 raw recursive-generic fixture source"
+            ],
+            "durationMs": 5.732932999999775,
+            "accepted": true
+          }
+        ]
+      },
+      "recoveryEvidence": {
+        "historicalTypeScript": "5.8.3",
+        "effectiveFrozenLookupPassed": true,
+        "S0": {
+          "cacheHit": false,
+          "javascriptSha256": "74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76"
+        },
+        "A": {
+          "typescriptReplayPassed": true,
+          "originalArgumentsRetained": true,
+          "typescriptSha256": "b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1",
+          "javascriptSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096"
+        }
+      },
+      "moduleCount": 61,
+      "sourceBytes": 1088337,
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+        "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+        "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+        "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+      },
+      "nativeRuntimeIrTyping": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 707753,
+        "expressionCount": 54879,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "strictSh1Qualified": false,
+        "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      },
+      "nativeFixtureCases": 8,
+      "nativeGateTotalMs": 106461.999493,
+      "originalIrCheckedBuilds": [
+        "C2",
+        "C3"
+      ],
+      "nativeGeneratedProductsEqualC2C3": true,
+      "C1LegacyInventory": {
+        "report": "original-ir-inventory.json",
+        "traversalComplete": true,
+        "findingCounts": {
+          "call-arity-needs-expression-typing": 255,
+          "call-type-arity": 19
+        },
+        "findingCount": null,
+        "findingCountsCoverage": "legacy-inventory",
+        "portableChecker": {
+          "status": "unavailable-at-explicit-seed-boundary",
+          "boundary": {
+            "kind": "selected-authoring-seed",
+            "executingSourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+            "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+            "reason": "The explicitly pinned pre-checker Q may produce C1; current C1/C2/C3 checker consumers remain mandatory."
+          }
+        },
+        "runtimeIrTypingAccepted": false,
+        "sameOriginalIrCheckedBeforeEmission": false,
+        "strictSh1Qualified": false
+      },
+      "generatedConformance": {
+        "compilerGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "behaviorObservationsPerGeneration": 59,
+        "letScopeObservationsPerGeneration": 29,
+        "letScopeCaseCount": 4,
+        "negativeIrCasesPerGeneration": 36,
+        "malformedOrForeignCarrierCasesPerGeneration": 5,
+        "resourceAndDirectTypeOperations": "Exact receipts retained in compiler evidence bundle",
+        "checkedPreparedEntry": "passed",
+        "sameInspectedIrEmitted": true,
+        "exhaustiveForAllInputs": false
+      },
+      "generations": [
+        {
+          "name": "C1",
+          "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "cb8bc40a9cff4f6640d722da7d84a66affe2f5a8d614a61dd0d366a2b8e85130",
+            "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 669012.241075,
+            "admissions": 100639.40256299998,
+            "canonicalSurface": 43986.61225200002,
+            "emit": 248907.61742200004,
+            "tscAndWrite": 3416.784449999919,
+            "total": 1065962.6603569998
+          }
+        },
+        {
+          "name": "C2",
+          "executingCompilerSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+            "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 657735.50603,
+            "admissions": 99665.163971,
+            "canonicalSurface": 42982.82286800002,
+            "emit": 307976.01428800006,
+            "tscAndWrite": 3486.6032439998817,
+            "total": 1111846.111453
+          }
+        },
+        {
+          "name": "C3",
+          "executingCompilerSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+            "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 672575.680808,
+            "admissions": 106870.15897400002,
+            "canonicalSurface": 45725.19203300006,
+            "emit": 324805.3441039999,
+            "tscAndWrite": 3563.868296000175,
+            "total": 1153540.245578
+          }
+        }
+      ],
+      "generationTimingTotals": {
+        "loadAndPrepare": 1999323.427913,
+        "admissions": 307174.725508,
+        "canonicalSurface": 132694.6271530001,
+        "emit": 881688.975814,
+        "tscAndWrite": 10467.255989999976,
+        "total": 3331349.017388
+      },
+      "generationTimingScope": {
+        "source": "Logged generation receipt timingsMs objects retained without alteration.",
+        "emit": "Includes erasure, original IR inventory/checking, and TypeScript printing.",
+        "tscAndWrite": "Includes TypeScript compilation together with evidence writes, hashing, recipe/toolchain identity work; it is not a pure CLI timing.",
+        "total": "Elapsed generation observation on this workflow runner; changes between runs are not attributed solely to TypeScript."
+      },
+      "toolchain": {
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+        "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "typescript": "Version 7.0.2"
+      },
+      "recipeSha256": "0a6eaf5c622bfab68835a554945f3a26523a80d32510b54a91af105c65aaa5be",
+      "authoringSeed": {
+        "kind": "previous-qualified-authoring-seed",
+        "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+        "sourceClosureSha256": "7e18013c260de84b08d57e923aef184993b0c5fea4de4775a68288a8ff9e157a",
+        "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "identitySha256": "0dc33de63fee9800e3da68e54605a27d222306c55e4631496995efd066b2e2d9",
+        "independentAlgorithm": false,
+        "priorQualification": {
+          "evidence": "compiler-qualified-current-source-fixed-point",
+          "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+          "compilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "runId": 37831951758,
+          "artifactName": "psc0-sh1-e91b9558d665879871b8bf0893915ae64b27c7fe",
+          "claim": "Compiler-qualified seed; selected-provider acceptance is a separate receipt."
+        },
+        "producerToolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 5.8.3"
+        },
+        "executionRuntime": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+        }
+      },
+      "sameSourceTypeScriptComparison": {
+        "status": "pass",
+        "summary": {
+          "mode": "same-source-comparison",
+          "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/full-compiler/report.json",
+          "sourceSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+          "timings": [
+            {
+              "phase": "compile-historical",
+              "version": "5.8.3",
+              "elapsedMs": 9281.561786999999
+            },
+            {
+              "phase": "compile-current",
+              "version": "7.0.2",
+              "elapsedMs": 2866.11967
+            }
+          ]
+        },
+        "timingScope": "One direct CLI compilation observation per profile of the same complete emitted compiler TypeScript source. Each elapsedMs is the profile report's phases[].compile.elapsedMs. This comparison does not establish whole-pipeline speedup, repeat-run variance, or cross-version artifact equality.",
+        "fullReportArtifactPath": "dist/typescript-profile/full-compiler/report.json",
+        "fieldsUnavailableFromCompletedLog": [
+          "sourceBytes",
+          "per-profile artifact hashes",
+          "full per-profile diagnostics and command receipts"
+        ],
+        "artifactInspection": "The exact report and phase files are retained in the compiler workflow artifact. The completed log prints the source digest and direct CLI elapsed times; unprinted report fields were not inferred."
+      },
+      "fullCompilerIrCounts": {
+        "native": {
+          "expressionCount": 54879,
+          "visitedSteps": 707753,
+          "findingCount": 0,
+          "traversalComplete": true
+        },
+        "C2": {
+          "status": "not-published-in-completed-log",
+          "fullReportArtifactPath": "dist/sh1/C2/original-ir-inventory.json"
+        },
+        "C3": {
+          "status": "not-published-in-completed-log",
+          "fullReportArtifactPath": "dist/sh1/C3/original-ir-inventory.json"
+        }
+      },
+      "receiptCount": 53,
+      "independentBaselineProductComparison": {
+        "baselineSourceRef": "1b5fd12382c920944924c9d03e0851984293caa2",
+        "currentSourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+        "exactLoggedHashesCompared": true,
+        "equalityByProduct": {
+          "canonicalSurfaceSourceSha256": true,
+          "normalizedCanonicalAdmissionsSha256": true,
+          "typescriptSha256": true,
+          "javascriptSha256": false
+        },
+        "interpretation": "Canonical source, normalized admissions and TypeScript agree across these separately qualified checkpoints; JavaScript differs. Qualification requires C2/C3 equality within each profile."
+      }
     }
   },
   "acceptanceAxes": {
     "compilerQualified": "Exact current-source C2/C3 products and generated capability/conformance evidence.",
     "kernelChecked": "Actual selected-provider decisions for the exact canonical admission streams.",
-    "strictSh1": "Complete runtime IR obligations and enforcement; a diagnostic inventory does not grant this status."
+    "strictSh1": "Complete mandatory runtime and semantic obligations plus strict profile enforcement; bounded runtime IR typing does not by itself grant this status.",
+    "runtimeIrTyping": "Bounded compositional typing of the exact original IR supplied to checked emission; native and current generated compiler receipts are distinct from legacy inventory and strict semantic obligations."
   },
   "retainedInitialIrTypeArguments": {
     "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
@@ -2985,22 +3522,41 @@
     }
   },
   "currentOriginalIrObservation": {
-    "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
-    "runId": 37852341550,
+    "sourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+    "runId": 37910429506,
     "generations": [
       "C2",
       "C3"
     ],
+    "checker": "portable bounded runtime IR checker",
+    "accepted": true,
     "traversalComplete": true,
-    "recordedFindingCounts": {
-      "call-arity-needs-expression-typing": 244
-    },
-    "derivedAbsentCategoryCounts": {
-      "call-type-arity": 0
+    "findingCount": 0,
+    "findingCountsCoverage": "all-findings",
+    "sameOriginalIrCheckedBeforeEmission": true,
+    "expressionCount": null,
+    "visitedSteps": null,
+    "unprintedCounts": "The completed generation summaries do not print these full counts; see the exact full inventory reports in the retained compiler artifact. Native counts are separately reported and are not substituted.",
+    "native": {
+      "schemaVersion": 1,
+      "kind": "psc0-native-original-ir-check",
+      "accepted": true,
+      "traversalComplete": true,
+      "visitedSteps": 707753,
+      "expressionCount": 54879,
+      "findingCount": 0,
+      "retainedFindingCount": 0,
+      "omittedFindingDetails": 0,
+      "strictSh1Qualified": false,
+      "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
     },
     "strictSh1Qualified": false,
-    "interpretation": "The unchanged inventory traversed all original IR. E's C1 report, produced by old Q, still records 19 type-argument findings; C2/C3 record none.",
-    "remainingPlan": "docs/selfhost-language/RUNTIME_IR_PLAN.md"
+    "profileActivated": false,
+    "receipts": [
+      "typescript7-qualification.json",
+      "typescript7-provider.json"
+    ],
+    "remainingPlan": "RUNTIME_IR_PLAN.md"
   },
   "recursiveGenericFindingResolution": {
     "historicalRecord": "retainedInitialIrTypeArguments",
@@ -3013,8 +3569,74 @@
   "integration": {
     "canonicalBranch": "psc0/sh1-implementation-v1",
     "qualificationBranchForGenericRepair": "psc0/sh1-generic-erasure-v1",
-    "qualifiedPortableSourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
-    "documentationBaseRef": "dc18eeb08ef717214064c462ecd846c8b454a19e",
-    "method": "Normal fast-forward to the qualified E descendant with documentation/evidence only; A seed selection unchanged."
-  }
+    "qualifiedGenericRepairSourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+    "qualificationBranchForRuntimeIrChecker": "psc0/sh1-ir-checker-v1",
+    "qualifiedRuntimeIrBaselineSourceRef": "1b5fd12382c920944924c9d03e0851984293caa2",
+    "qualificationBranchForCurrentTypeScript": "psc0/typescript-7-v1",
+    "qualifiedPortableSourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+    "qualifiedCurrentToolchainSourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+    "currentTypeScriptVersion": "7.0.2",
+    "previousIntegratedRef": "829a2e953895f03225a77425141aa3ded5e78694",
+    "documentationBaseRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+    "method": "Normal fast-forward to the qualified TS7 descendant with documentation/evidence only. Executable qualification remains attached to the immutable source references.",
+    "selectedAuthoringSeedChanged": false,
+    "strictSh1Qualified": false,
+    "profileActivated": false
+  },
+  "historicalOriginalIrObservations": [
+    {
+      "sourceRef": "cf8fbd784944a98b1e390b709685ca54c2511827",
+      "runId": 37852341550,
+      "generations": [
+        "C2",
+        "C3"
+      ],
+      "traversalComplete": true,
+      "recordedFindingCounts": {
+        "call-arity-needs-expression-typing": 244
+      },
+      "derivedAbsentCategoryCounts": {
+        "call-type-arity": 0
+      },
+      "strictSh1Qualified": false,
+      "interpretation": "The unchanged inventory traversed all original IR. E's C1 report, produced by old Q, still records 19 type-argument findings; C2/C3 record none.",
+      "remainingPlan": "docs/selfhost-language/RUNTIME_IR_PLAN.md"
+    },
+    {
+      "sourceRef": "1b5fd12382c920944924c9d03e0851984293caa2",
+      "runId": 37906602597,
+      "generations": [
+        "C2",
+        "C3"
+      ],
+      "checker": "portable bounded runtime IR checker",
+      "accepted": true,
+      "traversalComplete": true,
+      "findingCount": 0,
+      "sameOriginalIrCheckedBeforeEmission": true,
+      "expressionCount": null,
+      "visitedSteps": null,
+      "unprintedCounts": "The completed generation summaries do not print these full counts; see exact full inventory reports in the retained compiler artifact. Native counts are separately reported and not substituted.",
+      "native": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 707753,
+        "expressionCount": 54879,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "strictSh1Qualified": false,
+        "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      },
+      "strictSh1Qualified": false,
+      "profileActivated": false,
+      "receipts": [
+        "runtime-ir-checker-qualification.json",
+        "runtime-ir-checker-provider.json"
+      ],
+      "remainingPlan": "RUNTIME_IR_PLAN.md"
+    }
+  ]
 }

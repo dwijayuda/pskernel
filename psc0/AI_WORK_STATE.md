@@ -1,138 +1,95 @@
 # PSC0 SH/1 implementation work state
 
-Updated: 2026-10-09 UTC.
+Updated: 2026-10-09 10:28:22 UTC.
 
-## Active M6 implementation checkpoint (2026-10-09)
+## Current M6 and TypeScript 7 result
 
-Work continues on isolated branch `psc0/sh1-ir-checker-v1`, descending from
-integration documentation commit `829a2e953895f03225a77425141aa3ded5e78694`.
-The qualified E source and selected A seed below remain unchanged.
+The bounded portable runtime IR checker, same-IR checked emission and scoped-let
+backend correction are qualified under TypeScript 5.8.3 at
+`1b5fd12382c920944924c9d03e0851984293caa2`
+([run 37906602597](https://github.com/dwijayuda/pskernel/actions/runs/37906602597)).
+Current PSC0 TypeScript 7.0.2 integration is qualified at
+`99786185f77edf952f11989d4c9bc44028f22f11`
+([run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506)).
+The second source retains the same portable M6 code. Both checkpoints have
+separate compiler and selected-provider receipts.
 
-The coherent M6 change adds neutral portable type operations, an explicit input
-size preflight and a task-stack expression checker beside the existing IR model.
-It checks global value/function distinctions, lexical bindings, simultaneous
-generic substitution, exact function grouping, every body/initializer annotation,
-layout ownership and fields, match coverage and intrinsic operand/result types.
-Unknown types, unsupported scalar/import capabilities and exhausted resources
-remain explicit failures. Empty inductives/matches are outside this checkpoint's
-active emission contract.
+Canonical integration uses a normal fast-forward of
+`psc0/sh1-implementation-v1` to the qualified TS7 descendant and documentation.
+The exact qualifying source remains the immutable reference above; a later
+documentation commit does not claim a fresh compiler run.
 
-A separate checked emission API checks the exact IR it emits. The cloud driver
-uses the same portable check-before-emit rule for current generations and retains
-explicit authenticated historical seed boundaries. The host adapter validates
-same-compiler record/constructor brands and canonical scalar carriers; it supplies
-no independent expression typing rules.
+The independently qualified M6 baseline at `1b5fd12382c920944924c9d03e0851984293caa2` records:
 
-Validation is architecture-first: independent source reviews, a native exact-source
-IR gate and focused native/generated conformance matrix, followed by the planned
-C1/C2/C3 and pinned-provider checkpoint. The first complete native runtime IR
-check passed at af820 below; full generated and compiler qualification remains
-pending. No strict profile is activated and no provider or lowering
-preservation claim is inferred from runtime type acceptance. Resource counters
-distinguish input-shape, dispatcher and individual type-operation budgets; finding
-counts count failed checking obligations, with first error within a type operation.
+| Evidence | Observed result |
+| --- | --- |
+| Portable compiler source | 61 modules; 1,088,337 bytes |
+| Native full original IR | 54,879 expressions; 707,753 visited steps; complete; accepted; zero findings |
+| Native fixtures | Eight cases passed |
+| N1/C1/C2/C3 runtime conformance | 59 observations per generation, including 29 observations across four let-scope cases |
+| Generated checker refusals | 36 negative IR cases and five malformed/foreign carrier cases per generation; resource and direct type-operation cases also passed |
+| Current C2/C3 full original IR | Complete; accepted; zero findings; same original IR checked before emission |
+| Current C2/C3 products | Canonical surface source, normalized admissions, TS and JS agree; N1 TS/JS also agree |
+| Independent selected provider | Three exact admission streams accepted after emission |
 
-### First cloud execution and complete source-form repair
+The generated C2/C3 summaries do not print their full expression or visited-step
+counts. Those fields are not inferred from the native counts; their full reports
+remain in `dist/sh1/C2/original-ir-inventory.json` and the corresponding C3 artifact path.
 
-Implementation checkpoint `7f6d7474864cb06b534f119f528afa4bc6a3c3db`
-ran in [37902919310](https://github.com/dwijayuda/pskernel/actions/runs/37902919310).
-The native Lean build passed all 133 jobs. The first native-candidate PSC parse
-then stopped at Check.lean:160:29 on a parenthesized typed lambda argument.
-No new checker conformance, full-source IR acceptance, C1/C2/C3 or provider
-qualification was earned in that run. Its logged 245-plus-19 inventory belongs
-to the retained A seed artifact, not to the current M6 source.
+The native development gate's internal total was 144.586 seconds. The C1/C2/C3
+generation totals were 1,145.486 / 1,187.825 / 1,199.391 seconds.
+Across those three generations, preparation accounted for 60.17% of the recorded
+total; `tscAndWrite` accounted for 30.655 seconds, or about 0.87%. The latter
+includes evidence writes, hashing and identity work as well as TypeScript.
+These are observed phase timings from one qualification run, not controlled benchmarks.
 
-A grammar audit identified the whole class: seven callbacks in Check.lean and
-nine in CheckTypes.lean. All are now explicitly typed local let initializers
-passed by name, preserving their bodies and signatures. This uses the existing
-full-term let-RHS parser; it adds no parser capability or typing exception.
-The development command also builds `psc1_ir_check_tests`, matching CI.
-The follow-up checkpoint `ccb8ba00ddf677327b4c38a0d6a4a459b83f51f8`
-passed raw PSC parsing and another 133-job native build in
-[run 37903821319](https://github.com/dwijayuda/pskernel/actions/runs/37903821319).
-It stopped during PSC elaboration of `psIrCheckMatchBindings` with
-`matchExpectedType`, before any checker acceptance gate.
+The compiler bundle preserves all 28 complete logged JSON receipts, including
+their original provider-not-attempted fields. The separate later provider receipt
+records `accepted: true` and `emissionWasGatedByThisCheck: false`.
+Compiler qualification, bounded IR typing and exact-stream provider acceptance
+are earned; strict SH/1 and profile activation remain false.
 
-The elaborator requires an expected result type for matches. An unannotated
-let initializer supplies none. All four direct let-bound matches in Check.lean
-now explicitly state their existing result types; the other four new portable
-modules contain no instance of this inference class. The follow-up changes no
-checker rule or elaborator behavior. Current-source qualification remains pending.
+See [runtime-ir-checker-qualification.json](docs/selfhost-language/runtime-ir-checker-qualification.json),
+[runtime-ir-checker-provider.json](docs/selfhost-language/runtime-ir-checker-provider.json) and
+[runtime-ir-checker-execution.json](docs/selfhost-language/runtime-ir-checker-execution.json)
+for complete receipts and the retained attempt history.
 
-Checkpoint `ce11b93f1f824ccb5a8acb1b43d5f47d05ecbb26` passed native
-compilation again in [run 37904253709](https://github.com/dwijayuda/pskernel/actions/runs/37904253709)
-and cleared `matchExpectedType`, then exposed `unknownName:options` in the
-same helper. Source tracing proved a normalizer omission: all original
-parameters are renamed, but dotted parameter references retain the old receiver.
-Nine sites in two new recursive functions are affected. Three typed branch-local
-aliases preserve those receivers without changing recursion, checking rules or
-resource accounting. This compatibility spelling remains consumable by selected
-seed A; the general normalizer itself is unchanged in this M6 checkpoint.
+Current emission uses exact TypeScript 7.0.2. Historical S0/A recovery uses exact
+5.8.3, including a byte-checked TypeScript replay when reusing authenticated A.
+Frozen recovery receives and verifies its actual historical child launcher
+before building. The root workspace still uses the old TypeScript programmatic
+API and remains on 5.8.3. Lean 4.34.0 and Node 22.23.3 keep their pins.
 
-A future projection-renaming capability must preserve exact qualified-name
-resolution priority and local shadowing, and handle multi-segment internal
-parameter names. Do not invent named getters for these PSC structures: this
-frontend installs type, constructor and recursor declarations, and handles
-field syntax directly. Qualification of the alias repair remains pending.
-Attempt evidence is retained in
-[runtime-ir-checker-execution.json](docs/selfhost-language/runtime-ir-checker-execution.json).
+The completed same-source comparison compiled the full emitted compiler with
+TypeScript 5.8.3 in **9,281.561787 ms** and 7.0.2 in **2,866.119670 ms**.
+That single sequential pair gives a **3.238× direct-CLI speed ratio** and
+**69.12% less elapsed time**. It includes startup, checking and emission; it does
+not measure the complete self-host pipeline. The input TS SHA-256 is
+`f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70`.
+See [TYPESCRIPT7.md](docs/selfhost-language/TYPESCRIPT7.md) and
+[typescript7-qualification.json](docs/selfhost-language/typescript7-qualification.json)
+for the exact measurement and scope.
 
-### First complete native IR acceptance and generated emission finding
+A remains the selected authoring seed. Compiler qualification, bounded runtime
+IR typing, exact provider acceptance and strict SH/1 are separate. Strict SH/1
+and named-profile activation remain false. Kernel/provider implementation,
+defeq/cache internals and metatheory are unchanged.
 
-Checkpoint `af820270f9dc4fdcf76600733fa4773c14f3df5f` in
-[run 37905284246](https://github.com/dwijayuda/pskernel/actions/runs/37905284246)
-passed raw PSC preparation, all 133 native build jobs and eight native checker
-cases. The complete current compiler IR was accepted with 61 modules, 54,843
-expressions, 707,366 visited steps and zero findings. The exact checked native
-emission matched N1 TypeScript byte for byte. Preserve its exact receipt at
-[the first native acceptance](docs/selfhost-language/runtime-ir-checker-first-native.json).
-
-The generated compiler also accepted the positive IR fixture and produced equal
-raw/checked TypeScript, but TypeScript compilation exposed a valid let-shadowing
-case: the initializer was emitted inside the new const binding's JavaScript
-scope. The checker correctly uses the outer IR scope. The coherent backend repair
-uses a parameterized generator only when the existing conservative initializer
-name scan detects possible capture; ordinary const blocks remain unchanged.
-The tail optimizer declines the same case, retaining the corrected generator
-path. Focused coverage includes a yielding initializer, an initializer closure
-capturing the outer value, and nested shadowing through deep recursion.
-No checker rule is weakened and the original fixture remains intact. The TypeScript 5.8.3 repair baseline at
-`1b5fd12382c920944924c9d03e0851984293caa2` has passed the native development
-and selected-seed C1 gates in [run 37906602597](https://github.com/dwijayuda/pskernel/actions/runs/37906602597).
-Current-source C2/C3 and provider qualification remain pending.
-
-The user also authorized a possible TypeScript 7.0.2 upgrade. The isolated
-`psc0/typescript-7-v1` branch starts at the M6 emitter repair checkpoint
-`1b5fd12382c920944924c9d03e0851984293caa2`. Current CLI integration is staged
-with exact `PSC0_TSC` and `PSC0_TYPESCRIPT_VERSION` profiles. Historical S0/A
-recovery retains 5.8.3 and its existing identity; current emission uses 7.0.2.
-The separate root workspace still uses the older compiler API and remains on
-5.8.3. Actual installed-package, native-CLI and same-source TypeScript comparison
-gates precede expensive current-source qualification. The standalone
-package/CLI availability check passed on its first execution in
-[run 37907973917](https://github.com/dwijayuda/pskernel/actions/runs/37907973917)
-at `cb0a9d012c66e3e02e2391562243912a0e8700d4`. Full current-source native,
-generated, fixed-point and provider outcomes remain pending cloud evidence.
-Cache/artifact reuse also recompiles authenticated A TypeScript with 5.8.3 and
-requires the exact original JavaScript hash before current qualification proceeds.
-See [TYPESCRIPT7.md](docs/selfhost-language/TYPESCRIPT7.md).
-The first integrated TypeScript 7 checkpoint, `956e2c3345d8d634904ff812b31d3b84fc9c23d9`,
-failed only in frozen S0 recovery in [run 37909229485](https://github.com/dwijayuda/pskernel/actions/runs/37909229485).
-The exact installed-profile contract, source guards and historical native build
-(118 jobs) passed. The runner globally prepended current TypeScript 7 after
-printing the historical step PATH; frozen S0 ignores the new explicit override
-and then encountered TS5112. Current PSC0 generation was not reached.
-The coherent repair removes the unused global current-TypeScript PATH entry,
-pins the historical child environment after runner augmentation, and records
-the frozen resolver's effective launcher/version before any recovery build.
-Historical source, compiler flags, seed hashes and A selection remain unchanged.
-See [typescript7-execution.json](docs/selfhost-language/typescript7-execution.json).
-Do not claim a speedup before comparing the measured TypeScript phase.
+The execution histories retain all source-form and emission findings, without
+rewriting earlier failures as passes:
+[runtime-ir-checker-execution.json](docs/selfhost-language/runtime-ir-checker-execution.json),
+[first complete native acceptance](docs/selfhost-language/runtime-ir-checker-first-native.json)
+and [typescript7-execution.json](docs/selfhost-language/typescript7-execution.json).
+The source-compatible callback/match/record-alias forms are documented in
+[SPEC.md](docs/selfhost-language/SPEC.md). The general projection-normalizer
+repair remains future work; no syntax exception or checker weakening was added.
 
 ## Current source and qualification checkpoints
 
-The current qualified portable source is the recursive generic-argument repair E,
-`cf8fbd784944a98b1e390b709685ca54c2511827`. It was independently qualified on
+The current qualified integration source is the TypeScript 7 M6 checkpoint
+`99786185f77edf952f11989d4c9bc44028f22f11` above. The earlier recursive
+generic-argument repair E,
+`cf8fbd784944a98b1e390b709685ca54c2511827`, was independently qualified on
 `psc0/sh1-generic-erasure-v1`: compiler and pinned-provider jobs passed on the
 first execution of [run 37852341550](https://github.com/dwijayuda/pskernel/actions/runs/37852341550).
 Its parent helper migration H,
@@ -140,9 +97,9 @@ Its parent helper migration H,
 the first execution of [run 37851669475](https://github.com/dwijayuda/pskernel/actions/runs/37851669475).
 
 The canonical integration branch is `psc0/sh1-implementation-v1`; integration
-preserves the E branch's source/qualification provenance and uses a normal
-fast-forward. Documentation-only descendants do not change the qualified
-portable source.
+preserves each feature branch's source/qualification provenance and uses normal
+fast-forwards. Documentation-only descendants preserve the exact qualified
+executable sources.
 
 | Checkpoint | Source commit | Result |
 | --- | --- | --- |
@@ -150,6 +107,8 @@ portable source.
 | B: Foundation.List migration | `70d6010ddccbdd6b4939f2fb3c088bfe4e607de0` | Compiler-qualified and exact admissions accepted on its first migration execution |
 | H: three compiler helpers | `671685c3f0059574405a1e630dd965d421a26f05` | Compiler-qualified and exact admissions accepted on its first execution |
 | E: recursive generic-argument erasure | `cf8fbd784944a98b1e390b709685ca54c2511827` | Compiler-qualified and exact admissions accepted on its first execution |
+| M6: bounded runtime IR checker and scoped-let correction | `1b5fd12382c920944924c9d03e0851984293caa2` | Qualified under TypeScript 5.8.3, with current IR typing and separate provider acceptance |
+| Current TypeScript 7.0.2 integration | `99786185f77edf952f11989d4c9bc44028f22f11` | Same portable M6 source qualified under 7.0.2; historical recovery remains 5.8.3 |
 
 Compiler qualification, Core-provider acceptance and strict runtime SH/1 remain
 separate axes. Strict SH/1 is still false, and psconfig retains the existing PSC1
@@ -218,7 +177,7 @@ admission streams after emission. Its preserved receipts are
 and [provider acceptance](docs/selfhost-language/helper-migration-provider.json).
 The provider identity and checked-emission boundary are the same as E below.
 
-## E evidence and the remaining runtime boundary
+## Historical E evidence before the portable checker
 
 Run 37852341550: compiler job `113568120771` and provider job
 `113579690742` both succeeded on the first execution.
@@ -262,8 +221,8 @@ and [provider acceptance](docs/selfhost-language/recursive-generic-erasure-provi
 The selected authoring compiler Q remains A from
 `e91b9558d665879871b8bf0893915ae64b27c7fe`, with JavaScript SHA256
 `9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096`.
-Do not silently promote E as the seed or claim the historical S0 can consume
-the migrated source. Preserve the authenticated S0 -> A recovery route and A's
+Do not silently promote E, M6 or the TS7 compiler as the seed, or claim the
+historical S0 can consume the migrated source. Preserve the authenticated S0 -> A recovery route and A's
 qualified seed cache/artifact identities.
 
 Ordinary edits use `npm run dev:sh1`; `npm run iterate:sh1 -- ... --loop`
@@ -271,8 +230,8 @@ provides optional resident preparation reuse. Full runs also execute the bounded
 native gate before expensive selected-Q generation. Source-family and semantic
 milestones receive C1/C2/C3 plus exact provider checks, selected by
 `[sh1-qualify]` or full manual dispatch. Independent checkpoint branches may
-qualify in parallel. Both new checkpoints passed their native, compiler and
-provider gates on their first execution, without a semantic test/fix cycle.
+qualify in parallel. H and E passed their native, compiler and provider gates on their first
+execution. M6 and TS7 preserve their separate attempt histories above.
 
 H's bounded native gate took 39.951 seconds, and E's took 25.886 seconds.
 Full C1/C2/C3 generation totals were 993.651/1,011.667/991.582 seconds for H and
@@ -281,12 +240,24 @@ not a benchmark or a general speedup claim. The earlier 14.590-second
 development result used a smaller bounded gate; warm resident preparation
 measurements exclude source reads and optional emission.
 
-The active M6 implementation follows
+The current TS7 native development gate recorded **106.462 seconds** internally
+(`106461.999493 ms`), excluding the preceding `lake build`. Current C1/C2/C3
+generation totals were 1,065.963 / 1,111.846 / 1,153.540 seconds. These
+single-run stage totals are separate from the direct CLI comparison and do not
+attribute all cross-run timing differences to TypeScript.
+
+The qualified bounded M6 implementation is described in
 [docs/selfhost-language/RUNTIME_IR_PLAN.md](docs/selfhost-language/RUNTIME_IR_PLAN.md).
-Its portable expression checker covers the current IR, with scoped simultaneous
-type substitution, checked body/initializer annotations, exact function grouping,
-global value/function distinction and explicit resource failures. The host
-inventory reports that portable checker; qualification results are pending above.
+Its portable expression checker covers the active current IR, with scoped
+simultaneous type substitution, checked body/initializer annotations, exact
+function grouping, global value/function distinction and explicit resource
+failures. The current host inventory reports that portable checker.
+
+The recommended next language slice is the bounded parameter-projection
+normalizer repair in MIGRATION.md. Keep its implementation consumable by A and
+qualify direct raw-source uses of the repaired form. Replace compatibility aliases
+only after a separate explicit qualification and selection of a seed that accepts
+that authored source.
 
 Strict runtime enforcement additionally needs enabled primitive/layout/import
 and scalar/bounds/text-position contracts, erasure/backend correspondence and
@@ -302,7 +273,8 @@ that changes nondependent value parameters, a pure preparation seam, and focused
 generated-compiler qualification. Migrate source families only after capability
 evidence passes.
 
-Current M6 execution branch: psc0/sh1-ir-checker-v1.
+M6 TS5 qualification branch: psc0/sh1-ir-checker-v1.
+Current TS7 qualification branch: psc0/typescript-7-v1.
 Qualified integration branch: psc0/sh1-implementation-v1.
 Historical compiler baseline: 37f63c39d4a07189938046c64152bba25d789450.
 The historical 55-module record remains immutable.

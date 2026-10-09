@@ -1,16 +1,34 @@
 # PSC0 self-host language: findings and decisions
 
-Status: historical research baseline with a working implementation, 2026-10-08. The selected authoring seed A (`e91b9558d665879871b8bf0893915ae64b27c7fe`) and Foundation.List migration B are qualified, including their exact-stream provider checks. The three-helper migration H (`671685c3f0059574405a1e630dd965d421a26f05`) passed compiler qualification and exact provider acceptance on its first execution. The recursive generic-argument repair E (`cf8fbd784944a98b1e390b709685ca54c2511827`) passed compiler qualification and exact provider acceptance on its first execution. [IMPLEMENTATION.md](IMPLEMENTATION.md) documents commands and boundaries; [qualification-evidence.json](qualification-evidence.json) records exact results. Strict runtime profile enforcement remains pending.
+Status: historical research baseline with a qualified bounded authoring
+implementation, updated 2026-10-09. A remains the selected authoring seed.
+Foundation.List B, helper migration H and recursive generic-erasure repair E
+retain their original qualification receipts. The M6 portable runtime IR checker
+and current TypeScript 7.0.2 integration are now separately qualified, including
+their exact-stream provider checks. Full strict SH/1 and profile activation
+remain separate unfinished contracts.
 
-The isolated current-output upgrade to TypeScript 7.0.2 is documented in
-[TYPESCRIPT7.md](TYPESCRIPT7.md). Its exact package/CLI check passed
-[run 37907973917](https://github.com/dwijayuda/pskernel/actions/runs/37907973917);
-full PSC0 integration qualification is pending. Historical S0/A products retain
-their original 5.8.3 toolchain and A remains selected.
+The current qualified integration source is
+`99786185f77edf952f11989d4c9bc44028f22f11`
+([run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506)).
+Its portable M6 implementation was independently qualified under TypeScript
+5.8.3 at `1b5fd12382c920944924c9d03e0851984293caa2`
+([run 37906602597](https://github.com/dwijayuda/pskernel/actions/runs/37906602597)).
+Historical S0/A recovery keeps TypeScript 5.8.3; new PSC0 emission uses 7.0.2.
+The separate root compiler-API workspace remains on 5.8.3.
+[TYPESCRIPT7.md](TYPESCRIPT7.md) records scope, commands and measured costs.
 
-The audit and its source citations below describe the immutable baseline. Later implementation evidence is recorded separately; the historical 55-module inventory remains unchanged.
+[IMPLEMENTATION.md](IMPLEMENTATION.md) documents installed behavior and commands;
+[qualification-evidence.json](qualification-evidence.json) records exact results.
+The audit and its source citations below describe the immutable baseline. Later
+implementation evidence is separate; the historical 55-module inventory is unchanged.
 
-The implementation now accepts the bounded ordinary-parameter recursion capability and has migrated Foundation.List plus three compiler helpers. E preserves declaration generic arguments when erasure reconstructs recursive calls. Its complete C2/C3 inventories contain zero type-argument arity findings and 244 remaining call-expression typing obligations. Those remaining records require a compositional portable checker, specified in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md); they are not 244 demonstrated runtime failures. The selected A seed remains unchanged.
+The implementation accepts bounded ordinary-parameter recursion and has migrated
+Foundation.List plus three compiler helpers. E repaired ordered generic arguments
+in recursive erasure. M6 now checks complete current IR compositionally and checks
+the same IR before emission. E's historical 244 unfinished call-expression typing
+obligations remain evidence of that earlier inventory; current portable reports
+have their own accepted/completeness results and identities.
 
 Baseline: `dwijayuda/pskernel@37f63c39d4a07189938046c64152bba25d789450`, specifically `psc0/`. The later `pscv0/` implementation was not used as evidence of capabilities present in PSC0.
 
@@ -20,7 +38,7 @@ Adopt one versioned authoring contract, **PSC0-SH/1**, implemented by the portab
 
 This is a bounded PSC implementation language, not a second general-purpose compiler project. The current handwritten worker/closure encodings should become compiler implementation details. The practical bottlenecks are frontend recognition and bootstrap discipline; the names of the profiles do not themselves solve either problem.
 
-Read [SPEC.md](SPEC.md) for the language contract and remaining obligations, [MIGRATION.md](MIGRATION.md) for completed milestones and the development workflow, [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) for the next portable checker, [proposal.json](proposal.json) for the capability ledger, and [baseline-evidence.json](baseline-evidence.json) for the immutable source inventory.
+Read [SPEC.md](SPEC.md) for the language contract and remaining obligations, [MIGRATION.md](MIGRATION.md) for completed milestones and the development workflow, [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) for the installed checker and remaining strict contracts, [proposal.json](proposal.json) for the capability ledger, and [baseline-evidence.json](baseline-evidence.json) for the immutable source inventory.
 
 ## 1. Correct the premise for this directory
 
@@ -128,7 +146,7 @@ An initial incremental implementation should cache parsing per source and resume
 
 ### Native checking is a separate performance workstream
 
-On main, the old `--kernel pskernel-core` route imports a legacy generated provider, not the newly copied kernel-core source.[WORKER], [IDENTITY] An active branch, `psc0/native-core-selfhost-v1`, is implementing native integration. At the inspected `b109be0...` snapshot, its checked fixed-point workflow failed full-corpus acceptance; passing bounded provider tests did not establish a checked full compiler.[NATIVE], [RUN]
+At the historical research baseline, main's old `--kernel pskernel-core` route imported a legacy generated provider rather than the copied kernel-core source.[WORKER], [IDENTITY] The then-active branch `psc0/native-core-selfhost-v1` was implementing native integration. At the inspected `b109be0...` snapshot, its checked fixed-point workflow failed full-corpus acceptance; passing bounded provider tests did not establish a checked full compiler.[NATIVE], [RUN]
 
 That branch already has a 12-package source-tree lock, an opt-in fast path, scoped CI and Lake caching. Its fast path skips broad regression only when the preserved package trees match; it still runs the checked pipeline. It is not a cache of provider acceptance, and its tree lock alone does not cover host/config/provider/toolchain identity. Reuse its accepted work instead of duplicating it in the language branch.[NATIVELOCK], [NATIVECHECK]
 

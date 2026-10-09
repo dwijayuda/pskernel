@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "psc0-typescript7-upgrade-execution",
-  "updatedAt": "2026-10-09T09:15:00Z",
+  "updatedAt": "2026-10-09T10:28:22Z",
   "branch": "psc0/typescript-7-v1",
   "requestedVersion": "7.0.2",
   "historicalRecoveryVersion": "5.8.3",
@@ -9,7 +9,7 @@
   "selectedSeedChanged": false,
   "rootWorkspaceCompilerApiDependencyChanged": false,
   "portableM6SourceRef": "1b5fd12382c920944924c9d03e0851984293caa2",
-  "status": "historical-child-discovery-repair-pending-qualification",
+  "status": "current-psc0-compiler-qualified-runtime-ir-typing-and-selected-provider-accepted",
   "packageAvailability": "typescript7-package-evidence.json",
   "attempts": [
     {
@@ -61,11 +61,293 @@
         "Verify and retain exact frozen-resolver launcher/version before recovery build",
         "Preserve historical source, arguments, manifests and seed identities"
       ]
+    },
+    {
+      "sourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+      "sourceTree": "8daf2f7c37edf94f1c2b91332212baef6eea0139",
+      "runId": 37910429506,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37910429506",
+      "compilerJobId": 113753993100,
+      "providerJobId": 113775134434,
+      "conclusion": "success",
+      "compilerConclusion": "success",
+      "providerConclusion": "success",
+      "phase": "complete-current-source-qualification-and-independent-provider-acceptance",
+      "sourceClosureSha256": "1dbe0be4f97ad51c2898b86546590d4331b463dd080976ba4cb2c72f0e7c59a0",
+      "moduleCount": 61,
+      "sourceBytes": 1088337,
+      "currentTypeScriptVersion": "7.0.2",
+      "historicalRecoveryTypeScriptVersion": "5.8.3",
+      "passed": [
+        "Installed exact current and historical TypeScript profiles",
+        "Host syntax and bootstrap source restrictions",
+        "Actual frozen-host historical launcher/version resolution",
+        "Cold S0 recovery and authenticated TypeScript5 replay of selected A",
+        "Current native compiler and changed CLI paths",
+        "N1 native development gate and portable checker conformance",
+        "Same complete emitted compiler under both TypeScript profiles",
+        "Current-source C1/C2/C3 generation, conformance and all four C2/C3 product equalities",
+        "Independent pinned-provider acceptance of three exact admission streams"
+      ],
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+        "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+        "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+        "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+      },
+      "nativeRuntimeIrTyping": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 707753,
+        "expressionCount": 54879,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "strictSh1Qualified": false,
+        "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+      },
+      "generatedConformance": {
+        "compilerGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "behaviorObservationsPerGeneration": 59,
+        "letScopeObservationsPerGeneration": 29,
+        "letScopeCaseCount": 4,
+        "negativeIrCasesPerGeneration": 36,
+        "malformedOrForeignCarrierCasesPerGeneration": 5,
+        "resourceAndDirectTypeOperations": "Exact receipts retained in compiler evidence bundle",
+        "checkedPreparedEntry": "passed",
+        "sameInspectedIrEmitted": true,
+        "exhaustiveForAllInputs": false
+      },
+      "currentSourceC2C3": {
+        "accepted": true,
+        "traversalComplete": true,
+        "findingCount": 0,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "fullCounts": {
+          "native": {
+            "expressionCount": 54879,
+            "visitedSteps": 707753,
+            "findingCount": 0,
+            "traversalComplete": true
+          },
+          "C2": {
+            "status": "not-published-in-completed-log",
+            "fullReportArtifactPath": "dist/sh1/C2/original-ir-inventory.json"
+          },
+          "C3": {
+            "status": "not-published-in-completed-log",
+            "fullReportArtifactPath": "dist/sh1/C3/original-ir-inventory.json"
+          }
+        }
+      },
+      "historicalResolution": {
+        "passed": true,
+        "sourceRef": "37f63c39d4a07189938046c64152bba25d789450",
+        "expectedLauncher": "/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc",
+        "selectedLauncher": "/home/runner/work/_temp/psc0-typescript-5.8.3/node_modules/typescript/bin/tsc",
+        "reportedVersion": "Version 5.8.3",
+        "evidence": "typescript7-qualification.json"
+      },
+      "S0Recovery": {
+        "cacheHit": false,
+        "identitySha256": "9ff4523a020329e5cfe6374fa93e17ab267017dd622cc0d7c9f6db71209db6f0",
+        "compilerSha256": "74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76",
+        "sourceRef": "37f63c39d4a07189938046c64152bba25d789450"
+      },
+      "selectedSeedReplay": {
+        "passed": true,
+        "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+        "typescriptProfile": {
+          "version": "5.8.3",
+          "purpose": "historical-seed-recovery",
+          "arguments": []
+        },
+        "typescriptSha256": "b7d57fc37a85d8f75c7bdfcac934d8022399a8543251b172dfaab91cab5e30b1",
+        "javascriptSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+        "compileElapsedMs": 8595.649938,
+        "originalArgumentsRetained": true,
+        "evidence": "typescript7-qualification.json"
+      },
+      "sameSourceTypeScriptComparison": {
+        "status": "pass",
+        "summary": {
+          "mode": "same-source-comparison",
+          "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/full-compiler/report.json",
+          "sourceSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+          "timings": [
+            {
+              "phase": "compile-historical",
+              "version": "5.8.3",
+              "elapsedMs": 9281.561786999999
+            },
+            {
+              "phase": "compile-current",
+              "version": "7.0.2",
+              "elapsedMs": 2866.11967
+            }
+          ]
+        },
+        "timingScope": "One direct CLI compilation observation per profile of the same complete emitted compiler TypeScript source. Each elapsedMs is the profile report's phases[].compile.elapsedMs. This comparison does not establish whole-pipeline speedup, repeat-run variance, or cross-version artifact equality.",
+        "fullReportArtifactPath": "dist/typescript-profile/full-compiler/report.json",
+        "fieldsUnavailableFromCompletedLog": [
+          "sourceBytes",
+          "per-profile artifact hashes",
+          "full per-profile diagnostics and command receipts"
+        ],
+        "artifactInspection": "The exact report and phase files are retained in the compiler workflow artifact. The completed log prints the source digest and direct CLI elapsed times; unprinted report fields were not inferred."
+      },
+      "derivedTypeScriptComparison": {
+        "sourceSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+        "typescript5": {
+          "version": "5.8.3",
+          "elapsedMs": 9281.561786999999
+        },
+        "typescript7": {
+          "version": "7.0.2",
+          "elapsedMs": 2866.11967
+        },
+        "ratio": 3.2383720345494154,
+        "elapsedReductionPercent": 69.12028669556062,
+        "savedMs": 6415.442116999999,
+        "scope": "One sequential direct-CLI compilation per profile on the same full emitted compiler source, TypeScript 5 then 7; process startup, type checking and emission included; not a controlled repeated benchmark or full self-host pipeline timing."
+      },
+      "generations": [
+        {
+          "name": "C1",
+          "executingCompilerSha256": "9d8a91e890c779c6b377b8a482ae3e997a1630b360eb8d6e7c022b3964510096",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "cb8bc40a9cff4f6640d722da7d84a66affe2f5a8d614a61dd0d366a2b8e85130",
+            "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 669012.241075,
+            "admissions": 100639.40256299998,
+            "canonicalSurface": 43986.61225200002,
+            "emit": 248907.61742200004,
+            "tscAndWrite": 3416.784449999919,
+            "total": 1065962.6603569998
+          }
+        },
+        {
+          "name": "C2",
+          "executingCompilerSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+            "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 657735.50603,
+            "admissions": 99665.163971,
+            "canonicalSurface": 42982.82286800002,
+            "emit": 307976.01428800006,
+            "tscAndWrite": 3486.6032439998817,
+            "total": 1111846.111453
+          }
+        },
+        {
+          "name": "C3",
+          "executingCompilerSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+            "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+          },
+          "timingsMs": {
+            "loadAndPrepare": 672575.680808,
+            "admissions": 106870.15897400002,
+            "canonicalSurface": 45725.19203300006,
+            "emit": 324805.3441039999,
+            "tscAndWrite": 3563.868296000175,
+            "total": 1153540.245578
+          }
+        }
+      ],
+      "nativeGateTotalMs": 106461.999493,
+      "generationTimingScope": {
+        "source": "Logged generation receipt timingsMs objects retained without alteration.",
+        "emit": "Includes erasure, original IR inventory/checking, and TypeScript printing.",
+        "tscAndWrite": "Includes TypeScript compilation together with evidence writes, hashing, recipe/toolchain identity work; it is not a pure CLI timing.",
+        "total": "Elapsed generation observation on this workflow runner; changes between runs are not attributed solely to TypeScript."
+      },
+      "providerAcceptance": {
+        "accepted": true,
+        "exactStreamCount": 3,
+        "emissionWasGatedByThisCheck": false,
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+        "streams": [
+          {
+            "canonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "artifacts": [
+              "C2 compiler source",
+              "C3 compiler source"
+            ],
+            "durationMs": 1002.410885,
+            "accepted": true
+          },
+          {
+            "canonicalAdmissionsSha256": "bd9694659315e73feb2ed811953bb0b539fe363249f99212f0d3154e3f613987",
+            "artifacts": [
+              "C2 raw lean capability source",
+              "C2 raw ps capability source",
+              "C3 raw lean capability source",
+              "C3 raw ps capability source"
+            ],
+            "durationMs": 6.712974999999915,
+            "accepted": true
+          },
+          {
+            "canonicalAdmissionsSha256": "11b515897f24e6c194b8c1daf239b4941940d8204a4846e601b462e92b703af8",
+            "artifacts": [
+              "C2 raw recursive-generic fixture source",
+              "C3 raw recursive-generic fixture source"
+            ],
+            "durationMs": 5.732932999999775,
+            "accepted": true
+          }
+        ]
+      },
+      "artifactArchives": {
+        "compiler": {
+          "id": 11608909925,
+          "sizeBytes": 7337028,
+          "sha256": "0cd1e3526f66de2fe075bed9f69c21d9c71fa02b06092d3a689f5721e4ad9a6e"
+        },
+        "provider": {
+          "id": 11609599962,
+          "sizeBytes": 1223,
+          "sha256": "37f6aede62d3c872e6d2427145ef827e7c923ea10861a9081e3fd65fcb47280a"
+        }
+      },
+      "compilerEvidence": "typescript7-qualification.json",
+      "providerEvidence": "typescript7-provider.json",
+      "strictSh1Qualified": false,
+      "selectedSeedChanged": false,
+      "rootWorkspaceCompilerApiDependencyChanged": false
     }
   ],
   "claimBoundaries": [
     "The package probe and profile contract are not full PSC0 compatibility evidence.",
     "No full-compiler TypeScript performance measurement has been earned by the failed integration attempt.",
-    "A remains selected; compiler qualification, portable IR typing, provider acceptance and full strict SH/1 remain separate."
-  ]
+    "A remains selected; compiler qualification, portable IR typing, provider acceptance and full strict SH/1 remain separate.",
+    "The qualified 99786185 checkpoint has its own current-source compiler/runtime and later exact-stream provider receipts. Its direct TypeScript phase measurement is one sequential same-source pair, not a complete self-host speedup."
+  ],
+  "qualifiedSourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+  "compilerQualified": true,
+  "runtimeIrTypingQualified": true,
+  "selectedProviderAccepted": true,
+  "strictSh1Qualified": false,
+  "profileActivated": false
 }

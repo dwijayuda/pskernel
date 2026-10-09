@@ -1,6 +1,6 @@
 # PSC0-SH/1: self-host authoring contract and capability plan
 
-Status: the bounded varying-parameter recursion capability is **compiler-qualified** at the selected authoring seed A, `e91b9558d665879871b8bf0893915ae64b27c7fe`; its exact admissions passed the pinned provider. Foundation.List (B) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and its exact-stream provider check on the first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and its exact-stream provider check on the first execution. E's complete C2/C3 inventories have zero type-argument arity findings and 244 remaining call-expression typing obligations. The full strict PSC0-SH/1 profile remains pending runtime enforcement (M6), and psconfig retains the existing PSC1 bootstrap lane. The words MUST and MUST NOT describe the complete contract, including obligations still pending. [IMPLEMENTATION.md](IMPLEMENTATION.md) defines the implemented checkpoint boundaries; [qualification-evidence.json](qualification-evidence.json) distinguishes compiler, provider and strict-runtime evidence.
+Status: the bounded varying-parameter recursion capability is **compiler-qualified** at the selected authoring seed A, `e91b9558d665879871b8bf0893915ae64b27c7fe`; its exact admissions passed the pinned provider. Foundation.List (B) is qualified. The three-helper migration H at `671685c3f0059574405a1e630dd965d421a26f05` passed compiler qualification and its exact-stream provider check on the first execution. The recursive generic-argument repair E at `cf8fbd784944a98b1e390b709685ca54c2511827` passed compiler qualification and its exact-stream provider check on the first execution. E's complete C2/C3 inventories have zero type-argument arity findings and 244 remaining call-expression typing obligations. The bounded M6 runtime IR typing checkpoint at `1b5fd12382c920944924c9d03e0851984293caa2` is compiler-qualified on TypeScript 5.8.3 and has separate exact-stream provider acceptance; the current TypeScript 7 checkpoint at `99786185f77edf952f11989d4c9bc44028f22f11` also passed compiler qualification and its independent provider check. Full strict PSC0-SH/1 remains pending its remaining runtime and semantic obligations, and psconfig retains the existing PSC1 bootstrap lane. The words MUST and MUST NOT describe the complete contract, including obligations still pending. [IMPLEMENTATION.md](IMPLEMENTATION.md) defines the implemented checkpoint boundaries; [qualification-evidence.json](qualification-evidence.json) distinguishes compiler, provider and strict-runtime evidence.
 
 Scope: the PSC0 compiler implementation and its portable dependencies. Initial executable target: existing TypeScript-to-JavaScript bootstrap lane. Initial authoritative source: PSC1-compatible `.lean`, parsed by PSC0's own frontend. Existing generated `.ps` remains the canonical exchange form.
 
@@ -24,7 +24,23 @@ The historical source compatibility lane remains available during transition. A 
 | Runtime | Existing scalar/regular generic representations with explicit checks | Separately specified optional scalar/target extensions |
 | Host | No portable host IO or foreign implementation APIs | Host adapters remain outside the compiler language |
 
+### Current authoring forms
+
 Keep explicit types on match-valued local lets when no expected result type is available. “Inferred locals” means the existing supported inference cases, not a promise of full Lean inference.[AST], [LET], [MATCH]
+
+The M6 source makes three existing frontend/normalizer boundaries concrete:
+
+| Situation | Supported source form | Current boundary |
+| --- | --- | --- |
+| Callback argument | Bind a typed lambda to a local with an explicit function type, then pass that local by name. | A typed lambda is accepted as a let initializer; an inline parenthesized lambda in an ordinary argument is outside the pinned argument grammar. |
+| Match-valued let initializer | Give the local its result type before the initializer. | The current match elaborator needs an expected result type; general match-result inference is not installed. |
+| Projection from an original record parameter during changing-parameter normalization | Inside the existing root-match branch, bind the record parameter to a typed local and project the local. | Normalization renames original parameter binders, including fixed parameters, without rewriting a dotted reference rooted at such a parameter. |
+
+These restrictions are established by the actual parser, term elaborator and recursion normalizer; M6 accommodates them without granting new syntax or inference capabilities.[M6PARSE], [M6TERM], [M6RECURSION]
+
+For example, M6 uses `let limits : PsIrCheckOptions := options;` before `limits.maxTypeSteps`, and `let currentState : PsIrCheckState := state;` before projections of the changing state. The ordinary initializer reference is rewritten to the hygienic parameter identity; the branch-local alias keeps its own name. Keep these aliases inside the structural-match branches so the recognizer still sees the supported root match. This restriction applies when changing-parameter normalization actually runs, rather than to every recursive function or every field projection.[M6CHECK]
+
+The planned two-file parameter-projection repair has separate acceptance requirements in [MIGRATION.md](MIGRATION.md#follow-on-repair--parameter-projections-in-recursion-normalization). It must preserve exact full-name priority and the existing first-segment projection path; only an absent first-segment base permits a longest proper multi-segment local prefix. Exact recursion-identity helpers must remain exact-only, and field-typing failure must not trigger another lookup. This design is future work. Its implementation must remain consumable by selected seed A. Direct projection syntax cannot replace compatibility aliases in compiler source merely because a newer candidate accepts it; a seed that accepts that authored source must first be qualified and selected.
 
 ## 2. Source and module rules
 
@@ -171,24 +187,37 @@ For explicit state, document whether a function is `State -> Except Error (Value
 
 ## 6. Runtime IR validation
 
-Current PSC0 erasure returns the original raw `PsVerifiedIrModule`; TS accepts its `.unknown` type. The installed inventory is diagnostic. The generic-erasure repair E removes all 19 historical type-argument arity findings from its complete C2/C3 inventories, while 244 call-expression typing obligations remain. This repairs missing recursive-call generic arguments; it does not supply the full runtime checker.
+### Installed bounded API
 
-Implement the checker for this actual model rather than copying later wrapper APIs wholesale. [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) gives the next coherent implementation and its acceptance boundaries, including function-valued globals, compositional expression types, simultaneous scoped substitution and explicit exhaustion.[API], [IR], [TYPE]
+M6 installs portable runtime typing for the existing `PsVerifiedIrModule`. The implementation and its qualification status are recorded in [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md); the current-source compiler and provider results remain separate receipts in [qualification-evidence.json](qualification-evidence.json). The checker does not depend on a replacement IR or on a host implementation of expression inference.
 
-The checker MUST cover:
+The M6 TS5 baseline at `1b5fd12382c920944924c9d03e0851984293caa2` passed [run 37906602597](https://github.com/dwijayuda/pskernel/actions/runs/37906602597). Native checking accepted the complete 61-module compiler IR with zero findings. N1/C1/C2/C3 each passed 59 runtime observations, 36 negative IR cases and five carrier refusals, plus the resource, substitution and checked-entry cases. C2 and C3 accepted the complete current-source IR with zero findings and checked that same IR before emission; all four deterministic products agree. N1 TS/JS also agree with C2/C3. Exact counts, identities and the separate three-stream provider acceptance are retained in the [compiler/runtime receipt](runtime-ir-checker-qualification.json) and [provider receipt](runtime-ir-checker-provider.json). The provider ran after emission.
 
-- Declared names and lexical variable scope, including legal shadowing represented by distinct identities.
-- Named type arity, scoped type parameters and runtime type closure.
-- Runtime function argument/result types and arity after existing application normalization.
-- Record/constructor field layouts and projection types.
-- Exhaustive, nonduplicate flat matches.
-- Intrinsic signatures and the selected primitive ledger.
-- Literal/result-type consistency and the selected scalar capability's range, signedness, canonicalization and target-width invariants.
-- Import/call closure and unresolved runtime `.unknown`.
+The current TS7 checkpoint at `99786185f77edf952f11989d4c9bc44028f22f11` separately passed [run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506), including full C2/C3 qualification and the independent provider check. Its current-source IR reports are accepted and complete with zero findings, with the same IR checked before emission. The [TS7 compiler/runtime receipt](typescript7-qualification.json) and [TS7 provider receipt](typescript7-provider.json) retain this profile's exact identities. The current C2/C3 compiler JS hash is `37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161`; the TS5 baseline retains its own hash. Neither checkpoint activates strict SH/1 or replaces selected authoring seed A.
 
-Continue report mode on the entire existing closure while the portable checker is implemented. Distinguish deliberate erasure, supported parametric types and actual unknown runtime types. Enforce it on new SH/1 source only after the migration has accounted for historical cases. A wrapper name is optional; actual checks and evidence are required.
+`psCheckVerifiedIrModule` checks module names and signatures, nearest lexical bindings, named-type arity and type-parameter scope, and the runtime type of each supported expression. It checks declaration/lambda results and let initializers against their annotations; infers function-valued callees compositionally; checks generic/runtime call arity; and checks record/constructor fields, projections, and flat match coverage. The active intrinsic ledger gives operand and result types. Explicit `.unknown` is an error, including during equality; it is never a wildcard.[M6CHECK], [M6TYPES]
 
-Kernel admission establishes core typing relative to its environment. The IR check establishes additional representational constraints. Semantic correspondence/runtime tests address lowering correctness. These claims MUST remain distinguishable.
+Caller and callee type scopes remain separate. Generic instantiation uses simultaneous substitution: selecting a replacement returns it unchanged, even when caller and callee reuse names such as T0 and T1. Function parameter grouping is exact: `Function([A], Function([B], R))` differs from `Function([A, B], R)`. A nongeneric global with zero runtime parameters has its declared result type as a value; that result may itself be a function. Generic schemes require direct explicit instantiation and do not become first-class polymorphic values.[M6CHECK], [M6TYPES]
+
+`psTsEmitCheckedModule` requires an accepted, complete report and then passes the exact checked IR to the original emitter. `psCompilerCheckedTypeScriptFromPrepared` exposes that route from an admission-ready prepared module. These entry points are defined in `Ps.BackendTs.Checked`. The raw erasure and emission APIs still exist; a checked entry point does not globally activate strict profile enforcement.[M6CHECKED]
+
+### Bounds and evidence meaning
+
+Before synchronous lookup or binding scans, a portable preflight visits every model/list occurrence and bounds each individual string's UTF-8 size. Input preflight and expression dispatch each have their own `maxSteps` allowance; each type well-formedness, equality or substitution operation has a `maxTypeSteps` allowance. These are bounded-work scopes, not a single wall-clock, allocation or total-operation budget. Exhaustion rejects and marks traversal incomplete.[M6CHECK], [M6SIZE]
+
+`maxFindings` limits retained diagnostic details without stopping the dispatcher. The total counts failed checking obligations; a type operation reports its first error rather than every malformed descendant. Host per-code counts describe all findings only when all details were retained. IR owner/path diagnostics are structural paths, not recovered source positions.[M6HOST]
+
+The host validates its generated-value carriers and serializes the portable report. It permits the old diagnostic inventory only at an explicit immutable-recovery or selected-authoring-seed boundary. That legacy route always records `runtimeIrTypingAccepted: false`. Preserve E's complete historical C2/C3 inventories—zero type-argument arity findings and 244 unfinished expression-typing obligations—as evidence about those exact executions. They are neither 244 established runtime failures nor an M6 acceptance result.[M6HOST]
+
+### Active scope and remaining strict obligations
+
+The installed typing ledger admits Nat, Int, Bool, Char, String and Unit, plus the declared arity-one Array runtime type and its checked intrinsic signatures. The optional fixed-width, floating and word-sized variants remain in the IR model, but their use in a checked module is refused. External imports, empty inductive layouts and empty matches are also explicit refusals in this slice.[M6TYPES], [M6CHECK]
+
+A successful report establishes this bounded runtime typing contract. The full strict profile still needs the applicable primitive laws, literal/canonical value rules, bounds and text-position validity, source/IR evaluation correspondence, and erasure/backend layout and semantic preservation. New scalar or import capabilities need their own target/ABI qualification before being enabled; unused optional extensions need not become prerequisites for the existing closed compiler lane. A post-erasure type check cannot recreate a deleted bounds proof.
+
+M6's focused runtime fixtures also exposed and cover a bounded let-emission repair: an initializer that refers to the old same-named binding must be evaluated outside the new binding's scope, including suspended calls and captured closures. The generator path now preserves that scope, and the tail optimizer declines unsafe batching for this case. This targeted correction supplies evidence for the tested forms, not a general lowering-preservation proof.[M6EXPR], [M6MOD], [M6FIXTURES]
+
+Kernel admission establishes Core typing relative to the admitted environment. Runtime IR checking establishes additional representational constraints on a particular module. Compiler qualification establishes the declared current-source generation and execution evidence. Semantic correspondence addresses preservation through lowering. These claims MUST remain distinguishable; none of the first three alone activates strict PSC0-SH/1 or selects a replacement for authoring seed A.
 
 ## 7. Capability evidence and enforcement
 
@@ -206,7 +235,7 @@ Where normalization is intended to preserve canonical admissions exactly, requir
 
 A capability is **proposed** until implementation exists; **implemented** after focused checks; **generated-tested** only after the generated compiler consumes ordinary authoring examples; and **compiler-qualified** after the required current-source generation equality and capability/runtime tests.
 
-Qualification has separate axes. A **compiler-qualified seed** can support controlled migration with its limited claims. **Strict SH/1 qualification** additionally requires all mandatory capabilities and runtime IR enforcement (M6). **Kernel-checked qualification** requires actual selected-provider acceptance and is recorded independently. A compiler-only checkpoint does not imply either stricter claim.
+Qualification has separate axes. A **compiler-qualified seed** can support controlled migration with its limited claims. **Strict SH/1 qualification** additionally requires all mandatory capabilities and the complete enabled runtime/semantic contract; the bounded M6 typing API alone does not complete that contract. **Kernel-checked qualification** requires actual selected-provider acceptance and is recorded independently. A compiler-only checkpoint does not imply either stricter claim.
 
 The seed manifest MUST include the language/capability set, normalizer version, exact executing compiler, source closure, prelude/runtime, target/toolchain, provider identity and evidence level. Do not let a profile string grant a stronger claim than the evidence.
 
@@ -232,3 +261,15 @@ Authoring readability and runtime efficiency are separate acceptance dimensions.
 [MATCH]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/elab/src/Ps/Elab/Term.lean#L1919-L1938
 [EOPEN]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/erasure/src/Ps/Erasure/Definition.lean#L224-L249
 [EREC]: https://github.com/dwijayuda/pskernel/blob/37f63c39d4a07189938046c64152bba25d789450/psc0/packages/erasure/src/Ps/Erasure/Expr.lean#L987-L1063
+
+[M6PARSE]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean
+[M6TERM]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/elab/src/Ps/Elab/Term.lean
+[M6RECURSION]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/elab/src/Ps/Elab/Recursion.lean
+[M6CHECK]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean
+[M6TYPES]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean
+[M6SIZE]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean
+[M6CHECKED]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean
+[M6HOST]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/scripts/original-ir-inventory.mjs
+[M6EXPR]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean
+[M6MOD]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean
+[M6FIXTURES]: https://github.com/dwijayuda/pskernel/blob/956e2c3345d8d634904ff812b31d3b84fc9c23d9/psc0/scripts/sh1-ir-checker-conformance.mjs

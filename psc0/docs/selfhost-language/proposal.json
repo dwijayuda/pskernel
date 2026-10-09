@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "kind": "language-contract-and-migration-ledger",
   "id": "PSC0-SH/1",
-  "status": "bounded-recursion-multiple-source-families-and-recursive-generic-erasure-compiler-qualified; strict-runtime-enforcement-pending",
+  "status": "bounded-recursion-source-families-recursive-generic-erasure-and-ts5-ts7-runtime-ir-typing-compiler-qualified; strict-runtime-enforcement-pending",
   "activation": {
     "selectedByPsconfig": false,
     "enforcementInstalled": false,
@@ -13,7 +13,8 @@
       "runId": 37831951758
     },
     "qualifiedSeedManifest": "selfhost-seed.json",
-    "enforcementMeaning": "Complete strict profile enforcement remains pending; bounded recursion and ordered recursive generic-argument preservation have separate compiler/provider evidence."
+    "enforcementMeaning": "Complete strict profile enforcement remains pending. M6 installs a bounded original-IR typing API and checked emission entry; compiler qualification, runtime typing, provider acceptance and profile activation retain separate evidence.",
+    "runtimeIrTypingApiPresent": true
   },
   "repository": "dwijayuda/pskernel",
   "baselineRef": "37f63c39d4a07189938046c64152bba25d789450",
@@ -24,12 +25,33 @@
     "generatedCanonicalKind": "proofScript",
     "initialSourceAuthority": "handwritten .lean",
     "psAuthorityChange": "optional-after-parity",
-    "newPunctuationRequired": false
+    "newPunctuationRequired": false,
+    "currentConstraints": [
+      {
+        "id": "match-let-expected-type",
+        "form": "Explicit result type on a match-valued let initializer.",
+        "scope": "Existing expected-type requirement of the PSC match elaborator; not a new M6 language rule."
+      },
+      {
+        "id": "typed-callback-local",
+        "form": "Bind a typed lambda to an explicitly typed local, then pass the local name as the callback argument.",
+        "scope": "The pinned parser does not accept inline parenthesized lambdas in ordinary argument positions."
+      },
+      {
+        "id": "normalized-parameter-projection-alias",
+        "form": "Inside the existing root-match branch, bind the original record parameter to a typed local and project the local.",
+        "scope": "Applies to original fixed or varying parameters when changing-parameter normalization renames their binders."
+      }
+    ]
   },
   "target": {
     "minimum": "original TypeScript -> JavaScript",
     "typescriptBaseline": "5.8.3",
-    "allCopiedBackendsRequired": false
+    "allCopiedBackendsRequired": false,
+    "typescriptCurrent": "7.0.2",
+    "typescriptCurrentQualification": "compiler-qualified-and-provider-accepted",
+    "historicalRecoveryTypeScript": "5.8.3",
+    "toolchainEvidence": "TYPESCRIPT7.md"
   },
   "packageScope": [
     "backend-ts",
@@ -129,7 +151,55 @@
         "scripts/sh1-capabilities.mjs",
         "test/fixtures/selfhost-sh1-accumulators.lean",
         "test/fixtures/selfhost-sh1-accumulators.ps"
-      ]
+      ],
+      "currentLimitation": {
+        "id": "parameter-projection-prefix-renaming",
+        "status": "source-proven-normalizer-gap",
+        "affectedWhen": "Changing-parameter normalization renames original parameters, including fixed record parameters.",
+        "cause": "Dotted references rooted at those parameters survive while their binders receive hygienic internal names.",
+        "compatibilityForm": "Use a typed branch-local alias of the original record parameter and project the alias.",
+        "implementationReference": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+        "plannedRepair": {
+          "status": "design-complete-implementation-and-qualification-pending",
+          "acceptance": [
+            "Preserve exact local/global qualified-name priority and the existing first-segment path, including a selected field chain whose typing fails.",
+            "Resolve the complete multi-segment hygienic base and chained field suffixes with no global-prefix expansion or magic-name exemption.",
+            "Respect resolved parameter identity and let/lambda/pattern shadowing.",
+            "Cover both fixed record parameters and generalized record state.",
+            "Keep exact identity helpers unchanged and retain refusals when projected values would masquerade as unchanged whole parameters or constructor children.",
+            "Preserve public binder order/kinds, structural provenance, simultaneous arguments and existing dependent/recursive-escape refusals.",
+            "Keep implementation source compilable by selected A while repaired native/generated compilers consume ordinary raw projection examples.",
+            "Review the whole affected reference class, then require focused runtime/original-IR evidence, exact-current-source C2/C3 equality and independent provider receipts.",
+            "Select a qualified compiler that accepts the new authored form before removing compatibility aliases from compiler source."
+          ],
+          "implementationAreas": [
+            "packages/elab/src/Ps/Elab/Term.lean",
+            "packages/elab/src/Ps/Elab/Recursion.lean"
+          ],
+          "design": {
+            "sourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+            "sharedResolver": "Return an untyped resolved base and remaining field suffix from Term.lean; use the same selection policy in projection elaboration and parameter-reference rewriting.",
+            "recursionEnvironment": "Thread immutable PsEnvironment through the recursion walk/normalizer.",
+            "priority": [
+              "Resolve the complete exact local/global name first.",
+              "Otherwise preserve an existing first-segment local/global projection base whenever it resolves.",
+              "Only an absent first-segment base permits the longest proper multi-segment LOCAL prefix.",
+              "Type the selected base and field chain once; do not retry lookup after a field-typing error."
+            ],
+            "prohibitedExpansion": [
+              "global-prefix expansion",
+              "magic internal-name exemptions",
+              "projection-base identity in unchanged-argument or constructor-child classification"
+            ],
+            "exactIdentityHelpers": [
+              "psElabRecursionLocalId",
+              "psElabSyntaxLocalId"
+            ],
+            "exactIdentityRule": "These helpers remain exact-only; state.field cannot inherit the identity of state.",
+            "parserBoundary": "Raw binders have one segment; the longer local-prefix path handles complete multi-segment hygienic names."
+          }
+        }
+      }
     },
     {
       "id": "control.explicit-error-state",
@@ -159,7 +229,7 @@
     {
       "id": "runtime.closed-ir",
       "tier": "required-new-before-strict-promotion",
-      "current": "report-only-inventory-and-qualified-recursive-generic-repair; compositional-type-checker-and-strict-validation-pending",
+      "current": "qualified-recursive-generic-repair; bounded-portable-runtime-typing-ts5-and-ts7-qualified; strict-validation-pending",
       "proposal": "Report original IR first; enforce scope, arity, layouts, primitive signatures, runtime type closure and import closure once inventoried. Include literal/result-type and selected scalar range/width invariants.",
       "fixtures": [
         "unbound-runtime-variable",
@@ -212,9 +282,11 @@
         "strictSh1Qualified": false
       },
       "nextBoundedWork": [
-        "Implement portable typed environments/signatures, callee-expression inference, simultaneous scoped substitution and exact argument/result checking over the existing IR.",
-        "Integrate typed primitive/layout/import closure and explicit exhaustion; have the host report the portable checker.",
-        "Gate strict emission on successful validation of the same IR object and separately close remaining erasure/backend semantic obligations."
+        "Retain the separately earned TS5 and current-TS7 native/generated/runtime/compiler/provider checkpoints without relabeling historical inventories.",
+        "Implement and qualify the planned two-file parameter-projection repair using source consumable by selected A; remove compatibility aliases only after separate explicit qualified seed selection.",
+        "Keep checked emission of the exact inspected IR, pre-emission refusal of malformed/incomplete input, and bounded development gates as regression contracts for future source milestones.",
+        "Close the remaining enabled primitive/value, bounds/text-position, layout and erasure/backend correspondence requirements before strict SH/1 promotion.",
+        "Keep optional scalar, import ABI and empty-layout/match refusals explicit until the applicable capability is specified and qualified."
       ],
       "observedHistory": [
         {
@@ -281,7 +353,9 @@
         "selectedProviderAccepted": true,
         "strictSh1Qualified": false,
         "evidence": "docs/selfhost-language/qualification-evidence.json"
-      }
+      },
+      "installedBoundedCheckpoint": "#/runtimeIrTypingCheckpoint",
+      "historicalInventoryMeaning": "The existing observed, previousObserved and observedHistory objects retain pre-M6 diagnostic executions. Their counts are not portable-checker acceptance results."
     },
     {
       "id": "source.declaration-wrappers",
@@ -436,7 +510,8 @@
       "dependsOn": [
         "M3"
       ],
-      "status": "planned-extensions"
+      "status": "planned-extensions",
+      "nextBoundedCandidate": "Parameter-projection hygiene in changing-parameter normalization; acceptance is recorded in recursion.varying-parameters.currentLimitation."
     },
     {
       "id": "M6",
@@ -451,7 +526,7 @@
         "M4",
         "M5"
       ],
-      "status": "recursive-generic-argument-repair-compiler-qualified-and-provider-accepted; portable-expression-checker-and-strict-enforcement-pending"
+      "status": "recursive-generic-argument-repair-compiler-qualified-and-provider-accepted; bounded-portable-runtime-typing-ts5-and-ts7-qualified-and-provider-accepted; complete-strict-contract-pending"
     },
     {
       "id": "M7",
@@ -565,6 +640,21 @@
         "exact-admissions-prelude-provider-options-identity"
       ],
       "orthogonalTo": "compiler and strict-profile qualification"
+    },
+    "runtimeIrTyping": {
+      "requires": [
+        "accepted-and-complete-original-IR-reports-for-exact-current-source",
+        "native-and-generated-compositional-typing-positive-negative-fixtures",
+        "same-IR-checked-emission-and-rejection-before-emitter",
+        "simultaneous-scoped-substitution-and-exact-function-groups",
+        "explicit-resource-exhaustion-and-honest-capped-diagnostics",
+        "host-carrier-validation-before-portable-execution",
+        "executing-compiler-source-options-and-toolchain-identities"
+      ],
+      "stage": "M6-bounded-runtime-typing",
+      "impliesCompilerFixedPoint": false,
+      "impliesStrictSh1": false,
+      "impliesKernelChecked": false
     }
   },
   "currentGenerationContract": {
@@ -583,9 +673,10 @@
       "C2 = C1(B)",
       "C3 = C2(B)"
     ],
-    "currentSourceMeaning": "After selecting Q from A, the B symbol in the executable equation denotes each exact current authored source checkpoint, including helper migration H and generic-erasure E.",
-    "inventoryMeaning": "A generation receipt describes IR produced by its executing compiler. E's old-Q C1 full-source report legitimately differs from repaired C2/C3; fixtures executed by new C1 exercise the repair.",
-    "definitionsApplyTo": "The historical initial A qualification before selecting Q; afterSeedPromotion defines later current-source checkpoints."
+    "currentSourceMeaning": "After selecting Q from A, the B symbol in the executable equation denotes each exact current authored source checkpoint, including H, E and the bounded M6 runtime-typing implementation.",
+    "inventoryMeaning": "A generation receipt describes IR produced by its executing compiler. Preserve historical E inventories separately. A pinned pre-checker Q may produce C1's legacy report while the new C1 executable exercises M6; later current-source reports require the portable checker. Legacy inventory never grants runtime IR typing acceptance.",
+    "definitionsApplyTo": "The historical initial A qualification before selecting Q; afterSeedPromotion defines later current-source checkpoints.",
+    "toolchainMeaning": "Compare C2/C3 within one exact current profile. TS7 current qualification and TS5 historical seed recovery have separate CLI/option identities; neither cross-version JS equality nor inherited TS5 acceptance is assumed."
   },
   "firstSourceMigration": {
     "sourceRef": "70d6010ddccbdd6b4939f2fb3c088bfe4e607de0",
@@ -626,6 +717,321 @@
     "selectedProviderAccepted": true,
     "strictSh1Qualified": false,
     "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "evidence": "docs/selfhost-language/qualification-evidence.json"
+  },
+  "runtimeIrTypingCheckpoint": {
+    "status": "ts5-and-current-ts7-compiler-and-runtime-typing-qualified-provider-accepted",
+    "implementationRef": "1b5fd12382c920944924c9d03e0851984293caa2",
+    "reviewedIntegrationRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+    "selectedAuthoringSeedRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
+    "entryPoints": [
+      "psCheckVerifiedIrModule",
+      "psTsEmitCheckedModule",
+      "psCompilerCheckedTypeScriptFromPrepared"
+    ],
+    "implementationPaths": [
+      "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+      "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+      "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+      "packages/backend-ts/src/Ps/BackendTs/Checked.lean"
+    ],
+    "activeScalarTypes": [
+      "Nat",
+      "Int",
+      "Bool",
+      "Char",
+      "String",
+      "Unit"
+    ],
+    "runtimeTypeEntries": [
+      {
+        "name": "Array",
+        "arity": 1
+      }
+    ],
+    "refusedInCheckedModules": [
+      "unknown-runtime-types",
+      "fixed-width-floating-and-word-sized-scalar-types-or-operations",
+      "external-import-ABI",
+      "empty-inductive-layouts-and-empty-matches",
+      "uninstantiated-generic-values",
+      "generic-zero-runtime-parameter-values"
+    ],
+    "checkingScope": [
+      "module-signature-and-layout-name-closure",
+      "nearest-lexical-term-bindings-and-scoped-type-parameters",
+      "exact-runtime-function-parameter-groups",
+      "simultaneous-generic-substitution-with-verbatim-replacements",
+      "compositional-callee-and-expression-types",
+      "annotated-let-initializers-and-lambda/declaration-results",
+      "record/constructor-fields-positional-constructor-order-projections-and-flat-match-coverage",
+      "active-literal-and-intrinsic-operand/result-types",
+      "same-IR-checked-emission"
+    ],
+    "resources": {
+      "defaults": {
+        "maxSteps": 5000000,
+        "maxTypeSteps": 65536,
+        "maxFindings": 1000
+      },
+      "maxSteps": "Separate whole-input preflight and dispatcher allowances; every input/list occurrence is visited, and each individual string has an initial-fuel UTF-8 size bound.",
+      "maxTypeSteps": "Per type well-formedness, equality or simultaneous substitution operation.",
+      "maxFindings": "Retained diagnostic detail cap; total failed-obligation count and dispatcher traversal continue.",
+      "visitedSteps": "Completed preflight plus dispatcher steps; excludes internal type/lookup operations, and failed preflight returns zero.",
+      "exhaustion": "Reject with incomplete traversal; never accept unchecked input at zero fuel.",
+      "countsMeaning": "Failed checking obligations; a type operation reports its first error rather than every malformed descendant.",
+      "limitsMeaning": "Bounded work scopes, not a single wall-clock, total-byte or allocation budget."
+    },
+    "hostBoundary": {
+      "carrierChecks": "Current compiler-instance constructor ownership, supported scalar carriers, malformed/cyclic input and carrier resource limits.",
+      "semanticChecker": "Portable Ps.CompilerIr.Check only; host serializes reports.",
+      "legacyAllowedOnlyAt": [
+        "immutable-seed-recovery",
+        "selected-authoring-seed"
+      ],
+      "legacyRuntimeIrTypingAccepted": false,
+      "cappedPerCodeCounts": "findingCountsCoverage is retained-details-only when finding details were omitted."
+    },
+    "boundedBackendRepair": {
+      "scope": "Preserve the old binding in a same-named let initializer, including suspended calls and closure capture, while the body uses the new binding.",
+      "implementation": "Use a generator-parameter boundary when the conservative name-use scan detects the initializer reference; refuse that case in direct tail-loop batching.",
+      "fixtures": [
+        "shadowOldScope",
+        "shadowWrappedCall",
+        "shadowClosure",
+        "shadowNestedTail"
+      ],
+      "preservationClaim": "Focused behavior evidence only; no general lowering-preservation proof."
+    },
+    "qualifications": {
+      "baselineTs5": {
+        "sourceRef": "1b5fd12382c920944924c9d03e0851984293caa2",
+        "runId": 37906602597,
+        "typescriptVersion": "5.8.3",
+        "status": "compiler-and-runtime-ir-typing-qualified-provider-accepted",
+        "compilerQualified": true,
+        "runtimeIrTypingQualified": true,
+        "selectedProviderAccepted": true,
+        "strictSh1Qualified": false,
+        "sourceClosureSha256": "1dbe0be4f97ad51c2898b86546590d4331b463dd080976ba4cb2c72f0e7c59a0",
+        "compilerSha256": "eb9768db1a10ca6da40666914e116431646a6fcdeca50c3a2f5e6dd250a031af",
+        "receipt": "runtime-ir-checker-qualification.json",
+        "compilerJobId": 113741458448,
+        "providerJobId": 113763408946,
+        "moduleCount": 61,
+        "sourceBytes": 1088337,
+        "providerReceipt": "runtime-ir-checker-provider.json",
+        "nativeFullIr": {
+          "accepted": true,
+          "traversalComplete": true,
+          "expressionCount": 54879,
+          "visitedSteps": 707753,
+          "findingCount": 0,
+          "nativeFixtureCases": 8,
+          "sameIrCheckedEmission": true,
+          "checkedRawTypeScriptParity": true
+        },
+        "generatedConformance": {
+          "generations": [
+            "N1",
+            "C1",
+            "C2",
+            "C3"
+          ],
+          "behaviorObservationsPerGeneration": 59,
+          "negativeIrCasesPerGeneration": 36,
+          "carrierRefusalsPerGeneration": 5,
+          "additionalCases": [
+            "input-preflight-and-type-operation-exhaustion",
+            "simultaneous-nested-generic-substitution",
+            "diagnostic-detail-cap",
+            "checked-prepared-entry",
+            "compiler-instance-carrier-ownership"
+          ],
+          "status": "pass",
+          "exhaustiveForAllInputs": false
+        },
+        "fullCompilerIr": {
+          "C2": {
+            "accepted": true,
+            "traversalComplete": true,
+            "findingCount": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "expressionCount": null,
+            "visitedSteps": null,
+            "countsStatus": "not-published-in-completed-log",
+            "fullReportArtifactPath": "dist/sh1/C2/original-ir-inventory.json"
+          },
+          "C3": {
+            "accepted": true,
+            "traversalComplete": true,
+            "findingCount": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "expressionCount": null,
+            "visitedSteps": null,
+            "countsStatus": "not-published-in-completed-log",
+            "fullReportArtifactPath": "dist/sh1/C3/original-ir-inventory.json"
+          }
+        },
+        "fixedPoint": {
+          "comparedGenerations": [
+            "C2",
+            "C3"
+          ],
+          "productsEqual": true,
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+            "javascriptSha256": "eb9768db1a10ca6da40666914e116431646a6fcdeca50c3a2f5e6dd250a031af"
+          },
+          "nativeToC2C3TypeScriptEquality": true,
+          "nativeToC2C3JavaScriptEquality": true
+        },
+        "providerBoundary": {
+          "acceptedDistinctStreams": 3,
+          "accepted": true,
+          "emissionWasGatedByThisCheck": false,
+          "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+          "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+          "exactStreamReceipt": "runtime-ir-checker-provider.json"
+        }
+      },
+      "currentTs7": {
+        "sourceRef": "99786185f77edf952f11989d4c9bc44028f22f11",
+        "runId": 37910429506,
+        "typescriptVersion": "7.0.2",
+        "historicalRecoveryTypeScriptVersion": "5.8.3",
+        "status": "compiler-and-runtime-ir-typing-qualified-provider-accepted",
+        "compilerQualified": true,
+        "runtimeIrTypingQualified": true,
+        "selectedProviderAccepted": true,
+        "strictSh1Qualified": false,
+        "sourceClosureSha256": "1dbe0be4f97ad51c2898b86546590d4331b463dd080976ba4cb2c72f0e7c59a0",
+        "compilerSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161",
+        "receipt": "typescript7-qualification.json",
+        "attemptHistory": "TYPESCRIPT7.md",
+        "compilerJobId": 113753993100,
+        "compilerConclusion": "success",
+        "providerJobId": 113775134434,
+        "providerStatus": "success",
+        "providerReceipt": "typescript7-provider.json",
+        "providerBoundary": {
+          "acceptedDistinctStreams": 3,
+          "accepted": true,
+          "emissionWasGatedByThisCheck": false,
+          "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+          "binarySha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+          "exactStreamReceipt": "typescript7-provider.json"
+        },
+        "moduleCount": 61,
+        "sourceBytes": 1088337,
+        "nativeFullIr": {
+          "accepted": true,
+          "traversalComplete": true,
+          "expressionCount": 54879,
+          "visitedSteps": 707753,
+          "findingCount": 0,
+          "nativeFixtureCases": 8,
+          "sameIrCheckedEmission": true,
+          "checkedRawTypeScriptParity": true
+        },
+        "generatedConformance": {
+          "generations": [
+            "N1",
+            "C1",
+            "C2",
+            "C3"
+          ],
+          "behaviorObservationsPerGeneration": 59,
+          "negativeIrCasesPerGeneration": 36,
+          "carrierRefusalsPerGeneration": 5,
+          "additionalCases": [
+            "input-preflight-and-type-operation-exhaustion",
+            "simultaneous-nested-generic-substitution",
+            "diagnostic-detail-cap",
+            "checked-prepared-entry",
+            "compiler-instance-carrier-ownership"
+          ],
+          "status": "pass",
+          "exhaustiveForAllInputs": false
+        },
+        "fullCompilerIr": {
+          "C2": {
+            "accepted": true,
+            "traversalComplete": true,
+            "findingCount": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "expressionCount": null,
+            "visitedSteps": null,
+            "countsStatus": "not-published-in-completed-log",
+            "fullReportArtifactPath": "dist/sh1/C2/original-ir-inventory.json"
+          },
+          "C3": {
+            "accepted": true,
+            "traversalComplete": true,
+            "findingCount": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "expressionCount": null,
+            "visitedSteps": null,
+            "countsStatus": "not-published-in-completed-log",
+            "fullReportArtifactPath": "dist/sh1/C3/original-ir-inventory.json"
+          }
+        },
+        "fixedPoint": {
+          "comparedGenerations": [
+            "C2",
+            "C3"
+          ],
+          "productsEqual": true,
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "a40fae26dac09196053ac2e2ad861a2018953b45677d2316ec9861967f08bc12",
+            "normalizedCanonicalAdmissionsSha256": "8dbd60580cae617312ee92edc04f2c570a23176964daf1bf2d72a839b136071c",
+            "typescriptSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+            "javascriptSha256": "37ab7de713295b7a2143f1df92b746f97e5a73a8177e906f406fde4a474c0161"
+          },
+          "nativeToC2C3TypeScriptEquality": true,
+          "nativeToC2C3JavaScriptEquality": true
+        },
+        "sameSourceTypeScriptComparison": {
+          "status": "pass",
+          "sourceSha256": "f20c9132ae2f8adade08346b0457f6bb02b6e5145097116d2a827121304a8f70",
+          "timings": [
+            {
+              "phase": "compile-historical",
+              "version": "5.8.3",
+              "elapsedMs": 9281.561786999999
+            },
+            {
+              "phase": "compile-current",
+              "version": "7.0.2",
+              "elapsedMs": 2866.11967
+            }
+          ],
+          "timingScope": "One direct CLI compilation observation per profile of the same complete emitted compiler TypeScript source. Each elapsedMs is the profile report's phases[].compile.elapsedMs. This comparison does not establish whole-pipeline speedup, repeat-run variance, or cross-version artifact equality.",
+          "fullReportArtifactPath": "dist/typescript-profile/full-compiler/report.json",
+          "fieldsUnavailableFromCompletedLog": [
+            "sourceBytes",
+            "per-profile artifact hashes",
+            "full per-profile diagnostics and command receipts"
+          ],
+          "evidence": "typescript7-qualification.json#/sameSourceTypeScriptComparison"
+        }
+      }
+    },
+    "strictSh1Qualified": false,
+    "profileActivated": false,
+    "doesNotEstablish": [
+      "complete-primitive-or-canonical-value-laws",
+      "bounds-or-UTF8-position-validity",
+      "source-erasure-and-target-layout-correspondence",
+      "general-erasure/backend-semantic-preservation",
+      "optional-scalar-or-external-import-ABI-capabilities",
+      "provider-acceptance-from-typing-alone",
+      "strict-SH/1-or-unrestricted-PSC1/Lean",
+      "new-authoring-seed-selection"
+    ],
     "evidence": "docs/selfhost-language/qualification-evidence.json"
   }
 }

@@ -1,18 +1,29 @@
 # PSC0 SH/1 implementation and qualification
 
-Status: implementation A, Foundation.List migration B, the three-helper migration H
-and recursive generic-erasure repair E are compiler-qualified and have separate
-acceptance receipts from the pinned native provider. H is
-`671685c3f0059574405a1e630dd965d421a26f05`; E is
-`cf8fbd784944a98b1e390b709685ca54c2511827`.
-A remains the selected recoverable authoring seed. The canonical implementation
-branch is `psc0/sh1-implementation-v1`; E was qualified independently on
-`psc0/sh1-generic-erasure-v1` before fast-forward integration.
+Status: bounded runtime IR typing M6 is compiler-qualified with independent
+selected-provider acceptance in both its TypeScript 5 baseline and the current
+TypeScript 7.0.2 integration. The exact qualifying source checkpoints are:
 
-This document supplements [SPEC.md](SPEC.md). The M6 runtime IR checker and
-TypeScript 7 migration have separate qualification checkpoints. Strict runtime
-profile activation also requires the remaining contracts in SPEC.md. Exact source identities, original receipts and
-cloud outcomes are indexed in [qualification-evidence.json](qualification-evidence.json).
+| Checkpoint | Source | Qualification |
+| --- | --- | --- |
+| M6, TypeScript 5.8.3 baseline | `1b5fd12382c920944924c9d03e0851984293caa2` | [Run 37906602597](https://github.com/dwijayuda/pskernel/actions/runs/37906602597) |
+| M6 with current TypeScript 7.0.2 | `99786185f77edf952f11989d4c9bc44028f22f11` | [Run 37910429506](https://github.com/dwijayuda/pskernel/actions/runs/37910429506) |
+
+The portable M6 source is the same in both checkpoints. The TypeScript integration
+changes current host/CLI selection and qualification tooling; historical S0/A
+recovery remains pinned to 5.8.3. A remains the selected authoring seed.
+The canonical integration branch is `psc0/sh1-implementation-v1`; documentation
+descendants preserve the exact qualifying source references above.
+
+The installed checker verifies its bounded runtime type contract before emitting
+the same IR. Strict SH/1 remains false because the remaining primitive/value,
+bounds/text-position and lowering correspondence contracts are separate.
+No named PSC1 profile or new seed is selected by these qualifications.
+
+This document supplements [SPEC.md](SPEC.md). Exact receipts and historical
+A/B/H/E records are indexed in [qualification-evidence.json](qualification-evidence.json).
+[TYPESCRIPT7.md](TYPESCRIPT7.md) records the exact compiler profiles, recovery
+proof and measured TypeScript phase.
 
 ## Implemented capability
 
@@ -98,8 +109,7 @@ npm run dev:sh1
 
 This runs `lake build psc1 psc1_ir_check_tests` followed by
 `node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1`.
-On the TypeScript 7 migration branch, current compilation requires TypeScript
-7.0.2. Install the `psc0` development dependency or provide the installed
+Current PSC0 compilation requires exact TypeScript 7.0.2. Install the `psc0` development dependency or provide the installed
 launcher through `PSC0_TSC`; `PSC0_TYPESCRIPT_VERSION` defaults to `7.0.2`.
 CI installs separate exact current and historical profiles. The historical
 recovery commands require `5.8.3` and its matching launcher; source manifests
@@ -132,6 +142,20 @@ most useful for unchanged input and late-module edits across a longer session:
 PSC0_ITERATION_SHA256="$(node -p "require('./dist/sh1/N1/receipt.json').artifacts.javascriptSha256")"
 npm run iterate:sh1 -- --compiler dist/sh1/N1/index.js --compiler-sha256 "$PSC0_ITERATION_SHA256" --loop
 ```
+
+Choose the development route by the work being done:
+
+| Work | Route | Evidence |
+| --- | --- | --- |
+| One coherent source change, including an early dependency | `dev:sh1` | Incremental native build and bounded current generated execution |
+| Repeated unchanged or late-module edits in a long session | Resident `iterate:sh1` with an explicit compiler pin | Reused preparation and admission-ready development products |
+| Language, source-family, runtime or toolchain promotion | Full C1/C2/C3 and separate provider gate | Exact-source qualification under the recorded profile |
+| Documentation-only descendant with identical executable sources | Preserve the existing qualified source and receipts | No new compiler execution is implied |
+
+A resident session still pays its first whole-closure preparation cost. It is
+useful when repeated requests amortize that startup; it does not establish a new
+self-host fixed point for edited source. The last qualified checkpoint keeps its
+original identity while development continues.
 
 The resident CLI checks the supplied pin before importing the exact JavaScript
 bytes. Select a compiler with the preparation API; the historical S0 lacks it.
@@ -297,8 +321,9 @@ supply their separate evidence.
 | Axis | Required evidence |
 | --- | --- |
 | Compiler-qualified capability | Current-source C2/C3 products, raw capability execution and conformance receipts |
+| Bounded runtime IR typing | Complete portable compositional check of the exact IR supplied to checked emission |
 | Kernel-checked products | Actual acceptance of exact canonical admissions by the separately pinned provider |
-| Strict SH/1 runtime qualification | Complete runtime typing/layout/intrinsic obligations; an IR inventory alone is insufficient |
+| Strict SH/1 runtime qualification | Complete mandatory runtime and semantic obligations plus strict profile enforcement; bounded typing alone is insufficient |
 
 The native baseline at
 `963030dc2d154008fccc82e7c8ed29331f138799` passed its historical full checked
@@ -306,10 +331,13 @@ self-host run [37825822957](https://github.com/dwijayuda/pskernel/actions/runs/3
 That historical result does not accept newly generated worker admissions.
 New products are checked through a separate pinned provider checkout.
 
-`original-ir-inventory.mjs` examines the original PSC0 IR produced by the exact
-compiler instance. It reports unknown types, scope/layout/arity findings and
-unresolved obligations without expanding the portable compiler closure.
-It is a diagnostic artifact and does not grant strict-profile acceptance.
+`original-ir-inventory.mjs` validates generated value carriers, invokes the
+portable checker in the exact current compiler instance, and serializes its
+bounded runtime typing report. The checked backend emits that same original IR
+only after acceptance. The old diagnostic inventory remains available solely at
+the authenticated S0/A producer boundary, where the older compiler lacks the
+new checker. Its unresolved observations never count as runtime typing acceptance.
+Neither report grants strict-profile qualification.
 
 ## Qualified implementation checkpoint
 
@@ -344,7 +372,7 @@ The resident CLI still rereads and hashes source; optional emission remains whol
 The original-IR traversal completed. It reported 245 call-arity cases requiring
 expression typing and 19 call type-arity findings, with no other recorded finding
 categories. That historical inventory did not establish strict SH/1 qualification.
-The current E findings and remaining obligations are recorded below.
+E's later historical inventory and M6's bounded typing result are recorded below.
 
 ## Qualified Foundation.List migration
 
@@ -544,29 +572,98 @@ acceptance is preserved in
 [recursive-generic-erasure-provider.json](recursive-generic-erasure-provider.json).
 No kernel/provider implementation or metatheory changed.
 
-## Remaining runtime IR work
+## Qualified bounded runtime IR typing
 
-E removes all 19 recorded generic-argument arity findings from the complete
-current-source C2/C3 inventories. The 244
-`call-arity-needs-expression-typing` records remain. They identify unfinished
-checking obligations, not 244 independently demonstrated incorrect calls.
+The earlier E inventories contained 244 unfinished call-expression typing
+obligations after the generic-argument repair. M6 replaces that limited current
+inventory with one portable compositional checker for the original IR.
+The old E receipts retain their original counts.
 
-The inventory knows signatures for direct variables/literal lambdas, but does
-not compose result types through function-valued let, if, match, projection
-or call expressions. The next coherent implementation is one portable
-expression checker with typed lexical environments, ordered generic schemes,
-simultaneous scoped substitution, exact function grouping, typed
-primitive/layout signatures and explicit resource-exhaustion results.
+The checker validates signatures, scoped bindings, exact function parameter
+groups, ordered generic schemes with simultaneous substitution, annotated
+initializers and function results, layout fields/projections/matches and active
+intrinsic types. Unknown types, unsupported capabilities and resource exhaustion
+are failures. A host adapter validates generated carriers and serializes the
+portable result; it has no separate expression-typing implementation.
 
-[RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) records that design and its acceptance
-sequence. It distinguishes global constants that hold functions from zero-argument
-functions, and rejects silent substitution exhaustion. Its strict entry point must check the
-same IR that it emits.
+[Check.lean](../../packages/compiler-ir/src/Ps/CompilerIr/Check.lean),
+[CheckTypes.lean](../../packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean)
+and [CheckSize.lean](../../packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean)
+own those rules.
+[BackendTs/Checked.lean](../../packages/backend-ts/src/Ps/BackendTs/Checked.lean)
+checks the exact IR supplied to emission.
+[Construct.lean](../../packages/compiler-ir/src/Ps/CompilerIr/Construct.lean)
+provides ordinary portable constructors for the generated host boundary.
 
-The checker and remaining primitive, layout, import and lowering/backend
-semantic obligations must be closed before strict SH/1 activation. Neither
-zero generic findings nor selected Core admission acceptance supplies that
-missing runtime enforcement.
+The independently qualified M6 baseline at `1b5fd12382c920944924c9d03e0851984293caa2` records:
+
+| Evidence | Observed result |
+| --- | --- |
+| Portable compiler source | 61 modules; 1,088,337 bytes |
+| Native full original IR | 54,879 expressions; 707,753 visited steps; complete; accepted; zero findings |
+| Native fixtures | Eight cases passed |
+| N1/C1/C2/C3 runtime conformance | 59 observations per generation, including 29 observations across four let-scope cases |
+| Generated checker refusals | 36 negative IR cases and five malformed/foreign carrier cases per generation; resource and direct type-operation cases also passed |
+| Current C2/C3 full original IR | Complete; accepted; zero findings; same original IR checked before emission |
+| Current C2/C3 products | Canonical surface source, normalized admissions, TS and JS agree; N1 TS/JS also agree |
+| Independent selected provider | Three exact admission streams accepted after emission |
+
+The generated C2/C3 summaries do not print their full expression or visited-step
+counts. Those fields are not inferred from the native counts; their full reports
+remain in `dist/sh1/C2/original-ir-inventory.json` and the corresponding C3 artifact path.
+
+The native development gate's internal total was 144.586 seconds. The C1/C2/C3
+generation totals were 1,145.486 / 1,187.825 / 1,199.391 seconds.
+Across those three generations, preparation accounted for 60.17% of the recorded
+total; `tscAndWrite` accounted for 30.655 seconds, or about 0.87%. The latter
+includes evidence writes, hashing and identity work as well as TypeScript.
+These are observed phase timings from one qualification run, not controlled benchmarks.
+
+The compiler bundle preserves all 28 complete logged JSON receipts, including
+their original provider-not-attempted fields. The separate later provider receipt
+records `accepted: true` and `emissionWasGatedByThisCheck: false`.
+Compiler qualification, bounded IR typing and exact-stream provider acceptance
+are earned; strict SH/1 and profile activation remain false.
+
+See [runtime-ir-checker-qualification.json](runtime-ir-checker-qualification.json),
+[runtime-ir-checker-provider.json](runtime-ir-checker-provider.json) and
+[runtime-ir-checker-execution.json](runtime-ir-checker-execution.json)
+for complete receipts and the retained attempt history.
+
+The selected old Q can still produce a legacy C1 inventory: that report belongs
+to Q's produced IR. The new C1 executable contains the checker, executes its
+conformance cases, and uses it for current C2 generation; C2 does the same for C3.
+The explicitly authenticated legacy boundary never grants runtime typing
+acceptance. No current checker failure falls back to the legacy inventory.
+
+A valid let-shadowing fixture also exposed a backend scope defect. The repaired
+generator evaluates a same-named initializer in the outer scope and introduces
+the new binding for the body. It handles a suspended initializer and a closure
+capturing the old binding; the tail optimizer declines the affected direct-loop
+case. The original fixture remains, with focused coverage for the complete
+affected family.
+
+[RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md) defines the installed API, its resource
+and diagnostic counters, active/refused capabilities and remaining contracts.
+Successful typing does not establish primitive laws, valid bounds/UTF-8
+positions or general erasure/backend preservation. Optional scalar and import
+capabilities remain disabled until their own contracts are qualified.
+Provider acceptance of exact admissions is a separate receipt.
+
+## Current authoring boundaries
+
+The supported authoring subset now includes qualified ordinary structural
+recursion with changing nondependent value parameters, as used by Foundation.List
+and the three migrated compiler helpers. Its grammar and inference remain bounded.
+
+Use explicitly typed local callbacks when passing a typed lambda as an argument.
+Give match-valued let initializers an explicit result type. In changing-parameter
+normalization, project original record parameters through typed branch-local
+aliases until the separate projection-normalizer repair is qualified and a seed
+that supports its authored form is explicitly selected.
+[SPEC.md](SPEC.md#current-authoring-forms) gives the precise forms and
+[MIGRATION.md](MIGRATION.md#follow-on-repair--parameter-projections-in-recursion-normalization)
+defines that repair's scope.
 
 ## Migration order
 
@@ -579,10 +676,14 @@ missing runtime enforcement.
 4. Completed: repair ordered recursive generic arguments in isolated E,
    qualify its original-IR/runtime behavior and current-source C2/C3, and obtain
    exact-stream provider acceptance.
-5. Next: implement the coherent portable IR checker in
-   [RUNTIME_IR_PLAN.md](RUNTIME_IR_PLAN.md). Further source families and optional
-   syntax conveniences remain separately scoped work.
-6. Routine iteration: use the native development gate and suitable resident
+5. Completed: implement and qualify the bounded portable runtime IR checker,
+   same-IR checked emission and old-scope let correction under both the TS5
+   baseline and current TS7 profile.
+6. Recommended next language slice: implement the demonstrated parameter-projection
+   repair. Keep its implementation A-compatible and qualify the newly supported
+   authored form. A separate explicit seed selection must precede replacing
+   compatibility aliases or migrating compiler source to that form.
+7. Routine iteration: use the native development gate and suitable resident
    preparation reuse. Reserve full fixed-point/provider work for semantic
    promotion checkpoints.
 

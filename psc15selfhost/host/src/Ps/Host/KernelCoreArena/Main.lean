@@ -1,4 +1,4 @@
-import Ps.Host.KernelCoreArena.Replay
+import Ps.Host.KernelCoreArena.Phase
 
 namespace PsKernelCoreArena
 
@@ -96,6 +96,8 @@ def main (args : List String) : IO UInt32 := do
       PsKernelCoreArena.runChecker true
   | ["--profile"] =>
       PsKernelCoreArena.runChecker false true
+  | ["--phase-theorem", name] =>
+      PsKernelCoreArena.runTheoremPhases name
   | ["--version"] =>
       IO.println "pskernel-core-arena/1 lean-profile=4.34.0+4.34.1 export=3.1.0"
       pure 0

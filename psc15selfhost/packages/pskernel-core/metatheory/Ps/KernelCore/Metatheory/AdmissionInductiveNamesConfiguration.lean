@@ -455,3 +455,98 @@ theorem psKernelAddSimpleMutualInductive_success_partitioned_name_guards
       psKernelNameListContains name zs = false)
   exact ⟨hXsAbsent, hYsAbsent, hZsAbsent,
     hXsUnique, hYsUnique, hZsUnique, hXDisjoint, hYDisjoint⟩
+
+/--
+Negative executable membership excludes any selected source list member.
+This is a purely structural list result; it assumes no comparator laws.
+-/
+theorem psKernelNameListContains_false_of_mem
+    (needle : PsKernelName) (names : List PsKernelName)
+    (hFalse : psKernelNameListContains needle names = false) :
+    ∀ name : PsKernelName, List.Mem name names ->
+      psKernelNameEq needle name = false := by
+  revert hFalse
+  induction names with
+  | nil =>
+      intro hFalse name hMember
+      cases hMember
+  | cons head tail ih =>
+      intro hFalse name hMember
+      cases hHead : psKernelNameEq needle head with
+      | true =>
+          simp [psKernelNameListContains, hHead] at hFalse
+      | false =>
+          cases hMember with
+          | head => exact hHead
+          | tail =>
+              apply ih
+              · simpa [psKernelNameListContains, hHead] using hFalse
+              · assumption
+
+/--
+Executable cross-family name exclusion is symmetric. This result uses the
+already kernel-proved symmetry of the actual name comparator, not a newly
+assumed equality law or a conversion through syntactic NoDup.
+-/
+theorem psKernelNameListContains_reverse_false
+    (left right : List PsKernelName)
+    (hDisjoint : ∀ name : PsKernelName, List.Mem name left ->
+      psKernelNameListContains name right = false) :
+    ∀ name : PsKernelName, List.Mem name right ->
+      psKernelNameListContains name left = false := by
+  revert hDisjoint
+  induction left with
+  | nil =>
+      intro hDisjoint name hMember
+      rfl
+  | cons head tail ih =>
+      intro hDisjoint name hMember
+      have hHead : psKernelNameListContains head right = false :=
+        hDisjoint head (List.Mem.head tail)
+      have hTail : ∀ other : PsKernelName, List.Mem other tail ->
+          psKernelNameListContains other right = false := by
+        intro other hOther
+        exact hDisjoint other (List.Mem.tail head hOther)
+      have hNoHead : psKernelNameEq name head = false := by
+        rw [psKernelNameEq_symm_core name head]
+        exact psKernelNameListContains_false_of_mem head right hHead name hMember
+      simpa [psKernelNameListContains, hNoHead] using ih hTail name hMember
+
+/--
+The successful mutual source-level global preflight directly discharges
+constructor-versus-recursor executable name exclusion in the direction needed
+to preserve all reserved recursors throughout constructor publication.
+-/
+theorem psKernelAddSimpleMutualInductive_success_constructor_recursor_disjoint
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hRun : psKernelAddSimpleMutualInductive
+      fuel environment decl maxRecDepth maxNatSize = Except.ok result) :
+    ∀ name : PsKernelName,
+      List.Mem name (psKernelSimpleMutualCtorNames decl.types) ->
+      psKernelNameListContains name (psKernelSimpleMutualRecNames decl.types) = false := by
+  obtain ⟨_, _, _, _, _, _, _, hRecCtor⟩ :=
+    psKernelAddSimpleMutualInductive_success_partitioned_name_guards
+      fuel environment result decl maxRecDepth maxNatSize hIndex hRun
+  exact psKernelNameListContains_reverse_false
+    (psKernelSimpleMutualRecNames decl.types)
+    (psKernelSimpleMutualCtorNames decl.types) hRecCtor
+
+/--
+Canonical absence of a finite name family entails absence of every syntactic
+member. This does not turn an accelerated-index negative result into a
+semantic fact: the input is already authoritative list-based absence.
+-/
+theorem PsKernelInductiveNamesAbsent.lookup_none_of_mem
+    {environment : PsKernelEnvironment} {names : List PsKernelName}
+    (hAbsent : PsKernelInductiveNamesAbsent environment names)
+    (name : PsKernelName) (hMember : List.Mem name names) :
+    psKernelFindConstantInList name environment.constants = none := by
+  induction hAbsent with
+  | nil =>
+      cases hMember
+  | cons head rest hHead hRest ih =>
+      cases hMember with
+      | head => exact hHead
+      | tail => exact ih name (by assumption)

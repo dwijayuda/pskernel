@@ -357,3 +357,76 @@ theorem psKernelPreparedMutualHeaders_preserves_reserved_names
   intro info hMember
   exact hDisjoint info.base.name
     (psKernelMakeSimpleMutualBaseInfos_name_member typeNames decl shapes info hMember)
+
+/--
+The actual provisional family-insertion loop cannot erase a previously
+present canonical name. Even when a later inserted datatype shadows a lookup,
+some actual declaration continues to answer it. This is a structural fold
+fact and requires neither index assumptions nor new trusted name laws.
+-/
+theorem psKernelAddMutualInductiveInfos_preserves_present
+    (infos : List PsKernelInductiveInfo) :
+    ∀ (environment : PsKernelEnvironment) (name : PsKernelName)
+      (found : PsKernelConstantInfo),
+      psKernelFindConstantInList name environment.constants = some found ->
+      ∃ newer : PsKernelConstantInfo,
+        psKernelFindConstantInList name
+          (psKernelAddMutualInductiveInfos infos environment).constants = some newer := by
+  induction infos with
+  | nil =>
+      intro environment name found hPresent
+      exact ⟨found, by simpa [psKernelAddMutualInductiveInfos] using hPresent⟩
+  | cons info rest ih =>
+      intro environment name found hPresent
+      let next := psKernelEnvironmentAddUnchecked
+        environment (PsKernelConstantInfo.inductInfo info)
+      cases hEqual : psKernelNameEq info.base.name name with
+      | true =>
+          have hNext : psKernelFindConstantInList name next.constants =
+              some (PsKernelConstantInfo.inductInfo info) := by
+            simp [next, psKernelEnvironmentAddUnchecked, psKernelFindConstantInList,
+              psKernelConstantInfoName, psKernelConstantInfoBase, hEqual]
+          simpa [psKernelAddMutualInductiveInfos, next] using
+            ih next name (PsKernelConstantInfo.inductInfo info) hNext
+      | false =>
+          have hNext : psKernelFindConstantInList name next.constants = some found := by
+            simpa [next, psKernelEnvironmentAddUnchecked, psKernelFindConstantInList,
+              psKernelConstantInfoName, psKernelConstantInfoBase, hEqual] using hPresent
+          simpa [psKernelAddMutualInductiveInfos, next] using
+            ih next name found hNext
+
+/--
+Every member of the actual provisional inductive metadata list remains
+canonically present after the complete insertion fold. Comparator reflexivity
+is explicit here and discharged from the specified implementation by callers;
+the theorem cannot be misread as a fresh source-level trusted premise.
+-/
+theorem psKernelAddMutualInductiveInfos_member_present
+    (infos : List PsKernelInductiveInfo)
+    (hReflexive : PsKernelStringEqReflexiveLaw) :
+    ∀ (environment : PsKernelEnvironment) (info : PsKernelInductiveInfo),
+      List.Mem info infos ->
+      ∃ found : PsKernelConstantInfo,
+        psKernelFindConstantInList info.base.name
+          (psKernelAddMutualInductiveInfos infos environment).constants = some found := by
+  induction infos with
+  | nil =>
+      intro environment info hMember
+      cases hMember
+  | cons head rest ih =>
+      intro environment info hMember
+      let next := psKernelEnvironmentAddUnchecked
+        environment (PsKernelConstantInfo.inductInfo head)
+      cases hMember with
+      | head =>
+          have hSelf := psKernelNameEq_refl_of_string_law hReflexive head.base.name
+          have hPresent : psKernelFindConstantInList head.base.name next.constants =
+              some (PsKernelConstantInfo.inductInfo head) := by
+            simp [next, psKernelEnvironmentAddUnchecked, psKernelFindConstantInList,
+              psKernelConstantInfoName, psKernelConstantInfoBase, hSelf]
+          simpa [psKernelAddMutualInductiveInfos, next] using
+            psKernelAddMutualInductiveInfos_preserves_present rest next
+              head.base.name (PsKernelConstantInfo.inductInfo head) hPresent
+      | tail =>
+          simpa [psKernelAddMutualInductiveInfos, next] using
+            ih next info (by assumption)

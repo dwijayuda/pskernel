@@ -191,7 +191,7 @@ theorem psKernelAddSimpleMutualInductive_success_first_header_refines
 
 
 /-- Exact checked prefix of successful mutual admission, before constructor publication. -/
-theorem psKernelAddSimpleMutualInductive_success_header_pipeline
+theorem psKernelAddSimpleMutualInductive_success_constructor_pipeline
     (fuel : Nat) (environment result : PsKernelEnvironment)
     (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
     (hRun : psKernelAddSimpleMutualInductive fuel environment decl maxRecDepth maxNatSize =
@@ -200,7 +200,8 @@ theorem psKernelAddSimpleMutualInductive_success_header_pipeline
       (checked : PsKernelExpr × PsKernelCheckerSession)
       (sorted : PsKernelLevel × PsKernelCheckerSession)
       (paramResult indexResult : PsKernelOpenBindersResult)
-      (resultLevel : PsKernelLevel) (tailShapes : List PsKernelSimpleMutualTypeShape),
+      (resultLevel : PsKernelLevel) (tailShapes : List PsKernelSimpleMutualTypeShape)
+      (ctorResult : PsKernelAddMutualConstructorsResult),
       decl.types = first :: remaining ∧
       psKernelSessionCheck fuel
         (psKernelMkCheckerSession environment decl.levelParams
@@ -213,7 +214,21 @@ theorem psKernelAddSimpleMutualInductive_success_header_pipeline
       psKernelOpenSimpleMutualRemainingTypesWorker remaining fuel environment decl.levelParams
         (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef else PsKernelDefinitionSafety.safe)
         maxRecDepth maxNatSize paramResult.session paramResult.binders resultLevel =
-          Except.ok tailShapes := by
+          Except.ok tailShapes ∧
+
+      psKernelAddSimpleMutualTypesWorker
+        (PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes)
+        fuel (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+          else PsKernelDefinitionSafety.safe)
+        resultLevel (psKernelLevelParamsToLevels decl.levelParams)
+        paramResult.binders (psKernelSimpleMutualNames decl.types)
+        (PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes)
+        paramResult.session
+        (psKernelAddMutualInductiveInfos
+          (psKernelMakeSimpleMutualBaseInfos
+            (psKernelSimpleMutualNames decl.types) decl
+            (PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes))
+          environment) 0 = Except.ok ctorResult := by
   let allNames : List PsKernelName :=
     psKernelMutualNameListAppend
       (psKernelSimpleMutualNames decl.types)
@@ -367,10 +382,67 @@ theorem psKernelAddSimpleMutualInductive_success_header_pipeline
                                                           simp only [hTail] at hRun
                                                           cases hRun
                                                       | ok tailShapes =>
-                                                          exact ⟨first, remaining, checked, sorted, paramResult,
-                                                            indexResult, resultLevel, tailShapes, rfl,
-                                                            hChecked, hSort, hParams, hIndices, hResult, hTail⟩
+                                                          simp only [safety] at hTail
+                                                          simp only [hTail] at hRun
+                                                          let shapes : List PsKernelSimpleMutualTypeShape :=
+                                                            PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
+                                                          let work0 := psKernelAddMutualInductiveInfos
+                                                            (psKernelMakeSimpleMutualBaseInfos
+                                                              (psKernelSimpleMutualNames (first :: remaining))
+                                                              decl shapes) environment
+                                                          cases hCtor : psKernelAddSimpleMutualTypesWorker
+                                                              shapes fuel safety resultLevel
+                                                              (psKernelLevelParamsToLevels decl.levelParams)
+                                                              paramResult.binders
+                                                              (psKernelSimpleMutualNames (first :: remaining))
+                                                              shapes paramResult.session work0 0 with
+                                                          | error message =>
+                                                              cases hRun
+                                                          | ok ctorResult =>
+                                                              refine ⟨first, remaining, checked, sorted, paramResult,
+                                                                indexResult, resultLevel, tailShapes, ctorResult, rfl,
+                                                                hChecked, hSort, hParams, hIndices, hResult, hTail, ?_⟩
+                                                              simpa only [shapes, work0, safety] using hCtor
                                                   | _ => simp only [hResult] at hRun; cases hRun
+
+
+/--
+Preserve the independently proved header-only projection as a stable public
+interface; the stronger executable pipeline above is the single source of
+actual stage-success evidence through constructor publication.
+-/
+theorem psKernelAddSimpleMutualInductive_success_header_pipeline
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hRun : psKernelAddSimpleMutualInductive fuel environment decl maxRecDepth maxNatSize =
+      Except.ok result) :
+    ∃ (first : PsKernelSimpleMutualTypeDecl) (remaining : List PsKernelSimpleMutualTypeDecl)
+      (checked : PsKernelExpr × PsKernelCheckerSession)
+      (sorted : PsKernelLevel × PsKernelCheckerSession)
+      (paramResult indexResult : PsKernelOpenBindersResult)
+      (resultLevel : PsKernelLevel) (tailShapes : List PsKernelSimpleMutualTypeShape),
+      decl.types = first :: remaining ∧
+      psKernelSessionCheck fuel
+        (psKernelMkCheckerSession environment decl.levelParams
+          (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef else PsKernelDefinitionSafety.safe)
+          maxRecDepth maxNatSize) first.type = Except.ok checked ∧
+      psKernelSessionEnsureSort fuel checked.2 checked.1 = Except.ok sorted ∧
+      psKernelOpenSimpleHeaderParams fuel sorted.2 first.type decl.numParams = Except.ok paramResult ∧
+      psKernelOpenSimpleHeaderIndices fuel paramResult.session paramResult.result = Except.ok indexResult ∧
+      indexResult.result = PsKernelExpr.sort resultLevel ∧
+      psKernelOpenSimpleMutualRemainingTypesWorker remaining fuel environment decl.levelParams
+        (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef else PsKernelDefinitionSafety.safe)
+        maxRecDepth maxNatSize paramResult.session paramResult.binders resultLevel =
+          Except.ok tailShapes := by
+  obtain ⟨first, remaining, checked, sorted, paramResult, indexResult,
+    resultLevel, tailShapes, ctorResult,
+    hTypes, hCheck, hSort, hParams, hIndices, hResult, hTail, hCtors⟩ :=
+    psKernelAddSimpleMutualInductive_success_constructor_pipeline
+      fuel environment result decl maxRecDepth maxNatSize hRun
+  exact ⟨first, remaining, checked, sorted, paramResult, indexResult,
+    resultLevel, tailShapes, hTypes, hCheck, hSort,
+    hParams, hIndices, hResult, hTail⟩
+
 
 
 /--

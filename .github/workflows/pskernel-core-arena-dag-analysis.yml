@@ -1,0 +1,122 @@
+name: PSKernel Core Init proof DAG analysis
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-budget-study-v1
+    paths:
+      - ".github/workflows/pskernel-core-arena-dag-analysis.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-dag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34.1 and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build exact pinned Init exporter input
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          (cd arena && uv run lka.py build-test init --cache)
+      - name: Analyze structural DAG and theorem payload
+        working-directory: arena
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from collections import Counter
+          import json
+          targets = {361999, 407876}
+          names = {0: "_"}
+          nodes = {}
+          theorems = []
+          def name_of(idx):
+              return names.get(idx, "name#" + str(idx))
+          with open("_build/tests/init.ndjson", encoding="utf-8") as inp:
+              for line_no, raw in enumerate(inp,1):
+                  obj = json.loads(raw)
+                  if "in" in obj:
+                      index = obj["in"]
+                      if "str" in obj:
+                          v=obj["str"]; parent=name_of(v["pre"]); child=v["str"]
+                          names[index] = child if parent == "_" else parent+"."+child
+                      elif "num" in obj:
+                          v=obj["num"]; parent=name_of(v["pre"]); child=str(v["i"])
+                          names[index] = child if parent == "_" else parent+"."+child
+                  if "ie" in obj:
+                      kind="other"; children=(); nameid=None
+                      for key in ("bvar","sort","const","app","lam","forallE","letE","proj","natVal","strVal","mdata"):
+                          if key in obj:
+                              kind=key
+                              v=obj[key]
+                              if key=="const": nameid=v["name"]
+                              if key=="app": children=(v["fn"],v["arg"])
+                              if key in ("lam","forallE"): children=(v["type"],v["body"])
+                              if key=="letE": children=(v["type"],v["value"],v["body"])
+                              if key=="proj": children=(v["struct"],)
+                              if key=="mdata": children=(v["expr"],)
+                              break
+                      nodes[obj["ie"]] = (kind,children,nameid)
+                  if line_no in targets:
+                      thm=obj.get("thm")
+                      if thm is None: raise SystemExit("target is not a theorem record: "+str(line_no))
+                      theorems.append((line_no,name_of(thm["name"]),thm["type"],thm["value"]))
+                  if line_no >= max(targets): break
+
+          def summary(root):
+              seen=set()
+              stack=[root]
+              while stack:
+                  n=stack.pop()
+                  if n in seen: continue
+                  seen.add(n)
+                  node=nodes.get(n)
+                  if node is None: raise SystemExit("unresolved expr reference "+str(n))
+                  stack.extend(node[1])
+              kinds=Counter(nodes[n][0] for n in seen)
+              consts=Counter(name_of(nodes[n][2]) for n in seen if nodes[n][0]=="const")
+              indegree=Counter(c for n in seen for c in nodes[n][1])
+              ordered=sorted(seen)
+              topological=all(c<n for n in ordered for c in nodes[n][1])
+              CAP=10**12
+              size={}
+              depth={}
+              if topological:
+                  for n in ordered:
+                      children=nodes[n][1]
+                      size[n]=min(CAP,1+sum(size[c] for c in children))
+                      depth[n]=1+max((depth[c] for c in children), default=0)
+              print("DAG_STATS", json.dumps({
+                  "root":root,
+                  "unique_nodes":len(seen),
+                  "tree_nodes_saturated":size.get(root,"not-topologically-ordered"),
+                  "max_depth":depth.get(root),
+                  "shared_nodes":sum(v>1 for v in indegree.values()),
+                  "largest_indegree":max(indegree.values(),default=0),
+                  "kinds":dict(kinds),
+                  "contains_reduceNat":any(n.endswith("reduceNat") for n in consts),
+                  "contains_reduceBool":any(n.endswith("reduceBool") for n in consts),
+                  "native_reduction_constants":{k:v for k,v in consts.items() if "reduceNat" in k or "reduceBool" in k},
+                  "top_constants":consts.most_common(16),
+                  "topological_order":topological
+              },ensure_ascii=False))
+          print("TOTAL_INTERNED_EXPRS",len(nodes))
+          for line,name,typeidx,valueidx in theorems:
+              print("THEOREM",line,name,"typeidx=",typeidx,"proofidx=",valueidx)
+              print("TYPE:"); summary(typeidx)
+              print("PROOF:"); summary(valueidx)
+          PY

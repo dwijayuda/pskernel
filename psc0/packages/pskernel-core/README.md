@@ -45,10 +45,19 @@ and outstanding evidence are recorded in [RESEARCH_AND_MIGRATION.md](RESEARCH_AN
 
 ## Current stage result
 
-[Run 37979868377](https://github.com/dwijayuda/pskernel/actions/runs/37979868377)
-at `05542332ab589314917cd67a7eb7b74e80557770` passes the build, metatheory,
-84 companion proofs, foundations, Nat-dispatch regressions, 141 tutorial
-verdicts and fresh 4.35 Prelude/UTF8 checks. Historical bugs yield 17 correct
-rejections and one known decline. Full Init still times out; Std exhausts a
-reduction bound at `Std.Sat.AIG.mkXorCached`; Mathlib is therefore not run.
-See [the exact evidence](MIGRATION_EVIDENCE.json). The next stage is deferred.
+[Run 37990758789](https://github.com/dwijayuda/pskernel/actions/runs/37990758789) at
+`e8ed888bb4f16153b9aac335872d770ac19bbb11` passes native foundations and regressions,
+the complete metatheory, all 84 companion proof files, 141/141 tutorial
+verdicts, and 18/18 bug rejections with zero declines. Fresh 4.35 Prelude,
+UTF8, XOR, and Int64 dependency closures also pass.
+
+**Full conformance remains open:** Init times out at 500 seconds and Std at
+590 seconds; Mathlib is skipped by those prerequisite failures. No time limit
+was increased. See [the exact receipt](MIGRATION_EVIDENCE.json).
+
+The [research and architecture review](RESEARCH_AND_MIGRATION.md) compares
+pinned official Lean, Con Leche, current Con Ron, Nanoda, and Lean4Lean sources,
+audits the historical Arena branches, and explains the remaining cost of
+repeated expression-tree and binder traversals. This checkpoint stops before
+the next representation redesign. Generated PSC0 compiler/kernel qualification
+and default-provider selection remain separate.

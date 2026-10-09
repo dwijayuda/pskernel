@@ -14,6 +14,7 @@ export const releaseHostFiles = Object.freeze([
   'bin/psc.mjs',
   'scripts/release-manifest.mjs',
   'scripts/checked-build.mjs',
+  'scripts/checked-artifact-publication.mjs',
   'scripts/checked-prepared-session.mjs',
   'scripts/checked-source-snapshot.mjs',
   'scripts/checked-kernel-provider.mjs',

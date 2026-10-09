@@ -15,7 +15,9 @@ deriving instance DecidableEq for PsKernelExpr
 
 namespace PsKernelSharing
 
-structure Algebra (β : Type) where
+/-- An operation dictionary. Class specialization lets the native compiler erase
+callback dispatch while retaining one proof of the traversal. -/
+class Algebra (β : Type) where
   atom : PsKernelExpr → Nat → β
   unary : PsKernelExpr → Nat → β → β
   binary : PsKernelExpr → Nat → β → β → β
@@ -27,7 +29,7 @@ structure Algebra (β : Type) where
   ternaryStop2 : (e : PsKernelExpr) → (d : Nat) → (t v : β) →
     Option { r : β // ∀ b, r = ternary e d t v b } := fun _ _ _ _ => none
 
-def fold (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) : β :=
+@[specialize a] def fold (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) : β :=
   match e with
   | .app f x => a.binary e cursor (fold a f cursor) (fold a x cursor)
   | .lam _ t b _ | .forallE _ t b _ =>
@@ -56,7 +58,7 @@ def smallWithFuel (fuel : Nat) (e : PsKernelExpr) : Bool :=
 
 def small (e : PsKernelExpr) : Bool := smallWithFuel 3 e
 
-def walk (a : Algebra β) (e : @& PsKernelExpr) (cursor : Nat)
+@[specialize a] def walk (a : Algebra β) (e : @& PsKernelExpr) (cursor : Nat)
     (memo : Memo PsKernelExpr β (fold a)) : Squash (Result (fold a) e cursor) :=
   let descend := fun _ : Unit =>
     match h : e with
@@ -115,7 +117,7 @@ def walk (a : Algebra β) (e : @& PsKernelExpr) (cursor : Nat)
   else step e cursor memo descend
 termination_by structural e
 
-def run (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) : β :=
+@[inline] def run (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) : β :=
   if small e then fold a e cursor else value (walk a e cursor {})
 
 theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
@@ -125,13 +127,13 @@ theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
   · rfl
   · exact value_eq _
 
-def countAlgebra : Algebra Nat where
+@[inline] def countAlgebra : Algebra Nat where
   atom := fun _ _ => 1
   unary := fun _ _ n => Nat.succ n
   binary := fun _ _ l r => Nat.succ (l + r)
   ternary := fun _ _ t v b => Nat.succ (t + (v + b))
 
-def looseAlgebra : Algebra Bool where
+@[inline] def looseAlgebra : Algebra Bool where
   atom := fun e d => match e with
     | .bvar i => Nat.ble d i
     | _ => false
@@ -146,7 +148,7 @@ def looseAlgebra : Algebra Bool where
   ternaryStop2 := fun _ _ t v =>
     if h : v = true then some ⟨true, by intro b; cases t <;> simp [h]⟩ else none
 
-def fvarAlgebra : Algebra Bool where
+@[inline] def fvarAlgebra : Algebra Bool where
   atom := fun e _ => match e with
     | .fvar _ => true
     | _ => false
@@ -176,28 +178,31 @@ theorem fvar_fold (e : PsKernelExpr) (d : Nat) :
 end PsKernelSharing
 
 def psKernelExprNodeCountShared (e : PsKernelExpr) : Nat :=
-  PsKernelSharing.run PsKernelSharing.countAlgebra e 0
+  if PsKernelSharing.small e then psKernelExprNodeCount e
+  else PsKernelSharing.run PsKernelSharing.countAlgebra e 0
 
 def psKernelExprHasLooseAtShared (e : PsKernelExpr) (d : Nat) : Bool :=
-  PsKernelSharing.run PsKernelSharing.looseAlgebra e d
+  if PsKernelSharing.small e then psKernelExprHasLooseAt e d
+  else PsKernelSharing.run PsKernelSharing.looseAlgebra e d
 
 def psKernelExprHasFVarShared (e : PsKernelExpr) : Bool :=
-  PsKernelSharing.run PsKernelSharing.fvarAlgebra e 0
+  if PsKernelSharing.small e then psKernelExprHasFVar e
+  else PsKernelSharing.run PsKernelSharing.fvarAlgebra e 0
 
 @[csimp] theorem psKernelExprNodeCount_shared_eq :
     psKernelExprNodeCount = psKernelExprNodeCountShared := by
   funext e
-  rw [psKernelExprNodeCountShared, PsKernelSharing.run_eq, PsKernelSharing.count_fold]
+  simp [psKernelExprNodeCountShared, PsKernelSharing.run_eq, PsKernelSharing.count_fold]
 
 @[csimp] theorem psKernelExprHasLooseAt_shared_eq :
     psKernelExprHasLooseAt = psKernelExprHasLooseAtShared := by
   funext e d
-  rw [psKernelExprHasLooseAtShared, PsKernelSharing.run_eq, PsKernelSharing.loose_fold]
+  simp [psKernelExprHasLooseAtShared, PsKernelSharing.run_eq, PsKernelSharing.loose_fold]
 
 @[csimp] theorem psKernelExprHasFVar_shared_eq :
     psKernelExprHasFVar = psKernelExprHasFVarShared := by
   funext e
-  rw [psKernelExprHasFVarShared, PsKernelSharing.run_eq, PsKernelSharing.fvar_fold]
+  simp [psKernelExprHasFVarShared, PsKernelSharing.run_eq, PsKernelSharing.fvar_fold]
 
 def psKernelExprHasLooseBVarShared (e : PsKernelExpr) : Bool :=
   psKernelExprHasLooseAtShared e 0
@@ -220,7 +225,7 @@ namespace PsKernelSharing
 
 abbrev Changed := PsKernelExpr × Bool
 
-def rebuildUnary (e : PsKernelExpr) (_d : Nat) (r : Changed) : Changed :=
+@[inline] def rebuildUnary (e : PsKernelExpr) (_d : Nat) (r : Changed) : Changed :=
   if r.2 then
     match e with
     | .mdata md _ => (.mdata md r.1, true)
@@ -228,7 +233,7 @@ def rebuildUnary (e : PsKernelExpr) (_d : Nat) (r : Changed) : Changed :=
     | _ => (e, false)
   else (e, false)
 
-def rebuildBinary (e : PsKernelExpr) (_d : Nat) (l r : Changed) : Changed :=
+@[inline] def rebuildBinary (e : PsKernelExpr) (_d : Nat) (l r : Changed) : Changed :=
   let rebuilt : PsKernelExpr := match e with
     | .app _ _ => .app l.1 r.1
     | .lam n _ _ bi => .lam n l.1 r.1 bi
@@ -238,7 +243,7 @@ def rebuildBinary (e : PsKernelExpr) (_d : Nat) (l r : Changed) : Changed :=
   else if r.2 then (rebuilt, true)
   else (e, false)
 
-def rebuildTernary (e : PsKernelExpr) (_d : Nat) (t v b : Changed) : Changed :=
+@[inline] def rebuildTernary (e : PsKernelExpr) (_d : Nat) (t v b : Changed) : Changed :=
   let rebuilt : PsKernelExpr := match e with
     | .letE n _ _ _ nd => .letE n t.1 v.1 b.1 nd
     | _ => e
@@ -247,14 +252,14 @@ def rebuildTernary (e : PsKernelExpr) (_d : Nat) (t v b : Changed) : Changed :=
   else if b.2 then (rebuilt, true)
   else (e, false)
 
-def changedAlgebra (atom : PsKernelExpr → Nat → Changed) : Algebra Changed :=
+@[inline] def changedAlgebra (atom : PsKernelExpr → Nat → Changed) : Algebra Changed :=
   { atom := atom, unary := rebuildUnary, binary := rebuildBinary, ternary := rebuildTernary }
 
 end PsKernelSharing
 
 namespace PsKernelSharing
 
-def levelAlgebra (params : List PsKernelName) (levels : List PsKernelLevel) : Algebra PsKernelExpr where
+@[inline] def levelAlgebra (params : List PsKernelName) (levels : List PsKernelLevel) : Algebra PsKernelExpr where
   atom := fun e _ => match e with
     | .sort u => .sort (psKernelLevelInstantiateParams u params levels)
     | .const n us => .const n (psKernelInstantiateLevelList us params levels)
@@ -282,10 +287,11 @@ end PsKernelSharing
 
 def psKernelExprInstantiateLevelParamsShared (e : PsKernelExpr)
     (params : List PsKernelName) (levels : List PsKernelLevel) : PsKernelExpr :=
-  PsKernelSharing.run (PsKernelSharing.levelAlgebra params levels) e 0
+  if PsKernelSharing.small e then psKernelExprInstantiateLevelParams e params levels
+  else PsKernelSharing.run (PsKernelSharing.levelAlgebra params levels) e 0
 
 @[csimp] theorem psKernelExprInstantiateLevelParams_shared_eq :
     psKernelExprInstantiateLevelParams = psKernelExprInstantiateLevelParamsShared := by
   funext e params levels
-  rw [psKernelExprInstantiateLevelParamsShared, PsKernelSharing.run_eq,
+  simp [psKernelExprInstantiateLevelParamsShared, PsKernelSharing.run_eq,
     PsKernelSharing.level_fold]

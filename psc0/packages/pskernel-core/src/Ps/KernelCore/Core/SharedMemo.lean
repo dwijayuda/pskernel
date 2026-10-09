@@ -35,11 +35,14 @@ theorem value_eq {α β : Type} {spec : α → Nat → β} {node : α} {cursor :
 
 @[inline] def probe {α β : Type} [DecidableEq α] {spec : α → Nat → β}
     (key : USize × Nat) (node : @& α) (cursor : Nat) (memo : Memo α β spec)
-    (descend : Unit → Squash (Result spec node cursor)) :
+    (descend : Unit → Squash (Result spec node cursor))
+    (cacheResult : β → Bool := fun _ => true) :
     Squash (Result spec node cursor) :=
   let miss := fun _ : Unit =>
     Squash.lift (descend ()) fun (result, next) =>
-      Squash.mk (result, next.insert key ⟨node, cursor, result.1, result.2⟩)
+      let updated := if cacheResult result.1 then
+        next.insert key ⟨node, cursor, result.1, result.2⟩ else next
+      Squash.mk (result, updated)
   match memo[key]? with
   | none => miss ()
   | some entry =>

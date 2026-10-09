@@ -188,7 +188,7 @@ abbrev EqResult (left right : PsKernelExpr) := Result eqSpec (left, right) 0
       letI : DecidableEq PsKernelExpr :=
         fun a b => withPtrEqDecEq a b (fun _ => originalDecEq a b)
       let probePair := fun _ : Unit =>
-        probe (leftAddress, rightAddress.toNat) (left, right) 0 memo descend
+        probe (leftAddress, rightAddress.toNat) (left, right) 0 memo descend (fun result => result)
       if leftAddress == rightAddress then
         match withPtrEqDecEq left right (fun _ => originalDecEq left right) with
         | isTrue h =>
@@ -197,6 +197,10 @@ abbrev EqResult (left right : PsKernelExpr) := Result eqSpec (left, right) 0
       else probePair ())
       (fun _ _ => Subsingleton.elim _ _))
     (fun _ _ => Subsingleton.elim _ _)
+
+@[inline] def eqSmall (left right : PsKernelExpr) : Bool :=
+  withPtrEq left right (fun _ => psKernelExprEq left right)
+    (fun h => by subst right; exact expr_reflexive left)
 
 def eqWalk (left right : @& PsKernelExpr) (memo : EqMemo) :
     Squash (EqResult left right) :=
@@ -255,19 +259,23 @@ def eqWalk (left right : @& PsKernelExpr) (memo : EqMemo) :
         Squash.mk (⟨r0.1, by simp [eqSpec, hl, hr, psKernelExprEq, hg.1, hi, ←hr0]⟩, memo)
       else Squash.mk (⟨psKernelExprEq left right, by simp [eqSpec, hl, hr]⟩, memo)
     | _, _ => Squash.mk (⟨psKernelExprEq left right, by simp [eqSpec, hl, hr]⟩, memo)
-  if small left then Squash.mk (⟨psKernelExprEq left right, rfl⟩, memo)
+  if small left then Squash.mk (⟨eqSmall left right, rfl⟩, memo)
   else eqStep left right memo descend
 termination_by structural left
 
 end PsKernelSharing
 
 def psKernelExprEqShared (left right : PsKernelExpr) : Bool :=
-  if PsKernelSharing.small left then psKernelExprEq left right
-  else PsKernelSharing.value (PsKernelSharing.eqWalk left right {})
+  withPtrEq left right (fun _ =>
+    if PsKernelSharing.small left then psKernelExprEq left right
+    else PsKernelSharing.value (PsKernelSharing.eqWalk left right {}))
+    (fun h => by
+      subst right
+      simp [PsKernelSharing.value_eq, PsKernelSharing.eqSpec, PsKernelSharing.expr_reflexive])
 
 @[csimp] theorem psKernelExprEq_shared_eq : psKernelExprEq = psKernelExprEqShared := by
   funext left right
-  unfold psKernelExprEqShared
+  unfold psKernelExprEqShared withPtrEq
   split
   · rfl
   · simpa only [PsKernelSharing.eqSpec] using

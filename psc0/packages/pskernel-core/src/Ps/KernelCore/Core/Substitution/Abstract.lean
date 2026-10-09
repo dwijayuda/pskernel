@@ -339,7 +339,7 @@ def psKernelExprAbstractFVarsAtChanged
 
 namespace PsKernelSharing
 
-def abstractAlgebra (fvars : List PsKernelName) : Algebra Changed :=
+@[inline] def abstractAlgebra (fvars : List PsKernelName) : Algebra Changed :=
   changedAlgebra fun e offset =>
     match e with
     | .fvar name =>
@@ -361,12 +361,13 @@ end PsKernelSharing
 
 def psKernelExprAbstractFVarsAtChangedShared (e : PsKernelExpr)
     (fvars : List PsKernelName) (offset : Nat) : Prod PsKernelExpr Bool :=
-  PsKernelSharing.run (PsKernelSharing.abstractAlgebra fvars) e offset
+  if PsKernelSharing.small e then psKernelExprAbstractFVarsAtChanged e fvars offset
+  else PsKernelSharing.run (PsKernelSharing.abstractAlgebra fvars) e offset
 
 @[csimp] theorem psKernelExprAbstractFVarsAtChanged_shared_eq :
     psKernelExprAbstractFVarsAtChanged = psKernelExprAbstractFVarsAtChangedShared := by
   funext e fvars offset
-  rw [psKernelExprAbstractFVarsAtChangedShared, PsKernelSharing.run_eq,
+  simp [psKernelExprAbstractFVarsAtChangedShared, PsKernelSharing.run_eq,
     PsKernelSharing.abstract_fold]
 
 

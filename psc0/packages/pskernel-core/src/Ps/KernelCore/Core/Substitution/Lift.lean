@@ -287,7 +287,7 @@ def psKernelExprLiftLooseBVarsChanged
 
 namespace PsKernelSharing
 
-def liftAlgebra (amount : Nat) : Algebra Changed :=
+@[inline] def liftAlgebra (amount : Nat) : Algebra Changed :=
   changedAlgebra fun e start =>
     if Nat.beq amount 0 then (e, false)
     else match e with
@@ -314,6 +314,7 @@ end PsKernelSharing
 def psKernelExprLiftLooseBVarsChangedShared (e : PsKernelExpr) (start amount : Nat) :
     Prod PsKernelExpr Bool :=
   if Nat.beq amount 0 then (e, false)
+  else if PsKernelSharing.small e then psKernelExprLiftLooseBVarsChanged e start amount
   else PsKernelSharing.run (PsKernelSharing.liftAlgebra amount) e start
 
 @[csimp] theorem psKernelExprLiftLooseBVarsChanged_shared_eq :

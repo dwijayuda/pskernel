@@ -24,8 +24,8 @@ avoids path copying for every temporary syntax result and whole-table copying
 when a retained checkpoint is extended. Neither store needs a logical invariant:
 every entry already certifies the result it stores. -/
 structure Memo (α β : Type) (spec : α → Nat → β) where
-  checkpoint : Lean.PersistentHashMap Nat (Entry α β spec) := {}
-  scratch : Std.HashMap Nat (Entry α β spec) := {}
+  checkpoint : Lean.PersistentHashMap Nat (Entry α β spec)
+  scratch : Std.HashMap Nat (Entry α β spec)
 
 instance : EmptyCollection (Memo α β spec) :=
   ⟨{ checkpoint := {}, scratch := {} }⟩

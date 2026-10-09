@@ -735,3 +735,94 @@ theorem psKernelAddSimpleMutualInductive_success_prepared_constructor_inputs
   · simpa only [hCtorNames] using hCtorUnique
   · simpa only [hRecNames] using hReservedSplit.1
   · simpa only [hRecNames] using hRecUnique
+
+/--
+Composition boundary for the executable mutual-constructor family worker.
+
+The prepared input certificate supplies authoritative indexes, canonical
+semantic preservation, source-name freshness and uniqueness. The independently
+sound session and the actual successful worker supply checked constructor
+history, exact insertion provenance, and a sound work environment.
+
+The cross-family disjointness requirement is explicit at this boundary; it
+must be discharged from the *same actual admission* global naming guard.
+No infer-only typing, unproved comparator reflexivity, or replacement
+well-formedness is inferred.
+-/
+theorem psKernelMutualConstructorWorker_prepared_refines
+    (fuel : Nat) (environment : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (headerSession : PsKernelCheckerSession)
+    (resultLevel : PsKernelLevel) (params : List PsKernelOpenBinder)
+    (result : PsKernelAddMutualConstructorsResult)
+    (hPrepared : PsKernelPreparedMutualConstructorInputsValid environment decl shapes)
+    (hHeaderConfig : PsKernelCheckerConfigurationSound
+      headerSession.context headerSession.state)
+    (hHeaderEnvironment : headerSession.context.environment = environment)
+    (hCross : ∀ name : PsKernelName, List.Mem name
+        (psKernelMutualShapeConstructorNames shapes) ->
+      psKernelNameListContains name
+        (shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+          psKernelSimpleRecName shape.decl.name)) = false)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelAddSimpleMutualTypesWorker shapes fuel
+      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+        else PsKernelDefinitionSafety.safe)
+      resultLevel (psKernelLevelParamsToLevels decl.levelParams)
+      params (psKernelSimpleMutualNames decl.types) shapes headerSession
+      (psKernelAddMutualInductiveInfos
+        (psKernelMakeSimpleMutualBaseInfos
+          (psKernelSimpleMutualNames decl.types) decl shapes) environment) 0 =
+        Except.ok result) :
+    let work0 := psKernelAddMutualInductiveInfos
+      (psKernelMakeSimpleMutualBaseInfos
+        (psKernelSimpleMutualNames decl.types) decl shapes) environment
+    ∃ added : List PsKernelConstantInfo,
+      PsKernelCheckedMutualFamilyConstructorHistory
+        (psKernelSimpleMutualNames decl.types) shapes
+        (psKernelLevelParamsToLevels decl.levelParams) params resultLevel
+        headerSession.context.levelParams
+        (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+          else PsKernelDefinitionSafety.safe)
+        headerSession.context.localContext
+        work0 0 shapes result.shapes result.environment ∧
+      PsKernelEnvironmentSemanticExtends environment result.environment ∧
+      PsKernelEnvironmentIndexRefines result.environment ∧
+      PsKernelInductiveNamesAbsent result.environment
+        (shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+          psKernelSimpleRecName shape.decl.name)) ∧
+      PsKernelEnvironmentExtendsBy work0 result.environment added.reverse ∧
+      result.environment.quotInitialized = work0.quotInitialized ∧
+      added.map psKernelConstantInfoName =
+        psKernelMutualShapeConstructorNames shapes := by
+  let work0 := psKernelAddMutualInductiveInfos
+    (psKernelMakeSimpleMutualBaseInfos
+      (psKernelSimpleMutualNames decl.types) decl shapes) environment
+  obtain ⟨hShapeDecls, hEnvExt, hIndex, hCtorAbsent, hCtorUnique,
+    hRecAbsent, hRecUnique, hHeadersTyped⟩ := hPrepared
+  have hSessionExt :
+      PsKernelEnvironmentSemanticExtends headerSession.context.environment work0 := by
+    rw [hHeaderEnvironment]
+    exact hEnvExt
+  obtain ⟨hHistory, hCtorExt, hFinalIndex⟩ :=
+    psKernelAddSimpleMutualTypesWorker_concrete_semantic_history
+      shapes fuel
+      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+        else PsKernelDefinitionSafety.safe)
+      resultLevel (psKernelLevelParamsToLevels decl.levelParams) params
+      (psKernelSimpleMutualNames decl.types) shapes
+      headerSession work0 0 result
+      hIndex hHeaderConfig hSessionExt hCtorAbsent hCtorUnique
+      (PsKernelMutualTypeShapeSuffix.root shapes) hNative hString hRun
+  have hRecAbsentFinal :=
+    hHistory.preserves_absent_names
+      (shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+        psKernelSimpleRecName shape.decl.name))
+      hRecAbsent hCross
+  obtain ⟨added, hAdded, hQuot, hNames⟩ := hHistory.exact_extension
+  exact ⟨added, hHistory,
+    PsKernelEnvironmentSemanticExtends.trans environment work0
+      result.environment hEnvExt hCtorExt,
+    hFinalIndex, hRecAbsentFinal, hAdded, hQuot, hNames⟩

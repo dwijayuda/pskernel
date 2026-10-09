@@ -31,41 +31,42 @@ def fold (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) : β :=
   | .mdata _ b | .proj _ _ b => a.unary e cursor (fold a b cursor)
   | _ => a.atom e cursor
 
+def isCompound : PsKernelExpr → Bool
+  | .app .. | .lam .. | .forallE .. | .letE .. | .mdata .. | .proj .. => true
+  | _ => false
+
 def walk (a : Algebra β) (e : @& PsKernelExpr) (cursor : Nat)
     (memo : Memo PsKernelExpr β (fold a)) : Squash (Result (fold a) e cursor) :=
-  match e with
-  | .app f x =>
-    step e cursor memo fun _ =>
+  let descend := fun _ : Unit =>
+    match h : e with
+    | .app f x =>
       Squash.lift (walk a f cursor memo) fun (fr, m) =>
       Squash.lift (walk a x cursor m) fun (xr, m) =>
-      Squash.mk (⟨a.binary e cursor fr.1 xr.1, by simp [fold, fr.2, xr.2]⟩, m)
-  | .lam n t b bi =>
-    step e cursor memo fun _ =>
+      Squash.mk (⟨a.binary e cursor fr.1 xr.1, by simp [h, fold, fr.2, xr.2]⟩, m)
+    | .lam n t b bi =>
       Squash.lift (walk a t cursor memo) fun (tr, m) =>
       Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
-      Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [fold, tr.2, br.2]⟩, m)
-  | .forallE n t b bi =>
-    step e cursor memo fun _ =>
+      Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [h, fold, tr.2, br.2]⟩, m)
+    | .forallE n t b bi =>
       Squash.lift (walk a t cursor memo) fun (tr, m) =>
       Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
-      Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [fold, tr.2, br.2]⟩, m)
-  | .letE n t v b nd =>
-    step e cursor memo fun _ =>
+      Squash.mk (⟨a.binary e cursor tr.1 br.1, by simp [h, fold, tr.2, br.2]⟩, m)
+    | .letE n t v b nd =>
       Squash.lift (walk a t cursor memo) fun (tr, m) =>
       Squash.lift (walk a v cursor m) fun (vr, m) =>
       Squash.lift (walk a b (cursor + 1) m) fun (br, m) =>
       Squash.mk (⟨a.ternary e cursor tr.1 vr.1 br.1,
-        by simp [fold, tr.2, vr.2, br.2]⟩, m)
-  | .mdata md b =>
-    step e cursor memo fun _ =>
+        by simp [h, fold, tr.2, vr.2, br.2]⟩, m)
+    | .mdata md b =>
       Squash.lift (walk a b cursor memo) fun (br, m) =>
-      Squash.mk (⟨a.unary e cursor br.1, by simp [fold, br.2]⟩, m)
-  | .proj n i b =>
-    step e cursor memo fun _ =>
+      Squash.mk (⟨a.unary e cursor br.1, by simp [h, fold, br.2]⟩, m)
+    | .proj n i b =>
       Squash.lift (walk a b cursor memo) fun (br, m) =>
-      Squash.mk (⟨a.unary e cursor br.1, by simp [fold, br.2]⟩, m)
-  | .bvar _ | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ =>
-      Squash.mk (⟨a.atom e cursor, rfl⟩, memo)
+      Squash.mk (⟨a.unary e cursor br.1, by simp [h, fold, br.2]⟩, m)
+    | .bvar _ | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ =>
+      Squash.mk (⟨a.atom e cursor, by simp [h, fold]⟩, memo)
+  if isCompound e then step e cursor memo descend else descend ()
+termination_by structural e
 
 def run (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) : β :=
   value (walk a e cursor {})

@@ -394,13 +394,14 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_pipeline
                                                               (psKernelSimpleMutualNames decl.types)
                                                               shapes paramResult.session work0 0 with
                                                           | error message =>
-                                                              simp only [hCtor] at hRun
                                                               cases hRun
                                                           | ok ctorResult =>
+                                                              have hCtorAligned := hCtor
+                                                              rw [hTypes] at hCtorAligned
                                                               refine ⟨first, remaining, checked, sorted, paramResult,
                                                                 indexResult, resultLevel, tailShapes, ctorResult, rfl,
                                                                 hChecked, hSort, hParams, hIndices, hResult, hTail, ?_⟩
-                                                              simpa only [shapes, work0, safety] using hCtor
+                                                              simpa only [shapes, work0, safety] using hCtorAligned
                                                   | _ => simp only [hResult] at hRun; cases hRun
 
 

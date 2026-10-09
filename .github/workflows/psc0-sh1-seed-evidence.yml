@@ -1,0 +1,608 @@
+name: PSC0 SH1 seed evidence collector
+
+# This workflow only collects already successful R evidence. It never selects a seed.
+on:
+  push:
+    branches: ['psc0/sh1-projection-grammar-v1']
+    paths:
+      - 'docs/psc0-sh1-seed-evidence-request.json'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc0-sh1-seed-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    if: ${{ contains(github.event.head_commit.message, '[seed-evidence]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Read the explicit evidence request
+        uses: actions/checkout@v4
+        with:
+          path: request-source
+          persist-credentials: false
+          sparse-checkout: docs
+      - name: Authenticate the fixed run, all jobs, and immutable artifact IDs
+        id: provenance
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const expected = {
+              "schemaVersion": 1,
+              "kind": "psc0-sh1-seed-evidence-request",
+              "repository": "dwijayuda/pskernel",
+              "runId": 37925722635,
+              "runAttempt": 1,
+              "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+              "sourceBranch": "psc0/sh1-projection-grammar-v1",
+              "workflowId": 378853677,
+              "workflowPath": ".github/workflows/psc0-sh1.yml",
+              "requiredJobs": [
+                "compiler",
+                "successor-recovery",
+                "kernel-admissions"
+              ],
+              "purpose": "Collect authenticated file evidence and a proposed selection; never activate the seed."
+            };
+            
+            const assert = (await import('node:assert/strict')).default;
+            const { mkdir, readFile, writeFile } = await import('node:fs/promises');
+            const path = await import('node:path');
+            const workspace = process.env.GITHUB_WORKSPACE;
+            const requestBytes = await readFile(path.join(workspace,
+              'request-source/docs/psc0-sh1-seed-evidence-request.json'));
+            const request = JSON.parse(requestBytes.toString('utf8'));
+            assert.deepEqual(request, expected, 'PSC0_SH1_EVIDENCE_FIXED_REQUEST');
+            assert.equal(context.repo.owner + '/' + context.repo.repo, expected.repository);
+            const api = { owner: context.repo.owner, repo: context.repo.repo };
+            const run = (await github.rest.actions.getWorkflowRun({
+              ...api, run_id: expected.runId,
+            })).data;
+            assert.equal(run.id, expected.runId);
+            assert.equal(run.run_attempt, expected.runAttempt);
+            assert.equal(run.repository.full_name, expected.repository);
+            assert.equal(run.head_repository.full_name, expected.repository);
+            assert.equal(run.workflow_id, expected.workflowId);
+            assert.equal(run.path, expected.workflowPath);
+            assert.equal(run.event, 'push');
+            assert.equal(run.head_sha, expected.sourceRef);
+            assert.equal(run.head_branch, expected.sourceBranch);
+            assert.equal(run.status, 'completed', 'PSC0_SH1_EVIDENCE_RUN_NOT_COMPLETE');
+            assert.equal(run.conclusion, 'success', 'PSC0_SH1_EVIDENCE_RUN_NOT_SUCCESSFUL');
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+              ...api, run_id: expected.runId, filter: 'latest', per_page: 100,
+            });
+            assert.deepEqual(jobs.map((job) => job.name).sort(), [...expected.requiredJobs].sort(),
+              'PSC0_SH1_EVIDENCE_EXACT_JOB_SET');
+            for (const job of jobs) {
+              assert.equal(job.run_id, expected.runId);
+              assert.equal(job.run_attempt, expected.runAttempt);
+              assert.equal(job.status, 'completed');
+              assert.equal(job.conclusion, 'success', 'PSC0_SH1_EVIDENCE_JOB_' + job.name);
+            }
+            const requiredSteps = [
+              ['compiler', 'Qualify exact current-source C2/C3 at a promotion checkpoint'],
+              ['successor-recovery', 'Authenticate the cold recovery receipt and the rebuilt successor bytes'],
+              ['kernel-admissions', 'Obtain actual provider decisions for the qualified admission streams'],
+            ];
+            for (const [jobName, stepName] of requiredSteps) {
+              const matches = jobs.find((job) => job.name === jobName).steps
+                .filter((step) => step.name === stepName);
+              assert.equal(matches.length, 1, 'PSC0_SH1_EVIDENCE_REQUIRED_STEP_' + jobName);
+              assert.equal(matches[0].status, 'completed');
+              assert.equal(matches[0].conclusion, 'success');
+            }
+            const allArtifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              ...api, run_id: expected.runId, per_page: 100,
+            });
+            const names = {
+              compiler: 'psc0-sh1-ts7.0.2-' + expected.sourceRef,
+              provider: 'psc0-sh1-kernel-ts7.0.2-' + expected.sourceRef,
+              cold: 'psc0-sh1-successor-recovery-ts7.0.2-' + expected.sourceRef,
+            };
+            const artifacts = {};
+            for (const [kind, name] of Object.entries(names)) {
+              const matches = allArtifacts.filter((artifact) => artifact.name === name);
+              assert.equal(matches.length, 1, 'PSC0_SH1_EVIDENCE_UNIQUE_ARTIFACT_' + kind);
+              const artifact = matches[0];
+              assert(Number.isSafeInteger(artifact.id) && artifact.id > 0);
+              assert.equal(artifact.expired, false);
+              assert.equal(artifact.workflow_run.id, expected.runId);
+              assert.equal(artifact.workflow_run.repository_id, run.repository.id);
+              assert.equal(artifact.workflow_run.head_repository_id, run.head_repository.id);
+              assert.equal(artifact.workflow_run.head_sha, expected.sourceRef);
+              assert.equal(artifact.workflow_run.head_branch, expected.sourceBranch);
+              if (artifact.digest !== undefined && artifact.digest !== null) {
+                assert.match(artifact.digest, /^sha256:[a-f0-9]{64}$/u);
+              }
+              artifacts[kind] = artifact;
+              core.setOutput(kind + '-artifact-id', String(artifact.id));
+            }
+            core.setOutput('source-ref', expected.sourceRef);
+            core.setOutput('run-id', String(expected.runId));
+            const output = path.join(workspace, 'seed-evidence-output');
+            await mkdir(output, { recursive: true });
+            await writeFile(path.join(output, 'request.json'), requestBytes);
+            await writeFile(path.join(output, 'run-provenance.json'), JSON.stringify({
+              schemaVersion: 1,
+              evidence: 'github-api-run-job-artifact-binding',
+              request,
+              collector: { runId: context.runId, sourceRef: context.sha },
+              run, jobs, artifacts,
+              note: 'Artifact archive digests are transport metadata; receipt hashes are computed from the extracted receipt file bytes.',
+            }, null, 2) + '\n');
+            core.info('PSC0_SH1_EVIDENCE_RUN_AUTHENTICATED: ' + JSON.stringify({
+              runId: run.id, runAttempt: run.run_attempt, sourceRef: run.head_sha,
+              artifactIds: Object.fromEntries(Object.entries(artifacts)
+                .map(([kind, artifact]) => [kind, artifact.id])),
+            }));
+      - name: Read the helper and raw source from the qualified R revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.provenance.outputs.source-ref }}
+          path: r-source
+          persist-credentials: false
+          sparse-checkout: psc0
+      - name: Read the exact compiler qualification artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ steps.provenance.outputs.compiler-artifact-id }}
+          run-id: ${{ steps.provenance.outputs.run-id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: evidence-input/compiler
+          merge-multiple: true
+      - name: Read the exact independent provider artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ steps.provenance.outputs.provider-artifact-id }}
+          run-id: ${{ steps.provenance.outputs.run-id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: evidence-input/provider
+          merge-multiple: true
+      - name: Read the exact cold successor recovery artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ steps.provenance.outputs.cold-artifact-id }}
+          run-id: ${{ steps.provenance.outputs.run-id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: evidence-input/cold
+          merge-multiple: true
+      - name: Authenticate actual receipt bytes and prepare a reviewable selection proposal
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const expected = {
+              "schemaVersion": 1,
+              "kind": "psc0-sh1-seed-evidence-request",
+              "repository": "dwijayuda/pskernel",
+              "runId": 37925722635,
+              "runAttempt": 1,
+              "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+              "sourceBranch": "psc0/sh1-projection-grammar-v1",
+              "workflowId": 378853677,
+              "workflowPath": ".github/workflows/psc0-sh1.yml",
+              "requiredJobs": [
+                "compiler",
+                "successor-recovery",
+                "kernel-admissions"
+              ],
+              "purpose": "Collect authenticated file evidence and a proposed selection; never activate the seed."
+            };
+            
+            const assert = (await import('node:assert/strict')).default;
+            const { mkdir, readFile, writeFile } = await import('node:fs/promises');
+            const { createHash } = await import('node:crypto');
+            const path = await import('node:path');
+            const { pathToFileURL } = await import('node:url');
+            const workspace = process.env.GITHUB_WORKSPACE;
+            const output = path.join(workspace, 'seed-evidence-output');
+            const roots = {
+              compiler: path.join(workspace, 'evidence-input/compiler'),
+              provider: path.join(workspace, 'evidence-input/provider'),
+              cold: path.join(workspace, 'evidence-input/cold'),
+              source: path.join(workspace, 'r-source/psc0'),
+            };
+            const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
+            const provenance = JSON.parse(await readFile(path.join(output, 'run-provenance.json'), 'utf8'));
+            assert.deepEqual(provenance.request, expected);
+            const inputs = new Map();
+            const copies = [];
+            function relativePath(value) {
+              assert(typeof value === 'string' && value.length > 0 && !value.includes('\\') &&
+                !value.includes('\0') && !value.includes(':') && !value.startsWith('/') &&
+                value.split('/').every((part) => part && part !== '.' && part !== '..'),
+              'PSC0_SH1_EVIDENCE_RELATIVE_PATH');
+              return value;
+            }
+            function decodeJson(bytes) {
+              const content = bytes.toString('utf8');
+              assert(bytes.equals(Buffer.from(content, 'utf8')), 'PSC0_SH1_EVIDENCE_UTF8_BYTES');
+              return { content, value: JSON.parse(content) };
+            }
+            async function readInput(kind, relative) {
+              const bytes = await readFile(path.join(roots[kind], relativePath(relative)));
+              const observation = {
+                origin: kind, path: relative, sha256: hash(bytes), bytes: bytes.length,
+                ...(kind === 'source' ? { sourceRef: expected.sourceRef }
+                  : { artifactId: provenance.artifacts[kind].id }),
+              };
+              const key = kind + '/' + relative;
+              if (inputs.has(key)) assert.deepEqual(inputs.get(key), observation,
+                'PSC0_SH1_EVIDENCE_INPUT_CHANGED');
+              inputs.set(key, observation);
+              return { bytes, sha256: observation.sha256, size: observation.bytes };
+            }
+            async function readJson(kind, relative) {
+              const file = await readInput(kind, relative);
+              return { ...file, ...decodeJson(file.bytes) };
+            }
+            async function retainJson(relative, bytes, origin) {
+              relativePath(relative);
+              decodeJson(bytes);
+              assert(!copies.some((copy) => copy.path === relative), 'PSC0_SH1_EVIDENCE_OUTPUT_DUPLICATE');
+              const destination = path.join(output, relative);
+              await mkdir(path.dirname(destination), { recursive: true });
+              await writeFile(destination, bytes);
+              copies.push({ path: relative, sha256: hash(bytes), bytes: bytes.length, origin });
+              return destination;
+            }
+            async function copyJson(kind, relative, destination) {
+              const file = await readJson(kind, relative);
+              await retainJson(destination, file.bytes, { kind, path: relative,
+                ...(kind === 'source' ? { sourceRef: expected.sourceRef }
+                  : { artifactId: provenance.artifacts[kind].id }) });
+              return file;
+            }
+            for (const name of ['request.json', 'run-provenance.json']) {
+              const bytes = await readFile(path.join(output, name));
+              decodeJson(bytes);
+              copies.push({ path: name, sha256: hash(bytes), bytes: bytes.length,
+                origin: name === 'request.json' ? 'exact request file bytes' : 'collector GitHub API snapshot' });
+            }
+            const seeds = await import(pathToFileURL(
+              path.join(roots.source, 'scripts/sh1-successor-seed.mjs')).href);
+            const evidenceDirectory = 'psc0/docs/selfhost-language/seed-evidence/' + expected.sourceRef;
+            const candidate = await copyJson('compiler', 'dist/sh1/seed-promotion.json',
+              evidenceDirectory + '/seed-promotion.json');
+            const qualification = await copyJson('compiler', 'dist/sh1/qualification.json',
+              evidenceDirectory + '/qualification.json');
+            const parent = await copyJson('source', 'selfhost-seed.json',
+              evidenceDirectory + '/parent-A-manifest.json');
+            const generations = {};
+            for (const generation of ['C1', 'C2', 'C3']) {
+              generations[generation] = await copyJson('compiler',
+                'dist/sh1/' + generation + '/receipt.json',
+                evidenceDirectory + '/' + generation + '-receipt.json');
+            }
+            const manifest = seeds.validateSuccessorSeedManifest(candidate.value);
+            assert.equal(manifest.sourceRef, expected.sourceRef);
+            assert.equal(manifest.qualification.runId, expected.runId);
+            assert.equal(manifest.recoveryEvidence, undefined);
+            assert.equal(manifest.providerEvidence, undefined);
+            assert.deepEqual(manifest.parent.manifest, parent.value);
+            const rebuiltDescriptor = seeds.makeSuccessorSeedManifest({
+              qualification: qualification.value,
+              firstReceipt: generations.C1.value,
+              secondReceipt: generations.C2.value,
+              thirdReceipt: generations.C3.value,
+              parentManifest: parent.value,
+              runId: expected.runId,
+            });
+            assert.deepEqual(rebuiltDescriptor, manifest, 'PSC0_SH1_EVIDENCE_DESCRIPTOR_FROM_ACTUAL_RECEIPTS');
+            const selected = seeds.successorSeedSelection(manifest);
+            const productFields = [
+              ['canonical-source.json', 'canonicalSurfaceSourceSha256'],
+              ['admissions.json', 'normalizedCanonicalAdmissionsSha256'],
+              ['index.ts', 'typescriptSha256'],
+              ['index.js', 'javascriptSha256'],
+            ];
+            async function verifyProducts(kind, directory, expectedArtifacts) {
+              for (const [file, field] of productFields) {
+                const actual = await readInput(kind, directory + '/' + file);
+                assert.equal(actual.sha256, expectedArtifacts[field],
+                  'PSC0_SH1_EVIDENCE_PRODUCT_' + kind + '_' + directory + '_' + file);
+              }
+            }
+            for (const generation of ['C1', 'C2', 'C3']) {
+              await verifyProducts('compiler', 'dist/sh1/' + generation,
+                generations[generation].value.artifacts);
+            }
+            const sourceClosure = await copyJson('compiler', 'dist/sh1/C1/source-closure.json',
+              evidenceDirectory + '/source-closure.json');
+            assert(Array.isArray(sourceClosure.value) && sourceClosure.value.length > 0);
+            assert.equal(sourceClosure.value.length, qualification.value.moduleCount);
+            assert.equal(new Set(sourceClosure.value.map((file) => file.path)).size, sourceClosure.value.length);
+            assert.equal(hash(JSON.stringify(sourceClosure.value)), manifest.sourceClosureSha256);
+            for (const file of sourceClosure.value) {
+              assert.deepEqual(Object.keys(file).sort(), ['path', 'sha256']);
+              assert.match(file.sha256, /^[a-f0-9]{64}$/u);
+              assert.equal((await readInput('source', file.path)).sha256, file.sha256,
+                'PSC0_SH1_EVIDENCE_PINNED_RAW_SOURCE_' + file.path);
+            }
+            for (const generation of ['C2', 'C3']) {
+              assert.deepEqual((await readJson('compiler',
+                'dist/sh1/' + generation + '/source-closure.json')).value, sourceClosure.value);
+            }
+            for (const file of manifest.recovery.runnerRecipe.files) {
+              assert.equal((await readInput('source', file.path)).sha256, file.sha256,
+                'PSC0_SH1_EVIDENCE_PINNED_RUNNER_RECIPE_' + file.path);
+            }
+            const native = await copyJson('compiler', 'dist/sh1/development/N1/receipt.json',
+              evidenceDirectory + '/N1-receipt.json');
+            const nativeGrammar = await copyJson('compiler', 'dist/sh1/development/N1/grammar-closure.json',
+              evidenceDirectory + '/N1-grammar-closure.json');
+            assert.equal(native.value.evidence, 'native-seeded-generated-compiler-candidate');
+            assert.equal(native.value.sourceRef, expected.sourceRef);
+            assert.equal(native.value.sourceClosureSha256, manifest.sourceClosureSha256);
+            assert.equal(nativeGrammar.value.evidence, 'full-authored-closure-canonical-source-correspondence');
+            assert.equal(nativeGrammar.value.compilerSha256, native.value.artifacts.javascriptSha256);
+            assert.equal(nativeGrammar.value.closureSha256, manifest.sourceClosureSha256);
+            assert.equal(nativeGrammar.value.moduleCount, qualification.value.moduleCount);
+            assert.deepEqual(nativeGrammar.value.sourceGrammar, manifest.authoring.syntax);
+            assert.equal(nativeGrammar.value.canonicalSurfaceSourceSha256,
+              manifest.expectedArtifacts.canonicalSurfaceSourceSha256);
+            assert.equal(nativeGrammar.value.fullStandardConformance, false);
+            assert.equal(nativeGrammar.value.fullPscvConformance, false);
+            assert.equal(native.value.canonicalSourceCorrespondence.reportSha256, nativeGrammar.sha256);
+            assert.equal(qualification.value.nativeCanonicalSourceCorrespondence.report,
+              'development/N1/grammar-closure.json');
+            assert.equal(qualification.value.nativeCanonicalSourceCorrespondence.reportSha256, nativeGrammar.sha256);
+            assert.equal(qualification.value.nativeCanonicalSourceCorrespondence.compilerSha256,
+              native.value.artifacts.javascriptSha256);
+            for (const [file, field] of productFields.slice(2)) {
+              assert.equal((await readInput('compiler', 'dist/sh1/development/N1/' + file)).sha256,
+                native.value.artifacts[field]);
+            }
+            const expectedStreams = new Map();
+            async function addExpectedStream(relative, expectedSha256, label) {
+              const file = await readInput('compiler', 'dist/sh1/' + relative);
+              assert.equal(file.sha256, expectedSha256, 'PSC0_SH1_EVIDENCE_ADMISSIONS_' + relative);
+              const previous = expectedStreams.get(file.sha256);
+              if (previous) {
+                assert(previous.bytes.equals(file.bytes), 'PSC0_SH1_EVIDENCE_ADMISSIONS_BYTES');
+                previous.labels.push(label);
+              } else expectedStreams.set(file.sha256, { bytes: file.bytes, labels: [label] });
+            }
+            assert.deepEqual(qualification.value.recursiveGenericErasureGenerations, ['C1', 'C2', 'C3']);
+            for (const generation of ['C1', 'C2', 'C3']) {
+              const receipt = generations[generation].value;
+              const capabilities = (await readJson('compiler',
+                'dist/sh1/' + generation + '/capabilities/receipt.json')).value;
+              assert.equal(capabilities.evidence, 'raw-source-generated-execution');
+              assert.equal(capabilities.compilerSha256, receipt.artifacts.javascriptSha256);
+              assert.deepEqual(capabilities.sourceKinds.map((item) => item.sourceKind).sort(), ['lean', 'ps']);
+              assert.equal(capabilities.grammar.evidence, 'generated-compiler-source-grammar-api');
+              assert.equal(capabilities.grammar.compilerSha256, receipt.artifacts.javascriptSha256);
+              assert.deepEqual(capabilities.grammar.sourceGrammar, manifest.authoring.syntax);
+              assert.equal(capabilities.projectionResolution.evidence,
+                'owned-compiler-api-resolution-and-source-identity');
+              assert.equal(capabilities.projectionResolution.allPassed, true);
+              for (const capability of capabilities.sourceKinds) {
+                assert.equal(capability.generatedCompilerConsumedRawSource, true);
+                assert.equal(capability.behavior, 'pass');
+                assert.equal((await readInput('source',
+                  'test/fixtures/selfhost-sh1-accumulators.' + capability.sourceKind)).sha256,
+                capability.sourceSha256);
+                if (generation !== 'C1') {
+                  await addExpectedStream(generation + '/capabilities/' + capability.sourceKind + '/admissions.json',
+                    capability.admissionsSha256, generation + ' raw ' + capability.sourceKind + ' capability source');
+                }
+              }
+              if (generation !== 'C1') {
+                await addExpectedStream(generation + '/admissions.json',
+                  receipt.artifacts.normalizedCanonicalAdmissionsSha256, generation + ' compiler source');
+                const generic = (await readJson('compiler',
+                  'dist/sh1/' + generation + '/generic-erasure/receipt.json')).value;
+                assert.equal(generic.evidence, 'scoped-recursive-generic-erasure');
+                assert.equal(generic.compilerSha256, receipt.artifacts.javascriptSha256);
+                assert.equal(generic.behavior.status, 'pass');
+                assert.equal(generic.sourceSha256, (await readInput('source',
+                  'test/fixtures/selfhost-sh1-generic-erasure.lean')).sha256);
+                await addExpectedStream(generation + '/generic-erasure/admissions.json',
+                  generic.artifacts.admissionsSha256, generation + ' raw recursive-generic fixture source');
+              }
+            }
+            const providerReference = 'docs/selfhost-language/grammar-migration-provider.json';
+            const provider = await copyJson('provider', 'kernel-admissions.json', 'psc0/' + providerReference);
+            assert.equal(provider.value.evidence, 'selected-provider-acceptance-for-qualified-compiler-admissions');
+            assert.equal(provider.value.sourceRef, expected.sourceRef);
+            assert.equal(provider.value.sourceClosureSha256, manifest.sourceClosureSha256);
+            assert.equal(provider.value.compilerSha256, manifest.expectedArtifacts.javascriptSha256);
+            assert.equal(provider.value.provider.sourceRef, '963030dc2d154008fccc82e7c8ed29331f138799');
+            assert.match(provider.value.provider.sourceTree, /^[a-f0-9]{40}$/u);
+            assert.match(provider.value.provider.binarySha256, /^[a-f0-9]{64}$/u);
+            assert.deepEqual(provider.value.provider.command, ['psc_kernel_core_provider', '--check']);
+            assert.equal(provider.value.accepted, true);
+            assert.equal(provider.value.emissionWasGatedByThisCheck, false);
+            assert.equal(provider.value.streams.length, expectedStreams.size);
+            const seenStreams = new Set();
+            for (const stream of provider.value.streams) {
+              const expectedStream = expectedStreams.get(stream.canonicalAdmissionsSha256);
+              assert(expectedStream, 'PSC0_SH1_EVIDENCE_PROVIDER_UNEXPECTED_STREAM');
+              assert(!seenStreams.has(stream.canonicalAdmissionsSha256),
+                'PSC0_SH1_EVIDENCE_PROVIDER_DUPLICATE_STREAM');
+              seenStreams.add(stream.canonicalAdmissionsSha256);
+              assert.deepEqual([...stream.artifacts].sort(), [...expectedStream.labels].sort(),
+                'PSC0_SH1_EVIDENCE_PROVIDER_EXACT_COVERAGE');
+              assert.equal(stream.result.accepted, true, 'PSC0_SH1_EVIDENCE_PROVIDER_STREAM_REFUSED');
+            }
+            const coldReference = 'docs/selfhost-language/grammar-migration-cold-recovery.json';
+            const cold = await copyJson('cold', 'dist/sh1-successor-cold/receipt.json', 'psc0/' + coldReference);
+            const coldDescriptor = await copyJson('cold', 'dist/sh1-successor-cold/seed-promotion.json',
+              evidenceDirectory + '/cold-seed-promotion.json');
+            assert(coldDescriptor.bytes.equals(candidate.bytes), 'PSC0_SH1_EVIDENCE_IDENTICAL_COLD_DESCRIPTOR');
+            const coldReceipt = cold.value;
+            assert.equal(coldReceipt.evidence, 'qualified-successor-cold-recovery');
+            assert.equal(coldReceipt.sourceRef, expected.sourceRef);
+            assert.equal(coldReceipt.sourceClosureSha256, manifest.sourceClosureSha256);
+            assert.equal(coldReceipt.parentIdentitySha256, manifest.parent.identitySha256);
+            assert.equal(coldReceipt.parentCompilerSha256, parent.value.expectedArtifacts.javascriptSha256);
+            assert.equal(coldReceipt.compilerSha256, manifest.expectedArtifacts.javascriptSha256);
+            assert.equal(coldReceipt.successorIdentitySha256, selected.identitySha256);
+            assert.equal(coldReceipt.runnerSourceRef, manifest.recovery.runnerSourceRef);
+            assert.equal(coldReceipt.runnerRecipeSha256, manifest.recovery.runnerRecipe.sha256);
+            assert.deepEqual(coldReceipt.toolchain, manifest.toolchain);
+            assert.deepEqual(coldReceipt.expectedFirstGenerationArtifacts, manifest.expectedFirstGenerationArtifacts);
+            assert.deepEqual(coldReceipt.expectedArtifacts, manifest.expectedArtifacts);
+            assert.deepEqual(coldReceipt.actualFirstGenerationArtifacts, manifest.expectedFirstGenerationArtifacts);
+            assert.deepEqual(coldReceipt.actualArtifacts, manifest.expectedArtifacts);
+            assert.equal(coldReceipt.method, 'pinned-parent-two-new-raw-source-generations');
+            assert.equal(coldReceipt.passed, true);
+            assert.equal(coldReceipt.coldSuccessorRecovery, true);
+            assert.equal(coldReceipt.selectedSeedChanged, false);
+            assert.equal(coldReceipt.originalIrCheckedBeforeEmission, true);
+            assert.equal(coldReceipt.parentCacheVerified, true);
+            assert.equal(coldReceipt.strictSh1Qualified, false);
+            assert.equal(coldReceipt.fullPscvConformance, false);
+            for (const [generation, expectedArtifacts, executingSha256] of [
+              ['C1', manifest.expectedFirstGenerationArtifacts, parent.value.expectedArtifacts.javascriptSha256],
+              ['C2', manifest.expectedArtifacts, manifest.expectedFirstGenerationArtifacts.javascriptSha256],
+            ]) {
+              const directory = 'dist/sh1-successor-cold/' + generation;
+              const receipt = (await copyJson('cold', directory + '/receipt.json',
+                evidenceDirectory + '/cold-' + generation + '-receipt.json')).value;
+              assert.equal(receipt.evidence, 'candidate-build');
+              assert.equal(receipt.sourceRef, expected.sourceRef);
+              assert.equal(receipt.sourceClosureSha256, manifest.sourceClosureSha256);
+              assert.equal(receipt.sourceKind, 'raw-authoritative-lean');
+              assert.equal(receipt.executingCompilerSha256, executingSha256);
+              assert.deepEqual(receipt.toolchain, manifest.toolchain);
+              assert.deepEqual(receipt.recipe, manifest.recovery.runnerRecipe);
+              assert.deepEqual(receipt.artifacts, expectedArtifacts);
+              assert.deepEqual((await readJson('cold', directory + '/source-closure.json')).value,
+                sourceClosure.value);
+              if (generation === 'C2') {
+                assert.equal(receipt.originalIrInventory.traversalComplete, true);
+                assert.equal(receipt.originalIrInventory.runtimeIrTypingAccepted, true);
+                assert.equal(receipt.originalIrInventory.sameOriginalIrCheckedBeforeEmission, true);
+              }
+              await verifyProducts('cold', directory, expectedArtifacts);
+            }
+            const cacheChecks = [
+              ['compiler', selected.parent.cacheDirectory, parent.value],
+              ['compiler', selected.cacheDirectory, manifest],
+              ['cold', selected.cacheDirectory, manifest],
+            ];
+            for (const [kind, directory, cacheManifest] of cacheChecks) {
+              assert(await seeds.verifyAuthoringSeedCache(path.join(roots[kind], directory), cacheManifest),
+                'PSC0_SH1_EVIDENCE_CACHE_' + kind + '_' + directory);
+              for (const file of ['seed.json', 'index.ts', 'index.js']) await readInput(kind, directory + '/' + file);
+            }
+            const proposed = {
+              ...manifest,
+              recoveryEvidence: {
+                evidence: coldReceipt.evidence,
+                sourceRef: coldReceipt.sourceRef,
+                sourceClosureSha256: coldReceipt.sourceClosureSha256,
+                parentIdentitySha256: coldReceipt.parentIdentitySha256,
+                compilerSha256: coldReceipt.compilerSha256,
+                receiptSha256: cold.sha256, reference: coldReference,
+                passed: true, coldSuccessorRecovery: true, runId: expected.runId,
+              },
+              providerEvidence: {
+                providerSourceRef: provider.value.provider.sourceRef,
+                sourceRef: provider.value.sourceRef,
+                compilerSha256: provider.value.compilerSha256,
+                receiptSha256: provider.sha256, reference: providerReference,
+                accepted: true, runId: expected.runId,
+              },
+            };
+            seeds.validateSuccessorSeedManifest(proposed);
+            assert.equal(seeds.successorSeedIdentity(proposed), selected.identitySha256,
+              'PSC0_SH1_EVIDENCE_PROVENANCE_DOES_NOT_CHANGE_COMPILER_IDENTITY');
+            const proposedRelative = 'proposed/psc0/selfhost-seed.json';
+            const proposedPath = await retainJson(proposedRelative,
+              Buffer.from(JSON.stringify(proposed, null, 2) + '\n', 'utf8'),
+              'collector-generated proposal; not an activated seed');
+            const explicitProposal = await seeds.readSelectedAuthoringSeed(proposedPath);
+            assert.equal(explicitProposal.identitySha256, selected.identitySha256);
+            assert(parent.bytes.equals(await readFile(path.join(roots.source, 'selfhost-seed.json'))),
+              'PSC0_SH1_EVIDENCE_PINNED_PARENT_UNCHANGED');
+            const finalRun = (await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner, repo: context.repo.repo, run_id: expected.runId,
+            })).data;
+            assert.equal(finalRun.head_sha, expected.sourceRef);
+            assert.equal(finalRun.run_attempt, expected.runAttempt);
+            assert.equal(finalRun.status, 'completed');
+            assert.equal(finalRun.conclusion, 'success');
+            const index = {
+              schemaVersion: 1,
+              evidence: 'authenticated-artifact-receipt-file-bytes',
+              sourceRef: expected.sourceRef, qualificationRunId: expected.runId,
+              qualificationRunAttempt: expected.runAttempt,
+              successorIdentitySha256: selected.identitySha256,
+              compilerSha256: manifest.expectedArtifacts.javascriptSha256,
+              providerReceiptSha256: provider.sha256, coldRecoveryReceiptSha256: cold.sha256,
+              proposedManifest: proposedRelative,
+              copiedJsonFiles: [...copies].sort((left, right) => left.path.localeCompare(right.path)),
+              authenticatedInputs: [...inputs.values()].sort((left, right) =>
+                (left.origin + '/' + left.path).localeCompare(right.origin + '/' + right.path)),
+              providerCoverage: {
+                logicalArtifactCount: [...expectedStreams.values()].reduce((sum, stream) => sum + stream.labels.length, 0),
+                distinctAdmissionStreams: expectedStreams.size,
+                everyExpectedStreamAccepted: true,
+              },
+              verifiedCaches: cacheChecks.map(([origin, directory]) => ({ origin, directory })),
+              receiptHashMethod: 'SHA-256 of the original extracted file Buffer bytes, copied without JSON reserialization.',
+              indexSelfDigest: 'The exact index bytes and their digest are logged separately; this index does not hash itself.',
+              selectedSeedChanged: false,
+              activation: 'Not performed. Commit the exact evidence files and proposed manifest only after review.',
+              buildsExecuted: false, generatedCompilerImported: false, typescriptInstalled: false,
+              strictSh1Qualified: false, fullPscvConformance: false,
+            };
+            await retainJson('index.json', Buffer.from(JSON.stringify(index, null, 2) + '\n', 'utf8'),
+              'collector-generated evidence index');
+            for (const copy of copies) {
+              const bytes = await readFile(path.join(output, copy.path));
+              assert.equal(hash(bytes), copy.sha256, 'PSC0_SH1_EVIDENCE_RETAINED_BYTES');
+              const { content } = decodeJson(bytes);
+              const metadata = { path: copy.path, sha256: copy.sha256, bytes: bytes.length };
+              const payload = JSON.stringify({ ...metadata, content });
+              const maximumPayloadBytes = 8 * 1024;
+              if (Buffer.byteLength(payload, 'utf8') <= maximumPayloadBytes) {
+                core.info('PSC0_SH1_EVIDENCE_FILE: ' + payload);
+              } else {
+                const fragments = [];
+                for (let start = 0; start < content.length;) {
+                  let stop = Math.min(start + 1024, content.length);
+                  if (stop < content.length) {
+                    const last = content.charCodeAt(stop - 1);
+                    const next = content.charCodeAt(stop);
+                    if (last >= 0xd800 && last <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) stop -= 1;
+                  }
+                  fragments.push(content.slice(start, stop));
+                  start = stop;
+                }
+                const chunkCount = fragments.length;
+                const chunks = fragments.map((fragment, chunkIndex) =>
+                  JSON.stringify({ ...metadata, chunkIndex, chunkCount, content: fragment }));
+                for (const chunk of chunks) {
+                  assert(Buffer.byteLength(chunk, 'utf8') <= maximumPayloadBytes,
+                    'PSC0_SH1_EVIDENCE_LOG_CHUNK_BOUND');
+                }
+                core.info('PSC0_SH1_EVIDENCE_FILE_MANIFEST: ' + JSON.stringify({ ...metadata, chunkCount }));
+                for (const chunk of chunks) core.info('PSC0_SH1_EVIDENCE_FILE_CHUNK: ' + chunk);
+              }
+            }
+            core.info('PSC0_SH1_EVIDENCE_COMPLETE: ' + JSON.stringify({
+              qualificationRunId: expected.runId, sourceRef: expected.sourceRef,
+              successorIdentitySha256: selected.identitySha256,
+              providerReceiptSha256: provider.sha256, coldRecoveryReceiptSha256: cold.sha256,
+              proposedManifest: proposedRelative, copiedJsonFiles: copies.length,
+              selectedSeedChanged: false,
+            }));
+      - name: Retain exact receipt copies, their index, and the unactivated proposal
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-sh1-seed-evidence-${{ steps.provenance.outputs.source-ref }}-${{ github.run_id }}
+          path: seed-evidence-output
+          if-no-files-found: error
+          retention-days: 30

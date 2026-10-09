@@ -1,6 +1,6 @@
 # PSC0 AI work state — strict SH/1 work in progress
 
-Updated: 2026-10-09 19:43 UTC. Evidence times are UTC. Jakarta is UTC+07:00.
+Updated: 2026-10-09 19:52 UTC. Evidence times are UTC. Jakarta is UTC+07:00.
 
 ## Read this first
 
@@ -8,16 +8,36 @@ The user authorized merging the qualified practical checkpoint and continuing th
 
 This current section supersedes stale assignments, pending-run descriptions and completed-scope instructions in the archived work states. The previous complete active state is retained at [history/AI_WORK_STATE_2026-10-09_18-13.md](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-09_18-13.md), exact blob dfa4b108a4a4982e0b7f78357b7de835324edc5e. Its evidence remains true for the revisions it describes. The historical M6/TypeScript 7 section below is preserved byte-for-byte.
 
-## 1. Current reviewed integration and completed fourth attempt
+## 1. Current integration, setup correction and completed attempts
 
 - The practical checkpoint is already merged to main: **ed5d00aca0743bde583b45fe7756dd494ac3960f**, by non-force fast-forward from37f63c39 at16:30:26 UTC. Do not repeat that merge.
-- Continue **psc0/strict-sh1-v1**. This file accompanies the coherent implementation batch whose expected parent is **5becf0cf22a8deec760e0da68b706e95ca72f902** (root tree **f18dc610ab30bba8c6b2f6b879722853186f08f8**). Discover the actual new head and its Actions run; its self-referential commit SHA cannot be written into this file before publication.
-- Exact integration manifest: [strict-implementation-batch.json](docs/selfhost-language/strict/reviewed-candidates/strict-implementation-batch.json), blob **a2bade0cd7d0eb33590f9afa36a5cdeed40896b2**. It binds **29 source/fixture/workflow files**, each expected base and cumulative final blob. These files are integrated with this work state, after independent source review. They are no longer merely unattached proposals.
+- Continue **psc0/strict-sh1-v1**. The coherent29-file implementation plus14 documentation/evidence files is committed at **2b5a4c903ed8a069cde8f08265b28042bcaf5766**, root tree **30750fad133a878aba3563b01fb315d4e07a97fd**, parent5becf0cf22a8deec760e0da68b706e95ca72f902. Exact readback confirmed all43 paths and blob identities. This work-state update accompanies a reviewed seven-file recovery dependency correction on top of2b5; discover its actual new head and both Actions runs.
+- Base implementation manifest: [strict-implementation-batch.json](docs/selfhost-language/strict/reviewed-candidates/strict-implementation-batch.json), blob **a2bade0cd7d0eb33590f9afa36a5cdeed40896b2**, binds the29 source/fixture/workflow files integrated at2b5. The current seven-file overlay is [recovery-profile-isolation.json](docs/selfhost-language/strict/recovery-profile-isolation.json), blob **a930b0bcc8e17cf474014d359e0fe7897bb16ae3**. Apply its final host/profile/recipe identities over the base manifest; all compiler .lean implementation bytes remain those of2b5.
 - This batch includes origins, source-owned preparation/admission reuse, immutable host ingress, Nat and partial-application demand repairs, the corrected new-only PS fixture, empty inductive elimination, inhabited zero-field records, the final actual-file evidence binder, and bounded qualification memory/phase instrumentation.
-- No qualification result for this batch exists at this write. The commit requests **[sh1-qualify]**, causing one coherent native/N1/C1/C2/C3 workflow; the frozen provider runs only after compiler qualification. Do not attribute earlier run results to this new source.
+- Fifth attempt [37982287451](https://github.com/dwijayuda/pskernel/actions/runs/37982287451), compiler **113995538185**, failed at seed authentication step3 before memory preflight, toolchain installation, compiler execution or fixture checks. Provider **113995716773 skipped**; artifact list is empty. It exposed the recovery/conformance pin coupling described below. No current-source compiler result exists for2b5. The overlay commit requests both **[sh1-qualify] [sh1-ts7-cold]**, running independent full qualification and isolated native cold recovery in parallel. Do not borrow success from05f or the old recovery recipe.
 - The preceding executable source was **05f37fc04e52bfaed70389291a0fcdeda819f71f**. Its fourth run [37971952859](https://github.com/dwijayuda/pskernel/actions/runs/37971952859), compiler job **113960540944**, failed at fixed-point step25. Native development step23 and selected-R C1 step24 passed. V8 reported heap exhaustion at19:02:29 UTC and exit134 at19:02:59. Provider job **113979513794 was skipped**.
 - Docs checkpoints **818a1a5ea794694e6891d104307ffc74300722a2** and **5becf0cf22a8deec760e0da68b706e95ca72f902** preserved reviewed packets and evidence without altering the05f compiler. 818a had11 documentation files;5bec had8 documentation files plus the independent read-only inspection workflow.
 - Strict source is not merged to main and not selected as an authoring seed. **R remains selected; strictSh1Qualified and semanticContractQualified remain false.**
+
+### Fifth-attempt setup refusal and completed dependency review
+
+At19:45:02 UTC, readNativeSeedRecoveryPolicy refused **PSC0_SH1_NATIVE_SEED_RECIPE_FILE_PIN: scripts/sh1-grammar-conformance.mjs**. Expected48efa9b0c90e7904a1df49f43253395841bff90c, actual77dcbec4a94f7ba27b0727a0888b4098d77f05fc. Exact decoded log blob **4a86c2878cd576768532f780da0e3e71bc7050d5**, SHA-256 **70068f4f4f838620d1971b520d615a3d9377852153008074d46cbdde21e38316**,22551 characters, and structured setup failure **fb79c27029ec3b87ebc465546aebc65157549f24** are retained under attempts/2b5a4c903ed8a069cde8f08265b28042bcaf5766/.
+
+The complete seven-module recovery graph and all29 changed implementation files were reviewed. Only the grammar-conformance module overlapped its frozen runner recipe. Recovery uses none of its test functions: successor-seed imports only the six-field frozen grammar profile. That exact profile block/property order is byte-identical in old48efa, current77dcb and the new dependency-free data module.
+
+The reviewed correction isolates the stable data, preserving the existing conformance export. Recovery authenticates the profile module directly; evolving fixtures no longer enter that recipe. Historical requiredRecipeFiles metadata, the selectedR manifest/identity/source/toolchain and all four expected products are unchanged. No pin check is removed. Both pre-import and post-recovery recipe checks remain. Final overlay files:
+
+| File | Final blob |
+| --- | --- |
+| scripts/sh1-grammar-profile.mjs |26836a8e487d77c94a73485e2d11e3575b932edf|
+| scripts/sh1-grammar-conformance.mjs |2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141|
+| scripts/sh1-successor-seed.mjs |3514a7797e739e7a47af33c91ab58e912584d0c7|
+| scripts/sh1-native-seed-recovery.mjs |c1b5673079b2faae56e9c778b62e70087e639fbe|
+| selfhost-seed-recovery.json |6e4e90f8fe67a47e280721fd64a72a4410025fca|
+| scripts/sh1-qualify.mjs |eedce11a6d99dee010c3de4352a716e5385eb156|
+| .github/workflows/psc0-sh1-ts7-recovery.yml |499763e3ee1bcb7a3d62e56c543d9232b0630591|
+
+New policy SHA-256 **70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30**; new recipe SHA-256 **d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d**. The earlier successful cold receipt qualifies the old recipe only. **A new successful isolated cold receipt is mandatory before claiming this revised route qualified.** Its workflow has no cache/artifact restore, its own pinnedR checkout and cache directory, an independent concurrency group and cancel-in-progress:false. Full qualification can independently authenticate already qualifiedR bytes while cold recovery runs; their results are not substitutes.
 
 ### Authenticated failure inspection
 
@@ -36,7 +56,7 @@ Reviewed resource manifest **5a71a7f7c6074aea8a4380d3d200756fa02c3878**, SHA-256
 | File | Final blob |
 | --- | --- |
 | scripts/sh1-resource-policy.mjs |7e3066c513a91a6e0717aac9465a879097c0dd82|
-| scripts/sh1-qualify.mjs |1945f97a202f2ebeb7ca9ac10f9482d07394c2d9|
+| scripts/sh1-qualify.mjs |eedce11a6d99dee010c3de4352a716e5385eb156 (1945 resource implementation plus one profile recipe input)|
 | .github/workflows/psc0-sh1.yml |cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8|
 
 Full qualification uses **8192 MiB old-space**, requires **12 GiB effectively available memory at process entry**, and verifies the observed V8 heap-limit band. It takes the minimum of physical MemAvailable, Node availability and each resolvable visible cgroup ancestor's remaining limit. Unsupported mappings, inherited heap overrides or quoted/backslash NODE_OPTIONS refuse with a saved policy receipt. A root with no memory counters is accepted only when cgroup.type and cgroup.events are also absent: both are kernel interfaces omitted only on the actual hierarchy root, avoiding namespace-root misclassification.
@@ -57,7 +77,7 @@ Each generated build synchronously appends scalar-only checkpoints to resource-u
 3. Keep Lean 4.34.0, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b; Node 22.23.3; TypeScript 7.0.2. TS5/TS6 are retired from current development/recovery. Historical producer metadata does not authorize running an old compiler.
 4. Keep current .ps grammar **ps-0.9-r3/new-only/bounded-selfhost-subset**. No old grammar compatibility switch.
 5. Keep handwritten PSC1-compatible .lean as authoring authority, parsed by PSC0's own frontend. No authority switch to generated .ps.
-6. Keep selected R and its authenticated manifest/recovery policy. Do not promote F or any strict candidate merely because compilation or conformance passes.
+6. Keep selectedR and its exact authenticated manifest/identity/products. The separate native recovery runner policy has the explicitly reviewed profile-isolation update above and requires its own new cold receipt; it does not replace the selected manifest or weaken checks. Do not promoteF or any strict candidate merely because compilation or conformance passes.
 7. No kernel, provider, definitional-equality, cache-algorithm or existing metatheory changes. The frozen provider remains an independent exact-stream admission consumer.
 8. Complete existing mandatory language/runtime obligations first. Defer bulk refactoring, optional scalars/backends, general do, omitted lambda domains, nested patterns, source-authority changes and seed promotion.
 9. Preserve explicit resource refusals, truthful spans/origins, immutable source state, first errors, exact function groups and public source calling contracts.
@@ -248,10 +268,10 @@ The uninhabited raw files remain byte-identical: test/fixtures/selfhost-sh1-empt
 Final grammar coverage retains5 empty syntax pairs/6 refusals and adds1 zero-field pair/2 refusals, all parse/print only. The original-IR gate extends its existing one TS7 compilation to33 positive declarations/4 inductives/3 structures,38 rejections and61 behavior observations; separate empty evidence records2 layouts/5 eliminations and5 actual d.ts ABI signatures, with one callback that throws before producing any empty inhabitant. Native checker coverage becomes15 cases in its existing process, retaining the exact five-declaration Lean fixture and separate nullary-record coverage. These counts are integrated assertion contracts awaiting actual execution; final evidence binding and independent review are complete. No additional full/source preparation, TS7 invocation or native checker process is required by this coverage.
 ## 10. Immediate continuation order
 
-1. Discover the exact current strict-branch head and [sh1-qualify] run. This work state and29-file manifest were committed with the implementation; do not rebuild the same candidate or repeat the completed read-only inspection.
+1. Discover the exact current strict-branch head and both tagged full/cold runs. The29-file base implementation is2b5; its setup-only failure is recorded. The seven-file overlay fixes the complete reviewed recipe dependency class. Do not repeat the completed read-only artifact inspection or count setup failure as a compiler test.
 2. Observe the early memory-policy receipt, then native build/development and R-to-C1. Native/current-source fixture observations must match the new exact counts and hashes. Do not borrow05f success.
 3. Observe C2/C3, actual native/C2/C3 origin correspondence, all four fixed-point products, runtime/grammar/IR gates and the final actual-file binder. Use resource phase records to identify any failure boundary before another edit/run.
-4. Preserve the separately pinned provider's actual result. If compiler qualification fails, provider skip is neither acceptance nor rejection.
+4. Preserve the separately pinned provider's actual result and the independent new native cold-recovery receipt tied to policy70806f/reciped4c361. If compiler qualification fails, provider skip is neither acceptance nor rejection; old cold success does not qualify the revised recipe.
 5. Save completed logs, exact receipts and scoped findings in this work state and ledgers. No speculative rerun or broad refactor; investigate any concrete failure by class.
 6. Continue the shared type-indexed value/environment/call/error relation and the reachable erasure-scope invariant. A complete static source argument over actual metadata can establish a rule; a new serialized Core-to-IR certificate is not itself a SPEC MUST. Do not close rows with unproved premises, circular arguments, typing or finite tests.
 7. Complete N/ER/EV/TS general arguments and reconcile all mandatory coverage before strict activation. Do not merge unqualified strict source or change selectedR/source authority. Optional language expansion, bulk refactoring and seed promotion remain deferred.

@@ -80,6 +80,17 @@ passed native development and C1, then exhausted the heap in the first C2 build.
 successful read-only archive inspection. No C2 files were retained. The new
 batch has not inherited the previous run's success.
 
+The reviewed 43-file source/evidence commit is `2b5a4c903ed8a069cde8f08265b28042bcaf5766`.
+Its fifth run stopped at seed authentication before compiler work or memory
+preflight: recovery still pinned the earlier grammar-conformance helper.
+[The reviewed recovery overlay](recovery-profile-isolation.json) isolates its
+byte-identical six-field grammar profile into a separately authenticated data
+module. All seven runtime recipe dependencies and current callers were audited;
+selected R identity, historical manifest metadata and four products stay fixed.
+The overlay requests full qualification and a separate isolated native TS7 cold
+recovery run in parallel. The old cold receipt does not qualify the revised
+recipe. Record the two results separately; neither is a general semantic proof.
+
 The next full run uses a fixed 8192 MiB old-space limit and a measured 12 GiB
 available-memory preflight before expensive work. Candidate and fixed-point
 processes repeat the preflight before generated compiler loading; they do not

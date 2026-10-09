@@ -6,19 +6,19 @@
     "files": [
       {
         "path": "scripts/sh1-native-seed-recovery.mjs",
-        "gitBlobSha1": "4e2fe462ba5c8160ff5c08f70ce52152173b0d6f"
+        "gitBlobSha1": "c1b5673079b2faae56e9c778b62e70087e639fbe"
       },
       {
         "path": "scripts/sh1-successor-seed.mjs",
-        "gitBlobSha1": "ddd54197ee3f7831d0643431c05f435b1fdfe53f"
+        "gitBlobSha1": "3514a7797e739e7a47af33c91ab58e912584d0c7"
       },
       {
         "path": "scripts/sh1-seed-manifest.mjs",
         "gitBlobSha1": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
       },
       {
-        "path": "scripts/sh1-grammar-conformance.mjs",
-        "gitBlobSha1": "48efa9b0c90e7904a1df49f43253395841bff90c"
+        "path": "scripts/sh1-grammar-profile.mjs",
+        "gitBlobSha1": "26836a8e487d77c94a73485e2d11e3575b932edf"
       },
       {
         "path": "scripts/sh1-source-snapshot.mjs",

@@ -7,7 +7,7 @@ import {
   validateQualifiedSeedManifest, qualifiedSeedIdentity,
   readSelectedSeed, verifyQualifiedSeedCache,
 } from './sh1-seed-manifest.mjs';
-import { sh1GrammarProfile } from './sh1-grammar-conformance.mjs';
+import { sh1GrammarProfile } from './sh1-grammar-profile.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const successorSeedKind = 'psc0-qualified-successor-seed';

@@ -1,18 +1,12 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { sh1GrammarProfile } from './sh1-grammar-profile.mjs';
 
 // This is a finite API gate for the supported source subset. It is not the
 // reference's complete Standard/PSCV conformance suite or a kernel proof.
 // The caller loads and identifies a compiler, then decides where to save the
 // returned receipt. No compiler loading, filesystem access, or subprocesses occur here.
-export const sh1GrammarProfile = Object.freeze({
-  edition: 'ps-0.9-r3',
-  mode: 'new-only',
-  support: 'bounded-selfhost-subset',
-  referenceSha256: '4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71',
-  fullStandardConformance: false,
-  fullPscvConformance: false,
-});
+export { sh1GrammarProfile };
 
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 

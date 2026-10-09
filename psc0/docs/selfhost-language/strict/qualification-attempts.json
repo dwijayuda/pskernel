@@ -827,6 +827,58 @@
         "testsExecuted": false,
         "scope": "Read-only exact archive and compiler text inspection. No C2 files were retained in the archive. This narrows the failure to before the first TypeScript product write under the unchanged full dist/sh1 upload; it does not identify an internal synchronous phase or prove a memory fix."
       }
+    },
+    {
+      "attempt": 5,
+      "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+      "runId": 37982287451,
+      "workflowId": 378853677,
+      "runAttempt": 1,
+      "compilerJobId": 113995538185,
+      "providerJobId": 113995716773,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37982287451",
+      "startedAt": "2026-10-09T19:44:35Z",
+      "diagnosticAt": "2026-10-09T19:45:02.0533397Z",
+      "status": "failure",
+      "failedStep": {
+        "number": 3,
+        "name": "Authenticate the selected R seed and TS7-only recovery policy"
+      },
+      "actualRefusal": {
+        "stage": "seed-recovery-runner-recipe-authentication",
+        "code": "PSC0_SH1_NATIVE_SEED_RECIPE_FILE_PIN",
+        "path": "scripts/sh1-grammar-conformance.mjs",
+        "expectedBlob": "48efa9b0c90e7904a1df49f43253395841bff90c",
+        "actualBlob": "77dcbec4a94f7ba27b0727a0888b4098d77f05fc"
+      },
+      "compilerExecuted": false,
+      "resourcePreflightExecuted": false,
+      "providerStatus": "skipped",
+      "currentGenerationQualification": "not-started",
+      "strictRuntimeReference": "not-started",
+      "artifacts": [],
+      "failureEvidence": {
+        "path": "attempts/2b5a4c903ed8a069cde8f08265b28042bcaf5766/setup-failure.json",
+        "blob": "fb79c27029ec3b87ebc465546aebc65157549f24"
+      },
+      "log": {
+        "path": "attempts/2b5a4c903ed8a069cde8f08265b28042bcaf5766/job.log",
+        "blob": "4a86c2878cd576768532f780da0e3e71bc7050d5",
+        "sha256": "70068f4f4f838620d1971b520d615a3d9377852153008074d46cbdde21e38316",
+        "characters": 22551
+      },
+      "scopeOfFailure": "Setup-only refusal on one exact recipe dependency. No native/generated compiler, runtime/grammar fixture, memory preflight or provider ran. All six grammar-profile fields are byte-identical; the evolving conformance module was coupled to frozen recovery solely through its profile export.",
+      "reviewedCorrection": {
+        "manifest": "recovery-profile-isolation.json",
+        "blob": "a930b0bcc8e17cf474014d359e0fe7897bb16ae3",
+        "files": 7,
+        "oneChangingConformanceDependencyIsolated": true,
+        "selectedRManifestIdentityAndProductsUnchanged": true,
+        "allSevenRuntimeImportsAndPinsReviewed": true,
+        "newIsolatedColdReceiptRequired": true
+      },
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
     }
   ],
   "selectedSeedChanged": false,

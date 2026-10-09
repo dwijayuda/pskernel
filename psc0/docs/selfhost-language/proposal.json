@@ -1779,7 +1779,7 @@
     }
   },
   "strictEnforcementCheckpoint": {
-    "status": "fourth-attempt-native-and-C1-passed-C2-resource-failure-reviewed-coherent-batch-awaiting-qualification",
+    "status": "coherent-source-committed-fifth-attempt-setup-refusal-reviewed-recovery-overlay-awaiting-full-and-cold",
     "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
     "branch": "psc0/strict-sh1-v1",
     "implementationManifest": "strict/implementation-checkpoint.json",
@@ -1815,16 +1815,20 @@
     "selectedSeedUnchanged": "R",
     "sourceAuthority": ".lean",
     "cloudExecution": {
-      "status": "fourth-attempt-native-and-C1-passed-C2-heap-exhaustion",
-      "sourceRef": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
-      "runId": 37971952859,
-      "compilerJobId": 113960540944,
-      "providerJobId": 113979513794,
+      "status": "fifth-attempt-setup-refused-before-compiler-reviewed-recovery-overlay-awaiting-full-and-cold",
+      "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+      "runId": 37982287451,
+      "workflowId": 378853677,
+      "compilerJobId": 113995538185,
+      "providerJobId": 113995716773,
       "providerStatus": "skipped",
-      "attempts": 4,
-      "retainedArchiveInspectionRunId": 37980548050,
-      "c2RetainedFiles": 0,
-      "exactInternalPhaseKnown": false
+      "attempts": 5,
+      "failedStep": 3,
+      "diagnostic": "PSC0_SH1_NATIVE_SEED_RECIPE_FILE_PIN: scripts/sh1-grammar-conformance.mjs",
+      "compilerExecuted": false,
+      "resourcePreflightExecuted": false,
+      "artifacts": [],
+      "failureEvidence": "strict/attempts/2b5a4c903ed8a069cde8f08265b28042bcaf5766/setup-failure.json"
     },
     "initialImplementationRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
     "sourceBoundaryCorrection": "strict/source-boundary-correction.json",
@@ -1872,7 +1876,7 @@
     "reviewedIntegration": {
       "manifest": "strict/reviewed-candidates/strict-implementation-batch.json",
       "expectedParent": "5becf0cf22a8deec760e0da68b706e95ca72f902",
-      "status": "reviewed-integration-awaiting-exact-cloud-execution",
+      "status": "committed-source-compiler-execution-not-started-setup-refused",
       "originAndPreparationReuse": true,
       "orderedPartialAndNatEvaluation": true,
       "hostSnapshotBeforeCompilation": true,
@@ -1881,7 +1885,8 @@
       "oldSpaceMiB": 8192,
       "minimumAvailableBytes": 12884901888,
       "strictSh1Qualified": false,
-      "semanticContractQualified": false
+      "semanticContractQualified": false,
+      "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766"
     },
     "plannedSourceEvaluationRegression": {
       "declarations": 12,
@@ -1924,6 +1929,20 @@
       },
       "nativeCheckerCases": 15,
       "executedOnThisIntegration": false
+    },
+    "recoveryProfileIsolation": {
+      "manifest": "strict/recovery-profile-isolation.json",
+      "blob": "a930b0bcc8e17cf474014d359e0fe7897bb16ae3",
+      "expectedParent": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+      "status": "independently-reviewed-awaiting-full-and-isolated-cold-execution",
+      "files": 7,
+      "policySha256": "70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30",
+      "recipeSha256": "d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d",
+      "grammarProfileByteIdentical": true,
+      "selectedRIdentityAndProductsUnchanged": true,
+      "previousColdReceiptQualifiesNewRecipe": false,
+      "newColdRecipeQualified": false,
+      "currentCompilerQualified": false
     }
   }
 }

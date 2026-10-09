@@ -243,7 +243,7 @@
   ],
   "targetAdmission": {
     "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
-    "candidateBlob": "1c5f03cd8d21288f2e1dcb9dbd72191af5f091e5",
+    "candidateBlob": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139",
     "policy": "psc0-sh1-ts-target/1",
     "api": "psSh1CheckTarget (maxSteps : Nat) (module : PsVerifiedIrModule) : Except PsSh1TargetError PsSh1TargetReport",
     "ordering": "After a complete accepted check of the same original IR and before its emission in the atomic source API.",
@@ -298,7 +298,20 @@
     ],
     "fixtureScope": "T01–T29 are finite candidate boundary cases. Their actual compiler/source receipts must be recorded by qualification; no execution is claimed here.",
     "sameIrTypingIsRequired": true,
-    "arbitraryTypedIrBecomesStrictSource": false
+    "arbitraryTypedIrBecomesStrictSource": false,
+    "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+    "reconciledEarlierCandidate": {
+      "blob": "1c5f03cd8d21288f2e1dcb9dbd72191af5f091e5",
+      "actualIncludesWeightedLambdaDepth": true,
+      "changes": [
+        "Qualified PsSh1TargetTask constructors",
+        "Qualified PsSh1TargetNameRole constructors",
+        "Explicit Bool type for hasParameters"
+      ],
+      "contentComparison": "Both files have 604 lines and become byte-identical after reversing only those constructor qualifications and the Bool annotation.",
+      "reviewedBy": "/root/empty_evidence_finish",
+      "compilerExecutionClaim": false
+    }
   },
   "reusableArtifacts": [
     {
@@ -2019,9 +2032,11 @@
   "reviewedImplementation": {
     "expectedParent": "5becf0cf22a8deec760e0da68b706e95ca72f902",
     "manifest": "reviewed-candidates/strict-implementation-batch.json",
-    "status": "source-reviewed-integration-awaiting-exact-cloud-qualification",
+    "status": "committed-source-compiler-execution-not-started-setup-refused",
     "retainedFailedAttempt": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
     "completedInspectionRunId": 37980548050,
-    "implementationIsNotGeneralPreservationProof": true
+    "implementationIsNotGeneralPreservationProof": true,
+    "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+    "latestSetupFailure": "2b5a4c903ed8a069cde8f08265b28042bcaf5766"
   }
 }

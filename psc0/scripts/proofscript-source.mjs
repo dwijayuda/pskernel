@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { inspect, TextDecoder } from 'node:util';
-import { sh1GrammarProfile } from './sh1-grammar-conformance.mjs';
+import { sh1GrammarProfile } from './source-grammar-profile.mjs';
 
 const verifiedGrammarCompilers = new WeakSet();
 

@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const cases = [
   ['scripts/compile-with-generated.mjs', [
-    'sources: chunks,',
-    'compiler.List.cons(head, tail), compiler.List.nil()',
-    'compiler.psCompilerPrepareSources(project.sourceKind, sources)',
-    'compiler.psCompilerTypeScriptFromPrepared(prepared)',
+    "import { buildChecked } from './checked-build.mjs'",
+    'const receipt = await buildChecked({',
+    'compilerPath: path.resolve(root, compiler)',
+    'entryPath: path.resolve(root, entry)',
   ]],
   // Shape/ownership guard for the pure prefix seam. Generated session admission
   // correspondence and transition cases provide the semantic evidence.
@@ -74,5 +74,7 @@ assert(!api.includes('prepared.canonicalAdmissions'), 'admissions must come from
 const session = await readFile(new URL('./checked-prepared-session.mjs', import.meta.url), 'utf8');
 assert(session.indexOf('freezeGraph(prepared);') < session.indexOf('const admissions = admissionsFrom(compiler, prepared);'));
 assert(session.includes('admissionsFrom(compiler, item.prepared) !== item.admissions'));
-assert(session.includes('compiler.psCompilerTypeScriptFromPrepared(item.prepared)'));
-console.log('PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, combined admission and unchanged kernel gate)');
+assert(session.includes('compiler.psCompilerCheckedTypeScriptFromPrepared(irPolicy.options, item.prepared)'));
+assert(!session.includes('psCompilerTypeScriptFromPrepared'),
+  'protected prepared sessions must not retain a raw TypeScript emission fallback');
+console.log('PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, combined admission and checked IR emission)');

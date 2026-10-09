@@ -1,0 +1,170 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { mkdtemp, writeFile, readFile, readdir, rm, symlink } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
+import { publishCheckedArtifacts } from './checked-artifact-publication.mjs';
+
+// Orchestration fixtures only: these strings/receipts are not compiler proofs.
+async function fixture(fn) {
+  const directory = await mkdtemp(path.join(tmpdir(), 'psc0-publication-'));
+  const entryPath = path.join(directory, 'Main.ps');
+  await writeFile(entryPath, 'source');
+  const publish = (artifacts, options = {}) => publishCheckedArtifacts({
+    entryPath, outputPath: path.join(directory, 'answer.ts'),
+    artifacts: new Map(Object.entries(artifacts)), receipt: { fixture: true },
+    ...options,
+  });
+  try { await fn({ directory, entryPath, publish }); }
+  finally { await rm(directory, { recursive: true, force: true }); }
+}
+const hash = value => createHash('sha256').update(value).digest('hex');
+test('accepted bytes and completion receipt match, including a subsequent owned update', () => fixture(async ({ directory, publish }) => {
+  const first = await publish({ 'answer.ts': 'first' });
+  assert.equal(first.outputOwner, 'Main.ps');
+  assert.equal(first.artifacts[0].sha256, hash('first'));
+  assert.deepEqual(JSON.parse(await readFile(path.join(directory, 'answer.checked.json'), 'utf8')), first);
+  const second = await publish({ 'answer.ts': 'second' });
+  assert.notEqual(second.transactionId, first.transactionId);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'second');
+  assert.equal(second.artifacts[0].sha256, hash('second'));
+  assert.equal(existsSync(path.join(directory, '.answer.psc-lock')), false);
+}));
+test('handwritten output is preserved and receives no ownership receipt', () => fixture(async ({ directory, publish }) => {
+  await writeFile(path.join(directory, 'answer.ts'), 'handwritten');
+  await assert.rejects(publish({ 'answer.ts': 'generated' }), /OUTPUT_UNOWNED/);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'handwritten');
+  assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
+  assert.equal(existsSync(path.join(directory, '.answer.psc-lock')), false);
+}));
+test('manual edits to previously generated output are never overwritten', () => fixture(async ({ directory, publish }) => {
+  await publish({ 'answer.ts': 'first' });
+  const receipt = await readFile(path.join(directory, 'answer.checked.json'));
+  await writeFile(path.join(directory, 'answer.ts'), 'user edit');
+  await assert.rejects(publish({ 'answer.ts': 'second' }), /OUTPUT_MODIFIED/);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'user edit');
+  assert.deepEqual(await readFile(path.join(directory, 'answer.checked.json')), receipt);
+}));
+test('freshness or cancellation failure leaves the previous completed generation intact', () => fixture(async ({ directory, publish }) => {
+  await publish({ 'answer.ts': 'first' });
+  const receipt = await readFile(path.join(directory, 'answer.checked.json'));
+  await assert.rejects(publish({ 'answer.ts': 'second' }, {
+    beforeCommit() { throw new Error('source superseded'); },
+  }), /source superseded/);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'first');
+  assert.deepEqual(await readFile(path.join(directory, 'answer.checked.json')), receipt);
+}));
+test('one publisher owns an output while validation yields', () => fixture(async ({ directory, publish }) => {
+  let release, entered;
+  const ready = new Promise(resolve => { entered = resolve; });
+  const held = new Promise(resolve => { release = resolve; });
+  const first = publish({ 'answer.ts': 'first' }, { beforeCommit: async () => { entered(); await held; } });
+  await ready;
+  try { await assert.rejects(publish({ 'answer.ts': 'second' }), /OUTPUT_BUSY/); }
+  finally { release(); }
+  await first;
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'first');
+}));
+test('TS-only publication retires only owned old JavaScript siblings', () => fixture(async ({ directory, publish }) => {
+  await publish({ 'answer.ts': 'first', 'answer.js': 'old js', 'answer.js.map': '{}' }, {
+    outputPath: path.join(directory, 'answer.js'),
+  });
+  await publish({ 'answer.ts': 'second' });
+  assert.equal(existsSync(path.join(directory, 'answer.js')), false);
+  assert.equal(existsSync(path.join(directory, 'answer.js.map')), false);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'second');
+}));
+test('changed ownership during validation is detected without discarding the user edit', () => fixture(async ({ directory, publish }) => {
+  await publish({ 'answer.ts': 'first' });
+  await assert.rejects(publish({ 'answer.ts': 'second' }, {
+    beforeCommit: () => writeFile(path.join(directory, 'answer.ts'), 'concurrent edit'),
+  }), /OUTPUT_CHANGED_DURING_BUILD/);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'concurrent edit');
+}));
+test('a real partial rename failure restores the complete preceding generation', () => fixture(async ({ directory, publish }) => {
+  await publish({ 'answer.ts': 'first', 'answer.js': 'first js' }, {
+    outputPath: path.join(directory, 'answer.js'),
+  });
+  const receipt = await readFile(path.join(directory, 'answer.checked.json'));
+  await assert.rejects(publish({ 'answer.ts': 'second', 'answer.js': 'second js' }, {
+    outputPath: path.join(directory, 'answer.js'),
+    beforeCommit: async () => {
+      // Model an I/O failure after the first rename by withdrawing the second
+      // staged file. This uses the real filesystem, not a replaceable fs adapter.
+      const [stage] = (await readdir(directory)).filter(name => name.startsWith('.psc-stage-'));
+      assert.ok(stage);
+      await rm(path.join(directory, stage, 'answer.js'));
+    },
+  }), /ENOENT/);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'first');
+  assert.equal(await readFile(path.join(directory, 'answer.js'), 'utf8'), 'first js');
+  assert.deepEqual(await readFile(path.join(directory, 'answer.checked.json')), receipt);
+  assert.equal(existsSync(path.join(directory, '.answer.psc-lock')), false);
+}));
+test('a first-generation partial failure leaves no new output or completion receipt', () => fixture(async ({ directory, publish }) => {
+  await assert.rejects(publish({ 'answer.ts': 'new', 'answer.js': 'new js' }, {
+    outputPath: path.join(directory, 'answer.js'),
+    beforeCommit: async () => {
+      const [stage] = (await readdir(directory)).filter(name => name.startsWith('.psc-stage-'));
+      await rm(path.join(directory, stage, 'answer.js'));
+    },
+  }), /ENOENT/);
+  assert.equal(existsSync(path.join(directory, 'answer.ts')), false);
+  assert.equal(existsSync(path.join(directory, 'answer.js')), false);
+  assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
+  assert.equal(existsSync(path.join(directory, '.answer.psc-lock')), false);
+}));
+test('output names cannot escape the selected stem and symbolic links are refused', () => fixture(async ({ directory, publish }) => {
+  await assert.rejects(publish({ 'answer.ts': 'safe', '../other.ts': 'bad' }), /OUTPUT_ARTIFACT_NAME/);
+  const outside = path.join(directory, 'user.ts');
+  await writeFile(outside, 'user');
+  await symlink(outside, path.join(directory, 'answer.ts'));
+  await assert.rejects(publish({ 'answer.ts': 'generated' }), /OUTPUT_NOT_REGULAR/);
+  assert.equal(await readFile(outside, 'utf8'), 'user');
+}));
+
+test('invalidation observed after artifact writes restores the previous completed set', () => fixture(async ({ directory, publish }) => {
+  await publish({ 'answer.ts': 'first', 'answer.js': 'old js' }, {
+    outputPath: path.join(directory, 'answer.js'),
+  });
+  const receipt = await readFile(path.join(directory, 'answer.checked.json'));
+  let eligibilityChecks = 0;
+  await assert.rejects(publish({ 'answer.ts': 'second' }, {
+    beforeCommit() { if (++eligibilityChecks === 2) throw new Error('source superseded before receipt'); },
+  }), /source superseded before receipt/);
+  assert.equal(eligibilityChecks, 2);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'first');
+  assert.equal(await readFile(path.join(directory, 'answer.js'), 'utf8'), 'old js');
+  assert.deepEqual(await readFile(path.join(directory, 'answer.checked.json')), receipt);
+}));
+test('incomplete rollback retains backups and never restores a stale receipt', () => fixture(async ({ directory, publish }) => {
+  await publish({ 'answer.ts': 'first', 'answer.js': 'unchanged js' }, {
+    outputPath: path.join(directory, 'answer.js'),
+  });
+  let eligibilityChecks = 0;
+  await assert.rejects(publish({ 'answer.ts': 'second', 'answer.js': 'unchanged js' }, {
+    outputPath: path.join(directory, 'answer.js'),
+    beforeCommit: async () => {
+      if (++eligibilityChecks === 2) {
+        await writeFile(path.join(directory, 'answer.js'), 'concurrent user edit');
+        throw new Error('superseded with an independently modified sibling');
+      }
+    },
+  }), /OUTPUT_RECOVERY_REQUIRED/);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'first');
+  assert.equal(await readFile(path.join(directory, 'answer.js'), 'utf8'), 'concurrent user edit');
+  assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
+  const lock = path.join(directory, '.answer.psc-lock');
+  const journal = JSON.parse(await readFile(path.join(lock, 'journal.json'), 'utf8'));
+  assert.equal(existsSync(path.join(journal.staging, 'previous', 'answer.checked.json')), true);
+  assert.equal(existsSync(path.join(lock, 'recovery.json')), true);
+}));
+test('a previously absent destination appearing during validation is preserved', () => fixture(async ({ directory, publish }) => {
+  await assert.rejects(publish({ 'answer.ts': 'generated' }, {
+    beforeCommit: () => writeFile(path.join(directory, 'answer.ts'), 'new user file'),
+  }), /OUTPUT_CHANGED_DURING_BUILD/);
+  assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'new user file');
+  assert.equal(existsSync(path.join(directory, 'answer.checked.json')), false);
+}));

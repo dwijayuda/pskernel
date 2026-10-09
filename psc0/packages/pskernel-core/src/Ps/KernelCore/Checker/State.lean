@@ -173,3 +173,45 @@ def psKernelCheckerStateExitLocalScope
     success := parent.success
     failure := parent.failure
   }
+
+
+/-- Syntax hashes are independent of the environment and local context.
+Only this intrinsically certified metadata is carried out of a child scope. -/
+def psKernelExprMapRetainHash (parent child : PsKernelExprMap) : PsKernelExprMap :=
+  { parent with hashMemo := child.hashMemo }
+
+theorem psKernelExprMapRetainHash_eq (parent child : PsKernelExprMap) :
+    psKernelExprMapRetainHash parent child = parent := by
+  cases parent
+  unfold psKernelExprMapRetainHash
+  congr 1
+  exact Subsingleton.elim _ _
+
+def psKernelExprPairSetRetainHash (parent child : PsKernelExprPairSet) : PsKernelExprPairSet :=
+  { parent with hashMemo := child.hashMemo }
+
+theorem psKernelExprPairSetRetainHash_eq (parent child : PsKernelExprPairSet) :
+    psKernelExprPairSetRetainHash parent child = parent := by
+  cases parent
+  unfold psKernelExprPairSetRetainHash
+  congr 1
+  exact Subsingleton.elim _ _
+
+def psKernelCheckerStateExitLocalScopeShared
+    (parent child : PsKernelCheckerState) : PsKernelCheckerState :=
+  {
+    nextFresh := Nat.max parent.nextFresh child.nextFresh
+    inferOnly := psKernelExprMapRetainHash parent.inferOnly child.inferOnly
+    checkedInfer := psKernelExprMapRetainHash parent.checkedInfer child.checkedInfer
+    whnfCore := psKernelExprMapRetainHash parent.whnfCore child.whnfCore
+    whnf := psKernelExprMapRetainHash parent.whnf child.whnf
+    unfold := psKernelExprMapRetainHash parent.unfold child.unfold
+    success := psKernelExprPairSetRetainHash parent.success child.success
+    failure := psKernelExprPairSetRetainHash parent.failure child.failure
+  }
+
+@[csimp] theorem psKernelCheckerStateExitLocalScope_shared_eq :
+    psKernelCheckerStateExitLocalScope = psKernelCheckerStateExitLocalScopeShared := by
+  funext parent child
+  simp [psKernelCheckerStateExitLocalScopeShared, psKernelCheckerStateExitLocalScope,
+    psKernelExprMapRetainHash_eq, psKernelExprPairSetRetainHash_eq]

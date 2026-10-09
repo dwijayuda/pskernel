@@ -1,5 +1,5 @@
 import Ps.KernelCore.Core.Substitution.Abstract
-import Ps.KernelCore.Runtime.Acceleration.Cache
+import Ps.KernelCore.Checker.State
 
 private instance : BEq PsKernelExpr := ⟨fun a b => decide (a = b)⟩
 
@@ -112,4 +112,12 @@ def main : IO Unit := do
   ensure (psKernelExprMapGet map levelResult == some (.bvar 77)) "structurally equal map key"
   ensure (psKernelExprPairSetContains pairs openDag closed) "symmetric persistent pair hash"
   ensure (!psKernelExprPairSetContains pairs closed (.bvar 999)) "pair hash miss"
+  let childMap := psKernelExprMapInsert map openDag (.bvar 88)
+  let parentState := psKernelCheckerStateWithWhnf psKernelCheckerStateEmpty map
+  let childState := psKernelCheckerStateWithWhnf parentState childMap
+  let restored := psKernelCheckerStateExitLocalScope parentState childState
+  ensure (psKernelExprMapGet restored.whnf closed == some (.bvar 77))
+    "scope exit preserves the parent semantic cache"
+  ensure (psKernelExprMapGet restored.whnf openDag == none)
+    "retained syntax metadata does not publish a child semantic result"
   IO.println "PSKERNEL_SHARED_SYNTAX: PASS cursors=4 variants=14 DAG-depth=32"

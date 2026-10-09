@@ -352,7 +352,8 @@ theorem abstract_fold (e : PsKernelExpr) (fvars : List PsKernelName) (offset : N
     fold (abstractAlgebra fvars) e offset =
       psKernelExprAbstractFVarsAtChanged e fvars offset := by
   induction e generalizing offset <;>
-    simp_all [PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
+    simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+      PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
       PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
       PsKernelSharing.rebuildTernary, abstractAlgebra,
       psKernelExprAbstractFVarsAtChanged] <;> try rfl

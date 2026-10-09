@@ -165,15 +165,18 @@ theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
 
 theorem count_fold (e : PsKernelExpr) (d : Nat) :
     fold countAlgebra e d = psKernelExprNodeCount e := by
-  induction e generalizing d <;> simp_all [fold, countAlgebra, psKernelExprNodeCount]
+  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+      PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, fold, countAlgebra, psKernelExprNodeCount]
 
 theorem loose_fold (e : PsKernelExpr) (d : Nat) :
     fold looseAlgebra e d = psKernelExprHasLooseAt e d := by
-  induction e generalizing d <;> simp_all [fold, looseAlgebra, psKernelExprHasLooseAt]
+  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+      PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, fold, looseAlgebra, psKernelExprHasLooseAt]
 
 theorem fvar_fold (e : PsKernelExpr) (d : Nat) :
     fold fvarAlgebra e d = psKernelExprHasFVar e := by
-  induction e generalizing d <;> simp_all [fold, fvarAlgebra, psKernelExprHasFVar]
+  induction e generalizing d <;> simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+      PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, fold, fvarAlgebra, psKernelExprHasFVar]
 
 end PsKernelSharing
 
@@ -281,7 +284,8 @@ theorem level_fold (e : PsKernelExpr) (d : Nat)
     (params : List PsKernelName) (levels : List PsKernelLevel) :
     fold (levelAlgebra params levels) e d = psKernelExprInstantiateLevelParams e params levels := by
   induction e generalizing d <;>
-    simp_all [fold, levelAlgebra, psKernelExprInstantiateLevelParams]
+    simp_all [PsKernelSharing.Algebra.atom, PsKernelSharing.Algebra.unary,
+      PsKernelSharing.Algebra.binary, PsKernelSharing.Algebra.ternary, fold, levelAlgebra, psKernelExprInstantiateLevelParams]
 
 end PsKernelSharing
 

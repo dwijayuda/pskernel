@@ -1,0 +1,78 @@
+name: PSC0 shared syntax diagnosis
+on:
+  push:
+    branches: [psc0/pskernel-core-lean435-arena-v1]
+    paths: [".github/workflows/psc0-pskernel-core-sharing-diagnosis.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install pinned Lean and debugger
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          sudo apt-get install -y gdb
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+          run-id: 37995608258
+          github-token: ${{ github.token }}
+      - name: Sample full Init traversal for 180 seconds
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "BINARY_SOURCE_SHA=5dc960d81587b9ed705a3df992443d10da315f5b"
+          chmod +x kernel/psc_kernel_core_arena
+          sha256sum kernel/psc_kernel_core_arena
+          echo "bfab8ebbe52143ad7beefb7e0a3d2c84a89bd6ce9aeed92dcba71cf68b69d6a2  kernel/psc_kernel_core_arena" | sha256sum -c -
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cd arena
+          uv run lka.py build-test init --cache
+          ulimit -s 65536
+          set +e
+          /usr/bin/time -v timeout 180 ../kernel/psc_kernel_core_arena --profile-historical < _build/tests/init.ndjson > profile.stdout 2> profile.log &
+          timer=$!
+          for sample in $(seq 1 11); do
+            sleep 15
+            limiter=$(pgrep -P "$timer" | head -n 1)
+            if test -z "$limiter"; then break; fi
+            checker=$(pgrep -P "$limiter" | head -n 1)
+            if test -z "$checker"; then break; fi
+            echo "STACK_SAMPLE=$sample" >> profile.stacks
+            timeout 10 sudo gdb -q -n -batch -ex 'set pagination off' -ex 'set print frame-arguments none' -ex 'thread apply all bt 32' -ex detach -p "$checker" >> profile.stacks 2>&1
+          done
+          wait "$timer"
+          code=$?
+          set -e
+          echo "DIAGNOSTIC_INIT_EXIT=$code"
+          tail -n 45 profile.log
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          rows = []
+          for line in Path("profile.log").read_text().splitlines():
+              m = re.search(r"elapsed_ms=(\d+)", line)
+              if m:
+                  rows.append((int(m[1]), line))
+          print("TOP_SLOW_DECLARATIONS")
+          for _, line in sorted(rows, reverse=True)[:20]:
+              print(line)
+          PY
+          if test -f profile.stacks; then cat profile.stacks; fi
+          printf '%s\n' "$code" > profile.exit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shared-syntax-worker-samples
+          path: |
+            arena/profile.*

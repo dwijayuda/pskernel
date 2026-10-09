@@ -1,3 +1,38 @@
+# PSC0 T1 checked TypeScript library adoption — implementation active
+
+Updated: 2026-10-09 23:47 UTC / 10 October 2026 Asia/Jakarta.
+
+## User-authorized scope
+
+The user accepted the next milestone: two pure acyclic ProofScript modules, one checked project bundle, mechanically thin neighboring TypeScript facades, and one handwritten TypeScript consumer. Preserve explicit source ownership and selected public exports through preparation/lowering; enforce a bounded runtime ABI; publish the complete bundle/facade generation through the existing protected supervisor. This is T1, before full psdev watch. The user also asks whether the same PSKernel Core can execute as generated JavaScript before Wasm. Investigate the existing TS7 path and qualify any proposed provider separately; do not equate historical bounded JS demonstrations with a qualified current provider.
+
+Integration branch: psc0/platform-t1-v1, created from fresh platform-v1 HEAD 4265f1d614d15fc9e6ed133a923779ba7af16db8. No implementation or runtime qualification has completed at this checkpoint.
+
+## Planned implementation and ownership
+
+- Root owns checked host/session/source snapshot, CLI policy, output ownership/publication, integration and this handoff.
+- Compiler slice owns explicit owned-project preparation and checked export/ABI emission. Existing self-host entry points remain available; new metadata must stay in the supported portable source profile. One bundle provides shared runtime identity now; true separate compilation and separately packaged shared runtime are later work.
+- Qualification slice owns focused cloud compilation, successor fixed-point qualification, the shipped two-module example and installed Windows/Linux integration evidence.
+- Core-JS slice audits same-source generation, historical evidence and a bounded cloud feasibility probe. Kernel algorithms/metatheory/provider capabilities are not incidental implementation scope.
+
+Define the concrete export/ABI contract first. Start with pure acyclic local modules and documented TypeScript settings. Unsupported exports or foreign values must fail explicitly. Extend receipt and ownership coverage to every generated file; handwritten files survive, and no successful receipt may describe a partial generation. A failed source revision must not become a newly accepted output. Full watch scheduling, broader npm/workspace library resolution, LSP, complete package renaming and Wasm default promotion are subsequent milestones.
+
+## Preserved baseline and acceptance
+
+The selected seed remains R fe2560aba0f347b1caf8d000d371464642d44f23. Existing F is fcd875c8f38db4b0524090bd10c7c2fd5024053d, 61 raw portable modules, source closure SHA256 6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7, generated JS SHA256 5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15, run37947341800. T1 compiler changes require fresh qualification; old F evidence proves only its exact old closure. Do focused checks while implementing and one coherent successor fixed-point checkpoint when ready.
+
+Bootstrap remains Node22.23.3 / Lean4.34.0 / TypeScript7.0.2. Current native Core source remains 963030dc2d154008fccc82e7c8ed29331f138799 and its qualified Linux/Windows artifacts remain selected. No implicit 4.35 Arena substitution, native evaluator enablement, kernel default fallback, seed promotion, main merge or npm publication.
+
+Full compiler/architecture proofs remain later assurance work in psc0/proofs/**/*.proof.lean, outside bootstrap. Record ownership, export correspondence, ABI, publication and source-to-executable obligations now. Required runtime admission/validation remains mandatory; no new formal theorem or full PSCV claim follows from this milestone. Preserve exact bootstrap/release inputs durably as a parallel retention task; JSON evidence is not executable archive retention.
+
+## Execution rules
+
+GitHub connector/MCP exclusively for repository reads/writes; builds/tests/source execution only in GitHub Actions. No local files, checkout, shell build/test, browser or Desktop Commander. Pure in-memory text/JSON transformations and evidence hashing are permitted. Before every ref update read live HEAD, preserve concurrent changes and use a non-force expected-HEAD lease. Keep slice histories and checkpoint this handoff. Continue authorized T1 to its acceptance criteria, documenting a concrete blocker if one remains.
+
+---
+
+# Previous completed Wasm planning checkpoint
+
 # PSC0 Wasm Core direction — research complete, implementation pending
 
 Updated: 2026-10-09 22:52:02 UTC. This section is active and supersedes the completed onboarding checkpoint below.

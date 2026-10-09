@@ -38,16 +38,16 @@ jobs:
           lake env .lake/build/bin/lean4export Init -- Int64.toBitVec_div > int64.ndjson
           ulimit -s 65536
           set +e
-          /usr/bin/time -v timeout 180 ../kernel/psc_kernel_core_arena --profile < int64.ndjson > profile.stdout 2> profile.log &
+          /usr/bin/time -v timeout 60 ../kernel/psc_kernel_core_arena --profile < int64.ndjson > profile.stdout 2> profile.log &
           timer=$!
-          for sample in 1 2 3 4 5 6 7 8; do
+          for sample in 1 2 3; do
             sleep 15
             limiter=$(pgrep -P "$timer" | head -n 1)
             if test -z "$limiter"; then break; fi
             checker=$(pgrep -P "$limiter" | head -n 1)
             if test -z "$checker"; then break; fi
             echo "STACK_SAMPLE=$sample" >> profile.stacks
-            timeout 10 sudo gdb -q -n -batch -ex 'set pagination off' -ex 'set print frame-arguments none' -ex 'bt 32' -ex detach -p "$checker" >> profile.stacks 2>&1
+            timeout 10 sudo gdb -q -n -batch -ex 'set pagination off' -ex 'set print frame-arguments none' -ex 'thread apply all bt 32' -ex detach -p "$checker" >> profile.stacks 2>&1
           done
           wait "$timer"
           code=$?

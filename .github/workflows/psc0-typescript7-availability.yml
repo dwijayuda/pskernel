@@ -1,0 +1,70 @@
+name: PSC0 TypeScript 7 package availability
+
+on:
+  push:
+    branches: ['psc0/typescript-7-v1']
+    paths: ['.github/workflows/psc0-typescript7-availability.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Inspect and install the exact requested package
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/psc0-typescript7-evidence"
+          npm view typescript@7.0.2 version dist bin optionalDependencies --json > "$RUNNER_TEMP/psc0-typescript7-evidence/registry.json"
+          npm install --prefix "$RUNNER_TEMP/psc0-typescript7-tools" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+      - name: Verify the actual installed launcher and emitted products
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync, writeFileSync, realpathSync, copyFileSync } from 'node:fs';
+          import { spawnSync } from 'node:child_process';
+          import path from 'node:path';
+          import { createRequire } from 'node:module';
+          const require = createRequire(import.meta.url);
+          const prefix = path.join(process.env.RUNNER_TEMP, 'psc0-typescript7-tools');
+          const evidence = path.join(process.env.RUNNER_TEMP, 'psc0-typescript7-evidence');
+          const manifestPath = require.resolve('typescript/package.json', { paths: [prefix] });
+          const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+          assert.equal(manifest.name, 'typescript');
+          assert.equal(manifest.version, '7.0.2');
+          const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;
+          assert.equal(typeof bin, 'string');
+          const launcher = realpathSync(path.resolve(path.dirname(manifestPath), bin));
+          const version = spawnSync(process.execPath, [launcher, '--version'], { encoding: 'utf8' });
+          assert.equal(version.status, 0, version.stderr);
+          assert.equal(version.stdout.trim(), 'Version 7.0.2');
+          const input = path.join(evidence, 'fixture.ts');
+          writeFileSync(input, 'export const answer: bigint = 42n;\n');
+          writeFileSync(path.join(evidence, 'tsconfig.json'), '{"compilerOptions":{"noEmit":true},"files":["does-not-exist.ts"]}\n');
+          const args = [launcher, '--ignoreConfig', input, '--target', 'ES2022', '--module', 'ES2022', '--moduleResolution', 'bundler', '--strict', '--declaration', '--sourceMap', '--noEmitOnError', '--skipLibCheck', '--pretty', 'false'];
+          const result = spawnSync(process.execPath, args, { cwd: evidence, encoding: 'utf8', timeout: 30000 });
+          writeFileSync(path.join(evidence, 'compile.stdout'), result.stdout ?? '');
+          writeFileSync(path.join(evidence, 'compile.stderr'), result.stderr ?? '');
+          writeFileSync(path.join(evidence, 'installed-package.json'), JSON.stringify(manifest, null, 2) + '\n');
+          copyFileSync(path.join(prefix, 'package-lock.json'), path.join(evidence, 'package-lock.json'));
+          assert.equal(result.status, 0, result.stdout + result.stderr);
+          for (const file of ['fixture.js', 'fixture.d.ts', 'fixture.js.map']) assert(readFileSync(path.join(evidence, file)).length > 0);
+          const receipt = { schemaVersion: 1, evidence: 'installed-typescript-7-package-and-cli', node: process.version, platform: process.platform, architecture: process.arch, packageVersion: manifest.version, packageBin: manifest.bin, launcher, reportedVersion: version.stdout.trim(), optionalDependencies: manifest.optionalDependencies ?? {}, compile: { exitCode: result.status, target: 'ES2022', module: 'ES2022', moduleResolution: 'bundler', strict: true, declaration: true, sourceMap: true, ignoreUnrelatedConfig: true }, fullPsc0Qualification: false };
+          writeFileSync(path.join(evidence, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n');
+          console.log('PSC0_TYPESCRIPT7_PACKAGE: ' + JSON.stringify(receipt));
+          NODE
+      - name: Retain the package evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-typescript7-availability-${{ github.sha }}
+          path: ${{ runner.temp }}/psc0-typescript7-evidence
+          if-no-files-found: ignore
+          retention-days: 30

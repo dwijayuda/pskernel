@@ -826,3 +826,34 @@ theorem psKernelMutualConstructorWorker_prepared_refines
     PsKernelEnvironmentSemanticExtends.trans environment work0
       result.environment hEnvExt hCtorExt,
     hFinalIndex, hRecAbsentFinal, hAdded, hQuot, hNames⟩
+
+/--
+The actual global source-level name guards discharge the cross-name condition
+needed by the checked constructor-history worker. The proof transports the
+executable disjointness through independently established shape provenance.
+No additional cross-family uniqueness premise is imposed on successful input.
+-/
+theorem psKernelAddSimpleMutualInductive_success_shape_ctor_rec_disjoint
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (hShapeDecls : shapes.map PsKernelSimpleMutualTypeShape.decl = decl.types)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hRun : psKernelAddSimpleMutualInductive
+      fuel environment decl maxRecDepth maxNatSize = Except.ok result) :
+    ∀ name : PsKernelName, List.Mem name
+      (psKernelMutualShapeConstructorNames shapes) ->
+      psKernelNameListContains name
+        (shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+          psKernelSimpleRecName shape.decl.name)) = false := by
+  have hCross :=
+    psKernelAddSimpleMutualInductive_success_constructor_recursor_disjoint
+      fuel environment result decl maxRecDepth maxNatSize hIndex hRun
+  have hCtorNames : psKernelMutualShapeConstructorNames shapes =
+      psKernelSimpleMutualCtorNames decl.types := by
+    rw [psKernelMutualShapeConstructorNames_source, hShapeDecls]
+  have hRecNames : shapes.map
+      (fun shape : PsKernelSimpleMutualTypeShape => psKernelSimpleRecName shape.decl.name) =
+      psKernelSimpleMutualRecNames decl.types := by
+    rw [psKernelMutualShapeRecursorNames_source, hShapeDecls]
+  simpa only [hCtorNames, hRecNames] using hCross

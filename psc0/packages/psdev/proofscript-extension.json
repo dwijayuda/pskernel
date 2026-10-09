@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "protocol": "psc-command/1",
+  "operations": [
+    "command:dev"
+  ],
+  "entry": "command.wasm",
+  "sha256": "63b9c0f41bfc46a06b148a92b370c73f950d1b89b544b290cc7e83e15998e279"
+}

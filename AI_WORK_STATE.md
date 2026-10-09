@@ -1,5 +1,13 @@
 # AI Work State
 
+## Arena synchronized cloud validation — 2026-10-09
+
+- Branch `pscv/pskernel-core-arena-synced-v2` is based on proof commit `5a7d428b303a865b14a81e6bcb4a6e38050d9165`, with only Arena transport/test harness ported from `756f4b9175edc11adf19b6b50586af762d296edc`.
+- Added profile-only `--profile` route plus pinned, automated Arena readiness, soundness and hotspot CI. Kernel source is unchanged from the proof HEAD.
+- All v2 results pending at the time of this commit; full Init, Std and Mathlib are not accepted.
+- Do not merge back into proof lane until ordinary correctness gates and controlled performance changes are green.
+
+
 ## Continuation verified green and mutual provisional header frontier — 2026-10-09
 - Live proof HEAD was reconciled as `781742a3fad4b963cd68e63f0c11ffaeba9a8bbd`; integration HEAD remains `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`. No integration branch changes were made.
 - **Full cloud proof/native/portable-erasure GREEN** at `2b43210e3e9aadf639f9114538660a6c38951845`, run [#37917208078](https://github.com/dwijayuda/pskernel/actions/runs/37917208078). Earlier full green [#37916143657](https://github.com/dwijayuda/pskernel/actions/runs/37916143657) validated `ba1e424b8bf519ae39a5b64d1e32608c6b4a6add`.

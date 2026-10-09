@@ -1,0 +1,56 @@
+name: PSKernel Core Arena v2 hotspot profile
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-synced-v2
+    paths:
+      - ".github/workflows/pskernel-core-arena-v2-profile.yml"
+      - "psc15selfhost/host/src/Ps/Host/KernelCoreArena/Main.lean"
+      - "psc15selfhost/packages/pskernel-core/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolate-hot-records:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build native Arena checker
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build psc_kernel_core_arena
+          .lake/build/bin/psc_kernel_core_arena --version
+      - name: Produce exact pinned Init corpus and 380k prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cd arena
+          uv run lka.py build-test init --cache
+          head -n 380000 _build/tests/init.ndjson > "$RUNNER_TEMP/init-380k.ndjson"
+          wc -l -c "$RUNNER_TEMP/init-380k.ndjson"
+      - name: Time native hot records without weakening validity checks
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -f 'profile_wall_s=%e profile_peak_kb=%M profile_exit=%x' timeout 240 psc15selfhost/.lake/build/bin/psc_kernel_core_arena --profile < "$RUNNER_TEMP/init-380k.ndjson"
+          status=$?
+          echo "diagnostic_exit=$status (124 denotes incomplete diagnostic, not acceptance)"
+          if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then exit "$status"; fi
+          exit 0

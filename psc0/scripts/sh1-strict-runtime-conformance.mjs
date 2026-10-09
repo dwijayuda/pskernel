@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { inspectOriginalIrCarrier } from './original-ir-carrier.mjs';
 import { describeOriginalIrCheckReport, inventoryOriginalIr } from './original-ir-inventory.mjs';
 import { compileTypeScript, sha256, unwrap, valueTag } from './sh1-capabilities.mjs';
+import { compileStrictSources } from './sh1-strict-source.mjs';
 
 export const strictRuntimeContractSha256 = '21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89';
 export const strictRuntimeReferenceSourceSha256 = '3a4ada94e66ce4bc8a18bf0417c2a9660c06e326b4de312c8ee83ba831bda008';
@@ -325,6 +326,98 @@ function textPositions(compiler, contract) {
   return [{ id: cursorCase.id, after }, { id: lexerCase.id, origins }];
 }
 
+// A source-level regression for the installed Nat.beq primitive. The other
+// equality operations remain covered by the unchanged original-IR fixture.
+// These independent fixed expectations do not use the emitted compiler as an oracle.
+async function sourceEqualityRegression({ compiler, compilerSha256, root, outDir, tsc }) {
+  const relativeDirectory = 'source-equality';
+  const directory = path.join(outDir, relativeDirectory);
+  await mkdir(directory, { recursive: true });
+  const moduleName = ['Ps', 'Compiler', 'StrictRuntimeEquality'];
+  const rawSources = {
+    lean: [
+      'def strictSourceNatEqEqual : Bool := Nat.beq 7 7',
+      'def strictSourceNatEqDisjoint : Bool := Nat.beq 1 2',
+      'def strictSourceNatEqReversed : Bool := Nat.beq 2 1',
+      'def strictSourceNatEqZero : Bool := Nat.beq 0 0',
+      'def strictSourceNatEqLarge : Bool := Nat.beq 900719925474099312345678901234567890 900719925474099312345678901234567891',
+      'def strictSourceNatEqComputed : Bool := Nat.beq (Nat.add 2 3) 5',
+    ].join('\n') + '\n',
+    ps: [
+      'def strictSourceNatEqEqual : Bool := Nat.beq(7, 7)',
+      'def strictSourceNatEqDisjoint : Bool := Nat.beq(1, 2)',
+      'def strictSourceNatEqReversed : Bool := Nat.beq(2, 1)',
+      'def strictSourceNatEqZero : Bool := Nat.beq(0, 0)',
+      'def strictSourceNatEqLarge : Bool := Nat.beq(900719925474099312345678901234567890, 900719925474099312345678901234567891)',
+      'def strictSourceNatEqComputed : Bool := Nat.beq(Nat.add(2, 3), 5)',
+    ].join('\n') + '\n',
+  };
+  const expected = [
+    { id: 'equal', declaration: 'strictSourceNatEqEqual', expected: true },
+    { id: 'disjoint', declaration: 'strictSourceNatEqDisjoint', expected: false },
+    { id: 'reversed', declaration: 'strictSourceNatEqReversed', expected: false },
+    { id: 'zero', declaration: 'strictSourceNatEqZero', expected: true },
+    { id: 'large', declaration: 'strictSourceNatEqLarge', expected: false },
+    { id: 'computed', declaration: 'strictSourceNatEqComputed', expected: true },
+  ];
+  const sources = [], compiled = {};
+  for (const sourceKind of ['lean', 'ps']) {
+    const source = rawSources[sourceKind];
+    const sourcePath = relativeDirectory + '/source.' + sourceKind;
+    await writeFile(path.join(outDir, sourcePath), source, 'utf8');
+    const result = compileStrictSources(compiler, [{ moduleName, source }],
+      { compilerSha256, sourceKind });
+    assert.equal(result.evidence.sourcePolicy.moduleCount, 1);
+    assert.equal(result.evidence.sourcePolicy.stats.declarationCount, expected.length);
+    assert.equal(result.evidence.sourcePolicy.importCount, 0);
+    const sourceSha256 = sha256(source), sourceBytes = Buffer.byteLength(source);
+    assert.deepEqual(result.evidence.sourceInputs, [{ moduleName, sourceSha256, sourceBytes }]);
+    assert.equal(result.evidence.preparationCount, 1);
+    assert.equal(result.evidence.portableIrCheckCount, 1);
+    const evidenceText = JSON.stringify(result.evidence, null, 2) + '\n';
+    const evidencePath = relativeDirectory + '/' + sourceKind + '-source-receipt.json';
+    await writeFile(path.join(outDir, evidencePath), evidenceText, 'utf8');
+    sources.push({ sourceKind, path: sourcePath, sha256: sourceSha256, bytes: sourceBytes,
+      evidencePath, evidenceSha256: sha256(evidenceText), evidence: result.evidence });
+    compiled[sourceKind] = result;
+  }
+  assert.equal(compiled.lean.typeScript, compiled.ps.typeScript,
+    'PSC0_STRICT_SOURCE_EQUALITY_TYPESCRIPT_BYTES');
+  assert.equal(compiled.lean.admissions, compiled.ps.admissions,
+    'PSC0_STRICT_SOURCE_EQUALITY_ADMISSIONS_BYTES');
+  const typeScript = compiled.lean.typeScript, admissions = compiled.lean.admissions;
+  const admissionsPath = relativeDirectory + '/admissions.jsonl';
+  await writeFile(path.join(outDir, admissionsPath), admissions, 'utf8');
+  // Compile this single shared module separately: concatenating complete emitted
+  // modules would duplicate their private runtime helpers.
+  const generated = await compileTypeScript(typeScript, path.join(directory, 'runtime'), tsc, root, '7.0.2');
+  const javascript = await readFile(generated, 'utf8');
+  const runtime = await import(pathToFileURL(generated).href + '?sha256=' + sha256(javascript));
+  const observations = expected.map((entry) => {
+    const value = runtime[entry.declaration];
+    assert.equal(typeof value, 'boolean', 'PSC0_STRICT_SOURCE_EQUALITY_RESULT_TYPE: ' + entry.id);
+    assert.equal(value, entry.expected, 'PSC0_STRICT_SOURCE_EQUALITY_RESULT: ' + entry.id);
+    return { ...entry, value };
+  });
+  return {
+    schemaVersion: 1, kind: 'psc0-source-nat-equality-conformance', status: 'pass',
+    compilerSha256, sourceOperation: 'Nat.beq', irOperation: 'natEq',
+    declarationCount: expected.length, sources,
+    byteAgreement: { typescript: true, admissions: true },
+    artifacts: {
+      typescript: { path: relativeDirectory + '/runtime/index.ts', sha256: sha256(typeScript) },
+      javascript: { path: relativeDirectory + '/runtime/index.js', sha256: sha256(javascript) },
+      admissions: { path: admissionsPath, sha256: sha256(admissions) },
+    },
+    expectedValuesOrigin: 'independent-fixed-results',
+    observations, observationsSha256: sha256(JSON.stringify(observations)),
+    rawSourceCompilationCount: 2, portableIrCheckCount: 2, typescriptCompilationCount: 1,
+    strictSh1Qualified: false, semanticContractQualified: false,
+    formalPreservationProven: false, sourceProofProvenanceReconstructed: false,
+    provider: { status: 'not-attempted', kernelChecked: false },
+  };
+}
+
 // This proves finite executable correspondence and defensive refusals.
 // It does not claim erased proof provenance, general totality, or strict SH/1.
 export async function runStrictRuntimeConformance({
@@ -363,6 +456,7 @@ export async function runStrictRuntimeConformance({
   const evaluation = operandEvaluation(runtime);
   const carrier = carrierCases(compiler, compilerSha256, fixture);
   const positions = textPositions(compiler, contract);
+  const sourceEquality = await sourceEqualityRegression({ compiler, compilerSha256, root, outDir, tsc });
   const receipt = {
     schemaVersion: 1, kind: 'psc0-enabled-runtime-conformance', status: 'pass',
     compilerSha256, contractVersion: contract.version, contractSha256: strictRuntimeContractSha256,
@@ -373,14 +467,16 @@ export async function runStrictRuntimeConformance({
     artifacts: { typescriptSha256: sha256(typeScript), javascriptSha256: sha256(javascript) },
     operationCoverage, observations, observationsSha256: sha256(JSON.stringify(observations)),
     defensiveBounds: bounds, operandEvaluation: evaluation, carrier, textPositions: positions,
+    sourceEqualityRegression: sourceEquality,
     interpretation: {
       correspondence: '186 fixed native Lean reference observations for all 45 enabled operations.',
       bounds: 'Defensive refusal outside proof-required source bounds; no reconstructed proof or totality claim.',
       operands: 'Host callback observations for exact once/in-order evaluation; no new admitted FFI capability.',
       unicode: 'Canonical String/Char values, no repair, raw byte positions keep pinned fallback semantics.',
       booleanDemand: 'Value truth tables only; general short-circuit lowering proof is a separate obligation.',
+      sourceEquality: 'Six Nat.beq declarations in raw Lean and new-only PS share exact TS/admission bytes and independent fixed Bool results.',
     },
-    strictSh1Qualified: false, formalPreservationProven: false,
+    strictSh1Qualified: false, semanticContractQualified: false, formalPreservationProven: false,
     sourceProofProvenanceReconstructed: false, provider: { status: 'not-attempted', kernelChecked: false },
   };
   await mkdir(outDir, { recursive: true });

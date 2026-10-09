@@ -276,12 +276,12 @@ def psTsEmitIntrinsicFromPrinted
   | .natEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " === ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as bigint) === ((", right, ") as bigint))"]);
       psTsPrinted2 emit arguments
   | .natNe =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " !== ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as bigint) !== ((", right, ") as bigint))"]);
       psTsPrinted2 emit arguments
   | .natLe =>
       let emit : String -> String -> Except PsTsEmitError String :=
@@ -331,7 +331,7 @@ def psTsEmitIntrinsicFromPrinted
   | .intEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " === ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as bigint) === ((", right, ") as bigint))"]);
       psTsPrinted2 emit arguments
   | .intLe =>
       let emit : String -> String -> Except PsTsEmitError String :=
@@ -361,12 +361,12 @@ def psTsEmitIntrinsicFromPrinted
   | .boolEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " === ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as boolean) === ((", right, ") as boolean))"]);
       psTsPrinted2 emit arguments
   | .boolNe =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " !== ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as boolean) !== ((", right, ") as boolean))"]);
       psTsPrinted2 emit arguments
   | .charOfNat =>
       let emit : String -> Except PsTsEmitError String :=
@@ -435,7 +435,7 @@ def psTsEmitIntrinsicFromPrinted
   | .stringEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " === ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as string) === ((", right, ") as string))"]);
       psTsPrinted2 emit arguments
   | .arrayEmptyWithCapacity =>
       let emit : String -> Except PsTsEmitError String :=

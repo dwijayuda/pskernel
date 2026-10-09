@@ -1,6 +1,6 @@
 # PSC0 AI work state — active strict SH/1 milestone
 
-Updated: 2026-10-09 17:37:00 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
+Updated: 2026-10-09 18:13:00 UTC. Evidence times are UTC; user-facing Jakarta times are UTC+07:00.
 
 ## Read this first
 
@@ -11,6 +11,46 @@ At 2026-10-09 16:30:26 UTC, main was independently read back at **ed5d00aca0743b
 This active section and [strict/PLAN.md](docs/selfhost-language/strict/PLAN.md) supersede the archived instructions below that say “main remains untouched,” “do not merge main,” “the task is complete,” or “no work is outstanding.” Those instructions described the previous completed scope. They do not prohibit the merge and strict implementation now explicitly authorized by the user. The archived evidence and limits remain true for their exact revisions.
 
 **Continue the work; do not restart the earlier research, repeat the completed baseline qualifications, or claim that merging enables unrestricted PSC1.** Main contains the practical language improvement, F worker migrations, new-only ps-0.9-r3 grammar and TypeScript 7 migration. The complete strict source/runtime/semantic contract still has distinct obligations.
+
+## Current checkpoint: runtime comparison correction
+
+Updated evidence: 2026-10-09 18:13 UTC. This section supersedes earlier pending-run and assignment notes below.
+
+Main was freshly read at ed5d00aca0743bde583b45fe7756dd494ac3960f at 18:07 UTC. The strict branch was d6b7044258efaa272dcf396ce08b0c10496edcd2. Main contains the previously qualified practical language/new-only grammar/TS7 checkpoint; none of the strict implementation candidates is merged or selected as a seed.
+
+The third exact-source run, [37967710379](https://github.com/dwijayuda/pskernel/actions/runs/37967710379), source d6b704, compiler job 113946142567, advanced beyond the earlier source-form failures:
+
+- Native atomic source compilation accepted all 64 modules, 1,178,731 source bytes and 149 imports.
+- The exact original IR passed complete checking: 60,937 expressions, 777,667 visited steps, zero findings. The target traversal accepted 1,572,007 visits.
+- Generated N1 source conformance passed 2 acceptances, 33 refusals and 2 host carrier refusals. Target conformance passed 9 acceptances and 20 refusals.
+- The pinned native Lean reference produced all 186 runtime observations. The generated runtime fixture then failed TypeScript 7 compilation with eleven TS2367 disjoint-literal comparison diagnostics. Runtime observation comparison, C1/C2/C3 qualification and the provider job were not reached.
+
+The exact decoded log SHA-256 is a29f53b59ad41bb4621ea63d0711333e5e7dbf86777d90905dbbcebafeecef6e (334689 characters). Artifact 11634467384 has digest 09c421c7b7899bee5001ef2fd0b5bc42735478bb0ccc30743d18d8c323fa2118. The native source receipt is retained at strict/attempts/d6b7044258efaa272dcf396ce08b0c10496edcd2/native-source.json under docs/selfhost-language. Its exact JSON-plus-newline bytes independently match the native IR evidence hash 4002227af1aa5667d75006cb72407cead865195e16583d8be47b00eff906ccbf.
+
+This follow-up contains the reviewed correction: six BackendTs/Expr comparison templates widen operands to their checked TypeScript primitive types (bigint, boolean or string). Each expression still occurs once, in the same order, with no runtime conversion. The unchanged 45-operation/186-reference-observation fixture remains intact. Six additional installed Nat.beq examples enter through raw Lean and new-only PS, require identical TS/admission bytes, and execute one additional small TS7 compilation. The binder authenticates both raw sources, both actual source receipts and the shared TS/JS/admission files for each N1/C1/C2/C3 compiler. It does not execute or recheck them.
+
+Reviewed immutable inputs: emitter 9628e3c9def09c487abb5b8859a79c7be735acf9; runtime gate 8838155fb80ef28f7bf5c3916c207c6c94451634; root evidence binder 8c8a781012871b1f0f748ed46921287efab8e046. Agent manifest cba72f5f9a5730d263bf229034c6cd29cac47e4f retains exact reversible edits and independent reviews. The committed runtime-comparison-correction.json adds this integration and failed-run context. Discover the resulting source commit and its Actions run from the branch. The follow-up is not qualified merely because it is committed.
+
+### Separate reviewed origin and Nat drafts: continue after the immediate checkpoint
+
+Keep these out of the immediate runtime comparison qualification. The reviewed origin module metadata and owned-environment reuse integration are now available as:
+
+| File group | Candidate blobs |
+| --- | --- |
+| Elab recursion/declarations | c403bd879e439b7b6e88303df430890352a14115 / a388d013dbf6c9270ffa91997512f672da6aabff |
+| Compiler.Api and its existing source guards | f31d88f0172122d4cf62d62f35f372fe89581c18 / 3957a932618c1b61ffc45d9d8924b32c90c7b5e4 / 495012a236a1bb3a5626a826e22a4ff1dab99efc |
+| Compiler.Sh1 / BackendTs.Sh1 | a947a4058e3d91a02d4f8120a3d86556100c8555 / 1026e3a9d1f89432d9a94d9cd098900f6e4d8b53 |
+| Initial host observation draft, still being completed | ea946c3f3d1331316544bb0c412a2e6ede7324e7 |
+| Origin design | 124c5155e445bf2f1800b8a32a47b4504bf64020; manifest b65d43687f3eecae05749078d5c26b96f7f065bd |
+| Independently reviewed Nat major demand repair | Erasure/Expr 3153b38e9a85e00932cac7cad59440dede218899 against 28e14f991df68c4a7d49f09120a42c85c919d6a8 |
+
+Origins associate actual source declarations, successful normalization plans, worker syntax and actual ordered Core members. The source-owned path retains one actual final environment and canonical admission encoding: three admission encodings become one, and the redundant environment rebuild is removed. Arbitrary externally supplied prepared APIs retain validation/reconstruction. This is not a cache protocol change or a transferable authority token.
+
+The current origin_host_native agent owns completing/reviewing sh1-strict-source.mjs, native StrictSourceCompile.lean serialization/error attribution and small sh1-capabilities.mjs assertions that reuse the existing positive/negative calls. Root owns the evidence binder, qualification integration and docs. The current runtime_comparison_finish agent audits general runtime laws; its regression_review peer prepares the separate Nat demand regression. Reassign by scope if these agents are no longer available.
+
+Nat repair binds a computed major once in IR and reserves only its emitted output name before erasing minors. It preserves original variable/literal and non-Nat output. No Core fvar is invented. The new explicit freshness refusal may occur earlier for inconsistent fabricated name-index/count inputs; preserve the error-order claim only for consistent compiler-owned scopes. Callback demand examples are host probes, not a new admitted effect/FFI feature.
+
+All strict/general semantic flags remain false. Finish actual origin/normalization/erasure/backend obligations; do not infer them from typing, a finite runtime pass, provider acceptance or fixed-point equality. Continue with exact source review and coherent cloud gates. Preserve R, new-only grammar, TS7 and all frozen kernel/provider/defeq/cache/metatheory boundaries.
 
 ## Latest executable checkpoint and immediate continuation
 

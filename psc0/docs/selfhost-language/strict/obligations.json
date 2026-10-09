@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-09T17:37:00Z",
+  "updatedAtUtc": "2026-10-09T18:11:00Z",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -445,13 +445,13 @@
     "generalRulesDischarged": 0
   },
   "cloudExecution": {
-    "status": "second-attempt-refused-expected-type-correction-awaiting-qualification",
-    "failedSourceRef": "ce3c4f55f99fd11c7a61d5449e67bc49d58658db",
-    "runId": 37966777236,
-    "compilerJobId": 113942981936,
+    "status": "native-source-target-passed-runtime-comparison-correction-awaiting-qualification",
+    "failedSourceRef": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
+    "runId": 37967710379,
+    "compilerJobId": 113946142567,
     "providerSeparate": true,
     "selectedSeed": "R",
-    "attempts": 2
+    "attempts": 3
   },
   "sourceBoundaryCorrection": "source-boundary-correction.json",
   "qualificationAttempts": "qualification-attempts.json",
@@ -473,5 +473,30 @@
     "status": "source-reviewed-candidate-awaiting-qualification",
     "semanticPreservationProven": false
   },
-  "sourceExpectedTypeCorrection": "source-expected-type-correction.json"
+  "sourceExpectedTypeCorrection": "source-expected-type-correction.json",
+  "nativeObservation": {
+    "sourceRef": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
+    "runId": 37967710379,
+    "compilerJobId": 113946142567,
+    "scope": "native atomic source and generated N1 source/target conformance only",
+    "moduleCount": 64,
+    "sourceBytes": 1178731,
+    "originalIrExpressions": 60937,
+    "originalIrVisitedSteps": 777667,
+    "originalIrFindings": 0,
+    "targetVisitedSteps": 1572007,
+    "sourceCases": {
+      "accepted": 2,
+      "refused": 33,
+      "carrierRefused": 2
+    },
+    "targetCases": {
+      "accepted": 9,
+      "refused": 20
+    },
+    "nativeRuntimeReferenceObservations": 186,
+    "currentGenerationQualified": false,
+    "providerStatus": "skipped"
+  },
+  "runtimeComparisonCorrection": "runtime-comparison-correction.json"
 }

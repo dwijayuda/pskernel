@@ -52,6 +52,91 @@ function typed(report) {
   assert.equal(report.sameOriginalIrCheckedBeforeEmission, true);
 }
 
+
+async function bindSourceEquality({ outDir, directory, compilerSha256, value }) {
+  assert.equal(value.schemaVersion, 1);
+  assert.equal(value.kind, 'psc0-source-nat-equality-conformance');
+  assert.equal(value.status, 'pass');
+  assert.equal(value.compilerSha256, compilerSha256);
+  assert.equal(value.sourceOperation, 'Nat.beq');
+  assert.equal(value.irOperation, 'natEq');
+  assert.equal(value.declarationCount, 6);
+  assert.equal(value.expectedValuesOrigin, 'independent-fixed-results');
+  assert.equal(value.rawSourceCompilationCount, 2);
+  assert.equal(value.portableIrCheckCount, 2);
+  assert.equal(value.typescriptCompilationCount, 1);
+  assert.deepEqual(value.byteAgreement, { typescript: true, admissions: true });
+  assert.equal(value.semanticContractQualified, false);
+  assert.equal(value.formalPreservationProven, false);
+  assert.equal(value.sourceProofProvenanceReconstructed, false);
+  assert.deepEqual(value.provider, { status: 'not-attempted', kernelChecked: false });
+  noStrictClaim(value, 'source equality');
+  const expected = [
+    ['equal', 'strictSourceNatEqEqual', true],
+    ['disjoint', 'strictSourceNatEqDisjoint', false],
+    ['reversed', 'strictSourceNatEqReversed', false],
+    ['zero', 'strictSourceNatEqZero', true],
+    ['large', 'strictSourceNatEqLarge', false],
+    ['computed', 'strictSourceNatEqComputed', true],
+  ].map(([id, declaration, result]) => ({ id, declaration, expected: result, value: result }));
+  assert.deepEqual(value.observations, expected);
+  assert.equal(value.observationsSha256, hash(JSON.stringify(expected)));
+  assert.deepEqual(value.sources.map((item) => item.sourceKind), ['lean', 'ps']);
+  const sources = [];
+  for (const item of value.sources) {
+    const sourceKind = item.sourceKind;
+    assert.equal(item.path, 'source-equality/source.' + sourceKind);
+    assert.equal(item.evidencePath, 'source-equality/' + sourceKind + '-source-receipt.json');
+    const raw = await artifact(outDir, directory + '/' + item.path, item.sha256);
+    assert.equal(raw.bytes, item.bytes);
+    const receipt = await jsonFile(outDir, directory + '/' + item.evidencePath);
+    assert.equal(receipt.file.sha256, item.evidenceSha256);
+    assert.deepEqual(receipt.value, item.evidence);
+    const evidence = receipt.value;
+    assert.equal(evidence.evidence, 'portable-atomic-source-and-target-enforcement');
+    assert.equal(evidence.compilerSha256, compilerSha256);
+    assert.equal(evidence.sourceKind, sourceKind);
+    assert.deepEqual(evidence.sourceInputs, [{
+      moduleName: ['Ps', 'Compiler', 'StrictRuntimeEquality'],
+      sourceSha256: item.sha256, sourceBytes: item.bytes,
+    }]);
+    assert.equal(evidence.sourceInputsSha256, hash(JSON.stringify(evidence.sourceInputs)));
+    assert.deepEqual(evidence.sourceGrammar, sh1GrammarProfile);
+    const policy = evidence.sourcePolicy;
+    assert.equal(policy.profile, 'PSC0-SH/1');
+    assert.equal(policy.enforcementVersion, 1);
+    assert.equal(policy.sourceKind, sourceKind);
+    assert.equal(policy.moduleCount, 1);
+    assert.equal(policy.sourceBytes, item.bytes);
+    assert.equal(policy.importCount, 0);
+    assert.equal(policy.stats.declarationCount, 6);
+    assert.equal(policy.accepted, true);
+    assert.equal(policy.traversalComplete, true);
+    noStrictClaim(policy, 'source equality policy');
+    targetPolicy(evidence.targetPolicy);
+    typed(evidence.originalIr);
+    assert.equal(evidence.preparationCount, 1);
+    assert.equal(evidence.portableIrCheckCount, 1);
+    assert.equal(evidence.artifacts.typescriptSha256, value.artifacts.typescript.sha256);
+    assert.equal(evidence.artifacts.admissionsSha256, value.artifacts.admissions.sha256);
+    assert.equal(evidence.semanticContractQualified, false);
+    assert.equal(evidence.providerChecked, false);
+    noStrictClaim(evidence, 'source equality atomic result');
+    sources.push({ sourceKind, raw, receipt: receipt.file });
+  }
+  const products = {};
+  for (const [kind, relative] of [
+    ['typescript', 'source-equality/runtime/index.ts'],
+    ['javascript', 'source-equality/runtime/index.js'],
+    ['admissions', 'source-equality/admissions.jsonl'],
+  ]) {
+    assert.equal(value.artifacts[kind].path, relative);
+    products[kind] = await artifact(outDir, directory + '/' + relative, value.artifacts[kind].sha256);
+  }
+  return { sources, artifacts: products, observationCount: 6,
+    observationsSha256: value.observationsSha256 };
+}
+
 // Authenticate the actual existing receipt bytes. This never prepares source,
 // rechecks IR, executes a compiler, or substitutes a finite pass for preservation.
 export async function bindStrictQualificationEvidence({
@@ -138,9 +223,12 @@ export async function bindStrictQualificationEvidence({
     assert.equal(runtime.value.formalPreservationProven, false);
     assert.equal(runtime.value.sourceProofProvenanceReconstructed, false);
     noStrictClaim(runtime.value, name + ' runtime conformance');
+    const sourceEquality = await bindSourceEquality({ outDir,
+      directory: directory + '/strict-runtime', compilerSha256,
+      value: runtime.value.sourceEqualityRegression });
     const compiler = await artifact(outDir, directory + '/index.js', compilerSha256);
     generationEvidence.push({ name, compiler, source: source.file, target: target.file, runtime: runtime.file,
-      operationCount: 45, observationCount: 186, sourceRefusals: 33, targetRefusals: 20 });
+      sourceEquality, operationCount: 45, observationCount: 186, sourceRefusals: 33, targetRefusals: 20 });
   }
 
   const nativeFile = await jsonFile(outDir, 'development/N1/strict-source-native.json');

@@ -1,5 +1,16 @@
 # AI Work State
 
+## Continuation verified green and mutual provisional header frontier — 2026-10-09
+- Live proof HEAD was reconciled as `781742a3fad4b963cd68e63f0c11ffaeba9a8bbd`; integration HEAD remains `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`. No integration branch changes were made.
+- **Full cloud proof/native/portable-erasure GREEN** at `2b43210e3e9aadf639f9114538660a6c38951845`, run [#37917208078](https://github.com/dwijayuda/pskernel/actions/runs/37917208078). Earlier full green [#37916143657](https://github.com/dwijayuda/pskernel/actions/runs/37916143657) validated `ba1e424b8bf519ae39a5b64d1e32608c6b4a6add`.
+- Checked mutual constructor-family history now has an actual-source entry point without a separately assumed `PsKernelStringEqReflexiveLaw`; the proof reuses the verified specified-cursor comparator and preserves explicit NativeReduction/StringEq premises and constructor-history input invariants.
+- Independent checked source header Sort typing for **every** member of a successful mutual bundle is derived from the first checked header plus the independently checked remaining history; no infer-only typing was used.
+- Provisional header metadata provenance and semantic/index preservation were proved under explicit source-shape naming invariants. Source-level global guards are partitioned into type/recursor/constructor canonical freshness, uniqueness, and executable cross-family exclusions.
+- A further source-level provisional mutual-header theorem composes checked shape-name provenance with those derived guards. Commits `7c1f384a83daaf4b16402755cb02e80c400fdb6f` and `781742a3fad4b963cd68e63f0c11ffaeba9a8bbd` await full CI validation ([#37917471824](https://github.com/dwijayuda/pskernel/actions/runs/37917471824), [#37917676881](https://github.com/dwijayuda/pskernel/actions/runs/37917676881)); they are **not** claimed green here.
+- CI diagnosed two local proof-elaboration errors along the way (unsupported `List.Forall` in pinned Lean and malformed list-membership pattern). Both were replaced with structural membership proofs before the verified green checkpoint; production/kernel acceptance rules were not changed.
+- Still **open**: entire mutual constructor/recursor transaction discharge (including progressive naming and replacement invariants), nested induction, full ordinary well-formed semantic environment extension, final Kernel/API/session implementation refinement, complete semantic axiom/assumption audit, integration reconciliation, and final conformance gates. Audit A/B/C/D stays **50/6/17/6**; no grade or trusted premise was silently promoted.
+- All work used GitHub objects and GitHub cloud CI only, with verified parent HEAD and non-force expected-HEAD updates. No local checkout, local build, or Desktop Commander.
+
 ## Mutual header semantic bridge — 2026-10-09
 - Live proof head was reverified as `80b16e6e71bf0709b8cac4eeb0a4ef29c81dd14e`; integration remains `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`.
 - Full proof/native/prelude run **#792 GREEN** at `f1a6718b4cd415056e1425e3d614730e938ac615`, validating the executable mutual-header pipeline projection.

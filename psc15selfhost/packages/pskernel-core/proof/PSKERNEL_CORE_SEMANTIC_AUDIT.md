@@ -2,6 +2,13 @@
 
 Status baseline: proof branch after the first independent typing metatheory and strengthened Quot/environment/cache work. This audit is deliberately conservative: compilation and proof-file presence do not imply semantic completeness.
 
+## Latest verified primitive and mutual transaction evidence — 2026-10-09
+This table counts only canonical source/proof pair grades. Historical descriptions below of opaque string primitives and unresolved comparator reflexivity predate the explicitly authorized source API migration and do **not** describe the current implementation. The actual equality traversal now uses specified `String.Pos.Raw.atEnd`/`next` and fresh candidate generation uses `String.append`. Kernel-checked `psKernelStringEq_reflexive`, candidate injectivity, name freshness, and generated universe uniqueness are available with existing named positive StringEq soundness where required; no bridge equating the old opaque declarations to specified Lean declarations is claimed.
+
+The full GitHub [#37947356409](https://github.com/dwijayuda/pskernel/actions/runs/37947356409) proves actual-source mutual constructor history plus metadata replacement preserve prior semantics and authoritative indexes. [#37947884962](https://github.com/dwijayuda/pskernel/actions/runs/37947884962) extends this to preservation of reserved recursor names. [#37948262425](https://github.com/dwijayuda/pskernel/actions/runs/37948262425) proves source-driven elimination universe uniqueness and conditional generated/validated recursor publication refinement. This still requires extraction of the real successful recursor build/validation/final result equalities from the top-level executable before claiming an unconditional full mutual transaction. Nested transactions, complete ordinary environment well-formedness, final public Kernel/API/session implementation refinement, final assumption audit and integration remain open.
+
+No canonical audit grade is changed on this update: **50 A / 6 B / 17 C / 6 D = 79 pairs**. Separate metatheory modules are not double-counted as new canonical pairs; passing Lean compilation is not alone a final semantic completeness certificate.
+
 ## Grade definitions
 
 - **A — semantic/refinement:** a nontrivial theorem relates implementation behavior to an independently stated kernel semantic/refinement property, or proves a semantic-history refinement invariant.

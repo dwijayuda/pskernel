@@ -43,8 +43,9 @@ for(const pkg of map.packages){
   const manifest=JSON.parse(readFileSync(manifestPath,'utf8'));
   if(manifest.name!==pkg.packageName)throw new Error(`package-map: manifest name drift for ${pkg.name}`);
   if(manifest.proofscript?.status!==pkg.status)throw new Error(`package-map: status drift for ${pkg.name}`);
-  if(pkg.sourceLanguage==='typescript'&&manifest.proofscript?.sourceLanguage!=='typescript'){
-    throw new Error(`package-map: TypeScript source policy missing in manifest for ${pkg.name}`);
+  if(typeof pkg.sourceLanguage!=='string'||pkg.sourceLanguage.length===0||
+    manifest.proofscript?.sourceLanguage!==pkg.sourceLanguage){
+    throw new Error(`package-map: source language drift for ${pkg.name}`);
   }
 }
 

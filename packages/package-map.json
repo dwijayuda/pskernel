@@ -544,7 +544,7 @@
         "backend-ts",
         "kernel"
       ],
-      "sourceLanguage": "typescript",
+      "sourceLanguage": "typescript+lean+proofscript-bootstrap",
       "notes": [
         "Canonical verified compilation now also carries globally synthesized class dictionaries as ordinary pskernel-checked definition arguments; no compiler-specific typeclass representation is introduced.",
         "Verified compilation now inherits acyclic local where helpers through ordinary checked-core let/lambda erasure; no compiler-specific where representation was added.",
@@ -552,7 +552,7 @@
         "A source-level composition gate asserts nested let -> lambda(if) -> ADT match in verified IR and local higher-order calls from both match branches, preventing feature support from remaining isolated happy paths.",
         "Canonical integration now covers higher-order generic structural recursion: map over a pskernel-admitted recursive generic list preserves TypeScript generics/function types while compiling recursor IHs to ordinary JavaScript recursion.",
         "Compiler orchestration starts at CheckedCoreModule; it has no syntax, parser, language-checker, or elaborator dependency.",
-        "The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript Compiler API -> JavaScript/.d.ts/source map.",
+        "The preferred verified path is checked core -> erasure -> verified compiler IR -> TypeScript -> TypeScript 7.0.2 CLI -> JavaScript/.d.ts/source map.",
         "The compiler is untrusted with respect to theorem validity; pskernel admission has already occurred before this package runs.",
         "The verified compiler now covers construction and elimination of non-recursive unindexed generic ADTs through kernel-admitted constructors/recursors.",
         "The verified compiler now carries direct recursive ADTs and primitive structurally recursive functions—with invariant runtime parameters—from pskernel recursors to ordinary TypeScript/JavaScript recursion.",

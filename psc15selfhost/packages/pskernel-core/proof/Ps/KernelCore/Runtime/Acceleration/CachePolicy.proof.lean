@@ -48,13 +48,6 @@ theorem psKernelSemanticCacheRemainingFast_refines
       cases budget with
       | zero => rfl
       | succ n =>
-          change
-            (if Nat.beq (psKernelSemanticCacheRemainingFast fn n) 0 then 0
-             else psKernelSemanticCacheRemainingFast arg
-                    (Nat.pred (psKernelSemanticCacheRemainingFast fn n))) =
-              psKernelEncodeRemaining
-                ((psKernelSemanticCacheRemainingReference fn n).bind
-                  (fun rem => psKernelSemanticCacheRemainingReference arg rem))
           rw [ihFn n]
           exact psKernelEncodeSequence
             (psKernelSemanticCacheRemainingReference fn n)
@@ -66,13 +59,6 @@ theorem psKernelSemanticCacheRemainingFast_refines
       cases budget with
       | zero => rfl
       | succ n =>
-          change
-            (if Nat.beq (psKernelSemanticCacheRemainingFast type n) 0 then 0
-             else psKernelSemanticCacheRemainingFast body
-                    (Nat.pred (psKernelSemanticCacheRemainingFast type n))) =
-              psKernelEncodeRemaining
-                ((psKernelSemanticCacheRemainingReference type n).bind
-                  (fun rem => psKernelSemanticCacheRemainingReference body rem))
           rw [ihType n]
           exact psKernelEncodeSequence
             (psKernelSemanticCacheRemainingReference type n)
@@ -84,13 +70,6 @@ theorem psKernelSemanticCacheRemainingFast_refines
       cases budget with
       | zero => rfl
       | succ n =>
-          change
-            (if Nat.beq (psKernelSemanticCacheRemainingFast type n) 0 then 0
-             else psKernelSemanticCacheRemainingFast body
-                    (Nat.pred (psKernelSemanticCacheRemainingFast type n))) =
-              psKernelEncodeRemaining
-                ((psKernelSemanticCacheRemainingReference type n).bind
-                  (fun rem => psKernelSemanticCacheRemainingReference body rem))
           rw [ihType n]
           exact psKernelEncodeSequence
             (psKernelSemanticCacheRemainingReference type n)
@@ -102,18 +81,6 @@ theorem psKernelSemanticCacheRemainingFast_refines
       cases budget with
       | zero => rfl
       | succ n =>
-          change
-            (if Nat.beq (psKernelSemanticCacheRemainingFast type n) 0 then 0
-             else
-               let valueRest := psKernelSemanticCacheRemainingFast value
-                  (Nat.pred (psKernelSemanticCacheRemainingFast type n))
-               if Nat.beq valueRest 0 then 0
-               else psKernelSemanticCacheRemainingFast body (Nat.pred valueRest)) =
-              psKernelEncodeRemaining
-                ((psKernelSemanticCacheRemainingReference type n).bind
-                  (fun typeRest =>
-                    (psKernelSemanticCacheRemainingReference value typeRest).bind
-                      (fun valueRest => psKernelSemanticCacheRemainingReference body valueRest)))
           rw [ihType n]
           cases hType : psKernelSemanticCacheRemainingReference type n with
           | none =>
@@ -181,16 +148,18 @@ theorem psKernelSemanticCacheEligible_app_with_fvar_right
           (PsKernelExpr.fvar name)) =
       false := by
   have hFVar : ∀ fuel : Nat,
-      psKernelSemanticCacheRemaining (PsKernelExpr.fvar name) fuel = none := by
+      psKernelSemanticCacheRemainingReference (PsKernelExpr.fvar name) fuel = none := by
     intro fuel
     cases fuel <;> rfl
-  cases hFn : psKernelSemanticCacheRemaining fn 255 with
+  unfold psKernelSemanticCacheEligible
+  rw [psKernelSemanticCacheRemaining_fast_equals_reference]
+  cases hFn : psKernelSemanticCacheRemainingReference fn 255 with
   | none =>
-      simp [psKernelSemanticCacheEligible, psKernelSemanticCacheNodeBudget,
-        psKernelSemanticCacheRemaining, hFn, hFVar]
+      simp [psKernelSemanticCacheNodeBudget,
+        psKernelSemanticCacheRemainingReference, hFn, hFVar]
   | some remaining =>
-      simp [psKernelSemanticCacheEligible, psKernelSemanticCacheNodeBudget,
-        psKernelSemanticCacheRemaining, hFn, hFVar]
+      simp [psKernelSemanticCacheNodeBudget,
+        psKernelSemanticCacheRemainingReference, hFn, hFVar]
 
 theorem psKernelSemanticPairCacheEligible_left_fvar
     (name : PsKernelName)

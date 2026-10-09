@@ -26,6 +26,17 @@ structure PsCompilerPreparationState where
   environment : PsEnvironment
   declarationsRev : List PsDeclaration
 
+-- These are retained results, not authority tokens. The source-owned entry
+-- point establishes their provenance by constructing and consuming them itself.
+structure PsCompilerPreparationOutput where
+  prepared : PsCompilerAdmissionReadyModule
+  environment : PsEnvironment
+  admissions : String
+
+structure PsCompilerPreparationStepWithOriginsResult where
+  state : PsCompilerPreparationState
+  origins : List PsElabBatchOrigin
+
 def psCompilerTranslateSource
     (sourceKind targetKind : PsCompilerSourceKind)
     (source : String) :
@@ -87,16 +98,27 @@ def psCompilerElaborateSource
   | Except.ok sourceModule =>
       psCompilerElaborateModule sourceModule
 
-def psCompilerPrepareElaborated
+def psCompilerPrepareElaboratedWithOutput
     (elaborated : PsElabModuleResult) :
-    Except PsCompilerError PsCompilerAdmissionReadyModule :=
+    Except PsCompilerError PsCompilerPreparationOutput :=
   match
       psEncodeCheckedAdmissionsCanonical
         elaborated.declarations with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
-  | Except.ok _ =>
-      Except.ok (PsCompilerAdmissionReadyModule.mk elaborated.declarations)
+  | Except.ok canonicalAdmissions =>
+      let prepared : PsCompilerAdmissionReadyModule :=
+        PsCompilerAdmissionReadyModule.mk elaborated.declarations;
+      let admissions : String := String.Internal.append canonicalAdmissions "\n";
+      Except.ok
+        (PsCompilerPreparationOutput.mk prepared elaborated.environment admissions)
+
+def psCompilerPrepareElaborated
+    (elaborated : PsElabModuleResult) :
+    Except PsCompilerError PsCompilerAdmissionReadyModule :=
+  match psCompilerPrepareElaboratedWithOutput elaborated with
+  | Except.error error => Except.error error
+  | Except.ok output => Except.ok output.prepared
 
 def psCompilerCheckElaborated
     (elaborated : PsElabModuleResult) :
@@ -120,18 +142,30 @@ def psCompilerPreparationStart
   PsCompilerPreparationState.mk
     sourceKind psSelfHostProdPreludeEnvironment List.nil
 
+-- One actual elaboration supplies both the next state and source-local origins.
+-- The surrounding source-owned caller attaches module identity to these records.
+def psCompilerPreparationStepParsedWithOrigins
+    (state : PsCompilerPreparationState)
+    (sourceModule : PsSyntaxModule) :
+    Except PsElabOriginError PsCompilerPreparationStepWithOriginsResult :=
+  match psElabModuleWithOrigins state.environment sourceModule with
+  | Except.error error => Except.error error
+  | Except.ok elaborated =>
+      let nextState : PsCompilerPreparationState :=
+        PsCompilerPreparationState.mk
+          state.sourceKind elaborated.result.environment
+          (psListAppend
+            (psListReverse elaborated.result.declarations) state.declarationsRev);
+      Except.ok
+        (PsCompilerPreparationStepWithOriginsResult.mk nextState elaborated.origins)
+
 def psCompilerPreparationStepParsed
     (state : PsCompilerPreparationState)
     (sourceModule : PsSyntaxModule) :
     Except PsCompilerError PsCompilerPreparationState :=
-  match psElabModule state.environment sourceModule with
-  | Except.error error =>
-      Except.error (PsCompilerError.elaboration error)
-  | Except.ok elaborated =>
-      Except.ok
-        (PsCompilerPreparationState.mk
-          state.sourceKind elaborated.environment
-          (psListAppend (psListReverse elaborated.declarations) state.declarationsRev))
+  match psCompilerPreparationStepParsedWithOrigins state sourceModule with
+  | Except.error error => Except.error (PsCompilerError.elaboration error.error)
+  | Except.ok result => Except.ok result.state
 
 def psCompilerPreparationStep
     (state : PsCompilerPreparationState)
@@ -146,10 +180,17 @@ def psCompilerPreparationElaborated
     (state : PsCompilerPreparationState) : PsElabModuleResult :=
   PsElabModuleResult.mk state.environment (psListReverse state.declarationsRev)
 
+def psCompilerPreparationFinishWithOutput
+    (state : PsCompilerPreparationState) :
+    Except PsCompilerError PsCompilerPreparationOutput :=
+  psCompilerPrepareElaboratedWithOutput (psCompilerPreparationElaborated state)
+
 def psCompilerPreparationFinish
     (state : PsCompilerPreparationState) :
     Except PsCompilerError PsCompilerAdmissionReadyModule :=
-  psCompilerPrepareElaborated (psCompilerPreparationElaborated state)
+  match psCompilerPreparationFinishWithOutput state with
+  | Except.error error => Except.error error
+  | Except.ok output => Except.ok output.prepared
 
 def psCompilerPreparationSourcesWorker
     (sources : List String)

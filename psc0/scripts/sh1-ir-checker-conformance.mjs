@@ -79,6 +79,20 @@ function fixtureModel(c) {
   const array = intrinsic('arrayPush', [
     intrinsic('arrayEmptyWithCapacity', [natural(1)], [nat]), natural(7),
   ], [nat]);
+  const emptyLayouts = [inductive('Empty', []), inductive('EmptyBox', [], ['T0'])];
+  const emptyMatch = (scrutinee, owner = 'Empty', types = []) =>
+    E.matchE(owner, list(types), scrutinee, list([]));
+  const emptyDeclarations = [
+    declaration('eliminateEmptyNat', nat, emptyMatch(variable('empty')), [['empty', named('Empty')]]),
+    declaration('eliminateEmptyFunction', fnNat, emptyMatch(variable('empty')), [['empty', named('Empty')]]),
+    declaration('eliminateEmptyGeneric', T0, emptyMatch(variable('empty'), 'EmptyBox', [T0]),
+      [['empty', named('EmptyBox', [T0])]], ['T0']),
+    declaration('eliminateEmptyTypedCall', nat,
+      call(E.letE('emptyResult', fnNat, emptyMatch(variable('empty')), variable('emptyResult')), [natural(7)]),
+      [['empty', named('Empty')]]),
+    declaration('eliminateEmptyComputed', nat, emptyMatch(call('makeEmpty', [])),
+      [['makeEmpty', functionType([], named('Empty'))]]),
+  ];
   const positive = module([...base,
     declaration('fromLet', nat, call(E.letE('callee', fnNat, plusOne, variable('callee')), [natural(5)])),
     declaration('fromIf', nat, call(E.ifE(truth(true), variable('functionValue'), plusOne), [natural(5)])),
@@ -122,7 +136,9 @@ function fixtureModel(c) {
     declaration('fromCharacter', string, intrinsic('stringPush', [
       text('x'), intrinsic('charOfNat', [natural(65)]),
     ])),
-  ]);
+    ...emptyDeclarations,
+    declaration('zeroFieldRecordValue', named('RecordUnit'), record('RecordUnit', [])),
+  ], [...layouts, structure('RecordUnit', [])], [...choices, ...emptyLayouts]);
   const single = (body, result = nat, params = [], types = []) =>
     module([...base, declaration('rejectedResult', result, body, params, types)]);
   const negative = [
@@ -169,10 +185,15 @@ function fixtureModel(c) {
       [['value', primitive('uint32')]]), 'scalar-capability-unqualified'],
     ['external-import-ABI', module([declaration('importedUse', nat, variable('external'))], [], [],
       [c.psIrCheckMakeExternalImport('external', 'unqualified-module', 'external', nat)]), 'external-import-abi-unqualified'],
-    ['empty-layout', module([], [], [inductive('Empty', [])]), 'empty-layout-unsupported'],
-    ['empty-match', module([declaration('eliminate', nat,
-      E.matchE('Empty', list([]), variable('empty'), list([])), [['empty', named('Empty')]])],
-      [], [inductive('Empty', [])]), 'empty-match-unsupported'],
+    ['empty-match-missing-result-hint', module([declaration('eliminate', nat,
+      call(emptyMatch(variable('empty')), [natural(1)]), [['empty', named('Empty')]])],
+      [], emptyLayouts), 'empty-match-result-type-required'],
+    ['empty-match-wrong-scrutinee', module([declaration('eliminate', nat,
+      emptyMatch(natural(1)))], [], emptyLayouts), 'type-mismatch'],
+    ['empty-match-type-argument-arity', module([declaration('eliminate', nat,
+      emptyMatch(variable('empty'), 'EmptyBox'), [['empty', named('EmptyBox', [nat])]])],
+      [], emptyLayouts), 'layout-type-arity'],
+    ['empty-match-inhabited-layout', single(match([])), 'match-coverage'],
     ['runtime-layout-name-collision', module([], [structure('Array', [])], []), 'duplicate-layout-name'],
   ];
   return { positive, negative, single, natural, E, L, nat, list, module, declaration };
@@ -201,8 +222,23 @@ function assertBehavior(runtime) {
     assert.equal(runtime.shadowNestedTail(fuel, 7n), 7n + 2n * fuel, 'PSC0_SH1_IR_SHADOW_NESTED_TAIL');
     observations++;
   }
+  assert.deepEqual(Object.getOwnPropertyNames(runtime.zeroFieldRecordValue), []);
+  const recordBrands = Object.getOwnPropertySymbols(runtime.zeroFieldRecordValue);
+  assert.equal(recordBrands.length, 1);
+  assert.equal(runtime.zeroFieldRecordValue[recordBrands[0]], true);
+  observations++;
+  let scrutineeCalls = 0;
+  const scrutineeFailure = new Error('empty scrutinee probe');
+  assert.throws(() => runtime.eliminateEmptyComputed(() => {
+    scrutineeCalls++; throw scrutineeFailure;
+  }), (error) => error === scrutineeFailure, 'PSC0_SH1_IR_EMPTY_SCRUTINEE_PRECEDENCE');
+  assert.equal(scrutineeCalls, 1, 'PSC0_SH1_IR_EMPTY_SCRUTINEE_ONCE');
+  observations++;
   return {
     status: 'pass', observations, exhaustiveForAllInputs: false,
+    zeroFieldRecord: { ownStringFields: 0, ownBrandSymbols: 1, inhabited: true },
+    emptyScrutinee: { callbackCalls: scrutineeCalls, propagatedOriginalFailure: true,
+      noEmptyInhabitantConstructed: true },
     letScopeCases: [
       { name: 'shadowOldScope', observations: 8 },
       { name: 'shadowWrappedCall', observations: 8 },
@@ -210,6 +246,32 @@ function assertBehavior(runtime) {
       { name: 'shadowNestedTail', observations: tailFuels.length },
     ],
   };
+}
+
+function observeEmptyAbi(typeScript, declarations) {
+  assert.match(typeScript, /export type Empty = never;/u);
+  assert.match(typeScript, /export type EmptyBox<T0> = never;/u);
+  assert.equal(typeScript.split('__ps$Computation<never>').length - 1, 5);
+  const names = ['eliminateEmptyNat', 'eliminateEmptyFunction', 'eliminateEmptyGeneric',
+    'eliminateEmptyTypedCall', 'eliminateEmptyComputed'];
+  const signatures = names.map((name) => {
+    const lines = declarations.split(/\r?\n/u)
+      .filter((line) => line.startsWith('export declare function ' + name + '(') ||
+        line.startsWith('export declare function ' + name + '<'));
+    assert.equal(lines.length, 1, 'PSC0_SH1_IR_EMPTY_ABI: ' + name);
+    return { name, signature: lines[0] };
+  });
+  assert.match(declarations, /export type Empty = never;/u);
+  assert.match(declarations, /export type EmptyBox<T0> = never;/u);
+  assert.match(signatures[0].signature, /\(empty: Empty\): bigint;/u);
+  assert.match(signatures[1].signature, /\(empty: Empty\): \([^)]*: bigint\) => bigint;/u);
+  assert.match(signatures[2].signature, /<T0>\(empty: EmptyBox<T0>\): T0;/u);
+  assert.match(signatures[3].signature, /\(empty: Empty\): bigint;/u);
+  assert.match(signatures[4].signature, /\(makeEmpty: \(\) => Empty\): bigint;/u);
+  return { emptyLayoutCount: 2, emptyEliminationCount: 5, signatures,
+    declarationArtifact: 'accepted/index.d.ts', declarationSha256: sha256(declarations),
+    additionalTypeScriptCompilations: 0, nativeValueOracle: false,
+    strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false };
 }
 
 function assertRejected(report, label, code) {
@@ -237,6 +299,14 @@ export async function runIrCheckerConformance({
   assert.equal(typeScript, unwrap(compiler.psTsEmitModule(fixture.positive), 'IR_RAW_EMIT_PARITY'));
   const generated = await compileTypeScript(typeScript, path.join(outDir, 'accepted'), tsc, root);
   const behavior = assertBehavior(await import(pathToFileURL(generated).href));
+  const declarations = await readFile(path.join(outDir, 'accepted', 'index.d.ts'), 'utf8');
+  const emptyElimination = observeEmptyAbi(typeScript, declarations);
+  assert.match(declarations, /export interface RecordUnit/u);
+  assert.match(declarations, /export declare const zeroFieldRecordValue: RecordUnit;/u);
+  const zeroFieldRecords = { structureCount: 1, fieldCount: 0, valueCount: 1,
+    declarationArtifact: 'accepted/index.d.ts', declarationSha256: sha256(declarations),
+    inhabited: true, additionalTypeScriptCompilations: 0,
+    strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false };
   const rejected = [];
   for (const [name, ir, code] of fixture.negative) {
     const report = inventoryOriginalIr(compiler, ir, { compilerSha256 });
@@ -314,7 +384,7 @@ export async function runIrCheckerConformance({
     schemaVersion: 1, evidence: 'portable-original-ir-checker-conformance',
     compilerSha256, acceptedFixture: positive,
     artifacts: { typescriptSha256: sha256(typeScript), javascriptSha256: sha256(await readFile(generated)) },
-    behavior, rejected, exhausted, directTypeOperations, carrierRejections,
+    behavior, rejected, exhausted, directTypeOperations, carrierRejections, emptyElimination, zeroFieldRecords,
     diagnosticsCap: { limit: 0, findingCount: capped.findingCount, omittedFindingDetails: capped.omittedFindingDetails },
     checkedPreparedEntry: { sourceSha256: sha256(source), typescriptSha256: sha256(preparedOutput), status: 'pass' },
     instanceOwnership: 'All IR constructors and neutral record factories belong to the checked compiler namespace.',

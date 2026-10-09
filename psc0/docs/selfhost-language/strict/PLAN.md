@@ -64,9 +64,47 @@ Explicitly cover public wrappers/workers, structural decrease and simultaneous c
 
 Prefer small admission/provenance checks over rewriting unrelated compiler code. Static risks in arbitrary handcrafted IR are not automatically failures in the qualified source closure. Conversely, a source-closure pass does not establish the safety of arbitrary typed IR.
 
-## First integrated implementation checkpoint
+## Current reviewed integration and next gate
 
-[implementation-checkpoint.json](implementation-checkpoint.json) binds every candidate source, host gate, reference and recipe input by its exact Git blob. The new portable source and atomic backend APIs, target admission, Unicode and array guards, native/current host consumers and actual-file evidence binder are implemented candidates. Cloud execution is still pending at this source checkpoint.
+[The current integration manifest](reviewed-candidates/strict-implementation-batch.json)
+binds 29 source, fixture and workflow files to their exact bases and final blobs.
+This batch combines actual normalization origins, one source-owned canonical
+admission encoding and no environment reconstruction, immutable ingress
+snapshots, computed Nat/partial-application sequencing, empty inductive
+elimination and inhabited zero-field records. The final binder has independent
+source review and retains all preceding source/runtime/target gates.
+
+The fourth cloud attempt at `05f37fc04e52bfaed70389291a0fcdeda819f71f`
+passed native development and C1, then exhausted the heap in the first C2 build.
+[The attempt ledger](qualification-attempts.json) retains that failure and the
+successful read-only archive inspection. No C2 files were retained. The new
+batch has not inherited the previous run's success.
+
+The next full run uses a fixed 8192 MiB old-space limit and a measured 12 GiB
+available-memory preflight before expensive work. Candidate and fixed-point
+processes repeat the preflight before generated compiler loading; they do not
+apply a new per-generation availability refusal after a process has allocated
+its heap. Scalar-only synchronous phase records survive an abort. The budget
+and reduced repeated work do not establish a peak-memory repair.
+
+The source gate remains 2 accepted / 33 refused / 2 carrier refusals; each
+positive bundle now has 3 modules, 11 source declarations and 16 Core
+declarations. The existing runtime matrix remains 45 operations / 186
+observations plus six raw equalities; the shared sequencing fixture adds
+12 declarations / 24 native values / 21 host probes. Empty/zero-field evidence
+reuses existing source, IR, native and TypeScript invocations.
+
+After exact-source execution, preserve all receipts and the independent
+provider result. Continue the shared value/environment/call relation and the
+actual reachable erasure-scope invariant, then discharge the N/ER/EV/TS rule
+families. A complete source argument over actual metadata or a correct checked
+association witness can establish correspondence; an extra serialized
+certificate format is not a normative requirement. All 33 general rows remain
+open until their full arguments and evidence exist.
+
+## Historical first integrated implementation checkpoint
+
+[implementation-checkpoint.json](implementation-checkpoint.json) binds every candidate source, host gate, reference and recipe input by its exact Git blob. The new portable source and atomic backend APIs, target admission, Unicode and array guards, native/current host consumers and actual-file evidence binder are implemented candidates. Cloud execution was pending at that first source checkpoint; later attempts are recorded above and in the attempt ledger.
 
 The finite source gate has two positive raw Lean/PS bundles, twenty-one portable refusals and two host Unicode refusals. Target conformance has nine accepted and twenty refused cases. Runtime conformance covers all forty-five enabled operations with 186 independent native observations, eight bounds failures, nine order/fault probes, five invalid carriers and two Unicode/position families. These counts describe planned assertions until their actual receipts pass.
 

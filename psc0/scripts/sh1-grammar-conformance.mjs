@@ -462,6 +462,170 @@ function checkEmptyCallMeaning(compiler) {
   };
 }
 
+
+const emptySyntaxCases = [
+  { name: 'empty-type-command-boundary',
+    lean: 'inductive Empty(alpha : Type) where\ndef following : Nat := 7\n',
+    ps: 'inductive Empty(alpha : Type) where {}\ndef following : Nat := 7\n',
+    shape: 'empty-type' },
+  { name: 'empty-elimination',
+    lean: 'def probe(value : Empty) : Nat := nomatch value\n',
+    ps: 'def probe(value : Empty) : Nat := match value with {}\n',
+    shape: 'direct', leanTerm: 'nomatch value', psTerm: 'match value with {}' },
+  { name: 'grouped-empty-scrutinee-consumed-span',
+    lean: '-- é\ndef probe(value : Empty) : Nat := nomatch (get value)\n',
+    ps: '-- é\ndef probe(value : Empty) : Nat := match (get(value)) with {}\n',
+    shape: 'computed', leanTerm: 'nomatch (get value)', psTerm: 'match (get(value)) with {}' },
+  { name: 'nested-empty-keeps-outer-alternatives',
+    lean: 'def probe(choice : Choice) (empty : Empty) : Nat := match choice with\n' +
+      '  | Choice.first => nomatch empty\n  | Choice.second => 7\n',
+    ps: 'def probe(choice : Choice, empty : Empty) : Nat := match choice with {\n' +
+      '  | Choice.first => match empty with {}\n  | Choice.second => 7\n}\n',
+    shape: 'outer', leanTerm: 'nomatch empty', psTerm: 'match empty with {}' },
+  { name: 'grouped-empty-argument',
+    lean: 'def probe(value : Empty) : Nat := use (nomatch value)\n',
+    ps: 'def probe(value : Empty) : Nat := use(match value with {})\n',
+    shape: 'argument', leanTerm: 'nomatch value', psTerm: 'match value with {}' },
+];
+
+const emptySyntaxRefusals = [
+  ['bare-lean-empty-match', 'lean', 'def probe(value : Empty) : Nat := match value with\n'],
+  ['lean-nomatch-missing-scrutinee', 'lean', 'def probe(value : Empty) : Nat := nomatch\n'],
+  ['lean-multiple-nomatch-scrutinees', 'lean',
+    'def probe(left : Empty) (right : Empty) : Nat := nomatch left, right\n'],
+  ['ps-empty-match-missing-close', 'ps', 'def probe(value : Empty) : Nat := match value with {\n'],
+  ['ps-empty-type-missing-close', 'ps', 'inductive Empty where {\n'],
+  ['ps-empty-match-orphan-bar', 'ps', 'def probe(value : Empty) : Nat := match value with { | }\n'],
+];
+
+function emptyPosition(source, offset) {
+  const prefix = source.slice(0, offset), lines = prefix.split('\n');
+  return { byteOffset: BigInt(Buffer.byteLength(prefix)), line: BigInt(lines.length),
+    column: BigInt([...lines.at(-1)].length + 1) };
+}
+
+function checkEmptySyntaxShape(parsed, test, kind) {
+  const source = test[kind], declarations = array(parsed.declarations);
+  if (test.shape === 'empty-type') {
+    assert.equal(declarations.length, 2, test.name);
+    assert.equal(tag(declarations[0]), 'inductiveDecl');
+    assert.equal(array(declarations[0].constructors).length, 0);
+    assert.equal(nameText(declarations[1].name), 'following');
+    const stop = kind === 'lean' ? source.indexOf('where') + 'where'.length : source.indexOf('}') + 1;
+    assert.deepEqual(positionData(declarations[0].span.stop), emptyPosition(source, stop));
+    return diagnostic(declarations[0].span);
+  }
+  assert.equal(declarations.length, 1, test.name);
+  let empty = declarations[0].value;
+  if (test.shape === 'outer') {
+    assert.equal(tag(empty), 'matchE');
+    const alternatives = array(empty.alternatives);
+    assert.equal(alternatives.length, 2, 'outer alternatives must not be consumed by nomatch');
+    empty = alternatives[0].snd.fst;
+  } else if (test.shape === 'argument') {
+    assert.equal(tag(empty), 'app');
+    assert.equal(array(empty.args).length, 1);
+    empty = array(empty.args)[0];
+  }
+  assert.equal(tag(empty), 'matchE');
+  assert.equal(array(empty.alternatives).length, 0);
+  if (test.shape === 'computed') {
+    assert.deepEqual(applicationShape(empty.scrutinee), app(ref('get'), ref('value')));
+  } else {
+    assert.equal(tag(empty.scrutinee), 'reference');
+  }
+  const term = kind === 'lean' ? test.leanTerm : test.psTerm, start = source.indexOf(term);
+  assert(start >= 0);
+  assert.deepEqual(positionData(empty.span.start), emptyPosition(source, start));
+  assert.deepEqual(positionData(empty.span.stop), emptyPosition(source, start + term.length));
+  return diagnostic(empty.span);
+}
+
+function checkEmptySyntax(compiler) {
+  const lean = compiler.PsCompilerSourceKind.lean, ps = compiler.PsCompilerSourceKind.proofScript;
+  const pairs = emptySyntaxCases.map((test) => {
+    const parsedLean = ok(compiler.psCompilerParseSource(lean, test.lean), test.name + '_LEAN_PARSE');
+    const parsedPs = ok(compiler.psCompilerParseSource(ps, test.ps), test.name + '_PS_PARSE');
+    assert.deepEqual(syntaxData(parsedLean), syntaxData(parsedPs), test.name + ': common AST');
+    const spans = { lean: checkEmptySyntaxShape(parsedLean, test, 'lean'),
+      ps: checkEmptySyntaxShape(parsedPs, test, 'ps') };
+    const canonicalLean = translate(compiler, lean, lean, test.lean, test.name + '_LEAN');
+    const canonicalPs = translate(compiler, lean, ps, test.lean, test.name + '_TO_PS');
+    const reparsed = ok(compiler.psCompilerParseSource(ps, canonicalPs), test.name + '_ROUND_TRIP');
+    assert.deepEqual(syntaxData(reparsed), syntaxData(parsedLean), test.name + ': round-trip AST');
+    assert.equal(translate(compiler, ps, lean, canonicalPs, test.name + '_BACK'), canonicalLean);
+    assert.equal(translate(compiler, ps, ps, test.ps, test.name + '_PS'), canonicalPs);
+    assert.equal(translate(compiler, lean, lean, canonicalLean, test.name + '_LEAN_STABLE'), canonicalLean);
+    assert.equal(translate(compiler, ps, ps, canonicalPs, test.name + '_PS_STABLE'), canonicalPs);
+    if (test.shape !== 'empty-type') assert(canonicalLean.includes('nomatch '));
+    return { name: test.name, leanSha256: sha256(test.lean), proofScriptSha256: sha256(test.ps),
+      canonicalLeanSha256: sha256(canonicalLean), canonicalProofScriptSha256: sha256(canonicalPs),
+      astSha256: sha256(JSON.stringify(syntaxData(parsedLean))), spans };
+  });
+  const refusals = emptySyntaxRefusals.map(([name, kind, source]) => ({
+    ...refused(compiler.psCompilerParseSource(kind === 'lean' ? lean : ps, source), name,
+      [kind === 'lean' ? 'leanFrontend' : 'proofScriptFrontend', 'parse']),
+    sourceKind: kind, sourceSha256: sha256(source),
+  }));
+  return { pairs, refusals, canonicalRoundTrips: pairs.length,
+    sourceScope: 'regular empty data; one Lean nomatch scrutinee; current PS empty braces',
+    additionalPreparations: 0, nativeMultiScrutineeNomatch: false,
+    bareLeanEmptyMatch: 'refused', fullStandardConformance: false,
+    fullPscvConformance: false, kernelChecked: false };
+}
+
+
+const zeroFieldRecordSyntax = {
+  lean: 'structure RecordUnit where\ndef value : RecordUnit := {}\n',
+  ps: 'structure RecordUnit where {}\ndef value : RecordUnit := {}\n',
+};
+const zeroFieldRecordRefusals = [
+  ['zero-field-structure-missing-close', 'structure RecordUnit where {\n'],
+  ['zero-field-structure-semicolon', 'structure RecordUnit where { ; }\n'],
+];
+
+function checkZeroFieldRecords(compiler) {
+  const lean = compiler.PsCompilerSourceKind.lean, ps = compiler.PsCompilerSourceKind.proofScript;
+  const parsed = {};
+  const spans = {};
+  for (const kind of ['lean', 'ps']) {
+    const source = zeroFieldRecordSyntax[kind];
+    parsed[kind] = ok(compiler.psCompilerParseSource(kind === 'lean' ? lean : ps, source),
+      'ZERO_FIELD_RECORD_' + kind);
+    const declarations = array(parsed[kind].declarations);
+    assert.equal(declarations.length, 2);
+    assert.equal(tag(declarations[0]), 'structureDecl');
+    assert.equal(array(declarations[0].fields).length, 0);
+    assert.equal(tag(declarations[1].value), 'record');
+    assert.equal(array(declarations[1].value.fields).length, 0);
+    const stop = kind === 'lean' ? source.indexOf('where') + 5 : source.indexOf('}') + 1;
+    assert.deepEqual(positionData(declarations[0].span.stop), emptyPosition(source, stop));
+    const recordStart = source.lastIndexOf('{}');
+    assert.deepEqual(positionData(declarations[1].value.span.start), emptyPosition(source, recordStart));
+    assert.deepEqual(positionData(declarations[1].value.span.stop), emptyPosition(source, recordStart + 2));
+    spans[kind] = { structure: diagnostic(declarations[0].span), record: diagnostic(declarations[1].value.span) };
+  }
+  assert.deepEqual(syntaxData(parsed.lean), syntaxData(parsed.ps));
+  const canonicalLean = translate(compiler, lean, lean, zeroFieldRecordSyntax.lean, 'ZERO_RECORD_LEAN');
+  const canonicalPs = translate(compiler, lean, ps, zeroFieldRecordSyntax.lean, 'ZERO_RECORD_TO_PS');
+  assert.deepEqual(syntaxData(parse(compiler, canonicalPs, 'ZERO_RECORD_ROUND_TRIP')), syntaxData(parsed.lean));
+  assert.equal(translate(compiler, ps, lean, canonicalPs, 'ZERO_RECORD_BACK'), canonicalLean);
+  assert.equal(translate(compiler, ps, ps, zeroFieldRecordSyntax.ps, 'ZERO_RECORD_PS'), canonicalPs);
+  assert.equal(translate(compiler, lean, lean, canonicalLean, 'ZERO_RECORD_LEAN_STABLE'), canonicalLean);
+  assert.equal(translate(compiler, ps, ps, canonicalPs, 'ZERO_RECORD_PS_STABLE'), canonicalPs);
+  const refusals = zeroFieldRecordRefusals.map(([name, source]) => ({
+    ...refused(compiler.psCompilerParseSource(ps, source), name, ['proofScriptFrontend', 'parse']),
+    sourceSha256: sha256(source),
+  }));
+  return { pairs: [{ name: 'inhabited-zero-field-structure-and-record',
+      leanSha256: sha256(zeroFieldRecordSyntax.lean), proofScriptSha256: sha256(zeroFieldRecordSyntax.ps),
+      canonicalLeanSha256: sha256(canonicalLean), canonicalProofScriptSha256: sha256(canonicalPs),
+      astSha256: sha256(JSON.stringify(syntaxData(parsed.lean))), spans }],
+    refusals, canonicalRoundTrips: 1, additionalPreparations: 0,
+    inhabitedStructure: true, emptyInductiveElimination: false,
+    fullStandardConformance: false, fullPscvConformance: false, kernelChecked: false };
+}
+
 export function runSh1GrammarConformance({ compiler, compilerSha256 }) {
   requireApi(compiler, compilerSha256);
   const applications = [];
@@ -487,6 +651,8 @@ export function runSh1GrammarConformance({ compiler, compilerSha256 }) {
       name, ['proofScriptFrontend', 'parse']),
     sourceSha256: sha256(source),
   }));
+  const emptyElimination = checkEmptySyntax(compiler);
+  const zeroFieldRecords = checkZeroFieldRecords(compiler);
   const lexical = checkLexical(compiler);
   const emptyCallMeaning = checkEmptyCallMeaning(compiler);
   const interleavedSource = 'def probe(x : Nat) {alpha : Type} : Nat := x\n';
@@ -502,7 +668,8 @@ export function runSh1GrammarConformance({ compiler, compilerSha256 }) {
     compilerSha256,
     sourceGrammar: sh1GrammarProfile,
     corpusSha256: sha256(JSON.stringify({
-      applicationCases, supportedCases, parseRefusals,
+      applicationCases, supportedCases, parseRefusals, emptySyntaxCases, emptySyntaxRefusals,
+      zeroFieldRecordSyntax, zeroFieldRecordRefusals,
       lexicalSources: lexical.positions.concat(lexical.commentAndLiteralWhitespace, lexical.refusals)
         .map((item) => item.sourceSha256),
       elaborationSources: [emptyCallMeaning.explicitUnit, ...emptyCallMeaning.refusals]
@@ -518,8 +685,12 @@ export function runSh1GrammarConformance({ compiler, compilerSha256 }) {
       lexicalRefusals: lexical.refusals.length,
       emptyCallRefusals: emptyCallMeaning.refusals.length,
       printerRefusals: 1,
+      emptySyntaxPairs: emptyElimination.pairs.length,
+      emptySyntaxRefusals: emptyElimination.refusals.length,
+      zeroFieldRecordPairs: zeroFieldRecords.pairs.length,
+      zeroFieldRecordRefusals: zeroFieldRecords.refusals.length,
     },
-    applications, supported, refusals, lexical, emptyCallMeaning, printerRefusal,
+    applications, supported, refusals, lexical, emptyCallMeaning, printerRefusal, emptyElimination, zeroFieldRecords,
     scope: {
       finiteCorpus: true,
       smallGrammarCasesUseProofScriptRoundTrips: true,

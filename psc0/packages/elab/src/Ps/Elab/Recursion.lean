@@ -565,14 +565,28 @@ structure PsElabStructuralNormalization where
   publicType : PsExpr
   workerArguments : List PsExpr
 
-def psElabRecursionBuildNormalization
+-- This record retains the actual successful plan and constructed worker syntax.
+-- It deliberately contains no elaboration context or environment snapshot.
+structure PsElabNormalizationOrigin where
+  plan : PsElabRecursionPlan
+  span : PsSourceSpan
+  workerName : PsName
+  workerBinders : List (Prod PsSyntaxBinderHead PsSyntaxTerm)
+  workerType : PsSyntaxTerm
+  workerValue : PsSyntaxTerm
+
+structure PsElabStructuralNormalizationWithOrigin where
+  normalization : PsElabStructuralNormalization
+  origin : PsElabNormalizationOrigin
+
+def psElabRecursionBuildNormalizationWithOrigin
     (plan : PsElabRecursionPlan)
     (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (typeSyntax valueSyntax : PsSyntaxTerm)
     (span : PsSourceSpan)
     (binderResult : PsElabTypedBindersResult)
     (typeResult : PsElabTermResult) :
-    Except PsElabError PsElabStructuralNormalization :=
+    Except PsElabError PsElabStructuralNormalizationWithOrigin :=
   let typed := psElabTypedBinderListReverse binderResult.bindersRev;
   let forbidden := List.cons plan.majorId plan.generalizedIds;
   let publicType := psMetaInstantiate typeResult.context.metaContext typeResult.term;
@@ -613,25 +627,46 @@ def psElabRecursionBuildNormalization
                         -- rejects an existing internal declaration with this name.
                         let workerName := psNameAppendNum
                           (psNameAppendStr plan.functionName "$psc0SH") 0;
-                        Except.ok (PsElabStructuralNormalization.mk
-                          plan.functionName workerName fixed
-                          (PsSyntaxTerm.forallE state renamedType.term span)
-                          (PsSyntaxTerm.matchE major
-                            (psElabRecursionWrapAlternatives state alternatives) matchSpan)
-                          typeResult.context binderResult.bindersRev publicType
-                          (psListAppend fixedValues stateValues))
+                        let workerType : PsSyntaxTerm :=
+                          PsSyntaxTerm.forallE state renamedType.term span;
+                        let workerValue : PsSyntaxTerm :=
+                          PsSyntaxTerm.matchE major
+                            (psElabRecursionWrapAlternatives state alternatives) matchSpan;
+                        let normalization : PsElabStructuralNormalization :=
+                          PsElabStructuralNormalization.mk
+                            plan.functionName workerName fixed workerType workerValue
+                            typeResult.context binderResult.bindersRev publicType
+                            (psListAppend fixedValues stateValues);
+                        let origin : PsElabNormalizationOrigin :=
+                          PsElabNormalizationOrigin.mk
+                            plan span workerName fixed workerType workerValue;
+                        Except.ok
+                          (PsElabStructuralNormalizationWithOrigin.mk normalization origin)
                     | _ => Except.error PsElabError.structuralRecursionInternal
+
+def psElabRecursionBuildNormalization
+    (plan : PsElabRecursionPlan)
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (typeSyntax valueSyntax : PsSyntaxTerm)
+    (span : PsSourceSpan)
+    (binderResult : PsElabTypedBindersResult)
+    (typeResult : PsElabTermResult) :
+    Except PsElabError PsElabStructuralNormalization :=
+  match psElabRecursionBuildNormalizationWithOrigin
+      plan binders typeSyntax valueSyntax span binderResult typeResult with
+  | Except.error error => Except.error error
+  | Except.ok result => Except.ok result.normalization
 
 def psElabRecursionTermCallback
     (context : PsElabContext) (term : PsSyntaxTerm) (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   psElabTerm context term expected
 
-def psElabPlanStructuralNormalization
+def psElabPlanStructuralNormalizationWithOrigin
     (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
     (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (typeSyntax valueSyntax : PsSyntaxTerm) (span : PsSourceSpan) :
-    Except PsElabError (Option PsElabStructuralNormalization) :=
+    Except PsElabError (Option PsElabStructuralNormalizationWithOrigin) :=
   match valueSyntax with
   | PsSyntaxTerm.matchE scrutinee _ _ =>
       match psSyntaxNameToName nameSyntax with
@@ -667,8 +702,22 @@ def psElabPlanStructuralNormalization
                                 else
                                   let generalized := PsElabRecursionPlan.mk name
                                     plan.parameterIds explicitIds majorId scanned.changedIds;
-                                  match psElabRecursionBuildNormalization generalized
+                                  match psElabRecursionBuildNormalizationWithOrigin generalized
                                       binders typeSyntax valueSyntax span binderResult typeResult with
                                   | Except.error error => Except.error error
                                   | Except.ok normalized => Except.ok (Option.some normalized)
   | _ => Except.ok Option.none
+
+-- Existing callers receive the same plan result and errors by projection.
+def psElabPlanStructuralNormalization
+    (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (typeSyntax valueSyntax : PsSyntaxTerm) (span : PsSourceSpan) :
+    Except PsElabError (Option PsElabStructuralNormalization) :=
+  match psElabPlanStructuralNormalizationWithOrigin
+      environment nameSyntax binders typeSyntax valueSyntax span with
+  | Except.error error => Except.error error
+  | Except.ok result =>
+      match result with
+      | Option.none => Except.ok Option.none
+      | Option.some normalized => Except.ok (Option.some normalized.normalization)

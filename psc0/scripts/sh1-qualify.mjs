@@ -6,6 +6,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
+import { enforceQualificationResourcePolicy, createQualificationResourceTrace } from './sh1-resource-policy.mjs';
 import {
   bootstrapEntryRelative as entryRelative,
   readBootstrapClosure as sourceClosure,
@@ -110,12 +111,13 @@ async function toolchainIdentity() {
 
 async function recipeIdentity() {
   const files = [
-    'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs',
+    'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs', 'scripts/sh1-resource-policy.mjs',
     'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-projection-conformance.mjs',
     'scripts/sh1-successor-seed.mjs', 'psconfig.json',
     'scripts/sh1-fresh-name-conformance.mjs', 'scripts/sh1-migration-worker-conformance.mjs',
     'scripts/sh1-migration-worker-abi.mjs',
     'test/fixtures/selfhost-sh1-accumulators.lean', 'test/fixtures/selfhost-sh1-accumulators.ps',
+    'test/fixtures/selfhost-sh1-empty.lean', 'test/fixtures/selfhost-sh1-empty.ps',
     'scripts/proofscript-source.mjs', 'scripts/checked-source-snapshot.mjs',
     'scripts/selfhost-source-workspace.mjs', 'scripts/LeanCheckedSeed.lean',
     'scripts/typescript-cli.mjs', 'scripts/check-typescript-profile.mjs', 'scripts/workspace-layout.mjs',
@@ -336,8 +338,15 @@ async function buildGeneration(compilerPath, closure, outDir, {
   workspace = root, expectedSha256, authoringSeed, legacyIrBoundary,
 } = {}) {
   const start = performance.now();
+  const resources = createQualificationResourceTrace(outDir, {
+    command, generation: path.basename(outDir), sourceClosureSha256: closure.sha256,
+    executingCompilerSha256: expectedSha256 ?? null,
+  });
+  resources.checkpoint('generation-start');
+  resources.checkpoint('compiler-load-start');
   const loaded = await loadCompiler(compilerPath, { expectedSha256 });
   const { compiler, compilerSha256 } = loaded;
+  resources.checkpoint('compiler-load-complete', { executingCompilerSha256: compilerSha256 });
   const inputs = closure.ordered.map(({ path: sourcePath, source }) => ({
     path: sourcePath, source: stripImports(source),
   }));
@@ -346,7 +355,11 @@ async function buildGeneration(compilerPath, closure, outDir, {
   let preparation;
   let strict = null;
   if (typeof compiler.psCompilerSh1TypeScriptSources === 'function') {
+    resources.checkpoint('atomic-source-wrapper-start', {
+      scope: 'ingress-portable-atomic-compilation-and-post-emission-host-readback',
+    });
     strict = compileStrictSources(compiler, strictSourceInputsFromClosure(closure), { compilerSha256 });
+    resources.checkpoint('atomic-source-wrapper-complete');
     prepared = strict.prepared;
     preparation = { mode: 'portable-atomic-source-and-target',
       fullSourcePreparations: 1, portableIrChecks: 1,
@@ -358,6 +371,7 @@ async function buildGeneration(compilerPath, closure, outDir, {
     assert.equal(legacyIrBoundary.executingCompilerSha256, compilerSha256);
     assert.equal(authoringSeed?.sourceRef, 'fe2560aba0f347b1caf8d000d371464642d44f23',
       'PSC0_SH1_STRICT_BOOTSTRAP_REQUIRES_SELECTED_R');
+    resources.checkpoint('selected-R-preparation-start');
     const session = createGeneratedPreparationSession(compiler, { compilerSha256 });
     const result = session.prepare('lean', inputs);
     prepared = result.prepared;
@@ -368,10 +382,14 @@ async function buildGeneration(compilerPath, closure, outDir, {
     preparation = { ...result.receipt, warmNoChange: warm.receipt,
       strictSourceBoundary: 'unavailable-on-immutable-selected-R-authoring-compiler',
       strictSh1Qualified: false };
+    resources.checkpoint('selected-R-preparation-complete');
   }
   const prepareDone = performance.now();
+  resources.checkpoint('admissions-start', { mode: strict ? 'reuse-atomic-output' : 'encode-selected-R-prepared' });
   const admissions = strict ? strict.admissions : admissionText(compiler, prepared);
+  resources.checkpoint('admissions-complete');
   const admissionDone = performance.now();
+  resources.checkpoint('canonical-surface-start');
   const canonical = [];
   for (const item of closure.ordered) {
     canonical.push({
@@ -382,13 +400,19 @@ async function buildGeneration(compilerPath, closure, outDir, {
   }
   const canonicalText = JSON.stringify(canonical, null, 2) + '\n';
   const canonicalDone = performance.now();
+  resources.checkpoint('canonical-surface-complete');
+  resources.checkpoint('original-ir-start', { mode: strict ? 'reuse-atomic-output' : 'erase-selected-R-prepared' });
   const ir = strict ? strict.originalIr : unwrap(compiler.psCompilerVerifiedIrFromPrepared(prepared), 'ERASE');
+  resources.checkpoint('original-ir-complete');
   // Reuse the exact source-owned objects. In the atomic path this is readback
   // after emission; the selected-R bootstrap path retains its prior ordering.
+  resources.checkpoint('migration-abi-start');
   const migrationWorkerAbi = runMigrationWorkerAbi(compiler, prepared, ir, valueTag);
+  resources.checkpoint('migration-abi-complete');
   const irInventory = strict ? strict.irInventory : inventoryOriginalIr(compiler, ir, {
     compilerSha256, legacyBoundary: legacyIrBoundary,
   });
+  resources.checkpoint('original-ir-inventory-complete');
   const legacyBoundary = irInventory.portableChecker.status === 'unavailable-at-explicit-seed-boundary';
   if (!legacyBoundary && (!irInventory.runtimeIrTypingAccepted || !irInventory.traversalComplete)) {
     await writeJson(path.join(outDir, 'original-ir-inventory.json'), irInventory);
@@ -397,15 +421,21 @@ async function buildGeneration(compilerPath, closure, outDir, {
   }
   // Current compilers already emitted this same IR inside the atomic API.
   // The immutable R bootstrap route checks/emits its own exact IR here.
+  resources.checkpoint('emission-start', { mode: strict ? 'reuse-atomic-output' : 'emit-selected-R-ir' });
   const typeScript = strict ? strict.typeScript : unwrap(compiler.psTsEmitModule(ir), 'EMIT');
+  resources.checkpoint('emission-complete');
   const emitDone = performance.now();
+  resources.checkpoint('typescript-child-start', { scope: 'write-typescript-and-run-separate-ts7-child' });
   const outputJs = await compileTypeScript(typeScript, outDir, tsc, root, typescriptVersion);
+  resources.checkpoint('typescript-child-complete');
+  resources.checkpoint('artifact-write-start');
   const javascript = await readFile(outputJs);
   await writeJson(path.join(outDir, 'original-ir-inventory.json'), irInventory);
   if (strict) await writeJson(path.join(outDir, 'strict-source.json'), strict.evidence);
   await writeFile(path.join(outDir, 'admissions.json'), admissions);
   await writeFile(path.join(outDir, 'canonical-source.json'), canonicalText);
   await writeJson(path.join(outDir, 'source-closure.json'), closure.manifest);
+  resources.checkpoint('artifact-write-complete');
   const receipt = {
     schemaVersion: 1,
     executingCompilerSha256: compilerSha256,
@@ -466,6 +496,11 @@ async function buildGeneration(compilerPath, closure, outDir, {
     evidence: 'candidate-build',
     provider: { status: 'not-attempted', kernelChecked: false },
   };
+  resources.checkpoint('generation-end-before-receipt-write');
+  receipt.resourceObservation = resources.reference();
+  receipt.resourcePolicy = resourcePolicyReceipt ? { ...resourcePolicyReceipt,
+    report: path.relative(outDir, resourcePolicyFile).split(path.sep).join('/'),
+  } : null;
   await writeJson(path.join(outDir, 'receipt.json'), receipt);
   process.stdout.write('PSC0_SH1_GENERATION: ' + JSON.stringify(receipt) + '\n');
   return { ...loaded, outputJs, receipt };
@@ -1014,6 +1049,9 @@ function option(args, name, fallback) {
 }
 
 const outDir = path.resolve(root, option(args, '--out', 'dist/sh1'));
+const resourcePolicyFile = path.join(outDir, 'resource-policy-' + command + '.json');
+const resourcePolicyReceipt = ['candidate', 'fixed-point'].includes(command)
+  ? enforceQualificationResourcePolicy({ command, receiptPath: resourcePolicyFile }) : null;
 if (command === 'native-candidate') {
   const nativeCompiler = path.resolve(root, option(args, '--native', '.lake/build/bin/psc1'));
   await nativeCandidate(nativeCompiler, await sourceClosure(root), outDir);

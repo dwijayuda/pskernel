@@ -174,7 +174,10 @@ def psTsEmitInductive
               let generic :=
                 psTsGenericNames inductiveInfo.typeParameters;
               let typeLine :=
-                psTsJoin "" ["export type ", inductiveInfo.name, generic, " =\n  | ", psTsJoin "\n  | " variants, ";"];
+                if psListIsEmpty variants then
+                  psTsJoin "" ["export type ", inductiveInfo.name, generic, " = never;"]
+                else
+                  psTsJoin "" ["export type ", inductiveInfo.name, generic, " =\n  | ", psTsJoin "\n  | " variants, ";"];
               let tagLine := psTsJoin "" ["const ", tag, ": unique symbol = Symbol(", psJsonQuote (psTsJoin "" ["ProofScript.", inductiveInfo.name, ".tag"]), ");"];
               let exportLine := psTsJoin "" ["export const ", inductiveInfo.name, " = {"];
               Except.ok (psTsAppendLines [tagLine, typeLine, exportLine] (psTsAppendLines constructorValues ["} as const;"]))

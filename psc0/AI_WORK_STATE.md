@@ -1,6 +1,6 @@
 # PSC0 AI work state — strict SH/1 work in progress
 
-Updated: 2026-10-09 19:28 UTC. Evidence times are UTC. Jakarta is UTC+07:00.
+Updated: 2026-10-09 19:43 UTC. Evidence times are UTC. Jakarta is UTC+07:00.
 
 ## Read this first
 
@@ -8,20 +8,47 @@ The user authorized merging the qualified practical checkpoint and continuing th
 
 This current section supersedes stale assignments, pending-run descriptions and completed-scope instructions in the archived work states. The previous complete active state is retained at [history/AI_WORK_STATE_2026-10-09_18-13.md](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-09_18-13.md), exact blob dfa4b108a4a4982e0b7f78357b7de835324edc5e. Its evidence remains true for the revisions it describes. The historical M6/TypeScript 7 section below is preserved byte-for-byte.
 
-## 1. Actual refs and completed fourth cloud attempt
+## 1. Current reviewed integration and completed fourth attempt
 
-- Main was merged by non-force fast-forward at 16:30:26 UTC: 37f63c39d4a07189938046c64152bba25d789450 to **ed5d00aca0743bde583b45fe7756dd494ac3960f**. The exact comparison was ahead 40 / behind 0 with main as merge base. Main's latest readback in this work was ed5d at 18:07 UTC. Do not repeat the completed merge.
-- Work branch: **psc0/strict-sh1-v1**.
-- Current executable source head: **05f37fc04e52bfaed70389291a0fcdeda819f71f**, parent d6b7044258efaa272dcf396ce08b0c10496edcd2, root tree 3ec74ea68131a309f9d3c0b621df057ae42aa643.
-- Exact Actions run: [37971952859](https://github.com/dwijayuda/pskernel/actions/runs/37971952859), compiler job 113960540944, workflow 378853677.
-- This run is now **completed: FAILURE**. Native development step 23 and selected-seed candidate step 24 PASSED. Fixed-point step 25 exhausted the JavaScript heap at 19:02:29 UTC and ended with exit 134 at 19:02:59 UTC. The compiler job finished at 19:03; provider job **113979513794 was skipped**. No C2 generation receipt appeared in the log, no C3/fixed-point result was obtained, and no provider success is claimed.
-- The docs-only checkpoint **818a1a5ea794694e6891d104307ffc74300722a2** is committed, parent 05f, root tree **217f97891a5fe51b275a9503f00f087e982ae008**. Its comparison is ahead 1 / behind 0, exactly eleven documentation files. A second evidence/inspection checkpoint may follow; discover the actual head. The PSC0 qualification workflow excludes docs and the separate inspection workflow path.
-- The branch is not merged to main and is not selected as an authoring seed.
-- New origin/evaluation/ingress/empty-data changes below remain **unattached source-reviewed candidates**, not executable code in 05f or the docs checkpoint. Do not attribute the fourth run's results to these newer candidates.
+- The practical checkpoint is already merged to main: **ed5d00aca0743bde583b45fe7756dd494ac3960f**, by non-force fast-forward from37f63c39 at16:30:26 UTC. Do not repeat that merge.
+- Continue **psc0/strict-sh1-v1**. This file accompanies the coherent implementation batch whose expected parent is **5becf0cf22a8deec760e0da68b706e95ca72f902** (root tree **f18dc610ab30bba8c6b2f6b879722853186f08f8**). Discover the actual new head and its Actions run; its self-referential commit SHA cannot be written into this file before publication.
+- Exact integration manifest: [strict-implementation-batch.json](docs/selfhost-language/strict/reviewed-candidates/strict-implementation-batch.json), blob **a2bade0cd7d0eb33590f9afa36a5cdeed40896b2**. It binds **29 source/fixture/workflow files**, each expected base and cumulative final blob. These files are integrated with this work state, after independent source review. They are no longer merely unattached proposals.
+- This batch includes origins, source-owned preparation/admission reuse, immutable host ingress, Nat and partial-application demand repairs, the corrected new-only PS fixture, empty inductive elimination, inhabited zero-field records, the final actual-file evidence binder, and bounded qualification memory/phase instrumentation.
+- No qualification result for this batch exists at this write. The commit requests **[sh1-qualify]**, causing one coherent native/N1/C1/C2/C3 workflow; the frozen provider runs only after compiler qualification. Do not attribute earlier run results to this new source.
+- The preceding executable source was **05f37fc04e52bfaed70389291a0fcdeda819f71f**. Its fourth run [37971952859](https://github.com/dwijayuda/pskernel/actions/runs/37971952859), compiler job **113960540944**, failed at fixed-point step25. Native development step23 and selected-R C1 step24 passed. V8 reported heap exhaustion at19:02:29 UTC and exit134 at19:02:59. Provider job **113979513794 was skipped**.
+- Docs checkpoints **818a1a5ea794694e6891d104307ffc74300722a2** and **5becf0cf22a8deec760e0da68b706e95ca72f902** preserved reviewed packets and evidence without altering the05f compiler. 818a had11 documentation files;5bec had8 documentation files plus the independent read-only inspection workflow.
+- Strict source is not merged to main and not selected as an authoring seed. **R remains selected; strictSh1Qualified and semanticContractQualified remain false.**
 
-The full completed log is authenticated: SHA-256 **ba246485c1297ee3631ffbf30547f6801ef665587eae9867b0646dee93f330ed**, 719267 characters. Artifact **11639377985** has 3182763 bytes, digest **2efaf91d57973103e53288140b2adeca3f13c53267138b228c25079d82dc287e**, and expires 2026-11-08. A read-only GitHub Actions inspection of that exact archive is being published in this evidence checkpoint: verify metadata/archive/C1 product hashes, inspect C2 file inventory and actual C1 preparation/encoder text, execute no compiler. The inspection workflow is `.github/workflows/psc0-evidence-inspect.yml`, reviewed source blob **ddab8f4985fdc7ee9661792c205678404a67296f**. It pins Node, artifact metadata, archive bytes and the C1 product; counts 241 non-directory files; reads compiler text without executing it; and emits one inspection JSON marker. Its exact push-triggered run is not yet observed at this write. This is data inspection, not another qualification run.
+### Authenticated failure inspection
 
-The failure occurred in the first C2 build of a fresh fixed-point Node process. Cross-generation compiler loads cannot explain this first failure. The existing buildGeneration log has no internal phase markers, so the precise allocation phase is unknown. The last GC retained 3680.6 MB in a roughly 4123.7 MB heap. Do not claim that the reviewed one-encoding/zero-reconstruction change already fixes the peak. Review source lifetimes and the actual generated code; any larger bounded heap policy must check actual runner memory and retain phase/resource evidence before the next coherent run.
+The completed fourth compiler log has SHA-256 **ba246485c1297ee3631ffbf30547f6801ef665587eae9867b0646dee93f330ed**,719267 characters. Artifact **11639377985**,3182763 bytes, digest **2efaf91d57973103e53288140b2adeca3f13c53267138b228c25079d82dc287e**, expires2026-11-08.
+
+The read-only inspection **PASSED**: [run37980548050](https://github.com/dwijayuda/pskernel/actions/runs/37980548050), job **113989649430**, workflow379962074, source5bec. It authenticated metadata/archive/C1 hashes, counted241 files and read8 complete C1 function excerpts. It executed no compiler or tests. Actual evidence blob **77c6e9ae9dbf0a2c6f47cb7b0d415437bf056f0e**, SHA-256 **8dd073faaf235c9c5bffed661d7335ec5a4bdc8dd4225d77ad3e1603aef2496c**, is retained at [retained-artifact-inspection.json](docs/selfhost-language/strict/attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/retained-artifact-inspection.json).
+
+Actual C1 JS:3109387 bytes, **ccdfb5f1c226dce25776b817a391a09c783a71e695ea30ca3702df198bd1d23b**. Its actual receipt:168198 bytes, SHA-256 **b1f907a79cc97e0b6ee440d8147f0b1bbdf2372a2268ad3cf26fe339064f2a3f**. **The archive contains no C2 files.** Under the unchanged complete dist/sh1 upload this places failure before the first TypeScript product write; it does not distinguish the internal synchronous compilation/translation/ABI phase.
+
+C2 was the first build in a fresh fixed-point Node process. Cross-generation module accumulation cannot explain this failure. Source audit confirms three complete admission encodings and one environment rebuild in the executed C1 route. The integrated source reduces these to one and zero. It still retains the original environment until erasure and adds origins; no lower peak is proved yet. Canonical encoding builds linked string lists, complete strings and suspended recursive continuations, with an optional normalized Core graph; it is not a generic PsJsonValue-tree encode. The UTF-8 cache holds two views, not unbounded source strings. No cache algorithm was changed.
+
+### Bounded resource policy for this run
+
+Reviewed resource manifest **5a71a7f7c6074aea8a4380d3d200756fa02c3878**, SHA-256 **3cf59fc94d2bca253828115ef2190b987c5a7022df66b665ea799bc17fc6ea60**, binds:
+
+| File | Final blob |
+| --- | --- |
+| scripts/sh1-resource-policy.mjs |7e3066c513a91a6e0717aac9465a879097c0dd82|
+| scripts/sh1-qualify.mjs |1945f97a202f2ebeb7ca9ac10f9482d07394c2d9|
+| .github/workflows/psc0-sh1.yml |cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8|
+
+Full qualification uses **8192 MiB old-space**, requires **12 GiB effectively available memory at process entry**, and verifies the observed V8 heap-limit band. It takes the minimum of physical MemAvailable, Node availability and each resolvable visible cgroup ancestor's remaining limit. Unsupported mappings, inherited heap overrides or quoted/backslash NODE_OPTIONS refuse with a saved policy receipt. A root with no memory counters is accepted only when cgroup.type and cgroup.events are also absent: both are kernel interfaces omitted only on the actual hierarchy root, avoiding namespace-root misclassification.
+
+The workflow checks this before expensive work and each candidate/fixed-point process checks before generated compiler loading. No dynamic fallback, global NODE_OPTIONS, source callback/FFI, timer, explicit GC or cache change is introduced. Native dev:sh1 stays on its existing native-candidate command. Full CLI entry points now require the explicit flag:
+
+```text
+node --max-old-space-size=8192 scripts/sh1-qualify.mjs candidate --seed <authenticated-R-index.js> --out dist/sh1 --native .lake/build/bin/psc1
+node --max-old-space-size=8192 scripts/sh1-qualify.mjs fixed-point --out dist/sh1
+```
+
+Each generated build synchronously appends scalar-only checkpoints to resource-usage.jsonl before/after loading, the atomic source wrapper, admission reuse, canonical translation, IR/ABI readback, emission reuse, TS child and writes. Generation receipts bind the actual trace hash. Policy files are resource-policy-preflight.json, resource-policy-candidate.json and resource-policy-fixed-point.json. The atomic wrapper includes ingress and post-emission host readback; its internal phase/transient heap peak remains opaque. Process maxRSS is retrospective RSS high-water, not V8 peak heap. The12 GiB entry check reserves no memory and guarantees no later peak; old-space is not an RSS limit.
 
 ## 2. Persistent user decisions and execution rules
 
@@ -49,7 +76,7 @@ The enabled runtime contract has six primitive types, Array, 45 operations and 1
 
 The 05f correction, exercised successfully by N1 and C1 finite conformance, widens six comparison templates to their already checked primitive TypeScript types: Nat equality/inequality, Int equality, Bool equality/inequality and String equality. It adds no runtime conversion or extra operand evaluation. Six raw Nat.beq declarations enter through both Lean and current PS; their TS and admissions must agree, then one shared tiny TS7 compile executes fixed expected Bool results.
 
-Exact current correction blobs:
+Exact 05f predecessor correction blobs (cumulative current overlays are in the integration manifest):
 
 | File | Blob |
 | --- | --- |
@@ -85,7 +112,7 @@ Fourth-attempt native source: **64 modules / 1178903 bytes / 149 imports / 1623 
 
 N1 and C1 each passed finite source2/33/2, target9/20, runtime45/186 plus8 bounds/9 operand/5 carrier/2 text families, and the6 raw-source equality cases. The C1 candidate also passed87 worker observations and12 public-signature checks. The complete strict semantic contract remains open.
 
-## 5. Next reviewed origin and preparation-reuse slice
+## 5. Integrated origin and preparation-reuse slice
 
 These changes are not in 05f. Exact committed bases must be checked before integration.
 
@@ -177,7 +204,7 @@ Diagnostic callback/accessor traces remain outside canonical immutable source va
 
 ## 8. Root evidence binder and general arguments
 
-Root binder candidate **6027955a326dd5cb0e1dba59ba76a8901dde5672**, SHA-256 b2ec7f6d52f8959a6a0d5a08b3fcf493985150f0ca4b0f1982e2362d72bdf681, is independently reviewed against current origin/ingress and the expanded 12/24/21 fixture. Its base is committed 8c8a781012871b1f0f748ed46921287efab8e046. It supersedes e4c39270 (old counts), 466f47ac (before ingress) and their earlier root drafts. The binder imports the PS source pin from the gate, so the corrected27d987 hash needs no binder literal change. Root interim empty-source binder **b1fcb553a724d59f346a266da78e5a2f9958bfba**, SHA-256 **0cd84a26f6309f1a32e19435b90d587918a250d07293e75a20df06760d8ae509**, adds five reversible edits to602: fixture pins,3-input ingress capture, actual2raw/2TS artifacts tied to atomic receipts and origins, typed empty-result/freshness records, and generation summaries. **Do not integrate b1 as final:** its9-source/12-Core totals precede the zero-field record addition. Final totals are11/16 and separate record/grammar/native/IR observations still need binding.
+Final integrated binder **bb02be336824c078f118be130128aa38c15615bf**, SHA-256 **24b1f1786a2b8c5b782c0d2553d026bb350981d411fa7fec316b2ef8736f019c**, has independent CLEAR review. Manifest **a1786b4e0ad9660ac3e904347749d294c4b71865** retains15 exact reversible edits from reviewed6027955a326dd5cb0e1dba59ba76a8901dde5672 and10 from interimb1fcb553a724d59f346a266da78e5a2f9958bfba. Its expected committed base was8c8a781012871b1f0f748ed46921287efab8e046. **Never restore602 or b1 over this final binder.** Source counts are11/16, ingress captures3 inputs, and separate source/grammar/native/IR empty/zero-field evidence is bound to actual receipts, artifact bytes and origins. Both frozen source-evaluation binder functions remain byte-identical, preserving the dynamic PS hash27d987 and12/24/21 fixture.
 
 The binder:
 
@@ -211,33 +238,35 @@ Empty data and zero-field structures are mandatory regular-data coverage. They a
 - Empty inductive/elimination: owned Lean accepts single-scrutinee `nomatch`; PS accepts `match e with {}`. Ordinary bare empty Lean match-with remains refused, preserving outer-branch boundaries. PrintLean emits nomatch. Consumed spans include where/grouping/closing braces correctly.
 - The IR checker accepts zero-constructor layouts and takes an existing checked expected type only for zero-branch matches; missing result evidence explicitly refuses. Nonempty synthesis, owner/type-arity/scrutinee/coverage checks remain unchanged.
 - Erasure wraps the known motive/major result in a fresh typed IR let. The backend emits `never`; empty elimination evaluates the scrutinee once in a `__ps$Computation<never>` generator before an unreachable throw.
-- Zero-field structure parsers and elaborator no longer reject an empty field list. A discovered bare-constructor gap also needs the reviewed Erasure constE lookup through runtimeStructureConstructors; it reuses the existing zero-argument structure application lowering to actual IR record[]. Previously the bare constructor reached unknownConstant. This is a source-derived defect, not an executed failed test.
+- Zero-field structure parsers and elaborator no longer reject an empty field list. The discovered bare-constructor gap is repaired by the integrated Erasure constE lookup through runtimeStructureConstructors; it reuses the existing zero-argument structure application lowering to actual IR record[]. Previously the bare constructor reached unknownConstant. This is a source-derived defect, not an executed failed test.
 - Core uninhabited manifest **5360abde1e14fe714a7d1105b28c5131f79d355d** is independently reviewed; the zero-field stacked core manifest **06ca2937bb073583b4a0f02cc12219253172228c** is independently reviewed. Final cumulative Erasure Expr is **6da268d23db1d2a709134f54dc8ae8a7f81367d3**, SHA-256 **3c05cf0890507d2fdf2706dd0576b7bf03ed2c2b97c8619115cfaa791227e20b**, extending3e112 through empty elimination and nullary record lookup. Retrieve final exact parser/declaration/backend blobs from these guarded manifests; preserve origin a388 and backend dfd581 cumulative bases.
 
-Final evidence packet **c822a05b23225b39c306c3ac4ba0898b25876e49** is frozen for independent review. Source gate **e987f2834e74c8acded0fa628e245ef823dcc17a** retains accepted2/refused33/carrier2 and exactly two preparations/checks. Each positive now has **3 modules /11 source declarations /16 Core declarations /1 import /0 normalizations**. The earlier13-Core guess was corrected directly from actual structure batches; do not reuse it. The uninhabited fixture alone remains5 source/6 Core, with4 typed empty eliminations. The existing library adds one zero-field structure/value (2 source/4 Core); it uses the existing emitted TS bundles and has separate zeroFieldRecords observations.
+Final evidence packet **c822a05b23225b39c306c3ac4ba0898b25876e49** has completed independent review and is integrated. Source gate **e987f2834e74c8acded0fa628e245ef823dcc17a** retains accepted2/refused33/carrier2 and exactly two preparations/checks. Each positive now has **3 modules /11 source declarations /16 Core declarations /1 import /0 normalizations**. The earlier13-Core guess was corrected directly from actual structure batches; do not reuse it. The uninhabited fixture alone remains5 source/6 Core, with4 typed empty eliminations. The existing library adds one zero-field structure/value (2 source/4 Core); it uses the existing emitted TS bundles and has separate zeroFieldRecords observations.
 
 The uninhabited raw files remain byte-identical: test/fixtures/selfhost-sh1-empty.lean blob **295b7dc991bf37e9de8e3d49b7db3692f0c4cf53**, SHA-256 **243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5**,345 bytes; .ps blob **cada46d9d1f10d95bcd6053fff6078262b600b6c**, SHA-256 **71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390**,369 bytes. Source receipts bind written empty.lean/empty.ps and accepted-lean.ts/accepted-ps.ts to actual atomic input/output hashes.
 
-Final grammar coverage retains5 empty syntax pairs/6 refusals and adds1 zero-field pair/2 refusals, all parse/print only. The original-IR gate extends its existing one TS7 compilation to33 positive declarations/4 inductives/3 structures,38 rejections and61 behavior observations; separate empty evidence records2 layouts/5 eliminations and5 actual d.ts ABI signatures, with one callback that throws before producing any empty inhabitant. Native checker coverage becomes15 cases in its existing process, retaining the exact five-declaration Lean fixture and separate nullary-record coverage. These counts are candidate contracts awaiting actual execution; root must finish evidence binding and peer review before a coherent run. No additional full/source preparation, TS7 invocation or native checker process is required by this coverage.
+Final grammar coverage retains5 empty syntax pairs/6 refusals and adds1 zero-field pair/2 refusals, all parse/print only. The original-IR gate extends its existing one TS7 compilation to33 positive declarations/4 inductives/3 structures,38 rejections and61 behavior observations; separate empty evidence records2 layouts/5 eliminations and5 actual d.ts ABI signatures, with one callback that throws before producing any empty inhabitant. Native checker coverage becomes15 cases in its existing process, retaining the exact five-declaration Lean fixture and separate nullary-record coverage. These counts are integrated assertion contracts awaiting actual execution; final evidence binding and independent review are complete. No additional full/source preparation, TS7 invocation or native checker process is required by this coverage.
 ## 10. Immediate continuation order
 
-1. Preserve completed fourth-attempt evidence and inspect its exact retained artifact in the read-only cloud job. Locate actual generated preparation/encoding control flow and C2 output presence; do not rerun the failed compiler workflow speculatively.
-2. Finish the resource/lifetime audit. Integrate proven preparation reuse and, if justified, an explicit bounded runner-memory/heap policy with phase diagnostics. Do not weaken language/typing/runtime gates or claim an unexecuted memory improvement.
-3. Preserve corrected packet64717, runtime-law packeta91a and binder602. Finish binding/review of empty/zero-field evidence c822a, updating interim b1 to11-source/16-Core and preserving the frozen12/24/21 runtime fixture.
-4. Integrate only exact reviewed blobs on the fresh strict-branch head after the resource response and evidence dependencies are ready. Update correspondence/obligations/proposal/plan and this work state with honest scope.
-5. Run the coherent native preflight and exact-source C2/C3/provider qualification once its dependencies are ready.
-6. Merge only the actually qualified implementation scope under a fresh comparison/lease. R and source authority remain unchanged; strict flags remain false until the complete mandatory contract is discharged.
-7. Continue mandatory semantic/empty-data work before optional language expansion or bulk refactoring.
+1. Discover the exact current strict-branch head and [sh1-qualify] run. This work state and29-file manifest were committed with the implementation; do not rebuild the same candidate or repeat the completed read-only inspection.
+2. Observe the early memory-policy receipt, then native build/development and R-to-C1. Native/current-source fixture observations must match the new exact counts and hashes. Do not borrow05f success.
+3. Observe C2/C3, actual native/C2/C3 origin correspondence, all four fixed-point products, runtime/grammar/IR gates and the final actual-file binder. Use resource phase records to identify any failure boundary before another edit/run.
+4. Preserve the separately pinned provider's actual result. If compiler qualification fails, provider skip is neither acceptance nor rejection.
+5. Save completed logs, exact receipts and scoped findings in this work state and ledgers. No speculative rerun or broad refactor; investigate any concrete failure by class.
+6. Continue the shared type-indexed value/environment/call/error relation and the reachable erasure-scope invariant. A complete static source argument over actual metadata can establish a rule; a new serialized Core-to-IR certificate is not itself a SPEC MUST. Do not close rows with unproved premises, circular arguments, typing or finite tests.
+7. Complete N/ER/EV/TS general arguments and reconcile all mandatory coverage before strict activation. Do not merge unqualified strict source or change selectedR/source authority. Optional language expansion, bulk refactoring and seed promotion remain deferred.
 
 ## 11. Agent and tool handoff
 
-Last active owners: root for integration/evidence/docs/refs and the read-only artifact-inspection workflow; empty_evidence_finish for the final empty/zero-field gate review and final binder (11 source / 16 Core plus record/grammar/native/IR evidence); runtime_comparison_finish for the urgent resource/lifetime audit; artifact_inspection_review completed the independent inspection workflow review. The previous origin implementation and grammar peer reviews are retained in their immutable packets. Origin/ingress and corrected partial/shared-runtime packets are frozen. Agent sessions may disappear; recover work by immutable blobs/manifests above and reassign by scope.
+Root owns all integration/evidence/docs/refs and the exact cloud-run follow-through. empty_evidence_finish completed the final binder and is now drafting the shared semantics/reachable-scope foundation against the final source. runtime_comparison_finish completed the resource/lifetime packet and provides a narrow domain/call sanity review. artifact_inspection_review completed independent archive-workflow, empty-evidence-binder and resource-policy reviews. Recover work by immutable blobs/manifests; agent sessions may disappear.
 
-In-memory stores expire after roughly twenty minutes. Never rely on an old store name. Costly completed drafts are immutable Git blobs. GitHub fetch_blob/fetch_file return content under structuredContent; inspect isError before storing. Batch a few independent reads with Promise.allSettled and inspect every result. Keep writes/leases sequential.
+The shared-semantics work is documentation/source argument only so far, not production code, a closed row or a claimed theorem. Concrete premises found during its inventory: executable scopes differ from type-only scopes; output-only fresh names are not Core fvars; simultaneous type substitution has a fuel-zero unchanged fallback that needs a depth/coverage argument; missing-argument capture, result-group eta flattening and backend eta-to-let are distinct obligations. None alone is a demonstrated accepted-source defect. Do not start a test/fix loop from a conditional proof premise.
 
-Do not fetch REST /actions/jobs/:id through generic github_fetch; the connector rejects that endpoint. Use fetch_workflow_run_jobs and fetch_workflow_job_logs. Running logs may be unavailable until completion. The repository actions/runs collection and individual run URL are supported.
+In-memory stores expire after roughly twenty minutes. Never rely on an old store name. Costly completed drafts are immutable Git blobs. GitHub fetch_blob/fetch_file return content under structuredContent; inspect isError. Batch a few independent reads with Promise.allSettled and inspect every result. Keep writes/leases sequential.
 
-Pure SHA-256 review helper blob fe3478ead5638f8647e67a5ef2a2f2de4e2eb896 contains a standalone function before the marker "// Pure data review only:". This is a data hashing helper, not permission to execute compiler code locally.
+Use fetch_workflow_run_jobs and fetch_workflow_job_logs with repo_full_name. Generic REST /actions/jobs/:id is unsupported; repository actions/runs collection and individual run URLs work. Running logs may be unavailable until completion.
+
+Pure SHA-256 review helper blob fe3478ead5638f8647e67a5ef2a2f2de4e2eb896 contains a standalone function before "// Pure data review only:". It authorizes only data hashing, not local compiler execution.
 
 ## 12. Qualified baseline and protected identities
 

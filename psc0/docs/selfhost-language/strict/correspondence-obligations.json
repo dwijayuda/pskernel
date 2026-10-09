@@ -121,7 +121,7 @@
       "A new total-array authoring library; existing enabled Array intrinsic obligations are included, not excluded."
     ],
     "mandatoryCoverageNotWaived": [
-      "The currently refused empty runtime data/match forms need explicit reconciliation with the full required regular-data contract.",
+      "Empty inductives, single-scrutinee empty elimination and inhabited zero-field structures are now implemented in the reviewed batch with source/grammar/native/IR evidence gates; exact execution and general regular-data preservation remain required.",
       "Source origins and the source/Core/IR transformation relation remain required despite finite closure qualification.",
       "Exact demand/evaluation, layout, capture and error correspondence remain open where listed."
     ]
@@ -147,8 +147,9 @@
       "Host allocation is conditional on success as recorded in the runtime contract.",
       "Arbitrary mutated/cyclic/foreign JavaScript values and callbacks are not silently included."
     ],
-    "traceLimitation": "parsedModules and prepared retain real artifacts but do not constitute a declaration-by-declaration normalization/erasure witness. Current Core and original IR have no source-origin field.",
-    "relatedRowsAreNotAnExecutionDag": "Call, closure and machine rows require a mutually consistent simulation relation; relatedObligations are cross-references. The practical implementation/evidence sequence below is dependency-ordered."
+    "traceLimitation": "The current source-owned path retains actual source/module ordinals, Core batch identities and roles, successful normalization plan metadata, parsed syntax, final environment and admissions. Actual erasure scopes contain runtime/type/erased-local and layout maps. These structures support provenance and a source-pinned semantic argument; they do not automatically prove complete binder/expression preservation.",
+    "relatedRowsAreNotAnExecutionDag": "Call, closure and machine rows require a mutually consistent simulation relation; relatedObligations are cross-references. The practical implementation/evidence sequence below is dependency-ordered.",
+    "assuranceStrategyClarification": "SPEC requires truthful origins and the complete enabled semantic contract, not a particular serialized Core-to-IR certificate format. A complete general source argument over actual reachable erasure metadata can discharge a rule; a checked per-compilation witness is another possible method and needs its own correctness argument. Finite tests, unproved invariants and circular conditional lemmas cannot discharge a rule."
   },
   "implementationOrder": [
     {
@@ -191,10 +192,10 @@
     {
       "phase": 4,
       "id": "retain-transformation-witness",
-      "work": "Design source-origin and resolved-binder/layout associations from existing normalization/erasure metadata, then check actual mappings per compilation. Do not fabricate them from output names.",
+      "work": "Retain truthful source-to-normalized-Core origins from the actual successful normalization path. Establish actual resolved-binder/layout associations by a complete reachable-scope source argument or a checked per-compilation witness; do not infer identity from printed output names.",
       "outputs": [
-        "versioned original-to-worker/public origin witness",
-        "prepared-to-runtime binding and layout witness"
+        "versioned original-to-worker/public origin observations",
+        "explicit reachable binder/layout invariant or checked association witness"
       ],
       "proofLimit": "A witness checker also needs an argument for the property it validates."
     },
@@ -344,7 +345,7 @@
       "sources": [
         {
           "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
-          "blob": "13614bc6eb279c93d4cbcbd8815b671beae38199",
+          "blob": "f31d88f0172122d4cf62d62f35f372fe89581c18",
           "definitions": [
             "psCompilerPreparationStepParsed",
             "psCompilerPreparationElaborated",
@@ -374,7 +375,7 @@
         ],
         "notEstablished": [
           "A source-owned pipeline proves object provenance, not the correctness of each source-to-Core or Core-to-IR association.",
-          "The present Core/IR data does not retain a complete source-origin or transformation witness.",
+          "Retained source-to-Core origin batches identify the actual generated members. They do not, alone, prove the expression-level Core-to-IR transformation.",
           "A semantic environment/prelude relation and a general declaration-erasure argument remain required."
         ]
       },
@@ -408,7 +409,7 @@
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -465,7 +466,7 @@
         },
         {
           "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
-          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
           "definitions": [
             "psEraseApplicationArgumentsWorker",
             "psEraseRuntimeExprWithFuelWorker"
@@ -510,7 +511,7 @@
       "sources": [
         {
           "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
-          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
           "definitions": [
             "psEraseApplicationArgumentsWorker",
             "psEraseFinishApplicationWithFuelWorker",
@@ -531,7 +532,7 @@
         "Eta completion introduces only the runtime binders supported by the current erasure rule."
       ],
       "requiredRelation": "The erased callee, argument groups and returned closures have the same application meaning and demand order as the supported prepared application.",
-      "ruleArgument": "Application erasure advances through the telescope, collecting runtime and type arguments with reverse accumulators whose final reversal restores order. Completion eta-expands missing runtime arguments and rejects unsupported type gaps. Function-result handling retains an explicit lambda or function result instead of relying on JavaScript underapplication.",
+      "ruleArgument": "Application erasure advances through the telescope, collecting runtime and type arguments with reverse accumulators whose final reversal restores order. Completion eta-expands missing runtime arguments and rejects unsupported type gaps. Function-result handling retains an explicit lambda or function result instead of relying on JavaScript underapplication. The reviewed completion path evaluates a computed callee and already supplied computed runtime operands in ordered typed lets outside the completion lambda. Variables/literals remain values; computed monomorphic callee types are rebuilt from runtime-only domains so erased proof/type binders do not leak into IR annotations.",
       "perCompilation": {
         "availableOrCandidate": [
           "IR typing checks exact runtime groups, generic arity, argument/result types and simultaneous substitution.",
@@ -549,7 +550,13 @@
         "ER-02",
         "ER-03",
         "ER-09"
-      ]
+      ],
+      "implementationReview": {
+        "manifest": "reviewed-candidates/source-evaluation.json",
+        "sourceOrder": "callee then supplied runtime operands, once, before closure return",
+        "execution": "pending for this source",
+        "generalRelation": "open"
+      }
     },
     {
       "id": "ER-05",
@@ -570,7 +577,7 @@
         },
         {
           "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
-          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
           "definitions": [
             "psEraseRuntimeStructureFields",
             "psEraseRuntimeStructureApplication",
@@ -627,7 +634,7 @@
         },
         {
           "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
-          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
           "definitions": [
             "psEraseRuntimeConstructorFields",
             "psEraseRuntimeConstructorApplication"
@@ -672,7 +679,7 @@
       "sources": [
         {
           "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
-          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
           "definitions": [
             "psOpenMatchMinorHypotheses",
             "psEraseMatchMinor",
@@ -688,16 +695,16 @@
         "Source purity alone is not treated as a proof of identical evaluation frequency, faults or resource behavior."
       ],
       "requiredRelation": "The erased case dispatch and reconstructed recursive calls preserve the recursor's value, capture, demand and error semantics.",
-      "ruleArgument": "Regular cases open constructor fields and reconstruct recursive calls using the current definition's parameter metadata, replacing the structural argument with the selected child. Nat lowers into an equality test against zero and a predecessor step. In the current Nat rule, a nonvariable scrutinee expression appears in both the equality test and predecessor subtraction.",
+      "ruleArgument": "Regular cases open constructor fields and reconstruct recursive calls using the current definition's parameter metadata, replacing the structural argument with the selected child. The reviewed Nat rule evaluates a computed major once into a fresh typed IR let; zero testing and predecessor formation read that same value. Existing variables/literals already are values and retain their route. Empty recursors retain the known motive result in a fresh typed let around the zero-branch IR match.",
       "perCompilation": {
         "availableOrCandidate": [
           "IR typing validates the reconstructed call scheme, runtime arguments, cases and result.",
           "A future lowering witness can record the source major, branch fields and reconstructed argument positions without changing kernel/provider logic."
         ],
         "notEstablished": [
-          "Exact once-only Nat major demand is a concrete open obligation: the successor route can evaluate a nonvariable major twice.",
-          "Value agreement under a separately justified total pure semantics would not by itself close demand/error/resource correspondence.",
-          "Do not repair this by weakening the contract or inferring preservation from the compiler fixed point; a separate lowering design and evidence are required."
+          "The concrete repeated-major lowering is repaired in reviewed source; the frozen 12-declaration source-evaluation fixture and empty-data gates still need exact execution.",
+          "A complete recursive-hypothesis/substitution relation and the freshness/capture argument for every accepted recursor path remain required.",
+          "Demand/error correspondence must be established under the declared value and successful-resource domains; compiler equality and finite examples do not discharge the general rule."
         ]
       },
       "generalPreservationProven": false,
@@ -775,7 +782,7 @@
         },
         {
           "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
-          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
           "definitions": [
             "psOpenMatchMinorFields",
             "psEraseRuntimeExprWithFuelWorker"
@@ -827,7 +834,7 @@
       "sources": [
         {
           "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
-          "blob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+          "blob": "c403bd879e439b7b6e88303df430890352a14115",
           "definitions": [
             "psElabRecursionLocalId",
             "psElabRecursionIsSelf",
@@ -837,7 +844,7 @@
         },
         {
           "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
-          "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+          "blob": "ff632f3a40b069bfead799b408af009ec9931261",
           "definitions": [
             "psElabNormalizedDefinition"
           ]
@@ -858,16 +865,16 @@
         "Exact full-name priority and the established first-segment projection priority are preserved; field typing failure does not trigger alternate lookup."
       ],
       "requiredRelation": "Normalization renames exactly the intended resolved binders and retains truthful origin information for every generated declaration and diagnostic.",
-      "ruleArgument": "The rewrite tracks bound names and resolved local identifiers rather than substituting arbitrary matching strings. The qualified projection repair extends only the documented local-prefix resolution boundary. Original syntax retains spans, but preparation does not currently expose a complete original-declaration-to-generated-Core witness.",
+      "ruleArgument": "The rewrite tracks bound names and resolved local identifiers rather than substituting arbitrary matching strings. The qualified projection repair extends only the documented local-prefix resolution boundary. The current origin path retains actual source ordinals, names/spans, Core batch identities/roles, and the successful normalization plan used for the emitted worker/public batch.",
       "perCompilation": {
         "availableOrCandidate": [
-          "Source admission retains actual parsedModules with spans and actual prepared output separately.",
-          "Existing projection/name fixtures and qualified compiler replay are finite regression evidence."
+          "Actual source-owned origins are produced by the same preparation as the emitted Core and serialized identically by native and generated observers.",
+          "The fixed-point binder compares actual native/C2/C3 origin observations and the capability fixture's 35 source / 55 Core / 16 plan observations.",
+          "These are pending execution on the reviewed batch; baseline projection/name replay remains finite historical evidence."
         ],
         "notEstablished": [
-          "Parsed AST plus prepared declarations are not themselves a transformation mapping.",
-          "SPEC's normalization-origin obligation remains open until the mapping is retained and checked or otherwise fully justified.",
-          "General alpha/binding preservation is not established by exact compiler output equality."
+          "Origin metadata does not independently prove alpha conversion, binding or normalization semantics.",
+          "General alpha/binding preservation and truthful error association for every accepted normalization path remain required."
         ]
       },
       "generalPreservationProven": false,
@@ -887,7 +894,7 @@
       "sources": [
         {
           "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
-          "blob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+          "blob": "c403bd879e439b7b6e88303df430890352a14115",
           "definitions": [
             "psElabRecursionChangedArguments",
             "psElabRecursionStateIsRuntime",
@@ -897,7 +904,7 @@
         },
         {
           "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
-          "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+          "blob": "ff632f3a40b069bfead799b408af009ec9931261",
           "definitions": [
             "psElabDeclarationBatch"
           ]
@@ -940,7 +947,7 @@
       "sources": [
         {
           "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
-          "blob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+          "blob": "c403bd879e439b7b6e88303df430890352a14115",
           "definitions": [
             "psElabRecursionRewriteCall",
             "psElabRecursionSelectedValues",
@@ -989,14 +996,14 @@
       "sources": [
         {
           "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
-          "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+          "blob": "ff632f3a40b069bfead799b408af009ec9931261",
           "definitions": [
             "psElabNormalizedDefinition"
           ]
         },
         {
           "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
-          "blob": "bba4a42a13c29ed5b41761e883e8da0b81a34192",
+          "blob": "c403bd879e439b7b6e88303df430890352a14115",
           "definitions": [
             "psElabRecursionSelectedBinders",
             "psElabRecursionBuildNormalization"
@@ -1045,7 +1052,7 @@
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1083,14 +1090,14 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1129,21 +1136,21 @@
       "sources": [
         {
           "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
-          "blob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+          "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
           "definitions": [
             "psErasePrimitiveApplication"
           ]
         },
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitIntrinsicFromPrinted"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1157,7 +1164,8 @@
         "availableOrCandidate": [
           "Same-IR intrinsic signature checks are available.",
           "The companion native/JS conformance candidate records 186 observations across the finite operation matrix.",
-          "New arrayGet/set guards explicitly refuse invalid bounds while evaluating operands once in array/index/value order."
+          "New arrayGet/set guards explicitly refuse invalid bounds while evaluating operands once in array/index/value order.",
+          "The reviewed stringAtEnd and arrayEmptyWithCapacity templates preserve operand demand/order. The 45-operation runtime-law review and frozen source-evaluation fixture are recorded without a whole-row proof claim."
         ],
         "notEstablished": [
           "General operation preservation still depends on the complete runtime-contract arguments and explicit domains.",
@@ -1183,14 +1191,14 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1228,14 +1236,14 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1274,7 +1282,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitLetStatements",
             "psTsExprUsesNameWithFuel",
@@ -1283,7 +1291,7 @@
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1323,14 +1331,14 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1367,20 +1375,21 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
       "domain": [
         "The structure, type instantiation and complete fields are checked.",
-        "Runtime structures are immutable by the portable contract; arbitrary host mutation is outside the relation."
+        "Runtime structures are immutable by the portable contract; arbitrary host mutation is outside the relation.",
+        "Zero-field structures remain inhabited records with one nullary constructor and an empty runtime field list; the private brand is retained."
       ],
       "requiredRelation": "Construction produces one related record with each field expression evaluated once in the IR field order.",
       "ruleArgument": "The emitter builds one object containing the private brand symbol and the actual ordered field entries. The brand carries no source field value. Source-to-IR record argument ordering remains a separate erasure obligation.",
@@ -1413,14 +1422,14 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1457,14 +1466,14 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
@@ -1503,27 +1512,28 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
         },
         {
           "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
-          "blob": "94b80cd7fe617e62c9a95446ff019e088d57b0b3",
+          "blob": "ac527384033181014417579e39f93a1595d4cf72",
           "definitions": []
         }
       ],
       "domain": [
         "The scrutinee type and complete nonduplicate constructor coverage are checked.",
-        "Each branch field/name/type binding is valid; empty runtime matches are explicitly refused."
+        "Each branch field/name/type binding is valid. Zero-constructor matches require a checked expected result type; a missing empty-match result type explicitly refuses."
       ],
       "requiredRelation": "The scrutinee is evaluated once, exactly the matching constructor branch is selected, and branch variables denote the corresponding fields.",
-      "ruleArgument": "The general backend stores the scrutinee in a fresh local, switches on the private tag and creates branch-local field bindings. An impossible tag throws the explicit existing Error path. This once-bound IR match does not repair the separate duplicated Nat-major erasure rule.",
+      "ruleArgument": "For nonempty layouts the backend stores the scrutinee in a fresh local, switches on the private tag and creates branch-local field bindings. An impossible tag throws the existing explicit Error path. For empty layouts it emits a never-typed generator that evaluates the scrutinee once before an unreachable throw, without reading a tag or inventing an inhabitant. Computed Nat major once-only evaluation is established by the separate reviewed erasure let.",
       "perCompilation": {
         "availableOrCandidate": [
           "IR typing checks coverage, owner, binding types and branch result compatibility.",
-          "Target admission reserves actual generated match temporaries and checks all branch local/property names."
+          "Target admission reserves actual generated match temporaries and checks all branch local/property names.",
+          "Empty source and original-IR gates bind actual typed result/freshness metadata, both empty layouts and five emitted declaration signatures; the diagnostic callback throws before producing an empty value."
         ],
         "notEstablished": [
           "The tag/field relation, fresh-name soundness and branch substitution require a general argument.",
@@ -1554,7 +1564,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
-          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
           "definitions": [
             "psTsFreshInternalWorker",
             "psTsBuildBrandMap",
@@ -1564,7 +1574,7 @@
         },
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsFreshMatchTempWorker",
             "psTsExprUsesNameWithFuel"
@@ -1610,7 +1620,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
-          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
           "definitions": [
             "psTsEmitStructure",
             "psTsEmitConstructorVariant",
@@ -1620,7 +1630,7 @@
         },
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
@@ -1672,7 +1682,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitIntrinsicFromPrinted",
             "psTsEmitLetStatements",
@@ -1715,7 +1725,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
-          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
           "definitions": [
             "psTsStackRuntimeSupport",
             "psTsEmitDeclarationGeneral"
@@ -1723,7 +1733,7 @@
         },
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
-          "blob": "3658a56ec4d9b3f454affd623a3ee81134206c2e",
+          "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
           "definitions": [
             "psTsEmitExprWithFuel"
           ]
@@ -1767,7 +1777,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
-          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
           "definitions": [
             "psTsEtaArgumentsFresh",
             "psTsEtaBind",
@@ -1812,7 +1822,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
-          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
           "definitions": [
             "psTsCountLiteral",
             "psTsCountRecursiveArgument",
@@ -1859,7 +1869,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
-          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
           "definitions": [
             "psTsTailPureWithFuel",
             "psTsTailAliasValue",
@@ -1910,7 +1920,7 @@
       "sources": [
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
-          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
           "definitions": [
             "psTsEmitDeclarationGeneral",
             "psTsEmitModule"
@@ -1925,7 +1935,7 @@
         },
         {
           "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
-          "blob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+          "blob": "ff632f3a40b069bfead799b408af009ec9931261",
           "definitions": [
             "psElabNormalizedDefinition"
           ]
@@ -1976,7 +1986,7 @@
         },
         {
           "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
-          "blob": "fa6491f4861ddc59caba51c03a29790fc6e8653b",
+          "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
           "definitions": [
             "psTsEmitModule"
           ]
@@ -2005,5 +2015,13 @@
       "assuranceStatus": "open-preservation-with-explicit-local-obligations",
       "relatedObligations": []
     }
-  ]
+  ],
+  "reviewedImplementation": {
+    "expectedParent": "5becf0cf22a8deec760e0da68b706e95ca72f902",
+    "manifest": "reviewed-candidates/strict-implementation-batch.json",
+    "status": "source-reviewed-integration-awaiting-exact-cloud-qualification",
+    "retainedFailedAttempt": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+    "completedInspectionRunId": 37980548050,
+    "implementationIsNotGeneralPreservationProof": true
+  }
 }

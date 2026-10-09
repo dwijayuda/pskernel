@@ -70,6 +70,8 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
     true
   else if psStringEq token.text "match" then
     true
+  else if psStringEq token.text "nomatch" then
+    true
   else
     psStringEq token.text "with"
 
@@ -1340,6 +1342,29 @@ def psParseLeanRecordApplicationTailWithFuel
             cursor := cursor
           }
 
+-- The Lean grouping parser preserves inner semantic spans. A nomatch span
+-- additionally covers its actually consumed tokens, including grouped scrutinees.
+-- The input is the finite token list already constructed by the owned lexer.
+def psLeanNomatchConsumedStop
+    (tokens : List PsToken) :
+    Option PsToken -> PsSourcePos -> PsSourcePos :=
+  match tokens with
+  | List.nil =>
+      fun (_next : Option PsToken) (latest : PsSourcePos) => latest
+  | List.cons token rest =>
+      let smaller : Option PsToken -> PsSourcePos -> PsSourcePos :=
+        psLeanNomatchConsumedStop rest;
+      fun (next : Option PsToken) (latest : PsSourcePos) =>
+        let finished : Bool :=
+          if psTokenKindEq token.kind PsTokenKind.endOfInput then true
+          else
+            match next with
+            | Option.none => false
+            | Option.some unconsumed =>
+                Nat.ble unconsumed.span.start.byteOffset token.span.start.byteOffset;
+        if finished then latest
+        else smaller next token.span.stop
+
 def psParseLeanTermWithFuel
     (fuel : Nat) :
     PsTokenCursor ->
@@ -1363,6 +1388,24 @@ def psParseLeanTermWithFuel
               remaining
               keyword.token.span.start
               keyword.cursor
+      else if psTokenCursorAtText cursor "nomatch" then
+        match psTokenCursorAdvance cursor with
+        | Option.none => Except.error (PsParseError.unexpectedEnd "nomatch scrutinee")
+        | Option.some keyword =>
+            match smaller keyword.cursor with
+            | Except.error error => Except.error error
+            | Except.ok scrutinee =>
+                let stop : PsSourcePos :=
+                  psLeanNomatchConsumedStop keyword.cursor.remaining
+                    (psTokenCursorPeek scrutinee.cursor) keyword.token.span.stop;
+                Except.ok {
+                  value :=
+                    PsSyntaxTerm.matchE scrutinee.value List.nil {
+                      start := keyword.token.span.start
+                      stop := stop
+                    }
+                  cursor := scrutinee.cursor
+                }
       else if psTokenCursorAtText cursor "match" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "match scrutinee")
@@ -1900,34 +1943,24 @@ def psParseLeanStructureDeclaration
                         [] with
                   | Except.error error => Except.error error
                   | Except.ok fields =>
-                      match psParseListReverse fields.value with
-                      | [] =>
-                          match psTokenCursorPeek fields.cursor with
-                          | Option.none =>
-                              Except.error
-                                (PsParseError.unexpectedEnd
-                                  "structure field")
-                          | Option.some token =>
-                              Except.error
-                                (PsParseError.expectedText
-                                  "structure field"
-                                  token.text
-                                  token.span)
-                      | List.cons lastField _ =>
-                          match lastField with
-                          | Prod.mk lastHead _ =>
-                              Except.ok {
-                                value :=
-                                  PsSyntaxDeclaration.structureDecl
-                                    name.value
-                                    params.value
-                                    fields.value
-                                    {
-                                      start := keyword.token.span.start
-                                      stop := lastHead.span.stop
-                                    }
-                                cursor := fields.cursor
-                              }
+                      let stop : PsSourcePos :=
+                        match psParseListReverse fields.value with
+                        | List.nil => afterWhere.token.span.stop
+                        | List.cons lastField _ =>
+                            match lastField with
+                            | Prod.mk lastHead _ => lastHead.span.stop;
+                      Except.ok {
+                        value :=
+                          PsSyntaxDeclaration.structureDecl
+                            name.value
+                            params.value
+                            fields.value
+                            {
+                              start := keyword.token.span.start
+                              stop := stop
+                            }
+                        cursor := fields.cursor
+                      }
 
 def psParseLeanInductiveDeclaration
     (cursor : PsTokenCursor) :
@@ -1961,38 +1994,23 @@ def psParseLeanInductiveDeclaration
                         [] with
                     | Except.error error => Except.error error
                     | Except.ok constructors =>
-                        match constructors.value with
-                        | [] =>
-                            match psTokenCursorPeek constructors.cursor with
-                            | Option.none =>
-                                Except.error
-                                  (PsParseError.unexpectedEnd
-                                    "inductive constructor")
-                            | Option.some token =>
-                                Except.error
-                                  (PsParseError.expectedText
-                                    "|"
-                                    token.text
-                                    token.span)
-                        | _ =>
-                            let stop : PsSourcePos :=
-                              match psParseListReverse constructors.value with
-                              | [] => name.value.span.stop
-                              | List.cons constructor _ =>
-                                  constructor.span.stop;
-                            Except.ok {
-                              value :=
-                                PsSyntaxDeclaration.inductiveDecl
-                                  name.value
-                                  params.value
-                                  resultType
-                                  constructors.value
-                                  {
-                                    start := keyword.token.span.start
-                                    stop := stop
-                                  }
-                              cursor := constructors.cursor
-                            };
+                        let stop : PsSourcePos :=
+                          match psParseListReverse constructors.value with
+                          | List.nil => afterWhere.token.span.stop
+                          | List.cons constructor _ => constructor.span.stop;
+                        Except.ok {
+                          value :=
+                            PsSyntaxDeclaration.inductiveDecl
+                              name.value
+                              params.value
+                              resultType
+                              constructors.value
+                              {
+                                start := keyword.token.span.start
+                                stop := stop
+                              }
+                          cursor := constructors.cursor
+                        };
               if psTokenCursorAtText params.cursor ":" then
                 match psTokenCursorAdvance params.cursor with
                 | Option.none =>

@@ -38,6 +38,67 @@ def psIrNativeGroupedCall : PsVerifiedIrModule :=
       [] [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1),
           PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 2)])
 
+-- The exact five-declaration uninhabited source fixture is also checked by native
+-- Lean in this existing executable. No test constructs or supplies an Empty value.
+inductive Sh1Empty (alpha : Type) where
+def sh1EmptyNat (value : Sh1Empty Nat) : Nat := nomatch value
+def sh1EmptyFunction (value : Sh1Empty Nat) : Nat -> Nat := nomatch value
+def sh1EmptyGeneric (alpha : Type) (value : Sh1Empty alpha) : alpha := nomatch value
+def sh1EmptyFresh (value : Sh1Empty Nat) (emptyResult : Nat) : Nat := nomatch value
+
+-- A zero-field structure is inhabited; keep this separate from empty elimination.
+structure Sh1EmptyRecord where
+def sh1EmptyRecordValue : Sh1EmptyRecord := {}
+
+def psIrNativeZeroFieldValue : Bool :=
+  match sh1EmptyRecordValue with
+  | Sh1EmptyRecord.mk => true
+
+def psIrNativeEmptyType : PsVerifiedIrType :=
+  PsVerifiedIrType.named "NativeEmpty" []
+
+def psIrNativeEmptyLayout : PsVerifiedIrInductive :=
+  PsVerifiedIrInductive.mk "NativeEmpty" [] []
+
+def psIrNativeEmptyBoxLayout : PsVerifiedIrInductive :=
+  PsVerifiedIrInductive.mk "NativeEmptyBox" [PsVerifiedIrTypeParameter.mk "T0"] []
+
+def psIrNativeEmptyMatch : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.matchE "NativeEmpty" [] (PsVerifiedIrExpr.var "empty") []
+
+def psIrNativeEmptyCase (body : PsVerifiedIrExpr) : PsVerifiedIrModule :=
+  PsVerifiedIrModule.mk [] [] [psIrNativeEmptyLayout, psIrNativeEmptyBoxLayout]
+    [PsVerifiedIrDeclaration.mk "nativeEmptyCase" []
+      [PsVerifiedIrParameter.mk "empty" psIrNativeEmptyType] psIrNativeNat body]
+
+def psIrNativeEmptyPositive : PsVerifiedIrModule :=
+  let typeParameter := PsVerifiedIrType.typeParameter "T0"
+  PsVerifiedIrModule.mk [] [PsVerifiedIrStructure.mk "NativeRecordUnit" [] []]
+    [psIrNativeEmptyLayout, psIrNativeEmptyBoxLayout]
+    [PsVerifiedIrDeclaration.mk "nativeEmptyNat" []
+       [PsVerifiedIrParameter.mk "empty" psIrNativeEmptyType] psIrNativeNat psIrNativeEmptyMatch,
+     PsVerifiedIrDeclaration.mk "nativeEmptyFunction" []
+       [PsVerifiedIrParameter.mk "empty" psIrNativeEmptyType] psIrNativeNatFunction psIrNativeEmptyMatch,
+     PsVerifiedIrDeclaration.mk "nativeEmptyGeneric" [PsVerifiedIrTypeParameter.mk "T0"]
+       [PsVerifiedIrParameter.mk "empty" (PsVerifiedIrType.named "NativeEmptyBox" [typeParameter])]
+       typeParameter (PsVerifiedIrExpr.matchE "NativeEmptyBox" [typeParameter] (PsVerifiedIrExpr.var "empty") []),
+     PsVerifiedIrDeclaration.mk "nativeEmptyTypedCall" []
+       [PsVerifiedIrParameter.mk "empty" psIrNativeEmptyType] psIrNativeNat
+       (PsVerifiedIrExpr.call
+         (PsVerifiedIrExpr.letE "emptyResult" psIrNativeNatFunction
+           psIrNativeEmptyMatch (PsVerifiedIrExpr.var "emptyResult"))
+         [] [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 7)]),
+     PsVerifiedIrDeclaration.mk "nativeZeroFieldRecord" [] []
+       (PsVerifiedIrType.named "NativeRecordUnit" [])
+       (PsVerifiedIrExpr.record "NativeRecordUnit" [] [])]
+
+def psIrNativeInhabitedEmptyMatch : PsVerifiedIrModule :=
+  PsVerifiedIrModule.mk [] []
+    [PsVerifiedIrInductive.mk "NativeUnit" [] [PsVerifiedIrConstructor.mk "mk" []]]
+    [PsVerifiedIrDeclaration.mk "nativeInhabitedEmpty" [] [] psIrNativeNat
+      (PsVerifiedIrExpr.matchE "NativeUnit" []
+        (PsVerifiedIrExpr.constructor "NativeUnit" "mk" [] []) [])]
+
 def psIrNativeHasCode (report : PsIrCheckReport) (code : String) : Bool :=
   report.findings.any (fun finding => finding.code == code)
 
@@ -53,6 +114,7 @@ def psIrNativeCases : List (String × Bool) :=
     { psIrCheckDefaultOptions with maxTypeSteps := 0 } psIrNativePositive
   let noDetails := psCheckVerifiedIrModule
     { psIrCheckDefaultOptions with maxFindings := 0 } psIrNativeFalseAnnotation
+  let emptyAccepted := psCheckVerifiedIrModule psIrCheckDefaultOptions psIrNativeEmptyPositive
   [
     ("function-valued let has compositional type",
       accepted.accepted && accepted.traversalComplete && accepted.findingCount == 0),
@@ -75,7 +137,36 @@ def psIrNativeCases : List (String × Bool) :=
     ("type fuel exhaustion is explicit",
       !noTypeSteps.accepted && psIrNativeHasCode noTypeSteps "type-resource-limit"),
     ("diagnostic cap preserves finding count",
-      !noDetails.accepted && noDetails.findingCount > 0 && noDetails.findings.isEmpty)
+      !noDetails.accepted && noDetails.findingCount > 0 && noDetails.findings.isEmpty),
+    ("empty layouts and typed empty results are accepted",
+      emptyAccepted.accepted && emptyAccepted.traversalComplete && emptyAccepted.findingCount == 0),
+    ("empty layouts emit never and typed empty generators",
+      match psTsEmitCheckedModule psIrCheckDefaultOptions psIrNativeEmptyPositive with
+      | Except.ok output =>
+          (output.splitOn "export type NativeEmpty = never;").length == 2 &&
+          (output.splitOn "export type NativeEmptyBox<T0> = never;").length == 2 &&
+          (output.splitOn "__ps$Computation<never>").length == 5
+      | Except.error _ => false),
+    ("empty match without an expected result is rejected",
+      psIrNativeRejects
+        (psIrNativeEmptyCase
+          (PsVerifiedIrExpr.call psIrNativeEmptyMatch []
+            [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)]))
+        "empty-match-result-type-required"),
+    ("empty match still checks its scrutinee",
+      psIrNativeRejects
+        (psIrNativeEmptyCase (PsVerifiedIrExpr.matchE "NativeEmpty" []
+          (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)) []))
+        "type-mismatch"),
+    ("empty match still checks layout type arity",
+      psIrNativeRejects
+        (psIrNativeEmptyCase (PsVerifiedIrExpr.matchE "NativeEmptyBox" []
+          (PsVerifiedIrExpr.var "empty") []))
+        "layout-type-arity"),
+    ("empty alternatives still refuse an inhabited datatype",
+      psIrNativeRejects psIrNativeInhabitedEmptyMatch "match-coverage"),
+    ("zero-field source record has its nullary inhabitant",
+      psIrNativeZeroFieldValue)
   ]
 
 
@@ -285,7 +376,11 @@ def main (args : List String) : IO Unit := do
     else
       throw (IO.userError ("PSC0_SH1_IR_NATIVE_FAIL: " ++ item.fst))
   IO.println ("PSC0_SH1_IR_NATIVE: {\"schemaVersion\":1,\"status\":\"pass\",\"cases\":" ++
-    toString cases.length ++ ",\"checkedEmitterRejectsInvalidIr\":true,\"strictSh1Qualified\":false}")
+    toString cases.length ++ ",\"checkedEmitterRejectsInvalidIr\":true,\"strictSh1Qualified\":false," ++
+    "\"emptyElimination\":{\"nativeSourceFixturePath\":\"test/fixtures/selfhost-sh1-empty.lean\"," ++
+    "\"nativeSourceFixtureSha256\":\"243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5\"," ++
+    "\"nativeSourceDeclarations\":5,\"emptyLayouts\":2,\"emptyEliminations\":4,\"nativeValueOracle\":false}," ++
+    "\"zeroFieldRecords\":{\"structureCount\":1,\"fieldCount\":0,\"inhabited\":true,\"nullaryValueMatched\":true}}")
   match args with
   | [] => pure ()
   | [sourcePath, outputPath] => psIrNativeCheckCurrentSource sourcePath outputPath

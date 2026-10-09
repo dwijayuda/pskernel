@@ -432,12 +432,16 @@ def psPrintLeanTermWithFuel
               match printedAlternativesResult with
               | Except.error error => Except.error error
               | Except.ok printedAlternatives =>
-                  Except.ok
-                    (psPrintLeanConcat4
-                      "match "
-                      printedScrutinee
-                      " with\n"
-                      (psPrintJoin "\n" printedAlternatives))
+                  match printedAlternatives with
+                  | List.nil =>
+                      Except.ok (psPrintLeanConcat2 "nomatch " printedScrutinee)
+                  | List.cons _ _ =>
+                      Except.ok
+                        (psPrintLeanConcat4
+                          "match "
+                          printedScrutinee
+                          " with\n"
+                          (psPrintJoin "\n" printedAlternatives))
 
 def psPrintLeanTerm
     (term : PsSyntaxTerm) :

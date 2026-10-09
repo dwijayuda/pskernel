@@ -1779,7 +1779,7 @@
     }
   },
   "strictEnforcementCheckpoint": {
-    "status": "native-source-target-conformance-passed-reviewed-runtime-comparison-correction-awaiting-cloud-qualification",
+    "status": "fourth-attempt-native-and-C1-passed-C2-resource-failure-reviewed-coherent-batch-awaiting-qualification",
     "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
     "branch": "psc0/strict-sh1-v1",
     "implementationManifest": "strict/implementation-checkpoint.json",
@@ -1815,28 +1815,34 @@
     "selectedSeedUnchanged": "R",
     "sourceAuthority": ".lean",
     "cloudExecution": {
-      "status": "failed-at-native-runtime-fixture-typescript-compilation",
-      "sourceRef": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
-      "runId": 37967710379,
-      "compilerJobId": 113946142567,
+      "status": "fourth-attempt-native-and-C1-passed-C2-heap-exhaustion",
+      "sourceRef": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "runId": 37971952859,
+      "compilerJobId": 113960540944,
+      "providerJobId": 113979513794,
       "providerStatus": "skipped",
-      "attempts": 3
+      "attempts": 4,
+      "retainedArchiveInspectionRunId": 37980548050,
+      "c2RetainedFiles": 0,
+      "exactInternalPhaseKnown": false
     },
     "initialImplementationRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
     "sourceBoundaryCorrection": "strict/source-boundary-correction.json",
     "qualificationAttempts": "strict/qualification-attempts.json",
     "sourceExpectedTypeCorrection": "strict/source-expected-type-correction.json",
     "nativeObservation": {
-      "sourceRef": "d6b7044258efaa272dcf396ce08b0c10496edcd2",
-      "runId": 37967710379,
-      "compilerJobId": 113946142567,
-      "scope": "native atomic source and generated N1 source/target conformance only",
+      "sourceRef": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "runId": 37971952859,
+      "compilerJobId": 113960540944,
+      "scope": "Native N1 development and selected-R C1 conformance; no C2/C3 qualification",
       "moduleCount": 64,
-      "sourceBytes": 1178731,
+      "sourceBytes": 1178903,
+      "importCount": 149,
+      "sourceDeclarations": 1623,
       "originalIrExpressions": 60937,
       "originalIrVisitedSteps": 777667,
       "originalIrFindings": 0,
-      "targetVisitedSteps": 1572007,
+      "traversalComplete": true,
       "sourceCases": {
         "accepted": 2,
         "refused": 33,
@@ -1846,7 +1852,9 @@
         "accepted": 9,
         "refused": 20
       },
+      "enabledRuntimeOperations": 45,
       "nativeRuntimeReferenceObservations": 186,
+      "rawSourceNatEqualityObservations": 6,
       "currentGenerationQualified": false,
       "providerStatus": "skipped"
     },
@@ -1860,6 +1868,62 @@
       "rawSourceCompilations": 2,
       "additionalSmallTypeScriptCompilations": 1,
       "originalRuntimeObservationsUnchanged": 186
+    },
+    "reviewedIntegration": {
+      "manifest": "strict/reviewed-candidates/strict-implementation-batch.json",
+      "expectedParent": "5becf0cf22a8deec760e0da68b706e95ca72f902",
+      "status": "reviewed-integration-awaiting-exact-cloud-execution",
+      "originAndPreparationReuse": true,
+      "orderedPartialAndNatEvaluation": true,
+      "hostSnapshotBeforeCompilation": true,
+      "emptyAndZeroFieldRegularData": true,
+      "resourcePolicy": "psc0-sh1-generated-qualification-resources/1",
+      "oldSpaceMiB": 8192,
+      "minimumAvailableBytes": 12884901888,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    "plannedSourceEvaluationRegression": {
+      "declarations": 12,
+      "nativeObservations": 24,
+      "hostProbes": 21,
+      "sourceKinds": [
+        "lean",
+        "ps"
+      ],
+      "rawSourceCompilations": 2,
+      "sharedSmallTypeScriptCompilations": 1,
+      "extraNativeExecutionsAfterReference": 0,
+      "profile": "ps-0.9-r3/new-only"
+    },
+    "plannedRegularDataCoverage": {
+      "sourcePositivePerKind": {
+        "modules": 3,
+        "sourceDeclarations": 11,
+        "coreDeclarations": 16,
+        "imports": 1,
+        "normalizations": 0
+      },
+      "emptySourceDeclarations": 5,
+      "emptyCoreDeclarations": 6,
+      "emptySourceEliminations": 4,
+      "zeroFieldSourceDeclarations": 2,
+      "zeroFieldCoreDeclarations": 4,
+      "grammar": {
+        "emptyPairs": 5,
+        "emptyRefusals": 6,
+        "zeroFieldPairs": 1,
+        "zeroFieldRefusals": 2
+      },
+      "ir": {
+        "refusals": 38,
+        "behaviorObservations": 61,
+        "emptyLayouts": 2,
+        "emptyEliminations": 5,
+        "emptyDeclarationSignatures": 5
+      },
+      "nativeCheckerCases": 15,
+      "executedOnThisIntegration": false
     }
   }
 }

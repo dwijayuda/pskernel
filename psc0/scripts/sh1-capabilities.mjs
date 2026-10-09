@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { compileStrictSources } from './sh1-strict-source.mjs';
+import { compileStrictSources, strictSourceFailure } from './sh1-strict-source.mjs';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -155,9 +155,117 @@ function assertGrammarBehavior(runtime, label) {
   return { observations, behavior: 'pass', edition: 'ps-0.9-r3', mode: 'new-only' };
 }
 
+// These assertions reuse the existing raw-source compilations. Expected facts
+// come from the authored fixtures, including implicit/proof binders, a major
+// after the changing state, and two distinct recursive branches changing state.
+// Position checks count Unicode scalars and UTF-8 bytes, as the source format
+// specifies; they do not parse or elaborate another copy of the source.
+function capabilitySourcePositions(source) {
+  let byteOffset = 0;
+  let line = 1;
+  let column = 1;
+  const positions = new Map([[0, { byteOffset, line, column }]]);
+  for (const scalar of source) {
+    byteOffset += Buffer.byteLength(scalar);
+    if (scalar === '\n') { line++; column = 1; } else column++;
+    positions.set(byteOffset, { byteOffset, line, column });
+  }
+  return positions;
+}
+
+function assertCapabilityOrigins(evidence, source, label) {
+  const origins = evidence.sourceOrigins;
+  assert.equal(origins.policy, 'psc0-declaration-origins/1', label);
+  assert.equal(origins.moduleCount, 1, label);
+  assert.equal(origins.sourceDeclarationCount, 35, label);
+  assert.equal(origins.coreDeclarationCount, 55, label);
+  assert.equal(origins.normalizationCount, 16, label);
+  assert.equal(origins.semanticCorrespondenceDischarged, false, label);
+  assert.equal(evidence.canonicalAdmissionEncodingCount, 1, label);
+  assert.equal(evidence.environmentReconstructionCount, 0, label);
+  const module = origins.modules[0];
+  assert.deepEqual(module.moduleName, ['Ps', 'Compiler', 'StrictCapabilities'], label);
+  const byName = new Map(module.batches.map((batch) => [batch.sourceName.join('.'), batch]));
+  const positions = capabilitySourcePositions(source);
+  const sourceBytes = Buffer.from(source);
+  for (const batch of module.batches) {
+    assert.deepEqual(batch.span.start, positions.get(batch.span.start.byteOffset), label + ': start position');
+    assert.deepEqual(batch.span.stop, positions.get(batch.span.stop.byteOffset), label + ': stop position');
+    const authored = sourceBytes.subarray(batch.span.start.byteOffset, batch.span.stop.byteOffset).toString('utf8');
+    assert(['def', 'function', 'const', 'structure'].some(
+      (keyword) => authored.startsWith(keyword + ' ' + batch.sourceName.join('.'))),
+    label + ': containing source declaration');
+  }
+  const plans = [
+    { name: 'sh1ReverseInto', parameters: 3, explicit: [1, 2], major: 1, generalized: [2], fixed: 2 },
+    { name: 'sh1NatAcc', parameters: 2, explicit: [0, 1], major: 0, generalized: [1], fixed: 1 },
+    { name: 'sh1Swap', parameters: 3, explicit: [0, 1, 2], major: 0, generalized: [1, 2], fixed: 1 },
+    { name: 'sh1StateBefore', parameters: 2, explicit: [0, 1], major: 1, generalized: [0], fixed: 1 },
+    { name: 'sh1FunctionResult', parameters: 2, explicit: [0, 1], major: 0, generalized: [1], fixed: 1 },
+    { name: 'sh1WithProof', parameters: 4, explicit: [1, 2, 3], major: 2, generalized: [3], fixed: 3 },
+    { name: 'sh1Shadow', parameters: 2, explicit: [0, 1], major: 1, generalized: [0], fixed: 1 },
+    { name: 'sh1OuterHypothesis', parameters: 2, explicit: [0, 1], major: 0, generalized: [1, 1], fixed: 1 },
+    { name: 'sh1ProjectionAcc', parameters: 2, explicit: [0, 1], major: 0, generalized: [1], fixed: 1 },
+    { name: 'sh1ProjectionFixed', parameters: 3, explicit: [0, 1, 2], major: 1, generalized: [2], fixed: 2 },
+    { name: 'sh1ProjectionNested', parameters: 3, explicit: [0, 1, 2], major: 0, generalized: [2], fixed: 2 },
+    { name: 'sh1ProjectionBefore', parameters: 2, explicit: [0, 1], major: 1, generalized: [0], fixed: 1 },
+    { name: 'sh1ProjectionLambda', parameters: 2, explicit: [0, 1], major: 0, generalized: [1], fixed: 1 },
+    { name: 'sh1ProjectionLet', parameters: 2, explicit: [0, 1], major: 0, generalized: [1], fixed: 1 },
+    { name: 'sh1ProjectionPattern', parameters: 2, explicit: [0, 1], major: 0, generalized: [1], fixed: 1 },
+    { name: 'sh1ProjectionSwap', parameters: 3, explicit: [0, 1, 2], major: 0, generalized: [1, 2], fixed: 1 },
+  ];
+  for (const expected of plans) {
+    const batch = byName.get(expected.name);
+    assert(batch?.normalization, label + ': normalized ' + expected.name);
+    const plan = batch.normalization;
+    const ids = plan.parameterIds;
+    assert.equal(ids.length, expected.parameters, label + ': parameter count ' + expected.name);
+    assert.deepEqual(plan.explicitIds, expected.explicit.map((index) => ids[index]), label + ': explicit identities');
+    assert.equal(plan.majorId, ids[expected.major], label + ': structural major');
+    assert.deepEqual(plan.generalizedIds, expected.generalized.map((index) => ids[index]),
+      label + ': actual changed-parameter collection');
+    assert.equal(plan.workerBinderCount, expected.fixed, label + ': retained fixed binders');
+    assert.equal(plan.actualWorkerSyntaxRetained, true, label + ': worker syntax');
+    assert.deepEqual(plan.functionName, [['str', expected.name]], label + ': public name');
+    assert.deepEqual(plan.workerName,
+      [['str', expected.name], ['str', '$psc0SH'], ['num', '0']], label + ': numeric worker identity');
+    assert.deepEqual(batch.members.map((member) => member.role), ['normalizedWorker', 'publicWrapper'], label);
+  }
+  for (const name of ['sh1WorkerReference', 'sh1Partial', 'sh1GrammarConstant']) {
+    const batch = byName.get(name);
+    assert(batch, label + ': existing declaration ' + name);
+    assert.equal(batch.normalization, null, label + ': unchanged authoring ' + name);
+    assert.deepEqual(batch.members.map((member) => member.role), ['sourceDeclaration'], label);
+  }
+  for (const name of ['Sh1ProjectionState', 'Sh1ProjectionBox']) {
+    const batch = byName.get(name);
+    assert(batch, label + ': structure ' + name);
+    assert.equal(batch.normalization, null, label + ': structure normalization');
+    assert.deepEqual(batch.members.map((member) => member.role),
+      ['structureType', 'constructor', 'recursor'], label + ': actual structure batch');
+    assert.deepEqual(batch.members.map((member) => member.name),
+      [[['str', name]], [['str', name], ['str', 'mk']], [['str', name], ['str', 'rec']]],
+      label + ': generated structure member association');
+  }
+  return {
+    policy: origins.policy,
+    sourceDeclarations: origins.sourceDeclarationCount,
+    coreDeclarations: origins.coreDeclarationCount,
+    normalizationPlans: plans.length,
+    unchangedDeclarations: 3,
+    structureBatches: 2,
+    positionPairs: module.batches.length,
+    duplicateGeneralizedIdsRetained: true,
+    observationsSha256: origins.observationsSha256,
+    semanticCorrespondenceDischarged: false,
+  };
+}
+
 const negativeCases = [
   {
     name: 'narrowed-nested-induction-hypothesis',
+    owner: 'sh1BadNarrow',
+    spanStopToken: 'value', spanStopTail: '\n',
     expected: 'structuralRecursionNotDecreasing',
     source: 'def sh1BadNarrow (fuel : Nat) (state : Nat) : Nat -> Nat :=\n' +
       '  match fuel with\n  | Nat.zero => fun (value : Nat) => value\n' +
@@ -170,6 +278,8 @@ const negativeCases = [
 
   {
     name: 'unsaturated-recursive-call',
+    owner: 'sh1BadArity', phase: 'stableDeclaration',
+    spanStopToken: 'remaining', spanStopTail: '\n',
     expected: 'structuralRecursionArity',
     source: 'def sh1BadArity (fuel : Nat) (state : Nat) : Nat :=\n' +
       '  match fuel with\n  | Nat.zero => state\n' +
@@ -177,6 +287,8 @@ const negativeCases = [
   },
   {
     name: 'nondecreasing-major',
+    owner: 'sh1BadSame', phase: 'stableDeclaration',
+    spanStopToken: 'state', spanStopTail: ')\n',
     expected: 'structuralRecursionNotDecreasing',
     source: 'def sh1BadSame (fuel : Nat) (state : Nat) : Nat :=\n' +
       '  match fuel with\n  | Nat.zero => state\n' +
@@ -184,6 +296,8 @@ const negativeCases = [
   },
   {
     name: 'unrelated-constructor-child',
+    owner: 'sh1BadOther', phase: 'stableDeclaration',
+    spanStopToken: 'state', spanStopTail: ')\n',
     expected: 'structuralRecursionNotDecreasing',
     source: 'def sh1BadOther (fuel : Nat) (other : Nat) (state : Nat) : Nat :=\n' +
       '  match fuel with\n  | Nat.zero => state\n' +
@@ -193,6 +307,8 @@ const negativeCases = [
   },
   {
     name: 'escaping-self-reference',
+    owner: 'sh1BadEscape', phase: 'stableDeclaration',
+    spanStopToken: 'state', spanStopTail: ')\n',
     expected: 'structuralRecursionEscapingReference',
     source: 'def sh1BadEscape (fuel : Nat) (state : Nat) : Nat :=\n' +
       '  match fuel with\n  | Nat.zero => state\n' +
@@ -202,6 +318,8 @@ const negativeCases = [
   },
   {
     name: 'major-dependent-parameter',
+    owner: 'sh1BadDependent', phase: 'normalizationPlanning',
+    spanStopToken: 'state', spanStopTail: ')\n',
     expected: 'structuralRecursionDependentParameter',
     source: 'def sh1BadDependent (family : Nat -> Type) (fuel : Nat) (value : family fuel) (state : Nat) : Nat :=\n' +
       '  match fuel with\n  | Nat.zero => 0\n' +
@@ -237,6 +355,7 @@ export async function runSh1Capabilities({
     const strict = compileStrictSources(compiler, [{
       moduleName: ['Ps', 'Compiler', 'StrictCapabilities'], source,
     }], { compilerSha256, sourceKind: extension });
+    const sourceOrigins = assertCapabilityOrigins(strict.evidence, source, 'source origins ' + extension);
     const admissions = strict.admissions;
     const generatedTs = strict.typeScript;
     const generatedJs = await compileTypeScript(generatedTs, path.join(outDir, extension, 'generated'), tsc, root);
@@ -252,6 +371,7 @@ export async function runSh1Capabilities({
       javascriptSha256: sha256(await readFile(generatedJs)),
       generatedCompilerConsumedRawSource: true,
       strictSourceEnforcement: strict.evidence,
+      sourceOrigins,
       behavior: 'pass',
       projectionBehavior,
       grammarBehavior,
@@ -285,7 +405,28 @@ export async function runSh1Capabilities({
     const tags = diagnosticTags(result.error);
     assert(tags.includes(test.expected), 'PSC0_SH1_NEGATIVE_DIAGNOSTIC: ' + test.name +
       '; expected ' + test.expected + ', got ' + JSON.stringify(diagnosticValue(result.error)));
-    rejected.push({ name: test.name, sourceSha256: sha256(test.source), diagnosticTags: tags });
+    const origin = strictSourceFailure(result.error);
+    assert.equal(origin.stage, 'source', 'PSC0_SH1_NEGATIVE_ORIGIN_STAGE: ' + test.name);
+    assert.equal(origin.code, 'source-elaboration', 'PSC0_SH1_NEGATIVE_ORIGIN_CODE: ' + test.name);
+    assert.equal(origin.moduleName, 'Ps.Compiler.StrictNegative', 'PSC0_SH1_NEGATIVE_ORIGIN_MODULE: ' + test.name);
+    assert.equal(origin.owner, test.owner, 'PSC0_SH1_NEGATIVE_ORIGIN_OWNER: ' + test.name);
+    assert.equal(origin.sourceIndex, 0, 'PSC0_SH1_NEGATIVE_ORIGIN_INDEX: ' + test.name);
+    assert(['stableDeclaration', 'normalizationPlanning', 'normalizedWorker', 'publicWrapper', 'declarationInsertion']
+      .includes(origin.phase), 'PSC0_SH1_NEGATIVE_ORIGIN_PHASE: ' + test.name);
+    // The narrowed nested-IH case retains its actual phase without guessing
+    // whether the stable attempt or the normalized worker is the first refusal.
+    if (test.phase) assert.equal(origin.phase, test.phase, 'PSC0_SH1_NEGATIVE_ORIGIN_PHASE: ' + test.name);
+    const positions = capabilitySourcePositions(test.source);
+    assert.deepEqual(origin.span.start, positions.get(0), 'PSC0_SH1_NEGATIVE_ORIGIN_START: ' + test.name);
+    // ParseLean consumes grouping parentheses but stores the inner argument's
+    // span in an application. Pin each fixture's actual final token and tail.
+    assert(test.source.endsWith(test.spanStopToken + test.spanStopTail),
+      'PSC0_SH1_NEGATIVE_ORIGIN_STOP_FIXTURE: ' + test.name);
+    const stopByte = Buffer.byteLength(test.source) - Buffer.byteLength(test.spanStopTail);
+    assert.deepEqual(origin.span.stop, positions.get(stopByte),
+      'PSC0_SH1_NEGATIVE_ORIGIN_STOP: ' + test.name);
+    rejected.push({ name: test.name, sourceSha256: sha256(test.source), diagnosticTags: tags,
+      sourceOrigin: origin });
   }
   const stableSource =
     'inductive ListInv (alpha : Type) where | nil | cons (head : alpha) (tail : ListInv alpha)\n' +
@@ -317,6 +458,7 @@ export async function runSh1Capabilities({
     grammar,
     workerMigration,
     independentExpectedBehavior: [
+      'Retained source-to-Core declaration batches, normalization plans, typed worker names, and source error origins',
       'Nat accumulation', 'simultaneous state swapping', 'state before structural major',
       'function results', 'erased stable proof binder', 'generic List at Nat and String',
       'public partial application', 'existing worker correspondence',

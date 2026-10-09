@@ -95,6 +95,9 @@ jobs:
         id: node
         with:
           node-version: ${{ steps.seed-selection.outputs.node-version }}
+      - name: Check the actual full-qualification runner memory before expensive work
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
+        run: node --max-old-space-size=8192 scripts/sh1-resource-policy.mjs --preflight dist/sh1/resource-policy-preflight.json
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: psc0
@@ -142,6 +145,7 @@ jobs:
           node --check scripts/check-typescript-profile.mjs
           node --check scripts/native-typescript-cli.test.mjs
           node scripts/check-native-replay-host-source.mjs
+          node --check scripts/sh1-resource-policy.mjs
           node --check scripts/sh1-qualify.mjs
           node --check scripts/sh1-capabilities.mjs
           node --check scripts/sh1-check-admissions.mjs
@@ -337,11 +341,11 @@ jobs:
         run: node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out ${{ steps.seed-selection.outputs.full-qualification == 'true' && 'dist/sh1/development' || 'dist/sh1' }}
       - name: Build the selected-seed candidate before full qualification
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
-        run: node scripts/sh1-qualify.mjs candidate --seed ${{ steps.seed-selection.outputs.compiler-path }} --out dist/sh1 --native .lake/build/bin/psc1
+        run: node --max-old-space-size=8192 scripts/sh1-qualify.mjs candidate --seed ${{ steps.seed-selection.outputs.compiler-path }} --out dist/sh1 --native .lake/build/bin/psc1
       - name: Qualify exact current-source C2/C3 at a promotion checkpoint
         id: qualify
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
-        run: node scripts/sh1-qualify.mjs fixed-point --out dist/sh1
+        run: node --max-old-space-size=8192 scripts/sh1-qualify.mjs fixed-point --out dist/sh1
       - name: Retain the newly qualified seed without activating a source migration
         if: ${{ steps.qualify.outputs.promoted-seed-cache-key != '' }}
         uses: actions/cache/save@v4

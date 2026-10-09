@@ -611,7 +611,7 @@
           "currentMutatorUtilization": 0.084
         },
         "firstUncompletedGeneration": "C2",
-        "internalPhase": "Not determined from the existing log; buildGeneration has no internal phase markers and logged no C2 generation receipt."
+        "internalPhase": "Not determined: existing buildGeneration has no internal phase markers. No C2 generation receipt was logged and subsequent authenticated archive inspection found no C2 files."
       },
       "successfulSteps": [
         {
@@ -770,7 +770,7 @@
         "meaning": "Actual successful marker payloads retained as data; not a substitute for a complete qualification receipt."
       },
       "providerStatus": "skipped",
-      "currentGenerationQualification": "C1-passed-no-C2-receipt-logged-C3-not-reached",
+      "currentGenerationQualification": "C1-passed-no-retained-C2-products-C3-not-reached",
       "strictRuntimeReference": "native-reference-produced-and-compared-at-N1-and-C1",
       "strictRuntimeGeneratedComparison": "N1-and-C1-passed-45-operations-186-observations-plus-six-raw-source-equalities",
       "log": {
@@ -800,7 +800,33 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "scopeOfFailure": "Native development and the selected-R C1 candidate passed, including the equality correction. A fresh fixed-point process exhausted its approximately 4 GiB default JavaScript heap before the first C2 generation receipt. The exact internal allocation phase is not logged. The separately reviewed reuse/semantic/empty-data candidates were not executed in this source; do not claim they already fix this peak.",
-      "nextInvestigation": "Authenticate retained artifact 11639377985 and inspect C2 file inventory plus actual C1 preparation/encoder text in a read-only cloud job. Review retained graphs and the already planned one-encode/zero-reconstruction path before the next coherent compiler qualification."
+      "nextInvestigation": "Integrate the independently reviewed one-encoding/zero-reconstruction implementation with explicit 8192 MiB old-space budget, measured runner headroom checks and host phase/resource evidence. Qualify the full coherent reviewed source; do not infer that lower work alone repairs peak memory.",
+      "retainedArtifactInspection": {
+        "runId": 37980548050,
+        "jobId": 113989649430,
+        "workflowId": 379962074,
+        "sourceRef": "5becf0cf22a8deec760e0da68b706e95ca72f902",
+        "workflowBlob": "ddab8f4985fdc7ee9661792c205678404a67296f",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/37980548050",
+        "result": "success",
+        "path": "attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/retained-artifact-inspection.json",
+        "blob": "77c6e9ae9dbf0a2c6f47cb7b0d415437bf056f0e",
+        "sha256": "8dd073faaf235c9c5bffed661d7335ec5a4bdc8dd4225d77ad3e1603aef2496c",
+        "decodedLogSha256": "5a38a503dd0ff24b169cf13f1944e6c0c7bc54c5b77b6c4d1f6b47c2b9e8fd01",
+        "decodedLogCharacters": 29180,
+        "archiveEntries": 241,
+        "archiveFiles": 241,
+        "c2Files": [],
+        "c2Products": [],
+        "compilerSha256": "ccdfb5f1c226dce25776b817a391a09c783a71e695ea30ca3702df198bd1d23b",
+        "compilerBytes": 3109387,
+        "actualC1ReceiptSha256": "b1f907a79cc97e0b6ee440d8147f0b1bbdf2372a2268ad3cf26fe339064f2a3f",
+        "actualC1ReceiptBytes": 168198,
+        "completeCompilerFunctionExcerpts": 8,
+        "compilerExecuted": false,
+        "testsExecuted": false,
+        "scope": "Read-only exact archive and compiler text inspection. No C2 files were retained in the archive. This narrows the failure to before the first TypeScript product write under the unchanged full dist/sh1 upload; it does not identify an internal synchronous phase or prove a memory fix."
+      }
     }
   ],
   "selectedSeedChanged": false,

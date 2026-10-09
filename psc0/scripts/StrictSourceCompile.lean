@@ -20,6 +20,14 @@ def psStrictNativeSpan (value : Option PsSourceSpan) : String :=
         [("start", psStrictNativePos span.start),
          ("stop", psStrictNativePos span.stop)]
 
+def psStrictNativeOriginPhase (phase : PsElabOriginPhase) : String :=
+  match phase with
+  | .stableDeclaration => "stableDeclaration"
+  | .normalizationPlanning => "normalizationPlanning"
+  | .normalizedWorker => "normalizedWorker"
+  | .publicWrapper => "publicWrapper"
+  | .declarationInsertion => "declarationInsertion"
+
 def psStrictNativeCompilerDetail (error : PsCompilerError) : String :=
   match error with
   | .elaboration value => psHostElabErrorText value
@@ -47,6 +55,16 @@ def psStrictNativeError (error : PsSh1EmitError) : String :=
              ("moduleName", psJsonQuote finding.moduleName),
              ("owner", psJsonQuote finding.owner),
              ("span", psStrictNativeSpan finding.span)]
+        | .origin moduleName failure =>
+            [("stage", psJsonQuote "source"),
+             ("code", psJsonQuote "source-elaboration"),
+             ("moduleName", psJsonQuote moduleName),
+             ("compilerStage", psJsonQuote "elaboration"),
+             ("detail", psJsonQuote (psHostElabErrorText failure.error)),
+             ("owner", psJsonQuote (psSh1NameText failure.sourceName.segments)),
+             ("sourceIndex", toString failure.sourceIndex),
+             ("phase", psJsonQuote (psStrictNativeOriginPhase failure.phase)),
+             ("span", psStrictNativeSpan (some failure.span))]
         | .compiler moduleName failure =>
             [("stage", psJsonQuote "source"),
              ("code", psJsonQuote "source-compiler"),
@@ -77,7 +95,8 @@ def psStrictNativeError (error : PsSh1EmitError) : String :=
     ([("schemaVersion", "1"),
       ("evidence", psJsonQuote "native-atomic-source-refusal"),
       ("strictSh1Qualified", "false"),
-      ("semanticContractQualified", "false")] ++ fields)
+      ("semanticContractQualified", "false"),
+      ("providerChecked", "false")] ++ fields)
 
 def psStrictNativeInput
     (sourceKind : PsCompilerSourceKind) (path : String) : IO PsSh1SourceInput := do
@@ -93,6 +112,134 @@ def psStrictNativeInput
     | _ => throw (IO.userError ("PSC0_SH1_NATIVE_MODULE_PATH: " ++ path))
   let source ← IO.FS.readFile path
   pure (psSh1SourceInput (modulePath.splitOn "/") source)
+
+-- These compact records observe the actual retained source-to-Core association.
+-- Their field order matches observeStrictOrigins in sh1-strict-source.mjs.
+-- Native IO serializes the data; the evidence binder hashes the common payload.
+-- No parser, elaborator, admission encoder or IR checker is called again.
+def psStrictNativeCoreNameParts
+    (name : PsName) (parts : List String) : List String :=
+  match name with
+  | .anonymous => parts
+  | .str parent value =>
+      psStrictNativeCoreNameParts parent
+        (psJsonArray [psJsonQuote "str", psJsonQuote value] :: parts)
+  | .num parent value =>
+      psStrictNativeCoreNameParts parent
+        (psJsonArray [psJsonQuote "num", psJsonQuote (toString value)] :: parts)
+
+def psStrictNativeCoreName (name : PsName) : String :=
+  psJsonArray (psStrictNativeCoreNameParts name [])
+
+def psStrictNativeOriginRole (role : PsElabOriginRole) : String :=
+  match role with
+  | .sourceDeclaration => "sourceDeclaration"
+  | .inductiveType => "inductiveType"
+  | .structureType => "structureType"
+  | .constructor => "constructor"
+  | .recursor => "recursor"
+  | .normalizedWorker => "normalizedWorker"
+  | .publicWrapper => "publicWrapper"
+
+def psStrictNativeSyntaxKind (term : PsSyntaxTerm) : String :=
+  match term with
+  | .reference _ => "reference"
+  | .natural _ _ => "natural"
+  | .string _ _ => "string"
+  | .character _ _ => "character"
+  | .bool _ _ => "bool"
+  | .unit _ => "unit"
+  | .record _ _ => "record"
+  | .app _ _ _ => "app"
+  | .lambda _ _ _ => "lambda"
+  | .forallE _ _ _ => "forallE"
+  | .letE _ _ _ _ _ => "letE"
+  | .ifE _ _ _ _ => "ifE"
+  | .matchE _ _ _ => "matchE"
+
+def psStrictNativeOriginIds (ids : List Nat) : String :=
+  psJsonArray (ids.map (fun id => psJsonQuote (toString id)))
+
+def psStrictNativeNormalization (origin : PsElabNormalizationOrigin) : String :=
+  let plan := origin.plan
+  psJsonObject
+    [("functionName", psStrictNativeCoreName plan.functionName),
+     ("workerName", psStrictNativeCoreName origin.workerName),
+     ("parameterIds", psStrictNativeOriginIds plan.parameterIds),
+     ("explicitIds", psStrictNativeOriginIds plan.explicitIds),
+     ("majorId", psJsonQuote (toString plan.majorId)),
+     ("generalizedIds", psStrictNativeOriginIds plan.generalizedIds),
+     ("workerBinderCount", toString origin.workerBinders.length),
+     ("workerTypeKind", psJsonQuote (psStrictNativeSyntaxKind origin.workerType)),
+     ("workerValueKind", psJsonQuote (psStrictNativeSyntaxKind origin.workerValue)),
+     ("actualWorkerSyntaxRetained", "true")]
+
+def psStrictNativeOriginMember (member : PsElabMemberOrigin) : String :=
+  psJsonObject
+    [("index", toString member.index),
+     ("name", psStrictNativeCoreName member.name),
+     ("role", psJsonQuote (psStrictNativeOriginRole member.role))]
+
+def psStrictNativeOriginBatch
+    (batch : PsElabBatchOrigin) (coreStart : Nat) : String :=
+  let normalization :=
+    match batch.normalization with
+    | none => "null"
+    | some origin => psStrictNativeNormalization origin
+  psJsonObject
+    [("sourceIndex", toString batch.sourceIndex),
+     ("sourceName", psJsonArray (batch.sourceName.segments.map psJsonQuote)),
+     ("span", psStrictNativeSpan (some batch.span)),
+     ("coreStart", toString coreStart),
+     ("members", psJsonArray (batch.members.map psStrictNativeOriginMember)),
+     ("normalization", normalization)]
+
+structure PsStrictNativeOriginRecords where
+  records : List String
+  sourceCount : Nat
+  normalizationCount : Nat
+
+def psStrictNativeOriginBatches
+    (batches : List PsElabBatchOrigin) (coreStart : Nat) :
+    PsStrictNativeOriginRecords :=
+  match batches with
+  | [] => PsStrictNativeOriginRecords.mk [] 0 0
+  | batch :: rest =>
+      let tail := psStrictNativeOriginBatches rest (coreStart + batch.members.length)
+      let normalized :=
+        match batch.normalization with
+        | none => 0
+        | some _ => 1
+      PsStrictNativeOriginRecords.mk
+        (psStrictNativeOriginBatch batch coreStart :: tail.records)
+        (tail.sourceCount + 1) (tail.normalizationCount + normalized)
+
+def psStrictNativeOriginModules (modules : List PsSh1ModuleOrigin) :
+    PsStrictNativeOriginRecords :=
+  match modules with
+  | [] => PsStrictNativeOriginRecords.mk [] 0 0
+  | current :: rest =>
+      let batches := psStrictNativeOriginBatches current.batches current.coreStart
+      let tail := psStrictNativeOriginModules rest
+      let record := psJsonObject
+        [("moduleName", psJsonArray (current.moduleName.map psJsonQuote)),
+         ("coreStart", toString current.coreStart),
+         ("batches", psJsonArray batches.records)]
+      PsStrictNativeOriginRecords.mk (record :: tail.records)
+        (batches.sourceCount + tail.sourceCount)
+        (batches.normalizationCount + tail.normalizationCount)
+
+def psStrictNativeSourceOrigins (result : PsSh1Emission) : String :=
+  let records := psStrictNativeOriginModules result.origins
+  psJsonObject
+    [("policy", psJsonQuote "psc0-declaration-origins/1"),
+     ("actualParsedModulesRetained", toString result.parsedModules.length),
+     ("moduleCount", toString result.origins.length),
+     ("sourceDeclarationCount", toString records.sourceCount),
+     ("coreDeclarationCount", toString result.prepared.declarations.length),
+     ("normalizationCount", toString records.normalizationCount),
+     ("modules", psJsonArray records.records),
+     ("semanticCorrespondenceDischarged", "false")]
 
 def psStrictNativeReport
     (result : PsSh1Emission) (sourceKind : String) : String :=
@@ -146,10 +293,10 @@ def psStrictNativeReport
         ("traversalComplete", psStrictNativeBool target.traversalComplete),
         ("visitedSteps", toString target.visitedSteps)]),
      ("originalIr", psJsonObject irFields),
-     ("sourceOrigins", psJsonObject
-       [("actualParsedModulesRetained", toString result.parsedModules.length),
-        ("semanticCorrespondenceDischarged", "false")]),
+     ("sourceOrigins", psStrictNativeSourceOrigins result),
      ("preparationCount", "1"),
+     ("canonicalAdmissionEncodingCount", "1"),
+     ("environmentReconstructionCount", "0"),
      ("portableIrCheckCount", "1"),
      ("strictSh1Qualified", psStrictNativeBool result.strictSh1Qualified),
      ("semanticContractQualified", psStrictNativeBool result.semanticContractQualified),

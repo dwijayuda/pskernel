@@ -41,6 +41,7 @@ structure PsSh1SourceFinding where
 inductive PsSh1SourceError where
   | policy (finding : PsSh1SourceFinding)
   | compiler (moduleName : String) (error : PsCompilerError)
+  | origin (moduleName : String) (error : PsElabOriginError)
 
 def psSh1SourceFailure
     (code detail moduleName owner : String) (span : Option PsSourceSpan) :
@@ -76,9 +77,21 @@ structure PsSh1ParsedModule where
   moduleName : List String
   sourceModule : PsSyntaxModule
 
+-- Each record is attached to the actual successful module preparation.
+-- coreStart counts preceding actual batch members in the final prepared order.
+-- The batch retains containing source spans and the actual normalization plan;
+-- this declaration-level association is not an expression preservation proof.
+structure PsSh1ModuleOrigin where
+  moduleName : List String
+  coreStart : Nat
+  batches : List PsElabBatchOrigin
+
 structure PsSh1PreparedSources where
   prepared : PsCompilerAdmissionReadyModule
+  environment : PsEnvironment
+  admissions : String
   parsedModules : List PsSh1ParsedModule
+  origins : List PsSh1ModuleOrigin
   report : PsSh1SourceReport
 
 def psSh1NameTextWorker (segments : List String) (prefixText : String) : String :=
@@ -597,10 +610,19 @@ def psSh1SyntaxRun
           | Except.error error => Except.error error
           | Except.ok stepped => psSh1SyntaxRun options moduleName origins remaining stepped
 
+def psSh1OriginCoreCount
+    (origins : List PsElabBatchOrigin) (count : Nat) : Nat :=
+  match origins with
+  | List.nil => count
+  | List.cons origin rest =>
+      psSh1OriginCoreCount rest (Nat.add count (psListLength origin.members))
+
 structure PsSh1PreparationState where
   preparation : PsCompilerPreparationState
   modulesRev : List (List String)
   parsedRev : List PsSh1ParsedModule
+  originsRev : List PsSh1ModuleOrigin
+  coreCount : Nat
   moduleCount : Nat
   sourceBytes : Nat
   inputBytes : Nat
@@ -637,15 +659,21 @@ def psSh1PrepareModule
                           (PsSh1SyntaxState.mk tasks state.stats) with
                       | Except.error error => Except.error error
                       | Except.ok stats =>
-                          match psCompilerPreparationStepParsed state.preparation parsed.sourceModule with
+                          match psCompilerPreparationStepParsedWithOrigins
+                              state.preparation parsed.sourceModule with
                           | Except.error error =>
-                              Except.error (PsSh1SourceError.compiler moduleName error)
-                          | Except.ok prepared =>
-                              Except.ok (PsSh1PreparationState.mk prepared
+                              Except.error (PsSh1SourceError.origin moduleName error)
+                          | Except.ok result =>
+                              let origin : PsSh1ModuleOrigin :=
+                                PsSh1ModuleOrigin.mk
+                                  input.moduleName state.coreCount result.origins;
+                              Except.ok (PsSh1PreparationState.mk result.state
                                 (List.cons input.moduleName state.modulesRev)
                                 (List.cons
                                   (PsSh1ParsedModule.mk input.moduleName parsed.sourceModule)
                                   state.parsedRev)
+                                (List.cons origin state.originsRev)
+                                (psSh1OriginCoreCount result.origins state.coreCount)
                                 (Nat.succ state.moduleCount)
                                 (Nat.add state.sourceBytes sourceBytes)
                                 inputBytes (Nat.add state.importCount importCount) stats)
@@ -680,14 +708,17 @@ def psCompilerSh1PrepareSources
         "<input>" "" Option.none)
   else
     let initial : PsSh1PreparationState := PsSh1PreparationState.mk
-      (psCompilerPreparationStart sourceKind) List.nil List.nil 0 0 0 0 psSh1EmptySyntaxStats;
+      (psCompilerPreparationStart sourceKind) List.nil List.nil List.nil
+      0 0 0 0 0 psSh1EmptySyntaxStats;
     match psSh1PrepareSourcesWorker inputs options initial with
     | Except.error error => Except.error error
     | Except.ok state =>
-        match psCompilerPreparationFinish state.preparation with
+        match psCompilerPreparationFinishWithOutput state.preparation with
         | Except.error error => Except.error (PsSh1SourceError.compiler "<bundle>" error)
-        | Except.ok prepared =>
+        | Except.ok output =>
             let report : PsSh1SourceReport := PsSh1SourceReport.mk
               "PSC0-SH/1" 1 sourceKind options state.moduleCount state.sourceBytes
               state.inputBytes state.importCount state.stats true true false;
-            Except.ok (PsSh1PreparedSources.mk prepared (psListReverse state.parsedRev) report)
+            Except.ok (PsSh1PreparedSources.mk
+              output.prepared output.environment output.admissions
+              (psListReverse state.parsedRev) (psListReverse state.originsRev) report)

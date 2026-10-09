@@ -501,25 +501,31 @@ def psIrCheckMatch (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
     (state : PsIrCheckState) (scope : PsIrCheckScope) (name : String)
     (typeArguments : List PsVerifiedIrType) (scrutinee : PsVerifiedIrExpr)
     (alternatives : List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr))
-    (_expected : Option PsVerifiedIrType) : PsIrCheckState :=
+    (expected : Option PsVerifiedIrType) : PsIrCheckState :=
   let annotated := psIrCheckTypeArguments options module typeArguments scope 0 state;
   let alternativeName : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> String :=
     fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) => alternative.fst;
   let names := psListMap alternativeName alternatives;
   let unique := psIrCheckNames options names scope "duplicate-match-alternative" List.nil annotated;
-  let nonempty :=
+  -- Empty elimination has no branch from which to synthesize a result.
+  -- The existing expected type is authoritative only for this zero-branch case.
+  let resultHint := if psListIsEmpty alternatives then expected else Option.none;
+  let resultChecked :=
     if psListIsEmpty alternatives then
-      psIrCheckFinding options unique scope "empty-match-unsupported"
-        "empty elimination is outside the active runtime contract" Option.none Option.none
+      match expected with
+      | Option.none =>
+          psIrCheckFinding options unique scope "empty-match-result-type-required"
+            "empty elimination requires an expected result type" Option.none Option.none
+      | Option.some _ => unique
     else unique;
   let layoutResult : PsIrCheckState × PsIrCheckMatchPlan :=
     match psIrCheckFindInductive module.inductives name with
     | Option.none =>
         Prod.mk
-          (psIrCheckFinding options nonempty scope "unresolved-layout-owner" name Option.none Option.none)
+          (psIrCheckFinding options resultChecked scope "unresolved-layout-owner" name Option.none Option.none)
           (PsIrCheckMatchPlan.mk scope List.nil List.nil)
     | Option.some layout =>
-        let arity := psIrCheckArity options nonempty scope "layout-type-arity"
+        let arity := psIrCheckArity options resultChecked scope "layout-type-arity"
           (psListLength layout.typeParameters) (psListLength typeArguments);
         let covered := psIrCheckMissingAlternatives options layout.constructors names scope arity;
         Prod.mk covered
@@ -530,7 +536,7 @@ def psIrCheckMatch (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
     [PsIrCheckTask.expression (psIrCheckAt scope "scrutinee") scrutinee
        (Option.some (PsVerifiedIrType.named name typeArguments)) false,
      PsIrCheckTask.discard,
-     PsIrCheckTask.alternatives layoutResult.snd alternatives Option.none 0]
+     PsIrCheckTask.alternatives layoutResult.snd alternatives resultHint 0]
 
 def psIrCheckExpression (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
     (state : PsIrCheckState) (scope : PsIrCheckScope) (expr : PsVerifiedIrExpr)
@@ -780,12 +786,7 @@ def psIrCheckStep (options : PsIrCheckOptions) (module : PsVerifiedIrModule)
           let scope := psIrCheckScopeRoot layout.name types List.nil;
           let named := psIrCheckNames options [layout.name] scope "duplicate-layout-name" seen state;
           let scopeChecked := psIrCheckNames options types scope "duplicate-type-parameter" List.nil named;
-          let checked :=
-            if psListIsEmpty layout.constructors then
-              psIrCheckFinding options scopeChecked scope "empty-layout-unsupported"
-                layout.name Option.none Option.none
-            else scopeChecked;
-          psIrCheckSchedule checked
+          psIrCheckSchedule scopeChecked
             [PsIrCheckTask.constructors scope layout.constructors List.nil,
              PsIrCheckTask.inductives rest (List.cons layout.name seen)]
   | PsIrCheckTask.constructors scope remaining seen =>

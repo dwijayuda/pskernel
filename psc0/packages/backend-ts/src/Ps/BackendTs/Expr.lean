@@ -422,9 +422,8 @@ def psTsEmitIntrinsicFromPrinted
   | .stringAtEnd =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (value : String) (position : String) =>
-          let size :=
-            psTsJoin "" ["__ps$utf8(", value, ").size"];
-          Except.ok (psTsJoin "" ["(", position, " >= ", size, ")"]);
+          Except.ok
+            (psTsJoin "" ["((__ps_s: string, __ps_p: bigint) => ", "(__ps_p >= __ps$utf8(__ps_s).size))(", value, ", ", position, ")"]);
       psTsPrinted2 emit arguments
   | .stringExtract =>
       let emit : String -> String -> String -> Except PsTsEmitError String :=
@@ -441,7 +440,7 @@ def psTsEmitIntrinsicFromPrinted
       let emit : String -> Except PsTsEmitError String :=
         fun (capacity : String) =>
           Except.ok
-            (psTsJoin "" ["(() => { void (", capacity, "); return []; })()"]);
+            (psTsJoin "" ["((__ps_capacity: bigint) => { void __ps_capacity; return []; })(", capacity, ")"]);
       psTsPrinted1 emit arguments
   | .arraySize =>
       let emit : String -> Except PsTsEmitError String :=
@@ -645,45 +644,54 @@ def psTsEmitExprWithFuel
           | Option.none =>
               Except.error (PsTsEmitError.unknownInductive inductiveName)
           | Option.some tag =>
-              let temp := psTsFreshMatchTemp expr;
-              let printAlternative : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> Except PsTsEmitError String :=
-                fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
-                  match alternative with
-                  | Prod.mk constructorName detail =>
-                    match detail with
-                    | Prod.mk bindings body =>
-                      match
-                          smaller
-                            body with
-                      | Except.error error => Except.error error
-                      | Except.ok printedBody =>
-                          if psListIsEmpty bindings then
-                            Except.ok
-                              (psTsJoin "" ["case ", psJsonQuote constructorName, ": return ", printedBody, ";"])
-                          else
-                            let printBinding : PsVerifiedIrMatchBinding -> Except PsTsEmitError String :=
-                              fun (binding : PsVerifiedIrMatchBinding) =>
-                                match psTsEmitType binding.type with
-                                | Except.error error => Except.error error
-                                | Except.ok type =>
-                                    Except.ok
-                                      (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temp, ".", binding.field, ";"]);
-                            match psListMapExcept printBinding bindings with
-                            | Except.error error => Except.error error
-                            | Except.ok printedBindings =>
-                                Except.ok
-                                  (psTsJoin "" ["case ", psJsonQuote constructorName, ": { ", psTsJoin " " printedBindings, " return ", printedBody, "; }"]);
-              match psListMapExcept printAlternative alternatives with
-              | Except.error error => Except.error error
-              | Except.ok cases =>
-                  match
-                      smaller
-                        scrutinee with
-                  | Except.error error => Except.error error
-                  | Except.ok printedScrutinee =>
-                      Except.ok
-                        (psTsJoin "" ["(yield* (function*() { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
-                            "invalid ProofScript constructor tag", "); })())"])
+              if psListIsEmpty alternatives then
+                match smaller scrutinee with
+                | Except.error error => Except.error error
+                | Except.ok printedScrutinee =>
+                    Except.ok
+                      (psTsJoin "" ["(yield* (function*(): __ps$Computation<never> { void (",
+                        printedScrutinee, "); throw new Error(",
+                        psJsonQuote "unreachable empty ProofScript match", "); })())"])
+              else
+                let temp := psTsFreshMatchTemp expr;
+                let printAlternative : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> Except PsTsEmitError String :=
+                  fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
+                    match alternative with
+                    | Prod.mk constructorName detail =>
+                      match detail with
+                      | Prod.mk bindings body =>
+                        match
+                            smaller
+                              body with
+                        | Except.error error => Except.error error
+                        | Except.ok printedBody =>
+                            if psListIsEmpty bindings then
+                              Except.ok
+                                (psTsJoin "" ["case ", psJsonQuote constructorName, ": return ", printedBody, ";"])
+                            else
+                              let printBinding : PsVerifiedIrMatchBinding -> Except PsTsEmitError String :=
+                                fun (binding : PsVerifiedIrMatchBinding) =>
+                                  match psTsEmitType binding.type with
+                                  | Except.error error => Except.error error
+                                  | Except.ok type =>
+                                      Except.ok
+                                        (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temp, ".", binding.field, ";"]);
+                              match psListMapExcept printBinding bindings with
+                              | Except.error error => Except.error error
+                              | Except.ok printedBindings =>
+                                  Except.ok
+                                    (psTsJoin "" ["case ", psJsonQuote constructorName, ": { ", psTsJoin " " printedBindings, " return ", printedBody, "; }"]);
+                match psListMapExcept printAlternative alternatives with
+                | Except.error error => Except.error error
+                | Except.ok cases =>
+                    match
+                        smaller
+                          scrutinee with
+                    | Except.error error => Except.error error
+                    | Except.ok printedScrutinee =>
+                        Except.ok
+                          (psTsJoin "" ["(yield* (function*() { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
+                              "invalid ProofScript constructor tag", "); })())"])
 
 
 def psTsEmitExpr

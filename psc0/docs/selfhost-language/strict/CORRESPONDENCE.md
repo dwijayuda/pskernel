@@ -14,6 +14,23 @@ identities in the ledger. Those identities describe proposed implementation
 inputs; they are not execution receipts. Native/generated qualification must
 record its actual source, compiler, IR, toolchain and product identities.
 
+## Reviewed implementation update
+
+The current integration is recorded in
+[the exact implementation manifest](reviewed-candidates/strict-implementation-batch.json).
+It retains source/normalization origins and one source-owned preparation result,
+repairs computed Nat and partial-application demand, and implements both empty
+inductives/elimination and inhabited zero-field structures. Its conformance
+receipts must come from the exact subsequent cloud run; source review is not an
+execution result.
+
+The preceding attempt at `05f37fc04e52bfaed70389291a0fcdeda819f71f`
+passed native development and the selected-R C1 gate, then exhausted the heap
+during C2. [Its retained evidence](qualification-attempts.json) and authenticated
+archive inspection establish that no C2 files were retained. The reviewed
+one-encoding path and measured 8 GiB old-space policy are not yet evidence that
+the next generation succeeds. All 33 general correspondence rules remain open.
+
 ## 1. Assurance boundary
 
 [SPEC.md](../SPEC.md), especially sections 2, 4, 6, 7 and 8, remains normative.
@@ -63,14 +80,17 @@ target reports. This prevents a caller from supplying unrelated IR or a report
 as the authority for a source compilation. It is valuable provenance, but it
 does not fill in a missing transformation proof.
 
-In particular, **`parsedModules` plus `prepared` is not a declaration-by-
-declaration normalization witness**. The current Core and original-IR models
-have no source-origin field. Normalization and erasure have useful transient
-information—resolved local identities, worker/public batches, core names,
-source/projection indices and runtime/type/erased-local maps—but the current
-public preparation output does not preserve a complete checked association.
-Any new witness must record that actual association while it is available,
-rather than infer it later from generated display names.
+In particular, **`parsedModules` plus `prepared` alone does not establish a
+transformation relation**. The reviewed origin path additionally retains actual
+source ordinals/names/spans, Core member identities and roles, and successful
+normalization-plan metadata. Erasure scopes contain actual runtime/type/erased
+local maps, expression substitutions and source/projection/layout identities.
+A complete source argument can quantify over those reachable structures; a
+checked per-compilation association witness is another possible method.
+Neither method may infer identity from generated display names or assume its
+own invariant. SPEC requires the full preservation argument and truthful
+origins; it does not mandate a particular serialized Core-to-IR certificate.
+The current retained observations do not themselves discharge that argument.
 
 A practical value relation must keep Nat and Int distinct despite their shared
 bigint carrier, Char and String distinct despite their shared string carrier,
@@ -155,18 +175,18 @@ simultaneous state, old-scope argument evaluation, captures and the wrapper's
 meaning. The previously qualified finite worker signatures and 87 worker
 observations remain evidence about their stated revisions and cases.
 
-**There is a concrete open Nat-demand obligation.**
-`psEraseNatRecursorAlternatives` currently uses a nonvariable major in the
-zero test and again in the successor predecessor expression. On that path the
-major may be evaluated twice. A separately justified total pure semantics could
-support final-value agreement, but it would not by itself establish exact
-demand, error or resource correspondence. This ledger keeps that obligation
-open; it does not change erasure or weaken the contract to conceal it.
+**The concrete repeated Nat-major lowering is repaired in the reviewed source.**
+`psEraseNatRecursorAlternatives` now places a computed major in one fresh typed
+IR let before zero testing and predecessor formation. Variables and literals
+are already values. The related partial-application repair similarly captures
+a computed callee and already supplied computed operands in ordered typed lets
+before returning the completion lambda. Both changes have a frozen shared
+source-evaluation fixture; execution on the integrated source is still required.
 
-By comparison, the structure-recursor rewrite introduces one let-bound major
-before projections, and the backend's original-IR match evaluates its
-scrutinee into one temporary. Those local patterns are useful arguments for
-their own rules; neither repairs the Nat lowering.
+The general recursor, substitution, grouped-call and capture relations remain
+open. These local sequencing corrections do not prove those relations for all
+accepted programs. Structure-recursion majors, ordinary matches and zero-branch
+matches have their own once-only lowering paths and associated proof premises.
 
 ### S5 — emitted TS/JS and runtime machinery
 
@@ -352,12 +372,13 @@ The practical sequence is recorded in the JSON ledger:
    target admission and that same emitter.
 3. Qualify the exact current path through native/generated compilers and keep
    independent provider receipts and actual product hashes.
-4. Retain genuine normalization/binder/layout witness information that is
-   currently discarded.
+4. Retain truthful normalization origins and establish the actual reachable
+   binder/layout invariant by a complete source argument or a correct checked
+   association witness.
 5. Define the common value/environment/evaluation relation, including closures,
    grouped calls, faults and demand, and relate the generator machine to it.
-6. Discharge the normalization and erasure families, including the separate
-   Nat-major demand issue.
+6. Discharge the normalization and erasure families, including the general
+   demand, substitution and capture arguments around the repaired local rules.
 7. Discharge the eleven expression rules, three optimization families, name/
    initialization arguments and explicit TS/JS toolchain assumptions.
 8. Reconcile every mandatory normative coverage requirement before activation.
@@ -370,10 +391,11 @@ than create a continuing cycle of undirected test fixes.
 Optional fixed-width/floating scalars, additional targets, foreign ABI support,
 nested patterns, omitted-domain inference and a new total-array authoring
 library are excluded only on their existing optional/deferred terms.
-**Existing Array intrinsic obligations are included.** Current refusals for
-empty layouts/matches require an explicit decision against the full mandatory
-regular-data contract; their absence from the compiler closure does not make
-the obligation disappear.
+**Existing Array intrinsic obligations are included.** Empty layouts/matches
+and inhabited zero-field structures are now implemented in the reviewed batch.
+Their raw-source, grammar, native, original-IR and emitted-type gates remain
+mandatory, together with general regular-data preservation. Their absence
+from the compiler's own source corpus does not remove that obligation.
 
 The completion criterion is a fully reconciled mandatory ledger with its
 general arguments/evidence and one immutable exact-source qualification.

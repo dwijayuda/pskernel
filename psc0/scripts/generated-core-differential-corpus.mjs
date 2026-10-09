@@ -74,7 +74,7 @@ for (const fixture of providerCorpus) {
   if (!expectedAccepted && !Number.isSafeInteger(expectedIndex)) {
     throw new Error('PSC0_GENERATED_DIFFERENTIAL_INVALID_FIXTURE: ' + fixture.id);
   }
-  const native = checkCoreAdmissions(wire, { timeoutMs: 120000 });
+  const native = checkCoreAdmissions(wire, { timeoutMs: 60000 });
   if (native.accepted !== expectedAccepted ||
       (expectedIndex !== null && native.declarationIndex !== expectedIndex)) {
     throw new Error('PSC0_GENERATED_DIFFERENTIAL_NATIVE_CORPUS_DRIFT: ' + fixture.id +

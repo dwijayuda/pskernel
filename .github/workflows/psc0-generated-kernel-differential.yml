@@ -3,13 +3,11 @@ name: PSC0 generated JS kernel differential corpus
 on:
   push:
     branches: ['psc0/generated-kernel-differential-v1']
-  pull_request:
-    paths:
-      - '.github/workflows/psc0-generated-kernel-differential.yml'
-      - 'psc0/scripts/generated-core-differential-corpus.mjs'
-      - 'psc0/scripts/generated-core-provider.mjs'
-      - 'psc0/scripts/generated-core-provider-cli.mjs'
   workflow_dispatch:
+
+concurrency:
+  group: psc0-core-differential-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

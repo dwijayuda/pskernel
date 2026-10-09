@@ -1,5 +1,160 @@
 import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
+/- An independent Option-returning specification stays in CachePolicy.lean.
+   Fast returns zero on failure, or succ of the unused budget on success.
+   This theorem excludes new cache eligibility for every possible input. -/
+private def psKernelEncodeRemaining : Option Nat → Nat
+  | .none => 0
+  | .some n => Nat.succ n
+
+private theorem psKernelEncodeSequence
+    (first : Option Nat)
+    (next : Nat → Option Nat)
+    (nextFast : Nat → Nat)
+    (hNext : ∀ n, nextFast n = psKernelEncodeRemaining (next n)) :
+    (if Nat.beq (psKernelEncodeRemaining first) 0 then 0
+     else nextFast (Nat.pred (psKernelEncodeRemaining first))) =
+       psKernelEncodeRemaining (first.bind next) := by
+  cases first with
+  | none => rfl
+  | some n => simpa [psKernelEncodeRemaining] using hNext n
+
+theorem psKernelSemanticCacheRemainingFast_refines
+    (expr : PsKernelExpr) :
+    ∀ budget : Nat,
+      psKernelSemanticCacheRemainingFast expr budget =
+        psKernelEncodeRemaining (psKernelSemanticCacheRemainingReference expr budget) := by
+  induction expr with
+  | bvar _ =>
+      intro budget
+      cases budget <;> rfl
+  | fvar _ =>
+      intro budget
+      cases budget <;> rfl
+  | mvar _ =>
+      intro budget
+      cases budget <;> rfl
+  | sort _ =>
+      intro budget
+      cases budget <;> rfl
+  | const _ _ =>
+      intro budget
+      cases budget <;> rfl
+  | lit _ =>
+      intro budget
+      cases budget <;> rfl
+  | app fn arg ihFn ihArg =>
+      intro budget
+      cases budget with
+      | zero => rfl
+      | succ n =>
+          change
+            (if Nat.beq (psKernelSemanticCacheRemainingFast fn n) 0 then 0
+             else psKernelSemanticCacheRemainingFast arg
+                    (Nat.pred (psKernelSemanticCacheRemainingFast fn n))) =
+              psKernelEncodeRemaining
+                ((psKernelSemanticCacheRemainingReference fn n).bind
+                  (fun rem => psKernelSemanticCacheRemainingReference arg rem))
+          rw [ihFn n]
+          exact psKernelEncodeSequence
+            (psKernelSemanticCacheRemainingReference fn n)
+            (fun rem => psKernelSemanticCacheRemainingReference arg rem)
+            (fun rem => psKernelSemanticCacheRemainingFast arg rem)
+            ihArg
+  | lam _ type body _ ihType ihBody =>
+      intro budget
+      cases budget with
+      | zero => rfl
+      | succ n =>
+          change
+            (if Nat.beq (psKernelSemanticCacheRemainingFast type n) 0 then 0
+             else psKernelSemanticCacheRemainingFast body
+                    (Nat.pred (psKernelSemanticCacheRemainingFast type n))) =
+              psKernelEncodeRemaining
+                ((psKernelSemanticCacheRemainingReference type n).bind
+                  (fun rem => psKernelSemanticCacheRemainingReference body rem))
+          rw [ihType n]
+          exact psKernelEncodeSequence
+            (psKernelSemanticCacheRemainingReference type n)
+            (fun rem => psKernelSemanticCacheRemainingReference body rem)
+            (fun rem => psKernelSemanticCacheRemainingFast body rem)
+            ihBody
+  | forallE _ type body _ ihType ihBody =>
+      intro budget
+      cases budget with
+      | zero => rfl
+      | succ n =>
+          change
+            (if Nat.beq (psKernelSemanticCacheRemainingFast type n) 0 then 0
+             else psKernelSemanticCacheRemainingFast body
+                    (Nat.pred (psKernelSemanticCacheRemainingFast type n))) =
+              psKernelEncodeRemaining
+                ((psKernelSemanticCacheRemainingReference type n).bind
+                  (fun rem => psKernelSemanticCacheRemainingReference body rem))
+          rw [ihType n]
+          exact psKernelEncodeSequence
+            (psKernelSemanticCacheRemainingReference type n)
+            (fun rem => psKernelSemanticCacheRemainingReference body rem)
+            (fun rem => psKernelSemanticCacheRemainingFast body rem)
+            ihBody
+  | letE _ type value body _ ihType ihValue ihBody =>
+      intro budget
+      cases budget with
+      | zero => rfl
+      | succ n =>
+          change
+            (if Nat.beq (psKernelSemanticCacheRemainingFast type n) 0 then 0
+             else
+               let valueRest := psKernelSemanticCacheRemainingFast value
+                  (Nat.pred (psKernelSemanticCacheRemainingFast type n))
+               if Nat.beq valueRest 0 then 0
+               else psKernelSemanticCacheRemainingFast body (Nat.pred valueRest)) =
+              psKernelEncodeRemaining
+                ((psKernelSemanticCacheRemainingReference type n).bind
+                  (fun typeRest =>
+                    (psKernelSemanticCacheRemainingReference value typeRest).bind
+                      (fun valueRest => psKernelSemanticCacheRemainingReference body valueRest)))
+          rw [ihType n]
+          cases hType : psKernelSemanticCacheRemainingReference type n with
+          | none =>
+              simp [psKernelEncodeRemaining, hType]
+          | some typeRest =>
+              simpa [psKernelEncodeRemaining, hType, ihValue typeRest] using
+                (psKernelEncodeSequence
+                  (psKernelSemanticCacheRemainingReference value typeRest)
+                  (fun valueRest => psKernelSemanticCacheRemainingReference body valueRest)
+                  (fun valueRest => psKernelSemanticCacheRemainingFast body valueRest)
+                  ihBody)
+  | mdata _ body ihBody =>
+      intro budget
+      cases budget with
+      | zero => rfl
+      | succ n =>
+          change
+            psKernelSemanticCacheRemainingFast body n =
+              psKernelEncodeRemaining (psKernelSemanticCacheRemainingReference body n)
+          exact ihBody n
+  | proj _ _ body ihBody =>
+      intro budget
+      cases budget with
+      | zero => rfl
+      | succ n =>
+          change
+            psKernelSemanticCacheRemainingFast body n =
+              psKernelEncodeRemaining (psKernelSemanticCacheRemainingReference body n)
+          exact ihBody n
+
+theorem psKernelSemanticCacheRemaining_fast_equals_reference
+    (expr : PsKernelExpr) (budget : Nat) :
+    psKernelSemanticCacheRemaining expr budget =
+      psKernelSemanticCacheRemainingReference expr budget := by
+  simp only [psKernelSemanticCacheRemaining,
+    psKernelSemanticCacheRemainingFast_refines expr budget]
+  cases h : psKernelSemanticCacheRemainingReference expr budget with
+  | none => rfl
+  | some n => rfl
+
+
 theorem psKernelSemanticCacheEligible_fvar
     (name : PsKernelName) :
     psKernelSemanticCacheEligible

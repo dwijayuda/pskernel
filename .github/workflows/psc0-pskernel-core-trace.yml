@@ -25,15 +25,17 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          Path("src/Ps/KernelCore/DebugTrace.lean").write_text("import Ps.KernelCore.Core.Substitution.ListOps\n\ndef psKernelTraceName : PsKernelName → String\n  | .anonymous => \"\"\n  | .str p s => psKernelTraceName p ++ \".\" ++ s\n  | .num p n => psKernelTraceName p ++ \".\" ++ toString n\n\ndef psKernelTraceHead (e : PsKernelExpr) : String :=\n  match psKernelExprGetAppFn e with\n  | .const n _ => psKernelTraceName n\n  | .fvar n => \"fvar\" ++ psKernelTraceName n\n  | .bvar n => \"bvar\" ++ toString n\n  | .lit (.nat n) => toString n\n  | .lit (.str _) => \"string\"\n  | .sort _ => \"sort\"\n  | .lam _ _ _ _ => \"lambda\"\n  | .forallE _ _ _ _ => \"forall\"\n  | .proj n i _ => \"proj\" ++ psKernelTraceName n ++ \".\" ++ toString i\n  | .letE _ _ _ _ _ => \"let\"\n  | .mdata _ _ => \"mdata\"\n  | _ => \"other\"\n\ndef psKernelTraceSummary (e : PsKernelExpr) : String :=\n  String.intercalate \" \" (psKernelTraceHead e ::\n    (psKernelExprGetAppArgs e).map psKernelTraceHead)\n")
+          helper = "import Ps.KernelCore.Core.Substitution.ListOps\n\ndef psKernelTraceName : PsKernelName → String\n  | .anonymous => \"\"\n  | .str p s => psKernelTraceName p ++ \".\" ++ s\n  | .num p n => psKernelTraceName p ++ \".\" ++ toString n\n\ndef psKernelTraceHead (e : PsKernelExpr) : String :=\n  match psKernelExprGetAppFn e with\n  | .const n _ => psKernelTraceName n\n  | .fvar n => \"fvar\" ++ psKernelTraceName n\n  | .bvar n => \"bvar\" ++ toString n\n  | .lit (.nat n) => toString n\n  | .lit (.str _) => \"string\"\n  | .sort _ => \"sort\"\n  | .lam _ _ _ _ => \"lambda\"\n  | .forallE _ _ _ _ => \"forall\"\n  | .proj n i _ => \"proj\" ++ psKernelTraceName n ++ \".\" ++ toString i\n  | .letE _ _ _ _ _ => \"let\"\n  | .mdata _ _ => \"mdata\"\n  | _ => \"other\"\n\ndef psKernelTraceSummary (e : PsKernelExpr) : String :=\n  String.intercalate \" \" (psKernelTraceHead e ::\n    (psKernelExprGetAppArgs e).map psKernelTraceHead)\n"
+          p = Path("src/Ps/KernelCore/Core/Expr.lean")
+          p.write_text(p.read_text() + "\n" + helper.split("\n", 1)[1])
           p = Path("src/Ps/KernelCore/Checker/Reduction/Whnf.lean")
-          s = "import Ps.KernelCore.DebugTrace\n" + p.read_text()
+          s = p.read_text()
           target = "  match\n      psKernelReduceNative"
           replacement = '  dbg_trace ("WHNF depth=" ++ toString context.recDepth ++ " " ++ psKernelTraceSummary core)\n' + target
           assert s.count(target) == 1
           p.write_text(s.replace(target, replacement))
           p = Path("src/Ps/KernelCore/Checker/DefEq/DeltaStep.lean")
-          s = "import Ps.KernelCore.DebugTrace\n" + p.read_text()
+          s = p.read_text()
           target = "  let leftDefinition :="
           replacement = '  dbg_trace ("DELTA " ++ psKernelTraceSummary left ++ " == " ++ psKernelTraceSummary right)\n' + target
           assert s.count(target) == 1

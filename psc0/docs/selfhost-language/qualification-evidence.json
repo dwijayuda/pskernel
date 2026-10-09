@@ -4,8 +4,8 @@
   "repository": "dwijayuda/pskernel",
   "historicalSourceRef": "37f63c39d4a07189938046c64152bba25d789450",
   "implementationBranch": "psc0/sh1-implementation-v1",
-  "updatedUtc": "2026-10-09 14:03:32 UTC",
-  "currentStatus": "R is fully qualified, independently accepted, cold-recovered and selected. The applied F worker source passed native/host/original-IR/grammar gates, but its first qualification stopped at a new host fixture's nonexistent structure-constructor export. The coherent host-helper correction requires a fresh exact-source qualification; no F fixed point/provider acceptance is claimed.",
+  "updatedUtc": "2026-10-09 14:51:06 UTC",
+  "currentStatus": "R remains qualified and selected. F attempt 2 passed the authenticated R and current-native 87-case behavior reports with identical observations, then failed an unsupported isolated ABI probe before C1 emission. The supported probe correction and TypeScript 7-only PSC0 development/recovery changes require fresh qualification. Repository-root TypeScript 5 API retirement is a separate ongoing adapter migration.",
   "checkpoints": {
     "boundedDevelopment": {
       "sourceRef": "9641928bcf7d5394f46e19a31a8ae3fd096d44b5",
@@ -3634,9 +3634,9 @@
       }
     },
     "finiteWorkerMigration": {
-      "status": "host-fixture-correction-awaiting-qualification",
+      "status": "supported-ABI-probe-and-TypeScript7-only-tooling-awaiting-qualification",
       "sourceRef": null,
-      "sourceRefMeaning": "The exact correcting source commit is recorded with its subsequent qualification run; worker source blobs remain those applied at 9ee0b1fd38dd1456a187d4675f9027440a989f2d.",
+      "sourceRefMeaning": "The immutable source commit applying this ABI/tooling correction is recorded by its new qualification run; production worker source blobs remain those applied at 9ee0b1fd38dd1456a187d4675f9027440a989f2d.",
       "applicationParentCommit": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
       "scope": {
         "workers": 12,
@@ -3661,9 +3661,9 @@
       "publicTypeAndIrAbi": null,
       "run": null,
       "hostCompletion": {
-        "proofScriptSessionBoundary": "First F attempt passed all 27 focused source/snapshot/session tests and actual generated preparation-session conformance; complete F qualification still pending.",
+        "proofScriptSessionBoundary": "F attempts 1 and 2 passed all 27 focused source/snapshot/session tests and actual generated preparation-session conformance. New-only raw PS boundaries are applied; complete F qualification remains pending.",
         "focusedHostCases": 3,
-        "providerReceiptByteLogging": "Applied; provider job was not reached in attempt 1.",
+        "providerReceiptByteLogging": "Applied; neither failed F attempt reached the provider job.",
         "focusedHostCasesExecuted": true
       },
       "selectedSeedChangedByF": false,
@@ -3823,9 +3823,167 @@
             "C2/C3 fixed point",
             "Independent F provider decisions"
           ]
+        },
+        {
+          "number": 2,
+          "sourceRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
+          "run": {
+            "id": 37941485695,
+            "attempt": 1,
+            "url": "https://github.com/dwijayuda/pskernel/actions/runs/37941485695",
+            "compilerJob": 113856701970,
+            "conclusion": "failure"
+          },
+          "reference": "worker-migration-attempt-2.json",
+          "fullLogReference": "evidence-logs/worker-migration-attempt-2.log",
+          "failure": {
+            "stepNumber": 40,
+            "stepName": "Build the selected-seed candidate before full qualification",
+            "error": "PSC0_SH1_MIGRATION_ABI_ISOLATED_SIGNATURE_PROBE: leanFrontend",
+            "source": "scripts/sh1-migration-worker-abi.mjs:245",
+            "exactLoggedLines": [
+              "2026-10-09T14:26:37.9198440Z file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-migration-worker-abi.mjs:154",
+              "2026-10-09T14:26:37.9199077Z   throw new Error('PSC0_SH1_MIGRATION_ABI_' + operation + ': ' + String(valueTag(value.error)));",
+              "2026-10-09T14:26:37.9199443Z         ^",
+              "2026-10-09T14:26:37.9199544Z ",
+              "2026-10-09T14:26:37.9199798Z Error: PSC0_SH1_MIGRATION_ABI_ISOLATED_SIGNATURE_PROBE: leanFrontend",
+              "2026-10-09T14:26:37.9200344Z     at unwrap (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-migration-worker-abi.mjs:154:9)",
+              "2026-10-09T14:26:37.9200992Z     at runMigrationWorkerAbi (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-migration-worker-abi.mjs:245:17)",
+              "2026-10-09T14:26:37.9201633Z     at buildGeneration (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:363:7)",
+              "2026-10-09T14:26:37.9202173Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1040:22",
+              "2026-10-09T14:26:37.9202468Z ",
+              "2026-10-09T14:26:37.9202550Z Node.js v22.23.3",
+              "2026-10-09T14:26:38.0682117Z ##[error]Process completed with exit code 1."
+            ],
+            "diagnosticLimit": "The wrapper reports only the outer leanFrontend error tag. The nested frontend error and rejected probe position are absent from this primary log.",
+            "boundary": "The C1 ABI hook received the prepared current-source declarations and original IR, then rejected the isolated signature-probe source before the original-IR checking and emission boundary."
+          },
+          "passed": {
+            "authenticatedReference": {
+              "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+              "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+              "elapsedMs": 457.16560799999996,
+              "passed": true,
+              "compilerBuilt": false,
+              "currentSourceQualifiedByThisCheck": false,
+              "cases": 87,
+              "observationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+              "families": [
+                {
+                  "family": "F1",
+                  "workerCases": 44,
+                  "wrapperCases": 7,
+                  "observationSha256": "637829f32a117a029b9f95bb7e19313239ca3ea42977f62961102534c785aa2b"
+                },
+                {
+                  "family": "F2",
+                  "cases": 36,
+                  "observationSha256": "8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59"
+                }
+              ]
+            },
+            "nativeCandidate": {
+              "sourceRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
+              "moduleCount": 61,
+              "closureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+              "javascriptSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+              "typescriptSha256": "0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a",
+              "elapsedMs": 272882.511957,
+              "grammarReceiptSha256": "6d6bdb15cb1c4dacebee92104dd11538058118b072637575f1f39f7e4bb8878c",
+              "nativeIR": {
+                "report": "ir-checker-native/receipt.json",
+                "schemaVersion": 1,
+                "kind": "psc0-native-original-ir-check",
+                "accepted": true,
+                "traversalComplete": true,
+                "visitedSteps": 728064,
+                "expressionCount": 56602,
+                "findingCount": 0,
+                "retainedFindingCount": 0,
+                "omittedFindingDetails": 0,
+                "strictSh1Qualified": false,
+                "reportPath": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/ir-checker-native/checked-current-source.ts.ir-report.json"
+              },
+              "selectedSeedBootstrapProven": false,
+              "currentSourceFixedPointProven": false
+            },
+            "n1WorkerMigration": {
+              "cases": 87,
+              "observationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+              "families": [
+                {
+                  "family": "F1",
+                  "workerCases": 44,
+                  "wrapperCases": 7,
+                  "observationSha256": "637829f32a117a029b9f95bb7e19313239ca3ea42977f62961102534c785aa2b"
+                },
+                {
+                  "family": "F2",
+                  "cases": 36,
+                  "observationSha256": "8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59"
+                }
+              ]
+            },
+            "grammarClosure": {
+              "compilerSha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15",
+              "closureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+              "moduleCount": 61,
+              "proofScriptBytes": 902538,
+              "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent"
+            },
+            "typescriptComparison": {
+              "mode": "same-source-comparison",
+              "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/full-compiler/report.json",
+              "sourceSha256": "0d90517192bba53dbc6190c774158559b64871b7222ba37b0df5a65a325db99a",
+              "timings": [
+                {
+                  "phase": "compile-historical",
+                  "version": "5.8.3",
+                  "elapsedMs": 7142.063881
+                },
+                {
+                  "phase": "compile-current",
+                  "version": "7.0.2",
+                  "elapsedMs": 2186.0665360000003
+                }
+              ]
+            }
+          },
+          "unreached": [
+            "C1 generation receipt and full twelve-worker ABI acceptance",
+            "paired selected-R/current-F migration correspondence receipt",
+            "C2/C3 same-source fixed point",
+            "current-F independent provider admissions"
+          ],
+          "retainedEvidence": {
+            "bundleSha256": "47fc2dd40136b6577a42c247e597a9c975f51dd221f649be4066eafb8b365c51",
+            "decodedPrimaryLogSha256": "6c5b5d731bd9fe49364835c6a1bc543ef64f3b14425eaf44d75a566cfdd482c3",
+            "compactLoggedRecords": 16,
+            "originalArtifactReceiptBytes": false
+          }
         }
       ],
       "correction": {
+        "scope": "Isolated ABI probe plus early workflow preflight; PSC0 host and qualification tooling retire TypeScript 5 in the same checkpoint. The twelve workers and three alias removals are unchanged.",
+        "reason": "The owned Lean frontend has no axiom declaration grammar. Model the nineteen monomorphic probe types with one-constructor inductives and read the independent complete signature from the first explicitly annotated worker binder.",
+        "expectedBehaviorChanged": false,
+        "requiredCases": 87,
+        "requiredAbiWorkers": 12,
+        "auditReference": "worker-migration-abi-repair.json",
+        "correctedAbiBlob": "4870981ef906729cb9d2538c20d0c40b18db5069",
+        "referencePreflight": {
+          "source": "authenticated selected R",
+          "before": "N1",
+          "cases": 87,
+          "signatureTypeAnnotations": 12,
+          "typedGenericPartialWrappers": 12,
+          "compilerBuild": false,
+          "currentSourceCoreOrIrCompared": false,
+          "replacesFullCurrentAbiGate": false
+        },
+        "productionWorkerSourceChanged": false
+      },
+      "fixtureCorrection": {
         "scope": "Two host behavior fixture helpers plus one cheap workflow reference preflight; compiler worker/grammar/checker/ABI/provider/selected-seed source unchanged.",
         "reason": "The TS backend emits structures as interfaces/private brands, without Type.mk runtime namespaces. Reuse actual neutral factories/templates and explicitly label non-IR structural host fixture records.",
         "expectedBehaviorChanged": false,
@@ -3849,6 +4007,31 @@
           "sharedMigration": "796263a6a5724f3971530b435f13eb7ce1438eb8"
         }
       }
+    },
+    "typeScript5Retirement": {
+      "status": "PSC0-current-profile-applied-proof-pending-root-workspace-migration-pending",
+      "authorization": "User: retire TypeScript 5 from future development; the old compiler is no longer needed.",
+      "currentVersion": "7.0.2",
+      "currentLegacyFallback": false,
+      "routineOldCompilerInstallation": false,
+      "routineCrossVersionComparison": false,
+      "immutableHistoricalSourceAndEvidencePreserved": true,
+      "selectedRManifestChanged": false,
+      "selectedRIdentityChanged": false,
+      "psc0ProfileManifestReference": "typescript7-only-tooling-change.json",
+      "nativeSelectedRRecovery": {
+        "status": "implemented-awaiting-independent-cold-proof",
+        "runner": "scripts/sh1-native-seed-recovery.mjs",
+        "policy": "selfhost-seed-recovery.json",
+        "changeRecord": "typescript7-native-recovery-change.json",
+        "exactFourProductsRequired": true,
+        "selectedIdentityUnchanged": true,
+        "generatedCompilerExecuted": false,
+        "historicalTypeScriptExecuted": false
+      },
+      "rootWorkspace": "The separate root backend compiler-API adapter and root workspace pins are being migrated on their own branch; no TypeScript 5 retirement claim is made for them yet.",
+      "providerKernelMetatheoryDefeqChanged": false,
+      "qualified": false
     }
   },
   "acceptanceAxes": {
@@ -4202,7 +4385,7 @@
   "activeContinuation": {
     "branch": "psc0/sh1-projection-grammar-v1",
     "sourceRef": null,
-    "stage": "Coherent F fixture correction; fresh qualification pending",
+    "stage": "Supported ABI probe and TypeScript 7-only PSC0 qualification pending",
     "canonicalBranchIntegrated": false,
     "selectedSeed": "R",
     "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
@@ -4212,7 +4395,8 @@
     "qualifiedRSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
     "selectionCommitSha": "e65606397fb679d7cb96f4f0e92700a6cf0944a6",
     "initialFSourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
-    "lastAttemptRunId": 37939061854,
-    "lastAttemptConclusion": "failure"
+    "lastAttemptRunId": 37941485695,
+    "lastAttemptConclusion": "failure",
+    "typeScript5RetirementRequested": true
   }
 }

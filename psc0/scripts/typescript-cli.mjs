@@ -3,8 +3,8 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 
 function checkedVersion(version) {
-  if (version !== '7.0.2' && version !== '5.8.3') {
-    throw new Error('PSC0_TYPESCRIPT_VERSION: expected 7.0.2 or historical 5.8.3, received ' + JSON.stringify(version));
+  if (version !== '7.0.2') {
+    throw new Error('PSC0_TYPESCRIPT_VERSION: expected current TypeScript 7.0.2, received ' + JSON.stringify(version));
   }
   return version;
 }
@@ -13,10 +13,11 @@ export function expectedTypeScriptVersion() {
   return checkedVersion(process.env.PSC0_TYPESCRIPT_VERSION ?? '7.0.2');
 }
 
-// Positional source files must ignore unrelated project configuration in TS7.
-// Historical recovery keeps the exact TS5 argument list and artifact recipe.
+// Current positional compilation uses only TS7 and ignores unrelated project configuration.
+// Historical producer recipes remain available at their immutable source revisions.
 export function typeScriptProfileArgs(args, version = expectedTypeScriptVersion()) {
-  return checkedVersion(version) === '7.0.2' ? ['--ignoreConfig', ...args] : [...args];
+  checkedVersion(version);
+  return ['--ignoreConfig', ...args];
 }
 
 function installedPackageCli(packageJson) {
@@ -54,7 +55,7 @@ function installedLauncher(candidate) {
   }
 }
 
-// Both pinned releases provide a JavaScript bin.tsc launcher. Invoke that file
+// The pinned TS7 package provides a JavaScript bin.tsc launcher. Invoke that file
 // through Node on every host; never invoke a shell shim or the native binary.
 export function resolveTypeScriptCli() {
   const expected = expectedTypeScriptVersion();

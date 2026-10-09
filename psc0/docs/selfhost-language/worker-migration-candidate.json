@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "psc0-sh1-finite-worker-migration-candidate",
-  "status": "applied-host-fixture-correction-qualification-pending",
+  "status": "applied-supported-ABI-probe-and-TypeScript7-only-tooling-qualification-pending",
   "repository": "dwijayuda/pskernel",
   "inspectedBaseRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
   "sourceGrammar": {
@@ -441,17 +441,24 @@
     "outOfScopeSourceBytesPreserved": true,
     "independentBehaviorAndAbiReview": "complete",
     "nativeBuildExecuted": true,
-    "generatedRuntimeExecuted": false,
+    "generatedRuntimeExecuted": true,
     "compilerQualification": null,
     "providerAcceptance": null,
     "nativeBuildResult": {
-      "sourceRef": "9ee0b1fd38dd1456a187d4675f9027440a989f2d",
-      "runId": 37939061854,
+      "sourceRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
+      "runId": 37941485695,
       "core": 75,
       "translation": 10,
       "erasure": 16
     },
-    "generatedRuntimeScope": "Existing N1 compiler/runtime gates passed, but the new 87-case migration gate stopped during its first fixture construction and has no completed receipt."
+    "generatedRuntimeScope": "Attempt 2 completed all 87 migration cases on authenticated R and current native F with deeply equal reports. C1/C2/C3 paired behavior, twelve-worker current Core/IR ABI, fixed point and provider acceptance remain pending.",
+    "nativeBehavior": {
+      "sourceRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
+      "runId": 37941485695,
+      "cases": 87,
+      "referenceAndCurrentReportsEqual": true,
+      "observationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be"
+    }
   },
   "performanceClaim": null,
   "preparedHostCompletion": {
@@ -526,6 +533,13 @@
       "conclusion": "failure",
       "evidence": "worker-migration-attempt-1.json",
       "failureScope": "Missing runtime structure constructor in new host fixture, before worker behavior results."
+    },
+    {
+      "sourceRef": "f62c38c890af13b1e8ccb2a4d2650b9c7c6d2d5f",
+      "runId": 37941485695,
+      "conclusion": "failure",
+      "evidence": "worker-migration-attempt-2.json",
+      "failureScope": "C1 isolated signature source rejected by the owned Lean frontend; complete current-source ABI/fixed-point/provider gates remain unearned."
     }
   ],
   "fixtureCorrection": {
@@ -551,5 +565,31 @@
       "freshName": "240727d033a1eb2d630826560c350ea76dd4d4d4",
       "sharedMigration": "796263a6a5724f3971530b435f13eb7ce1438eb8"
     }
+  },
+  "abiProbeCorrection": {
+    "scope": "Isolated ABI probe plus early workflow preflight; PSC0 host and qualification tooling retire TypeScript 5 in the same checkpoint. The twelve workers and three alias removals are unchanged.",
+    "reason": "The owned Lean frontend has no axiom declaration grammar. Model the nineteen monomorphic probe types with one-constructor inductives and read the independent complete signature from the first explicitly annotated worker binder.",
+    "expectedBehaviorChanged": false,
+    "requiredCases": 87,
+    "requiredAbiWorkers": 12,
+    "auditReference": "worker-migration-abi-repair.json",
+    "correctedAbiBlob": "4870981ef906729cb9d2538c20d0c40b18db5069",
+    "referencePreflight": {
+      "source": "authenticated selected R",
+      "before": "N1",
+      "cases": 87,
+      "signatureTypeAnnotations": 12,
+      "typedGenericPartialWrappers": 12,
+      "compilerBuild": false,
+      "currentSourceCoreOrIrCompared": false,
+      "replacesFullCurrentAbiGate": false
+    },
+    "productionWorkerSourceChanged": false
+  },
+  "currentTypeScriptPolicy": {
+    "version": "7.0.2",
+    "oldCompilerRetiredFromActivePsc0Tooling": true,
+    "coldRecoveryProofPending": true,
+    "rootWorkspaceRetirementSeparateAndPending": true
   }
 }

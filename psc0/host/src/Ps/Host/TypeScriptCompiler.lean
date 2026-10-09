@@ -24,14 +24,15 @@ def psTypeScriptOutputPaths
     psReplaceSuffix typeScriptPath ".ts" ".js.map"
   )
 
--- Current compilation and historical recovery have separate, exact profiles.
+-- Current compilation accepts only the pinned TS7 profile. Historical recipes
+-- remain at their immutable source revisions.
 def psTypeScriptExpectedVersion : IO String := do
   let version := (← IO.getEnv "PSC0_TYPESCRIPT_VERSION").getD "7.0.2"
-  if version == "7.0.2" || version == "5.8.3" then
+  if version == "7.0.2" then
     pure version
   else
     throw (IO.userError
-      ("PSC0_TYPESCRIPT_VERSION: expected 7.0.2 or historical 5.8.3, received " ++ version))
+      ("PSC0_TYPESCRIPT_VERSION: expected current TypeScript 7.0.2, received " ++ version))
 
 -- FilePath.isAbsolute also accepts drive-relative Windows paths such as C:tsc.
 def psTypeScriptAbsolutePath (value : String) : Bool :=
@@ -164,8 +165,8 @@ def psTypeScriptVersion : IO String := do
   let cli ← psTypeScriptCli
   psTypeScriptVerifyVersion cli expected
 
-def psTypeScriptProfileArgs (version : String) (args : Array String) : Array String :=
-  if version == "7.0.2" then #["--ignoreConfig"] ++ args else args
+def psTypeScriptProfileArgs (args : Array String) : Array String :=
+  #["--ignoreConfig"] ++ args
 
 def psCompileTypeScriptFile
     (typeScriptPath : String) :
@@ -173,7 +174,7 @@ def psCompileTypeScriptFile
   let expected ← psTypeScriptExpectedVersion
   let cli ← psTypeScriptCli
   let version ← psTypeScriptVerifyVersion cli expected
-  let arguments := psTypeScriptProfileArgs version #[
+  let arguments := psTypeScriptProfileArgs #[
       typeScriptPath,
       "--target", "ES2022",
       "--module", "ES2022",

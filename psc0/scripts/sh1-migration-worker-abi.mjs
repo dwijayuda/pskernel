@@ -107,18 +107,23 @@ function collectAbstractTypes(type, names) {
   for (const argument of type.slice(1)) collectAbstractTypes(argument, names);
 }
 
-function signatureSource() {
+function abstractTypeNames() {
   const names = new Set();
   for (const worker of workers) {
     for (const [, type] of worker.parameters) collectAbstractTypes(type, names);
     collectAbstractTypes(worker.result, names);
   }
-  // These axioms model the unchanged monomorphic Type names only. The exact
-  // actual worker types, including universe arguments, are compared below.
-  const lines = [...names].sort().map((name) => 'axiom ' + name + ' : Type');
-  workers.forEach((worker, index) => {
-    lines.push('axiom sh1MigrationExpected' + index + ' : ' + fullTypeSource(worker));
-  });
+  return [...names].sort();
+}
+
+const abstractTypes = abstractTypeNames();
+
+function signatureSource() {
+  // The owned Lean frontend accepts these monomorphic inductives. Each mock
+  // has one zero-field constructor; constructorless inductives and axioms are
+  // not supported. Only the unchanged type names/universes enter comparison.
+  const lines = abstractTypes.map((name) =>
+    'inductive ' + name + ' : Type where\n  | mk');
   workers.forEach((worker, index) => {
     const before = worker.parameters.slice(0, worker.outerArguments);
     const after = worker.parameters.slice(worker.outerArguments);
@@ -137,6 +142,7 @@ function signatureSource() {
 }
 
 const isolatedSource = signatureSource();
+export const migrationWorkerAbiProbeSource = isolatedSource;
 
 function array(value, valueTag) {
   const result = [];
@@ -151,7 +157,8 @@ function array(value, valueTag) {
 
 function unwrap(value, valueTag, operation) {
   if (valueTag(value) === 'ok') return value.value;
-  throw new Error('PSC0_SH1_MIGRATION_ABI_' + operation + ': ' + String(valueTag(value.error)));
+  throw new Error('PSC0_SH1_MIGRATION_ABI_' + operation + ': ' +
+    String(valueTag(value.error)) + ' ' + JSON.stringify(alphaData(value.error, valueTag)));
 }
 
 function selectedCoreDeclarations(compiler, declarations, names, valueTag) {
@@ -236,35 +243,91 @@ function observedIrType(type, valueTag, depth = 0) {
   }
 }
 
-export function runMigrationWorkerAbi(compiler, prepared, ir, valueTag) {
+function prepareMigrationWorkerAbiProbe(compiler, valueTag) {
   assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_ABI_TAG_READER');
-  for (const name of ['psCompilerPrepareSource', 'psExprAlphaEq', 'psDeclarationName',
-    'psDeclarationType', 'psNameToString', 'psNameEq', 'psRootName']) {
-    assert.equal(typeof compiler[name], 'function', 'PSC0_SH1_MIGRATION_ABI_EXPORT: ' + name);
-  }
+  const required = ['psCompilerPrepareSource', 'psExprAlphaEq', 'psDeclarationName',
+    'psDeclarationType', 'psNameToString', 'psNameEq', 'psRootName'];
+  const missing = required.filter((name) => typeof compiler[name] !== 'function');
+  assert.deepEqual(missing, [], 'PSC0_SH1_MIGRATION_ABI_MISSING_EXPORTS');
+  assert.equal(valueTag(compiler.PsCompilerSourceKind?.lean), 'lean',
+    'PSC0_SH1_MIGRATION_ABI_LEAN_SOURCE_KIND');
   const probe = unwrap(compiler.psCompilerPrepareSource(
     compiler.PsCompilerSourceKind.lean, isolatedSource), valueTag, 'ISOLATED_SIGNATURE_PROBE');
+  const partials = workers.map((_, index) => 'sh1MigrationPartial' + index);
+  const declarations = selectedCoreDeclarations(compiler, probe.declarations, partials, valueTag);
+  const referenceTypes = workers.map((worker, index) => {
+    const partial = declarations.get(partials[index]);
+    assert.equal(valueTag(partial), 'definitionDecl',
+      'PSC0_SH1_MIGRATION_PARTIAL_DECL_KIND: ' + worker.name);
+    assert.equal(array(partial.levelParams, valueTag).length, 0,
+      'PSC0_SH1_MIGRATION_PARTIAL_UNIVERSE_PARAMETERS: ' + worker.name);
+    const wrapperType = compiler.psDeclarationType(partial);
+    assert.equal(valueTag(wrapperType), 'forallE',
+      'PSC0_SH1_MIGRATION_PARTIAL_WORKER_BINDER: ' + worker.name);
+    assert.equal(valueTag(wrapperType.binder), 'explicit',
+      'PSC0_SH1_MIGRATION_PARTIAL_WORKER_BINDER_KIND: ' + worker.name);
+    const result = dropBinders(wrapperType, worker.parameters.length + 1, valueTag, worker.name);
+    assert.notEqual(valueTag(result), 'forallE',
+      'PSC0_SH1_MIGRATION_PARTIAL_WRAPPER_ARITY: ' + worker.name);
+    const referenceType = wrapperType.type;
+    const referenceResult = dropBinders(referenceType, worker.parameters.length, valueTag, worker.name);
+    assert.notEqual(valueTag(referenceResult), 'forallE',
+      'PSC0_SH1_MIGRATION_REFERENCE_FUNCTION_RESULT: ' + worker.name);
+    return {
+      name: worker.name,
+      completePublicType: fullTypeSource(worker),
+      coreType: alphaData(referenceType, valueTag),
+      originalOuterArguments: worker.outerArguments,
+      partialApplicationType: fullTypeSource(worker, worker.outerArguments),
+      genericPartialWrapperElaborated: true,
+    };
+  });
+  return {
+    declarations,
+    report: {
+      schemaVersion: 1,
+      evidence: 'isolated-migration-signature-and-partial-probe',
+      sourceSha256: sha256(isolatedSource),
+      sourceKind: 'lean',
+      abstractTypeDeclarations: abstractTypes.length,
+      abstractTypeNames: abstractTypes,
+      signatureTypeAnnotations: workers.length,
+      typedGenericPartialWrappers: workers.length,
+      declarationCount: array(probe.declarations, valueTag).length,
+      referenceTypes,
+      referenceTypeSha256: sha256(JSON.stringify(referenceTypes)),
+      phase: 'elaboration-and-admission-encoding',
+      mergedIntoAuthoritativeClosure: false,
+      erasedOrEmitted: false,
+      runtimeExecuted: false,
+      currentSourceCoreOrIrCompared: false,
+      fullBaselineClosurePreparedAgain: false,
+    },
+  };
+}
+
+export function runMigrationWorkerAbiProbe(compiler, valueTag) {
+  return prepareMigrationWorkerAbiProbe(compiler, valueTag).report;
+}
+
+export function runMigrationWorkerAbi(compiler, prepared, ir, valueTag) {
+  const probe = prepareMigrationWorkerAbiProbe(compiler, valueTag);
   const names = workers.map((worker) => worker.name);
-  const references = workers.map((_, index) => 'sh1MigrationExpected' + index);
   const partials = workers.map((_, index) => 'sh1MigrationPartial' + index);
   const actual = selectedCoreDeclarations(compiler, prepared.declarations, names, valueTag);
-  const isolated = selectedCoreDeclarations(compiler, probe.declarations,
-    references.concat(partials), valueTag);
+  const isolated = probe.declarations;
   const runtime = selectedIrDeclarations(ir, valueTag);
   const observations = workers.map((worker, index) => {
     const declaration = actual.get(worker.name);
-    const reference = isolated.get(references[index]);
     const partial = isolated.get(partials[index]);
     assert.equal(valueTag(declaration), 'definitionDecl',
       'PSC0_SH1_MIGRATION_CORE_DECL_KIND: ' + worker.name);
     assert.equal(array(declaration.levelParams, valueTag).length, 0,
       'PSC0_SH1_MIGRATION_CORE_UNIVERSE_PARAMETERS: ' + worker.name);
-    assert.equal(valueTag(reference), 'axiomDecl',
-      'PSC0_SH1_MIGRATION_REFERENCE_DECL_KIND: ' + worker.name);
     assert.equal(valueTag(partial), 'definitionDecl',
       'PSC0_SH1_MIGRATION_PARTIAL_DECL_KIND: ' + worker.name);
     const actualType = compiler.psDeclarationType(declaration);
-    const referenceType = compiler.psDeclarationType(reference);
+    const referenceType = compiler.psDeclarationType(partial).type;
     assert.equal(compiler.psExprAlphaEq(actualType, referenceType), true,
       'PSC0_SH1_MIGRATION_COMPLETE_PUBLIC_TYPE: ' + worker.name);
     const result = dropBinders(actualType, worker.parameters.length, valueTag, worker.name);
@@ -312,8 +375,10 @@ export function runMigrationWorkerAbi(compiler, prepared, ir, valueTag) {
     isolatedProbe: {
       sourceSha256: sha256(isolatedSource),
       sourceKind: 'lean',
-      signatureAxioms: workers.length,
+      abstractTypeDeclarations: abstractTypes.length,
+      signatureTypeAnnotations: workers.length,
       typedGenericPartialWrappers: workers.length,
+      referenceTypeSha256: probe.report.referenceTypeSha256,
       phase: 'elaboration-and-admission-encoding',
       mergedIntoAuthoritativeClosure: false,
       erasedOrEmitted: false,

@@ -24,10 +24,10 @@ try {
     });
     const input = path.join(staging, `${fixture}.ts`);
     await writeFile(input, source);
-    // TS7 permits CommonJS with bundler resolution; keep TS5 recovery arguments unchanged.
+    // The current TS7 CommonJS fixture uses explicit bundler resolution.
     execFileSync(process.execPath, [tsc, ...typeScriptProfileArgs([
       input, '--strict', '--target', 'ES2022', '--module', 'commonjs',
-      ...(expectedVersion === '7.0.2' ? ['--moduleResolution', 'bundler'] : []),
+      '--moduleResolution', 'bundler',
     ], expectedVersion)], {
       encoding: 'utf8', timeout: 120000,
     });

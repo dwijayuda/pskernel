@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-native-ts7-seed-recovery-policy",
+  "recipe": {
+    "id": "native-lean-original-ir-four-products-ts7/1",
+    "files": [
+      {
+        "path": "scripts/sh1-native-seed-recovery.mjs",
+        "gitBlobSha1": "4e2fe462ba5c8160ff5c08f70ce52152173b0d6f"
+      },
+      {
+        "path": "scripts/sh1-successor-seed.mjs",
+        "gitBlobSha1": "ddd54197ee3f7831d0643431c05f435b1fdfe53f"
+      },
+      {
+        "path": "scripts/sh1-seed-manifest.mjs",
+        "gitBlobSha1": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
+      },
+      {
+        "path": "scripts/sh1-grammar-conformance.mjs",
+        "gitBlobSha1": "48efa9b0c90e7904a1df49f43253395841bff90c"
+      },
+      {
+        "path": "scripts/sh1-source-snapshot.mjs",
+        "gitBlobSha1": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+      },
+      {
+        "path": "scripts/workspace-layout.mjs",
+        "gitBlobSha1": "eb7c2c07f147a812f9998904a60123b3719e5539"
+      },
+      {
+        "path": "scripts/typescript-cli.mjs",
+        "gitBlobSha1": "9d6607a6f4284b0afba8023566f6e1d75c30a64a"
+      }
+    ]
+  },
+  "selectedSeed": {
+    "manifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+    "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225"
+  },
+  "source": {
+    "ref": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "closureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+    "moduleCount": 61,
+    "kind": "raw-authoritative-lean",
+    "entry": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean"
+  },
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "qualificationBoundary": "A separate successful isolated cold receipt is required before claiming this recovery route qualified."
+}

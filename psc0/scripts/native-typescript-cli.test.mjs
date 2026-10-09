@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
-import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,11 +40,28 @@ try {
   assert.match(await readFile(discoveryOutput, 'utf8'), /export const answer/);
   assert(discovery.stdout.includes('PSC2_TYPESCRIPT: ' + expected), discovery.stdout);
 
-  // A valid installed launcher with the wrong allowed profile must fail before tsc compilation.
-  const mismatchOutput = path.join(directory, 'wrong-profile.js');
+  // The retired TS5 profile must fail before launcher selection or compilation.
+  const retiredOutput = path.join(directory, 'retired-profile.js');
+  const retired = spawnSync(compiler, ['build', source, '--out', retiredOutput], {
+    cwd: directory, env: { ...selectedEnv, PSC0_TYPESCRIPT_VERSION: '5.8.3' },
+    encoding: 'utf8', timeout: 30000,
+  });
+  assert.notEqual(retired.status, 0);
+  assert.match(retired.stderr, /PSC0_TYPESCRIPT_VERSION/);
+  assert(!existsSync(retiredOutput), 'a retired profile must not emit JavaScript');
+
+  // This package-shaped fixture reports a wrong version; it is not a TS compiler.
+  // It preserves the native version-mismatch check without installing TS5.
+  const mismatchPackage = path.join(directory, 'wrong-version-package');
+  const mismatchCli = path.join(mismatchPackage, 'bin', 'tsc');
+  await mkdir(path.dirname(mismatchCli), { recursive: true });
+  await writeFile(path.join(mismatchPackage, 'package.json'), JSON.stringify({
+    name: 'typescript', version: '7.0.1', bin: { tsc: 'bin/tsc' },
+  }));
+  await writeFile(mismatchCli, 'process.stdout.write("Version 7.0.1");');
+  const mismatchOutput = path.join(directory, 'wrong-version.js');
   const mismatch = spawnSync(compiler, ['build', source, '--out', mismatchOutput], {
-    cwd: directory, env: { ...selectedEnv,
-      PSC0_TYPESCRIPT_VERSION: expected === '7.0.2' ? '5.8.3' : '7.0.2' },
+    cwd: directory, env: { ...selectedEnv, PSC0_TSC: mismatchCli },
     encoding: 'utf8', timeout: 30000,
   });
   assert.notEqual(mismatch.status, 0);

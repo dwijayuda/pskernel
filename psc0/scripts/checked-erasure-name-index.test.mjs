@@ -31,7 +31,7 @@ test('generated erasure indexes preserve collisions, structured names, precedenc
     assert.equal(execFileSync(process.execPath,[compiler,'--version'],{encoding:'utf8',timeout:10000}).trim(),'Version '+expectedVersion);
     execFileSync(process.execPath,[compiler,...typeScriptProfileArgs([
       '--strict','--target','ES2022','--module','ES2022',
-      ...(expectedVersion==='7.0.2'?['--moduleResolution','bundler']:[]),
+      '--moduleResolution','bundler',
       '--outDir',dir,ts],expectedVersion)],{encoding:'utf8',timeout:60000});
     const m=await import(pathToFileURL(path.join(dir,'index.js')).href);
     assert.equal(m.erasureScopeCollision(7n),16n, 'local output names must not capture a qualified declaration');

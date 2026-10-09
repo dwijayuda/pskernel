@@ -47,14 +47,20 @@ const historicalRecipe = Object.freeze({
   leanGitHash: '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
 });
 const [command, ...args] = process.argv.slice(2);
-const historicalCommands = new Set(['seed-identity', 'recover-seed', 'recover-qualified-seed']);
+const historicalCommands = new Set([
+  'seed-identity', 'recover-seed', 'recover-qualified-seed', 'recover-successor-seed',
+]);
+if (historicalCommands.has(command)) {
+  throw new Error('PSC0_SH1_LEGACY_RECOVERY_RETIRED: current development uses TypeScript 7 only; ' +
+    'use scripts/sh1-native-seed-recovery.mjs for the selected seed. Historical recipes remain at their immutable source revisions.');
+}
 const typescriptVersion = expectedTypeScriptVersion();
-assert.equal(typescriptVersion, historicalCommands.has(command) ? '5.8.3' : '7.0.2',
-  'PSC0_SH1_TYPESCRIPT_PROFILE: recovery requires 5.8.3; current qualification requires 7.0.2');
+assert.equal(typescriptVersion, '7.0.2',
+  'PSC0_SH1_TYPESCRIPT_PROFILE: current qualification requires TypeScript 7.0.2');
 const tsc = resolveTypeScriptCli();
 const typescriptProfile = Object.freeze({
   version: typescriptVersion,
-  purpose: historicalCommands.has(command) ? 'historical-seed-recovery' : 'current-emission',
+  purpose: 'current-emission',
   arguments: typeScriptProfileArgs([], typescriptVersion),
 });
 
@@ -294,7 +300,7 @@ async function selectedAuthoringSeed(compilerOverride) {
   assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed',
     'PSC0_SH1_MIGRATION_PROJECTION_SUCCESSOR_REQUIRED');
   // The dispatch reader requires both authentic cold-recovery and provider
-  // evidence. Immutable S0/A reconstruction still uses its separate commands.
+  // evidence. Historical S0/A recipes are archived at their original revisions.
   await verifySeedExecutionRuntime(selected.manifest.toolchain, selected.recoveryTypeScriptVersion);
   const compilerPath = path.resolve(root, compilerOverride ?? selected.compilerPath);
   const expectedSha256 = selected.manifest.expectedArtifacts.javascriptSha256;
@@ -358,9 +364,7 @@ async function buildGeneration(compilerPath, closure, outDir, {
   const canonicalDone = performance.now();
   const ir = unwrap(compiler.psCompilerVerifiedIrFromPrepared(prepared), 'ERASE');
   // Observe the existing current-source objects before their original-IR check.
-  // Historical TS5 reconstruction retains its exact established boundary.
-  const migrationWorkerAbi = historicalCommands.has(command) ? undefined
-    : runMigrationWorkerAbi(compiler, prepared, ir, valueTag);
+  const migrationWorkerAbi = runMigrationWorkerAbi(compiler, prepared, ir, valueTag);
   const irInventory = inventoryOriginalIr(compiler, ir, {
     compilerSha256, legacyBoundary: legacyIrBoundary,
   });
@@ -812,75 +816,17 @@ async function recoverSuccessorSeed({
 
 async function retainPromotableSeed(qualification, firstReceipt, secondReceipt, thirdReceipt, outDir) {
   const selected = await readSelectedSeed();
-  if (selected.mode === 'qualified' && selected.manifest.kind === 'psc0-qualified-source-seed' &&
-      typescriptVersion === '7.0.2') {
-    const manifest = makeSuccessorSeedManifest({
-      qualification, firstReceipt, secondReceipt, thirdReceipt,
-      parentManifest: selected.manifest, runId: process.env.GITHUB_RUN_ID,
-      syntaxReferenceSha256: sh1GrammarProfile.referenceSha256,
-    });
-    const successor = successorSeedSelection(manifest);
-    await materializeSuccessorSeed({
-      generationDirectory: path.join(outDir, 'C2'),
-      cacheDirectory: path.join(root, successor.cacheDirectory), manifest,
-      origin: 'Fresh compiler-qualified successor candidate; A stays selected until cold recovery and provider acceptance.',
-    });
-    await writeJson(path.join(outDir, 'seed-promotion.json'), manifest);
-    await writeJson(path.join(outDir, 'seed-selection.json'), {
-      status: 'successor-candidate-retained-not-selected',
-      selectedSourceRef: selected.sourceRef,
-      selectedCompilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,
-      candidateSourceRef: manifest.sourceRef,
-      candidateCompilerSha256: manifest.expectedArtifacts.javascriptSha256,
-      candidateIdentitySha256: successor.identitySha256,
-      remaining: ['cold-successor-recovery', 'exact-stream-provider-acceptance', 'explicit-selected-manifest-update'],
-    });
-    if (process.env.GITHUB_OUTPUT) {
-      await appendFile(process.env.GITHUB_OUTPUT,
-        'successor-candidate=true\n' +
-        'promoted-seed-cache-key=' + successor.cacheKey + '\n' +
-        'promoted-seed-cache-directory=psc0/' + successor.cacheDirectory + '\n');
-    }
-    process.stdout.write('PSC0_SH1_SEED_PROMOTION: ' + JSON.stringify(manifest) + '\n');
-    return;
-  }
-  if (selected.mode === 'qualified') {
-    // The selected recoverable successor remains sufficient for this migration.
-    // Further promotion requires its own explicit and qualified recovery path.
-    await writeJson(path.join(outDir, 'seed-selection.json'), {
-      status: 'existing-qualified-authoring-seed-retained',
-      sourceRef: selected.sourceRef,
-      compilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,
-      futurePromotion: 'A later language capability promotion needs an explicit parent-seed recovery plan.',
-    });
-    return;
-  }
-  if (typescriptVersion !== '5.8.3') {
-    await writeJson(path.join(outDir, 'seed-selection.json'), {
-      status: 'historical-authoring-seed-retained',
-      sourceRef: selected.sourceRef,
-      reason: 'A TypeScript 7 product needs an explicit new seed manifest and parent-seed recovery recipe.',
-    });
-    return;
-  }
-  const manifest = makeQualifiedSeedManifest({
-    qualification, firstReceipt, secondReceipt, runId: process.env.GITHUB_RUN_ID,
+  assert.equal(selected.mode, 'qualified', 'PSC0_SH1_CURRENT_QUALIFIED_SEED_REQUIRED');
+  assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed',
+    'PSC0_SH1_CURRENT_SUCCESSOR_REQUIRED');
+  // Current migrations retain the already qualified successor. A new promotion
+  // requires its own qualified recovery contract and explicit selection.
+  await writeJson(path.join(outDir, 'seed-selection.json'), {
+    status: 'existing-qualified-authoring-seed-retained',
+    sourceRef: selected.sourceRef,
+    compilerSha256: selected.manifest.expectedArtifacts.javascriptSha256,
+    futurePromotion: 'A later language capability promotion needs an explicit TypeScript 7 recovery plan.',
   });
-  const identity = qualifiedSeedIdentity(manifest);
-  const relativeDirectory = '.selfhost-seeds/qualified/' + identity;
-  await materializeQualifiedSeed({
-    generationDirectory: path.join(outDir, 'C2'),
-    cacheDirectory: path.join(root, relativeDirectory),
-    manifest,
-    origin: 'Fresh C2/C3 current-source qualification; root seed selection remains unchanged.',
-  });
-  await writeJson(path.join(outDir, 'seed-promotion.json'), manifest);
-  if (process.env.GITHUB_OUTPUT) {
-    await appendFile(process.env.GITHUB_OUTPUT,
-      'promoted-seed-cache-key=psc0-sh1-qualified-v1-' + identity + '\n' +
-      'promoted-seed-cache-directory=psc0/' + relativeDirectory + '\n');
-  }
-  process.stdout.write('PSC0_SH1_SEED_PROMOTION: ' + JSON.stringify(manifest) + '\n');
 }
 
 async function nativeCandidate(nativeCompiler, closure, outDir) {
@@ -984,31 +930,7 @@ function option(args, name, fallback) {
 }
 
 const outDir = path.resolve(root, option(args, '--out', 'dist/sh1'));
-if (command === 'seed-identity') {
-  const sourceRoot = path.resolve(root, option(args, '--source', '../historical-source/psc0'));
-  const { identitySha256 } = await historicalIdentity(sourceRoot);
-  if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, 'identity=' + identitySha256 + '\n');
-  process.stdout.write('PSC0_SH1_SEED_IDENTITY: ' + identitySha256 + '\n');
-} else if (command === 'recover-seed') {
-  const sourceRoot = path.resolve(root, option(args, '--source', '../historical-source/psc0'));
-  await recoverSeed(sourceRoot, outDir);
-} else if (command === 'recover-qualified-seed') {
-  await recoverQualifiedSeed({
-    sourceRoot: path.resolve(root, option(args, '--source', '../qualified-source/psc0')),
-    bootstrapCompiler: path.resolve(root, option(args, '--bootstrap', '.selfhost-seeds/' + historicalRef + '/index.js')),
-    artifactDirectory: path.resolve(root, option(args, '--artifact', '../qualified-artifact/dist/sh1')),
-    outDir,
-    manifestPath: option(args, '--manifest', undefined),
-  });
-} else if (command === 'recover-successor-seed') {
-  await recoverSuccessorSeed({
-    manifestPath: option(args, '--manifest', undefined),
-    parentCompiler: option(args, '--parent', undefined),
-    cacheDirectory: option(args, '--cache-directory', undefined),
-    artifactDirectory: option(args, '--artifact', undefined),
-    outDir, cold: args.includes('--cold'),
-  });
-} else if (command === 'native-candidate') {
+if (command === 'native-candidate') {
   const nativeCompiler = path.resolve(root, option(args, '--native', '.lake/build/bin/psc1'));
   await nativeCandidate(nativeCompiler, await sourceClosure(root), outDir);
 } else if (command === 'candidate') {
@@ -1254,5 +1176,5 @@ if (command === 'seed-identity') {
   await retainPromotableSeed(receipt, firstReceipt, second.receipt, third.receipt, outDir);
   process.stdout.write('PSC0_SH1_FIXED_POINT: ' + JSON.stringify(receipt) + '\n');
 } else {
-  throw new Error('usage: node scripts/sh1-qualify.mjs seed-identity|recover-seed|recover-qualified-seed|recover-successor-seed|native-candidate|candidate|fixed-point [--out directory] [--source historical-psc0] [--seed compiler.js] [--native native-psc1]');
+  throw new Error('usage: node scripts/sh1-qualify.mjs native-candidate|candidate|fixed-point [--out directory] [--seed compiler.js] [--native native-psc1]');
 }

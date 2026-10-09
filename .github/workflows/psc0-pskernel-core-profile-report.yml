@@ -1,0 +1,34 @@
+name: PSC0 kernel profile report
+on:
+  push:
+    branches: [psc0/pskernel-core-lean435-arena-v1]
+    paths: [".github/workflows/psc0-pskernel-core-profile-report.yml"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: init-profile
+          path: profile
+          run-id: 37987163057
+          github-token: ${{ github.token }}
+      - name: Summarize completed production Init profile
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          rows = []
+          for line in Path("profile/profile.log").read_text().splitlines():
+              m = re.search(r"elapsed_ms=(\d+)", line)
+              if m:
+                  rows.append((int(m[1]), line))
+          print("SOURCE=4a006bd9a59c2a4ad98a1a13bb47bfb6aa9edbd9 RUN=37987163057")
+          print("TOP_SLOW_DECLARATIONS count=", len(rows), "sum_ms=", sum(t for t,_ in rows))
+          for _, line in sorted(rows, reverse=True)[:40]:
+              print(line)
+          PY

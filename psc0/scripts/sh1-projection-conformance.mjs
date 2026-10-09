@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { invokeCompilerValueEntry } from './sh1-function-entry.mjs';
 
 // Every syntax node, name, local declaration, and global declaration below is
 // made by the compiler instance being checked. Reports contain only plain data.
@@ -73,7 +74,7 @@ export function runProjectionResolutionConformance(compiler, valueTag) {
         expected: { kind: 'local', id: String(expected.id), fields: expected.fields },
       });
     } else {
-      assert.equal(compiler.psNameEq(base.name, name(expected.segments)), true,
+      assert.equal(invokeCompilerValueEntry(compiler, 'psNameEq', [base.name, name(expected.segments)]), true,
         label(caseName + '_GLOBAL'));
       cases.push({
         name: caseName, family: 'resolution',

@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "kind": "psc0-pending-canonical-and-recursion-source-review",
   "repository": "dwijayuda/pskernel",
-  "updatedAtUtc": "2026-10-09T21:51:00Z",
+  "updatedAtUtc": "2026-10-09T22:46:59Z",
   "expectedDocumentationParent": "715a17ba725cf3bdcc9ae6c95278ca9ca240fa46",
   "compilerSourceStill": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
   "mainAtReview": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
-  "status": "historical-pre-recursion-inventory-superseded-by-reviewed43-file-base-held-for-recursive-structure",
+  "status": "historical-pre-recursion-inventory-superseded-by-enclosing-final-43-file-source-integration",
   "codeFilesBeforeRecursionCorrection": [
     {
       "path": "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
@@ -528,9 +528,11 @@
   },
   "supersededBy": {
     "path": "reviewed-candidates/canonical-recursion-batch.json",
-    "blob": "70f357cb1b61376d370faf3925e76557464f95ff",
+    "blob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
     "files": 43,
-    "expectedParent": "796f2fd8feebc96dfcdd79002e6a53aeb7b4ad90"
+    "expectedParent": "5a44bbb054d41a7534a0714bdd3f3d3b0ec467a2",
+    "recursiveStructureSourceManifest": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+    "recursiveStructureEvidenceManifest": "7aede7e241162b32dc608a7f5d246da211cac095"
   },
-  "currentInstruction": "Use the current pending43-file inventory and AI_WORK_STATE. Source is not integrated; final recursive-structure overlay/evidence is required before one full qualification."
+  "currentInstruction": "Use the final43-file integrated manifest and newest AI_WORK_STATE. All old candidate/held-run sections below are historical. Do not publish the obsolete41-file or pre-structure43-file assembly."
 }

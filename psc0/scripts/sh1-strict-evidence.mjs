@@ -1138,6 +1138,348 @@ async function bindSourceEquality({ outDir, directory, compilerSha256, value }) 
     observationsSha256: value.observationsSha256 };
 }
 
+
+function genericFunctionObservations() {
+  const pure = [
+    ['generic-return-direct', '107'], ['generic-return-let', '107'],
+    ['generic-higher-order-parameter', '37'], ['known-flat-entry-as-value', '37'],
+    ['generic-record-field', '37'], ['generic-inductive-field', '37'],
+    ['array-of-function-values', '37'], ['array-map-function-result', '37'],
+    ['array-fold-binary-bridge', '15'], ['type-only-computed-value', '29'],
+    ['type-only-function-instantiation', '107'], ['type-and-proof-only-activation', '53'],
+    ['generic-lambda-body-result', '107'], ['generic-projection-computed-head', '37'],
+  ].map(([id, value]) => ({ id, value, status: 'pass' }));
+  const demand = [
+    ...[['computed-closure-first', '35'], ['computed-closure-second', '43'],
+      ['computed-closure-reuse', '35']].map(([id, value]) => ({ id, value, status: 'pass',
+        diagnosticDomain: 'host-callback-demand' })),
+    { id: 'computed-closure-discarded', trace: ['make', 'make'], status: 'pass',
+      diagnosticDomain: 'host-callback-demand' },
+    { id: 'computed-closure-original-fault', trace: ['make', 'make', 'make-failure'],
+      status: 'pass', diagnosticDomain: 'host-callback-demand' },
+  ];
+  return { observations: [...pure, ...demand], observationCount: 19, status: 'pass',
+    pureValueCases: 14, callbackDemandDiagnostics: 5,
+    exhaustiveForAllInputs: false, sourceEffectCapabilityAdded: false };
+}
+
+
+function structuralRecursionObservations() {
+  return [
+    ['major-capture-two', 'sh1CoreMajorCapture', '2', '3'],
+    ['major-capture-three', 'sh1CoreMajorCapture', '3', '6'],
+    ['nested-outer-two', 'sh1CoreNestedOuter', '2', '3'],
+    ['nested-outer-three', 'sh1CoreNestedOuter', '3', '6'],
+  ].map(([id, declaration, input, value]) => ({ id, declaration, input, value, status: 'pass' }));
+}
+
+async function bindPreparedCoreRecursion(outDir, folder, source, value) {
+  const reference = value.recursion.reference;
+  const expected = structuralRecursionObservations();
+  const behavior = { observations: expected, observationCount: 4, status: 'pass',
+    exhaustiveForAllInputs: false };
+  assert.deepEqual(value.recursion.behavior, behavior);
+  assert.equal(reference.policy, 'prepared-core-nat-reference/1');
+  assert.equal(reference.preparedObject, 'same PsCompilerAdmissionReadyModule used for original IR');
+  assert.equal(reference.artifact.path, 'recursion-core.json');
+  const core = await jsonFile(outDir, folder + '/recursion-core.json');
+  assert.equal(core.file.sha256, reference.artifact.sha256);
+  assert.equal(core.file.bytes, reference.artifact.bytes);
+  assert.equal(core.value.schemaVersion, 1);
+  assert.equal(core.value.evidence, 'actual-prepared-core-nat-recursion');
+  assert.equal(core.value.sourceSha256, source.sha256);
+  assert.equal(core.value.declarations.length, 2);
+  assert.deepEqual(core.value.declarations.map((declaration) => declaration.name),
+    ['sh1CoreMajorCapture', 'sh1CoreNestedOuter']);
+  for (const declaration of core.value.declarations) {
+    assert.equal(declaration.type.tag, 'forallE');
+    assert.equal(declaration.type.binder, 'explicit');
+    assert.equal(declaration.value.tag, 'lam');
+    assert.equal(declaration.value.binder, 'explicit');
+    for (const type of [declaration.type.type, declaration.type.body, declaration.value.type]) {
+      assert.deepEqual(type, { tag: 'constE', name: [['str', 'Nat']], levels: [] });
+    }
+  }
+  assert.deepEqual(reference.declarations, core.value.declarations.map((declaration) => ({
+    name: declaration.name, sourceRuntimeArity: 1, coreSha256: hash(JSON.stringify(declaration)),
+  })));
+  assert.equal(reference.observationCount, 4);
+  assert.equal(reference.observations.length, 4);
+  let totalSteps = 0;
+  for (let index = 0; index < 4; index++) {
+    const { steps, recursorApplications, ...observation } = reference.observations[index];
+    assert.deepEqual(observation, expected[index]);
+    assert(Number.isSafeInteger(steps) && steps > 0 && steps <= 20000);
+    assert(Number.isSafeInteger(recursorApplications) && recursorApplications > 0 &&
+      recursorApplications <= steps);
+    totalSteps += steps;
+  }
+  assert(totalSteps <= 20000);
+  assert.deepEqual(reference.budget, { limit: 20000, used: totalSteps, remaining: 20000 - totalSteps,
+    scope: 'shared across all four reference observations' });
+  assert(Number.isSafeInteger(reference.snapshot.nodes) &&
+    reference.snapshot.nodes > 0 && reference.snapshot.nodes <= 8192);
+  assert.equal(reference.snapshot.nodeLimit, 8192);
+  assert.equal(reference.snapshot.depthLimit, 128);
+  assert.deepEqual(reference.supportedExecutableForms,
+    ['bvar', 'lam', 'app', 'letE', 'lit.natural', 'constE']);
+  assert.deepEqual(reference.runtimeConstants,
+    ['Nat.zero', 'Nat.succ', 'Nat.add', 'Nat.rec', 'sh1CoreMajorCapture', 'sh1CoreNestedOuter']);
+  assert.equal(reference.suppliedNatRecMinorClosures, true);
+  for (const key of ['additionalPreparations', 'additionalTypeScriptCompilations',
+    'additionalNativeExecutions']) assert.equal(reference[key], 0);
+  assert.equal(reference.status, 'pass');
+  assert.equal(reference.exhaustiveForAllInputs, false);
+  assert.equal(reference.generalRecursorDemandAdequacy, false);
+  if (value.native) assert.deepEqual(value.native.recursionBehavior, behavior);
+  return { artifact: core.file, sourceSha256: source.sha256,
+    declarations: reference.declarations, referenceObservationCount: 4,
+    emittedObservationCount: 4, nativeObservationCount: value.native ? 4 : 0,
+    observationsSha256: hash(JSON.stringify(expected)),
+    referenceObservationsSha256: hash(JSON.stringify(reference.observations)),
+    budget: reference.budget, snapshot: reference.snapshot,
+    finiteEvidenceOnly: true, generalRecursorDemandAdequacy: false };
+}
+
+async function bindStructuralRecursionRefusals(outDir, directory, conformance) {
+  const expected = [
+    {
+      "id": "nested-major-alias-lean",
+      "sourceKind": "lean",
+      "inputSha256": "f79fbfdbb2d0f19d74242f7c7f8395c95cf8646cf233d9588e9226a3273c6eb8",
+      "code": "source-elaboration",
+      "detail": "structuralRecursionNotDecreasing",
+      "owner": "sh1NestedMajorAlias",
+      "boundary": "structural-recursion-provenance"
+    },
+    {
+      "id": "nested-major-alias-ps",
+      "sourceKind": "ps",
+      "inputSha256": "a69c438a49e2dfb519744a018d514f71270a60f3703d3fe49a286ba9a3ee5bda",
+      "code": "source-elaboration",
+      "detail": "structuralRecursionNotDecreasing",
+      "owner": "sh1NestedMajorAlias",
+      "boundary": "structural-recursion-provenance"
+    },
+    {
+      "id": "nested-descendant-lean",
+      "sourceKind": "lean",
+      "inputSha256": "9a26a9d572d348f8380d547ac73779d2c85deb1aefb33cd71e654e3a51697bf8",
+      "code": "source-elaboration",
+      "detail": "structuralRecursionNotDecreasing",
+      "owner": "sh1NestedDescendant",
+      "boundary": "structural-recursion-provenance"
+    },
+    {
+      "id": "nested-descendant-ps",
+      "sourceKind": "ps",
+      "inputSha256": "6e312e78fc3f13fa359ca715947ea175ddbe38e544ad2660dddd3730547fb8f4",
+      "code": "source-elaboration",
+      "detail": "structuralRecursionNotDecreasing",
+      "owner": "sh1NestedDescendant",
+      "boundary": "structural-recursion-provenance"
+    },
+    {
+      "id": "implicit-major-dependent-proof",
+      "sourceKind": "lean",
+      "inputSha256": "8cb1ca86bca4886e47a11eba364c77790a49bb3cc2bdb1644aabe021c1e0948c",
+      "code": "source-elaboration",
+      "detail": "structuralRecursionDependentParameter",
+      "owner": "sh1ImplicitMajorProof",
+      "boundary": "structural-recursion-original-telescope"
+    }
+  ];
+  const cases = await jsonFile(outDir, directory + '/strict-source/source-cases.json');
+  assert.equal(cases.value.length, 38);
+  assert.equal(conformance.refused.length, 38);
+  assert.equal(new Set(cases.value.map((item) => item.id)).size, 38);
+  assert.deepEqual(conformance.refused.map((item) => item.id), cases.value.map((item) => item.id));
+  const observations = [];
+  for (let index = 0; index < expected.length; index++) {
+    const wanted = expected[index], test = cases.value[index + 33];
+    assert.deepEqual({
+      id: test.id, sourceKind: test.kind ?? 'lean', inputSha256: hash(JSON.stringify(test.inputs)),
+      code: test.code, detail: test.expectedDetail, owner: test.expectedOwner, boundary: test.boundary,
+    }, wanted);
+    assert.deepEqual(test.limits ?? {}, {});
+    const item = conformance.refused[index + 33];
+    assert.deepEqual({
+      id: item.id, sourceKind: item.sourceKind, inputSha256: item.inputSha256,
+      code: item.failure.code, detail: item.failure.detail, owner: item.failure.owner,
+      boundary: item.boundary,
+    }, wanted);
+    assert.equal(item.failure.stage, 'source');
+    assert.equal(item.failure.compilerStage, 'elaboration');
+    assert.deepEqual(item.limits, {});
+    observations.push(wanted);
+  }
+  return { cases: cases.file, observations, observationCount: 5,
+    observationBoundary: 'owned frontend structural elaboration',
+    oldSourceRefusalCount: 33, totalSourceRefusalCount: 38,
+    finiteEvidenceOnly: true, generalRecursorDemandAdequacy: false };
+}
+
+
+function bindRecursiveStructures(value, originalIr) {
+  assert.equal(value.policy, 'recursive-structure-fields-and-root-hypotheses/1');
+  assert.equal(value.compileOnly, true);
+  assert.equal(value.structureCount, 2);
+  assert.equal(value.declarationCount, 4);
+  assert.equal(value.projectionCount, 6);
+  assert.equal(value.usedHypothesisCount, 2);
+  assert.equal(value.unusedHypothesisCount, 2);
+  assert.deepEqual(value.originalIr, { ...originalIr, reusedExistingCheck: true });
+  for (const key of ['runtimeInvocations', 'constructedRuntimeRecords',
+    'additionalPreparations', 'additionalIrChecks', 'additionalTypeScriptCompilations',
+    'additionalNativeExecutions']) assert.equal(value[key], 0);
+  assert.equal(value.generalRecursorDemandAdequacyProven, false);
+  assert.equal(value.semanticPreservationProven, false);
+  const parameterType = { kind: 'typeParameter', name: 'T0' };
+  const naturalType = { kind: 'primitive', name: 'nat' };
+  const namedType = (name, parameters) => ({
+    kind: 'named', name,
+    arguments: parameters.map((parameter) => ({ kind: 'typeParameter', name: parameter })),
+  });
+  const layouts = [
+    { name: 'Sh1RecursiveRecord', typeParameters: [], recursiveFieldIndex: 0,
+      fields: [{ name: 'next', type: namedType('Sh1RecursiveRecord', []) }] },
+    { name: 'Sh1RecursiveGenericRecord', typeParameters: ['T0'], recursiveFieldIndex: 1,
+      fields: [{ name: 'item', type: parameterType },
+        { name: 'next', type: namedType('Sh1RecursiveGenericRecord', ['T0']) }] },
+  ];
+  assert.deepEqual(value.layouts, layouts);
+  const specs = [
+    { name: 'sh1RecursiveRecordObserve', layout: 0, result: naturalType, outcome: 'zero' },
+    { name: 'sh1RecursiveRecordStep', layout: 0, result: naturalType, outcome: 'recursive-call' },
+    { name: 'sh1RecursiveGenericObserve', layout: 1, result: parameterType, outcome: 'item' },
+    { name: 'sh1RecursiveGenericStep', layout: 1, result: parameterType, outcome: 'recursive-call' },
+  ];
+  assert.equal(value.declarations.length, specs.length);
+  value.declarations.forEach((observed, index) => {
+    const expected = specs[index], layout = layouts[expected.layout];
+    const inputType = namedType(layout.name, layout.typeParameters);
+    assert.equal(observed.parameters.length, 1);
+    assert.equal(observed.projections.length, layout.fields.length);
+    const parameter = observed.parameters[0].name;
+    const major = observed.major.name;
+    const bindings = observed.projections.map((projection) => projection.binding);
+    const names = [parameter, major, ...bindings];
+    assert(names.every((name) => typeof name === 'string' && name.length > 0));
+    assert.equal(new Set(names).size, names.length, 'PSC0_SH1_RECURSIVE_STRUCTURE_BINDER_DISTINCT');
+    assert(names.every((name) => !specs.some((item) => item.name === name) &&
+      !layouts.some((item) => item.name === name)));
+    let body;
+    if (expected.outcome === 'recursive-call') {
+      body = { kind: 'recursive-call', declaration: expected.name,
+        typeArguments: inputType.arguments, arguments: [bindings[layout.recursiveFieldIndex]],
+        runtimeArity: 1 };
+    } else if (expected.outcome === 'zero') {
+      body = { kind: 'natural', value: '0' };
+    } else {
+      body = { kind: 'field', field: 'item', binding: bindings[0] };
+    }
+    assert.deepEqual(observed, {
+      name: expected.name, structure: layout.name, typeParameters: layout.typeParameters,
+      parameters: [{ name: parameter, type: inputType }],
+      resultType: expected.result,
+      major: { name: major, sourceParameter: parameter, type: inputType, evaluations: 1, fresh: true },
+      projections: layout.fields.map((field, fieldIndex) => ({
+        index: fieldIndex, field: field.name, binding: bindings[fieldIndex],
+        type: field.type, target: major,
+      })),
+      recursiveFieldIndex: layout.recursiveFieldIndex, body,
+      freshNamesDistinct: true, remainingHypothesisLambdas: 0,
+    });
+  });
+  assert.equal(value.declarations.reduce((count, item) => count + item.projections.length, 0), 6);
+  assert.equal(value.declarations.filter((item) => item.body.kind === 'recursive-call').length, 2);
+  return {
+    policy: value.policy, compileOnly: true, structureCount: 2, declarationCount: 4,
+    projectionCount: 6, usedHypothesisCount: 2, unusedHypothesisCount: 2,
+    layouts: value.layouts, declarations: value.declarations,
+    layoutsSha256: hash(JSON.stringify(value.layouts)),
+    declarationsSha256: hash(JSON.stringify(value.declarations)),
+    originalIr: value.originalIr,
+    runtimeInvocations: 0, constructedRuntimeRecords: 0,
+    additionalPreparations: 0, additionalIrChecks: 0,
+    additionalTypeScriptCompilations: 0, additionalNativeExecutions: 0,
+    finiteEvidenceOnly: true, generalRecursorDemandAdequacyProven: false,
+    semanticPreservationProven: false,
+  };
+}
+
+async function bindGenericFunctionValues(outDir, directory, compilerSha256, source, requireNative) {
+  const folder = directory + '/generic-erasure';
+  const receipt = await jsonFile(outDir, folder + '/receipt.json');
+  const value = receipt.value;
+  assert.equal(value.schemaVersion, 1);
+  assert.equal(value.evidence, 'scoped-recursive-generic-erasure');
+  assert.equal(value.compilerSha256, compilerSha256);
+  assert.equal(value.sourceKind, 'raw-authoritative-lean');
+  assert.equal(value.sourceSha256, source.sha256);
+  noStrictClaim(value.originalIr, 'generic original IR');
+  assert.deepEqual(value.behavior,
+    { observations: 19, status: 'pass', exhaustiveForAllInputs: false });
+  const group = value.functionValues;
+  assert.equal(group.ir.policy, 'canonical-unary-values-flat-aligned-entries/1');
+  assert.deepEqual(group.ir.sourceEntries, [
+    ['sh1GroupIdentity', 1], ['sh1GroupDirect', 1], ['sh1GroupLet', 1],
+    ['sh1GroupApply', 2], ['sh1GroupHigher', 1], ['sh1GroupWeighted', 2],
+    ['sh1GroupKnown', 0], ['sh1GroupRecordUse', 1], ['sh1GroupBoxUse', 1],
+    ['sh1GroupArrayUse', 1], ['sh1GroupArrayMap', 1], ['sh1GroupArrayFold', 0],
+    ['sh1GroupComputed', 2], ['sh1GroupTypeOnlyUse', 1],
+    ['sh1GroupTypeOnlyHigher', 1], ['sh1GroupTypeProofOnlyUse', 1],
+    ['sh1GroupLambda', 1], ['sh1GroupProjection', 1],
+  ].map(([name, runtimeArity]) => ({ name, runtimeArity })));
+  assert.deepEqual(group.ir.typeActivationEntries,
+    ['sh1GroupTypeOnly', 'sh1GroupTypeProofOnly'].map((name) => ({
+      name, sourceRuntimeArity: 0, physicalRuntimeArity: 1,
+      internalActivation: 'fresh-ignored-unit', typeArity: 1,
+    })));
+  assert(Number.isSafeInteger(group.ir.typeNodes) && group.ir.typeNodes > 0 &&
+    group.ir.typeNodes <= 10000);
+  assert(Number.isSafeInteger(group.ir.unaryFunctionNodes) && group.ir.unaryFunctionNodes > 0 &&
+    group.ir.unaryFunctionNodes <= group.ir.typeNodes);
+  const original = group.ir.originalIr;
+  assert.equal(original.accepted, true);
+  assert.equal(original.traversalComplete, true);
+  assert.equal(original.findingCount, '0');
+  assert.equal(original.checkedObjectIsEmittedObject, true);
+  for (const key of ['expressionCount', 'visitedSteps']) {
+    assert.equal(typeof original[key], 'string');
+    assert(/^[1-9][0-9]*$/.test(original[key]));
+  }
+  for (const key of ['additionalPreparations', 'additionalTypeScriptCompilations',
+    'additionalNativeExecutions']) assert.equal(group.ir[key], 0);
+  assert.deepEqual(group.behavior, genericFunctionObservations());
+  const recursion = await bindPreparedCoreRecursion(outDir, folder, source, value);
+  const recursiveStructures = bindRecursiveStructures(value.recursiveStructures, original);
+  assert.deepEqual(value.provider, { status: 'not-attempted', kernelChecked: false });
+  const products = {
+    admissions: await artifact(outDir, folder + '/admissions.json', value.artifacts.admissionsSha256),
+    typescript: await artifact(outDir, folder + '/generated/index.ts', value.artifacts.typescriptSha256),
+    javascript: await artifact(outDir, folder + '/generated/index.js', value.artifacts.javascriptSha256),
+  };
+  let native = null;
+  if (requireNative) assert(value.native, 'PSC0_SH1_GENERIC_NATIVE_REFERENCE_REQUIRED');
+  if (value.native) {
+    assert.equal(value.native.typescriptSha256, value.artifacts.typescriptSha256);
+    assert.deepEqual(value.native.behavior, value.behavior);
+    assert.deepEqual(value.native.functionValueBehavior, group.behavior);
+    native = {
+      typescript: await artifact(outDir, folder + '/native/index.ts', value.native.typescriptSha256),
+      javascript: await artifact(outDir, folder + '/native/index.js', value.native.javascriptSha256),
+      oldRecursiveObservationCount: 19, pureValueCount: 14, hostDemandDiagnosticCount: 5,
+    };
+  }
+  return { receipt: receipt.file, source, artifacts: products, native, recursion, recursiveStructures,
+    originalIr: original, policy: group.ir.policy,
+    sourceEntries: group.ir.sourceEntries, typeActivationEntries: group.ir.typeActivationEntries,
+    oldRecursiveObservationCount: 19, pureValueCount: 14, hostDemandDiagnosticCount: 5,
+    observationsSha256: hash(JSON.stringify(group.behavior.observations)),
+    finiteEvidenceOnly: true, sourceEffectCapabilityAdded: false };
+}
+
 // Authenticate the actual existing receipt bytes. This never prepares source,
 // rechecks IR, executes a compiler, or substitutes a finite pass for preservation.
 export async function bindStrictQualificationEvidence({
@@ -1166,6 +1508,9 @@ export async function bindStrictQualificationEvidence({
     ['C2', 'C2', secondReceipt.artifacts.javascriptSha256],
     ['C3', 'C3', thirdReceipt.artifacts.javascriptSha256],
   ];
+  const genericBytes = await readFile(new URL('../test/fixtures/selfhost-sh1-generic-erasure.lean', import.meta.url));
+  const genericSource = { path: 'test/fixtures/selfhost-sh1-generic-erasure.lean',
+    sha256: hash(genericBytes), bytes: genericBytes.length };
   const generationEvidence = [];
   for (const [name, directory, compilerSha256] of generations) {
     const source = await jsonFile(outDir, directory + '/strict-source/receipt.json');
@@ -1174,7 +1519,7 @@ export async function bindStrictQualificationEvidence({
     noStrictClaim(source.value, name + ' source conformance');
     assert.equal(source.value.semanticContractQualified, false);
     assert.equal(source.value.accepted.length, 2);
-    assert.equal(source.value.refused.length, 33);
+    assert.equal(source.value.refused.length, 38);
     assert.equal(source.value.carrierRefusals.length, 2);
     for (const item of source.value.accepted) {
       assert.equal(item.compilerSha256, compilerSha256);
@@ -1188,6 +1533,7 @@ export async function bindStrictQualificationEvidence({
       assert.equal(item.semanticContractQualified, false);
     }
     assert(source.value.refused.every((item) => typeof item.failure.code === 'string'));
+    const structuralRecursionRefusals = await bindStructuralRecursionRefusals(outDir, directory, source.value);
     assert(source.value.carrierRefusals.every((item) => item.refused === true));
     const ingressSnapshots = bindIngressSnapshots(source.value.ingressSnapshots, source.value.accepted);
     const emptySource = await bindEmptySource({ outDir, directory: directory + '/strict-source',
@@ -1236,10 +1582,13 @@ export async function bindStrictQualificationEvidence({
       directory: directory + '/strict-runtime', compilerSha256,
       value: runtime.value.sourceEvaluationRegression, native: sourceEvaluationReference });
     const capabilityOrigins = await bindCapabilityOrigins(outDir, directory, compilerSha256);
+    const genericFunctionValues = await bindGenericFunctionValues(outDir, directory,
+      compilerSha256, genericSource, name === 'N1');
     const compiler = await artifact(outDir, directory + '/index.js', compilerSha256);
     generationEvidence.push({ name, compiler, source: source.file, target: target.file, runtime: runtime.file,
       sourceEquality, sourceEvaluation, capabilityOrigins, ingressSnapshots, emptySource, zeroFieldSource, emptyIr,
-      operationCount: 45, observationCount: 186, sourceRefusals: 33, targetRefusals: 20 });
+      genericFunctionValues, structuralRecursionRefusals,
+      operationCount: 45, observationCount: 186, sourceRefusals: 38, targetRefusals: 20 });
   }
 
   const nativeFile = await jsonFile(outDir, 'development/N1/strict-source-native.json');
@@ -1320,6 +1669,7 @@ export async function bindStrictQualificationEvidence({
     },
     sourceEnforcementQualified: true, targetAdmissionQualified: true,
     enabledRuntimeFiniteConformanceQualified: true,
+    genericFunctionValueFiniteConformanceQualified: true,
     strictSh1Qualified: false, semanticContractQualified: false,
     providerChecked: false,
   };

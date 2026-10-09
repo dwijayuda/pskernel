@@ -4,11 +4,56 @@ Status: active implementation from ed5d00aca0743bde583b45fe7756dd494ac3960f; not
 
 ## Latest execution boundary
 
-The enclosing commit integrates the independently reviewed parser correction over source **3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc** without a qualification tag. Source review proved a mandatory generic saturation-boundary gap before the planned run; complete and independently review that correction before requesting one coherent full **[sh1-qualify]** run. [nomatch-application-entry.json](reviewed-candidates/nomatch-application-entry.json), blob aa62fec9ef76acc69f289d168b2b23b21dc07d93, binds all six guarded edits and final source 8c39064e8a9c4bcda1ec9f2432ccbe0a70769574. Existing fuel/public signatures and all fixtures/invocations remain; the primary intentionally closes existing grouping/list forms under nesting. Discover the actual enclosing source before continuing; this checkpoint launches no full run.
+The enclosing source commit over **5a44bbb054d41a7534a0714bdd3f3d3b0ec467a2**
+integrates the independently reviewed 43-code-file
+[canonical function and recursion batch](reviewed-candidates/canonical-recursion-batch.json).
+It requests one complete **[sh1-qualify]** workflow. Discover the actual enclosing
+source SHA and run head before attributing any result. No additional native-only
+checkpoint or isolated cold run is requested.
 
-The previous full run **37986002380** admitted all 64 source modules and passed partial native/source/target/runtime/IR conformance, then failed the grouped-empty-argument common-AST assertion. C1/C2/C3 and provider were not reached. The complete failure log and exact native receipt are committed under attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/. Revised isolated TS7 cold recovery **37983663908 passed** and is not repeated for this parser change.
+The last compiler source **fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504** passed
+native development run **37988707250** / compiler job **114017088870**, including
+the corrected grouped-empty grammar gate. Full qualification stages and
+provider were skipped. The earlier full run37986002380 failed that grammar
+assertion and remains in the attempt ledger. The independently revised TS7
+cold recipe passed run37983663908 and is unchanged.
 
-The reviewed [NORMALIZATION_ARGUMENTS.md](NORMALIZATION_ARGUMENTS.md) and [TS_RULE_ARGUMENTS.md](TS_RULE_ARGUMENTS.md) supply general local derivations with explicit remaining ER/Core/host composition premises. The reviewed [EV_RULE_ARGUMENTS.md](EV_RULE_ARGUMENTS.md) completes the eleven expression-case local arguments. ER and shared-premise completion proceed alongside qualification. The supported implicit generic identity returning a function is now source-proved to lose its saturation boundary: both direct overapplication and a typed-let intermediate lead to an exact IR arity refusal. Resolve the full generic substitution/saturation/adapter class without weakening the checker or contract. The separate result-eta delay question remains a pure/total source-argument obligation. All 33 full correspondence obligations and strict/global flags remain open/false until justified.
+The complete source correction covers canonical unary function values with
+actual flat declaration entries, generic and computed result boundaries,
+partial capture and Unit activation; 102 finite Nat worker placements and
+three streaming-prefix List readers; final-meta constructor refinement of
+root recursive minors; and one-shot root-child eligibility in elaboration
+and erasure. The original complete telescope, including implicit and proof
+parameters, is checked for major dependence on actual self calls.
+
+Nested explicit control remains supported. A recursive reference may use an
+already established root-child identity there; a second match or descendant
+match cannot create a new self-call hypothesis. The previous implementation
+description claiming that matching result types were sufficient was unsound
+and is corrected in [IMPLEMENTATION.md](../IMPLEMENTATION.md).
+
+Evidence adds four separately labelled actual-prepared-Core / emitted /
+native-PSC-emitted Nat equations and five precisely staged source refusals.
+The source total is now **2 accepted / 38 refused / 2 carrier refusals**;
+the old33 refusal prefix and every existing assertion remain. Generic old
+19 observations and canonical19 observations remain separate. The new binder
+authenticates the actual Core snapshots and source-case artifact for each
+N1/C1/C2/C3 compiler, without extra compiler execution.
+
+The recursive-structure correction retains the actual field/IH minor, captures
+the major once and emits the original ordered typed record projections. The
+same generic fixture/gate/binder adds two record layouts, four compile-only
+functions, six projection checks and two used/two unused IH checks. No new
+compiler/check/TS/native invocation or runtime record value is added.
+
+The reviewed [CANONICAL_FUNCTION_ARGUMENTS.md](CANONICAL_FUNCTION_ARGUMENTS.md)
+and completed [ERASURE_ARGUMENTS.md](ERASURE_ARGUMENTS.md) supply the actual
+entry/type/capture and all nine ER source-derived rule interfaces. N/EV/TS
+packets retain their local results. The final independent cross-family
+source/Core/ghost/provenance/initialization composition is being completed.
+All **33** correspondence rows and strict/global assurance flags remain
+open/false until their complete general arguments and exact evidence justify
+closure.
 
 ## Goal and scope
 
@@ -72,7 +117,9 @@ Explicitly cover public wrappers/workers, structural decrease and simultaneous c
 
 Prefer small admission/provenance checks over rewriting unrelated compiler code. Static risks in arbitrary handcrafted IR are not automatically failures in the qualified source closure. Conversely, a source-closure pass does not establish the safety of arbitrary typed IR.
 
-## Current reviewed integration and next gate
+## Historical reviewed integrations before the canonical/recursion batch
+
+The records in this section describe prior source attempts. Their then-current counts and requested runs are historical; the latest execution boundary above controls the next action.
 
 [The current integration manifest](reviewed-candidates/strict-implementation-batch.json)
 binds 29 source, fixture and workflow files to their exact bases and final blobs.

@@ -13,8 +13,8 @@ def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :
   match fuel with
   | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_name : String) => true
   | Nat.succ remaining =>
-      let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;
       fun (expr : PsVerifiedIrExpr) (name : String) =>
+        let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;
         let uses : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => smaller value name;
         let parameterUses : PsVerifiedIrParameter -> Bool :=
           fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name;
@@ -519,8 +519,8 @@ def psTsEmitExprWithFuel
   match fuel with
   | Nat.zero => fun (_expr : PsVerifiedIrExpr) => Except.error PsTsEmitError.fuelExhausted
   | Nat.succ remaining =>
-    let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;
     fun (expr : PsVerifiedIrExpr) =>
+      let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;
       match expr with
       | .literal literal =>
           psTsEmitLiteral literal

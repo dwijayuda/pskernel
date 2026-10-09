@@ -5,6 +5,7 @@ import Ps.Meta.Context
 
 structure PsElabStructuralRecursion where
   functionName : PsName
+  parameterIds : List Nat
   explicitParameterIds : List Nat
   recursiveParameterIndex : Nat
   calls : List (Prod Nat Nat)
@@ -72,3 +73,14 @@ def psElabContextWithStructuralRecursion
     metaContext := context.metaContext
     structuralRecursion := structuralRecursion
   }
+
+-- Root fields keep their established call map in every nested body. Only the
+-- whole declaration match may create that map; a nested fold has another IH.
+def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext :=
+  match context.structuralRecursion with
+  | Option.none => context
+  | Option.some recursion =>
+      psElabContextWithStructuralRecursion context
+        (Option.some (PsElabStructuralRecursion.mk
+          recursion.functionName recursion.parameterIds recursion.explicitParameterIds
+          recursion.recursiveParameterIndex recursion.calls recursion.resultType false))

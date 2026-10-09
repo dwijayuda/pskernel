@@ -197,6 +197,103 @@ function reservedRuntimeNameCases() {
   })));
 }
 
+// These cases must reach the structural elaborator. A parser/erasure refusal
+// is not accepted as evidence for the intended root-IH/telescope boundary.
+function structuralRecursionRefusalCases() {
+  return [
+  {
+    "id": "nested-major-alias-lean",
+    "kind": "lean",
+    "boundary": "structural-recursion-provenance",
+    "inputs": [
+      {
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictCase"
+        ],
+        "source": "def sh1NestedMajorAlias (n : Nat) : Nat :=\n  match n with\n  | Nat.zero => 0\n  | Nat.succ k =>\n      match n with\n      | Nat.zero => 100\n      | Nat.succ j => Nat.add (sh1NestedMajorAlias j) 1\n"
+      }
+    ],
+    "code": "source-elaboration",
+    "expectedOwner": "sh1NestedMajorAlias",
+    "expectedDetail": "structuralRecursionNotDecreasing"
+  },
+  {
+    "id": "nested-major-alias-ps",
+    "kind": "ps",
+    "boundary": "structural-recursion-provenance",
+    "inputs": [
+      {
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictCase"
+        ],
+        "source": "def sh1NestedMajorAlias(n : Nat) : Nat :=\n  match n with {\n  | Nat.zero => 0\n  | Nat.succ k =>\n      match n with {\n      | Nat.zero => 100\n      | Nat.succ j => Nat.add(sh1NestedMajorAlias(j), 1)\n      }\n  }\n"
+      }
+    ],
+    "code": "source-elaboration",
+    "expectedOwner": "sh1NestedMajorAlias",
+    "expectedDetail": "structuralRecursionNotDecreasing"
+  },
+  {
+    "id": "nested-descendant-lean",
+    "kind": "lean",
+    "boundary": "structural-recursion-provenance",
+    "inputs": [
+      {
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictCase"
+        ],
+        "source": "def sh1NestedDescendant (n : Nat) : Nat :=\n  match n with\n  | Nat.zero => 0\n  | Nat.succ k =>\n      match k with\n      | Nat.zero => 1\n      | Nat.succ j => Nat.add (sh1NestedDescendant j) 1\n"
+      }
+    ],
+    "code": "source-elaboration",
+    "expectedOwner": "sh1NestedDescendant",
+    "expectedDetail": "structuralRecursionNotDecreasing"
+  },
+  {
+    "id": "nested-descendant-ps",
+    "kind": "ps",
+    "boundary": "structural-recursion-provenance",
+    "inputs": [
+      {
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictCase"
+        ],
+        "source": "def sh1NestedDescendant(n : Nat) : Nat :=\n  match n with {\n  | Nat.zero => 0\n  | Nat.succ k =>\n      match k with {\n      | Nat.zero => 1\n      | Nat.succ j => Nat.add(sh1NestedDescendant(j), 1)\n      }\n  }\n"
+      }
+    ],
+    "code": "source-elaboration",
+    "expectedOwner": "sh1NestedDescendant",
+    "expectedDetail": "structuralRecursionNotDecreasing"
+  },
+  {
+    "id": "implicit-major-dependent-proof",
+    "kind": "lean",
+    "boundary": "structural-recursion-original-telescope",
+    "inputs": [
+      {
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictCase"
+        ],
+        "source": "def sh1ImplicitMajorProof {P : Nat -> Prop} (n : Nat) {h : P n} : Nat :=\n  match n with\n  | Nat.zero => 0\n  | Nat.succ k => sh1ImplicitMajorProof k\n"
+      }
+    ],
+    "code": "source-elaboration",
+    "expectedOwner": "sh1ImplicitMajorProof",
+    "expectedDetail": "structuralRecursionDependentParameter"
+  }
+];
+}
+
 function sourceCases() {
   return [
     { id: 'empty-bundle', inputs: [], code: 'source-empty-bundle' },
@@ -238,6 +335,7 @@ function sourceCases() {
     { id: 'term-position-budget', inputs: [input(literal)], limits: { maxTermSteps: 0 },
       code: 'source-term-limit' },
     ...reservedRuntimeNameCases(),
+    ...structuralRecursionRefusalCases(),
   ];
 }
 
@@ -467,6 +565,11 @@ export async function runStrictSourceConformance({ compiler, compilerSha256, out
     }
     assert(failure, 'PSC0_SH1_SOURCE_REFUSAL_MISSING: ' + test.id);
     assert.equal(failure.code, test.code, 'PSC0_SH1_SOURCE_REFUSAL_CODE: ' + test.id);
+    if (test.expectedDetail) {
+      assert.equal(failure.compilerStage, 'elaboration', 'PSC0_SH1_RECURSION_REFUSAL_STAGE: ' + test.id);
+      assert.equal(failure.detail, test.expectedDetail, 'PSC0_SH1_RECURSION_REFUSAL_DETAIL: ' + test.id);
+      assert.equal(failure.owner, test.expectedOwner, 'PSC0_SH1_RECURSION_REFUSAL_OWNER: ' + test.id);
+    }
     if (test.exactName) {
       const offset = test.inputs[0].source.indexOf(test.exactName);
       assert.equal(failure.owner, test.exactName);

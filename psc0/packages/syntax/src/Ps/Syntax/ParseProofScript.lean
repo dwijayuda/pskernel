@@ -76,16 +76,16 @@ def psParseProofScriptCallArgsWithFuel
             Except.error
               (PsParseError.expectedText ")" token.text token.span)
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List PsSyntaxTerm ->
-          Except PsParseError PsProofScriptCallArgs :=
-        psParseProofScriptCallArgsWithFuel
-          parseArgument
-          remaining;
       fun
         (cursor : PsTokenCursor)
         (argsRev : List PsSyntaxTerm) =>
+        let smaller :
+            PsTokenCursor ->
+            List PsSyntaxTerm ->
+            Except PsParseError PsProofScriptCallArgs :=
+          psParseProofScriptCallArgsWithFuel
+            parseArgument
+            remaining;
         if psTokenCursorAtText cursor ")" then
           match psTokenCursorAdvance cursor with
           | Option.none => Except.error (PsParseError.unexpectedEnd ")")
@@ -205,15 +205,15 @@ def psParseProofScriptRecordFieldsWithFuel
         (_fieldsRev : List (Prod PsSyntaxName PsSyntaxTerm)) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List (Prod PsSyntaxName PsSyntaxTerm) ->
-          Except PsParseError
-            (PsParseResult (List (Prod PsSyntaxName PsSyntaxTerm))) :=
-        psParseProofScriptRecordFieldsWithFuel parseTerm remaining;
       fun
         (cursor : PsTokenCursor)
         (fieldsRev : List (Prod PsSyntaxName PsSyntaxTerm)) =>
+        let smaller :
+            PsTokenCursor ->
+            List (Prod PsSyntaxName PsSyntaxTerm) ->
+            Except PsParseError
+              (PsParseResult (List (Prod PsSyntaxName PsSyntaxTerm))) :=
+          psParseProofScriptRecordFieldsWithFuel parseTerm remaining;
         if psTokenCursorAtText cursor "}" then
           Except.ok {
             value := psParseListReverse fieldsRev
@@ -387,12 +387,12 @@ def psParseProofScriptPostfixTailWithFuel
       fun (_current : PsSyntaxTerm) (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsSyntaxTerm ->
-          PsTokenCursor ->
-          Except PsParseError (PsParseResult PsSyntaxTerm) :=
-        psParseProofScriptPostfixTailWithFuel parseArgument remaining;
       fun (current : PsSyntaxTerm) (cursor : PsTokenCursor) =>
+        let smaller :
+            PsSyntaxTerm ->
+            PsTokenCursor ->
+            Except PsParseError (PsParseResult PsSyntaxTerm) :=
+          psParseProofScriptPostfixTailWithFuel parseArgument remaining;
         if psProofScriptBoolAnd
             (psTokenCursorAtText cursor "(")
             (psProofScriptCallAdjacent current cursor) then
@@ -435,16 +435,16 @@ def psParseProofScriptNativeTailWithFuel
         (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          List PsSyntaxTerm ->
-          PsSourcePos ->
-          PsTokenCursor ->
-          Except PsParseError (PsParseResult PsSyntaxTerm) :=
-        psParseProofScriptNativeTailWithFuel parseArgument head remaining;
       fun
         (argsRev : List PsSyntaxTerm)
         (stop : PsSourcePos)
         (cursor : PsTokenCursor) =>
+        let smaller :
+            List PsSyntaxTerm ->
+            PsSourcePos ->
+            PsTokenCursor ->
+            Except PsParseError (PsParseResult PsSyntaxTerm) :=
+          psParseProofScriptNativeTailWithFuel parseArgument head remaining;
         let span : PsSourceSpan := {
           start := psProofScriptTermStart head
           stop := stop
@@ -660,9 +660,9 @@ def psParseProofScriptBinderTypeWithFuel
   | Nat.zero =>
       fun (_cursor : PsTokenCursor) => Except.error PsParseError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) :=
-        psParseProofScriptBinderTypeWithFuel remaining;
       fun (cursor : PsTokenCursor) =>
+        let smaller : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) :=
+          psParseProofScriptBinderTypeWithFuel remaining;
         if psTokenCursorAtBinderStart cursor then
           psParseProofScriptNestedBinderType smaller (Nat.succ remaining) cursor
         else
@@ -728,15 +728,15 @@ def psParseProofScriptBindersWithFuel
           cursor := cursor
         }
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List (PsSyntaxBinderHead × PsSyntaxTerm) ->
-          Except PsParseError
-            (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
-        psParseProofScriptBindersWithFuel remaining;
       fun
         (cursor : PsTokenCursor)
         (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
+        let smaller :
+            PsTokenCursor ->
+            List (PsSyntaxBinderHead × PsSyntaxTerm) ->
+            Except PsParseError
+              (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+          psParseProofScriptBindersWithFuel remaining;
         if psTokenCursorAtBinderStart cursor then
           match psParseProofScriptBinder cursor with
           | Except.error error => Except.error error
@@ -764,15 +764,15 @@ def psParseProofScriptExplicitEntriesWithFuel
         (_entriesRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
-          Except PsParseError
-            (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
-        psParseProofScriptExplicitEntriesWithFuel remaining;
       fun
         (cursor : PsTokenCursor)
         (entriesRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>
+        let smaller :
+            PsTokenCursor ->
+            List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
+            Except PsParseError
+              (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
+          psParseProofScriptExplicitEntriesWithFuel remaining;
         if psTokenCursorAtText cursor ")" then
           match entriesRev with
           | [] =>
@@ -843,15 +843,15 @@ def psParseProofScriptDeclarationBindersWithFuel
         (_prefixRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
-          Except PsParseError
-            (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
-        psParseProofScriptDeclarationBindersWithFuel remaining;
       fun
         (cursor : PsTokenCursor)
         (prefixRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) =>
+        let smaller :
+            PsTokenCursor ->
+            List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
+            Except PsParseError
+              (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
+          psParseProofScriptDeclarationBindersWithFuel remaining;
         if psTokenCursorAtText cursor "(" then
           match psTokenCursorAdvance cursor with
           | Option.none => Except.error (PsParseError.unexpectedEnd "parameter")
@@ -902,15 +902,15 @@ def psParseProofScriptMatchAlternativesWithFuel
         (_alternativesRev : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) ->
-          Except PsParseError
-            (PsParseResult (List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))) :=
-        psParseProofScriptMatchAlternativesWithFuel parseTerm remaining;
       fun
         (cursor : PsTokenCursor)
         (alternativesRev : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) =>
+        let smaller :
+            PsTokenCursor ->
+            List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) ->
+            Except PsParseError
+              (PsParseResult (List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))) :=
+          psParseProofScriptMatchAlternativesWithFuel parseTerm remaining;
         if psTokenCursorAtText cursor "}" then
           Except.ok {
             value := psParseListReverse alternativesRev
@@ -973,11 +973,11 @@ def psParseProofScriptTermWithFuel
       fun (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          Except PsParseError (PsParseResult PsSyntaxTerm) :=
-        psParseProofScriptTermWithFuel remaining;
       fun (cursor : PsTokenCursor) =>
+        let smaller :
+            PsTokenCursor ->
+            Except PsParseError (PsParseResult PsSyntaxTerm) :=
+          psParseProofScriptTermWithFuel remaining;
         if psTokenCursorAtText cursor "do" then
           Except.error
             (psProofScriptExpectedError
@@ -1277,14 +1277,14 @@ def psParseProofScriptInductiveConstructorsWithFuel
         (_constructorsRev : List PsSyntaxInductiveConstructor) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List PsSyntaxInductiveConstructor ->
-          Except PsParseError (PsParseResult (List PsSyntaxInductiveConstructor)) :=
-        psParseProofScriptInductiveConstructorsWithFuel remaining;
       fun
         (cursor : PsTokenCursor)
         (constructorsRev : List PsSyntaxInductiveConstructor) =>
+        let smaller :
+            PsTokenCursor ->
+            List PsSyntaxInductiveConstructor ->
+            Except PsParseError (PsParseResult (List PsSyntaxInductiveConstructor)) :=
+          psParseProofScriptInductiveConstructorsWithFuel remaining;
         if psTokenCursorAtText cursor "}" then
           Except.ok { value := psParseListReverse constructorsRev, cursor := cursor }
         else
@@ -1378,16 +1378,16 @@ def psParseProofScriptStructureFieldsWithFuel
         (_fieldsRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List (PsSyntaxBinderHead × PsSyntaxTerm) ->
-          Except PsParseError
-            (PsParseResult
-              (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
-        psParseProofScriptStructureFieldsWithFuel remaining;
       fun
         (cursor : PsTokenCursor)
         (fieldsRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
+        let smaller :
+            PsTokenCursor ->
+            List (PsSyntaxBinderHead × PsSyntaxTerm) ->
+            Except PsParseError
+              (PsParseResult
+                (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+          psParseProofScriptStructureFieldsWithFuel remaining;
         if psTokenCursorAtText cursor "}" then
           Except.ok {
             value := psParseListReverse fieldsRev
@@ -1676,14 +1676,14 @@ def psParseProofScriptImportsWithFuel
           cursor := cursor
         }
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List PsSyntaxImport ->
-          Except PsParseError (PsParseResult (List PsSyntaxImport)) :=
-        psParseProofScriptImportsWithFuel remaining;
       fun
         (cursor : PsTokenCursor)
         (importsRev : List PsSyntaxImport) =>
+        let smaller :
+            PsTokenCursor ->
+            List PsSyntaxImport ->
+            Except PsParseError (PsParseResult (List PsSyntaxImport)) :=
+          psParseProofScriptImportsWithFuel remaining;
         if psTokenCursorAtText cursor "import" then
           match psParseProofScriptImport cursor with
           | Except.error error => Except.error error
@@ -1730,15 +1730,15 @@ def psParseProofScriptDeclarationsWithFuel
                   token.text
                   token.span)
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List PsSyntaxDeclaration ->
-          Except PsParseError
-            (PsParseResult (List PsSyntaxDeclaration)) :=
-        psParseProofScriptDeclarationsWithFuel remaining;
       fun
         (cursor : PsTokenCursor)
         (declarationsRev : List PsSyntaxDeclaration) =>
+        let smaller :
+            PsTokenCursor ->
+            List PsSyntaxDeclaration ->
+            Except PsParseError
+              (PsParseResult (List PsSyntaxDeclaration)) :=
+          psParseProofScriptDeclarationsWithFuel remaining;
         if psTokenCursorDone cursor then
           Except.ok {
             value := psParseListReverse declarationsRev

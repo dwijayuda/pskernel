@@ -109,10 +109,10 @@ def psReadFixedHex
         fun (value : Nat) =>
           Option.some (Prod.mk value chars)
   | nextCount + 1 =>
-      let smaller : List Char -> Nat -> Option (Prod Nat (List Char)) :=
-        psReadFixedHex nextCount;
       fun (chars : List Char) =>
         fun (value : Nat) =>
+          let smaller : List Char -> Nat -> Option (Prod Nat (List Char)) :=
+            psReadFixedHex nextCount;
           match chars with
           | [] =>
               Option.none
@@ -167,10 +167,10 @@ def psDecodeStringBodyWithFuel
         fun (charsRev : List Char) =>
           Option.none
   | nextFuel + 1 =>
-      let smaller : List Char -> List Char -> Option String :=
-        psDecodeStringBodyWithFuel nextFuel;
       fun (chars : List Char) =>
         fun (charsRev : List Char) =>
+          let smaller : List Char -> List Char -> Option String :=
+            psDecodeStringBodyWithFuel nextFuel;
           match chars with
           | [] =>
               Option.none

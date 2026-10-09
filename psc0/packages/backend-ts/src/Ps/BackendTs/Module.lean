@@ -76,8 +76,7 @@ def psTsNameSequence (namePrefix : String) (count : Nat) : Nat -> List String :=
   match count with
   | Nat.zero => fun (_index : Nat) => List.nil
   | Nat.succ remaining =>
-      let smaller : Nat -> List String := psTsNameSequence namePrefix remaining;
-      fun (index : Nat) => List.cons (String.Internal.append namePrefix (psNatToString index)) (smaller (Nat.succ index))
+      fun (index : Nat) => let smaller : Nat -> List String := psTsNameSequence namePrefix remaining; List.cons (String.Internal.append namePrefix (psNatToString index)) (smaller (Nat.succ index))
 
 def psTsEmitStructure
     (brands : List (String × String))
@@ -244,8 +243,8 @@ def psTsEtaApplyWorker (arguments : List PsVerifiedIrExpr) (fuel : Nat) : PsVeri
   match fuel with
   | Nat.zero => fun (_fn : PsVerifiedIrExpr) => Option.none
   | Nat.succ remaining =>
-      let smaller : PsVerifiedIrExpr -> Option PsVerifiedIrExpr := psTsEtaApplyWorker arguments remaining;
       fun (fn : PsVerifiedIrExpr) =>
+        let smaller : PsVerifiedIrExpr -> Option PsVerifiedIrExpr := psTsEtaApplyWorker arguments remaining;
         match fn with
         | PsVerifiedIrExpr.lambda parameters _ body => psTsEtaBind parameters arguments body
         | PsVerifiedIrExpr.letE name type value body =>
@@ -505,8 +504,8 @@ def psTsTailPureWithFuel (aliases : List PsTsTailAlias) (fuel : Nat) : PsVerifie
   match fuel with
   | Nat.zero => fun (_expr : PsVerifiedIrExpr) => false
   | Nat.succ remaining =>
-      let smaller : PsVerifiedIrExpr -> Bool := psTsTailPureWithFuel aliases remaining;
       fun (expr : PsVerifiedIrExpr) =>
+        let smaller : PsVerifiedIrExpr -> Bool := psTsTailPureWithFuel aliases remaining;
         let impure : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => if smaller value then false else true;
         let impureField : Prod String PsVerifiedIrExpr -> Bool := fun (field : Prod String PsVerifiedIrExpr) => impure (Prod.snd field);
         match expr with
@@ -562,8 +561,8 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
   match fuel with
   | Nat.zero => fun (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
   | Nat.succ remaining =>
-      let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitWithFuel brands tags declaration remaining;
       fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
+        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitWithFuel brands tags declaration remaining;
         let emitPure : PsVerifiedIrExpr -> Option String := psTsTailPrintPure brands tags aliases;
         match expr with
         | PsVerifiedIrExpr.call fn types arguments =>

@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-09T20:41:18Z",
+  "updatedAtUtc": "2026-10-09T22:46:59Z",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -668,10 +668,43 @@
       "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
       "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
       "rowsClosed": 0
+    },
+    {
+      "family": "GROUP",
+      "rows": [],
+      "document": "CANONICAL_FUNCTION_ARGUMENTS.md",
+      "blob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+      "sha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+      "manifest": "reviewed-candidates/canonical-function-arguments.json",
+      "manifestBlob": "30b8328b7e4158cd7279239dc34a4813240916d7",
+      "status": "independently-reviewed-local-general-entry-and-finite-placement-arguments",
+      "rowsClosed": 0
+    },
+    {
+      "family": "ER",
+      "rows": [
+        "ER-01",
+        "ER-02",
+        "ER-03",
+        "ER-04",
+        "ER-05",
+        "ER-06",
+        "ER-07",
+        "ER-08",
+        "ER-09"
+      ],
+      "document": "ERASURE_ARGUMENTS.md",
+      "blob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+      "sha256": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+      "manifest": "reviewed-candidates/erasure-arguments.json",
+      "manifestBlob": "22cc9d4721321eeac34979394a09fb5447524891",
+      "status": "complete-local-source-derived-arguments-with-reviewed-producer-classifier-demand-and-structure-scopes",
+      "rowsClosed": 0,
+      "finalCrossFamilyCompositionPending": true
     }
   ],
   "pendingErasureClassCorrection": {
-    "status": "source-proven-mandatory-coverage-gap-not-executed",
+    "status": "reviewed-canonical-and-root-recursion-class-correction-integrated-by-enclosing-commit",
     "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
     "leanSource": "def groupId {alpha : Type} (value : alpha) : alpha := value\ndef groupUse (f : Nat -> Nat) : Nat := groupId f 0\n",
     "inference": "Supported typed binder and implicit generic application produce closed Core (((groupId (Nat -> Nat)) f) 0), with no unresolved metas.",
@@ -682,8 +715,122 @@
       "Function-valued generic parameter/layout/result representation and necessary adapters",
       "Ordinary partial capture, result eta and backend eta"
     ],
-    "next": "Complete coherent class correction and independent source review before one next full qualification.",
+    "next": "Observe one exact-source full qualification and complete the final cross-family composition of the attached N/GROUP/ER/EV/TS arguments.",
     "contractAndCheckerMustNotBeWeakened": true,
-    "newColdRunRequired": false
+    "newColdRunRequired": false,
+    "reviewedIntegration": {
+      "status": "reviewed-canonical-and-root-recursion-class-correction-integrated-by-enclosing-commit",
+      "integrationManifest": "reviewed-candidates/canonical-recursion-batch.json",
+      "integrationBlob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
+      "producerManifest": "reviewed-candidates/structural-root-core-repair.json",
+      "producerManifestBlob": "895081aaa285af545c635e7211c51508c81acb93",
+      "actualCoreEvidenceManifest": "reviewed-candidates/prepared-core-recursion-evidence.json",
+      "actualCoreEvidenceManifestBlob": "17225938686b8eed9654daab3c75c926f86d0def",
+      "bindingManifest": "reviewed-candidates/canonical-recursion-evidence.json",
+      "bindingManifestBlob": "b1694c3ea44ad2a90116af6afde0b17f6d9ef629",
+      "rootChildBoundary": "Whole root match creates direct child IDs. Nested control retains existing outer child calls; new descendant/second-match aliases refuse precisely.",
+      "capabilityCorrection": "The previous implementation text claiming matching nested result telescopes suffice for fresh descendant hypotheses was unsound and is corrected before strict activation.",
+      "completeOriginalTelescope": true,
+      "actualRootMinorConstructorRefinement": true,
+      "finiteCoreEquations": 4,
+      "newPreciseSourceRefusals": 5,
+      "newSourceRefusalTotal": 38,
+      "executionEvidenceForThisSource": false,
+      "newColdRunRequired": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    }
+  },
+  "currentQualificationRequest": {
+    "status": "enclosing-source-commit-requests-one-full-qualification-awaiting-run-discovery",
+    "expectedParent": "5a44bbb054d41a7534a0714bdd3f3d3b0ec467a2",
+    "priorCompilerSource": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+    "manifest": "reviewed-candidates/canonical-recursion-batch.json",
+    "manifestBlob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
+    "sourceFiles": 43,
+    "trigger": "[sh1-qualify]",
+    "repeatColdRecovery": false,
+    "repeatNativeOnlyCheckpoint": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "reviewedCanonicalRecursionCorrection": {
+    "status": "reviewed-canonical-and-root-recursion-class-correction-integrated-by-enclosing-commit",
+    "integrationManifest": "reviewed-candidates/canonical-recursion-batch.json",
+    "integrationBlob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
+    "producerManifest": "reviewed-candidates/structural-root-core-repair.json",
+    "producerManifestBlob": "895081aaa285af545c635e7211c51508c81acb93",
+    "actualCoreEvidenceManifest": "reviewed-candidates/prepared-core-recursion-evidence.json",
+    "actualCoreEvidenceManifestBlob": "17225938686b8eed9654daab3c75c926f86d0def",
+    "bindingManifest": "reviewed-candidates/canonical-recursion-evidence.json",
+    "bindingManifestBlob": "b1694c3ea44ad2a90116af6afde0b17f6d9ef629",
+    "rootChildBoundary": "Whole root match creates direct child IDs. Nested control retains existing outer child calls; new descendant/second-match aliases refuse precisely.",
+    "capabilityCorrection": "The previous implementation text claiming matching nested result telescopes suffice for fresh descendant hypotheses was unsound and is corrected before strict activation.",
+    "completeOriginalTelescope": true,
+    "actualRootMinorConstructorRefinement": true,
+    "finiteCoreEquations": 4,
+    "newPreciseSourceRefusals": 5,
+    "newSourceRefusalTotal": 38,
+    "executionEvidenceForThisSource": false,
+    "newColdRunRequired": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "recursiveStructures": {
+      "status": "reviewed-source-and-compile-only-evidence-integrated-by-enclosing-commit",
+      "sourceManifest": "reviewed-candidates/recursive-structure-erasure.json",
+      "sourceManifestBlob": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+      "evidenceManifest": "reviewed-candidates/recursive-structure-evidence.json",
+      "evidenceManifestBlob": "7aede7e241162b32dc608a7f5d246da211cac095",
+      "sourceFiles": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "7498d68c2f2c57d94ab008b36d08766c957ad815"
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+          "blob": "57e76a17858b3f4333a44ed880326ac33695351e"
+        }
+      ],
+      "samePreparedAndOriginalIr": true,
+      "layouts": 2,
+      "declarations": 4,
+      "projections": 6,
+      "usedHypotheses": 2,
+      "unusedHypotheses": 2,
+      "runtimeInvocations": 0,
+      "additionalCompilerInvocations": 0,
+      "executionEvidenceForThisSource": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    }
+  },
+  "reviewedRecursiveStructureCorrection": {
+    "status": "reviewed-source-and-compile-only-evidence-integrated-by-enclosing-commit",
+    "sourceManifest": "reviewed-candidates/recursive-structure-erasure.json",
+    "sourceManifestBlob": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+    "evidenceManifest": "reviewed-candidates/recursive-structure-evidence.json",
+    "evidenceManifestBlob": "7aede7e241162b32dc608a7f5d246da211cac095",
+    "sourceFiles": [
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "blob": "7498d68c2f2c57d94ab008b36d08766c957ad815"
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+        "blob": "57e76a17858b3f4333a44ed880326ac33695351e"
+      }
+    ],
+    "samePreparedAndOriginalIr": true,
+    "layouts": 2,
+    "declarations": 4,
+    "projections": 6,
+    "usedHypotheses": 2,
+    "unusedHypotheses": 2,
+    "runtimeInvocations": 0,
+    "additionalCompilerInvocations": 0,
+    "executionEvidenceForThisSource": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false
   }
 }

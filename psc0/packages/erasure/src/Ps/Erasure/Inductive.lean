@@ -13,9 +13,9 @@ def psPrepareInductiveParametersWithFuel
       fun (_scope : PsErasureScope) (_cursor : PsExpr) (_count : Nat) (_index : Nat) (_values : List PsExpr) (_parameters : List PsVerifiedIrTypeParameter) =>
         Except.error PsErasureError.fuelExhausted
   | Nat.succ remainingFuel =>
-      let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsExpr -> List PsVerifiedIrTypeParameter -> Except PsErasureError PsPreparedInductiveParameters :=
-        psPrepareInductiveParametersWithFuel environment remainingFuel;
       fun (scope : PsErasureScope) (cursor : PsExpr) (count : Nat) (index : Nat) (valuesRev : List PsExpr) (parametersRev : List PsVerifiedIrTypeParameter) =>
+        let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsExpr -> List PsVerifiedIrTypeParameter -> Except PsErasureError PsPreparedInductiveParameters :=
+          psPrepareInductiveParametersWithFuel environment remainingFuel;
         match count with
         | Nat.zero => Except.ok (PsPreparedInductiveParameters.mk scope (psListReverse valuesRev) (psListReverse parametersRev))
         | Nat.succ remaining =>
@@ -113,9 +113,9 @@ def psPrepareConstructorFieldsWithFuel
       fun (_scope : PsErasureScope) (_cursor : PsExpr) (_count : Nat) (_index : Nat) (_fields : List PsRuntimeConstructorField) =>
         Except.error PsErasureError.fuelExhausted
   | Nat.succ remainingFuel =>
-      let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsRuntimeConstructorField -> Except PsErasureError PsPreparedConstructorFields :=
-        psPrepareConstructorFieldsWithFuel environment remainingFuel;
       fun (scope : PsErasureScope) (cursor : PsExpr) (count : Nat) (index : Nat) (fieldsRev : List PsRuntimeConstructorField) =>
+        let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsRuntimeConstructorField -> Except PsErasureError PsPreparedConstructorFields :=
+          psPrepareConstructorFieldsWithFuel environment remainingFuel;
         match count with
         | Nat.zero => Except.ok (PsPreparedConstructorFields.mk (psListReverse fieldsRev))
         | Nat.succ remaining =>

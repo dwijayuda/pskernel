@@ -38,6 +38,76 @@ A/B/H/E records are indexed in [qualification-evidence.json](qualification-evide
 [TYPESCRIPT7.md](TYPESCRIPT7.md) records the exact compiler profiles, recovery
 proof and measured TypeScript phase.
 
+## Current strict SH/1 source integration
+
+The practical migration is merged in main at `ed5d00aca0743bde583b45fe7756dd494ac3960f`.
+The enclosing strict-branch source commit integrates the reviewed canonical
+function-value representation, finite worker-binding placement and structural
+recursion correspondence correction. Its [exact 43-code-file manifest](strict/reviewed-candidates/canonical-recursion-batch.json)
+binds the unchanged branch bases and every final candidate. This is a request
+for one complete qualification, not a claim that the run has passed.
+
+Function values use nested unary runtime arrows throughout generic arguments,
+returned values, record/data fields and arrays. Actual named declaration entries
+retain the complete aligned lambda prefix from checked Core; a computed returned
+function does not enlarge that entry. Supplied partial operands are captured
+once in order. Generic definitions with no logical runtime arguments use a
+fresh ignored Unit activation argument internally. The existing exact IR checker
+and refusal of arbitrary generic initialized values remain.
+
+The full original structural telescope now includes implicit and proof
+parameters. An actual recursive call refuses unresolved or major-dependent
+parameter/result types. After all minors have been elaborated, the root match
+refines each original-major reference to that minor's actual constructor and
+fields, under the final metavariable context. Root recursion permission is
+consumed before branch-body elaboration and erasure; nested control retains
+already established outer child hypotheses.
+
+The old text saying that an equal nested result telescope alone could introduce
+new descendant hypotheses was incorrect. A fold hypothesis supplies the value
+at its established child; it does not supply an arbitrary recursive function
+at a newly exposed grandchild or an alias from a second match. Current strict
+SH/1 admits direct structural descent and references to established root-child
+identities inside nested control. New nested child aliases are explicitly
+refused. This corrects an unsound capability claim before strict activation;
+it is not a general descendant-recursion implementation.
+
+The source-level counterexamples and exact repair are preserved in
+[the producer review](strict/reviewed-candidates/structural-root-core-repair.json).
+The finite regression reads the same prepared Core declarations later erased,
+records their typed AST snapshots, and checks four fixed Nat equations through
+actual minor closures. It separately checks emitted and native-PSC-emitted
+programs. Five source refusals require the precise structural elaboration
+stage, owner and error. These observations reuse existing compiler/TS/native
+builds; they do not establish general recursor demand adequacy.
+
+Recursive structures now follow their actual minor telescope. The Core prepass
+retains recursive-record field and IH lambdas; expression erasure captures the
+major once, binds ordered typed record projections and reuses the existing
+field/IH opening. Used root IHs call the actual declaration on the projected
+child. Record layouts, generic field types and the original numParams+3
+recursor saturation boundary remain intact. Ordinary recursive-record
+declarations and their functions are supported even when their types have no
+finite canonical inhabitants.
+
+The existing generic fixture adds two recursive record layouts and four
+compile-only functions. Its same-object original-IR inspection checks six
+ordered projections and two used/two unused hypotheses. It adds no compiler
+invocation or runtime record value. The exact source and evidence reviews are
+[recursive-structure-erasure.json](strict/reviewed-candidates/recursive-structure-erasure.json)
+and [recursive-structure-evidence.json](strict/reviewed-candidates/recursive-structure-evidence.json).
+
+The [canonical function argument](strict/CANONICAL_FUNCTION_ARGUMENTS.md)
+records the general entry, capture, activation, bridge and finite-placement
+arguments. The completed [erasure argument](strict/ERASURE_ARGUMENTS.md)
+supplies all nine source-derived ER rule interfaces, including actual root
+recursion and both structure-recursor routes. Final cross-family composition
+and all 33 administrative correspondence dispositions remain open until
+independently justified against the exact qualification. All strict/global/provider qualification
+flags remain false until exact execution and required arguments are complete.
+Selected R, new-only ps-0.9-r3, Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2
+are unchanged. The passed isolated TS7 cold recipe does not need another run.
+
 ## Current new-only source grammar checkpoint
 
 The current `.ps` parser, printer, active fixtures and host source identity move
@@ -269,10 +339,16 @@ accepted subset, so the historical compiler can build the first candidate.
 - Name decisions use lexical identities. All internal worker parameters are
   alpha-renamed to names unavailable in source syntax. The global worker uses
   a numeric internal name component, and environment insertion checks collision.
-- Unrelated nested matches retain available outer induction hypotheses but
-  cannot introduce decreasing children. Descendant hypotheses are available
-  only when their expected result telescope agrees with the whole worker
-  result; narrower nested motives are outside this checkpoint.
+- Explicit nested matches retain already established outer induction
+  hypotheses. Only the whole root structural match registers direct child
+  identities for self calls. A second match or a match on a child cannot
+  manufacture a new recursive hypothesis, even when its expected result
+  telescope matches the worker result. New descendant/alias provenance needs
+  a separately implemented and qualified capability.
+- The complete original parameter telescope, including implicit and proof
+  parameters, and the result must be resolved and major-independent for an
+  actual recursive call. Root minor bodies refine references to the original
+  major to the actual constructor and fields after final elaboration.
 
 The kernel/provider implementation and metatheory are unchanged on this branch.
 

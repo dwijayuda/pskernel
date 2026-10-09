@@ -278,10 +278,10 @@ def psElabRecursionWalkWithFuel
       fun (_context : PsLocalContext) (_source : PsSyntaxTerm) =>
         Except.error PsElabError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : PsLocalContext -> PsSyntaxTerm ->
-          Except PsElabError PsElabRecursionWalkResult :=
-        psElabRecursionWalkWithFuel remaining plan environment;
       fun (context : PsLocalContext) (source : PsSyntaxTerm) =>
+        let smaller : PsLocalContext -> PsSyntaxTerm ->
+            Except PsElabError PsElabRecursionWalkResult :=
+          psElabRecursionWalkWithFuel remaining plan environment;
         match source with
         | PsSyntaxTerm.reference sourceName =>
             if psElabRecursionIsSelf plan context source then

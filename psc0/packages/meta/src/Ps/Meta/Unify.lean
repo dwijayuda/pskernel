@@ -94,19 +94,19 @@ def psUnifyWithFuelWorker
           (right : PsExpr) =>
         psUnifyFailure context
   | Nat.succ remaining =>
-      let smaller :
-          PsEnvironment ->
-          PsLocalContext ->
-          PsMetaContext ->
-          PsExpr ->
-          PsExpr ->
-          PsUnifyResult :=
-        psUnifyWithFuelWorker remaining;
       fun (environment : PsEnvironment)
           (localContext : PsLocalContext)
           (context : PsMetaContext)
           (left : PsExpr)
           (right : PsExpr) =>
+        let smaller :
+            PsEnvironment ->
+            PsLocalContext ->
+            PsMetaContext ->
+            PsExpr ->
+            PsExpr ->
+            PsUnifyResult :=
+          psUnifyWithFuelWorker remaining;
         let leftValue := psWhnf environment context localContext left;
         let rightValue := psWhnf environment context localContext right;
         if psExprAlphaEq leftValue rightValue then

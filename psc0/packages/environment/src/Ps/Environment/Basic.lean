@@ -58,8 +58,8 @@ def psEnvironmentHashStringWorker (fuel : Nat) : String -> Nat -> Nat -> Nat :=
   match fuel with
   | Nat.zero => fun (_value : String) (_position : Nat) (hash : Nat) => hash
   | Nat.succ remaining =>
-      let smaller : String -> Nat -> Nat -> Nat := psEnvironmentHashStringWorker remaining;
       fun (value : String) (position : Nat) (hash : Nat) =>
+        let smaller : String -> Nat -> Nat -> Nat := psEnvironmentHashStringWorker remaining;
         if String.Internal.atEnd value (String.Pos.Raw.mk position) then hash
         else
           let char := String.Internal.get value (String.Pos.Raw.mk position);
@@ -83,8 +83,8 @@ def psEnvironmentIndexFindWorker (fuel : Nat) : PsEnvironmentIndex -> Nat -> Lis
         | PsEnvironmentIndex.bucket declarations => declarations
         | _ => List.nil
   | Nat.succ remaining =>
-      let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration := psEnvironmentIndexFindWorker remaining;
       fun (index : PsEnvironmentIndex) (hash : Nat) =>
+        let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration := psEnvironmentIndexFindWorker remaining;
         match index with
         | PsEnvironmentIndex.branch left right =>
             if Nat.beq (Nat.mod hash 2) 0 then smaller left (Nat.div hash 2)
@@ -95,8 +95,8 @@ def psEnvironmentIndexSetWorker (fuel : Nat) : PsEnvironmentIndex -> Nat -> List
   match fuel with
   | Nat.zero => fun (_index : PsEnvironmentIndex) (_hash : Nat) (declarations : List PsDeclaration) => PsEnvironmentIndex.bucket declarations
   | Nat.succ remaining =>
-      let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration -> PsEnvironmentIndex := psEnvironmentIndexSetWorker remaining;
       fun (index : PsEnvironmentIndex) (hash : Nat) (declarations : List PsDeclaration) =>
+        let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration -> PsEnvironmentIndex := psEnvironmentIndexSetWorker remaining;
         let left : PsEnvironmentIndex := match index with
           | PsEnvironmentIndex.branch value _ => value
           | _ => PsEnvironmentIndex.empty;

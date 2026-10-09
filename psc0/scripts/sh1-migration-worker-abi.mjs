@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { invokeCompilerValueEntry } from './sh1-function-entry.mjs';
 import { createHash } from 'node:crypto';
 
 // Read-only observations of the exact prepared/Core and IR objects already
@@ -168,8 +169,8 @@ function selectedCoreDeclarations(compiler, declarations, names, valueTag) {
     const name = compiler.psNameToString(compiler.psDeclarationName(declaration));
     if (!wanted.has(name)) continue;
     assert(!selected.has(name), 'PSC0_SH1_MIGRATION_DUPLICATE_CORE_NAME: ' + name);
-    assert.equal(compiler.psNameEq(compiler.psDeclarationName(declaration),
-      compiler.psRootName(name)), true, 'PSC0_SH1_MIGRATION_CORE_ROOT_NAME: ' + name);
+    assert.equal(invokeCompilerValueEntry(compiler, 'psNameEq', [compiler.psDeclarationName(declaration),
+      compiler.psRootName(name)]), true, 'PSC0_SH1_MIGRATION_CORE_ROOT_NAME: ' + name);
     selected.set(name, declaration);
   }
   for (const name of names) {
@@ -328,14 +329,14 @@ export function runMigrationWorkerAbi(compiler, prepared, ir, valueTag) {
       'PSC0_SH1_MIGRATION_PARTIAL_DECL_KIND: ' + worker.name);
     const actualType = compiler.psDeclarationType(declaration);
     const referenceType = compiler.psDeclarationType(partial).type;
-    assert.equal(compiler.psExprAlphaEq(actualType, referenceType), true,
+    assert.equal(invokeCompilerValueEntry(compiler, 'psExprAlphaEq', [actualType, referenceType]), true,
       'PSC0_SH1_MIGRATION_COMPLETE_PUBLIC_TYPE: ' + worker.name);
     const result = dropBinders(actualType, worker.parameters.length, valueTag, worker.name);
     assert.notEqual(valueTag(result), 'forallE',
       'PSC0_SH1_MIGRATION_UNEXPECTED_FUNCTION_RESULT: ' + worker.name);
     const remainingType = dropBinders(actualType, worker.outerArguments, valueTag, worker.name);
     const expectedRemaining = dropBinders(referenceType, worker.outerArguments, valueTag, worker.name);
-    assert.equal(compiler.psExprAlphaEq(remainingType, expectedRemaining), true,
+    assert.equal(invokeCompilerValueEntry(compiler, 'psExprAlphaEq', [remainingType, expectedRemaining]), true,
       'PSC0_SH1_MIGRATION_PUBLIC_PARTIAL_TYPE: ' + worker.name);
 
     const irDeclaration = runtime.get(worker.name);

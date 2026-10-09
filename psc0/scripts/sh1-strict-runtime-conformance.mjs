@@ -1418,7 +1418,7 @@ function sourceEvaluationHostProbes(runtime, fixture) {
           enumerable: true,
           get() {
             visit('callee');
-            return (a, b, c) => 100n * a + 10n * b + c;
+            return (a) => (b) => (c) => 100n * a + 10n * b + c;
           },
         });
         if (entry.mode === 'nested')
@@ -1511,7 +1511,7 @@ async function sourceEvaluationRegression({ compiler, compilerSha256, root, outD
     } else if (entry.callbackFixture === 'partial-weighted-record' ||
         entry.callbackFixture === 'partial-nested-weighted-record') {
       // Plain immutable host records with related pure fields, without accessors.
-      const holder = { apply: (a, b, c) => 100n * a + 10n * b + c };
+      const holder = { apply: (a) => (b) => (c) => 100n * a + 10n * b + c };
       const arguments_ = [holder, () => 2n, () => 4n, (value) => value + 1n, BigInt(entry.input)];
       if (entry.callbackFixture === 'partial-weighted-record') arguments_.push(entry.useSaved);
       result = runtime[entry.declaration](...arguments_);

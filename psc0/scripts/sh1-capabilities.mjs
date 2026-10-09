@@ -73,14 +73,18 @@ export async function compileTypeScript(source, directory, tsc, cwd, version = e
 }
 
 function assertBehavior(runtime, label) {
+  // These unchanged raw declarations return computed functions after the
+  // explicit source prefix; a result arrow is not an extra entry parameter.
+  assert.equal(runtime.sh1FunctionResult.length, 2, label + ': function-result entry');
+  assert.equal(runtime.sh1WorkerReference.length, 1, label + ': worker-reference entry');
   for (const fuel of [0n, 1n, 2n, 31n, 20000n]) {
     assert.equal(runtime.sh1OuterHypothesis(fuel, 0n), fuel, label + ': outer IH through unrelated zero match');
     assert.equal(runtime.sh1OuterHypothesis(fuel, 5n), fuel + 5n, label + ': outer IH through unrelated successor match');
     assert.equal(runtime.sh1NatAcc(fuel, 11n), 11n + 3n * fuel, label + ': Nat state');
     const expectedSwap = fuel % 2n === 0n ? 11n : 23n;
     assert.equal(runtime.sh1Swap(fuel, 11n, 23n), expectedSwap, label + ': simultaneous swap');
-    assert.equal(runtime.sh1WorkerReference(fuel, 11n, 23n), expectedSwap, label + ': existing worker');
-    assert.equal(runtime.sh1FunctionResult(fuel, 7n, 13n), 20n + 2n * fuel, label + ': function result');
+    assert.equal(runtime.sh1WorkerReference(fuel)(11n)(23n), expectedSwap, label + ': existing worker');
+    assert.equal(runtime.sh1FunctionResult(fuel, 7n)(13n), 20n + 2n * fuel, label + ': function result');
     assert.equal(runtime.sh1WithProof(fuel, 17n), 17n + fuel, label + ': erased proof parameter');
   }
   assert.equal(runtime.sh1Shadow(37n, 0n), 37n, label + ': shadowed state base');

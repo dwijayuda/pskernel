@@ -114,6 +114,7 @@ async function recipeIdentity() {
     'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs', 'scripts/sh1-resource-policy.mjs',
     'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-grammar-profile.mjs', 'scripts/sh1-projection-conformance.mjs',
     'scripts/sh1-successor-seed.mjs', 'psconfig.json',
+    'scripts/sh1-function-entry.mjs',
     'scripts/sh1-fresh-name-conformance.mjs', 'scripts/sh1-migration-worker-conformance.mjs',
     'scripts/sh1-migration-worker-abi.mjs',
     'test/fixtures/selfhost-sh1-accumulators.lean', 'test/fixtures/selfhost-sh1-accumulators.ps',

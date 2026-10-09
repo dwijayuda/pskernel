@@ -176,17 +176,6 @@ def psInferStructureProjectionFieldWorker
                     fun (_cursor : PsExpr) =>
                       Except.error PsInferError.fuelExhausted
   | Nat.succ fuel =>
-      let smaller :
-          PsEnvironment ->
-          PsMetaContext ->
-          PsLocalContext ->
-          PsName ->
-          PsExpr ->
-          Nat ->
-          Nat ->
-          PsExpr ->
-          Except PsInferError PsExpr :=
-        psInferStructureProjectionFieldWorker fuel;
       fun (environment : PsEnvironment) =>
         fun (metaContext : PsMetaContext) =>
           fun (localContext : PsLocalContext) =>
@@ -195,6 +184,17 @@ def psInferStructureProjectionFieldWorker
                 fun (requestedIndex : Nat) =>
                   fun (fieldIndex : Nat) =>
                     fun (cursor : PsExpr) =>
+                      let smaller :
+                          PsEnvironment ->
+                          PsMetaContext ->
+                          PsLocalContext ->
+                          PsName ->
+                          PsExpr ->
+                          Nat ->
+                          Nat ->
+                          PsExpr ->
+                          Except PsInferError PsExpr :=
+                        psInferStructureProjectionFieldWorker fuel;
                       match
                           psWhnf
                             environment
@@ -330,17 +330,17 @@ def psInferTypeWithFuelWorker
             fun (_expr : PsExpr) =>
               Except.error PsInferError.fuelExhausted
   | Nat.succ fuel =>
-      let smaller :
-          PsEnvironment ->
-          PsMetaContext ->
-          PsLocalContext ->
-          PsExpr ->
-          Except PsInferError PsExpr :=
-        psInferTypeWithFuelWorker fuel;
       fun (environment : PsEnvironment) =>
         fun (metaContext : PsMetaContext) =>
           fun (localContext : PsLocalContext) =>
             fun (expr : PsExpr) =>
+              let smaller :
+                  PsEnvironment ->
+                  PsMetaContext ->
+                  PsLocalContext ->
+                  PsExpr ->
+                  Except PsInferError PsExpr :=
+                psInferTypeWithFuelWorker fuel;
               match expr with
               | .bvar index =>
                   Except.error (PsInferError.looseBoundVariable index)

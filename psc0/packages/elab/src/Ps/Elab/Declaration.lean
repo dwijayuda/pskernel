@@ -187,6 +187,8 @@ def psElabStructuralRecursionFromSource
                           Option.some
                             (PsElabStructuralRecursion.mk
                               functionName
+                              (psElabRecursionParameterIds
+                                (psElabTypedBinderListReverse bindersRev))
                               explicitParameterIds
                               recursiveParameterIndex
                               List.nil
@@ -468,9 +470,9 @@ def psElabNestedRecursiveFieldTypeSupportedWithFuel
   | Nat.zero =>
       fun (_inductiveName : PsName) (_type : PsExpr) => false
   | Nat.succ remaining =>
-      let smaller : PsName -> PsExpr -> Bool :=
-        psElabNestedRecursiveFieldTypeSupportedWithFuel remaining;
       fun (inductiveName : PsName) (type : PsExpr) =>
+        let smaller : PsName -> PsExpr -> Bool :=
+          psElabNestedRecursiveFieldTypeSupportedWithFuel remaining;
         if psExprHasConst inductiveName type then
           let view := psExprAppView type;
           match view.head with
@@ -790,15 +792,15 @@ def psOpenConstructorFieldsWorker
             context
             bindersRev)
   | Nat.succ remaining =>
-      let smaller :
-          PsElabContext ->
-          PsExpr ->
-          List PsElabTypedBinder ->
-          Except PsElabError PsElabConstructorBuildResult :=
-        psOpenConstructorFieldsWorker remaining;
       fun (context : PsElabContext)
           (cursor : PsExpr)
           (bindersRev : List PsElabTypedBinder) =>
+        let smaller :
+            PsElabContext ->
+            PsExpr ->
+            List PsElabTypedBinder ->
+            Except PsElabError PsElabConstructorBuildResult :=
+          psOpenConstructorFieldsWorker remaining;
         match psInferEnsureForall
             context.environment
             context.metaContext

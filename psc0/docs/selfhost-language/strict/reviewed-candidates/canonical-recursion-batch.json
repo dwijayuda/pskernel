@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "kind": "psc0-sh1-pending-canonical-recursion-source-review",
-  "status": "reviewed-43-file-base-held-for-recursive-structure-coverage-correction-not-integrated",
-  "expectedParent": "796f2fd8feebc96dfcdd79002e6a53aeb7b4ad90",
-  "expectedRootTree": "2c43951dbfeac90f809bd7c74a3a3f9b36eed425",
+  "kind": "psc0-sh1-canonical-recursion-source-integration",
+  "status": "source-integrated-by-enclosing-commit-awaiting-one-full-qualification",
+  "expectedParent": "5a44bbb054d41a7534a0714bdd3f3d3b0ec467a2",
+  "expectedRootTree": "a197ede26027af2c54010bb142b5a9e4ba74b026",
   "priorCompilerSource": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
   "practicalMain": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "counts": {
@@ -18,7 +18,15 @@
     "actualCoreRecursionEquations": 4,
     "sourceAccepted": 2,
     "sourceRefused": 38,
-    "sourceCarrierRefused": 2
+    "sourceCarrierRefused": 2,
+    "recursiveStructureLayouts": 2,
+    "recursiveStructureDeclarations": 4,
+    "recursiveStructureProjections": 6,
+    "recursiveStructureUsedHypotheses": 2,
+    "recursiveStructureUnusedHypotheses": 2,
+    "recursiveStructureRuntimeInvocations": 0,
+    "genericFixtureSourceDeclarations": 34,
+    "genericFixtureDefinitions": 30
   },
   "files": [
     {
@@ -319,13 +327,22 @@
       "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
       "baseBlob": "66b20621288b76153fa78db6c923f0c7b0c5d9ab",
       "baseSha256": "445f2e69466cee3725821e43c46c6b04577986bd9b3b7ce6623e8e154009940a",
-      "candidateBlob": "897a2514e18e0ba51fb93cde6ab933a72a2c6f7f",
-      "candidateSha256": "c102169cc4cbb03c5cc9016666cc53acc116404430e4d724aee5f8f9863a2172",
-      "candidateBytes": 10012,
+      "candidateBlob": "57e76a17858b3f4333a44ed880326ac33695351e",
+      "candidateSha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b",
+      "candidateBytes": 10378,
       "semanticLayer": null,
       "natLayer": "897a2514e18e0ba51fb93cde6ab933a72a2c6f7f",
       "streamingLayer": null,
-      "overlays": []
+      "overlays": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+          "baseBlob": "897a2514e18e0ba51fb93cde6ab933a72a2c6f7f",
+          "baseSha256": "c102169cc4cbb03c5cc9016666cc53acc116404430e4d724aee5f8f9863a2172",
+          "candidateBlob": "57e76a17858b3f4333a44ed880326ac33695351e",
+          "candidateSha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b",
+          "candidateBytes": 10378
+        }
+      ]
     },
     {
       "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
@@ -379,9 +396,9 @@
       "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
       "baseBlob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
       "baseSha256": "3c05cf0890507d2fdf2706dd0576b7bf03ed2c2b97c8619115cfaa791227e20b",
-      "candidateBlob": "f1ecc9458fe0c606b0a34c321517069cd27280e4",
-      "candidateSha256": "0119067649f78605eac5c1339a92ab9171b7c06180932d5db1d606ff074b530b",
-      "candidateBytes": 127724,
+      "candidateBlob": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+      "candidateSha256": "7da07e96681a91651b3d651c55cfb8af9ee431d27b0930987fd44642bd3ffeb6",
+      "candidateBytes": 137310,
       "semanticLayer": "cdc76937f215fd2803841600266816acb122ea90",
       "natLayer": "f16cb31b41b890e9c5d4d2d7540d44d1a5f06e12",
       "streamingLayer": null,
@@ -393,6 +410,14 @@
           "candidateBlob": "f1ecc9458fe0c606b0a34c321517069cd27280e4",
           "candidateSha256": "0119067649f78605eac5c1339a92ab9171b7c06180932d5db1d606ff074b530b",
           "candidateBytes": 127724
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "baseBlob": "f1ecc9458fe0c606b0a34c321517069cd27280e4",
+          "baseSha256": "0119067649f78605eac5c1339a92ab9171b7c06180932d5db1d606ff074b530b",
+          "candidateBlob": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+          "candidateSha256": "7da07e96681a91651b3d651c55cfb8af9ee431d27b0930987fd44642bd3ffeb6",
+          "candidateBytes": 137310
         }
       ]
     },
@@ -481,9 +506,9 @@
       "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
       "baseBlob": "284d971fe1944bd1d63b3eb41f9ff0d9a049dd84",
       "baseSha256": "574fc4874e0cd5561fcdd873c7942aa90cd77abaa66441c76b5e4f7c3755e4de",
-      "candidateBlob": "aee5fd7bf96dbfec9ee1c3b4c2698178c55a10e3",
-      "candidateSha256": "6b43a4c92695d355dba24764901cc8b35e50bf43a428ffbc57046be9283c3b7c",
-      "candidateBytes": 5369,
+      "candidateBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+      "candidateSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+      "candidateBytes": 6340,
       "overlays": [
         {
           "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
@@ -492,6 +517,14 @@
           "candidateBlob": "aee5fd7bf96dbfec9ee1c3b4c2698178c55a10e3",
           "candidateSha256": "6b43a4c92695d355dba24764901cc8b35e50bf43a428ffbc57046be9283c3b7c",
           "candidateBytes": 5369
+        },
+        {
+          "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
+          "baseBlob": "aee5fd7bf96dbfec9ee1c3b4c2698178c55a10e3",
+          "baseSha256": "6b43a4c92695d355dba24764901cc8b35e50bf43a428ffbc57046be9283c3b7c",
+          "candidateBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+          "candidateSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+          "candidateBytes": 6340
         }
       ]
     },
@@ -499,9 +532,9 @@
       "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
       "baseBlob": "91a18f1cd26eeec36d720a8acbca6a79a3a9b1ab",
       "baseSha256": "7e86809c9bd8d7bae33c30f0870abd19b3f98e26bcebc6d5f0561ce23c5341ca",
-      "candidateBlob": "59aa5df7a650f4e3134a41c34377eac9aa75dc1d",
-      "candidateSha256": "dbc556d46a0f2e67e902021cf98cb14fc842bd889d68ae83dc586ac6732a2c6f",
-      "candidateBytes": 29200,
+      "candidateBlob": "076d058b965bad45b64e81c7a0ae8c1ac02f88db",
+      "candidateSha256": "a1e48e2386effb23425ea16f4c1d966a59bf7bc6e3d09f8c50e412651bae1332",
+      "candidateBytes": 37975,
       "overlays": [
         {
           "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
@@ -510,6 +543,14 @@
           "candidateBlob": "59aa5df7a650f4e3134a41c34377eac9aa75dc1d",
           "candidateSha256": "dbc556d46a0f2e67e902021cf98cb14fc842bd889d68ae83dc586ac6732a2c6f",
           "candidateBytes": 29200
+        },
+        {
+          "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+          "baseBlob": "59aa5df7a650f4e3134a41c34377eac9aa75dc1d",
+          "baseSha256": "dbc556d46a0f2e67e902021cf98cb14fc842bd889d68ae83dc586ac6732a2c6f",
+          "candidateBlob": "076d058b965bad45b64e81c7a0ae8c1ac02f88db",
+          "candidateSha256": "a1e48e2386effb23425ea16f4c1d966a59bf7bc6e3d09f8c50e412651bae1332",
+          "candidateBytes": 37975
         }
       ]
     },
@@ -517,9 +558,9 @@
       "path": "psc0/scripts/sh1-strict-evidence.mjs",
       "baseBlob": "bb02be336824c078f118be130128aa38c15615bf",
       "baseSha256": "24b1f1786a2b8c5b782c0d2553d026bb350981d411fa7fec316b2ef8736f019c",
-      "candidateBlob": "b18475cd8f1e019c7372a1df64cd3464a62c210a",
-      "candidateSha256": "1def5e42cc86de1aacf4eed80d47462b9bede92f55b81f0449cf897ee88a11d9",
-      "candidateBytes": 80994,
+      "candidateBlob": "4242eb6e4944ef0be2bfe8a9ae02b0c1123fde54",
+      "candidateSha256": "e6417102ab7101b04f475a888e9eb6d9c7e1e544f079c6ba8a58874995753d4b",
+      "candidateBytes": 85963,
       "overlays": [
         {
           "path": "psc0/scripts/sh1-strict-evidence.mjs",
@@ -527,6 +568,14 @@
           "candidateBlob": "b18475cd8f1e019c7372a1df64cd3464a62c210a",
           "candidateSha256": "1def5e42cc86de1aacf4eed80d47462b9bede92f55b81f0449cf897ee88a11d9",
           "candidateBytes": 80994
+        },
+        {
+          "path": "psc0/scripts/sh1-strict-evidence.mjs",
+          "baseBlob": "b18475cd8f1e019c7372a1df64cd3464a62c210a",
+          "baseSha256": "1def5e42cc86de1aacf4eed80d47462b9bede92f55b81f0449cf897ee88a11d9",
+          "candidateBlob": "4242eb6e4944ef0be2bfe8a9ae02b0c1123fde54",
+          "candidateSha256": "e6417102ab7101b04f475a888e9eb6d9c7e1e544f079c6ba8a58874995753d4b",
+          "candidateBytes": 85963
         }
       ]
     },
@@ -593,6 +642,18 @@
     {
       "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/canonical-function-arguments.json",
       "blob": "30b8328b7e4158cd7279239dc34a4813240916d7"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/recursive-structure-erasure.json",
+      "blob": "62a0075aa7eafef61ebc6f9d4af68f743bff8492"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/recursive-structure-evidence.json",
+      "blob": "7aede7e241162b32dc608a7f5d246da211cac095"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/erasure-arguments.json",
+      "blob": "22cc9d4721321eeac34979394a09fb5447524891"
     }
   ],
   "coreDecisions": [
@@ -601,17 +662,22 @@
     "Actual root minor bodies reconstruct the current major from selected constructor fields after final elaboration.",
     "Complete original parameter/result telescope includes implicit/proof types and must be resolved and major-independent for a self call.",
     "Only a whole root match creates self-call IH provenance; nested control retains established outer child IDs and refuses invented descendants/aliases.",
-    "Exact source snapshots, typed Core snapshots, original checked IR, emitted/native-PSC observations and precise refusal artifacts stay separately bound."
+    "Exact source snapshots, typed Core snapshots, original checked IR, emitted/native-PSC observations and precise refusal artifacts stay separately bound.",
+    "Recursive structure recursors preserve the complete field/IH minor, capture the major once, bind actual ordered record projections and reuse the existing root/outer IH lowering; original numParams+3 saturation is retained."
   ],
   "review": {
     "exactBasePinsChecked": true,
     "rootForwardReverseHashAndReadback": true,
-    "independentSourceReview": "Existing43-file base source/evidence scopes CLEAR; a newly demonstrated mandatory recursive-structure coverage gap prevents treating the batch as complete.",
-    "executionFromReview": false
+    "independentSourceReview": "CLEAR across canonical, allocation, producer, erasure, recursive structures, host and evidence scopes",
+    "executionFromReview": false,
+    "recursiveStructureEvidence": {
+      "root": "CLEAR exact seven guards, hashes, bytes, readback and source semantics",
+      "artifact": "CLEAR bounded independent actual-model, same-IR, layout/field/IH and preserved-invocation review"
+    }
   },
   "qualification": {
-    "trigger": "HELD: do not publish [sh1-qualify] until the recursive-structure class and existing-fixture evidence are reviewed",
-    "sourceRef": "Compiler source remains fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504 at this documentation checkpoint.",
+    "trigger": "[sh1-qualify]",
+    "sourceRef": "Discover enclosing commit before attributing the run",
     "nativeOnlyCheckpoint": false,
     "coldRerunRequired": false,
     "existingGatesPreserved": true,
@@ -644,28 +710,30 @@
     "canonicalBlob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
     "correspondenceRows": 33,
     "rowsClosed": 0,
-    "finiteEvidenceIsGeneralProof": false
+    "finiteEvidenceIsGeneralProof": false,
+    "erasureDocument": "psc0/docs/selfhost-language/strict/ERASURE_ARGUMENTS.md",
+    "erasureBlob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+    "erasureManifestBlob": "22cc9d4721321eeac34979394a09fb5447524891",
+    "localErasureClassBlockers": 0,
+    "globalComposition": "Pending final independent cross-stage composition and exact current-source qualification"
   },
-  "supersedesUnattachedAssembly": [
-    "5bb17b70724fa9a17d53f732f4a79f2553d15b3d",
-    "b19d22e352cbe8f236677599f8309f3f4aec09a0"
-  ],
-  "pendingStructureCorrection": {
-    "status": "two-file-source-correction-being-prepared",
-    "paths": [
-      "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
-      "psc0/packages/erasure/src/Ps/Erasure/Expr.lean"
-    ],
-    "finding": "A direct recursive structure produces IH minor lambdas after its fields; old StructureRecursor substitutes only numFields, leaving an IH lambda and causing valid observer source to fail original-IR typing.",
-    "source": "structure Sh1Loop where\n  next : Sh1Loop\ndef sh1Observe (value : Sh1Loop) : Nat :=\n  match value with\n  | Sh1Loop.mk next => 0\n",
-    "decision": "Preserve existing record representation. Leave recursive structure recursors intact in the Core projection prepass; lower via one captured major and ordered record-field projections, reusing actual field/IH opening and root-call reconstruction. No recursive Core expansion. Existing proof/type field refusals stay unchanged.",
-    "owner": "artifact_inspection_review",
-    "peers": [
-      "empty_evidence_finish",
-      "runtime_comparison_finish"
-    ],
-    "evidence": "Add compile-only layout/observer/used-IH coverage to the existing generic fixture, with no extra compiler invocation and no fabricated Loop inhabitant."
+  "supersedesUnattachedAssembly": {
+    "sourceManifest": "b19d22e352cbe8f236677599f8309f3f4aec09a0",
+    "tree": "faabf657afa1c69fd3a5f595dfebd6b00ca93286",
+    "historicalPendingInventory": "70f357cb1b61376d370faf3925e76557464f95ff",
+    "reason": "Those assemblies predate the recursive-structure source and compile-only evidence overlay. None was published as compiler source."
   },
-  "unattachedTreeNotPublished": "faabf657afa1c69fd3a5f595dfebd6b00ca93286",
-  "updatedAtUtc": "2026-10-09T22:30:00Z"
+  "updatedAtUtc": "2026-10-09T22:45:00Z",
+  "recursiveStructureCorrection": {
+    "actualRuntimeOnlyRecordFields": true,
+    "retainRecursiveCoreMinor": true,
+    "majorEvaluatedOnce": true,
+    "orderedTypedProjections": true,
+    "reuseExistingFieldsAndHypotheses": true,
+    "usedRootAndRetainedOuterHypotheses": true,
+    "originalRecursorBoundary": "numParams + 3",
+    "mayCompletePartialRecursor": false,
+    "sourceManifest": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+    "evidenceManifest": "7aede7e241162b32dc608a7f5d246da211cac095"
+  }
 }

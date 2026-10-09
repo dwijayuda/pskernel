@@ -81,21 +81,21 @@ def psPrepareInstanceWithFuelWorker
                   success := false
                 }
   | Nat.succ fuel =>
-      let smaller :
-          PsEnvironment ->
-          PsLocalContext ->
-          PsMetaContext ->
-          PsExpr ->
-          PsExpr ->
-          List PsPreparedInstanceArgument ->
-          PsPreparedInstance :=
-        psPrepareInstanceWithFuelWorker fuel;
       fun (environment : PsEnvironment) =>
         fun (localContext : PsLocalContext) =>
           fun (context : PsMetaContext) =>
             fun (value : PsExpr) =>
               fun (type : PsExpr) =>
                 fun (arguments : List PsPreparedInstanceArgument) =>
+                  let smaller :
+                      PsEnvironment ->
+                      PsLocalContext ->
+                      PsMetaContext ->
+                      PsExpr ->
+                      PsExpr ->
+                      List PsPreparedInstanceArgument ->
+                      PsPreparedInstance :=
+                    psPrepareInstanceWithFuelWorker fuel;
                   let typeValue :=
                     psWhnf environment context localContext type;
                   match typeValue with
@@ -324,19 +324,19 @@ def psSynthInstanceWithFuelWorker
               fun (_target : PsExpr) =>
                 psSynthFailure context
   | Nat.succ fuel =>
-      let smaller :
-          PsEnvironment ->
-          PsLocalContext ->
-          PsInstanceIndex ->
-          PsMetaContext ->
-          PsExpr ->
-          PsSynthInstanceResult :=
-        psSynthInstanceWithFuelWorker fuel;
       fun (environment : PsEnvironment) =>
         fun (localContext : PsLocalContext) =>
           fun (index : PsInstanceIndex) =>
             fun (context : PsMetaContext) =>
               fun (target : PsExpr) =>
+                let smaller :
+                    PsEnvironment ->
+                    PsLocalContext ->
+                    PsInstanceIndex ->
+                    PsMetaContext ->
+                    PsExpr ->
+                    PsSynthInstanceResult :=
+                  psSynthInstanceWithFuelWorker fuel;
                 let synthesize :=
                   fun (nextContext : PsMetaContext) =>
                     fun (nextTarget : PsExpr) =>

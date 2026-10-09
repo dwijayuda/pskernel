@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { invokeCompilerValueEntry } from './sh1-function-entry.mjs';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -59,7 +60,7 @@ function data(value) {
 function publicType(compiler, prepared, name) {
   const target = compiler.psRootName(name);
   for (const declaration of array(prepared.declarations)) {
-    if (compiler.psNameEq(compiler.psDeclarationName(declaration), target)) {
+    if (invokeCompilerValueEntry(compiler, 'psNameEq', [compiler.psDeclarationName(declaration), target])) {
       return compiler.psDeclarationType(declaration);
     }
   }
@@ -74,7 +75,24 @@ function sourceSpan(source, start, end) {
   return source.slice(first, last).trim() + '\n';
 }
 
-function checkHelpers(runtime, withProbes) {
+function checkHelpers(runtime, withProbes, sourceLabel = 'current') {
+  assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_HELPER_SOURCE_LABEL');
+  const returnedClosure = sourceLabel === 'reference';
+  // Source prefixes: reference workers stop before a match and return the last
+  // argument as a closure; the migrated workers have explicit full headers.
+  for (const [name, referenceArity, currentArity] of [
+    ['psExprApplyManyWorker', 1, 2],
+    ['psExprAppViewAccWorker', 1, 2],
+    ['psErasureAddUniqueStringWorker', 2, 3],
+  ]) assert.equal(runtime[name].length, returnedClosure ? referenceArity : currentArity,
+    'PSC0_SH1_HELPER_SOURCE_ENTRY_ARITY: ' + name);
+  const applyManyWorker = returnedClosure ? (args, fn) => runtime.psExprApplyManyWorker(args)(fn) :
+    runtime.psExprApplyManyWorker;
+  const appViewWorker = returnedClosure ? (expr, args) => runtime.psExprAppViewAccWorker(expr)(args) :
+    runtime.psExprAppViewAccWorker;
+  const uniqueWorker = returnedClosure ?
+    (used, attempts, base) => runtime.psErasureAddUniqueStringWorker(used, attempts)(base) :
+    runtime.psErasureAddUniqueStringWorker;
   for (const name of publicNames) assert.equal(typeof runtime[name], 'function', name);
   const e = runtime.PsExpr;
   const anonymous = runtime.PsName.anonymous;
@@ -110,7 +128,7 @@ function checkHelpers(runtime, withProbes) {
         const expected = apply(head, prefix.concat(arguments_));
         const applied = [
           runtime.psExprApplyMany(initial, args),
-          runtime.psExprApplyManyWorker(args, initial),
+          applyManyWorker(args, initial),
         ];
         if (withProbes) applied.push(runtime.sh1ApplyManyCurried(args, initial));
         for (const result of applied) {
@@ -126,7 +144,7 @@ function checkHelpers(runtime, withProbes) {
           const values = list(runtime, suffix);
           const views = [
             runtime.psExprAppViewAcc(expected, values),
-            runtime.psExprAppViewAccWorker(expected, values),
+            appViewWorker(expected, values),
           ];
           if (withProbes) views.push(runtime.sh1AppViewAccCurried(expected, values));
           for (const output of views) assertView(output, head, prefix.concat(arguments_, suffix));
@@ -152,7 +170,7 @@ function checkHelpers(runtime, withProbes) {
         const values = list(runtime, used);
         const outputs = [
           runtime.psErasureAddUniqueString(values, base, BigInt(attempts)),
-          runtime.psErasureAddUniqueStringWorker(values, BigInt(attempts), base),
+          uniqueWorker(values, BigInt(attempts), base),
         ];
         if (withProbes) outputs.push(runtime.sh1UniqueStringCurried(values, BigInt(attempts), base));
         for (const output of outputs) {
@@ -218,13 +236,13 @@ export async function runHelperConformance({
       compiler.PsCompilerSourceKind.lean, list(compiler, sources)), 'HELPER_PREPARE_' + label);
     if (label === 'reference') referencePrepared = prepared;
     else for (const name of publicNames) {
-      assert.equal(compiler.psExprAlphaEq(publicType(compiler, referencePrepared, name),
-        publicType(compiler, prepared, name)), true, 'PSC0_SH1_HELPER_PUBLIC_TYPE_CHANGED: ' + name);
+      assert.equal(invokeCompilerValueEntry(compiler, 'psExprAlphaEq', [publicType(compiler, referencePrepared, name),
+        publicType(compiler, prepared, name)]), true, 'PSC0_SH1_HELPER_PUBLIC_TYPE_CHANGED: ' + name);
     }
     const admissions = unwrap(compiler.psCompilerAdmissionsFromPrepared(prepared), 'HELPER_ADMISSIONS');
     const typeScript = unwrap(compiler.psCompilerTypeScriptFromPrepared(prepared), 'HELPER_EMIT');
     const outputJs = await compileTypeScript(typeScript, path.join(outDir, label), tsc, root);
-    const coverage = checkHelpers(await import(pathToFileURL(outputJs).href), true);
+    const coverage = checkHelpers(await import(pathToFileURL(outputJs).href), true, label);
     outputs.push({
       source: label, sourceSha256: sha256(source), coverage,
       admissionsSha256: sha256(admissions), typescriptSha256: sha256(typeScript),

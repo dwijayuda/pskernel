@@ -59,8 +59,8 @@ def psTsEmitTypeWithFuel (fuel : Nat) : PsVerifiedIrType -> Except PsTsEmitError
   match fuel with
   | Nat.zero => fun (_type : PsVerifiedIrType) => Except.error PsTsEmitError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : PsVerifiedIrType -> Except PsTsEmitError String := psTsEmitTypeWithFuel remaining;
       fun (type : PsVerifiedIrType) =>
+        let smaller : PsVerifiedIrType -> Except PsTsEmitError String := psTsEmitTypeWithFuel remaining;
         match type with
         | .unknown => Except.ok "unknown"
         | .typeParameter name => Except.ok name

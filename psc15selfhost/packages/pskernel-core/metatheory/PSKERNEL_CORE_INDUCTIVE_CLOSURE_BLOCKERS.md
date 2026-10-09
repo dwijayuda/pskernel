@@ -59,6 +59,26 @@ distinctness, or changing production generation merely for proof convenience.
   semantics, final Kernel/API/session family, full audit, integration
   reconciliation and final acceptance gates remain incomplete.
 
+## Pinned standard-library bridge check — 2026-10-09
+
+The pinned `src/Init/Data/String/Defs.lean` defines `String.append`
+with a checked byte-array body and proves `String.toByteArray_append`,
+`String.append_left_inj`, and `String.append_right_inj`.
+These results concern the standard `String.append`/`++` operation.
+
+The executable candidate generator instead calls the separately declared
+opaque `String.Internal.append` from `Bootstrap.lean`. Both declarations
+carry the native symbol `lean_string_append`, but sharing an external symbol
+does not establish a kernel-checked equality of the Lean declarations.
+Consequently the standard append injectivity theorem cannot simply be applied
+to the actual candidate expression. The missing bridge must relate these
+specific declarations (or specify the internal operation directly).
+This check narrows the missing obligation; it does not prove that no bridge
+could exist elsewhere, prove freshness, or authorize a production rewrite.
+
+Pinned checked append definition and lemmas:
+https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Data/String/Defs.lean
+
 ## Required intervention
 
 Identify/provide a kernel-checked bridge applicable to the pinned opaque
